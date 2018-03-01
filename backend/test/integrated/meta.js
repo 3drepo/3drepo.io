@@ -22,8 +22,8 @@ let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
@@ -109,6 +109,27 @@ describe('Metadata', function () {
 	it('metadata search of a specific revision should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/4DTaskSequence.json`)
 		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('all metadata of head master should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/master/head/meta/all.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('all metadata of revision tag should succeed', function(done){
+		agent.get(`/${username}/${model}/revision/myTag/meta/all.json`)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+	it('all metadata of non existent revision should fail', function(done){
+		agent.get(`/${username}/${model}/revision/blahblah123/meta/all.json`)
+		.expect(404, function(err, res){
 			done(err);
 		});
 	});

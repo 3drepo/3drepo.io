@@ -81,10 +81,6 @@ class IssueScreenshotController implements ng.IController {
 		this.highlightBackground = "#FF9800";
 		this.screenShotPromise = this.$q.defer();
 
-		// Inspired by confile's answer - http://stackoverflow.com/a/28241682/782358
-		this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-
 		this.mouseDragX = 0;
 		this.mouseDragY = 0;
 		this.lastMouseDragX = -1;
@@ -121,13 +117,26 @@ class IssueScreenshotController implements ng.IController {
 		} else {
 			this.$element.ready(() => {
 
+				angular.element((window as any)).bind("resize", () => {
+					this.handleResize();
+				});
+
 				// Get scribble canvas
 				this.scribbleCanvas = document.getElementById("scribbleCanvas");
 				this.scribbleCanvasContext = this.scribbleCanvas.getContext("2d");
 
+				// Prevent blurring on resize
+				this.scribbleCanvasContext.mozImageSmoothingEnabled = false;
+				this.scribbleCanvasContext.webkitImageSmoothingEnabled = false;
+				this.scribbleCanvasContext.msImageSmoothingEnabled = false;
+				this.scribbleCanvasContext.imageSmoothingEnabled = false;
+
+				this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+				this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 				// Set the screen shot canvas to 80% screen size
-				this.scribbleCanvas.width = (innerWidth * 80) / 100;
-				this.scribbleCanvas.height = (innerHeight * 80) / 100;
+				this.scribbleCanvas.width = (this.innerWidth * 80) / 100;
+				this.scribbleCanvas.height = (this.innerHeight * 80) / 100;
+				this.handleResize();
 
 				// Set up canvas
 				this.initCanvas(this.scribbleCanvas);
@@ -160,6 +169,59 @@ class IssueScreenshotController implements ng.IController {
 
 	}
 
+	public handleResize() {
+
+		requestAnimationFrame(() => {
+			const imgObj = new Image();
+			imgObj.src = this.scribbleCanvas.toDataURL("image/png");
+			imgObj.onload = () => {
+				// Inspired by confile's answer - http://stackoverflow.com/a/28241682/782358
+				this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+				this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+				// resize & clear the original canvas and copy back in the cached pixel data //
+				this.scribbleCanvas.width = (this.innerWidth * 80) / 100;
+				this.scribbleCanvas.height = (this.innerHeight * 80) / 100;
+
+				// var hRatio = this.scribbleCanvas.width / imgObj.width    ;
+				// var vRatio = this.scribbleCanvas.width / imgObj.height  ;
+				// var ratio  = Math.min ( hRatio, vRatio );
+				// ctx.drawImage(img, 0,0, img.width, img.height, 0,0,img.width*ratio, img.height*ratio);
+				this.scribbleCanvasContext.drawImage(
+					imgObj, 0, 0, imgObj.width, imgObj.height,  // source rectangle
+					0, 0, this.scribbleCanvas.width, this.scribbleCanvas.height,  // destination rectangle
+				);
+				// this.scribbleCanvasContext.drawImage(
+				// 	imgObj, 0, 0,
+				// 	imgObj.width, imgObj.height,
+				// 	imgObj.width * ratio, imgObj.height * ratio,
+				// );
+			};
+
+		});
+		// requestAnimationFrame(() => {
+		// 	this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+		// 	this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+		// 	const oldWidth = this.scribbleCanvas.style.width;
+		// 	const oldHeight = this.scribbleCanvas.style.height;
+
+		// 	this.scribbleCanvas.style.width = (this.innerWidth * 80) / 100;
+		// 	this.scribbleCanvas.style.height = (this.innerHeight * 80) / 100;
+
+		// 	const widthRatio = oldWidth / this.scribbleCanvas.style.width;
+		// 	const heightRatio = oldHeight / this.scribbleCanvas.style.height;
+
+		// 	this.scribbleCanvasContext.scale(widthRatio, heightRatio);
+		// });
+
+		// const currentImage = this.scribbleCanvas.toDataURL("image/png");
+		// this.scribbleCanvas.style.width = (this.innerWidth * 80) / 100;
+		// this.scribbleCanvas.style.height = (this.innerHeight * 80) / 100;
+		// this.scribbleCanvasContext.drawImage(currentImage, 0, 0);
+
+	}
+
 	public changePenSize() {
 		this.penToIndicatorRatio = 0.5;
 		this.penSize = this.penIndicatorSize * this.penToIndicatorRatio;
@@ -172,79 +234,115 @@ class IssueScreenshotController implements ng.IController {
 		this.DialogService.closeDialog();
 	}
 
-	public initCanvas(canvas) {
-
-		canvas.addEventListener("mousedown", (event) => {
-			this.mouseDragX = event.layerX;
-			this.mouseDragY = event.layerY;
-			this.mouseDragging = true;
-
-			this.updateImage(canvas);
-
-			// window.status="DOWN: "+event.layerX+", "+event.layerY;
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
-
-			this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-			this.actionsPointerEvents = "none";
-		}, false);
-
-		canvas.addEventListener("mouseup", (event) => {
-			this.mouseButton = 0;
-			this.mouseDragging = false;
-			this.lastMouseDragX = -1;
-			this.lastMouseDragY = -1;
-
-			this.updateImage(canvas);
-
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
-
-			this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-			this.actionsPointerEvents = "auto";
-		}, false);
-
-		canvas.addEventListener("mouseout", (event) => {
-			this.mouseButton = 0;
-			this.mouseDragging = false;
-			this.lastMouseDragX = -1;
-			this.lastMouseDragY = -1;
-
-			this.updateImage(canvas);
-
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
-
-			this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-			this.actionsPointerEvents = "auto";
-
-		}, false);
-
-		canvas.addEventListener("mousemove", (event) => {
-
-			this.mouseDragX = event.layerX;
-			this.mouseDragY = event.layerY;
-
-			if (!this.mouseDragging && !this.showPenIndicator) {
-				this.$timeout(() => {
-					this.showPenIndicator = true;
-				});
-			} else {
-				if ((this.lastMouseDragX !== -1) && (!this.hasDrawnOnCanvas)) {
-					this.hasDrawnOnCanvas = true;
+	public normaliseInteraction(coordinate, event) {
+		switch (coordinate) {
+			case "x":
+				if (event.layerX) {
+					return event.layerX;
+				} else if (event.touches && event.touches[0]) {
+					const touch = event.touches[0];
+					const canvasEl = touch.target.getBoundingClientRect();
+					return touch.clientX - canvasEl.x;
 				}
-				this.updateImage(canvas);
+			case "y":
+				if (event.layerY) {
+					return event.layerY;
+				} else if (event.touches  && event.touches[0]) {
+					const touch = event.touches[0];
+					const canvasEl = touch.target.getBoundingClientRect();
+					return touch.clientY - canvasEl.y;
+				}
 			}
+	}
 
-			event.preventDefault();
-			event.stopPropagation();
-			event.returnValue = false;
+	public startDraw(event: any, canvas: any) {
 
-			this.setPenIndicatorPosition(event.layerX, event.layerY);
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+
+		this.mouseDragX = this.normaliseInteraction("x", event);
+		this.mouseDragY = this.normaliseInteraction("y", event);
+		this.mouseDragging = true;
+
+		this.updateImage(canvas);
+		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
+		this.actionsPointerEvents = "none";
+	}
+
+	public endDraw(event: any, canvas: any) {
+
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+
+		this.mouseButton = 0;
+		this.mouseDragging = false;
+		this.lastMouseDragX = -1;
+		this.lastMouseDragY = -1;
+
+		this.updateImage(canvas);
+		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+		this.actionsPointerEvents = "auto";
+	}
+
+	public outOfDrawCanvas(event: any, canvas: any) {
+
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+
+		this.mouseButton = 0;
+		this.mouseDragging = false;
+		this.lastMouseDragX = -1;
+		this.lastMouseDragY = -1;
+		this.updateImage(canvas);
+
+		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
+		this.actionsPointerEvents = "auto";
+	}
+
+	public moveOnDrawCanvas(event: any, canvas: any) {
+		event.preventDefault();
+		event.stopPropagation();
+		event.returnValue = false;
+
+		this.mouseDragX = this.normaliseInteraction("x", event);
+		this.mouseDragY = this.normaliseInteraction("y", event);
+
+		if (!this.mouseDragging && !this.showPenIndicator) {
+			this.$timeout(() => {
+				this.showPenIndicator = true;
+			});
+		} else {
+			if ((this.lastMouseDragX !== -1) && (!this.hasDrawnOnCanvas)) {
+				this.hasDrawnOnCanvas = true;
+			}
+			this.updateImage(canvas);
+		}
+
+		this.setPenIndicatorPosition(event.layerX, event.layerY);
+	}
+
+	public addCanvasEventListener(canvas, eventName, callback) {
+		canvas.addEventListener(eventName, (event) => {
+			callback(event, canvas);
 		}, false);
+	}
+
+	public initCanvas(canvas: any) {
+
+		this.addCanvasEventListener(canvas, "touchstart", this.startDraw.bind(this));
+		this.addCanvasEventListener(canvas, "mousedown", this.startDraw.bind(this));
+
+		this.addCanvasEventListener(canvas, "touchend", this.endDraw.bind(this));
+		this.addCanvasEventListener(canvas, "mouseup", this.endDraw.bind(this));
+
+		this.addCanvasEventListener(canvas, "touchleave", this.outOfDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, "mouseout", this.outOfDrawCanvas.bind(this));
+
+		this.addCanvasEventListener(canvas, "touchmove", this.moveOnDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, "mousemove", this.moveOnDrawCanvas.bind(this));
 
 	}
 
@@ -259,7 +357,6 @@ class IssueScreenshotController implements ng.IController {
 		if (this.lastMouseDragX < 0 || this.lastMouseDragY < 0) {
 			this.lastMouseDragX = this.mouseDragX;
 			this.lastMouseDragY = this.mouseDragY;
-			return;
 		}
 
 		context.lineWidth = this.penSize;
@@ -341,10 +438,10 @@ class IssueScreenshotController implements ng.IController {
 		const height = this.penIndicator[0].offsetHeight;
 
 		const positionLeft = x - width / 2;
-		const positionTop = (y - height / 2) + 50;
+		const positionTop = (y - height / 2);
 
 		this.penIndicator.css("left", positionLeft + "px");
-		this.penIndicator.css("top", positionTop + "px");
+		this.penIndicator.css("top", (positionTop + 45) + "px");
 	}
 
 }

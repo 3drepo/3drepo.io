@@ -33,6 +33,7 @@ class DocsController implements ng.IController {
 	private allDocTypesHeight;
 	private state: any;
 	private show;
+	private noMetadata;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -61,12 +62,15 @@ class DocsController implements ng.IController {
 		this.$scope.$watch(() => {
 			return this.DocsService.state;
 		}, () => {
-
 			if (this.DocsService.state.updated === true) {
 				this.docs = this.DocsService.state.docs;
 				this.allDocTypesHeight = this.DocsService.state.allDocTypesHeight;
 				this.DocsService.state.updated = false;
 				this.setContentHeight();
+			}
+
+			if (this.noMetadata !== this.DocsService.state.noMetadata) {
+				this.noMetadata = this.DocsService.state.noMetadata;
 			}
 
 			if (this.show !== this.DocsService.state.show) {

@@ -16,38 +16,38 @@
  */
 "use strict";
 
-var express = require('express');
-var router = express.Router({mergeParams: true});
+let express = require("express");
+let router = express.Router({mergeParams: true});
 
-var LatLon = require('geodesy').LatLonEllipsoidal;
-var OsGridRef = require('geodesy').OsGridRef;
-var generateMeshes = require('../libs/generateMeshes');
-var generateglTF = require('../libs/generateglTF');
-var config = require('../config.js');
-var stash = require('../models/helper/stash');
-var C = require('../constants');
-var middlewares = require("../middlewares/middlewares");
+let LatLon = require("geodesy").LatLonEllipsoidal;
+let OsGridRef = require("geodesy").OsGridRef;
+let generateMeshes = require("../libs/generateMeshes");
+let generateglTF = require("../libs/generateglTF");
+let config = require("../config.js");
+let stash = require("../models/helper/stash");
+let C = require("../constants");
+let middlewares = require("../middlewares/middlewares");
 const systemLogger = require("../logger.js").systemLogger;
 
 // wrapper for os get apis
-var OSGet = require('../libs/OSGet')(config.os);
+let OSGet = require("../libs/OSGet")(config.os);
 
-router.get('/buildings.gltf', middlewares.loggedIn, function(req, res, next){
-	genglX('gltf', req, res, next);
+router.get("/buildings.gltf", middlewares.loggedIn, function(req, res, next){
+	genglX("gltf", req, res, next);
 });
 
-router.get('/buildings.bin', middlewares.loggedIn, function(req, res, next){
-	genglX('bin', req, res, next);
+router.get("/buildings.bin", middlewares.loggedIn, function(req, res, next){
+	genglX("bin", req, res, next);
 });
 
-router.get('/map-images/:style/:z/:x/:y.png', middlewares.loggedIn, getMapTiles);
+router.get("/map-images/:style/:z/:x/:y.png", middlewares.loggedIn, getMapTiles);
 
-router.get('/building-meta/:uprn', middlewares.loggedIn, getUPRN);
+router.get("/building-meta/:uprn", middlewares.loggedIn, getUPRN);
 
 //TO-DO: dirty quick fix to be deleted later
-router.get('/:shader.glsl', function(req, res){ 
+router.get("/:shader.glsl", function(req, res){ 
 	//console.log(__dirname);
-	res.sendFile(require('path').resolve(__dirname + '../../../public/shader/gltfStockShaders/' + req.params.shader + '.glsl'));
+	res.sendFile(require("path").resolve(__dirname + "../../../public/shader/gltfStockShaders/" + req.params.shader + ".glsl"));
 });
 
 function extendObject(a, b){
@@ -67,7 +67,7 @@ function genglX(format, req, res){
 	//return res.status(404).send('tmp no avail');
 	//console.log(req);
 
-	let acceptedClassCodes = ['CE', 'C', 'R']; //commerial, education and residential
+	let acceptedClassCodes = ["CE", "C", "R"]; //commerial, education and residential
 	let convertClassCode = function(classCode){
 		
 		for(let i=0; i<acceptedClassCodes.length; i++){
@@ -81,42 +81,42 @@ function genglX(format, req, res){
 
 	//color scheme
 	let materialMapping = {
-		'C': 'Effect-Blue',
-		'CE': 'Effect-Red',
-		'R': 'Effect-Green'
+		"C": "Effect-Blue",
+		"CE": "Effect-Red",
+		"R": "Effect-Green"
 	};
 
-	var methodNames = {
-		'RADIUS': 'radius',
-		'BBOX': 'bbox',
-		'OSGRID': 'osgrid'
+	let methodNames = {
+		"RADIUS": "radius",
+		"BBOX": "bbox",
+		"OSGRID": "osgrid"
 	};
 
 	//TO-DO: hard coded account for stashing 3d building grids
-	let dbCol =  {account: 'ordnancesurvey', model: 'properties_dimensions', logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: "ordnancesurvey", model: "properties_dimensions", logger: req[C.REQ_REPO].logger};
 
-	var method = req.query.method;
+	let method = req.query.method;
 
 	let gltfUrl;
 	let binUrl;
 	
-	if(format === 'gltf'){
+	if(format === "gltf"){
 		gltfUrl = `/${dbCol.account}/${dbCol.model}${req.url}`;
-		binUrl  = gltfUrl.replace('gltf', 'bin');
+		binUrl  = gltfUrl.replace("gltf", "bin");
 
 	} else {
 		binUrl = `/${dbCol.account}/${dbCol.model}${req.url}`;
-		gltfUrl  = binUrl.replace('bin', 'gltf');
+		gltfUrl  = binUrl.replace("bin", "gltf");
 	}
 
-	var lat;
-	var lon;
-	var radius;
-	var lowerLeftLat;
-	var lowerLeftLon;
-	var draw;
-	var grid;
-	var lowerLeftGrid;
+	let lat;
+	let lon;
+	let radius;
+	let lowerLeftLat;
+	let lowerLeftLon;
+	let draw;
+	let grid;
+	let lowerLeftGrid;
 
 	draw = Boolean(parseInt(req.query.draw));
 
@@ -143,9 +143,9 @@ function genglX(format, req, res){
 		let osgrid = OsGridRef.parse(osgridref);
 
 		let refLenToGridScale =  {
-			10:{ 'length': 10, size: 9 },
-			8: { 'length': 8, size: 99 },
-			6: { 'length': 6, size: 999 },
+			10:{ "length": 10, size: 9 },
+			8: { "length": 8, size: 99 },
+			6: { "length": 6, size: 999 },
 		};
 
 		let size = refLenToGridScale[osgridref.length].size;
@@ -155,7 +155,7 @@ function genglX(format, req, res){
 
 		//console.log(lowerLeftGrid, grid);
 	} else {
-		return res.status(400).json({ message: 'method must be either radius, bbox or osgrid'});
+		return res.status(400).json({ message: "method must be either radius, bbox or osgrid"});
 	}
 
 
@@ -269,7 +269,7 @@ function genglX(format, req, res){
 				//console.log('draw');
 				return Promise.all(promises);
 			} else {
-				return Promise.reject({ message: 'Please put draw=1 in query string if you wish to generate glTF'});
+				return Promise.reject({ message: "Please put draw=1 in query string if you wish to generate glTF"});
 			}
 
 
@@ -322,11 +322,11 @@ function genglX(format, req, res){
 			//console.log('Heightless building count', heightlessBuildingCount);
 
 
-			let glTF = generateglTF(meshesByBuilding, `${req.url.replace('.gltf', '.bin').substr(1)}`, materialMapping);
+			let glTF = generateglTF(meshesByBuilding, `${req.url.replace(".gltf", ".bin").substr(1)}`, materialMapping);
 
-			stash.saveStashByFilename(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
+			stash.saveStashByFilename(dbCol, "gltf", gltfUrl, new Buffer.from(JSON.stringify(glTF.json)));
 			//bin file should also in .stash.gltf but with .bin as filename extension
-			stash.saveStashByFilename(dbCol, 'gltf', binUrl, glTF.buffer);
+			stash.saveStashByFilename(dbCol, "gltf", binUrl, glTF.buffer);
 			
 
 			return Promise.resolve(glTF);
@@ -335,21 +335,21 @@ function genglX(format, req, res){
 	}
 
 	Promise.all([
-		stash.findStashByFilename(dbCol, 'gltf', gltfUrl),
-		stash.findStashByFilename(dbCol, 'gltf', binUrl)
+		stash.findStashByFilename(dbCol, "gltf", gltfUrl),
+		stash.findStashByFilename(dbCol, "gltf", binUrl)
 	]).then(buffers => {
 
 		let json = buffers[0];
 		let bin = buffers[1];
 
 		if(json && bin){
-			systemLogger.logInfo('stash found');
+			systemLogger.logInfo("stash found");
 			return Promise.resolve({ json: json, buffer: bin});
 		} else {
-			systemLogger.logInfo('stash not found');
+			systemLogger.logInfo("stash not found");
 
 			if(true){
-				return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'});
+				return Promise.reject({ message: "No stash and we are not going to bother os api server today so no data for you, sorry."});
 			} else {
 				return getBuildingsAndGenerate();
 			}
@@ -357,7 +357,7 @@ function genglX(format, req, res){
 
 	}).then(glTF => {
 
-		if(format === 'bin') {
+		if(format === "bin") {
 			res.status(200).send(glTF.buffer);
 		} else {
 			//json from stash is a Buffer
@@ -386,27 +386,27 @@ function getMapTiles(req, res){
 	z = req.params.z;
 
 	//TO-DO: hard coded account for stashing map images
-	let dbCol =  {account: 'ordnancesurvey', model: 'map_images', logger: req[C.REQ_REPO].logger};
+	let dbCol =  {account: "ordnancesurvey", model: "map_images", logger: req[C.REQ_REPO].logger};
 	
 	let filename = `${req.params.style}/${z}/${x}/${y}.png`;
 
 
-	stash.findStashByFilename(dbCol, 'png', filename).then( image => {
+	stash.findStashByFilename(dbCol, "png", filename).then( image => {
 		
 		if(image) {
 
-			req[C.REQ_REPO].logger.logDebug('Map tile images found from stash');
+			req[C.REQ_REPO].logger.logDebug("Map tile images found from stash");
 			return Promise.resolve(image);
 
 		} else {
 
-			req[C.REQ_REPO].logger.logDebug('Map tile images NOT found from stash, getting from ordnance survey');
+			req[C.REQ_REPO].logger.logDebug("Map tile images NOT found from stash, getting from ordnance survey");
 			return OSGet.map({
-				tileMatrixSet: 'EPSG:3857', 
+				tileMatrixSet: "EPSG:3857", 
 				layer: `${req.params.style} 3857`, 
 				z, x, y
 			}).then(image => {
-				stash.saveStashByFilename(dbCol, 'png', filename, image);
+				stash.saveStashByFilename(dbCol, "png", filename, image);
 				return Promise.resolve(image);
 			});
 		}
@@ -414,7 +414,7 @@ function getMapTiles(req, res){
 	}).then(image => {
 
 
-		res.writeHead(200, {'Content-Type': 'image/png' });
+		res.writeHead(200, {"Content-Type": "image/png" });
 		res.write(image);
 		res.end();
 

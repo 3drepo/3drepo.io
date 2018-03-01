@@ -1,36 +1,29 @@
 bottom-buttons {
   display: block;
   position: absolute;
-  bottom: 80px;
+  bottom: 15px;
   left: 0;
   right: 0;
-  width: 300px;
-  margin: auto;
+  width: 100%;
   text-align: center;
 }
 
-bottom-buttons #leftButtons {
-  position: absolute;
-  left: 20px;
-  top: 8px;
-}
-bottom-buttons #leftButtons span {
-  outline: none;
-  align-items: center;
+@media (max-width: 767px) { 
+  bottom-buttons #middleButtons {
+    display: none;
+  } 
 }
 
-bottom-buttons #rightButtons {
-  position: absolute;
-  right: 10px;
-  top: 8px;
-}
-bottom-buttons #rightButtons span {
-  outline: none;
+bottom-buttons #middleButtons {
+  margin: auto;
 }
 
-bottom-buttons #showButtonIcon {
-  font-size: 25px;
-  margin-top: -5px;
+bottom-buttons #middleButtons button {
+  margin: auto !important;
+}
+
+bottom-buttons #middleButtons .middleButtonHolder {
+  width: 85px;
 }
 
 bottom-buttons .actionButton {
@@ -47,6 +40,10 @@ bottom-buttons .viewingOptionButtonHolder {
   bottom: 50px;
 }
 
+bottom-buttons .viewingOptionButtonHolder .viewingOptionButtons {
+  margin-left: 22px;
+}
+
 bottom-buttons label {
   color: #FFFFFF;
   text-shadow: 0 0 2px #000;
@@ -57,19 +54,7 @@ bottom-buttons label:hover {
   cursor: pointer;
 }
 
-#leftButtons span, #rightButtons {
-  width: 75px;
-}
-
-.actionButton {
+bottom-buttons #middleButtonHolder .actionButton {
   padding: 0 !important;
   margin: 0 !important;
 }
-
-/* .viewingOptionButtonHolder {
-  pointer-events: none;
-} */
-/* 
-.viewingOptionButtons svg {
-  pointer-events: none;
-} */

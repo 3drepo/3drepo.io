@@ -15,9 +15,8 @@
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
 
-import { Pin } from "./pin";
-import { UnityUtil } from "./unity-util";
-
+declare const Pin;
+declare const UnityUtil; 
 declare const ClientConfig;
 declare const Module;
 
@@ -128,8 +127,9 @@ export class Viewer {
 	public units = "m";
 	public convertToM = 1.0;
 	public logos = [];
+	public divId = "unityViewer";
 
-	public unityLoaderPath = "unity/Release/UnityLoader.js";
+	public unityLoaderPath = "unity/Build/UnityLoader.js";
 	public unityScriptInserted = false;
 	public viewer: HTMLElement;
 
@@ -191,23 +191,27 @@ export class Viewer {
 
 		this.loadingDiv.appendChild(this.loadingDivText);
 
-		const canvas = document.createElement("canvas");
-		canvas.className = "emscripten";
-		canvas.setAttribute("id", "canvas");
-		canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-		canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+		const unityHolder = document.createElement("div");
+		unityHolder.className = "emscripten";
+		unityHolder.setAttribute("id", this.divId);
+		unityHolder.removeAttribute("style");
+		unityHolder.setAttribute("width", "100%");
+		unityHolder.setAttribute("height", "100%");
+		unityHolder.setAttribute("tabindex", "1"); // You need this for unityHolder to register keyboard events
+		unityHolder.setAttribute("oncontextmenu", "event.preventDefault()");
 
-		canvas.onmousedown = () => {
+		unityHolder.onmousedown = () => {
 			return false;
 		};
 
-		canvas.style["pointer-events"] = "all";
+		unityHolder.style["pointer-events"] = "all";
 
 		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(canvas);
+		this.viewer.appendChild(unityHolder);
 		this.viewer.appendChild(this.loadingDiv);
 
 		this.unityLoaderScript = document.createElement("script");
+
 
 	}
 
@@ -232,10 +236,9 @@ export class Viewer {
 
 	public insertUnityLoader() {
 		return new Promise((resolve, reject) => {
-			this.unityLoaderScript.setAttribute("defer", "");
-			this.unityLoaderScript.setAttribute("async", "");
 			this.unityLoaderScript.addEventListener ("load", () => {
 				console.debug("Loaded UnityLoader.js succesfully");
+				UnityUtil.loadUnity(this.divId);
 				resolve();
 			}, false);
 			this.unityLoaderScript.addEventListener ("error", (error) => {
@@ -406,21 +409,20 @@ export class Viewer {
 
 	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride) {
 
-		const canHighlight = !this.pinDropMode && !this.measureMode;
+		const canHighlight = this.initialized && !this.pinDropMode && !this.measureMode;
 
 		if (canHighlight) {
 
-			idsIn = idsIn || [];
-			const uniqueIds = idsIn.filter((value, index) => {
-				return idsIn.indexOf(value) === index;
-			});
-
-			if (uniqueIds.length) {
-				const multi = multiOverride || this.multiSelectMode;
-				UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
-			} else {
-				UnityUtil.clearHighlights();
+			if (idsIn) {
+				const uniqueIds = Array.from(new Set(idsIn));
+				if (uniqueIds.length) {
+					const multi = multiOverride || this.multiSelectMode;
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
+					return;
+				}
 			}
+
+			UnityUtil.clearHighlights();
 
 		}
 
@@ -493,6 +495,7 @@ export class Viewer {
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = "none";
+		this.initialized = false;
 		UnityUtil.reset();
 	}
 
@@ -504,6 +507,7 @@ export class Viewer {
 	public loadModel(account, model, branch, revision) {
 
 		return UnityUtil.onReady().then(() => {
+			this.initialized = true;
 			this.account = account;
 			this.model = model;
 			this.branch = branch;
@@ -690,6 +694,28 @@ export class Viewer {
 		if (this.pins.hasOwnProperty(id)) {
 			this.pins[id].changeColour(colours);
 		}
+	}
+
+	/**
+	 * Initialise map creator within unity
+	 * @param {Object[]} surveyPoints - array of survey points and it's respective latitude and longitude value
+	 */
+	public mapInitialise(surveyPoints) {
+		UnityUtil.mapInitialise(surveyPoints);
+	}
+
+	/**
+	 * Start map generation
+	 */
+	public  mapStart() {
+		UnityUtil.mapStart();
+	}
+
+	/**
+	 * Stop map generation
+	 */
+	public mapStop() {
+		UnityUtil.mapStop();
 	}
 
 }

@@ -14,17 +14,20 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-declare var grecaptcha;
+declare const grecaptcha;
+declare let zxcvbn;
 class SignupController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"$mdDialog",
 		"$location",
+		"$window",
+
 		"ClientConfigService",
 		"APIService",
 		"AuthService",
-		"$window",
+		"PasswordService",
 	];
 
 	private reCaptchaResponse;
@@ -38,6 +41,8 @@ class SignupController implements ng.IController {
 	private version;
 	private logo;
 	private captchaKey;
+	private passwordStrength;
+	private passwordResult;
 
 	private tcAgreed;
 	private useReCAPTCHA;
@@ -48,18 +53,27 @@ class SignupController implements ng.IController {
 	private legalText;
 	private legalTitle;
 	private registerErrorMessage;
+	private emailInvalid;
+	private allowedPhone;
 
 	constructor(
 		private $scope,
 		private $mdDialog,
 		private $location,
+		private $window,
+
 		private ClientConfigService,
 		private APIService,
 		private AuthService,
-		private $window,
-	) {}
+		private PasswordService,
+	) {
+
+	}
 
 	public $onInit() {
+		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
+
+		this.PasswordService.addPasswordStrengthLib();
 
 		this.AuthService.sendLoginRequest().then((response) => {
 			if (response.data.username) {
@@ -83,6 +97,8 @@ class SignupController implements ng.IController {
 		this.useReCAPTCHA = false;
 		this.registering = false;
 		this.showLegalText = false;
+
+		this.emailInvalid = false;
 
 		this.jobTitles = [
 			"Director",
@@ -146,7 +162,6 @@ class SignupController implements ng.IController {
 				this.legalText += ".";
 			}
 		}
-
 		this.watchers();
 
 	}
@@ -163,6 +178,18 @@ class SignupController implements ng.IController {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
 			}
+			if (this.newUser.password !== undefined && this.PasswordService.passwordLibraryAvailable()) {
+				const result = this.PasswordService.evaluatePassword(this.newUser.password);
+				this.passwordResult = result;
+				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newUser.password, result.score);
+				this.checkInvalidPassword(result.score);
+
+			}
+			if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
+				this.invalidatePhoneNumber();
+			} else {
+				this.validatePhoneNumber();
+			}
 		}, true);
 
 		this.$scope.$watch("AuthService.isLoggedIn()", (newValue) => {
@@ -171,6 +198,48 @@ class SignupController implements ng.IController {
 				this.goToLoginPage();
 			}
 		});
+
+		this.$scope.$watch(() =>  this.$scope.signup.$error, (error) => {
+			if (error.email) {
+				this.emailInvalid = true;
+			}
+		}, true);
+	}
+
+	public checkInvalidPassword(score) {
+		switch (score) {
+		case 0:
+			this.invalidatePassword();
+			break;
+		case 1:
+			this.invalidatePassword();
+			break;
+		case 2:
+			this.validatePassword();
+			break;
+		case 3:
+			this.validatePassword();
+			break;
+		case 4:
+			this.validatePassword();
+			break;
+		}
+	}
+
+	public invalidatePassword() {
+		this.$scope.signup.password.$setValidity("required", false);
+	}
+
+	public validatePassword() {
+		this.$scope.signup.password.$setValidity("required", true);
+	}
+
+	public invalidatePhoneNumber() {
+		this.$scope.signup.phoneNo.$setValidity("required", false);
+	}
+
+	public validatePhoneNumber() {
+		this.$scope.signup.phoneNo.$setValidity("required", true);
 	}
 
 	public handleLegalItem(legalItem) {
@@ -236,7 +305,6 @@ class SignupController implements ng.IController {
 		let	allowRegister = true;
 		const formatRegex = this.ClientConfigService.usernameRegExp;
 		const allowedFormat = new RegExp(formatRegex); // English letters, numbers, underscore, not starting with number
-		const allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
 		if (
 			(!this.isDefined(this.newUser.username)) ||
@@ -250,18 +318,32 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.country))
 
 		) {
-			this.registerErrorMessage = "Please fill all required fields";
+			if (this.emailInvalid) {
+				this.registerErrorMessage = "Email is invalid";
+			} else {
+				this.registerErrorMessage = "Please fill all required fields";
+			}
 			return;
 		}
 
 		if (!allowedFormat.test(this.newUser.username)) {
-			this.registerErrorMessage = `Username not allowed: English letters,
+			this.registerErrorMessage = `Username not allowed: Max length 64 characters. Can contain upper and lowercase letters,
 				numbers, underscore allowed only, and must not start with number`;
 			return;
 		}
 
-		if ( this.newUser.phoneNo && !allowedPhone.test(this.newUser.phoneNo) ) {
+		if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
 			this.registerErrorMessage = "Phone number can be blank, or made of numbers and +- characters only";
+			return;
+		}
+
+		if ( !this.newUser.password || this.newUser.password.length < 8 ) {
+			this.registerErrorMessage = "Password must be at least 8 characters long";
+			return;
+		}
+
+		if (this.passwordResult && this.passwordResult.score < 2) {
+			this.registerErrorMessage = "Password is too weak; " + this.passwordResult.feedback.suggestions.join(" ");
 			return;
 		}
 
@@ -317,7 +399,7 @@ class SignupController implements ng.IController {
 	}
 
 	public getLegalText(legalItem) {
-		return `<a target='_blank' href='/${legalItem.page}'> ${legalItem.title} </a>`;
+		return `<a target='_blank' href='/${legalItem.page}'>${legalItem.title}</a>`;
 	}
 }
 

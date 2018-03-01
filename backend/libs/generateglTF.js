@@ -16,27 +16,27 @@
  */
 
 
-var normalVec = require('./normalVec');
+let normalVec = require("./normalVec");
 
 
 function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options){
-	'use strict';
+	"use strict";
 	// glTF const
 	const ELEMENT_ARRAY_BUFFER = 34963;
 	const ARRAY_BUFFER = 34962;
 	const UNSIGNED_SHORT = 5123;
 	const FLOAT = 5126;
-	const SCALAR = 'SCALAR';
-	const VEC3 = 'VEC3';
+	const SCALAR = "SCALAR";
+	const VEC3 = "VEC3";
 	const IDENTITY_MATRIX = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
 	const PRIMITIVE_MODE_TRIANGLES = 4;
-	const KHR_BINARY_GLTF = 'KHR_binary_glTF';
+	const KHR_BINARY_GLTF = "KHR_binary_glTF";
 
-	let json = require('./glTFMetaTemplate.json');
+	let json = require("./glTFMetaTemplate.json");
 	json = JSON.parse(JSON.stringify(json));
 
 	// bin info
-	let binId = 'buffer1';
+	let binId = "buffer1";
 	if(options && options.forGlb){
 		json.extensionsUsed.push(KHR_BINARY_GLTF);
 		binId = KHR_BINARY_GLTF;
@@ -48,11 +48,11 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		};
 	}
 
-	let nodeName = 'node_1';
-	let meshName = 'mesh_1';
+	let nodeName = "node_1";
+	let meshName = "mesh_1";
 
 	json.meshes[meshName] = {
-		'name': meshName,
+		"name": meshName,
 		"primitives": []
 	};
 
@@ -64,7 +64,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		"extras" : { "multipart" : "true" }
 	};
 
-	let vertexBufferViewName = `vertex_buffer`;
+	let vertexBufferViewName = "vertex_buffer";
 
 	json.bufferViews[vertexBufferViewName] = {
 		"buffer": binId,
@@ -73,7 +73,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		"target": ARRAY_BUFFER
 	};
 
-	let normalBufferViewName = `normal_buffer`;
+	let normalBufferViewName = "normal_buffer";
 
 	json.bufferViews[normalBufferViewName] = {
 		"buffer": binId,
@@ -82,7 +82,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		"target": ARRAY_BUFFER
 	};
 
-	let indexBufferViewName = `index_buffer`;
+	let indexBufferViewName = "index_buffer";
 
 	json.bufferViews[indexBufferViewName] = {
 		"buffer": binId,
@@ -91,7 +91,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		"target": ELEMENT_ARRAY_BUFFER
 	};
 
-	let idMapBufferViewName = `idMap_buffer`;
+	let idMapBufferViewName = "idMap_buffer";
 
 	json.bufferViews[idMapBufferViewName] = {
 		"buffer": binId,
@@ -159,7 +159,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 			"byteStride": 4
 		};
 
-		let effect = 'Effect-White';
+		let effect = "Effect-White";
 
 		if(options && options.materialMapping && options.materialMapping[bufferInfo.classCode]){
 			effect = options.materialMapping[bufferInfo.classCode];
@@ -187,7 +187,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 }
 
 function generateBuffer(meshesByBuilding, binName, materialMapping){
-	'use strict';
+	"use strict";
 	
 	let GLBYTE = {
 		FLOAT: 4,
@@ -253,10 +253,10 @@ function generateBuffer(meshesByBuilding, binName, materialMapping){
 			idMapsCount: idMaps.length
 		};
 
-		let verticesBuffer = new Buffer(( glVertices.length * 3 ) * GLBYTE.FLOAT);
-		let normalsBuffer = new Buffer(( glNormals.length * 3 ) * GLBYTE.FLOAT);
-		let indicesBuffer = new Buffer(glIndices.length * GLBYTE.UINT);
-		let idMapsBuffer = new Buffer(idMaps.length *GLBYTE.FLOAT);
+		let verticesBuffer = new Buffer.alloc(( glVertices.length * 3 ) * GLBYTE.FLOAT);
+		let normalsBuffer = new Buffer.alloc(( glNormals.length * 3 ) * GLBYTE.FLOAT);
+		let indicesBuffer = new Buffer.alloc(glIndices.length * GLBYTE.UINT);
+		let idMapsBuffer = new Buffer.alloc(idMaps.length *GLBYTE.FLOAT);
 
 
 		let writeBufferOffset;

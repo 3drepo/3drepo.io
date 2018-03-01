@@ -69,12 +69,21 @@ const methods = {
 	remove: function(name){
 
 		let job = this.findById(name);
+		let isInUse = false;	
+		this.user.customData.billing.subscriptions.findByJob(name).forEach( sub => {
+			//We can ignore empty subscriptions. So only return error code if 
+			//not empty.
+			if(sub.assignedUser) {
+				isInUse = true;
+			}
+		});
 		
-		if(this.user.customData.billing.subscriptions.findByJob(name).length > 0){
-			return Promise.reject(responseCodes.JOB_ASSIGNED);
-		} else if (!job) {
+		if (!job) {
 			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		} else {
+		} else if(isInUse) {
+			return Promise.reject(responseCodes.JOB_ASSIGNED);
+		}
+		else {
 			job.remove();
 			return this.user.save();
 		}

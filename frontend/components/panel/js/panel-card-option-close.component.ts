@@ -31,8 +31,7 @@ class PanelCardOptionCloseController implements ng.IController {
 
 export const PanelCardOptionCloseComponent: ng.IComponentOptions = {
 	bindings: {
-		menu: "=",
-		selectedCloseOption: "=",
+		show: "=",
 	},
 	controller: PanelCardOptionCloseController,
 	controllerAs: "vm",

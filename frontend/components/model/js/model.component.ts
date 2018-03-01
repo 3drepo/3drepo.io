@@ -26,6 +26,7 @@ class ModelController implements ng.IController {
 		"$compile",
 		"$mdDialog",
 
+		"ClipService",
 		"EventService",
 		"TreeService",
 		"RevisionsService",
@@ -61,6 +62,7 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
+		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -166,17 +168,17 @@ class ModelController implements ng.IController {
 
 		if (!this.ViewerService.currentModel.model) {
 			console.debug("Initiating Viewer");
-
-			this.ViewerService.initViewer()
-				.then(() => {
-					this.ViewerService.loadViewerModel(
-						this.account,
-						this.model,
-						this.branch,
-						this.revision,
-					);
-				});
-
+			if (this.ViewerService.viewer) {
+				this.ViewerService.initViewer()
+					.then(() => {
+						this.ViewerService.loadViewerModel(
+							this.account,
+							this.model,
+							this.branch,
+							this.revision,
+						);
+					});
+			}
 		} else {
 			// Load the model
 			this.ViewerService.loadViewerModel(
@@ -199,13 +201,12 @@ class ModelController implements ng.IController {
 					this.PanelService.hideSubModels(this.issuesCardIndex, true);
 				}
 
-				this.EventService.send(
-					this.EventService.EVENT.MODEL_SETTINGS_READY,
-					data,
-				);
+				this.ViewerService.updateViewerSettings(data.updateViewerSettings);
+				this.ClipService.initClip(data.properties.unit);
 
 				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
 					.then((tree) => {
+
 						this.EventService.send(this.EventService.EVENT.TREE_READY, tree);
 						// FIXME: I don't know if treeMap is still used. Doc component now uses Tree Service directly.
 						this.treeMap = this.TreeService.getMap(tree.nodes);
@@ -245,6 +246,7 @@ export const ModelComponent: ng.IComponentOptions = {
 		model:  "=",
 		revision: "=",
 		state:    "=",
+		isLiteMode: "=",
 	},
 	controller: ModelController,
 	controllerAs: "vm",

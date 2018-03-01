@@ -24,6 +24,7 @@ class PanelController implements ng.IController {
 
 		"PanelService",
 		"EventService",
+		"TreeService",
 	];
 
 	public maxHeightAvailable;
@@ -43,6 +44,7 @@ class PanelController implements ng.IController {
 
 		private PanelService: any,
 		private EventService: any,
+		private TreeService: any,
 	) {}
 
 	public $onInit() {
@@ -53,7 +55,7 @@ class PanelController implements ng.IController {
 		this.activate = true;
 
 		this.panelTopBottomGap = 55,
-		this.itemGap = 20,
+		this.itemGap = 30,
 		this.panelToolbarHeight = 40,
 		this.contentItemsShown = [];
 
@@ -72,6 +74,7 @@ class PanelController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
+			// console.log(newValue, oldValue);
 			if (oldValue.length && newValue.length) {
 				for (let i = 0; i < newValue.length; i ++) {
 
@@ -98,7 +101,10 @@ class PanelController implements ng.IController {
 				// TODO: This is ugly, why are we doing this?
 				if (item && item.menu && event.value) {
 					event.value.menu.forEach((newItem) => {
-						if (item.menu.indexOf(newItem) === -1) {
+						const exists = item.menu.find((oldItem) => {
+							return oldItem.role === newItem.role;
+						});
+						if (!exists) {
 							item.menu.push(newItem);
 						}
 					});
@@ -106,6 +112,11 @@ class PanelController implements ng.IController {
 
 			}
 		});
+
+		this.$scope.$watch(() => this.TreeService.getHideIfc(),
+			(hideIfc) => {
+				this.PanelService.setHideIfc(hideIfc);
+			});
 
 	}
 
@@ -133,7 +144,7 @@ class PanelController implements ng.IController {
 		/*
 		* Watch for screen resize
 		*/
-		angular.element(this.$window).bind("resize", () => {
+		angular.element(window as any).bind("resize", () => {
 			this.resize();
 		});
 
@@ -278,6 +289,9 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
+		this.$timeout().then(() => {
+			angular.element(window as any).triggerHandler("resize");
+		});
 	}
 
 }

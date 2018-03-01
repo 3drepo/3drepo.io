@@ -26,10 +26,10 @@
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 						md-input-container(flex)
 							label Quota available
-							input(type="text", value="{{vm.quota.spaceLimit | formatBytes}}", ng-disabled="true")
+							input(type="text", value="{{vm.quota.spaceLimit | formatBytesGB}}", ng-disabled="true")
 						md-input-container(flex)
 							label Quota used
-							input(type="text", value="{{vm.quota.spaceUsed | formatBytes:vm.quota.spaceLimit}}", ng-disabled="true")
+							input(type="text", value="{{vm.quota.spaceUsed | formatBytesGB:vm.quota.spaceLimit}}", ng-disabled="true")
 
 					div(layout="row")
 						md-input-container(flex)

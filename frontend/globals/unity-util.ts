@@ -16,6 +16,7 @@
  **/
 declare var Module;
 declare var SendMessage;
+declare var UnityLoader;
 
 export class UnityUtil {
 
@@ -27,6 +28,8 @@ export class UnityUtil {
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
 		MODEL_LOADED : 3, // Models
 	};
+
+	public static unityInstance;
 
 	public static readyPromise;
 	public static readyResolve;
@@ -49,42 +52,51 @@ export class UnityUtil {
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = "WebGLInterface";
 
-	public static sendMessageVss;
-	public static sendMessageVssn;
-	public static sendMessageVsss;
-
 	public static init(
 		errorCallback: any,
 	) {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static _SendMessage(gameObject, func, param) {
+	public static onProgress(gameInstance, progress: number) {
 
-		if (param === undefined) {
-
-			if (!UnityUtil.sendMessageVss) {
-				UnityUtil.sendMessageVss = Module.cwrap("SendMessage", "void", ["string", "string"]);
-			}
-			UnityUtil.sendMessageVss(gameObject, func);
-
-		} else if (typeof param === "string") {
-
-			if (!UnityUtil.sendMessageVsss) {
-				UnityUtil.sendMessageVsss = Module.cwrap("SendMessageString", "void", ["string", "string", "string"]);
-			}
-			UnityUtil.sendMessageVsss(gameObject, func, param);
-
-		} else if (typeof param === "number") {
-
-			if (!UnityUtil.sendMessageVssn) {
-				UnityUtil.sendMessageVssn = Module.cwrap("SendMessageFloat", "void", ["string", "string", "number"]);
-			}
-			UnityUtil.sendMessageVssn(gameObject, func, param);
-
-		} else {
-			throw new Error("" + param + " is does not have a type which is supported by SendMessage.");
+		if (!gameInstance.progress) {
+			gameInstance.progress = document.createElement("div");
+			gameInstance.progress.className = "unityProgressBar";
+			document.getElementById("viewer").appendChild(gameInstance.progress);
 		}
+
+		requestAnimationFrame(() => {
+			if (progress === 1) {
+				gameInstance.progress.style.width = 0;
+				gameInstance.progress.style.display = "none";
+			} else {
+				const width = document.body.clientWidth * (progress);
+				gameInstance.progress.style.width = width + "px";
+			}
+		});
+
+	}
+
+	public static loadUnity(divId: any) {
+		const unitySettings: any = {
+			onProgress: this.onProgress,
+		};
+		UnityLoader.Error.handler = this.onUnityError;
+		if (window && (window as any).Module) {
+			unitySettings.Module = (window as any).Module;
+			UnityUtil.unityInstance = UnityLoader.instantiate(
+				divId,
+				"unity/Build/unity.json",
+				unitySettings,
+			);
+		} else {
+			UnityUtil.unityInstance = UnityLoader.instantiate(
+				divId,
+				"unity/Build/unity.json",
+			);
+		}
+
 	}
 
 	/**
@@ -104,23 +116,31 @@ export class UnityUtil {
 	/**
 	 * Handle a error from Unity
 	 */
-	public static onUnityError(err, url, line) {
-		let conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
-					<br><br> <code>Error ${err} occured at line ${line}</code>
-					<br><br>  This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
-					(such as Chrome or Firefox), reduce your memory usage and try again.
-					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.`;
+	public static onUnityError(errorObject) {
 
+		const err = errorObject.message;
+		const line = errorObject.lineno;
 		let reload = false;
+		let conf;
+
 		if (err.indexOf("Array buffer allocation failed") !== -1 ||
 			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
 			reload = true;
-			conf += `<br><br> Click OK to refresh this page<md-container>`;
+			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
+					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br>  This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
+					(such as Chrome or Firefox), reduce your memory usage and try again.
+					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
+					<br><md-container>`;
 		} else {
-			conf += `<br><md-container>`;
+			conf = `Something went wrong :( <br><br> <code>Error ${err} occured at line ${line}</code><br><br>
+				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
+				<br><br> Click OK to refresh this page<md-container>`;
 		}
 
-		UnityUtil.userAlert(conf, reload);
+		const isUnityError = reload;
+
+		UnityUtil.userAlert(conf, reload, isUnityError);
 
 		return true;
 	}
@@ -157,48 +177,52 @@ export class UnityUtil {
 
 	}
 
-	public static userAlert(message, reload) {
+	public static userAlert(message, reload, isUnity) {
 
 		if (!UnityUtil.unityHasErrored) {
 
 			// Unity can error multiple times, we don't want
 			// to keep annoying the user
 			UnityUtil.unityHasErrored = true;
-			UnityUtil.errorCallback(message, reload);
+			UnityUtil.errorCallback(message, reload, isUnity);
 		}
 
 	}
 
 	public static toUnity(methodName, requireStatus, params) {
 
-		// console.log(methodName, requireStatus, params);
-
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
-				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.unityInstance) {
+					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				}
 			}).catch((error) => {
 				if (error !== "cancel") {
 					console.error("UnityUtil.onLoaded() failed: ", error);
-					UnityUtil.userAlert(error, true);
+					UnityUtil.userAlert(error, true, true);
 				}
 			});
 		} else if (requireStatus === UnityUtil.LoadingState.MODEL_LOADING) {
 			// Requires model to be loading
 			UnityUtil.onLoading().then(() => {
-				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.unityInstance) {
+					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				}
 			}).catch((error) => {
 				if (error !== "cancel") {
-					UnityUtil.userAlert(error, true);
+					UnityUtil.userAlert(error, true, true);
 					console.error("UnityUtil.onLoading() failed: ", error);
 				}
 			});
 		} else {
 			UnityUtil.onReady().then(() => {
-				SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.unityInstance) {
+					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				}
 			}).catch((error) => {
 				if (error !== "cancel") {
-					UnityUtil.userAlert(error, true);
+					UnityUtil.userAlert(error, true, true);
 					console.error("UnityUtil.onReady() failed: ", error);
 				}
 			});
@@ -224,7 +248,6 @@ export class UnityUtil {
 	}
 
 	public static comparatorLoaded() {
-		// console.log("comparatorLoaded - resolve");
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
@@ -242,6 +265,11 @@ export class UnityUtil {
 		UnityUtil.loadingResolve.resolve();
 	}
 
+	public static navMethodChanged(newNavMode) {
+		// TODO: do some front end magic to update the navigation button
+		// newNavMode can currently be "Turntable" or "Helicopter"
+	}
+
 	public static objectStatusBroadcast(nodeInfo) {
 		UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
 		UnityUtil.objectStatusPromise = null;
@@ -251,7 +279,6 @@ export class UnityUtil {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
 		// readyoptimisation in added into unity.
-		SendMessage = UnityUtil._SendMessage;
 		UnityUtil.readyResolve.resolve();
 	}
 
@@ -393,6 +420,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set tolerance threshold
+	 * @param {string} theshold - tolerance level for diffing/clashing
+	 */
+	public static diffToolSetThreshold(theshold) {
+		UnityUtil.toUnity("DiffToolSetThreshold", UnityUtil.LoadingState.MODEL_LOADED, theshold);
+
+	}
+
+	/**
 	* Only show the comparator model
 	* i.e. Only show the model you are trying to compare with, not the base model
 	*/
@@ -482,7 +518,7 @@ export class UnityUtil {
 		if (account && model) {
 			nameSpace = account + "." + model;
 		}
-		if (UnityUtil.objectStatusPromise) {
+		if (UnityUtil.objectStatusPromise && UnityUtil.objectStatusPromise.then) {
 			UnityUtil.objectStatusPromise.then(() => {
 				UnityUtil._getObjectsStatus(nameSpace, promise);
 			});
@@ -562,6 +598,28 @@ export class UnityUtil {
 
 		return UnityUtil.onLoading();
 
+	}
+
+	/**
+	 * Initialise map creator within unity
+	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
+	 */
+	public static mapInitialise(surveyingInfo) {
+		UnityUtil.toUnity("MapsInitiate", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(surveyingInfo));
+	}
+
+	/**
+	 * Start map generation
+	 */
+	public static mapStart() {
+		UnityUtil.toUnity("ShowMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Stop map generation
+	 */
+	public static mapStop() {
+		UnityUtil.toUnity("HideMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**

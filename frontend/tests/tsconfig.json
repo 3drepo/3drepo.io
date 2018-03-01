@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+      "target": "es2015",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "sourceMap": false,
+      "declaration": false,
+      "removeComments": true,
+      "noImplicitAny": false,
+      "outDir": "./e2e/built",
+      "types": ["mocha", "chai", "node"]
+    },
+    "include": [
+      "./e2e/**/*"
+    ],
+    "exclude": [
+      "./e2e/built"
+    ]
+  }

@@ -4,10 +4,8 @@
     const router = express.Router({mergeParams: true});
     const responseCodes = require("../response_codes.js");
     const C = require("../constants");
-    const systemLogger = require("../logger.js").systemLogger;
     const serialize = require("serialize-javascript");
     const _ = require("lodash");
-    const fs = require("fs");
     const addressMeta = require("../models/addressMeta");
     const units = require("../models/unit");
     const History = require("../models/history");
@@ -17,94 +15,6 @@
     const path = require("path");
     
     const config = require("../config");
-    
-    /**
-     * Get the pug files for the required state or plugin
-     *
-     * @param {string} required - Name of required plugin
-     * @param {string} pathToStatesAndPlugins - Root path of plugins 
-     * @param {Object} params - Updates with information from plugin structure 
-     */
-    function getPugFiles(required, pathToStatesAndPlugins, params) {
-        let requiredFiles,
-            requiredDir,
-            fileSplit;
-    
-        requiredDir = pathToStatesAndPlugins + "/" + required + "/pug";
-        try {
-            fs.accessSync(requiredDir, fs.F_OK); // Throw for fail
-    
-            requiredFiles = fs.readdirSync(requiredDir);
-            requiredFiles.forEach(function (file) {
-                fileSplit = file.split(".");
-                params.frontendPug.push({
-                    id: fileSplit[0] + ".html",
-                    path: requiredDir + "/" + file
-                });
-            });
-        } catch (e) {
-            // Pug files don"t exist
-            systemLogger.logFatal(e.message);
-        }
-    }
-    
-    /**
-     * Setup loading only the required states and plugins pug files
-     *
-     * @private
-     * @param {string[]} statesAndPlugins - List of states and plugins to load 
-     * @param {string} required - Plugin to load
-     * @param {string} pathToStatesAndPlugins - Base directory to load plugins from
-     * @param {Object} params - Updates with information from plugin structure
-     */
-    function setupRequiredPug(statesAndPlugins, required, pathToStatesAndPlugins, params) {
-        let i, length;
-    
-        if (statesAndPlugins.indexOf(required.plugin) !== -1) {
-            getPugFiles(required.plugin, pathToStatesAndPlugins, params);
-    
-            // Friends
-            if (required.hasOwnProperty("friends")) {
-                for (i = 0, length = required.friends.length; i < length; i++) {
-                    if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
-                        getPugFiles(required.friends[i], pathToStatesAndPlugins, params);
-                    }
-                }
-            }
-    
-            // Functions
-            if (required.hasOwnProperty("functions")) {
-                for (i = 0, length = required.functions.length; i < length; i++) {
-                    if (statesAndPlugins.indexOf(required.functions[i]) !== -1) {
-                        getPugFiles(required.functions[i], pathToStatesAndPlugins, params);
-                    }
-                }
-            }
-    
-            // Recurse for children
-            if (required.hasOwnProperty("children")) {
-                for (i = 0, length = required.children.length; i < length; i++) {
-                    setupRequiredPug(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
-                }
-            }
-    
-        }
-    }
-    
-    /**
-     * Get all available states and plugins
-     *
-     * @param {Object} params - updates with information from plugin structure
-     */
-    function setupPug(params, pluginStructure) {
-    
-        const pathToStatesAndPlugins = path.join(__dirname + "./../../frontend/components");
-    
-        // Get all available states and plugins in the file system
-        const statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
-        setupRequiredPug(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
-        
-    }
     
     function createClientConfig(serverConfig, req) {
     
@@ -120,14 +30,9 @@
         }
     
         let clientConfig = {
-            "pluginLoaded": [],
-            "pluginPug": [],
-            "pluginJS": [],
-            "pluginAngular": {},
-            "parentStateJSON": {},
+            "maintenanceMode": config.maintenanceMode,
             "ui": {},
             "uistate": {},
-            "pluginCSS": [],
             "structure": pluginStructure,
             "frontendPug": [],
             "gaTrackId": config.gaTrackId,
@@ -211,8 +116,6 @@
     
         clientConfig.impliedPermission = C.IMPLIED_PERM;
     
-        setupPug(clientConfig, pluginStructure);
-        
         return clientConfig;
     }
     

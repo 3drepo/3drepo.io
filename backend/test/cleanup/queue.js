@@ -2,8 +2,8 @@
 
 let config = require('../../config');
 let q = require('../../services/queue');
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 
 if(config.cn_queue){
 

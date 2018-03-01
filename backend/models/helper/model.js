@@ -323,6 +323,18 @@ function createAndAssignRole(modelName, account, username, data) {
 			setting.timestamp = new Date();
 		}
 
+		if(data.surveyPoints) {
+			setting.surveyPoints = data.surveyPoints;
+		}
+
+		if(data.angleFromNorth) {
+			setting.angleFromNorth = data.angleFromNorth;
+		}
+
+		if(data.elevation) {
+			setting.elevation = data.elevation;
+		}
+
 		setting.updateProperties({
 			unit: data.unit,
 			code: data.code,
@@ -388,8 +400,9 @@ function importToyProject(account, username){
 
 		return Promise.all([
 
-			importToyModel(account, username, 'Sample_House', 'Sample_House', project.name),
-			importToyModel(account, username, 'Sample_Tree', 'Sample_Tree', project.name)
+			importToyModel(account, username, 'Lego_House_Architecture', '9d8e8a6a-466e-46ea-b1bc-965dff2e143a', project.name),
+			importToyModel(account, username, 'Lego_House_Landscape', 'b0d6e585-c5d6-4015-98a6-5e123112098a', project.name),
+			importToyModel(account, username, 'Lego_House_Structure', 'f4cbbffd-9ba5-48ac-b3a5-22dd2bcf5190', project.name)
 
 		]).then(models => {
 
@@ -408,7 +421,7 @@ function importToyProject(account, username){
 				};
 			});
 
-			return importToyModel(account, username, 'Sample_Federation', 'Sample_Federation', project.name, subModels, skip);
+			return importToyModel(account, username, 'Lego_House_Federation', 'cfffd7e4-9fec-4f31-b606-32e6239df076', project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -430,11 +443,19 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	let desc = '';
 	let type = 'sample';
 
-	//dun move the toy model instead make a copy of it
-	// let copy = true;
-
 	let data = {
-		desc, type, project, unit: 'm', subModels
+		desc, 
+		type, 
+		project, 
+		unit: 'mm', 
+		subModels,
+		surveyPoints: [
+			{
+				latLong: [48.92454, 2.02831],
+				position: [ 0, 0, 0],
+			}
+		],
+		angleFromNorth: 145,
 	};
 
 	return createAndAssignRole(modelName, account, username, data).then(data => {
@@ -861,6 +882,9 @@ function getModelProperties(account, model, branch, rev, username){
 						model: ref.project
 					});
 				})
+				.catch(err => {
+					return Promise.resolve();
+				})
 			);
 		});
 
@@ -1248,14 +1272,14 @@ function getFullTree_noSubTree(account, model, branch, rev){
 }
 
 function searchTree(account, model, branch, rev, searchString, username){
-	
-
-	let items = [];
 
 	let search = (history) => {
 
+		let items = [];
+
 		let filter = {
 			_id: {'$in': history.current },
+			type: {'$in': ["transformation", "mesh"]},
 			name: new RegExp(searchString, 'i')
 		};
 
@@ -1688,6 +1712,10 @@ function getModelPermission(username, setting, account){
 	});
 }
 
+function getAllMetadata(account, model, branch, rev) {
+	return getAllIdsWithMetadataField(account, model, branch, rev, "");
+}
+
 function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 	//Get sequence tag then call the generic getAllIdsWithMetadataField
 	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
@@ -1708,7 +1736,11 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 	//Get the revision object to find all relevant IDs
 	let getHistory;
 	let history;
-	let fullFieldName = "metadata." + fieldName;
+	let fullFieldName = "metadata";
+
+	if (fieldName && fieldName.length > 0) {
+		fullFieldName += "." + fieldName;
+	}
 
 	if(rev && utils.isUUID(rev)){
 		getHistory = History.findByUID({ account, model }, rev);
@@ -1745,12 +1777,17 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 			}
 
 			getMeta.push(
-				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username).then(obj => {
+				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
+				.then(obj => {
 					return Promise.resolve({
 						data: obj.data,
 						account: ref.owner,
 						model: ref.project
 					});
+				})
+				.catch(err => {
+					//Just because a sub model fails doesn't mean everything failed. Resolve the promise.
+					return Promise.resolve();
 				})
 			);
 		});
@@ -1773,12 +1810,11 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 			if(obj){
 				//rename fieldName to "value"
 				let parsedObj = {data: obj};
-				if(obj.length > 0)
-				{
+				if(obj.length > 0 && fieldName && fieldName.length > 0) {
 					const objStr = JSON.stringify(obj);
 					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
 				}
-				if(_subMeta.length > 0){
+				if(_subMeta.length > 0) {
 					parsedObj.subModels = _subMeta;
 				}
 				return parsedObj;
@@ -1795,7 +1831,6 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 }
 
 function getMetadata(account, model, id){
-	
 
 	let projection = {
 		shared_id: 0,
@@ -1868,6 +1903,7 @@ module.exports = {
 	getMetadata,
 	getFullTree_noSubTree,
 	resetCorrelationId,
+	getAllMetadata,
    	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
 	setStatus,

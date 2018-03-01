@@ -1,6 +1,3 @@
-import { IQService } from "angular";
-import { UnityUtil } from "../../../_built/amd/globals/unity-util";
-
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -41,7 +38,7 @@ export class ViewerService {
 	private Viewer: any;
 
 	constructor(
-		public $q: IQService,
+		public $q: ng.IQService,
 
 		public ClientConfigService: any,
 		public APIService: any,
@@ -50,6 +47,7 @@ export class ViewerService {
 		public DocsService: any,
 
 	) {
+
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;
@@ -74,6 +72,19 @@ export class ViewerService {
 		this.pinData = newPinData.data;
 	}
 
+	public updateViewerSettings(settings) {
+		this.viewer.updateSettings(settings);
+	}
+
+	public updateClippingPlanes(params) {
+		this.viewer.updateClippingPlanes(
+			params.clippingPlanes,
+			params.fromClipPanel,
+			params.account,
+			params.model,
+		);
+	}
+
 	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
@@ -83,12 +94,12 @@ export class ViewerService {
 
 			switch (event.type) {
 
-			case this.EventService.EVENT.MODEL_SETTINGS_READY:
-				if (event.value.account === account && event.value.model === model) {
-					this.viewer.updateSettings(event.value);
-					// mapTile && mapTile.updateSettings(event.value.settings);
-				}
-				break;
+			// case this.EventService.EVENT.MODEL_SETTINGS_READY:
+			// 	if (event.value.account === account && event.value.model === model) {
+			// 		this.viewer.updateSettings(event.value);
+			// 		// mapTile && mapTile.updateSettings(event.value.settings);
+			// 	}
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
 				this.viewer.clickPin(event.value.id);
@@ -101,12 +112,14 @@ export class ViewerService {
 				);
 				break;
 
-			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-				this.viewer.updateClippingPlanes(
-					event.value.clippingPlanes, event.value.fromClipPanel,
-					event.value.account, event.value.model,
-				);
-				break;
+			// case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
+			// 	this.viewer.updateClippingPlanes(
+			// 		event.value.clippingPlanes,
+			// 		event.value.fromClipPanel,
+			// 		event.value.account,
+			// 		event.value.model,
+			// 	);
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
 				this.DocsService.state.show = false;
@@ -183,6 +196,21 @@ export class ViewerService {
 
 	}
 
+	public setCamera(params) {
+		if (this.viewer) {
+			this.viewer.setCamera(
+				params.position,
+				params.view_dir,
+				params.up,
+				params.look_at,
+				params.animate !== undefined ? params.animate : true,
+				params.rollerCoasterMode,
+				params.account,
+				params.model,
+			);
+		}
+	}
+
 	public removeUnsavedPin() {
 		this.removePin({id: this.newPinId });
 		this.setPin({data: null});
@@ -196,7 +224,9 @@ export class ViewerService {
 	}
 
 	public clearHighlights() {
-		this.viewer.clearHighlights();
+		if (this.viewer) {
+			this.viewer.clearHighlights();
+		}
 	}
 
 	public getCurrentViewpoint(params) {
@@ -231,7 +261,9 @@ export class ViewerService {
 	}
 
 	public clearClippingPlanes() {
-		this.viewer.clearClippingPlanes();
+		if (this.viewer) {
+			this.viewer.clearClippingPlanes();
+		}
 	}
 
 	public getObjectsStatus(params) {
@@ -243,42 +275,57 @@ export class ViewerService {
 	}
 
 	public highlightObjects(params)  {
-
-		this.viewer.highlightObjects(
-			params.account,
-			params.model,
-			params.id ? [params.id] : params.ids,
-			params.zoom,
-			params.colour,
-			params.multi,
-		);
+		if (this.viewer) {
+			this.viewer.highlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids,
+				params.zoom,
+				params.colour,
+				params.multi,
+			);
+		}
 	}
 
 	public setMultiSelectMode(value)  {
-		this.viewer.setMultiSelectMode(value);
+		if (this.viewer) {
+			this.viewer.setMultiSelectMode(value);
+		}
 	}
 
 	public switchObjectVisibility(account, model, ids, visibility)  {
-		this.viewer.switchObjectVisibility(account, model, ids, visibility);
+		if (this.viewer) {
+			this.viewer.switchObjectVisibility(account, model, ids, visibility);
+		}
 	}
 
 	public hideHiddenByDefaultObjects() {
-		this.viewer.hideHiddenByDefaultObjects();
+		if (this.viewer) {
+			this.viewer.hideHiddenByDefaultObjects();
+		}
 	}
 
 	public showHiddenByDefaultObjects() {
-		this.viewer.showHiddenByDefaultObjects();
+		if (this.viewer) {
+			this.viewer.showHiddenByDefaultObjects();
+		}
 	}
 
-	public handleUnityError(message: string, reload: boolean)  {
+	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
 
-		this.DialogService.html("Unity Error", message, true)
+		let errorType = "3D Repo Error";
+
+		if (isUnity) {
+			errorType = "Unity Error";
+		}
+
+		this.DialogService.html(errorType, message, true)
 			.then(() => {
 				if (reload) {
 					location.reload();
 				}
 			}, () => {
-				console.error("Unity errorered and user canceled reload", message);
+				console.error("Unity errored and user canceled reload", message);
 			});
 
 	}
@@ -302,11 +349,15 @@ export class ViewerService {
 	}
 
 	public goToExtent() {
-		this.viewer.showAll();
+		if (this.viewer) {
+			this.viewer.showAll();
+		}
 	}
 
 	public setNavMode(mode) {
-		this.viewer.setNavMode(mode);
+		if (this.viewer) {
+			this.viewer.setNavMode(mode);
+		}
 	}
 
 	public unityInserted(): boolean {
@@ -340,12 +391,14 @@ export class ViewerService {
 
 		if (this.unityInserted() === true) {
 			return this.callInit();
-		} else {
+		} else if (this.viewer) {
+
 			return this.viewer.insertUnityLoader()
 				.then(() => { this.callInit(); })
 				.catch((error) => {
 					console.error("Error inserting Unity script: ", error);
 				});
+
 		}
 
 	}
@@ -443,27 +496,58 @@ export class ViewerService {
 	}
 
 	public diffToolEnableWithClashMode() {
-		this.viewer.diffToolEnableWithClashMode();
+		if (this.viewer) {
+			this.viewer.diffToolEnableWithClashMode();
+		}
 	}
 
 	public diffToolEnableWithDiffMode() {
-		this.viewer.diffToolEnableWithDiffMode();
+		if (this.viewer) {
+			this.viewer.diffToolEnableWithDiffMode();
+		}
 	}
 
 	public diffToolDisableAndClear() {
-		this.viewer.diffToolDisableAndClear();
+		if (this.viewer) {
+			this.viewer.diffToolDisableAndClear();
+		}
+
 	}
 
 	public diffToolShowBaseModel() {
-		this.viewer.diffToolShowBaseModel();
+		if (this.viewer) {
+			this.viewer.diffToolShowBaseModel();
+		}
 	}
 
 	public diffToolShowComparatorModel() {
-		this.viewer.diffToolShowComparatorModel();
+		if (this.viewer) {
+			this.viewer.diffToolShowComparatorModel();
+		}
 	}
 
 	public diffToolDiffView() {
-		this.viewer.diffToolDiffView();
+		if (this.viewer) {
+			this.viewer.diffToolDiffView();
+		}
+	}
+
+	public mapInitialise(surveyPoints) {
+		if (this.viewer) {
+			this.viewer.mapInitialise(surveyPoints);
+		}
+	}
+
+	public  mapStart() {
+		if (this.viewer) {
+			this.viewer.mapStart();
+		}
+	}
+
+	public mapStop() {
+		if (this.viewer) {
+			this.viewer.mapStop();
+		}
 	}
 
 }

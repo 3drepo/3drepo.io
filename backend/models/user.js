@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var mongoose = require("mongoose");
-var ModelFactory = require('./factory/modelFactory');
-var responseCodes = require('../response_codes.js');
-var _ = require('lodash');
-var DB = require('../db/db');
-var crypto = require('crypto');
-var utils = require("../utils");
-const Role = require('./role');
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let responseCodes = require("../response_codes.js");
+let _ = require("lodash");
+let DB = require("../db/db");
+let crypto = require("crypto");
+let utils = require("../utils");
+const Role = require("./role");
 
-var systemLogger = require("../logger.js").systemLogger;
+let systemLogger = require("../logger.js").systemLogger;
 
-var Subscription = require('./subscription');
-var config = require('../config');
+let Subscription = require("./subscription");
+let config = require("../config");
 
 
-var ModelSetting = require('./modelSetting');
-var C = require('../constants');
-var userBilling = require("./userBilling");
-var job = require('./job');
-var permissionTemplate = require('./permissionTemplate');
-var accountPermission = require('./accountPermission');
-var Project = require('./project');
+let ModelSetting = require("./modelSetting");
+let C = require("../constants");
+let userBilling = require("./userBilling");
+let job = require("./job");
+let permissionTemplate = require("./permissionTemplate");
+let accountPermission = require("./accountPermission");
+let Project = require("./project");
 
-var schema = mongoose.Schema({
+let schema = mongoose.Schema({
 	_id : String,
 	user: String,
 	//db: String,
@@ -93,11 +93,11 @@ var schema = mongoose.Schema({
 });
 
 schema.statics.historyChunksStats = function(dbName){
-	'use strict';
+	"use strict";
 
 	return ModelFactory.dbManager.listCollections(dbName).then(collections => {
 
-		let historyChunks = _.filter(collections, collection => collection.name.endsWith('.history.chunks'));
+		let historyChunks = _.filter(collections, collection => collection.name.endsWith(".history.chunks"));
 		let promises = [];
 
 		historyChunks.forEach(collection => {
@@ -111,15 +111,18 @@ schema.statics.historyChunksStats = function(dbName){
 };
 
 schema.statics.authenticate = function(logger, username, password){
-	'use strict';
+	"use strict";
 
 	if(!username || !password){
 		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
-	return DB.getAuthDB().then(authDB => {
+	let authDB = null;
+	return DB.getAuthDB().then(_authDB => {
+		authDB = _authDB;
 		return authDB.authenticate(username, password);
 	}).then(() => {
+		authDB.close();	
 		return this.findByUserName(username);
 	}).then(user => {
 		if(user.customData && user.customData.inactive) {
@@ -134,6 +137,9 @@ schema.statics.authenticate = function(logger, username, password){
 		return user.save();
 
 	}).catch( err => {
+		if(authDB) {
+			authDB.close();	
+		}
 		return Promise.reject(err.resCode ? err : {resCode: utils.mongoErrorToResCode(err)});
 	});
 };
@@ -144,51 +150,51 @@ schema.statics.authenticate = function(logger, username, password){
 // };
 
 schema.statics.findByUserName = function(user){
-	return this.findOne({account: 'admin'}, { user });
+	return this.findOne({account: "admin"}, { user });
 };
 
 //case insenstive
 schema.statics.isUserNameTaken = function(username){
-	return this.count({account: 'admin'}, {
-		user: new RegExp(`^${username}$`, 'i')
+	return this.count({account: "admin"}, {
+		user: new RegExp(`^${username}$`, "i")
 	});
 };
 
 schema.statics.findByEmail = function(email){
-	return this.findOne({account: 'admin'}, { 'customData.email': email });
+	return this.findOne({account: "admin"}, { "customData.email": email });
 };
 
 schema.statics.findByPaypalPaymentToken = function(token){
-	return this.findOne({account: 'admin'}, { 'customData.billing.paypalPaymentToken': token });
+	return this.findOne({account: "admin"}, { "customData.billing.paypalPaymentToken": token });
 };
 
 schema.statics.isEmailTaken = function(email, exceptUser){
-	'use strict';
+	"use strict";
 
-	let query = { 'customData.email': email};
+	let query = { "customData.email": email};
 
 	if(exceptUser){
-		query = { 'customData.email': email, 'user': { '$ne': exceptUser }};
+		query = { "customData.email": email, "user": { "$ne": exceptUser }};
 	}
 
-	return this.count({account: 'admin'}, query);
+	return this.count({account: "admin"}, query);
 };
 
 
 schema.statics.findUserByBillingId = function(billingAgreementId){
-	return this.findOne({account: 'admin'}, { 'customData.billing.billingAgreementId': billingAgreementId });
+	return this.findOne({account: "admin"}, { "customData.billing.billingAgreementId": billingAgreementId });
 };
 
 
 schema.statics.updatePassword = function(logger, username, oldPassword, token, newPassword){
-	'use strict';
+	"use strict";
 
 	if(!((oldPassword || token) && newPassword)){
 		return Promise.reject({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE});
 	}
 
-	var checkUser;
-	var user;
+	let checkUser;
+	let user;
 
 	if(oldPassword){
 		
@@ -203,7 +209,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 			user = _user;
 
-			var tokenData = user.customData.resetPasswordToken;
+			let tokenData = user.customData.resetPasswordToken;
 			if(tokenData && tokenData.token === token && tokenData.expiredAt > new Date()){
 				return Promise.resolve();
 			} else {
@@ -215,8 +221,8 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 	return checkUser.then(() => {
 
 		let updateUserCmd = {
-			'updateUser' : username,
-			'pwd': newPassword
+			"updateUser" : username,
+			"pwd": newPassword
 		 };
 
 		 return ModelFactory.dbManager.runCommand("admin", updateUserCmd);
@@ -236,10 +242,10 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 };
 
-schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,19}$/;
+schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime, skipCheckEmail){
-	'use strict';
+	"use strict";
 	return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
 		let cleanedCustomData = {};
@@ -265,7 +271,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 	
 
-		['firstName', 'lastName', 'email'].forEach(key => {
+		["firstName", "lastName", "email"].forEach(key => {
 			if (customData && customData[key]){
 				cleanedCustomData[key] = customData[key];
 			}
@@ -273,7 +279,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 		let billingInfo = {};
 
-		['firstName', 'lastName', 'phoneNo', 'countryCode', 'jobTitle', 'company'].forEach(key => {
+		["firstName", "lastName", "phoneNo", "countryCode", "jobTitle", "company"].forEach(key => {
 			if (customData && customData[key]){
 				billingInfo[key] = customData[key];
 			}
@@ -281,7 +287,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 		//cleanedCustomData.billing = {};
 
-		var expiryAt = new Date();
+		let expiryAt = new Date();
 		expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
 		cleanedCustomData.inactive = true;
@@ -316,7 +322,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	
 		if(customData){
 			cleanedCustomData.emailVerifyToken = {
-				token: crypto.randomBytes(64).toString('hex'),
+				token: crypto.randomBytes(64).toString("hex"),
 				expiredAt: expiryAt
 			};
 		}
@@ -360,7 +366,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 };
 
 schema.statics.verify = function(username, token, options){
-	'use strict';
+	"use strict";
 
 	options = options || {};
 
@@ -374,7 +380,7 @@ schema.statics.verify = function(username, token, options){
 		
 		user = _user;
 
-		var tokenData = user && user.customData && user.customData.emailVerifyToken;
+		let tokenData = user && user.customData && user.customData.emailVerifyToken;
 
 		if(!user){
 
@@ -401,10 +407,10 @@ schema.statics.verify = function(username, token, options){
 		if(!skipImportToyModel){
 
 			//import toy model
-			var ModelHelper = require('./helper/model');
+			let ModelHelper = require("./helper/model");
 
 			ModelHelper.importToyProject(username, username).catch(err => {
-				systemLogger.logError('Failed to import toy model', { err : err && err.stack ? err.stack : err});
+				systemLogger.logError("Failed to import toy model", { err : err && err.stack ? err.stack : err});
 			});
 		}
 
@@ -417,7 +423,7 @@ schema.statics.verify = function(username, token, options){
 				return Role.grantTeamSpaceRoleToUser(username, username);
 			}
 		).catch(err => {
-			systemLogger.logError('Failed to create role for ', username);
+			systemLogger.logError("Failed to create role for ", username);
 		});
 
 	});
@@ -430,9 +436,9 @@ schema.methods.getAvatar = function(){
 };
 
 schema.methods.updateInfo = function(updateObj){
-	'use strict';
+	"use strict";
 	
-	let updateableFields = [ 'firstName', 'lastName', 'email' ];
+	let updateableFields = [ "firstName", "lastName", "email" ];
 
 	this.customData = this.customData || {};
 	updateableFields.forEach(field => {
@@ -452,11 +458,11 @@ schema.methods.updateInfo = function(updateObj){
 
 schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTime){
 
-	var expiryAt = new Date();
+	let expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
-	var resetPasswordToken = {
-		token: crypto.randomBytes(64).toString('hex'),
+	let resetPasswordToken = {
+		token: crypto.randomBytes(64).toString("hex"),
 		expiredAt: expiryAt
 	};
 
@@ -483,7 +489,7 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 
 
 function _fillInModelDetails(accountName, setting, permissions){
-	'use strict';
+	"use strict";
 
 	if(permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1){
 		permissions = C.MODEL_PERM_LIST.slice(0);
@@ -527,7 +533,7 @@ function _fillInModelDetails(accountName, setting, permissions){
 }
 //list all models in an account
 function _getModels(accountName, ids, permissions){
-	'use strict';
+	"use strict";
 
 	let models = [];
 	let fedModels = [];
@@ -535,7 +541,7 @@ function _getModels(accountName, ids, permissions){
 	let query = {};
 
 	if(ids){
-		query = { _id : { '$in': ids}};
+		query = { _id : { "$in": ids}};
 	}
 
 	return ModelSetting.find({account: accountName}, query).then(settings => {
@@ -546,7 +552,7 @@ function _getModels(accountName, ids, permissions){
 			promises.push(
 				_fillInModelDetails(accountName, setting, permissions).then(model => {
 					if(!(model.permissions.length == 1 && model.permissions[0] == null))
-						setting.federate ? fedModels.push(model) : models.push(model);
+						{setting.federate ? fedModels.push(model) : models.push(model);}
 				})
 			);
 		});
@@ -557,7 +563,7 @@ function _getModels(accountName, ids, permissions){
 
 // find projects and put models into project
 function _addProjects(account, username, models){
-	'use strict';
+	"use strict";
 	
 	let query = {};
 
@@ -572,7 +578,7 @@ function _addProjects(account, username, models){
 			project = project.toObject();
 
 			let permissions = project.permissions.find(p => p.user === username);
-			permissions = _.get(permissions, 'permissions') || [];
+			permissions = _.get(permissions, "permissions") || [];
 			// show inherited and implied permissions
 			permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
 			permissions = permissions.concat(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
@@ -605,7 +611,7 @@ function _addProjects(account, username, models){
 
 
 function _findModelDetails(dbUserCache, username, model){
-	'use strict';
+	"use strict";
 
 	let getUser;
 	let dbUser;
@@ -642,7 +648,7 @@ function _findModelDetails(dbUserCache, username, model){
 }
 
 function _calSpace(user){
-	'use strict';
+	"use strict";
 
 	let quota = user.customData.billing.subscriptions.getSubscriptionLimits();
 
@@ -665,7 +671,7 @@ function _calSpace(user){
 }
 
 function _sortAccountsAndModels(accounts){
-	'use strict';
+	"use strict";
 
 	function sortModel(a, b) {
 			if(a.timestamp < b.timestamp){
@@ -722,14 +728,14 @@ function _makeAccountObject(name){
 
 function _createAccounts(roles, userName)
 {
-	'use strict';
+	"use strict";
 
 	let accounts = [];
 	let promises = [];
 
 	roles.forEach( role => {
 		promises.push(User.findByUserName(role.db).then(user => {
-			if(!user) return;
+			if(!user) {return;}
 			let tsPromises = [];
 			const permission = user.customData.permissions.findByUser(userName);
 			if(permission){
@@ -771,8 +777,8 @@ function _createAccounts(roles, userName)
 				//check project scope permissions
 				let projPromises = [];
 				let account = null;
-				const query = { 'permissions': { '$elemMatch': { user: userName } }};
-				const projection = { 'permissions': { '$elemMatch': { user: userName } }, "models": 1, "name": 1};
+				const query = { "permissions": { "$elemMatch": { user: userName } }};
+				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1};
 				return Project.find({account: user.user}, query, projection).then(projects => {
 
 					projects.forEach( _proj =>{
@@ -823,7 +829,7 @@ function _createAccounts(roles, userName)
 							}
 						}));						
 
-					})
+					});
 					return Promise.all(projPromises).then(()=>
 							{
 								//model permissions
@@ -934,10 +940,10 @@ function _createAccounts(roles, userName)
 
 }
 schema.methods.listAccounts = function(){
-	'use strict';
+	"use strict";
 
 	return _createAccounts(this.roles, this.user);	
-}
+};
 
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	"use strict";
@@ -959,7 +965,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
-	'use strict';
+	"use strict";
 
 
 	let dbUser;
@@ -983,16 +989,16 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 };
 
 schema.methods.executeBillingAgreement = function(){
-	'use strict';
+	"use strict";
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
 		return this.save();
 	});
 };
 
 schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
-	'use strict';
-	var sub = this.customData.billing.subscriptions.findByID(id);
-	var username = sub ? sub.assignedUser : null ;
+	"use strict";
+	let sub = this.customData.billing.subscriptions.findByID(id);
+	let username = sub ? sub.assignedUser : null ;
 	return this.customData.billing.subscriptions.removeAssignedSubscriptionFromUser(id, this.user, cascadeRemove).then(subscription => {
 		if(username){
 			Role.revokeTeamSpaceRoleFromUser(username, this.user);
@@ -1003,7 +1009,7 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 };
 
 schema.methods.assignSubscriptionToUser = function(id, userData){
-	'use strict';
+	"use strict";
 
 	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
 		//add this user to the role
@@ -1013,7 +1019,7 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 };
 
 schema.methods.updateAssignDetail = function(id, data){
-	'use strict';
+	"use strict";
 
 	return this.customData.billing.subscriptions.updateAssignDetail(id, data).then(subscription => {
 		return this.save().then(() => subscription);
@@ -1021,7 +1027,7 @@ schema.methods.updateAssignDetail = function(id, data){
 };
 
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
-	'use strict';
+	"use strict";
 
 	this.customData.billing.billingUser = billingUser;
 	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);
@@ -1033,10 +1039,10 @@ schema.methods.createSubscription = function(plan, billingUser, active, expiredA
 };
 
 var User = ModelFactory.createClass(
-	'User',
+	"User",
 	schema,
 	() => {
-		return 'system.users';
+		return "system.users";
 	}
 );
 

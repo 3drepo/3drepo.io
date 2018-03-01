@@ -29,6 +29,8 @@ class PanelCardOptionMenuController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 	) {}
 
+	public $ngInit() {}
+
 	// TODO: Not actually sure what's going on here?
 	public menuItemSelected(index: number) {
 

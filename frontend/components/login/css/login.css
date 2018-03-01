@@ -6,7 +6,7 @@ login .loginContainer {
   overflow: hidden;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 767px) {
   login .homeUserContent {
     margin-top: 8vh;
   }
@@ -19,6 +19,10 @@ login .loginProgress {
 
 login .username {
   margin-bottom: 0px;
+}
+
+login .userNotice {
+  margin-top: 10px;
 }
 
 login md-progress-circular {
