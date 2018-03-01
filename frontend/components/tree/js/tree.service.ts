@@ -629,14 +629,17 @@ export class TreeService {
 			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
 			const numChildren = nodeToExpand.children.length;
 
+			let position = 0; // We don't want to use i as some childNodes aren't displayed (no name)
 			for (let i = 0; i < numChildren; i++) {
 
-				nodeToExpand.children[i].expanded = false;
-				nodeToExpand.children[i].level = nodeToExpand.level + 1;
+				const childNode = nodeToExpand.children[i];
+				childNode.expanded = false;
+				childNode.level = nodeToExpand.level + 1;
 
-				if (nodeToExpand.children[i].hasOwnProperty("name")) {
-					if (this.nodesToShow.indexOf(nodeToExpand.children[i]) === -1) {
-						this.nodesToShow.splice(nodeToExpandIndex + i + 1, 0, nodeToExpand.children[i]);
+				if (childNode && childNode.hasOwnProperty("name")) {
+					if (this.nodesToShow.indexOf(childNode) === -1) {
+						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
+						position++;
 					}
 				}
 

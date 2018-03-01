@@ -156,15 +156,6 @@ class AccountFederationsController implements ng.IController {
 					model.permissions,
 				),
 			},
-			delete: {
-				label: "Delete",
-				icon: "delete",
-				color: "#F44336",
-				hidden: !this.AuthService.hasPermission(
-					this.ClientConfigService.permissions.PERM_DELETE_MODEL,
-					model.permissions,
-				),
-			},
 			permissions: {
 				label: "Permissions",
 				icon: "group",
@@ -175,6 +166,15 @@ class AccountFederationsController implements ng.IController {
 				icon: "settings",
 				hidden: !this.AuthService.hasPermission(
 					this.ClientConfigService.permissions.PERM_CHANGE_MODEL_SETTINGS,
+					model.permissions,
+				),
+			},
+			delete: {
+				label: "Delete",
+				icon: "delete",
+				color: "#F44336",
+				hidden: !this.AuthService.hasPermission(
+					this.ClientConfigService.permissions.PERM_DELETE_MODEL,
 					model.permissions,
 				),
 			},

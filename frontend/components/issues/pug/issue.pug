@@ -107,10 +107,12 @@ md-content#issueInformation(
 			md-input-container(flex)
 				label Due Date
 				md-datepicker(
+					flex="50"
 					id="issueDueDate"
 					ng-model="vm.issueData.due_date"
 					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangeDueDate()"
+					md-hide-icons="calendar"
 					md-date-locale="locale")
 
 		.issueOrthogonalViewIssue(layout="row" ng-if="vm.issueData.viewpoint.type === 'orthogonal'")
