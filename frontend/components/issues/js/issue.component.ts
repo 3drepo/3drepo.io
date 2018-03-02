@@ -561,7 +561,7 @@ class IssueController implements ng.IController {
 					}
 
 				})
-				.catch(this.handleUpdateError);
+				.catch(this.handleUpdateError.bind(this));
 
 			this.checkCanComment();
 
@@ -730,7 +730,7 @@ class IssueController implements ng.IController {
 						}
 
 					})
-					.catch(this.handleUpdateError);
+					.catch(this.handleUpdateError.bind(this));
 			}
 
 		} else {
