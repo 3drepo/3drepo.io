@@ -87,13 +87,13 @@ class IssueController implements ng.IController {
 		private $mdDialog,
 		private $element,
 		private $state,
+		private $timeout,
+		private $scope,
 
 		private IssuesService,
 		private APIService,
 		private NotificationService,
 		private AuthService,
-		private $timeout,
-		private $scope,
 		private ClientConfigService,
 		private AnalyticService,
 		private StateManager,
@@ -185,7 +185,8 @@ class IssueController implements ng.IController {
 		// listen for user clicking the back button
 		window.addEventListener("popstate", this.popStateHandler);
 		window.addEventListener("beforeunload", this.refreshHandler);
-
+		
+		this.watchers();
 	}
 
 	/**
@@ -1020,6 +1021,8 @@ class IssueController implements ng.IController {
 			const pruneHidden = this.pruneNodes(objectInfo.hiddenNodes, "toggleState");
 			const hiddenGroupData = this.createGroupData(pruneHidden);
 
+
+			// TODO: This needs denesting
 			const postUrl = `${this.account}/${this.model}/groups`;
 			this.APIService.post(postUrl, highlightedGroupData)
 				.then((highlightedGroupResponse) => {
@@ -1161,10 +1164,10 @@ class IssueController implements ng.IController {
 		const commentIndex = (this.issueData.comments.length - 1) - index;
 
 		this.IssuesService.deleteComment(this.issueData, commentIndex)
-			.then(function() {
+			.then(() => {
 				this.issueData.comments.splice(commentIndex, 1);
 			})
-			.catch(function(error){
+			.catch((error) => {
 				this.errorDeleteComment(error);
 			});
 
@@ -1205,12 +1208,13 @@ class IssueController implements ng.IController {
 			);
 		}
 
-		viewpointPromise.promise.then(function (viewpoint) {
-			this.commentViewpoint = viewpoint;
-			this.commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
-		}).catch(function(error){
-			this.errorSavingScreemshot(error);
-		});
+		viewpointPromise.promise
+			.then((viewpoint) => {
+				this.commentViewpoint = viewpoint;
+				this.commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
+			}).catch((error) => {
+				this.errorSavingScreemshot(error);
+			});
 
 		this.setContentHeight();
 	};
