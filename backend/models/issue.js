@@ -708,6 +708,20 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 		groupCheckPromises.push(checkGroup(data.viewpoint.shown_group_id));
 	}
 
+	if (data.viewpoints) {
+		for (let i = 0; i < data.viewpoints.length; i++) {
+			if (data.viewpoints[i].highlighted_group_id) {
+				groupCheckPromises.push(checkGroup(data.viewpoints[i].highlighted_group_id));
+			}
+			if (data.viewpoints[i].hidden_group_id) {
+				groupCheckPromises.push(checkGroup(data.viewpoints[i].hidden_group_id));
+			}
+			if (data.viewpoints[i].shown_group_id) {
+				groupCheckPromises.push(checkGroup(data.viewpoints[i].shown_group_id));
+			}
+		}
+	}
+
 	return Promise.all(groupCheckPromises).then(groups => {
 
 		for (let i = 0; groups && i < groups.length; i++) {
@@ -1695,15 +1709,19 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												if (-1 === matchingIssue[complexAttr].findIndex(attr =>
 														utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
 													matchingIssue[complexAttr].push(issue[complexAttr][i]);
-												}
-												if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
-													matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
-														return a.created > b.created;
-													});
+												} else {
+													// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
 												}
 											}
+											if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
+												matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
+													return a.created > b.created;
+												});
+											}
 										}
-										return Issue.update({account, model}, { _id: issue._id}, matchingIssue);
+										return Issue.update({account, model}, { _id: issue._id}, matchingIssue).then(() => {
+											return matchingIssue;
+										});
 									}
 								})
 							);
@@ -1717,7 +1735,9 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						let notifications = [];
 
 						savedIssues.forEach(issue => {
-							if(issue && issue.clean) {
+							schema.statics.setGroupIssueId({account, model}, issue, issue._id);
+
+							if (issue && issue.clean) {
 								notifications.push(issue.clean(settings.type));
 							}
 						});
@@ -1936,9 +1956,10 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							for (let i = 0; i < vpComponents.length; i++) {
 
+								let highlightedObjects = [];
+
 								// TODO: refactor to reduce duplication?
 								if (vpComponents[i].Selection) {
-									let highlightedObjects = [];
 
 									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
 										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
@@ -1974,6 +1995,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								if (vpComponents[i].Visibility) {
 									let hiddenObjects = [];
 									let shownObjects = [];
+
+									shownObjects = shownObjects.concat(highlightedObjects);
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
 										let componentsToHide = [];
