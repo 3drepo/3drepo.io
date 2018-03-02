@@ -300,7 +300,7 @@ billingSchema.methods.executeBillingAgreement = function(user){
 };
 
 billingSchema.methods.getActiveSubscriptions = function() {
-	let res = { basic: config.subscription.basic};
+	let res = { basic: config.subscriptions.basic};
 
 	Object.keys(this.subscriptions).forEach(key => {
 		if(key === "paypal") {

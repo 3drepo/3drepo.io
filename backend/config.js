@@ -232,8 +232,8 @@ config.db.username = coalesce(config.db.username, "username");
 config.db.password = coalesce(config.db.password, "password");
 
 //Subscription info
-config.subscription = coalesce(config.subscription, {});
-config.subscription.basic = coalesce(config.subscription.basic, {collaborator : 0, data: 200});
+config.subscriptions = coalesce(config.subscriptions, {});
+config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
 
 // Other options
 config.js_debug_level = coalesce(config.js_debug_level, "debug"); // Loading prod or debug scripts
