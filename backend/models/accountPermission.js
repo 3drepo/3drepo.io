@@ -43,11 +43,15 @@
 
 		_check(user, permission){
 
-			/*
-			 * FIXME: this needs to check team_members
-			 * if(!this.user.customData.billing.subscriptions.findByAssignedUser(user)){
+			const userToCheck = User.findByUserName(user);
+
+			if(!userToCheck) {
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
+			}
+
+			if(userToCheck.isMemberOfTeamspace(this.user.user)){
 				return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-			}*/
+			}
 
 			const isPermissionInvalid = permission.permissions && 
 				_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
