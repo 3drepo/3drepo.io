@@ -29,7 +29,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 				StateManager.state.changing = true;
 
-				AuthService.init(false)
+				AuthService.init()
 					.then(() => {
 						StateManager.state.authInitialized = true;
 						finishedAuth.resolve();
