@@ -30,9 +30,9 @@ class IssuesListController implements ng.IController {
 
 	private toShow: string;
 	private info: string;
-	private focusedIssueIndex: null;
-	private selectedIssueIndex: null;
-	private internalSelectedIssue: null;
+	private focusedIssueIndex: any;
+	private selectedIssueIndex: any;
+	private internalSelectedIssue: any;
 	private onEditIssue: any;
 	private contentHeight: any;
 	private allIssues: any;
