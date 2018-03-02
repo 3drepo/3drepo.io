@@ -186,24 +186,22 @@
 
 		const User = require('./user');
 
-		let subscriptions;
+		let userList;
 
-/*		
- *		FIXME: this should look at whether the user has the team member role.
- *		return User.findByUserName(account.account).then(user => {
+		return User.getAllUsersInTeamspace(account.account).then(users => {
 			
-			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			userList = users;
 			return Project.find(account, query);
 		
 		}).then(projects => {
 			
 			if(projects){
-				projects.forEach(p => Project.populateUsers(subscriptions, p));
+				projects.forEach(p => Project.populateUsers(userList, p));
 			}
 
 			return projects;
 
-		});*/
+		});
 	}
 
 
@@ -211,17 +209,17 @@
 
 		const User = require('./user');
 
-		let subscriptions;
+		let userList;
 
-		return User.findByUserName(account.account).then(user => {
+		return User.getAllUsersInTeamspace(account.account).then(users => {
 			
-			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			userList = users;
 			return Project.findOne(account, query);
 		
 		}).then(project => {
 			
 			if(project){
-				return Project.populateUsers(subscriptions, project);
+				return Project.populateUsers(userList, project);
 			} else {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			}
@@ -229,15 +227,15 @@
 		});
 	}
 
-	schema.statics.populateUsers = function(subscriptions, project){
+	schema.statics.populateUsers = function(userList, project){
 
-		subscriptions && subscriptions.forEach(sub => {
+		userList.forEach(user => {
 
-			const userFound = project.permissions.find(perm => perm.user === sub.assignedUser);
+			const userFound = project.permissions.find(perm => perm.user === user);
 
-			if(!userFound && sub.assignedUser){
+			if(!userFound){
 				project.permissions.push({
-					user: sub.assignedUser
+					user
 				});
 			}
 		});

@@ -26,7 +26,6 @@ const Role = require("./role");
 
 let systemLogger = require("../logger.js").systemLogger;
 
-let Subscription = require("./subscription");
 let config = require("../config");
 
 
@@ -1033,6 +1032,24 @@ schema.methods.createSubscription = function(plan, billingUser, active, expiredA
 	});
 
 };
+
+schema.methods.isMemberOfTeamspace = function(teamspace) {
+	"use strict";
+	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
+
+}
+
+schema.statics.getAllUsersInTeamspace = function(teamspace) {
+	"use strict";
+	return this.find({account: "admin"}, { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE }, {user : 1}).then( users => {
+		let res = [];
+		users.forEach(user => {
+			res.push(user.user);
+		});
+
+		return Promise.resolve(res);
+	});
+}
 
 var User = ModelFactory.createClass(
 	"User",

@@ -26,7 +26,7 @@
 	const pug = require("pug");
 	const phantom = require("phantom");
 	const config = require("../config");
-	const Subscription = require("./subscription");
+	const Subscription = null; //FIXME: this needs rewriting... require("./subscription");
 	const systemLogger = require("../logger.js").systemLogger;
 	const Counter = require("./counter");
 	const Mailer = require("../mailer/mailer");

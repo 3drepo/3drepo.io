@@ -20,7 +20,6 @@
 const mongoose = require("mongoose");
 const billingAddressInfo = require("./billingAddress");
 const moment = require("moment");
-const Subscription = require("./subscription");
 const vat = require("./vat");
 const utils = require("../utils");
 const C = require("../constants");
@@ -31,7 +30,7 @@ const responseCodes = require("../response_codes.js");
 const Mailer = require("../mailer/mailer");
 const systemLogger = require("../logger.js").systemLogger;
 
-let getSubscription = Subscription.getSubscription;
+let getSubscription = {}//Subscription.getSubscription;
 
 let billingSchema = mongoose.Schema({
 	subscriptions: Object,
