@@ -186,11 +186,10 @@
 
 		const User = require('./user');
 
-		let userList;
 
 		return User.getAllUsersInTeamspace(account.account).then(users => {
 			
-			userList = users;
+			const userList = users;
 			return Project.find(account, query);
 		
 		}).then(projects => {
