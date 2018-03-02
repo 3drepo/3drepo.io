@@ -28,9 +28,8 @@ const utils = require("../utils");
 
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 router.post("/subscriptions", middlewares.isAccountAdmin, createSubscription);
-router.post("/subscriptions/:sid/assign", middlewares.isAccountAdmin, assignSubscription);
-router.put("/subscriptions/:sid/assign", middlewares.isAccountAdmin, updateAssignDetail);
-router.delete("/subscriptions/:sid/assign", middlewares.isAccountAdmin, removeAssignedSubscription);
+router.post("/subscriptions/assign", middlewares.isAccountAdmin, addTeamMember);
+router.delete("/subscriptions/assign", middlewares.isAccountAdmin, removeTeamMember);
 
 function createSubscription(req, res, next) {
 
@@ -73,60 +72,32 @@ function listSubscriptions(req, res, next) {
 		});
 }
 
-function assignSubscription(req, res, next) {
+function addTeamMember(req, res, next) {
 
 	let responsePlace = utils.APIInfo(req);
+	
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
-
-			let userData = {};
-
-			if (req.body.email) {
-				userData.email = req.body.email;
-			} else if (req.body.user) {
-				userData.user = req.body.user;
-			}
-
-			if (req.body.job) {
-				userData.job = req.body.job;
-			}
-
-			if (req.body.permissions){
-				userData.permissions = req.body.permissions;
-			}
-
-			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
+			if(req.body.user)
+				return dbUser.addTeamMember(req.body.user);
+			else
+				return Promise.reject(responseCodes.USER_NOT_FOUND);
 		})
 		.then(subscription => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK);
 		})
 		.catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 }
 
-function updateAssignDetail(req, res, next){
-	let responsePlace = utils.APIInfo(req);
-	User.findByUserName(req.params.account)
-		.then(dbUser => {
-
-			return dbUser.updateAssignDetail(req.params.sid, req.body);
-		})
-		.then(subscription => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
-		})
-		.catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-}
-
-function removeAssignedSubscription(req, res, next) {
+function removeTeamMember(req, res, next) {
 
 	let responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
 
-			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid, req.query.cascadeRemove);
+			return dbUser.removeAssignedSubscriptionFromUser(req.body.user, req.query.cascadeRemove);
 
 		})
 		.then(subscription => {

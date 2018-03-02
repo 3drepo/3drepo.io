@@ -990,35 +990,61 @@ schema.methods.executeBillingAgreement = function(){
 	});
 };
 
-schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
+schema.methods.removeTeamMember = function(username, cascadeRemove){
 	"use strict";
-	let sub = this.customData.billing.subscriptions.findByID(id);
-	let username = sub ? sub.assignedUser : null ;
-	return this.customData.billing.subscriptions.removeAssignedSubscriptionFromUser(id, this.user, cascadeRemove).then(subscription => {
-		if(username){
-			Role.revokeTeamSpaceRoleFromUser(username, this.user);
+	//check if they have any permissions assigned
+	return Project.find({ account }, { 'permissions.user':  username}).then(projects => {
+		
+		foundProjects = projects;
+		return ModelSetting.find({ account: account }, { 'permissions.user': username});
+	
+	}).then(models => {
+
+		foundModels = models;
+
+		if(!cascadeRemove && (foundModels.length || foundProjects.length || teamspacePerm)){
+
+			return Promise.reject({ 
+				resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
+				info: {
+					models: foundModels.map(m => { return { model: m.name}; }),
+					projects: foundProjects.map(p => p.name),
+					teamspace: teamspacePerm
+				}
+			});
+
+		} else {
+
+			//remove all permissions assigned
+			let removeTeamspacePermission = Promise.resolve();
+
+			if(teamspacePerm){
+				removeTeamspacePermission = this.user.customData.permissions.remove(username);
+			}
+			
+			return Promise.all(
+				[].concat(
+					foundModels.map(model => 
+						model.changePermissions(model.permissions.filter(p => p.user !== username))
+					),
+					foundProjects.map(project => 
+						project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })
+					),
+					removeTeamspacePermission
+				)
+			);
 		}
-		return this.save().then(() => subscription);
+
+	}).then(() => {
+		return Role.revokeTeamSpaceRoleFromUser(username, this.user);
 	});
 
 };
 
-schema.methods.assignSubscriptionToUser = function(id, userData){
+schema.methods.addTeamMember = function(user){
 	"use strict";
 
-	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
-		//add this user to the role
-		Role.grantTeamSpaceRoleToUser(userData.user, this.user);
-		return this.save().then(() => subscription);
-	});
-};
-
-schema.methods.updateAssignDetail = function(id, data){
-	"use strict";
-
-	return this.customData.billing.subscriptions.updateAssignDetail(id, data).then(subscription => {
-		return this.save().then(() => subscription);
-	});
+	return Role.grantTeamSpaceRoleToUser(user, this.user);
 };
 
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
