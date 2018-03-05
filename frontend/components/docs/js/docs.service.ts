@@ -89,7 +89,7 @@ export class DocsService {
 		// Get any documents associated with an object
 		const object = event.value;
 
-		this.TreeService.getMap()
+		this.TreeService.onReady()
 			.then((treeMap) => {
 				const metadataIds = treeMap.oIdToMetaId[object.id];
 				if (metadataIds && metadataIds.length) {

@@ -617,7 +617,7 @@
 				ViewerService.goToExtent();
 			}
 
-			TreeService.getMap().then(function(){
+			TreeService.onReady().then(function(){
 				TreeService.updateModelState(TreeService.allNodes[0]);
 			});
 		}
@@ -729,13 +729,13 @@
 
 		function handleHighlights(objects) {
 
-			TreeService.getMap()
-				.then(function(treeMap){
+			TreeService.onReady()
+				.then(function(){
 
 					var nodes = new Set();
 
 					for (var i = 0; i < objects.length; i++) {
-						var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+						var objUid = TreeService.treeMap.sharedIdToUid[objects[i].shared_id];
 
 						if (objUid) {
 							var node = TreeService.getNodeById(objUid);
@@ -766,14 +766,14 @@
 
 		function handleHidden(objects) {
 
-			TreeService.getMap()
-				.then(function(treeMap){
+			TreeService.onReady()
+				.then(function(){
 
 					if (objects) {
 						// Make a list of nodes to hide
 						var hiddenNodes = [];
 						for (var i = 0; i < objects.length; i++) {
-							var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+							var objUid = TreeService.treeMap.sharedIdToUid[objects[i].shared_id];
 
 							if (objUid) {
 								hiddenNodes.push(TreeService.getNodeById(objUid));
@@ -789,8 +789,8 @@
 
 		function handleShown(objects) {
 
-			TreeService.getMap()
-				.then(function(treeMap){
+			TreeService.onReady()
+				.then(function(){
 
 					TreeService.hideAllTreeNodes(false);
 
@@ -798,7 +798,7 @@
 						// Make a list of nodes to shown
 						var shownNodes = [];
 						for (var i = 0; i < objects.length; i++) {
-							var objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+							var objUid = TreeService.treeMap.sharedIdToUid[objects[i].shared_id];
 
 							if (objUid) {
 								shownNodes.push(TreeService.getNodeById(objUid));
