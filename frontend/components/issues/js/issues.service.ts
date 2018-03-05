@@ -38,6 +38,7 @@ export class IssuesService {
 	private state: any;
 	private groupsCache: any;
 	private initDefer: any;
+	private jobsDeferred: any;
 	private availableJobs: any;
 
 	constructor(
@@ -57,11 +58,12 @@ export class IssuesService {
 	) {
 		this.groupsCache = {};
 		this.initDefer = $q.defer();
+		this.jobsDeferred = this.$q.defer();
 		this.resetIssues();
 	}
 
 	public resetIssues() {
-	
+		this.jobsDeferred = this.$q.defer();
 		this.state = {
 			heights : {
 				infoHeight : 135,
@@ -330,7 +332,9 @@ export class IssuesService {
 		}
 		
 		if (issue.assigned_roles[0]) {
-			issue.issueRoleColor = this.getJobColor(issue.assigned_roles[0]);
+			this.getJobColor(issue.assigned_roles[0]).then((color) => {
+				issue.issueRoleColor = color;
+			});
 		}
 		
 		if (!issue.descriptionThumbnail) {
@@ -961,20 +965,19 @@ export class IssuesService {
 
 	public getJobs(account, model){
 
-		const deferred = this.$q.defer();
 		const url = account + "/" + model + "/jobs.json";
 
 		this.APIService.get(url).then(
 			(jobsData) => {
-				this.availableJobs = jobsData.data;
-				deferred.resolve(this.availableJobs);
+				//this.availableJobs = jobsData.data;
+				this.jobsDeferred.resolve(jobsData.data);
 			},
 			() => {
-				deferred.resolve([]);
+				this.jobsDeferred.resolve([]);
 			}
 		);
 
-		return deferred.promise;
+		return this.jobsDeferred.promise;
 	}
 
 	public getUserJobForModel(account, model){
@@ -1026,26 +1029,32 @@ export class IssuesService {
 	}
 
 	public getJobColor(id) {
+		return this.jobsDeferred.promise
+			.then((jobs) => {
+				let roleColor = "#ffffff";
+				let found = false;
 
-		let roleColor = "#ffffff";
-		let found = false;
-
-		if (id) {
-			for (let i = 0; i < this.availableJobs.length; i ++) {
-				let job = this.availableJobs[i];
-				if (job._id === id && job.color) {
-					roleColor = job.color;
-					found = true;
-					break;
+				if (id && jobs) {
+					for (let i = 0; i < jobs.length; i ++) {
+						let job = jobs[i];
+						if (job._id === id && job.color) {
+							roleColor = job.color;
+							found = true;
+							break;
+						}
+					}	
 				}
-			}	
-		}
-		
-		if (!found) {
-			console.debug("Job color not found for", id);
-		}
+				
+				if (!found) {
+					console.debug("Job color not found for", id);
+				}
 
-		return roleColor;
+				return roleColor;
+			})
+			.catch((error) => {
+				console.error("Error getting Job Color as available jobs did not resolve");
+				return "#ffffff";
+			})
 	}
 
 	/**
