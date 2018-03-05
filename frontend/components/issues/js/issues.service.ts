@@ -1052,7 +1052,7 @@ export class IssuesService {
 				return roleColor;
 			})
 			.catch((error) => {
-				console.error("Error getting Job Color as available jobs did not resolve");#
+				console.error("Error getting Job Color as available jobs did not resolve");
 				return "#ffffff";
 			})
 	}
