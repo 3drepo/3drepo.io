@@ -172,7 +172,6 @@ export class IssuesService {
 	public handleIssueFilter(issue: any, filterText: string) {
 		// Required custom filter due to the fact that Angular
 		// does not allow compound OR filters
-		let i;
 
 		// Search the title
 		let show = this.stringSearch(issue.title, filterText) ||
@@ -180,26 +179,24 @@ export class IssuesService {
 				this.stringSearch(issue.owner, filterText);
 
 		// Search the type
-		// show = this.stringSearch(issue.type, filterText);
-
+		show = this.stringSearch(issue.type, filterText);
 
 		// Search the list of assigned issues
 		if (!show && issue.hasOwnProperty("assigned_roles")) {
-			i = 0;
+			let i = 0;
 			while(!show && (i < issue.assigned_roles.length)) {
 				show = show || this.stringSearch(issue.assigned_roles[i], filterText);
-				i += 1;
+				i++;
 			}
 		}
 
 		// Search the comments
 		if (!show && issue.hasOwnProperty("comments")) {
-			i = 0;
-
+			let i = 0;
 			while (!show && (i < issue.comments.length)) {
-				show = show || this.stringSearch(issue.comments[i].comment, filterText);
-				show = show || this.stringSearch(issue.comments[i].owner, filterText);
-				i += 1;
+				show = this.stringSearch(issue.comments[i].comment, filterText) ||
+						this.stringSearch(issue.comments[i].owner, filterText);
+				i++;
 			}
 		}
 
