@@ -333,7 +333,6 @@ export class IssuesService {
 		
 		if (issue.assigned_roles[0]) {
 			this.getJobColor(issue.assigned_roles[0]).then((color) => {
-				console.log("getJobColor from promise", color)
 				issue.issueRoleColor = color;
 			});
 		}
