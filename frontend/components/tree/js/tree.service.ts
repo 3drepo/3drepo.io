@@ -124,7 +124,6 @@ export class TreeService {
 	}
 
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
-		console.log("tree - init");
 		this.treeMap = null;
 		branch = branch ? branch : "master";
 
@@ -146,13 +145,11 @@ export class TreeService {
 		return Promise.all(meshesAndTrees)
 			.then((meshAndTreeData) => {
 				const tree = meshAndTreeData[1];
-				console.log("tree - tree nodes", tree.nodes);
 				this.setAllNodes([tree.nodes]);
 				this.setSubTreesById(tree.subTreesById);
 				this.setCachedIdToPath(tree.idToPath);
 				this.setSubModelIdToPath(tree.subModelIdToPath);
 				return this.getMap().then(() => {
-					console.log("tree - Finished loading all tree elements");
 					this.ready.resolve(tree);
 					return tree;
 				});
@@ -269,7 +266,6 @@ export class TreeService {
 					mainTree.subTreesById = subTreesById;
 
 					return Promise.all(awaitedSubTrees).then(() => {
-						console.log("tree - resolve tree", mainTree);
 						this.treeReady.resolve(mainTree);
 						return mainTree;
 					});

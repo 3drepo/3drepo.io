@@ -204,13 +204,9 @@ class ModelController implements ng.IController {
 					data,
 				);
 
-				console.log("tree - calling init from model.component");
 				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
 					.then((tree) => {
-						console.log("tree - after init in model.component")
-						// this.TreeService.getMap(tree.nodes).then(() => {
 						this.EventService.send(this.EventService.EVENT.TREE_READY, tree);
-						// });
 					})
 					.catch((error) => {
 						console.error("Error initialising tree: ", error);
