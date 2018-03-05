@@ -588,9 +588,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 		// 	return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
 		// }
 
-		if(_.map(priorityEnum).indexOf(data.priority) === -1){
-			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
-		}
+		// if(_.map(priorityEnum).indexOf(data.priority) === -1){
+		// 	return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
+		// }
 
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
@@ -1094,11 +1094,12 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if(data.hasOwnProperty("priority")){
-		if (_.map(priorityEnum).indexOf(data.priority) === -1){
-
-			throw responseCodes.ISSUE_INVALID_PRIORITY;
-
-		} else if(data.priority !== this.priority) {
+		// if (_.map(priorityEnum).indexOf(data.priority) === -1){
+		// 
+		// 	throw responseCodes.ISSUE_INVALID_PRIORITY;
+		// 
+		// } else 
+		if (data.priority !== this.priority) {
 
 			const canChangeStatus = isAdmin || hasOwnerJob;
 
