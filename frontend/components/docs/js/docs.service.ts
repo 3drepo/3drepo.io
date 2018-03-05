@@ -90,8 +90,8 @@ export class DocsService {
 		const object = event.value;
 
 		this.TreeService.onReady()
-			.then((treeMap) => {
-				const metadataIds = treeMap.oIdToMetaId[object.id];
+			.then(() => {
+				const metadataIds = this.TreeService.treeMap.oIdToMetaId[object.id];
 				if (metadataIds && metadataIds.length) {
 					this.state.noMetadata = false;
 					this.updateDocs(
