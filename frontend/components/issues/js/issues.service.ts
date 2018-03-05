@@ -113,7 +113,7 @@ export class IssuesService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public setupIssuesToShow(model, filterText) {
+	public setupIssuesToShow(model: string, filterText: string) {
 		this.state.issuesToShow = [];
 
 		if (this.state.allIssues.length > 0) {
@@ -134,52 +134,16 @@ export class IssuesService {
 			// dig into it right before release
 
 			// Filter text
-			let someText = angular.isDefined(filterText) && filterText !== "";
-			if (someText) {
-
-				// TODO: do we need $filter?
-
-				this.state.issuesToShow = (this.$filter("filter")(this.state.issuesToShow, (issue) => {
-					// Required custom filter due to the fact that Angular
-					// does not allow compound OR filters
-					let i;
-
-					// Search the title
-					let show = this.stringSearch(issue.title, filterText);
-					show = show || this.stringSearch(issue.timeStamp, filterText);
-					show = show || this.stringSearch(issue.owner, filterText);
-
-					// Search the list of assigned issues
-					if (!show && issue.hasOwnProperty("assigned_roles")) {
-						i = 0;
-						while(!show && (i < issue.assigned_roles.length)) {
-							show = show || this.stringSearch(issue.assigned_roles[i], filterText);
-							i += 1;
-						}
-					}
-
-					// Search the comments
-					if (!show && issue.hasOwnProperty("comments")) {
-						i = 0;
-
-						while (!show && (i < issue.comments.length)) {
-							show = show || this.stringSearch(issue.comments[i].comment, filterText);
-							show = show || this.stringSearch(issue.comments[i].owner, filterText);
-							i += 1;
-						}
-					}
-
-					return show;
-				}));
+			const notEmpty = angular.isDefined(filterText) && filterText !== "";
+			if (notEmpty) {
+				this.state.issuesToShow = this.filteredIssues(filterText);
 			} 
 
-			// Closed
-			for (let i = (this.state.issuesToShow.length - 1); i >= 0; i -= 1) {
-
-				if (!this.state.issueDisplay.showClosed && (this.state.issuesToShow[i].status === "closed")) {
-					this.state.issuesToShow.splice(i, 1);
-				}
-			}
+			// Sub models
+			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
+				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
+			});
+	
 
 			// Sub models
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
@@ -192,6 +156,54 @@ export class IssuesService {
 			});
 		
 		}
+
+	}
+
+	public filteredIssues(filterText: string) {
+		return (this.$filter("filter")(
+			this.state.issuesToShow,
+			(issue) => { 
+				return this.handleIssueFilter(issue, filterText); 
+			}
+			
+		));
+	}
+
+	public handleIssueFilter(issue: any, filterText: string) {
+		// Required custom filter due to the fact that Angular
+		// does not allow compound OR filters
+		let i;
+
+		// Search the title
+		let show = this.stringSearch(issue.title, filterText) ||
+				this.stringSearch(issue.timeStamp, filterText) ||
+				this.stringSearch(issue.owner, filterText);
+
+		// Search the type
+		// show = this.stringSearch(issue.type, filterText);
+
+
+		// Search the list of assigned issues
+		if (!show && issue.hasOwnProperty("assigned_roles")) {
+			i = 0;
+			while(!show && (i < issue.assigned_roles.length)) {
+				show = show || this.stringSearch(issue.assigned_roles[i], filterText);
+				i += 1;
+			}
+		}
+
+		// Search the comments
+		if (!show && issue.hasOwnProperty("comments")) {
+			i = 0;
+
+			while (!show && (i < issue.comments.length)) {
+				show = show || this.stringSearch(issue.comments[i].comment, filterText);
+				show = show || this.stringSearch(issue.comments[i].owner, filterText);
+				i += 1;
+			}
+		}
+
+		return show;
 
 	}
 
