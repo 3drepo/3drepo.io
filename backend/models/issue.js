@@ -1963,7 +1963,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								if (vpComponents[i].Selection) {
 
 									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
-										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
+										for (let k = 0; vpComponents[i].Selection[j].Component && k < vpComponents[i].Selection[j].Component.length; k++) {
 											let objectModel = model;
 
 											if (settings.federate) {
