@@ -40,6 +40,7 @@ export class AuthService {
 	private loggedIn;
 	private state;
 	private events;
+	private initPromise;
 
 	constructor(
 		private $injector,
@@ -111,13 +112,13 @@ export class AuthService {
 		const checkLoginMismatch = this.ClientConfigService.login_check_interval || 4; // Seconds
 
 		this.$interval(() => {
-			this.init(true);
+			this.shouldAutoLogout();
 		}, 1000 * checkLoginMismatch);
 
 	}
 
 	public loginSuccess(response: any) {
-		console.log("login success");
+
 		this.loggedIn = true;
 		this.username = response.data.username;
 
@@ -215,11 +216,9 @@ export class AuthService {
 	}
 
 	// TODO: This needs tidying up. Probably lots of irrelvant logic in this now
-	public init(interval) {
+	public init() {
 
-		const initPromise = this.$q.defer();
-
-		interval = !!interval;
+		this.initPromise = this.$q.defer();
 
 		// If we are not logged in, check
 		// with the API server whether we
@@ -229,25 +228,13 @@ export class AuthService {
 
 			this.sendLoginRequest()
 				.then((data) => {
-					// If we are not logging in because of an interval
-					// then we are initializing the auth plugin
-					if (!interval) {
-						data.initialiser = true;
-						this.loginSuccess(data);
-					} else if (!this.loggedIn) {
-						// If we are logging in using an interval,
-						// we only need to run login success if the loggedIn
-						// says we are not logged in.
-						this.loginSuccess(data);
-					}
+
+					data.initialiser = true;
+					this.loginSuccess(data);
+
 				})
 				.catch((reason) => {
-					const code = this.ClientConfigService.responseCodes.ALREADY_LOGGED_IN.code;
-					if (interval && reason.code === code) {
-
-						this.loginSuccess(reason);
-
-					} else if (this.loggedIn === null || (interval && this.loggedIn)) {
+					if (this.loggedIn === null) {
 
 						reason.initialiser = true;
 						this.loginFailure(reason);
@@ -256,20 +243,14 @@ export class AuthService {
 				});
 
 			this.authDefer.promise.then(() => {
-				initPromise.resolve(this.loggedIn);
+				this.initPromise.resolve(this.loggedIn);
 			}).catch((error) => {
-				// console.error("auto - Authentication error:", error);
-				initPromise.reject(error);
+				this.initPromise.reject(error);
 			});
 
-		} else if (interval) {
-			this.authDefer.promise.then(() => {
-				this.shouldAutoLogout();
-				initPromise.resolve(this.loggedIn);
-			});
 		}
 
-		return initPromise.promise;
+		return this.initPromise.promise;
 	}
 
 	public getUsername() {
