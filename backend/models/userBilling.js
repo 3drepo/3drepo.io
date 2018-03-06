@@ -285,6 +285,21 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 	});
 };
 
+function renewAndCleanSubscriptions(subs, newExpiryDate) {
+	let updatedSubs = [];
+	if(subs) {
+		subs.forEach( sub => {
+			if(sub.pendingQuantity) {
+				sub.expiryDate = newExpiryDate;
+				sub.quantity = sub.pendingQuantity;
+				sub.pendingQuantity = undefined;
+				updatedSubs.push(sub);
+			}
+		});
+	}
+	return updatedSubs;
+}
+
 billingSchema.methods.executeBillingAgreement = function(user){
 
 	let billingAgreement;
@@ -313,9 +328,6 @@ billingSchema.methods.executeBillingAgreement = function(user){
 
 				this.billingAgreementId = billingAgreement.id;
 				
-				// remove pending delete subscriptions
-				this.subscriptions.removePendingDeleteSubscription();
-
 				if(new Date(billingAgreement.start_date) > getImmediatePaymentStartDate().toDate()){
 					// we are done here if the billing agreement start later
 					return Promise.resolve();
@@ -329,7 +341,9 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 				// IPN message should come quickly after executing an agreement, usually less then a minute
 				let twoDayLater = moment().utc().add(48, 'hour').toDate();
-				this.subscriptions.renewSubscriptions(twoDayLater, { assignLimits: true });
+				this.subscriptions.paypal = renewAndCleanSubscriptions(
+								this.subscriptions.paypal,
+								twoDayLater);
 				
 				// change invoice state
 				invoice.changeState(C.INV_PENDING, {
@@ -338,12 +352,9 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				});
 
 				return invoice.save();
-
 			});
 		}
 	});
-
-
 };
 
 billingSchema.methods.getActiveSubscriptions = function() {
@@ -438,7 +449,7 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 			.hours(0).minutes(0).seconds(0).milliseconds(0)
 			.toDate();
 
-		this.subscriptions.renewSubscriptions(expiredAt);
+		this.subscriptions.paypal = renewAndCleanSubscriptions(this.subscriptions.paypal, expiredAt);
 
 		return Invoice.findPendingInvoice(user, this.billingAgreementId);
 	
