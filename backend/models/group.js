@@ -92,7 +92,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 		.then(group => {
 			let ifcGuidPromises = [];
 
-			for (let i = 0; i < group.objects.length; i++) {
+			for (let i = 0; group && i < group.objects.length; i++) {
 				const obj = group.objects[i];
 				if (obj.ifc_guid) {
 					groupObjectsMap[obj.ifc_guid] = obj;
@@ -116,7 +116,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 			}
 
 			return Promise.all(ifcGuidPromises).then(() => {
-				if (groupObjectsMap) {
+				if (groupObjectsMap && groupObjectsMap.length > 0) {
 					group.objects = [];
 					for (let id in groupObjectsMap) {
 						group.objects.push(groupObjectsMap[id]);

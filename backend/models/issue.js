@@ -178,6 +178,10 @@ let schema = Schema({
 	creator_role: String,
 	due_date: Number,
 
+	// Temporary issue origin information
+	origin_account: String,
+	origin_model: String,
+
 	//to be remove
 	scribble: Object,
 
@@ -308,7 +312,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 };
 
 
-schema.statics.findByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
+schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
 
 	let issues;
 	let self = this;
@@ -408,7 +412,7 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 
 	}).then(refs => {
 
-		if(!refs.length){
+		if(!refs.length || (ids && ids.length === issues.length)){
 			return Promise.resolve(issues);
 		} else {
 
@@ -429,7 +433,14 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 								};
 							}
 
-							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean);
+							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean)
+								.then(subModelIssues => {
+									return subModelIssues.map(issue => {
+										issue.origin_account = childDbName;
+										issue.origin_model = childModel;
+										return issue;
+									});
+								});
 						} else {
 							return Promise.resolve([]);
 						}
@@ -462,7 +473,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return this.findByModelName({account, model}, username, branch, revId, projection, noClean, ids);
+		return this.findIssuesByModelName({account, model}, username, branch, revId, projection, noClean, ids);
 
 	}).then(issues => {
 
@@ -470,8 +481,11 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 		issues.forEach(issue => {
 
+			const issueAccount = (issue.origin_account) ? issue.origin_account : account;
+			const issueModel = (issue.origin_model) ? issue.origin_model : model;
+
 			bcfPromises.push(
-				issue.getBCFMarkup(account, model, _.get(settings, "properties.unit")).then(bcf => {
+				issue.getBCFMarkup(issueAccount, issueModel, _.get(settings, "properties.unit")).then(bcf => {
 
 					zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
@@ -1413,10 +1427,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		let componentsPromises = [];
 
 		if (_.get(vp, "highlighted_group_id")) {
-			let highlightedGroupId = _.get(vp, "highlighted_group_id");
+			const highlightedGroupId = _.get(vp, "highlighted_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1441,10 +1455,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		}
 
 		if (_.get(vp, "hidden_group_id")) {
-			let hiddenGroupId = _.get(vp, "hidden_group_id");
+			const hiddenGroupId = _.get(vp, "hidden_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1474,10 +1488,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		}
 
 		if (_.get(vp, "shown_group_id")) {
-			let shownGroupId = _.get(vp, "shown_group_id");
+			const shownGroupId = _.get(vp, "shown_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
