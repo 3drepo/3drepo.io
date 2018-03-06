@@ -62,7 +62,6 @@
 
 		let limits;
 
-		//console.log('checking free space');
 		return User.findByUserName(account).then( dbUser => {
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
@@ -75,9 +74,7 @@
 			stats.forEach(stat => {
 				totalSize += stat.size;
 			});
-
-			// console.log(limits.spaceLimit);
-			// console.log(totalSize);
+			totalSize /= 1024*1024;
 
 			return Promise.resolve(limits.spaceLimit - totalSize);
 		});

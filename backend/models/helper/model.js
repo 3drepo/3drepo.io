@@ -1484,6 +1484,7 @@ function uploadFile(req){
 					return cb({ resCode: responseCodes.SIZE_LIMIT });
 				}
 
+				const sizeInMB = size / (1024*1024);
 				middlewares.freeSpace(account).then(space => {
 
 					if(size > space){
