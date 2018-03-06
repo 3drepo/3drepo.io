@@ -159,6 +159,7 @@
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },
 
 		LICENSE_NO_CHANGE: { message: "You must increase your number of licenses", status: 400 },
+		PLAN_NOT_FOUND: { message: "Plan not found", status: 404 },
 		SUBSCRIPTION_NOT_FOUND: { message: "Subscription not found", status: 404 },
 		SUBSCRIPTION_ALREADY_ASSIGNED: { message: "Subscription already assigned to someone else", status: 400 },
 		USER_ALREADY_ASSIGNED: { message: "This user is already in another subscription", status: 400 },

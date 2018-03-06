@@ -942,7 +942,6 @@ schema.methods.listAccounts = function(){
 
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	"use strict";
-
 	let billingAgreement;
 
 	plans = plans || [];
