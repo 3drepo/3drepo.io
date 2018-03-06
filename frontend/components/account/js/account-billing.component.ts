@@ -222,11 +222,16 @@ class AccountBillingController implements ng.IController {
 	 * Set up num licenses and price
 	 */
 	public setupLicensesInfo() {
-		this.numLicenses = this.subscriptions.filter((sub) => {
-			return sub.inCurrentAgreement;
-		}).length;
+		this.numLicenses = 0;
+		if (this.subscriptions.paypal) {
+			this.numLicenses = this.subscriptions.paypal.reduce((total, item) => {
+				return total + item.quantity;
+			});
+		}
 		this.numNewLicenses = this.numLicenses;
-		this.pricePerLicense = this.plans[0].amount;
+		const availablePlansIdx = Object.keys(this.plans).filter( (key) => this.plans[key].available);
+		// this won't work if we support more than 1 plan..
+		this.pricePerLicense = availablePlansIdx.length ? this.plans[availablePlansIdx[0]].price : 0;
 	}
 
 	/**

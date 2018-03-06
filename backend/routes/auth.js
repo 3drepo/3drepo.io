@@ -29,7 +29,6 @@ var User = require("../models/user");
 var addressMeta = require("../models/addressMeta");
 var Mailer = require("../mailer/mailer");
 var httpsPost = require("../libs/httpsReq").post;
-//var crypto = require('crypto');
 
 var multer = require("multer");
 
@@ -55,14 +54,6 @@ router.post('/:account/verify', verify);
 router.post('/:account/forgot-password', forgotPassword);
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
-
-// function expireSession(req) {
-// 	if (req.session)
-// 	{
-// 		req.session.cookie.expires = new Date(0);
-// 		req.session.cookie.maxAge = 0;
-// 	}
-// }
 
 function createSession(place, req, res, next, user){
 

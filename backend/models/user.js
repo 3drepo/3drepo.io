@@ -655,7 +655,7 @@ function _calSpace(user){
 				totalSize += stat.size;
 			});
 
-			quota.spaceUsed = totalSize;
+			quota.spaceUsed = totalSize / (1024*1024); // In MiB
 		} else if(quota) {
 			quota.spaceUsed = 0;
 		}

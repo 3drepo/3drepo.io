@@ -355,37 +355,39 @@ billingSchema.methods.executeBillingAgreement = function(user){
 
 billingSchema.methods.getActiveSubscriptions = function() {
 	let res = { basic: config.subscriptions.basic};
-
-	Object.keys(this.subscriptions).forEach(key => {
-		if(key === "paypal") {
-			res.paypal = [];
-			this.subscriptions.paypal.forEach( ppPlan => {
-				if( ppPlan.expiryDate || ppPlan.expiryDate > this.now) {
-					res.paypal.push(ppPlan);
-				}
-			});
-		}
-		else {
-			if(!this.subscriptions[key].expiryDate || 
-				this.subscriptions[key].expiryDate > this.now) {
-				res[key] = this.subscriptions[key];
+	if(this.subscriptions) {
+		Object.keys(this.subscriptions).forEach(key => {
+			if(key === "paypal") {
+				res.paypal = [];
+				this.subscriptions.paypal.forEach( ppPlan => {
+					if( ppPlan.expiryDate || ppPlan.expiryDate > this.now) {
+						res.paypal.push(ppPlan);
+					}
+				});
 			}
+			else {
+				if(!this.subscriptions[key].expiryDate || 
+					this.subscriptions[key].expiryDate > this.now) {
+					res[key] = this.subscriptions[key];
+				}
+	
+			}
+		});
 
-		}
-	});
-
+	}
 	return res;
 }
 
 billingSchema.methods.getSubscriptionLimits = function() {
 
 	
-	let sumLimits = {
-		spaceLimit: 0,
-		collaboratorLimit: 0
-	};
+	let sumLimits = {};
 
-	
+	if(config.subscriptions.basic) {
+		sumLimits.spaceLimit = config.subscriptions.basic.data;
+		sumLimits.collaboratorLimit = config.subscriptions.basic.collaborators;
+	}
+
 	if(this.subscriptions)	{
 		Object.keys(this.subscriptions).forEach(key => {
 			if(key === "paypal") {
@@ -395,8 +397,8 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					if( plan &&
 						(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
 						spaceLimit += plan.data;
-						if(sumLimits.collaborators !== "unlimited") {
-							sumLimits.collaboratorLimits = plan.collaborators === "unlimited"? 
+						if(sumLimits.collaborator !== "unlimited") {
+							sumLimits.collaboratorLimit = plan.collaborators === "unlimited"? 
 								"unlimited" : sumLimits.collaborators + plan.collaborators;
 						}
 					}
@@ -407,8 +409,8 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					this.subscriptions[key].expiryDate > this.now) {
 					spaceLimit += this.subscriptions[key].data;							
 					if(sumLimits.collaborators !== "unlimited") {
-						sumLimits.collaboratorLimits = this.subscriptions[key].collaborators === "unlimited"? 
-							"unlimited" : sumLimits.collaborators + this.subscriptions[key].collaborators;
+						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited"? 
+							"unlimited" : sumLimits.collaborator + this.subscriptions[key].collaborators;
 					}
 				}
 
