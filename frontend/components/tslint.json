@@ -6,6 +6,7 @@
         "jsdoc-format": false,
         "prefer-for-of": false,
         "no-console": [true, "log", "warning"],
-        "object-literal-sort-keys": false
+        "object-literal-sort-keys": false,
+        "no-empty": false,
     }
 }

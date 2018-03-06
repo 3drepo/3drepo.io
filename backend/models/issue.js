@@ -125,6 +125,7 @@ let schema = Schema({
 		group_id: Object,
 		highlighted_group_id: Object,
 		hidden_group_id: Object,
+		shown_group_id: Object,
 		hideIfc: Boolean,
 		screenshot: {
 			flag: Number, 
@@ -547,16 +548,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 	let issue = Issue.createInstance(dbColOptions);
 	issue._id = stringToUUID(uuid.v1());
 
-	let checkGroup = function(group_id){
-		return Group.findByUID(dbColOptions, group_id).then(group => {
-			if(!group){
-				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-			} else {
-				return Promise.resolve(group);
-			}
-		});
-	};
-
 	if(!data.name){
 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
 	}
@@ -587,29 +578,15 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}
 	}));
 
-	let group;
-
 	return Promise.all(promises).then(() => {
-
-		if(data.group_id){
-			return checkGroup(data.group_id);
-		} else {
-			return Promise.resolve();
-		}
-		
-	}).then(_group => {
-
-		if(_group){
-			group = _group;
-		}
 
 		return Issue.count(dbColOptions);
 		
 	}).then(count => {
 
-		if(_.map(statusEnum).indexOf(data.status) === -1){
-			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
-		}
+		// if(_.map(statusEnum).indexOf(data.status) === -1){
+		// 	return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
+		// }
 
 		if(_.map(priorityEnum).indexOf(data.priority) === -1){
 			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
@@ -686,12 +663,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		return issue.save().then(issue => {
 
-			if(group){
-				group.issue_id = issue._id;
-				return group.save();
-			} else {
-				return Promise.resolve();
-			}
+			return this.setGroupIssueId(dbColOptions, data, issue._id);
 
 		}).then(() => {
 			return ModelSetting.findById(dbColOptions, dbColOptions.model);
@@ -703,6 +675,61 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			return Promise.resolve(cleaned);
 		});
+	});
+};
+
+schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
+
+	let checkGroup = function(group_id){
+		return Group.findByUID(dbColOptions, group_id).then(group => {
+			if(!group){
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			} else {
+				return Promise.resolve(group);
+			}
+		});
+	};
+
+	let groupCheckPromises = [];
+
+	if (data.group_id){
+		groupCheckPromises.push(checkGroup(data.group_id));
+	}
+
+	if (data.viewpoint && data.viewpoint.highlighted_group_id) {
+		groupCheckPromises.push(checkGroup(data.viewpoint.highlighted_group_id));
+	}
+
+	if (data.viewpoint && data.viewpoint.hidden_group_id) {
+		groupCheckPromises.push(checkGroup(data.viewpoint.hidden_group_id));
+	}
+
+	if (data.viewpoint && data.viewpoint.shown_group_id) {
+		groupCheckPromises.push(checkGroup(data.viewpoint.shown_group_id));
+	}
+
+	if (data.viewpoints) {
+		for (let i = 0; i < data.viewpoints.length; i++) {
+			if (data.viewpoints[i].highlighted_group_id) {
+				groupCheckPromises.push(checkGroup(data.viewpoints[i].highlighted_group_id));
+			}
+			if (data.viewpoints[i].hidden_group_id) {
+				groupCheckPromises.push(checkGroup(data.viewpoints[i].hidden_group_id));
+			}
+			if (data.viewpoints[i].shown_group_id) {
+				groupCheckPromises.push(checkGroup(data.viewpoints[i].shown_group_id));
+			}
+		}
+	}
+
+	return Promise.all(groupCheckPromises).then(groups => {
+
+		for (let i = 0; groups && i < groups.length; i++) {
+			groups[i].issue_id = issueId;
+			groups[i].save();
+		}
+
+		return Promise.resolve();
 	});
 };
 
@@ -887,6 +914,8 @@ schema.methods.updateComment = function(commentIndex, data){
 
 		}).then(issue => {
 
+			schema.statics.setGroupIssueId(this._dbcolOptions, data, issue._id);
+
 			issue = issue.clean();
 			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
 			let eventData = comment;
@@ -1031,36 +1060,37 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	if (statusExists) {
 
-		const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
-		if (invalidStatus) {
+		// const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
+		// if (invalidStatus) {
 
-			throw responseCodes.ISSUE_INVALID_STATUS;
+		// 	throw responseCodes.ISSUE_INVALID_STATUS;
 
-		} else {
+		// } else {
 
-			const statusHasChanged = data.status !== this.status;
+		const statusHasChanged = data.status !== this.status;
 
-			if(statusHasChanged) {
+		if(statusHasChanged) {
 
-				const canChangeStatus = isAdmin || 
-					hasOwnerJob ||
-					(hasAssignedJob && data.status !== statusEnum.CLOSED);
+			const canChangeStatus = isAdmin || 
+				hasOwnerJob ||
+				(hasAssignedJob && data.status !== statusEnum.CLOSED);
 
-				if (canChangeStatus) {
+			if (canChangeStatus) {
 
-					//change status to for_approval if assigned roles is changed.
-					if (data.status === statusEnum.FOR_APPROVAL) {
-						this.assigned_roles = this.creator_role ? [this.creator_role] : [];
-					}
-
-					systemComment = this.addSystemComment(data.owner, "status", this.status, data.status);
-					this.status_last_changed = (new Date()).getTime();
-					this.status = data.status;			
-				} else {
-					throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+				//change status to for_approval if assigned roles is changed.
+				if (data.status === statusEnum.FOR_APPROVAL) {
+					this.assigned_roles = this.creator_role ? [this.creator_role] : [];
 				}
+
+				systemComment = this.addSystemComment(data.owner, "status", this.status, data.status);
+				this.status_last_changed = (new Date()).getTime();
+				this.status = data.status;			
+			} else {
+				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 			}
 		}
+
+		//}
 	}
 
 	if(data.hasOwnProperty("priority")){
@@ -1138,6 +1168,7 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
 	cleaned.highlighted_group_id = cleaned.highlighted_group_id ? uuidToString(cleaned.highlighted_group_id) : undefined;
 	cleaned.hidden_group_id = cleaned.hidden_group_id ? uuidToString(cleaned.hidden_group_id) : undefined;
+	cleaned.shown_group_id = cleaned.shown_group_id ? uuidToString(cleaned.shown_group_id) : undefined;
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
@@ -1159,7 +1190,10 @@ schema.methods.clean = function(typePrefix, modelCode){
 
 		if(cleaned.comments[i].viewpoint){
 
-			cleaned.comments[i].viewpoint = JSON.parse(JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint))));
+			const commentViewpoint = JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint)));
+			if (commentViewpoint) {
+				cleaned.comments[i].viewpoint = JSON.parse(commentViewpoint);
+			}
 
 			if(i > 0 && cleaned.comments[i-1].viewpoint && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
 				//hide repeated screenshot if consecutive comments relate to the same viewpoint
@@ -1394,7 +1428,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 							if (groupObject.ifc_guid) {
 								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
 									"@": {
-										ifcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guid
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1421,12 +1455,46 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 											DefaultVisibility: true
 										}
 									};
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component = [];
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
 							if (groupObject.ifc_guid) {
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Component.push({
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
 									"@": {
-										ifcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guid
+									},
+									OriginatingSystem: "3D Repo"
+								});
+							}
+						}
+					}
+				})
+			);
+		}
+
+		if (_.get(vp, "shown_group_id")) {
+			let shownGroupId = _.get(vp, "shown_group_id");
+			componentsPromises.push(
+				Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
+					if (group.objects && group.objects.length > 0) {
+						for (let i = 0; i < group.objects.length; i++) {
+							const groupObject = group.objects[i];
+							if (!viewpointXmlObj.VisualizationInfo.Components) {
+								viewpointXmlObj.VisualizationInfo.Components = {};
+							}
+							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
+										"@": {
+											DefaultVisibility: false
+										}
+									};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
+							}
+							if (groupObject.ifc_guid) {
+								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
+									"@": {
+										IfcGuid: groupObject.ifc_guid
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1612,7 +1680,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										guid: utils.generateUUID(),
 										created: timeStamp,
 										action: {property: "bcf_import"},
-										owner: account
+										owner: requester.user
 									};
 
 									if (!matchingIssue) {
@@ -1641,15 +1709,19 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												if (-1 === matchingIssue[complexAttr].findIndex(attr =>
 														utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
 													matchingIssue[complexAttr].push(issue[complexAttr][i]);
-												}
-												if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
-													matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
-														return a.created > b.created;
-													});
+												} else {
+													// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
 												}
 											}
+											if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
+												matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
+													return a.created > b.created;
+												});
+											}
 										}
-										return Issue.update({account, model}, { _id: issue._id}, matchingIssue);
+										return Issue.update({account, model}, { _id: issue._id}, matchingIssue).then(() => {
+											return matchingIssue;
+										});
 									}
 								})
 							);
@@ -1663,13 +1735,15 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						let notifications = [];
 
 						savedIssues.forEach(issue => {
-							if(issue && issue.clean) {
+							schema.statics.setGroupIssueId({account, model}, issue, issue._id);
+
+							if (issue && issue.clean) {
 								notifications.push(issue.clean(settings.type));
 							}
 						});
 
 						if(notifications.length){
-							ChatEvent.newIssues(requester, account, model, notifications);
+							ChatEvent.newIssues(requester.socketId, account, model, notifications);
 						}
 						
 						resolve();
@@ -1882,22 +1956,23 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							for (let i = 0; i < vpComponents.length; i++) {
 
+								let highlightedObjects = [];
+
 								// TODO: refactor to reduce duplication?
 								if (vpComponents[i].Selection) {
-									let highlightedObjects = [];
 
 									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
 										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
 											let objectModel = model;
 
 											if (settings.federate) {
-												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].ifcGuid];
+												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
 											}
 
 											highlightedObjects.push({
 												account: account,
 												model: objectModel,
-												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].ifcGuid
+												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
 											});
 										}
 									}
@@ -1919,24 +1994,52 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 								if (vpComponents[i].Visibility) {
 									let hiddenObjects = [];
+									let shownObjects = [];
+
+									shownObjects = shownObjects.concat(highlightedObjects);
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
-										if (vpComponents[i].Visibility[j]["@"].DefaultVisibility) {
-											for (let k = 0; k < vpComponents[i].Visibility[j].Component.length; k++) {
-												let objectModel = model;
+										let componentsToHide = [];
+										let componentsToShow = [];
 
-												if (settings.federate) {
-													objectModel = ifcToModelMap[vpComponents[i].Visibility[j].Component[k]["@"].ifcGuid];
-												}
-
-												hiddenObjects.push({
-													account: account,
-													model: objectModel,
-													ifc_guid: vpComponents[i].Visibility[j].Component[k]["@"].ifcGuid
-												});
+										if (JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility)) {
+											componentsToShow = vpComponents[i].Visibility[j].Component;
+											if (vpComponents[i].Visibility[j].Exceptions) {
+												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
 											}
 										} else {
-											systemLogger.logError("Visibility where DefaultVisibility is false currently unsupported for BCF import!");
+											componentsToHide = vpComponents[i].Visibility[j].Component;
+											if (vpComponents[i].Visibility[j].Exceptions) {
+												componentsToShow = vpComponents[i].Visibility[j].Exceptions[0].Component;
+											}
+										}
+
+										for (let k = 0; componentsToHide && k < componentsToHide.length; k++) {
+											let objectModel = model;
+
+											if (settings.federate) {
+												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
+											}
+
+											hiddenObjects.push({
+												account: account,
+												model: objectModel,
+												ifc_guid: componentsToHide[k]["@"].IfcGuid
+											});
+										}
+
+										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
+											let objectModel = model;
+
+											if (settings.federate) {
+												objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
+											}
+
+											shownObjects.push({
+												account: account,
+												model: objectModel,
+												ifc_guid: componentsToShow[k]["@"].IfcGuid
+											});
 										}
 									}
 
@@ -1950,6 +2053,20 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										groupPromises.push(
 											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
 												vp.hidden_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+
+									if (shownObjects.length > 0) {
+										let shownObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: shownObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
+												vp.shown_group_id = utils.uuidToString(group._id);
 											})
 										);
 									}

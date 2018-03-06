@@ -28,8 +28,8 @@ div(ng-if="vm.federation.federate" layout="row", layout-align="start center")
 					md-menu-item(ng-repeat="(key, value) in vm.federation.federationOptions", ng-if="!value.hidden")
 						md-button(ng-click="vm.doFederationOption($event, key, vm.account, vm.project, vm.federation)")
 							div(layout="row", flex)
-								p(flex, style="color:{{value.color}}") {{value.label}}
 								md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
+								p(flex, style="color:{{value.color}}") {{value.label}}
 
 
 // Models list
