@@ -1,12 +1,10 @@
 const gulp = require("gulp");
 const webpack = require('webpack-stream');
-const uglify = require('gulp-uglify');
-const concat = require('gulp-concat');
 const gutil = require('gulp-util');
-const order = require("gulp-order");
 const print = require('gulp-print');
 const livereload = require('gulp-livereload');
 const watch = require('gulp-watch');
+const concat = require('gulp-concat');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
 const sourcemaps = require('gulp-sourcemaps');
@@ -17,18 +15,9 @@ const typedoc = require("gulp-typedoc");
 
 const del = require('del');
 
-const ts = require('gulp-typescript');
 const localWebpack = require('webpack');
 
 let isWatch = false;
-
-const tsConfig = {
-  typescript: require("typescript"),
-  //target: "es6",
-  module: "amd",
-  lib: ["es2015", "dom"],
-  sourceMap: true
-};
 
 const allImages = [
   './images/**'
@@ -45,8 +34,6 @@ const allCss = [
     './node_modules/font-awesome/css/font-awesome.css',
     './components/**/**.css'
 ]
-
-const allJs = ['_built/ts-components.js', 'components/**/*.js'];
 
 const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
 const icons = './icons/*.svg';
@@ -202,150 +189,7 @@ gulp.task('service-workers-dev', function(callback) {
   sw(callback, false)
 });
 
-// JavaScript
-// We have one dev task and one production task because the time taken to do 
-// minifcation + source maps is so long
-
 // BUILD COMPONENTS
-
-gulp.task("typescript-components", function(done){
-   
-  // COMPILE TYPESCRIPT TO AMD
-  return gulp.src(['components/**/*.ts'])
-    .pipe(ts(tsConfig))
-    .on('error', exitOnError)
-    .pipe(gulp.dest('./_built/amd/components/'))
-    .on("end", done)
-
-})
-
-gulp.task("amd-components", function(done){
-
-  // CREATE COMPONENTS (FROM TS COMPILED AMD)
-  return gulp.src(["./entry-ts-components.js"])
-    .pipe(sourcemaps.init())
-    .pipe(webpack({
-      output: {
-        filename: 'ts-components.js',
-      },
-    }, localWebpack))
-    .on('error', exitOnError)
-    .pipe(gulp.dest('./_built/'))
-    .on("end", done)
-
-});
-
-gulp.task("tsc-amd-components", gulp.series("typescript-components", "amd-components"))
-// BUILD DEPENDENCIES
-
-gulp.task("zxcvbn", function(done) {
-
-  return gulp.src(['./zxcvbn-entry.js'])
-    .pipe(sourcemaps.init())
-    .pipe(webpack({
-      output: {
-        filename: 'zxcvbn.js',
-        libraryTarget: 'umd',
-        // library: 'strength'
-      },
-    }, localWebpack))
-    .pipe(gulp.dest("./../public/dist/"))
-  
-
-});
-
-gulp.task("typescript-globals", function(done) {
-  
-  // COMPILE TYPESCRIPT TO AMD
-  return gulp.src(['globals/*.ts'])
-    .pipe(ts(tsConfig))
-    .on('error', exitOnError)
-    .pipe(gulp.dest('./_built/amd/globals/'))
-    .on("end", done)
-
-});
-
-gulp.task("amd-dependencies", function(done){
-
-    // CREATE DEPENDENCIES 
-    return gulp.src(['./entry.js'])
-      .pipe(sourcemaps.init())
-      .pipe(webpack({
-        output: {
-          filename: 'dependencies.js',
-        },
-      }, localWebpack))
-      .on('error', exitOnError)
-      .pipe(gulp.dest('./_built/'))
-      .on("end", done)
-
-});
-
-gulp.task("tsc-amd-dependencies", gulp.series("typescript-globals", "amd-dependencies"));
-
-gulp.task('javascript-build', function(done){
-  
-  const jsOrder = [
-    '_built/dependencies.js',
-    'components/entry/js/entry.js',
-    '_built/ts-components.js',
-    'components/**/*.js',
-    'bootstrap.js'
-  ];
-
-  const js = [
-    '_built/dependencies.js',
-    '_built/ts-components.js',
-    'components/**/*.js',
-    'bootstrap.js'
-  ];
-
-  return gulp.src(js)
-          .pipe(order(jsOrder, { base: './' }))
-          .pipe(print())
-          .pipe(sourcemaps.init())
-          .pipe(concat("three_d_repo.min.js"))
-          .pipe(uglify({mangle: false})) // Mangle causes error for some reason
-            .on('error', exitOnError)
-          .pipe(size())
-          .pipe(sourcemaps.write('./maps'))
-          .pipe(gulp.dest("./../public/dist/"))
-          .on("end", done)
-    
-});
-
-gulp.task('javascript-build-dev', function(done){
-
-  const jsOrder = [
-    '_built/dependencies.js',
-    'components/entry/js/entry.js',
-    '_built/ts-components.js',
-    'components/**/*.js',
-    'bootstrap.js'
-  ];
-
-  const js = [
-    '_built/dependencies.js',
-    '_built/ts-components.js',
-    'components/**/*.js',
-    'bootstrap.js'
-  ];
-
-  return gulp.src(js)
-          .pipe(order(jsOrder, { base: './' }))
-          .pipe(sourcemaps.init())
-          .pipe(concat("three_d_repo.min.js"))
-          .pipe(sourcemaps.write('./maps'))
-          .pipe(gulp.dest("./../public/dist/"))
-          .pipe(livereload())
-          .on("end", done)
-  
-});
-
-gulp.task('javascript', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build", "zxcvbn" ));
-
-gulp.task('javascript-dev', gulp.series('clean', "tsc-amd-dependencies", "tsc-amd-components", "javascript-build-dev", "zxcvbn"))
-
 gulp.task("typedoc", function() {
     return gulp
         .src(["./components/**/*.ts"])
@@ -358,16 +202,14 @@ gulp.task("typedoc", function() {
     ;
 });
 
-
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
   isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true })
 
   // WATCHERS
-
   gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./entry.js", "./entry-ts-components.js", "./globals/*.ts", "./components/**/*.{ts,js}", "./bootstrap.js"], gulp.series(["javascript-dev", "service-workers-dev"]))
+  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))
@@ -376,13 +218,11 @@ gulp.task('watch', function() {
 
 });
 
-// Final task to build everything for the frontend (public folder)
-// It will use 'javascript' task rather than the dev version which includes maps
+
 gulp.task('build', gulp.series(
   gulp.parallel(
     'index', 
-    'pug', 
-    'javascript',
+    'pug',
     'css', 
     'icons', 
     'fonts', 

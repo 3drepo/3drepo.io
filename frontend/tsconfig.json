@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "types": ["angular", "angular-material"],
+      "target": "ES5",
+      "lib": [
+        "ES6",
+        "DOM",
+      ]
+    },
+    "exclude": [
+      "./node_modules",
+      "./tests"
+    ],
+    
+}

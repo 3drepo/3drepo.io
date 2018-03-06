@@ -7,6 +7,10 @@ declare global {
 		Module: any;
 		zxcvbn: any;
 		ClientConfig: any;
+		TDR: any;
+		UnityUtil: any;
+		Viewer: any;
+		Pin: any;
 	}
 }
 export {};
