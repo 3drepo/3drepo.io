@@ -48,6 +48,8 @@ class BottomButtonsController implements ng.IController {
 			showAll: "M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z",
 			isolate1: "M12,6.5A9.76,9.76,0,0,1,20.82,12,9.82,9.82,0,0,1,3.18,12,9.76,9.76,0,0,1,12,6.5m0-2A11.83,11.83,0,0,0,1,12a11.82,11.82,0,0,0,22,0A11.83,11.83,0,0,0,12,4.5Z",
 			isolate2: "M12,7a5,5,0,1,0,5,5A5,5,0,0,0,12,7Zm0,8a3,3,0,1,1,3-3A3,3,0,0,1,12,15Z",
+			hide1: "M0 0h48v48H0zm0 0h48v48H0zm0 0h48v48H0zm0 0h48v48H0z",
+			hide2: "M24 14c5.52 0 10 4.48 10 10 0 1.29-.26 2.52-.71 3.65l5.85 5.85c3.02-2.52 5.4-5.78 6.87-9.5-3.47-8.78-12-15-22.01-15-2.8 0-5.48.5-7.97 1.4l4.32 4.31c1.13-.44 2.36-.71 3.65-.71zM4 8.55l4.56 4.56.91.91C6.17 16.6 3.56 20.03 2 24c3.46 8.78 12 15 22 15 3.1 0 6.06-.6 8.77-1.69l.85.85L39.45 44 42 41.46 6.55 6 4 8.55zM15.06 19.6l3.09 3.09c-.09.43-.15.86-.15 1.31 0 3.31 2.69 6 6 6 .45 0 .88-.06 1.3-.15l3.09 3.09C27.06 33.6 25.58 34 24 34c-5.52 0-10-4.48-10-10 0-1.58.4-3.06 1.06-4.4zm8.61-1.57l6.3 6.3L30 24c0-3.31-2.69-6-6-6l-.33.03z",
 			focus: "M118.9,663.3H10v217.8C10,941.3,58.7,990,118.9,990h217.8V881.1H118.9V663.3z M118.9,118.9h217.8V10H118.9C58.7,10,10,58.7,10,118.9v217.8h108.9V118.9z M881.1,10H663.3v108.9h217.8v217.8H990V118.9C990,58.7,941.3,10,881.1,10z M881.1,881.1H663.3V990h217.8c60.2,0,108.9-48.7,108.9-108.9V663.3H881.1V881.1z M500,336.7c-90.1,0-163.3,73.2-163.3,163.3S409.9,663.3,500,663.3S663.3,590.1,663.3,500S590.1,336.7,500,336.7z",
 		};
 
@@ -93,19 +95,21 @@ class BottomButtonsController implements ng.IController {
 
 		this.leftButtons.push({
 			label: "Show All",
-			icon: "fa fa-eye",
 			click: () => { this.showAll(); },
 		});
 
 		this.leftButtons.push({
+			label: "Hide",
+			click: () => { this.hide(); },
+		});
+
+		this.leftButtons.push({
 			label: "Isolate",
-			icon: "fa fa-scissors",
 			click: () => { this.isolate(); },
 		});
 
 		this.leftButtons.push({
 			label: "Focus",
-			icon: "fa fa-toggle-off",
 			click: () => { this.focusMode(); },
 		});
 
@@ -145,6 +149,10 @@ class BottomButtonsController implements ng.IController {
 
 	public showAll() {
 		this.TreeService.showAllTreeNodes(true);
+	}
+
+	public hide() {
+		this.TreeService.hideSelected();
 	}
 
 	public isolate() {

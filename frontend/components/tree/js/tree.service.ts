@@ -812,6 +812,18 @@ export class TreeService {
 	}
 
 	/**
+	 * Hide selected objects 
+	 */
+	public hideSelected() {
+
+		const selected = this.getCurrentSelectedNodes().concat();
+		if (selected && selected.length) {
+			this.hideTreeNodes(selected);
+		}
+
+	}
+
+	/**
 	 * Isolate selected objects by hiding all other objects.
 	 */
 	public isolateSelected() {
