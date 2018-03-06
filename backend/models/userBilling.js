@@ -148,10 +148,6 @@ billingSchema.methods.cancelAgreement = function(){
 
 };
 
-billingSchema.methods.isNewPayment = function(changes){
-	return changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence();
-};
-
 let getImmediatePaymentStartDate = function(){
 	return moment().utc().add(60, "second");
 };
@@ -382,39 +378,43 @@ billingSchema.methods.getActiveSubscriptions = function() {
 }
 
 billingSchema.methods.getSubscriptionLimits = function() {
+
+	
 	let sumLimits = {
 		spaceLimit: 0,
 		collaboratorLimit: 0
 	};
 
 	
-	Object.keys(this.subscriptions).forEach(key => {
-		if(key === "paypal") {
-			res.paypal = [];
-			this.subscriptions.paypal.forEach( ppPlan => {
-				const plan = config.subscriptions.plans[ppPlan.plan];
-				if( plan &&
-					(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
-
-					spaceLimit += plan.data;													if(sumLimits.collaborators !== "unlimited") {
-						sumLimits.collaboratorLimits = plan.collaborators === "unlimited"? 
-							"unlimited" : sumLimits.collaborators + plan.collaborators;
+	if(this.subscriptions)	{
+		Object.keys(this.subscriptions).forEach(key => {
+			if(key === "paypal") {
+				res.paypal = [];
+				this.subscriptions.paypal.forEach( ppPlan => {
+					const plan = config.subscriptions.plans[ppPlan.plan];
+					if( plan &&
+						(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
+						spaceLimit += plan.data;
+						if(sumLimits.collaborators !== "unlimited") {
+							sumLimits.collaboratorLimits = plan.collaborators === "unlimited"? 
+								"unlimited" : sumLimits.collaborators + plan.collaborators;
+						}
+					}
+				});
+			}
+			else {
+				if(!this.subscriptions[key].expiryDate || 
+					this.subscriptions[key].expiryDate > this.now) {
+					spaceLimit += this.subscriptions[key].data;							
+					if(sumLimits.collaborators !== "unlimited") {
+						sumLimits.collaboratorLimits = this.subscriptions[key].collaborators === "unlimited"? 
+							"unlimited" : sumLimits.collaborators + this.subscriptions[key].collaborators;
 					}
 				}
-			});
-		}
-		else {
-			if(!this.subscriptions[key].expiryDate || 
-				this.subscriptions[key].expiryDate > this.now) {
-				spaceLimit += this.subscriptions[key].data;							
-				if(sumLimits.collaborators !== "unlimited") {
-					sumLimits.collaboratorLimits = this.subscriptions[key].collaborators === "unlimited"? 
-						"unlimited" : sumLimits.collaborators + this.subscriptions[key].collaborators;
-				}
-			}
 
-		}
-	});
+			}
+		});
+	}
 
 	return sumLimits;
 }
