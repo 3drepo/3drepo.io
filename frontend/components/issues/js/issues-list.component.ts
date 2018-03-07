@@ -19,7 +19,6 @@ class IssuesListController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
-		"$filter",
 		"$window",
 		"$timeout",
 
@@ -44,7 +43,6 @@ class IssuesListController implements ng.IController {
 
 	constructor(
 		private $scope,
-		private $filter,
 		private $window,
 		private $timeout,
 		

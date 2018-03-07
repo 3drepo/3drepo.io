@@ -20,8 +20,10 @@ export class EventService {
 
 	public static internalCurrentError;
 	public static internalCurrentEvent;
+	public static timeout;
 
 	public static $inject: string[] = [
+		"$timeout"
 	];
 
 	private EVENT = {
@@ -90,30 +92,32 @@ export class EventService {
 	};
 
 	constructor(
+		private $timeout: ng.ITimeoutService
 	) {
 		EventService.internalCurrentEvent = {};
 		EventService.internalCurrentError = {};
+		EventService.timeout = this.$timeout;
 	}
 
 	public send(type, value) {
 		const stack = (new Error()).stack;
-		setTimeout(() => {
+		EventService.timeout(() => {
 			if (type === null || type === undefined) {
 				console.trace("UNDEFINED EVENT TYPE" + type);
 			} else {
 				EventService.internalCurrentEvent = {type, value, stack};
 			}
-		}, 0);
+		});
 	}
 
 	public sendError(type, value) {
-		setTimeout(() => {
+		EventService.timeout(() => {
 			if (type === null || type === undefined) {
 				console.trace("UNDEFINED ERROR TYPE");
 			} else {
 				EventService.internalCurrentError = {type, value};
 			}
-		}, 0);
+		});
 	}
 
 	public currentEvent() {
