@@ -363,14 +363,14 @@ billingSchema.methods.getActiveSubscriptions = function() {
 			if(key === "paypal") {
 				res.paypal = [];
 				this.subscriptions.paypal.forEach( ppPlan => {
-					if( ppPlan.expiryDate || ppPlan.expiryDate > this.now) {
+					if( !ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
 						res.paypal.push(ppPlan);
 					}
 				});
 			}
 			else {
 				if(!this.subscriptions[key].expiryDate || 
-					this.subscriptions[key].expiryDate > this.now) {
+					this.subscriptions[key].expiryDate > Date.now()) {
 					res[key] = this.subscriptions[key];
 				}
 	
@@ -405,7 +405,7 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					this.subscriptions.paypal.forEach( ppPlan => {
 						const plan = config.subscriptions.plans[ppPlan.plan];
 						if( plan &&
-							(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
+							(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now())) {
 							sumLimits.spaceLimit += plan.data * ppPlan.quantity;
 							if(sumLimits.collaboratorLimit !== "unlimited") {
 								sumLimits.collaboratorLimit = plan.collaborators === "unlimited"? 
@@ -417,7 +417,7 @@ billingSchema.methods.getSubscriptionLimits = function() {
 			}
 			else {
 				if(!this.subscriptions[key].expiryDate || 
-					this.subscriptions[key].expiryDate > this.now) {
+					this.subscriptions[key].expiryDate > Date.now()) {
 					sumLimits.spaceLimit += this.subscriptions[key].data;							
 					if(sumLimits.collaboratorLimit !== "unlimited") {
 						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited"? 
