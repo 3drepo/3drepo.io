@@ -166,7 +166,7 @@ function getCleanedUpPayPalSubscriptions(currentSubs) {
 	return subs;
 };
 
-billingSchema.methods.updateSubscriptions = function(newPlans) {
+billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	if(!this.subscriptions) {
 		this.subscriptions = {};
 	}
@@ -215,15 +215,14 @@ billingSchema.methods.updateSubscriptions = function(newPlans) {
 
 }
 
-//FIXME: change name of method
-billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {
+billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, billingAddress) {
 	// User want to buy new subscriptions.
 	// Update subscriptions with new plans
 	this.billingUser = billingUser;
 
 	return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
 		this.markModified('billingInfo');
-		return this.updateSubscriptions(plans);
+		return this.writeSubscriptionChanges(plans);
 
 	}).then(changes => {
 		if (!changes) {

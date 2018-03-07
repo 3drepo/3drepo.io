@@ -223,15 +223,28 @@ class AccountBillingController implements ng.IController {
 	 */
 	public setupLicensesInfo() {
 		this.numLicenses = 0;
+		this.pricePerLicense = null;
 		if (this.subscriptions.paypal) {
 			this.numLicenses = this.subscriptions.paypal.reduce((total, item) => {
 				return total + item.quantity;
 			});
+
+			this.planId = this.subscriptions.paypal[0].plan;
+			if (this.planId && this.plans[this.subscriptions.paypal[0].plan]) {
+				this.pricePerLicense = this.plans[this.subscriptions.paypal[0].plan].price;
+			}
 		}
+
+		if (!this.planId || !this.pricePerLicense) {
+			// Use the user's current plan if they already have a plan
+			// Otherwise use the first available plan
+			const availablePlansIdx = Object.keys(this.plans).filter( (key) => this.plans[key].available);
+			this.pricePerLicense = availablePlansIdx.length ? this.plans[availablePlansIdx[0]].price : 0;
+			this.planId = availablePlansIdx[0];
+		}
+
 		this.numNewLicenses = this.numLicenses;
-		const availablePlansIdx = Object.keys(this.plans).filter( (key) => this.plans[key].available);
-		// this won't work if we support more than 1 plan..
-		this.pricePerLicense = availablePlansIdx.length ? this.plans[availablePlansIdx[0]].price : 0;
+
 	}
 
 	/**

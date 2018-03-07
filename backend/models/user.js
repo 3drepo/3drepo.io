@@ -940,13 +940,13 @@ schema.methods.listAccounts = function(){
 	return _createAccounts(this.roles, this.user);	
 };
 
-schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
+schema.methods.updateSubscriptions = function(plans, billingUser, billingAddress){
 	"use strict";
 	let billingAgreement;
 
 	plans = plans || [];
 	
-	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress)
+	return this.customData.billing.updateSubscriptions(plans, this.user, billingUser, billingAddress)
 	.then(_billingAgreement => {
 		
 		billingAgreement = _billingAgreement;

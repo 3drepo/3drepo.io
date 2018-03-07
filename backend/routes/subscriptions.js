@@ -27,18 +27,18 @@ const config = require("../config");
 const utils = require("../utils");
 
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
-router.post("/subscriptions", middlewares.isAccountAdmin, createSubscription);
+router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
 router.post("/subscriptions/assign", middlewares.isAccountAdmin, addTeamMember);
 router.delete("/subscriptions/assign", middlewares.isAccountAdmin, removeTeamMember);
 
-function createSubscription(req, res, next) {
+function updateSubscription(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
 			let billingUser = req.session.user.username;
-			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
+			return dbUser.updateSubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 		})
 		.then(agreement => {
 
