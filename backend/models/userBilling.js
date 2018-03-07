@@ -79,8 +79,9 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 		if(licence.pendingQuantity > licence.quantity)
 		{
-			proRataAmount += config.subscriptions.plans[licence.plan].price * (licence.pendingQuantity - licence.quantity);
-			proRataItems.push({plan: licence.plan, quantity: licence.pendingQuantity - licence.quantity});
+			const additionalLicences = licence.pendingQuantity - licence.quantity;
+			proRataAmount += config.subscriptions.plans[licence.plan].price * additionalLicences;
+			proRataItems.push({plan: licence.plan, quantity: additionalLicences});
 		}
 
 		regularAmount += config.subscriptions.plans[licence.plan].price * licence.pendingQuantity;
@@ -96,6 +97,7 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 		// Calculate percentage of payment period * cost of the period.
 		let proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays());
+	
 		proRataAmount = proRataFactor * proRataAmount;
 
 		// add the pro-rata price info in the changes obj, useful for generating invoice without recaluating £ of each item in the invoice class
@@ -157,7 +159,7 @@ function getCleanedUpPayPalSubscriptions(currentSubs) {
 	if(currentSubs) {
 		currentSubs.forEach( payPalEntry => {
 			if(!payPalEntry.expiryDate || payPalEntry.expiryDate > Date.now()) {
-				payPalEntry.pendingQuantitiy = undefined;
+				payPalEntry.pendingQuantity = undefined;
 				subs.push(payPalEntry);
 			}
 		});
@@ -229,7 +231,6 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 	}).then(changes => {
 		if (!changes) {
 			// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
-			console.log("no changes detected.");
 			if (this.billingAgreementId && this.billingInfo.isModified())
 			{	
 				const paypalUpdate = Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
@@ -256,7 +257,6 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 				this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 			}
 			// Once we have calculated a set of payments send them
-			console.log(this.subscriptions);
 			return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
 
 				//save the payment token to user billing info
