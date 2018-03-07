@@ -47,6 +47,7 @@ class AccountBillingController implements ng.IController {
 	private payPalError;
 	private pricePerLicense;
 	private priceLicenses;
+	private planId;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -224,10 +225,10 @@ class AccountBillingController implements ng.IController {
 	public setupLicensesInfo() {
 		this.numLicenses = 0;
 		this.pricePerLicense = null;
-		if (this.subscriptions.paypal) {
+		if (this.subscriptions.paypal && this.subscriptions.paypal.length > 0) {
 			this.numLicenses = this.subscriptions.paypal.reduce((total, item) => {
 				return total + item.quantity;
-			});
+			}, 0);
 
 			this.planId = this.subscriptions.paypal[0].plan;
 			if (this.planId && this.plans[this.subscriptions.paypal[0].plan]) {
@@ -244,6 +245,7 @@ class AccountBillingController implements ng.IController {
 		}
 
 		this.numNewLicenses = this.numLicenses;
+		console.log( " new: " , this.numNewLicenses, " price: " , this.pricePerLicense, " plan ID: " , this.planId);
 
 	}
 

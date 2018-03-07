@@ -379,43 +379,55 @@ billingSchema.methods.getActiveSubscriptions = function() {
 
 billingSchema.methods.getSubscriptionLimits = function() {
 
-	
 	let sumLimits = {};
 
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
 		sumLimits.collaboratorLimit = config.subscriptions.basic.collaborators;
 	}
+	
+	if(!sumLimits.spaceLimit) {
+		sumLimits.spaceLimit = 0;
+	}
+
+	if(!sumLimits.collaboratorLimit) {
+		sumLimits.collaboratorLimit = 0;
+	}
+
+	console.log("before", sumLimits);
 
 	if(this.subscriptions)	{
 		Object.keys(this.subscriptions).forEach(key => {
 			if(key === "paypal") {
-				res.paypal = [];
-				this.subscriptions.paypal.forEach( ppPlan => {
-					const plan = config.subscriptions.plans[ppPlan.plan];
-					if( plan &&
-						(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
-						spaceLimit += plan.data;
-						if(sumLimits.collaborator !== "unlimited") {
-							sumLimits.collaboratorLimit = plan.collaborators === "unlimited"? 
-								"unlimited" : sumLimits.collaborators + plan.collaborators;
+				if (this.subscriptions.paypal.length > 0) {
+					this.subscriptions.paypal.forEach( ppPlan => {
+						const plan = config.subscriptions.plans[ppPlan.plan];
+						if( plan &&
+							(ppPlan.expiryDate || ppPlan.expiryDate > this.now)) {
+							sumLimits.spaceLimit += plan.data * ppPlan.quantity;
+							if(sumLimits.collaboratorLimit !== "unlimited") {
+								sumLimits.collaboratorLimit = plan.collaborators === "unlimited"? 
+									"unlimited" : sumLimits.collaboratorLimit + plan.collaborators * ppPlan.quantity;
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 			else {
 				if(!this.subscriptions[key].expiryDate || 
 					this.subscriptions[key].expiryDate > this.now) {
-					spaceLimit += this.subscriptions[key].data;							
-					if(sumLimits.collaborators !== "unlimited") {
+					sumLimits.spaceLimit += this.subscriptions[key].data;							
+					if(sumLimits.collaboratorLimit !== "unlimited") {
 						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited"? 
-							"unlimited" : sumLimits.collaborator + this.subscriptions[key].collaborators;
+							"unlimited" : sumLimits.collaboratorLimit + this.subscriptions[key].collaborators;
 					}
 				}
 
 			}
 		});
 	}
+
+	console.log("after", sumLimits);
 
 	return sumLimits;
 }
