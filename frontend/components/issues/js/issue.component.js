@@ -160,6 +160,22 @@
 			status.charAt(0).toUpperCase() + status.slice(1);
 		}
 
+		vm.handleBCFPriority = function(BCFPriority) {
+
+			var exists = vm.priorities.find(function(priority) {
+				return BCFPriority === priority.value
+			});
+
+			if (!exists) {
+				var newPriority = {
+					value: BCFPriority,
+					label: BCFPriority
+				}
+				vm.priorities.push(newPriority);
+				$timeout(function() {});
+			}
+		}
+
 		vm.handleBCFStatus = function(BCFStatus) {
 
 			var exists = vm.statuses.find(function(status) {
@@ -175,7 +191,38 @@
 				vm.statuses.push(newStatus);
 				$timeout(function() {});
 			}
-			
+		}
+
+		vm.handleBCFAssign = function(BCFAssign) {
+
+			var exists = vm.modelJobs.find(function(assign) {
+				return BCFAssign === assign.value
+			});
+
+			if (!exists) {
+				var newAssign = {
+					value: BCFAssign,
+					label: BCFAssign
+				}
+				vm.statuses.push(newAssign);
+				$timeout(function() {});
+			}
+		}
+
+		vm.handleBCFType = function(BCFType) {
+
+			var exists = vm.topic_types.find(function(type) {
+				return BCFType === type.value
+			});
+
+			if (!exists) {
+				var newType = {
+					value: BCFType,
+					label: BCFType
+				}
+				vm.topic_types.push(newType);
+				$timeout(function() {});
+			}
 		}
 
 		vm.getPlaceholderText = function() {
@@ -250,7 +297,10 @@
 
 			//console.log(vm.issueData.status)
 
+			vm.handleBCFPriority(vm.issueData.priority);
 			vm.handleBCFStatus(vm.issueData.status);
+			vm.handleBCFAssign(vm.issueData.assigned_roles);
+			vm.handleBCFType(vm.issueData.topic_type);
 
 			vm.checkCanComment();
 
