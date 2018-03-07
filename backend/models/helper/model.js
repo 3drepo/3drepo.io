@@ -1636,7 +1636,7 @@ function removeModel(account, model, forceRemove){
 
 		collections.forEach(collection => {
 			if(collection.name.startsWith(model + '.')){
-				promises.push(ModelFactory.dbManager.dropCollection(account, collection.name));
+				promises.push(ModelFactory.dbManager.dropCollection(account, collection));
 			}
 		});
 
@@ -1650,9 +1650,6 @@ function removeModel(account, model, forceRemove){
 
 		//remove model from all project
 		return Project.removeModel(account, model);
-	/*}).catch(err => {
-		systemLogger.logError(`Failed to removeModel:`, err);
-		return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});*/
 	});
 
 }
