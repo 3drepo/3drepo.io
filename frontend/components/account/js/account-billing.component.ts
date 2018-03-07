@@ -174,13 +174,14 @@ class AccountBillingController implements ng.IController {
 	public changeSubscription() {
 		const data = {
 			plans: [{
-				plan: "THE-100-QUID-PLAN",
+				plan: this.planId,
 				quantity: this.numNewLicenses,
 			}],
 			billingAddress: this.newBillingAddress,
 		};
 
-		if (this.numLicenses === this.numNewLicenses) {
+		const licenceCountChanged = this.numLicenses !== this.numNewLicenses;
+		if (!licenceCountChanged) {
 			this.payPalInfo = "Updating billing information. Please do not refresh the page or close the tab.";
 		} else {
 			this.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
@@ -194,7 +195,7 @@ class AccountBillingController implements ng.IController {
 		this.APIService.post(this.account + "/subscriptions", data)
 			.then((response) => {
 				if (response.status === 200) {
-					if (this.numLicenses === this.numNewLicenses) {
+					if (!licenceCountChange) {
 						this.payPalInfo = "Billing information updated.";
 						this.$timeout(() => {
 							this.DialogService.closeDialog();
@@ -245,7 +246,6 @@ class AccountBillingController implements ng.IController {
 		}
 
 		this.numNewLicenses = this.numLicenses;
-		console.log( " new: " , this.numNewLicenses, " price: " , this.pricePerLicense, " plan ID: " , this.planId);
 
 	}
 

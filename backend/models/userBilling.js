@@ -156,7 +156,7 @@ function getCleanedUpPayPalSubscriptions(currentSubs) {
 	let subs = [];
 	if(currentSubs) {
 		currentSubs.forEach( payPalEntry => {
-			if(!payPalEntry.expiryDate || payPalEntry.expiryDate > this.now) {
+			if(!payPalEntry.expiryDate || payPalEntry.expiryDate > Date.now()) {
 				payPalEntry.pendingQuantitiy = undefined;
 				subs.push(payPalEntry);
 			}
@@ -184,7 +184,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 
 		let entryInCurrent = currentSubs.findIndex( element => newSubs.plan === element.plan);
 		hasChanges = hasChanges || (entryInCurrent < 0 || currentSubs[entryInCurrent].quantity !== newSubs.quantity);
-		
+
 		let planEntry = null;
 		
 		if(entryInCurrent < 0) {
@@ -202,6 +202,8 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	}
 
 	hasChanges = hasChanges || currentSubs.length;
+
+	
 	if(hasChanges) {
 		this.subscriptions.paypal = updatedSubs;
 		const result = {
@@ -227,6 +229,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 	}).then(changes => {
 		if (!changes) {
 			// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
+			console.log("no changes detected.");
 			if (this.billingAgreementId && this.billingInfo.isModified())
 			{	
 				const paypalUpdate = Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
@@ -253,6 +256,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 				this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 			}
 			// Once we have calculated a set of payments send them
+			console.log(this.subscriptions);
 			return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
 
 				//save the payment token to user billing info
@@ -394,8 +398,6 @@ billingSchema.methods.getSubscriptionLimits = function() {
 		sumLimits.collaboratorLimit = 0;
 	}
 
-	console.log("before", sumLimits);
-
 	if(this.subscriptions)	{
 		Object.keys(this.subscriptions).forEach(key => {
 			if(key === "paypal") {
@@ -426,8 +428,6 @@ billingSchema.methods.getSubscriptionLimits = function() {
 			}
 		});
 	}
-
-	console.log("after", sumLimits);
 
 	return sumLimits;
 }
