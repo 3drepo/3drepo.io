@@ -694,8 +694,8 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
-	let checkGroup = function(group_id){
-		return Group.findByUID(dbColOptions, group_id).then(group => {
+	let updateGroup = function(group_id){
+		return Group.updateIssueId(dbColOptions, group_id, issueId).then(group => {
 			if(!group){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			} else {
@@ -704,47 +704,39 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 		});
 	};
 
-	let groupCheckPromises = [];
+	let groupUpdatePromises = [];
 
 	if (data.group_id){
-		groupCheckPromises.push(checkGroup(data.group_id));
+		groupUpdatePromises.push(updateGroup(data.group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.highlighted_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.highlighted_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.highlighted_group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.hidden_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.hidden_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.hidden_group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.shown_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.shown_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.shown_group_id));
 	}
 
 	if (data.viewpoints) {
 		for (let i = 0; i < data.viewpoints.length; i++) {
 			if (data.viewpoints[i].highlighted_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].highlighted_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].highlighted_group_id));
 			}
 			if (data.viewpoints[i].hidden_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].hidden_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].hidden_group_id));
 			}
 			if (data.viewpoints[i].shown_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].shown_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].shown_group_id));
 			}
 		}
 	}
 
-	return Promise.all(groupCheckPromises).then(groups => {
-
-		for (let i = 0; groups && i < groups.length; i++) {
-			groups[i].issue_id = issueId;
-			groups[i].save();
-		}
-
-		return Promise.resolve();
-	});
+	return Promise.all(groupUpdatePromises);
 };
 
 schema.statics.getScreenshot = function(dbColOptions, uid, vid){
@@ -2011,13 +2003,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									let hiddenObjects = [];
 									let shownObjects = [];
 
-									shownObjects = shownObjects.concat(highlightedObjects);
-
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+										const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
 										let componentsToHide = [];
 										let componentsToShow = [];
 
-										if (JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility)) {
+										if (defaultVisibility) {
 											componentsToShow = vpComponents[i].Visibility[j].Component;
 											if (vpComponents[i].Visibility[j].Exceptions) {
 												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
@@ -2036,11 +2027,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
 											}
 
-											hiddenObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: componentsToHide[k]["@"].IfcGuid
-											});
+											// Exclude items selected
+											if (-1 === highlightedObjects.map(highlightObject => {
+														return highlightObject.ifc_guid;
+													}).indexOf(componentsToHide[k]["@"].IfcGuid)) {
+												hiddenObjects.push({
+													account: account,
+													model: objectModel,
+													ifc_guid: componentsToHide[k]["@"].IfcGuid
+												});
+											}
 										}
 
 										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
@@ -2058,21 +2054,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										}
 									}
 
-									if (hiddenObjects.length > 0) {
-										let hiddenObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: hiddenObjects
-										};
-
-										groupPromises.push(
-											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
-												vp.hidden_group_id = utils.uuidToString(group._id);
-											})
-										);
-									}
-
+									// TODO: May need a better way to combine hidden/shown
+									// as it is not ideal to save both hidden and shown objects
 									if (shownObjects.length > 0) {
+										for (let j = 0; highlightedObjects && j < highlightedObjects.length; j++) {
+											if (-1 === shownObjects.map(shownObject => {
+														return shownObject.ifc_guid;
+													}).indexOf(highlightedObjects[j].ifc_guid)) {
+												shownObjects.push(highlightedObjects[j]);
+											}
+										}
 										let shownObjectsData = {
 											name: issue.name,
 											color: [255, 0, 0],
@@ -2082,6 +2073,18 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										groupPromises.push(
 											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
 												vp.shown_group_id = utils.uuidToString(group._id);
+											})
+										);
+									} else if (hiddenObjects.length > 0) {
+										let hiddenObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: hiddenObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
+												vp.hidden_group_id = utils.uuidToString(group._id);
 											})
 										);
 									}

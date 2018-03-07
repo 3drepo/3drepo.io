@@ -629,28 +629,6 @@
 			if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
 						issue.viewpoint.hasOwnProperty("hidden_group_id") ||
 						issue.viewpoint.hasOwnProperty("shown_group_id"))) {
-				if (issue.viewpoint.highlighted_group_id) {
-					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
-					var highlightPromise;
-
-					if (groupsCache[highlightedGroupId]) {
-						highlightPromise = handleHighlights(groupsCache[highlightedGroupId]);
-					} else {
-						var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
-
-						highlightPromise = APIService.get(highlightedGroupUrl)
-							.then(function (response) {
-								groupsCache[highlightedGroupId] = response.data.objects;
-								return handleHighlights(response.data.objects);
-							})
-							.catch(function(error){
-								console.error("There was a problem getting the highlights: ", error);
-							});
-					}
-
-					promises.push(highlightPromise);
-				}
-				
 				if (issue.viewpoint.hidden_group_id) {
 					var hiddenGroupId = issue.viewpoint.hidden_group_id;
 					var hiddenPromise;
@@ -694,6 +672,28 @@
 					}
 
 					promises.push(shownPromise);
+				}
+
+				if (issue.viewpoint.highlighted_group_id) {
+					var highlightedGroupId = issue.viewpoint.highlighted_group_id;
+					var highlightPromise;
+
+					if (groupsCache[highlightedGroupId]) {
+						highlightPromise = handleHighlights(groupsCache[highlightedGroupId]);
+					} else {
+						var highlightedGroupUrl = issue.account + "/" + issue.model + "/groups/" + highlightedGroupId;
+
+						highlightPromise = APIService.get(highlightedGroupUrl)
+							.then(function (response) {
+								groupsCache[highlightedGroupId] = response.data.objects;
+								return handleHighlights(response.data.objects);
+							})
+							.catch(function(error){
+								console.error("There was a problem getting the highlights: ", error);
+							});
+					}
+
+					promises.push(highlightPromise);
 				}
 			} else {
 				var groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
@@ -814,13 +814,17 @@
 
 		function handleTree(response) {
 
-			if (response.data.objects && response.data.objects.length > 0) {
-				handleHighlights(response.data.objects);
-			}
-
 			if (response.data.hiddenObjects) {
 				handleHidden(response.data.hiddenObjects);
 			} 
+
+			if (response.data.shownObjects) {
+				handleShown(response.data.shownObjects);
+			}
+
+			if (response.data.objects && response.data.objects.length > 0) {
+				handleHighlights(response.data.objects);
+			}
 
 		}
 

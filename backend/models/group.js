@@ -177,6 +177,18 @@ groupSchema.statics.listGroups = function(dbCol){
 	return this.find(dbCol, {});
 };
 
+groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
+	'use strict';
+
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) }).then(group => {
+		const issueIdData = {
+			issue_id: issueId
+		};
+
+		return group.updateAttrs(issueIdData);
+	});
+};
+
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
@@ -209,6 +221,7 @@ groupSchema.methods.updateAttrs = function(data){
 		this.name = data.name || this.name;
 		this.objects = data.objects || this.objects;
 		this.color = data.color || this.color;
+		this.issue_id = data.issue_id || this.issue_id;
 
 		this.markModified('objects');
 		return this.save();
@@ -225,7 +238,6 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.updateAttrs(data);
-	
 };
 
 groupSchema.methods.clean = function(){
