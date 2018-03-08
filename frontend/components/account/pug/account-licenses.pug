@@ -39,17 +39,17 @@
 										type="text"
 										ng-model="vm.newLicenseAssignee"
 										tdr-focus="true"
-										ng-disabled="vm.allLicensesAssigned"
+										ng-disabled="vm.numLicenses === vm.licenses.length"
 										ng-keypress="vm.assignLicense($event)")
 								div(flex="50", layout="column", layout-align="end start")
 									md-button.md-raised.md-accent.assignButton(
 										layout="column"
 										ng-click="vm.assignLicense()"
-										ng-disabled="vm.addDisabled") Assign
+										ng-disabled="vm.numLicenses === vm.licenses.length") Assign
 									//div(layout="column")
 										p {{vm.addMessage}}
 
-							p#errorMessage(ng-if="vm.allLicensesAssigned") All licences have been assigned
+							p#errorMessage(ng-if="vm.numLicenses === vm.licenses.length") All licences have been assigned
 
 
 							md-divider
@@ -58,7 +58,7 @@
 							md-content#accountLicensesList
 								section
 									md-subheader
-										div Licences ({{vm.numLicensesAssigned}} assigned, {{vm.numLicenses}} total)
+										div Licences ({{vm.licenses.length}} assigned, {{vm.numLicenses}} total)
 								
 								md-list-item(
 									ng-repeat="license in vm.licenses"
@@ -100,7 +100,7 @@
 											md-icon.angular-material-icons(layout-align="start start") remove_circle
 								
 
-								div(ng-if="vm.allLicensesAssigned")
+								div(ng-if="vm.numLicenses === vm.licenses.length")
 									md-divider
 									p#accountLicensesBillingPage
 										| To add more licences please go to the

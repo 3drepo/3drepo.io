@@ -28,8 +28,6 @@ const utils = require("../utils");
 
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
-router.post("/subscriptions/assign", middlewares.isAccountAdmin, addTeamMember);
-router.delete("/subscriptions/assign", middlewares.isAccountAdmin, removeTeamMember);
 
 function updateSubscription(req, res, next) {
 
@@ -69,42 +67,6 @@ function listSubscriptions(req, res, next) {
 		})
 		.catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-}
-
-function addTeamMember(req, res, next) {
-
-	let responsePlace = utils.APIInfo(req);
-	
-	User.findByUserName(req.params.account)
-		.then(dbUser => {
-			if(req.body.user)
-				return dbUser.addTeamMember(req.body.user);
-			else
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
-		})
-		.then(subscription => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK);
-		})
-		.catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-}
-
-function removeTeamMember(req, res, next) {
-
-	let responsePlace = utils.APIInfo(req);
-	User.findByUserName(req.params.account)
-		.then(dbUser => {
-
-			return dbUser.removeAssignedSubscriptionFromUser(req.body.user, req.query.cascadeRemove);
-
-		})
-		.then(subscription => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
-		})
-		.catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 		});
 }
 

@@ -991,11 +991,14 @@ schema.methods.executeBillingAgreement = function(){
 
 schema.methods.removeTeamMember = function(username, cascadeRemove){
 	"use strict";
+	let foundProjects = [];
+	let foundModels = [];
+	let teamspacePerm = this.customData.permissions.findByUser(username);
 	//check if they have any permissions assigned
-	return Project.find({ account }, { 'permissions.user':  username}).then(projects => {
+	return Project.find({ account: this.user }, { 'permissions.user':  username}).then(projects => {
 		
 		foundProjects = projects;
-		return ModelSetting.find({ account: account }, { 'permissions.user': username});
+		return ModelSetting.find({ account: this.user }, { 'permissions.user': username});
 	
 	}).then(models => {
 
@@ -1077,9 +1080,36 @@ schema.statics.getQuotaInfo = function(teamspace) {
 	
 }
 
+schema.statics.getMembersAndJobs = function(teamspace) {
+	let memberArr = [];
+	let memToJob = {};
+	let promises = [];
+
+	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
+		console.log(members);
+					memberArr = members;
+				});
+
+//	const getJobInfoProm = TODO: job refactoring then retreive all job info from this teamspace
+	promises.push(getTSMemProm);
+//	promises.push(getJobInfoProm);
+		
+	return Promise.all(promises).then( () => {
+		let resultArr = [];
+		memberArr.forEach(mem => {
+			//TODO: Get job info, put it into a json with the username
+			resultArr.push({user: mem});
+		})
+		return resultArr;
+	});
+}
+
 schema.statics.getAllUsersInTeamspace = function(teamspace) {
 	"use strict";
-	return this.find({account: "admin"}, { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE }, {user : 1}).then( users => {
+
+	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
+	console.log(query);
+	return this.find({account: "admin"}, query , {user : 1}).then( users => {
 		let res = [];
 		users.forEach(user => {
 			res.push(user.user);
