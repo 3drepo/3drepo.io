@@ -148,13 +148,18 @@
 			
 			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
 
-				const someUserNotAssignedWithLicence = this.permissions.some(
-					perm => !teamspace.customData.billing.subscriptions.findByAssignedUser(perm.user)
-				);
+				User.getAllUsersInTeamspace(teamspace.user).then( members => {
+					const someUserNotAssignedWithLicence = this.permissions.some(
+						perm => {
+							!members.includes(perm.user);
+						}
+					);
 
-				if(someUserNotAssignedWithLicence){
-					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-				}
+					if(someUserNotAssignedWithLicence){
+						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+					}
+				});
+				
 
 			});
 		}

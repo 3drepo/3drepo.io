@@ -1021,7 +1021,7 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 			let removeTeamspacePermission = Promise.resolve();
 
 			if(teamspacePerm){
-				removeTeamspacePermission = this.user.customData.permissions.remove(username);
+				removeTeamspacePermission = this.customData.permissions.remove(username);
 			}
 			
 			return Promise.all(

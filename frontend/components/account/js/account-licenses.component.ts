@@ -236,10 +236,10 @@ class AccountLicensesController implements ng.IController {
 	 */
 	public removeLicense(index) {
 		const removeUrl = `${this.account}/members/` + this.licenses[index].user;
+		this.licenseIndex = index;
 		this.APIService.delete(removeUrl, {})
 			.then((response) => {
 				if (response.status === 200) {
-					this.licenseIndex = index;
 					this.licenses.splice(index, 1);
 				}
 			})
@@ -294,7 +294,7 @@ class AccountLicensesController implements ng.IController {
 	 */
 	public removeLicenseConfirmed() {
 		const removeLicenseUrl = this.account + "/members/"
-			+ this.licenses[this.licenseIndex] + "?cascadeRemove=true";
+			+ this.licenses[this.licenseIndex].user + "?cascadeRemove=true";
 		this.APIService.delete(removeLicenseUrl, {})
 			.then((response) => {
 				if (response.status === 200) {
