@@ -548,31 +548,6 @@ export class IssuesService {
 					issue.viewpoint.hasOwnProperty("hidden_group_id") ||
 					issue.viewpoint.hasOwnProperty("shown_group_id"))) {
 			
-			if (issue.viewpoint.highlighted_group_id) {
-
-				const highlightedGroupId = issue.viewpoint.highlighted_group_id;
-				const highlightedGroupUrl = `${issue.account}/${issue.model}/groups/${highlightedGroupId}`;
-				
-				let highlightPromise;
-
-				if (this.groupsCache[highlightedGroupUrl]) {
-					highlightPromise = this.handleHighlights(this.groupsCache[highlightedGroupUrl]);
-				} else {
-					
-					highlightPromise = this.APIService.get(highlightedGroupUrl)
-						.then((response) => {
-							this.groupsCache[highlightedGroupUrl] = response.data.objects;
-							return this.handleHighlights(response.data.objects);
-						})
-						.catch((error) => {
-							console.error("There was a problem getting the highlights: ", error);
-						});
-
-				}
-
-				promises.push(highlightPromise);
-			}
-			
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
@@ -622,7 +597,32 @@ export class IssuesService {
 
 				promises.push(shownPromise);
 			}
-	
+
+			if (issue.viewpoint.highlighted_group_id) {
+
+				const highlightedGroupId = issue.viewpoint.highlighted_group_id;
+				const highlightedGroupUrl = `${issue.account}/${issue.model}/groups/${highlightedGroupId}`;
+
+				let highlightPromise;
+
+				if (this.groupsCache[highlightedGroupUrl]) {
+					highlightPromise = this.handleHighlights(this.groupsCache[highlightedGroupUrl]);
+				} else {
+
+					highlightPromise = this.APIService.get(highlightedGroupUrl)
+						.then((response) => {
+							this.groupsCache[highlightedGroupUrl] = response.data.objects;
+							return this.handleHighlights(response.data.objects);
+						})
+						.catch((error) => {
+							console.error("There was a problem getting the highlights: ", error);
+						});
+
+				}
+
+				promises.push(highlightPromise);
+			}
+
 		} else {
 
 			
@@ -743,13 +743,17 @@ export class IssuesService {
 
 	public handleTree(response) {
 
-		if (response.data.objects && response.data.objects.length > 0) {
-			this.handleHighlights(response.data.objects);
-		}
-
 		if (response.data.hiddenObjects) {
 			this.handleHidden(response.data.hiddenObjects);
 		} 
+
+		if (response.data.shownObjects) {
+			this.handleShown(response.data.shownObjects);
+		}
+
+		if (response.data.objects && response.data.objects.length > 0) {
+			this.handleHighlights(response.data.objects);
+		}
 
 	}
 

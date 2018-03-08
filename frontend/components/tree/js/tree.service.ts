@@ -46,6 +46,8 @@ export class TreeService {
 	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
 	private treeMapReady;
+	private generatedMaps;
+	private ready;
 
 	constructor(
 		private $q: ng.IQService,
@@ -56,10 +58,13 @@ export class TreeService {
 	}
 
 	public reset() {
-		this.treeReady = this.$q.defer();
-		this.treeMapReady = null;
-		this.state = {};
 
+		this.ready = this.$q.defer();
+		this.treeReady = this.$q.defer();
+		this.treeMapReady = this.$q.defer();
+		this.generatedMaps = null;
+
+		this.state = {};
 		this.state.idToPath = {};
 		this.state.hideIfc = true;
 		this.allNodes = [];
@@ -71,6 +76,10 @@ export class TreeService {
 		this.subModelIdToPath = {};
 		this.highlightMapUpdateTime = Date.now();
 		this.highlightSelectedViewerObject = true;
+	}
+
+	public onReady() {
+		return this.ready.promise;
 	}
 
 	/**
@@ -127,35 +136,52 @@ export class TreeService {
 		}
 
 		const url = this.baseURL + "fulltree.json";
-		this.getTrees(url, setting);
-		this.getIdToMeshes();
 
-		return this.treeReady.promise.then((tree) => {
-			this.setAllNodes([tree.nodes]);
-			this.setSubTreesById(tree.subTreesById);
-			this.setCachedIdToPath(tree.idToPath);
-			this.setSubModelIdToPath(tree.subModelIdToPath);
-			return tree;
-		});
+		const meshesAndTrees = [
+			this.getIdToMeshes(),
+			this.getTrees(url, setting),
+		];
+
+		return Promise.all(meshesAndTrees)
+			.then((meshAndTreeData) => {
+				const tree = meshAndTreeData[1];
+				this.setAllNodes([tree.nodes]);
+				this.setSubTreesById(tree.subTreesById);
+				this.setCachedIdToPath(tree.idToPath);
+				this.setSubModelIdToPath(tree.subModelIdToPath);
+				return this.getMap().then(() => {
+					this.ready.resolve(tree);
+					return tree;
+				});
+			})
+			.catch((error) => {
+				console.error("Error resolving tree(s): ", error);
+			});
 
 	}
 
 	public getIdToMeshes() {
+
 		const url = this.baseURL + "idToMeshes.json";
-		this.APIService.get(url, {
+		const options = {
 			headers: {
 				"Content-Type": "application/json",
 			},
-		}).then((json) => {
-			this.idToMeshes = json.data.idToMeshes;
-		}).catch((error) => {
-			console.error("Failed to get Id to Meshes:", error);
-		});
+		};
+
+		return this.APIService.get(url, options)
+			.then((json) => {
+				this.idToMeshes = json.data.idToMeshes;
+			})
+			.catch((error) => {
+				console.error("Failed to get Id to Meshes:", error);
+			});
+
 	}
 
 	public getTrees(url: string, setting: any) {
 
-		this.APIService.get(url, {
+		return this.APIService.get(url, {
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -191,60 +217,65 @@ export class TreeService {
 				const subTrees = json.data.subTrees;
 				const subTreesById = {};
 
-				this.getIdToPath()
-					.then((idToPath) => {
-
-						const awaitedSubTrees = [];
-
-						if (idToPath && idToPath.treePaths) {
-
-							mainTree.idToPath = idToPath.treePaths.idToPath;
-
-							if (subTrees) {
-
-								// idToObjRef only needed if model is a fed model.
-								// i.e. subTrees.length > 0
-
-								mainTree.subModelIdToPath = {};
-
-								subTrees.forEach((subtree) => {
-
-									const subtreeIdToPath = idToPath.treePaths.subModels.find((submodel) => {
-										return subtree.model === submodel.model;
-									});
-
-									if (subtreeIdToPath) {
-										subtree.idToPath = subtreeIdToPath.idToPath;
-									}
-
-									this.handleSubTree(
-										subtree,
-										mainTree,
-										subTreesById,
-										awaitedSubTrees,
-									);
-								});
-							}
-
-						}
-
-						mainTree.subTreesById = subTreesById;
-
-						Promise.all(awaitedSubTrees).then(() => {
-							return this.treeReady.resolve(mainTree);
-						});
-
-					})
-					.catch((error) => {
-						console.error("Error getting getIdToPath", error);
-						this.reset();
-					});
-
+				return this.handleIdToPath(mainTree, subTrees, subTreesById);
 			})
 			.catch((error) => {
 				console.error("Tree Init Error:", error);
 				this.reset();
 			});
+	}
+
+	public handleIdToPath(mainTree, subTrees, subTreesById) {
+		return this.getIdToPath()
+				.then((idToPath) => {
+
+					const awaitedSubTrees = [];
+
+					if (idToPath && idToPath.treePaths) {
+
+						mainTree.idToPath = idToPath.treePaths.idToPath;
+
+						if (subTrees) {
+
+							// idToObjRef only needed if model is a fed model.
+							// i.e. subTrees.length > 0
+
+							mainTree.subModelIdToPath = {};
+
+							subTrees.forEach((subtree) => {
+
+								const subtreeIdToPath = idToPath.treePaths.subModels.find((submodel) => {
+									return subtree.model === submodel.model;
+								});
+
+								if (subtreeIdToPath) {
+									subtree.idToPath = subtreeIdToPath.idToPath;
+								}
+
+								this.handleSubTree(
+									subtree,
+									mainTree,
+									subTreesById,
+									awaitedSubTrees,
+								);
+							});
+						}
+
+					}
+
+					mainTree.subTreesById = subTreesById;
+
+					return Promise.all(awaitedSubTrees).then(() => {
+						this.treeReady.resolve(mainTree);
+						return mainTree;
+					});
+
+				})
+				.catch((error) => {
+					console.error("Error getting getIdToPath", error);
+					this.reset();
+				});
+
 	}
 
 	public getIdToPath() {
@@ -340,12 +371,12 @@ export class TreeService {
 
 		const leafId = leaf._id;
 		const sharedId = leaf.shared_id;
-		const subTreePromises  = [];
+
 		if (leaf) {
 
 			if (leaf.children) {
 				leaf.children.forEach((child) => {
-					subTreePromises.push(this.genMap(child, items));
+					this.genMap(child, items);
 				});
 			}
 			items.uidToSharedId[leafId] = sharedId;
@@ -355,29 +386,27 @@ export class TreeService {
 			}
 		}
 
-		return Promise.all(subTreePromises).then(() => {
-				return items;
-			},
-		);
+		return items;
+
 	}
 
 	public getMap() {
-		// only do this once!
-		if (this.treeMapReady) {
-			return this.treeMapReady;
-		} else {
-			this.treeMap = {
-				oIdToMetaId: {},
-				sharedIdToUid: {},
-				uidToSharedId: {},
-			};
-			this.treeMapReady = this.treeReady.promise.then((tree) => {
-				this.treeMap.idToMeshes = this.idToMeshes;
-				return this.genMap(tree.nodes, this.treeMap);
-			});
-			return this.treeMapReady;
 
+		// only do this once!
+		if (!this.generatedMaps) {
+			this.treeReady.promise.then((tree) => {
+				this.treeMap = {
+					oIdToMetaId: {},
+					sharedIdToUid: {},
+					uidToSharedId: {},
+				};
+				this.treeMap.idToMeshes = this.idToMeshes;
+				this.generatedMaps = this.genMap(tree.nodes, this.treeMap);
+				this.treeMapReady.resolve(this.generatedMaps);
+			});
 		}
+
+		return this.treeMapReady.promise;
 
 	}
 
@@ -862,9 +891,9 @@ export class TreeService {
 	 */
 	public updateModelState(node) {
 
-		this.getMap().then((treeMap) => {
+		this.ready.promise.then(() => {
 			const childNodes = {};
-			this.traverseNodeAndPushId(node, childNodes, treeMap.idToMeshes);
+			this.traverseNodeAndPushId(node, childNodes, this.treeMap.idToMeshes);
 			for (const key in childNodes) {
 				if (key) {
 					for (let i = 0; i < childNodes[key].length; i++) {
@@ -915,10 +944,10 @@ export class TreeService {
 				}
 			}
 
-			return this.getMap().then((treeMap) => {
+			return this.ready.promise.then(() => {
 				const map = {};
 				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+					this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes);
 				});
 
 				this.setHighlightMap(map);
@@ -946,10 +975,10 @@ export class TreeService {
 			if (!final) {
 				return Promise.resolve();
 			} else {
-				return this.getMap().then((treeMap) => {
+				return this.ready.promise.then(() => {
 					const map = {};
 					this.currentSelectedNodes.forEach((n) => {
-						this.traverseNodeAndPushId(n, map, treeMap.idToMeshes);
+						this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes);
 					});
 
 					this.setHighlightMap(map);

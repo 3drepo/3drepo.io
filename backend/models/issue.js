@@ -178,6 +178,10 @@ let schema = Schema({
 	creator_role: String,
 	due_date: Number,
 
+	// Temporary issue origin information
+	origin_account: String,
+	origin_model: String,
+
 	//to be remove
 	scribble: Object,
 
@@ -308,7 +312,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 };
 
 
-schema.statics.findByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
+schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
 
 	let issues;
 	let self = this;
@@ -408,7 +412,7 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 
 	}).then(refs => {
 
-		if(!refs.length){
+		if(!refs.length || (ids && ids.length === issues.length)){
 			return Promise.resolve(issues);
 		} else {
 
@@ -429,7 +433,14 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 								};
 							}
 
-							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean);
+							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean)
+								.then(subModelIssues => {
+									return subModelIssues.map(issue => {
+										issue.origin_account = childDbName;
+										issue.origin_model = childModel;
+										return issue;
+									});
+								});
 						} else {
 							return Promise.resolve([]);
 						}
@@ -462,7 +473,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return this.findByModelName({account, model}, username, branch, revId, projection, noClean, ids);
+		return this.findIssuesByModelName({account, model}, username, branch, revId, projection, noClean, ids);
 
 	}).then(issues => {
 
@@ -470,8 +481,11 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 		issues.forEach(issue => {
 
+			const issueAccount = (issue.origin_account) ? issue.origin_account : account;
+			const issueModel = (issue.origin_model) ? issue.origin_model : model;
+
 			bcfPromises.push(
-				issue.getBCFMarkup(account, model, _.get(settings, "properties.unit")).then(bcf => {
+				issue.getBCFMarkup(issueAccount, issueModel, _.get(settings, "properties.unit")).then(bcf => {
 
 					zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
@@ -588,9 +602,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 		// 	return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
 		// }
 
-		if(_.map(priorityEnum).indexOf(data.priority) === -1){
-			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
-		}
+		// if(_.map(priorityEnum).indexOf(data.priority) === -1){
+		// 	return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
+		// }
 
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
@@ -680,8 +694,8 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
-	let checkGroup = function(group_id){
-		return Group.findByUID(dbColOptions, group_id).then(group => {
+	let updateGroup = function(group_id){
+		return Group.updateIssueId(dbColOptions, group_id, issueId).then(group => {
 			if(!group){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			} else {
@@ -690,47 +704,39 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 		});
 	};
 
-	let groupCheckPromises = [];
+	let groupUpdatePromises = [];
 
 	if (data.group_id){
-		groupCheckPromises.push(checkGroup(data.group_id));
+		groupUpdatePromises.push(updateGroup(data.group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.highlighted_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.highlighted_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.highlighted_group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.hidden_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.hidden_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.hidden_group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.shown_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.shown_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.shown_group_id));
 	}
 
 	if (data.viewpoints) {
 		for (let i = 0; i < data.viewpoints.length; i++) {
 			if (data.viewpoints[i].highlighted_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].highlighted_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].highlighted_group_id));
 			}
 			if (data.viewpoints[i].hidden_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].hidden_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].hidden_group_id));
 			}
 			if (data.viewpoints[i].shown_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].shown_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].shown_group_id));
 			}
 		}
 	}
 
-	return Promise.all(groupCheckPromises).then(groups => {
-
-		for (let i = 0; groups && i < groups.length; i++) {
-			groups[i].issue_id = issueId;
-			groups[i].save();
-		}
-
-		return Promise.resolve();
-	});
+	return Promise.all(groupUpdatePromises);
 };
 
 schema.statics.getScreenshot = function(dbColOptions, uid, vid){
@@ -1094,11 +1100,12 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if(data.hasOwnProperty("priority")){
-		if (_.map(priorityEnum).indexOf(data.priority) === -1){
-
-			throw responseCodes.ISSUE_INVALID_PRIORITY;
-
-		} else if(data.priority !== this.priority) {
+		// if (_.map(priorityEnum).indexOf(data.priority) === -1){
+		// 
+		// 	throw responseCodes.ISSUE_INVALID_PRIORITY;
+		// 
+		// } else 
+		if (data.priority !== this.priority) {
 
 			const canChangeStatus = isAdmin || hasOwnerJob;
 
@@ -1412,10 +1419,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		let componentsPromises = [];
 
 		if (_.get(vp, "highlighted_group_id")) {
-			let highlightedGroupId = _.get(vp, "highlighted_group_id");
+			const highlightedGroupId = _.get(vp, "highlighted_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1440,10 +1447,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		}
 
 		if (_.get(vp, "hidden_group_id")) {
-			let hiddenGroupId = _.get(vp, "hidden_group_id");
+			const hiddenGroupId = _.get(vp, "hidden_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1473,10 +1480,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		}
 
 		if (_.get(vp, "shown_group_id")) {
-			let shownGroupId = _.get(vp, "shown_group_id");
+			const shownGroupId = _.get(vp, "shown_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1962,7 +1969,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								if (vpComponents[i].Selection) {
 
 									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
-										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
+										for (let k = 0; vpComponents[i].Selection[j].Component && k < vpComponents[i].Selection[j].Component.length; k++) {
 											let objectModel = model;
 
 											if (settings.federate) {
@@ -1996,13 +2003,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									let hiddenObjects = [];
 									let shownObjects = [];
 
-									shownObjects = shownObjects.concat(highlightedObjects);
-
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+										const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
 										let componentsToHide = [];
 										let componentsToShow = [];
 
-										if (JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility)) {
+										if (defaultVisibility) {
 											componentsToShow = vpComponents[i].Visibility[j].Component;
 											if (vpComponents[i].Visibility[j].Exceptions) {
 												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
@@ -2021,11 +2027,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
 											}
 
-											hiddenObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: componentsToHide[k]["@"].IfcGuid
-											});
+											// Exclude items selected
+											if (-1 === highlightedObjects.map(highlightObject => {
+														return highlightObject.ifc_guid;
+													}).indexOf(componentsToHide[k]["@"].IfcGuid)) {
+												hiddenObjects.push({
+													account: account,
+													model: objectModel,
+													ifc_guid: componentsToHide[k]["@"].IfcGuid
+												});
+											}
 										}
 
 										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
@@ -2043,21 +2054,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										}
 									}
 
-									if (hiddenObjects.length > 0) {
-										let hiddenObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: hiddenObjects
-										};
-
-										groupPromises.push(
-											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
-												vp.hidden_group_id = utils.uuidToString(group._id);
-											})
-										);
-									}
-
+									// TODO: May need a better way to combine hidden/shown
+									// as it is not ideal to save both hidden and shown objects
 									if (shownObjects.length > 0) {
+										for (let j = 0; highlightedObjects && j < highlightedObjects.length; j++) {
+											if (-1 === shownObjects.map(shownObject => {
+														return shownObject.ifc_guid;
+													}).indexOf(highlightedObjects[j].ifc_guid)) {
+												shownObjects.push(highlightedObjects[j]);
+											}
+										}
 										let shownObjectsData = {
 											name: issue.name,
 											color: [255, 0, 0],
@@ -2067,6 +2073,18 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										groupPromises.push(
 											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
 												vp.shown_group_id = utils.uuidToString(group._id);
+											})
+										);
+									} else if (hiddenObjects.length > 0) {
+										let hiddenObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: hiddenObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
+												vp.hidden_group_id = utils.uuidToString(group._id);
 											})
 										);
 									}
