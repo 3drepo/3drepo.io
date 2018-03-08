@@ -119,6 +119,7 @@ module.exports.createApp = function (serverConfig) {
 	// payment api header
 	app.use("/payment", require("../routes/payment"));
 
+	app.use("/:account", require("../routes/teamspace"));
 	app.use("/:account", require("../routes/job"));
 	app.use("/:account", require("../routes/permissionTemplate"));
 	app.use("/:account", require("../routes/accountPermission"));

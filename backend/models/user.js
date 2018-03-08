@@ -1050,7 +1050,7 @@ schema.methods.createSubscription = function(plan, billingUser, active, expiredA
 	"use strict";
 
 	this.customData.billing.billingUser = billingUser;
-	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);
+	let subscription = this.customData.billing.addSubscription(plan, active, expiredAt);
 	//this.markModified('customData.billing');
 	return this.save().then(() => {
 		return Promise.resolve(subscription);
@@ -1062,6 +1062,19 @@ schema.methods.isMemberOfTeamspace = function(teamspace) {
 	"use strict";
 	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
 
+}
+
+schema.statics.getQuotaInfo = function(teamspace) {
+	return this.findByUserName(teamspace).then( (user) => {
+		if(!user) {
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		const quota = user.customData.billing.getSubscriptionLimits();
+		return Promise.resolve(quota);
+	});
+	
+	
 }
 
 schema.statics.getAllUsersInTeamspace = function(teamspace) {

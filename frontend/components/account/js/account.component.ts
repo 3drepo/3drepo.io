@@ -129,10 +129,6 @@ class AccountController implements ng.IController {
 				this.initPlans();
 			}
 
-			if (directive === "licenses") {
-				this.initSubscriptions();
-			}
-
 		}
 	}
 

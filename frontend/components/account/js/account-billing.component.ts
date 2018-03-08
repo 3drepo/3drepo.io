@@ -195,7 +195,7 @@ class AccountBillingController implements ng.IController {
 		this.APIService.post(this.account + "/subscriptions", data)
 			.then((response) => {
 				if (response.status === 200) {
-					if (!licenceCountChange) {
+					if (!licenceCountChanged) {
 						this.payPalInfo = "Billing information updated.";
 						this.$timeout(() => {
 							this.DialogService.closeDialog();
