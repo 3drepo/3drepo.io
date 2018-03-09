@@ -758,10 +758,6 @@ function _createAccounts(roles, userName)
 						_getModels(account.account, null, inheritedModelPermissions).then(data => {
 							account.models = data.models;
 							account.fedModels = data.fedModels;
-								// add space usage stat info into account object
-							if (isTeamspaceAdmin){
-								return _calSpace(user).then(quota => account.quota = quota);
-							}
 						}).then(() => _addProjects(account, userName))	
 					);
 				}
@@ -1073,8 +1069,7 @@ schema.statics.getQuotaInfo = function(teamspace) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		const quota = user.customData.billing.getSubscriptionLimits();
-		return Promise.resolve(quota);
+		return _calSpace(user);
 	});
 	
 	

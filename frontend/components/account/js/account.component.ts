@@ -33,9 +33,6 @@ class AccountController implements ng.IController {
 	private loadingAccount;
 	private username;
 	private account;
-	private billings;
-	private plans;
-	private subscriptions;
 	private query;
 	private itemToShow;
 	private firstName;
@@ -50,7 +47,6 @@ class AccountController implements ng.IController {
 	private accounts;
 	private billingAddress;
 	private hasAvatar;
-	private quota;
 	private showLiteModeButton;
 
 	constructor(
@@ -101,58 +97,9 @@ class AccountController implements ng.IController {
 
 		if (!this.accountInitialised) {
 			// TODO: This is also a mess
-			this.getUserInfo().then(() => {
-				this.AuthService.authDefer.promise.then(() => {
-					this.AccountService.accountDefer.promise.then(() => {
-						this.handleDirectiveInit(directive);
-					});
-				});
-			});
-
-		} else {
-			this.handleDirectiveInit(directive);
-		}
-
-	}
-
-	public handleDirectiveInit(directive) {
-		// If you go to a different URL teamspace you need to check
-		// that you are actually the user in question!
-
-		// TODO: This shouldn't be necessary
-
-		if (this.username === this.AuthService.getUsername()) {
-
-			if (directive === "billing") {
-				this.initSubscriptions();
-				this.initBillings();
-				this.initPlans();
-			}
+			this.getUserInfo();
 
 		}
-	}
-
-	public initBillings() {
-		return this.APIService.get(this.account + "/invoices")
-			.then((response) => {
-				this.billings = response.data;
-			});
-	}
-
-	public initPlans() {
-		return this.APIService.get("plans")
-			.then((response) => {
-				if (response.status === 200) {
-					this.plans = response.data;
-				}
-			});
-	}
-
-	public initSubscriptions() {
-		return this.APIService.get(this.account + "/subscriptions")
-			.then((response) => {
-				this.subscriptions = response.data;
-			});
 	}
 
 	public capitalizeFirstLetter(str: string) {
@@ -288,16 +235,6 @@ class AccountController implements ng.IController {
 							if (!this.billingAddress.hasOwnProperty("firstName")) {
 								this.billingAddress.firstName = this.firstName;
 								this.billingAddress.lastName = this.lastName;
-							}
-						}
-
-						// Get quota
-						if (angular.isDefined(this.accounts)) {
-							for (let i = 0; i < this.accounts.length; i++) {
-								if (this.accounts[i].account === this.account) {
-									this.quota = this.accounts[i].quota;
-									break;
-								}
 							}
 						}
 

@@ -366,8 +366,6 @@ export const AccountFederationsComponent: ng.IComponentOptions = {
 		originalFederationData: "=",
 		federationIndex: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
 		isDefaultFederation: "@",
 		getPotentialFederationModels: "=",
 		federationsSaving: "=",

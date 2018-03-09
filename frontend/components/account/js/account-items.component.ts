@@ -1224,8 +1224,6 @@ export const AccountItemsComponent: ng.IComponentOptions = {
 		account: "=",
 		accounts: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
 		isLiteMode: "<",
 	},
 	controller: AccountItemsController,

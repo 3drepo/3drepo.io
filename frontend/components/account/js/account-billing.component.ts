@@ -48,6 +48,7 @@ class AccountBillingController implements ng.IController {
 	private pricePerLicense;
 	private priceLicenses;
 	private planId;
+	private quota;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -60,6 +61,10 @@ class AccountBillingController implements ng.IController {
 	) {}
 
 	public $onInit() {
+		this.initSubscriptions();
+		this.initBillings();
+		this.initPlans();
+		this.initQuota();
 		this.showInfo = true;
 		this.saveDisabled = true;
 		this.countries = this.ClientConfigService.countries;
@@ -67,6 +72,36 @@ class AccountBillingController implements ng.IController {
 		this.showStates = false;
 		this.newBillingAddress = {};
 		this.watchers();
+	}
+
+	public initBillings() {
+		return this.APIService.get(this.account + "/invoices")
+			.then((response) => {
+				this.billings = response.data;
+			});
+	}
+
+	public initPlans() {
+		return this.APIService.get("plans")
+			.then((response) => {
+				if (response.status === 200) {
+					this.plans = response.data;
+				}
+			});
+	}
+
+	public initSubscriptions() {
+		return this.APIService.get(this.account + "/subscriptions")
+			.then((response) => {
+				this.subscriptions = response.data;
+			});
+	}
+
+	public initQuota() {
+		return this.APIService.get(this.account + "/quota")
+			.then((response) => {
+				this.quota = response.data;
+			});
 	}
 
 	public watchers() {
@@ -279,10 +314,6 @@ export const AccountBillingComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "=",
 		billingAddress: "=",
-		quota: "=",
-		billings: "=",
-		subscriptions: "=",
-		plans: "=",
 	},
 	controller: AccountBillingController,
 	controllerAs: "vm",
