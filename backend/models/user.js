@@ -1042,7 +1042,15 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 schema.methods.addTeamMember = function(user){
 	"use strict";
 
-	return Role.grantTeamSpaceRoleToUser(user, this.user);
+	return User.findByUserName(user).then(userEntry => {
+	
+		if(userEntry.isMemberOfTeamspace(this.user)) {
+			return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);	
+		}
+		
+		return Role.grantTeamSpaceRoleToUser(user, this.user);
+	});
+
 };
 
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
