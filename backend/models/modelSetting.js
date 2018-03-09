@@ -146,34 +146,31 @@ schema.methods.changePermissions = function(permissions){
 		let promises = [];
 
 		permissions.forEach(permission => {
-
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 
-			if(!dbUser.customData.billing.subscriptions.findByAssignedUser(permission.user)){
-				return promises.push(Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE));
-			}
+			return	User.findByUserName(permission.user).then( assignedUser => {
+				if(!assignedUser) {
+					return promises.push(Promise.reject(responseCodes.USER_NOT_FOUND));
+				}
 
-			let perm = this.permissions.find(perm => perm.user === permission.user);
+				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
+				if(!isMember) {
+					return promises.push(Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE));
+				}
+				let perm = this.permissions.find(perm => perm.user === permission.user);
 
-			if(perm) {
+				if(perm) {
+	
+					perm.permission = permission.permission;
 
-				perm.permission = permission.permission;
+				}
 
-			} else {
+			});
 
-				promises.push(
-					User.findByUserName(permission.user).then(user => {
-						if(!user){
-							return Promise.reject(responseCodes.USER_NOT_FOUND);
-						} else {
-							return;
-						}
-					})
-				);
-			}
 
+			
 		});
 
 		return Promise.all(promises);
