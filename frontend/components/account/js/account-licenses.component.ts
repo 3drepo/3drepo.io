@@ -30,7 +30,6 @@ class AccountLicensesController implements ng.IController {
 	private jobColors;
 	private licenses;
 	private numLicenses;
-	private toShow;
 	private jobs;
 	private addJobMessage;
 	private newJob;
@@ -136,8 +135,6 @@ class AccountLicensesController implements ng.IController {
 	}
 
 	public init() {
-		this.toShow = (this.numLicenses > 0 || this.numLicenses === "unlimited") ? "0+" : "0";
-
 		this.licenses.forEach((entry) => {
 			entry.showRemove = this.account !== entry.user;
 		});
