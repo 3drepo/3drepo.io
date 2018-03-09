@@ -113,6 +113,19 @@ class AccountLicensesController implements ng.IController {
 		this.watchers();
 	}
 
+	public numUnassignedToShow() {
+		return this.numLicenses === "unlimited" ? 2 : this.numAssignedLicenses();
+	}
+
+	public numAssignedLicenses() {
+		return  this.numLicenses - this.licenses.length;
+	}
+
+	public allLicensesAssigned() {
+		return this.numLicenses === "unlimited" ? false : this.numLicenses === this.licenses.length;
+
+	}
+
 	public watchers() {
 		/*
 		* Watch changes to the new license assignee name
@@ -123,7 +136,7 @@ class AccountLicensesController implements ng.IController {
 	}
 
 	public init() {
-		this.toShow = (this.numLicenses > 0) ? "0+" : "0";
+		this.toShow = (this.numLicenses > 0 || this.numLicenses === "unlimited") ? "0+" : "0";
 
 		this.licenses.forEach((entry) => {
 			entry.showRemove = this.account !== entry.user;

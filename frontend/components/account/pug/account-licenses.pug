@@ -39,17 +39,17 @@
 										type="text"
 										ng-model="vm.newLicenseAssignee"
 										tdr-focus="true"
-										ng-disabled="vm.numLicenses === vm.licenses.length"
+										ng-disabled="vm.allLicensesAssigned()"
 										ng-keypress="vm.assignLicense($event)")
 								div(flex="50", layout="column", layout-align="end start")
 									md-button.md-raised.md-accent.assignButton(
 										layout="column"
 										ng-click="vm.assignLicense()"
-										ng-disabled="vm.numLicenses === vm.licenses.length") Assign
+										ng-disabled="vm.allLicensesAssigned()") Assign
 									//div(layout="column")
 										p {{vm.addMessage}}
 
-							p#errorMessage(ng-if="vm.numLicenses === vm.licenses.length") All licences have been assigned
+							p#errorMessage(ng-if="vm.allLicensesAssigned()") All licences have been assigned
 
 
 							md-divider
@@ -58,7 +58,7 @@
 							md-content#accountLicensesList
 								section
 									md-subheader
-										div Licences ({{vm.licenses.length}} assigned, {{vm.numLicenses}} total)
+										div Licences ({{vm.licenses.length}} out of {{vm.numLicenses}} assigned)
 								
 								md-list-item(
 									ng-repeat="license in vm.licenses"
@@ -91,7 +91,7 @@
 
 								// Unassigned
 								md-list#accountLicensesUnassigned
-									md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
+									md-list-item(ng-repeat="i in [].constructor(vm.numUnassignedToShow()) track by $index")
 										div(layout="row", layout-align="start center", flex="50")
 											md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
 											.md-list-item-text
@@ -100,7 +100,7 @@
 											md-icon.angular-material-icons(layout-align="start start") remove_circle
 								
 
-								div(ng-if="vm.numLicenses === vm.licenses.length")
+								div(ng-if="vm.allLicensesAssigned()")
 									md-divider
 									p#accountLicensesBillingPage
 										| To add more licences please go to the
