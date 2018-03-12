@@ -298,7 +298,6 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 
 			});
 
-			//console.log('some refs', refs)
 			allRefs = allRefs.concat(refs);
 
 			return Promise.all(promises);
@@ -362,8 +361,6 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 			if(histories.length > 0){
 
 				let history = histories[0];
-				//console.log('next history found', history);
-
 				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
 				filter = {
 					"created" : { "$lt": history.timestamp.valueOf() },
@@ -1678,8 +1675,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 	
 						issues.forEach(issue => {
-							console.log(issue);
-
 							saveIssueProms.push(
 								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
 									// System notification of BCF import
@@ -1704,7 +1699,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
 										for (let simpleAttrIndex in simpleAttrs) {
 											const simpleAttr = simpleAttrs[simpleAttrIndex];
-											if (undefined === matchingIssue[simpleAttr] && undefined !== issue[simpleAttr]) {
+											if (undefined !== issue[simpleAttr] 
+											 && (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
+												matchingIssue.comments.push({
+												guid: utils.generateUUID(),
+													created: timeStamp,
+													action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
+													owner: requester.user + "(BCF Import)"
+												});
 												matchingIssue[simpleAttr] = issue[simpleAttr];
 											}
 										}
@@ -2133,7 +2135,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								if (vpComponents[i].ViewSetupHints) {
 									// TODO: Full ViewSetupHints support -
 									// SpaceVisible should correspond to !hideIfc
-									//console.log(vpComponents[i].ViewSetupHints);
 									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
 									systemLogger.logInfo("ViewSetupHints not fully supported for BCF import!");
 								}
