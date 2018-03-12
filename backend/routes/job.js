@@ -38,7 +38,7 @@
 			color: req.body.color
 		};
 
-		Job.addJob(req.params.account, job).then(() => {
+		Job.addJob(req.params.account, newJob).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, newJob);
 		}).catch(err => {
 

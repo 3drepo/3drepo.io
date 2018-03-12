@@ -29,21 +29,27 @@ const schema = mongoose.Schema({
 
 
 schema.statics.findByJob = function(teamspace, job) {
-	return this.findOne({account: "teamspace"}, {_id: job});
+	return this.findOne({account: teamspace}, {_id: job});
+	
 }
 
 schema.statics.addJob = function(teamspace, jobData) {
-	if(!job._id) {
+	if(!jobData._id) {
 		return Promise.reject(responseCodes.JOB_ID_INVALID);
 	}
 	
 	return this.findByJob(teamspace, jobData._id).then(jobFound => {
+		console.log("job Found: ", jobFound);
 		if(jobFound) {
 			return Promise.reject(responseCodes.DUP_JOB);
 		}
 		
 		const newJobEntry = this.model('Job').createInstance({account: teamspace});
-		newJobEntry.save();
+		newJobEntry._id = jobData._id;
+		if(jobData.color) {
+			newJobEntry.color = jobData.color;
+		}
+		return newJobEntry.save();
 
 
 	});
