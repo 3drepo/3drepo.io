@@ -171,6 +171,7 @@ class AccountLicensesController implements ng.IController {
 					throw(response);
 				} else {
 					this.jobs.push(job);
+					this.newJob = "";
 				}
 			})
 			.catch((error) => {
