@@ -200,7 +200,6 @@ class HomeController implements ng.IController {
 
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
-
 					this.loggedOutPages.forEach((page) => {
 						this.setPage(newState, page);
 					});
@@ -264,6 +263,11 @@ class HomeController implements ng.IController {
 						loggedIn: false,
 						account: null,
 					});
+
+					if (this.StateManager.query) {
+						this.$location.search('username', this.StateManager.query.username);
+						this.$location.search('token', this.StateManager.query.token);
+					}
 
 				}
 			} else {
