@@ -19,11 +19,14 @@ class AccountLicensesController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
+		"$location",
+
 		"APIService",
 		"StateManager",
 		"DialogService",
 	];
 
+	private showPage;
 	private account;
 	private promise;
 	private job;
@@ -49,6 +52,8 @@ class AccountLicensesController implements ng.IController {
 
 	constructor(
 		private $scope: any,
+		private $location: any,
+
 		private APIService: any,
 		private StateManager: any,
 		private DialogService: any,
@@ -323,7 +328,8 @@ class AccountLicensesController implements ng.IController {
 	 * Go back to the billing page
 	 */
 	public goToBillingPage() {
-		this.StateManager.setQuery({page: "billing"});
+		this.showPage({page: "billing", callingPage: "licences"});
+		this.$location.search({}).search("page", "billing");
 	}
 
 }
