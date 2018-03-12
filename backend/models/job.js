@@ -19,84 +19,77 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const ModelFactory = require('./factory/modelFactory');
+const responseCodes = require('../response_codes.js');
 const schema = mongoose.Schema({
 	_id: String,
-	color: String
+	color: String,
+	users: [String]
 });
-const responseCodes = require('../response_codes.js');
 
-const methods = {
 
-	init: function(user, jobs) {
+schema.statics.findByJob = function(teamspace, job) {
+	return this.findOne({account: "teamspace"}, {_id: job});
+}
 
-		this.user = user;
-		this.jobs = jobs;
-		return this;
-	},
-
-	findById: function(id){
-		return this.jobs.id(id);
-	},
-
-	add: function(job) {
-		if(!job._id){
-			return Promise.reject(responseCodes.JOB_ID_VALID);
-		} else if (this.findById(job._id)){
-			return Promise.reject(responseCodes.DUP_JOB);
-		} else {
-			this.jobs.push(job);
-			return this.user.save();
-		}
-
-	},
-
-	update: function(job) {
-	
-		const jobToUpdate = this.findById(job._id);
-
-		if(!job._id){
-			return Promise.reject(responseCodes.JOB_ID_VALID);
-		}
-		else if (!jobToUpdate) {
-			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		} else {
-			jobToUpdate.color = job.color;
-			return this.user.save();
-		}
-
-	},
-
-	remove: function(name){
-
-		let job = this.findById(name);
-		let isInUse = false;	
-		this.user.customData.billing.subscriptions.findByJob(name).forEach( sub => {
-			//We can ignore empty subscriptions. So only return error code if 
-			//not empty.
-			if(sub.assignedUser) {
-				isInUse = true;
-			}
-		});
-		
-		if (!job) {
-			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		} else if(isInUse) {
-			return Promise.reject(responseCodes.JOB_ASSIGNED);
-		}
-		else {
-			job.remove();
-			return this.user.save();
-		}
-		
-	},
-
-	get: function(){
-		return this.jobs;
+schema.statics.addJob = function(teamspace, jobData) {
+	if(!job._id) {
+		return Promise.reject(responseCodes.JOB_ID_INVALID);
 	}
-};
+	
+	return this.findByJob(teamspace, jobData._id).then(jobFound => {
+		if(jobFound) {
+			return Promise.reject(responseCodes.DUP_JOB);
+		}
+		
+		const newJobEntry = this.model('Job').createInstance({account: teamspace});
+		newJobEntry.save();
 
-// Mongoose doesn't support subschema static method
-module.exports = {
-	schema, methods
-};
+
+	});
+}
+
+schema.methods.updateJob = function(updatedData) {
+	if(updateData.color)
+		this.color = updatedData.color;
+
+	return this.save();
+}
+
+schema.statics.removeJob = function(teamspace, jobName) {
+
+	return this.findByJob(teamspace, jobName).then(jobFound => {
+		if(!jobFound) {
+			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+		}
+	
+		if(jobFound.users.length > 0) {
+			return Promise.reject(responseCodes.JOB_ASSIGNED);	
+		}
+
+		return Job.remove({account: teamspace}, {_id: jobName});
+
+	});
+
+
+}
+
+schema.statics.getAllJobs = function(teamspace) {
+	return this.find({account: teamspace}).then(jobs => {
+		const jobList = [];
+		jobs.forEach(job => {
+			jobList.push({_id: job._id, color: job.color});
+		});
+		return jobList;
+	});
+
+}
+
+var Job = ModelFactory.createClass(
+	'Job',
+	schema,
+	() => {
+		return "jobs";
+	});
+module.exports = Job;
 

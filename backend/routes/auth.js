@@ -372,7 +372,6 @@ function listUserInfo(req, res, next){
 			email: customData.email,
 			billingInfo: customData.billing.billingInfo,
 			hasAvatar: customData.avatar ? true : false,
-			jobs: customData.jobs
 		});
 
 	}).catch(err => {

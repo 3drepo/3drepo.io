@@ -32,7 +32,6 @@ let config = require("../config");
 let ModelSetting = require("./modelSetting");
 let C = require("../constants");
 let userBilling = require("./userBilling");
-let job = require("./job");
 let permissionTemplate = require("./permissionTemplate");
 let accountPermission = require("./accountPermission");
 let Project = require("./project");
@@ -68,12 +67,6 @@ let schema = mongoose.Schema({
 		},
 		avatar: Object,
 		lastLoginAt: Date,
-		jobs: {
-			type: [job.schema],
-			get: function(jobs){
-				return job.methods.init(this, jobs);
-			}
-		},
 		permissionTemplates: {
 			type: [permissionTemplate.schema],
 			get: function(permissionTemplates){
@@ -318,8 +311,6 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 			}
 		];	
 
-		cleanedCustomData.jobs = C.DEFAULT_JOBS;
-	
 		if(customData){
 			cleanedCustomData.emailVerifyToken = {
 				token: crypto.randomBytes(64).toString("hex"),
