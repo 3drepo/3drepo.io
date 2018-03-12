@@ -1183,7 +1183,6 @@
 		*/
 		function importBcf(account, model, revision, file){
 
-			var deferred = $q.defer();
 
 			var bcfUrl = account + "/" + model + "/issues.bcfzip";
 			if(revision){
@@ -1193,17 +1192,14 @@
 			var formData = new FormData();
 			formData.append("file", file);
 
-			APIService.post(bcfUrl, formData, {"Content-Type": undefined}).then(function(res){
+			return APIService.post(bcfUrl, formData, {"Content-Type": undefined}).then(function(res){
 				
-				if(res.status === 200){
-					deferred.resolve();
-				} else {
-					deferred.reject(res.data);
+				if(res.status !== 200){
+					return Promise.reject(res.data);
 				}
 
 			});
 
-			return deferred.promise;
 		}
 
 		/**
