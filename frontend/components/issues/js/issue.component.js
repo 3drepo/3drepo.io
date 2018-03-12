@@ -319,7 +319,7 @@
 			if (vm.data && vm.statuses && vm.statuses.length) {
 				vm.issueFailedToLoad = false;
 				vm.issueData = null;
-
+				console.log("updated issue");
 				IssuesService.getIssue(vm.data.account, vm.data.model, vm.data._id)
 					.then(function(fetchedIssue){
 						vm.setEditIssueData(fetchedIssue);
@@ -538,7 +538,7 @@
 		vm.statusChange = function () {
 			
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
-				
+				//console.log("status changed", vm.data, vm.issueData);
 				// If it's unassigned we can update so that there are no assigned roles
 				if (vm.issueData.assigned_roles.indexOf("Unassigned") !== -1) {
 					vm.issueData.assigned_roles = [];
@@ -561,6 +561,11 @@
 
 							// Add info for new comment
 							vm.issueData.comments.forEach(function(comment){
+
+								if (comment && comment.viewpoint && comment.viewpoint.screenshot) {
+									comment.viewpoint.screenshotPath = APIService.getAPIUrl(comment.viewpoint.screenshot);
+								}
+
 								if (comment && comment.action && comment.action.property) {
 									IssuesService.convertActionCommentToText(comment, vm.topic_types);
 								}
