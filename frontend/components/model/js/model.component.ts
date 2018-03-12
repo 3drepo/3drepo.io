@@ -206,10 +206,10 @@ class ModelController implements ng.IController {
 
 				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
 					.then((tree) => {
-
 						this.EventService.send(this.EventService.EVENT.TREE_READY, tree);
-						// FIXME: I don't know if treeMap is still used. Doc component now uses Tree Service directly.
-						this.treeMap = this.TreeService.getMap(tree.nodes);
+					})
+					.catch((error) => {
+						console.error("Error initialising tree: ", error);
 					});
 			})
 			.catch((error) => {

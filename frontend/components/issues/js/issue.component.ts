@@ -291,6 +291,24 @@ class IssueController implements ng.IController {
 		status.charAt(0).toUpperCase() + status.slice(1);
 	}
 
+	public handleBCFPriority(BCFPriority: string) {
+
+		const exists = this.priorities.find((priority) => {
+			return BCFPriority === priority.value;
+		});
+
+		if (!exists) {
+			const newPriority = {
+				value: BCFPriority,
+				label: BCFPriority,
+			};
+			this.priorities.push(newPriority);
+			this.$timeout(() => {});
+
+		}
+
+	}
+
 	public handleBCFStatus(BCFStatus: string) {
 
 		const exists = this.statuses.find((status) => {
@@ -304,6 +322,42 @@ class IssueController implements ng.IController {
 			};
 			// console.log(newStatus);
 			this.statuses.push(newStatus);
+			this.$timeout(() => {});
+
+		}
+
+	}
+
+	public handleBCFAssign(BCFAssign: string) {
+
+		const exists = this.modelJobs.find((assign) => {
+			return BCFAssign === assign.value;
+		});
+
+		if (!exists) {
+			const newAssign = {
+				value: BCFAssign,
+				label: BCFAssign,
+			};
+			this.modelJobs.push(newAssign);
+			this.$timeout(() => {});
+
+		}
+
+	}
+
+	public handleBCFType(BCFType: string) {
+
+		const exists = this.topic_types.find((type) => {
+			return BCFType === type.value;
+		});
+
+		if (!exists) {
+			const newType = {
+				value: BCFType,
+				label: BCFType,
+			};
+			this.topic_types.push(newType);
 			this.$timeout(() => {});
 
 		}

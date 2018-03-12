@@ -202,9 +202,9 @@ function listIssues(req, res, next) {
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
 	}
 
 	findIssue.then(issues => {
@@ -305,9 +305,9 @@ function renderIssuesHTML(req, res, next){
 	}
 
 	if (req.params.rid) {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {

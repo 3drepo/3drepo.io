@@ -92,7 +92,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 		.then(group => {
 			let ifcGuidPromises = [];
 
-			for (let i = 0; i < group.objects.length; i++) {
+			for (let i = 0; group && i < group.objects.length; i++) {
 				const obj = group.objects[i];
 				if (obj.ifc_guid) {
 					groupObjectsMap[obj.ifc_guid] = obj;
@@ -116,7 +116,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 			}
 
 			return Promise.all(ifcGuidPromises).then(() => {
-				if (groupObjectsMap) {
+				if (groupObjectsMap && groupObjectsMap.length > 0) {
 					group.objects = [];
 					for (let id in groupObjectsMap) {
 						group.objects.push(groupObjectsMap[id]);
@@ -177,6 +177,18 @@ groupSchema.statics.listGroups = function(dbCol){
 	return this.find(dbCol, {});
 };
 
+groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
+	'use strict';
+
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) }).then(group => {
+		const issueIdData = {
+			issue_id: issueId
+		};
+
+		return group.updateAttrs(issueIdData);
+	});
+};
+
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
@@ -209,6 +221,7 @@ groupSchema.methods.updateAttrs = function(data){
 		this.name = data.name || this.name;
 		this.objects = data.objects || this.objects;
 		this.color = data.color || this.color;
+		this.issue_id = data.issue_id || this.issue_id;
 
 		this.markModified('objects');
 		return this.save();
@@ -225,7 +238,6 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.updateAttrs(data);
-	
 };
 
 groupSchema.methods.clean = function(){

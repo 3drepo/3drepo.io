@@ -204,8 +204,9 @@ describe("Issues", function () {
 
 			agent.post(`/${username}/${model}/issues.json`)
 			.send(issue)
-			.expect(400 , function(err, res){
-				expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_PRIORITY.value);
+			.expect(200 , function(err, res){
+				// Invalid priority is now allowed to accommodate for BCF import
+				// expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_PRIORITY.value);
 				done(err);
 			});
 		});
@@ -289,7 +290,7 @@ describe("Issues", function () {
 		});
 
 
-		it("change status should fail if value is invalid", function(done){
+		it("change status should not fail if value is invalid", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
@@ -347,7 +348,7 @@ describe("Issues", function () {
 			], done);
 		});
 
-		it("change priority should fail if value is invalid", function(done){
+		it("change priority should not fail if value is invalid", function(done){
 
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
@@ -365,8 +366,9 @@ describe("Issues", function () {
 				function(done){
 					agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send(priority)
-					.expect(400, function(err, res){
-						expect(res.body.value === responseCodes.ISSUE_INVALID_PRIORITY.value);
+					.expect(200, function(err, res){
+						// Invalid priority is now allowed to accommodate for BCF import
+						// expect(res.body.value === responseCodes.ISSUE_INVALID_PRIORITY.value);
 						done(err);
 					});
 				}
