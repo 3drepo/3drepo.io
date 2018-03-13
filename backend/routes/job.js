@@ -28,8 +28,32 @@
 	router.post("/jobs", middlewares.job.canCreate, createJob);
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
 	router.get("/jobs", middlewares.job.canView, listJobs);
+	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
+	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
+	function addUserToJob(req, res, next){
+
+		Job.addUserToJob(req.params.account, req.params.user, req.params.jobId).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
+	}
+
+	
+	function removeUserFromJobs(req, res, next){
+
+		Job.removeUserFromJobs(req.params.account, req.params.user).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
+	}
 
 	function createJob(req, res, next){
 
@@ -76,7 +100,6 @@
 
 	function listJobs(req, res, next){
 		Job.getAllJobs(req.params.account).then(jobs => {
-			console.log(jobs);
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
 		}).catch(err => {
 

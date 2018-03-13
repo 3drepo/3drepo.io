@@ -158,17 +158,35 @@ class AccountLicensesController implements ng.IController {
 
 	public assignJob(index) {
 		const licence = this.licenses[index];
-		const url = this.account + "/subscriptions/" + licence.id + "/assign";
+		if (licence.job) {
+			const url = this.account + "/jobs/" + licence.job + "/" + licence.user;
+			this.APIService.post(url)
+				.then((response) => {
+					if (response.status !== 200) {
+						throw(response);
+					}
+				})
+				.catch((error) => {
+					this.handleError("assign", "job", error);
+				});
+		} else {
+			this.unassignUser(index);
+		}
+	}
 
-		this.APIService.put(url, {job: licence.job})
+	public unassignUser(index) {
+		const licence = this.licenses[index];
+		const url = this.account + "/jobs/unassign/" + licence.user;
+		this.APIService.delete(url)
 			.then((response) => {
 				if (response.status !== 200) {
 					throw(response);
 				}
 			})
 			.catch((error) => {
-				this.handleError("assign", "job", error);
+				this.handleError("unassign", "job", error);
 			});
+
 	}
 
 	public addJob() {

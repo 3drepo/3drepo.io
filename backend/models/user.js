@@ -23,6 +23,7 @@ let DB = require("../db/db");
 let crypto = require("crypto");
 let utils = require("../utils");
 const Role = require("./role");
+const Job = require("./job");
 
 let systemLogger = require("../logger.js").systemLogger;
 
@@ -637,7 +638,6 @@ function _calSpace(user){
 	"use strict";
 
 	let quota = user.customData.billing.getSubscriptionLimits();
-
 	return User.historyChunksStats(user.user).then(stats => {
 
 		if(stats && quota.spaceLimit > 0){
@@ -650,7 +650,6 @@ function _calSpace(user){
 		} else if(quota) {
 			quota.spaceUsed = 0;
 		}
-
 		return quota;
 	});
 
@@ -685,22 +684,6 @@ function _sortAccountsAndModels(accounts){
 		}
 	});
 }
-
-// function _findModel(id, accounts){
-
-// 	//flatten all the model ids in accounts object
-// 	const ids = accounts.reduce(
-// 		(arr, account) => arr.concat(
-// 			account.models.map(model => model.model), 
-// 			account.fedModels.map(model => model.model), 
-// 			account.projects.reduce((arr, project) => arr.concat(project.models.map(model => model.model)), [])
-// 		), 
-// 		[]
-// 	);
-
-// 	console.log('findModel', ids, id);
-// 	return ids.indexOf(id) !== -1;
-// }
 
 function _findModel(id, account){
 	return account.models.find(m => m.model === id) ||
@@ -1080,19 +1063,24 @@ schema.statics.getMembersAndJobs = function(teamspace) {
 	let promises = [];
 
 	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
-		console.log(members);
 					memberArr = members;
 				});
 
-//	const getJobInfoProm = TODO: job refactoring then retreive all job info from this teamspace
+	const getJobInfoProm = Job.usersWithJob(teamspace).then( _memToJob => {
+		memToJob = _memToJob;
+	});; 
 	promises.push(getTSMemProm);
-//	promises.push(getJobInfoProm);
+	promises.push(getJobInfoProm);
 		
 	return Promise.all(promises).then( () => {
 		let resultArr = [];
 		memberArr.forEach(mem => {
-			//TODO: Get job info, put it into a json with the username
-			resultArr.push({user: mem});
+			let entry = {user: mem};
+			if(memToJob[mem]) {
+				entry.job = memToJob[mem];			
+			}
+
+			resultArr.push(entry);
 		})
 		return resultArr;
 	});
@@ -1102,7 +1090,6 @@ schema.statics.getAllUsersInTeamspace = function(teamspace) {
 	"use strict";
 
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	console.log(query);
 	return this.find({account: "admin"}, query , {user : 1}).then( users => {
 		let res = [];
 		users.forEach(user => {
@@ -1110,6 +1097,18 @@ schema.statics.getAllUsersInTeamspace = function(teamspace) {
 		});
 
 		return Promise.resolve(res);
+	});
+}
+
+schema.statics.teamspaceMemberCheck = function(teamspace, user) {
+	return User.findByUserName(user).then( (userEntry) => {
+		if(!userEntry) {
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		if(!userEntry.isMemberOfTeamspace(teamspace)) {
+			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+		}
 	});
 }
 

@@ -28,9 +28,74 @@ const schema = mongoose.Schema({
 });
 
 
+schema.statics.usersWithJob = function(teamspace) {
+	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
+		let userToJob  = {};
+		
+		jobs.forEach( job => {
+			job.users.forEach( user => {
+				userToJob[user] = job._id;
+			});
+		});
+
+		return userToJob;
+	
+	});
+	
+}
+
+schema.statics.removeUserFromAnyJob = function(teamspace, user) {
+	return Job.findByUser(teamspace, user).then( jobs => {
+		const removalPromises = [];
+		if(jobs) {
+			jobs.forEach( job => {
+				removalPromises.push(job.removeUserFromJob(user));
+			});
+		}
+		return Promise.all(removalPromises);
+	});
+
+}
+
+schema.methods.removeUserFromJob = function(user) {
+	this.users.splice(this.users.indexOf(user), 1);
+	return this.save();
+}
+
+
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
 	
+}
+
+schema.statics.findByUser = function(teamspace, user) {
+	return this.find({account: teamspace}, {users: user});
+}
+
+schema.statics.removeUserFromJobs = function(teamspace, user) {
+	const User = require('./user');
+	return User.teamspaceMemberCheck(teamspace, user).then( () => {
+		return Job.removeUserFromAnyJob(teamspace, user);		
+	});
+
+}
+
+schema.statics.addUserToJob = function(teamspace, user, jobName) {
+	//Check if user is member of teamspace
+	const User = require('./user');
+	return User.teamspaceMemberCheck(teamspace, user).then( () => {
+		return Job.findByJob(teamspace, jobName).then( (job) => {
+			if(!job) {
+				return Promise.reject(responseCodse.JOB_NOT_FOUND);
+			}
+
+			return Job.removeUserFromAnyJob(teamspace, user).then(() => {
+				job.users.push(user);
+				return job.save();
+			});
+
+		});
+	});
 }
 
 schema.statics.addJob = function(teamspace, jobData) {
@@ -39,7 +104,6 @@ schema.statics.addJob = function(teamspace, jobData) {
 	}
 	
 	return this.findByJob(teamspace, jobData._id).then(jobFound => {
-		console.log("job Found: ", jobFound);
 		if(jobFound) {
 			return Promise.reject(responseCodes.DUP_JOB);
 		}
