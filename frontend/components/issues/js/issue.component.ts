@@ -595,6 +595,9 @@ class IssueController implements ng.IController {
 
 						// Add info for new comment
 						this.issueData.comments.forEach((comment) => {
+							if (comment && comment.viewpoint && comment.viewpoint.screenshot) {
+								comment.viewpoint.screenshotPath = this.APIService.getAPIUrl(comment.viewpoint.screenshot);
+							}
 							if (comment && comment.action && comment.action.property) {
 								this.IssuesService.convertActionCommentToText(comment, this.topic_types);
 							}

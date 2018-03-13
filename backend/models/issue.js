@@ -298,7 +298,6 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 
 			});
 
-			//console.log('some refs', refs)
 			allRefs = allRefs.concat(refs);
 
 			return Promise.all(promises);
@@ -362,8 +361,6 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 			if(histories.length > 0){
 
 				let history = histories[0];
-				//console.log('next history found', history);
-
 				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
 				filter = {
 					"created" : { "$lt": history.timestamp.valueOf() },
@@ -1678,7 +1675,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 	
 						issues.forEach(issue => {
-
 							saveIssueProms.push(
 								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
 									// System notification of BCF import
@@ -1703,7 +1699,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
 										for (let simpleAttrIndex in simpleAttrs) {
 											const simpleAttr = simpleAttrs[simpleAttrIndex];
-											if (undefined === matchingIssue[simpleAttr] && undefined !== issue[simpleAttr]) {
+											if (undefined !== issue[simpleAttr] 
+											 && (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
+												matchingIssue.comments.push({
+												guid: utils.generateUUID(),
+													created: timeStamp,
+													action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
+													owner: requester.user + "(BCF Import)"
+												});
 												matchingIssue[simpleAttr] = issue[simpleAttr];
 											}
 										}
@@ -1998,6 +2001,40 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										);
 									}
 								}
+								else if (vpComponents[i].Coloring) {
+									//FIXME: this is essentially copy of selection with slight modification. Should merge common code.
+									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
+										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
+											const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
+											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
+												let objectModel = model;
+
+												if (settings.federate) {
+													objectModel = ifcToModelMap[vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
+												}
+												highlightedObjects.push({
+													account: account,
+													model: objectModel,
+													ifc_guid: vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
+												});
+											}
+										}
+									}
+
+									if (highlightedObjects.length > 0) {
+										let highlightedObjectsData = {
+											name: issue.name,
+											color: [255, 0, 0],
+											objects: highlightedObjects
+										};
+
+										groupPromises.push(
+											Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
+												vp.highlighted_group_id = utils.uuidToString(group._id);
+											})
+										);
+									}
+								}
 
 								if (vpComponents[i].Visibility) {
 									let hiddenObjects = [];
@@ -2098,7 +2135,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								if (vpComponents[i].ViewSetupHints) {
 									// TODO: Full ViewSetupHints support -
 									// SpaceVisible should correspond to !hideIfc
-									//console.log(vpComponents[i].ViewSetupHints);
 									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
 									systemLogger.logInfo("ViewSetupHints not fully supported for BCF import!");
 								}
