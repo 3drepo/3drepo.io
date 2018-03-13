@@ -987,24 +987,20 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 
 		} else {
 
-			//remove all permissions assigned
-			let removeTeamspacePermission = Promise.resolve();
+			const promises = [];
 
 			if(teamspacePerm){
-				removeTeamspacePermission = this.customData.permissions.remove(username);
+				promises.push(this.customData.permissions.remove(username));
 			}
+
+			promises.push(foundModels.map(model => 
+				model.changePermissions(model.permissions.filter(p => p.user !== username))));
+
+			promises.push(foundProjects.map(project => 
+				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));
 			
-			return Promise.all(
-				[].concat(
-					foundModels.map(model => 
-						model.changePermissions(model.permissions.filter(p => p.user !== username))
-					),
-					foundProjects.map(project => 
-						project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })
-					),
-					removeTeamspacePermission
-				)
-			);
+			promises.push(Job.removeUserFromAnyJob(this.user, username));
+			return Promise.all(promises);
 		}
 
 	}).then(() => {
