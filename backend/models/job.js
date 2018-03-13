@@ -21,12 +21,23 @@
 const mongoose = require("mongoose");
 const ModelFactory = require('./factory/modelFactory');
 const responseCodes = require('../response_codes.js');
+const C = require('../constants.js');
 const schema = mongoose.Schema({
 	_id: String,
 	color: String,
 	users: [String]
 });
 
+
+schema.statics.addDefaultJobs = function(teamspace) {
+	const promises = [];
+	C.DEFAULT_JOBS.forEach(job => {
+		promises.push(this.addJob(teamspace, job));
+	});
+
+	return Promise.all(promises);
+
+}
 
 schema.statics.usersWithJob = function(teamspace) {
 	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
@@ -102,7 +113,6 @@ schema.statics.addJob = function(teamspace, jobData) {
 	if(!jobData._id) {
 		return Promise.reject(responseCodes.JOB_ID_INVALID);
 	}
-	
 	return this.findByJob(teamspace, jobData._id).then(jobFound => {
 		if(jobFound) {
 			return Promise.reject(responseCodes.DUP_JOB);

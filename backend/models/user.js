@@ -396,6 +396,7 @@ schema.statics.verify = function(username, token, options){
 
 	}).then(user => {
 
+
 		if(!skipImportToyModel){
 
 			//import toy model
@@ -412,6 +413,8 @@ schema.statics.verify = function(username, token, options){
 		).catch(err => {
 			systemLogger.logError("Failed to create role for ", username);
 		});
+
+		Job.addDefaultJobs(username);
 
 	});
 };
