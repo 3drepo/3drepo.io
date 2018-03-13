@@ -47,7 +47,6 @@ class ClipController implements ng.IController {
 	public disableWatchSlider;
 	public displayedAxis;
 	public disableWatchAxis;
-	public displayedDistance;
 	public normal;
 
 	public onContentHeightRequest;
@@ -97,7 +96,11 @@ class ClipController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.displayDistance", () => {
-			this.updateDisplaySlider(false, this.visible);
+			if (!this.disableWatchDistance) {
+				this.updateDisplaySlider(false, this.visible);
+			}
+
+			this.disableWatchDistance = false;
 		});
 
 		this.$scope.$watch("vm.units", (newUnits, oldUnits) => {
@@ -137,6 +140,9 @@ class ClipController implements ng.IController {
 				this.updateDisplayedDistance(false, this.visible);
 			}
 
+			if (this.displayedAxis !== "") {
+				this.normal = null;
+			}
 			this.disableWatchAxis = false;
 		});
 
@@ -181,7 +187,6 @@ class ClipController implements ng.IController {
 				break;
 
 			case this.EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST:
-
 				this.setDisplayValues(
 					this.determineAxis(event.value.normal),
 					event.value.distance,
@@ -189,8 +194,6 @@ class ClipController implements ng.IController {
 					event.value.clipDirection === 1,
 					undefined,
 				);
-
-				this.updateDisplayedDistance(true, this.visible);
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_SUBMODEL_TRANS_INFO:
@@ -202,7 +205,9 @@ class ClipController implements ng.IController {
 
 			case this.EventService.EVENT.VIEWER.BBOX_READY:
 				this.bbox = event.value.bbox;
-				this.setDisplayValues("X", this.bbox.max[0], this.visible, false, this.direction);
+				if (!this.normal) {
+					this.setDisplayValues("X", this.bbox.max[0], this.visible, false, this.direction);
+				}
 				this.updateDisplayedDistance(true, this.visible);
 				break;
 
@@ -307,7 +312,6 @@ class ClipController implements ng.IController {
 			}],
 			fromClipPanel: true,
 		};
-
 		this.EventService.send(
 			this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES,
 			event,
@@ -319,7 +323,7 @@ class ClipController implements ng.IController {
 	 * Determine axis based on normal provided
 	 */
 	public determineAxis(normal) {
-		let res = "";
+		let res = null;
 		if (normal.length === 3) {
 			if (normal[1] === 0  && normal[2] === 0) {
 				res = "X";
@@ -328,6 +332,9 @@ class ClipController implements ng.IController {
 			} else if (normal[0] === 0 && normal[1] === 0) {
 				res = "Y";
 			}
+		}
+		if (!res) {
+			this.normal = normal;
 		}
 
 		return res;
@@ -349,14 +356,19 @@ class ClipController implements ng.IController {
 
 		// We only want to disable watch if the value is going to change.
 		// Otherwise we might be ignoring the next update.
-		this.disableWatchAxis = this.displayedAxis !== axis;
-		this.disableWatchSlider = this.disableWatchDistance = this.displayedDistance !== newDistance;
+		this.disableWatchAxis =  this.displayedAxis !== axis;
+		this.disableWatchDistance = this.displayDistance !== newDistance;
+		this.disableWatchSlider = this.disableWatchDistance && axis;
 
 		this.displayDistance = newDistance;
 		this.direction = direction;
-		this.displayedAxis = axis;
+		if (axis) {
+			this.displayedAxis = axis;
+		} else {
+			this.displayedAxis = "";
+		}
 
-		if (slider != null) {
+		if (slider) {
 			this.sliderPosition = slider;
 			if (moveClip) {
 				this.updateClippingPlane();
@@ -423,7 +435,9 @@ class ClipController implements ng.IController {
 	 * Update displayed Distance based on slider position and axis
 	 */
 	public updateDisplayedDistance(updateSlider, moveClip) {
-
+		if (this.normal) {
+			return;
+		}
 		const minMax = this.getMinMax();
 		const max = minMax.max;
 		const min = minMax.min;
@@ -466,6 +480,9 @@ class ClipController implements ng.IController {
 	 * Update display slider based on current internal distance
 	 */
 	public updateDisplaySlider(updateDistance, moveClip) {
+		if (this.normal) {
+			return;
+		}
 		const minMax = this.getMinMax();
 		const max = minMax.max;
 		const min = minMax.min;
@@ -486,7 +503,6 @@ class ClipController implements ng.IController {
 			value = 100;
 		}
 		this.sliderPosition = value;
-
 		if (moveClip) {
 			this.updateClippingPlane();
 		}

@@ -1879,7 +1879,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
 						extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
 						extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
-						extras.ClippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
+						//extras.ClippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
 						extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
 						extras.Index = viewpoints[guid].Viewpoint;
 						extras.Snapshot = viewpoints[guid].Snapshot;
@@ -1909,6 +1909,38 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						} else if (unit === "ft") {
 							scale = 3.28084;
 						}	
+
+						if(_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
+							const clippingPlanes = 	_.get(vpXML, "VisualizationInfo.ClippingPlanes");
+							const planes = [];
+							if(clippingPlanes[0].ClippingPlane) {
+								for(let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
+									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
+									let clip = {};
+									clip.normal = [
+										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
+										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
+										-parseFloat(_.get(vpXML, fieldName + ".Direction[0].Y[0]._"))
+									];
+									const position = [
+										parseFloat(_.get(vpXML, fieldName + ".Location[0].X[0]._")) * scale,
+										parseFloat(_.get(vpXML, fieldName + ".Location[0].Z[0]._")) * scale,
+										-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
+									];
+
+									const distanceSqrd = position[0] * position[0] 
+										+ position[1] * position[1] 
+										+ position[2] * position[2];
+
+									clip.distance = Math.sqrt(distanceSqrd);
+									clip.clipDirection = 1; 
+									planes.push(clip);
+								}
+							}
+
+							vp.clippingPlanes = planes;
+
+						}
 
 						if(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")){
 							vp.up = [
