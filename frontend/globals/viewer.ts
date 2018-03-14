@@ -212,7 +212,6 @@ export class Viewer {
 
 		this.unityLoaderScript = document.createElement("script");
 
-
 	}
 
 	public setUnits(units) {
@@ -591,7 +590,7 @@ export class Viewer {
 		* NOTE= Clipping planes are now all managed by unity use broadcast events to retrieve its info
 	*/
 
-	public tbroadcastClippingPlane(clip) {
+	public clipBroadcast(clip) {
 		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 

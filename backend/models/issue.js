@@ -1819,6 +1819,9 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 						issue.status =_.get(xml, "Markup.Topic[0].@.TopicStatus");
+						if( !issue.status || issue.status === "") {
+							issue.status = "open";
+						}
 						issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
 						issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
 						issue.priority =  _.get(xml, "Markup.Topic[0].Priority[0]._");
@@ -1915,7 +1918,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							if(clippingPlanes[0].ClippingPlane) {
 								for(let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
 									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
-									let clip = {};
+									let clip = {};									
 									clip.normal = [
 										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
 										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
@@ -1927,11 +1930,10 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
 									];
 
-									const distanceSqrd = position[0] * position[0] 
-										+ position[1] * position[1] 
-										+ position[2] * position[2];
+									clip.distance = - (position[0] * clip.normal[0] 
+										+ position[1] * clip.normal[1] 
+										+ position[2] * clip.normal[2]);
 
-									clip.distance = Math.sqrt(distanceSqrd);
 									clip.clipDirection = 1; 
 									planes.push(clip);
 								}

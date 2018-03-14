@@ -1216,11 +1216,11 @@ export class IssuesService {
 
 		if (0 === text.length) {
 			if (!comment.action.from) {
-				comment.action.from = "";
+				comment.action.from = "(empty)";
 			}
 
 			if (!comment.action.to) {
-				comment.action.to = "";
+				comment.action.to = "(empty)";
 			}
 
 			text = comment.action.propertyText + " updated from " +
