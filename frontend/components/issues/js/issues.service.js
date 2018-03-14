@@ -558,9 +558,9 @@
 							issue.viewpoint.hasOwnProperty("group_id"))) ||
 					issue.hasOwnProperty("group_id")) {
 
+				handleShowIssue(issue);
 				showMultiIds(issue).then( function() {
 					TreeService.showProgress = false;
-					handleShowIssue(issue);
 				});
 				
 		
