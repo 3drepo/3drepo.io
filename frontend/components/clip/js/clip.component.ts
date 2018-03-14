@@ -51,7 +51,6 @@ class ClipController implements ng.IController {
 	public disableWatchSlider;
 	public displayedAxis;
 	public disableWatchAxis;
-	public displayedDistance;
 	public normal;
 
 	public onContentHeightRequest;
@@ -104,7 +103,7 @@ class ClipController implements ng.IController {
 		);
 
 		this.$scope.$watch("vm.displayDistance", (value) => {
-			this.ClipService.updateDisplaySlider(false, this.visible);
+			this.ClipService.setDisplayedDistance(value);
 		});
 
 		this.$scope.$watch("vm.units", (newUnits, oldUnits) => {

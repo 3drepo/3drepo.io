@@ -39,35 +39,37 @@ div(ng-if="vm.bbox && vm.units", layout="column", layout-align="start center", f
 					min="{{vm.sliderMin}}"
 					max="{{vm.sliderMax}}"
 					aria-label="Position"
-					ng-disabled="!vm.visible")
+					ng-disabled="!vm.visible || vm.normal")
 
 				div(flex, layout="row")
 					
 					input.distanceInput(
 						ng-submit="vm.update()"
 						ng-model="vm.displayDistance"
-						ng-disabled="!vm.visible")
+						ng-disabled="!vm.visible || vm.normal")
 					|
 
 					div 
 						button.upDownButtons.angular-material-icons(
 							id="incrementClip"
+							ng-disabled="!vm.visible || vm.normal"
 							ng-click="vm.incrementDiscrete()"
 						) keyboard_arrow_up
 						button.upDownButtons.angular-material-icons(
 							id="decrementClip"
+							ng-disabled="!vm.visible || vm.normal"	
 							ng-click="vm.decrementDiscrete(0.001)"
 						) keyboard_arrow_down
 
 					md-select(
-						ng-disabled="vm.units == 'ft'"
+						ng-disabled="vm.units == 'ft' || vm.normal"
 						ng-selected="vm.modelUnits"
 						ng-model="vm.units"
 						ng-required="true")
 
 						md-option(
 							ng-if="vm.unitShouldShow(unit)"
-							ng-disabled="unit.value === 'ft'"
+							ng-disabled="unit.value === 'ft'|| vm.normal"
 							ng-repeat="unit in vm.availableUnits" 
 							value="{{unit.value}}") {{unit.value}}
 					
