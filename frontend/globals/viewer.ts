@@ -213,7 +213,6 @@ export class Viewer {
 
 		this.unityLoaderScript = document.createElement("script");
 
-
 	}
 
 	public setUnits(units) {
@@ -592,7 +591,7 @@ export class Viewer {
 		* NOTE= Clipping planes are now all managed by unity use broadcast events to retrieve its info
 	*/
 
-	public tbroadcastClippingPlane(clip) {
+	public broadcastClippingPlane(clip) {
 		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
@@ -607,6 +606,7 @@ export class Viewer {
 
 		if (clipPlanes && clipPlanes.length > 1) {
 			console.error("More than 1 clipping planes requested!");
+			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
 		}
 	}
 
