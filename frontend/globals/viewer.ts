@@ -606,6 +606,7 @@ export class Viewer {
 
 		if (clipPlanes && clipPlanes.length > 1) {
 			console.error("More than 1 clipping planes requested!");
+			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
 		}
 	}
 
