@@ -135,7 +135,6 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 			let sharedIdObjects = [];
 			let sharedIdPromises = [];
 			let ifcObjectByAccount = {};
-			let uniqueGroupObjects = [];
 
 			for (let i = 0; i < group.objects.length; i++) {
 				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
