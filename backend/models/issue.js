@@ -1838,7 +1838,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
 						issue.markModified("extras");
 
-					}
+				}
 
 					_.get(xml ,"Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 						let obj = {
@@ -1879,7 +1879,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
 						extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
 						extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
-						//extras.ClippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
 						extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
 						extras.Index = viewpoints[guid].Viewpoint;
 						extras.Snapshot = viewpoints[guid].Snapshot;
@@ -2019,21 +2018,10 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										}
 									}
 
-									if (highlightedObjects.length > 0) {
-										let highlightedObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: highlightedObjects
-										};
-
-										groupPromises.push(
-											Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
-												vp.highlighted_group_id = utils.uuidToString(group._id);
-											})
-										);
-									}
+								
 								}
-								else if (vpComponents[i].Coloring) {
+								if (vpComponents[i].Coloring) {
+									console.log("ProcessedColour", issue._id);
 									//FIXME: this is essentially copy of selection with slight modification. Should merge common code.
 									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
 										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
@@ -2053,19 +2041,19 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										}
 									}
 
-									if (highlightedObjects.length > 0) {
-										let highlightedObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: highlightedObjects
-										};
+								}
 
-										groupPromises.push(
-											Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
-												vp.highlighted_group_id = utils.uuidToString(group._id);
-											})
-										);
-									}
+								if (highlightedObjects.length > 0) {
+									let highlightedObjectsData = {
+										name: issue.name,
+										color: [255, 0, 0],
+										objects: highlightedObjects
+									};
+									groupPromises.push(
+										Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
+											vp.highlighted_group_id = utils.uuidToString(group._id);
+										})
+									);
 								}
 
 								if (vpComponents[i].Visibility) {
@@ -2159,10 +2147,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									}
 								}
 
-								if (vpComponents[i].Coloring) {
-									vp.extras.Coloring = vpComponents[i].Coloring;
-									systemLogger.logInfo("Colouring not fully supported for BCF import!");
-								}
 
 								if (vpComponents[i].ViewSetupHints) {
 									// TODO: Full ViewSetupHints support -
