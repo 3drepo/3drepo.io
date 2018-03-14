@@ -43,8 +43,8 @@ var groupSchema = Schema({
 	color: [Number]
 });
 
-groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
-	return Meta.find({ account, model }, { type: "meta", "metadata.IFC GUID": ifcGuid }, { "parents": 1, "metadata.IFC GUID": 1 })
+groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
+	return Meta.find({ account, model }, { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }}, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let uuids = [];
 			for (let i = 0; i < results.length; i++) {
@@ -132,29 +132,33 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
-			let sharedIdObjects;
+			let sharedIdObjects = [];
 			let sharedIdPromises = [];
+			let ifcObjectByAccount = {};
 			let uniqueGroupObjects = [];
 
 			for (let i = 0; i < group.objects.length; i++) {
 				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
-					uniqueGroupObjects[group.objects[i].ifc_guid] = group.objects[i];
+					const namespace = group.objects[i].account + "__" + group.objects[i].model;
+					if(!ifcObjectByAccount[namespace]) {
+						ifcObjectByAccount[namespace] = [];
+					}
+					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
 				}
 			}
 
-			for (let ifcGuid in uniqueGroupObjects) {
-				const groupObject = uniqueGroupObjects[ifcGuid];
+			for (let namespace in ifcObjectByAccount) {
+				const nsSplitArr = namespace.split("__");
+				const account = nsSplitArr[0];
+				const model = nsSplitArr[1];
 				sharedIdPromises.push(
-					this.ifcGuidToUUIDs(groupObject.account,
-						groupObject.model,
-						groupObject.ifc_guid).then(sharedIds => {
+					this.ifcGuidsToUUIDs(account,
+						model,
+						ifcObjectByAccount[namespace]).then(sharedIds => {
 						for (let j = 0; j < sharedIds.length; j++) {
-							if (!sharedIdObjects) {
-								sharedIdObjects = [];
-							}
 							sharedIdObjects.push({
-								account: groupObject.account,
-								model: groupObject.model,
+								account,
+								model,
 								shared_id: sharedIds[j]
 							});
 						}
