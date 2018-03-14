@@ -2021,7 +2021,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								
 								}
 								if (vpComponents[i].Coloring) {
-									console.log("ProcessedColour", issue._id);
 									//FIXME: this is essentially copy of selection with slight modification. Should merge common code.
 									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
 										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
