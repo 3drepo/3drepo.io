@@ -204,7 +204,7 @@
 					value: BCFAssign,
 					label: BCFAssign
 				}
-				vm.statuses.push(newAssign);
+				vm.modelJobs.push(newAssign);
 				$timeout(function() {});
 			}
 		}
