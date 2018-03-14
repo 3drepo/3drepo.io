@@ -1819,7 +1819,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 						issue.status =_.get(xml, "Markup.Topic[0].@.TopicStatus");
-						if(!issue.status || issue.status = "") {
+						if( !issue.status || issue.status === "") {
 							issue.status = "open";
 						}
 						issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
