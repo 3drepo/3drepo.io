@@ -195,18 +195,13 @@
 
 		vm.handleBCFAssign = function(BCFAssign) {
 
-			var exists = vm.modelJobs.find(function(assign) {
-				return BCFAssign === assign.value
-			});
-
-			if (!exists) {
-				var newAssign = {
-					value: BCFAssign,
-					label: BCFAssign
+			BCFAssign.forEach(function(unknownJob) {
+				if(BCFAssign.indexOf(assign) === -1) {
+					vm.modelJobs.push(unknownJob);
+					$timeout(function() {});
 				}
-				vm.modelJobs.push(newAssign);
-				$timeout(function() {});
-			}
+			
+			});
 		}
 
 		vm.handleBCFType = function(BCFType) {
@@ -262,11 +257,14 @@
 					// Get the actual role and return the last part of it
 					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
 					*/
+					console.log(availableJob._id);
 					return availableJob._id;
 				});
 
 				// Always have an unassign option for users
 				vm.modelJobs.push("Unassigned");
+				console.log("available job", vm.availableJobs);
+				console.log("model job " , vm.modelJobs);
 			}
 		});
 
