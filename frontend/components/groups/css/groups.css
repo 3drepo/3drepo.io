@@ -1,0 +1,78 @@
+groups {
+    position: relative;
+}
+
+groups .groupsContainer {
+    overflow: hidden;
+    height: 100%;
+}
+
+groups .groupContainer {
+    height: calc(100% - 67px);
+    overflow-y: auto;
+}
+
+groups .addHolder {
+    bottom: 0;
+    right: 0;
+    margin-right: 12px;
+    width: 100%;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+groups .metaMargin {
+    margin: 3px;
+}
+
+groups .groupName {
+    margin-top: 20px;
+}
+
+groups .groupColorBar {
+    width: 15px;
+    margin: 10px;
+}
+
+groups .groupColorHolder {
+    width: 50px;
+}
+
+groups .groupEnterHolder {
+    width: 45px;
+    background: #0c2f54;
+    color: white;
+}
+
+groups .groupEnterSpace {
+    width: 45px;
+}
+
+groups .groupMeta {
+   font-size: 12px;
+   color: #8a8a8a;
+}
+
+groups .groupName {
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+groups .groupEnterHolder md-icon {
+    color: white;
+}
+
+groups .groupDescription {
+    color: #8a8a8a;
+}
+
+groups .group {
+    border-bottom: solid gainsboro 1px;
+    min-height: 75px;
+}
+
+groups .groupsList {
+    height: calc(100% - 52px);
+    overflow-y: scroll;
+}

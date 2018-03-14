@@ -42,7 +42,14 @@ div(layout="column", class="md-whiteframe-1dp")
 				
 				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
-			
+
+			groups(
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				model-settings='vm.modelSettings'
+				ng-if="vm.contentData.type === 'groups'")
+
 			docs(
 				ng-if="vm.contentData.type === 'docs'"
 				show-add='vm.showAdd'
@@ -109,6 +116,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings'
 				ng-if="vm.contentData.type === 'gis'")
+
 
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")

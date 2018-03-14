@@ -1,0 +1,102 @@
+div.groupsContainer
+
+    div.groupsNotice(
+        layout="column"
+        layout-align="center center"
+        ng-if="vm.loading")
+        h3 Loading model settings...
+
+    md-container.groupsList(
+        ng-if="vm.toShow === 'groups'"
+        flex="100"
+        layout="column")
+
+        div.group(
+            layout="row"
+            flex="100"
+            ng-if="vm.groups.length > 0"
+            ng-click="vm.selectGroup(group)"
+            ng-repeat="group in vm.groups")
+
+            div.groupColorBar(style="background-color: {{group.color}};")
+            div(layout="column", flex="100" layout-margin)
+                div(layout="row" layout-align="space-between center")
+                    span.groupName {{group.name}}
+                    span.groupMeta  {{group.author}}
+                    span.groupMeta  {{group.date}}
+                div
+                    span.groupDescription {{group.description}}
+            
+            div.groupColorHolder(
+                layout="row"
+                layout-align="center center")
+
+                md-button.md-icon-button(aria-label="Invert Colors")
+                    md-icon.angular-material-icons invert_colors
+            
+            div.groupEnterHolder(
+                ng-click="vm.editGroup()"
+                ng-if="group.selected === true"
+                layout="row"
+                layout-align="center center")
+
+                md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
+
+            div.groupEnterSpace(
+                ng-if="group.selected !== true"
+                layout="row"
+                layout-align="center center")
+
+        md-container(
+            ng-if="vm.groups.length === 0"
+            layout-fill
+            layout="column")
+
+            h3 No groups have been created yet
+
+    div.groupContainer(
+        layout="column"
+        layout-margin
+        ng-if="vm.toShow === 'group'")
+
+        md-input-container.groupName
+            label Group Name
+            input(ng-model="vm.selectedGroup.name")
+
+        md-input-container
+            label Group Description
+            textarea.groupDescriptionInput(ng-model="vm.selectedGroup.description")
+        
+        md-container(
+            layout="row"
+            layout-align="space-between center")
+
+            div.metaMargin
+                label.groupMeta Author: 
+                span.groupMeta {{ vm.selectedGroup.author }}
+
+            div.metaMargin
+                label.groupMeta Creation Date: 
+                span.groupMeta {{ vm.selectedGroup.date }}
+
+    div.addHolder(layout="row" layout-align="end-center")
+        button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
+            type="button" 
+            aria-label="Add"
+            ng-if="vm.toShow === 'groups'"
+            ng-click="vm.addGroup()")
+            md-icon(
+                class="angular-material-icons ng-scope material-icons"
+                role="img"
+                aria-hidden="true") add
+
+        button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
+            type="button" 
+            aria-label="Add" 
+            ng-if="vm.toShow === 'group'"
+            ng-click="vm.enableGroupEditing()")
+            md-icon(
+                class="angular-material-icons ng-scope material-icons"
+                role="img"
+                aria-hidden="true") edit
+

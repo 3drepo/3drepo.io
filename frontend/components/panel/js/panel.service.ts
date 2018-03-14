@@ -109,6 +109,17 @@ export class PanelService {
 		});
 
 		this.issuesPanelCard.left.push({
+			type: "groups",
+			title: "Groups",
+			show: false,
+			help: "List current groups",
+			icon: "group_work",
+			minHeight: 80,
+			fixedHeight: false,
+			options: [],
+		});
+
+		this.issuesPanelCard.left.push({
 			type: "tree",
 			title: "Tree",
 			show: false,
@@ -233,9 +244,20 @@ export class PanelService {
 
 	// 	}
 
+	public getCardIndex(type) {
+		let index = -1;
+		const obj = this.issuesPanelCard.left.forEach((panel, i) => {
+			if (panel.type === type) {
+				index = i;
+			}
+		});
+		return index;
+	}
+
 	public setHideIfc(value: boolean) {
-		const issuesCardIndex = 1; // index of tree panel
-		const menuItemIndex = 2; // index of hideIfc
+
+		const issuesCardIndex = this.getCardIndex("issues"); // index of tree panel
+		const menuItemIndex = this.getCardIndex("issues"); // index of hideIfc
 
 		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
 			.menu[menuItemIndex];
