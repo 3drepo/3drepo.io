@@ -548,7 +548,7 @@
 					priority: vm.issueData.priority,
 					status: vm.issueData.status,
 					topic_type: vm.issueData.topic_type,
-					due_date: vm.issueData.due_date,
+					due_date: Date.parse(vm.issueData.due_date),
 					assigned_roles: vm.issueData.assigned_roles
 				};
 
@@ -958,7 +958,7 @@
 				priority: vm.issueData.priority,
 				status: vm.issueData.status,
 				topic_type: vm.issueData.topic_type,
-				due_date: vm.issueData.due_date,
+				due_date: Date.parse(vm.issueData.due_date),
 				desc: vm.issueData.desc,
 				rev_id: vm.revision
 			};
