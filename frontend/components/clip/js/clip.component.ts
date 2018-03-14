@@ -162,30 +162,6 @@ class ClipController implements ng.IController {
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 
 			switch (event.type) {
-			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-
-				if (!event.value.fromClipPanel) {
-					const clip = event.value.clippingPlanes[0];
-					if (clip) {
-						// this.visible = true;
-						this.setDisplayValues(
-							this.determineAxis(clip.normal),
-							clip.distance,
-							false,
-							clip.clipDirection === 1,
-							undefined,
-						);
-
-						this.updateDisplayedDistance(true, this.visible);
-					} else {
-
-						this.reset();
-						this.ViewerService.clearClippingPlanes();
-					}
-				}
-
-				break;
-
 			case this.EventService.EVENT.VIEWER.CLIPPING_PLANE_BROADCAST:
 				this.setDisplayValues(
 					this.determineAxis(event.value.normal),
