@@ -1132,7 +1132,6 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		}
 	}
 
-		console.log(data.due_date, !data.due_date, this.due_date, !this.due_date);
 	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
 		if(!(!data.due_date && !this.due_date))
 		{
