@@ -551,7 +551,7 @@ export class IssuesService {
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
-				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/hiddenGroupId`;
+				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/${hiddenGroupId}`;
 
 				let hiddenPromise;
 
