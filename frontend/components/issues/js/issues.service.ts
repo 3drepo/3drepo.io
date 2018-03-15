@@ -1195,7 +1195,9 @@ export class IssuesService {
 			case "due_date":
 
 				comment.action.propertyText = "Due Date";
-				comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+				if (comment.action.to) {
+					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+				}
 				if (comment.action.from) {
 					comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
 				} else {

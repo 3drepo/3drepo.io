@@ -1133,13 +1133,20 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
-		const canChangeStatus = isAdmin || hasOwnerJob;
-		if (canChangeStatus) {
-			systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, data.due_date);
-			this.due_date = data.due_date;
-		} else {
-			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+		if(!(!data.due_date && !this.due_date))
+		{
+			if(data.due_date === null) {
+				data.due_date = undefined;
+			}
+			const canChangeStatus = isAdmin || hasOwnerJob;
+			if (canChangeStatus) {
+				systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, data.due_date);
+				this.due_date = data.due_date;
+			} else {
+				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+			}
 		}
+
 	}
 
 	let settings;
