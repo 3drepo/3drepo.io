@@ -196,7 +196,7 @@
 		vm.handleBCFAssign = function(BCFAssign) {
 
 			BCFAssign.forEach(function(unknownJob) {
-				if(vm.modelJobs.indexOf(assign) === -1) {
+				if(vm.modelJobs.indexOf(unknownJob) === -1) {
 					vm.modelJobs.push(unknownJob);
 					$timeout(function() {});
 				}
