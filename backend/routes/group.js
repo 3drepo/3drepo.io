@@ -62,6 +62,7 @@ function findGroup(req, res, next){
 	'use strict';
 	let place = utils.APIInfo(req);
 
+	const start = Date.now();
 	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
@@ -69,7 +70,7 @@ function findGroup(req, res, next){
 			return Promise.resolve(group);
 		}
 	}).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

@@ -44,14 +44,16 @@ var groupSchema = Schema({
 });
 
 groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
-	return Meta.find({ account, model }, { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }}, { "parents": 1, "metadata.IFC GUID": 1 })
-		.then(results => {
-			let uuids = [];
-			for (let i = 0; i < results.length; i++) {
-				uuids = uuids.concat(results[i].parents);
-			}
-			return uuids;
+	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
+	const project = { parents: 1, _id: 0 };
+
+	const db = require("../db/db");
+	return db.getCollection(account, model+ ".scene").then(dbCol => {
+		return dbCol.find(query, project).toArray().then(results => {
+			return results;
 		});
+	});
+
 };
 
 groupSchema.statics.uuidToIfcGuids = function(obj) {
@@ -132,9 +134,9 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
-			let sharedIdObjects = [];
-			let sharedIdPromises = [];
-			let ifcObjectByAccount = {};
+			const sharedIdObjects = [];
+			const sharedIdPromises = [];
+			const ifcObjectByAccount = {};
 
 			for (let i = 0; i < group.objects.length; i++) {
 				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
@@ -145,31 +147,30 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
 				}
 			}
-
+			
 			for (let namespace in ifcObjectByAccount) {
 				const nsSplitArr = namespace.split("__");
 				const account = nsSplitArr[0];
 				const model = nsSplitArr[1];
-				sharedIdPromises.push(
-					this.ifcGuidsToUUIDs(account,
-						model,
-						ifcObjectByAccount[namespace]).then(sharedIds => {
-						for (let j = 0; j < sharedIds.length; j++) {
-							sharedIdObjects.push({
-								account,
-								model,
-								shared_id: sharedIds[j]
+				if(account && model) {
+					sharedIdPromises.push(this.ifcGuidsToUUIDs(account, model,
+						ifcObjectByAccount[namespace]).then(results => {
+						for (let i = 0; i < results.length; i++) {
+							results[i].parents.forEach( id => {
+								sharedIdObjects.push({account, model, shared_id: utils.uuidToString(id)});
 							});
 						}
-					})
-				)
+					}));
+				}
+
 			}
 
 			return Promise.all(sharedIdPromises).then(() => {
-				if (sharedIdObjects && sharedIdObjects.length > 0) {
-					group.objects = sharedIdObjects;
+				let returnGroup = { _id: utils.uuidToString(group._id), color: group.color}
+				if (sharedIdObjects.length > 0) {
+					returnGroup.objects = sharedIdObjects;
 				}
-				return group;
+				return returnGroup;
 			});
 		});
 };
