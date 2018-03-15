@@ -551,7 +551,7 @@ export class IssuesService {
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
-				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/hiddenGroupId`;
+				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/${hiddenGroupId}`;
 
 				let hiddenPromise;
 
@@ -1116,8 +1116,6 @@ export class IssuesService {
 	*/
 	public importBcf(account, model, revision, file){
 
-		let deferred = this.$q.defer();
-
 		let bcfUrl = account + "/" + model + "/issues.bcfzip";
 		if(revision){
 			bcfUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
@@ -1126,18 +1124,13 @@ export class IssuesService {
 		let formData = new FormData();
 		formData.append("file", file);
 
-		this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
-			.then((res) => {
-				
-				if(res.status === 200){
-					deferred.resolve();
-				} else {
-					deferred.reject(res.data);
+		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
+			.then(function(res){
+				if(res.status !== 200){
+					throw res.data;
 				}
-
 			});
 
-		return deferred.promise;
 	}
 
 	/**

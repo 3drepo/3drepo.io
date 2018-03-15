@@ -56,7 +56,7 @@ div#accountHolder(
 			account-licenses(
 				ng-if="vm.username && vm.itemToShow === 'licenses'"
 				account="vm.account"
-				show-page="vm.showPage(page, callingPage)")
+				show-page="vm.showPage(page, callingPage, data)")
 
 			account-modelsetting(
 				ng-if="vm.username && vm.itemToShow === 'modelsetting'"
