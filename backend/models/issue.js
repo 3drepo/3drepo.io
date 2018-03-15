@@ -1222,21 +1222,13 @@ schema.methods.generateCommentsGUID = function(){
 		if(!comment.guid && !isSystemComment(comment)){
 			comment.guid = utils.generateUUID();
 		}
-		if(!comment.viewpoint && !isSystemComment(comment)){
-			comment.viewpoint = this.viewpoint.guid;
+		if(!comment.viewpoint && !isSystemComment(comment) && this.viewpoints.length > 0){
+			comment.viewpoint = this.viewpoints[0].guid;
 		}
 	});
 };
 
-schema.methods.generateViewpointGUID = function(){
-	if(!this.viewpoint.guid){
-		this.viewpoint.guid = utils.generateUUID();
-	}
-};
-
 schema.methods.getBCFMarkup = function(account, model, unit){
-
-	this.generateViewpointGUID();
 	this.generateCommentsGUID();
 	this.save();
 

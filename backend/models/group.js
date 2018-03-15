@@ -170,6 +170,10 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 				if (sharedIdObjects.length > 0) {
 					returnGroup.objects = sharedIdObjects;
 				}
+				else
+				{
+					returnGroup.objects = group.objects;
+				}
 				return returnGroup;
 			});
 		});
