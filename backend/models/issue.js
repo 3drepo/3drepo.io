@@ -578,14 +578,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
-		if(_.map(statusEnum).indexOf(data.status) === -1){
-			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
-		}
-
-		if(_.map(priorityEnum).indexOf(data.priority) === -1){
-		 	return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
-		}
-
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
 		issue.name = data.name;
