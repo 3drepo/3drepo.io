@@ -28,6 +28,7 @@ let multer = require("multer");
 let config = require("../config.js");
 
 let User = require("../models/user");
+const Job = require("../models/job");
 let ModelHelper = require("../models/helper/model");
 
 let stringToUUID = utils.stringToUUID;
@@ -129,32 +130,34 @@ function updateIssue(req, res, next){
 			
 			action = User.findByUserName(req.params.account).then(dbUser => {
 
-				const sub = dbUser.customData.billing.subscriptions.findByAssignedUser(req.session.user.username);
-				const job = sub && sub.job;
-				const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
-				const userIsAdmin = ModelHelper.isUserAdmin(
-					req.params.account, 
-					req.params.model, 
-					req.session.user.username
-				);
+				return Job.findByUser(dbUser.user, req.session.user.username).then(_job => {
+					const job = _job._id;
+					const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
+					const userIsAdmin = ModelHelper.isUserAdmin(
+						req.params.account, 
+						req.params.model, 
+						req.session.user.username
+					);
 				
-				return userIsAdmin.then( projAdmin => {
+					return userIsAdmin.then( projAdmin => {
+	
+						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+						const isAdmin = projAdmin || tsAdmin;
+						const hasOwnerJob = issue.creator_role === job && issue.creator_role && job; 
+						const hasAssignedJob = job === issue.assigned_roles[0];
 
-					const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-					const isAdmin = projAdmin || tsAdmin;
-					const hasOwnerJob = issue.creator_role === job && issue.creator_role && job; 
-					const hasAssignedJob = job === issue.assigned_roles[0];
-
-					return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
+						return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
 					
 
-				}).catch(err =>{
+					}).catch(err =>{
 						if(err){
 							return Promise.reject(err);
 						}
 						else{
 							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
 						}
+					});
+
 				});
 
 

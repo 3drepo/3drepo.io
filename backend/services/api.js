@@ -106,6 +106,7 @@ module.exports.createApp = function (serverConfig) {
 		}
 	});
 
+	app.use("/:account", require("../routes/job"));
 	app.use("/", require("../routes/plan"));
 	//auth handler
 	app.use("/", require("../routes/auth"));
@@ -120,7 +121,6 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/payment", require("../routes/payment"));
 
 	app.use("/:account", require("../routes/teamspace"));
-	app.use("/:account", require("../routes/job"));
 	app.use("/:account", require("../routes/permissionTemplate"));
 	app.use("/:account", require("../routes/accountPermission"));
 	

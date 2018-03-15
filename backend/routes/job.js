@@ -26,8 +26,9 @@
 	const utils = require("../utils");
 
 	router.post("/jobs", middlewares.job.canCreate, createJob);
+	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
-	router.get("/jobs", middlewares.job.canView, listJobs);
+	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
@@ -41,6 +42,25 @@
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 
+	}
+
+	function getUserJob(req, res, next) {
+		const teamspace = req.params.account;
+		const user = req.session.user.username;
+
+		//middleware checks if user is in teamspace, so this member check should not be necessary here.
+		Job.findByUser(teamspace, user).then( (job) => {
+		 	const result = {};
+			if(job) {
+				result._id = job._id;
+				result.color = job.color;
+			}
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		})
 	}
 
 	

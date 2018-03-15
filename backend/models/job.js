@@ -56,14 +56,10 @@ schema.statics.usersWithJob = function(teamspace) {
 }
 
 schema.statics.removeUserFromAnyJob = function(teamspace, user) {
-	return Job.findByUser(teamspace, user).then( jobs => {
-		const removalPromises = [];
-		if(jobs) {
-			jobs.forEach( job => {
-				removalPromises.push(job.removeUserFromJob(user));
-			});
+	return Job.findByUser(teamspace, user).then( job => {
+		if(job) {
+			return job.removeUserFromJob(user);
 		}
-		return Promise.all(removalPromises);
 	});
 
 }
@@ -80,7 +76,7 @@ schema.statics.findByJob = function(teamspace, job) {
 }
 
 schema.statics.findByUser = function(teamspace, user) {
-	return this.find({account: teamspace}, {users: user});
+	return this.findOne({account: teamspace}, {users: user});
 }
 
 schema.statics.removeUserFromJobs = function(teamspace, user) {

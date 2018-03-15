@@ -81,6 +81,16 @@
 
 	}
 
+	function isTeamspaceMember(req, res, next) {
+		const teamspace = req.params.account;
+		const user = req.session.user.username;
+		return User.teamspaceMemberCheck(teamspace, user).then(() => {
+			next();
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
+
 	function hasCollaboratorQuota(req, res, next){
 
 		let limits;
@@ -192,6 +202,7 @@
 
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
+		isTeamspaceMember,
 		connectQueue,
 		loggedIn,
 
