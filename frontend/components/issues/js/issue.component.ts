@@ -328,10 +328,10 @@ class IssueController implements ng.IController {
 
 	}
 
-	public handleBCFAssign(BCFAssign: string) {
+	public handleBCFAssign(BCFAssign: [string]) {
 		BCFAssign.forEach(function(unknownJob) {
-			if (modelJobs.indexOf(unknownJob) === -1) {
-				vm.modelJobs.push(unknownJob);
+			if (this.modelJobs.indexOf(unknownJob) === -1) {
+				this.modelJobs.push(unknownJob);
 				this.$timeout(() => {});
 			};
 		});
@@ -398,6 +398,12 @@ class IssueController implements ng.IController {
 		this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 		this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 		this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+
+
+		this.handleBCFPriority(this.issueData.priority);
+		this.handleBCFStatus(this.issueData.status);
+		this.handleBCFAssign(this.issueData.assigned_roles);
+		this.handleBCFType(this.issueData.topic_type);
 
 		this.checkCanComment();
 		this.convertCommentTopicType();
