@@ -618,7 +618,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
 		if (data.due_date) {
-			issue.due_date = Date.parse(data.due_date);
+			issue.due_date = data.due_date;
 		}
 
 		if(data.viewpoint){
@@ -1135,8 +1135,8 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
 		const canChangeStatus = isAdmin || hasOwnerJob;
 		if (canChangeStatus) {
-			systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, Date.parse(data.due_date));
-			this.due_date = Date.parse(data.due_date);
+			systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, data.due_date);
+			this.due_date = data.due_date;
 		} else {
 			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 		}

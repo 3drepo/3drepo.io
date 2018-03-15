@@ -329,20 +329,12 @@ class IssueController implements ng.IController {
 	}
 
 	public handleBCFAssign(BCFAssign: string) {
-
-		const exists = this.modelJobs.find((assign) => {
-			return BCFAssign === assign.value;
-		});
-
-		if (!exists) {
-			const newAssign = {
-				value: BCFAssign,
-				label: BCFAssign,
+		BCFAssign.forEach(function(unknownJob) {
+			if (modelJobs.indexOf(unknownJob) === -1) {
+				vm.modelJobs.push(unknownJob);
+				this.$timeout(() => {});
 			};
-			this.modelJobs.push(newAssign);
-			this.$timeout(() => {});
-
-		}
+		});
 
 	}
 
@@ -582,7 +574,7 @@ class IssueController implements ng.IController {
 				priority: this.issueData.priority,
 				status: this.issueData.status,
 				topic_type: this.issueData.topic_type,
-				due_date: this.issueData.due_date,
+				due_date: Date.parse(this.issueData.due_date),
 				assigned_roles: this.issueData.assigned_roles,
 			};
 
@@ -992,7 +984,7 @@ class IssueController implements ng.IController {
 			priority: this.issueData.priority,
 			status: this.issueData.status,
 			topic_type: this.issueData.topic_type,
-			due_date: this.issueData.due_date,
+			due_date: Date.parse(this.issueData.due_date),
 			desc: this.issueData.desc,
 			rev_id: this.revision,
 		};
