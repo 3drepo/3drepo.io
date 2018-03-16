@@ -187,7 +187,6 @@
 					value: BCFStatus,
 					label: BCFStatus
 				}
-				// console.log(newStatus);
 				vm.statuses.push(newStatus);
 				$timeout(function() {});
 			}
@@ -257,14 +256,11 @@
 					// Get the actual role and return the last part of it
 					return availableRole.role.substring(availableRole.role.lastIndexOf(".") + 1);
 					*/
-					console.log(availableJob._id);
 					return availableJob._id;
 				});
 
 				// Always have an unassign option for users
 				vm.modelJobs.push("Unassigned");
-				console.log("available job", vm.availableJobs);
-				console.log("model job " , vm.modelJobs);
 			}
 		});
 
@@ -293,7 +289,6 @@
 
 			vm.issueData.status = vm.issueData.status.toLowerCase()
 
-			//console.log(vm.issueData.status)
 
 			vm.handleBCFPriority(vm.issueData.priority);
 			vm.handleBCFStatus(vm.issueData.status);
@@ -317,7 +312,6 @@
 			if (vm.data && vm.statuses && vm.statuses.length) {
 				vm.issueFailedToLoad = false;
 				vm.issueData = null;
-				console.log("updated issue");
 				IssuesService.getIssue(vm.data.account, vm.data.model, vm.data._id)
 					.then(function(fetchedIssue){
 						vm.setEditIssueData(fetchedIssue);
@@ -536,7 +530,6 @@
 		vm.statusChange = function () {
 			
 			if (vm.data && vm.issueData.account && vm.issueData.model) {
-				//console.log("status changed", vm.data, vm.issueData);
 				// If it's unassigned we can update so that there are no assigned roles
 				if (vm.issueData.assigned_roles.indexOf("Unassigned") !== -1) {
 					vm.issueData.assigned_roles = [];

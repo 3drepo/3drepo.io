@@ -777,7 +777,10 @@
 
 							if (objUid) {
 								hiddenNodes.push(TreeService.getNodeById(objUid));
+							} else {
+								console.error("failed to find UID for ", objects[i].shared_id);
 							}
+							
 						}
 						TreeService.hideTreeNodes(hiddenNodes);
 					}

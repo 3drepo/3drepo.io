@@ -146,6 +146,10 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 					}
 					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
 				}
+				else {
+					sharedIdObjects.push(group.objects[i]);
+				}
+
 			}
 			
 			for (let namespace in ifcObjectByAccount) {
@@ -167,13 +171,7 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 			return Promise.all(sharedIdPromises).then(() => {
 				let returnGroup = { _id: utils.uuidToString(group._id), color: group.color}
-				if (sharedIdObjects.length > 0) {
-					returnGroup.objects = sharedIdObjects;
-				}
-				else
-				{
-					returnGroup.objects = group.objects;
-				}
+				returnGroup.objects = sharedIdObjects;
 				return returnGroup;
 			});
 		});
