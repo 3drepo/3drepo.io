@@ -1304,7 +1304,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
-				"@": {Guid: utils.uuidToString(comment.viewpoint)}
+				"@": {Guid: utils.uuidToString(comment.viewpoint ? comment.viewpoint :  utils.generateUUID())}
 			},
 			// bcf 1.0 for back comp
 			"Status": this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, " ")) : "",
