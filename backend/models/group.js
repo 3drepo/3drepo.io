@@ -77,6 +77,17 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 		});
 };
 
+function uuidsToIfcGuids(account, model, ids) {
+	const query = { type: "meta", parents: {$in: ids} };
+	const project =  { "metadata.IFC GUID": 1 };
+	const db = require("../db/db");
+	return db.getCollection(account, model+ ".scene").then(dbCol => {
+		return dbCol.find(query, project).toArray().then(results => {
+			return results;
+		});
+	});
+};
+
 /**
  * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
  */
@@ -198,34 +209,60 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
-	let ifcGuidPromises = [];
+	const ifcGuidPromises = [];
+	const sharedIdsByAccount = {};	
+	let modifiedObjectList = null;
 
 	if (data.objects) {
+		modifiedObjectList = []
 		for (let i = 0; i < data.objects.length; i++) {
 			const obj = data.objects[i];
 
 			if (obj.shared_id) {
+				const ns = obj.account + "__" + obj.model;
 				if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-					obj.id = utils.stringToUUID(obj.id);
+					obj.id = utils.stringToUUID(obj.shared_id);
 				}
-				ifcGuidPromises.push(
-					groupSchema.statics.uuidToIfcGuids(obj).then(ifcGuids => {
-						if (ifcGuids && ifcGuids.length > 0) {
-							for (let i = 0; i < ifcGuids.length; i++) {
-								obj.ifc_guid = ifcGuids[i];
-								delete obj.shared_id;
-							}
-						}
-					})
-				);
+				if(!sharedIdsByAccount[ns]) {
+					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
+				}
+				sharedIdsByAccount[ns].sharedIDArr.push(obj.id);
+				sharedIdsByAccount[ns].org.push(obj);
+				
+			}
+			else {
+				modifiedObjectList.push(obj);
 			}
 		}
+
+		for (let namespace in sharedIdsByAccount) {
+			const nsSplitArr = namespace.split("__");
+			const account = nsSplitArr[0];
+			const model = nsSplitArr[1];
+			ifcGuidPromises.push(
+				uuidsToIfcGuids(account, model, sharedIdsByAccount[namespace].sharedIDArr).then(ifcGuids => {
+					if (ifcGuids && ifcGuids.length > 0) {
+						for (let i = 0; i < ifcGuids.length; i++) {
+							modifiedObjectList.push({account, model, ifc_guid: ifcGuids[i].metadata["IFC GUID"]});
+						}
+					}
+					else {
+						//this isn't a IFC GUID model.
+						modifiedObjectList = modifiedObjectList.concat(sharedIdsByAccount[namespace].org);
+					}
+					
+				})
+			);
+		}
+
+
+
 	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
 
 		this.name = data.name || this.name;
-		this.objects = data.objects || this.objects;
+		this.objects = modifiedObjectList || this.objects;
 		this.color = data.color || this.color;
 		this.issue_id = data.issue_id || this.issue_id;
 
