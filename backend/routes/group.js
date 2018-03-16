@@ -62,7 +62,6 @@ function findGroup(req, res, next){
 	'use strict';
 	let place = utils.APIInfo(req);
 
-	const start = Date.now();
 	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
