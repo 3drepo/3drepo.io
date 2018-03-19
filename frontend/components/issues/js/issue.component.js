@@ -863,7 +863,7 @@
 					while (nodePath && nodePath.length > 0) {
 						var parentNodeId = nodePath.shift();
 						var parentNode = TreeService.getNodeById(parentNodeId);
-						if ((node[property] && node[property] === parentNode[property]) ||
+						if ( node.project === parentNode.project && (node[property] && node[property] === parentNode[property]) ||
 								(!node[property] && 1 === nodePath.length)) {
 							prunedNodesMap[parentNode._id] = {
 								account: parentNode.account,
@@ -895,7 +895,7 @@
 				color: [255, 0, 0], 
 				objects: nodes
 			};
-			return groupData;
+			return nodes.length === 0? null : groupData;
 		}
 
 		vm.createGroup = function(viewpoint, screenShot, objectInfo) {
@@ -906,20 +906,27 @@
 			// Create a group of hidden objects
 			var hiddenGroupData = createGroupData(pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 
-			APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData)
-				.then(function (highlightedGroupResponse) {
-					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData)
-						.then(function (hiddenGroupResponse) {
-							viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-							vm.doSaveIssue(viewpoint, screenShot);
-						}).catch(function(error){
-							console.error(error);
-						})
-				}).catch(function(error){
-					console.error(error);
-				});
-		
+			var promises = [];
+
+			if(highlightedGroupData) {
+				promises.push(APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData)
+					.then(function (highlightedGroupResponse) {
+						viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+					}));
+			}
+
+			if(hiddenGroupData) {
+				promises.push(APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData)
+					.then(function (hiddenGroupResponse) {
+						viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+					}));
+			}
+
+			Promise.all(promises).then(function() {
+				vm.doSaveIssue(viewpoint, screenShot);
+			}).catch(function(error){
+				console.error(error);
+			});
 		};
 
 
@@ -1014,69 +1021,68 @@
 		};
 
 		vm.saveComment = function() {
-			var viewpointPromise = $q.defer();
 			var objectsPromise = $q.defer();
-
+			var objectInfo;
 			//Get selected objects
 			ViewerService.getObjectsStatus({
 				promise: objectsPromise 
 			});
+			var initPromises = [];
+			initPromises.push(objectsPromise.promise.then(function(_objectInfo) {
+				objectInfo = _objectInfo;
+			}));
 
-			objectsPromise.promise.then(function(objectInfo) {
-				
+			if (!angular.isDefined(vm.commentThumbnail)) {
+				var viewpointPromise = $q.defer();
+				ViewerService.getCurrentViewpoint(
+					{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
+				);
+				initPromises.push(viewpointPromise.promise.then(function(viewpoint) {
+					vm.commentViewpoint = viewpoint;
+				}));
+			}
+
+
+
+			Promise.all(initPromises).then(function() {
+				//FIXME: this is duplicated code - something similar already exists in CreateGroup
 				// Create a group of selected objects
 				var highlightedGroupData = createGroupData(pruneNodes(objectInfo.highlightedNodes, "selected"));
-				
+			
 				// Create a group of hidden objects
 				var hiddenGroupData = createGroupData(pruneNodes(objectInfo.hiddenNodes, "toggleState"));
-				
-				APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData).then(function (highlightedGroupResponse) {
-					APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData).then(function (hiddenGroupResponse) {
-						if (angular.isDefined(vm.commentThumbnail)) {
+
+				var promises = [];
+
+				if(highlightedGroupData) {
+					promises.push(APIService.post(vm.account + "/" + vm.model + "/groups", highlightedGroupData)
+						.then(function (highlightedGroupResponse) {
 							vm.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+						}));
+				}
+		
+				if(hiddenGroupData) {
+					promises.push(APIService.post(vm.account + "/" + vm.model + "/groups", hiddenGroupData)
+						.then(function (hiddenGroupResponse) {
 							vm.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
 							vm.commentViewpoint.hideIfc = TreeService.getHideIfc();
-							IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
-								.then(function (response) {
-									vm.saving = false;
-									vm.canEditDescription = vm.checkCanEditDesc();
-									vm.afterNewComment(response.data.issue);
-								})
-								.catch(function(error){
-									vm.errorSavingComment(error);
-								});
-				
-						} else {
+						}));
+				}
 
-							ViewerService.getCurrentViewpoint(
-								{promise: viewpointPromise, account: vm.issueData.account, model: vm.issueData.model}
-							);
-				
-							viewpointPromise.promise.then(function (viewpoint) {
-								viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-								viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-								viewpoint.hideIfc = TreeService.getHideIfc();
-								IssuesService.saveComment(vm.issueData, vm.comment, viewpoint)
-									.then(function (response) {
-										vm.saving = false;
-										vm.afterNewComment(response.data.issue);
-									})
-									.catch(function(error){
-										vm.errorSavingComment(error);
-									});
-							})
-							.catch(function(error) {
-								console.error(error);
-							});
-						}
-					})
-					.catch(function(error) {
-						console(error);
-					});
-				})
-				.catch(function(error) {
+				Promise.all(promises).then(function() {
+					IssuesService.saveComment(vm.issueData, vm.comment, vm.commentViewpoint)
+						.then(function (response) {
+							vm.saving = false;
+							vm.canEditDescription = vm.checkCanEditDesc();
+							vm.afterNewComment(response.data.issue);
+						})
+						.catch(function(error){
+							vm.errorSavingComment(error);
+						});
+				}).catch(function(error){
 					console.error(error);
 				});
+			
 
 				AnalyticService.sendEvent({
 					eventCategory: "Issue",
