@@ -96,6 +96,29 @@ module.exports = {
 		shared_storage: '/tmp',
 		event_exchange: 'eventExchange'
 	},
+	subscriptions: {
+		basic: {
+			collaborators: 0,
+			data: 200
+		},
+		plans: {
+			hundredQuidPlan: {
+				collaborators : 1,
+				label: "100-QUID-PRO-PLAN",
+				data: 1024* 10,
+				available: false,
+				price: 100
+			},
+			march2018: {
+				collaborators: 1,
+				label: "Advance License (from 2018)",
+				data: 1024 * 2,
+				available: true,
+				price: 29
+
+			}
+		}
+	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false,
 	paypal:{

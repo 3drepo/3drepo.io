@@ -74,11 +74,12 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 	let regularItems = [];
 	let proRataItems = [];
-
+	
 	this.subscriptions.paypal.forEach( licence => {
 
-		if(licence.pendingQuantity > licence.quantity)
+		if(licence.pendingQuantity > licence.quantity && licence.quantity !== 0)
 		{
+			//Calculate proRata if we are adding additional licenses
 			const additionalLicences = licence.pendingQuantity - licence.quantity;
 			proRataAmount += config.subscriptions.plans[licence.plan].price * additionalLicences;
 			proRataItems.push({plan: licence.plan, quantity: additionalLicences});
@@ -89,6 +90,8 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 	});
 
 
+	console.log("regular amount:", regularAmount, "items: ", regularItems);
+	console.log("proRata amount:", proRataAmount, "proRata items: ", proRataItems);
 	let nextPaymentDate = moment(this.nextPaymentDate);
 
 	if (proRataAmount) {
@@ -109,7 +112,7 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 		payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataAmount, country, isBusiness, proRataLength));
 	
-	} else {
+	} else if(proRataItems.length > 0){
 		// it means a decrease in no. of licences
 		// new agreement will start on next payment date
 
@@ -176,7 +179,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	let hasChanges = false;
 	let updatedSubs = [];
 	let totalSubCount = 0;
-		
+
 	for(let i = 0; i < newPlans.length; ++i) {
 
 		const newSubs = newPlans[i];

@@ -32,7 +32,6 @@ const User = require("../../models/user");
 const url = require("url");
 
 const Paypal = require("../../models/paypal");
-// const Subscriptions = require("../../models/subscriptions");
 
 const sinon = require("sinon");
 
