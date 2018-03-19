@@ -1026,18 +1026,6 @@ schema.methods.addTeamMember = function(user){
 
 };
 
-schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
-	"use strict";
-
-	this.customData.billing.billingUser = billingUser;
-	let subscription = this.customData.billing.addSubscription(plan, active, expiredAt);
-	//this.markModified('customData.billing');
-	return this.save().then(() => {
-		return Promise.resolve(subscription);
-	});
-
-};
-
 schema.methods.isMemberOfTeamspace = function(teamspace) {
 	"use strict";
 	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
