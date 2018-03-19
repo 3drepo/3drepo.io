@@ -65,7 +65,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 	}
 	var parent = utils.stringToUUID(uid);
 	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
-	return Meta.find({ account, model }, { type: "meta", parents: parent }, { "parents": 1, "metadata.IFC GUID": 1 })
+	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let ifcGuids = [];
 			results.forEach(res => {
@@ -78,7 +78,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 };
 
 function uuidsToIfcGuids(account, model, ids) {
-	const query = { type: "meta", parents: {$in: ids} };
+	const query = { type: "meta", parents: {$in: ids}, "metadata.IFC GUID": {$exists: true} };
 	const project =  { "metadata.IFC GUID": 1 };
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
