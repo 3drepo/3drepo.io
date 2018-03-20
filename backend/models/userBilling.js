@@ -76,9 +76,10 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 	let proRataItems = [];
 	
 	this.subscriptions.paypal.forEach( licence => {
-
+		console.log(licence);
 		if(licence.pendingQuantity > licence.quantity && licence.quantity !== 0)
 		{
+			console.log("Found pro rata licenses");
 			//Calculate proRata if we are adding additional licenses
 			const additionalLicences = licence.pendingQuantity - licence.quantity;
 			proRataAmount += config.subscriptions.plans[licence.plan].price * additionalLicences;
@@ -179,6 +180,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	let hasChanges = false;
 	let updatedSubs = [];
 	let totalSubCount = 0;
+	console.log("current subs:" , currentSubs, this.subscriptions);
 
 	for(let i = 0; i < newPlans.length; ++i) {
 
@@ -193,10 +195,12 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 		let planEntry = null;
 		
 		if(entryInCurrent < 0) {
+			console.log("no entry...");
 			planEntry = {plan: newSubs.plan, quantity: 0} 
 			planEntry.pendingQuantity = newSubs.quantity;
 		}
 		else {
+			console.log("found entry");
 			planEntry = currentSubs[entryInCurrent];
 			planEntry.pendingQuantity = newSubs.quantity;
 			currentSubs.splice(entryInCurrent, 1);

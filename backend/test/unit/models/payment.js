@@ -77,6 +77,7 @@ describe('UserBilling', function(){
 				vat: data.isBusiness ? 'ABC123' : null
 			}
 		}
+		console.log(data.currentSubscriptions);
 		if(data.lastAnniversaryDate){
 			instanceProp.lastAnniversaryDate = data.lastAnniversaryDate.toDate();
 			instanceProp.nextPaymentDate =  data.nextPaymentDate;
@@ -256,21 +257,14 @@ describe('UserBilling', function(){
 				quantity: 4
 			}];
 
-			let currentSubscriptions = [{
-				plan: 'hundredQuidPlan',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			},{
-				plan: 'hundredQuidPlan',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+			let currentSubscriptions = {
+				paypal:
+				[{
+					plan: 'hundredQuidPlan',
+					quantity: 2,
+					expiryDate: nextPaymentDate
+				}]
+			};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
