@@ -75,11 +75,15 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 	let regularItems = [];
 	let proRataItems = [];
 	
+	let licensesDecreased = false;
+
 	this.subscriptions.paypal.forEach( licence => {
-		console.log(licence);
+		//I'm not sure how well this will work when/if we have multi licenses
+		//Currently next payment is determined by whether we have proRata licenses
+		//And there can be situations where one has proRata and the other has decreased
+		licensesDecreased = licence.pendingQuantity < licence.quantity;
 		if(licence.pendingQuantity > licence.quantity && licence.quantity !== 0)
 		{
-			console.log("Found pro rata licenses");
 			//Calculate proRata if we are adding additional licenses
 			const additionalLicences = licence.pendingQuantity - licence.quantity;
 			proRataAmount += config.subscriptions.plans[licence.plan].price * additionalLicences;
@@ -91,10 +95,7 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 	});
 
 
-	console.log("regular amount:", regularAmount, "items: ", regularItems);
-	console.log("proRata amount:", proRataAmount, "proRata items: ", proRataItems);
 	let nextPaymentDate = moment(this.nextPaymentDate);
-
 	if (proRataAmount) {
 		// The length of the pro-rata period is difference between now and next payment date
 		proRataLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
@@ -113,12 +114,9 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 		payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataAmount, country, isBusiness, proRataLength));
 	
-	} else if(proRataItems.length > 0){
-		// it means a decrease in no. of licences
+	} else if(licensesDecreased){
 		// new agreement will start on next payment date
-
 		paymentDate = moment(nextPaymentDate).utc().toDate();
-
 	}
 
 	//useful for generating invoice
@@ -162,8 +160,8 @@ function getCleanedUpPayPalSubscriptions(currentSubs) {
 	let subs = [];
 	if(currentSubs) {
 		currentSubs.forEach( payPalEntry => {
-			if(!payPalEntry.expiryDate || payPalEntry.expiryDate > Date.now()) {
-				payPalEntry.pendingQuantity = undefined;
+			if(payPalEntry.quantity > 0) {
+				delete payPalEntry.pendingQuantity;
 				subs.push(payPalEntry);
 			}
 		});
@@ -180,7 +178,6 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	let hasChanges = false;
 	let updatedSubs = [];
 	let totalSubCount = 0;
-	console.log("current subs:" , currentSubs, this.subscriptions);
 
 	for(let i = 0; i < newPlans.length; ++i) {
 
@@ -195,12 +192,10 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 		let planEntry = null;
 		
 		if(entryInCurrent < 0) {
-			console.log("no entry...");
 			planEntry = {plan: newSubs.plan, quantity: 0} 
 			planEntry.pendingQuantity = newSubs.quantity;
 		}
 		else {
-			console.log("found entry");
 			planEntry = currentSubs[entryInCurrent];
 			planEntry.pendingQuantity = newSubs.quantity;
 			currentSubs.splice(entryInCurrent, 1);
@@ -212,7 +207,6 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 
 	hasChanges = hasChanges || currentSubs.length;
 
-	
 	if(hasChanges) {
 		this.subscriptions.paypal = updatedSubs;
 		const result = {

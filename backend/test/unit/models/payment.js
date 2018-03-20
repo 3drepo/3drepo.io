@@ -77,7 +77,6 @@ describe('UserBilling', function(){
 				vat: data.isBusiness ? 'ABC123' : null
 			}
 		}
-		console.log(data.currentSubscriptions);
 		if(data.lastAnniversaryDate){
 			instanceProp.lastAnniversaryDate = data.lastAnniversaryDate.toDate();
 			instanceProp.nextPaymentDate =  data.nextPaymentDate;
@@ -107,7 +106,7 @@ describe('UserBilling', function(){
 				quantity: 1
 			}];
 
-			let currentSubscriptions = {};
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'GB';
@@ -118,13 +117,11 @@ describe('UserBilling', function(){
 				expect(result.changes).to.deep.equal({	 
 					cancelledAllPlans: false 
 				});
-				console.log("Regular:", result.regularPayment);
 				expect(result.regularPayment.gross).to.equal(120);
 				expect(result.regularPayment.net).to.closeTo(100, Number.EPSILON);
 				expect(result.regularPayment.tax).to.closeTo(20, Number.EPSILON);
 				expect(result.regularPayment.length.value).to.equal(1);
 				expect(result.regularPayment.length.unit).to.equal('MONTH');
-				console.log("Pro-rata: ", result.proRataPayment);
 				expect(result.proRataPayment).to.not.exist;
 				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
 			});
@@ -137,7 +134,7 @@ describe('UserBilling', function(){
 				quantity: 3
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'GB';
@@ -165,7 +162,7 @@ describe('UserBilling', function(){
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'DE';
@@ -194,7 +191,7 @@ describe('UserBilling', function(){
 				quantity: 1
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'GB';
@@ -222,7 +219,7 @@ describe('UserBilling', function(){
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'DE';
@@ -257,7 +254,7 @@ describe('UserBilling', function(){
 				quantity: 4
 			}];
 
-			let currentSubscriptions = {
+			const currentSubscriptions = {
 				paypal:
 				[{
 					plan: 'hundredQuidPlan',
@@ -301,14 +298,12 @@ describe('UserBilling', function(){
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [{
+			const currentSubscriptions = {
+				paypal: [{
 				plan: 'hundredQuidPlan',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+				quantity: 1,
+				expiryDate: nextPaymentDate }
+			]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
@@ -344,14 +339,12 @@ describe('UserBilling', function(){
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [{
+			const currentSubscriptions = {
+				paypal: [{
 				plan: 'hundredQuidPlan',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+				quantity: 1,
+				expiryDate: nextPaymentDate}
+			]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
@@ -386,14 +379,12 @@ describe('UserBilling', function(){
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [{
+			const currentSubscriptions = {
+				paypal: [{
 				plan: 'hundredQuidPlan',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+				quantity: 1,
+				expiryDate: nextPaymentDate}
+			]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
@@ -429,18 +420,12 @@ describe('UserBilling', function(){
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [];
-
-			for(let i=0; i<3; i++){
-				currentSubscriptions.push({
-					plan: 'hundredQuidPlan',
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					inCurrentAgreement: true,
-					active: true,
-					expiredAt: nextPaymentDate
-				});
-			}
+			const currentSubscriptions = {
+				paypal: [{
+				plan: 'hundredQuidPlan',
+				quantity: 3,
+				expiryDate: nextPaymentDate
+				}]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 				
