@@ -15,23 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
+
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let utils = require("../utils");
+let uuid = require("node-uuid");
+let Schema = mongoose.Schema;
+let Mesh = require("./mesh");
+let responseCodes = require("../response_codes.js");
+let Meta = require("./meta");
 
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var utils = require('../utils');
-var uuid = require('node-uuid');
-var _ = require('lodash');
-var Schema = mongoose.Schema;
-var Mesh = require('./mesh');
-var responseCodes = require('../response_codes.js');
-var Meta = require('./meta');
-var systemLogger = require("../logger.js").systemLogger;
-var ifcIdMaps;
-
-var groupSchema = Schema({
+let groupSchema = Schema({
 	// no extra attributes
 	_id: Object,
+	name: String,
+	author: String,
+	description: String,
+	createdAt: Number,
 	objects: [{
 		_id : false,
 		shared_id: Object,
@@ -55,20 +57,20 @@ groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
 };
 
 groupSchema.statics.uuidToIfcGuids = function(obj) {
-	var account = obj.account;
-	var model = obj.model;
-	var uid = obj.shared_id;
+	let account = obj.account;
+	let model = obj.model;
+	let uid = obj.shared_id;
 	if ("[object String]" !== Object.prototype.toString.call(uid)) {
 		uid = utils.uuidToString(uid);
 	}
-	var parent = utils.stringToUUID(uid);
+	let parent = utils.stringToUUID(uid);
 	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
 	return Meta.find({ account, model }, { type: "meta", parents: parent }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let ifcGuids = [];
 			results.forEach(res => {
-				if (this.isIfcGuid(res.metadata['IFC GUID'])) {
-					ifcGuids.push(res.metadata['IFC GUID']);
+				if (this.isIfcGuid(res.metadata["IFC GUID"])) {
+					ifcGuids.push(res.metadata["IFC GUID"]);
 				}
 			});
 			return ifcGuids;
@@ -83,7 +85,6 @@ groupSchema.statics.isIfcGuid = function(value) {
 };
 
 groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
-	'use strict';
 
 	// Extract a unique list of IDs only
 	let groupObjectsMap = [];
@@ -128,7 +129,6 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 };
 
 groupSchema.statics.findByUID = function(dbCol, uid){
-	'use strict';
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -159,7 +159,7 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 							});
 						}
 					})
-				)
+				);
 			}
 
 			return Promise.all(sharedIdPromises).then(() => {
@@ -171,15 +171,11 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol){
-	'use strict';
-
-	return this.find(dbCol, {});
+groupSchema.statics.listGroups = function(dbCol, query){
+	return this.find(dbCol, query || {});
 };
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
-	'use strict';
-
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) }).then(group => {
 		const issueIdData = {
 			issue_id: issueId
@@ -190,8 +186,6 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 };
 
 groupSchema.methods.updateAttrs = function(data){
-	'use strict';
-
 	let ifcGuidPromises = [];
 
 	if (data.objects) {
@@ -217,21 +211,15 @@ groupSchema.methods.updateAttrs = function(data){
 	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
-
-		this.name = data.name || this.name;
-		this.objects = data.objects || this.objects;
-		this.color = data.color || this.color;
-		this.issue_id = data.issue_id || this.issue_id;
-
-		this.markModified('objects');
+		Object.assign(this, data);
+		this.markModified("objects");
 		return this.save();
 	});
+
 };
 
 groupSchema.statics.createGroup = function(dbCol, data){
-	'use strict';
-
-	let group = this.model('Group').createInstance({
+	let group = this.model("Group").createInstance({
 		account: dbCol.account, 
 		model: dbCol.model
 	});
@@ -241,7 +229,6 @@ groupSchema.statics.createGroup = function(dbCol, data){
 };
 
 groupSchema.methods.clean = function(){
-	'use strict';
 
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
@@ -262,7 +249,6 @@ groupSchema.methods.clean = function(){
 
 
 groupSchema.statics.deleteGroup = function(dbCol, id){
-	'use strict';
 
 	return Group.findOneAndRemove(dbCol, { _id : utils.stringToUUID(id)}).then(group => {
 
@@ -286,8 +272,8 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 	});
 };
 
-var Group = ModelFactory.createClass(
-	'Group', 
+const Group = ModelFactory.createClass(
+	"Group", 
 	groupSchema, 
 	arg => { 
 		return `${arg.model}.groups`;

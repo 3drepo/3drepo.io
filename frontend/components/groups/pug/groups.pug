@@ -4,7 +4,7 @@ div.groupsContainer
         layout="column"
         layout-align="center center"
         ng-if="vm.loading")
-        h3 Loading model settings...
+        h3 Loading groups...
 
     md-container.groupsList(
         ng-if="vm.toShow === 'groups'"
@@ -13,12 +13,11 @@ div.groupsContainer
 
         div.group(
             layout="row"
-            flex="100"
             ng-if="vm.groups.length > 0"
             ng-click="vm.selectGroup(group)"
             ng-repeat="group in vm.groups")
 
-            div.groupColorBar(style="background-color: {{group.color}};")
+            div.groupColorBar(style="background-color: {{vm.getGroupColor(group)}};")
             div(layout="column", flex="100" layout-margin)
                 div(layout="row" layout-align="space-between center")
                     span.groupName {{group.name}}
@@ -47,7 +46,7 @@ div.groupsContainer
                 layout="row"
                 layout-align="center center")
 
-        md-container(
+        md-container.noGroups(
             ng-if="vm.groups.length === 0"
             layout-fill
             layout="column")
@@ -77,26 +76,64 @@ div.groupsContainer
 
             div.metaMargin
                 label.groupMeta Creation Date: 
-                span.groupMeta {{ vm.selectedGroup.date }}
+                span.groupMeta {{ vm.selectedGroup.createdAt }}
 
-    div.addHolder(layout="row" layout-align="end-center")
-        button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
-            type="button" 
-            aria-label="Add"
-            ng-if="vm.toShow === 'groups'"
-            ng-click="vm.addGroup()")
-            md-icon(
-                class="angular-material-icons ng-scope material-icons"
-                role="img"
-                aria-hidden="true") add
+    div.addHolder(layout="row" flex="100")
 
-        button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
-            type="button" 
-            aria-label="Add" 
-            ng-if="vm.toShow === 'group'"
-            ng-click="vm.enableGroupEditing()")
-            md-icon(
-                class="angular-material-icons ng-scope material-icons"
-                role="img"
-                aria-hidden="true") edit
+        div(flex="50" layout="row" layout-align="start center")
+            button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                type="button" 
+                aria-label="Delete"
+                ng-show="vm.toShow === 'groups' && vm.selectedGroup"
+                ng-click="vm.deleteGroup()")
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") delete
+
+            button(
+                class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                style="background-color: {{vm.getGroupColor(vm.selectedGroup)}};"
+                type="button" 
+                aria-label="Color" 
+                ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                ng-click="vm.changeGroupColor()")
+
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") format_color_fill
+
+        div(flex="50" layout="row" layout-align="end center")
+            button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                type="button" 
+                aria-label="Add"
+                ng-show="vm.toShow === 'groups'"
+                ng-click="vm.addGroup()")
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") add
+            
+            button(
+                class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                type="button" 
+                aria-label="Add" 
+                ng-disabled="vm.saveDisabled()"
+                ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                ng-click="vm.handleGroupSave()")
+
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") save
+            
+            md-progress-circular.spinner(
+                ng-if="vm.toShow === 'group' && vm.savingGroup")
+
+
+
+
+        
+        
 

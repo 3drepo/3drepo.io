@@ -960,10 +960,13 @@ export class TreeService {
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNode(node: any, multi: boolean, final: boolean) {
+	public selectNode(node: any, multi: boolean, final: boolean, additive: boolean) {
 
 		if (node) {
-			if (multi) {
+
+			if (additive) {
+				this.setNodeSelection(node, true);
+			} else if (multi) {
 				// Multiselect mode and we selected the same node - unselect it
 				this.setNodeSelection(node, !node.selected);
 			} else {
@@ -994,7 +997,9 @@ export class TreeService {
 	 * @param nodes	Array of nodes to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNodes(nodes: any[], multi: boolean, final: boolean) {
+	public selectNodes(nodes: any[], multi: boolean, final: boolean, additive: boolean) {
+
+		console.log("selectNodes", additive);
 
 		if (nodes && nodes.length > 0) {
 			if (!multi) {
@@ -1005,11 +1010,31 @@ export class TreeService {
 			for (let i = 0; i < nodes.length; i++) {
 				const sameNodeIndex = this.currentSelectedNodes.indexOf(nodes[i]);
 
-				if (-1 === sameNodeIndex || multi) {
-					this.selectNode(nodes[i], true, final && nodes.length - 1 === i);
+				if (additive) {
+					this.selectNode(
+						nodes[i],
+						false,
+						true,
+						additive
+					);
+				} else if (-1 === sameNodeIndex || multi) {
+					this.selectNode(
+						nodes[i],
+						true,
+						final && nodes.length - 1 === i,
+						additive
+					);
 				}
+
 			}
 		}
+	}
+
+	public selectNodesByIds(nodeIds: any[], multi: boolean, final: boolean, additive: boolean) {
+		const nodes = nodeIds.map((n) =>{
+			return this.getNodeById(n._id);
+		});
+		this.selectNodes(nodes, multi, final, additive);
 	}
 
 	/**

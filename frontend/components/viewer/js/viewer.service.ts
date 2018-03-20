@@ -287,6 +287,10 @@ export class ViewerService {
 		}
 	}
 
+	public getMultiSelectMode() {
+		return this.viewer.multiSelectMode;
+	}
+
 	public setMultiSelectMode(value)  {
 		if (this.viewer) {
 			this.viewer.setMultiSelectMode(value);

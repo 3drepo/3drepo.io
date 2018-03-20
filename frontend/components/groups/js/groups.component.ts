@@ -19,9 +19,6 @@ class GroupsController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
-		"$q",
-
-		"ViewerService",
 		"GroupsService",
 	];
 
@@ -34,21 +31,25 @@ class GroupsController implements ng.IController {
 	private account: string;
 	private onShowItem;
 	private toShow: string;
+	private savingGroup: boolean;
+	private changed: boolean;
 
 	constructor(
 		private $scope: any,
-		private $q: any,
-
-		private ViewerService: any,
 		private GroupsService: any,
 	) {}
 
 	public $onInit() {
+		this.changed = false;
+		this.teamspace = this.account; // Workaround legacy naming 
 		this.onContentHeightRequest({height: 130});
 		this.watchers();
 		this.toShow = "groups";
 		this.loading = true;
-		this.getGroups(this.teamspace, this.model);
+		this.GroupsService.getGroups(this.account, this.model)
+			.then(() => {
+				this.loading = false;
+			})
 	}
 
 	public $onDestroy() {
@@ -57,59 +58,119 @@ class GroupsController implements ng.IController {
 
 	public watchers() {
 
+		this.$scope.$watch(() => {
+			return this.GroupsService.state;
+		}, (state) => {
+			angular.extend(this, state);
+			this.changed = true;
+		}, true)
+
 		this.$scope.$watch("vm.groups", () => {
 			this.setContentHeight();
 		});
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
-			console.log("vm.hideItems", newValue)
 			if (newValue) {
 				this.toShow = "groups";
 			}
-			
 		});
+
+		this.$scope.$watch("vm.selectedGroup", () => {
+			this.changed = true;
+		}, true);
 
 	}
 
-	public getGroups(teamspace, model) {
-		this.GroupsService.getGroups(this.model, this.teamspace)
-			.then((groups) => {
-				this.groups = groups;
-				this.loading = false;
-			});
+
+	public saveDisabled() {
+		return !this.selectedGroup ||
+			   !this.selectedGroup.name ||
+			   !this.changed
 	}
 
 	public editGroup() {
+		this.changed = false;
 		this.showGroupPane();
 	}
 
+	public deleteGroup(group) {
+		if (
+			this.selectedGroup && 
+			this.selectedGroup._id
+		) {
+			this.GroupsService.deleteGroup(
+				this.teamspace,
+				this.model,
+				this.selectedGroup
+			);
+		}
+	}
 
 	public addGroup() {
-		this.selectedGroup = {
+
+		this.GroupsService.selectGroup({
 			new: true,
-			date: new Date(),
-			author: this.account,
-		};
+			createdAt: Date.now(),
+			author: this.teamspace,
+			name: this.GroupsService.getDefaultGroupName(this.groups),
+		})
 		this.showGroupPane();
+	}
+
+	public handleGroupSave() {
+		this.savingGroup = true;
+		if (this.selectedGroup.new) {
+			this.createGroup();
+		} else {
+			this.updateGroup();
+		}
+	}
+
+		
+	public getGroupColor(group) {
+		return this.GroupsService.getGroupColor(group);
+	}
+
+	public updateGroup() {
+		console.log("updateGroup");
+		this.GroupsService.updateGroup(
+			this.teamspace,
+			this.model,
+			this.selectedGroup._id,
+			this.selectedGroup
+		)
+			.then(() => {
+				this.changed = false;
+				this.savingGroup = false;
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
+	public createGroup() {
+		this.GroupsService.createGroup(
+			this.teamspace,
+			this.model,
+			this.selectedGroup
+		)
+			.then(() => {
+				this.changed = false;
+				this.savingGroup = false;
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	}
 
 	public showGroupPane() {
-		console.log(this.onShowItem);
 		this.toShow = "group";
 		this.onContentHeightRequest({height: 280});
 		this.onShowItem();
 	}
 
-	public enableGroupEditing() {
-		
-	}
-
 	public selectGroup(group) {
-		if (this.selectedGroup) {
-			this.selectedGroup.selected = false;
-		}
-		this.selectedGroup = group;
-		this.selectedGroup.selected = true;
+		this.GroupsService.selectGroup(group);
 	}
 
 	public setContentHeight() {

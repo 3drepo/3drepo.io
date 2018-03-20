@@ -16,35 +16,42 @@
  */
 
 "use strict";
-var express = require('express');
-var router = express.Router({mergeParams: true});
-var middlewares = require('../middlewares/middlewares');
+let express = require("express");
+let router = express.Router({mergeParams: true});
+let middlewares = require("../middlewares/middlewares");
 // var config = require('../config');
-var C = require("../constants");
-var responseCodes = require('../response_codes.js');
-var Group = require('../models/group');
-var utils = require('../utils');
+let C = require("../constants");
+let responseCodes = require("../response_codes.js");
+let Group = require("../models/group");
+let utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get('/', middlewares.issue.canView, listGroups);
-router.get('/:uid', middlewares.issue.canView, findGroup);
-router.put('/:uid', middlewares.issue.canCreate, updateGroup);
-router.post('/', middlewares.issue.canCreate, createGroup);
-router.delete('/:id', middlewares.issue.canCreate, deleteGroup);
+router.get("/", middlewares.issue.canView, listGroups);
+router.get("/:uid", middlewares.issue.canView, findGroup);
+router.put("/:uid", middlewares.issue.canCreate, updateGroup);
+router.post("/", middlewares.issue.canCreate, createGroup);
+router.delete("/:id", middlewares.issue.canCreate, deleteGroup);
 
 
-var getDbColOptions = function(req){
+let getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
 function listGroups(req, res, next){
-	'use strict';
 
 	let place = utils.APIInfo(req);
+	let query = {};
 
-	Group.listGroups(getDbColOptions(req)).then(groups => {
+	// If we want groups that aren't from issues
+	if (req.query.noIssues) {
+		query = { issue_id: { $exists: false } };
+	}
+
+	Group.listGroups(getDbColOptions(req), query).then(groups => {
+
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
+
 		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
@@ -59,7 +66,6 @@ function listGroups(req, res, next){
 
 function findGroup(req, res, next){
 
-	'use strict';
 	let place = utils.APIInfo(req);
 
 	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
@@ -77,7 +83,6 @@ function findGroup(req, res, next){
 }
 
 function createGroup(req, res, next){
-	'use strict';
 
 	let place = utils.APIInfo(req);
 
@@ -93,13 +98,12 @@ function createGroup(req, res, next){
 }
 
 function deleteGroup(req, res, next){
-	'use strict';
 
 	let place = utils.APIInfo(req);
 
 	Group.deleteGroup(getDbColOptions(req), req.params.id).then(() => {
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, { 'status': 'success'});
+		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 		//next();	
 
 	}).catch(err => {
@@ -109,7 +113,6 @@ function deleteGroup(req, res, next){
 }
 
 function updateGroup(req, res, next){
-	'use strict';
 
 	let place = utils.APIInfo(req);
 

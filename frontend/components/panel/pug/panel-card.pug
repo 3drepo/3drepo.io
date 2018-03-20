@@ -25,14 +25,15 @@ div(layout="column", class="md-whiteframe-1dp")
 		md-content(id="content", style="height:{{vm.contentData.height}}px")
 			issues(
 				ng-if="vm.contentData.type === 'issues'"
+				account='vm.account'
+				model='vm.model'
 				show-add='vm.showAdd'
 				show='vm.contentData.show'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				on-show-item='vm.showItem()'
 				hide-item='vm.hideSelectedItem'
 				show-edit='vm.showEdit'
-				account='vm.account'
-				model='vm.model'
+
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
@@ -44,11 +45,13 @@ div(layout="column", class="md-whiteframe-1dp")
 				selected-menu-option='vm.selectedMenuOption')
 
 			groups(
+				ng-if="vm.contentData.type === 'groups'"
+				account='vm.account'
+				model='vm.model'
 				on-show-item='vm.showItem()'
 				hide-item='vm.hideSelectedItem'
 				on-content-height-request='vm.onContentHeightRequest(height)'
-				model-settings='vm.modelSettings'
-				ng-if="vm.contentData.type === 'groups'")
+				model-settings='vm.modelSettings')
 
 			docs(
 				ng-if="vm.contentData.type === 'docs'"

@@ -12,6 +12,10 @@ groups .groupContainer {
     overflow-y: auto;
 }
 
+groups .noGroups {
+    text-align: center;
+}
+
 groups .addHolder {
     bottom: 0;
     right: 0;
@@ -20,6 +24,12 @@ groups .addHolder {
     background: #fff;
     margin: 0;
     padding: 0;
+}
+
+groups .spinner {
+    width: 25px !important;
+    margin: 12.5px !important;
+    height: 25px !important;
 }
 
 groups .metaMargin {

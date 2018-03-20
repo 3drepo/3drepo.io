@@ -144,7 +144,6 @@ class PanelCardController implements ng.IController {
 	 * Content wants to show an individual item
 	 */
 	public showItem() {
-		console.log("showItem in panel-card");
 		this.statusIcon = "arrow_back";
 		this.hideMenuButton = true;
 		this.hideSelectedItem = false; // So that a change to this value is propagated
@@ -154,7 +153,6 @@ class PanelCardController implements ng.IController {
 	 * Content wants to show it's main content
 	 */
 	public hideItem() {
-		console.log("hideItem");
 		this.statusIcon = this.contentData.icon;
 		this.hideMenuButton = false;
 		this.hideSelectedItem = true;

@@ -18,56 +18,172 @@
 export class GroupsService {
 
 	public static $inject: string[] = [
+		"APIService",
+		"TreeService",
+		"MultiSelectService",
 	];
 
+	private state;
+
 	constructor(
+		private APIService: any,
+		private TreeService: any,
+		private MultiSelectService: any
 	) {
+		this.state = {
+			groups: [],
+			selectedGroup: {},
+		};
 	}
 
-	getGroups(teamspace, model) {
 
-		// const group = this.APIService.get(hiddenGroupUrl)
-		// 		.then((response) => {
+	public initGroups(teamspace, model) {
+		return this.getGroups(teamspace, model)
+			.then((groups) => {
+				console.log(groups)
+				this.state.groups = groups;
+				this.cleanGroups(this.state.groups);
+			});
+	}
 
-		// 		});
+	public getDefaultGroupName(groups) {
+		const groupNames = [];
+		groups.forEach((group) => {
+			groupNames.push(group.name);
+		});
+
+		const prefix = "Group ";
+		let num = 1;
+		let groupName = prefix + num;
+		while (groupNames.indexOf(groupName) !== -1) {
+			groupName = prefix + num++;
+		}
+		return groupName;
+	}
+
+	public getGroupColor(group) {
+		if (group && group.color) {
+			const red = group.color[0];
+			const blue = group.color[1];
+			const green = group.color[2];
+			return `rgba(${red}, ${blue}, ${green}, 1)`;
+		} 
+
+		return "rgba(255, 255, 255, 1)";
+	}
+
+	public cleanGroups(groups) {
+		groups.forEach((group) => {
+			if (!group.name) {
+				group.name = "No assigned name";
+			}
+		})
+	}
+
+	public selectGroup(group) {
+		if (this.state.selectedGroup) {
+			this.state.selectedGroup.selected = false;
+		}
+		this.state.selectedGroup = group;
+		this.state.selectedGroup.selected = true;
+
+		if (this.state.selectedGroup.objects) {	
+			const additive = this.MultiSelectService.isMultiMode();
+			this.TreeService.selectNodesByIds(
+				this.state.selectedGroup.objects,
+				additive,
+				true,
+				additive
+			);
+		}
+
+	}
+
+
+	public createGroupData(group) {
+		if (!group) {
+			console.error("No group object was passed to createGroupData");
+			return;
+		}
+		const groupData = {
+			name: group.name,
+			author: group.author,
+			description: group.description,
+			createdAt: group.createdAt || Date.now(),
+			color: group.color || [255, 0, 0],
+			objects: this.TreeService.getCurrentSelectedNodes(),
+		};
+		return groupData;
+	}
+
+	public getGroups(teamspace, model) {
+		const groupUrl = `${teamspace}/${model}/groups?noIssues=true`;
+
+		return this.APIService.get(groupUrl)
+			.then((response) => {
+				this.state.groups = response.data;
+			});
+	}
+
+	public updateGroup(teamspace, model, groupId, group) {
 		
-		return Promise.resolve([
-			{
-				name: "Group 1",
-				author: "James",
-				date: "24/08/2018",
-				description: "A new group hahahahahha",
-				color: "green"
-			},
-			{
-				name: "Group 2",
-				author: "James",
-				date: "24/08/2018",
-				description: "A group numbered 2",
-				color: "red"
-			},		{
-				name: "Group 3",
-				author: "James",
-				date: "24/08/2018",
-				description: "A new group hahahahahha",
-				color: "orange"
-			},
-			{
-				name: "Group 4",
-				author: "James",
-				date: "24/08/2018",
-				description: "A group numbered 2",
-				color: "yellow"
-			},
-			{
-				name: "Group 5",
-				author: "James",
-				date: "24/08/2018",
-				description: "A new group hahahahahha",
-				color: "blue"
-			},
-		]);
+		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
+		const groupData = this.createGroupData(group);
+		return this.APIService.put(groupUrl, groupData)
+			.then((response) => {
+				const newGroup = response.data;
+				newGroup.new = false;
+				this.replaceStateGroup(newGroup)
+				return newGroup;
+			});
 	}
+
+	public createGroup(teamspace, model, group) {
+		const groupUrl = `${teamspace}/${model}/groups/`;
+		const groupData = this.createGroupData(group);
+		
+		return this.APIService.post(groupUrl, groupData)
+			.then((response) => {
+				const newGroup = response.data;
+				newGroup.new = false;
+				this.state.groups.push(newGroup);
+				return newGroup;
+			});
+	}
+
+	public deleteGroup(teamspace, model, deleteGroup) {
+		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
+		return this.APIService.delete(groupUrl)
+			.then((response) => {
+				this.deleteStateGroup(deleteGroup)
+				return response;
+			});
+	}
+
+	public deleteStateGroup(deleteGroup) {
+		this.state.groups = this.state.groups.filter((g) => {
+			return deleteGroup._id !== g._id
+		}); 
+		if (deleteGroup._id === this.state.selectedGroup._id) {
+			this.state.selectedGroup = null;
+		}
+	}
+
+	public replaceStateGroup(newGroup) {
+
+		// We need to update the local date state
+		this.state.groups.forEach((group, i) => { 
+			if (newGroup._id === group._id) {
+				this.state.groups[i] = newGroup; 
+			} 
+		});
+
+		// And do the same if it's the selected group
+		if (newGroup._id === this.state.selectedGroup._id) {
+			this.state.selectedGroup = newGroup;
+		}
+	}
+	
 	
 }
 
