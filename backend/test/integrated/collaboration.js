@@ -828,7 +828,6 @@ describe('Sharing/Unsharing a model', function () {
 			agent.post(`/${username}/${model}/permissions`)
 			.send(permissions)
 			.expect(404, function(err, res){
-				console.log(err, res);
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
 			});
