@@ -20,6 +20,7 @@ export class TreeService {
 	public static $inject: string[] = [
 		"$q",
 		"APIService",
+		"ViewerService",
 	];
 
 	public highlightSelectedViewerObject;
@@ -52,6 +53,7 @@ export class TreeService {
 	constructor(
 		private $q: ng.IQService,
 		private APIService,
+		private ViewerService,
 	) {
 		this.reset();
 
@@ -567,7 +569,7 @@ export class TreeService {
 
 	/**
 	 * Update toggleState of given node based on its children and
-	 * traverse up the tree if necessary and call updateModelState
+	 * traverse up the tree if necessary and call updateModelVisibility
 	 * @param node	Node to update.
 	 */
 	public updateParentVisibility(node: any) {
@@ -725,7 +727,7 @@ export class TreeService {
 		}
 
 		if (!noHighlight) {
-			this.selectNode(this.nodesToShow[selectedIndex], multi, true, false).then(() => {
+			this.selectNodes([this.nodesToShow[selectedIndex]], multi, true, false).then(() => {
 				this.selectedIndex = selectedIndex;
 			});
 		} else {
@@ -775,7 +777,7 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, "invisible");
-		this.updateModelState(this.allNodes[0]);
+		this.updateModelVisibility(this.allNodes[0]);
 	}
 
 	/**
@@ -784,7 +786,7 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, "visible");
-		this.updateModelState(this.allNodes[0]);
+		this.updateModelVisibility(this.allNodes[0]);
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
@@ -836,7 +838,7 @@ export class TreeService {
 	public hideAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus(this.allNodes[0], "invisible");
 		if (updateModel) {
-			this.updateModelState(this.allNodes[0]);
+			this.updateModelVisibility(this.allNodes[0]);
 		}
 	}
 
@@ -849,7 +851,7 @@ export class TreeService {
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
 		if (updateModel) {
-			this.updateModelState(this.allNodes[0]);
+			this.updateModelVisibility(this.allNodes[0]);
 		}
 	}
 
@@ -897,29 +899,129 @@ export class TreeService {
 		return !node.children || !node.children || node.children.length === 0;
 	}
 
+
+
+	/**
+	 * Handle visibility changes from tree service to viewer service.
+	 * @param clickedIds	Collection of ids to show/hide.
+	 * @param visible	Set ids to visibile.
+	 */
+	public handleVisibility(clickedIds: any, visible: boolean) {
+
+		const objectIds = {};
+
+		for (const id in clickedIds) {
+			if (id) {
+				const account = clickedIds[id].account;
+				const model = clickedIds[id].model || clickedIds[id].project; // TODO: Kill .project from backend
+				const key = account + "@" + model;
+
+				if (!objectIds[key]) {
+					objectIds[key] = [];
+				}
+
+				objectIds[key].push(id);
+			}
+		}
+
+		// Update viewer object visibility
+		for (const key in objectIds) {
+			if (key) {
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				if (this.ViewerService.viewer) {
+	
+					this.ViewerService.switchObjectVisibility(
+						account,
+						model,
+						objectIds[key],
+						visible,
+					);
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * Handle highlight changes from tree service to viewer service.
+	 * @param highlightMap	Collection of ids to highlight.
+	 */
+	public handleSelection(highlightMap: any) {
+
+		// Update viewer highlights
+		this.ViewerService.clearHighlights();
+
+		for (const key in highlightMap) {
+			if (key) {
+
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				// Separately highlight the children
+				// but only for multipart meshes
+				this.ViewerService.highlightObjects({
+					account,
+					ids: highlightMap[key].meshes,
+					colour: highlightMap[key].colour,
+					model,
+					multi: true,
+					source: "tree",
+				});
+			}
+		}
+
+	}
+
 	/**
 	 * Update the state of clickedHidden and clickedShown, which are used by tree component
 	 * to apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public updateModelState(node) {
+	public updateModelVisibility(node) {
 
 		this.ready.promise.then(() => {
 			const childNodes = {};
 			this.traverseNodeAndPushId(node, childNodes, this.treeMap.idToMeshes);
 			for (const key in childNodes) {
-				if (key) {
-					for (let i = 0; i < childNodes[key].length; i++) {
-						const id  = childNodes[key][i];
-						const n = this.getNodeById(id);
-						if (n) {
-							this.updateModelStateHidden(n);
-							this.updateModelStateShown(n);
+				if (!key) {
+					continue;
+				}
+				const childMeshes = childNodes[key].meshes;
+
+				if (!childMeshes) {
+					continue;
+				}
+
+				for (let i = 0; i < childMeshes.length; i++) {
+
+					const id  = childMeshes[i];
+					const childNode = this.getNodeById(id);
+
+					if (childNode) {
+		
+						if (childNode.toggleState === "invisible") {
+							this.clickedHidden[childNode._id] = childNode;
+						} else {
+							delete this.clickedHidden[childNode._id];
 						}
+					
+						if (childNode.toggleState === "visible") {
+							this.clickedShown[childNode._id] = childNode;
+						} else {
+							delete this.clickedShown[childNode._id];
+						}
+						
 					}
 				}
 			}
-			this.visibilityUpdateTime = Date.now();
+
+			this.handleVisibility(this.getClickedHidden(), false);
+			this.handleVisibility(this.getClickedShown(), true);
+	
 		});
 
 	}
@@ -956,15 +1058,6 @@ export class TreeService {
 					this.currentSelectedNodes.splice(nodeIndex, 1);
 				}
 			}
-
-			return this.ready.promise.then(() => {
-				const highlightMap = {};
-				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, highlightMap, this.treeMap.idToMeshes, colour);
-				});
-
-				this.setHighlightMap(highlightMap);
-			});
 		}
 	}
 
@@ -973,9 +1066,23 @@ export class TreeService {
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNode(node: any, multi: boolean, final: boolean, additive: boolean, colour?: number[]) {
+	public selectNodes(nodes: any[], multi: boolean, final: boolean, additive: boolean, colour?: number[]) {
 
-		if (node) {
+		if (!nodes || nodes.length === 0) {
+			return Promise.reject("No node specified");
+		}
+
+		if (!multi) {
+			// If it is not multiselect mode, remove all highlights
+			this.clearCurrentlySelected();
+		}
+
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+
+			if (!node) {
+				continue;
+			}
 
 			if (additive) {
 				this.setNodeSelection(node, true, colour);
@@ -998,50 +1105,14 @@ export class TreeService {
 					});
 
 					this.setHighlightMap(map);
+					this.handleSelection(this.highlightMap);
 				});
 			}
+
 		}
 
-		return Promise.reject("No node specified");
 	}
 
-	/**
-	 * Select multiple nodes in the tree.
-	 * @param nodes	Array of nodes to select.
-	 * @param multi	Is multi select enabled.
-	 */
-	public selectNodes(nodes: any[], multi: boolean, final: boolean, additive: boolean) {
-
-		console.log("selectNodes", additive);
-
-		if (nodes && nodes.length > 0) {
-			if (!multi) {
-				// If it is not multiselect mode, remove all highlights
-				this.clearCurrentlySelected();
-			}
-
-			for (let i = 0; i < nodes.length; i++) {
-				const sameNodeIndex = this.currentSelectedNodes.indexOf(nodes[i]);
-
-				if (additive) {
-					this.selectNode(
-						nodes[i],
-						false,
-						true,
-						additive
-					);
-				} else if (-1 === sameNodeIndex || multi) {
-					this.selectNode(
-						nodes[i],
-						true,
-						final && nodes.length - 1 === i,
-						additive
-					);
-				}
-
-			}
-		}
-	}
 
 	public selectNodesByIds(nodeIds: any[], multi: boolean, final: boolean, additive: boolean) {
 		const nodes = nodeIds.map((n) =>{
@@ -1050,29 +1121,6 @@ export class TreeService {
 		this.selectNodes(nodes, multi, final, additive);
 	}
 
-	/**
-	 * Toggle node from clickedHidden collection.
-	 * @param node	Node to toggle.
-	 */
-	public updateModelStateHidden(node) {
-		if (node.toggleState === "invisible") {
-			this.clickedHidden[node._id] = node;
-		} else {
-			delete this.clickedHidden[node._id];
-		}
-	}
-
-	/**
-	 * Toggle node from clickedShown collection.
-	 * @param node	Node to toggle.
-	 */
-	public updateModelStateShown(node) {
-		if (node.toggleState === "visible") {
-			this.clickedShown[node._id] = node;
-		} else {
-			delete this.clickedShown[node._id];
-		}
-	}
 
 	/**
 	 * @returns	List of leaf nodes that are shown by default.

@@ -115,7 +115,7 @@ class TreeController implements ng.IController {
 								selectedNode.selected = true;
 							});
 
-							this.TreeService.updateModelState(this.allNodes[0]);
+							this.TreeService.updateModelVisibility(this.allNodes[0]);
 							angular.element((window as any).window).triggerHandler("resize");
 							
 						}
@@ -243,35 +243,35 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		this.updateTreeState();
+		//this.updateTreeState();
 
 	}
 
-	public updateTreeState() {
+	// public updateTreeState() {
 
-		// TODO - interval for redrawing highlights and object visibility is not ideal
+	// 	// TODO - interval for redrawing highlights and object visibility is not ideal
 
-		let lastViewerUpdateTime = Date.now();
-		setInterval(() => {
+	// 	let lastViewerUpdateTime = Date.now();
+	// 	setInterval(() => {
 
-			if (this.TreeService.highlightMapUpdateTime) {
-				if (lastViewerUpdateTime < this.TreeService.highlightMapUpdateTime) {
-					this.handleSelection(this.TreeService.highlightMap);
-				}
-			}
+	// 		if (this.TreeService.highlightMapUpdateTime) {
+	// 			if (lastViewerUpdateTime < this.TreeService.highlightMapUpdateTime) {
+	// 				this.handleSelection(this.TreeService.highlightMap);
+	// 			}
+	// 		}
 
-			if (this.TreeService.visibilityUpdateTime) {
-				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
-					this.handleVisibility(this.TreeService.getClickedHidden(), false);
-					this.handleVisibility(this.TreeService.getClickedShown(), true);
-				}
-			}
+	// 		if (this.TreeService.visibilityUpdateTime) {
+	// 			if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
+	// 				this.handleVisibility(this.TreeService.getClickedHidden(), false);
+	// 				this.handleVisibility(this.TreeService.getClickedShown(), true);
+	// 			}
+	// 		}
 
-			lastViewerUpdateTime = Date.now();
+	// 		lastViewerUpdateTime = Date.now();
 
-		}, 150);
+	// 	}, 150);
 
-	}
+	// }
 
 	public showTreeInPane() {
 		this.searching = false;
@@ -282,78 +282,6 @@ class TreeController implements ng.IController {
 		this.setContentHeight(this.nodes);
 	}
 
-	/**
-	 * Handle visibility changes from tree service to viewer service.
-	 * @param clickedIds	Collection of ids to show/hide.
-	 * @param visible	Set ids to visibile.
-	 */
-	public handleVisibility(clickedIds: any, visible: boolean) {
-		const objectIds = [];
-
-		for (const id in clickedIds) {
-			if (id) {
-				const account = clickedIds[id].account;
-				const model = clickedIds[id].model || clickedIds[id].project; // TODO: Kill .project from backend
-				const key = account + "@" + model;
-
-				if (!objectIds[key]) {
-					objectIds[key] = [];
-				}
-
-				objectIds[key].push(id);
-			}
-		}
-
-		// Update viewer object visibility
-		for (const key in objectIds) {
-			if (key) {
-				const vals = key.split("@");
-				const account = vals[0];
-				const model = vals[1];
-
-				if (this.ViewerService.viewer) {
-					this.ViewerService.switchObjectVisibility(
-						account,
-						model,
-						objectIds[key],
-						visible,
-					);
-				}
-
-			}
-		}
-	}
-
-	/**
-	 * Handle highlight changes from tree service to viewer service.
-	 * @param highlightMap	Collection of ids to highlight.
-	 */
-	public handleSelection(highlightMap: any) {
-
-		// Update viewer highlights
-		this.ViewerService.clearHighlights();
-
-		for (const key in highlightMap) {
-			if (key) {
-
-				const vals = key.split("@");
-				const account = vals[0];
-				const model = vals[1];
-
-				// Separately highlight the children
-				// but only for multipart meshes
-				this.ViewerService.highlightObjects({
-					account,
-					ids: highlightMap[key].meshes,
-					colour: highlightMap[key].colour,
-					model,
-					multi: true,
-					source: "tree",
-				});
-			}
-		}
-
-	}
 
 	/**
 	 * Set the content height.
@@ -414,7 +342,7 @@ class TreeController implements ng.IController {
 	public toggleTreeNode(node) {
 		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
 		this.TreeService.setTreeNodeStatus(node, newState);
-		this.TreeService.updateModelState(node);
+		this.TreeService.updateModelVisibility(node);
 	}
 
 	/**
@@ -423,8 +351,7 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
-		this.TreeService.updateModelState(node);
+		this.TreeService.selectNodes([node], this.MultiSelectService.isMultiMode(), true);
 	}
 
 	public filterItemSelected(item) {
@@ -447,8 +374,7 @@ class TreeController implements ng.IController {
 			// TODO: This throws a unity error when filtering
 
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNode(serviceNode, this.MultiSelectService.isMultiMode(), true);
-			this.TreeService.updateModelState(serviceNode);
+			this.TreeService.selectNode([serviceNode], this.MultiSelectService.isMultiMode(), true);
 		}
 
 	}

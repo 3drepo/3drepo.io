@@ -26,7 +26,7 @@ export class ViewerService {
 		"APIService",
 		"DialogService",
 		"EventService",
-		"DocsService",
+		//"DocsService",
 	];
 
 	private newPinId: string;
@@ -44,7 +44,7 @@ export class ViewerService {
 		public APIService: any,
 		public DialogService: any,
 		public EventService: any,
-		public DocsService: any,
+		//public DocsService: any,
 
 	) {
 
@@ -122,15 +122,15 @@ export class ViewerService {
 			// 	break;
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.DocsService.state.show = false;
+				//this.DocsService.state.show = false;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				if (valid) {
-					this.DocsService.handleObjectSelected(event);
-				}
+				// const valid = this.DocsService.state.active && !this.pin.pinDropMode;
+				// if (valid) {
+				// 	this.DocsService.handleObjectSelected(event);
+				// }
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:

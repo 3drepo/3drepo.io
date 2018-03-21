@@ -536,7 +536,7 @@ export class IssuesService {
 		}
 
 		this.TreeService.getMap().then(() => {
-			this.TreeService.updateModelState(this.TreeService.allNodes[0]);
+			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
 		});
 	}
 
@@ -555,7 +555,7 @@ export class IssuesService {
 
 				let hiddenPromise;
 
-				if (this.groupsCache[hiddenGroupId]) {
+				if (this.groupsCache[hiddenGroupUrl]) {
 					hiddenPromise = this.handleHidden(this.groupsCache[hiddenGroupUrl]);
 				} else {
 
@@ -581,7 +581,8 @@ export class IssuesService {
 
 				let shownPromise;
 
-				if (this.groupsCache[shownGroupId]) {
+				if (this.groupsCache[shownGroupUrl]) {
+					console.log("shownGroupUrl using cache")
 					shownPromise = this.handleShown(this.groupsCache[shownGroupUrl]);
 				} else {
 
