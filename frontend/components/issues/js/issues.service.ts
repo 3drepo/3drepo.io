@@ -658,88 +658,15 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-
-		this.TreeService.getMap()
-			.then((treeMap) => {
-
-				let nodes = new Set();
-
-				for (let i = 0; i < objects.length; i++) {
-					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-					if (objUid) {
-						let node = this.TreeService.getNodeById(objUid);
-						if (node && node.hasOwnProperty("name")) {
-							nodes.add(node);
-						}
-
-						if (i === objects.length - 1) {
-							// Only call expandToSelection for last selected node to improve performance
-							this.TreeService.initNodesToShow([this.TreeService.allNodes[0]]);
-							// TODO: we no longer need to select here, but still need to expand tree
-							this.TreeService.expandToSelection(this.TreeService.getPath(objUid), 0, undefined, true);
-							
-							if (nodes.size > 0) {
-								this.TreeService.selectNodes(Array.from(nodes), false, true);
-							}
-						}
-					}
-				}
-
-				angular.element((window as any)).triggerHandler("resize");
-				
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		this.TreeService.highlightsBySharedId(objects);
 	}
 
 	public handleHidden(objects) {
-
-		this.TreeService.getMap()
-			.then((treeMap) => {
-
-				if (objects) {
-					// Make a list of nodes to hide
-					let hiddenNodes = [];
-					for (let i = 0; i < objects.length; i++) {
-						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-						if (objUid) {
-							hiddenNodes.push(this.TreeService.getNodeById(objUid));
-						}
-					}
-					this.TreeService.hideTreeNodes(hiddenNodes);
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		this.TreeService.hideBySharedId(objects);
 	}
 
 	public handleShown(objects) {
-
-		this.TreeService.getMap()
-			.then((treeMap) => {
-
-				this.TreeService.hideAllTreeNodes(false);
-
-				if (objects) {
-					// Make a list of nodes to shown
-					let shownNodes = [];
-					for (let i = 0; i < objects.length; i++) {
-						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-						if (objUid) {
-							shownNodes.push(this.TreeService.getNodeById(objUid));
-						}
-					}
-					this.TreeService.showTreeNodes(shownNodes);
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		this.TreeService.showBySharedId(objects);
 	}
 
 	public handleTree(response) {

@@ -368,19 +368,6 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 
-		let removePromises = [];
-
-		group.objects.forEach(obj => removePromises.push(
-			Mesh.removeGroup(
-				obj.account,
-				obj.model,
-				utils.uuidToString(obj.id),
-				id
-			)
-		));
-
-		return Promise.all(removePromises);
-
 	});
 };
 

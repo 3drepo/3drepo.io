@@ -601,6 +601,7 @@ export class TreeService {
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -1120,6 +1121,108 @@ export class TreeService {
 		this.selectNodes(nodes, multi, additive, colour);
 	}
 
+	public selectNodesBySharedIds(sharedIds: any[], multi: boolean, additive: boolean, colour: number[]) {
+		return this.getMap().then(() => {
+			
+			const nodes = [];
+
+			for (let i = 0; i < sharedIds.length; i++) {
+				const objUid = this.treeMap.sharedIdToUid[sharedIds[i].shared_id];
+				const node = this.getNodeById(objUid);
+				nodes.push(node);
+			}
+			
+			console.log("selectNodesByIds", nodes, multi, additive, colour);
+			this.selectNodes(nodes, multi, additive, colour);
+			
+		});
+	}
+
+	public hideBySharedId(objects) {
+		this.getMap()
+			.then((treeMap) => {
+
+				if (objects) {
+					// Make a list of nodes to hide
+					let hiddenNodes = [];
+					for (let i = 0; i < objects.length; i++) {
+						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+						if (objUid) {
+							hiddenNodes.push(this.getNodeById(objUid));
+						}
+					}
+					this.hideTreeNodes(hiddenNodes);
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
+	public showBySharedId(objects) {
+
+		this.getMap()
+			.then((treeMap) => {
+
+				this.hideAllTreeNodes(false);
+
+				if (objects) {
+					// Make a list of nodes to shown
+					let shownNodes = [];
+					for (let i = 0; i < objects.length; i++) {
+						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+						if (objUid) {
+							shownNodes.push(this.getNodeById(objUid));
+						}
+					}
+					this.showTreeNodes(shownNodes);
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
+	}
+
+	public highlightsBySharedId(objects) {
+
+		this.getMap()
+			.then((treeMap) => {
+
+				let nodes = new Set();
+
+				for (let i = 0; i < objects.length; i++) {
+					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+					if (objUid) {
+						let node = this.getNodeById(objUid);
+						if (node && node.hasOwnProperty("name")) {
+							nodes.add(node);
+						}
+
+						if (i === objects.length - 1) {
+							// Only call expandToSelection for last selected node to improve performance
+							this.initNodesToShow([this.allNodes[0]]);
+							// TODO: we no longer need to select here, but still need to expand tree
+							this.expandToSelection(this.getPath(objUid), 0, undefined, true);
+							
+							if (nodes.size > 0) {
+								this.selectNodes(Array.from(nodes), false, true);
+							}
+						}
+					}
+				}
+
+				angular.element((window as any)).triggerHandler("resize");
+				
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	
+	}
 
 	/**
 	 * @returns	List of leaf nodes that are shown by default.

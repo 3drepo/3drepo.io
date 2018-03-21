@@ -80,6 +80,12 @@ export class GroupsService {
 		})
 	}
 
+	public isolateGroup(group) {
+		this.selectGroup(group).then(() => {
+			this.TreeService.isolateSelected();
+		})
+	}
+
 	public selectGroup(group) {
 		if (this.state.selectedGroup) {
 			this.state.selectedGroup.selected = false;
@@ -92,13 +98,15 @@ export class GroupsService {
 			const multi = this.MultiSelectService.isMultiMode();
 			const color = this.state.selectedGroup.color.map((c) => c / 255);
 			
-			this.TreeService.selectNodesByIds(
+			return this.TreeService.selectNodesBySharedIds(
 				this.state.selectedGroup.objects,
 				multi, // multi
 				true,
 				color,
 			);
 		}
+
+		return Promise.resolve();
 
 	}
 
@@ -109,12 +117,16 @@ export class GroupsService {
 			parseInt(255 * Math.random())
 		];
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
-		this.TreeService.selectNodesByIds(
-			this.state.selectedGroup.objects,
-			false, // multi
-			true,
-			color,
-		);
+		
+		if (this.state.selectedGroup.objects) {
+			this.TreeService.selectNodesBySharedIds(
+				this.state.selectedGroup.objects,
+				false, // multi
+				true,
+				color,
+			);
+		}
+		
 	}
 
 
@@ -129,9 +141,23 @@ export class GroupsService {
 			description: group.description,
 			createdAt: group.createdAt || Date.now(),
 			color: group.color || [255, 0, 0],
-			objects: this.TreeService.getCurrentSelectedNodes(),
+			objects: this.getSelectedObjects(),
 		};
 		return groupData;
+	}
+
+	public getSelectedObjects() {
+		const objects = this.TreeService.getCurrentSelectedNodes();
+		const cleanedObjects = [];
+		for (let i = 0; i < objects.length; i++) {
+			cleanedObjects[i] = {
+				shared_id:  objects[i].shared_id,
+				account:  objects[i].account,
+				model: objects[i].project
+			}
+		}
+
+		return cleanedObjects;
 	}
 
 	public getGroups(teamspace, model) {
@@ -144,9 +170,10 @@ export class GroupsService {
 	}
 
 	public updateGroup(teamspace, model, groupId, group) {
-
+		group.new = false;
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
 		const groupData = this.createGroupData(group);
+
 		console.log("updateGroup", groupData);
 		return this.APIService.put(groupUrl, groupData)
 			.then((response) => {
@@ -158,6 +185,7 @@ export class GroupsService {
 	}
 
 	public createGroup(teamspace, model, group) {
+		group.new = false;
 		const groupUrl = `${teamspace}/${model}/groups/`;
 		const groupData = this.createGroupData(group);
 		
@@ -166,6 +194,7 @@ export class GroupsService {
 				const newGroup = response.data;
 				newGroup.new = false;
 				this.state.groups.push(newGroup);
+				this.state.selectedGroup = newGroup;
 				return newGroup;
 			});
 	}

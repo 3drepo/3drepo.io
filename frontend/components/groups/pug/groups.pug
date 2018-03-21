@@ -30,6 +30,11 @@ div.groupsContainer
                 layout="row"
                 layout-align="center center")
 
+                md-button.md-icon-button(
+                    aria-label="Invert Colors"
+                    ng-click="vm.isolateGroup(group)")
+                    md-icon.angular-material-icons visibility
+
                 md-button.md-icon-button(aria-label="Invert Colors")
                     md-icon.angular-material-icons invert_colors
             

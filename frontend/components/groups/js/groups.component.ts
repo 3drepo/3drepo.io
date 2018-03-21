@@ -130,15 +130,15 @@ class GroupsController implements ng.IController {
 		this.GroupsService.changeSelectedGroupColor();
 	}
 
-		
+	public isolateGroup(group) {
+		this.GroupsService.isolateGroup(group);
+	}
+
 	public getGroupColor(group) {
 		return this.GroupsService.getGroupColor(group);
 	}
 
 	public updateGroup() {
-
-
-		console.log("updateGroup");
 		this.GroupsService.updateGroup(
 			this.teamspace,
 			this.model,
@@ -150,6 +150,7 @@ class GroupsController implements ng.IController {
 				this.savingGroup = false;
 			})
 			.catch((error) => {
+				this.savingGroup = false;
 				console.error(error);
 			});
 	}
@@ -165,6 +166,7 @@ class GroupsController implements ng.IController {
 				this.savingGroup = false;
 			})
 			.catch((error) => {
+				this.savingGroup = false;
 				console.error(error);
 			});
 	}
