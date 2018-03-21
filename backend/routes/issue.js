@@ -131,7 +131,7 @@ function updateIssue(req, res, next){
 			action = User.findByUserName(req.params.account).then(dbUser => {
 
 				return Job.findByUser(dbUser.user, req.session.user.username).then(_job => {
-					const job = _job._id;
+					const job = _job ?  _job._id : null;
 					const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
 					const userIsAdmin = ModelHelper.isUserAdmin(
 						req.params.account, 
