@@ -485,7 +485,7 @@ export class TreeService {
 	/**
 	 * Add all child id of a node recursively, the parent node's id will also be added.
 	 */
-	public traverseNodeAndPushId(node: any, nodes: any, idToMeshes: any) {
+	public traverseNodeAndPushId(node: any, highlightMap: any, idToMeshes: any, colour?: number[]) {
 
 		if (!node) {
 			console.error("traverseNodeAndPushId node is null: ", node);
@@ -496,27 +496,40 @@ export class TreeService {
 			console.error("traverseNodeAndPushId - idToMeshes is not defined: ", idToMeshes);
 			return;
 		}
+		
 
 		const model = node.model || node.project;
 		const key = this.getAccountModelKey(node.account, model);
+
+		if (!highlightMap[key]) {
+			highlightMap[key] = {};
+		}
+		
+		if (colour) {
+			highlightMap[key].colour = colour
+		}
+
+		// Add the meshes
 		let meshes = idToMeshes[node._id];
+
+		// the node is within a sub model
 		if (key && idToMeshes[key]) {
-			// the node is within a sub model
 			meshes = idToMeshes[key][node._id];
 		}
 		if (meshes) {
-			if (!nodes[key]) {
-				nodes[key] = meshes;
+			if (!highlightMap[key].meshes) {
+				highlightMap[key].meshes = meshes;
 			} else {
-				nodes[key] = nodes[key].concat(meshes);
+				highlightMap[key].meshes = highlightMap[key].meshes.concat(meshes);
 			}
 		} else if (node.children) {
 			// This should only happen in federations.
 			// Traverse down the tree to find submodel nodes
 			node.children.forEach((child) => {
-				this.traverseNodeAndPushId(child, nodes, idToMeshes);
+				this.traverseNodeAndPushId(child, highlightMap, idToMeshes, colour);
 			});
 		}
+
 	}
 
 	/**
@@ -928,7 +941,7 @@ export class TreeService {
 	 * @param node		Node to set.
 	 * @param isSelected	Is selected.
 	 */
-	public setNodeSelection(node: any, isSelected: boolean) {
+	public setNodeSelection(node: any, isSelected: boolean, colour?: number[]) {
 		if (node.selected !== isSelected) {
 			const nodeIndex = this.currentSelectedNodes.indexOf(node);
 
@@ -945,12 +958,12 @@ export class TreeService {
 			}
 
 			return this.ready.promise.then(() => {
-				const map = {};
+				const highlightMap = {};
 				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes);
+					this.traverseNodeAndPushId(n, highlightMap, this.treeMap.idToMeshes, colour);
 				});
 
-				this.setHighlightMap(map);
+				this.setHighlightMap(highlightMap);
 			});
 		}
 	}
@@ -960,19 +973,19 @@ export class TreeService {
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNode(node: any, multi: boolean, final: boolean, additive: boolean) {
+	public selectNode(node: any, multi: boolean, final: boolean, additive: boolean, colour?: number[]) {
 
 		if (node) {
 
 			if (additive) {
-				this.setNodeSelection(node, true);
+				this.setNodeSelection(node, true, colour);
 			} else if (multi) {
 				// Multiselect mode and we selected the same node - unselect it
-				this.setNodeSelection(node, !node.selected);
+				this.setNodeSelection(node, !node.selected, colour);
 			} else {
 				// If it is not multiselect mode, remove all highlights
 				this.clearCurrentlySelected();
-				this.setNodeSelection(node, true);
+				this.setNodeSelection(node, true, colour);
 			}
 
 			if (!final) {
@@ -981,7 +994,7 @@ export class TreeService {
 				return this.ready.promise.then(() => {
 					const map = {};
 					this.currentSelectedNodes.forEach((n) => {
-						this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes);
+						this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes, colour);
 					});
 
 					this.setHighlightMap(map);

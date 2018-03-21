@@ -344,7 +344,8 @@ class TreeController implements ng.IController {
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({
 					account,
-					ids: highlightMap[key],
+					ids: highlightMap[key].meshes,
+					colour: highlightMap[key].colour,
 					model,
 					multi: true,
 					source: "tree",
