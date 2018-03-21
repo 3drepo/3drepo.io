@@ -43,15 +43,17 @@ var groupSchema = Schema({
 	color: [Number]
 });
 
-groupSchema.statics.ifcGuidToUUIDs = function(account, model, ifcGuid) {
-	return Meta.find({ account, model }, { type: "meta", "metadata.IFC GUID": ifcGuid }, { "parents": 1, "metadata.IFC GUID": 1 })
-		.then(results => {
-			let uuids = [];
-			for (let i = 0; i < results.length; i++) {
-				uuids = uuids.concat(results[i].parents);
-			}
-			return uuids;
+groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
+	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
+	const project = { parents: 1, _id: 0 };
+
+	const db = require("../db/db");
+	return db.getCollection(account, model+ ".scene").then(dbCol => {
+		return dbCol.find(query, project).toArray().then(results => {
+			return results;
 		});
+	});
+
 };
 
 groupSchema.statics.uuidToIfcGuids = function(obj) {
@@ -63,7 +65,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 	}
 	var parent = utils.stringToUUID(uid);
 	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
-	return Meta.find({ account, model }, { type: "meta", parents: parent }, { "parents": 1, "metadata.IFC GUID": 1 })
+	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let ifcGuids = [];
 			results.forEach(res => {
@@ -73,6 +75,17 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 			});
 			return ifcGuids;
 		});
+};
+
+function uuidsToIfcGuids(account, model, ids) {
+	const query = { type: "meta", parents: {$in: ids}, "metadata.IFC GUID": {$exists: true} };
+	const project =  { "metadata.IFC GUID": 1 };
+	const db = require("../db/db");
+	return db.getCollection(account, model+ ".scene").then(dbCol => {
+		return dbCol.find(query, project).toArray().then(results => {
+			return results;
+		});
+	});
 };
 
 /**
@@ -132,41 +145,45 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
-			let sharedIdObjects;
-			let sharedIdPromises = [];
-			let uniqueGroupObjects = [];
+			const sharedIdObjects = [];
+			const sharedIdPromises = [];
+			const ifcObjectByAccount = {};
 
 			for (let i = 0; i < group.objects.length; i++) {
 				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
-					uniqueGroupObjects[group.objects[i].ifc_guid] = group.objects[i];
+					const namespace = group.objects[i].account + "__" + group.objects[i].model;
+					if(!ifcObjectByAccount[namespace]) {
+						ifcObjectByAccount[namespace] = [];
+					}
+					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
 				}
-			}
+				else {
+					sharedIdObjects.push(group.objects[i]);
+				}
 
-			for (let ifcGuid in uniqueGroupObjects) {
-				const groupObject = uniqueGroupObjects[ifcGuid];
-				sharedIdPromises.push(
-					this.ifcGuidToUUIDs(groupObject.account,
-						groupObject.model,
-						groupObject.ifc_guid).then(sharedIds => {
-						for (let j = 0; j < sharedIds.length; j++) {
-							if (!sharedIdObjects) {
-								sharedIdObjects = [];
-							}
-							sharedIdObjects.push({
-								account: groupObject.account,
-								model: groupObject.model,
-								shared_id: sharedIds[j]
+			}
+			
+			for (let namespace in ifcObjectByAccount) {
+				const nsSplitArr = namespace.split("__");
+				const account = nsSplitArr[0];
+				const model = nsSplitArr[1];
+				if(account && model) {
+					sharedIdPromises.push(this.ifcGuidsToUUIDs(account, model,
+						ifcObjectByAccount[namespace]).then(results => {
+						for (let i = 0; i < results.length; i++) {
+							results[i].parents.forEach( id => {
+								sharedIdObjects.push({account, model, shared_id: utils.uuidToString(id)});
 							});
 						}
-					})
-				)
+					}));
+				}
+
 			}
 
 			return Promise.all(sharedIdPromises).then(() => {
-				if (sharedIdObjects && sharedIdObjects.length > 0) {
-					group.objects = sharedIdObjects;
-				}
-				return group;
+				let returnGroup = { _id: utils.uuidToString(group._id), color: group.color}
+				returnGroup.objects = sharedIdObjects;
+				return returnGroup;
 			});
 		});
 };
@@ -192,34 +209,60 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 groupSchema.methods.updateAttrs = function(data){
 	'use strict';
 
-	let ifcGuidPromises = [];
+	const ifcGuidPromises = [];
+	const sharedIdsByAccount = {};	
+	let modifiedObjectList = null;
 
 	if (data.objects) {
+		modifiedObjectList = []
 		for (let i = 0; i < data.objects.length; i++) {
 			const obj = data.objects[i];
 
 			if (obj.shared_id) {
+				const ns = obj.account + "__" + obj.model;
 				if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-					obj.id = utils.stringToUUID(obj.id);
+					obj.id = utils.stringToUUID(obj.shared_id);
 				}
-				ifcGuidPromises.push(
-					groupSchema.statics.uuidToIfcGuids(obj).then(ifcGuids => {
-						if (ifcGuids && ifcGuids.length > 0) {
-							for (let i = 0; i < ifcGuids.length; i++) {
-								obj.ifc_guid = ifcGuids[i];
-								delete obj.shared_id;
-							}
-						}
-					})
-				);
+				if(!sharedIdsByAccount[ns]) {
+					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
+				}
+				sharedIdsByAccount[ns].sharedIDArr.push(obj.id);
+				sharedIdsByAccount[ns].org.push(obj);
+				
+			}
+			else {
+				modifiedObjectList.push(obj);
 			}
 		}
+
+		for (let namespace in sharedIdsByAccount) {
+			const nsSplitArr = namespace.split("__");
+			const account = nsSplitArr[0];
+			const model = nsSplitArr[1];
+			ifcGuidPromises.push(
+				uuidsToIfcGuids(account, model, sharedIdsByAccount[namespace].sharedIDArr).then(ifcGuids => {
+					if (ifcGuids && ifcGuids.length > 0) {
+						for (let i = 0; i < ifcGuids.length; i++) {
+							modifiedObjectList.push({account, model, ifc_guid: ifcGuids[i].metadata["IFC GUID"]});
+						}
+					}
+					else {
+						//this isn't a IFC GUID model.
+						modifiedObjectList = modifiedObjectList.concat(sharedIdsByAccount[namespace].org);
+					}
+					
+				})
+			);
+		}
+
+
+
 	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
 
 		this.name = data.name || this.name;
-		this.objects = data.objects || this.objects;
+		this.objects = modifiedObjectList || this.objects;
 		this.color = data.color || this.color;
 		this.issue_id = data.issue_id || this.issue_id;
 

@@ -69,7 +69,7 @@ function findGroup(req, res, next){
 			return Promise.resolve(group);
 		}
 	}).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
