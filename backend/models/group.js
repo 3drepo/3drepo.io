@@ -116,8 +116,8 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 					ifcGuidPromises.push(
 						this.uuidToIfcGuids(obj).then(ifcGuids => {
 							if (ifcGuids && ifcGuids.length > 0) {
-								for (let i = 0; i < ifcGuids.length; i++) {
-									obj.ifc_guid = ifcGuids[i];
+								for (let j = 0; j < ifcGuids.length; j++) {
+									obj.ifc_guid = ifcGuids[j];
 									delete obj.shared_id;
 									groupObjectsMap[obj.ifc_guid] = obj;
 								}
@@ -133,6 +133,9 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 				if (groupObjectsMap && groupObjectsMap.length > 0) {
 					group.objects = [];
 					for (let id in groupObjectsMap) {
+						if (id === undefined) {
+							continue;
+						}
 						group.objects.push(groupObjectsMap[id]);
 					}
 				}
@@ -164,6 +167,9 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 			}
 			
 			for (let namespace in ifcObjectByAccount) {
+				if (namespace === undefined) {
+					continue;
+				}
 				const nsSplitArr = namespace.split("__");
 				const account = nsSplitArr[0];
 				const model = nsSplitArr[1];
@@ -231,6 +237,9 @@ groupSchema.methods.updateAttrs = function(data){
 		}
 
 		for (let namespace in sharedIdsByAccount) {
+			if (namespace === undefined) {
+				continue;
+			}
 			const nsSplitArr = namespace.split("__");
 			const account = nsSplitArr[0];
 			const model = nsSplitArr[1];
@@ -249,8 +258,6 @@ groupSchema.methods.updateAttrs = function(data){
 				})
 			);
 		}
-
-
 
 	}
 
