@@ -712,7 +712,7 @@ export class TreeService {
 		}
 
 		if (!noHighlight) {
-			this.selectNode(this.nodesToShow[selectedIndex], multi, true).then(() => {
+			this.selectNode(this.nodesToShow[selectedIndex], multi, true, false).then(() => {
 				this.selectedIndex = selectedIndex;
 			});
 		} else {

@@ -104,6 +104,11 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
+
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+
 			let ifcGuidPromises = [];
 
 			for (let i = 0; group && i < group.objects.length; i++) {
@@ -148,6 +153,11 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
+
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+
 			const sharedIdObjects = [];
 			const sharedIdPromises = [];
 			const ifcObjectByAccount = {};
