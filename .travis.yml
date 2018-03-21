@@ -28,6 +28,7 @@ before_install:
     - mongod --version
     - until nc -z localhost 27017; do sleep 1; done
     - test_ver=`cat backend/test/testDBVersion`
+    - echo $test_ver
     - cd submodules/tests
     - git checkout $test_ver
     - git status
