@@ -118,9 +118,10 @@ describe('Job', function () {
 			},
 
 			callback => {
-				agent.get(`/${username}/jobs`)
+				agent.get(`/${username}/members`)
 				.expect(200, function(err, res){
-					expect(res.body.find(entry => entry._id === job._id).users.indexOf("user1")).to.not.equal(-1);
+					var entry = res.body.members.find(entry => entry.user === "user1");
+					expect(entry.job).to.equal(job._id);
 					callback(err);
 				});
 			}
@@ -133,22 +134,18 @@ describe('Job', function () {
 	it('should able to change assignment to another job', function(done){
 		async.series([
 			callback => {
-				agent.put(`/${username}/jobs/${job2._id}/user1`)
+				agent.post(`/${username}/jobs/${job2._id}/user1`)
 				.expect(200, function(err, res){
 					callback(err);
 				});
 			},
 
 			callback => {
-				agent.get(`/${username}/jobs`)
+				agent.get(`/${username}/members`)
 				.expect(200, function(err, res){
 					for(var i = 0; i < res.body.length; ++i) {
-						if(res.body[i]._id === job._id) {
-							expect(res.body[i].users.indexOf("user1")).to.not.equal(-1);
-						}
-						else {
-							expect(res.body[i].users.indexOf("user1")).to.equal(-1);
-						}
+						var entry = res.body.members.find(entry => entry.user === "user1");
+						expect(entry.job).to.equal(job2._id);
 					}
 
 					callback(err);
@@ -182,9 +179,9 @@ describe('Job', function () {
 	})
 
 	it('job should be removed from the list', function(done){
-		agent.get(`/${username}.json`)
+		agent.get(`/${username}/jobs`)
 		.expect(200, function(err, res){
-			expect(res.body.jobs).to.deep.equal([job2]);
+			expect(res.body).to.deep.equal([job2]);
 			done(err);
 		});
 	});
