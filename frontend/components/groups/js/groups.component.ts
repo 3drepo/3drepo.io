@@ -126,12 +126,18 @@ class GroupsController implements ng.IController {
 		}
 	}
 
+	public changeGroupColor() {
+		this.GroupsService.changeSelectedGroupColor();
+	}
+
 		
 	public getGroupColor(group) {
 		return this.GroupsService.getGroupColor(group);
 	}
 
 	public updateGroup() {
+
+
 		console.log("updateGroup");
 		this.GroupsService.updateGroup(
 			this.teamspace,

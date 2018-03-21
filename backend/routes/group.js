@@ -16,14 +16,14 @@
  */
 
 "use strict";
-let express = require("express");
-let router = express.Router({mergeParams: true});
-let middlewares = require("../middlewares/middlewares");
-// var config = require('../config');
-let C = require("../constants");
-let responseCodes = require("../response_codes.js");
-let Group = require("../models/group");
-let utils = require("../utils");
+
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
+const Group = require("../models/group");
+const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
 router.get("/", middlewares.issue.canView, listGroups);
@@ -31,7 +31,6 @@ router.get("/:uid", middlewares.issue.canView, findGroup);
 router.put("/:uid", middlewares.issue.canCreate, updateGroup);
 router.post("/", middlewares.issue.canCreate, createGroup);
 router.delete("/:id", middlewares.issue.canCreate, deleteGroup);
-
 
 let getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
@@ -51,7 +50,6 @@ function listGroups(req, res, next){
 
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
-
 		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
@@ -68,7 +66,7 @@ function findGroup(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
+	Group.findByUIDSerialised(getDbColOptions(req), req.params.uid).then( group => {
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {

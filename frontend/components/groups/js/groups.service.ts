@@ -88,15 +88,33 @@ export class GroupsService {
 		this.state.selectedGroup.selected = true;
 
 		if (this.state.selectedGroup.objects) {	
-			const additive = this.MultiSelectService.isMultiMode();
+			console.log(this.state.selectedGroup.objects);
+			const multi = this.MultiSelectService.isMultiMode();
+			const color = this.state.selectedGroup.color.map((c) => c / 255);
+			
 			this.TreeService.selectNodesByIds(
 				this.state.selectedGroup.objects,
-				additive,
+				multi, // multi
 				true,
-				additive
+				color,
 			);
 		}
 
+	}
+
+	public changeSelectedGroupColor() {
+		this.state.selectedGroup.color = [
+			parseInt(255 * Math.random()), 
+			parseInt(255 * Math.random()),
+			parseInt(255 * Math.random())
+		];
+		const color = this.state.selectedGroup.color.map((c) => c / 255);
+		this.TreeService.selectNodesByIds(
+			this.state.selectedGroup.objects,
+			false, // multi
+			true,
+			color,
+		);
 	}
 
 
@@ -126,9 +144,10 @@ export class GroupsService {
 	}
 
 	public updateGroup(teamspace, model, groupId, group) {
-		
+
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
 		const groupData = this.createGroupData(group);
+		console.log("updateGroup", groupData);
 		return this.APIService.put(groupUrl, groupData)
 			.then((response) => {
 				const newGroup = response.data;

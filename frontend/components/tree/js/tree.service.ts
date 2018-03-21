@@ -727,7 +727,7 @@ export class TreeService {
 		}
 
 		if (!noHighlight) {
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, true, false).then(() => {
+			this.selectNodes([this.nodesToShow[selectedIndex]], multi, false).then(() => {
 				this.selectedIndex = selectedIndex;
 			});
 		} else {
@@ -1066,7 +1066,7 @@ export class TreeService {
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNodes(nodes: any[], multi: boolean, final: boolean, additive: boolean, colour?: number[]) {
+	public selectNodes(nodes: any[], multi: boolean, additive: boolean, colour?: number[]) {
 
 		if (!nodes || nodes.length === 0) {
 			return Promise.reject("No node specified");
@@ -1085,6 +1085,7 @@ export class TreeService {
 			}
 
 			if (additive) {
+				console.log("additiive", node);
 				this.setNodeSelection(node, true, colour);
 			} else if (multi) {
 				// Multiselect mode and we selected the same node - unselect it
@@ -1095,30 +1096,28 @@ export class TreeService {
 				this.setNodeSelection(node, true, colour);
 			}
 
-			if (!final) {
-				return Promise.resolve();
-			} else {
-				return this.ready.promise.then(() => {
-					const map = {};
-					this.currentSelectedNodes.forEach((n) => {
-						this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes, colour);
-					});
-
-					this.setHighlightMap(map);
-					this.handleSelection(this.highlightMap);
-				});
-			}
-
 		}
+
+		return this.ready.promise.then(() => {
+			const map = {};
+			this.currentSelectedNodes.forEach((n) => {
+				this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes, colour);
+			});
+
+			this.setHighlightMap(map);
+			this.handleSelection(this.highlightMap);
+		});
 
 	}
 
 
-	public selectNodesByIds(nodeIds: any[], multi: boolean, final: boolean, additive: boolean) {
+	public selectNodesByIds(nodeIds: any[], multi: boolean, additive: boolean, colour: number[]) {
 		const nodes = nodeIds.map((n) =>{
 			return this.getNodeById(n._id);
 		});
-		this.selectNodes(nodes, multi, final, additive);
+
+		console.log("selectNodesByIds", nodes, multi, additive, colour);
+		this.selectNodes(nodes, multi, additive, colour);
 	}
 
 

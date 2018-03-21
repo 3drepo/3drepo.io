@@ -90,6 +90,8 @@ function uuidsToIfcGuids(account, model, ids) {
 	});
 }
 
+
+
 /**
  * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
  */
@@ -149,7 +151,55 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 		});
 };
 
+
 groupSchema.statics.findByUID = function(dbCol, uid){
+
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+		.then(group => {
+			let sharedIdObjects = [];
+			let sharedIdPromises = [];
+			let ifcObjectByAccount = {};
+
+			for (let i = 0; i < group.objects.length; i++) {
+				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
+					const namespace = group.objects[i].account + "__" + group.objects[i].model;
+					if(!ifcObjectByAccount[namespace]) {
+						ifcObjectByAccount[namespace] = [];
+					}
+					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
+				}
+			}
+
+			for (let namespace in ifcObjectByAccount) {
+				const nsSplitArr = namespace.split("__");
+				const account = nsSplitArr[0];
+				const model = nsSplitArr[1];
+				sharedIdPromises.push(
+					this.ifcGuidsToUUIDs(account,
+						model,
+						ifcObjectByAccount[namespace]).then(sharedIds => {
+						for (let j = 0; j < sharedIds.length; j++) {
+							sharedIdObjects.push({
+								account,
+								model,
+								shared_id: sharedIds[j]
+							});
+						}
+					})
+				);
+			}
+
+			return Promise.all(sharedIdPromises).then(() => {
+				if (sharedIdObjects && sharedIdObjects.length > 0) {
+					group.objects = sharedIdObjects;
+				}
+				return group;
+			});
+		});
+
+};
+
+groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
