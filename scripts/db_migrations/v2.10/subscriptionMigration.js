@@ -14,7 +14,10 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 			jobEntrys[job._id] = job;
 			jobEntrys[job._id].users = [];
 		});
+
+		delete user.customData.jobs;
 	}
+
 
 	if(user.customData.billing.subscriptions && user.customData.billing.subscriptions.constructor === Array) {
 		user.customData.billing.subscriptions.forEach(function(sub) {

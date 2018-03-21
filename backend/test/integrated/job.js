@@ -37,9 +37,6 @@ describe('Job', function () {
 	let job = { _id: 'job1', color: '000000'};
 	let job2 = { _id: 'job2', color: '000000'};
 
-	let subId = '58ecfbf94804d17bee4cdbbc';
-
-
 	before(function(done){
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
@@ -95,16 +92,15 @@ describe('Job', function () {
 	});
 
 	it('should able to list the job created', function(done){
-		agent.get(`/${username}.json`)
+		agent.get(`/${username}/jobs`)
 		.expect(200, function(err, res){
-			expect(res.body.jobs).to.deep.equal([job, job2]);
+			expect(res.body).to.deep.equal([job, job2]);
 			done(err);
 		});
 	});
 
 	it('should fail to assign a job that doesnt exist to a licence(user)', function(done){
-		agent.post(`/${username}/subscriptions/${subId}/assign`)
-		.send({ user: 'testing', job: `nonsense`})
+		agent.post(`/${username}/jobs/nonsense/user1`)
 		.expect(404, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
 			done(err);
@@ -115,17 +111,16 @@ describe('Job', function () {
 
 		async.series([
 			callback => {
-				agent.post(`/${username}/subscriptions/${subId}/assign`)
-				.send({ user: 'testing', job: job._id})
+				agent.post(`/${username}/jobs/${job._id}/user1`)
 				.expect(200, function(err, res){
 					callback(err);
 				});
 			},
 
 			callback => {
-				agent.get(`/${username}/subscriptions`)
+				agent.get(`/${username}/jobs`)
 				.expect(200, function(err, res){
-					expect(res.body.find(sub => sub._id === subId).job).to.equal(job._id);
+					expect(res.body.find(entry => entry._id === job._id).users.indexOf("user1")).to.not.equal(-1);
 					callback(err);
 				});
 			}
@@ -134,53 +129,28 @@ describe('Job', function () {
 
 	});
 
-	it('should fail to change assignment to a job that doesnt exist to a licence(user)', function(done){
-		agent.put(`/${username}/subscriptions/${subId}/assign`)
-		.send({ job: `nonsense`})
-		.expect(404, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
-			done(err);
-		});
-	});
 
 	it('should able to change assignment to another job', function(done){
 		async.series([
 			callback => {
-				agent.put(`/${username}/subscriptions/${subId}/assign`)
-				.send({ job: job2._id})
+				agent.put(`/${username}/jobs/${job2._id}/user1`)
 				.expect(200, function(err, res){
 					callback(err);
 				});
 			},
 
 			callback => {
-				agent.get(`/${username}/subscriptions`)
+				agent.get(`/${username}/jobs`)
 				.expect(200, function(err, res){
-					expect(res.body.find(sub => sub._id === subId).job).to.equal(job2._id);
-					callback(err);
-				});
-			}
+					for(var i = 0; i < res.body.length; ++i) {
+						if(res.body[i]._id === job._id) {
+							expect(res.body[i].users.indexOf("user1")).to.not.equal(-1);
+						}
+						else {
+							expect(res.body[i].users.indexOf("user1")).to.equal(-1);
+						}
+					}
 
-		], (err, res) => done(err));
-	});
-
-
-	it('should able to unassign', function(done){
-
-		let subId = '591063b613f4b994b72df324';
-		async.series([
-			callback => {
-				agent.put(`/${username}/subscriptions/${subId}/assign`)
-				.send({ job: ''})
-				.expect(200, function(err, res){
-					callback(err);
-				});
-			},
-
-			callback => {
-				agent.get(`/${username}/subscriptions`)
-				.expect(200, function(err, res){
-					expect(res.body.find(sub => sub._id === subId).job).to.not.exist;
 					callback(err);
 				});
 			}

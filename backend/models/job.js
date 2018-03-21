@@ -93,7 +93,7 @@ schema.statics.addUserToJob = function(teamspace, user, jobName) {
 	return User.teamspaceMemberCheck(teamspace, user).then( () => {
 		return Job.findByJob(teamspace, jobName).then( (job) => {
 			if(!job) {
-				return Promise.reject(responseCodse.JOB_NOT_FOUND);
+				return Promise.reject(responseCodes.JOB_NOT_FOUND);
 			}
 
 			return Job.removeUserFromAnyJob(teamspace, user).then(() => {
