@@ -328,21 +328,13 @@ class IssueController implements ng.IController {
 
 	}
 
-	public handleBCFAssign(BCFAssign: string) {
-
-		const exists = this.modelJobs.find((assign) => {
-			return BCFAssign === assign.value;
-		});
-
-		if (!exists) {
-			const newAssign = {
-				value: BCFAssign,
-				label: BCFAssign,
+	public handleBCFAssign(BCFAssign: [string]) {
+		BCFAssign.forEach((unknownJob) => {
+			if (this.modelJobs.indexOf(unknownJob) === -1) {
+				this.modelJobs.push(unknownJob);
+				this.$timeout(() => {});
 			};
-			this.modelJobs.push(newAssign);
-			this.$timeout(() => {});
-
-		}
+		});
 
 	}
 
@@ -406,6 +398,12 @@ class IssueController implements ng.IController {
 		this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 		this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 		this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
+
+
+		this.handleBCFPriority(this.issueData.priority);
+		this.handleBCFStatus(this.issueData.status);
+		this.handleBCFAssign(this.issueData.assigned_roles);
+		this.handleBCFType(this.issueData.topic_type);
 
 		this.checkCanComment();
 		this.convertCommentTopicType();
@@ -582,7 +580,7 @@ class IssueController implements ng.IController {
 				priority: this.issueData.priority,
 				status: this.issueData.status,
 				topic_type: this.issueData.topic_type,
-				due_date: this.issueData.due_date,
+				due_date: Date.parse(this.issueData.due_date),
 				assigned_roles: this.issueData.assigned_roles,
 			};
 
@@ -900,6 +898,7 @@ class IssueController implements ng.IController {
 					const parentNodeId = nodePath.shift();
 					const parentNode = this.TreeService.getNodeById(parentNodeId);
 					if (
+						node.project === parentNode.project && // Do not prune node if parent is a federation node
 						(node[property] && node[property] === parentNode[property]) ||
 						(!node[property] && 1 === nodePath.length)
 					) {
@@ -937,7 +936,7 @@ class IssueController implements ng.IController {
 			color: [255, 0, 0],
 			objects: nodes,
 		};
-		return groupData;
+		return nodes.length === 0? null : groupData;
 	}
 
 	public createGroup(viewpoint, screenShot, objectInfo) {
@@ -948,21 +947,27 @@ class IssueController implements ng.IController {
 		// Create a group of hidden objects
 		const hiddenGroupData = this.createGroupData(this.pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 
-		this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
-			.then((highlightedGroupResponse) => {
+		const promises = [];
 
-				viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-				this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
-					.then((hiddenGroupResponse) => {
-						viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-						this.doSaveIssue(viewpoint, screenShot);
-					}).catch((error) => {
-						console.error(error);
-					});
+		if(highlightedGroupData) {
+			promises.push(this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
+				.then((highlightedGroupResponse) => {
+					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+				}));
+		}
 
-			}).catch((error) => {
-				console.error(error);
-			});
+		if(hiddenGroupData) {
+			promises.push(this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
+				.then((hiddenGroupResponse) => {
+					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+				}));
+		}
+
+		Promise.all(promises).then(() => {
+			this.doSaveIssue(viewpoint, screenShot);
+		}).catch((error) => {
+			console.error(error);
+		});
 
 	}
 
@@ -992,7 +997,7 @@ class IssueController implements ng.IController {
 			priority: this.issueData.priority,
 			status: this.issueData.status,
 			topic_type: this.issueData.topic_type,
-			due_date: this.issueData.due_date,
+			due_date: Date.parse(this.issueData.due_date),
 			desc: this.issueData.desc,
 			rev_id: this.revision,
 		};
@@ -1060,7 +1065,6 @@ class IssueController implements ng.IController {
 	}
 
 	public saveComment() {
-		const viewpointPromise = this.$q.defer();
 		const objectsPromise = this.$q.defer();
 
 		// Get selected objects
@@ -1068,74 +1072,69 @@ class IssueController implements ng.IController {
 			promise: objectsPromise,
 		});
 
-		objectsPromise.promise.then((objectInfo) => {
+		const initPromises = [];
 
+		let objectInfo;
+
+		initPromises.push(objectsPromise.promise.then((_objectInfo) => {
+			objectInfo = _objectInfo;
+		}));
+
+		if (!angular.isDefined(this.commentThumbnail)) {
+			var viewpointPromise = this.$q.defer();
+			this.ViewerService.getCurrentViewpoint(
+				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
+			);
+			initPromises.push(viewpointPromise.promise.then((viewpoint) => {
+				this.commentViewpoint = viewpoint;
+			}));
+		}
+
+		Promise.all(initPromises).then( () => {
+			//FIXME: this is duplicated code - something similar already exists in CreateGroup
 			// Create a group of selected objects
-			const prunedSelected = this.pruneNodes(objectInfo.highlightedNodes, "selected");
-			const highlightedGroupData = this.createGroupData(prunedSelected);
-
+			const highlightedGroupData = this.createGroupData(this.pruneNodes(objectInfo.highlightedNodes, "selected"));
+		
 			// Create a group of hidden objects
-			const pruneHidden = this.pruneNodes(objectInfo.hiddenNodes, "toggleState");
-			const hiddenGroupData = this.createGroupData(pruneHidden);
+			const hiddenGroupData = this.createGroupData(this.pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 
-
-			// TODO: This needs denesting
-			const postUrl = `${this.account}/${this.model}/groups`;
-			this.APIService.post(postUrl, highlightedGroupData)
+			const promises = [];
+			
+			if(highlightedGroupData) {
+			promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
 				.then((highlightedGroupResponse) => {
-					this.APIService.post(postUrl, hiddenGroupData)
-						.then((hiddenGroupResponse) => {
-							if (angular.isDefined(this.commentThumbnail)) {
-								this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-								this.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-								this.commentViewpoint.hideIfc = this.TreeService.getHideIfc();
-								this.IssuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
-									.then((response) => {
-										this.saving = false;
-										this.canEditDescription = this.checkCanEditDesc();
-										this.afterNewComment(response.data.issue, false);
-									})
-									.catch((error) => {
-										this.errorSavingComment(error);
-									});
-
-							} else {
-
-								this.ViewerService.getCurrentViewpoint(
-									{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
-								);
-
-								viewpointPromise.promise.then((viewpoint) => {
-									viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-									viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-									viewpoint.hideIfc = this.TreeService.getHideIfc();
-									this.IssuesService.saveComment(this.issueData, this.comment, viewpoint)
-										.then((response) => {
-											this.saving = false;
-											this.afterNewComment(response.data.issue, false);
-										})
-										.catch((error) => {
-											this.errorSavingComment(error);
-										});
-								})
-								.catch((error) => {
-									console.error(error);
-								});
-							}
-						})
-						.catch((error) => {
-							console.error(error);
-						});
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-
+					this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+				}));
+			}
+	
+			if(hiddenGroupData) {
+				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
+					.then((hiddenGroupResponse) => {
+						this.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+						this.commentViewpoint.hideIfc = this.TreeService.getHideIfc();
+					}));
+			}
+	
+			Promise.all(promises).then(() => {
+				this.IssuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
+					.then((response) => {
+						this.saving = false;
+						this.canEditDescription = this.checkCanEditDesc();
+						this.afterNewComment(response.data.issue, false);
+					})
+					.catch((error) => {
+						this.errorSavingComment(error);
+					});
+			}).catch((error) => {
+				console.error(error);
+			});
+			
 			this.AnalyticService.sendEvent({
 				eventCategory: "Issue",
-				eventAction: "comment",
+				eventAction: "comment"
 			});
 		});
+
 	}
 
 	public errorSavingComment(error) {
