@@ -149,15 +149,14 @@ schema.methods.changePermissions = function(permissions){
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
-
-			return	User.findByUserName(permission.user).then( assignedUser => {
+			promises.push(User.findByUserName(permission.user).then( assignedUser => {
 				if(!assignedUser) {
-					return promises.push(Promise.reject(responseCodes.USER_NOT_FOUND));
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 
 				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
 				if(!isMember) {
-					return promises.push(Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE));
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}
 				let perm = this.permissions.find(perm => perm.user === permission.user);
 
@@ -166,24 +165,18 @@ schema.methods.changePermissions = function(permissions){
 					perm.permission = permission.permission;
 
 				}
-
-			});
+			}));
 
 
 			
 		});
 
-		return Promise.all(promises);
+		return Promise.all(promises).then( () => {
+			this.permissions = permissions;
+			return this.save();
+		});
 
-	}).then(() => {
-		
-		this.permissions = permissions;
-
-		return this.save();		
-	}).then(
-		() => this.permissions
-	);
-
+	});
 };
 
 schema.methods.isPermissionAssigned = function(permission){
