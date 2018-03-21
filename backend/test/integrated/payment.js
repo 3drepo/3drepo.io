@@ -120,7 +120,7 @@ describe("Enrolling to a subscription", function () {
 	let plans = {
 		"plans": [
 			{
-			"plan": "THE-100-QUID-PLAN",
+			"plan": "hundredQuidPlan",
 			"quantity": 3
 			}
 		],
@@ -137,18 +137,6 @@ describe("Enrolling to a subscription", function () {
 			"vat": "123456"
 		}
 	};
-
-
-	// it("should fail if VAT is invalid", function(done){
-	// 	this.timeout(timeout);
-
-	// 	agent.post(`/${username}/subscriptions`)
-	// 	.send(plans)
-	// 	.expect(400, function(err, res){
-	// 		expect(res.body.value).to.equal(responseCodes.INVALID_VAT.value);
-	// 		done(err);
-	// 	});
-	// });
 
 
 	it("should succeed no VAT is supplied", function(done){
@@ -197,7 +185,7 @@ describe("Enrolling to a subscription", function () {
 		let _plans = {
 			"plans": [
 				{
-				"plan": "THE-100-QUID-PLAN",
+				"plan": "hundredQuidPlan",
 				"quantity": 3
 				}
 			],
@@ -256,7 +244,7 @@ describe("Enrolling to a subscription", function () {
 		let _plans = {
 			"plans": [
 				{
-				"plan": "THE-100-QUID-PLAN",
+				"plan": "hundredQuidPlan",
 				"quantity": 3
 				}
 			],
