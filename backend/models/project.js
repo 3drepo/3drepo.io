@@ -123,6 +123,7 @@
 		let usersToRemove = [];
 		let usersToAdd = [];
 
+		let check = Promise.resolve();
 		if(data.permissions){
 			// user to delete
 			for(let i = data.permissions.length -1; i >=0; i--){
@@ -133,28 +134,15 @@
 
 			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
 			usersToAdd = _.difference(data.permissions.map(p => p.user), this.permissions.map(p => p.user));
-		}
 
-		Object.keys(data).forEach(key => {
-			if(whitelist.indexOf(key) !== -1){
-
-				this[key] = data[key];
-			}
-		});
-
-		let check = Promise.resolve();
-
-		if(this.permissions.length){
-			
 			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
 
-				User.getAllUsersInTeamspace(teamspace.user).then( members => {
-					const someUserNotAssignedWithLicence = this.permissions.some(
+				return User.getAllUsersInTeamspace(teamspace.user).then( members => {
+					const someUserNotAssignedWithLicence = data.permissions.some(
 						perm => {
-							!members.includes(perm.user);
+							return !members.includes(perm.user);
 						}
 					);
-
 					if(someUserNotAssignedWithLicence){
 						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 					}
@@ -164,8 +152,16 @@
 			});
 		}
 
+		
 		return check.then(() => {
 
+			Object.keys(data).forEach(key => {
+				if(whitelist.indexOf(key) !== -1){
+
+					this[key] = data[key];
+				}
+			});
+	
 			let userPromises = [];
 
 			usersToRemove.forEach(user => {
