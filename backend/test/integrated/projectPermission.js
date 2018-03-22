@@ -279,8 +279,6 @@ describe('Project Permissions::', function () {
 
 			
 			callback => {
-				console.log('permissions', permissions);
-
 				agentTeamspaceAdmin
 				.put(`/${teamspace}/projects/${project}`)
 				.send({ permissions })
@@ -368,7 +366,7 @@ describe('Project Permissions::', function () {
 			done(err);});
 	});
 
-	it('Users with admin_project permission on a project can access a model in it', function(done){
+	it('Users with admin_project permission on a project can access jobs', function(done){
 
 		const modelId = '4b130bee-caba-46c1-a64d-32b7d1a41d6f';
 
