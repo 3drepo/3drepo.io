@@ -173,6 +173,7 @@
 
 		LICENCE_REMOVAL_SPACE_EXCEEDED: { message: "Your current quota usage exceeds the requested change.", status: 400 },
 		REMOVE_ASSIGNED_LICENCE: { message: "Some of the licences are assigned and can\"t be removed", status: 400 },
+		LICENCE_LIMIT_REACHED: {message: "All licenses have been assigned", status: 400},
 
 		BILLING_NOT_FOUND: { message: "Billing not found", status: 404 },
 		PAYPAL_ERROR: { status: 400 },

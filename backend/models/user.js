@@ -930,15 +930,18 @@ schema.methods.updateSubscriptions = function(plans, billingUser, billingAddress
 	});
 };
 
+function updateUser(username, update) {
+	const db = require("../db/db");
+	return db.getCollection("admin", "system.users").then(dbCol => {
+		return dbCol.update({user: username}, update);
+	});
+
+}
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
 	"use strict";
-
-
 	let dbUser;
-
 	return this.findUserByBillingId(billingAgreementId).then(user => {
-
 		dbUser = user;
 
 		if(!dbUser){
@@ -948,7 +951,8 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
 
 	}).then(() => {
-		return dbUser.save();
+		// FIXME: For some reason this.save() wasn't always working. overriding this with direct mongo client update.
+		return updateUser(dbUser.user,  {$set: {"customData.billing" : dbUser.customData.billing}});
 	}).then(() => {
 		return Promise.resolve({subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo});
 	});
@@ -958,14 +962,22 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 schema.methods.executeBillingAgreement = function(){
 	"use strict";
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
-		return this.save();
-	});
+	//	return this.save()			
+		// FIXME: For some reason this.save() wasn't always working. overriding this with direct mongo client update.
+		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
+	})
 };
 
 schema.methods.removeTeamMember = function(username, cascadeRemove){
 	"use strict";
 	let foundProjects = [];
 	let foundModels = [];
+	
+	if(this.user === username) {
+		//The user should not be able to remove itself from the teamspace
+		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
+	}
+
 	let teamspacePerm = this.customData.permissions.findByUser(username);
 	//check if they have any permissions assigned
 	return Project.find({ account: this.user }, { 'permissions.user':  username}).then(projects => {
@@ -1014,16 +1026,23 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 
 schema.methods.addTeamMember = function(user){
 	"use strict";
-
-	return User.findByUserName(user).then(userEntry => {
-	
-		if(userEntry.isMemberOfTeamspace(this.user)) {
-			return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);	
+	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
+		const limits = this.customData.billing.getSubscriptionLimits();
+		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
+			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
 		}
-		
-		return Role.grantTeamSpaceRoleToUser(user, this.user);
+		else {
+			return User.findByUserName(user).then(userEntry => {
+				if(!userEntry) {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
+				if(userEntry.isMemberOfTeamspace(this.user)) {
+					return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);	
+				}
+				return Role.grantTeamSpaceRoleToUser(user, this.user);
+			});
+		}
 	});
-
 };
 
 schema.methods.isMemberOfTeamspace = function(teamspace) {

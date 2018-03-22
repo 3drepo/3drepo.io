@@ -245,6 +245,11 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 
 		} else {
 
+			const isNewPayment = !this.subscriptions.paypal || 
+				this.subscriptions.paypal.filter( (entry) => {
+					return entry.quantity > 0;
+				}).length === 0;
+			
 			//changes in plans
 			let startDate = getImmediatePaymentStartDate();
 
@@ -253,7 +258,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 			const invoiceLineItems = data.listItems;
 
 			//init date for 1st/'new' payments
-			if (invoiceLineItems.proRataPeriodPlans.length){
+			if (isNewPayment){
 				this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 				this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 			}
@@ -290,11 +295,11 @@ function renewAndCleanSubscriptions(subs, newExpiryDate) {
 	if(subs) {
 		subs.forEach( sub => {
 			if(sub.pendingQuantity) {
-				sub.expiryDate = newExpiryDate;
 				sub.quantity = sub.pendingQuantity;
-				sub.pendingQuantity = undefined;
-				updatedSubs.push(sub);
+				delete sub.pendingQuantity;
 			}
+			sub.expiryDate = newExpiryDate;
+			updatedSubs.push(sub);
 		});
 	}
 	return updatedSubs;
@@ -312,7 +317,6 @@ billingSchema.methods.executeBillingAgreement = function(user){
 			return Promise.resolve();
 
 		} else {
-
 			//exec the agreement
 			return Paypal.executeAgreement(this.paypalPaymentToken).then(_billingAgreement => {
 
@@ -437,19 +441,16 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 	const User = require('./user');
 
 	let invoice;
-
 	if(this.nextPaymentDate > paymentInfo.nextPaymentDate){
 		return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
 	}
 
-	return Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
+	const promise = Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
 		if(invoice){
 			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
 		}
 
 	}).then(() => {
-
-
 		if(this.nextPaymentDate && 
 			moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(this.nextPaymentDate).utc().startOf('date').toISOString()){
 			this.lastAnniversaryDate = new Date(this.nextPaymentDate);
@@ -464,91 +465,92 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 			.toDate();
 
 		this.subscriptions.paypal = renewAndCleanSubscriptions(this.subscriptions.paypal, expiredAt);
-
-		return Invoice.findPendingInvoice(user, this.billingAgreementId);
+	});
 	
-	}).then(pendingInvoice => {
+	promise.then( () => {
+		return Invoice.findPendingInvoice(user, this.billingAgreementId).then(pendingInvoice => {
+			invoice = pendingInvoice;
 
-		invoice = pendingInvoice;
+			if(!invoice){
 
-		if(!invoice){
+				invoice = Invoice.createInstance({ account: user });
+				return invoice.initInvoice({ 
+					nextPaymentDate: this.nextPaymentDate,
+					billingAgreementId: this.billingAgreementId,
+					billingInfo: this.billingInfo,
+					startDate: this.lastAnniversaryDate,
+					account: user
+				});
+			}
 
-			invoice = Invoice.createInstance({ account: user });
-			return invoice.initInvoice({ 
-				nextPaymentDate: this.nextPaymentDate,
+		}).then(() => {
+
+			invoice.changeState(C.INV_COMPLETE, {
+				raw: raw,
+				gateway: paymentInfo.gateway,
+				currency: paymentInfo.currency,
+				amount: paymentInfo.amount,
 				billingAgreementId: this.billingAgreementId,
-				billingInfo: this.billingInfo,
-				startDate: this.lastAnniversaryDate,
-				account: user
+				nextPaymentDate: this.nextPaymentDate,
+				taxAmount: paymentInfo.taxAmount,
+				nextPaymentAmount: paymentInfo.nextAmount,
+				transactionId: paymentInfo.transactionId
 			});
-		}
 
-	}).then(() => {
-
-		invoice.changeState(C.INV_COMPLETE, {
-			raw: raw,
-			gateway: paymentInfo.gateway,
-			currency: paymentInfo.currency,
-			amount: paymentInfo.amount,
-			billingAgreementId: this.billingAgreementId,
-			nextPaymentDate: this.nextPaymentDate,
-			taxAmount: paymentInfo.taxAmount,
-			nextPaymentAmount: paymentInfo.nextAmount,
-			transactionId: paymentInfo.transactionId
-		});
-
-		return invoice.save();
-
-	}).then(invoice => {
-
-		return invoice.generatePDF().then(pdf => {
-
-			invoice.pdf = pdf;
-			// also save the pdf to database for ref.
 			return invoice.save();
-		});
+
+		}).then(invoice => {
+
+			return invoice.generatePDF().then(pdf => {
+	
+				invoice.pdf = pdf;
+				// also save the pdf to database for ref.
+				return invoice.save();
+			});
 			
 
-	}).then(invoice => {
+		}).then(invoice => {
 
-		//email
+			//email
+			let attachments;
 
-		let attachments;
-
-		attachments = [{
-			filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
-			content: invoice.pdf
-		}];
+			attachments = [{
+				filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
+				content: invoice.pdf
+			}];
 		
 
-		//send invoice
-		let amount = invoice.amount;
-		let currency = invoice.currency;
+			//send invoice
+			let amount = invoice.amount;
+			let currency = invoice.currency;
 
-		User.findByUserName(this.billingUser).then(billingUser => {
+			return User.findByUserName(this.billingUser).then(billingUser => {
 			
-			return Promise.all([
-				//make a copy to sales
-				Mailer.sendPaymentReceivedEmailToSales({
-					account: user,
-					amount: `${currency}${amount}`,
-					email: billingUser.customData.email,
-					invoiceNo: invoice.invoiceNo,
-					type: invoice.type
-				}, attachments),
+				return Promise.all([
+					//make a copy to sales
+					Mailer.sendPaymentReceivedEmailToSales({
+						account: user,
+						amount: `${currency}${amount}`,
+						email: billingUser.customData.email,
+						invoiceNo: invoice.invoiceNo,
+						type: invoice.type
+					}, attachments),
 
-				Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
-					account: user,
-					amount: `${currency}${amount}`,
-				}, attachments)
-			]);
+					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
+						account: user,
+						amount: `${currency}${amount}`,
+					}, attachments)
+				]);
 
-		}).catch(err => {
-			systemLogger.logError(`Email error - ${err.message}`);
-		});
+			}).catch(err => {
+				systemLogger.logError(`Email error - ${err.message}`);
+			});
 
-		return;
+			return;
+		})
 	});
+	return promise;
+
 };
 
 module.exports = billingSchema;
