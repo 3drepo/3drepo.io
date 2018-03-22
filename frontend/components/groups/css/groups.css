@@ -86,3 +86,31 @@ groups .groupsList {
     height: calc(100% - 52px);
     overflow-y: scroll;
 }
+
+/** menus appear in another part of the DOM **/
+
+
+.groupColorColumn {
+    width: 100px;
+}
+
+.groupHexColor {
+    width: 135px;
+    margin-right: 20px;
+}
+
+.groupHexColorContainer {
+    margin-top: 30px;
+}
+
+
+.groupColorMenu {
+    height: 195px;
+    width: 365px;
+}
+
+.groupColor {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
+}

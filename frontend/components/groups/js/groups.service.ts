@@ -61,12 +61,21 @@ export class GroupsService {
 		return groupName;
 	}
 
-	public getGroupColor(group) {
+	public setSelectedGroupColor(color) {
+		this.state.selectedGroup.color = color;
+		this.updateSelectedGroupColor();
+	}
+
+	public getRGBA(color) {
+		const red = color[0];
+		const blue = color[1];
+		const green = color[2];
+		return `rgba(${red}, ${blue}, ${green}, 1)`;
+	}
+
+	public getGroupRGBAColor(group) {
 		if (group && group.color) {
-			const red = group.color[0];
-			const blue = group.color[1];
-			const green = group.color[2];
-			return `rgba(${red}, ${blue}, ${green}, 1)`;
+			return this.getRGBA(group.color);
 		} 
 
 		return "rgba(255, 255, 255, 1)";
@@ -110,12 +119,7 @@ export class GroupsService {
 
 	}
 
-	public changeSelectedGroupColor() {
-		this.state.selectedGroup.color = [
-			parseInt(255 * Math.random()), 
-			parseInt(255 * Math.random()),
-			parseInt(255 * Math.random())
-		];
+	public updateSelectedGroupColor() {
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
 		
 		if (this.state.selectedGroup.objects) {

@@ -17,7 +17,7 @@ div.groupsContainer
             ng-click="vm.selectGroup(group)"
             ng-repeat="group in vm.groups")
 
-            div.groupColorBar(style="background-color: {{vm.getGroupColor(group)}};")
+            div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
             div(layout="column", flex="100" layout-margin)
                 div(layout="row" layout-align="space-between center")
                     span.groupName {{group.name}}
@@ -96,18 +96,32 @@ div.groupsContainer
                     role="img"
                     aria-hidden="true") delete
 
-            button(
-                class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                style="background-color: {{vm.getGroupColor(vm.selectedGroup)}};"
-                type="button" 
-                aria-label="Color" 
-                ng-show="vm.toShow === 'group' && !vm.savingGroup"
-                ng-click="vm.changeGroupColor()")
+            md-menu
+                button(
+                    class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                    style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};"
+                    type="button" 
+                    aria-label="Color" 
+                    ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                    ng-click="vm.openColorMenu($mdMenu, $event)")
 
-                md-icon(
-                    class="angular-material-icons ng-scope material-icons"
-                    role="img"
-                    aria-hidden="true") format_color_fill
+                    md-icon(
+                        class="angular-material-icons ng-scope material-icons"
+                        role="img"
+                        aria-hidden="true") format_color_fill
+
+                md-menu-content.groupColorMenu
+                    md-menu-item
+                        div.groupColorColumn(layout="column" ng-repeat="row in vm.groupColours")
+                            div(layout="row" ng-repeat="color in row")
+                                div.groupColor(
+                                    ng-click="vm.setSelectedGroupColor(color)"
+                                    style="background-color: {{vm.getRGBA(color)}};")
+                        md-input-container.groupHexColorContainer(layout="column" layout-align="start center")
+                            label Hex Colour
+                            input.groupHexColor
+
+                       
 
         div(flex="50" layout="row" layout-align="end center")
             button(class="md-accent md-fab md-mini md-button md-ink-ripple" 

@@ -33,6 +33,7 @@ class GroupsController implements ng.IController {
 	private toShow: string;
 	private savingGroup: boolean;
 	private changed: boolean;
+	private groupColours: any[];
 
 	constructor(
 		private $scope: any,
@@ -50,6 +51,14 @@ class GroupsController implements ng.IController {
 			.then(() => {
 				this.loading = false;
 			})
+
+		this.groupColours = [
+			[[255, 195, 18], [196, 229, 56], [52, 152, 219], [253, 167, 223], [237, 76, 103]],
+			[[247, 159, 31], [163, 203, 56], [18, 137, 167], [217, 128, 250], [181, 52, 113]], 
+			[[238, 90, 36], [0, 148, 50], [6, 82, 221], [153, 128, 250], [131, 52, 113]],
+			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]]
+		]
+		
 	}
 
 	public $onDestroy() {
@@ -79,6 +88,11 @@ class GroupsController implements ng.IController {
 			this.changed = true;
 		}, true);
 
+	}
+
+
+	public openColorMenu($mdMenu, event) {
+		$mdMenu.open(event);
 	}
 
 
@@ -126,16 +140,20 @@ class GroupsController implements ng.IController {
 		}
 	}
 
-	public changeGroupColor() {
-		this.GroupsService.changeSelectedGroupColor();
-	}
-
 	public isolateGroup(group) {
 		this.GroupsService.isolateGroup(group);
 	}
 
-	public getGroupColor(group) {
-		return this.GroupsService.getGroupColor(group);
+	public setSelectedGroupColor(color: number[]) {
+		this.GroupsService.setSelectedGroupColor(color);
+	}
+
+	public getRGBA(color: any) {
+		return this.GroupsService.getRGBA(color);
+	}
+
+	public getGroupRGBAColor(group: any) {
+		return this.GroupsService.getGroupRGBAColor(group);
 	}
 
 	public updateGroup() {
