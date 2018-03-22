@@ -192,7 +192,7 @@ describe('Permission templates', function () {
 		agent.post(`/${username}/${model}/permissions`)
 		.send([{ user: 'nonses', permission: 'customB'}])
 		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 			done(err);
 		});
 
