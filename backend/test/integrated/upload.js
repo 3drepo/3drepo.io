@@ -91,6 +91,7 @@ describe('Uploading a model', function () {
 			agent.post(`/${username}/${modelId}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(400, function(err, res){
+				console.log("!!!!", res.body);
 				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
 				done(err);
 			});
@@ -127,7 +128,14 @@ describe('Uploading a model', function () {
 		before(function(){
 			//give some money to this guy
 			return User.findByUserName(username).then( user => {
-				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment().utc().add(1, 'month'))
+				user.customData.billing.subscriptions  = { 
+					"discretionary" : {
+		                 		"collaborators" : 2,
+			                 	"data" : 1024,
+        	            			"expiryDate" : moment().utc().add(1, 'month')
+		                	}
+				};
+				return user.save();
 			})
 		});
 

@@ -99,7 +99,7 @@ module.exports = {
 	subscriptions: {
 		basic: {
 			collaborators: 0,
-			data: 200
+			data: 0
 		},
 		plans: {
 			hundredQuidPlan: {
