@@ -705,6 +705,14 @@ describe("Enrolling to a subscription", function () {
 					});
 				});
 
+				it("should succeed anyway if the user is not a member", function(done){
+					agent.delete(`/${username}/members/${username4}`)
+					.send({})
+					.expect(200, function(err, res){
+						done(err);
+					});
+				});
+
 				it("should fail if try to remove itself", function(done){
 					agent.delete(`/${username}/members/${username}`)
 					.send({})
