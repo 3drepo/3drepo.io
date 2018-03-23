@@ -389,7 +389,7 @@ billingSchema.methods.getActiveSubscriptions = function() {
 billingSchema.methods.getSubscriptionLimits = function() {
 
 	let sumLimits = {};
-
+	console.log(this.subscriptions);
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
 		sumLimits.collaboratorLimit = config.subscriptions.basic.collaborators;

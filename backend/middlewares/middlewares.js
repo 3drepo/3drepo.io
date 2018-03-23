@@ -61,7 +61,7 @@
 	function freeSpace(account){
 
 		let limits;
-
+		console.log("Calculating freespace for " , account);
 		return User.findByUserName(account).then( dbUser => {
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
