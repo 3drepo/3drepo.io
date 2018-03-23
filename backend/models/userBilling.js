@@ -389,13 +389,11 @@ billingSchema.methods.getActiveSubscriptions = function() {
 billingSchema.methods.getSubscriptionLimits = function() {
 
 	let sumLimits = {};
-	console.log(this.subscriptions);
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
 		sumLimits.collaboratorLimit = config.subscriptions.basic.collaborators;
 	}
 	
-	console.log("after Basic:", sumLimits);
 	if(!sumLimits.spaceLimit) {
 		sumLimits.spaceLimit = 0;
 	}
@@ -420,7 +418,6 @@ billingSchema.methods.getSubscriptionLimits = function() {
 						}
 					});
 				}
-				console.log("after Paypal:", sumLimits);
 			}
 			else {
 				if(!this.subscriptions[key].expiryDate || 
@@ -431,7 +428,6 @@ billingSchema.methods.getSubscriptionLimits = function() {
 							"unlimited" : sumLimits.collaboratorLimit + this.subscriptions[key].collaborators;
 					}
 				}
-				console.log("after "+key+":", sumLimits);
 
 			}
 		});

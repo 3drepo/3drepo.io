@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -62,7 +62,7 @@ describe("Checking Quota Info  ", function() {
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
-		quota: {spaceLimit: 22539, collaboratorLimit: "unlimited", spaceUsed: 0}
+		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0}
 	}
 
 	const mixedUser3 = {
@@ -97,20 +97,206 @@ describe("Checking Quota Info  ", function() {
 	});
 
 	describe("user with no subscription", function(done) {
+		const user = noSubUser;
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: noSubUser.user, password: noSubUser.password})
+			.send({username: user.user, password: user.password})
 			.expect(200, done);
 			
 		});
 
 		it("should have basic quota", function(done) {
-			agent.get(`/${noSubUser.user}/quota`)
+			agent.get(`/${user.user}/quota`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(noSubUser.quota);
+				expect(res.body).to.deep.equal(user.quota);
 				done(err);
 			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+	});
+
+	describe("user with paypal subscription", function(done) {
+		const user = paypalUser;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have basic & paypal quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+
+
+	});
+
+	describe("user with enterprise subscription", function(done) {
+		const user = enterpriseUser;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have basic & enterprise quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+	});
+
+	describe("user with discretionary subscription", function(done) {
+		const user = discretionaryUser;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have basic & discretionary quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+	});
+
+	describe("user with mixed subscription", function(done) {
+		const user =  mixedUser1;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have the correct aggregated quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+	});
+
+	
+	describe("user with mixed subscription with expired subscriptions (1)", function(done) {
+		const user =  mixedUser2;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have the correct aggregated quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+	});
+
+	describe("user with mixed subscription with expired subscriptions (2)", function(done) {
+		const user =  mixedUser3;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have the correct aggregated quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
+		});
+	});
+
+	describe("user with mixed subscription with expired subscriptions (3)", function(done) {
+		const user =  mixedUser4;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+			.send({username: user.user, password: user.password})
+			.expect(200, done);
+			
+		});
+
+		it("should have the correct aggregated quota", function(done) {
+			agent.get(`/${user.user}/quota`)
+			.expect(200, function(err, res) {
+				console.log(res.body);
+				expect(res.body).to.deep.equal(user.quota);
+				done(err);
+			});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+			.expect(200, done);
 		});
 	});
 
