@@ -19,11 +19,12 @@ div.groupsContainer
 
             div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
             div(layout="column", flex="100" layout-margin)
-                div(layout="row" layout-align="space-between center")
+                div(layout="row" layout-align="space-between center"  flex="100")
                     span.groupName {{group.name}}
+                div(layout="row" flex="100")
                     span.groupMeta  {{group.author}}
-                    span.groupMeta  {{group.date}}
-                div
+                    span.groupMeta  {{ group.createdAt  | date:"MM/dd/yyyy"}}
+                div(layout="row"  flex="100")
                     span.groupDescription {{group.description}}
             
             div.groupColorHolder(
@@ -63,7 +64,7 @@ div.groupsContainer
         layout-margin
         ng-if="vm.toShow === 'group'")
 
-        md-input-container.groupName
+        md-input-container.groupNameInput
             label Group Name
             input(ng-model="vm.selectedGroup.name")
 
@@ -81,13 +82,14 @@ div.groupsContainer
 
             div.metaMargin
                 label.groupMeta Creation Date: 
-                span.groupMeta {{ vm.selectedGroup.createdAt }}
+                span.groupMeta {{ vm.selectedGroup.createdAt  | date:"MM/dd/yyyy"}}
 
     div.addHolder(layout="row" flex="100")
 
         div(flex="50" layout="row" layout-align="start center")
             button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
+                type="button"
+                ng-if="vm.groups.length > 0"
                 aria-label="Delete"
                 ng-show="vm.toShow === 'groups' && vm.selectedGroup"
                 ng-click="vm.deleteGroup()")
@@ -117,11 +119,13 @@ div.groupsContainer
                                 div.groupColor(
                                     ng-click="vm.setSelectedGroupColor(color)"
                                     style="background-color: {{vm.getRGBA(color)}};")
-                        md-input-container.groupHexColorContainer(layout="column" layout-align="start center")
-                            label Hex Colour
-                            input.groupHexColor
-
-                       
+                        div(layout="column")
+                            md-input-container.groupHexColorContainer(layout="column" layout-align="start center")
+                                label Hex Colour
+                                input.groupHexColor(ng-model="vm.hexColor")
+                            div(layout-fill).groupCurrentColorHolder
+                                label.groupCurrentColor Current Colour
+                                div.groupCurrentColorBlock(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
 
         div(flex="50" layout="row" layout-align="end center")
             button(class="md-accent md-fab md-mini md-button md-ink-ripple" 

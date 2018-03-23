@@ -91,22 +91,7 @@ export class TreeService {
 		this.highlightSelectedViewerObject = value;
 	}
 
-	/**
-	 * Resets highlight map to prevent extra triggers of handleSelection.
-	 * TODO: DEPRECATE? timestamp used instead to check state sync.
-	 */
-	public resetHighlightMap() {
-		this.highlightMap = null;
-	}
 
-	/**
-	 * Sets highlight map and updates highlightMapUpdateTime.
-	 * @param value	Map of highlighted objects.
-	 */
-	public setHighlightMap(value: any) {
-		this.highlightMap = value;
-		this.highlightMapUpdateTime = Date.now();
-	}
 
 	public genIdToObjRef(tree: any, map: any) {
 
@@ -946,36 +931,6 @@ export class TreeService {
 		}
 	}
 
-	/**
-	 * Handle highlight changes from tree service to viewer service.
-	 * @param highlightMap	Collection of ids to highlight.
-	 */
-	public handleSelection(highlightMap: any) {
-
-		// Update viewer highlights
-		this.ViewerService.clearHighlights();
-
-		for (const key in highlightMap) {
-			if (key) {
-
-				const vals = key.split("@");
-				const account = vals[0];
-				const model = vals[1];
-
-				// Separately highlight the children
-				// but only for multipart meshes
-				this.ViewerService.highlightObjects({
-					account,
-					ids: highlightMap[key].meshes,
-					colour: highlightMap[key].colour,
-					model,
-					multi: true,
-					source: "tree",
-				});
-			}
-		}
-
-	}
 
 	/**
 	 * Update the state of clickedHidden and clickedShown, which are used by tree component
@@ -1044,7 +999,7 @@ export class TreeService {
 	 * @param node		Node to set.
 	 * @param isSelected	Is selected.
 	 */
-	public setNodeSelection(node: any, isSelected: boolean, colour?: number[]) {
+	public setNodeSelection(node: any, isSelected: boolean) {
 		if (node.selected !== isSelected) {
 			const nodeIndex = this.currentSelectedNodes.indexOf(node);
 
@@ -1069,6 +1024,8 @@ export class TreeService {
 	 */
 	public selectNodes(nodes: any[], multi: boolean, additive: boolean, colour?: number[]) {
 
+		console.log("multi")
+
 		if (!nodes || nodes.length === 0) {
 			return Promise.reject("No node specified");
 		}
@@ -1086,31 +1043,58 @@ export class TreeService {
 			}
 
 			if (additive) {
-				console.log("additiive", node);
-				this.setNodeSelection(node, true, colour);
+				this.setNodeSelection(node, true);
 			} else if (multi) {
 				// Multiselect mode and we selected the same node - unselect it
-				this.setNodeSelection(node, !node.selected, colour);
+				this.setNodeSelection(node, !node.selected);
 			} else {
 				// If it is not multiselect mode, remove all highlights
 				this.clearCurrentlySelected();
-				this.setNodeSelection(node, true, colour);
+				this.setNodeSelection(node, true);
 			}
 
 		}
 
-		return this.ready.promise.then(() => {
-			const map = {};
-			this.currentSelectedNodes.forEach((n) => {
-				this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes, colour);
-			});
-
-			this.setHighlightMap(map);
-			this.handleSelection(this.highlightMap);
-		});
+		return this.highlightNodes(nodes, multi, colour);
 
 	}
 
+	public highlightNodes(nodes: any, multi: boolean, colour: number[]) {
+		return this.ready.promise.then(() => {
+			
+			const highlightMap = {};
+			nodes.forEach((n) => {
+				this.traverseNodeAndPushId(n, highlightMap, this.treeMap.idToMeshes, colour);
+			});
+
+
+			// Update viewer highlights
+			if (!multi) {
+				this.ViewerService.clearHighlights();
+			}
+
+			for (const key in highlightMap) {
+				if (key) {
+
+					const vals = key.split("@");
+					const account = vals[0];
+					const model = vals[1];
+
+					// Separately highlight the children
+					// but only for multipart meshes
+					this.ViewerService.highlightObjects({
+						account,
+						ids: highlightMap[key].meshes,
+						colour: highlightMap[key].colour,
+						model,
+						multi: true,
+						source: "tree",
+					});
+				}
+			}
+
+		});
+	}
 
 	public selectNodesByIds(nodeIds: any[], multi: boolean, additive: boolean, colour: number[]) {
 		const nodes = nodeIds.map((n) =>{

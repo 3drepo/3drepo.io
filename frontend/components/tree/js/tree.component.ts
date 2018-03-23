@@ -243,35 +243,7 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		//this.updateTreeState();
-
 	}
-
-	// public updateTreeState() {
-
-	// 	// TODO - interval for redrawing highlights and object visibility is not ideal
-
-	// 	let lastViewerUpdateTime = Date.now();
-	// 	setInterval(() => {
-
-	// 		if (this.TreeService.highlightMapUpdateTime) {
-	// 			if (lastViewerUpdateTime < this.TreeService.highlightMapUpdateTime) {
-	// 				this.handleSelection(this.TreeService.highlightMap);
-	// 			}
-	// 		}
-
-	// 		if (this.TreeService.visibilityUpdateTime) {
-	// 			if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
-	// 				this.handleVisibility(this.TreeService.getClickedHidden(), false);
-	// 				this.handleVisibility(this.TreeService.getClickedShown(), true);
-	// 			}
-	// 		}
-
-	// 		lastViewerUpdateTime = Date.now();
-
-	// 	}, 150);
-
-	// }
 
 	public showTreeInPane() {
 		this.searching = false;
@@ -374,7 +346,7 @@ class TreeController implements ng.IController {
 			// TODO: This throws a unity error when filtering
 
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNode([serviceNode], this.MultiSelectService.isMultiMode(), true);
+			this.TreeService.selectNodes([serviceNode], this.MultiSelectService.isMultiMode(), true);
 		}
 
 	}

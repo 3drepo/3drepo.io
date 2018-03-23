@@ -34,6 +34,7 @@ class GroupsController implements ng.IController {
 	private savingGroup: boolean;
 	private changed: boolean;
 	private groupColours: any[];
+	private hexColor: string;
 
 	constructor(
 		private $scope: any,
@@ -88,6 +89,15 @@ class GroupsController implements ng.IController {
 			this.changed = true;
 		}, true);
 
+		this.$scope.$watch("vm.hexColor", () => {
+			if (this.hexColor) {
+				const validHex = this.GroupsService.hexToRGBA(this.hexColor);
+				if (validHex.length === 3) {
+					this.setSelectedGroupColor(validHex, true);
+				}
+			}
+		});
+
 	}
 
 
@@ -122,12 +132,8 @@ class GroupsController implements ng.IController {
 
 	public addGroup() {
 
-		this.GroupsService.selectGroup({
-			new: true,
-			createdAt: Date.now(),
-			author: this.teamspace,
-			name: this.GroupsService.getDefaultGroupName(this.groups),
-		})
+		const newGroup = this.GroupsService.generateNewGroup(this.teamspace);
+		this.GroupsService.selectGroup(newGroup)
 		this.showGroupPane();
 	}
 
@@ -144,7 +150,10 @@ class GroupsController implements ng.IController {
 		this.GroupsService.isolateGroup(group);
 	}
 
-	public setSelectedGroupColor(color: number[]) {
+	public setSelectedGroupColor(color: number[], isHex: boolean) {
+		if (!isHex) {
+			this.hexColor = "";
+		}
 		this.GroupsService.setSelectedGroupColor(color);
 	}
 
@@ -191,8 +200,10 @@ class GroupsController implements ng.IController {
 
 	public showGroupPane() {
 		this.toShow = "group";
+		this.hexColor = "";
 		this.onContentHeightRequest({height: 280});
 		this.onShowItem();
+		this.GroupsService.updateSelectedGroupColor();
 	}
 
 	public selectGroup(group) {
@@ -200,9 +211,16 @@ class GroupsController implements ng.IController {
 	}
 
 	public setContentHeight() {
+
+		if (this.toShow === "group") {
+			return 300;
+		}
+
 		let contentHeight = 0;
+		let groupHeight = 100;
+		let actionBar = 52;
 		if (this.groups && this.groups.length) {
-			contentHeight = this.groups.length * 100;
+			contentHeight = (this.groups.length * groupHeight) + actionBar;
 		} else {
 			contentHeight = 130;
 		}

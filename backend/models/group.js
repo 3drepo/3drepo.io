@@ -22,7 +22,6 @@ let ModelFactory = require("./factory/modelFactory");
 let utils = require("../utils");
 let uuid = require("node-uuid");
 let Schema = mongoose.Schema;
-let Mesh = require("./mesh");
 let responseCodes = require("../response_codes.js");
 let Meta = require("./meta");
 
@@ -33,7 +32,7 @@ let groupSchema = Schema({
 	name: String,
 	author: String,
 	description: String,
-	createdAt: Number,
+	createdAt: Date,
 	objects: [{
 		_id : false,
 		shared_id: Object,

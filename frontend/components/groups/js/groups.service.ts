@@ -81,6 +81,33 @@ export class GroupsService {
 		return "rgba(255, 255, 255, 1)";
 	}
 
+	public getRandomColor() {
+		return [
+			(Math.random() * 255).toFixed(0),
+			(Math.random() * 255).toFixed(0),
+			(Math.random() * 255).toFixed(0)
+		]
+	}
+
+	public hexToRGBA(hex, alpha) {
+
+		alpha = (alpha !== undefined) ? alpha : 1;
+
+		// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+		hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+			return r + r + g + g + b + b;
+		});
+	
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? [
+			parseInt(result[1], 16),
+			parseInt(result[2], 16),
+			parseInt(result[3], 16)
+		 ] : [];
+
+	}
+
 	public cleanGroups(groups) {
 		groups.forEach((group) => {
 			if (!group.name) {
@@ -119,6 +146,18 @@ export class GroupsService {
 
 	}
 
+	public generateNewGroup(teamspace) {
+		return {
+			new: true,
+			createdAt: Date.now(),
+			author: teamspace,
+			description: "",
+			name: this.getDefaultGroupName(this.state.groups),
+			color: this.getRandomColor(),
+			objects: this.getSelectedObjects(),
+		}
+	}
+
 	public updateSelectedGroupColor() {
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
 		
@@ -144,7 +183,7 @@ export class GroupsService {
 			author: group.author,
 			description: group.description,
 			createdAt: group.createdAt || Date.now(),
-			color: group.color || [255, 0, 0],
+			color: group.color || this.getRandomColor(),
 			objects: this.getSelectedObjects(),
 		};
 		return groupData;
@@ -176,14 +215,14 @@ export class GroupsService {
 	public updateGroup(teamspace, model, groupId, group) {
 		group.new = false;
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
-		const groupData = this.createGroupData(group);
+		group.objects = this.getSelectedObjects();
 
-		console.log("updateGroup", groupData);
-		return this.APIService.put(groupUrl, groupData)
+		return this.APIService.put(groupUrl, group)
 			.then((response) => {
 				const newGroup = response.data;
 				newGroup.new = false;
-				this.replaceStateGroup(newGroup)
+				this.replaceStateGroup(newGroup);
+				this.updateSelectedGroupColor();
 				return newGroup;
 			});
 	}
@@ -191,14 +230,15 @@ export class GroupsService {
 	public createGroup(teamspace, model, group) {
 		group.new = false;
 		const groupUrl = `${teamspace}/${model}/groups/`;
-		const groupData = this.createGroupData(group);
+		group.objects = this.getSelectedObjects();
 		
-		return this.APIService.post(groupUrl, groupData)
+		return this.APIService.post(groupUrl, group)
 			.then((response) => {
 				const newGroup = response.data;
 				newGroup.new = false;
 				this.state.groups.push(newGroup);
 				this.state.selectedGroup = newGroup;
+				this.updateSelectedGroupColor();
 				return newGroup;
 			});
 	}
