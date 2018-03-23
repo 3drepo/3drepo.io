@@ -1487,6 +1487,7 @@ function uploadFile(req){
 				const sizeInMB = size / (1024*1024);
 				middlewares.freeSpace(account).then(space => {
 
+					console.log("!!!! file size: ", sizeInMB, "space: ", space);
 					if(sizeInMB > space){
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
 						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);

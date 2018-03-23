@@ -614,7 +614,6 @@ describe("Enrolling to a subscription", function () {
 					.add(3, "day")
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
-				console.log("!!!!!", subscriptions.paypal[0].expiryDate, expiredAt);
 				expect(subscriptions.paypal[0].expiryDate.valueOf()).to.equal(expiredAt.valueOf());
 				done();
 			}).catch(err => {
@@ -658,7 +657,6 @@ describe("Enrolling to a subscription", function () {
 			it("to a non existing user should fail", function(done){
 				agent.post(`/${username}/members/payment_non_existing`)
 				.expect(404, function(err, res){
-					console.log("!!!! res", res.body, res.status);					
 					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 					done(err);
 				});
