@@ -291,7 +291,6 @@ describe('Revision', function () {
 		.field('tag', 'a!b')
 		.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 		.expect(400, function(err, res){
-			console.log("!!!!", res.body);
 			expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value)
 			done(err);
 		});
