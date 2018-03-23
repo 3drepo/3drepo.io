@@ -1,0 +1,1 @@
+mongo  --eval "db.getSiblingDB('admin').getCollection('system.users').findOne({user: 'sub_enterprise'})"
