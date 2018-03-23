@@ -869,6 +869,37 @@ export class TreeService {
 		}
 	}
 
+	public isolateNodesBySharedId(objects) {
+
+		this.getMap()
+		.then((treeMap) => {
+
+			if (objects) {
+				// Make a list of nodes to shown
+				let shownNodes = [];
+				for (let i = 0; i < objects.length; i++) {
+					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+
+					if (objUid) {
+						shownNodes.push(this.getNodeById(objUid));
+					}
+				}
+				// Hide all
+				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
+				// Show selected
+				if (shownNodes) {
+					this.setCurrentSelectedNodes(shownNodes);
+					this.showTreeNodes(shownNodes);
+				}
+			}
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+
+		
+	}
+
 	/**
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
@@ -1101,7 +1132,6 @@ export class TreeService {
 			return this.getNodeById(n._id);
 		});
 
-		console.log("selectNodesByIds", nodes, multi, additive, colour);
 		this.selectNodes(nodes, multi, additive, colour);
 	}
 
@@ -1116,7 +1146,6 @@ export class TreeService {
 				nodes.push(node);
 			}
 			
-			console.log("selectNodesByIds", nodes, multi, additive, colour);
 			this.selectNodes(nodes, multi, additive, colour);
 			
 		});

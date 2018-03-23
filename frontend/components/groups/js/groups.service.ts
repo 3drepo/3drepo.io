@@ -118,7 +118,7 @@ export class GroupsService {
 
 	public isolateGroup(group) {
 		this.selectGroup(group).then(() => {
-			this.TreeService.isolateSelected();
+			this.TreeService.isolateNodesBySharedId(this.state.selectedGroup.objects);
 		})
 	}
 
