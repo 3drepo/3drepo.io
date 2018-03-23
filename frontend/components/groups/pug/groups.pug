@@ -83,6 +83,19 @@ div.groupsContainer
             div.metaMargin
                 label.groupMeta Creation Date: 
                 span.groupMeta {{ vm.selectedGroup.createdAt  | date:"MM/dd/yyyy"}}
+           
+        md-container(
+            layout="row"
+            layout-align="space-between center")
+
+            div.metaMargin
+                label.groupMeta Last Updated By: 
+                span.groupMeta {{ vm.selectedGroup.updatedBy }}
+
+            div.metaMargin
+                label.groupMeta Updated On: 
+                span.groupMeta {{ vm.selectedGroup.updatedAt | date:"MM/dd/yyyy"}}
+
 
     div.addHolder(layout="row" flex="100")
 

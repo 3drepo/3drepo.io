@@ -33,6 +33,8 @@ let groupSchema = Schema({
 	author: String,
 	description: String,
 	createdAt: Date,
+	updatedAt: Date,
+	updatedBy: String,
 	objects: [{
 		_id : false,
 		shared_id: Object,
@@ -155,37 +157,50 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
+
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+
 			let sharedIdObjects = [];
 			let sharedIdPromises = [];
 			let ifcObjectByAccount = {};
 
-			for (let i = 0; i < group.objects.length; i++) {
-				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
-					const namespace = group.objects[i].account + "__" + group.objects[i].model;
-					if(!ifcObjectByAccount[namespace]) {
-						ifcObjectByAccount[namespace] = [];
-					}
-					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
-				}
-			}
-
-			for (let namespace in ifcObjectByAccount) {
-				const nsSplitArr = namespace.split("__");
-				const account = nsSplitArr[0];
-				const model = nsSplitArr[1];
-				sharedIdPromises.push(
-					this.ifcGuidsToUUIDs(account,
-						model,
-						ifcObjectByAccount[namespace]).then(sharedIds => {
-						for (let j = 0; j < sharedIds.length; j++) {
-							sharedIdObjects.push({
-								account,
-								model,
-								shared_id: sharedIds[j]
-							});
+			if (group.objects && group.objects.length) {
+				for (let i = 0; i < group.objects.length; i++) {
+					if (this.isIfcGuid(group.objects[i].ifc_guid)) {
+						const namespace = group.objects[i].account + "__" + group.objects[i].model;
+						if(!ifcObjectByAccount[namespace]) {
+							ifcObjectByAccount[namespace] = [];
 						}
-					})
-				);
+						ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
+					}
+				}
+	
+				for (let namespace in ifcObjectByAccount) {
+
+					if (!ifcObjectByAccount.hasOwnProperty(namespace)) {
+						continue;
+					}
+
+					const nsSplitArr = namespace.split("__");
+					const account = nsSplitArr[0];
+					const model = nsSplitArr[1];
+					sharedIdPromises.push(
+						this.ifcGuidsToUUIDs(account,
+							model,
+							ifcObjectByAccount[namespace]).then(sharedIds => {
+							for (let j = 0; j < sharedIds.length; j++) {
+								sharedIdObjects.push({
+									account,
+									model,
+									shared_id: sharedIds[j]
+								});
+							}
+						})
+					);
+					
+				}
 			}
 
 			return Promise.all(sharedIdPromises).then(() => {
@@ -268,7 +283,8 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 };
 
 groupSchema.methods.updateAttrs = function(data){
-
+	console.log("updateAttrs", data);
+	delete data.__v;
 	const ifcGuidPromises = [];
 	const sharedIdsByAccount = {};	
 	let modifiedObjectList = null;
@@ -321,8 +337,15 @@ groupSchema.methods.updateAttrs = function(data){
 	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
-		Object.assign(this, data);
+		this.description = data.description;
+		this.name = data.name;
+		this.author = data.author;
+		this.createdAt = data.createdAt;
+		this.description = data.description;
+		this.updatedAt = data.updatedAt;
+		this.updatedBy = data.updatedBy;
 		this.objects = modifiedObjectList || this.objects;
+		this.color = data.color;
 		this.markModified("objects");
 		return this.save();
 	});

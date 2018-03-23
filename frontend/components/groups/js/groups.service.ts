@@ -21,6 +21,7 @@ export class GroupsService {
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
+		"AuthService"
 	];
 
 	private state;
@@ -28,7 +29,8 @@ export class GroupsService {
 	constructor(
 		private APIService: any,
 		private TreeService: any,
-		private MultiSelectService: any
+		private MultiSelectService: any,
+		private AuthService: any,
 	) {
 		this.state = {
 			groups: [],
@@ -146,11 +148,13 @@ export class GroupsService {
 
 	}
 
-	public generateNewGroup(teamspace) {
+	public generateNewGroup() {
 		return {
 			new: true,
 			createdAt: Date.now(),
-			author: teamspace,
+			updatedAt: Date.now(),
+			updatedBy: this.AuthService.getUsername(),
+			author: this.AuthService.getUsername(),
 			description: "",
 			name: this.getDefaultGroupName(this.state.groups),
 			color: this.getRandomColor(),
@@ -170,23 +174,6 @@ export class GroupsService {
 			);
 		}
 		
-	}
-
-
-	public createGroupData(group) {
-		if (!group) {
-			console.error("No group object was passed to createGroupData");
-			return;
-		}
-		const groupData = {
-			name: group.name,
-			author: group.author,
-			description: group.description,
-			createdAt: group.createdAt || Date.now(),
-			color: group.color || this.getRandomColor(),
-			objects: this.getSelectedObjects(),
-		};
-		return groupData;
 	}
 
 	public getSelectedObjects() {
@@ -213,7 +200,10 @@ export class GroupsService {
 	}
 
 	public updateGroup(teamspace, model, groupId, group) {
+		console.log("updateGroup teamsapce in service", teamspace)
 		group.new = false;
+		group.updatedAt = Date.now();
+		group.updatedBy = this.AuthService.getUsername();
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
 		group.objects = this.getSelectedObjects();
 
@@ -228,6 +218,9 @@ export class GroupsService {
 	}
 
 	public createGroup(teamspace, model, group) {
+
+		console.log("createGroup ", teamspace);
+
 		group.new = false;
 		const groupUrl = `${teamspace}/${model}/groups/`;
 		group.objects = this.getSelectedObjects();

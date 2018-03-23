@@ -63,7 +63,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public $onDestroy() {
-		
+		this.groups = [];
 	}
 
 	public watchers() {
@@ -132,7 +132,7 @@ class GroupsController implements ng.IController {
 
 	public addGroup() {
 
-		const newGroup = this.GroupsService.generateNewGroup(this.teamspace);
+		const newGroup = this.GroupsService.generateNewGroup();
 		this.GroupsService.selectGroup(newGroup)
 		this.showGroupPane();
 	}
@@ -166,6 +166,9 @@ class GroupsController implements ng.IController {
 	}
 
 	public updateGroup() {
+
+		console.log("updateGroup Author", this.selectedGroup.author);
+
 		this.GroupsService.updateGroup(
 			this.teamspace,
 			this.model,
@@ -183,6 +186,8 @@ class GroupsController implements ng.IController {
 	}
 
 	public createGroup() {
+		console.log("createGroup teamsapce", this.teamspace);
+		console.log("createGroup selectedGroup", this.selectedGroup);
 		this.GroupsService.createGroup(
 			this.teamspace,
 			this.model,
