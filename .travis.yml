@@ -34,6 +34,7 @@ before_install:
     - git status
     - cd backend && mongorestore
     - cd ./../../../
+    - mongo  --eval "db.getSiblingDB('admin').getCollection('system.users').findOne({user: 'sub_enterprise'})"
     - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
 
 install:
