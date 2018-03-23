@@ -75,6 +75,7 @@
 				totalSize += stat.size;
 			});
 			totalSize /= 1024*1024;
+			console.log("!!!limit", limits, "Total size: ", totalSize);
 
 			return Promise.resolve(limits.spaceLimit - totalSize);
 		});
