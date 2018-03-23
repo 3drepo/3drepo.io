@@ -161,7 +161,6 @@
 
 		this.createdAt = new Date();
 		this.nextPaymentDate = data.nextPaymentDate;
-//		console.log('init inv', data.billingInfo);
 		this.info = data.billingInfo;
 		this.paypalPaymentToken = data.paypalPaymentToken;
 
@@ -215,7 +214,6 @@
 				}
 			});
 
-			//console.log(this.items);
 			return this;
 
 		} else if (data.billingAgreementId) {
@@ -282,7 +280,6 @@
 	};
 
 	schema.statics.findPendingInvoice = function(account, billingAgreementId){
-		//console.log(account, { billingAgreementId, state: C.INV_PENDING });
 		return this.findOne({ account }, { billingAgreementId, state: C.INV_PENDING });
 	};
 
@@ -489,7 +486,6 @@
 			return this.generatePDF();
 
 		} else {
-			//console.log('from cache')
 			return Promise.resolve(this.pdf.buffer);
 		}
 	};
