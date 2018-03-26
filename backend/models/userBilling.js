@@ -144,8 +144,7 @@ billingSchema.statics.getNextPaymentDate = function (date) {
 };
 
 billingSchema.methods.cancelAgreement = function(){
-
-	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {
+	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {		
 		this.subscriptions.paypal = [];
 		this.billingAgreementId = undefined;
 	});
@@ -238,7 +237,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 				return paypalUpdate;
 			}
 
-		} else if (changes.canceledAllPlans){
+		} else if (changes.cancelledAllPlans){
 			// User cancelled everything, no need to calculate/create new bills,
 			// just cancel the previous agreement
 			return this.cancelAgreement();
