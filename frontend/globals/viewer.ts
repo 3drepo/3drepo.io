@@ -316,8 +316,8 @@ export class Viewer {
 		UnityUtil.resetCamera();
 	}
 
-	public centreToPoint(model: string, meshId: string) {
-		UnityUtil.centreToPoint(model, meshId)
+	public centreToPoint(params) {
+		UnityUtil.centreToPoint(params);
 	}
 
 	public setUnity() {

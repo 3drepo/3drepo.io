@@ -197,9 +197,8 @@ export class ViewerService {
 	}
 
 	public centreToPoint(params: any) {
-		const model = params.teamspace + "." + params.model;
-		const meshId = params.meshId[0]; // TODO: Handle arrays!
-		this.viewer.centreToPoint(model, meshId);
+		console.log("Centering to point:", params);
+		this.viewer.centreToPoint(params);
 	}
 
 	public setCamera(params) {

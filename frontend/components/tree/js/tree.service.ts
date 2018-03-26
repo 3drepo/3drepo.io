@@ -48,7 +48,6 @@ export class TreeService {
 	private treeMapReady;
 	private generatedMaps;
 	private ready;
-	private currentSelectedMap: any;
 
 	constructor(
 		private $q: ng.IQService,
@@ -967,12 +966,13 @@ export class TreeService {
 			}
 
 			return this.ready.promise.then(() => {
-				this.currentSelectedMap = {};
+				let currentSelectedMap = {};
 				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, this.currentSelectedMap, this.treeMap.idToMeshes);
+					this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
 				});
 
-				this.setHighlightMap(this.currentSelectedMap);
+				this.setHighlightMap(currentSelectedMap);
+				return currentSelectedMap;
 			});
 		}
 	}
@@ -998,12 +998,14 @@ export class TreeService {
 				return Promise.resolve();
 			} else {
 				return this.ready.promise.then(() => {
-					this.currentSelectedMap = {};
+					let currentSelectedMap = {};
 					this.currentSelectedNodes.forEach((n) => {
-						this.traverseNodeAndPushId(n, this.currentSelectedMap, this.treeMap.idToMeshes);
+						this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
 					});
 
-					this.setHighlightMap(this.currentSelectedMap);
+					this.setHighlightMap(currentSelectedMap);
+
+					return currentSelectedMap;
 				});
 			}
 		}
