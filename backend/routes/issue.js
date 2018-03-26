@@ -202,9 +202,9 @@ function listIssues(req, res, next) {
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
 	}
 
 	findIssue.then(issues => {
@@ -305,9 +305,9 @@ function renderIssuesHTML(req, res, next){
 	}
 
 	if (req.params.rid) {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {
@@ -355,7 +355,7 @@ function importBCF(req, res, next){
 	function fileFilter(req, file, cb){
 
 		let acceptedFormat = [
-			"bcfzip", "zip"
+			"bcf", "bcfzip", "zip"
 		];
 
 		let format = file.originalname.split(".");
@@ -385,14 +385,14 @@ function importBCF(req, res, next){
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
-			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		
 		} else if(!req.file.size){
-			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
 
-			Issue.importBCF(req.headers[C.HEADER_SOCKET_ID], req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);

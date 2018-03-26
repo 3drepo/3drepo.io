@@ -72,6 +72,19 @@ export class ViewerService {
 		this.pinData = newPinData.data;
 	}
 
+	public updateViewerSettings(settings) {
+		this.viewer.updateSettings(settings);
+	}
+
+	public updateClippingPlanes(params) {
+		this.viewer.updateClippingPlanes(
+			params.clippingPlanes,
+			params.fromClipPanel,
+			params.account,
+			params.model,
+		);
+	}
+
 	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
@@ -81,12 +94,12 @@ export class ViewerService {
 
 			switch (event.type) {
 
-			case this.EventService.EVENT.MODEL_SETTINGS_READY:
-				if (event.value.account === account && event.value.model === model) {
-					this.viewer.updateSettings(event.value);
-					// mapTile && mapTile.updateSettings(event.value.settings);
-				}
-				break;
+			// case this.EventService.EVENT.MODEL_SETTINGS_READY:
+			// 	if (event.value.account === account && event.value.model === model) {
+			// 		this.viewer.updateSettings(event.value);
+			// 		// mapTile && mapTile.updateSettings(event.value.settings);
+			// 	}
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
 				this.viewer.clickPin(event.value.id);
@@ -99,12 +112,14 @@ export class ViewerService {
 				);
 				break;
 
-			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-				this.viewer.updateClippingPlanes(
-					event.value.clippingPlanes, event.value.fromClipPanel,
-					event.value.account, event.value.model,
-				);
-				break;
+			// case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
+			// 	this.viewer.updateClippingPlanes(
+			// 		event.value.clippingPlanes,
+			// 		event.value.fromClipPanel,
+			// 		event.value.account,
+			// 		event.value.model,
+			// 	);
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
 				this.DocsService.state.show = false;

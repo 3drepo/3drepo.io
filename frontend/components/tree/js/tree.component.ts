@@ -95,7 +95,7 @@ class TreeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
+		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 
@@ -119,9 +119,8 @@ class TreeController implements ng.IController {
 							});
 
 							this.TreeService.updateModelState(this.allNodes[0]);
-
 							angular.element((window as any).window).triggerHandler("resize");
-
+							
 						}
 					}
 				}
@@ -247,7 +246,14 @@ class TreeController implements ng.IController {
 				}
 			});
 
+		this.updateTreeState();
+
+	}
+
+	public updateTreeState() {
+
 		// TODO - interval for redrawing highlights and object visibility is not ideal
+
 		let lastViewerUpdateTime = Date.now();
 		setInterval(() => {
 
@@ -326,6 +332,7 @@ class TreeController implements ng.IController {
 	 * @param highlightMap	Collection of ids to highlight.
 	 */
 	public handleSelection(highlightMap: any) {
+
 		// Update viewer highlights
 		this.ViewerService.clearHighlights();
 
@@ -348,9 +355,6 @@ class TreeController implements ng.IController {
 			}
 		}
 
-		// Reset highlight map to prevent extra triggers of handleSelection
-		// (currently not needed as a timestamp is used to check sync)
-		// this.TreeService.resetHighlightMap();
 	}
 
 	/**

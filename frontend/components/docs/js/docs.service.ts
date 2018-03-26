@@ -60,8 +60,6 @@ export class DocsService {
 		this.getDocs(account, model, id)
 			.then((data) => {
 
-				console.log("DOCS - ", data);
-
 				if (!data) {
 					return;
 				}
@@ -91,9 +89,9 @@ export class DocsService {
 		// Get any documents associated with an object
 		const object = event.value;
 
-		this.TreeService.getMap()
-			.then((treeMap) => {
-				const metadataIds = treeMap.oIdToMetaId[object.id];
+		this.TreeService.onReady()
+			.then(() => {
+				const metadataIds = this.TreeService.treeMap.oIdToMetaId[object.id];
 				if (metadataIds && metadataIds.length) {
 					this.state.noMetadata = false;
 					this.updateDocs(

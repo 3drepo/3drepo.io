@@ -161,49 +161,7 @@ class HomeController implements ng.IController {
 		// TODO: This feels like a bit of a hack. Let's come up with
 		// a better way!
 		this.$scope.$watch(() => this.AuthService.state.currentData, (currentData) => {
-
-			const event = this.AuthService.state.currentEvent;
-
-			if (!angular.isDefined(event)) {
-				return;
-			}
-
-			switch (event) {
-			case this.AuthService.events.USER_LOGGED_IN:
-
-				if (!currentData.error) {
-					if (!currentData.initialiser) {
-
-						this.StateManager.updateState(true);
-
-						if (!this.StateManager.state.account) {
-
-							const username = this.AuthService.getUsername();
-							if (!username) {
-								console.error("Username is not defined for statemanager!");
-							}
-							this.StateManager.setHomeState({
-								account: username,
-							});
-						}
-					}
-				} else {
-					this.AuthService.logout();
-				}
-
-				break;
-
-			case this.AuthService.events.USER_LOGGED_OUT:
-				// TODO: Use state manager
-				// Only fire the Logout Event if we're on the home page
-				const currentPage = this.$location.path();
-
-				if (this.doNotLogout.indexOf(currentPage) === -1) {
-					this.StateManager.setHomeState({ loggedIn: false, account: null });
-				}
-				break;
-			}
-
+			this.handleLoginStatus(currentData);
 		}, true);
 
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
@@ -225,7 +183,7 @@ class HomeController implements ng.IController {
 
 				// If it's a legal page
 				const legal = this.pageCheck(newState, this.legalPages);
-				const loggedOut = this.pageCheck(newState, this.loggedOutPages);
+				const loggedOutPage = this.pageCheck(newState, this.loggedOutPages);
 
 				if (legal) {
 
@@ -236,13 +194,12 @@ class HomeController implements ng.IController {
 						this.setPage(newState, page);
 					});
 
-				} else if (loggedOut && !newState.loggedIn) {
+				} else if (loggedOutPage && !newState.loggedIn) {
 
 					// If its a logged out page which isnt login
 
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
-
 					this.loggedOutPages.forEach((page) => {
 						this.setPage(newState, page);
 					});
@@ -261,7 +218,7 @@ class HomeController implements ng.IController {
 				} else if (
 					!this.AuthService.getUsername() &&
 					!legal &&
-					!loggedOut
+					!loggedOutPage
 				) {
 
 					// Login page or none existant page
@@ -273,6 +230,65 @@ class HomeController implements ng.IController {
 			}
 		}, true);
 
+	}
+
+	public handleLoginStatus(currentData) {
+		const event = this.AuthService.state.currentEvent;
+
+		if (!angular.isDefined(event)) {
+			return;
+		}
+
+		switch (event) {
+		case this.AuthService.events.USER_LOGGED_IN:
+
+			if (!currentData.error) {
+				if (!currentData.initialiser) {
+
+					this.StateManager.updateState(true);
+
+					if (!this.StateManager.state.account) {
+						const username = this.AuthService.getUsername();
+						if (!username) {
+							console.error("Username is not defined for statemanager!");
+						}
+						this.StateManager.setHomeState({
+							account: username,
+						});
+					}
+
+				} else if (currentData.initialiser && !currentData.username) {
+
+					this.StateManager.setHomeState({
+						loggedIn: false,
+						account: null,
+					});
+
+					if (this.StateManager.query) {
+						this.$location.search('username', this.StateManager.query.username);
+						this.$location.search('token', this.StateManager.query.token);
+					}
+
+				}
+			} else {
+				this.AuthService.logout();
+			}
+
+			break;
+
+		case this.AuthService.events.USER_LOGGED_OUT:
+			// TODO: Use state manager
+			// Only fire the Logout Event if we're on the home page
+			const currentPage = this.$location.path();
+
+			if (this.doNotLogout.indexOf(currentPage) === -1) {
+				this.StateManager.setHomeState({
+					loggedIn: false,
+					account: null,
+				});
+			}
+			break;
+		}
 	}
 
 	public getLiteModeState() {
