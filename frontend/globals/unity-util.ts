@@ -319,7 +319,6 @@ export class UnityUtil {
 		const params = {
 			groups: meshIDs
 		};
-		console.log("centre to point called", params);
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 

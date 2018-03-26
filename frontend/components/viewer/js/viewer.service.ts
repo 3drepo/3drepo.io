@@ -197,7 +197,6 @@ export class ViewerService {
 	}
 
 	public centreToPoint(params: any) {
-		console.log("Centering to point:", params);
 		this.viewer.centreToPoint(params);
 	}
 
