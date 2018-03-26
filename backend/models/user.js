@@ -923,8 +923,7 @@ schema.methods.updateSubscriptions = function(plans, billingUser, billingAddress
 	.then(_billingAgreement => {
 		
 		billingAgreement = _billingAgreement;
-		return this.save();
-
+		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
 	}).then(() => {
 		return Promise.resolve(billingAgreement || {});
 	});
@@ -951,7 +950,6 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
 
 	}).then(() => {
-		// FIXME: For some reason this.save() wasn't always working. overriding this with direct mongo client update.
 		return updateUser(dbUser.user,  {$set: {"customData.billing" : dbUser.customData.billing}});
 	}).then(() => {
 		return Promise.resolve({subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo});
@@ -962,8 +960,6 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 schema.methods.executeBillingAgreement = function(){
 	"use strict";
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
-	//	return this.save()			
-		// FIXME: For some reason this.save() wasn't always working. overriding this with direct mongo client update.
 		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
 	})
 };
