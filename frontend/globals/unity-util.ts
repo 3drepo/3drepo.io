@@ -621,6 +621,38 @@ export class UnityUtil {
 	public static mapStop() {
 		UnityUtil.toUnity("HideMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
+	
+	/**
+	 * Override the diffuse colour of the given meshes
+	 * @param {string} account - teamspace the meshes resides in
+	 * @param {string} model - model ID the meshes resides in
+	 * @param {string[]} meshIDs - unique IDs of the meshes to operate on
+	 * @param {number[]} color - RGB value of the override color (note: alpha will be ignored)
+	 */
+	public static overrideMeshColor(account, model, meshIDs, color) {
+		const param: any = {};
+		if (account && model) {
+			param.nameSpace = account + "."  + model;
+		}
+		param.ids = meshIDs;
+		param.color = color;
+		UnityUtil.toUnity("OverrideMeshColor", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Restore the meshes to its original color values
+	 * @param {string} account - teamspace the meshes resides in
+	 * @param {string} model - model ID the meshes resides in
+	 * @param {string[]} meshIDs - unique IDs of the meshes to operate on
+	 */
+	public static resetMeshColor(account, model, meshIDs) {
+		const param: any = {};
+		if (account && model) {
+			param.nameSpace = account + "."  + model;
+		}
+		param.ids = meshIDs;
+		UnityUtil.toUnity("ResetMeshColor", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
 
 	/**
 	 * Remove a pin from the viewer
