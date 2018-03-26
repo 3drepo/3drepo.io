@@ -966,7 +966,7 @@ export class TreeService {
 			}
 
 			return this.ready.promise.then(() => {
-				let currentSelectedMap = {};
+				const currentSelectedMap = {};
 				this.currentSelectedNodes.forEach((n) => {
 					this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
 				});
@@ -998,7 +998,7 @@ export class TreeService {
 				return Promise.resolve();
 			} else {
 				return this.ready.promise.then(() => {
-					let currentSelectedMap = {};
+					const currentSelectedMap = {};
 					this.currentSelectedNodes.forEach((n) => {
 						this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
 					});
