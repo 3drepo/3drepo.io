@@ -28,9 +28,6 @@ class TreeController implements ng.IController {
 	];
 
 	public showProgress: boolean; // in pug
-	private model;
-	private account;
-
 	private revision;
 	private promise;
 	private highlightSelectedViewerObject: boolean;
