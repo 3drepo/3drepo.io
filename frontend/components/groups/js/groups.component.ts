@@ -38,6 +38,7 @@ class GroupsController implements ng.IController {
 	private groupColours: any[];
 	private hexColor: string;
 	private selectedObjectsLen: number;
+	private dialogThreshold: number;
 
 	constructor(
 		private $scope: any,
@@ -47,6 +48,8 @@ class GroupsController implements ng.IController {
 	) {}
 
 	public $onInit() {
+
+		this.dialogThreshold = 0.5;
 		this.changed = false;
 		this.teamspace = this.account; // Workaround legacy naming 
 		this.onContentHeightRequest({height: 130});
@@ -106,11 +109,14 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch(() => {
 			return this.GroupsService.selectionHasChanged();
-		}, (length) => {
-			console.log(length);
-			this.GroupsService.getObjectsStatus();
-			this.selectedObjectsLen = length;
-			this.changed = true;
+		}, () => {
+
+			this.GroupsService.getCurrentMeshHighlights().then((length) => {
+				console.log(length);
+				this.selectedObjectsLen = length;
+				this.changed = true;
+			});
+			
 		})
 
 	}
@@ -166,11 +172,18 @@ class GroupsController implements ng.IController {
 	}
 
 	public handleGroupSave() {
+
+
 		this.savingGroup = true;
 		if (this.selectedGroup.new) {
 			this.createGroup();
 		} else {
-			if (this.selectedObjectsLen < this.selectedGroup.objects.length * 0.5) {
+
+			const threshold = this.selectedGroup.totalSavedMeshes * this.dialogThreshold
+			const presentConfirmation = this.selectedObjectsLen < threshold;
+			
+			if (presentConfirmation) {
+
 				const content = `This looks like a significant change to the number of items
 					do you wish to continue?`;
 				const escapable = true;
@@ -179,8 +192,10 @@ class GroupsController implements ng.IController {
 						this.updateGroup();
 					})
 					.catch(() => {
+						this.savingGroup = false;
 						this.reselectGroup();
-					})
+					});
+
 			} else {
 				this.updateGroup();
 			}

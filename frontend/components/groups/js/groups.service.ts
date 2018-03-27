@@ -42,6 +42,7 @@ export class GroupsService {
 			groups: [],
 			selectedGroup: {},
 			ColorOverides: {},
+			totalSelectedMeshes : 0
 		};
 	}
 
@@ -130,9 +131,17 @@ export class GroupsService {
 		return this.TreeService.currentSelectedNodes.length;
 	}
 
-	public getObjectsStatus() {
-		this.TreeService.getObjectsStatus().then((objects) => {
-			console.log(objects)
+	public getCurrentMeshHighlights() {
+		return this.TreeService.getCurrentMeshHighlights().then((objects) => {
+			console.log(objects);
+			let total = 0;
+			for (var key in objects) {
+				console.log(objects[key]);
+				if (objects[key] && objects[key].meshes) {
+					total += objects[key].meshes.length;
+				}
+			}
+			return total;
 		});
 	}
 
@@ -227,23 +236,31 @@ export class GroupsService {
 		}
 		this.state.selectedGroup = group;
 		this.state.selectedGroup.selected = true;
+		this.state.selectedGroup.totalSavedMeshes = 0;
 
 		if (this.state.selectedGroup.objects) {	
 			console.log(this.state.selectedGroup.objects);
 			const multi = this.MultiSelectService.isMultiMode();
 			const color = this.state.selectedGroup.color.map((c) => c / 255);
 			
-			console.log("standard selection")
 			return this.TreeService.selectNodesBySharedIds(
 				this.state.selectedGroup.objects,
 				multi, // multi
 				true,
 				color,
-			);
+			).then(() => {
+				this.updateTotalSavedMeshes();
+			})
 		}
 
 		return Promise.resolve();
 
+	}
+
+	public updateTotalSavedMeshes() {
+		this.getCurrentMeshHighlights().then((meshTotal) => {
+			this.state.selectedGroup.totalSavedMeshes = meshTotal;
+		})
 	}
 
 	public generateNewGroup() {
@@ -311,6 +328,7 @@ export class GroupsService {
 				newGroup.new = false;
 				this.replaceStateGroup(newGroup);
 				this.updateSelectedGroupColor();
+				this.updateTotalSavedMeshes();
 				return newGroup;
 			});
 	}
