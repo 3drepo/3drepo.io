@@ -417,25 +417,25 @@ class TreeController implements ng.IController {
 	}
 
 	public selectAndCentreNode(node: any) {
-		if(node.toggleState !== "invisible") {
-			this.selectNode(node).then((currentSelectedMap) => {
-				if (Object.keys(currentSelectedMap).length === 0) {
-					return;
-				}
-				const meshIDArrs = [];
-	
-				const keys = Object.keys(currentSelectedMap);
-				keys.forEach((key) => {
-					meshIDArrs.push({
-						model: key.replace("@", "."),
-						meshID: currentSelectedMap[key]
-					});
-				});
-
-				this.ViewerService.centreToPoint(meshIDArrs);
-		});
+		if(node.toggleState === "invisible") {
+			return;
 		}
+	
+		this.selectNode(node).then((currentSelectedMap) => {
+			if (Object.keys(currentSelectedMap).length === 0) {
+				return;
+			}
+			const meshIDArrs = [];
+			const keys = Object.keys(currentSelectedMap);
+			keys.forEach((key) => {
+				meshIDArrs.push({
+					model: key.replace("@", "."),
+					meshID: currentSelectedMap[key]
+				});
+			});
 
+			this.ViewerService.centreToPoint(meshIDArrs);
+		});
 	}
 
 	/**
