@@ -20,6 +20,8 @@ class GroupsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"GroupsService",
+		"DialogService",
+		"$timeout",
 	];
 
 	private onContentHeightRequest: any;
@@ -35,16 +37,20 @@ class GroupsController implements ng.IController {
 	private changed: boolean;
 	private groupColours: any[];
 	private hexColor: string;
+	private selectedObjectsLen: number;
 
 	constructor(
 		private $scope: any,
 		private GroupsService: any,
+		private DialogService: any,
+		private $timeout: any,
 	) {}
 
 	public $onInit() {
 		this.changed = false;
 		this.teamspace = this.account; // Workaround legacy naming 
 		this.onContentHeightRequest({height: 130});
+		this.GroupsService.reset();
 		this.watchers();
 		this.toShow = "groups";
 		this.loading = true;
@@ -70,9 +76,12 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch(() => {
 			return this.GroupsService.state;
-		}, (state) => {
-			angular.extend(this, state);
+		}, (newState, oldState) => {
+			angular.extend(this, newState);
+				
 			this.changed = true;
+
+			console.log("this.GroupsService.state this.changed to true")
 		}, true)
 
 		this.$scope.$watch("vm.groups", () => {
@@ -85,9 +94,6 @@ class GroupsController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.selectedGroup", () => {
-			this.changed = true;
-		}, true);
 
 		this.$scope.$watch("vm.hexColor", () => {
 			if (this.hexColor) {
@@ -98,6 +104,27 @@ class GroupsController implements ng.IController {
 			}
 		});
 
+		this.$scope.$watch(() => {
+			return this.GroupsService.selectionHasChanged();
+		}, (length) => {
+			console.log(length);
+			this.GroupsService.getObjectsStatus();
+			this.selectedObjectsLen = length;
+			this.changed = true;
+		})
+
+	}
+
+	public toggleColorOveride($event, account, model, group) {
+		$event.stopPropagation();
+		this.GroupsService.toggleColorOveride(account, model, group);
+	}
+
+	public handleGroupError(method) {
+		const content = `We tried to ${method} your issue but it failed.
+			If this continues please message support@3drepo.io.`;
+		const escapable = true;
+		this.DialogService.text(`Group Error`, content, escapable);
 	}
 
 
@@ -107,6 +134,7 @@ class GroupsController implements ng.IController {
 
 
 	public saveDisabled() {
+		//console.log("saveDisabled", this.changed);
 		return !this.selectedGroup ||
 			   !this.selectedGroup.name ||
 			   !this.changed
@@ -142,11 +170,26 @@ class GroupsController implements ng.IController {
 		if (this.selectedGroup.new) {
 			this.createGroup();
 		} else {
-			this.updateGroup();
+			if (this.selectedObjectsLen < this.selectedGroup.objects.length * 0.5) {
+				const content = `This looks like a significant change to the number of items
+					do you wish to continue?`;
+				const escapable = true;
+				this.DialogService.confirm(`Confirm Group Update`, content, escapable, "Update", "Cancel")
+					.then(() => {
+						this.updateGroup();
+					})
+					.catch(() => {
+						this.reselectGroup();
+					})
+			} else {
+				this.updateGroup();
+			}
+			
 		}
 	}
 
-	public isolateGroup(group) {
+	public isolateGroup($event, group) {
+		$event.stopPropagation();
 		this.GroupsService.isolateGroup(group);
 	}
 
@@ -155,6 +198,11 @@ class GroupsController implements ng.IController {
 			this.hexColor = "";
 		}
 		this.GroupsService.setSelectedGroupColor(color);
+		this.changed = true;
+	}
+
+	public reselectGroup() {
+		this.GroupsService.reselectGroup(this.selectedGroup);
 	}
 
 	public getRGBA(color: any) {
@@ -176,10 +224,16 @@ class GroupsController implements ng.IController {
 			this.selectedGroup
 		)
 			.then(() => {
-				this.changed = false;
 				this.savingGroup = false;
+
+				// Wrapped in timeout to avoid watcher clashing
+				this.$timeout(() => {
+					this.changed = false;
+				});
+				console.log("this.changed updated", this.changed);
 			})
 			.catch((error) => {
+				this.handleGroupError("update");
 				this.savingGroup = false;
 				console.error(error);
 			});
@@ -194,10 +248,16 @@ class GroupsController implements ng.IController {
 			this.selectedGroup
 		)
 			.then(() => {
-				this.changed = false;
 				this.savingGroup = false;
+
+				// Wrapped in timeout to avoid watcher clashing
+				this.$timeout(() => {
+					this.changed = false;
+				});
+
 			})
 			.catch((error) => {
+				this.handleGroupError("create");
 				this.savingGroup = false;
 				console.error(error);
 			});
@@ -206,7 +266,7 @@ class GroupsController implements ng.IController {
 	public showGroupPane() {
 		this.toShow = "group";
 		this.hexColor = "";
-		this.onContentHeightRequest({height: 280});
+		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 		this.GroupsService.updateSelectedGroupColor();
 	}
@@ -218,7 +278,7 @@ class GroupsController implements ng.IController {
 	public setContentHeight() {
 
 		if (this.toShow === "group") {
-			return 300;
+			return 310;
 		}
 
 		let contentHeight = 0;

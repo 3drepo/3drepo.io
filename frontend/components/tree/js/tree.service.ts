@@ -1058,7 +1058,7 @@ export class TreeService {
 		console.log("multi")
 
 		if (!nodes || nodes.length === 0) {
-			return Promise.reject("No node specified");
+			return Promise.resolve("No nodes specified");
 		}
 
 		if (!multi) {

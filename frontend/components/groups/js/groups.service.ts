@@ -21,7 +21,8 @@ export class GroupsService {
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
-		"AuthService"
+		"AuthService",
+		"ViewerService"
 	];
 
 	private state;
@@ -31,13 +32,109 @@ export class GroupsService {
 		private TreeService: any,
 		private MultiSelectService: any,
 		private AuthService: any,
+		private ViewerService: any,
 	) {
+		this.reset();
+	}
+
+	public reset() {
 		this.state = {
 			groups: [],
 			selectedGroup: {},
+			ColorOverides: {},
 		};
 	}
 
+	public toggleColorOveride(account, model, group) {
+		if (this.state.ColorOverides[group._id]) {
+			this.removeColorOveride(group._id)
+		} else {
+			this.colorOveride(account, model, group);
+		}
+	}
+
+	public colorOveride(account, model, group) {
+		console.log("colorOveride");
+
+		const color = group.color.map((c) => c / 255);
+
+		this.TreeService.getMap()
+			.then((treeMap) => {
+
+
+				// We need to create a map of models for
+				// federation case
+				const models = {};
+
+				group.objects.forEach((object) => {
+					const uid = treeMap.sharedIdToUid[object.shared_id];
+					const key = object.account + "@" + object.model;
+					if (!models[key]) {
+						models[key] = { ids : [uid] };
+					} else {
+						models[key].ids.push(uid);
+					}
+				});
+
+				for (let key in models) {
+
+					const meshIds = models[key].ids;
+					const pair = key.split("@");
+					const account = pair[0];
+					const model = pair[1];
+
+					this.ViewerService.overrideMeshColor(account, model, meshIds, color);
+				}
+
+				this.state.ColorOverides[group._id] = {
+					models, color
+				};
+				
+			});
+	}
+
+	public removeAllColorOveride() {
+		for (let groupId in this.state.ColorOverides) {
+			this.removeColorOveride(groupId);
+		}
+	}
+
+	public removeColorOveride(groupId) {
+		console.log("removeColorOveride");
+		const group = this.state.ColorOverides[groupId]
+
+		for (let key in group.models) {
+
+			const meshIds = group.models[key].ids;
+			const pair = key.split("@");
+			const account = pair[0];
+			const model = pair[1];
+
+			this.ViewerService.resetMeshColor(
+				account,
+				model,
+				meshIds,
+				group.color
+			);
+		}
+
+		delete this.state.ColorOverides[groupId];
+	}
+
+	public reselectGroup(group) {
+		this.TreeService.showAllTreeNodes(true);
+		this.selectGroup(group);
+	}
+
+	public selectionHasChanged() {
+		return this.TreeService.currentSelectedNodes.length;
+	}
+
+	public getObjectsStatus() {
+		this.TreeService.getObjectsStatus().then((objects) => {
+			console.log(objects)
+		});
+	}
 
 	public initGroups(teamspace, model) {
 		return this.getGroups(teamspace, model)
@@ -136,6 +233,7 @@ export class GroupsService {
 			const multi = this.MultiSelectService.isMultiMode();
 			const color = this.state.selectedGroup.color.map((c) => c / 255);
 			
+			console.log("standard selection")
 			return this.TreeService.selectNodesBySharedIds(
 				this.state.selectedGroup.objects,
 				multi, // multi

@@ -554,6 +554,18 @@ export class ViewerService {
 		}
 	}
 
+	public overrideMeshColor(account, model, meshIDs, color) {
+		if (this.viewer) {
+			this.viewer.overrideMeshColor(account, model, meshIDs, color);
+		}
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		if (this.viewer) {
+			this.viewer.resetMeshColor(account, model, meshIDs);
+		}
+	}
+
 }
 
 export const ViewerServiceModule = angular

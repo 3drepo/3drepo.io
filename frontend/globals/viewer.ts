@@ -718,4 +718,13 @@ export class Viewer {
 		UnityUtil.mapStop();
 	}
 
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		UnityUtil.resetMeshColor(account, model, meshIDs);
+	}
+
 }

@@ -32,12 +32,22 @@ groups .spinner {
     height: 25px !important;
 }
 
+groups .spinner svg {
+    width: 25px !important;
+    height: 25px !important;
+    transform-origin: initial !important;
+}
+
 groups .metaMargin {
     margin: 3px;
 }
 
 groups .groupNameInput {
     margin-top: 20px;
+}
+
+groups .groupMain {
+    width: 195px;
 }
 
 groups .groupColorBar {
@@ -49,6 +59,7 @@ groups .groupColorHolder {
     width: 125px;
 }
 
+
 groups .groupEnterHolder {
     width: 45px;
     background: #0c2f54;
@@ -57,6 +68,17 @@ groups .groupEnterHolder {
 
 groups .groupEnterSpace {
     width: 45px;
+}
+
+groups .groupObjectMetaContainer {
+
+}
+
+groups .groupObjectMeta {
+    font-size: 14px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 3px;
 }
 
 groups .groupMeta {
@@ -94,9 +116,14 @@ groups .groupsList {
 
 /** menus appear in another part of the DOM **/
 
+.groupColorGrid  {
+    margin-top: 10px;
+}
 
 .groupColorColumn {
-    width: 100px;
+    width: 40px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .groupHexColor {
@@ -115,18 +142,23 @@ groups .groupsList {
 .groupCurrentColorBlock {
     height: 80px;
     width: 80px;
-    margin-top: 7px;
+    margin-top: 15px;
 }
 
 .groupColorMenu {
-    height: 195px;
-    width: 395px;
+    height: 205px;
+    width: 365px;
+}
+
+.groupColorContainer {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
 }
 
 .groupColor {
     width: 30px;
     height: 30px;
-    margin-bottom: 10px;
 }
 
 .groupCurrentColorHolder {

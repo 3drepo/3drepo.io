@@ -630,6 +630,8 @@ export class UnityUtil {
 	 * @param {number[]} color - RGB value of the override color (note: alpha will be ignored)
 	 */
 	public static overrideMeshColor(account, model, meshIDs, color) {
+		console.log("color", color);
+		console.log("overinding ", account, model, meshIDs, color);
 		const param: any = {};
 		if (account && model) {
 			param.nameSpace = account + "."  + model;
