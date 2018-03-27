@@ -313,13 +313,11 @@ export class UnityUtil {
 
 	/**
 	 * Centres the viewpoint to the object
-	 * @param {string} ns - namespace for the object, i.e. teamspace + "." + model
-	 * @param {string} id - unique ID of the object to centre on
+	 * @param {Object[]}  - array of json objects each recording {model: <account.modelID>, meshID: [array of mesh IDs]}
 	 */
-	public static centreToPoint(model, id) {
+	public static centreToPoint(meshIDs) {
 		const params = {
-			model,
-			meshID: id,
+			groups: meshIDs
 		};
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}

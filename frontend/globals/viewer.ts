@@ -316,6 +316,10 @@ export class Viewer {
 		UnityUtil.resetCamera();
 	}
 
+	public centreToPoint(params) {
+		UnityUtil.centreToPoint(params);
+	}
+
 	public setUnity() {
 		UnityUtil.viewer = this;
 	}

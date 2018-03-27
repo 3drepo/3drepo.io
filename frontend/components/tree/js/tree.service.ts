@@ -429,6 +429,27 @@ export class TreeService {
 		return this.subTreesById;
 	}
 
+	public getMeshId(nodeId: string) {
+		let meshId = this.idToMeshes[nodeId];
+
+		if (meshId !== undefined) {
+			return meshId;
+		}
+
+		for (const key in this.idToMeshes) {
+			if (key) {
+				const potentialMeshId = this.idToMeshes[key][nodeId];
+				if (potentialMeshId !== undefined) {
+					meshId = potentialMeshId;
+					return meshId;
+				}
+			}
+		}
+
+		return meshId;
+
+ 	}	 	
+
 	public setSubTreesById(value) {
 		this.subTreesById = value;
 	}
@@ -1049,6 +1070,20 @@ export class TreeService {
 	}
 
 	/**
+	 * Return a map of currently selected meshes
+	 */
+	public getCurrentMeshHighlights() {
+		return this.ready.promise.then(() => {
+			const currentSelectedMap = {};
+			this.currentSelectedNodes.forEach((n) => {
+				this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
+			});
+
+			return currentSelectedMap;
+		});
+	}
+
+	/**
 	 * Select a node in the tree.
 	 * @param node	Node to select.
 	 * @param multi	Is multi select enabled.
@@ -1123,6 +1158,8 @@ export class TreeService {
 					});
 				}
 			}
+
+			return highlightMap;
 
 		});
 	}
