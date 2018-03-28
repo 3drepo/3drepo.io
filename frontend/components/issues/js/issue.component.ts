@@ -269,6 +269,8 @@ class IssueController implements ng.IController {
 						this.setEditIssueData(fetchedIssue);
 						this.startNotification();
 						this.issueFailedToLoad = false;
+						//Update the issue data on issue service so search would work better
+						this.IssuesService.updateIssues(this.issueData);
 					})
 					.catch((error) => {
 						this.issueFailedToLoad = true;
