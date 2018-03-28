@@ -52,10 +52,10 @@ export class CompareService {
 					label: "3D Diff",
 					type: "diff",
 				},
-				// clash : {
-				// 	label: "3D Clash",
-				// 	type: "clash",
-				// },
+				clash : {
+				 	label: "3D Clash",
+				 	type: "clash",
+				},
 			},
 			baseModels: [],
 			targetModels: [],
@@ -335,14 +335,13 @@ export class CompareService {
 
 		} else if (this.state.mode === "clash") {
 
-			// TODO: Bring back with clash
-			// if (this.state.isFed) {
-			// 	this.ViewerService.diffToolEnableWithClashMode();
-			// } else {
-			// 	this.ViewerService.diffToolShowBaseModel();
-			// }
+			if (this.state.isFed) {
+			 	this.ViewerService.diffToolEnableWithClashMode();
+			} else {
+			 	this.ViewerService.diffToolShowBaseModel();
+			}
 
-			// this.changeCompareState("compare");
+			this.changeCompareState("compare");
 
 		}
 	}
@@ -362,10 +361,9 @@ export class CompareService {
 		this.state.compareState = "compare";
 
 		if (this.state.mode === "clash") {
-			// TODO: Bring back with clash
-			// if (this.state.isFed === true) {
-			// 	this.clashFed();
-			// }
+			if (this.state.isFed === true) {
+				this.clashFed();
+			}
 		} else if (this.state.mode === "diff") {
 			if (this.state.isFed === false) {
 				this.diffModel(account, model);
@@ -412,22 +410,21 @@ export class CompareService {
 
 	}
 
-	// TODO: Bring back with clash
-	// public clashFed() {
+	public clashFed() {
 
-	// 	this.ViewerService.diffToolDisableAndClear();
+		this.ViewerService.diffToolDisableAndClear();
 
-	// 	this.loadModels("clash")
-	// 		.then(() => {
-	// 			this.ViewerService.diffToolEnableWithClashMode();
-	// 			this.modelsLoaded();
-	// 		})
-	// 		.catch((error) => {
-	// 			this.modelsLoaded();
-	// 			console.error(error);
-	// 		});
+	 	this.loadModels("clash")
+	 		.then(() => {
+	 			this.ViewerService.diffToolEnableWithClashMode();
+	 			this.modelsLoaded();
+			})
+	 		.catch((error) => {
+	 			this.modelsLoaded();
+	 			console.error(error);
+	 		});
 
-	// }
+	}
 
 	public toggleModelVisibility(model) {
 		if (this.state.modelType === "target") {
@@ -440,19 +437,27 @@ export class CompareService {
 	}
 
 	private setBaseModelVisibility(model) {
+		console.log("seting base visibility");
 		const nodes = this.TreeService.getAllNodes();
 		if (nodes.length && nodes[0].children) {
 			const childNodes = nodes[0].children;
 			childNodes.forEach((node) => {
 				if (node.name === model.account + ":" + model.name) {
 					// TODO: Fix this
-					this.TreeService.setTreeNodeStatus(node, false);
+					if(model.visible === "invisible") {
+						this.TreeService.showTreeNodes([node]);
+					}
+					else {
+						this.TreeService.hideTreeNodes([node]);
+					}
+
 					// Keep the compare componetn and TreeService
 					// in sync with regards to visibility
 					model.visible = node.toggleState;
 				}
 			});
 		}
+		
 
 	}
 

@@ -164,7 +164,6 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "compare",
 			title: "Compare",
-			// title: "Compare",
 			show: false,
 			help: "Show clashes and differences between models",
 			icon: "compare",
