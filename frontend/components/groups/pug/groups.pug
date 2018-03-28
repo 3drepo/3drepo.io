@@ -7,7 +7,7 @@ div.groupsContainer
         h3 Loading groups...
 
     md-container.groupsList(
-        ng-if="vm.toShow === 'groups'"
+        ng-show="vm.toShow === 'groups'"
         flex="100"
         layout="column")
 
@@ -70,7 +70,7 @@ div.groupsContainer
     div.groupContainer(
         layout="column"
         layout-margin
-        ng-if="vm.toShow === 'group'")
+        ng-show="vm.toShow === 'group'")
 
         md-input-container.groupNameInput
             label Group Name
