@@ -52,7 +52,7 @@ class GroupsController implements ng.IController {
 		this.dialogThreshold = 0.5;
 		this.changed = false;
 		this.teamspace = this.account; // Workaround legacy naming 
-		this.onContentHeightRequest({height: 130});
+		this.onContentHeightRequest({height: 1000});
 		this.GroupsService.reset();
 		this.watchers();
 		this.toShow = "groups";
@@ -278,6 +278,14 @@ class GroupsController implements ng.IController {
 			});
 	}
 
+	public getColorOverideRGBA(group) {
+		let hasOveride = this.GroupsService.hasColorOveride(group);
+		if (hasOveride) {
+			return this.getGroupRGBAColor(group);
+		}
+		return "rgba(0,0,0,0.54)";
+	}
+
 	public showGroupPane() {
 		this.toShow = "group";
 		this.hexColor = "";
@@ -297,8 +305,9 @@ class GroupsController implements ng.IController {
 		}
 
 		let contentHeight = 0;
-		let groupHeight = 100;
-		let actionBar = 52;
+		const groupHeight = 125;
+		const actionBar = 52;
+
 		if (this.groups && this.groups.length) {
 			contentHeight = (this.groups.length * groupHeight) + actionBar;
 		} else {

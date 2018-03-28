@@ -505,38 +505,42 @@ export class TreeService {
 			return;
 		}
 		
+		let stack = [node];
 
-		const model = node.model || node.project;
-		const key = this.getAccountModelKey(node.account, model);
+		while (stack.length > 0) {
 
-		if (!highlightMap[key]) {
-			highlightMap[key] = {};
+			const childNode = stack.pop();
+			const model = childNode.model || childNode.project;
+			const key = this.getAccountModelKey(childNode.account, model);
+
+			if (!highlightMap[key]) {
+				highlightMap[key] = {};
+			}
+			
+			if (colour) {
+				highlightMap[key].colour = colour
+			}
+
+			// Add the meshes
+			let meshes = idToMeshes[childNode._id];
+
+			// the node is within a sub model
+			if (key && idToMeshes[key]) {
+				meshes = idToMeshes[key][childNode._id];
+			}
+			if (meshes) {
+				if (!highlightMap[key].meshes) {
+					highlightMap[key].meshes = meshes;
+				} else {
+					highlightMap[key].meshes = highlightMap[key].meshes.concat(meshes);
+				}
+			} else if (childNode.children) {
+				// This should only happen in federations.
+				// Traverse down the tree to find submodel nodes
+				stack = stack.concat(childNode.children);
+			}
 		}
 		
-		if (colour) {
-			highlightMap[key].colour = colour
-		}
-
-		// Add the meshes
-		let meshes = idToMeshes[node._id];
-
-		// the node is within a sub model
-		if (key && idToMeshes[key]) {
-			meshes = idToMeshes[key][node._id];
-		}
-		if (meshes) {
-			if (!highlightMap[key].meshes) {
-				highlightMap[key].meshes = meshes;
-			} else {
-				highlightMap[key].meshes = highlightMap[key].meshes.concat(meshes);
-			}
-		} else if (node.children) {
-			// This should only happen in federations.
-			// Traverse down the tree to find submodel nodes
-			node.children.forEach((child) => {
-				this.traverseNodeAndPushId(child, highlightMap, idToMeshes, colour);
-			});
-		}
 
 	}
 
@@ -895,6 +899,8 @@ export class TreeService {
 		this.getMap()
 		.then((treeMap) => {
 
+			console.log("isolateNodesBySharedId");
+
 			if (objects) {
 				// Make a list of nodes to shown
 				let shownNodes = [];
@@ -906,6 +912,7 @@ export class TreeService {
 					}
 				}
 				// Hide all
+				console.log("hideAllTreeNodes");
 				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
 				// Show selected
 				if (shownNodes) {
@@ -1039,9 +1046,9 @@ export class TreeService {
 	 */
 	public clearCurrentlySelected() {
 		if (this.currentSelectedNodes) {
-			this.currentSelectedNodes.forEach((selectedNode) => {
-				selectedNode.selected = false;
-			});
+			for (let i = 0; i < this.currentSelectedNodes.length; i++) {
+				this.currentSelectedNodes[i].selected = false;
+			}
 		}
 		this.currentSelectedNodes = [];
 	}
@@ -1075,10 +1082,9 @@ export class TreeService {
 	public getCurrentMeshHighlights() {
 		return this.ready.promise.then(() => {
 			const currentSelectedMap = {};
-			this.currentSelectedNodes.forEach((n) => {
-				this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
-			});
-
+			for (let i = 0; i < this.currentSelectedNodes.length; i++) {
+				this.traverseNodeAndPushId(this.currentSelectedNodes[i], currentSelectedMap, this.treeMap.idToMeshes);
+			}
 			return currentSelectedMap;
 		});
 	}
@@ -1129,10 +1135,10 @@ export class TreeService {
 		return this.ready.promise.then(() => {
 			
 			const highlightMap = {};
-			nodes.forEach((n) => {
-				this.traverseNodeAndPushId(n, highlightMap, this.treeMap.idToMeshes, colour);
-			});
 
+			for (let i = 0; i < nodes.length; i++) {
+				this.traverseNodeAndPushId(nodes[i], highlightMap, this.treeMap.idToMeshes, colour);
+			}
 
 			// Update viewer highlights
 			if (!multi) {
@@ -1327,7 +1333,10 @@ export class TreeService {
 	 */
 	public recurseIdToNodeMap(nodes) {
 		if (nodes) {
-			nodes.forEach((node) => {
+			for (let i = 0; i < nodes.length; i++) {
+
+				let node = nodes[i];
+			
 				if (node._id) {
 					this.idToNodeMap[node._id] = node;
 					if (node.toggleState === "visible" && (!node.children || node.children.length === 0)) {
@@ -1339,7 +1348,9 @@ export class TreeService {
 					node.defaultState = node.toggleState;
 					this.recurseIdToNodeMap(node.children);
 				}
-			});
+
+			}
+			
 		}
 	}
 

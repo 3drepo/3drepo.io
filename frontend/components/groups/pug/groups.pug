@@ -19,7 +19,7 @@ div.groupsContainer
 
             div.groupMain(layout="row")
                 div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
-                div(layout="column", flex="100" layout-margin)
+                div.groupMetaData(layout="column", flex="100" layout-margin)
                     div(layout="row" layout-align="space-between center"  flex="100")
                         span.groupName {{group.name}}
                     div(layout="row" flex="100")
@@ -43,8 +43,9 @@ div.groupsContainer
                     md-button.md-icon-button(
                         ng-click="vm.toggleColorOveride($event, vm.account, vm.model, group)"
                         aria-label="Invert Colors")
-                        md-icon.angular-material-icons invert_colors
-                    md-tooltip Colour Overide
+                        md-icon.angular-material-icons(
+                            style="color : {{vm.getColorOverideRGBA(group)}}") invert_colors
+                    md-tooltip Toggle Colour Overide
             
             div.groupEnterHolder(
                 ng-click="vm.editGroup()"

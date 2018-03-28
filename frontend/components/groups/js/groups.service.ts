@@ -41,13 +41,17 @@ export class GroupsService {
 		this.state = {
 			groups: [],
 			selectedGroup: {},
-			ColorOverides: {},
+			colorOveride: {},
 			totalSelectedMeshes : 0
 		};
 	}
 
+	public hasColorOveride(group) {
+		return this.state.colorOveride[group._id] !== undefined;
+	}
+
 	public toggleColorOveride(account, model, group) {
-		if (this.state.ColorOverides[group._id]) {
+		if (this.state.colorOveride[group._id]) {
 			this.removeColorOveride(group._id)
 		} else {
 			this.colorOveride(account, model, group);
@@ -62,24 +66,30 @@ export class GroupsService {
 		this.TreeService.getMap()
 			.then((treeMap) => {
 
-
 				// We need to create a map of models for
 				// federation case
-				const models = {};
+				const meshes = {};
+				
 
 				group.objects.forEach((object) => {
+
+					
 					const uid = treeMap.sharedIdToUid[object.shared_id];
-					const key = object.account + "@" + object.model;
-					if (!models[key]) {
-						models[key] = { ids : [uid] };
-					} else {
-						models[key].ids.push(uid);
-					}
+					const node = this.TreeService.getNodeById(uid);
+					this.TreeService.traverseNodeAndPushId(node, meshes, treeMap.idToMeshes);
+					// const key = object.account + "@" + object.model;
+					// if (!models[key]) {
+					// 	models[key] = { ids : [uid] };
+					// } else {
+					// 	models[key].ids.push(uid);
+					// }
 				});
 
-				for (let key in models) {
+				console.log("Model meshes", meshes)
 
-					const meshIds = models[key].ids;
+				for (let key in meshes) {
+
+					const meshIds = meshes[key].meshes;
 					const pair = key.split("@");
 					const account = pair[0];
 					const model = pair[1];
@@ -87,26 +97,26 @@ export class GroupsService {
 					this.ViewerService.overrideMeshColor(account, model, meshIds, color);
 				}
 
-				this.state.ColorOverides[group._id] = {
-					models, color
+				this.state.colorOveride[group._id] = {
+					models: meshes, color
 				};
 				
 			});
 	}
 
 	public removeAllColorOveride() {
-		for (let groupId in this.state.ColorOverides) {
+		for (let groupId in this.state.colorOveride) {
 			this.removeColorOveride(groupId);
 		}
 	}
 
 	public removeColorOveride(groupId) {
 		console.log("removeColorOveride");
-		const group = this.state.ColorOverides[groupId]
+		const group = this.state.colorOveride[groupId]
 
 		for (let key in group.models) {
 
-			const meshIds = group.models[key].ids;
+			const meshIds = group.models[key].meshes;
 			const pair = key.split("@");
 			const account = pair[0];
 			const model = pair[1];
@@ -119,7 +129,7 @@ export class GroupsService {
 			);
 		}
 
-		delete this.state.ColorOverides[groupId];
+		delete this.state.colorOveride[groupId];
 	}
 
 	public reselectGroup(group) {
@@ -225,6 +235,7 @@ export class GroupsService {
 	}
 
 	public isolateGroup(group) {
+		console.log("isolateGroup");
 		this.selectGroup(group).then(() => {
 			this.TreeService.isolateNodesBySharedId(this.state.selectedGroup.objects);
 		})
@@ -259,6 +270,7 @@ export class GroupsService {
 
 	public updateTotalSavedMeshes() {
 		this.getCurrentMeshHighlights().then((meshTotal) => {
+			console.log("meshTotal", meshTotal)
 			this.state.selectedGroup.totalSavedMeshes = meshTotal;
 		})
 	}

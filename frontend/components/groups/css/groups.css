@@ -47,7 +47,14 @@ groups .groupNameInput {
 }
 
 groups .groupMain {
-    width: 195px;
+    width: 315px;
+}
+
+groups .groupMetaData {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;   
+    width: 100px;
 }
 
 groups .groupColorBar {
@@ -104,8 +111,8 @@ groups .groupDescription {
 
 groups .group {
     border-bottom: solid gainsboro 1px;
-    min-height: 100px;
-    max-height: 100px;
+    min-height: 125px;
+    max-height: 125px;
     height: 100%;
 }
 
