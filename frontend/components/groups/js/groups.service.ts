@@ -22,7 +22,7 @@ export class GroupsService {
 		"TreeService",
 		"MultiSelectService",
 		"AuthService",
-		"ViewerService"
+		"ViewerService",
 	];
 
 	private state;
@@ -42,7 +42,7 @@ export class GroupsService {
 			groups: [],
 			selectedGroup: {},
 			colorOveride: {},
-			totalSelectedMeshes : 0
+			totalSelectedMeshes : 0,
 		};
 	}
 
@@ -59,7 +59,6 @@ export class GroupsService {
 	}
 
 	public colorOveride(account, model, group) {
-		console.log("colorOveride");
 
 		const color = group.color.map((c) => c / 255);
 
@@ -76,7 +75,11 @@ export class GroupsService {
 					this.TreeService.traverseNodesAndPushId(node, meshes, treeMap.idToMeshes);
 				});
 
-				for (let key in meshes) {
+				for (const key in meshes) {
+
+					if (key === undefined) {
+						continue;
+					}
 
 					const meshIds = meshes[key].meshes;
 					const pair = key.split("@");
@@ -87,7 +90,7 @@ export class GroupsService {
 				}
 
 				this.state.colorOveride[group._id] = {
-					models: meshes, color
+					models: meshes, color,
 				};
 
 			});
@@ -95,15 +98,22 @@ export class GroupsService {
 
 	public removeAllColorOveride() {
 		for (const groupId in this.state.colorOveride) {
+			if (!this.state.colorOveride.hasOwnProperty(groupId)) {
+				continue;
+			}
 			this.removeColorOveride(groupId);
 		}
 	}
 
 	public removeColorOveride(groupId) {
-		console.log("removeColorOveride");
+
 		const group = this.state.colorOveride[groupId];
 
 		for (const key in group.models) {
+
+			if (!group.models.hasOwnProperty(key)) {
+				continue;
+			}
 
 			const meshIds = group.models[key].meshes;
 			const pair = key.split("@");
@@ -114,7 +124,7 @@ export class GroupsService {
 				account,
 				model,
 				meshIds,
-				group.color
+				group.color,
 			);
 		}
 
@@ -126,16 +136,12 @@ export class GroupsService {
 		this.selectGroup(group);
 	}
 
-	public selectionHasChanged() {
-		return this.TreeService.currentSelectedNodes.length;
-	}
-
 	public getCurrentMeshHighlights() {
+
 		return this.TreeService.getCurrentMeshHighlights().then((objects) => {
-			console.log(objects);
+
 			let total = 0;
 			for (const key in objects) {
-				console.log(objects[key]);
 				if (objects[key] && objects[key].meshes) {
 					total += objects[key].meshes.length;
 				}
@@ -147,7 +153,6 @@ export class GroupsService {
 	public initGroups(teamspace, model) {
 		return this.getGroups(teamspace, model)
 			.then((groups) => {
-				console.log(groups);
 				this.state.groups = groups;
 				this.cleanGroups(this.state.groups);
 			});
@@ -211,7 +216,7 @@ export class GroupsService {
 			parseInt(result[1], 16),
 			parseInt(result[2], 16),
 			parseInt(result[3], 16),
-		 ] : [];
+		] : [];
 
 	}
 

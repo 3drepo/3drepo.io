@@ -254,7 +254,6 @@ class TreeController implements ng.IController {
 		this.setContentHeight(this.nodes);
 	}
 
-
 	/**
 	 * Set the content height.
 	 * The height of a node is dependent on its name length and its level.
@@ -318,13 +317,13 @@ class TreeController implements ng.IController {
 	}
 
 	public selectAndCentreNode(node: any) {
-		console.log("selectAndCentreNode", node);
-		if(node.toggleState === "invisible") {
+
+		if (node.toggleState === "invisible") {
 			return;
 		}
-	
+
 		this.selectNode(node).then((selectionMap) => {
-			console.log(selectionMap)
+
 			if (Object.keys(selectionMap).length === 0) {
 				return;
 			}
@@ -333,10 +332,10 @@ class TreeController implements ng.IController {
 			keys.forEach((key) => {
 				meshIDArrs.push({
 					model: key.replace("@", "."),
-					meshID: selectionMap[key].meshes
+					meshID: selectionMap[key].meshes,
 				});
 			});
-			console.log(meshIDArrs)
+
 			this.ViewerService.centreToPoint(meshIDArrs);
 		});
 	}

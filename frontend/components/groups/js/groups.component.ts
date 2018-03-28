@@ -19,9 +19,11 @@ class GroupsController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
+		"$timeout",
+
 		"GroupsService",
 		"DialogService",
-		"$timeout",
+		"TreeService",
 	];
 
 	private onContentHeightRequest: any;
@@ -42,9 +44,11 @@ class GroupsController implements ng.IController {
 
 	constructor(
 		private $scope: any,
+		private $timeout: any,
+
 		private GroupsService: any,
 		private DialogService: any,
-		private $timeout: any,
+		private TreeService: any,
 	) {}
 
 	public $onInit() {
@@ -106,7 +110,7 @@ class GroupsController implements ng.IController {
 		});
 
 		this.$scope.$watch(() => {
-			return this.GroupsService.selectionHasChanged();
+			return this.TreeService.currentSelectedNodes;
 		}, () => {
 
 			this.GroupsService.getCurrentMeshHighlights().then((length) => {
@@ -114,7 +118,7 @@ class GroupsController implements ng.IController {
 				this.changed = true;
 			});
 
-		});
+		}, true);
 
 	}
 

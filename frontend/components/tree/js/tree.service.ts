@@ -903,20 +903,17 @@ export class TreeService {
 		this.getMap()
 		.then((treeMap) => {
 
-			console.log("isolateNodesBySharedId");
-
 			if (objects) {
 				// Make a list of nodes to shown
-				let shownNodes = [];
+				const shownNodes = [];
 				for (let i = 0; i < objects.length; i++) {
-					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 					if (objUid) {
 						shownNodes.push(this.getNodeById(objUid));
 					}
 				}
 				// Hide all
-				console.log("hideAllTreeNodes");
 				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
 				// Show selected
 				if (shownNodes) {
@@ -1040,7 +1037,7 @@ export class TreeService {
 
 			this.handleVisibility(this.getClickedHidden(), false);
 			this.handleVisibility(this.getClickedShown(), true);
-	
+
 		});
 
 	}
@@ -1086,7 +1083,8 @@ export class TreeService {
 	public getCurrentMeshHighlights() {
 		return this.ready.promise.then(() => {
 			const currentSelectedMap = {};
-			this.traverseNodesAndPushId(this.currentSelectedNodes, currentSelectedMap, this.treeMap.idToMeshes);
+			const nodes = this.currentSelectedNodes.concat();
+			this.traverseNodesAndPushId(nodes, currentSelectedMap, this.treeMap.idToMeshes);
 			return currentSelectedMap;
 		});
 	}
@@ -1178,7 +1176,7 @@ export class TreeService {
 
 	public selectNodesBySharedIds(sharedIds: any[], multi: boolean, additive: boolean, colour: number[]) {
 		return this.getMap().then(() => {
-			
+
 			const nodes = [];
 
 			for (let i = 0; i < sharedIds.length; i++) {
@@ -1186,7 +1184,7 @@ export class TreeService {
 				const node = this.getNodeById(objUid);
 				nodes.push(node);
 			}
-			
+
 			this.selectNodes(nodes, multi, additive, colour);
 
 		});
@@ -1200,7 +1198,7 @@ export class TreeService {
 					// Make a list of nodes to hide
 					let hiddenNodes = [];
 					for (let i = 0; i < objects.length; i++) {
-						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 						if (objUid) {
 							hiddenNodes.push(this.getNodeById(objUid));
@@ -1225,7 +1223,7 @@ export class TreeService {
 					// Make a list of nodes to shown
 					let shownNodes = [];
 					for (let i = 0; i < objects.length; i++) {
-						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 						if (objUid) {
 							shownNodes.push(this.getNodeById(objUid));
@@ -1251,7 +1249,7 @@ export class TreeService {
 					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 					if (objUid) {
-						let node = this.getNodeById(objUid);
+						const node = this.getNodeById(objUid);
 						if (node && node.hasOwnProperty("name")) {
 							nodes.add(node);
 						}
