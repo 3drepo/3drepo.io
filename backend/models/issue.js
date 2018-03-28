@@ -866,6 +866,15 @@ schema.methods.updateComment = function(commentIndex, data){
 
 				data.viewpoint = data.viewpoint || {};
 				data.viewpoint.guid = utils.generateUUID();
+				if (data.viewpoint.highlighted_group_id) {
+					data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
+				}
+				if (data.viewpoint.hidden_group_id) {
+					data.viewpoint.hidden_group_id = stringToUUID(data.viewpoint.hidden_group_id);
+				}
+				if (data.viewpoint.shown_group_id) {
+					data.viewpoint.shown_group_id = stringToUUID(data.viewpoint.shown_group_id);
+				}
 
 				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
 					content: new Buffer.from(data.viewpoint.screenshot, "base64"),

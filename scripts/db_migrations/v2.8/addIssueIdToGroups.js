@@ -4,12 +4,7 @@ print('adding issue IDs to groups');
 
 var addIssueIdToGroup = function(myDb, settingId, groupId, issueId) {
 	print('adding ' + issueId + ' to ' + groupId);
-
-	var updateObj = {
-		issue_id: issueId
-	}
-
-	myDb.getCollection(settingId + '.groups').update({ _id: groupId }, updateObj);
+	myDb.getCollection(settingId + '.groups').update({ _id: groupId }, { $set: { issue_id: issueId } });
 };
 
 db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(function(database) {
