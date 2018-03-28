@@ -91,8 +91,6 @@ export class TreeService {
 		this.highlightSelectedViewerObject = value;
 	}
 
-
-
 	public genIdToObjRef(tree: any, map: any) {
 
 		if (!map) {
@@ -448,7 +446,7 @@ export class TreeService {
 
 		return meshId;
 
- 	}	 	
+ 	}
 
 	public setSubTreesById(value) {
 		this.subTreesById = value;
@@ -871,7 +869,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide selected objects 
+	 * Hide selected objects
 	 */
 	public hideSelected() {
 
@@ -898,6 +896,9 @@ export class TreeService {
 		}
 	}
 
+	/**
+	 * Isolate selected objects by their shared IDs
+	 */
 	public isolateNodesBySharedId(objects) {
 
 		this.getMap()
@@ -926,7 +927,6 @@ export class TreeService {
 			console.error(error);
 		});
 
-		
 	}
 
 	/**
@@ -944,8 +944,6 @@ export class TreeService {
 	public isLeafNode(node: any) {
 		return !node.children || !node.children || node.children.length === 0;
 	}
-
-
 
 	/**
 	 * Handle visibility changes from tree service to viewer service.
@@ -978,7 +976,7 @@ export class TreeService {
 				const model = vals[1];
 
 				if (this.ViewerService.viewer) {
-	
+
 					this.ViewerService.switchObjectVisibility(
 						account,
 						model,
@@ -990,7 +988,6 @@ export class TreeService {
 			}
 		}
 	}
-
 
 	/**
 	 * Update the state of clickedHidden and clickedShown, which are used by tree component
@@ -1089,13 +1086,17 @@ export class TreeService {
 		});
 	}
 
+	/**
+	 * Deselect a nodes in the tree.
+	 * @param nodes	Node to select.
+	 */
 	public deselectNodes(nodes: any[]) {
 		this.selectNodes(nodes, true, false);
 	}
 
 	/**
-	 * Select a node in the tree.
-	 * @param node	Node to select.
+	 * Select nodes in the tree.
+	 * @param nodes	Nodes to select.
 	 * @param multi	Is multi select enabled.
 	 */
 	public selectNodes(nodes: any[], multi: boolean, additive: boolean, colour?: number[]) {
@@ -1133,6 +1134,12 @@ export class TreeService {
 
 	}
 
+	/**
+	 * Call the highlighting in the viewer
+	 * @param nodes	Nodes to select.
+	 * @param multi	Is multi select enabled.
+	 * @param colour the colour to highlight
+	 */
 	public highlightNodes(nodes: any, multi: boolean, colour: number[]) {
 		return this.ready.promise.then(() => {
 
@@ -1170,21 +1177,20 @@ export class TreeService {
 		});
 	}
 
-	public selectNodesByIds(nodeIds: any[], multi: boolean, additive: boolean, colour: number[]) {
-		const nodes = nodeIds.map((n) => {
-			return this.getNodeById(n._id);
-		});
-
-		this.selectNodes(nodes, multi, additive, colour);
-	}
-
-	public selectNodesBySharedIds(sharedIds: any[], multi: boolean, additive: boolean, colour: number[]) {
+	/**
+	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects	Nodes to select
+	 * @param multi	Is multi select enabled
+	 * @param additive whether the selection should reset or keep add selections
+	 * @param colour the colour to highlight
+	 */
+	public selectNodesBySharedIds(objects: any[], multi: boolean, additive: boolean, colour: number[]) {
 		return this.getMap().then(() => {
 
 			const nodes = [];
 
-			for (let i = 0; i < sharedIds.length; i++) {
-				const objUid = this.treeMap.sharedIdToUid[sharedIds[i].shared_id];
+			for (let i = 0; i < objects.length; i++) {
+				const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
 				const node = this.getNodeById(objUid);
 				nodes.push(node);
 			}
@@ -1194,7 +1200,11 @@ export class TreeService {
 		});
 	}
 
-	public hideBySharedId(objects) {
+	/**
+	 * Hide series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects objects to hide
+	 */
+	public hideBySharedId(objects: any[]) {
 		this.getMap()
 			.then((treeMap) => {
 
@@ -1216,7 +1226,11 @@ export class TreeService {
 			});
 	}
 
-	public showBySharedId(objects) {
+	/**
+	 * Show a series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects objects to show
+	 */
+	public showBySharedId(objects: any[]) {
 
 		this.getMap()
 			.then((treeMap) => {
@@ -1242,12 +1256,16 @@ export class TreeService {
 
 	}
 
-	public highlightsBySharedId(objects) {
+	/**
+	 * Highlight a series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects objects to show
+	 */
+	public highlightsBySharedId(objects: any) {
 
 		this.getMap()
 			.then((treeMap) => {
 
-				let nodes = new Set();
+				const nodes = new Set();
 
 				for (let i = 0; i < objects.length; i++) {
 					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];

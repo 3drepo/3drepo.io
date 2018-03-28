@@ -37,6 +37,9 @@ export class GroupsService {
 		this.reset();
 	}
 
+	/**
+	 * Reset the data model
+	 */
 	public reset() {
 		this.state = {
 			groups: [],
@@ -46,11 +49,30 @@ export class GroupsService {
 		};
 	}
 
-	public hasColorOveride(group) {
+	/**
+	 * Initialise the groups state from the backend
+	 */
+	public initGroups(teamspace, model) {
+		return this.getGroups(teamspace, model)
+			.then((groups) => {
+				this.state.groups = groups;
+				this.cleanGroups(this.state.groups);
+			});
+	}
+
+	/**
+	 * Check if a group is currently color overriden
+	 * @param group the group to check
+	 */
+	public hasColorOveride(group: any) {
 		return this.state.colorOveride[group._id] !== undefined;
 	}
 
-	public toggleColorOveride(group) {
+	/**
+	 * Toggle the color over ride of a group
+	 * @param group the group to toggle
+	 */
+	public toggleColorOveride(group: any) {
 		if (this.state.colorOveride[group._id]) {
 			this.removeColorOveride(group._id);
 		} else {
@@ -58,7 +80,11 @@ export class GroupsService {
 		}
 	}
 
-	public colorOveride(group) {
+	/**
+	 * Color override the meshes of a given group
+	 * @param group the group to color override
+	 */
+	public colorOveride(group: any) {
 
 		const color = group.color.map((c) => c / 255);
 
@@ -96,6 +122,9 @@ export class GroupsService {
 			});
 	}
 
+	/**
+	 * Remove all color overrides from all groups
+	 */
 	public removeAllColorOveride() {
 		for (const groupId in this.state.colorOveride) {
 			if (!this.state.colorOveride.hasOwnProperty(groupId)) {
@@ -105,7 +134,10 @@ export class GroupsService {
 		}
 	}
 
-	public removeColorOveride(groupId) {
+	/**
+	 * Remove all color overrides from a given group based on it's ID
+	 */
+	public removeColorOveride(groupId: string) {
 
 		const group = this.state.colorOveride[groupId];
 
@@ -134,11 +166,16 @@ export class GroupsService {
 		}
 	}
 
+	/**
+	 * Reselect a group
+	 */
 	public reselectGroup(group) {
-		// this.TreeService.showAllTreeNodes(true);
 		this.selectGroup(group);
 	}
 
+	/**
+	 * Return all the meshes for all currently highlighted objects
+	 */
 	public getCurrentMeshHighlights() {
 
 		return this.TreeService.getCurrentMeshHighlights().then((objects) => {
@@ -153,14 +190,9 @@ export class GroupsService {
 		});
 	}
 
-	public initGroups(teamspace, model) {
-		return this.getGroups(teamspace, model)
-			.then((groups) => {
-				this.state.groups = groups;
-				this.cleanGroups(this.state.groups);
-			});
-	}
-
+	/**
+	 * Return a default group name, incrementing upwards
+	 */
 	public getDefaultGroupName(groups) {
 		const groupNames = [];
 		groups.forEach((group) => {
@@ -176,11 +208,17 @@ export class GroupsService {
 		return groupName;
 	}
 
+	/**
+	 * Set the color of the selected group to a given color
+	 */
 	public setSelectedGroupColor(color) {
 		this.state.selectedGroup.color = color;
 		this.updateSelectedGroupColor();
 	}
 
+	/**
+	 * Return an CSS friendly RGBA color from an array
+	 */
 	public getRGBA(color) {
 		const red = color[0];
 		const blue = color[1];
@@ -188,6 +226,9 @@ export class GroupsService {
 		return `rgba(${red}, ${blue}, ${green}, 1)`;
 	}
 
+	/**
+	 * Return an CSS friendly RGBA for a given group
+	 */
 	public getGroupRGBAColor(group) {
 		if (group && group.color) {
 			return this.getRGBA(group.color);
@@ -196,15 +237,21 @@ export class GroupsService {
 		return "rgba(255, 255, 255, 1)";
 	}
 
-	public getRandomColor() {
+	/**
+	 * Return a random RGB color array i.e. [255, 255, 255]
+	 */
+	public getRandomColor(): number[] {
 		return [
-			(Math.random() * 255).toFixed(0),
-			(Math.random() * 255).toFixed(0),
-			(Math.random() * 255).toFixed(0),
+			parseInt((Math.random() * 255).toFixed(0), 10),
+			parseInt((Math.random() * 255).toFixed(0), 10),
+			parseInt((Math.random() * 255).toFixed(0), 10),
 		];
 	}
 
-	public hexToRGBA(hex, alpha) {
+	/**
+	 * Convert a colour from hex to an RGBA value
+	 */
+	public hexToRGBA(hex: string, alpha: number) {
 
 		alpha = (alpha !== undefined) ? alpha : 1;
 
@@ -223,7 +270,10 @@ export class GroupsService {
 
 	}
 
-	public cleanGroups(groups) {
+	/**
+	 * Do any cleaning that's necessary for groups in the UI
+	 */
+	public cleanGroups(groups: any[]) {
 		groups.forEach((group) => {
 			if (!group.name) {
 				group.name = "No assigned name";
@@ -231,12 +281,20 @@ export class GroupsService {
 		});
 	}
 
+	/**
+	 * Isolate a group in the viewer
+	 * @param group the group to isolate
+	 */
 	public isolateGroup(group: any) {
 		this.selectGroup(group).then(() => {
 			this.TreeService.isolateNodesBySharedId(this.state.selectedGroup.objects);
 		});
 	}
 
+	/**
+	 * Select a group
+	 * @param group the group to select
+	 */
 	public selectGroup(group: any) {
 		if (this.state.selectedGroup) {
 			this.state.selectedGroup.selected = false;
@@ -264,12 +322,18 @@ export class GroupsService {
 
 	}
 
+	/**
+	 * Update the total number of saved meshes for the selected group
+	 */
 	public updateTotalSavedMeshes() {
-		this.getCurrentMeshHighlights().then((meshTotal) => {
+		this.getCurrentMeshHighlights().then((meshTotal: number) => {
 			this.state.selectedGroup.totalSavedMeshes = meshTotal;
 		});
 	}
 
+	/**
+	 * Generate a placeholder object for a new group
+	 */
 	public generateNewGroup() {
 		return {
 			new: true,
@@ -284,6 +348,9 @@ export class GroupsService {
 		};
 	}
 
+	/**
+	 * Update the selected group color in the viewer
+	 */
 	public updateSelectedGroupColor() {
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
 
@@ -298,6 +365,9 @@ export class GroupsService {
 
 	}
 
+	/**
+	 * Get the selected objects fit for sending to the backend
+	 */
 	public getSelectedObjects() {
 		const objects = this.TreeService.getCurrentSelectedNodes();
 		const cleanedObjects = [];
@@ -312,6 +382,9 @@ export class GroupsService {
 		return cleanedObjects;
 	}
 
+	/**
+	 * Get the groups from the backend
+	 */
 	public getGroups(teamspace: string, model: string) {
 		const groupUrl = `${teamspace}/${model}/groups?noIssues=true`;
 
@@ -321,6 +394,13 @@ export class GroupsService {
 			});
 	}
 
+	/**
+	 * Update a group in the backend
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 * @param groupId the id of the group to update
+	 * @param group the group object
+	 */
 	public updateGroup(teamspace: string, model: string, groupId: string, group: any) {
 
 		group.new = false;
@@ -340,6 +420,12 @@ export class GroupsService {
 			});
 	}
 
+	/**
+	 * Create a group in the backend
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 * @param group the group object to add to the database
+	 */
 	public createGroup(teamspace: string, model: string, group: any) {
 
 		group.new = false;
@@ -353,10 +439,17 @@ export class GroupsService {
 				this.state.groups.push(newGroup);
 				this.state.selectedGroup = newGroup;
 				this.updateSelectedGroupColor();
+				this.updateTotalSavedMeshes();
 				return newGroup;
 			});
 	}
 
+	/**
+	 * Delete a group in the backend
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 * @param group the group object to delete
+	 */
 	public deleteGroup(teamspace: string, model: string, deleteGroup: any) {
 		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
 		return this.APIService.delete(groupUrl)
@@ -368,6 +461,10 @@ export class GroupsService {
 			});
 	}
 
+	/**
+	 * Remove a group from the data model
+	 * @param deleteGroup the group to delete
+	 */
 	public deleteStateGroup(deleteGroup: any) {
 
 		this.state.groups = this.state.groups.filter((g) => {
@@ -378,6 +475,10 @@ export class GroupsService {
 		}
 	}
 
+	/**
+	 * Replace a group in the data model (i.e. after an update)
+	 * @param newGroup the group to delete
+	 */
 	public replaceStateGroup(newGroup: any) {
 
 		// We need to update the local date state

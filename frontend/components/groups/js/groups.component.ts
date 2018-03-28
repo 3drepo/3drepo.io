@@ -122,7 +122,7 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public toggleColorOveride($event, group) {
+	public toggleColorOveride($event, group: any) {
 		$event.stopPropagation();
 		this.GroupsService.toggleColorOveride(group);
 	}
@@ -134,7 +134,7 @@ class GroupsController implements ng.IController {
 		this.DialogService.text(`Group Error`, content, escapable);
 	}
 
-	public openColorMenu($mdMenu, event) {
+	public openColorMenu($mdMenu: any, event: any) {
 		$mdMenu.open(event);
 	}
 
@@ -192,7 +192,7 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public confirmUpdateDialog(saved, selected) {
+	public confirmUpdateDialog(saved: number, selected: number) {
 		const content = `This looks like a significant change to the number of objects
 					in this group (${saved} to ${selected}). Do you wish to update?`;
 		const escapable = true;
