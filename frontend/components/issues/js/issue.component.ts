@@ -320,7 +320,6 @@ class IssueController implements ng.IController {
 				value: BCFStatus,
 				label: BCFStatus,
 			};
-			// console.log(newStatus);
 			this.statuses.push(newStatus);
 			this.$timeout(() => {});
 
@@ -568,7 +567,6 @@ class IssueController implements ng.IController {
 	 * Handle status change
 	 */
 	public statusChange() {
-
 		if (this.data && this.issueData.account && this.issueData.model) {
 
 			// If it's unassigned we can update so that there are no assigned roles
@@ -625,6 +623,9 @@ class IssueController implements ng.IController {
 				eventAction: "edit",
 			});
 		}
+
+		//This is called so icon and assignment colour changes for new issues.
+		this.IssuesService.populateIssue(this.issueData);
 	}
 
 	public handleUpdateError(error) {
