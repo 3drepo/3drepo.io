@@ -175,34 +175,37 @@ export class IssuesService {
 		// Required custom filter due to the fact that Angular
 		// does not allow compound OR filters
 
-		// Search the title
-		let show = this.stringSearch(issue.title, filterText) ||
-				this.stringSearch(issue.timeStamp, filterText) ||
-				this.stringSearch(issue.owner, filterText);
+		// Exit the function as soon as we found a match.
 
-		// Search the type
-		show = this.stringSearch(issue.type, filterText);
+		// Search the title, timestamp, type and owner
+		if( this.stringSearch(issue.title, filterText) ||
+				this.stringSearch(issue.timeStamp, filterText) ||
+			this.stringSearch(issue.owner, filterText) ||
+			this.stringSearch(issue.topic_type, filterText)) {
+			return true;
+		}
 
 		// Search the list of assigned issues
-		if (!show && issue.hasOwnProperty("assigned_roles")) {
-			let i = 0;
-			while(!show && (i < issue.assigned_roles.length)) {
-				show = show || this.stringSearch(issue.assigned_roles[i], filterText);
-				i++;
+		if (issue.hasOwnProperty("assigned_roles")) {
+			for(let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
+				if(this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
+					return true;
+				}
 			}
 		}
-
+		console.log("searching comments..", issue);
 		// Search the comments
-		if (!show && issue.hasOwnProperty("comments")) {
-			let i = 0;
-			while (!show && (i < issue.comments.length)) {
-				show = this.stringSearch(issue.comments[i].comment, filterText) ||
-						this.stringSearch(issue.comments[i].owner, filterText);
-				i++;
+		if (issue.hasOwnProperty("comments")) {
+			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
+				if (!issue.comments[commentIdx].action &&  //skip any action comments (i.e system messages)
+					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
+					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
+					return true;
+				}
 			}
 		}
 
-		return show;
+		return false;
 
 	}
 
