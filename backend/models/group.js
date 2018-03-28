@@ -101,7 +101,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 	// Extract a unique list of IDs only
 	let groupObjectsMap = [];
 
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+	return this.findOne(dbCol, { _id: uid })
 		.then(group => {
 			let ifcGuidPromises = [];
 
@@ -197,7 +197,7 @@ groupSchema.statics.listGroups = function(dbCol){
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 	'use strict';
 
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) }).then(group => {
+	return this.findOne(dbCol, { _id: uid }).then(group => {
 		const issueIdData = {
 			issue_id: issueId
 		};
