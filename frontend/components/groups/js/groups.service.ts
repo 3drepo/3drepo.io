@@ -66,26 +66,15 @@ export class GroupsService {
 		this.TreeService.getMap()
 			.then((treeMap) => {
 
-				// We need to create a map of models for
-				// federation case
+				// Create a map of meshes  
+				// for the colour overiding
 				const meshes = {};
-				
 
 				group.objects.forEach((object) => {
-
-					
 					const uid = treeMap.sharedIdToUid[object.shared_id];
 					const node = this.TreeService.getNodeById(uid);
 					this.TreeService.traverseNodeAndPushId(node, meshes, treeMap.idToMeshes);
-					// const key = object.account + "@" + object.model;
-					// if (!models[key]) {
-					// 	models[key] = { ids : [uid] };
-					// } else {
-					// 	models[key].ids.push(uid);
-					// }
 				});
-
-				console.log("Model meshes", meshes)
 
 				for (let key in meshes) {
 
