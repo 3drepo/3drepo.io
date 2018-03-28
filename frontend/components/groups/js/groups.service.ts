@@ -50,15 +50,15 @@ export class GroupsService {
 		return this.state.colorOveride[group._id] !== undefined;
 	}
 
-	public toggleColorOveride(account, model, group) {
+	public toggleColorOveride(group) {
 		if (this.state.colorOveride[group._id]) {
 			this.removeColorOveride(group._id);
 		} else {
-			this.colorOveride(account, model, group);
+			this.colorOveride(group);
 		}
 	}
 
-	public colorOveride(account, model, group) {
+	public colorOveride(group) {
 
 		const color = group.color.map((c) => c / 255);
 
@@ -83,10 +83,10 @@ export class GroupsService {
 
 					const meshIds = meshes[key].meshes;
 					const pair = key.split("@");
-					const account = pair[0];
-					const model = pair[1];
+					const modelAccount = pair[0];
+					const modelId = pair[1];
 
-					this.ViewerService.overrideMeshColor(account, model, meshIds, color);
+					this.ViewerService.overrideMeshColor(modelAccount, modelId, meshIds, color);
 				}
 
 				this.state.colorOveride[group._id] = {
@@ -109,26 +109,29 @@ export class GroupsService {
 
 		const group = this.state.colorOveride[groupId];
 
-		for (const key in group.models) {
+		if (group) {
 
-			if (!group.models.hasOwnProperty(key)) {
-				continue;
+			for (const key in group.models) {
+
+				if (!group.models.hasOwnProperty(key)) {
+					continue;
+				}
+
+				const meshIds = group.models[key].meshes;
+				const pair = key.split("@");
+				const account = pair[0];
+				const model = pair[1];
+
+				this.ViewerService.resetMeshColor(
+					account,
+					model,
+					meshIds,
+					group.color,
+				);
 			}
 
-			const meshIds = group.models[key].meshes;
-			const pair = key.split("@");
-			const account = pair[0];
-			const model = pair[1];
-
-			this.ViewerService.resetMeshColor(
-				account,
-				model,
-				meshIds,
-				group.color,
-			);
+			delete this.state.colorOveride[groupId];
 		}
-
-		delete this.state.colorOveride[groupId];
 	}
 
 	public reselectGroup(group) {
@@ -359,12 +362,14 @@ export class GroupsService {
 		return this.APIService.delete(groupUrl)
 			.then((response) => {
 				this.TreeService.deselectNodes(deleteGroup.objects);
+				this.removeColorOveride(deleteGroup._id);
 				this.deleteStateGroup(deleteGroup);
 				return response;
 			});
 	}
 
 	public deleteStateGroup(deleteGroup: any) {
+
 		this.state.groups = this.state.groups.filter((g) => {
 			return deleteGroup._id !== g._id;
 		});

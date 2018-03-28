@@ -122,9 +122,9 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public toggleColorOveride($event, account: string, model: string, group) {
+	public toggleColorOveride($event, group) {
 		$event.stopPropagation();
-		this.GroupsService.toggleColorOveride(account, model, group);
+		this.GroupsService.toggleColorOveride(group);
 	}
 
 	public handleGroupError(method: string) {
@@ -146,6 +146,8 @@ class GroupsController implements ng.IController {
 
 	public editGroup() {
 		this.changed = false;
+		// We don't want color over ride when we're editing
+		this.GroupsService.removeColorOveride(this.selectedGroup._id);
 		this.showGroupPane();
 	}
 

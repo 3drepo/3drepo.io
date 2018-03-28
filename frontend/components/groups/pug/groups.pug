@@ -41,7 +41,7 @@ div.groupsContainer
 
                 div
                     md-button.md-icon-button(
-                        ng-click="vm.toggleColorOveride($event, vm.account, vm.model, group)"
+                        ng-click="vm.toggleColorOveride($event, group)"
                         aria-label="Invert Colors")
                         md-icon.angular-material-icons(
                             style="color : {{vm.getColorOverideRGBA(group)}}") invert_colors
