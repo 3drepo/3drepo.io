@@ -358,6 +358,7 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
 		return this.APIService.delete(groupUrl)
 			.then((response) => {
+				this.TreeService.deselectNodes(deleteGroup.objects);
 				this.deleteStateGroup(deleteGroup);
 				return response;
 			});

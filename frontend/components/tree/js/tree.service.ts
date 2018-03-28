@@ -1018,19 +1018,19 @@ export class TreeService {
 					const childNode = this.getNodeById(id);
 
 					if (childNode) {
-		
+
 						if (childNode.toggleState === "invisible") {
 							this.clickedHidden[childNode._id] = childNode;
 						} else {
 							delete this.clickedHidden[childNode._id];
 						}
-					
+
 						if (childNode.toggleState === "visible") {
 							this.clickedShown[childNode._id] = childNode;
 						} else {
 							delete this.clickedShown[childNode._id];
 						}
-						
+
 					}
 				}
 			}
@@ -1087,6 +1087,10 @@ export class TreeService {
 			this.traverseNodesAndPushId(nodes, currentSelectedMap, this.treeMap.idToMeshes);
 			return currentSelectedMap;
 		});
+	}
+
+	public deselectNodes(nodes: any[]) {
+		this.selectNodes(nodes, true, false);
 	}
 
 	/**
@@ -1167,7 +1171,7 @@ export class TreeService {
 	}
 
 	public selectNodesByIds(nodeIds: any[], multi: boolean, additive: boolean, colour: number[]) {
-		const nodes = nodeIds.map((n) =>{
+		const nodes = nodeIds.map((n) => {
 			return this.getNodeById(n._id);
 		});
 
@@ -1196,7 +1200,7 @@ export class TreeService {
 
 				if (objects) {
 					// Make a list of nodes to hide
-					let hiddenNodes = [];
+					const hiddenNodes = [];
 					for (let i = 0; i < objects.length; i++) {
 						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
@@ -1221,7 +1225,7 @@ export class TreeService {
 
 				if (objects) {
 					// Make a list of nodes to shown
-					let shownNodes = [];
+					const shownNodes = [];
 					for (let i = 0; i < objects.length; i++) {
 						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
@@ -1246,7 +1250,7 @@ export class TreeService {
 				let nodes = new Set();
 
 				for (let i = 0; i < objects.length; i++) {
-					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 					if (objUid) {
 						const node = this.getNodeById(objUid);
