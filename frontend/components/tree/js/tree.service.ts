@@ -493,19 +493,24 @@ export class TreeService {
 	/**
 	 * Add all child id of a node recursively, the parent node's id will also be added.
 	 */
-	public traverseNodeAndPushId(node: any, highlightMap: any, idToMeshes: any, colour?: number[]) {
+	public traverseNodesAndPushId(nodes: any, highlightMap: any, idToMeshes: any, colour?: number[]) {
 
-		if (!node) {
-			console.error("traverseNodeAndPushId node is null: ", node);
+		if (!nodes) {
+			console.error("traverseNodesAndPushId nodes is null: ", nodes);
 			return;
 		}
 
 		if (!idToMeshes) {
-			console.error("traverseNodeAndPushId - idToMeshes is not defined: ", idToMeshes);
+			console.error("traverseNodesAndPushId - idToMeshes is not defined: ", idToMeshes);
 			return;
 		}
-		
-		let stack = [node];
+
+		let stack;
+		if (Array.isArray(nodes) === false) {
+			stack = [nodes];
+		} else {
+			stack = nodes;
+		}
 
 		while (stack.length > 0) {
 
@@ -516,9 +521,9 @@ export class TreeService {
 			if (!highlightMap[key]) {
 				highlightMap[key] = {};
 			}
-			
+
 			if (colour) {
-				highlightMap[key].colour = colour
+				highlightMap[key].colour = colour;
 			}
 
 			// Add the meshes
@@ -540,7 +545,6 @@ export class TreeService {
 				stack = stack.concat(childNode.children);
 			}
 		}
-		
 
 	}
 
@@ -1000,7 +1004,7 @@ export class TreeService {
 
 		this.ready.promise.then(() => {
 			const childNodes = {};
-			this.traverseNodeAndPushId(node, childNodes, this.treeMap.idToMeshes);
+			this.traverseNodesAndPushId(node, childNodes, this.treeMap.idToMeshes);
 			for (const key in childNodes) {
 				if (!key) {
 					continue;
@@ -1082,9 +1086,7 @@ export class TreeService {
 	public getCurrentMeshHighlights() {
 		return this.ready.promise.then(() => {
 			const currentSelectedMap = {};
-			for (let i = 0; i < this.currentSelectedNodes.length; i++) {
-				this.traverseNodeAndPushId(this.currentSelectedNodes[i], currentSelectedMap, this.treeMap.idToMeshes);
-			}
+			this.traverseNodesAndPushId(this.currentSelectedNodes, currentSelectedMap, this.treeMap.idToMeshes);
 			return currentSelectedMap;
 		});
 	}
@@ -1095,8 +1097,6 @@ export class TreeService {
 	 * @param multi	Is multi select enabled.
 	 */
 	public selectNodes(nodes: any[], multi: boolean, additive: boolean, colour?: number[]) {
-
-		console.log("multi")
 
 		if (!nodes || nodes.length === 0) {
 			return Promise.resolve("No nodes specified");
@@ -1133,12 +1133,10 @@ export class TreeService {
 
 	public highlightNodes(nodes: any, multi: boolean, colour: number[]) {
 		return this.ready.promise.then(() => {
-			
+
 			const highlightMap = {};
 
-			for (let i = 0; i < nodes.length; i++) {
-				this.traverseNodeAndPushId(nodes[i], highlightMap, this.treeMap.idToMeshes, colour);
-			}
+			this.traverseNodesAndPushId(nodes, highlightMap, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
 			if (!multi) {
@@ -1190,7 +1188,7 @@ export class TreeService {
 			}
 			
 			this.selectNodes(nodes, multi, additive, colour);
-			
+
 		});
 	}
 
@@ -1263,7 +1261,7 @@ export class TreeService {
 							this.initNodesToShow([this.allNodes[0]]);
 							// TODO: we no longer need to select here, but still need to expand tree
 							this.expandToSelection(this.getPath(objUid), 0, undefined, true);
-							
+
 							if (nodes.size > 0) {
 								this.selectNodes(Array.from(nodes), false, true);
 							}
@@ -1272,12 +1270,12 @@ export class TreeService {
 				}
 
 				angular.element((window as any)).triggerHandler("resize");
-				
+
 			})
 			.catch((error) => {
 				console.error(error);
 			});
-	
+
 	}
 
 	/**
@@ -1335,8 +1333,8 @@ export class TreeService {
 		if (nodes) {
 			for (let i = 0; i < nodes.length; i++) {
 
-				let node = nodes[i];
-			
+				const node = nodes[i];
+
 				if (node._id) {
 					this.idToNodeMap[node._id] = node;
 					if (node.toggleState === "visible" && (!node.children || node.children.length === 0)) {
@@ -1350,7 +1348,7 @@ export class TreeService {
 				}
 
 			}
-			
+
 		}
 	}
 
