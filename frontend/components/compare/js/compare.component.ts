@@ -36,7 +36,7 @@ class CompareController implements ng.IController {
 	private account: any;
 	private model: any;
 	private modelSettings: any;
-	private loadingComparision: boolean;
+	private loadingComparison: boolean;
 	private loadingInfo: string;
 	private isFed: boolean;
 	private compareState: string;
@@ -58,7 +58,7 @@ class CompareController implements ng.IController {
 
 	public $onInit() {
 
-		this.CompareService.disableComparision();
+		this.CompareService.disableComparison();
 		this.loadingInfo = "Loading comparison...";
 		this.compareTypes = this.CompareService.state.compareTypes;
 		this.mode = this.CompareService.mode;
@@ -71,7 +71,7 @@ class CompareController implements ng.IController {
 	}
 
 	public $onDestroy() {
-		this.CompareService.disableComparision();
+		this.CompareService.disableComparison();
 		this.CompareService.reset();
 	}
 

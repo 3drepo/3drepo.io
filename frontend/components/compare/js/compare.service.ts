@@ -46,7 +46,7 @@ export class CompareService {
 		this.readyDefer = this.$q.defer();
 
 		this.state = {
-			loadingComparision : false,
+			loadingComparison : false,
 			compareTypes : {
 				diff : {
 					label: "3D Diff",
@@ -267,14 +267,14 @@ export class CompareService {
 	public canCompare() {
 		const loaded = !!this.ViewerService.currentModel.model;
 		const notModelClash = !this.isModelClash(this.state.mode);
-		return loaded && !this.state.loadingComparision && notModelClash;
+		return loaded && !this.state.loadingComparison && notModelClash;
 	}
 
 	public modelsLoaded() {
-		this.state.loadingComparision = false;
+		this.state.loadingComparison = false;
 		this.state.canChangeCompareState = true;
 		this.state.compareEnabled = true;
-		this.useSetModeComparision();
+		this.useSetModeComparison();
 	}
 
 	public loadModels(compareType: string) {
@@ -282,7 +282,7 @@ export class CompareService {
 		this.state.targetModels.forEach((model) => {
 			if (model && model.visible === "visible") {
 
-				this.state.loadingComparision = true;
+				this.state.loadingComparison = true;
 				const loadModel = this.ViewerService.diffToolLoadComparator(
 					model.account,
 					model.model,
@@ -310,19 +310,19 @@ export class CompareService {
 	public compare(account, model) {
 
 		if (this.state.compareEnabled) {
-			this.disableComparision();
+			this.disableComparison();
 		} else {
-			this.enableComparision(account, model);
+			this.enableComparison(account, model);
 		}
 
 	}
 
 	public compareInNewMode(mode) {
 		this.setMode(mode);
-		this.useSetModeComparision();
+		this.useSetModeComparison();
 	}
 
-	public useSetModeComparision() {
+	public useSetModeComparison() {
 
 		if (!this.state.compareEnabled) {
 			return;
@@ -346,7 +346,7 @@ export class CompareService {
 		}
 	}
 
-	public disableComparision() {
+	public disableComparison() {
 
 		this.state.compareEnabled = false;
 		this.state.canChangeCompareState = false;
@@ -355,7 +355,7 @@ export class CompareService {
 
 	}
 
-	public enableComparision(account: string, model: string) {
+	public enableComparison(account: string, model: string) {
 
 		this.state.canChangeCompareState = false;
 		this.state.compareState = "compare";
@@ -383,7 +383,7 @@ export class CompareService {
 		});
 		const revision = modelToDiff.selectedRevision;
 
-		this.state.loadingComparision = true;
+		this.state.loadingComparison = true;
 		this.ViewerService.diffToolLoadComparator(account, model, revision)
 			.then(() => {
 				this.ViewerService.diffToolEnableWithDiffMode();
@@ -433,7 +433,7 @@ export class CompareService {
 			this.setBaseModelVisibility(model);
 
 		}
-		this.disableComparision();
+		this.disableComparison();
 	}
 
 	private setBaseModelVisibility(model) {
