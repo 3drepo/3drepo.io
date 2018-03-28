@@ -437,7 +437,6 @@ export class CompareService {
 	}
 
 	private setBaseModelVisibility(model) {
-		console.log("seting base visibility");
 		const nodes = this.TreeService.getAllNodes();
 		if (nodes.length && nodes[0].children) {
 			const childNodes = nodes[0].children;
