@@ -181,7 +181,7 @@ class GroupsController implements ng.IController {
 			const presentConfirmation = this.selectedObjectsLen < threshold;
 
 			if (presentConfirmation) {
-				this.confirmUpdateDialog();
+				this.confirmUpdateDialog(this.selectedGroup.totalSavedMeshes,  this.selectedObjectsLen);
 			} else {
 				this.updateGroup();
 			}
@@ -190,9 +190,9 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public confirmUpdateDialog() {
-		const content = `This looks like a significant change to the number of items
-					do you wish to continue?`;
+	public confirmUpdateDialog(saved, selected) {
+		const content = `This looks like a significant change to the number of objects
+					in this group (${saved} to ${selected}). Do you wish to update?`;
 		const escapable = true;
 		this.DialogService.confirm(`Confirm Group Update`, content, escapable, "Update", "Cancel")
 			.then(() => {

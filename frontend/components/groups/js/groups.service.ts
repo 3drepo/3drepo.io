@@ -132,7 +132,7 @@ export class GroupsService {
 	}
 
 	public reselectGroup(group) {
-		this.TreeService.showAllTreeNodes(true);
+		// this.TreeService.showAllTreeNodes(true);
 		this.selectGroup(group);
 	}
 
