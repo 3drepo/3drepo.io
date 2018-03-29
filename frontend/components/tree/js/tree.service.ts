@@ -442,6 +442,27 @@ export class TreeService {
 		return this.subTreesById;
 	}
 
+	public getMeshId(nodeId: string) {
+		let meshId = this.idToMeshes[nodeId];
+
+		if (meshId !== undefined) {
+			return meshId;
+		}
+
+		for (const key in this.idToMeshes) {
+			if (key) {
+				const potentialMeshId = this.idToMeshes[key][nodeId];
+				if (potentialMeshId !== undefined) {
+					meshId = potentialMeshId;
+					return meshId;
+				}
+			}
+		}
+
+		return meshId;
+
+ 	}	 	
+
 	public setSubTreesById(value) {
 		this.subTreesById = value;
 	}
@@ -945,12 +966,13 @@ export class TreeService {
 			}
 
 			return this.ready.promise.then(() => {
-				const map = {};
+				const currentSelectedMap = {};
 				this.currentSelectedNodes.forEach((n) => {
-					this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes);
+					this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
 				});
 
-				this.setHighlightMap(map);
+				this.setHighlightMap(currentSelectedMap);
+				return currentSelectedMap;
 			});
 		}
 	}
@@ -976,12 +998,14 @@ export class TreeService {
 				return Promise.resolve();
 			} else {
 				return this.ready.promise.then(() => {
-					const map = {};
+					const currentSelectedMap = {};
 					this.currentSelectedNodes.forEach((n) => {
-						this.traverseNodeAndPushId(n, map, this.treeMap.idToMeshes);
+						this.traverseNodeAndPushId(n, currentSelectedMap, this.treeMap.idToMeshes);
 					});
 
-					this.setHighlightMap(map);
+					this.setHighlightMap(currentSelectedMap);
+
+					return currentSelectedMap;
 				});
 			}
 		}
