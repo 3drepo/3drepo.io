@@ -6,6 +6,7 @@ var dryRun = false; //if true -> it doesn't write to db
 var planNameConvert = { "THE-100-QUID-PLAN" : "hundredQuidPlan"};
 var paidUsers = ["CWCL", "VRZH", "BWT", "TRL", "HOK_Teamspace"];
 db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function(user) {
+	if(!user.customData || !user.customData.billing) return;
 	print("=============== " + user.user + "==================");
 	var jobEntrys = {};
 	var subscriptions = {};
@@ -74,6 +75,16 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 				}
 			}
 		});
+		if(!dryRun) {
+			user.customData.billing.subscriptions = subscriptions;
+			db.getSiblingDB('admin').getCollection('system.users').update({_id: user._id}, {$set : {customData : user.customData}});
+
+		}
+		print("\tUpdated Sub:");
+		print("\t\t" + JSON.stringify(subscriptions));
+	}
+	else{
+		print("\tSub already up to date..");
 	}
 
 	var userDB = db.getSiblingDB(user.user);
@@ -87,12 +98,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 		}
 	}
 
-	if(!dryRun) {
-		user.customData.billing.subscriptions = subscriptions;
-		db.getSiblingDB('admin').getCollection('system.users').update({_id: user._id}, {$set : {customData : user.customData}});
-	}
-	print("\tUpdated Sub:");
-	print("\t\t" + JSON.stringify(subscriptions));
+
 
 
 	
