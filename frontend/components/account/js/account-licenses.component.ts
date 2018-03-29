@@ -31,24 +31,20 @@ class AccountLicensesController implements ng.IController {
 	private promise;
 	private job;
 	private jobColors;
-	private unassigned;
 	private licenses;
-	private allLicensesAssigned;
-	private numLicensesAssigned;
 	private numLicenses;
-	private toShow;
-	private subscriptions;
 	private jobs;
-	private addDisabled;
 	private addJobMessage;
 	private newJob;
 	private deleteJobMessage;
-	private licenseAssigneeIndex;
 	private models;
 	private projects;
 	private teamspacePerms;
 	private newLicenseAssignee;
 	private addMessage;
+	private memberList;
+
+	private licenseIndex;
 
 	constructor(
 		private $scope: any,
@@ -64,14 +60,34 @@ class AccountLicensesController implements ng.IController {
 		this.promise = null;
 		this.jobs = [];
 
-		this.APIService.get(this.account + "/subscriptions")
+		const initPromises = [];
+
+		const quotaInfoPromise = this.APIService.get(this.account + "/quota")
 			.then((response) => {
-				this.subscriptions = response.data;
-				this.initSubscriptions();
+				if (response.data.collaboratorLimit) {
+					this.numLicenses = response.data.collaboratorLimit;
+				} else {
+					this.numLicenses = 0;
+				}
 			})
 			.catch((error) => {
 				this.handleError("retrieve", "subscriptions", error);
 			});
+
+		const memberListPromise = this.APIService.get(this.account + "/members")
+			.then((response) => {
+				return this.licenses = response.data.members;
+			})
+			.catch((error) => {
+				this.handleError("retrieve", "members", error);
+			});
+
+		initPromises.push(quotaInfoPromise);
+		initPromises.push(memberListPromise);
+
+		Promise.all(initPromises).then(() => {
+			this.init();
+		});
 
 		this.APIService.get(this.account + "/jobs")
 			.then((response) => {
@@ -101,37 +117,32 @@ class AccountLicensesController implements ng.IController {
 		this.watchers();
 	}
 
+	public numUnassignedToShow() {
+		return this.numLicenses === "unlimited" ? 2 : this.numAssignedLicenses();
+	}
+
+	public numAssignedLicenses() {
+		return  this.numLicenses - this.licenses.length;
+	}
+
+	public allLicensesAssigned() {
+		return this.numLicenses === "unlimited" ? false : this.numLicenses === this.licenses.length;
+
+	}
+
 	public watchers() {
 		/*
 		* Watch changes to the new license assignee name
 		*/
 		this.$scope.$watch("vm.newLicenseAssignee", (newValue) => {
-			this.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
+			// this.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
 	}
 
-	public initSubscriptions() {
-		this.unassigned = [];
-		this.licenses = [];
-		this.allLicensesAssigned = false;
-		this.numLicensesAssigned = 0;
-		this.numLicenses = this.subscriptions.length;
-		this.toShow = (this.numLicenses > 0) ? "0+" : "0";
-
-		for (let i = 0; i < this.numLicenses; i += 1) {
-			if (this.subscriptions[i].hasOwnProperty("assignedUser")) {
-				this.licenses.push({
-					user: this.subscriptions[i].assignedUser,
-					id: this.subscriptions[i]._id,
-					job: this.subscriptions[i].job,
-					showRemove: (this.subscriptions[i].assignedUser !== this.account),
-				});
-			} else {
-				this.unassigned.push(this.subscriptions[i]._id);
-			}
-		}
-		this.allLicensesAssigned = (this.unassigned.length === 0);
-		this.numLicensesAssigned = this.numLicenses - this.unassigned.length;
+	public init() {
+		this.licenses.forEach((entry) => {
+			entry.showRemove = this.account !== entry.user;
+		});
 
 	}
 
@@ -152,17 +163,35 @@ class AccountLicensesController implements ng.IController {
 
 	public assignJob(index) {
 		const licence = this.licenses[index];
-		const url = this.account + "/subscriptions/" + licence.id + "/assign";
+		if (licence.job) {
+			const url = this.account + "/jobs/" + licence.job + "/" + licence.user;
+			this.APIService.post(url)
+				.then((response) => {
+					if (response.status !== 200) {
+						throw(response);
+					}
+				})
+				.catch((error) => {
+					this.handleError("assign", "job", error);
+				});
+		} else {
+			this.unassignUser(index);
+		}
+	}
 
-		this.APIService.put(url, {job: licence.job})
+	public unassignUser(index) {
+		const licence = this.licenses[index];
+		const url = this.account + "/jobs/unassign/" + licence.user;
+		this.APIService.delete(url)
 			.then((response) => {
 				if (response.status !== 200) {
 					throw(response);
 				}
 			})
 			.catch((error) => {
-				this.handleError("assign", "job", error);
+				this.handleError("unassign", "job", error);
 			});
+
 	}
 
 	public addJob() {
@@ -218,17 +247,12 @@ class AccountLicensesController implements ng.IController {
 
 		if (doSave) {
 			this.APIService.post(
-				this.account + "/subscriptions/" + this.unassigned[0] + "/assign",
-				{user: this.newLicenseAssignee},
+				this.account + "/members/" + this.newLicenseAssignee,
 			)
 				.then((response) => {
 					if (response.status === 200) {
 						this.addMessage = "User " + this.newLicenseAssignee + " assigned a license";
-						this.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
-						this.unassigned.splice(0, 1);
-						this.allLicensesAssigned = (this.unassigned.length === 0);
-						this.numLicensesAssigned = this.numLicenses - this.unassigned.length;
-						this.addDisabled = this.allLicensesAssigned;
+						this.licenses.push({user: response.data.user, showRemove: true});
 						this.newLicenseAssignee = "";
 					} else if (response.status === 400) {
 						throw(response);
@@ -245,15 +269,12 @@ class AccountLicensesController implements ng.IController {
 	 * @param index
 	 */
 	public removeLicense(index) {
-		const removeUrl = `${this.account}/subscriptions/${this.licenses[index].id}/assign`;
+		const removeUrl = `${this.account}/members/` + this.licenses[index].user;
+		this.licenseIndex = index;
 		this.APIService.delete(removeUrl, {})
 			.then((response) => {
 				if (response.status === 200) {
-					this.unassigned.push(this.licenses[index].id);
 					this.licenses.splice(index, 1);
-					this.addDisabled = false;
-					this.allLicensesAssigned = false;
-					this.numLicensesAssigned = this.numLicenses - this.unassigned.length;
 				}
 			})
 			.catch((error) => {
@@ -261,7 +282,6 @@ class AccountLicensesController implements ng.IController {
 				if (error.status === 400) {
 					const responseCode = this.APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
 					if (error.data.value === responseCode) {
-						this.licenseAssigneeIndex = index;
 						this.models = error.data.models;
 						this.projects = error.data.projects;
 						if (error.data.teamspace) {
@@ -307,16 +327,12 @@ class AccountLicensesController implements ng.IController {
 	 * Remove license from user who is a team member of a model
 	 */
 	public removeLicenseConfirmed() {
-		const license = this.licenses[this.licenseAssigneeIndex].id;
-		const removeLicenseUrl = this.account + "/subscriptions/" + license + "/assign?cascadeRemove=true";
+		const removeLicenseUrl = this.account + "/members/"
+			+ this.licenses[this.licenseIndex].user + "?cascadeRemove=true";
 		this.APIService.delete(removeLicenseUrl, {})
 			.then((response) => {
 				if (response.status === 200) {
-					this.unassigned.push(this.licenses[this.licenseAssigneeIndex].id);
-					this.licenses.splice(this.licenseAssigneeIndex, 1);
-					this.addDisabled = false;
-					this.allLicensesAssigned = false;
-					this.numLicensesAssigned = this.numLicenses - this.unassigned.length;
+					this.licenses.splice(this.licenseIndex, 1);
 					this.DialogService.closeDialog();
 				}
 			})

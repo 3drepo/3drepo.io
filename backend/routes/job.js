@@ -22,54 +22,84 @@
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require('../response_codes');
 	const middlewares = require('../middlewares/middlewares');
-	const User = require("../models/user");
+	const Job = require("../models/job");
 	const utils = require("../utils");
 
 	router.post("/jobs", middlewares.job.canCreate, createJob);
+	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
-	router.get("/jobs", middlewares.job.canView, listJobs);
+	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
+	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
+	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
+	function addUserToJob(req, res, next){
 
-	function createJob(req, res, next){
-
-		User.findByUserName(req.params.account).then(user => {
-
-			if(!user){
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
-			}
-			
-			return user.customData.jobs.add({
-				_id: req.body._id,
-				color: req.body.color
-			});
-
-		}).then(user => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.jobs);
+		Job.addUserToJob(req.params.account, req.params.user, req.params.jobId).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
+	}
+
+	function getUserJob(req, res, next) {
+		const teamspace = req.params.account;
+		const user = req.session.user.username;
+
+		//middleware checks if user is in teamspace, so this member check should not be necessary here.
+		Job.findByUser(teamspace, user).then( (job) => {
+		 	const result = {};
+			if(job) {
+				result._id = job._id;
+				result.color = job.color;
+			}
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		})
+	}
+
+	
+	function removeUserFromJobs(req, res, next){
+
+		Job.removeUserFromJobs(req.params.account, req.params.user).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
+	}
+
+	function createJob(req, res, next){
+
+		const newJob = {
+			_id: req.body._id,
+			color: req.body.color
+		};
+
+		Job.addJob(req.params.account, newJob).then(() => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, newJob);
+		}).catch(err => {
+
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
 	}
 
 	function updateJob(req, res, next){
-		
-		User.findByUserName(req.params.account).then(user => {
-
-			if(!user){
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
-			}
-			
-			return user.customData.jobs.update({
-				_id: req.body._id,
-				color: req.body.color
+	
+		if(!req.body._id) {
+			return Promise.reject(responseCodes.JOB_ID_INVALID);
+		}
+		Job.findByJob(req.params.account, req.body._id).then( job => {
+			return job.updateJob(req.body).then(() => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 			});
-
-		}).then(user => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.jobs);
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -79,16 +109,7 @@
 
 	function deleteJob(req, res, next){
 
-		User.findByUserName(req.params.account).then(user => {
-
-			if(!user){
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
-			}
-
-			return user.customData.jobs.remove(req.params.jobId);
-
-		}).then(() => {
-
+		Job.removeJob(req.params.account, req.params.jobId).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 
 		}).catch(err => {
@@ -98,18 +119,7 @@
 	}
 
 	function listJobs(req, res, next){
-
-		const account = req.params.account;
-
-		User.findByUserName(account).then(user => {
-
-			if(!user){
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
-			}
-
-			return user.customData.jobs.get();
-
-		}).then(jobs => {
+		Job.getAllJobs(req.params.account).then(jobs => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
 		}).catch(err => {
 

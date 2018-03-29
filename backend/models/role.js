@@ -97,7 +97,6 @@
 		return ModelFactory.dbManager.runCommand("admin", cmd);
 	};
 
-
 	var Role = ModelFactory.createClass(
 		'Role', 
 		schema, 

@@ -827,8 +827,8 @@ describe('Sharing/Unsharing a model', function () {
 
 			agent.post(`/${username}/${model}/permissions`)
 			.send(permissions)
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+			.expect(404, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
 			});
 		});
