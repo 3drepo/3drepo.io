@@ -43,13 +43,12 @@ MongoClient.connect(url).then(_db => {
 				(async () => {
 					await thisDb.collection('settings').find().forEach(modelSetting => {
 						const modelId = modelSetting._id;
-						console.log("Loading Model: " + modelId);
+						console.log("Loading Model: " + dbItem.name + "." + modelId);
 
 						issuePromises.push(
 							new Promise((resolve, reject) => {
 								(async () => {
 									await thisDb.collection(modelId + '.issues').find().forEach(issue => {
-										console.log("Updating Issue: (" + dbItem.name + ", " + modelId + ") " + issue.name);
 										if (issue.group_id) {
 											convertToLUUID(issue.group_id);
 										}
