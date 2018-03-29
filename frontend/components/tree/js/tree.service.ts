@@ -446,7 +446,7 @@ export class TreeService {
 
 		return meshId;
 
- 	}
+	}
 
 	public setSubTreesById(value) {
 		this.subTreesById = value;
@@ -484,24 +484,22 @@ export class TreeService {
 		this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
 	}
 
-	public getAccountModelKey(account: string, model: string) {
-		return account + "@" + model;
-	}
-
 	/**
-	 * Add all child id of a node recursively, the parent node's id will also be added.
+	 * Get map of meshes and associated colours from an array of nodes
 	 */
-	public traverseNodesAndPushId(nodes: any, highlightMap: any, idToMeshes: any, colour?: number[]) {
+	public getMeshMapFromNodes(nodes: any, idToMeshes: any, colour?: number[]) {
 
 		if (!nodes) {
-			console.error("traverseNodesAndPushId nodes is null: ", nodes);
+			console.error("getMeshMapFromNodes nodes is null: ", nodes);
 			return;
 		}
 
 		if (!idToMeshes) {
-			console.error("traverseNodesAndPushId - idToMeshes is not defined: ", idToMeshes);
+			console.error("getMeshMapFromNodes - idToMeshes is not defined: ", idToMeshes);
 			return;
 		}
+
+		const highlightMap = {};
 
 		let stack;
 		if (Array.isArray(nodes) === false) {
@@ -514,29 +512,27 @@ export class TreeService {
 
 			const childNode = stack.pop();
 			const model = childNode.model || childNode.project;
-			const key = this.getAccountModelKey(childNode.account, model);
+			const key = childNode.account + "@" + model;
 
-			if (!highlightMap[key]) {
+			if (highlightMap[key] === undefined) {
 				highlightMap[key] = {};
 			}
 
-			if (colour) {
+			if (highlightMap[key].colour === undefined) {
 				highlightMap[key].colour = colour;
 			}
 
-			// Add the meshes
-			let meshes = idToMeshes[childNode._id];
+			// Check top level and then check if sub model of fed
+			const meshes = idToMeshes[childNode._id] || idToMeshes[key][childNode._id];
 
-			// the node is within a sub model
-			if (key && idToMeshes[key]) {
-				meshes = idToMeshes[key][childNode._id];
-			}
-			if (meshes) {
-				if (!highlightMap[key].meshes) {
+			if (meshes !== undefined) {
+
+				if (highlightMap[key].meshes === undefined) {
 					highlightMap[key].meshes = meshes;
 				} else {
 					highlightMap[key].meshes = highlightMap[key].meshes.concat(meshes);
 				}
+
 			} else if (childNode.children) {
 				// This should only happen in federations.
 				// Traverse down the tree to find submodel nodes
@@ -544,6 +540,7 @@ export class TreeService {
 			}
 		}
 
+		return highlightMap;
 	}
 
 	/**
@@ -997,8 +994,9 @@ export class TreeService {
 	public updateModelVisibility(node) {
 
 		this.ready.promise.then(() => {
-			const childNodes = {};
-			this.traverseNodesAndPushId(node, childNodes, this.treeMap.idToMeshes);
+
+			const childNodes = this.getMeshMapFromNodes(node, this.treeMap.idToMeshes);
+
 			for (const key in childNodes) {
 				if (!key) {
 					continue;
@@ -1083,9 +1081,8 @@ export class TreeService {
 	 */
 	public getCurrentMeshHighlights() {
 		return this.ready.promise.then(() => {
-			const currentSelectedMap = {};
 			const nodes = this.currentSelectedNodes.concat();
-			this.traverseNodesAndPushId(nodes, currentSelectedMap, this.treeMap.idToMeshes);
+			const currentSelectedMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 			return currentSelectedMap;
 		});
 	}
@@ -1147,9 +1144,7 @@ export class TreeService {
 	public highlightNodes(nodes: any, multi: boolean, colour: number[]) {
 		return this.ready.promise.then(() => {
 
-			const highlightMap = {};
-
-			this.traverseNodesAndPushId(nodes, highlightMap, this.treeMap.idToMeshes, colour);
+			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
 			if (!multi) {

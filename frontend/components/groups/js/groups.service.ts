@@ -91,15 +91,15 @@ export class GroupsService {
 		this.TreeService.getMap()
 			.then((treeMap) => {
 
-				// Create a map of meshes
-				// for the colour overiding
-				const meshes = {};
-
-				group.objects.forEach((object) => {
+				const nodes = group.objects.map((object) => {
 					const uid = treeMap.sharedIdToUid[object.shared_id];
 					const node = this.TreeService.getNodeById(uid);
-					this.TreeService.traverseNodesAndPushId(node, meshes, treeMap.idToMeshes);
+					return node;
 				});
+
+				// Create a map of meshes
+				// for the colour overiding
+				const meshes = this.TreeService.getMeshMapFromNodes(nodes,  treeMap.idToMeshes);
 
 				for (const key in meshes) {
 
