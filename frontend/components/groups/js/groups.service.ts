@@ -64,7 +64,7 @@ export class GroupsService {
 	 * Check if a group is currently color overriden
 	 * @param group the group to check
 	 */
-	public hasColorOveride(group: any) {
+	public hasColorOveride(group: any): boolean {
 		return this.state.colorOveride[group._id] !== undefined;
 	}
 
@@ -335,7 +335,7 @@ export class GroupsService {
 	/**
 	 * Generate a placeholder object for a new group
 	 */
-	public generateNewGroup() {
+	public generateNewGroup(): any {
 		return {
 			new: true,
 			createdAt: Date.now(),
@@ -369,7 +369,7 @@ export class GroupsService {
 	/**
 	 * Get the selected objects fit for sending to the backend
 	 */
-	public getSelectedObjects() {
+	public getSelectedObjects(): any[] {
 		const objects = this.TreeService.getCurrentSelectedNodes();
 		const cleanedObjects = [];
 		for (let i = 0; i < objects.length; i++) {
