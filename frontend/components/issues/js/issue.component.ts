@@ -185,7 +185,6 @@ class IssueController implements ng.IController {
 		// listen for user clicking the back button
 		window.addEventListener("popstate", this.popStateHandler);
 		window.addEventListener("beforeunload", this.refreshHandler);
-		
 		this.watchers();
 	}
 
@@ -269,6 +268,8 @@ class IssueController implements ng.IController {
 						this.setEditIssueData(fetchedIssue);
 						this.startNotification();
 						this.issueFailedToLoad = false;
+						//Update the issue data on issue service so search would work better
+						this.IssuesService.updateIssues(this.issueData);
 					})
 					.catch((error) => {
 						this.issueFailedToLoad = true;
@@ -320,7 +321,6 @@ class IssueController implements ng.IController {
 				value: BCFStatus,
 				label: BCFStatus,
 			};
-			// console.log(newStatus);
 			this.statuses.push(newStatus);
 			this.$timeout(() => {});
 
@@ -568,7 +568,6 @@ class IssueController implements ng.IController {
 	 * Handle status change
 	 */
 	public statusChange() {
-
 		if (this.data && this.issueData.account && this.issueData.model) {
 
 			// If it's unassigned we can update so that there are no assigned roles
@@ -625,6 +624,9 @@ class IssueController implements ng.IController {
 				eventAction: "edit",
 			});
 		}
+
+		//This is called so icon and assignment colour changes for new issues.
+		this.IssuesService.populateIssue(this.issueData);
 	}
 
 	public handleUpdateError(error) {
@@ -702,9 +704,10 @@ class IssueController implements ng.IController {
 	 * @param event
 	 */
 	public showScreenshotDialog(event) {
+		const parentScope = this;
 		this.$mdDialog.show({
-			controller: () => {
-				this.issueComponent = this;
+			controller: function() {
+				this.issueComponent = parentScope;
 			},
 			controllerAs: "vm",
 			templateUrl: "templates/issue-screen-shot-dialog.html",
