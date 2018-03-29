@@ -185,10 +185,7 @@ class IssueController implements ng.IController {
 		// listen for user clicking the back button
 		window.addEventListener("popstate", this.popStateHandler);
 		window.addEventListener("beforeunload", this.refreshHandler);
-		
 		this.watchers();
-
-		console.log("issue.component this in constructor", this);
 	}
 
 	/**
