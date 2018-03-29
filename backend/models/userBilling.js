@@ -18,29 +18,20 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const Subscriptions = require("./subscriptions");
 const billingAddressInfo = require("./billingAddress");
 const moment = require("moment");
-const Subscription = require("./subscription");
 const vat = require("./vat");
 const utils = require("../utils");
 const C = require("../constants");
+const config = require("../config");
 const Paypal = require("./paypal.js");
 const Invoice = require("./invoice.js");
 const responseCodes = require("../response_codes.js");
 const Mailer = require("../mailer/mailer");
 const systemLogger = require("../logger.js").systemLogger;
 
-let getSubscription = Subscription.getSubscription;
-
 let billingSchema = mongoose.Schema({
-	subscriptions: { 
-		type: [Subscriptions.schema], 
-		get: function (subs) { 
-			//console.log('subs', subs)
-			return new Subscriptions(this._parent, this.billingUser, this.billingInfo, subs); 
-		}
-	},
+	subscriptions: Object,
 	billingInfo: { type: billingAddressInfo, default: {}  },
 	//global billing info
 	billingAgreementId: String,
@@ -68,7 +59,7 @@ let Payment = function (type, netAmount, countryCode, isBusiness, length) {
 	this.tax = utils.roundToNDP(this.tax, 2.0);
 };
 
-billingSchema.methods.calculateAmounts = function(paymentDate, changes) {
+billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 	let country = this.billingInfo.countryCode;
 	let isBusiness = this.billingInfo.vat;
@@ -78,55 +69,66 @@ billingSchema.methods.calculateAmounts = function(paymentDate, changes) {
 
 	let payments = [];
 
-	// For all licences that we need to purchase add up amount * quantity
-	let regularAmount = changes.regularPeriodPlans.reduce((sum, licence) => {
-		return sum + getSubscription(licence.plan).amount * licence.quantity;
-	}, 0);
+	let regularAmount = 0;
+	let proRataAmount = 0;
 
-	let proRataAmount = changes.proRataPeriodPlans.reduce((sum, licence) => {
-		return sum + getSubscription(licence.plan).amount * licence.quantity;
-	}, 0);
+	let regularItems = [];
+	let proRataItems = [];
+	
+	let licensesDecreased = false;
+
+	this.subscriptions.paypal.forEach( licence => {
+		//I'm not sure how well this will work when/if we have multi licenses
+		//Currently next payment is determined by whether we have proRata licenses
+		//And there can be situations where one has proRata and the other has decreased
+		licensesDecreased = licence.pendingQuantity < licence.quantity;
+		if(licence.pendingQuantity > licence.quantity && licence.quantity !== 0)
+		{
+			//Calculate proRata if we are adding additional licenses
+			const additionalLicences = licence.pendingQuantity - licence.quantity;
+			proRataAmount += config.subscriptions.plans[licence.plan].price * additionalLicences;
+			proRataItems.push({plan: licence.plan, quantity: additionalLicences});
+		}
+
+		regularAmount += config.subscriptions.plans[licence.plan].price * licence.pendingQuantity;
+		regularItems.push({plan: licence.plan, quantity: licence.pendingQuantity});
+	});
 
 
 	let nextPaymentDate = moment(this.nextPaymentDate);
-
 	if (proRataAmount) {
-		//console.log('pro-rata');
 		// The length of the pro-rata period is difference between now and next payment date
 		proRataLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
 
 		// Calculate percentage of payment period * cost of the period.
 		let proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays());
+	
 		proRataAmount = proRataFactor * proRataAmount;
 
 		// add the pro-rata price info in the changes obj, useful for generating invoice without recaluating £ of each item in the invoice class
-		changes.proRataPeriodPlans.forEach(plan => {
-			plan.amount = proRataFactor * getSubscription(plan.plan).amount;
+		proRataItems.forEach(plan => {
+			plan.amount = proRataFactor * config.subscriptions.plans[plan.plan].price;
 			plan.taxAmount = calTax(plan.amount, country, isBusiness);
 			plan.amount += plan.taxAmount;
 		});
 
 		payments.push(new Payment(C.PRO_RATA_PAYMENT, proRataAmount, country, isBusiness, proRataLength));
 	
-	} else if (!proRataAmount && this.subscriptions.hasBoughtLicence()) {
-		// it means a decrease in no. of licences
+	} else if(licensesDecreased){
 		// new agreement will start on next payment date
-		//console.log('decrease');
-
 		paymentDate = moment(nextPaymentDate).utc().toDate();
-
 	}
 
 	//useful for generating invoice
-	changes.regularPeriodPlans.forEach(plan => {
-		plan.amount = getSubscription(plan.plan).amount;
+	regularItems.forEach(plan => {
+		plan.amount = config.subscriptions.plans[plan.plan].price;
 		plan.taxAmount = calTax(plan.amount, country, isBusiness);
 		plan.amount += plan.taxAmount;
 	});
 
 	payments.push(new Payment(C.REGULAR_PAYMENT, regularAmount, country, isBusiness, regularCycleLength));
 
-	return { payments, paymentDate, changesWithPriceAdded: changes};
+	return { payments, paymentDate, listItems: {regularPeriodPlans: regularItems, proRataPeriodPlans: proRataItems}};
 };
 
 // used to predict next payment date when ipn from paypal is delayed, where ipn contains the actual next payment date info.
@@ -142,35 +144,89 @@ billingSchema.statics.getNextPaymentDate = function (date) {
 };
 
 billingSchema.methods.cancelAgreement = function(){
-
-	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {
-		this.subscriptions.removePendingDeleteSubscription();
+	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {		
+		this.subscriptions.paypal = [];
 		this.billingAgreementId = undefined;
 	});
 
-};
-
-billingSchema.methods.isNewPayment = function(changes){
-	//console.log(new Date().getSeconds(), "buySubscription - isNewPayment")
-	return changes.proRataPeriodPlans.length === 0 && !this.subscriptions.hasBoughtLicence();
 };
 
 let getImmediatePaymentStartDate = function(){
 	return moment().utc().add(60, "second");
 };
 
-billingSchema.methods.buySubscriptions = function (plans, user, billingUser, billingAddress) {
-	// User want to buy new subscriptions.
-	
+function getCleanedUpPayPalSubscriptions(currentSubs) {
+	let subs = [];
+	if(currentSubs) {
+		currentSubs.forEach( payPalEntry => {
+			if(payPalEntry.quantity > 0) {
+				delete payPalEntry.pendingQuantity;
+				subs.push(payPalEntry);
+			}
+		});
+	}
 
+	return subs;
+};
+
+billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
+	if(!this.subscriptions) {
+		this.subscriptions = {};
+	}
+	let currentSubs = getCleanedUpPayPalSubscriptions(this.subscriptions.paypal);
+	let hasChanges = false;
+	let updatedSubs = [];
+	let totalSubCount = 0;
+
+	for(let i = 0; i < newPlans.length; ++i) {
+
+		const newSubs = newPlans[i];
+		if(!config.subscriptions.plans[newSubs.plan]) {
+			return Promise.reject(responseCodes.PLAN_NOT_FOUND);
+		}
+
+		let entryInCurrent = currentSubs.findIndex( element => newSubs.plan === element.plan);
+		hasChanges = hasChanges || (entryInCurrent < 0 || currentSubs[entryInCurrent].quantity !== newSubs.quantity);
+
+		let planEntry = null;
+		
+		if(entryInCurrent < 0) {
+			planEntry = {plan: newSubs.plan, quantity: 0} 
+			planEntry.pendingQuantity = newSubs.quantity;
+		}
+		else {
+			planEntry = currentSubs[entryInCurrent];
+			planEntry.pendingQuantity = newSubs.quantity;
+			currentSubs.splice(entryInCurrent, 1);
+		}
+
+		updatedSubs.push(planEntry);
+		totalSubCount += newSubs.quantity;
+	}
+
+	hasChanges = hasChanges || currentSubs.length;
+
+	if(hasChanges) {
+		this.subscriptions.paypal = updatedSubs;
+		const result = {
+			cancelledAllPlans : totalSubCount === 0
+		};
+		return Promise.resolve(result);
+	}
+	else {
+		return Promise.resolve(false);
+	}
+
+}
+
+billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, billingAddress) {
+	// User want to buy new subscriptions.
 	// Update subscriptions with new plans
-	//this.billingInfo = this.billingInfo || {};
 	this.billingUser = billingUser;
 
 	return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
-		//console.log(new Date().getSeconds(), "buySubscription - changeBillingAddress called")
 		this.markModified('billingInfo');
-		return this.subscriptions.changeSubscriptions(plans);
+		return this.writeSubscriptionChanges(plans);
 
 	}).then(changes => {
 		if (!changes) {
@@ -178,41 +234,35 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 			if (this.billingAgreementId && this.billingInfo.isModified())
 			{	
 				const paypalUpdate = Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
-				//console.log(new Date().getSeconds(), "buySubscription - Paypal.updateBillingAddress", paypalUpdate)
 				return paypalUpdate;
 			}
 
-		} else if (changes.canceledAllPlans){
+		} else if (changes.cancelledAllPlans){
 			// User cancelled everything, no need to calculate/create new bills,
 			// just cancel the previous agreement
-			//console.log(new Date().getSeconds(), "buySubscription - cancelAgreement");
 			return this.cancelAgreement();
 
-		} else if (changes) {
+		} else {
 
-			//console.log(new Date().getSeconds(), "buySubscription - changeBillingAddress has changes")
-			//changes in plans
+			const isNewPayment = !this.subscriptions.paypal || 
+				this.subscriptions.paypal.filter( (entry) => {
+					return entry.quantity > 0;
+				}).length === 0;
 			
+			//changes in plans
 			let startDate = getImmediatePaymentStartDate();
 
-			let data = this.calculateAmounts(startDate, changes);
+			let data = this.calculateAmounts(startDate);
 
-			changes = data.changesWithPriceAdded;
+			const invoiceLineItems = data.listItems;
 
 			//init date for 1st/'new' payments
-			
-
-			if (this.isNewPayment(changes)){
+			if (isNewPayment){
 				this.nextPaymentDate = billingSchema.statics.getNextPaymentDate(startDate);
 				this.lastAnniversaryDate = startDate.clone().startOf("day").toDate();
 			}
-
-			//console.log(new Date().getSeconds(), "buySubscription - finished isNewPayment, firing Paypal.processPayments");
-
 			// Once we have calculated a set of payments send them
 			return Paypal.processPayments(this, data.payments, data.paymentDate).then(paypalData => {
-
-				//console.log(new Date().getSeconds(), "buySubscription - return of Paypal.processPayments response: ", JSON.stringify(paypalData, null, 4));
 
 				//save the payment token to user billing info
 				this.paypalPaymentToken = paypalData.paypalPaymentToken;
@@ -220,11 +270,9 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 				// create invoice with init state for payment happens right after executing agreement
 				if(data.paymentDate <= startDate.toDate()){
 
-					//console.log(new Date().getSeconds(), "buySubscription - creating Invoice")
 					let invoice = Invoice.createInstance({ account: user });
-					//console.log(new Date().getSeconds(), "buySubscription - initInvoice")
 					invoice.initInvoice({ 
-						changes, 
+						changes: invoiceLineItems, 
 						payments: data.payments,
 						nextPaymentDate: this.nextPaymentDate,
 						billingInfo: this.billingInfo,
@@ -241,6 +289,21 @@ billingSchema.methods.buySubscriptions = function (plans, user, billingUser, bil
 	});
 };
 
+function renewAndCleanSubscriptions(subs, newExpiryDate) {
+	let updatedSubs = [];
+	if(subs) {
+		subs.forEach( sub => {
+			if(sub.pendingQuantity) {
+				sub.quantity = sub.pendingQuantity;
+				delete sub.pendingQuantity;
+			}
+			sub.expiryDate = newExpiryDate;
+			updatedSubs.push(sub);
+		});
+	}
+	return updatedSubs;
+}
+
 billingSchema.methods.executeBillingAgreement = function(user){
 
 	let billingAgreement;
@@ -253,7 +316,6 @@ billingSchema.methods.executeBillingAgreement = function(user){
 			return Promise.resolve();
 
 		} else {
-
 			//exec the agreement
 			return Paypal.executeAgreement(this.paypalPaymentToken).then(_billingAgreement => {
 
@@ -269,9 +331,6 @@ billingSchema.methods.executeBillingAgreement = function(user){
 
 				this.billingAgreementId = billingAgreement.id;
 				
-				// remove pending delete subscriptions
-				this.subscriptions.removePendingDeleteSubscription();
-
 				if(new Date(billingAgreement.start_date) > getImmediatePaymentStartDate().toDate()){
 					// we are done here if the billing agreement start later
 					return Promise.resolve();
@@ -285,11 +344,10 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 				// IPN message should come quickly after executing an agreement, usually less then a minute
 				let twoDayLater = moment().utc().add(48, 'hour').toDate();
-				this.subscriptions.renewSubscriptions(twoDayLater, { assignLimits: true });
+				this.subscriptions.paypal = renewAndCleanSubscriptions(
+								this.subscriptions.paypal,
+								twoDayLater);
 				
-				// assign first licence to billing user if there is none
-				this.subscriptions.assignFirstLicenceToBillingUser();
-
 				// change invoice state
 				invoice.changeState(C.INV_PENDING, {
 					billingAgreementId: this.billingAgreementId,
@@ -297,31 +355,100 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				});
 
 				return invoice.save();
-
 			});
 		}
 	});
-
-
 };
+
+billingSchema.methods.getActiveSubscriptions = function() {
+	let res = { basic: config.subscriptions.basic};
+	if(this.subscriptions) {
+		Object.keys(this.subscriptions).forEach(key => {
+			if(key === "paypal") {
+				res.paypal = [];
+				this.subscriptions.paypal.forEach( ppPlan => {
+					if( !ppPlan.expiryDate || ppPlan.expiryDate > Date.now()) {
+						res.paypal.push(ppPlan);
+					}
+				});
+			}
+			else {
+				if(!this.subscriptions[key].expiryDate || 
+					this.subscriptions[key].expiryDate > Date.now()) {
+					res[key] = this.subscriptions[key];
+				}
+	
+			}
+		});
+
+	}
+	return res;
+}
+
+billingSchema.methods.getSubscriptionLimits = function() {
+
+	let sumLimits = {};
+	if(config.subscriptions.basic) {
+		sumLimits.spaceLimit = config.subscriptions.basic.data;
+		sumLimits.collaboratorLimit = config.subscriptions.basic.collaborators;
+	}
+	
+	if(!sumLimits.spaceLimit) {
+		sumLimits.spaceLimit = 0;
+	}
+
+	if(!sumLimits.collaboratorLimit) {
+		sumLimits.collaboratorLimit = 0;
+	}
+
+	if(this.subscriptions)	{
+		Object.keys(this.subscriptions).forEach(key => {
+			if(key === "paypal") {
+				if (this.subscriptions.paypal.length > 0) {
+					this.subscriptions.paypal.forEach( ppPlan => {
+						const plan = config.subscriptions.plans[ppPlan.plan];
+						if( plan &&
+							(!ppPlan.expiryDate || ppPlan.expiryDate > Date.now())) {
+							sumLimits.spaceLimit += plan.data * ppPlan.quantity;
+							if(sumLimits.collaboratorLimit !== "unlimited") {
+								sumLimits.collaboratorLimit = plan.collaborators === "unlimited"? 
+									"unlimited" : sumLimits.collaboratorLimit + plan.collaborators * ppPlan.quantity;
+							}
+						}
+					});
+				}
+			}
+			else {
+				if(!this.subscriptions[key].expiryDate || 
+					this.subscriptions[key].expiryDate > Date.now()) {
+					sumLimits.spaceLimit += this.subscriptions[key].data;							
+					if(sumLimits.collaboratorLimit !== "unlimited") {
+						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited"? 
+							"unlimited" : sumLimits.collaboratorLimit + this.subscriptions[key].collaborators;
+					}
+				}
+
+			}
+		});
+	}
+
+	return sumLimits;
+}
 
 billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 	const User = require('./user');
 
 	let invoice;
-
 	if(this.nextPaymentDate > paymentInfo.nextPaymentDate){
 		return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
 	}
 
-	return Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
+	const promise = Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
 		if(invoice){
 			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
 		}
 
 	}).then(() => {
-
-
 		if(this.nextPaymentDate && 
 			moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(this.nextPaymentDate).utc().startOf('date').toISOString()){
 			this.lastAnniversaryDate = new Date(this.nextPaymentDate);
@@ -335,92 +462,93 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 			.hours(0).minutes(0).seconds(0).milliseconds(0)
 			.toDate();
 
-		this.subscriptions.renewSubscriptions(expiredAt);
-
-		return Invoice.findPendingInvoice(user, this.billingAgreementId);
+		this.subscriptions.paypal = renewAndCleanSubscriptions(this.subscriptions.paypal, expiredAt);
+	});
 	
-	}).then(pendingInvoice => {
+	promise.then( () => {
+		return Invoice.findPendingInvoice(user, this.billingAgreementId).then(pendingInvoice => {
+			invoice = pendingInvoice;
 
-		invoice = pendingInvoice;
+			if(!invoice){
 
-		if(!invoice){
+				invoice = Invoice.createInstance({ account: user });
+				return invoice.initInvoice({ 
+					nextPaymentDate: this.nextPaymentDate,
+					billingAgreementId: this.billingAgreementId,
+					billingInfo: this.billingInfo,
+					startDate: this.lastAnniversaryDate,
+					account: user
+				});
+			}
 
-			invoice = Invoice.createInstance({ account: user });
-			return invoice.initInvoice({ 
-				nextPaymentDate: this.nextPaymentDate,
+		}).then(() => {
+
+			invoice.changeState(C.INV_COMPLETE, {
+				raw: raw,
+				gateway: paymentInfo.gateway,
+				currency: paymentInfo.currency,
+				amount: paymentInfo.amount,
 				billingAgreementId: this.billingAgreementId,
-				billingInfo: this.billingInfo,
-				startDate: this.lastAnniversaryDate,
-				account: user
+				nextPaymentDate: this.nextPaymentDate,
+				taxAmount: paymentInfo.taxAmount,
+				nextPaymentAmount: paymentInfo.nextAmount,
+				transactionId: paymentInfo.transactionId
 			});
-		}
 
-	}).then(() => {
-
-		invoice.changeState(C.INV_COMPLETE, {
-			raw: raw,
-			gateway: paymentInfo.gateway,
-			currency: paymentInfo.currency,
-			amount: paymentInfo.amount,
-			billingAgreementId: this.billingAgreementId,
-			nextPaymentDate: this.nextPaymentDate,
-			taxAmount: paymentInfo.taxAmount,
-			nextPaymentAmount: paymentInfo.nextAmount,
-			transactionId: paymentInfo.transactionId
-		});
-
-		return invoice.save();
-
-	}).then(invoice => {
-
-		return invoice.generatePDF().then(pdf => {
-
-			invoice.pdf = pdf;
-			// also save the pdf to database for ref.
 			return invoice.save();
-		});
+
+		}).then(invoice => {
+
+			return invoice.generatePDF().then(pdf => {
+	
+				invoice.pdf = pdf;
+				// also save the pdf to database for ref.
+				return invoice.save();
+			});
 			
 
-	}).then(invoice => {
+		}).then(invoice => {
 
-		//email
+			//email
+			let attachments;
 
-		let attachments;
-
-		attachments = [{
-			filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
-			content: invoice.pdf
-		}];
+			attachments = [{
+				filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
+				content: invoice.pdf
+			}];
 		
 
-		//send invoice
-		let amount = invoice.amount;
-		let currency = invoice.currency;
+			//send invoice
+			let amount = invoice.amount;
+			let currency = invoice.currency;
 
-		User.findByUserName(this.billingUser).then(billingUser => {
+			return User.findByUserName(this.billingUser).then(billingUser => {
 			
-			return Promise.all([
-				//make a copy to sales
-				Mailer.sendPaymentReceivedEmailToSales({
-					account: user,
-					amount: `${currency}${amount}`,
-					email: billingUser.customData.email,
-					invoiceNo: invoice.invoiceNo,
-					type: invoice.type
-				}, attachments),
+				return Promise.all([
+					//make a copy to sales
+					Mailer.sendPaymentReceivedEmailToSales({
+						account: user,
+						amount: `${currency}${amount}`,
+						email: billingUser.customData.email,
+						invoiceNo: invoice.invoiceNo,
+						type: invoice.type
+					}, attachments),
 
-				Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
-					account: user,
-					amount: `${currency}${amount}`,
-				}, attachments)
-			]);
+					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
+						account: user,
+						amount: `${currency}${amount}`,
+					}, attachments)
+				]);
 
-		}).catch(err => {
-			systemLogger.logError(`Email error - ${err.message}`);
-		});
+			}).catch(err => {
+				systemLogger.logError(`Email error - ${err.message}`);
+			});
 
-		return;
+			return;
+		})
 	});
+	return promise;
+
 };
 
 module.exports = billingSchema;

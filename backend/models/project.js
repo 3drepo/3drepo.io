@@ -123,6 +123,7 @@
 		let usersToRemove = [];
 		let usersToAdd = [];
 
+		let check = Promise.resolve();
 		if(data.permissions){
 			// user to delete
 			for(let i = data.permissions.length -1; i >=0; i--){
@@ -133,34 +134,34 @@
 
 			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
 			usersToAdd = _.difference(data.permissions.map(p => p.user), this.permissions.map(p => p.user));
-		}
 
-		Object.keys(data).forEach(key => {
-			if(whitelist.indexOf(key) !== -1){
-
-				this[key] = data[key];
-			}
-		});
-
-		let check = Promise.resolve();
-
-		if(this.permissions.length){
-			
 			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
 
-				const someUserNotAssignedWithLicence = this.permissions.some(
-					perm => !teamspace.customData.billing.subscriptions.findByAssignedUser(perm.user)
-				);
-
-				if(someUserNotAssignedWithLicence){
-					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-				}
+				return User.getAllUsersInTeamspace(teamspace.user).then( members => {
+					const someUserNotAssignedWithLicence = data.permissions.some(
+						perm => {
+							return !members.includes(perm.user);
+						}
+					);
+					if(someUserNotAssignedWithLicence){
+						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+					}
+				});
+				
 
 			});
 		}
 
+		
 		return check.then(() => {
 
+			Object.keys(data).forEach(key => {
+				if(whitelist.indexOf(key) !== -1){
+
+					this[key] = data[key];
+				}
+			});
+	
 			let userPromises = [];
 
 			usersToRemove.forEach(user => {
@@ -186,17 +187,16 @@
 
 		const User = require('./user');
 
-		let subscriptions;
 
-		return User.findByUserName(account.account).then(user => {
+		return User.getAllUsersInTeamspace(account.account).then(users => {
 			
-			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			const userList = users;
 			return Project.find(account, query);
 		
 		}).then(projects => {
 			
 			if(projects){
-				projects.forEach(p => Project.populateUsers(subscriptions, p));
+				projects.forEach(p => Project.populateUsers(userList, p));
 			}
 
 			return projects;
@@ -209,17 +209,17 @@
 
 		const User = require('./user');
 
-		let subscriptions;
+		let userList;
 
-		return User.findByUserName(account.account).then(user => {
+		return User.getAllUsersInTeamspace(account.account).then(users => {
 			
-			subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
+			userList = users;
 			return Project.findOne(account, query);
 		
 		}).then(project => {
 			
 			if(project){
-				return Project.populateUsers(subscriptions, project);
+				return Project.populateUsers(userList, project);
 			} else {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			}
@@ -227,15 +227,15 @@
 		});
 	}
 
-	schema.statics.populateUsers = function(subscriptions, project){
+	schema.statics.populateUsers = function(userList, project){
 
-		subscriptions && subscriptions.forEach(sub => {
+		userList.forEach(user => {
 
-			const userFound = project.permissions.find(perm => perm.user === sub.assignedUser);
+			const userFound = project.permissions.find(perm => perm.user === user);
 
-			if(!userFound && sub.assignedUser){
+			if(!userFound){
 				project.permissions.push({
-					user: sub.assignedUser
+					user
 				});
 			}
 		});

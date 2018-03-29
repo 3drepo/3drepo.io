@@ -142,11 +142,6 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "print":
-				const ids = [];
-				this.IssuesService.state.issuesToShow.forEach((issue) => {
-					ids.push(issue._id);
-				});
-
 				const printEndpoint = this.account + "/" + this.model + "/issues.html?ids=" + ids.join(",");
 				const printUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, printEndpoint);
 				this.$window.open(printUrl, "_blank");

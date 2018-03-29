@@ -281,7 +281,6 @@ export const AccountModelSettingComponent: ng.IComponentOptions = {
 		accounts: "=",
 		model: "=",
 		showPage: "&",
-		subscriptions: "=",
 		data: "=",
 	},
 	controller: AccountModelSettingController,

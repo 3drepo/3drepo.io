@@ -35,29 +35,18 @@
 	function listPermissions(req, res, next){
 
 		User.findByUserName(req.params.account).then(user => {
-
-			// TODO: This is a hack
-			// Assign an empty array to permissionless users
-			var resData = user.toObject().customData;
-			resData.billing.subscriptions.forEach(sub => {
-				if (sub.assignedUser) {
-					var match = {'user' : sub.assignedUser};
-					var exists = _.find(resData.permissions, match);
-					if (!exists) {
-						resData.permissions.push({
-							user:  sub.assignedUser,
-							permissions: []
-						})
+			var permissions = user.toObject().customData.permissions;
+			return User.getAllUsersInTeamspace(req.params.account).then(users => {
+		
+				users.forEach( user => {
+					if(!_.find(permissions, {'user' : user})) {
+						permissions.push({user, permissions: []});
 					}
-				}
+				});
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
+			
 			});
 
-			// TODO: Why is this necessary? Remove undefined users
-			resData.permissions = _.remove(resData.permissions, function(u) {
-				return u.user !== undefined;
-			});
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resData.permissions);
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
