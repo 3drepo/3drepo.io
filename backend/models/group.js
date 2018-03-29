@@ -222,9 +222,9 @@ groupSchema.methods.updateAttrs = function(data){
 			if (obj.shared_id) {
 				const ns = obj.account + "__" + obj.model;
 				if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-					sharedIDSets.add(obj.shared_id);
 					obj.id = utils.stringToUUID(obj.shared_id);
 				}
+				sharedIDSets.add(obj.id);
 				if(!sharedIdsByAccount[ns]) {
 					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
 				}
