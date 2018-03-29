@@ -1053,23 +1053,27 @@ export class TreeService {
 
 	/**
 	 * Set selection status of node.
-	 * @param node		Node to set.
-	 * @param isSelected	Is selected.
+	 * @param node	Node to set selection status of
+	 * @param select whether the node should be selected or not
 	 */
-	public setNodeSelection(node: any, isSelected: boolean) {
-		if (node.selected !== isSelected) {
-			const nodeIndex = this.currentSelectedNodes.indexOf(node);
+	public setNodeSelection(node: any, select: boolean) {
 
-			if (isSelected) {
-				if (-1 === nodeIndex) {
-					node.selected = true;
-					this.currentSelectedNodes.push(node);
-				}
-			} else {
-				if (nodeIndex > -1) {
-					this.currentSelectedNodes[nodeIndex].selected = false;
-					this.currentSelectedNodes.splice(nodeIndex, 1);
-				}
+		// If node
+		if (node.selected === select) {
+			return;
+		}
+
+		const nodeIndex = this.currentSelectedNodes.indexOf(node);
+
+		if (select) {
+			if (nodeIndex === -1) {
+				node.selected = true;
+				this.currentSelectedNodes.push(node);
+			}
+		} else {
+			if (nodeIndex > -1) {
+				this.currentSelectedNodes[nodeIndex].selected = false;
+				this.currentSelectedNodes.splice(nodeIndex, 1);
 			}
 		}
 	}
@@ -1153,23 +1157,25 @@ export class TreeService {
 			}
 
 			for (const key in highlightMap) {
-				if (key) {
-
-					const vals = key.split("@");
-					const account = vals[0];
-					const model = vals[1];
-
-					// Separately highlight the children
-					// but only for multipart meshes
-					this.ViewerService.highlightObjects({
-						account,
-						ids: highlightMap[key].meshes,
-						colour: highlightMap[key].colour,
-						model,
-						multi: true,
-						source: "tree",
-					});
+				if (!highlightMap.hasOwnProperty(key)) {
+					continue;
 				}
+
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				// Separately highlight the children
+				// but only for multipart meshes
+				this.ViewerService.highlightObjects({
+					account,
+					ids: highlightMap[key].meshes,
+					colour: highlightMap[key].colour,
+					model,
+					multi: true,
+					source: "tree",
+				});
+
 			}
 
 			return highlightMap;
@@ -1185,6 +1191,11 @@ export class TreeService {
 	 * @param colour the colour to highlight
 	 */
 	public selectNodesBySharedIds(objects: any[], multi: boolean, additive: boolean, colour: number[]) {
+
+		if (!objects || objects.length === 0) {
+			return;
+		}
+
 		return this.getMap().then(() => {
 
 			const nodes = [];
@@ -1192,7 +1203,9 @@ export class TreeService {
 			for (let i = 0; i < objects.length; i++) {
 				const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
 				const node = this.getNodeById(objUid);
-				nodes.push(node);
+				if (node) {
+					nodes.push(node);
+				}
 			}
 
 			this.selectNodes(nodes, multi, additive, colour);
@@ -1205,21 +1218,26 @@ export class TreeService {
 	 * @param objects objects to hide
 	 */
 	public hideBySharedId(objects: any[]) {
+
+		if (!objects || objects.length === 0) {
+			return;
+		}
+
 		this.getMap()
 			.then((treeMap) => {
 
-				if (objects) {
-					// Make a list of nodes to hide
-					const hiddenNodes = [];
-					for (let i = 0; i < objects.length; i++) {
-						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+				// Make a list of nodes to hide
+				const hiddenNodes = [];
+				for (let i = 0; i < objects.length; i++) {
 
-						if (objUid) {
-							hiddenNodes.push(this.getNodeById(objUid));
-						}
+					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+					if (objUid) {
+						hiddenNodes.push(this.getNodeById(objUid));
 					}
-					this.hideTreeNodes(hiddenNodes);
+
 				}
+				this.hideTreeNodes(hiddenNodes);
+
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1232,23 +1250,26 @@ export class TreeService {
 	 */
 	public showBySharedId(objects: any[]) {
 
+		if (!objects || objects.length === 0) {
+			return;
+		}
+
 		this.getMap()
 			.then((treeMap) => {
 
 				this.hideAllTreeNodes(false);
 
-				if (objects) {
-					// Make a list of nodes to shown
-					const shownNodes = [];
-					for (let i = 0; i < objects.length; i++) {
-						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+				// Make a list of nodes to shown
+				const shownNodes = [];
+				for (let i = 0; i < objects.length; i++) {
+					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
-						if (objUid) {
-							shownNodes.push(this.getNodeById(objUid));
-						}
+					if (objUid) {
+						shownNodes.push(this.getNodeById(objUid));
 					}
-					this.showTreeNodes(shownNodes);
 				}
+				this.showTreeNodes(shownNodes);
+
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1268,23 +1289,25 @@ export class TreeService {
 				const nodes = new Set();
 
 				for (let i = 0; i < objects.length; i++) {
+
 					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+					if (!objUid) {
+						continue;
+					}
 
-					if (objUid) {
-						const node = this.getNodeById(objUid);
-						if (node && node.hasOwnProperty("name")) {
-							nodes.add(node);
-						}
+					const node = this.getNodeById(objUid);
+					if (node && node.hasOwnProperty("name")) {
+						nodes.add(node);
+					}
 
-						if (i === objects.length - 1) {
-							// Only call expandToSelection for last selected node to improve performance
-							this.initNodesToShow([this.allNodes[0]]);
-							// TODO: we no longer need to select here, but still need to expand tree
-							this.expandToSelection(this.getPath(objUid), 0, undefined, true);
+					if (i === objects.length - 1) {
+						// Only call expandToSelection for last selected node to improve performance
+						this.initNodesToShow([this.allNodes[0]]);
+						// TODO: we no longer need to select here, but still need to expand tree
+						this.expandToSelection(this.getPath(objUid), 0, undefined, true);
 
-							if (nodes.size > 0) {
-								this.selectNodes(Array.from(nodes), false, true);
-							}
+						if (nodes.size > 0) {
+							this.selectNodes(Array.from(nodes), false, true);
 						}
 					}
 				}

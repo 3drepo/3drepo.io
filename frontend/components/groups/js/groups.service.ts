@@ -140,30 +140,31 @@ export class GroupsService {
 	public removeColorOveride(groupId: string) {
 
 		const group = this.state.colorOveride[groupId];
+		if (!group) {
+			return;
+		}
 
-		if (group) {
+		for (const key in group.models) {
 
-			for (const key in group.models) {
-
-				if (!group.models.hasOwnProperty(key)) {
-					continue;
-				}
-
-				const meshIds = group.models[key].meshes;
-				const pair = key.split("@");
-				const account = pair[0];
-				const model = pair[1];
-
-				this.ViewerService.resetMeshColor(
-					account,
-					model,
-					meshIds,
-					group.color,
-				);
+			if (!group.models.hasOwnProperty(key)) {
+				continue;
 			}
 
-			delete this.state.colorOveride[groupId];
+			const meshIds = group.models[key].meshes;
+			const pair = key.split("@");
+			const account = pair[0];
+			const model = pair[1];
+
+			this.ViewerService.resetMeshColor(
+				account,
+				model,
+				meshIds,
+				group.color,
+			);
 		}
+
+		delete this.state.colorOveride[groupId];
+
 	}
 
 	/**
