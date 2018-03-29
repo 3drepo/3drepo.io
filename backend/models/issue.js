@@ -599,7 +599,16 @@ schema.statics.createIssue = function(dbColOptions, data){
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
 			data.viewpoint.group_id = data.group_id;
-			
+			if (data.viewpoint.highlighted_group_id) {
+				data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
+			}
+			if (data.viewpoint.hidden_group_id) {
+				data.viewpoint.hidden_group_id = stringToUUID(data.viewpoint.hidden_group_id);
+			}
+			if (data.viewpoint.shown_group_id) {
+				data.viewpoint.shown_group_id = stringToUUID(data.viewpoint.shown_group_id);
+			}
+
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer.from(data.viewpoint.scribble, "base64"),
 				flag: 1
@@ -857,6 +866,15 @@ schema.methods.updateComment = function(commentIndex, data){
 
 				data.viewpoint = data.viewpoint || {};
 				data.viewpoint.guid = utils.generateUUID();
+				if (data.viewpoint.highlighted_group_id) {
+					data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
+				}
+				if (data.viewpoint.hidden_group_id) {
+					data.viewpoint.hidden_group_id = stringToUUID(data.viewpoint.hidden_group_id);
+				}
+				if (data.viewpoint.shown_group_id) {
+					data.viewpoint.shown_group_id = stringToUUID(data.viewpoint.shown_group_id);
+				}
 
 				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
 					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
@@ -1152,12 +1170,20 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.model = this._dbcolOptions.model;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
-	cleaned.highlighted_group_id = cleaned.highlighted_group_id ? uuidToString(cleaned.highlighted_group_id) : undefined;
-	cleaned.hidden_group_id = cleaned.hidden_group_id ? uuidToString(cleaned.hidden_group_id) : undefined;
-	cleaned.shown_group_id = cleaned.shown_group_id ? uuidToString(cleaned.shown_group_id) : undefined;
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
+
+		cleaned.viewpoints[i].group_id = cleaned.viewpoints[i].group_id ? uuidToString(cleaned.viewpoints[i].group_id) : undefined;
+		cleaned.viewpoints[i].highlighted_group_id = cleaned.viewpoints[i].highlighted_group_id &&
+			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].highlighted_group_id) ?
+			uuidToString(cleaned.viewpoints[i].highlighted_group_id) : undefined;
+		cleaned.viewpoints[i].hidden_group_id = cleaned.viewpoints[i].hidden_group_id &&
+			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].hidden_group_id) ?
+			uuidToString(cleaned.viewpoints[i].hidden_group_id) : undefined;
+		cleaned.viewpoints[i].shown_group_id = cleaned.viewpoints[i].shown_group_id &&
+			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].shown_group_id) ?
+			uuidToString(cleaned.viewpoints[i].shown_group_id) : undefined;
 
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshot.png";
@@ -2041,7 +2067,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									};
 									groupPromises.push(
 										Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
-											vp.highlighted_group_id = utils.uuidToString(group._id);
+											vp.highlighted_group_id = group._id;
 										})
 									);
 								}
@@ -2119,7 +2145,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 										groupPromises.push(
 											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
-												vp.shown_group_id = utils.uuidToString(group._id);
+												vp.shown_group_id = group._id;
 											})
 										);
 									} else if (hiddenObjects.length > 0) {
@@ -2131,7 +2157,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 										groupPromises.push(
 											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
-												vp.hidden_group_id = utils.uuidToString(group._id);
+												vp.hidden_group_id = group._id;
 											})
 										);
 									}
