@@ -27,7 +27,7 @@
 								=" "
 								| to add licences.
 
-					div(ng-if="vm.licenses && vm.numLicenses > 0")
+					div(ng-if="vm.licenses && (vm.numLicenses > 0 || vm.numLicenses === 'unlimited')")
 						#accountLicensesAdd(layout="row")
 							div(flex="50", layout="column")
 								md-subheader Assign a licence
