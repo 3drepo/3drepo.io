@@ -79,7 +79,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 
 function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: {$in: ids}, "metadata.IFC GUID": {$exists: true} };
-	const project =  { "metadata.IFC GUID": 1 };
+	const project =  { "metadata.IFC GUID": 1 , parents: 1};
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
@@ -211,6 +211,7 @@ groupSchema.methods.updateAttrs = function(data){
 
 	const ifcGuidPromises = [];
 	const sharedIdsByAccount = {};	
+	const sharedIDSets = new Set();
 	let modifiedObjectList = null;
 
 	if (data.objects) {
@@ -223,6 +224,7 @@ groupSchema.methods.updateAttrs = function(data){
 				if ("[object String]" === Object.prototype.toString.call(obj.id)) {
 					obj.id = utils.stringToUUID(obj.shared_id);
 				}
+				sharedIDSets.add(obj.id);
 				if(!sharedIdsByAccount[ns]) {
 					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
 				}
@@ -244,7 +246,19 @@ groupSchema.methods.updateAttrs = function(data){
 					if (ifcGuids && ifcGuids.length > 0) {
 						for (let i = 0; i < ifcGuids.length; i++) {
 							modifiedObjectList.push({account, model, ifc_guid: ifcGuids[i].metadata["IFC GUID"]});
+							for(let j = 0; j < ifcGuids[i].parents.length; j++) {
+								sharedIDSets.delete(utils.uuidToString(ifcGuids[i].parents[j]));		
+							}
 						}
+
+						//if sharedIDSets.size > 0 , it means there are sharedIDs with no IFC GUIDs
+						sharedIDSets.forEach((sharedId) => {
+							modifiedObjectList.push({
+								account,
+								model,
+								shared_id: sharedId
+							});
+						});
 					}
 					else {
 						//this isn't a IFC GUID model.
