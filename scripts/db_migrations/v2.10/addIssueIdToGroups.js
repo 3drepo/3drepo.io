@@ -1,9 +1,8 @@
-// mongo --host hostname --port port -u username -p password --authenticationDatabase db scripts/db_migrations/v2.8/addIssueIdToGroups.js
+// mongo --host hostname --port port -u username -p password --authenticationDatabase db scripts/db_migrations/v2.10/addIssueIdToGroups.js
 
 print('adding issue IDs to groups');
 
 var addIssueIdToGroup = function(myDb, settingId, groupId, issueId) {
-	print('adding ' + issueId + ' to ' + groupId);
 	myDb.getCollection(settingId + '.groups').update({ _id: groupId }, { $set: { issue_id: issueId } });
 };
 
@@ -13,7 +12,6 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 	myDb.getCollection('settings').find().forEach(function(setting) {
 		print('Model: ' + setting._id);
 		myDb.getCollection(setting._id + '.issues').find().forEach(function(issue) {
-			print('Issue: ' + issue.name);
 			if (issue.group_id) {
 				addIssueIdToGroup(myDb, setting._id, issue.group_id, issue._id);
 			}

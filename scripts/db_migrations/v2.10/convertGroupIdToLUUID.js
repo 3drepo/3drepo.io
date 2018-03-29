@@ -1,4 +1,4 @@
-// node scripts/db_migrations/v2.8/convertGroupIdToLUUID.js mongodb://username:passwordq@hostname:port/db
+// node scripts/db_migrations/v2.10/convertGroupIdToLUUID.js mongodb://username:passwordq@hostname:port/db
 
 'use strict';
 
