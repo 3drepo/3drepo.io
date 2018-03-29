@@ -187,6 +187,8 @@ class IssueController implements ng.IController {
 		window.addEventListener("beforeunload", this.refreshHandler);
 		
 		this.watchers();
+
+		console.log("issue.component this in constructor", this);
 	}
 
 	/**
@@ -705,9 +707,10 @@ class IssueController implements ng.IController {
 	 * @param event
 	 */
 	public showScreenshotDialog(event) {
+		const parentScope = this;
 		this.$mdDialog.show({
-			controller: () => {
-				this.issueComponent = this;
+			controller: function() {
+				this.issueComponent = parentScope;
 			},
 			controllerAs: "vm",
 			templateUrl: "templates/issue-screen-shot-dialog.html",
