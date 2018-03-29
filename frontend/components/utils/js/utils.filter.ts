@@ -18,13 +18,12 @@
 function formatBytesGB() {
 
 	return (input: number, referenceValue: number) => {
-		const factor: number = 1073741824;
-		let units: string = "GB";
+		const factor: number = 1024; // Numbers are assumed to be in MBs.
+		const units: string = "GB";
 		return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2)
 	};
 
 }
-
 
 function formatBytes() {
 

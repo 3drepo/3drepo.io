@@ -47,6 +47,8 @@ class AccountBillingController implements ng.IController {
 	private payPalError;
 	private pricePerLicense;
 	private priceLicenses;
+	private planId;
+	private quota;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -59,6 +61,10 @@ class AccountBillingController implements ng.IController {
 	) {}
 
 	public $onInit() {
+		this.initSubscriptions();
+		this.initBillings();
+		this.initPlans();
+		this.initQuota();
 		this.showInfo = true;
 		this.saveDisabled = true;
 		this.countries = this.ClientConfigService.countries;
@@ -66,6 +72,36 @@ class AccountBillingController implements ng.IController {
 		this.showStates = false;
 		this.newBillingAddress = {};
 		this.watchers();
+	}
+
+	public initBillings() {
+		return this.APIService.get(this.account + "/invoices")
+			.then((response) => {
+				this.billings = response.data;
+			});
+	}
+
+	public initPlans() {
+		return this.APIService.get("plans")
+			.then((response) => {
+				if (response.status === 200) {
+					this.plans = response.data;
+				}
+			});
+	}
+
+	public initSubscriptions() {
+		return this.APIService.get(this.account + "/subscriptions")
+			.then((response) => {
+				this.subscriptions = response.data;
+			});
+	}
+
+	public initQuota() {
+		return this.APIService.get(this.account + "/quota")
+			.then((response) => {
+				this.quota = response.data;
+			});
 	}
 
 	public watchers() {
@@ -173,13 +209,14 @@ class AccountBillingController implements ng.IController {
 	public changeSubscription() {
 		const data = {
 			plans: [{
-				plan: "THE-100-QUID-PLAN",
+				plan: this.planId,
 				quantity: this.numNewLicenses,
 			}],
 			billingAddress: this.newBillingAddress,
 		};
 
-		if (this.numLicenses === this.numNewLicenses) {
+		const licenceCountChanged = this.numLicenses !== this.numNewLicenses;
+		if (!licenceCountChanged) {
 			this.payPalInfo = "Updating billing information. Please do not refresh the page or close the tab.";
 		} else {
 			this.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
@@ -193,7 +230,7 @@ class AccountBillingController implements ng.IController {
 		this.APIService.post(this.account + "/subscriptions", data)
 			.then((response) => {
 				if (response.status === 200) {
-					if (this.numLicenses === this.numNewLicenses) {
+					if (!licenceCountChanged) {
 						this.payPalInfo = "Billing information updated.";
 						this.$timeout(() => {
 							this.DialogService.closeDialog();
@@ -222,11 +259,29 @@ class AccountBillingController implements ng.IController {
 	 * Set up num licenses and price
 	 */
 	public setupLicensesInfo() {
-		this.numLicenses = this.subscriptions.filter((sub) => {
-			return sub.inCurrentAgreement;
-		}).length;
+		this.numLicenses = 0;
+		this.pricePerLicense = null;
+		if (this.subscriptions.paypal && this.subscriptions.paypal.length > 0) {
+			this.numLicenses = this.subscriptions.paypal.reduce((total, item) => {
+				return total + item.quantity;
+			}, 0);
+
+			this.planId = this.subscriptions.paypal[0].plan;
+			if (this.planId && this.plans[this.subscriptions.paypal[0].plan]) {
+				this.pricePerLicense = this.plans[this.subscriptions.paypal[0].plan].price;
+			}
+		}
+
+		if (!this.planId || !this.pricePerLicense) {
+			// Use the user's current plan if they already have a plan
+			// Otherwise use the first available plan
+			const availablePlansIdx = Object.keys(this.plans).filter( (key) => this.plans[key].available);
+			this.pricePerLicense = availablePlansIdx.length ? this.plans[availablePlansIdx[0]].price : 0;
+			this.planId = availablePlansIdx[0];
+		}
+
 		this.numNewLicenses = this.numLicenses;
-		this.pricePerLicense = this.plans[0].amount;
+
 	}
 
 	/**
@@ -259,10 +314,6 @@ export const AccountBillingComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "=",
 		billingAddress: "=",
-		quota: "=",
-		billings: "=",
-		subscriptions: "=",
-		plans: "=",
 	},
 	controller: AccountBillingController,
 	controllerAs: "vm",

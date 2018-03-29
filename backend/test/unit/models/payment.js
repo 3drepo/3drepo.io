@@ -18,10 +18,6 @@ let UserBilling = proxyquire('../../../models/userBilling', {
 	'./user': {}
 });
 
-let Subscriptions = proxyquire('../../../models/subscriptions', {
-	'./modelSetting' :  {}
-});
-
 let C = require('../../../constants');
 
 describe('UserBilling', function(){
@@ -73,36 +69,32 @@ describe('UserBilling', function(){
 
 	function createPaymentTest(data){
 
-		let subscriptions = new Subscriptions('', '', {}, data.currentSubscriptions);
 
-		subscriptions.now = data.paymentDate.toDate();
-		
-		let stub = sinon.stub(subscriptions, 'removeSubscriptionByPlan').returns(Promise.resolve());
-
-		return subscriptions.changeSubscriptions(data.newLicences).then(changes => {
-
-			let instanceProp = {
-				subscriptions,
-				billingInfo: {
-					countryCode: data.country,
-					vat: data.isBusiness ? 'ABC123' : null
-				}
+		let instanceProp = {
+			subscriptions : data.currentSubscriptions,
+			billingInfo: {
+				countryCode: data.country,
+				vat: data.isBusiness ? 'ABC123' : null
 			}
+		}
+		if(data.lastAnniversaryDate){
+			instanceProp.lastAnniversaryDate = data.lastAnniversaryDate.toDate();
+			instanceProp.nextPaymentDate =  data.nextPaymentDate;
+		}
 
-			if(data.lastAnniversaryDate){
-				instanceProp.lastAnniversaryDate = data.lastAnniversaryDate.toDate();
-				instanceProp.nextPaymentDate =  data.nextPaymentDate;
-			}
+		return UserBilling.methods.writeSubscriptionChanges.call(instanceProp, data.newLicences).then( changes => {
 
 			let paymentData = UserBilling.methods.calculateAmounts.call(instanceProp, data.paymentDate, changes);
 
 			let proRataPayment = paymentData.payments.find(payment => payment.type === C.PRO_RATA_PAYMENT);
 			let regularPayment = paymentData.payments.find(payment => payment.type === C.REGULAR_PAYMENT);
 			
-			stub.restore();
-
 			return {changes, proRataPayment, regularPayment, paymentDate: paymentData.paymentDate};
 		});
+
+
+
+		
 	}
 
 	describe('send correct payment info to paypal given old and new licences information', function(){
@@ -110,11 +102,11 @@ describe('UserBilling', function(){
 		it('business client from UK first time to buy 1 licence', function(){
 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 1
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'GB';
@@ -123,9 +115,7 @@ describe('UserBilling', function(){
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
 				expect(result.changes).to.deep.equal({	 
-					proRataPeriodPlans: [],
-					regularPeriodPlans: newLicences,
-					canceledAllPlans: false 
+					cancelledAllPlans: false 
 				});
 				expect(result.regularPayment.gross).to.equal(120);
 				expect(result.regularPayment.net).to.closeTo(100, Number.EPSILON);
@@ -140,22 +130,19 @@ describe('UserBilling', function(){
 		it('business client from UK first time to buy 3 licence', function(){
 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 3
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'GB';
 			let isBusiness = true;
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
-
 				expect(result.changes).to.deep.equal({	 
-					proRataPeriodPlans: [],
-					regularPeriodPlans: newLicences,
-					canceledAllPlans: false 
+					cancelledAllPlans: false 
 				});
 				expect(result.regularPayment.gross).to.equal(360);
 				expect(result.regularPayment.net).to.closeTo(300, Number.EPSILON);
@@ -171,11 +158,11 @@ describe('UserBilling', function(){
 		it('business client from DE first time to buy 2 licence', function(){
 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'DE';
@@ -184,9 +171,7 @@ describe('UserBilling', function(){
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
 				expect(result.changes).to.deep.equal({	 
-					proRataPeriodPlans: [],
-					regularPeriodPlans: newLicences,
-					canceledAllPlans: false 
+					cancelledAllPlans: false 
 				});
 				expect(result.regularPayment.gross).to.equal(200);
 				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
@@ -202,11 +187,11 @@ describe('UserBilling', function(){
 		it('personal client from UK first time to buy 1 licence', function(){
 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 1
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'GB';
@@ -215,9 +200,7 @@ describe('UserBilling', function(){
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
 				expect(result.changes).to.deep.equal({	 
-					proRataPeriodPlans: [],
-					regularPeriodPlans: newLicences,
-					canceledAllPlans: false 
+					cancelledAllPlans: false 
 				});
 				expect(result.regularPayment.gross).to.equal(120);
 				expect(result.regularPayment.net).to.closeTo(100, Number.EPSILON);
@@ -232,11 +215,11 @@ describe('UserBilling', function(){
 		it('personal client from DE first time to buy 2 licences', function(){
 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [];
+			const currentSubscriptions = {};
 			
 			let paymentDate = moment().utc();
 			let country = 'DE';
@@ -245,9 +228,7 @@ describe('UserBilling', function(){
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
 				expect(result.changes).to.deep.equal({	 
-					proRataPeriodPlans: [],
-					regularPeriodPlans: newLicences,
-					canceledAllPlans: false 
+					cancelledAllPlans: false 
 				});
 				expect(result.regularPayment.gross).to.equal(238);
 				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
@@ -269,32 +250,22 @@ describe('UserBilling', function(){
 
 			//newLicences quantity includes the number of licences user already has in database 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 4
 			}];
 
-			let currentSubscriptions = [{
-				plan: 'THE-100-QUID-PLAN',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			},{
-				plan: 'THE-100-QUID-PLAN',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+			const currentSubscriptions = {
+				paypal:
+				[{
+					plan: 'hundredQuidPlan',
+					quantity: 2,
+					expiryDate: nextPaymentDate
+				}]
+			};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.regularPeriodPlans).to.deep.equal(newLicences);
-				expect(result.changes.proRataPeriodPlans[0].plan).to.equal('THE-100-QUID-PLAN');
-				expect(result.changes.proRataPeriodPlans[0].quantity).to.equal(2);
-				expect(result.changes.canceledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).to.be.false;
 
 				expect(result.regularPayment.gross).to.equal(480);
 				expect(result.regularPayment.net).to.closeTo(400, Number.EPSILON);
@@ -323,25 +294,20 @@ describe('UserBilling', function(){
 
 			//newLicences quantity includes the number of licences user already has in database 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [{
-				plan: 'THE-100-QUID-PLAN',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+			const currentSubscriptions = {
+				paypal: [{
+				plan: 'hundredQuidPlan',
+				quantity: 1,
+				expiryDate: nextPaymentDate }
+			]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.regularPeriodPlans).to.deep.equal(newLicences);
-				expect(result.changes.proRataPeriodPlans[0].plan).to.equal('THE-100-QUID-PLAN');
-				expect(result.changes.proRataPeriodPlans[0].quantity).to.equal(1);
-				expect(result.changes.canceledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).to.be.false;
 
 				expect(result.regularPayment.gross).to.equal(240);
 				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
@@ -369,25 +335,20 @@ describe('UserBilling', function(){
 
 			//newLicences quantity includes the number of licences user already has in database 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [{
-				plan: 'THE-100-QUID-PLAN',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+			const currentSubscriptions = {
+				paypal: [{
+				plan: 'hundredQuidPlan',
+				quantity: 1,
+				expiryDate: nextPaymentDate}
+			]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.regularPeriodPlans).to.deep.equal(newLicences);
-				expect(result.changes.proRataPeriodPlans[0].plan).to.equal('THE-100-QUID-PLAN');
-				expect(result.changes.proRataPeriodPlans[0].quantity).to.equal(1);
-				expect(result.changes.canceledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).to.be.false;
 
 				expect(result.regularPayment.gross).to.equal(240);
 				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
@@ -414,25 +375,20 @@ describe('UserBilling', function(){
 
 			//newLicences quantity includes the number of licences user already has in database 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [{
-				plan: 'THE-100-QUID-PLAN',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				inCurrentAgreement: true,
-				active: true,
-				expiredAt: nextPaymentDate
-			}];
+			const currentSubscriptions = {
+				paypal: [{
+				plan: 'hundredQuidPlan',
+				quantity: 1,
+				expiryDate: nextPaymentDate}
+			]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.regularPeriodPlans).to.deep.equal(newLicences);
-				expect(result.changes.proRataPeriodPlans[0].plan).to.equal('THE-100-QUID-PLAN');
-				expect(result.changes.proRataPeriodPlans[0].quantity).to.equal(1);
-				expect(result.changes.canceledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).to.be.false;
 
 				expect(result.regularPayment.gross).to.equal(200);
 				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
@@ -460,29 +416,21 @@ describe('UserBilling', function(){
 
 			//newLicences quantity includes the number of licences user already has in database 
 			let newLicences = [{
-				plan: 'THE-100-QUID-PLAN',
+				plan: 'hundredQuidPlan',
 				quantity: 2
 			}];
 
-			let currentSubscriptions = [];
-
-			for(let i=0; i<3; i++){
-				currentSubscriptions.push({
-					plan: 'THE-100-QUID-PLAN',
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					inCurrentAgreement: true,
-					active: true,
-					expiredAt: nextPaymentDate
-				});
-			}
+			const currentSubscriptions = {
+				paypal: [{
+				plan: 'hundredQuidPlan',
+				quantity: 3,
+				expiryDate: nextPaymentDate
+				}]};
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 				
 				expect(result.changes).to.deep.equal({	 
-					proRataPeriodPlans: [],
-					regularPeriodPlans: newLicences,
-					canceledAllPlans: false 
+					cancelledAllPlans: false 
 				});
 
 				expect(result.regularPayment.gross).to.equal(240);
