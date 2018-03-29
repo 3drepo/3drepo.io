@@ -16,10 +16,10 @@
  */
 
 var express = require("express");
-var Subscription = require('../models/subscription');
 var responseCodes = require("../response_codes.js");
 var router = express.Router({mergeParams: true});
 var utils = require('../utils');
+var config = require("../config");
 
 router.get("/plans", listPlans);
 
@@ -27,8 +27,7 @@ router.get("/plans", listPlans);
 function listPlans(req, res, next){
 	'use strict';
 	let place = utils.APIInfo(req);
-	let subscriptions = Subscription.getAll().filter(sub => sub.plan !== Subscription.getBasicPlan().plan);
-	
+	let subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
 	responseCodes.respond(place, req, res, next, responseCodes.OK, subscriptions);
 }
 

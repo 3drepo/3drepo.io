@@ -23,17 +23,16 @@ let DB = require("../db/db");
 let crypto = require("crypto");
 let utils = require("../utils");
 const Role = require("./role");
+const Job = require("./job");
 
 let systemLogger = require("../logger.js").systemLogger;
 
-let Subscription = require("./subscription");
 let config = require("../config");
 
 
 let ModelSetting = require("./modelSetting");
 let C = require("../constants");
 let userBilling = require("./userBilling");
-let job = require("./job");
 let permissionTemplate = require("./permissionTemplate");
 let accountPermission = require("./accountPermission");
 let Project = require("./project");
@@ -55,7 +54,8 @@ let schema = mongoose.Schema({
 			expiredAt: Date,
 			token: String
 		},
-		billing: { 
+		billing: {
+			_id : false,
 			type: userBilling, 
 			default: userBilling,
 			get: function(billing){
@@ -68,12 +68,6 @@ let schema = mongoose.Schema({
 		},
 		avatar: Object,
 		lastLoginAt: Date,
-		jobs: {
-			type: [job.schema],
-			get: function(jobs){
-				return job.methods.init(this, jobs);
-			}
-		},
 		permissionTemplates: {
 			type: [permissionTemplate.schema],
 			get: function(permissionTemplates){
@@ -318,8 +312,6 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 			}
 		];	
 
-		cleanedCustomData.jobs = C.DEFAULT_JOBS;
-	
 		if(customData){
 			cleanedCustomData.emailVerifyToken = {
 				token: crypto.randomBytes(64).toString("hex"),
@@ -404,6 +396,7 @@ schema.statics.verify = function(username, token, options){
 
 	}).then(user => {
 
+
 		if(!skipImportToyModel){
 
 			//import toy model
@@ -413,11 +406,6 @@ schema.statics.verify = function(username, token, options){
 				systemLogger.logError("Failed to import toy model", { err : err && err.stack ? err.stack : err});
 			});
 		}
-
-		if(!skipCreateBasicPlan){
-			//basic quota
-			user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
-		}
 		
 		Role.createTeamSpaceRole(username).then(role => {
 				return Role.grantTeamSpaceRoleToUser(username, username);
@@ -425,6 +413,8 @@ schema.statics.verify = function(username, token, options){
 		).catch(err => {
 			systemLogger.logError("Failed to create role for ", username);
 		});
+
+		Job.addDefaultJobs(username);
 
 	});
 };
@@ -650,8 +640,7 @@ function _findModelDetails(dbUserCache, username, model){
 function _calSpace(user){
 	"use strict";
 
-	let quota = user.customData.billing.subscriptions.getSubscriptionLimits();
-
+	let quota = user.customData.billing.getSubscriptionLimits();
 	return User.historyChunksStats(user.user).then(stats => {
 
 		if(stats && quota.spaceLimit > 0){
@@ -660,11 +649,10 @@ function _calSpace(user){
 				totalSize += stat.size;
 			});
 
-			quota.spaceUsed = totalSize;
+			quota.spaceUsed = totalSize / (1024*1024); // In MiB
 		} else if(quota) {
 			quota.spaceUsed = 0;
 		}
-
 		return quota;
 	});
 
@@ -699,22 +687,6 @@ function _sortAccountsAndModels(accounts){
 		}
 	});
 }
-
-// function _findModel(id, accounts){
-
-// 	//flatten all the model ids in accounts object
-// 	const ids = accounts.reduce(
-// 		(arr, account) => arr.concat(
-// 			account.models.map(model => model.model), 
-// 			account.fedModels.map(model => model.model), 
-// 			account.projects.reduce((arr, project) => arr.concat(project.models.map(model => model.model)), [])
-// 		), 
-// 		[]
-// 	);
-
-// 	console.log('findModel', ids, id);
-// 	return ids.indexOf(id) !== -1;
-// }
 
 function _findModel(id, account){
 	return account.models.find(m => m.model === id) ||
@@ -763,10 +735,6 @@ function _createAccounts(roles, userName)
 						_getModels(account.account, null, inheritedModelPermissions).then(data => {
 							account.models = data.models;
 							account.fedModels = data.fedModels;
-								// add space usage stat info into account object
-							if (isTeamspaceAdmin){
-								return _calSpace(user).then(quota => account.quota = quota);
-							}
 						}).then(() => _addProjects(account, userName))	
 					);
 				}
@@ -945,33 +913,34 @@ schema.methods.listAccounts = function(){
 	return _createAccounts(this.roles, this.user);	
 };
 
-schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
+schema.methods.updateSubscriptions = function(plans, billingUser, billingAddress){
 	"use strict";
-
 	let billingAgreement;
 
 	plans = plans || [];
 	
-	return this.customData.billing.buySubscriptions(plans, this.user, billingUser, billingAddress)
+	return this.customData.billing.updateSubscriptions(plans, this.user, billingUser, billingAddress)
 	.then(_billingAgreement => {
 		
 		billingAgreement = _billingAgreement;
-		return this.save();
-
+		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
 	}).then(() => {
 		return Promise.resolve(billingAgreement || {});
 	});
 };
 
+function updateUser(username, update) {
+	const db = require("../db/db");
+	return db.getCollection("admin", "system.users").then(dbCol => {
+		return dbCol.update({user: username}, update);
+	});
+
+}
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
 	"use strict";
-
-
 	let dbUser;
-
 	return this.findUserByBillingId(billingAgreementId).then(user => {
-
 		dbUser = user;
 
 		if(!dbUser){
@@ -981,7 +950,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		return dbUser.customData.billing.activateSubscriptions(dbUser.user, paymentInfo, raw);
 
 	}).then(() => {
-		return dbUser.save();
+		return updateUser(dbUser.user,  {$set: {"customData.billing" : dbUser.customData.billing}});
 	}).then(() => {
 		return Promise.resolve({subscriptions: dbUser.customData.billing.subscriptions, account: dbUser, payment: paymentInfo});
 	});
@@ -991,52 +960,159 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 schema.methods.executeBillingAgreement = function(){
 	"use strict";
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
-		return this.save();
-	});
+		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
+	})
 };
 
-schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
+schema.methods.removeTeamMember = function(username, cascadeRemove){
 	"use strict";
-	let sub = this.customData.billing.subscriptions.findByID(id);
-	let username = sub ? sub.assignedUser : null ;
-	return this.customData.billing.subscriptions.removeAssignedSubscriptionFromUser(id, this.user, cascadeRemove).then(subscription => {
-		if(username){
-			Role.revokeTeamSpaceRoleFromUser(username, this.user);
+	let foundProjects = [];
+	let foundModels = [];
+	
+	if(this.user === username) {
+		//The user should not be able to remove itself from the teamspace
+		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
+	}
+
+	let teamspacePerm = this.customData.permissions.findByUser(username);
+	//check if they have any permissions assigned
+	return Project.find({ account: this.user }, { 'permissions.user':  username}).then(projects => {
+		
+		foundProjects = projects;
+		return ModelSetting.find({ account: this.user }, { 'permissions.user': username});
+	
+	}).then(models => {
+
+		foundModels = models;
+
+		if(!cascadeRemove && (foundModels.length || foundProjects.length || teamspacePerm)){
+
+			return Promise.reject({ 
+				resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
+				info: {
+					models: foundModels.map(m => { return { model: m.name}; }),
+					projects: foundProjects.map(p => p.name),
+					teamspace: teamspacePerm
+				}
+			});
+
+		} else {
+
+			const promises = [];
+
+			if(teamspacePerm){
+				promises.push(this.customData.permissions.remove(username));
+			}
+
+			promises.push(foundModels.map(model => 
+				model.changePermissions(model.permissions.filter(p => p.user !== username))));
+
+			promises.push(foundProjects.map(project => 
+				project.updateAttrs({ permissions: project.permissions.filter(p => p.user !== username) })));
+			
+			promises.push(Job.removeUserFromAnyJob(this.user, username));
+			return Promise.all(promises);
 		}
-		return this.save().then(() => subscription);
+
+	}).then(() => {
+		return Role.revokeTeamSpaceRoleFromUser(username, this.user);
 	});
 
 };
 
-schema.methods.assignSubscriptionToUser = function(id, userData){
+schema.methods.addTeamMember = function(user){
+	"use strict";
+	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
+		const limits = this.customData.billing.getSubscriptionLimits();
+		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
+			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
+		}
+		else {
+			return User.findByUserName(user).then(userEntry => {
+				if(!userEntry) {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
+				if(userEntry.isMemberOfTeamspace(this.user)) {
+					return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);	
+				}
+				return Role.grantTeamSpaceRoleToUser(user, this.user);
+			});
+		}
+	});
+};
+
+schema.methods.isMemberOfTeamspace = function(teamspace) {
+	"use strict";
+	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
+
+}
+
+schema.statics.getQuotaInfo = function(teamspace) {
+	return this.findByUserName(teamspace).then( (user) => {
+		if(!user) {
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		return _calSpace(user);
+	});
+	
+	
+}
+
+schema.statics.getMembersAndJobs = function(teamspace) {
+	let memberArr = [];
+	let memToJob = {};
+	let promises = [];
+
+	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
+					memberArr = members;
+				});
+
+	const getJobInfoProm = Job.usersWithJob(teamspace).then( _memToJob => {
+		memToJob = _memToJob;
+	});; 
+	promises.push(getTSMemProm);
+	promises.push(getJobInfoProm);
+		
+	return Promise.all(promises).then( () => {
+		let resultArr = [];
+		memberArr.forEach(mem => {
+			let entry = {user: mem};
+			if(memToJob[mem]) {
+				entry.job = memToJob[mem];			
+			}
+
+			resultArr.push(entry);
+		})
+		return resultArr;
+	});
+}
+
+schema.statics.getAllUsersInTeamspace = function(teamspace) {
 	"use strict";
 
-	return this.customData.billing.subscriptions.assignSubscriptionToUser(id, userData).then(subscription => {
-		//add this user to the role
-		Role.grantTeamSpaceRoleToUser(userData.user, this.user);
-		return this.save().then(() => subscription);
+	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
+	return this.find({account: "admin"}, query , {user : 1}).then( users => {
+		let res = [];
+		users.forEach(user => {
+			res.push(user.user);
+		});
+
+		return Promise.resolve(res);
 	});
-};
+}
 
-schema.methods.updateAssignDetail = function(id, data){
-	"use strict";
+schema.statics.teamspaceMemberCheck = function(teamspace, user) {
+	return User.findByUserName(user).then( (userEntry) => {
+		if(!userEntry) {
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
 
-	return this.customData.billing.subscriptions.updateAssignDetail(id, data).then(subscription => {
-		return this.save().then(() => subscription);
+		if(!userEntry.isMemberOfTeamspace(teamspace)) {
+			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+		}
 	});
-};
-
-schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
-	"use strict";
-
-	this.customData.billing.billingUser = billingUser;
-	let subscription = this.customData.billing.subscriptions.addSubscription(plan, active, expiredAt);
-	//this.markModified('customData.billing');
-	return this.save().then(() => {
-		return Promise.resolve(subscription);
-	});
-
-};
+}
 
 var User = ModelFactory.createClass(
 	"User",

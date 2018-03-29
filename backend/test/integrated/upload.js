@@ -127,7 +127,14 @@ describe('Uploading a model', function () {
 		before(function(){
 			//give some money to this guy
 			return User.findByUserName(username).then( user => {
-				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment().utc().add(1, 'month'))
+				user.customData.billing.subscriptions  = { 
+					"discretionary" : {
+		                 		"collaborators" : 2,
+			                 	"data" : 1024,
+        	            			"expiryDate" : moment().utc().add(1, 'month')
+		                	}
+				};
+				return user.save();
 			})
 		});
 

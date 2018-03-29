@@ -906,7 +906,7 @@ export class IssuesService {
 
 	public getJobs(account, model){
 
-		const url = account + "/" + model + "/jobs.json";
+		const url = account + "/jobs";
 
 		this.APIService.get(url).then(
 			(jobsData) => {
@@ -923,7 +923,7 @@ export class IssuesService {
 
 	public getUserJobForModel(account, model){
 		const deferred = this.$q.defer();
-		const url = account + "/" +model + "/userJobForModel.json";
+		const url = account + "/myJob";
 
 		this.APIService.get(url).then(
 			(userJob) => {
