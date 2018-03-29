@@ -193,7 +193,7 @@ export class IssuesService {
 				}
 			}
 		}
-		console.log("searching comments..", issue);
+		
 		// Search the comments
 		if (issue.hasOwnProperty("comments")) {
 			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
