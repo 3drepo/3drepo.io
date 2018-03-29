@@ -1,4 +1,3 @@
-//first move all the jobs to a new collection
 print("Changing plan name in invoices");
 
 var dryRun = false; //if true -> it doesn't write to db
