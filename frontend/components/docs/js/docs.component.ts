@@ -61,24 +61,6 @@ class DocsController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch(() => {
-			return this.ViewerService.selection;
-		}, (newSelection, oldSelection) => {
-
-			if (newSelection.backgroundSelected) {
-				this.DocsService.state.show = false;
-			} else if (
-				newSelection.selectedObject !== null &&
-				newSelection.selectedObject.id
-			) {
-				const valid = this.DocsService.state.active && !this.ViewerService.pin.pinDropMode;
-				if (valid) {
-					this.DocsService.handleObjectSelected(newSelection.selectedObject);
-				}
-			}
-
-		}, true);
-
-		this.$scope.$watch(() => {
 			return this.DocsService.state;
 		}, () => {
 			if (this.DocsService.state.updated === true) {

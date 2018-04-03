@@ -214,7 +214,6 @@ class PanelController implements ng.IController {
 	public calculateContentHeights() {
 		const tempContentItemsShown = angular.copy(this.contentItemsShown);
 		this.assignHeights(this.maxHeightAvailable, tempContentItemsShown, null);
-		//this.$timeout(() => {});
 	}
 
 	public assignHeights(heightAvailable: number, contentItems: any[], previousContentItems: any[]) {

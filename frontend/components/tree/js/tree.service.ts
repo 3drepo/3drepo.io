@@ -21,6 +21,7 @@ export class TreeService {
 		"$q",
 		"APIService",
 		"ViewerService",
+		"DocsService",
 	];
 
 	public highlightSelectedViewerObject;
@@ -54,6 +55,7 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
+		private DocsService,
 	) {
 		this.reset();
 
@@ -1041,6 +1043,11 @@ export class TreeService {
 	 * Unselect all selected items and clear the array
 	 */
 	public clearCurrentlySelected() {
+
+		if (this.DocsService.state.show) {
+			this.DocsService.state.show = false;
+		}
+
 		if (this.currentSelectedNodes) {
 			for (let i = 0; i < this.currentSelectedNodes.length; i++) {
 				this.currentSelectedNodes[i].selected = false;
@@ -1131,8 +1138,29 @@ export class TreeService {
 
 		}
 
+		const lastNode = nodes[nodes.length - 1] ;
+		this.handleMetadata(lastNode);
+
 		return this.highlightNodes(nodes, multi, colour);
 
+	}
+
+	/**
+	 * Show metadata in the metadata panel if necessary
+	 * @param lastNode the node to show the metadata for
+	 */
+	public handleMetadata(lastNode) {
+		// Handle showing metadata in the metadata panel if necessary
+
+		if (lastNode && lastNode.meta) {
+			if (this.DocsService.state.active && !this.ViewerService.pin.pinDropMode) {
+				this.DocsService.handleObjectSelected(
+					lastNode.account,
+					lastNode.model || lastNode.project,
+					lastNode.meta,
+				);
+			}
+		}
 	}
 
 	/**

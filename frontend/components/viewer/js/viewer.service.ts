@@ -35,7 +35,6 @@ export class ViewerService {
 	private pin: any;
 	private initialised: any;
 	private Viewer: any;
-	private selection: any;
 
 	constructor(
 		public $q: ng.IQService,
@@ -49,11 +48,6 @@ export class ViewerService {
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;
-
-		this.selection = {
-			backgroundSelected: false,
-			selectedObject: null,
-		};
 
 		this.currentModel = {
 			model : null,
@@ -116,13 +110,10 @@ export class ViewerService {
 				break;
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.selection.backgroundSelected = true;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				this.selection.backgroundSelected = false;
-				this.selection.selectedObject = event.value;
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:

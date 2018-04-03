@@ -22,7 +22,7 @@ export class DocsService {
 
 		"ClientConfigService",
 		"APIService",
-		"TreeService",
+		// "TreeService",
 	];
 
 	private state: any;
@@ -34,7 +34,7 @@ export class DocsService {
 
 		private ClientConfigService: any,
 		private APIService: any,
-		private TreeService: any,
+		// private TreeService: any,
 	) {
 		this.noMetadata = false;
 		this.docTypeHeight = 50;
@@ -84,24 +84,20 @@ export class DocsService {
 			});
 	}
 
-	public handleObjectSelected(object) {
+	public handleObjectSelected(account, model, metadataIds) {
 
-		this.TreeService.onReady()
-			.then(() => {
-				const metadataIds = this.TreeService.treeMap.oIdToMetaId[object.id];
-				if (metadataIds && metadataIds.length) {
-					this.state.noMetadata = false;
-					this.updateDocs(
-						object.account,
-						object.model,
-						metadataIds[0],
-					);
+		if (metadataIds && metadataIds.length) {
+			this.state.noMetadata = false;
+			this.updateDocs(
+				account,
+				model,
+				metadataIds[0],
+			);
 
-				} else {
-					this.state.noMetadata = true;
-					this.state.show = true;
-				}
-		});
+		} else {
+			this.state.noMetadata = true;
+			this.state.show = true;
+		}
 
 	}
 
