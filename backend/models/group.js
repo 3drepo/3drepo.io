@@ -141,10 +141,9 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 				if (groupObjectsMap && groupObjectsMap.length > 0) {
 					group.objects = [];
 					for (let id in groupObjectsMap) {
-						if (id === undefined) {
-							continue;
+						if (groupObjectsMap.hasOwnProperty(id)) {
+							group.objects.push(groupObjectsMap[id]);
 						}
-						group.objects.push(groupObjectsMap[id]);
 					}
 				}
 				return group;
@@ -241,7 +240,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 			}
 			
 			for (let namespace in ifcObjectByAccount) {
-				if (namespace === undefined) {
+				if (!ifcObjectByAccount.hasOwnProperty(namespace)) {
 					continue;
 				}
 				const nsSplitArr = namespace.split("__");
@@ -261,7 +260,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 			}
 
 			return Promise.all(sharedIdPromises).then(() => {
-				let returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
+				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
 				returnGroup.objects = sharedIdObjects;
 				return returnGroup;
 			});
@@ -284,7 +283,7 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 };
 
 groupSchema.methods.updateAttrs = function(data){
-	console.log("updateAttrs", data);
+
 	delete data.__v;
 	const ifcGuidPromises = [];
 	const sharedIdsByAccount = {};	
@@ -315,7 +314,7 @@ groupSchema.methods.updateAttrs = function(data){
 		}
 
 		for (let namespace in sharedIdsByAccount) {
-			if (namespace === undefined) {
+			if (!sharedIdsByAccount.hasOwnProperty(namespace)) {
 				continue;
 			}
 			const nsSplitArr = namespace.split("__");

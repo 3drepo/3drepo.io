@@ -26,7 +26,6 @@ export class ViewerService {
 		"APIService",
 		"DialogService",
 		"EventService",
-		// "DocsService",
 	];
 
 	private newPinId: string;
@@ -45,8 +44,6 @@ export class ViewerService {
 		public APIService: any,
 		public DialogService: any,
 		public EventService: any,
-		// public DocsService: any,
-
 	) {
 
 		this.newPinId = "newPinId";
