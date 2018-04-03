@@ -17,16 +17,16 @@
 
 "use strict";
 
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
-let utils = require("../utils");
-let uuid = require("node-uuid");
-let Schema = mongoose.Schema;
-let responseCodes = require("../response_codes.js");
-let Meta = require("./meta");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const utils = require("../utils");
+const uuid = require("node-uuid");
+const Schema = mongoose.Schema;
+const responseCodes = require("../response_codes.js");
+const Meta = require("./meta");
 
 
-let groupSchema = Schema({
+const groupSchema = Schema({
 	// no extra attributes
 	_id: Object,
 	name: String,
@@ -268,8 +268,14 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol, query){
-	return this.find(dbCol, query || {});
+groupSchema.statics.listGroups = function(dbCol, queryParams){
+	let query = {};
+
+	// If we want groups that aren't from issues
+	if (queryParams.noIssues) {
+		query = { issue_id: { $exists: false } };
+	}
+	return this.find(dbCol, query);
 };
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
@@ -285,7 +291,6 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
 groupSchema.methods.updateAttrs = function(data){
 
-	delete data.__v;
 	const ifcGuidPromises = [];
 	const sharedIdsByAccount = {};	
 	const sharedIDSets = new Set();

@@ -39,14 +39,8 @@ let getDbColOptions = function(req){
 function listGroups(req, res, next){
 
 	let place = utils.APIInfo(req);
-	let query = {};
 
-	// If we want groups that aren't from issues
-	if (req.query.noIssues) {
-		query = { issue_id: { $exists: false } };
-	}
-
-	Group.listGroups(getDbColOptions(req), query).then(groups => {
+	Group.listGroups(getDbColOptions(req), req.query).then(groups => {
 
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
