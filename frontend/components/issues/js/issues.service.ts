@@ -231,7 +231,7 @@ export class IssuesService {
 			});
 
 			// Check that there is a position for the pin
-			let pinPosition = issue.position && issue.position.length;
+			const pinPosition = issue.position && issue.position.length;
 
 			if (show !== undefined && pinPosition) {
 
@@ -299,7 +299,7 @@ export class IssuesService {
 			let matchs = oldIssue._id === issue._id;
 			if(matchs){
 
-				if(issue.status === "closed"){
+				if(issue.status === "closed") {
 					
 					this.state.allIssues[i].justClosed = true;
 
@@ -365,7 +365,7 @@ export class IssuesService {
 	}
 
 	public isViewer(permissions) {
-		//console.log("isViewer", permissions);
+		// console.log("isViewer", permissions);
 		return !this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
 			permissions
@@ -373,7 +373,7 @@ export class IssuesService {
 	}
 
 	public isAssignedJob(userJob, issueData, permissions) {
-		//console.log("isAssignedJob", permissions);
+		// console.log("isAssignedJob", permissions);
 		return (userJob._id && 
 				issueData.assigned_roles[0] && 
 				userJob._id === issueData.assigned_roles[0]) &&
@@ -465,7 +465,7 @@ export class IssuesService {
 		}
 	}
 
-	public showIssue(issue) {		
+	public showIssue(issue) {
 
 		this.TreeService.showProgress = true;
 
@@ -493,8 +493,7 @@ export class IssuesService {
 				this.TreeService.showProgress = false;
 				this.handleShowIssue(issue);
 			});
-			
-	
+
 		} else {
 			this.TreeService.showProgress = false;
 			this.handleShowIssue(issue);
@@ -511,7 +510,7 @@ export class IssuesService {
 			account: issue.account,
 			model: issue.model
 		};
-		
+
 		this.ViewerService.setCamera(issueData);
 
 	}
@@ -519,7 +518,7 @@ export class IssuesService {
 	public handleShowIssue(issue) {
 
 		if(issue && issue.viewpoint ) {
-			
+
 			if (issue.viewpoint.position && issue.viewpoint.position.length > 0) {
 				this.handleCameraView(issue);
 			}
@@ -534,7 +533,7 @@ export class IssuesService {
 			this.ClipService.updateClippingPlane(issueData);
 
 		} else {
-			//This issue does not have a viewpoint, go to default viewpoint
+			// This issue does not have a viewpoint, go to default viewpoint
 			this.ViewerService.goToExtent();
 		}
 
@@ -550,7 +549,7 @@ export class IssuesService {
 		if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
 					issue.viewpoint.hasOwnProperty("hidden_group_id") ||
 					issue.viewpoint.hasOwnProperty("shown_group_id"))) {
-			
+
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
@@ -628,8 +627,8 @@ export class IssuesService {
 
 		} else {
 
-			
-			let groupId = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id")) ? issue.viewpoint.group_id : issue.group_id;
+			const hasGroup = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id"));
+			const groupId = hasGroup ? issue.viewpoint.group_id : issue.group_id;
 			const groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
 			let handleTreePromise;
 
@@ -650,7 +649,7 @@ export class IssuesService {
 					});
 
 			}
-			
+
 			promises.push(handleTreePromise);
 
 		}
@@ -670,7 +669,7 @@ export class IssuesService {
 					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 					if (objUid) {
-						let node = this.TreeService.getNodeById(objUid);
+						const node = this.TreeService.getNodeById(objUid);
 						if (node && node.hasOwnProperty("name")) {
 							nodes.add(node);
 						}
@@ -680,7 +679,7 @@ export class IssuesService {
 							this.TreeService.initNodesToShow([this.TreeService.allNodes[0]]);
 							// TODO: we no longer need to select here, but still need to expand tree
 							this.TreeService.expandToSelection(this.TreeService.getPath(objUid), 0, undefined, true);
-							
+
 							if (nodes.size > 0) {
 								this.TreeService.selectNodes(Array.from(nodes), false, true);
 							}
@@ -689,7 +688,7 @@ export class IssuesService {
 				}
 
 				angular.element((window as any)).triggerHandler("resize");
-				
+
 			})
 			.catch((error) => {
 				console.error(error);
@@ -705,7 +704,7 @@ export class IssuesService {
 					// Make a list of nodes to hide
 					let hiddenNodes = [];
 					for (let i = 0; i < objects.length; i++) {
-						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 						if (objUid) {
 							hiddenNodes.push(this.TreeService.getNodeById(objUid));
@@ -730,7 +729,7 @@ export class IssuesService {
 					// Make a list of nodes to shown
 					let shownNodes = [];
 					for (let i = 0; i < objects.length; i++) {
-						let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
+						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
 
 						if (objUid) {
 							shownNodes.push(this.TreeService.getNodeById(objUid));
@@ -748,7 +747,7 @@ export class IssuesService {
 
 		if (response.data.hiddenObjects) {
 			this.handleHidden(response.data.hiddenObjects);
-		} 
+		}
 
 		if (response.data.shownObjects) {
 			this.handleShown(response.data.shownObjects);
@@ -767,10 +766,10 @@ export class IssuesService {
 			prettyTime,
 			postFix,
 			hours;
-		
-		let	monthToText = [
-			"Jan", "Feb", "Mar", "Apr", 
-			"May", "Jun", "Jul", "Aug", 
+
+		const	monthToText = [
+			"Jan", "Feb", "Mar", "Apr",
+			"May", "Jun", "Jul", "Aug",
 			"Sep", "Oct", "Nov", "Dec"
 		];
 
@@ -801,7 +800,7 @@ export class IssuesService {
 	}
 
 	public generateTitle(issue) {
-		if (issue.modelCode){
+		if (issue.modelCode) {
 			return issue.modelCode + "." + issue.number + " " + issue.name;
 		} else if (issue.typePrefix) {
 			return issue.typePrefix + "." + issue.number + " " + issue.name;
@@ -814,63 +813,46 @@ export class IssuesService {
 		return this.APIService.getAPIUrl(thumbnailUrl);
 	}
 
-	public getIssue(account, model, issueId){
+	public getIssue(account, model, issueId) {
 
-		let deferred = this.$q.defer();
-		let issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
+		const issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
 
-		this.APIService.get(issueUrl)
+		return this.APIService.get(issueUrl)
 			.then((res) => {
 				res.data = this.cleanIssue(res.data);
-				deferred.resolve(res.data);
-			})
-			.catch((err) => {
-				deferred.reject(err);
 			});
-
-		return deferred.promise;
 
 	}
 
 	public getIssues(account, model, revision) {
 
-		// TODO: This is a bit hacky. We are 
+		// TODO: This is a bit hacky. We are
 		// basically saying when getIssues is called
 		// we know the issues component is loaded...
 		this.initDefer.resolve();
 
-		let deferred = this.$q.defer();
 		let endpoint;
-		if(revision){
+		if (revision) {
 			endpoint = account + "/" + model + "/revision/" + revision + "/issues.json";
 		} else {
 			endpoint = account + "/" + model + "/issues.json";
 		}
 
-		this.APIService.get(endpoint).then(
-			(response) => {
-				let issuesData = response.data;
+		return this.APIService.get(endpoint)
+			.then((response) => {
+				const issuesData = response.data;
 				for (let i = 0; i < response.data.length; i ++) {
 					this.populateIssue(issuesData[i]);
 				}
-				deferred.resolve(response.data);
-			},
-			() => {
-				deferred.resolve([]);
-			}
-		);
-
-		
-
-		return deferred.promise;
+				return response.data;
+			});
 	}
 
 	public saveIssue(issue) {
-		let deferred = this.$q.defer(),
-			saveUrl;
 
-		let base = issue.account + "/" + issue.model;
-		if (issue.rev_id){
+		let saveUrl;
+		const base = issue.account + "/" + issue.model;
+		if (issue.rev_id) {
 			saveUrl = base + "/revision/" + issue.rev_id + "/issues.json";
 		} else {
 			saveUrl = base + "/issues.json";
@@ -883,12 +865,8 @@ export class IssuesService {
 			issue.norm = issue.pickedNorm;
 		}
 
-		this.APIService.post(saveUrl, issue, config)
-			.then((response) => {
-				deferred.resolve(response);
-			});
+		return this.APIService.post(saveUrl, issue, config);
 
-		return deferred.promise;
 	}
 
 	/**
@@ -911,16 +889,16 @@ export class IssuesService {
 
 		let endpoint = issue.account + "/" + issue.model;
 
-		if(issue.rev_id){
+		if (issue.rev_id) {
 			endpoint += "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json";
 		} else {
 			endpoint += "/issues/" + issue._id + ".json";
 		}
-			
-		let putConfig = {withCredentials: true};
+
+		const putConfig = {withCredentials: true};
 
 		return this.APIService.put(endpoint, putData, putConfig);
-	
+
 	}
 
 	public toggleCloseIssue(issue) {
@@ -929,7 +907,7 @@ export class IssuesService {
 			closed = !issue.closed;
 		}
 		return this.doPut(issue, {
-			closed: closed,
+			closed,
 			number: issue.number
 		});
 	}
@@ -939,24 +917,24 @@ export class IssuesService {
 			issue,
 			{
 				assigned_roles: issue.assigned_roles,
-				number: 0 //issue.number
+				number: 0 // issue.number
 			}
 		);
 	}
 
 	public saveComment(issue, comment, viewpoint) {
 		return this.doPut(issue, {
-			comment: comment,
-			viewpoint: viewpoint
+			comment,
+			viewpoint
 		});
 	}
 
 	public editComment(issue, comment, commentIndex) {
 		return this.doPut(issue, {
-			comment: comment,
+			comment,
 			number: issue.number,
 			edit: true,
-			commentIndex: commentIndex
+			commentIndex
 		});
 	}
 
@@ -975,17 +953,17 @@ export class IssuesService {
 			comment: "",
 			number: issue.number,
 			sealed: true,
-			commentIndex: commentIndex
+			commentIndex
 		});
 	}
 
-	public getJobs(account, model){
+	public getJobs(account, model) {
 
 		const url = account + "/jobs";
 
 		this.APIService.get(url).then(
 			(jobsData) => {
-				//this.availableJobs = jobsData.data;
+				// this.availableJobs = jobsData.data;
 				this.jobsDeferred.resolve(jobsData.data);
 			},
 			() => {
@@ -996,7 +974,7 @@ export class IssuesService {
 		return this.jobsDeferred.promise;
 	}
 
-	public getUserJobForModel(account, model){
+	public getUserJobForModel(account, model) {
 		const deferred = this.$q.defer();
 		const url = account + "/myJob";
 
@@ -1011,7 +989,6 @@ export class IssuesService {
 
 		return deferred.promise;
 	}
-
 
 	public hexToRgb(hex) {
 		// If nothing comes end, then send nothing out.
@@ -1038,8 +1015,8 @@ export class IssuesService {
 		}
 
 		return [
-			(parseInt(hexColours[0], 16) / 255.0), 
-			(parseInt(hexColours[1], 16) / 255.0), 
+			(parseInt(hexColours[0], 16) / 255.0),
+			(parseInt(hexColours[1], 16) / 255.0),
 			(parseInt(hexColours[2], 16) / 255.0)
 		];
 	}
@@ -1052,15 +1029,15 @@ export class IssuesService {
 
 				if (id && jobs) {
 					for (let i = 0; i < jobs.length; i ++) {
-						let job = jobs[i];
+						const job = jobs[i];
 						if (job._id === id && job.color) {
 							roleColor = job.color;
 							found = true;
 							break;
 						}
-					}	
+					}
 				}
-				
+
 				if (!found) {
 					console.debug("Job color not found for", id);
 				}
@@ -1070,7 +1047,7 @@ export class IssuesService {
 			.catch((error) => {
 				console.error("Error getting Job Color as available jobs did not resolve");
 				return "#ffffff";
-			})
+			});
 	}
 
 	/**
@@ -1078,7 +1055,7 @@ export class IssuesService {
 	 */
 	public getStatusIcon(issue) {
 
-		let statusIcon: any = {};
+		const statusIcon: any = {};
 
 		switch (issue.priority) {
 		case "none":
@@ -1117,19 +1094,19 @@ export class IssuesService {
 	/**
 	* Import bcf
 	*/
-	public importBcf(account, model, revision, file){
+	public importBcf(account, model, revision, file) {
 
 		let bcfUrl = account + "/" + model + "/issues.bcfzip";
-		if(revision){
+		if (revision) {
 			bcfUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
 		}
 
-		let formData = new FormData();
+		const formData = new FormData();
 		formData.append("file", file);
 
 		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
-			.then(function(res){
-				if(res.status !== 200){
+			.then(function(res) {
+				if (res.status !== 200) {
 					throw res.data;
 				}
 			});
@@ -1157,34 +1134,34 @@ export class IssuesService {
 
 				comment.action.propertyText = "Status";
 				comment.action.from = this.convertActionValueToText(comment.action.from);
-				comment.action.to= this.convertActionValueToText(comment.action.to);
+				comment.action.to = this.convertActionValueToText(comment.action.to);
 				break;
 
 			case "assigned_roles":
 
 				comment.action.propertyText = "Assigned";
 				comment.action.from = comment.action.from.toString();
-				comment.action.to= comment.action.to.toString();	
+				comment.action.to = comment.action.to.toString();
 				break;
 
 			case "topic_type":
 
 				comment.action.propertyText = "Type";
-				if(topic_types){
+				if (topic_types) {
 
-					let from = topic_types.find((topic_type) => {
+					const from = topic_types.find((topic_type) => {
 						return topic_type.value === comment.action.from;
 					});
 
-					let to = topic_types.find((topic_type) => {
+					const to = topic_types.find((topic_type) => {
 						return topic_type.value === comment.action.to;
 					});
 
-					if(from && from.label){
+					if (from && from.label) {
 						comment.action.from = from.label;
 					}
 
-					if(to && to.label){
+					if (to && to.label) {
 						comment.action.to = to.label;
 					}
 				}
@@ -1244,7 +1221,7 @@ export class IssuesService {
 	 * @param issue
 	 * @returns issue
 	 */
-	public cleanIssue(issue: any){
+	public cleanIssue(issue: any) {
 
 		issue.timeStamp = this.getPrettyTime(issue.created);
 		issue.title = this.generateTitle(issue);
@@ -1258,7 +1235,7 @@ export class IssuesService {
 				if (issue.comments[j].action) {
 					issue.comments[j].comment = this.convertActionCommentToText(issue.comments[j], undefined);
 				}
-				//screen shot path
+				// screen shot path
 				if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
 					issue.comments[j].viewpoint.screenshotPath = this.APIService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
 				}
@@ -1274,8 +1251,8 @@ export class IssuesService {
 	 */
 	public convertActionValueToText(value: string) {
 		const actions = [
-			"None", "Low", "Medium", "High", "Open", 
-			"In progress", "For approval", "Closed"
+			"None", "Low", "Medium", "High", "Open",
+			"In progress", "For approval", "Closed",
 		];
 		if (actions.indexOf(value) !== -1) {
 			return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
