@@ -26,7 +26,7 @@ export class ViewerService {
 		"APIService",
 		"DialogService",
 		"EventService",
-		//"DocsService",
+		// "DocsService",
 	];
 
 	private newPinId: string;
@@ -36,6 +36,7 @@ export class ViewerService {
 	private pin: any;
 	private initialised: any;
 	private Viewer: any;
+	private selection: any;
 
 	constructor(
 		public $q: ng.IQService,
@@ -44,13 +45,18 @@ export class ViewerService {
 		public APIService: any,
 		public DialogService: any,
 		public EventService: any,
-		//public DocsService: any,
+		// public DocsService: any,
 
 	) {
 
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;
+
+		this.selection = {
+			backgroundSelected: false,
+			selectedObject: null,
+		};
 
 		this.currentModel = {
 			model : null,
@@ -112,25 +118,14 @@ export class ViewerService {
 				);
 				break;
 
-			// case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-			// 	this.viewer.updateClippingPlanes(
-			// 		event.value.clippingPlanes,
-			// 		event.value.fromClipPanel,
-			// 		event.value.account,
-			// 		event.value.model,
-			// 	);
-			// 	break;
-
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				//this.DocsService.state.show = false;
+				this.selection.backgroundSelected = true;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				// const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				// if (valid) {
-				// 	this.DocsService.handleObjectSelected(event);
-				// }
+				this.selection.backgroundSelected = false;
+				this.selection.selectedObject = event.value;
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:

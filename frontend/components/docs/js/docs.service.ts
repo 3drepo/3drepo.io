@@ -84,10 +84,7 @@ export class DocsService {
 			});
 	}
 
-	public handleObjectSelected(event) {
-
-		// Get any documents associated with an object
-		const object = event.value;
+	public handleObjectSelected(object) {
 
 		this.TreeService.onReady()
 			.then(() => {

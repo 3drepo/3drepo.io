@@ -582,7 +582,6 @@ export class IssuesService {
 				let shownPromise;
 
 				if (this.groupsCache[shownGroupUrl]) {
-					console.log("shownGroupUrl using cache")
 					shownPromise = this.handleShown(this.groupsCache[shownGroupUrl]);
 				} else {
 
