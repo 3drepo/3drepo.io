@@ -50,6 +50,8 @@ export class TreeService {
 	private treeMapReady;
 	private generatedMaps;
 	private ready;
+	private idToPath;
+	private idToObjRef;
 
 	constructor(
 		private $q: ng.IQService,
@@ -69,15 +71,16 @@ export class TreeService {
 		this.generatedMaps = null;
 
 		this.state = {};
-		this.state.idToPath = {};
 		this.state.hideIfc = true;
 		this.allNodes = [];
+		this.idToPath = {};
 		this.currentSelectedNodes = [];
 		this.clickedHidden = {}; // or reset?
 		this.clickedShown = {}; // or reset?
 		this.nodesToShow = [];
 		this.subTreesById = {};
 		this.subModelIdToPath = {};
+		this.idToObjRef = {};
 		this.highlightMapUpdateTime = Date.now();
 		this.highlightSelectedViewerObject = true;
 	}
@@ -282,28 +285,28 @@ export class TreeService {
 	public handleSubTree(subtree: any, mainTree: any, subTreesById: any, awaitedSubTrees: any[]) {
 
 		const treeId = subtree._id;
-		const idToObjRef = this.genIdToObjRef(mainTree.nodes, undefined);
+		this.idToObjRef = this.genIdToObjRef(mainTree.nodes, undefined);
 
 		// attach the sub tree back on main tree
-		if (idToObjRef[treeId] && subtree.url) {
+		if (this.idToObjRef[treeId] && subtree.url) {
 
 			const getSubTree = this.APIService.get(subtree.url)
 				.then((res) => {
 
-					this.attachStatus(res, subtree, idToObjRef);
+					this.attachStatus(res, subtree, this.idToObjRef);
 
 					subtree.buf = res.data.mainTree;
 
 					const subTree = subtree.buf.nodes;
 					const subTreeId = subTree._id;
 
-					subTree.parent = idToObjRef[treeId];
+					subTree.parentId = treeId;
 
 					// Correct main tree using incoming subtree for federation
-					const nodeIdsToUpdate = subTree.parent.path.split("__");
+					const nodeIdsToUpdate = this.idToObjRef[subTree.parentId].path.split("__");
 
 					for (let i = nodeIdsToUpdate.length - 1; i >= 0; i--) {
-						const nodeToUpdate = idToObjRef[nodeIdsToUpdate[i]];
+						const nodeToUpdate = this.idToObjRef[nodeIdsToUpdate[i]];
 
 						if (nodeToUpdate.children) {
 							this.updateParentVisibilityByChildren(nodeToUpdate);
@@ -314,13 +317,13 @@ export class TreeService {
 
 					Object.assign(mainTree.subModelIdToPath, subtree.idToPath);
 
-					idToObjRef[treeId].children = [subTree];
-					idToObjRef[treeId].hasSubModelTree = true;
+					this.idToObjRef[treeId].children = [subTree];
+					this.idToObjRef[treeId].hasSubModelTree = true;
 					subTreesById[subTreeId] = subTree;
 
 				})
 				.catch((res) => {
-					this.attachStatus(res, subtree, idToObjRef);
+					this.attachStatus(res, subtree, this.idToObjRef);
 					console.warn("Subtree issue: ", res);
 				});
 
@@ -429,37 +432,16 @@ export class TreeService {
 		return this.subTreesById;
 	}
 
-	public getMeshId(nodeId: string) {
-		let meshId = this.idToMeshes[nodeId];
-
-		if (meshId !== undefined) {
-			return meshId;
-		}
-
-		for (const key in this.idToMeshes) {
-			if (key) {
-				const potentialMeshId = this.idToMeshes[key][nodeId];
-				if (potentialMeshId !== undefined) {
-					meshId = potentialMeshId;
-					return meshId;
-				}
-			}
-		}
-
-		return meshId;
-
-	}
-
 	public setSubTreesById(value) {
 		this.subTreesById = value;
 	}
 
 	public getCachedIdToPath() {
-		return this.state.idToPath;
+		return this.idToPath;
 	}
 
 	public setCachedIdToPath(value) {
-		this.state.idToPath = value;
+		this.idToPath = value;
 	}
 
 	public setSubModelIdToPath(value) {
@@ -525,7 +507,11 @@ export class TreeService {
 			}
 
 			// Check top level and then check if sub model of fed
-			const meshes = idToMeshes[childNode._id] || idToMeshes[key][childNode._id];
+			let meshes = idToMeshes[childNode._id];
+
+			if (meshes === undefined && idToMeshes[key]) {
+				meshes = idToMeshes[key][childNode._id];
+			}
 
 			if (meshes !== undefined) {
 
@@ -755,13 +741,14 @@ export class TreeService {
 	public getPath(objectID: string) {
 		let path;
 
-		if (this.state.idToPath[objectID]) {
+		if (this.idToPath[objectID]) {
 			// If the Object ID is on the main tree then use that path
-			path = this.state.idToPath[objectID].split("__");
+			path = this.idToPath[objectID].split("__");
 		} else if (this.subModelIdToPath[objectID]) {
 			// Else check the submodel for the id for the path
 			path = this.subModelIdToPath[objectID].split("__");
-			const parentPath = this.subTreesById[path[0]].parent.path.split("__");
+			const subtree = this.subTreesById[path[0]];
+			const parentPath = this.idToObjRef[subtree.parentId].path.split("__");
 			path = parentPath.concat(path);
 		} else {
 			path = this.getNodeById(objectID).path.split("__");
