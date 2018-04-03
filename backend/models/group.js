@@ -158,6 +158,7 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
 				}
 				else {
+					group.objects[i].shared_id = utils.uuidToString(group.objects[i].shared_id);
 					sharedIdObjects.push(group.objects[i]);
 				}
 
