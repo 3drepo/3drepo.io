@@ -155,7 +155,11 @@ class AccountProfileController implements ng.IController {
 			})
 			.catch((error) =>  {
 				if (error && error.data && error.data.message) {
-					this.passwordSaveError = error.data.message;
+					if (error.data.code === "INCORRECT_USERNAME_OR_PASSWORD") {
+						this.passwordSaveError = "Your old password was incorrect";
+					} else {
+						this.passwordSaveError = error.data.message;
+					}
 				} else {
 					this.passwordSaveError = "Unknown error updating password";
 				}
