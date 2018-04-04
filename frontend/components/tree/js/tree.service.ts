@@ -1079,7 +1079,13 @@ export class TreeService {
 	 * Deselect a nodes in the tree.
 	 * @param nodes	Node to select.
 	 */
-	public unhighlightNodes(nodes: any[]) {
+	public deselectNodes(nodes: any[]) {
+
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+			this.setNodeSelection(node, true);
+		}
+
 		return this.highlightNodes(nodes, true, undefined);
 	}
 

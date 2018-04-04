@@ -317,7 +317,7 @@ class TreeController implements ng.IController {
 
 		// Unhighlight the node in the viewer if we're making it invisible
 		if (newState === "invisible" && node.selected) {
-			this.TreeService.unhighlightNodes([node]);
+			this.TreeService.deselectNodes([node]);
 		}
 
 		this.TreeService.setTreeNodeStatus(node, newState);
