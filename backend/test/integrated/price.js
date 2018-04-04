@@ -32,7 +32,6 @@ const User = require("../../models/user");
 const url = require("url");
 
 const Paypal = require("../../models/paypal");
-// const Subscriptions = require("../../models/subscriptions");
 
 const sinon = require("sinon");
 
@@ -44,8 +43,6 @@ describe("Billing agreement price from PayPal", function () {
 	let password = "price_testing";
 	let email = "price_testing@mailinator.com";
 
-	// console.log(Paypal);
-	// Paypal.processPayments = function() { return Promise.resolve(); };
 	const timeout = 30000;
 
 	before(function(done){
@@ -78,7 +75,7 @@ describe("Billing agreement price from PayPal", function () {
 		let plans = {
 			"plans": [
 				{    
-				"plan": "THE-100-QUID-PLAN",
+				"plan": "hundredQuidPlan",
 				"quantity": options.noOfLicence
 				}
 			],
@@ -114,7 +111,6 @@ describe("Billing agreement price from PayPal", function () {
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
-
 			restores.forEach(function(restoreStub){
 				restoreStub.restore();
 			});
@@ -502,7 +498,6 @@ describe("Billing agreement price from PayPal", function () {
 
 		it("for a GB Business", function(done){
 			this.timeout(timeout);
-			//console.log(Subscriptions);
 
 			const stub = [
 				[Paypal, "processPayments", 

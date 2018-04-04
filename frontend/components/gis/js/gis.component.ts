@@ -66,7 +66,6 @@ class GISController implements ng.IController {
 						elevation: this.modelSettings.elevation || 0,
 						angleFromNorth: this.modelSettings.angleFromNorth || 0,
 					};
-					console.log("modelSettings.surveyPoints", surveySettings);
 					this.GISService.mapInitialise(surveySettings);
 				});
 			}

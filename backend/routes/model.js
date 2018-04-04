@@ -67,8 +67,6 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
 //model permission
 router.get("/:model/permissions",  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
-router.get("/:model/jobs.json", middlewares.hasReadAccessToModel, getJobs);
-router.get("/:model/userJobForModel.json", middlewares.hasReadAccessToModel, getUserJobForModel);
 
 //master tree
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
@@ -524,51 +522,6 @@ function getPermissions(req, res, next){
 
 	}).catch(err => {
 
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function getJobs(req, res, next){
-	
-
-	const account = req.params.account;
-
-	User.findByUserName(account).then(dbUser => {
-		if(!dbUser){
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
-
-		return dbUser.customData.jobs.get();
-
-	}).then(jobs => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
-	}).catch(err => {
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-
-}
-
-function getUserJobForModel(req, res, next){
-	
-
-	const account = req.params.account;
-	const username = req.session.user.username;
-
-	User.findByUserName(account).then(dbUser => {
-		if(!dbUser){
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
-
-		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username);
-		
-		if(job){
-			return dbUser.customData.jobs.findById(job.job);
-		}
-
-	}).then(job => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job || {});
-	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }

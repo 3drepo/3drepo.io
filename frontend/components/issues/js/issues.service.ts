@@ -175,34 +175,37 @@ export class IssuesService {
 		// Required custom filter due to the fact that Angular
 		// does not allow compound OR filters
 
-		// Search the title
-		let show = this.stringSearch(issue.title, filterText) ||
-				this.stringSearch(issue.timeStamp, filterText) ||
-				this.stringSearch(issue.owner, filterText);
+		// Exit the function as soon as we found a match.
 
-		// Search the type
-		show = this.stringSearch(issue.type, filterText);
+		// Search the title, timestamp, type and owner
+		if( this.stringSearch(issue.title, filterText) ||
+				this.stringSearch(issue.timeStamp, filterText) ||
+			this.stringSearch(issue.owner, filterText) ||
+			this.stringSearch(issue.topic_type, filterText)) {
+			return true;
+		}
 
 		// Search the list of assigned issues
-		if (!show && issue.hasOwnProperty("assigned_roles")) {
-			let i = 0;
-			while(!show && (i < issue.assigned_roles.length)) {
-				show = show || this.stringSearch(issue.assigned_roles[i], filterText);
-				i++;
+		if (issue.hasOwnProperty("assigned_roles")) {
+			for(let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
+				if(this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
+					return true;
+				}
 			}
 		}
-
+		
 		// Search the comments
-		if (!show && issue.hasOwnProperty("comments")) {
-			let i = 0;
-			while (!show && (i < issue.comments.length)) {
-				show = this.stringSearch(issue.comments[i].comment, filterText) ||
-						this.stringSearch(issue.comments[i].owner, filterText);
-				i++;
+		if (issue.hasOwnProperty("comments")) {
+			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
+				if (!issue.comments[commentIdx].action &&  //skip any action comments (i.e system messages)
+					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
+					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
+					return true;
+				}
 			}
 		}
 
-		return show;
+		return false;
 
 	}
 
@@ -551,7 +554,7 @@ export class IssuesService {
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
-				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/hiddenGroupId`;
+				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/${hiddenGroupId}`;
 
 				let hiddenPromise;
 
@@ -978,7 +981,7 @@ export class IssuesService {
 
 	public getJobs(account, model){
 
-		const url = account + "/" + model + "/jobs.json";
+		const url = account + "/jobs";
 
 		this.APIService.get(url).then(
 			(jobsData) => {
@@ -995,7 +998,7 @@ export class IssuesService {
 
 	public getUserJobForModel(account, model){
 		const deferred = this.$q.defer();
-		const url = account + "/" +model + "/userJobForModel.json";
+		const url = account + "/myJob";
 
 		this.APIService.get(url).then(
 			(userJob) => {
@@ -1116,8 +1119,6 @@ export class IssuesService {
 	*/
 	public importBcf(account, model, revision, file){
 
-		let deferred = this.$q.defer();
-
 		let bcfUrl = account + "/" + model + "/issues.bcfzip";
 		if(revision){
 			bcfUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
@@ -1126,18 +1127,13 @@ export class IssuesService {
 		let formData = new FormData();
 		formData.append("file", file);
 
-		this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
-			.then((res) => {
-				
-				if(res.status === 200){
-					deferred.resolve();
-				} else {
-					deferred.reject(res.data);
+		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
+			.then(function(res){
+				if(res.status !== 200){
+					throw res.data;
 				}
-
 			});
 
-		return deferred.promise;
 	}
 
 	/**
@@ -1202,7 +1198,9 @@ export class IssuesService {
 			case "due_date":
 
 				comment.action.propertyText = "Due Date";
-				comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+				if (comment.action.to) {
+					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+				}
 				if (comment.action.from) {
 					comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
 				} else {
@@ -1223,11 +1221,11 @@ export class IssuesService {
 
 		if (0 === text.length) {
 			if (!comment.action.from) {
-				comment.action.from = "";
+				comment.action.from = "(empty)";
 			}
 
 			if (!comment.action.to) {
-				comment.action.to = "";
+				comment.action.to = "(empty)";
 			}
 
 			text = comment.action.propertyText + " updated from " +

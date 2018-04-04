@@ -42,7 +42,6 @@ export class ClipService {
 	public disableWatchSlider: boolean;
 	public displayedAxis: string;
 	public disableWatchAxis: boolean;
-	public displayedDistance;
 	public normal;
 
 	constructor(
@@ -62,6 +61,7 @@ export class ClipService {
 			direction: false,
 			availableUnits: this.ClientConfigService.units,
 			progressInfo: "Model loading...",
+			normal: null
 		};
 	}
 
@@ -163,20 +163,28 @@ export class ClipService {
 			params.clipDirection === 1,
 			undefined,
 		);
-		this.updateDisplayedDistance(true, this.state.visible);
 	}
 
 	public setBoundingBox(bbox: any) {
 		if (bbox) {
 			this.state.bbox = bbox;
-			this.setDisplayValues(
-				"X",
-				this.state.bbox.max[0],
-				this.state.visible,
-				false,
-				this.state.direction,
-			);
+			if(!this.state.normal) {				
+				this.setDisplayValues(
+					"X",
+					this.state.bbox.max[0],
+					this.state.visible,
+					false,
+					this.state.direction,
+				);
+			}
 			this.updateDisplayedDistance(true, this.state.visible);
+		}
+	}
+
+	public setDisplayedDistance(newDistance: number) {
+		this.state.displayDistance = newDistance;
+		if (!this.state.disableWatchDistance) {
+			this.updateDisplaySlider(false, this.visible);
 		}
 	}
 
@@ -184,6 +192,10 @@ export class ClipService {
 		this.state.displayedAxis = newAxis;
 		if (!this.state.disableWatchAxis) {
 			this.updateDisplayedDistance(false, this.state.visible);
+		}
+
+		if (newAxis !== "") {
+			this.state.normal = null;
 		}
 
 		this.state.disableWatchAxis = false;
@@ -253,7 +265,7 @@ export class ClipService {
 	 * Determine axis based on normal provided
 	 */
 	public determineAxis(normal) {
-		let res = "";
+		let res = null;
 		if (normal.length === 3) {
 			if (normal[1] === 0  && normal[2] === 0) {
 				res = "X";
@@ -262,6 +274,10 @@ export class ClipService {
 			} else if (normal[0] === 0 && normal[1] === 0) {
 				res = "Y";
 			}
+		}
+
+		if(!res) {
+			this.state.normal = normal;
 		}
 
 		return res;
@@ -284,14 +300,19 @@ export class ClipService {
 
 		// We only want to disable watch if the value is going to change.
 		// Otherwise we might be ignoring the next update.
-		this.state.disableWatchAxis = this.state.displayedAxis !== axis;
-		this.state.disableWatchSlider = this.state.disableWatchDistance = this.state.displayedDistance !== newDistance;
+		this.disableWatchAxis =  this.state.displayedAxis !== axis;
+		this.disableWatchDistance = this.state.displayDistance !== newDistance;
+		this.disableWatchSlider = this.state.disableWatchDistance && axis !== null;
 
 		this.state.displayDistance = newDistance;
 		this.state.direction = direction;
-		this.state.displayedAxis = axis;
+		if (axis) {
+			this.state.displayedAxis = axis;
+		} else {
+			this.state.displayedAxis = "";
+		}
 
-		if (slider != null) {
+		if (slider) {
 			this.state.sliderPosition = slider;
 			if (moveClip) {
 				this.updateClippingPlaneByModel();
@@ -358,7 +379,9 @@ export class ClipService {
 	 * Update displayed Distance based on slider position and axis
 	 */
 	public updateDisplayedDistance(updateSlider, moveClip) {
-
+		if(this.state.normal) {
+			return;
+		}
 		const minMax = this.getMinMax();
 		const max = minMax.max;
 		const min = minMax.min;
@@ -401,6 +424,9 @@ export class ClipService {
 	 * Update display slider based on current internal distance
 	 */
 	public updateDisplaySlider(updateDistance, moveClip) {
+		if (this.state.normal) {
+			return;
+		}
 		const minMax = this.getMinMax();
 		const max = minMax.max;
 		const min = minMax.min;

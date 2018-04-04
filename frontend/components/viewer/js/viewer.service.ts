@@ -196,6 +196,10 @@ export class ViewerService {
 
 	}
 
+	public centreToPoint(params: any) {
+		this.viewer.centreToPoint(params);
+	}
+
 	public setCamera(params) {
 		if (this.viewer) {
 			this.viewer.setCamera(

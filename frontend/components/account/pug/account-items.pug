@@ -84,9 +84,7 @@
 											uploaded-file="vm.uploadedFile"
 											model-to-upload="vm.modelToUpload"
 											on-show-page="vm.showPage(page, callingPage)"
-											on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)",
-											quota="vm.quota"
-											subscriptions="vm.subscriptions")
+											on-setup-delete-model="vm.setupDeleteModel(event, model, account, project)")
 
 									p.no-federations(ng-if="vm.getIndividualModels(project.models).length == 0") No models created
 
@@ -124,8 +122,7 @@
 											check-federation-save-disabled="vm.checkFederationSaveDisabled"
 											is-duplicate-name="vm.isDuplicateName"
 											federation-save-disabled="vm.federationSaveDisabled"
-											federation-error-message="vm.federationErrorMessage"
-											subscriptions="vm.subscriptions")
+											federation-error-message="vm.federationErrorMessage")
 
 									p.no-federations(
 										ng-if="!vm.hasFederations(project.models)") No federations created
