@@ -20,9 +20,7 @@ describe("Sign up page ", () => {
         expect(element(by.model("vm.newUser.firstName")).isDisplayed()).to.eventually.equal(true);
         expect(element(by.model("vm.newUser.lastName")).isDisplayed()).to.eventually.equal(true);
         expect(element(by.model("vm.newUser.email")).isDisplayed()).to.eventually.equal(true);
-        expect(element(by.model("vm.newUser.phoneNo")).isDisplayed()).to.eventually.equal(true);
         expect(element(by.model("vm.newUser.company")).isDisplayed()).to.eventually.equal(true);
-        expect(element(by.model("vm.newUser.jobTitle")).isDisplayed()).to.eventually.equal(true);
       });
 
       it("with a terms and conditions check box", () => {
