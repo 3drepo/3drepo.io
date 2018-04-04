@@ -172,10 +172,9 @@ function signUp(req, res, next){
 				email: req.body.email,
 				firstName: req.body.firstName,
 				lastName: req.body.lastName,
-				phoneNo: req.body.phoneNo,
 				countryCode: req.body.countryCode,
-				jobTitle: req.body.jobTitle,
 				company: req.body.company,
+				mailListOptOut: !req.body.mailListAgreed,
 
 			}, config.tokenExpiry.emailVerify);
 		} else {

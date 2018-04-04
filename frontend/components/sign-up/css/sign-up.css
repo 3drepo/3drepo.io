@@ -26,6 +26,10 @@ sign-up #tc p {
     color: rgba(0, 0, 0, 0.7);
     margin: -3px 0 20px 10px;
 }
+sign-up #tc p.one-liner {
+    margin-top: 2px;
+}
+
 sign-up #tc a {
     outline: none;
 }

@@ -45,6 +45,7 @@ let schema = mongoose.Schema({
 		firstName: String,
 		lastName: String,
 		email: String,
+		mailListOptOut: Boolean,
 		inactive: Boolean,
 		resetPasswordToken: {
 			expiredAt: Date,
@@ -265,7 +266,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		}
 	
 
-		["firstName", "lastName", "email"].forEach(key => {
+		["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
 			if (customData && customData[key]){
 				cleanedCustomData[key] = customData[key];
 			}
@@ -273,7 +274,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 
 		let billingInfo = {};
 
-		["firstName", "lastName", "phoneNo", "countryCode", "jobTitle", "company"].forEach(key => {
+		["firstName", "lastName", "countryCode", "company"].forEach(key => {
 			if (customData && customData[key]){
 				billingInfo[key] = customData[key];
 			}
