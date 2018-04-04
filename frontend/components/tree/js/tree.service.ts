@@ -1085,8 +1085,8 @@ export class TreeService {
 	 * Deselect a nodes in the tree.
 	 * @param nodes	Node to select.
 	 */
-	public deselectNodes(nodes: any[]) {
-		this.selectNodes(nodes, true, false);
+	public unhighlightNodes(nodes: any[]) {
+		return this.highlightNodes(nodes, true);
 	}
 
 	/**
