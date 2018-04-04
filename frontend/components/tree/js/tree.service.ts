@@ -473,8 +473,8 @@ export class TreeService {
 	 */
 	public getMeshMapFromNodes(nodes: any, idToMeshes: any, colour?: number[]) {
 
-		if (!nodes) {
-			console.error("getMeshMapFromNodes nodes is null: ", nodes);
+		if (Array.isArray(nodes) === false) {
+			console.error("getMeshMapFromNodes nodes is not an array: ", nodes);
 			return;
 		}
 
@@ -485,12 +485,7 @@ export class TreeService {
 
 		const highlightMap = {};
 
-		let stack;
-		if (Array.isArray(nodes) === false) {
-			stack = [nodes];
-		} else {
-			stack = nodes;
-		}
+		let stack = nodes;
 
 		while (stack.length > 0) {
 
@@ -984,7 +979,7 @@ export class TreeService {
 
 		this.ready.promise.then(() => {
 
-			const childNodes = this.getMeshMapFromNodes(node, this.treeMap.idToMeshes);
+			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
 			for (const key in childNodes) {
 				if (!key) {
@@ -1031,15 +1026,14 @@ export class TreeService {
 	 */
 	public clearCurrentlySelected() {
 
-		if (this.DocsService.state.show) {
-			this.DocsService.state.show = false;
-		}
+		this.DocsService.closeDocs();
 
 		if (this.currentSelectedNodes) {
 			for (let i = 0; i < this.currentSelectedNodes.length; i++) {
 				this.currentSelectedNodes[i].selected = false;
 			}
 		}
+
 		this.currentSelectedNodes = [];
 	}
 
@@ -1086,7 +1080,7 @@ export class TreeService {
 	 * @param nodes	Node to select.
 	 */
 	public unhighlightNodes(nodes: any[]) {
-		return this.highlightNodes(nodes, true);
+		return this.highlightNodes(nodes, true, undefined);
 	}
 
 	/**
@@ -1134,20 +1128,18 @@ export class TreeService {
 
 	/**
 	 * Show metadata in the metadata panel if necessary
-	 * @param lastNode the node to show the metadata for
+	 * @param node the node to show the metadata for
 	 */
-	public handleMetadata(lastNode) {
-		// Handle showing metadata in the metadata panel if necessary
+	public handleMetadata(node) {
 
-		if (lastNode && lastNode.meta) {
-			if (this.DocsService.state.active && !this.ViewerService.pin.pinDropMode) {
-				this.DocsService.handleObjectSelected(
-					lastNode.account,
-					lastNode.model || lastNode.project,
-					lastNode.meta,
-				);
-			}
+		if (node && node.meta) {
+			this.DocsService.displayDocs(
+				node.account,
+				node.model || node.project,
+				node.meta,
+			);
 		}
+
 	}
 
 	/**
@@ -1203,7 +1195,7 @@ export class TreeService {
 	public selectNodesBySharedIds(objects: any[], multi: boolean, additive: boolean, colour: number[]) {
 
 		if (!objects || objects.length === 0) {
-			return;
+			return Promise.resolve();
 		}
 
 		return this.getMap().then(() => {

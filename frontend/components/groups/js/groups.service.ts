@@ -91,11 +91,15 @@ export class GroupsService {
 		this.TreeService.getMap()
 			.then((treeMap) => {
 
-				const nodes = group.objects.map((object) => {
+				// Convert shared IDs to unique IDs
+				let nodes = group.objects.map((object) => {
 					const uid = treeMap.sharedIdToUid[object.shared_id];
 					const node = this.TreeService.getNodeById(uid);
 					return node;
 				});
+
+				// Remove any undefined nodes
+				nodes = nodes.filter((n) => n !== undefined);
 
 				// Create a map of meshes
 				// for the colour overiding

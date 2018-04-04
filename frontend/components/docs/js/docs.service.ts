@@ -22,6 +22,7 @@ export class DocsService {
 
 		"ClientConfigService",
 		"APIService",
+		"ViewerService",
 	];
 
 	private state: any;
@@ -33,6 +34,7 @@ export class DocsService {
 
 		private ClientConfigService: any,
 		private APIService: any,
+		private ViewerService: any,
 	) {
 		this.noMetadata = false;
 		this.docTypeHeight = 50;
@@ -82,19 +84,31 @@ export class DocsService {
 			});
 	}
 
-	public handleObjectSelected(account, model, metadataIds) {
+	public closeDocs() {
+		if (this.state.show) {
+			this.state.show = false;
+		}
+	}
 
-		if (metadataIds && metadataIds.length) {
-			this.state.noMetadata = false;
-			this.updateDocs(
-				account,
-				model,
-				metadataIds[0],
-			);
+	public displayDocs(account, model, metadataIds) {
 
-		} else {
-			this.state.noMetadata = true;
-			this.state.show = true;
+		const canOpenDocs = this.state.active && !this.ViewerService.pin.pinDropMode;
+
+		if (canOpenDocs) {
+
+			if (metadataIds && metadataIds.length) {
+				this.state.noMetadata = false;
+				this.updateDocs(
+					account,
+					model,
+					metadataIds[0],
+				);
+
+			} else {
+				this.state.noMetadata = true;
+				this.state.show = true;
+			}
+
 		}
 
 	}
