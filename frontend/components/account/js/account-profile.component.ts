@@ -64,15 +64,26 @@ class AccountProfileController implements ng.IController {
 
 	public watchers() {
 		this.$scope.$watch("vm.newPassword", (newPassword) => {
+
+			if (newPassword === undefined) {
+				newPassword = "";
+			}
 			if (newPassword !== undefined) {
-				const result = this.PasswordService.evaluatePassword(this.newPassword);
-				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
+				const result = this.PasswordService.evaluatePassword(newPassword);
+				this.passwordStrength = this.PasswordService.getPasswordStrength(newPassword, result.score);
 				this.checkInvalidPassword(result);
 			}
 		});
 	}
 
 	public checkInvalidPassword(result) {
+
+		if (this.newPassword.length  < 8) {
+			this.invalidatePassword();
+			this.passwordSaveError = "Password must be at least 8 characters";
+			return;
+		}
+
 		switch (result.score) {
 		case 0:
 			this.invalidatePassword();
