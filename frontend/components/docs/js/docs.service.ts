@@ -22,7 +22,6 @@ export class DocsService {
 
 		"ClientConfigService",
 		"APIService",
-		// "TreeService",
 	];
 
 	private state: any;
@@ -34,7 +33,6 @@ export class DocsService {
 
 		private ClientConfigService: any,
 		private APIService: any,
-		// private TreeService: any,
 	) {
 		this.noMetadata = false;
 		this.docTypeHeight = 50;
