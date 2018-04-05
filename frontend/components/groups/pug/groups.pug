@@ -74,7 +74,9 @@ div.groupsContainer
 
         md-input-container.groupNameInput
             label Group Name
-            input(ng-model="vm.selectedGroup.name")
+            input(
+                ng-model="vm.selectedGroup.name" 
+                ng-maxlength="80")
 
         md-input-container
             label Group Description
@@ -161,7 +163,7 @@ div.groupsContainer
                 aria-label="Reselect"
                  ng-show="vm.toShow === 'group' && !vm.savingGroup"
                 ng-click="vm.reselectGroup()")
-                md-tooltip Reselect Group
+                md-tooltip Reset to Saved Selection
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
                     role="img"

@@ -318,8 +318,14 @@ export class GroupsService {
 				multi, // multi
 				true,
 				color,
-			).then(() => {
-				this.updateTotalSavedMeshes();
+			).then((meshes) => {
+
+				// If we haven't saved don't update saved meshes
+				if (!group.new) {
+					const total = this.getTotalMeshes(meshes);
+					this.state.selectedGroup.totalSavedMeshes = total;
+				}
+
 			});
 		}
 
@@ -327,12 +333,23 @@ export class GroupsService {
 
 	}
 
+	public getTotalMeshes(meshes) {
+		let total = 0;
+		for (const key in meshes) {
+			if (key && meshes[key]) {
+				total += meshes[key].meshes.length;
+			}
+		}
+		return total;
+	}
+
 	/**
 	 * Update the total number of saved meshes for the selected group
 	 */
-	public updateTotalSavedMeshes() {
-		this.getCurrentMeshHighlights().then((meshTotal: number) => {
-			this.state.selectedGroup.totalSavedMeshes = meshTotal;
+	public updateTotalSavedMeshes(group) {
+		this.TreeService.getMeshHighlightsBySharedId(group.objects).then((meshes: any) => {
+			const total = this.getTotalMeshes(meshes);
+			group.totalSavedMeshes = total;
 		});
 	}
 
@@ -360,11 +377,28 @@ export class GroupsService {
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
 
 		if (this.state.selectedGroup.objects) {
-			this.TreeService.selectNodesBySharedIds(
-				this.state.selectedGroup.objects,
-				false, // multi
-				true,
+
+			// console.log("currentSelected", this.TreeService.getCurrentSelectedNodes().concat());
+			// this.TreeService.highlightNodes(
+			// 	this.TreeService.getCurrentSelectedNodes().concat(),
+			// 	true, // multi
+			// 	undefined,
+			// 	false,
+			// );
+
+			// Find the nodes from the group that are currently selected
+			const intersection = this.state.selectedGroup.objects.concat()
+				.filter((o) => {
+					return this.TreeService.getCurrentSelectedNodes().find((n) => n.shared_id === o.shared_id );
+				});
+
+			console.log("intersection", intersection);
+			// console.log("selectedObjects", this.state.selectedGroup.objects.concat());
+			this.TreeService.highlightNodesBySharedId(
+				intersection,
+				true, // multi
 				color,
+				true,
 			);
 		}
 
@@ -420,7 +454,7 @@ export class GroupsService {
 				newGroup.new = false;
 				this.replaceStateGroup(newGroup);
 				this.updateSelectedGroupColor();
-				this.updateTotalSavedMeshes();
+				this.updateTotalSavedMeshes(newGroup);
 				return newGroup;
 			});
 	}
@@ -444,7 +478,7 @@ export class GroupsService {
 				this.state.groups.push(newGroup);
 				this.state.selectedGroup = newGroup;
 				this.updateSelectedGroupColor();
-				this.updateTotalSavedMeshes();
+				this.updateTotalSavedMeshes(newGroup);
 				return newGroup;
 			});
 	}

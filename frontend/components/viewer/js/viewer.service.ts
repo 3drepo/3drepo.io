@@ -212,6 +212,7 @@ export class ViewerService {
 
 	public clearHighlights() {
 		if (this.viewer) {
+			console.log("clearHighlights called")
 			this.viewer.clearHighlights();
 		}
 	}

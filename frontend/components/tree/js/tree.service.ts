@@ -878,39 +878,6 @@ export class TreeService {
 	}
 
 	/**
-	 * Isolate selected objects by their shared IDs
-	 */
-	public isolateNodesBySharedId(objects) {
-
-		this.getMap()
-		.then((treeMap) => {
-
-			if (objects) {
-				// Make a list of nodes to shown
-				const shownNodes = [];
-				for (let i = 0; i < objects.length; i++) {
-					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-					if (objUid) {
-						shownNodes.push(this.getNodeById(objUid));
-					}
-				}
-				// Hide all
-				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
-				// Show selected
-				if (shownNodes) {
-					this.setCurrentSelectedNodes(shownNodes);
-					this.showTreeNodes(shownNodes);
-				}
-			}
-		})
-		.catch((error) => {
-			console.error(error);
-		});
-
-	}
-
-	/**
 	 * @returns	True if IFC spaces are not hidden or node is not an IFC space.
 	 */
 	public canShowNode(node: any) {
@@ -1064,15 +1031,18 @@ export class TreeService {
 		}
 	}
 
+	public getMeshHighlights(nodes) {
+		return this.ready.promise.then(() => {
+			const currentSelectedMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
+			return currentSelectedMap;
+		});
+	}
+
 	/**
 	 * Return a map of currently selected meshes
 	 */
 	public getCurrentMeshHighlights() {
-		return this.ready.promise.then(() => {
-			const nodes = this.currentSelectedNodes.concat();
-			const currentSelectedMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
-			return currentSelectedMap;
-		});
+		return this.getMeshHighlights(this.currentSelectedNodes.concat());
 	}
 
 	/**
@@ -1083,10 +1053,11 @@ export class TreeService {
 
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
-			this.setNodeSelection(node, true);
+			this.setNodeSelection(node, false);
 		}
 
-		return this.highlightNodes(nodes, true, undefined);
+		console.log("deselectedNodes");
+		return this.highlightNodes(nodes, true, undefined, true);
 	}
 
 	/**
@@ -1101,6 +1072,7 @@ export class TreeService {
 		}
 
 		if (!multi) {
+			console.log("Clearing from selectNodes");
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
 		}
@@ -1119,6 +1091,7 @@ export class TreeService {
 				this.setNodeSelection(node, !node.selected);
 			} else {
 				// If it is not multiselect mode, remove all highlights
+				console.log("Clearing in else block of selectNodes");
 				this.clearCurrentlySelected();
 				this.setNodeSelection(node, true);
 			}
@@ -1128,7 +1101,7 @@ export class TreeService {
 		const lastNode = nodes[nodes.length - 1] ;
 		this.handleMetadata(lastNode);
 
-		return this.highlightNodes(nodes, multi, colour);
+		return this.highlightNodes(nodes, multi, colour, true);
 
 	}
 
@@ -1154,7 +1127,12 @@ export class TreeService {
 	 * @param multi	Is multi select enabled.
 	 * @param colour the colour to highlight
 	 */
-	public highlightNodes(nodes: any, multi: boolean, colour: number[]) {
+	public highlightNodes(nodes: any, multi: boolean, colour: number[], toggle: boolean) {
+
+		if (toggle === undefined) {
+			toggle = true;
+		}
+
 		return this.ready.promise.then(() => {
 
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
@@ -1180,7 +1158,7 @@ export class TreeService {
 					ids: highlightMap[key].meshes,
 					colour: highlightMap[key].colour,
 					model,
-					multi: true,
+					multi: toggle,
 					source: "tree",
 				});
 
@@ -1191,15 +1169,7 @@ export class TreeService {
 		});
 	}
 
-	/**
-	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects	Nodes to select
-	 * @param multi	Is multi select enabled
-	 * @param additive whether the selection should reset or keep add selections
-	 * @param colour the colour to highlight
-	 */
-	public selectNodesBySharedIds(objects: any[], multi: boolean, additive: boolean, colour: number[]) {
-
+	public getNodesFromSharedIds(objects) {
 		if (!objects || objects.length === 0) {
 			return Promise.resolve();
 		}
@@ -1216,9 +1186,77 @@ export class TreeService {
 				}
 			}
 
-			this.selectNodes(nodes, multi, additive, colour);
+			return nodes;
 
 		});
+	}
+
+	/**
+	 * Get the mesh map for a set of shared ids
+	 * @param objects the array of shared id objects
+	 */
+	public getMeshHighlightsBySharedId(objects) {
+		return this.getNodesFromSharedIds(objects).then((nodes) => {
+			const currentSelectedMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
+			return currentSelectedMap;
+		});
+	}
+
+	/**
+	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects	Nodes to select
+	 * @param multi	Is multi select enabled
+	 * @param additive whether the selection should reset or keep add selections
+	 * @param colour the colour to highlight
+	 */
+	public selectNodesBySharedIds(objects: any[], multi: boolean, additive: boolean, colour: number[]) {
+
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
+				if (nodes) {
+					return this.selectNodes(nodes, multi, additive, colour);
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
+	public highlightNodesBySharedId(objects: any[], multi: boolean, colour: number[], toggle: boolean) {
+
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
+				if (nodes) {
+					this.highlightNodes(nodes, multi, colour, toggle);
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
+	}
+
+	/**
+	 * Isolate selected objects by their shared IDs
+	 */
+	public isolateNodesBySharedId(objects) {
+
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
+				if (nodes) {
+					// Hide all
+					this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
+					// Show selected
+					if (nodes) {
+						this.setCurrentSelectedNodes(nodes);
+						this.showTreeNodes(nodes);
+					}
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
 	}
 
 	/**
@@ -1227,29 +1265,16 @@ export class TreeService {
 	 */
 	public hideBySharedId(objects: any[]) {
 
-		if (!objects || objects.length === 0) {
-			return;
-		}
-
-		this.getMap()
-			.then((treeMap) => {
-
-				// Make a list of nodes to hide
-				const hiddenNodes = [];
-				for (let i = 0; i < objects.length; i++) {
-
-					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-					if (objUid) {
-						hiddenNodes.push(this.getNodeById(objUid));
-					}
-
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
+				if (nodes) {
+					this.hideTreeNodes(nodes);
 				}
-				this.hideTreeNodes(hiddenNodes);
-
 			})
 			.catch((error) => {
 				console.error(error);
 			});
+
 	}
 
 	/**
@@ -1262,22 +1287,12 @@ export class TreeService {
 			return;
 		}
 
-		this.getMap()
-			.then((treeMap) => {
-
-				this.hideAllTreeNodes(false);
-
-				// Make a list of nodes to shown
-				const shownNodes = [];
-				for (let i = 0; i < objects.length; i++) {
-					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-					if (objUid) {
-						shownNodes.push(this.getNodeById(objUid));
-					}
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
+				if (nodes) {
+					this.hideAllTreeNodes(false);
+					this.showTreeNodes(nodes);
 				}
-				this.showTreeNodes(shownNodes);
-
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1291,6 +1306,7 @@ export class TreeService {
 	 */
 	public highlightsBySharedId(objects: any) {
 
+		// TODO: This could probably be refactored
 		this.getMap()
 			.then((treeMap) => {
 
