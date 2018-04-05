@@ -1088,7 +1088,7 @@ schema.statics.teamspaceMemberCheck = function(teamspace, user) {
 	});
 };
 
-let User = ModelFactory.createClass(
+const User = ModelFactory.createClass(
 	"User",
 	schema,
 	() => {
