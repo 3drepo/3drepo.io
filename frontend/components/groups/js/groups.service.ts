@@ -320,14 +320,17 @@ export class GroupsService {
 
 		// If multi is enabled we want to inverse selections
 		// rather than add them
-		const additive = (multi === true) ? false : true;
+		let additive = (multi === true) ? false : true;
+
+		if (this.state.selectedGroup.objects.length === 0) {
+			additive = false;
+		}
 
 		return this.TreeService.selectNodesBySharedIds(
 			this.state.selectedGroup.objects,
 			multi, // multi
 			additive,
 			color,
-			multi,
 			false,
 		).then((meshes) => {
 
@@ -399,7 +402,6 @@ export class GroupsService {
 				intersection,
 				true, // multi
 				color,
-				true,
 				true,
 			);
 		}

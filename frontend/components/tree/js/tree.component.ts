@@ -363,7 +363,7 @@ class TreeController implements ng.IController {
 	public selectNode(node) {
 		return this.TreeService.selectNodes(
 			[node], this.MultiSelectService.isMultiMode(), false,
-			false, undefined, this.MultiSelectService.isMultiMode(), true,
+			undefined, true,
 		);
 	}
 

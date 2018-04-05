@@ -720,7 +720,8 @@ export class TreeService {
 		}
 
 		if (!noHighlight) {
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, false, undefined, undefined, undefined).then(() => {
+
+			this.selectNodes([this.nodesToShow[selectedIndex]], multi, false, undefined, undefined).then(() => {
 				this.selectedIndex = selectedIndex;
 			});
 		} else {
@@ -1057,7 +1058,7 @@ export class TreeService {
 			this.setNodeSelection(node, false);
 		}
 
-		return this.highlightNodes(nodes, true, undefined, true, false);
+		return this.highlightNodes(nodes, true, undefined, false);
 	}
 
 	/**
@@ -1067,19 +1068,18 @@ export class TreeService {
 	 */
 	public selectNodes(
 		nodes: any[], multi: boolean, additive: boolean, colour: number[],
-		toggle: boolean, forceReHighlight: boolean,
+		forceReHighlight: boolean,
 	) {
 
-		if (!nodes || nodes.length === 0) {
-			return Promise.resolve("No nodes specified");
-		}
-
-		toggle = (toggle === undefined) ? true : false;
 		forceReHighlight = (forceReHighlight === undefined) ? true : false;
 
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
+		}
+
+		if (!nodes || nodes.length === 0) {
+			return Promise.resolve("No nodes specified");
 		}
 
 		for (let i = 0; i < nodes.length; i++) {
@@ -1105,7 +1105,7 @@ export class TreeService {
 		const lastNode = nodes[nodes.length - 1] ;
 		this.handleMetadata(lastNode);
 
-		return this.highlightNodes(nodes, multi, colour, toggle, forceReHighlight);
+		return this.highlightNodes(nodes, multi, colour, forceReHighlight);
 
 	}
 
@@ -1131,11 +1131,7 @@ export class TreeService {
 	 * @param multi	Is multi select enabled.
 	 * @param colour the colour to highlight
 	 */
-	public highlightNodes(nodes: any, multi: boolean, colour: number[], toggle: boolean, forceReHighlight: boolean) {
-
-		if (toggle === undefined) {
-			toggle = true;
-		}
+	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
 		return this.ready.promise.then(() => {
 
@@ -1162,7 +1158,7 @@ export class TreeService {
 					ids: highlightMap[key].meshes,
 					colour: highlightMap[key].colour,
 					model,
-					multi: toggle,
+					multi,
 					source: "tree",
 					forceReHighlight,
 				});
@@ -1216,12 +1212,12 @@ export class TreeService {
 	 */
 	public selectNodesBySharedIds(
 		objects: any[], multi: boolean, additive: boolean,
-		colour: number[], toggle: boolean, forceReHighlight: boolean,
+		colour: number[], forceReHighlight: boolean,
 	) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				return this.selectNodes(nodes, multi, additive, colour, toggle, forceReHighlight);
+				return this.selectNodes(nodes, multi, additive, colour, forceReHighlight);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1233,17 +1229,14 @@ export class TreeService {
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled
 	 * @param colour the colour to highlight
-	 * @param toggle whether to toggle the highlighting on or off
 	 * @param forceReHighlight force a rehighlighting to a new colour (overides toggle)
 	 */
 	public highlightNodesBySharedId(
-		objects: any[], multi: boolean, colour: number[],
-		toggle: boolean, forceReHighlight: boolean,
+		objects: any[], multi: boolean, colour: number[], forceReHighlight: boolean,
 	) {
-
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				this.highlightNodes(nodes, multi, colour, toggle, forceReHighlight);
+				this.highlightNodes(nodes, multi, colour, forceReHighlight);
 			})
 			.catch((error) => {
 				console.error(error);
