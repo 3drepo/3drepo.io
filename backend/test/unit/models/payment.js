@@ -78,7 +78,7 @@ describe('UserBilling', function(){
 			}
 		}
 
-		if(data.currentSubscriptions.paypal.length > 0) {
+		if(data.currentSubscriptions.paypal && data.currentSubscriptions.paypal.length > 0) {
 			//Add a billing agreement Id into the instance if we have paypal subscriptions
 			instanceProp.billingAgreementId = "I-5WJWJKFH40KD";
 		}
