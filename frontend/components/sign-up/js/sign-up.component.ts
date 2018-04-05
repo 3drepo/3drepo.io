@@ -44,6 +44,7 @@ class SignupController implements ng.IController {
 	private passwordStrength;
 	private passwordResult;
 
+	private mailListAgreed;
 	private tcAgreed;
 	private useReCAPTCHA;
 	private registering;
@@ -87,12 +88,13 @@ class SignupController implements ng.IController {
 		this.haveReadText = "";
 
 		this.buttonLabel = "Sign Up!";
-		this.newUser = {username: "", email: "", password: "", tcAgreed: false};
+		this.newUser = {username: "", email: "", password: "", mailListAgreed: true, tcAgreed: false};
 		this.version = this.ClientConfigService.VERSION;
 		this.logo = "/images/3drepo-logo-white.png";
 		this.captchaKey = this.ClientConfigService.captcha_client_key;
 
-		this.tcAgreed = false;
+		this.mailListAgreed = this.newUser.mailListAgreed;
+		this.tcAgreed = this.newUser.tcAgreed;
 		this.useReCAPTCHA = false;
 		this.registering = false;
 		this.showLegalText = false;
@@ -334,6 +336,7 @@ class SignupController implements ng.IController {
 			firstName: this.newUser.firstName,
 			lastName: this.newUser.lastName,
 			password: this.newUser.password,
+			mailListAgreed: this.newUser.mailListAgreed,
 		};
 
 		if (this.useReCAPTCHA) {
