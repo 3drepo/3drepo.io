@@ -5,7 +5,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 	var myDb = db.getSiblingDB(database.name);
     print('DB: ' + database.name + ' ----------------------------------');
 	myDb.getCollection('settings').find().forEach(function(setting){
-		if(setting.status && setting.status === "processing")
+		if(setting.status && (setting.status === "processing" || setting.status === "queued"))
 		{
 			var updateObj ={
 				'$set':{
