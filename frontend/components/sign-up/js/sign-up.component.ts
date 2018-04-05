@@ -44,11 +44,11 @@ class SignupController implements ng.IController {
 	private passwordStrength;
 	private passwordResult;
 
+	private mailListAgreed;
 	private tcAgreed;
 	private useReCAPTCHA;
 	private registering;
 	private showLegalText;
-	private jobTitles;
 	private countries;
 	private legalText;
 	private legalTitle;
@@ -88,30 +88,18 @@ class SignupController implements ng.IController {
 		this.haveReadText = "";
 
 		this.buttonLabel = "Sign Up!";
-		this.newUser = {username: "", email: "", password: "", tcAgreed: false};
+		this.newUser = {username: "", email: "", password: "", mailListAgreed: true, tcAgreed: false};
 		this.version = this.ClientConfigService.VERSION;
 		this.logo = "/images/3drepo-logo-white.png";
 		this.captchaKey = this.ClientConfigService.captcha_client_key;
 
-		this.tcAgreed = false;
+		this.mailListAgreed = this.newUser.mailListAgreed;
+		this.tcAgreed = this.newUser.tcAgreed;
 		this.useReCAPTCHA = false;
 		this.registering = false;
 		this.showLegalText = false;
 
 		this.emailInvalid = false;
-
-		this.jobTitles = [
-			"Director",
-			"Architect",
-			"Architectural assistant",
-			"BIM Manager",
-			"Structural engineer",
-			"Civil engineer",
-			"MEP engineer",
-			"Mechanical engineer",
-			"Facilities Manager",
-			"Other",
-		];
 
 		this.countries = this.ClientConfigService.countries.concat();
 		let gbIndex;
@@ -185,11 +173,6 @@ class SignupController implements ng.IController {
 				this.checkInvalidPassword(result.score);
 
 			}
-			if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
-				this.invalidatePhoneNumber();
-			} else {
-				this.validatePhoneNumber();
-			}
 		}, true);
 
 		this.$scope.$watch("AuthService.isLoggedIn()", (newValue) => {
@@ -232,14 +215,6 @@ class SignupController implements ng.IController {
 
 	public validatePassword() {
 		this.$scope.signup.password.$setValidity("required", true);
-	}
-
-	public invalidatePhoneNumber() {
-		this.$scope.signup.phoneNo.$setValidity("required", false);
-	}
-
-	public validatePhoneNumber() {
-		this.$scope.signup.phoneNo.$setValidity("required", true);
 	}
 
 	public handleLegalItem(legalItem) {
@@ -313,8 +288,6 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.firstName)) ||
 			(!this.isDefined(this.newUser.lastName)) ||
 			(!this.isDefined(this.newUser.company)) ||
-			(!this.isDefined(this.newUser.jobTitle)) ||
-			(this.newUser.jobTitle === "Other" && !this.isDefined(this.newUser.otherJobTitle)) ||
 			(!this.isDefined(this.newUser.country))
 
 		) {
@@ -329,11 +302,6 @@ class SignupController implements ng.IController {
 		if (!allowedFormat.test(this.newUser.username)) {
 			this.registerErrorMessage = `Username not allowed: Max length 64 characters. Can contain upper and lowercase letters,
 				numbers, underscore allowed only, and must not start with number`;
-			return;
-		}
-
-		if ( this.newUser.phoneNo && !this.allowedPhone.test(this.newUser.phoneNo) ) {
-			this.registerErrorMessage = "Phone number can be blank, or made of numbers and +- characters only";
 			return;
 		}
 
@@ -366,10 +334,9 @@ class SignupController implements ng.IController {
 			countryCode: this.newUser.country,
 			email: this.newUser.email,
 			firstName: this.newUser.firstName,
-			jobTitle: this.newUser.jobTitle === "Other" ? this.newUser.otherJobTitle : this.newUser.jobTitle,
 			lastName: this.newUser.lastName,
 			password: this.newUser.password,
-			phoneNo: this.newUser.phoneNo,
+			mailListAgreed: this.newUser.mailListAgreed,
 		};
 
 		if (this.useReCAPTCHA) {
