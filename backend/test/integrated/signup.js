@@ -53,11 +53,11 @@ describe('Sign up', function(){
 	let lastName = 'World';
 	let countryCode = 'GB';
 	let company = 'company';
-	let noMailListOptOut = false;
+	let mailListAgreed = true;
 
 	let usernameNoSpam = 'signup_nospam';
 	let emailNoSpam = 'test3drepo_signup_nospam@mailinator.com';
-	let mailListOptOut = true;
+	let noMailListAgreed = false;
 
 	let User = require('../../models/user');
 
@@ -73,7 +73,7 @@ describe('Sign up', function(){
 			"lastName": lastName,
 			"countryCode": countryCode,
 			"company": company,
-			"mailListOptOut": noMailListOptOut
+			"mailListAgreed": mailListAgreed
 
 		}).expect(200, function(err, res){
 
@@ -95,7 +95,7 @@ describe('Sign up', function(){
 			"lastName": lastName,
 			"countryCode": countryCode,
 			"company": company,
-			"mailListOptOut": noMailListOptOut
+			"mailListAgreed": mailListAgreed
 
 		}).expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
@@ -116,7 +116,7 @@ describe('Sign up', function(){
 			"lastName": lastName,
 			"countryCode": countryCode,
 			"company": company,
-			"mailListOptOut": mailListOptOut
+			"mailListAgreed": noMailListAgreed
 
 		}).expect(200, function(err, res){
 
