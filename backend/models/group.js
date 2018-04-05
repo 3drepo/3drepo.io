@@ -323,15 +323,15 @@ groupSchema.methods.updateAttrs = function(data){
 	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
-		this.description = data.description;
-		this.name = data.name;
-		this.author = data.author;
-		this.createdAt = data.createdAt;
-		this.description = data.description;
-		this.updatedAt = data.updatedAt;
-		this.updatedBy = data.updatedBy;
+		this.description = data.description || this.description;
+		this.name = data.name || this.name;
+		this.author = data.author || this.author;
+		this.createdAt = data.createdAt || this.createdAt;
+		this.updatedAt = data.updatedAt || this.updatedAt;
+		this.updatedBy = data.updatedBy || this.updatedBy;
 		this.objects = modifiedObjectList || this.objects;
-		this.color = data.color;
+		this.color = data.color || this.color;
+		this.issue_id = data.issue_id || this.issue_id;
 		this.markModified("objects");
 		return this.save();
 	});
