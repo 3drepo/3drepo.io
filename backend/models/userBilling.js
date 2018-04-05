@@ -145,7 +145,6 @@ billingSchema.statics.getNextPaymentDate = function (date) {
 
 billingSchema.methods.cancelAgreement = function(){
 	return Paypal.cancelOldAgreement(this.billingAgreementId).then(() => {		
-		this.subscriptions.paypal = [];
 		this.billingAgreementId = undefined;
 	});
 
@@ -173,7 +172,8 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	if(!this.subscriptions) {
 		this.subscriptions = {};
 	}
-	let currentSubs = getCleanedUpPayPalSubscriptions(this.subscriptions.paypal);
+
+	let currentSubs = this.billingAgreementId ? getCleanedUpPayPalSubscriptions(this.subscriptions.paypal) : [];
 	let hasChanges = false;
 	let updatedSubs = [];
 	let totalSubCount = 0;
