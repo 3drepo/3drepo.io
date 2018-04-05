@@ -256,10 +256,8 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
 			}
 
-			for (let i = 0; i < C.REPO_BLACKLIST_USERNAME.length; i++) {
-				if (C.REPO_BLACKLIST_USERNAME[i] === username) {
-					return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
-				}
+			if (-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())) {
+				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
 			}
 
 			["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
