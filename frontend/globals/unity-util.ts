@@ -546,7 +546,9 @@ export class UnityUtil {
 	 *  @param {number[]} color - RGB value of the highlighting colour
 	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted.
 	 *  				Also any objects that are already highlighted will be unhighlighted
-	 *  @param {bool} forceReHighlight - If set to true, existing highlighted objects will be forced to re-highlight itself. This is 
+	 *  @param {bool} forceReHighlight - If set to true, existing highlighted objects will be forced to re-highlight itself. 
+	 *  				This is typically used for re-colouring a highlight or when you want a specific set of objects
+	 *  				to stay highlighted when toggle mode is on
 	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
 		const params: any = {
