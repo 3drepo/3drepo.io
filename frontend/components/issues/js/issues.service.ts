@@ -820,6 +820,7 @@ export class IssuesService {
 		return this.APIService.get(issueUrl)
 			.then((res) => {
 				res.data = this.cleanIssue(res.data);
+				return res.data;
 			});
 
 	}
