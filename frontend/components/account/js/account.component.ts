@@ -261,7 +261,6 @@ export const AccountComponent: ng.IComponentOptions = {
 		state: "=",
 		query: "=",
 		account: "=",
-		keysDown: "=",
 		isLiteMode: "=",
 		showLiteModeButton: "<",
 

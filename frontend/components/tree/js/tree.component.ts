@@ -1,3 +1,5 @@
+import { TreeService } from "./tree.service";
+
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -359,7 +361,10 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode(node) {
-		return this.TreeService.selectNodes([node], this.MultiSelectService.isMultiMode(), true);
+		return this.TreeService.selectNodes(
+			[node], this.MultiSelectService.isMultiMode(), false,
+			false, undefined, this.MultiSelectService.isMultiMode(), true,
+		);
 	}
 
 	public filterItemSelected(item) {

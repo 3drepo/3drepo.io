@@ -244,7 +244,6 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		account: "=",
 		branch: "=",
 		contentData: "=",
-		keysDown: "=",
 		model: "=",
 		modelSettings: "=",
 		onHeightRequest: "&",

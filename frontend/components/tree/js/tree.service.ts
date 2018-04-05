@@ -720,7 +720,7 @@ export class TreeService {
 		}
 
 		if (!noHighlight) {
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, false).then(() => {
+			this.selectNodes([this.nodesToShow[selectedIndex]], multi, false, undefined, undefined, undefined).then(() => {
 				this.selectedIndex = selectedIndex;
 			});
 		} else {
@@ -1065,11 +1065,17 @@ export class TreeService {
 	 * @param nodes	Nodes to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNodes(nodes: any[], multi: boolean, additive: boolean, colour?: number[]) {
+	public selectNodes(
+		nodes: any[], multi: boolean, additive: boolean, colour: number[],
+		toggle: boolean, forceReHighlight: boolean,
+	) {
 
 		if (!nodes || nodes.length === 0) {
 			return Promise.resolve("No nodes specified");
 		}
+
+		toggle = (toggle === undefined) ? true : false;
+		forceReHighlight = (forceReHighlight === undefined) ? true : false;
 
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
@@ -1099,7 +1105,7 @@ export class TreeService {
 		const lastNode = nodes[nodes.length - 1] ;
 		this.handleMetadata(lastNode);
 
-		return this.highlightNodes(nodes, multi, colour, true, true);
+		return this.highlightNodes(nodes, multi, colour, toggle, forceReHighlight);
 
 	}
 
@@ -1208,13 +1214,14 @@ export class TreeService {
 	 * @param additive whether the selection should reset or keep add selections
 	 * @param colour the colour to highlight
 	 */
-	public selectNodesBySharedIds(objects: any[], multi: boolean, additive: boolean, colour: number[]) {
+	public selectNodesBySharedIds(
+		objects: any[], multi: boolean, additive: boolean,
+		colour: number[], toggle: boolean, forceReHighlight: boolean,
+	) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				if (nodes) {
-					return this.selectNodes(nodes, multi, additive, colour);
-				}
+				return this.selectNodes(nodes, multi, additive, colour, toggle, forceReHighlight);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1229,13 +1236,14 @@ export class TreeService {
 	 * @param toggle whether to toggle the highlighting on or off
 	 * @param forceReHighlight force a rehighlighting to a new colour (overides toggle)
 	 */
-	public highlightNodesBySharedId(objects: any[], multi: boolean, colour: number[], toggle: boolean, forceReHighlight: boolean) {
+	public highlightNodesBySharedId(
+		objects: any[], multi: boolean, colour: number[],
+		toggle: boolean, forceReHighlight: boolean,
+	) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				if (nodes) {
-					this.highlightNodes(nodes, multi, colour, toggle, forceReHighlight);
-				}
+				this.highlightNodes(nodes, multi, colour, toggle, forceReHighlight);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1250,15 +1258,14 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				if (nodes) {
-					// Hide all
-					this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
-					// Show selected
-					if (nodes) {
-						this.setCurrentSelectedNodes(nodes);
-						this.showTreeNodes(nodes);
-					}
-				}
+
+				// Hide all
+				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
+				// Show selected
+
+				this.setCurrentSelectedNodes(nodes);
+				this.showTreeNodes(nodes);
+
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1274,9 +1281,9 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				if (nodes) {
-					this.hideTreeNodes(nodes);
-				}
+
+				this.hideTreeNodes(nodes);
+
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1296,10 +1303,10 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				if (nodes) {
-					this.hideAllTreeNodes(false);
-					this.showTreeNodes(nodes);
-				}
+
+				this.hideAllTreeNodes(false);
+				this.showTreeNodes(nodes);
+
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1338,7 +1345,7 @@ export class TreeService {
 						this.expandToSelection(this.getPath(objUid), 0, undefined, true);
 
 						if (nodes.size > 0) {
-							this.selectNodes(Array.from(nodes), false, true);
+							this.selectNodes(Array.from(nodes), false, true, undefined, undefined, undefined);
 						}
 					}
 				}

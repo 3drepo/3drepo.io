@@ -424,15 +424,15 @@ class IssuesController implements ng.IController {
 				});
 			}
 
-			// If Federation 
+			// If Federation
 			if (!isSubmodelIssue) {
 				issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
 				if (issueShouldAdd) {
 					this.IssuesService.addIssue(issue);
 				}
-			} 	
-			
-			// If submodel 
+			}
+
+			// If submodel
 			if (isSubmodelIssue) {
 
 				if (submodel) {
@@ -498,7 +498,7 @@ class IssuesController implements ng.IController {
 				const escapable = true;
 				this.DialogService.text("Error Getting User Job", content, escapable);
 				console.error(error);
-			
+
 			});
 
 	};
@@ -508,27 +508,27 @@ class IssuesController implements ng.IController {
 	 * @param issue
 	 */
 	public editIssue(issue) {
-		
+
 		if (this.IssuesService.state.selectedIssue) {
 			this.IssuesService.deselectPin(this.IssuesService.state.selectedIssue);
 		}
-		
+
 		if (issue) {
 
 			this.ViewerService.highlightObjects([]);
-			this.$state.go("home.account.model.issue", 
+			this.$state.go("home.account.model.issue",
 				{
-					account: this.account, 
-					model: this.model, 
+					account: this.account,
+					model: this.model,
 					revision: this.revision,
 					issue: issue._id,
 					noSet: true
-				}, 
+				},
 				{notify: false}
 			);
 
 			this.IssuesService.setSelectedIssue(issue);
-			
+
 		} else {
 			this.IssuesService.resetSelectedIssue();
 		}
@@ -537,7 +537,7 @@ class IssuesController implements ng.IController {
 		this.showAddButton = false;
 		this.onShowItem();
 
-	};
+	}
 
 	/**
 	 * Exit issue editing
@@ -546,7 +546,7 @@ class IssuesController implements ng.IController {
 	public editIssueExit(issue) {
 		document.getElementById("issue" + issue._id).scrollIntoView();
 		this.hideItem = true;
-	};
+	}
 
 }
 
@@ -564,9 +564,8 @@ export const IssuesComponent: ng.IComponentOptions = {
 		onContentHeightRequest: "&",
 		onShowItem : "&",
 		hideItem: "=",
-		keysDown: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&"
+		setInitialSelectedObjects: "&",
 	},
 	controller: IssuesController,
 	controllerAs: "vm",

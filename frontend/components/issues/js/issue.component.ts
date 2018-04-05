@@ -1211,7 +1211,7 @@ class IssueController implements ng.IController {
 		if (!this.aboutToBeDestroyed) {
 			this.setContentHeight();
 		}
-	};
+	}
 
 	/**
 	 * Delete a comment
@@ -1237,13 +1237,13 @@ class IssueController implements ng.IController {
 
 		this.setContentHeight();
 	};
-	
+
 	/**
 	 * A screen shot has been saved
 	 * @param data
 	 */
 	public screenShotSave(data) {
-		let viewpointPromise = this.$q.defer();
+		const viewpointPromise = this.$q.defer();
 
 		this.savedScreenShot = data.screenShot;
 
@@ -1276,7 +1276,7 @@ class IssueController implements ng.IController {
 			});
 
 		this.setContentHeight();
-	};
+	}
 
 	/**
 	 * Set the content height
@@ -1335,7 +1335,7 @@ class IssueController implements ng.IController {
 			console.error("Height was trying to be set to falsy value");
 		}
 
-	};
+	}
 
 	public commentAreaScrollToBottom() {
 
@@ -1345,7 +1345,7 @@ class IssueController implements ng.IController {
 				commentArea.scrollTop = commentArea.scrollHeight;
 			}
 		});
-	};
+	}
 
 	public handleIssueChange(issue) {
 
@@ -1354,7 +1354,7 @@ class IssueController implements ng.IController {
 
 		this.$scope.$apply();
 
-	};
+	}
 
 	public startNotification() {
 
@@ -1427,7 +1427,7 @@ class IssueController implements ng.IController {
 			});
 
 		}
-};
+}
 
 }
 
@@ -1437,7 +1437,6 @@ export const IssueComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		data: "=",
-		keysDown: "<",
 		exit: "&",
 		event: "<",
 		selectedIssueLoaded: "<",

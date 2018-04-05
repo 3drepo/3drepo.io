@@ -262,7 +262,7 @@ export class GroupsService {
 
 		// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-		hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+		hex = hex.replace(shorthandRegex, (m, r, g, b) => {
 			return r + r + g + g + b + b;
 		});
 
@@ -301,6 +301,7 @@ export class GroupsService {
 	 * @param group the group to select
 	 */
 	public selectGroup(group: any) {
+
 		if (this.state.selectedGroup) {
 			this.state.selectedGroup.selected = false;
 		}
@@ -308,34 +309,35 @@ export class GroupsService {
 		this.state.selectedGroup.selected = true;
 		this.state.selectedGroup.totalSavedMeshes = 0;
 
-		if (this.state.selectedGroup.objects && this.state.selectedGroup.objects.length) {
+		// if (this.state.selectedGroup.objects && this.state.selectedGroup.objects.length) {
 
-			const multi = this.MultiSelectService.isMultiMode();
-			let color = this.ViewerService.getDefaultHighlightColor();
+		const multi = this.MultiSelectService.isMultiMode();
+		let color = this.ViewerService.getDefaultHighlightColor();
 
+		if (!this.state.selectedGroup.new) {
+			color = this.state.selectedGroup.color.map((c) => c / 255);
+		}
+
+		// If multi is enabled we want to inverse selections
+		// rather than add them
+		const additive = (multi === true) ? false : true;
+
+		return this.TreeService.selectNodesBySharedIds(
+			this.state.selectedGroup.objects,
+			multi, // multi
+			additive,
+			color,
+			multi,
+			false,
+		).then((meshes) => {
+
+			// If we haven't saved don't update saved meshes
 			if (!this.state.selectedGroup.new) {
-				color = this.state.selectedGroup.color.map((c) => c / 255);
+				const total = this.getTotalMeshes(meshes);
+				this.state.selectedGroup.totalSavedMeshes = total;
 			}
 
-			return this.TreeService.selectNodesBySharedIds(
-				this.state.selectedGroup.objects,
-				multi, // multi
-				true,
-				color,
-				true,
-			).then((meshes) => {
-
-				// If we haven't saved don't update saved meshes
-				if (!this.state.selectedGroup.new) {
-					const total = this.getTotalMeshes(meshes);
-					this.state.selectedGroup.totalSavedMeshes = total;
-				}
-
-			});
-		} else {
-			this.TreeService.clearCurrentlySelected();
-			return Promise.resolve();
-		}
+		});
 
 	}
 
@@ -383,7 +385,7 @@ export class GroupsService {
 
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
 
-		if (this.state.selectedGroup.objects) {
+		if (this.state.selectedGroup.objects && !this.state.selectedGroup.new) {
 
 			const currentSelected = this.TreeService.getCurrentSelectedNodes().concat();
 			const groupObjects = this.state.selectedGroup.objects.concat();

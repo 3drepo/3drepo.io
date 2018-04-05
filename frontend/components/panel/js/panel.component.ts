@@ -295,7 +295,6 @@ export const PanelComponent: ng.IComponentOptions = {
 	bindings: {
 		account:  "=",
 		branch:   "=",
-		keysDown: "=",
 		model:  "=",
 		modelSettings: "=",
 		position: "@",

@@ -1,5 +1,11 @@
 {
     "compilerOptions": {
-      "types": ["angular", "angular-material"]
+      "types": ["angular", "angular-material"],
+      "lib": [
+        "es5",
+        "es6",
+        "dom",
+      ],
     }
+    
 }
