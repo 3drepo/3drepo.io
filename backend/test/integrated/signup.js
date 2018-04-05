@@ -135,7 +135,7 @@ describe('Sign up', function(){
 			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
 			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
 			expect(user.customData.billing.billingInfo.company).to.equal(company);
-			expect(user.customData.mailListOptOut).to.be.null;
+			expect(user.customData.mailListOptOut).to.be.undefined;
 		});
 	});
 
@@ -148,7 +148,7 @@ describe('Sign up', function(){
 			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
 			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
 			expect(user.customData.billing.billingInfo.company).to.equal(company);
-			expect(user.customData.mailListOptOut).to.equal(mailListOptOut);
+			expect(user.customData.mailListOptOut).to.equal(true);
 		});
 	});
 
