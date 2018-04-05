@@ -993,6 +993,7 @@ export class TreeService {
 	 */
 	public clearCurrentlySelected() {
 
+		this.ViewerService.clearHighlights();
 		this.DocsService.closeDocs();
 
 		if (this.currentSelectedNodes) {
@@ -1056,8 +1057,7 @@ export class TreeService {
 			this.setNodeSelection(node, false);
 		}
 
-		console.log("deselectedNodes");
-		return this.highlightNodes(nodes, true, undefined, true);
+		return this.highlightNodes(nodes, true, undefined, true, false);
 	}
 
 	/**
@@ -1072,7 +1072,6 @@ export class TreeService {
 		}
 
 		if (!multi) {
-			console.log("Clearing from selectNodes");
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
 		}
@@ -1091,7 +1090,6 @@ export class TreeService {
 				this.setNodeSelection(node, !node.selected);
 			} else {
 				// If it is not multiselect mode, remove all highlights
-				console.log("Clearing in else block of selectNodes");
 				this.clearCurrentlySelected();
 				this.setNodeSelection(node, true);
 			}
@@ -1101,7 +1099,7 @@ export class TreeService {
 		const lastNode = nodes[nodes.length - 1] ;
 		this.handleMetadata(lastNode);
 
-		return this.highlightNodes(nodes, multi, colour, true);
+		return this.highlightNodes(nodes, multi, colour, true, true);
 
 	}
 
@@ -1127,7 +1125,7 @@ export class TreeService {
 	 * @param multi	Is multi select enabled.
 	 * @param colour the colour to highlight
 	 */
-	public highlightNodes(nodes: any, multi: boolean, colour: number[], toggle: boolean) {
+	public highlightNodes(nodes: any, multi: boolean, colour: number[], toggle: boolean, forceReHighlight: boolean) {
 
 		if (toggle === undefined) {
 			toggle = true;
@@ -1160,6 +1158,7 @@ export class TreeService {
 					model,
 					multi: toggle,
 					source: "tree",
+					forceReHighlight,
 				});
 
 			}
@@ -1171,7 +1170,7 @@ export class TreeService {
 
 	public getNodesFromSharedIds(objects) {
 		if (!objects || objects.length === 0) {
-			return Promise.resolve();
+			return Promise.resolve([]);
 		}
 
 		return this.getMap().then(() => {
@@ -1222,12 +1221,20 @@ export class TreeService {
 			});
 	}
 
-	public highlightNodesBySharedId(objects: any[], multi: boolean, colour: number[], toggle: boolean) {
+	/**
+	 * Highlight a series of nodes based on shared IDs (rather than unique IDs)
+	 * @param objects	Nodes to select
+	 * @param multi	Is multi select enabled
+	 * @param colour the colour to highlight
+	 * @param toggle whether to toggle the highlighting on or off
+	 * @param forceReHighlight force a rehighlighting to a new colour (overides toggle)
+	 */
+	public highlightNodesBySharedId(objects: any[], multi: boolean, colour: number[], toggle: boolean, forceReHighlight: boolean) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
 				if (nodes) {
-					this.highlightNodes(nodes, multi, colour, toggle);
+					this.highlightNodes(nodes, multi, colour, toggle, forceReHighlight);
 				}
 			})
 			.catch((error) => {

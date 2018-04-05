@@ -308,35 +308,41 @@ export class GroupsService {
 		this.state.selectedGroup.selected = true;
 		this.state.selectedGroup.totalSavedMeshes = 0;
 
-		if (this.state.selectedGroup.objects) {
+		if (this.state.selectedGroup.objects && this.state.selectedGroup.objects.length) {
 
 			const multi = this.MultiSelectService.isMultiMode();
-			const color = this.state.selectedGroup.color.map((c) => c / 255);
+			let color = this.ViewerService.getDefaultHighlightColor();
+
+			if (!this.state.selectedGroup.new) {
+				color = this.state.selectedGroup.color.map((c) => c / 255);
+			}
 
 			return this.TreeService.selectNodesBySharedIds(
 				this.state.selectedGroup.objects,
 				multi, // multi
 				true,
 				color,
+				true,
 			).then((meshes) => {
 
 				// If we haven't saved don't update saved meshes
-				if (!group.new) {
+				if (!this.state.selectedGroup.new) {
 					const total = this.getTotalMeshes(meshes);
 					this.state.selectedGroup.totalSavedMeshes = total;
 				}
 
 			});
+		} else {
+			this.TreeService.clearCurrentlySelected();
+			return Promise.resolve();
 		}
-
-		return Promise.resolve();
 
 	}
 
 	public getTotalMeshes(meshes) {
 		let total = 0;
 		for (const key in meshes) {
-			if (key && meshes[key]) {
+			if (key && meshes[key] && meshes[key].meshes) {
 				total += meshes[key].meshes.length;
 			}
 		}
@@ -374,30 +380,24 @@ export class GroupsService {
 	 * Update the selected group color in the viewer
 	 */
 	public updateSelectedGroupColor() {
+
 		const color = this.state.selectedGroup.color.map((c) => c / 255);
 
 		if (this.state.selectedGroup.objects) {
 
-			// console.log("currentSelected", this.TreeService.getCurrentSelectedNodes().concat());
-			// this.TreeService.highlightNodes(
-			// 	this.TreeService.getCurrentSelectedNodes().concat(),
-			// 	true, // multi
-			// 	undefined,
-			// 	false,
-			// );
+			const currentSelected = this.TreeService.getCurrentSelectedNodes().concat();
+			const groupObjects = this.state.selectedGroup.objects.concat();
 
 			// Find the nodes from the group that are currently selected
-			const intersection = this.state.selectedGroup.objects.concat()
-				.filter((o) => {
-					return this.TreeService.getCurrentSelectedNodes().find((n) => n.shared_id === o.shared_id );
-				});
+			const intersection = groupObjects.filter((o) => {
+				return currentSelected.find((n) => n.shared_id === o.shared_id );
+			});
 
-			console.log("intersection", intersection);
-			// console.log("selectedObjects", this.state.selectedGroup.objects.concat());
 			this.TreeService.highlightNodesBySharedId(
 				intersection,
 				true, // multi
 				color,
+				true,
 				true,
 			);
 		}

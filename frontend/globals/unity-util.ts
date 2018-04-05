@@ -29,6 +29,7 @@ export class UnityUtil {
 		MODEL_LOADED : 3, // Models
 	};
 
+
 	public static unityInstance;
 
 	public static readyPromise;
@@ -51,6 +52,7 @@ export class UnityUtil {
 	public static objectStatusPromise = null;
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = "WebGLInterface";
+	public static defaultHighlightColor = [1, 1, 0];
 
 	public static init(
 		errorCallback: any,
@@ -562,7 +564,7 @@ export class UnityUtil {
 		if (color) {
 			params.color = color;
 		} else  {
-			params.color = [1, 1, 0];
+			params.color = UnityUtil.defaultHighlightColor;
 		}
 
 		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));

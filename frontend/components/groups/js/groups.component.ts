@@ -292,7 +292,7 @@ class GroupsController implements ng.IController {
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
-		this.GroupsService.updateSelectedGroupColor();
+		// this.GroupsService.updateSelectedGroupColor();
 	}
 
 	public selectGroup(group: any) {

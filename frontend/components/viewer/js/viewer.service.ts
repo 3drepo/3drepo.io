@@ -212,7 +212,6 @@ export class ViewerService {
 
 	public clearHighlights() {
 		if (this.viewer) {
-			console.log("clearHighlights called")
 			this.viewer.clearHighlights();
 		}
 	}
@@ -271,6 +270,7 @@ export class ViewerService {
 				params.zoom,
 				params.colour,
 				params.multi,
+				params.forceReHighlight,
 			);
 		}
 	}
@@ -552,6 +552,10 @@ export class ViewerService {
 		if (this.viewer) {
 			this.viewer.resetMeshColor(account, model, meshIDs);
 		}
+	}
+
+	public getDefaultHighlightColor() {
+		return this.viewer.getDefaultHighlightColor();
 	}
 
 }

@@ -304,6 +304,10 @@ export class Viewer {
 
 	}
 
+	public getDefaultHighlightColor() {
+		return UnityUtil.defaultHighlightColor;
+	}
+
 	public handleError(message) {
 		this.errCallback(message);
 	}
@@ -410,7 +414,7 @@ export class Viewer {
 		UnityUtil.clearHighlights();
 	}
 
-	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride) {
+	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride, forceReHighlight) {
 
 		const canHighlight = this.initialized && !this.pinDropMode && !this.measureMode;
 
@@ -420,7 +424,7 @@ export class Viewer {
 				const uniqueIds = Array.from(new Set(idsIn));
 				if (uniqueIds.length) {
 					const multi = multiOverride || this.multiSelectMode;
-					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 					return;
 				}
 			}
