@@ -77,6 +77,11 @@ describe('UserBilling', function(){
 				vat: data.isBusiness ? 'ABC123' : null
 			}
 		}
+
+		if(data.currentSubscriptions.paypal && data.currentSubscriptions.paypal.length > 0) {
+			//Add a billing agreement Id into the instance if we have paypal subscriptions
+			instanceProp.billingAgreementId = "I-5WJWJKFH40KD";
+		}
 		if(data.lastAnniversaryDate){
 			instanceProp.lastAnniversaryDate = data.lastAnniversaryDate.toDate();
 			instanceProp.nextPaymentDate =  data.nextPaymentDate;

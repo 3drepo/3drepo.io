@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
 let mongoose = require("mongoose");
 let ModelFactory = require("./factory/modelFactory");
@@ -45,6 +46,7 @@ let schema = mongoose.Schema({
 		firstName: String,
 		lastName: String,
 		email: String,
+		mailListOptOut: Boolean,
 		inactive: Boolean,
 		resetPasswordToken: {
 			expiredAt: Date,
@@ -87,7 +89,6 @@ let schema = mongoose.Schema({
 });
 
 schema.statics.historyChunksStats = function(dbName){
-	"use strict";
 
 	return ModelFactory.dbManager.listCollections(dbName).then(collections => {
 
@@ -105,7 +106,6 @@ schema.statics.historyChunksStats = function(dbName){
 };
 
 schema.statics.authenticate = function(logger, username, password){
-	"use strict";
 
 	if(!username || !password){
 		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
@@ -163,7 +163,6 @@ schema.statics.findByPaypalPaymentToken = function(token){
 };
 
 schema.statics.isEmailTaken = function(email, exceptUser){
-	"use strict";
 
 	let query = { "customData.email": email};
 
@@ -181,7 +180,6 @@ schema.statics.findUserByBillingId = function(billingAgreementId){
 
 
 schema.statics.updatePassword = function(logger, username, oldPassword, token, newPassword){
-	"use strict";
 
 	if(!((oldPassword || token) && newPassword)){
 		return Promise.reject({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE});
@@ -217,9 +215,9 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 		let updateUserCmd = {
 			"updateUser" : username,
 			"pwd": newPassword
-		 };
+		};
 
-		 return ModelFactory.dbManager.runCommand("admin", updateUserCmd);
+		return ModelFactory.dbManager.runCommand("admin", updateUserCmd);
 
 	}).then(() => {
 
@@ -239,126 +237,123 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime, skipCheckEmail){
-	"use strict";
-	return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
-		let cleanedCustomData = {};
-		let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+	if (customData) {
+		return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
-		if(config.auth.allowPlusSignInEmail){
-			emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-		}
+			let cleanedCustomData = {};
+			let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
-		if(customData && (!customData.email || !customData.email.match(emailRegex))){
-			return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
-		}
+			if (config.auth.allowPlusSignInEmail) {
+				emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+			}
 
+			if (!customData.email || !customData.email.match(emailRegex)) {
+				return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+			}
 
-		if(!this.usernameRegExp.test(username)){
-			return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
-		}
+			if (!this.usernameRegExp.test(username)) {
+				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME});
+			}
 
-		for(let i=0 ; i < C.REPO_BLACKLIST_USERNAME.length; i++){
-			if(C.REPO_BLACKLIST_USERNAME[i] === username){
+			if (-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())) {
 				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
 			}
-		}
-	
 
-		["firstName", "lastName", "email"].forEach(key => {
-			if (customData && customData[key]){
-				cleanedCustomData[key] = customData[key];
-			}
-		});
+			["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
+				if (customData[key]){
+					cleanedCustomData[key] = customData[key];
+				}
+			});
 
-		let billingInfo = {};
+			let billingInfo = {};
 
-		["firstName", "lastName", "phoneNo", "countryCode", "jobTitle", "company"].forEach(key => {
-			if (customData && customData[key]){
-				billingInfo[key] = customData[key];
-			}
-		});
+			["firstName", "lastName", "countryCode", "company"].forEach(key => {
+				if (customData[key]){
+					billingInfo[key] = customData[key];
+				}
+			});
 
-		//cleanedCustomData.billing = {};
+			//cleanedCustomData.billing = {};
 
-		let expiryAt = new Date();
-		expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+			let expiryAt = new Date();
+			expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
-		cleanedCustomData.inactive = true;
+			cleanedCustomData.inactive = true;
 
-		//default permission
-		cleanedCustomData.permissions = [{
-			user: username,
-			permissions: [C.PERM_TEAMSPACE_ADMIN]
-		}];
+			//default permission
+			cleanedCustomData.permissions = [{
+				user: username,
+				permissions: [C.PERM_TEAMSPACE_ADMIN]
+			}];
 
-		//default templates
-		cleanedCustomData.permissionTemplates = [
-			{
-				_id: C.ADMIN_TEMPLATE,
-				permissions: C.ADMIN_TEMPLATE_PERMISSIONS
-			},
-			{
-				_id: C.VIEWER_TEMPLATE,
-				permissions: C.VIEWER_TEMPLATE_PERMISSIONS
-			},
-			{
-				_id: C.COMMENTER_TEMPLATE,
-				permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
-			},
-			{
-				_id: C.COLLABORATOR_TEMPLATE,
-				permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
-			}
-		];	
+			//default templates
+			cleanedCustomData.permissionTemplates = [
+				{
+					_id: C.ADMIN_TEMPLATE,
+					permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+				},
+				{
+					_id: C.VIEWER_TEMPLATE,
+					permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+				},
+				{
+					_id: C.COMMENTER_TEMPLATE,
+					permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+				},
+				{
+					_id: C.COLLABORATOR_TEMPLATE,
+					permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+				}
+			];	
 
-		if(customData){
 			cleanedCustomData.emailVerifyToken = {
 				token: crypto.randomBytes(64).toString("hex"),
 				expiredAt: expiryAt
 			};
-		}
 
-		return this.isUserNameTaken(username).then(count => {
-	
-			if(count !== 0){
-				return Promise.reject(responseCodes.USER_EXISTS);
-			}
+			return this.isUserNameTaken(username).then(count => {
+		
+				if (count !== 0) {
+					return Promise.reject(responseCodes.USER_EXISTS);
+				}
 
-			let checkEmail = Promise.resolve(0);
+				let checkEmail = Promise.resolve(0);
 
-			if(!skipCheckEmail){
-				checkEmail = this.isEmailTaken(customData.email);
-			}
-	
-			return checkEmail;
-		}).then(count => {
+				if (!skipCheckEmail) {
+					checkEmail = this.isEmailTaken(customData.email);
+				}
+		
+				return checkEmail;
+			}).then(count => {
 
-			if(count === 0){
-	
-				return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
-					return Promise.resolve(cleanedCustomData.emailVerifyToken);
-				}).catch(err => {
-					return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
-				});
+				if(count === 0){
+		
+					return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
+						return Promise.resolve(cleanedCustomData.emailVerifyToken);
+					}).catch(err => {
+						return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+					});
 
-			} else {
-				return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
-			}
+				} else {
+					return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
+				}
 
-		}).then(() => {
-			return this.findByUserName(username);
-		}).then(user => {
-			user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
-			return user.save();
-		}).then(() => {
-			return Promise.resolve(cleanedCustomData.emailVerifyToken);
+			}).then(() => {
+				return this.findByUserName(username);
+			}).then(user => {
+				user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
+				return user.save();
+			}).then(() => {
+				return Promise.resolve(cleanedCustomData.emailVerifyToken);
+			});
 		});
-	});
+	} else {
+		return Promise.reject({resCode: responseCodes.SIGN_UP_INVALID_EMAIL});
+	}
 };
 
 schema.statics.verify = function(username, token, options){
-	"use strict";
 
 	options = options || {};
 
@@ -396,7 +391,6 @@ schema.statics.verify = function(username, token, options){
 
 	}).then(user => {
 
-
 		if(!skipImportToyModel){
 
 			//import toy model
@@ -419,14 +413,11 @@ schema.statics.verify = function(username, token, options){
 	});
 };
 
-
-
 schema.methods.getAvatar = function(){
 	return this.customData && this.customData.avatar || null;
 };
 
 schema.methods.updateInfo = function(updateObj){
-	"use strict";
 	
 	let updateableFields = [ "firstName", "lastName", "email" ];
 
@@ -479,7 +470,6 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 
 
 function _fillInModelDetails(accountName, setting, permissions){
-	"use strict";
 
 	if(permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1){
 		permissions = C.MODEL_PERM_LIST.slice(0);
@@ -523,7 +513,6 @@ function _fillInModelDetails(accountName, setting, permissions){
 }
 //list all models in an account
 function _getModels(accountName, ids, permissions){
-	"use strict";
 
 	let models = [];
 	let fedModels = [];
@@ -553,7 +542,6 @@ function _getModels(accountName, ids, permissions){
 
 // find projects and put models into project
 function _addProjects(account, username, models){
-	"use strict";
 	
 	let query = {};
 
@@ -577,17 +565,17 @@ function _addProjects(account, username, models){
 			
 			projects[i] = project;
 
-			const findModel = model => (m, i, models) => {
+			const findModel = model => (m, index, modelList) => {
 				if (m.model === model){
-					models.splice(i, 1);
+					modelList.splice(index, 1);
 					return true;
 				}
 			};
 
-			project.models.forEach((model, i) => {
+			project.models.forEach((model, j) => {
 
 				let fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
-				project.models[i] = fullModel;
+				project.models[j] = fullModel;
 
 			});
 
@@ -601,7 +589,6 @@ function _addProjects(account, username, models){
 
 
 function _findModelDetails(dbUserCache, username, model){
-	"use strict";
 
 	let getUser;
 	let dbUser;
@@ -638,7 +625,6 @@ function _findModelDetails(dbUserCache, username, model){
 }
 
 function _calSpace(user){
-	"use strict";
 
 	let quota = user.customData.billing.getSubscriptionLimits();
 	return User.historyChunksStats(user.user).then(stats => {
@@ -659,7 +645,6 @@ function _calSpace(user){
 }
 
 function _sortAccountsAndModels(accounts){
-	"use strict";
 
 	function sortModel(a, b) {
 			if(a.timestamp < b.timestamp){
@@ -688,19 +673,17 @@ function _sortAccountsAndModels(accounts){
 	});
 }
 
-function _findModel(id, account){
+function _findModel(id, account) {
 	return account.models.find(m => m.model === id) ||
 		account.fedModels.find(m => m.model === id) ||
 		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id), null);
 }
 
-function _makeAccountObject(name){
+function _makeAccountObject(name) {
 	return {account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false};
 }
 
-function _createAccounts(roles, userName)
-{
-	"use strict";
+function _createAccounts(roles, userName) {
 
 	let accounts = [];
 	let promises = [];
@@ -759,8 +742,7 @@ function _createAccounts(roles, userName)
 							if(!account){
 	
 								account = accounts.find(account => account.account === user.user);
-								if(!account)
-								{
+								if(!account) {
 									account = _makeAccountObject(user.user);
 									accounts.push(account);
 								}
@@ -786,7 +768,7 @@ function _createAccounts(roles, userName)
 
 							const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
 							if(newModelIds.length){
-								 _getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+								_getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
 									myProj.models = models.models.concat(models.fedModels);
 									resolve();
 								});
@@ -908,13 +890,11 @@ function _createAccounts(roles, userName)
 
 }
 schema.methods.listAccounts = function(){
-	"use strict";
-
 	return _createAccounts(this.roles, this.user);	
 };
 
 schema.methods.updateSubscriptions = function(plans, billingUser, billingAddress){
-	"use strict";
+
 	let billingAgreement;
 
 	plans = plans || [];
@@ -938,7 +918,7 @@ function updateUser(username, update) {
 }
 
 schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw){
-	"use strict";
+
 	let dbUser;
 	return this.findUserByBillingId(billingAgreementId).then(user => {
 		dbUser = user;
@@ -958,14 +938,13 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 };
 
 schema.methods.executeBillingAgreement = function(){
-	"use strict";
 	return this.customData.billing.executeBillingAgreement(this.user).then(() => {
 		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
-	})
+	});
 };
 
 schema.methods.removeTeamMember = function(username, cascadeRemove){
-	"use strict";
+
 	let foundProjects = [];
 	let foundModels = [];
 	
@@ -1021,7 +1000,7 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 };
 
 schema.methods.addTeamMember = function(user){
-	"use strict";
+
 	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
 		const limits = this.customData.billing.getSubscriptionLimits();
 		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
@@ -1042,10 +1021,8 @@ schema.methods.addTeamMember = function(user){
 };
 
 schema.methods.isMemberOfTeamspace = function(teamspace) {
-	"use strict";
 	return this.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-
-}
+};
 
 schema.statics.getQuotaInfo = function(teamspace) {
 	return this.findByUserName(teamspace).then( (user) => {
@@ -1055,9 +1032,7 @@ schema.statics.getQuotaInfo = function(teamspace) {
 
 		return _calSpace(user);
 	});
-	
-	
-}
+};
 
 schema.statics.getMembersAndJobs = function(teamspace) {
 	let memberArr = [];
@@ -1070,7 +1045,7 @@ schema.statics.getMembersAndJobs = function(teamspace) {
 
 	const getJobInfoProm = Job.usersWithJob(teamspace).then( _memToJob => {
 		memToJob = _memToJob;
-	});; 
+	}); 
 	promises.push(getTSMemProm);
 	promises.push(getJobInfoProm);
 		
@@ -1083,13 +1058,12 @@ schema.statics.getMembersAndJobs = function(teamspace) {
 			}
 
 			resultArr.push(entry);
-		})
+		});
 		return resultArr;
 	});
-}
+};
 
 schema.statics.getAllUsersInTeamspace = function(teamspace) {
-	"use strict";
 
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
 	return this.find({account: "admin"}, query , {user : 1}).then( users => {
@@ -1100,7 +1074,7 @@ schema.statics.getAllUsersInTeamspace = function(teamspace) {
 
 		return Promise.resolve(res);
 	});
-}
+};
 
 schema.statics.teamspaceMemberCheck = function(teamspace, user) {
 	return User.findByUserName(user).then( (userEntry) => {
@@ -1112,9 +1086,9 @@ schema.statics.teamspaceMemberCheck = function(teamspace, user) {
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
 	});
-}
+};
 
-var User = ModelFactory.createClass(
+const User = ModelFactory.createClass(
 	"User",
 	schema,
 	() => {

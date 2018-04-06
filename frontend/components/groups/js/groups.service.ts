@@ -206,11 +206,12 @@ export class GroupsService {
 
 		const prefix = "Group ";
 		let num = 1;
-		let groupName = prefix + num;
-		while (groupNames.indexOf(groupName) !== -1) {
-			groupName = prefix + num++;
+
+		while (groupNames.indexOf(prefix + num) !== -1) {
+			num++;
 		}
-		return groupName;
+
+		return prefix + num;
 	}
 
 	/**
