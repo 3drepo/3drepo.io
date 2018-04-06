@@ -32,7 +32,7 @@ router.put("/:uid", middlewares.issue.canCreate, updateGroup);
 router.post("/", middlewares.issue.canCreate, createGroup);
 router.delete("/:id", middlewares.issue.canCreate, deleteGroup);
 
-let getDbColOptions = function(req){
+const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 

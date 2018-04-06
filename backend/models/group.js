@@ -60,13 +60,10 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
 };
 
 groupSchema.statics.uuidToIfcGuids = function(obj) {
-	let account = obj.account;
-	let model = obj.model;
-	let uid = obj.shared_id;
-	if ("[object String]" !== Object.prototype.toString.call(uid)) {
-		uid = utils.uuidToString(uid);
-	}
-	let parent = utils.stringToUUID(uid);
+	const account = obj.account;
+	const model = obj.model;
+	const uid =("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
+	const parent = utils.stringToUUID(uid);
 	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
 	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
@@ -234,11 +231,11 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 };
 
 groupSchema.statics.listGroups = function(dbCol, queryParams){
-	let query = {};
+	const query = {};
 
 	// If we want groups that aren't from issues
 	if (queryParams.noIssues) {
-		query = { issue_id: { $exists: false } };
+		query.issue_id = { $exists: false };
 	}
 	return this.find(dbCol, query);
 };
@@ -286,9 +283,6 @@ groupSchema.methods.updateAttrs = function(data){
 		}
 
 		for (let namespace in sharedIdsByAccount) {
-			if (!sharedIdsByAccount.hasOwnProperty(namespace)) {
-				continue;
-			}
 			const nsSplitArr = namespace.split("__");
 			const account = nsSplitArr[0];
 			const model = nsSplitArr[1];
@@ -339,7 +333,7 @@ groupSchema.methods.updateAttrs = function(data){
 };
 
 groupSchema.statics.createGroup = function(dbCol, data){
-	let group = this.model("Group").createInstance({
+	const group = this.model("Group").createInstance({
 		account: dbCol.account, 
 		model: dbCol.model
 	});
