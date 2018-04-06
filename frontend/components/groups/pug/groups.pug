@@ -72,11 +72,15 @@ div.groupsContainer
         layout-margin
         ng-show="vm.toShow === 'group'")
 
-        md-input-container.groupNameInput
-            label Group Name
-            input(
-                ng-model="vm.selectedGroup.name" 
-                ng-maxlength="80")
+
+        div(layout="row" flex).groupMarginBottom
+            div.openedGroupColorBar(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
+            div(layout="column" flex)
+                md-input-container
+                    label Group Name
+                    input(
+                        ng-model="vm.selectedGroup.name" 
+                        ng-maxlength="80")
 
         md-input-container
             label Group Description

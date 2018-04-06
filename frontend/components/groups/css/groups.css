@@ -38,12 +38,22 @@ groups .spinner svg {
     transform-origin: initial !important;
 }
 
+groups .groupNameContainer {
+    margin-bottom: 20px;
+}
+
+groups .groupMarginBottom {
+    /** Bit of a hack to battle with angular material **/
+    margin-bottom: 70px !important;
+}
+
 groups .metaMargin {
     margin: 3px;
 }
 
 groups .groupNameInput {
     margin-top: 20px;
+    width: 100%;
 }
 
 groups .groupMain {
@@ -103,6 +113,13 @@ groups .groupName {
 
 groups .groupEnterHolder md-icon {
     color: white;
+}
+
+groups .openedGroupColorBar {
+    width: 8px;
+    margin-top: 13px;
+    height: 30px;
+    margin-right: 10px;
 }
 
 groups .groupDescription {
