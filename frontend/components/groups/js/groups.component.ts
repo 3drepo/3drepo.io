@@ -24,6 +24,8 @@ class GroupsController implements ng.IController {
 		"GroupsService",
 		"DialogService",
 		"TreeService",
+		"AuthService",
+		"ClientConfigService",
 	];
 
 	private onContentHeightRequest: any;
@@ -41,6 +43,8 @@ class GroupsController implements ng.IController {
 	private hexColor: string;
 	private selectedObjectsLen: number;
 	private dialogThreshold: number;
+	private canAddGroup: boolean;
+	private modelSettings: any;
 
 	constructor(
 		private $scope: any,
@@ -49,10 +53,12 @@ class GroupsController implements ng.IController {
 		private GroupsService: any,
 		private DialogService: any,
 		private TreeService: any,
+		private AuthService: any,
+		private ClientConfigService: any,
 	) {}
 
 	public $onInit() {
-
+		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.changed = false;
 		this.teamspace = this.account; // Workaround legacy naming
@@ -110,6 +116,20 @@ class GroupsController implements ng.IController {
 			}
 		});
 
+		this.$scope.$watch("vm.modelSettings", () => {
+			if (this.modelSettings) {
+
+					const hasPerm = this.AuthService.hasPermission(
+						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+						this.modelSettings.permissions,
+					);
+
+					if (hasPerm) {
+						this.canAddGroup = true;
+					}
+			}
+		});
+
 		this.$scope.$watch(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
@@ -140,7 +160,8 @@ class GroupsController implements ng.IController {
 	}
 
 	public saveDisabled() {
-		return !this.selectedGroup ||
+		return !this.canAddGroup ||
+				!this.selectedGroup ||
 				!this.selectedGroup.name ||
 				!this.changed;
 	}

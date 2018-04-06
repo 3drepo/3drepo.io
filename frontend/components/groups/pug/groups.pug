@@ -178,6 +178,7 @@ div.groupsContainer
                 type="button" 
                 aria-label="Add"
                 ng-show="vm.toShow === 'groups'"
+                ng-disabled="!vm.canAddGroup"
                 ng-click="vm.addGroup()")
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
