@@ -141,6 +141,14 @@ export class IssuesService {
 				this.state.issuesToShow = this.filteredIssues(filterText);
 			} 
 
+			// Closed
+			for (let i = this.state.issuesToShow.length - 1; i >= 0; i--) {
+				if (!this.state.issueDisplay.showClosed &&
+					"closed" === this.state.issuesToShow[i].status) {
+					this.state.issuesToShow.splice(i, 1);
+				}
+			}
+
 			// Sub models
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
