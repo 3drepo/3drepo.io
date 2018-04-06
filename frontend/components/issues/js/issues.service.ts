@@ -1272,6 +1272,8 @@ export class IssuesService {
 
 		let actionText = "";
 
+		value = value.toLowerCase();
+
 		if (actions.hasOwnProperty(value)) {
 			actionText = actions[value];
 		}
