@@ -97,6 +97,7 @@ class GroupsController implements ng.IController {
 		this.$scope.$watch("vm.hideItem", (newValue) => {
 			if (newValue) {
 				this.toShow = "groups";
+				this.setContentHeight();
 			}
 		});
 
@@ -306,7 +307,7 @@ class GroupsController implements ng.IController {
 		}
 
 		let contentHeight = 0;
-		const groupHeight = 125;
+		const groupHeight = 110;
 		const actionBar = 52;
 
 		if (this.groups && this.groups.length) {

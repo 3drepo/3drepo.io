@@ -111,8 +111,8 @@ groups .groupDescription {
 
 groups .group {
     border-bottom: solid gainsboro 1px;
-    min-height: 125px;
-    max-height: 125px;
+    min-height: 110px;
+    max-height: 110px;
     height: 100%;
 }
 
