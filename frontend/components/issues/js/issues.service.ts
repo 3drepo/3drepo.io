@@ -1259,14 +1259,24 @@ export class IssuesService {
 	 * @param value
 	 */
 	public convertActionValueToText(value: string) {
-		const actions = [
-			"None", "Low", "Medium", "High", "Open",
-			"In progress", "For approval", "Closed",
-		];
-		if (actions.indexOf(value) !== -1) {
-			return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+		const actions = {
+			"none": "None",
+			"low": "Low",
+			"medium": "Medium",
+			"high": "High",
+			"open": "Open",
+			"in progress": "In progress",
+			"for approval": "For approval",
+			"closed": "Closed"
+		};
+
+		let actionText = "";
+
+		if (actions.hasOwnProperty(value)) {
+			actionText = actions[value];
 		}
-		return  "";
+
+		return actionText;
 	}
 
 }
