@@ -1338,7 +1338,7 @@ export class TreeService {
 						this.expandToSelection(this.getPath(objUid), 0, undefined, true);
 
 						if (nodes.size > 0) {
-							this.selectNodes(Array.from(nodes), false, true, undefined, undefined, undefined);
+							this.selectNodes(Array.from(nodes), false, true, undefined, undefined);
 						}
 					}
 				}
