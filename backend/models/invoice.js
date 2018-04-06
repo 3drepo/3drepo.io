@@ -475,10 +475,6 @@
 
 	};
 
-	schema.methods.getPDF = function () {
-		return this.generatePDF();
-	};
-
 	var Invoice = ModelFactory.createClass(
 		"Invoice",
 		schema,
