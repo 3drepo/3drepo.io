@@ -141,6 +141,14 @@ export class IssuesService {
 				this.state.issuesToShow = this.filteredIssues(filterText);
 			} 
 
+			// Closed
+			for (let i = this.state.issuesToShow.length - 1; i >= 0; i--) {
+				if (!this.state.issueDisplay.showClosed &&
+					"closed" === this.state.issuesToShow[i].status) {
+					this.state.issuesToShow.splice(i, 1);
+				}
+			}
+
 			// Sub models
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
@@ -1251,14 +1259,26 @@ export class IssuesService {
 	 * @param value
 	 */
 	public convertActionValueToText(value: string) {
-		const actions = [
-			"None", "Low", "Medium", "High", "Open",
-			"In progress", "For approval", "Closed",
-		];
-		if (actions.indexOf(value) !== -1) {
-			return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+		const actions = {
+			"none": "None",
+			"low": "Low",
+			"medium": "Medium",
+			"high": "High",
+			"open": "Open",
+			"in progress": "In progress",
+			"for approval": "For approval",
+			"closed": "Closed"
+		};
+
+		let actionText = value;
+
+		value = value.toLowerCase();
+
+		if (actions.hasOwnProperty(value)) {
+			actionText = actions[value];
 		}
-		return  "";
+
+		return actionText;
 	}
 
 }
