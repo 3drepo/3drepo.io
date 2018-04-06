@@ -79,7 +79,6 @@
 		taxAmount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
 		state: {type: String, default: C.INV_INIT, enum: [C.INV_INIT, C.INV_PENDING, C.INV_COMPLETE]},
-		pdf: Object,
 		paypalPaymentToken: String
 	});
 
@@ -324,9 +323,7 @@
 		//save first to generate invoice no before generating pdf
 		return invoice.save().then(invoice => {
 
-			// also save the pdf to database for ref.
 			return invoice.generatePDF().then(pdf => {
-				invoice.pdf = pdf;
 				return invoice;
 			});
 
@@ -478,16 +475,8 @@
 
 	};
 
-	schema.methods.getPDF = function (options) {
-		options = options || {};
-
-		if (options.regenerate || !this.pdf) {
-
-			return this.generatePDF();
-
-		} else {
-			return Promise.resolve(this.pdf.buffer);
-		}
+	schema.methods.getPDF = function () {
+		return this.generatePDF();
 	};
 
 	var Invoice = ModelFactory.createClass(

@@ -85,7 +85,7 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			return invoice.getPDF({regenerate: regenerate});
+			return invoice.getPDF();
 
 		}).then(pdf => {
 
