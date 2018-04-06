@@ -571,6 +571,22 @@ export class UnityUtil {
 	}
 
 	/**
+	 *  Unhighlight objects
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
+	 */
+	public static unhighlightObjects(account, model, idArr) {
+		const params: any = {
+			database : account,
+			model,
+			ids : idArr
+		};
+
+		UnityUtil.toUnity("UnhighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+	}
+
+	/**
 	 * Loading another model. NOTE: this will also clear the canvas of existing models
 	 * Use branch = master and revision = head to get the latest revision.
 	 *  @param {string} account - name of teamspace
