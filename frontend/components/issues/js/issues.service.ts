@@ -1270,7 +1270,7 @@ export class IssuesService {
 			"closed": "Closed"
 		};
 
-		let actionText = "";
+		let actionText = value;
 
 		value = value.toLowerCase();
 
