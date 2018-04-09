@@ -92,6 +92,12 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 				subscriptions.enterprise.collaborators = NumberInt(subscriptions.enterprise.collaborators);
 				subscriptions.enterprise.data = NumberInt(subscriptions.enterprise.data);
 			}
+
+			if(subscriptions.paypal) {
+				subscriptions.paypal.forEach(function(sub) {
+					sub.quantity = NumberInt(sub.quantity);
+				});
+			}
 			user.customData.billing.subscriptions = subscriptions;
 			var updateBson = {customData: user.customData};
 			if(createdAt) {
@@ -102,7 +108,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 		}
 		print("\tUpdated Sub:");
 		print("\t\t" + JSON.stringify(subscriptions));
-		print("User created at: "  + createdAt);
+		print("\tUser created at: "  + createdAt);
 	}
 	else{
 		print("\tSub already up to date..");
