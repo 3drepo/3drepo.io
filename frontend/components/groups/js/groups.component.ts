@@ -140,12 +140,13 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public resetToSavedGroup() {
-		this.selectedGroup.name = this.savedGroupData.name;
-		this.selectedGroup.description = this.savedGroupData.description;
-		this.selectedGroup.color = this.savedGroupData.color;
-		this.GroupsService.updateSelectedGroupColor();
-
+	public resetToSavedGroup() { 
+		if (this.selectedGroup && this.savedGroupData) {
+			this.selectedGroup.name = this.savedGroupData.name;
+			this.selectedGroup.description = this.savedGroupData.description;
+			this.selectedGroup.color = this.savedGroupData.color;
+			this.GroupsService.updateSelectedGroupColor();
+		}
 	}
 
 	public toggleColorOverride($event, group: any) {
