@@ -105,7 +105,7 @@ class GroupsController implements ng.IController {
 			if (newValue) {
 				this.toShow = "groups";
 				this.setContentHeight();
-				this.compareSavedGroup();
+				this.resetToSavedGroup();
 			}
 		});
 
@@ -120,14 +120,10 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
-				const hasPerm = this.AuthService.hasPermission(
+				this.canAddGroup = this.AuthService.hasPermission(
 					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
 					this.modelSettings.permissions,
 				);
-
-				if (hasPerm) {
-					this.canAddGroup = true;
-				}
 			}
 		});
 
@@ -144,24 +140,12 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public compareSavedGroup() {
-		//
-		if (this.selectedGroup.name !== this.savedGroupData.name) {
-			this.selectedGroup.name = this.savedGroupData.name;
-		}
+	public resetToSavedGroup() {
+		this.selectedGroup.name = this.savedGroupData.name;
+		this.selectedGroup.description = this.savedGroupData.description;
+		this.selectedGroup.color = this.savedGroupData.color;
+		this.GroupsService.updateSelectedGroupColor();
 
-		if (this.selectedGroup.description !== this.savedGroupData.description) {
-			this.selectedGroup.description = this.savedGroupData.description;
-		}
-
-		if (
-			this.selectedGroup.color[0] !== this.savedGroupData.color[0] ||
-			this.selectedGroup.color[1] !== this.savedGroupData.color[1] ||
-			this.selectedGroup.color[2] !== this.savedGroupData.color[2]
-		) {
-			this.selectedGroup.color = this.savedGroupData.color;
-			this.GroupsService.updateSelectedGroupColor();
-		}
 	}
 
 	public toggleColorOverride($event, group: any) {

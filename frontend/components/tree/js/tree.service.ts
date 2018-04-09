@@ -1092,17 +1092,6 @@ export class TreeService {
 			const shouldSelect = !multi || forceReHighlight || !node.selected;
 			this.setNodeSelection(node, shouldSelect);
 
-			// if (forceReHighlight) {
-			// 	this.setNodeSelection(node, true);
-			// } else if (multi) {
-			// 	// Multiselect mode and we selected the same node - unselect it
-			// 	this.setNodeSelection(node, !node.selected);
-			// } else {
-			// 	// If it is not multiselect mode, remove all highlights
-			// 	this.clearCurrentlySelected();
-			// 	this.setNodeSelection(node, true);
-			// }
-
 		}
 
 		const lastNode = nodes[nodes.length - 1] ;
