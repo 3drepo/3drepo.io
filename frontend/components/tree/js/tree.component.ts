@@ -333,23 +333,22 @@ class TreeController implements ng.IController {
 
 		// Select the node first then use all the currently selected nodes
 		// for zooming and centering too.
-		this.selectNode(node).then(() => {
-			this.TreeService.getCurrentMeshHighlights().then((selectionMap) => {
+		this.selectNode(node).then((selectionMap) => {
 
-				if (Object.keys(selectionMap).length === 0) {
-					return;
-				}
-				const meshIDArrs = [];
-				const keys = Object.keys(selectionMap);
-				keys.forEach((key) => {
-					meshIDArrs.push({
-						model: key.replace("@", "."),
-						meshID: selectionMap[key].meshes,
-					});
+			if (Object.keys(selectionMap).length === 0) {
+				return;
+			}
+			const meshIDArrs = [];
+			const keys = Object.keys(selectionMap);
+			keys.forEach((key) => {
+				meshIDArrs.push({
+					model: key.replace("@", "."),
+					meshID: selectionMap[key].meshes,
 				});
-
-				this.ViewerService.centreToPoint(meshIDArrs);
 			});
+
+			this.ViewerService.centreToPoint(meshIDArrs);
+
 		});
 	}
 
