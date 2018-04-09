@@ -23,8 +23,8 @@ class DocsController implements ng.IController {
 		"$timeout",
 		"$filter",
 
-		"EventService",
 		"DocsService",
+		"ViewerService",
 	];
 
 	private onContentHeightRequest;
@@ -41,8 +41,8 @@ class DocsController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 		private $filter: any,
 
-		private EventService: any,
 		private DocsService: any,
+		private ViewerService: any,
 	) {}
 
 	public $onInit() {
@@ -59,6 +59,7 @@ class DocsController implements ng.IController {
 	}
 
 	public watchers() {
+
 		this.$scope.$watch(() => {
 			return this.DocsService.state;
 		}, () => {

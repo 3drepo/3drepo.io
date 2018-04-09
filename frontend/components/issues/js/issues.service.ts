@@ -244,7 +244,7 @@ export class IssuesService {
 			if (show !== undefined && pinPosition) {
 
 				let pinColor = Pin.pinColours.blue;
-				let isSelectedPin = this.state.selectedIssue && 
+				const isSelectedPin = this.state.selectedIssue &&
 									issue._id === this.state.selectedIssue._id;
 
 				if (isSelectedPin) {
@@ -277,7 +277,7 @@ export class IssuesService {
 				this.deselectPin(this.state.selectedIssue);
 			}
 		}
-		
+
 		this.state.selectedIssue = issue;
 
 		// If we're saving then we already have pin and
@@ -308,7 +308,7 @@ export class IssuesService {
 			if(matchs){
 
 				if(issue.status === "closed") {
-					
+
 					this.state.allIssues[i].justClosed = true;
 
 					this.$timeout(() => {
@@ -330,15 +330,15 @@ export class IssuesService {
 	}
 
 	public populateIssue(issue) {
-		
+
 		if (issue) {
 			issue.title = this.generateTitle(issue);
 		}
-		
+
 		if (issue.created) {
 			issue.timeStamp = this.getPrettyTime(issue.created);
 		}
-		
+
 		if (issue.thumbnail) {
 			issue.thumbnailPath = this.getThumbnailPath(issue.thumbnail);
 		}
@@ -350,13 +350,13 @@ export class IssuesService {
 		if (issue) {
 			issue.statusIcon = this.getStatusIcon(issue);
 		}
-		
+
 		if (issue.assigned_roles[0]) {
 			this.getJobColor(issue.assigned_roles[0]).then((color) => {
 				issue.issueRoleColor = color;
 			});
 		}
-		
+
 		if (!issue.descriptionThumbnail) {
 			if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
 				issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
@@ -367,30 +367,30 @@ export class IssuesService {
 
 	public userJobMatchesCreator(userJob, issueData) {
 
-		return (userJob._id && 
-			issueData.creator_role && 
+		return (userJob._id &&
+			issueData.creator_role &&
 			userJob._id === issueData.creator_role);
 	}
 
 	public isViewer(permissions) {
 		// console.log("isViewer", permissions);
 		return !this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
 			permissions
 		);
 	}
 
 	public isAssignedJob(userJob, issueData, permissions) {
 		// console.log("isAssignedJob", permissions);
-		return (userJob._id && 
-				issueData.assigned_roles[0] && 
+		return (userJob._id &&
+				issueData.assigned_roles[0] &&
 				userJob._id === issueData.assigned_roles[0]) &&
 				!this.isViewer(permissions);
 	}
 
 	public isAdmin(permissions) {
 		return this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION, 
+			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
 			permissions
 		);
 	}
@@ -404,12 +404,12 @@ export class IssuesService {
 	}
 
 	public canChangeStatusToClosed(issueData, userJob, permissions) {
-		
+
 		let jobOwner = (this.userJobMatchesCreator(userJob, issueData) &&
 						!this.isViewer(permissions));
 
 		return this.isAdmin(permissions) || jobOwner;
-				
+
 	}
 
 	public canChangeStatus(issueData, userJob, permissions) {
@@ -420,23 +420,23 @@ export class IssuesService {
 			!this.isViewer(permissions)
 		);
 		return this.isAdmin(permissions) || jobMatches || assigned;
-				
+
 	}
 
 	public canChangeType(issueData, userJob, permissions) {
-		
+
 		return this.canComment(issueData, userJob, permissions);
 
 	}
 
 	public canChangeDueDate(issueData, userJob, permissions) {
-		
+
 		return this.canChangeStatusToClosed(issueData, userJob, permissions);
 
 	}
 
 	public canChangeAssigned(issueData, userJob, permissions) {
-		
+
 		return this.canComment(issueData, userJob, permissions);
 
 	}
@@ -449,13 +449,13 @@ export class IssuesService {
 	}
 
 	public canComment(issueData, userJob, permissions) {
-		
-		let isNotClosed = issueData && 
-			issueData.status && 
+
+		let isNotClosed = issueData &&
+			issueData.status &&
 			this.isOpen(issueData);
 
 		let ableToComment = this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE, 
+			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
 			permissions
 		);
 
@@ -510,7 +510,7 @@ export class IssuesService {
 
 	public handleCameraView(issue) {
 		// Set the camera position
-		let issueData = {
+		const issueData = {
 			position : issue.viewpoint.position,
 			view_dir : issue.viewpoint.view_dir,
 			look_at : issue.viewpoint.look_at,
@@ -531,7 +531,7 @@ export class IssuesService {
 				this.handleCameraView(issue);
 			}
 
-			let issueData = {
+			const issueData = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
@@ -546,13 +546,13 @@ export class IssuesService {
 		}
 
 		this.TreeService.getMap().then(() => {
-			this.TreeService.updateModelState(this.TreeService.allNodes[0]);
+			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
 		});
 	}
 
 	public showMultiIds(issue) {
 
-		let promises = [];
+		const promises = [];
 
 		if (issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
 					issue.viewpoint.hasOwnProperty("hidden_group_id") ||
@@ -565,7 +565,7 @@ export class IssuesService {
 
 				let hiddenPromise;
 
-				if (this.groupsCache[hiddenGroupId]) {
+				if (this.groupsCache[hiddenGroupUrl]) {
 					hiddenPromise = this.handleHidden(this.groupsCache[hiddenGroupUrl]);
 				} else {
 
@@ -591,7 +591,7 @@ export class IssuesService {
 
 				let shownPromise;
 
-				if (this.groupsCache[shownGroupId]) {
+				if (this.groupsCache[shownGroupUrl]) {
 					shownPromise = this.handleShown(this.groupsCache[shownGroupUrl]);
 				} else {
 
@@ -667,88 +667,19 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-
-		this.TreeService.getMap()
-			.then((treeMap) => {
-
-				let nodes = new Set();
-
-				for (let i = 0; i < objects.length; i++) {
-					let objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-					if (objUid) {
-						const node = this.TreeService.getNodeById(objUid);
-						if (node && node.hasOwnProperty("name")) {
-							nodes.add(node);
-						}
-
-						if (i === objects.length - 1) {
-							// Only call expandToSelection for last selected node to improve performance
-							this.TreeService.initNodesToShow([this.TreeService.allNodes[0]]);
-							// TODO: we no longer need to select here, but still need to expand tree
-							this.TreeService.expandToSelection(this.TreeService.getPath(objUid), 0, undefined, true);
-
-							if (nodes.size > 0) {
-								this.TreeService.selectNodes(Array.from(nodes), false, true);
-							}
-						}
-					}
-				}
-
+		this.TreeService.highlightsBySharedId(objects)
+			.then(() => {
 				angular.element((window as any)).triggerHandler("resize");
-
-			})
-			.catch((error) => {
-				console.error(error);
+				this.$timeout(() => {}); // Force a digest cycle
 			});
 	}
 
 	public handleHidden(objects) {
-
-		this.TreeService.getMap()
-			.then((treeMap) => {
-
-				if (objects) {
-					// Make a list of nodes to hide
-					let hiddenNodes = [];
-					for (let i = 0; i < objects.length; i++) {
-						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-						if (objUid) {
-							hiddenNodes.push(this.TreeService.getNodeById(objUid));
-						}
-					}
-					this.TreeService.hideTreeNodes(hiddenNodes);
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		this.TreeService.hideBySharedId(objects);
 	}
 
 	public handleShown(objects) {
-
-		this.TreeService.getMap()
-			.then((treeMap) => {
-
-				this.TreeService.hideAllTreeNodes(false);
-
-				if (objects) {
-					// Make a list of nodes to shown
-					let shownNodes = [];
-					for (let i = 0; i < objects.length; i++) {
-						const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-
-						if (objUid) {
-							shownNodes.push(this.TreeService.getNodeById(objUid));
-						}
-					}
-					this.TreeService.showTreeNodes(shownNodes);
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		this.TreeService.showBySharedId(objects);
 	}
 
 	public handleTree(response) {
@@ -778,7 +709,7 @@ export class IssuesService {
 		const	monthToText = [
 			"Jan", "Feb", "Mar", "Apr",
 			"May", "Jun", "Jul", "Aug",
-			"Sep", "Oct", "Nov", "Dec"
+			"Sep", "Oct", "Nov", "Dec",
 		];
 
 		if ((date.getFullYear() === currentDate.getFullYear()) &&
@@ -917,7 +848,7 @@ export class IssuesService {
 		}
 		return this.doPut(issue, {
 			closed,
-			number: issue.number
+			number: issue.number,
 		});
 	}
 
@@ -927,14 +858,14 @@ export class IssuesService {
 			{
 				assigned_roles: issue.assigned_roles,
 				number: 0 // issue.number
-			}
+			},
 		);
 	}
 
 	public saveComment(issue, comment, viewpoint) {
 		return this.doPut(issue, {
 			comment,
-			viewpoint
+			viewpoint,
 		});
 	}
 
@@ -943,7 +874,7 @@ export class IssuesService {
 			comment,
 			number: issue.number,
 			edit: true,
-			commentIndex
+			commentIndex,
 		});
 	}
 
@@ -952,7 +883,7 @@ export class IssuesService {
 			comment: "",
 			number: issue.number,
 			delete: true,
-			commentIndex: index
+			commentIndex: index,
 			// commentCreated: issue.comments[index].created
 		});
 	}
@@ -962,7 +893,7 @@ export class IssuesService {
 			comment: "",
 			number: issue.number,
 			sealed: true,
-			commentIndex
+			commentIndex,
 		});
 	}
 
@@ -977,7 +908,7 @@ export class IssuesService {
 			},
 			() => {
 				this.jobsDeferred.resolve([]);
-			}
+			},
 		);
 
 		return this.jobsDeferred.promise;
@@ -993,7 +924,7 @@ export class IssuesService {
 			},
 			() => {
 				deferred.resolve();
-			}
+			},
 		);
 
 		return deferred.promise;
@@ -1026,7 +957,7 @@ export class IssuesService {
 		return [
 			(parseInt(hexColours[0], 16) / 255.0),
 			(parseInt(hexColours[1], 16) / 255.0),
-			(parseInt(hexColours[2], 16) / 255.0)
+			(parseInt(hexColours[2], 16) / 255.0),
 		];
 	}
 

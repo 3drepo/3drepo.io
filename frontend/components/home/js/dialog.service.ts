@@ -154,6 +154,31 @@ export class DialogService {
 
 	}
 
+	public confirm(title, content, escapable, ok, cancel) {
+
+		if (!this.expiredDialogOpen) {
+
+			if (escapable === undefined) {
+				escapable = true;
+			}
+
+			return this.$mdDialog.show(
+				this.$mdDialog.confirm()
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
+					.title(title)
+					.textContent(content)
+					.ariaLabel(title)
+					.ok(ok)
+					.cancel(cancel)
+			);
+
+		} else {
+			return Promise.resolve();
+		}
+
+	}
+
 	public text(title, content, escapable) {
 
 		if (!this.expiredDialogOpen) {

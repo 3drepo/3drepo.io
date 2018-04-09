@@ -706,7 +706,7 @@ class IssueController implements ng.IController {
 	public showScreenshotDialog(event) {
 		const parentScope = this;
 		this.$mdDialog.show({
-			controller: function() {
+			controller() {
 				this.issueComponent = parentScope;
 			},
 			controllerAs: "vm",
@@ -1106,19 +1106,19 @@ class IssueController implements ng.IController {
 			//FIXME: this is duplicated code - something similar already exists in CreateGroup
 			// Create a group of selected objects
 			const highlightedGroupData = this.createGroupData(this.pruneNodes(objectInfo.highlightedNodes, "selected"));
-		
+
 			// Create a group of hidden objects
 			const hiddenGroupData = this.createGroupData(this.pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 
 			const promises = [];
-			
+
 			if(highlightedGroupData) {
 			promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 				}));
 			}
-	
+
 			if(hiddenGroupData) {
 				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
 					.then((hiddenGroupResponse) => {
@@ -1126,7 +1126,7 @@ class IssueController implements ng.IController {
 						this.commentViewpoint.hideIfc = this.TreeService.getHideIfc();
 					}));
 			}
-	
+
 			Promise.all(promises).then(() => {
 				this.IssuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
@@ -1140,10 +1140,10 @@ class IssueController implements ng.IController {
 			}).catch((error) => {
 				console.error(error);
 			});
-			
+
 			this.AnalyticService.sendEvent({
 				eventCategory: "Issue",
-				eventAction: "comment"
+				eventAction: "comment",
 			});
 		});
 
@@ -1185,11 +1185,11 @@ class IssueController implements ng.IController {
 			otherComment.sealed = true;
 		});
 
-		if(comment.owner !== this.AuthService.getUsername()) {
+		if (comment.owner !== this.AuthService.getUsername()) {
 			comment.sealed = true;
 		}
 
-		if(comment.viewpoint && comment.viewpoint.screenshot) {
+		if (comment.viewpoint && comment.viewpoint.screenshot) {
 			comment.viewpoint.screenshotPath = this.APIService.getAPIUrl(comment.viewpoint.screenshot);
 		}
 
@@ -1207,7 +1207,7 @@ class IssueController implements ng.IController {
 			action: comment.action,
 		});
 
-		if(!noDeleteInput) {
+		if (!noDeleteInput) {
 			delete this.comment;
 			delete this.commentThumbnail;
 			this.IssuesService.updateIssues(this.issueData);
@@ -1445,7 +1445,6 @@ export const IssueComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		data: "=",
-		keysDown: "<",
 		exit: "&",
 		event: "<",
 		selectedIssueLoaded: "<",
