@@ -1089,16 +1089,19 @@ export class TreeService {
 				continue;
 			}
 
-			if (forceReHighlight) {
-				this.setNodeSelection(node, true);
-			} else if (multi) {
-				// Multiselect mode and we selected the same node - unselect it
-				this.setNodeSelection(node, !node.selected);
-			} else {
-				// If it is not multiselect mode, remove all highlights
-				this.clearCurrentlySelected();
-				this.setNodeSelection(node, true);
-			}
+			const shouldSelect = !multi || forceReHighlight || !node.selected;
+			this.setNodeSelection(node, shouldSelect);
+
+			// if (forceReHighlight) {
+			// 	this.setNodeSelection(node, true);
+			// } else if (multi) {
+			// 	// Multiselect mode and we selected the same node - unselect it
+			// 	this.setNodeSelection(node, !node.selected);
+			// } else {
+			// 	// If it is not multiselect mode, remove all highlights
+			// 	this.clearCurrentlySelected();
+			// 	this.setNodeSelection(node, true);
+			// }
 
 		}
 
@@ -1347,13 +1350,15 @@ export class TreeService {
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
 
-				this.initNodesToShow([this.allNodes[0]]);
-				this.selectNodes(nodes, true, undefined, false);
+				if (nodes && nodes.length) {
+					this.initNodesToShow([this.allNodes[0]]);
+					this.selectNodes(nodes, true, undefined, false);
 
-				const lastNodeId = nodes[nodes.length - 1]._id;
-				const lastNodePath = this.getPath(lastNodeId);
+					const lastNodeId = nodes[nodes.length - 1]._id;
+					const lastNodePath = this.getPath(lastNodeId);
 
-				this.expandToSelection(lastNodePath, 0, true, true);
+					this.expandToSelection(lastNodePath, 0, true, true);
+				}
 
 			})
 			.catch((error) => {

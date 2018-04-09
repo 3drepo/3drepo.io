@@ -45,6 +45,7 @@ class GroupsController implements ng.IController {
 	private dialogThreshold: number;
 	private canAddGroup: boolean;
 	private modelSettings: any;
+	private savedGroupData: any;
 
 	constructor(
 		private $scope: any,
@@ -104,6 +105,7 @@ class GroupsController implements ng.IController {
 			if (newValue) {
 				this.toShow = "groups";
 				this.setContentHeight();
+				this.compareSavedGroup();
 			}
 		});
 
@@ -118,15 +120,14 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
+				const hasPerm = this.AuthService.hasPermission(
+					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+					this.modelSettings.permissions,
+				);
 
-					const hasPerm = this.AuthService.hasPermission(
-						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
-						this.modelSettings.permissions,
-					);
-
-					if (hasPerm) {
-						this.canAddGroup = true;
-					}
+				if (hasPerm) {
+					this.canAddGroup = true;
+				}
 			}
 		});
 
@@ -141,6 +142,26 @@ class GroupsController implements ng.IController {
 
 		}, true);
 
+	}
+
+	public compareSavedGroup() {
+		//
+		if (this.selectedGroup.name !== this.savedGroupData.name) {
+			this.selectedGroup.name = this.savedGroupData.name;
+		}
+
+		if (this.selectedGroup.description !== this.savedGroupData.description) {
+			this.selectedGroup.description = this.savedGroupData.description;
+		}
+
+		if (
+			this.selectedGroup.color[0] !== this.savedGroupData.color[0] ||
+			this.selectedGroup.color[1] !== this.savedGroupData.color[1] ||
+			this.selectedGroup.color[2] !== this.savedGroupData.color[2]
+		) {
+			this.selectedGroup.color = this.savedGroupData.color;
+			this.GroupsService.updateSelectedGroupColor();
+		}
 	}
 
 	public toggleColorOverride($event, group: any) {
@@ -263,7 +284,7 @@ class GroupsController implements ng.IController {
 		)
 			.then(() => {
 				this.savingGroup = false;
-
+				this.savedGroupData = Object.assign({}, this.selectedGroup);
 				// Wrapped in timeout to avoid watcher clashing
 				this.$timeout(() => {
 					this.changed = false;
@@ -286,7 +307,7 @@ class GroupsController implements ng.IController {
 		)
 			.then(() => {
 				this.savingGroup = false;
-
+				this.savedGroupData = Object.assign({}, this.selectedGroup);
 				// Wrapped in timeout to avoid watcher clashing
 				this.$timeout(() => {
 					this.changed = false;
@@ -310,6 +331,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public showGroupPane() {
+		this.savedGroupData = Object.assign({}, this.selectedGroup);
 		this.toShow = "group";
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
