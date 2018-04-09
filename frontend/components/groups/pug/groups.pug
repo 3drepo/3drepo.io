@@ -79,12 +79,15 @@ div.groupsContainer
                 md-input-container
                     label Group Name
                     input(
+                        ng-disabled="!vm.canAddGroup"
                         ng-model="vm.selectedGroup.name" 
                         ng-maxlength="80")
 
         md-input-container
             label Group Description
-            textarea.groupDescriptionInput(ng-model="vm.selectedGroup.description")
+            textarea.groupDescriptionInput(
+                ng-disabled="!vm.canAddGroup"
+                ng-model="vm.selectedGroup.description")
 
         md-container.groupObjectMetaContainer(
             layout="row"
@@ -136,6 +139,7 @@ div.groupsContainer
                     class="md-icon-button md-button md-ink-ripple" 
                     type="button" 
                     aria-label="Color" 
+                    ng-disabled="!vm.canAddGroup"
                     ng-show="vm.toShow === 'group' && !vm.savingGroup"
                     ng-click="vm.openColorMenu($mdMenu, $event)")
                     md-tooltip Group Colour
@@ -165,7 +169,7 @@ div.groupsContainer
                 type="button"
                 ng-if="vm.groups.length > 0"
                 aria-label="Reselect"
-                 ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                ng-show="vm.toShow === 'group' && !vm.savingGroup"
                 ng-click="vm.reselectGroup()")
                 md-tooltip Reset to Saved Selection
                 md-icon(
