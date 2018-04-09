@@ -319,27 +319,21 @@ export class GroupsService {
 			color = this.state.selectedGroup.color.map((c) => c / 255);
 		}
 
+		let selectNodes = true;
+
 		if (!multi) {
 			this.state.multiSelectedGroups = [group];
-			return this.TreeService.selectNodesBySharedIds(
-				this.state.selectedGroup.objects,
-				multi, // multi
-				color,
-				true,
-			).then((meshes) => {
-
-				// If we haven't saved don't update saved meshes
-				if (!this.state.selectedGroup.new) {
-					const total = this.getTotalMeshes(meshes);
-					this.state.selectedGroup.totalSavedMeshes = total;
-				}
-
-			});
 
 		} else if (!this.state.multiSelectedGroups.includes(group)) {
 
 			// selecting group that's not selected
 			this.state.multiSelectedGroups.push(group);
+
+		} else {
+			selectNodes = false;
+		}
+
+		if (selectNodes) {
 
 			return this.TreeService.selectNodesBySharedIds(
 				this.state.selectedGroup.objects,
@@ -357,6 +351,7 @@ export class GroupsService {
 			});
 
 		} else {
+
 			// Remove the group from selected groups
 			const index = this.state.multiSelectedGroups.indexOf(group);
 			this.state.multiSelectedGroups.splice(index, 1);
@@ -366,7 +361,7 @@ export class GroupsService {
 				.then((nodes) => {
 
 					this.TreeService.deselectNodes(nodes).then((meshes) => {
-								// If we haven't saved don't update saved meshes
+						// If we haven't saved don't update saved meshes
 						if (!this.state.selectedGroup.new) {
 							const total = this.getTotalMeshes(meshes);
 							this.state.selectedGroup.totalSavedMeshes = total;
@@ -374,7 +369,6 @@ export class GroupsService {
 					});
 
 				});
-
 		}
 
 	}
