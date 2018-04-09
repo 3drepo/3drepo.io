@@ -71,7 +71,7 @@ function createSession(place, req, res, next, user){
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles, flags: user.flags});
 		}
 	});
 }
@@ -86,8 +86,19 @@ function login(req, res, next){
 	}
 
 	User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-		req[C.REQ_REPO].logger.logInfo("User is logged in", { username: req.body.username});
-		createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
+
+		let responseData = { username: user.user };
+		
+		req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
+		
+		responseData.roles = user.roles;
+		responseData.flags = {};
+		
+		if (!user.hasReadLatestTerms()) {
+			responseData.flags.termsPrompt = true;
+		}
+
+		createSession(responsePlace, req, res, next, responseData);
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});

@@ -257,7 +257,7 @@ class HomeController implements ng.IController {
 						});
 					}
 
-				} else if (currentData.initialiser && !currentData.username) {
+				} else if (!currentData.username) {
 
 					this.StateManager.setHomeState({
 						loggedIn: false,
