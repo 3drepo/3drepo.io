@@ -1,0 +1,213 @@
+div.groupsContainer
+
+    div.groupsNotice(
+        layout="column"
+        layout-align="center center"
+        ng-if="vm.loading")
+        h3 Loading groups...
+
+    md-container.groupsList(
+        ng-show="vm.toShow === 'groups'"
+        flex="100"
+        layout="column")
+
+        div.group(
+            layout="row"
+            ng-if="vm.groups.length > 0"
+            ng-click="vm.selectGroup(group)"
+            ng-repeat="group in vm.groups")
+
+            div.groupMain(layout="row")
+                div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
+                div.groupMetaData(layout="column", flex="100" layout-margin)
+                    div(layout="row" layout-align="space-between center"  flex="100")
+                        span.groupName {{group.name}}
+                    div(layout="row" flex="100")
+                        span.groupMeta  {{group.author}}
+                        span.groupMeta  {{ group.createdAt  | date:"MM/dd/yyyy"}}
+                    div(layout="row"  flex="100")
+                        span.groupDescription {{group.description}}
+            
+            div.groupColorHolder(
+                layout="row"
+                layout-align="center center")
+
+                div
+                    md-button.md-icon-button(
+                        aria-label="Invert Colors"
+                        ng-click="vm.isolateGroup($event, group)")
+                        md-icon.angular-material-icons visibility
+                    md-tooltip Isolate
+
+                div
+                    md-button.md-icon-button(
+                        ng-click="vm.toggleColorOverride($event, group)"
+                        aria-label="Invert Colors")
+                        md-icon.angular-material-icons(
+                            style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
+                    md-tooltip Toggle Colour Override
+            
+            div.groupEnterHolder(
+                ng-click="vm.editGroup()"
+                ng-if="group.selected === true"
+                layout="row"
+                layout-align="center center")
+
+                md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
+
+            div.groupEnterSpace(
+                ng-if="group.selected !== true"
+                layout="row"
+                layout-align="center center")
+
+        md-container.noGroups(
+            ng-if="vm.groups.length === 0 && !vm.loading"
+            layout-fill
+            layout="column")
+
+            h3 No groups have been created yet
+
+    div.groupContainer(
+        layout="column"
+        layout-margin
+        ng-show="vm.toShow === 'group'")
+
+
+        div(layout="row" flex).groupMarginBottom
+            div.openedGroupColorBar(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
+            div(layout="column" flex)
+                md-input-container
+                    label Group Name
+                    input(
+                        ng-disabled="!vm.canAddGroup"
+                        ng-model="vm.selectedGroup.name" 
+                        ng-maxlength="80")
+
+        md-input-container
+            label Group Description
+            textarea.groupDescriptionInput(
+                ng-disabled="!vm.canAddGroup"
+                ng-model="vm.selectedGroup.description")
+
+        md-container.groupObjectMetaContainer(
+            layout="row"
+            layout-align="space-between center")
+            div.groupObjectMeta  Saved Objects: {{ vm.selectedGroup.totalSavedMeshes }} 
+            div.groupObjectMeta  Selected Objects: {{ vm.selectedObjectsLen || 0 }}
+        
+        md-container(
+            layout="row"
+            layout-align="space-between center")
+
+            div.metaMargin
+                label.groupMeta Author: 
+                span.groupMeta {{ vm.selectedGroup.author }}
+
+            div.metaMargin
+                label.groupMeta Creation Date: 
+                span.groupMeta {{ vm.selectedGroup.createdAt  | date:"MM/dd/yyyy"}}
+           
+        md-container(
+            layout="row"
+            layout-align="space-between center")
+
+            div.metaMargin
+                label.groupMeta Last Updated By: 
+                span.groupMeta {{ vm.selectedGroup.updatedBy }}
+
+            div.metaMargin
+                label.groupMeta Updated On: 
+                span.groupMeta {{ vm.selectedGroup.updatedAt | date:"MM/dd/yyyy"}}
+
+
+    div.addHolder(layout="row" flex="100")
+
+        div(flex="50" layout="row" layout-align="start center")
+            button(class="md-icon-button md-button md-ink-ripple" 
+                type="button"
+                ng-if="vm.groups.length > 0"
+                aria-label="Delete"
+                ng-show="vm.toShow === 'groups' && vm.selectedGroup"
+                ng-click="vm.deleteGroup()")
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") delete
+
+            md-menu
+                button(
+                    class="md-icon-button md-button md-ink-ripple" 
+                    type="button" 
+                    aria-label="Color" 
+                    ng-disabled="!vm.canAddGroup"
+                    ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                    ng-click="vm.openColorMenu($mdMenu, $event)")
+                    md-tooltip Group Colour
+                    md-icon(
+                        class="angular-material-icons ng-scope material-icons"
+                        role="img"
+                        aria-hidden="true") format_color_fill
+
+                md-menu-content.groupColorMenu
+                    md-menu-item
+                        div.groupColorGrid(layout="row")
+                            div.groupColorColumn(layout="column" ng-repeat="row in vm.groupColours")
+                                div.groupColorContainer(layout="row" ng-repeat="color in row")
+                                    div.groupColor(
+                                        ng-click="vm.setSelectedGroupColor(color)"
+                                        style="background-color: {{vm.getRGBA(color)}};")
+                        div(layout="column")
+                            md-input-container.groupHexColorContainer(layout="column" layout-align="start center")
+                                label Hex Colour
+                                input.groupHexColor(ng-model="vm.hexColor")
+                            div(layout-fill).groupCurrentColorHolder
+                                label.groupCurrentColor Current Colour
+                                div.groupCurrentColorBlock(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
+            
+
+            button(class="md-icon-button md-button md-ink-ripple" 
+                type="button"
+                ng-if="vm.groups.length > 0"
+                aria-label="Reselect"
+                ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                ng-click="vm.reselectGroup()")
+                md-tooltip Reset to Saved Selection
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") replay
+
+        div(flex="50" layout="row" layout-align="end center")
+            button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                type="button" 
+                aria-label="Add"
+                ng-show="vm.toShow === 'groups'"
+                ng-disabled="!vm.canAddGroup"
+                ng-click="vm.addGroup()")
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") add
+            
+            button(
+                class="md-accent md-fab md-mini md-button md-ink-ripple" 
+                type="button" 
+                aria-label="Add" 
+                ng-disabled="vm.saveDisabled()"
+                ng-show="vm.toShow === 'group' && !vm.savingGroup"
+                ng-click="vm.handleGroupSave()")
+
+                md-icon(
+                    class="angular-material-icons ng-scope material-icons"
+                    role="img"
+                    aria-hidden="true") save
+            
+            md-progress-circular.spinner(
+                ng-if="vm.toShow === 'group' && vm.savingGroup")
+
+
+
+
+        
+        
+

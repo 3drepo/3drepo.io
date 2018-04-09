@@ -90,12 +90,6 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
-		// this.$scope.$watch("vm.showAdd", (newValue)  => {
-		// 	if (this.isDefined(newValue)) {
-		// 		this.toggleAdd(newValue);
-		// 	}
-		// });
-
 		/*
 		* Watch show on contentData to toggle elements off
 		*/
@@ -110,11 +104,6 @@ class PanelCardController implements ng.IController {
 		*/
 		this.$scope.$watch("vm.showEdit", (newValue) => {
 			if (this.isDefined(newValue)) {
-				// this.PanelService.handlePanelEvent(
-				// 	this.contentData.type,
-				// 	this.EventService.EVENT.PANEL_CARD_EDIT_MODE,
-				// 	{on: true},
-				// );
 				this.hideItem();
 			}
 		});
@@ -128,19 +117,6 @@ class PanelCardController implements ng.IController {
 			}
 		});
 	}
-
-	// public toggleAdd(on) {
-	// 	if (this.contentData.type === "issues") {
-	// 		this.showToolbarOptions(["filter", "menu"], !on);
-	// 	}
-	// 	this.hideItem();
-	// 	this.$timeout();
-	// 	// this.PanelService.handlePanelEvent(
-	// 	// 	this.contentData.type,
-	// 	// 	this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-	// 	// 	{on},
-	// 	// );
-	// }
 
 	/*
 	* Watch type on contentData to create content and tool bar options
@@ -268,7 +244,6 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		account: "=",
 		branch: "=",
 		contentData: "=",
-		keysDown: "=",
 		model: "=",
 		modelSettings: "=",
 		onHeightRequest: "&",

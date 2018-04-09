@@ -51,7 +51,7 @@ tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 					p.noAccessName(ng-if="item.status") {{item.name}}
 				
 				// Toggle visibility
-				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode(item)", ng-if="!item.status")
+				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode($event, item)", ng-if="!item.status")
 					md-icon.angular-material-icons.visible(ng-if="item.toggleState==='visible'") visibility
 					md-tooltip(ng-if="item.toggleState==='visible'") Visible
 

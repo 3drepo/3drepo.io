@@ -322,7 +322,7 @@ class IssuesController implements ng.IController {
 					}
 				});
 
-				
+
 			}
 		});
 
@@ -365,24 +365,24 @@ class IssuesController implements ng.IController {
 		// Do the same for all subModels
 		if(this.subModels){
 			this.subModels.forEach((subModel) => {
-				//const submodel = true;
+				// const submodel = true;
 				if (subModel) {
 					this.NotificationService.subscribe.newIssues(
-						subModel.database, 
-						subModel.model, 
-						(issues) => { 
-							this.newIssueListener(issues, subModel); 
+						subModel.database,
+						subModel.model,
+						(issues) => {
+							this.newIssueListener(issues, subModel);
 						}
 					);
 					this.NotificationService.subscribe.issueChanged(
 						subModel.database,
-						subModel.model, 
+						subModel.model,
 						this.handleIssueChanged
 					);
 				} else {
 					console.error("Submodel was expected to be defined for issue subscription: ", subModel);
 				}
-				
+
 			});
 		}
 
@@ -401,7 +401,7 @@ class IssuesController implements ng.IController {
 	};
 
 	public shouldShowIssue(issue, submodel) {
-			
+
 		if (!issue) {
 			console.error("Issue is undefined/null: ", issue);
 			return;
@@ -416,7 +416,7 @@ class IssuesController implements ng.IController {
 
 			// this.revision will be null if on head revision
 			// as it is not set via the URL state
-			if (!this.revision){
+			if (!this.revision) {
 				currentRevision = this.revisions[0]; // Set it to the top revision
 			} else {
 				currentRevision = this.revisions.find((rev) => {
@@ -424,17 +424,16 @@ class IssuesController implements ng.IController {
 				});
 			}
 
-			// If Federation 
+			// If Federation
 			if (!isSubmodelIssue) {
+
 				issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
 				if (issueShouldAdd) {
 					this.IssuesService.addIssue(issue);
 				}
-			} 	
-			
-			// If submodel 
-			if (isSubmodelIssue) {
 
+			} else {
+				// If submodel
 				if (submodel) {
 
 					this.RevisionsService.listAll(submodel.database, submodel.model)
@@ -474,7 +473,7 @@ class IssuesController implements ng.IController {
 	* import bcf
 	* @param file
 	*/
-	public importBcf(file){
+	public importBcf(file) {
 
 		this.$scope.$apply();
 
@@ -498,37 +497,37 @@ class IssuesController implements ng.IController {
 				const escapable = true;
 				this.DialogService.text("Error Getting User Job", content, escapable);
 				console.error(error);
-			
+
 			});
 
-	};
+	}
 
 	/**
 	 * Set up editing issue
 	 * @param issue
 	 */
 	public editIssue(issue) {
-		
+
 		if (this.IssuesService.state.selectedIssue) {
 			this.IssuesService.deselectPin(this.IssuesService.state.selectedIssue);
 		}
-		
+
 		if (issue) {
 
 			this.ViewerService.highlightObjects([]);
-			this.$state.go("home.account.model.issue", 
+			this.$state.go("home.account.model.issue",
 				{
-					account: this.account, 
-					model: this.model, 
+					account: this.account,
+					model: this.model,
 					revision: this.revision,
 					issue: issue._id,
 					noSet: true
-				}, 
-				{notify: false}
+				},
+				{notify: false},
 			);
 
 			this.IssuesService.setSelectedIssue(issue);
-			
+
 		} else {
 			this.IssuesService.resetSelectedIssue();
 		}
@@ -537,7 +536,7 @@ class IssuesController implements ng.IController {
 		this.showAddButton = false;
 		this.onShowItem();
 
-	};
+	}
 
 	/**
 	 * Exit issue editing
@@ -546,7 +545,7 @@ class IssuesController implements ng.IController {
 	public editIssueExit(issue) {
 		document.getElementById("issue" + issue._id).scrollIntoView();
 		this.hideItem = true;
-	};
+	}
 
 }
 
@@ -564,9 +563,8 @@ export const IssuesComponent: ng.IComponentOptions = {
 		onContentHeightRequest: "&",
 		onShowItem : "&",
 		hideItem: "=",
-		keysDown: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&"
+		setInitialSelectedObjects: "&",
 	},
 	controller: IssuesController,
 	controllerAs: "vm",

@@ -5,7 +5,6 @@
 	
 	measure(
 		ng-if="!vm.isLiteMode"
-		keys-down="vm.keysDown"
 		id='measure-tool'
 	 	account='vm.account' 
 		model='vm.model' 
@@ -26,7 +25,6 @@
 			model-settings="vm.settings"
 			position="left"
 			style="pointer-events:{{vm.pointerEvents}}"
-			keys-down="vm.keysDown"
 			selected-objects="vm.selectedObjects"
 			set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 

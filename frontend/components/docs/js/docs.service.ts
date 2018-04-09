@@ -22,7 +22,7 @@ export class DocsService {
 
 		"ClientConfigService",
 		"APIService",
-		"TreeService",
+		"ViewerService",
 	];
 
 	private state: any;
@@ -34,7 +34,7 @@ export class DocsService {
 
 		private ClientConfigService: any,
 		private APIService: any,
-		private TreeService: any,
+		private ViewerService: any,
 	) {
 		this.noMetadata = false;
 		this.docTypeHeight = 50;
@@ -84,27 +84,32 @@ export class DocsService {
 			});
 	}
 
-	public handleObjectSelected(event) {
+	public closeDocs() {
+		if (this.state.show) {
+			this.state.show = false;
+		}
+	}
 
-		// Get any documents associated with an object
-		const object = event.value;
+	public displayDocs(account, model, metadataIds) {
 
-		this.TreeService.onReady()
-			.then(() => {
-				const metadataIds = this.TreeService.treeMap.oIdToMetaId[object.id];
-				if (metadataIds && metadataIds.length) {
-					this.state.noMetadata = false;
-					this.updateDocs(
-						object.account,
-						object.model,
-						metadataIds[0],
-					);
+		const canOpenDocs = this.state.active && !this.ViewerService.pin.pinDropMode;
 
-				} else {
-					this.state.noMetadata = true;
-					this.state.show = true;
-				}
-		});
+		if (canOpenDocs) {
+
+			if (metadataIds && metadataIds.length) {
+				this.state.noMetadata = false;
+				this.updateDocs(
+					account,
+					model,
+					metadataIds[0],
+				);
+
+			} else {
+				this.state.noMetadata = true;
+				this.state.show = true;
+			}
+
+		}
 
 	}
 
