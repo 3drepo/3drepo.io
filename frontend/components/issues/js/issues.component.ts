@@ -322,7 +322,7 @@ class IssuesController implements ng.IController {
 					}
 				});
 
-				
+
 			}
 		});
 
@@ -365,24 +365,24 @@ class IssuesController implements ng.IController {
 		// Do the same for all subModels
 		if(this.subModels){
 			this.subModels.forEach((subModel) => {
-				//const submodel = true;
+				// const submodel = true;
 				if (subModel) {
 					this.NotificationService.subscribe.newIssues(
-						subModel.database, 
-						subModel.model, 
-						(issues) => { 
-							this.newIssueListener(issues, subModel); 
+						subModel.database,
+						subModel.model,
+						(issues) => {
+							this.newIssueListener(issues, subModel);
 						}
 					);
 					this.NotificationService.subscribe.issueChanged(
 						subModel.database,
-						subModel.model, 
+						subModel.model,
 						this.handleIssueChanged
 					);
 				} else {
 					console.error("Submodel was expected to be defined for issue subscription: ", subModel);
 				}
-				
+
 			});
 		}
 
@@ -401,7 +401,7 @@ class IssuesController implements ng.IController {
 	};
 
 	public shouldShowIssue(issue, submodel) {
-			
+
 		if (!issue) {
 			console.error("Issue is undefined/null: ", issue);
 			return;
@@ -416,7 +416,7 @@ class IssuesController implements ng.IController {
 
 			// this.revision will be null if on head revision
 			// as it is not set via the URL state
-			if (!this.revision){
+			if (!this.revision) {
 				currentRevision = this.revisions[0]; // Set it to the top revision
 			} else {
 				currentRevision = this.revisions.find((rev) => {
@@ -426,15 +426,14 @@ class IssuesController implements ng.IController {
 
 			// If Federation
 			if (!isSubmodelIssue) {
+
 				issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
 				if (issueShouldAdd) {
 					this.IssuesService.addIssue(issue);
 				}
-			}
 
-			// If submodel
-			if (isSubmodelIssue) {
-
+			} else {
+				// If submodel
 				if (submodel) {
 
 					this.RevisionsService.listAll(submodel.database, submodel.model)
@@ -474,7 +473,7 @@ class IssuesController implements ng.IController {
 	* import bcf
 	* @param file
 	*/
-	public importBcf(file){
+	public importBcf(file) {
 
 		this.$scope.$apply();
 
@@ -501,7 +500,7 @@ class IssuesController implements ng.IController {
 
 			});
 
-	};
+	}
 
 	/**
 	 * Set up editing issue
@@ -524,7 +523,7 @@ class IssuesController implements ng.IController {
 					issue: issue._id,
 					noSet: true
 				},
-				{notify: false}
+				{notify: false},
 			);
 
 			this.IssuesService.setSelectedIssue(issue);

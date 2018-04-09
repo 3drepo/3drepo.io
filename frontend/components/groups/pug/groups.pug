@@ -41,11 +41,11 @@ div.groupsContainer
 
                 div
                     md-button.md-icon-button(
-                        ng-click="vm.toggleColorOveride($event, group)"
+                        ng-click="vm.toggleColorOverride($event, group)"
                         aria-label="Invert Colors")
                         md-icon.angular-material-icons(
-                            style="color : {{vm.getColorOverideRGBA(group)}}") invert_colors
-                    md-tooltip Toggle Colour Overide
+                            style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
+                    md-tooltip Toggle Colour Override
             
             div.groupEnterHolder(
                 ng-click="vm.editGroup()"

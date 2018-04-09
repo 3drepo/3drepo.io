@@ -473,7 +473,7 @@ export class TreeService {
 	 */
 	public getMeshMapFromNodes(nodes: any, idToMeshes: any, colour?: number[]) {
 
-		if (Array.isArray(nodes) === false) {
+		if (!Array.isArray(nodes)) {
 			console.error("getMeshMapFromNodes nodes is not an array: ", nodes);
 			return;
 		}
@@ -663,6 +663,9 @@ export class TreeService {
 	public expandTreeNode(nodeToExpand: any) {
 
 		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
+
+			console.log("expandTreeNode");
+
 			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
 			const numChildren = nodeToExpand.children.length;
 
@@ -673,8 +676,11 @@ export class TreeService {
 				childNode.expanded = false;
 				childNode.level = nodeToExpand.level + 1;
 
+				console.log("childNode", childNode);
+
 				if (childNode && childNode.hasOwnProperty("name")) {
 					if (this.nodesToShow.indexOf(childNode) === -1) {
+						console.log("adding node");
 						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
 						position++;
 					}
@@ -702,12 +708,15 @@ export class TreeService {
 
 		for (let i = 0; i < path.length; i++) {
 			const node = this.getNodeById(path[i]);
+
+			console.log("node in expandToSelection", node);
 			this.expandTreeNode(node);
 
 			// If it's the last node in the path
 			// scroll to it
 			if (i === path.length - 1) {
 				selectedIndex = this.nodesToShow.indexOf(node);
+				console.log(selectedIndex);
 
 				if (selectedIndex === -1) {
 					// Sometimes we have an edge case where an object doesn't exist in the tree
@@ -721,7 +730,7 @@ export class TreeService {
 
 		if (!noHighlight) {
 
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, false, undefined, undefined).then(() => {
+			this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
 				this.selectedIndex = selectedIndex;
 			});
 		} else {
@@ -1035,8 +1044,7 @@ export class TreeService {
 
 	public getMeshHighlights(nodes) {
 		return this.ready.promise.then(() => {
-			const currentSelectedMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
-			return currentSelectedMap;
+			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
 	}
 
@@ -1058,7 +1066,8 @@ export class TreeService {
 			this.setNodeSelection(node, false);
 		}
 
-		return this.highlightNodes(nodes, true, undefined, false);
+		return this.unhighlightNodes(nodes);
+
 	}
 
 	/**
@@ -1066,12 +1075,7 @@ export class TreeService {
 	 * @param nodes	Nodes to select.
 	 * @param multi	Is multi select enabled.
 	 */
-	public selectNodes(
-		nodes: any[], multi: boolean, additive: boolean, colour: number[],
-		forceReHighlight: boolean,
-	) {
-
-		forceReHighlight = (forceReHighlight === undefined) ? true : false;
+	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
 
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
@@ -1089,7 +1093,7 @@ export class TreeService {
 				continue;
 			}
 
-			if (additive) {
+			if (forceReHighlight) {
 				this.setNodeSelection(node, true);
 			} else if (multi) {
 				// Multiselect mode and we selected the same node - unselect it
@@ -1126,8 +1130,37 @@ export class TreeService {
 	}
 
 	/**
+	 * Unhighlight a set of nodes in the viewer
+	 * @param nodes	Nodes to unhighlight in the viewer
+	 */
+	public unhighlightNodes(nodes: any) {
+		return this.ready.promise.then(() => {
+
+			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, undefined);
+
+			for (const key in highlightMap) {
+				if (!highlightMap.hasOwnProperty(key)) {
+					continue;
+				}
+
+				const vals = key.split("@");
+				const account = vals[0];
+				const model = vals[1];
+
+				this.ViewerService.unhighlightObjects({
+					account,
+					model,
+					ids: highlightMap[key].meshes,
+				});
+			}
+
+			return highlightMap;
+		});
+	}
+
+	/**
 	 * Call the highlighting in the viewer
-	 * @param nodes	Nodes to select.
+	 * @param nodes	Nodes to highlight in the model.
 	 * @param multi	Is multi select enabled.
 	 * @param colour the colour to highlight
 	 */
@@ -1151,6 +1184,7 @@ export class TreeService {
 				const account = vals[0];
 				const model = vals[1];
 
+				console.log(multi, forceReHighlight);
 				// Separately highlight the children
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({
@@ -1198,8 +1232,7 @@ export class TreeService {
 	 */
 	public getMeshHighlightsBySharedId(objects) {
 		return this.getNodesFromSharedIds(objects).then((nodes) => {
-			const currentSelectedMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
-			return currentSelectedMap;
+			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
 	}
 
@@ -1207,17 +1240,13 @@ export class TreeService {
 	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled
-	 * @param additive whether the selection should reset or keep add selections
 	 * @param colour the colour to highlight
 	 */
-	public selectNodesBySharedIds(
-		objects: any[], multi: boolean, additive: boolean,
-		colour: number[], forceReHighlight: boolean,
-	) {
+	public selectNodesBySharedIds(objects: any[], multi: boolean,  colour: number[], forceReHighlight: boolean) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				return this.selectNodes(nodes, multi, additive, colour, forceReHighlight);
+				return this.selectNodes(nodes, multi, colour, forceReHighlight);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1229,7 +1258,7 @@ export class TreeService {
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled
 	 * @param colour the colour to highlight
-	 * @param forceReHighlight force a rehighlighting to a new colour (overides toggle)
+	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
 	public highlightNodesBySharedId(
 		objects: any[], multi: boolean, colour: number[], forceReHighlight: boolean,
@@ -1313,37 +1342,16 @@ export class TreeService {
 	 */
 	public highlightsBySharedId(objects: any) {
 
-		// TODO: This could probably be refactored
-		this.getMap()
-			.then((treeMap) => {
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
 
-				const nodes = new Set();
+				this.initNodesToShow([this.allNodes[0]]);
+				this.selectNodes(nodes, true, undefined, false);
 
-				for (let i = 0; i < objects.length; i++) {
+				const lastNodeId = nodes[nodes.length - 1]._id;
+				const lastNodePath = this.getPath(lastNodeId);
 
-					const objUid = treeMap.sharedIdToUid[objects[i].shared_id];
-					if (!objUid) {
-						continue;
-					}
-
-					const node = this.getNodeById(objUid);
-					if (node && node.hasOwnProperty("name")) {
-						nodes.add(node);
-					}
-
-					if (i === objects.length - 1) {
-						// Only call expandToSelection for last selected node to improve performance
-						this.initNodesToShow([this.allNodes[0]]);
-						// TODO: we no longer need to select here, but still need to expand tree
-						this.expandToSelection(this.getPath(objUid), 0, undefined, true);
-
-						if (nodes.size > 0) {
-							this.selectNodes(Array.from(nodes), false, true, undefined, undefined);
-						}
-					}
-				}
-
-				angular.element((window as any)).triggerHandler("resize");
+				this.expandToSelection(lastNodePath, 0, true, true);
 
 			})
 			.catch((error) => {

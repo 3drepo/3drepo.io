@@ -362,8 +362,10 @@ class TreeController implements ng.IController {
 	 */
 	public selectNode(node) {
 		return this.TreeService.selectNodes(
-			[node], this.MultiSelectService.isMultiMode(), false,
-			undefined, true,
+			[node],
+			this.MultiSelectService.isMultiMode(),
+			undefined,
+			false,
 		);
 	}
 
@@ -387,7 +389,7 @@ class TreeController implements ng.IController {
 			// TODO: This throws a unity error when filtering
 
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], this.MultiSelectService.isMultiMode(), true);
+			this.TreeService.selectNodes([serviceNode], this.MultiSelectService.isMultiMode(), undefined, false);
 		}
 
 	}

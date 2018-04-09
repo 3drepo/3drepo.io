@@ -392,6 +392,7 @@ export class Viewer {
 					});
 
 				} else {
+					console.log("OBJECT_SELECTED");
 					this.callback(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
 						id: pointInfo.id,
@@ -412,6 +413,19 @@ export class Viewer {
 
 	public clearHighlights() {
 		UnityUtil.clearHighlights();
+	}
+
+	public unhighlightObjects(account, model, idsIn) {
+
+		if (idsIn) {
+			const uniqueIds = Array.from(new Set(idsIn));
+			if (uniqueIds.length) {
+				UnityUtil.unhighlightObjects(account, model, uniqueIds);
+				return;
+			}
+		}
+
+		
 	}
 
 	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride, forceReHighlight) {

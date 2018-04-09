@@ -44,8 +44,9 @@ export class GroupsService {
 		this.state = {
 			groups: [],
 			selectedGroup: {},
-			colorOveride: {},
+			colorOverride: {},
 			totalSelectedMeshes : 0,
+			multiSelectedGroups: [],
 		};
 	}
 
@@ -64,19 +65,19 @@ export class GroupsService {
 	 * Check if a group is currently color overriden
 	 * @param group the group to check
 	 */
-	public hasColorOveride(group: any): boolean {
-		return this.state.colorOveride[group._id] !== undefined;
+	public hasColorOverride(group: any): boolean {
+		return this.state.colorOverride[group._id] !== undefined;
 	}
 
 	/**
 	 * Toggle the color over ride of a group
 	 * @param group the group to toggle
 	 */
-	public toggleColorOveride(group: any) {
-		if (this.state.colorOveride[group._id]) {
-			this.removeColorOveride(group._id);
+	public toggleColorOverride(group: any) {
+		if (this.state.colorOverride[group._id]) {
+			this.removeColorOverride(group._id);
 		} else {
-			this.colorOveride(group);
+			this.colorOverride(group);
 		}
 	}
 
@@ -84,7 +85,7 @@ export class GroupsService {
 	 * Color override the meshes of a given group
 	 * @param group the group to color override
 	 */
-	public colorOveride(group: any) {
+	public colorOverride(group: any) {
 
 		const color = group.color.map((c) => c / 255);
 
@@ -119,7 +120,7 @@ export class GroupsService {
 					this.ViewerService.overrideMeshColor(modelAccount, modelId, meshIds, color);
 				}
 
-				this.state.colorOveride[group._id] = {
+				this.state.colorOverride[group._id] = {
 					models: meshes, color,
 				};
 
@@ -129,21 +130,21 @@ export class GroupsService {
 	/**
 	 * Remove all color overrides from all groups
 	 */
-	public removeAllColorOveride() {
-		for (const groupId in this.state.colorOveride) {
-			if (!this.state.colorOveride.hasOwnProperty(groupId)) {
+	public removeAllColorOverride() {
+		for (const groupId in this.state.colorOverride) {
+			if (!this.state.colorOverride.hasOwnProperty(groupId)) {
 				continue;
 			}
-			this.removeColorOveride(groupId);
+			this.removeColorOverride(groupId);
 		}
 	}
 
 	/**
 	 * Remove all color overrides from a given group based on it's ID
 	 */
-	public removeColorOveride(groupId: string) {
+	public removeColorOverride(groupId: string) {
 
-		const group = this.state.colorOveride[groupId];
+		const group = this.state.colorOverride[groupId];
 		if (!group) {
 			return;
 		}
@@ -167,7 +168,7 @@ export class GroupsService {
 			);
 		}
 
-		delete this.state.colorOveride[groupId];
+		delete this.state.colorOverride[groupId];
 
 	}
 
@@ -282,7 +283,7 @@ export class GroupsService {
 	public cleanGroups(groups: any[]) {
 		groups.forEach((group) => {
 			if (!group.name) {
-				group.name = "No assigned name";
+				group.name = "(No assigned name)";
 			}
 		});
 	}
@@ -303,6 +304,9 @@ export class GroupsService {
 	 */
 	public selectGroup(group: any) {
 
+		const sameGroup = this.state.selectedGroup === group;
+		const multi = this.MultiSelectService.isMultiMode();
+
 		if (this.state.selectedGroup) {
 			this.state.selectedGroup.selected = false;
 		}
@@ -310,38 +314,73 @@ export class GroupsService {
 		this.state.selectedGroup.selected = true;
 		this.state.selectedGroup.totalSavedMeshes = 0;
 
-		// if (this.state.selectedGroup.objects && this.state.selectedGroup.objects.length) {
-
-		const multi = this.MultiSelectService.isMultiMode();
 		let color = this.ViewerService.getDefaultHighlightColor();
-
 		if (!this.state.selectedGroup.new) {
 			color = this.state.selectedGroup.color.map((c) => c / 255);
 		}
 
-		// If multi is enabled we want to inverse selections
-		// rather than add them
-		let additive = (multi === true) ? false : true;
+		console.log("before", this.state.multiSelectedGroups);
 
-		if (this.state.selectedGroup.objects.length === 0) {
-			additive = false;
+		if (!multi) {
+			this.state.multiSelectedGroups = [group];
+			console.log("selecting group (single)");
+			return this.TreeService.selectNodesBySharedIds(
+				this.state.selectedGroup.objects,
+				multi, // multi
+				color,
+				true,
+			).then((meshes) => {
+
+				// If we haven't saved don't update saved meshes
+				if (!this.state.selectedGroup.new) {
+					const total = this.getTotalMeshes(meshes);
+					this.state.selectedGroup.totalSavedMeshes = total;
+				}
+
+			});
+
+		} else if (!this.state.multiSelectedGroups.includes(group)) {
+
+			// selecting group that's not selected
+			console.log("selecting group (multi)");
+			this.state.multiSelectedGroups.push(group);
+
+			return this.TreeService.selectNodesBySharedIds(
+				this.state.selectedGroup.objects,
+				multi, // multi
+				color,
+				true,
+			).then((meshes) => {
+
+				// If we haven't saved don't update saved meshes
+				if (!this.state.selectedGroup.new) {
+					const total = this.getTotalMeshes(meshes);
+					this.state.selectedGroup.totalSavedMeshes = total;
+				}
+
+			});
+
+		} else {
+			console.log("unselecting group");
+			// Remove the group from selected groups
+			const index = this.state.multiSelectedGroups.indexOf(group);
+			this.state.multiSelectedGroups.splice(index, 1);
+
+			// selecting a group that's already selected
+			return this.TreeService.getNodesFromSharedIds(this.state.selectedGroup.objects)
+				.then((nodes) => {
+
+					this.TreeService.deselectNodes(nodes).then((meshes) => {
+								// If we haven't saved don't update saved meshes
+						if (!this.state.selectedGroup.new) {
+							const total = this.getTotalMeshes(meshes);
+							this.state.selectedGroup.totalSavedMeshes = total;
+						}
+					});
+
+				});
+
 		}
-
-		return this.TreeService.selectNodesBySharedIds(
-			this.state.selectedGroup.objects,
-			multi, // multi
-			additive,
-			color,
-			false,
-		).then((meshes) => {
-
-			// If we haven't saved don't update saved meshes
-			if (!this.state.selectedGroup.new) {
-				const total = this.getTotalMeshes(meshes);
-				this.state.selectedGroup.totalSavedMeshes = total;
-			}
-
-		});
 
 	}
 
@@ -499,7 +538,7 @@ export class GroupsService {
 		return this.APIService.delete(groupUrl)
 			.then((response) => {
 				this.TreeService.deselectNodes(deleteGroup.objects);
-				this.removeColorOveride(deleteGroup._id);
+				this.removeColorOverride(deleteGroup._id);
 				this.deleteStateGroup(deleteGroup);
 				return response;
 			});

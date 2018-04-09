@@ -107,6 +107,7 @@ groups .groupMeta {
 
 groups .groupName {
     font-weight: bold;
+    font-size: 14px;
     margin-bottom: 0px;
     height: 100%;
 }
@@ -124,12 +125,13 @@ groups .openedGroupColorBar {
 
 groups .groupDescription {
     color: #8a8a8a;
+    font-size: 12px;
 }
 
 groups .group {
     border-bottom: solid gainsboro 1px;
-    min-height: 110px;
-    max-height: 110px;
+    min-height: 95px;
+    max-height: 95px;
     height: 100%;
 }
 

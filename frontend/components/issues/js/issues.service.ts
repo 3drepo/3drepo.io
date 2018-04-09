@@ -667,7 +667,11 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.highlightsBySharedId(objects);
+		this.TreeService.highlightsBySharedId(objects)
+			.then(() => {
+				angular.element((window as any)).triggerHandler("resize");
+				this.$timeout(() => {}); // Force a digest cycle
+			});
 	}
 
 	public handleHidden(objects) {

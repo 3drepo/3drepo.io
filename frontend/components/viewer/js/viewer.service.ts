@@ -275,6 +275,16 @@ export class ViewerService {
 		}
 	}
 
+	public unhighlightObjects(params)  {
+		if (this.viewer) {
+			this.viewer.unhighlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids,
+			);
+		}
+	}
+
 	public getMultiSelectMode() {
 		return this.viewer.multiSelectMode;
 	}

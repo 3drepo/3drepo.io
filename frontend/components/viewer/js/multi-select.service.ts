@@ -101,11 +101,13 @@ export class MultiSelectService {
 	}
 
 	public multiSelectEnabled() {
+		console.log("multiSelectEnabled")
 		this.multiMode = true;
 		this.ViewerService.setMultiSelectMode(true);
 	}
 
 	public multiSelectDisabled() {
+		console.log("multiSelectDisabled")
 		this.multiMode = false;
 		this.ViewerService.setMultiSelectMode(false);
 	}

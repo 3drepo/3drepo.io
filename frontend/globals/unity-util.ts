@@ -582,7 +582,7 @@ export class UnityUtil {
 			model,
 			ids : idArr
 		};
-
+		console.log("unhighlighting ", params);
 		UnityUtil.toUnity("UnhighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 

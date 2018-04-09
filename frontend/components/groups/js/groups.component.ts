@@ -143,9 +143,9 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public toggleColorOveride($event, group: any) {
+	public toggleColorOverride($event, group: any) {
 		$event.stopPropagation();
-		this.GroupsService.toggleColorOveride(group);
+		this.GroupsService.toggleColorOverride(group);
 	}
 
 	public handleGroupError(method: string) {
@@ -169,7 +169,7 @@ class GroupsController implements ng.IController {
 	public editGroup() {
 		this.changed = false;
 		// We don't want color over ride when we're editing
-		this.GroupsService.removeColorOveride(this.selectedGroup._id);
+		this.GroupsService.removeColorOverride(this.selectedGroup._id);
 		this.showGroupPane();
 	}
 
@@ -301,9 +301,9 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public getColorOverideRGBA(group: any): string {
-		const hasOveride = this.GroupsService.hasColorOveride(group);
-		if (hasOveride) {
+	public getColorOverrideRGBA(group: any): string {
+		const hasOverride = this.GroupsService.hasColorOverride(group);
+		if (hasOverride) {
 			return this.getGroupRGBAColor(group);
 		}
 		return "rgba(0,0,0,0.54)";
