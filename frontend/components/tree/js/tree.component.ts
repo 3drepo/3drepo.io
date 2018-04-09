@@ -1,5 +1,3 @@
-import { TreeService } from "./tree.service";
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
