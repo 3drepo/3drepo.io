@@ -1074,6 +1074,8 @@ export class TreeService {
 	 * Select nodes in the tree.
 	 * @param nodes	Nodes to select.
 	 * @param multi	Is multi select enabled.
+	 * @param colour the colour array for selection in the viewer
+	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
 	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
 
@@ -1163,6 +1165,7 @@ export class TreeService {
 	 * @param nodes	Nodes to highlight in the model.
 	 * @param multi	Is multi select enabled.
 	 * @param colour the colour to highlight
+     * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
 	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
@@ -1204,6 +1207,10 @@ export class TreeService {
 		});
 	}
 
+	/**
+	 * Get a series of nodes with unique ID bu a series of objects that contain a shared_id
+	 * @param objects the array of shared id objects
+	 */
 	public getNodesFromSharedIds(objects) {
 		if (!objects || objects.length === 0) {
 			return Promise.resolve([]);
@@ -1241,6 +1248,7 @@ export class TreeService {
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled
 	 * @param colour the colour to highlight
+	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
 	public selectNodesBySharedIds(objects: any[], multi: boolean,  colour: number[], forceReHighlight: boolean) {
 
@@ -1275,6 +1283,7 @@ export class TreeService {
 
 	/**
 	 * Isolate selected objects by their shared IDs
+	 * @param objects an array of objects with shared_id properties
 	 */
 	public isolateNodesBySharedId(objects) {
 
