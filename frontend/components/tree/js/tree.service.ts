@@ -664,8 +664,6 @@ export class TreeService {
 
 		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
 
-			console.log("expandTreeNode");
-
 			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
 			const numChildren = nodeToExpand.children.length;
 
@@ -676,11 +674,9 @@ export class TreeService {
 				childNode.expanded = false;
 				childNode.level = nodeToExpand.level + 1;
 
-				console.log("childNode", childNode);
-
 				if (childNode && childNode.hasOwnProperty("name")) {
 					if (this.nodesToShow.indexOf(childNode) === -1) {
-						console.log("adding node");
+
 						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
 						position++;
 					}
@@ -709,14 +705,12 @@ export class TreeService {
 		for (let i = 0; i < path.length; i++) {
 			const node = this.getNodeById(path[i]);
 
-			console.log("node in expandToSelection", node);
 			this.expandTreeNode(node);
 
 			// If it's the last node in the path
 			// scroll to it
 			if (i === path.length - 1) {
 				selectedIndex = this.nodesToShow.indexOf(node);
-				console.log(selectedIndex);
 
 				if (selectedIndex === -1) {
 					// Sometimes we have an edge case where an object doesn't exist in the tree
@@ -1187,7 +1181,6 @@ export class TreeService {
 				const account = vals[0];
 				const model = vals[1];
 
-				console.log(multi, forceReHighlight);
 				// Separately highlight the children
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({

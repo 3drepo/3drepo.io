@@ -392,7 +392,6 @@ export class Viewer {
 					});
 
 				} else {
-					console.log("OBJECT_SELECTED");
 					this.callback(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
 						id: pointInfo.id,

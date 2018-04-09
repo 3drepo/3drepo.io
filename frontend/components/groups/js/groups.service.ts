@@ -319,11 +319,8 @@ export class GroupsService {
 			color = this.state.selectedGroup.color.map((c) => c / 255);
 		}
 
-		console.log("before", this.state.multiSelectedGroups);
-
 		if (!multi) {
 			this.state.multiSelectedGroups = [group];
-			console.log("selecting group (single)");
 			return this.TreeService.selectNodesBySharedIds(
 				this.state.selectedGroup.objects,
 				multi, // multi
@@ -342,7 +339,6 @@ export class GroupsService {
 		} else if (!this.state.multiSelectedGroups.includes(group)) {
 
 			// selecting group that's not selected
-			console.log("selecting group (multi)");
 			this.state.multiSelectedGroups.push(group);
 
 			return this.TreeService.selectNodesBySharedIds(
@@ -361,7 +357,6 @@ export class GroupsService {
 			});
 
 		} else {
-			console.log("unselecting group");
 			// Remove the group from selected groups
 			const index = this.state.multiSelectedGroups.indexOf(group);
 			this.state.multiSelectedGroups.splice(index, 1);
