@@ -336,6 +336,14 @@ class TreeController implements ng.IController {
 
 	}
 
+	public ignoreSelection($event, node) {
+		const doubleClick = $event.detail > 1;
+		if (doubleClick || node.toggleState === "invisible") {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Selected a node in the tree
 	 *
@@ -343,9 +351,7 @@ class TreeController implements ng.IController {
 	 */
 	public selectNode($event, node) {
 
-		// Prevent double click toggling
-		const doubleClick = $event.detail > 1;
-		if (doubleClick || node.toggleState === "invisible") {
+		if (this.ignoreSelection($event, node)) {
 			return;
 		}
 
@@ -357,11 +363,9 @@ class TreeController implements ng.IController {
 		);
 	}
 
-	public filterItemSelected($event, item) {
+	public filternodeSelected($event, node) {
 
-		// Prevent double click toggling
-		const doubleClick = $event.detail > 1;
-		if (doubleClick || item.toggleState === "invisible") {
+		if (this.ignoreSelection($event, node)) {
 			return;
 		}
 
@@ -369,12 +373,12 @@ class TreeController implements ng.IController {
 
 		if (!multi) {
 			this.nodes.forEach((n) => n.selected = false);
-			this.nodes[item.index].selected = true;
+			this.nodes[node.index].selected = true;
 		} else {
-			this.nodes[item.index].selected = !this.nodes[item.index].selected;
+			this.nodes[node.index].selected = !this.nodes[node.index].selected;
 		}
 
-		const selectedComponentNode = this.nodes[item.index];
+		const selectedComponentNode = this.nodes[node.index];
 
 		if (selectedComponentNode) {
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
