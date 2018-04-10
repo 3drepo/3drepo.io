@@ -64,15 +64,26 @@ class AccountProfileController implements ng.IController {
 
 	public watchers() {
 		this.$scope.$watch("vm.newPassword", (newPassword) => {
-			if (newPassword !== undefined) {
-				const result = this.PasswordService.evaluatePassword(this.newPassword);
-				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
-				this.checkInvalidPassword(result);
+
+			if (newPassword === undefined) {
+				newPassword = "";
 			}
+
+			const result = this.PasswordService.evaluatePassword(newPassword);
+			this.passwordStrength = this.PasswordService.getPasswordStrength(newPassword, result.score);
+			this.checkInvalidPassword(result);
+
 		});
 	}
 
 	public checkInvalidPassword(result) {
+
+		if (this.newPassword.length  < 8) {
+			this.invalidatePassword();
+			this.passwordSaveError = "Password must be at least 8 characters";
+			return;
+		}
+
 		switch (result.score) {
 		case 0:
 			this.invalidatePassword();
@@ -155,7 +166,11 @@ class AccountProfileController implements ng.IController {
 			})
 			.catch((error) =>  {
 				if (error && error.data && error.data.message) {
-					this.passwordSaveError = error.data.message;
+					if (error.data.code === "INCORRECT_USERNAME_OR_PASSWORD") {
+						this.passwordSaveError = "Your old password was incorrect";
+					} else {
+						this.passwordSaveError = error.data.message;
+					}
 				} else {
 					this.passwordSaveError = "Unknown error updating password";
 				}
