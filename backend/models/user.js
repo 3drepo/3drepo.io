@@ -242,10 +242,10 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
 			let cleanedCustomData = {};
-			let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+			let emailRegex = /^(['a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
 			if (config.auth.allowPlusSignInEmail) {
-				emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+				emailRegex = /^(['+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 			}
 
 			if (!customData.email || !customData.email.match(emailRegex)) {
@@ -955,10 +955,10 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 
 	let teamspacePerm = this.customData.permissions.findByUser(username);
 	//check if they have any permissions assigned
-	return Project.find({ account: this.user }, { 'permissions.user':  username}).then(projects => {
+	return Project.find({ account: this.user }, { "permissions.user":  username}).then(projects => {
 		
 		foundProjects = projects;
-		return ModelSetting.find({ account: this.user }, { 'permissions.user': username});
+		return ModelSetting.find({ account: this.user }, { "permissions.user": username});
 	
 	}).then(models => {
 
