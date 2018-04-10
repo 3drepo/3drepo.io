@@ -107,7 +107,6 @@ class TreeController implements ng.IController {
 							console.error("Couldn't find the object path");
 						} else {
 
-							// this.initNodesToShow();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
 							this.TreeService.updateModelVisibility(this.allNodes[0]);
 							angular.element((window as any).window).triggerHandler("resize");
@@ -129,10 +128,7 @@ class TreeController implements ng.IController {
 				this.setupInfiniteItemsFilter();
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
-				this.$timeout(() => {}).then(() => {
-					// this.TreeService.showAllTreeNodes();
-					// this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
-				});
+				this.$timeout(() => {}).then(() => {});
 
 			}
 		});
