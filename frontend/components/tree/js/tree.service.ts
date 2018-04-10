@@ -1001,12 +1001,23 @@ export class TreeService {
 		this.DocsService.closeDocs();
 
 		if (this.currentSelectedNodes) {
-			for (let i = 0; i < this.currentSelectedNodes.length; i++) {
-				this.currentSelectedNodes[i].selected = false;
-			}
+			this.traverseNodesAndSetSelected(this.currentSelectedNodes, false);
 		}
 
 		this.currentSelectedNodes = [];
+	}
+
+	public traverseNodesAndSetSelected(nodes, selected) {
+		nodes = nodes.concat(); // make a copy
+		let currentNode;
+		while (nodes.length) {
+			currentNode = nodes.pop();
+			currentNode.selected = selected;
+			if (currentNode.children && currentNode.children.length) {
+				nodes = nodes.concat(currentNode.children);
+			}
+		}
+
 	}
 
 	/**
@@ -1017,23 +1028,28 @@ export class TreeService {
 	public setNodeSelection(node: any, select: boolean) {
 
 		// If node
-		if (node.selected === select) {
+		if (node.selected !== undefined && node.selected === select) {
 			return;
 		}
 
 		const nodeIndex = this.currentSelectedNodes.indexOf(node);
+		console.log(nodeIndex);
 
 		if (select) {
 			if (nodeIndex === -1) {
 				node.selected = true;
 				this.currentSelectedNodes.push(node);
+				this.traverseNodesAndSetSelected([node], true);
 			}
 		} else {
 			if (nodeIndex > -1) {
 				this.currentSelectedNodes[nodeIndex].selected = false;
 				this.currentSelectedNodes.splice(nodeIndex, 1);
+				this.traverseNodesAndSetSelected([node], false);
 			}
 		}
+
+		console.log("this.currentSelectedNodes", this.currentSelectedNodes);
 	}
 
 	public getMeshHighlights(nodes) {
@@ -1093,6 +1109,8 @@ export class TreeService {
 			this.setNodeSelection(node, shouldSelect);
 
 		}
+
+		console.log(nodes);
 
 		const lastNode = nodes[nodes.length - 1] ;
 		this.handleMetadata(lastNode);
