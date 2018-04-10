@@ -20,6 +20,7 @@ class TreeController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"TreeService",
 		"EventService",
@@ -57,6 +58,7 @@ class TreeController implements ng.IController {
 	constructor(
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private TreeService,
 		private EventService,
@@ -105,16 +107,8 @@ class TreeController implements ng.IController {
 							console.error("Couldn't find the object path");
 						} else {
 
-							this.initNodesToShow();
-
+							// this.initNodesToShow();
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
-
-							// all these init and expanding unselects the selected, so let's select them again
-							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
-							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
-								selectedNode.selected = true;
-							});
-
 							this.TreeService.updateModelVisibility(this.allNodes[0]);
 							angular.element((window as any).window).triggerHandler("resize");
 
@@ -124,10 +118,7 @@ class TreeController implements ng.IController {
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
-				if (this.currentFilterItemSelected !== null) {
-					this.currentFilterItemSelected.class = "";
-					this.currentFilterItemSelected = null;
-				}
+				this.nodes.forEach((n) => n.class = "");
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
 				this.allNodes = this.TreeService.getAllNodes();
@@ -368,25 +359,19 @@ class TreeController implements ng.IController {
 
 	public filterItemSelected(item) {
 
-		if (this.currentFilterItemSelected === null) {
-			this.nodes[item.index].class = "treeNodeSelected";
-			this.currentFilterItemSelected = item;
-		} else if (item.index === this.currentFilterItemSelected.index) {
-			this.nodes[item.index].class = "";
-			this.currentFilterItemSelected = null;
-		} else {
-			this.nodes[this.currentFilterItemSelected.index].class = "";
-			this.nodes[item.index].class = "treeNodeSelected";
-			this.currentFilterItemSelected = item;
+		const multi = this.MultiSelectService.isMultiMode();
+
+		if (!multi) {
+			this.nodes.forEach((n) => n.class = "");
 		}
+
+		this.nodes[item.index].class = "treeNodeSelected";
 
 		const selectedComponentNode = this.nodes[item.index];
 
 		if (selectedComponentNode) {
-			// TODO: This throws a unity error when filtering
-
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], this.MultiSelectService.isMultiMode(), undefined, false);
+			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
 		}
 
 	}

@@ -75,6 +75,7 @@ div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterIte
 					layout="row", 
 					layout-align="start center"
 					ng-class="item.class"
+					ng-dblclick="vm.selectAndCentreNode(item)"
 					ng-click="vm.filterItemSelected(item)")
 
 					p.filterListNodeName {{item.name}}
