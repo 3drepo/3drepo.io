@@ -127,9 +127,7 @@ schema.statics.authenticate = function(logger, username, password){
 			user.customData = {};
 		}
 
-		if (user.hasReadLatestTerms()) {
-			user.customData.lastLoginAt = new Date();
-		}
+		user.customData.lastLoginAt = new Date();
 
 		return user.save();
 
@@ -418,11 +416,6 @@ schema.statics.verify = function(username, token, options){
 
 schema.methods.hasReadLatestTerms = function() {
 	return new Date(config.termsUpdatedAt) < this.customData.lastLoginAt;
-};
-
-schema.methods.updateLastLoginAt = function() {
-	this.customData.lastLoginAt = new Date();
-	return this.save();
 };
 
 schema.methods.getAvatar = function(){
