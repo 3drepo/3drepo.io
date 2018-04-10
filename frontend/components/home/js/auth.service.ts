@@ -129,6 +129,7 @@ export class AuthService {
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: response.data.username,
 			initialiser: response.data.initialiser,
+			flags: response.data.flags,
 		});
 
 		this.AnalyticService.setUserId(this.username);

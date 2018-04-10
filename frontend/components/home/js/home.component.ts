@@ -267,6 +267,17 @@ class HomeController implements ng.IController {
 					}
 
 				}
+
+				if (currentData.flags && currentData.flags.termsPrompt) {
+					this.DialogService.showDialog(
+						"new-terms-dialog.html",
+						this.$scope,
+						event,
+						false,
+						null,
+						false,
+					);
+				}
 			} else {
 				this.AuthService.logout();
 			}
