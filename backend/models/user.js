@@ -46,6 +46,7 @@ let schema = mongoose.Schema({
 		lastName: String,
 		email: String,
 		mailListOptOut: Boolean,
+		createdAt: Date,
 		inactive: Boolean,
 		resetPasswordToken: {
 			expiredAt: Date,
@@ -261,6 +262,8 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 			if (-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())) {
 				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
 			}
+			
+			cleanedCustomData.createdAt = new Date();
 
 			["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
 				if (customData[key]){
@@ -275,8 +278,6 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 					billingInfo[key] = customData[key];
 				}
 			});
-
-			//cleanedCustomData.billing = {};
 
 			let expiryAt = new Date();
 			expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);

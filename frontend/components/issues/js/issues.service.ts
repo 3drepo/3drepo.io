@@ -234,7 +234,7 @@ export class IssuesService {
 
 		// TODO: This is still inefficent and unclean
 		this.state.allIssues.forEach((issue) => {
-			let show = this.state.issuesToShow.find((shownIssue) => {
+			const show = this.state.issuesToShow.find((shownIssue) => {
 				return issue._id === shownIssue._id;
 			});
 
@@ -414,8 +414,8 @@ export class IssuesService {
 
 	public canChangeStatus(issueData, userJob, permissions) {
 
-		let assigned = this.isAssignedJob(userJob, issueData, permissions);
-		let jobMatches = (
+		const assigned = this.isAssignedJob(userJob, issueData, permissions);
+		const jobMatches = (
 			this.userJobMatchesCreator(userJob, issueData) &&
 			!this.isViewer(permissions)
 		);
@@ -450,13 +450,13 @@ export class IssuesService {
 
 	public canComment(issueData, userJob, permissions) {
 
-		let isNotClosed = issueData &&
+		const isNotClosed = issueData &&
 			issueData.status &&
 			this.isOpen(issueData);
 
-		let ableToComment = this.AuthService.hasPermission(
+		const ableToComment = this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-			permissions
+			permissions,
 		);
 
 		return ableToComment && isNotClosed;
@@ -468,7 +468,7 @@ export class IssuesService {
 		if (issue.position.length > 0 && issue._id) {
 			this.ViewerService.changePinColours({
 				id: issue._id,
-				colours: Pin.pinColours.blue
+				colours: Pin.pinColours.blue,
 			});
 		}
 	}
@@ -516,7 +516,7 @@ export class IssuesService {
 			look_at : issue.viewpoint.look_at,
 			up: issue.viewpoint.up,
 			account: issue.account,
-			model: issue.model
+			model: issue.model,
 		};
 
 		this.ViewerService.setCamera(issueData);
@@ -535,7 +535,7 @@ export class IssuesService {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
-				model: issue.model
+				model: issue.model,
 			};
 
 			this.ClipService.updateClippingPlane(issueData);
@@ -667,11 +667,13 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
+		this.TreeService.selectedIndex = undefined;
+		this.$timeout(() => {
 		this.TreeService.highlightsBySharedId(objects)
 			.then(() => {
 				angular.element((window as any)).triggerHandler("resize");
-				this.$timeout(() => {}); // Force a digest cycle
 			});
+		}); // Force a digest cycle
 	}
 
 	public handleHidden(objects) {
@@ -857,7 +859,7 @@ export class IssuesService {
 			issue,
 			{
 				assigned_roles: issue.assigned_roles,
-				number: 0 // issue.number
+				number: 0, // issue.number
 			},
 		);
 	}
@@ -1198,7 +1200,7 @@ export class IssuesService {
 			"open": "Open",
 			"in progress": "In progress",
 			"for approval": "For approval",
-			"closed": "Closed"
+			"closed": "Closed",
 		};
 
 		let actionText = value;
