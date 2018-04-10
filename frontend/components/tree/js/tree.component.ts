@@ -51,7 +51,7 @@ class TreeController implements ng.IController {
 	private hideIfc;
 	private showNodes;
 	private currentSelectedIndex;
-	private searching;
+	private latestSearch: string;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -131,46 +131,25 @@ class TreeController implements ng.IController {
 		});
 
 		this.$scope.$watch("vm.filterText", (newValue) => {
-			const noFilterItemsFoundHeight = 82;
+
 			if (newValue !== undefined) {
 				if (newValue.toString() === "") {
 					this.showTreeInPane();
-				} else if (!this.searching) {
+				} else {
 					this.showTree = false;
 					this.showFilterList = false;
 					this.showProgress = true;
 					this.progressInfo = "Filtering tree for objects";
 
-					this.searching = true;
-
-					this.TreeService.search(newValue, this.revision)
-						.then((json) => {
-
-							if (!this.showFilterList) {
-								this.searching = false;
-								this.showFilterList = true;
-								this.showProgress = false;
-								this.nodes = json.data;
-								if (this.nodes.length > 0) {
-									this.filterItemsFound = true;
-									for (let i = 0; i < this.nodes.length; i ++) {
-										this.nodes[i].index = i;
-										this.nodes[i].toggleState = "visible";
-										this.nodes[i].class = "unselectedFilterItem";
-										this.nodes[i].level = 0;
-									}
-									this.setupInfiniteItemsFilter();
-									this.setContentHeight(this.nodes);
-								} else {
-									this.filterItemsFound = false;
-									this.onContentHeightRequest({height: noFilterItemsFoundHeight});
-								}
-							}
-
-						})
-						.catch((error) => {
-							this.showTreeInPane();
+					// Use rIC if available for smoother interactions
+					if (window.requestIdleCallback) {
+						window.requestIdleCallback(() => {
+							this.performSearch(newValue);
 						});
+					} else {
+						this.performSearch(newValue);
+					}
+
 				}
 			}
 		});
@@ -230,7 +209,6 @@ class TreeController implements ng.IController {
 	}
 
 	public showTreeInPane() {
-		this.searching = false;
 		this.showTree = true;
 		this.showFilterList = false;
 		this.showProgress = false;
@@ -335,6 +313,42 @@ class TreeController implements ng.IController {
 		});
 
 	}
+
+	public performSearch(filterText) {
+		this.latestSearch = filterText;
+		this.TreeService.search(filterText, this.revision)
+			.then((json) => {
+				if (this.latestSearch !== filterText) {
+					return;
+				}
+				const noFilterItemsFoundHeight = 82;
+
+				if (!this.showFilterList) {
+					this.showFilterList = true;
+					this.showProgress = false;
+					this.nodes = json.data;
+					if (this.nodes.length > 0) {
+						this.filterItemsFound = true;
+						for (let i = 0; i < this.nodes.length; i ++) {
+							this.nodes[i].index = i;
+							this.nodes[i].toggleState = "visible";
+							this.nodes[i].class = "unselectedFilterItem";
+							this.nodes[i].level = 0;
+						}
+						this.setupInfiniteItemsFilter();
+						this.setContentHeight(this.nodes);
+					} else {
+						this.filterItemsFound = false;
+						this.onContentHeightRequest({height: noFilterItemsFoundHeight});
+					}
+				}
+
+			})
+			.catch((error) => {
+				this.showTreeInPane();
+			});
+	}
+
 	/**
 	 * Check if we should ignore trying to select a node
 	 */
@@ -357,6 +371,7 @@ class TreeController implements ng.IController {
 			return;
 		}
 
+		console.log("selectNode");
 		return this.TreeService.selectNodes(
 			[node],
 			this.MultiSelectService.isMultiMode(),
@@ -365,7 +380,7 @@ class TreeController implements ng.IController {
 		);
 	}
 
-	public filternodeSelected($event: any, node: any) {
+	public filterNodeSelected($event: any, node: any) {
 
 		if (this.ignoreSelection($event, node)) {
 			return;
