@@ -23,7 +23,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 
 	if(user.customData.billing.subscriptions && user.customData.billing.subscriptions.constructor === Array) {
 		user.customData.billing.subscriptions.forEach(function(sub) {
-			if(sub.plan == "BASIC") {
+			if(sub.plan === "BASIC") {
 				createdAt = sub.createdAt;
 				return;	
 			}
