@@ -183,7 +183,6 @@ class SignupController implements ng.IController {
 		});
 
 		this.$scope.$watch(() =>  this.$scope.signup.$error, (error) => {
-			console.log(error);
 			if (error.email) {
 				this.emailInvalid = true;
 			} else if (!error.email) {
