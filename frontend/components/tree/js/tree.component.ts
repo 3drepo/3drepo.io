@@ -232,7 +232,7 @@ class TreeController implements ng.IController {
 
 		this.$scope.$watch(() => this.TreeService.selectedIndex,
 			(selectedIndex) => {
-				if (selectedIndex) {
+				if (selectedIndex !== undefined) {
 
 					this.setContentHeight(this.fetchNodesToShow());
 
