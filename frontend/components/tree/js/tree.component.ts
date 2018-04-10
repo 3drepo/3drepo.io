@@ -335,8 +335,10 @@ class TreeController implements ng.IController {
 		});
 
 	}
-
-	public ignoreSelection($event, node) {
+	/**
+	 * Check if we should ignore trying to select a node
+	 */
+	public ignoreSelection($event: any, node: any): boolean {
 		const doubleClick = $event.detail > 1;
 		if (doubleClick || node.toggleState === "invisible") {
 			return true;
@@ -349,7 +351,7 @@ class TreeController implements ng.IController {
 	 *
 	 * @param node
 	 */
-	public selectNode($event, node) {
+	public selectNode($event: any, node: any) {
 
 		if (this.ignoreSelection($event, node)) {
 			return;
@@ -363,7 +365,7 @@ class TreeController implements ng.IController {
 		);
 	}
 
-	public filternodeSelected($event, node) {
+	public filternodeSelected($event: any, node: any) {
 
 		if (this.ignoreSelection($event, node)) {
 			return;
