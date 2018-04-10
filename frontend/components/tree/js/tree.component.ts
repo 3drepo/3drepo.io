@@ -34,13 +34,11 @@ class TreeController implements ng.IController {
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
 	private clickedShown;
-	// private lastParentWithName = null;
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
 	private showTree; // in pug
 	private showFilterList; // in pug
-	private currentFilterItemSelected = null;
 	private viewerSelectedObject;
 	private progressInfo; // in pug
 	private visible;
