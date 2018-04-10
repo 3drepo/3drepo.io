@@ -24,9 +24,7 @@
 							label Username
 							input(type='text', ng-model='vm.newUser.username', required, ng-keypress="vm.register($event)", tdr-focus="true")
 						md-input-container(flex)
-							label(ng-if="!vm.newUser.password") Password 
-							label(
-								ng-if="vm.newUser.password") Password ({{vm.passwordStrength}})
+							label Password {{ (vm.newUser.password) ? "(" + vm.passwordStrength + ")" : vm.passwordStrength }} 
 							input(name="password" type='password', ng-model='vm.newUser.password', required, ng-keypress="vm.register($event)")
 
 					div(layout="row", layout-xs="column")

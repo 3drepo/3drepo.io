@@ -183,8 +183,11 @@ class SignupController implements ng.IController {
 		});
 
 		this.$scope.$watch(() =>  this.$scope.signup.$error, (error) => {
+			console.log(error);
 			if (error.email) {
 				this.emailInvalid = true;
+			} else if (!error.email) {
+				this.emailInvalid = false;
 			}
 		}, true);
 	}
@@ -287,7 +290,6 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.password)) ||
 			(!this.isDefined(this.newUser.firstName)) ||
 			(!this.isDefined(this.newUser.lastName)) ||
-			(!this.isDefined(this.newUser.company)) ||
 			(!this.isDefined(this.newUser.country))
 
 		) {
