@@ -115,7 +115,7 @@ class TreeController implements ng.IController {
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
-				this.nodes.forEach((n) => n.class = "");
+				this.nodes.forEach((n) => n.selected = false);
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
 				this.allNodes = this.TreeService.getAllNodes();
@@ -126,8 +126,7 @@ class TreeController implements ng.IController {
 				this.setupInfiniteItemsFilter();
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
-				this.$timeout(() => {}).then(() => {});
-
+				this.$timeout(); // Force digest
 			}
 		});
 
@@ -316,9 +315,8 @@ class TreeController implements ng.IController {
 			return;
 		}
 
-		// Select the node first then use all the currently selected nodes
-		// for zooming and centering too.
-		this.selectNode(node).then((selectionMap) => {
+		// Get everything selected and center to it
+		this.TreeService.getCurrentMeshHighlights().then((selectionMap) => {
 
 			if (Object.keys(selectionMap).length === 0) {
 				return;
@@ -335,6 +333,7 @@ class TreeController implements ng.IController {
 			this.ViewerService.centreToPoint(meshIDArrs);
 
 		});
+
 	}
 
 	/**
@@ -342,7 +341,14 @@ class TreeController implements ng.IController {
 	 *
 	 * @param node
 	 */
-	public selectNode(node) {
+	public selectNode($event, node) {
+
+		// Prevent double click toggling
+		const doubleClick = $event.detail > 1;
+		if (doubleClick || node.toggleState === "invisible") {
+			return;
+		}
+
 		return this.TreeService.selectNodes(
 			[node],
 			this.MultiSelectService.isMultiMode(),
@@ -351,15 +357,22 @@ class TreeController implements ng.IController {
 		);
 	}
 
-	public filterItemSelected(item) {
+	public filterItemSelected($event, item) {
+
+		// Prevent double click toggling
+		const doubleClick = $event.detail > 1;
+		if (doubleClick || item.toggleState === "invisible") {
+			return;
+		}
 
 		const multi = this.MultiSelectService.isMultiMode();
 
 		if (!multi) {
-			this.nodes.forEach((n) => n.class = "");
+			this.nodes.forEach((n) => n.selected = false);
+			this.nodes[item.index].selected = true;
+		} else {
+			this.nodes[item.index].selected = !this.nodes[item.index].selected;
 		}
-
-		this.nodes[item.index].class = "treeNodeSelected";
 
 		const selectedComponentNode = this.nodes[item.index];
 

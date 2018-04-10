@@ -45,7 +45,7 @@ tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 				div(flex, layout="row", 
 					layout-align="start center"
 					ng-dblclick="vm.selectAndCentreNode(item)"
-					ng-click="vm.selectNode(item)")
+					ng-click="vm.selectNode($event, item)")
 
 					p(ng-if="!item.status") {{item.name}}
 					p.noAccessName(ng-if="item.status") {{item.name}}
@@ -74,9 +74,9 @@ div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterIte
 					flex, 
 					layout="row", 
 					layout-align="start center"
-					ng-class="item.class"
-					ng-dblclick="vm.selectAndCentreNode(item)"
-					ng-click="vm.filterItemSelected(item)")
+					ng-class="{treeNodeSelected: item.selected}"
+					ng-dblclick="vm.selectAndCentreNode($event, item)"
+					ng-click="vm.filterItemSelected($event, item)")
 
 					p.filterListNodeName {{item.name}}
 
