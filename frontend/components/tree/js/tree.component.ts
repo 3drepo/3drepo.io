@@ -332,7 +332,6 @@ class TreeController implements ng.IController {
 						for (let i = 0; i < this.nodes.length; i ++) {
 							this.nodes[i].index = i;
 							this.nodes[i].toggleState = "visible";
-							this.nodes[i].class = "unselectedFilterItem";
 							this.nodes[i].level = 0;
 						}
 						this.setupInfiniteItemsFilter();
