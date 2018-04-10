@@ -49,6 +49,7 @@ class AccountBillingController implements ng.IController {
 	private priceLicenses;
 	private planId;
 	private quota;
+	private billingError: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -78,29 +79,47 @@ class AccountBillingController implements ng.IController {
 		return this.APIService.get(this.account + "/invoices")
 			.then((response) => {
 				this.billings = response.data;
+			})
+			.catch((error) => {
+				console.error(error);
 			});
 	}
 
 	public initPlans() {
-		return this.APIService.get("plans")
+		return this.APIService.get("/plans")
 			.then((response) => {
 				if (response.status === 200) {
+					this.billingError = false;
 					this.plans = response.data;
 				}
+			})
+			.catch((error) => {
+				this.billingError = true;
+				console.error(error);
 			});
 	}
 
 	public initSubscriptions() {
 		return this.APIService.get(this.account + "/subscriptions")
 			.then((response) => {
+				this.billingError = false;
 				this.subscriptions = response.data;
+			})
+			.catch((error) => {
+				this.billingError = true;
+				console.error(error);
 			});
 	}
 
 	public initQuota() {
 		return this.APIService.get(this.account + "/quota")
 			.then((response) => {
+				this.billingError = false;
 				this.quota = response.data;
+			})
+			.catch((error) => {
+				this.billingError = true;
+				console.error(error);
 			});
 	}
 
