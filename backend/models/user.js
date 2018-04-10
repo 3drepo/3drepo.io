@@ -419,6 +419,11 @@ schema.methods.hasReadLatestTerms = function() {
 	return new Date(config.termsUpdatedAt) < this.customData.lastLoginAt;
 };
 
+schema.methods.updateLastLoginAt = function() {
+	this.customData.lastLoginAt = new Date();
+	return this.save();
+};
+
 schema.methods.getAvatar = function(){
 	return this.customData && this.customData.avatar || null;
 };
