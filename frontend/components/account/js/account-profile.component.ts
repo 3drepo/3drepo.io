@@ -68,11 +68,11 @@ class AccountProfileController implements ng.IController {
 			if (newPassword === undefined) {
 				newPassword = "";
 			}
-			if (newPassword !== undefined) {
-				const result = this.PasswordService.evaluatePassword(newPassword);
-				this.passwordStrength = this.PasswordService.getPasswordStrength(newPassword, result.score);
-				this.checkInvalidPassword(result);
-			}
+
+			const result = this.PasswordService.evaluatePassword(newPassword);
+			this.passwordStrength = this.PasswordService.getPasswordStrength(newPassword, result.score);
+			this.checkInvalidPassword(result);
+
 		});
 	}
 
