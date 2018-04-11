@@ -1180,7 +1180,7 @@ export class TreeService {
 					ids: highlightMap[key].meshes,
 					colour: highlightMap[key].colour,
 					model,
-					multi,
+					multi: true,
 					source: "tree",
 					forceReHighlight,
 				});
