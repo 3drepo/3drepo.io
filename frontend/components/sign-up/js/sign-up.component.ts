@@ -182,11 +182,6 @@ class SignupController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() =>  this.$scope.signup.$error, (error) => {
-			if (error.email) {
-				this.emailInvalid = true;
-			}
-		}, true);
 	}
 
 	public checkInvalidPassword(score) {
@@ -273,6 +268,13 @@ class SignupController implements ng.IController {
 		this.closeDialog();
 	}
 
+	public getPasswordLabel() {
+		if (this.newUser.password && this.passwordStrength) {
+			return "(" + this.passwordStrength + ")";
+		}
+		return "";
+	}
+
 	/**
 	 * Do the user registration
 	 */
@@ -287,11 +289,12 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.password)) ||
 			(!this.isDefined(this.newUser.firstName)) ||
 			(!this.isDefined(this.newUser.lastName)) ||
-			(!this.isDefined(this.newUser.company)) ||
 			(!this.isDefined(this.newUser.country))
 
 		) {
-			if (this.emailInvalid) {
+
+			const emailInvalid = this.$scope.signup.$error.email;
+			if (emailInvalid) {
 				this.registerErrorMessage = "Email is invalid";
 			} else {
 				this.registerErrorMessage = "Please fill all required fields";
