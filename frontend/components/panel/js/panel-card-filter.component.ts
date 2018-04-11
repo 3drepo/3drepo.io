@@ -28,7 +28,8 @@ class PanelCardFilterController implements ng.IController {
 	private filterInput;
 	private filterText;
 	private showClearFilterButton;
-	private showFilter;
+	private showFilter: boolean;
+	private showFilterButton: boolean;
 
 	constructor(
 		private $timeout: ng.ITimeoutService,
@@ -65,6 +66,7 @@ class PanelCardFilterController implements ng.IController {
 		this.filterInputText = "";
 		this.filterInput.focus();
 		this.showFilter = false;
+		this.showFilterButton = true;
 	}
 
 }
@@ -73,6 +75,7 @@ export const PanelCardFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		filterText: "=",
 		showFilter: "=",
+		showFilterButton: "=",
 	},
 	controller: PanelCardFilterController,
 	controllerAs: "vm",

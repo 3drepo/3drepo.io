@@ -34,6 +34,7 @@ class PanelCardController implements ng.IController {
 	private showHelp;
 	private visibleStatus;
 	private showFilter;
+	private showFilterButton;
 	private showClearFilterButton;
 	private showAdd;
 	private hideMenuButton;
@@ -65,6 +66,7 @@ class PanelCardController implements ng.IController {
 		this.showClearFilterButton = false;
 		this.showAdd = false;
 		this.hideMenuButton = false;
+		this.showFilterButton = true;
 		this.currentHighlightedOptionIndex = -1;
 
 		angular.element(() => {
@@ -213,7 +215,7 @@ class PanelCardController implements ng.IController {
 
 		switch (optionType) {
 		case "filter":
-			return " show-filter='vm.showFilter'";
+			return " show-filter='vm.showFilter' show-filter-button='vm.showFilterButton'";
 
 		case "visible":
 			return " visible='vm.visible'";
@@ -247,7 +249,6 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		model: "=",
 		modelSettings: "=",
 		onHeightRequest: "&",
-		onShowFilter: "&",
 		position: "=",
 		revision: "=",
 		selectedObjects: "=",

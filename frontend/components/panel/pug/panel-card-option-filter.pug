@@ -1,2 +1,5 @@
-md-button.md-icon-button(aria-label="Filter",  ng-click="vm.toggleFilter($event)")
+md-button.md-icon-button(
+	aria-label="Filter",
+	ng-click="vm.toggleFilter($event)",
+	ng-show="vm.showFilterButton")
 	md-icon.angular-material-icons search

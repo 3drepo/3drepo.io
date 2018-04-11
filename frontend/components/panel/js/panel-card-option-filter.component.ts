@@ -19,17 +19,20 @@ class PanelCardOptionFilterController implements ng.IController {
 
 	public static $inject: string[] = [];
 
-	public showFilter;
+	public showFilter: boolean;
+	public showFilterButton: boolean;
 
 	constructor() {
 		this.showFilter = false;
+		this.showFilterButton = true;
 	}
 
 	// TODO: This is a work around because
 	// not entirely sure how this.menu is generated etc
-	public toggleFilter(event) {
+	public toggleFilter(event: any) {
 		event.stopPropagation();
 		this.showFilter = !this.showFilter;
+		this.showFilterButton = !this.showFilterButton;
 	}
 
 }
@@ -37,6 +40,7 @@ class PanelCardOptionFilterController implements ng.IController {
 export const PanelCardOptionFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		showFilter: "=",
+		showFilterButton: "=",
 	},
 	controller: PanelCardOptionFilterController,
 	controllerAs: "vm",

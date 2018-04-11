@@ -100,16 +100,21 @@ class TreeController implements ng.IController {
 					const objectID = event.value.id;
 
 					if (objectID && this.TreeService.getCachedIdToPath()) {
+
 						const path = this.TreeService.getPath(objectID);
 						if (!path) {
 							console.error("Couldn't find the object path");
-						} else {
+						} else if (this.showTree) {
 
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
 							this.TreeService.updateModelVisibility(this.allNodes[0]);
 							angular.element((window as any).window).triggerHandler("resize");
 
+						} else {
+							const nodes = [this.TreeService.getNodeById(objectID)];
+							this.TreeService.selectNodes(nodes, this.MultiSelectService.isMultiMode(), undefined, true);
 						}
+
 					}
 				}
 
@@ -320,7 +325,7 @@ class TreeController implements ng.IController {
 		this.TreeService.search(filterText, this.revision)
 			.then((json) => {
 
-				if (this.latestSearch !== filterText || this.showFilterList) {
+				if (this.latestSearch !== filterText || this.showTree) {
 					return;
 				}
 
