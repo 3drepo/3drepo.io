@@ -15,7 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 class IssuesController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -132,7 +131,6 @@ class IssuesController implements ng.IController {
 
 		this.watchers();
 
-
 	}
 
 	public getIssuesData() {
@@ -150,7 +148,7 @@ class IssuesController implements ng.IController {
 							this.showProgress = false;
 						});
 					}, 1000);
-					
+
 				} else {
 					throw new Error("Error");
 				}
@@ -231,14 +229,10 @@ class IssuesController implements ng.IController {
 			if (this.modelSettings) {
 
 				this.issuesReady.then(() => {
-					const hasPerm = this.AuthService.hasPermission(
+					this.canAddIssue = this.AuthService.hasPermission(
 						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
 						this.modelSettings.permissions,
 					);
-
-					if (hasPerm) {
-						this.canAddIssue = true;
-					}
 				});
 
 				this.subModels = this.modelSettings.subModels || [];
