@@ -320,7 +320,7 @@ class TreeController implements ng.IController {
 		this.TreeService.search(filterText, this.revision)
 			.then((json) => {
 
-				if (this.latestSearch !== filterText || !this.showFilterList) {
+				if (this.latestSearch !== filterText || this.showFilterList) {
 					return;
 				}
 
