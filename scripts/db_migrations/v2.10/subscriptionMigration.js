@@ -10,6 +10,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 	print("=============== " + user.user + "==================");
 	var jobEntrys = {};
 	var subscriptions = {};
+	var createdAt = null;
 	if(user.customData.jobs) {
 		user.customData.jobs.forEach(function(job){
 			jobEntrys[job._id] = job;
@@ -22,7 +23,13 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 
 	if(user.customData.billing.subscriptions && user.customData.billing.subscriptions.constructor === Array) {
 		user.customData.billing.subscriptions.forEach(function(sub) {
-			if(sub.plan == "BASIC" || !sub.active) return;
+			if(sub.plan === "BASIC") {
+				createdAt = sub.createdAt;
+				return;	
+			}
+
+			if(!sub.active) return;
+
 			if(sub.job && sub.assignedUser && jobEntrys[sub.job]) {
 				jobEntrys[sub.job].users.push(sub.assignedUser);
 			}					
@@ -76,19 +83,39 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 			}
 		});
 		if(!dryRun) {
+			//This is the only way to make mongo store integers... by default it's always float...
+			if(subscriptions.discretionary) {
+				subscriptions.discretionary.collaborators = NumberInt(subscriptions.discretionary.collaborators);
+				subscriptions.discretionary.data = NumberInt(subscriptions.discretionary.data);
+			}
+			if(subscriptions.enterprise) {
+				subscriptions.enterprise.collaborators = NumberInt(subscriptions.enterprise.collaborators);
+				subscriptions.enterprise.data = NumberInt(subscriptions.enterprise.data);
+			}
+
+			if(subscriptions.paypal) {
+				subscriptions.paypal.forEach(function(sub) {
+					sub.quantity = NumberInt(sub.quantity);
+				});
+			}
 			user.customData.billing.subscriptions = subscriptions;
-			db.getSiblingDB('admin').getCollection('system.users').update({_id: user._id}, {$set : {customData : user.customData}});
+			var updateBson = {customData: user.customData};
+			if(createdAt) {
+				updateBson.createdAt = createdAt;
+			}
+			db.getSiblingDB('admin').getCollection('system.users').update({_id: user._id}, {$set : updateBson});
 
 		}
 		print("\tUpdated Sub:");
 		print("\t\t" + JSON.stringify(subscriptions));
+		print("\tUser created at: "  + createdAt);
 	}
 	else{
 		print("\tSub already up to date..");
 	}
 
 	var userDB = db.getSiblingDB(user.user);
-	if(userDB) {
+	if(userDB && jobEntrys.length > 0) {
 		print("\tCreating job collection...");
 		userDB.createCollection("jobs");
 		for(var job in jobEntrys) {

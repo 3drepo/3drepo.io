@@ -48,7 +48,6 @@ class ModelController implements ng.IController {
 	private revision;
 	private settings;
 	private issueId;
-	private keysDown;
 	private treeMap;
 	private selectedObjects;
 	private initialSelectedObjects;
@@ -76,7 +75,7 @@ class ModelController implements ng.IController {
 
 	public $onInit() {
 
-		this.issuesCardIndex = 0;
+		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
 		this.pointerEvents = "inherit";
 
 		history.pushState(null, null, document.URL);
@@ -115,10 +114,6 @@ class ModelController implements ng.IController {
 					this.setupModelInfo();
 				});
 			}
-		});
-
-		this.$scope.$watch("vm.keysDown", () => {
-			this.MultiSelectService.handleKeysDown(this.keysDown);
 		});
 
 		this.$scope.$watch("vm.issueId", () => {
@@ -242,7 +237,6 @@ export const ModelComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		issueId: "=",
-		keysDown: "<",
 		model:  "=",
 		revision: "=",
 		state:    "=",

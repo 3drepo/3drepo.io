@@ -129,7 +129,6 @@ class PanelController implements ng.IController {
 			// If we have clicked on a canvas, we are probably moving the model around
 			if (event.target.tagName === "CANVAS") {
 				this.activate = false;
-				this.$scope.$apply();
 			}
 		});
 
@@ -138,7 +137,6 @@ class PanelController implements ng.IController {
 		*/
 		angular.element(document).bind("mouseup", () => {
 			this.activate = true;
-			this.$scope.$apply();
 		});
 
 		/*
@@ -214,9 +212,6 @@ class PanelController implements ng.IController {
 	public calculateContentHeights() {
 		const tempContentItemsShown = angular.copy(this.contentItemsShown);
 		this.assignHeights(this.maxHeightAvailable, tempContentItemsShown, null);
-		this.$timeout(() => {
-			this.$scope.$apply();
-		});
 	}
 
 	public assignHeights(heightAvailable: number, contentItems: any[], previousContentItems: any[]) {
@@ -300,7 +295,6 @@ export const PanelComponent: ng.IComponentOptions = {
 	bindings: {
 		account:  "=",
 		branch:   "=",
-		keysDown: "=",
 		model:  "=",
 		modelSettings: "=",
 		position: "@",

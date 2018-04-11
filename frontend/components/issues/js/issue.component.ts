@@ -625,7 +625,7 @@ class IssueController implements ng.IController {
 			});
 		}
 
-		//This is called so icon and assignment colour changes for new issues.
+		// This is called so icon and assignment colour changes for new issues.
 		this.IssuesService.populateIssue(this.issueData);
 	}
 
@@ -706,7 +706,7 @@ class IssueController implements ng.IController {
 	public showScreenshotDialog(event) {
 		const parentScope = this;
 		this.$mdDialog.show({
-			controller: function() {
+			controller() {
 				this.issueComponent = parentScope;
 			},
 			controllerAs: "vm",
@@ -952,18 +952,26 @@ class IssueController implements ng.IController {
 
 		const promises = [];
 
-		if(highlightedGroupData) {
-			promises.push(this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
+		if (highlightedGroupData) {
+			const highlightPromise = this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-				}));
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+			promises.push(highlightPromise);
 		}
 
-		if(hiddenGroupData) {
-			promises.push(this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
+		if (hiddenGroupData) {
+			const hiddenPromise = this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
 				.then((hiddenGroupResponse) => {
 					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-				}));
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+			promises.push(hiddenPromise);
 		}
 
 		Promise.all(promises).then(() => {
@@ -1053,6 +1061,7 @@ class IssueController implements ng.IController {
 
 			})
 			.catch((error) => {
+				this.saving = false;
 				const content = "Something went wrong saving the issue. " +
 				"If this continues please message support@3drepo.io.";
 				const escapable = true;
@@ -1097,19 +1106,19 @@ class IssueController implements ng.IController {
 			//FIXME: this is duplicated code - something similar already exists in CreateGroup
 			// Create a group of selected objects
 			const highlightedGroupData = this.createGroupData(this.pruneNodes(objectInfo.highlightedNodes, "selected"));
-		
+
 			// Create a group of hidden objects
 			const hiddenGroupData = this.createGroupData(this.pruneNodes(objectInfo.hiddenNodes, "toggleState"));
 
 			const promises = [];
-			
+
 			if(highlightedGroupData) {
 			promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 				}));
 			}
-	
+
 			if(hiddenGroupData) {
 				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
 					.then((hiddenGroupResponse) => {
@@ -1117,7 +1126,7 @@ class IssueController implements ng.IController {
 						this.commentViewpoint.hideIfc = this.TreeService.getHideIfc();
 					}));
 			}
-	
+
 			Promise.all(promises).then(() => {
 				this.IssuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
@@ -1131,10 +1140,10 @@ class IssueController implements ng.IController {
 			}).catch((error) => {
 				console.error(error);
 			});
-			
+
 			this.AnalyticService.sendEvent({
 				eventCategory: "Issue",
-				eventAction: "comment"
+				eventAction: "comment",
 			});
 		});
 
@@ -1146,7 +1155,7 @@ class IssueController implements ng.IController {
 		const escapable = true;
 		this.DialogService.text("Error Saving Comment", content, escapable);
 		console.error("Something went wrong saving the issue comment: ", error);
-	};
+	}
 
 	public errorDeleteComment(error) {
 		const content = "Something went wrong deleting the comment. " +
@@ -1154,17 +1163,16 @@ class IssueController implements ng.IController {
 		const escapable = true;
 		this.DialogService.text("Error Deleting Comment", content, escapable);
 		console.error("Something went wrong deleting the issue comment: ", error);
-	};
+	}
 
 	public errorSavingScreemshot(error) {
 		const content = "Something went wrong saving the screenshot. " +
 		"If this continues please message support@3drepo.io.";
 		const escapable = true;
-		
+
 		this.DialogService.text("Error Saving Screenshot", content, escapable);
 		console.error("Something went wrong saving the screenshot: ", error);
-	};
-
+	}
 
 	/**
 	 * Process after new comment saved
@@ -1177,11 +1185,11 @@ class IssueController implements ng.IController {
 			otherComment.sealed = true;
 		});
 
-		if(comment.owner !== this.AuthService.getUsername()) {
+		if (comment.owner !== this.AuthService.getUsername()) {
 			comment.sealed = true;
 		}
 
-		if(comment.viewpoint && comment.viewpoint.screenshot){
+		if (comment.viewpoint && comment.viewpoint.screenshot) {
 			comment.viewpoint.screenshotPath = this.APIService.getAPIUrl(comment.viewpoint.screenshot);
 		}
 
@@ -1196,10 +1204,10 @@ class IssueController implements ng.IController {
 			owner: comment.owner,
 			timeStamp: this.IssuesService.getPrettyTime(comment.created),
 			viewpoint: comment.viewpoint,
-			action: comment.action
+			action: comment.action,
 		});
 
-		if(!noDeleteInput) {
+		if (!noDeleteInput) {
 			delete this.comment;
 			delete this.commentThumbnail;
 			this.IssuesService.updateIssues(this.issueData);
@@ -1211,7 +1219,7 @@ class IssueController implements ng.IController {
 		if (!this.aboutToBeDestroyed) {
 			this.setContentHeight();
 		}
-	};
+	}
 
 	/**
 	 * Delete a comment
@@ -1232,18 +1240,18 @@ class IssueController implements ng.IController {
 
 		this.AnalyticService.sendEvent({
 			eventCategory: "Issue",
-			eventAction: "deleteComment"
+			eventAction: "deleteComment",
 		});
 
 		this.setContentHeight();
-	};
-	
+	}
+
 	/**
 	 * A screen shot has been saved
 	 * @param data
 	 */
 	public screenShotSave(data) {
-		let viewpointPromise = this.$q.defer();
+		const viewpointPromise = this.$q.defer();
 
 		this.savedScreenShot = data.screenShot;
 
@@ -1255,7 +1263,7 @@ class IssueController implements ng.IController {
 			// Get the viewpoint and add the screen shot to it
 			// Remove base64 header text from screen shot
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
+				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model},
 			);
 
 		} else {
@@ -1263,7 +1271,7 @@ class IssueController implements ng.IController {
 			this.issueData.descriptionThumbnail = data.screenShot;
 
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.account, model: this.model}
+				{promise: viewpointPromise, account: this.account, model: this.model},
 			);
 		}
 
@@ -1276,7 +1284,7 @@ class IssueController implements ng.IController {
 			});
 
 		this.setContentHeight();
-	};
+	}
 
 	/**
 	 * Set the content height
@@ -1335,7 +1343,7 @@ class IssueController implements ng.IController {
 			console.error("Height was trying to be set to falsy value");
 		}
 
-	};
+	}
 
 	public commentAreaScrollToBottom() {
 
@@ -1345,7 +1353,7 @@ class IssueController implements ng.IController {
 				commentArea.scrollTop = commentArea.scrollHeight;
 			}
 		});
-	};
+	}
 
 	public handleIssueChange(issue) {
 
@@ -1354,7 +1362,7 @@ class IssueController implements ng.IController {
 
 		this.$scope.$apply();
 
-	};
+	}
 
 	public startNotification() {
 
@@ -1427,7 +1435,7 @@ class IssueController implements ng.IController {
 			});
 
 		}
-};
+}
 
 }
 
@@ -1437,7 +1445,6 @@ export const IssueComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		data: "=",
-		keysDown: "<",
 		exit: "&",
 		event: "<",
 		selectedIssueLoaded: "<",

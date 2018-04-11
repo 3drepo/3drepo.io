@@ -51,10 +51,13 @@ describe('Sign up', function(){
 	let email = 'test3drepo_signup@mailinator.com';
 	let firstName = 'Hello';
 	let lastName = 'World';
-	let phoneNo = '123456';
 	let countryCode = 'GB';
-	let jobTitle = 'ABC';
 	let company = 'company';
+	let mailListAgreed = true;
+
+	let usernameNoSpam = 'signup_nospam';
+	let emailNoSpam = 'test3drepo_signup_nospam@mailinator.com';
+	let noMailListAgreed = false;
 
 	let User = require('../../models/user');
 
@@ -68,10 +71,9 @@ describe('Sign up', function(){
 			"password": password,
 			"firstName": firstName,
 			"lastName": lastName,
-			"phoneNo": phoneNo,
 			"countryCode": countryCode,
-			"jobTitle": jobTitle,
-			"company": company
+			"company": company,
+			"mailListAgreed": mailListAgreed
 
 		}).expect(200, function(err, res){
 
@@ -91,13 +93,34 @@ describe('Sign up', function(){
 			"password": password,
 			"firstName": firstName,
 			"lastName": lastName,
-			"phoneNo": phoneNo,
 			"countryCode": countryCode,
-			"jobTitle": jobTitle,
-			"company": company
+			"company": company,
+			"mailListAgreed": mailListAgreed
 
 		}).expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
+			done(err);
+		});
+
+	});
+
+	it('with mailing list opt-out selected should return success', function(done){
+
+		request(server)
+		.post(`/${usernameNoSpam}`)
+		.send({
+
+			"email": emailNoSpam,
+			"password": password,
+			"firstName": firstName,
+			"lastName": lastName,
+			"countryCode": countryCode,
+			"company": company,
+			"mailListAgreed": noMailListAgreed
+
+		}).expect(200, function(err, res){
+
+			expect(res.body.account).to.equal(usernameNoSpam);
 			done(err);
 		});
 
@@ -110,10 +133,22 @@ describe('Sign up', function(){
 			expect(user.user).to.equal(username);
 			expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
 			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
-			expect(user.customData.billing.billingInfo.phoneNo).to.equal(phoneNo);
 			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
-			expect(user.customData.billing.billingInfo.jobTitle).to.equal(jobTitle);
 			expect(user.customData.billing.billingInfo.company).to.equal(company);
+			expect(user.customData.mailListOptOut).to.be.undefined;
+		});
+	});
+
+	it('with mailing list opt-out should have flag set', function(){
+		// use return for promise function
+		return User.findByUserName(usernameNoSpam).then(user => {
+			expect(user).to.not.be.null;
+			expect(user.user).to.equal(usernameNoSpam);
+			expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
+			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
+			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
+			expect(user.customData.billing.billingInfo.company).to.equal(company);
+			expect(user.customData.mailListOptOut).to.equal(true);
 		});
 	});
 
