@@ -201,12 +201,11 @@ function signUp(req, res, next){
 		let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
 		//send to sales
 		Mailer.sendNewUser({
+			user: req.params.account,
 			email: req.body.email,
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
-			phoneNo: req.body.phoneNo,
 			country: country && country.name,
-			jobTitle: req.body.jobTitle,
 			company: req.body.company,
 		}).catch( err => {
 			// catch email error instead of returning to client
