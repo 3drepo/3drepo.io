@@ -62,10 +62,7 @@ class AccountBillingController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.initSubscriptions();
-		this.initBillings();
-		this.initPlans();
-		this.initQuota();
+		this.initBillingData();
 		this.showInfo = true;
 		this.saveDisabled = true;
 		this.countries = this.ClientConfigService.countries;
@@ -75,52 +72,57 @@ class AccountBillingController implements ng.IController {
 		this.watchers();
 	}
 
+	public initBillingData() {
+		const initialisationPromises = [];
+		initialisationPromises.push(this.initSubscriptions());
+		initialisationPromises.push(this.initBillings());
+		initialisationPromises.push(this.initPlans());
+		initialisationPromises.push(this.initQuota());
+
+		Promise.all(initialisationPromises)
+			.then((results) => {
+				this.billingError = false;
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
 	public initBillings() {
 		return this.APIService.get(this.account + "/invoices")
 			.then((response) => {
 				this.billings = response.data;
 			})
-			.catch((error) => {
-				console.error(error);
-			});
+			.catch(this.handleAPIError.bind(this));
 	}
 
 	public initPlans() {
 		return this.APIService.get("/plans")
 			.then((response) => {
-				if (response.status === 200) {
-					this.billingError = false;
-					this.plans = response.data;
-				}
+				this.plans = response.data;
 			})
-			.catch((error) => {
-				this.billingError = true;
-				console.error(error);
-			});
+			.catch(this.handleAPIError.bind(this));
 	}
 
 	public initSubscriptions() {
 		return this.APIService.get(this.account + "/subscriptions")
 			.then((response) => {
-				this.billingError = false;
 				this.subscriptions = response.data;
 			})
-			.catch((error) => {
-				this.billingError = true;
-				console.error(error);
-			});
+			.catch(this.handleAPIError.bind(this));
 	}
 
 	public initQuota() {
 		return this.APIService.get(this.account + "/quota")
 			.then((response) => {
-				this.billingError = false;
 				this.quota = response.data;
 			})
-			.catch((error) => {
-				this.billingError = true;
-				console.error(error);
-			});
+			.catch(this.handleAPIError.bind(this));
+	}
+
+	public handleAPIError(error) {
+		this.billingError = true;
+		throw error;
 	}
 
 	public watchers() {
