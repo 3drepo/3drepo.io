@@ -94,9 +94,7 @@ function login(req, res, next){
 		responseData.roles = user.roles;
 		responseData.flags = {};
 
-		if (!user.hasReadLatestTerms()) {
-			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
-		}
+		responseData.flags.termsPrompt = !user.hasReadLatestTerms();
 
 		user.customData.lastLoginAt = new Date();
 
