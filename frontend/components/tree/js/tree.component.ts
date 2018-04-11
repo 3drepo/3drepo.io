@@ -136,11 +136,6 @@ class TreeController implements ng.IController {
 				if (newValue.toString() === "") {
 					this.showTreeInPane();
 				} else {
-					this.showTree = false;
-					this.showFilterList = false;
-					this.showProgress = true;
-					this.progressInfo = "Filtering tree for objects";
-
 					// Use rIC if available for smoother interactions
 					if (window.requestIdleCallback) {
 						window.requestIdleCallback(() => {
@@ -149,7 +144,6 @@ class TreeController implements ng.IController {
 					} else {
 						this.performSearch(newValue);
 					}
-
 				}
 			}
 		});
@@ -315,37 +309,43 @@ class TreeController implements ng.IController {
 	}
 
 	public performSearch(filterText) {
+
 		this.latestSearch = filterText;
+
+		this.showTree = false;
+		this.showFilterList = false;
+		this.showProgress = true;
+		this.progressInfo = "Filtering tree for objects";
+
 		this.TreeService.search(filterText, this.revision)
 			.then((json) => {
-				if (this.latestSearch !== filterText) {
+
+				if (this.latestSearch !== filterText || !this.showFilterList) {
 					return;
 				}
-				const noFilterItemsFoundHeight = 82;
 
-				if (!this.showFilterList) {
-					this.showFilterList = true;
-					this.showProgress = false;
-					this.nodes = json.data;
-					if (this.nodes.length > 0) {
-						this.filterItemsFound = true;
-						for (let i = 0; i < this.nodes.length; i ++) {
-							this.nodes[i].index = i;
-							this.nodes[i].toggleState = "visible";
-							this.nodes[i].level = 0;
-						}
-						this.setupInfiniteItemsFilter();
-						this.setContentHeight(this.nodes);
-					} else {
-						this.filterItemsFound = false;
-						this.onContentHeightRequest({height: noFilterItemsFoundHeight});
+				this.showFilterList = true;
+				this.showProgress = false;
+				this.nodes = json.data;
+				this.filterItemsFound = this.nodes.length > 0;
+
+				if (this.filterItemsFound) {
+					for (let i = 0; i < this.nodes.length; i++) {
+						this.nodes[i].index = i;
+						this.nodes[i].level = 0;
 					}
+					this.setupInfiniteItemsFilter();
+					this.setContentHeight(this.nodes);
+				} else {
+					const noFilterItemsFoundHeight = 82;
+					this.onContentHeightRequest({height: noFilterItemsFoundHeight});
 				}
 
 			})
 			.catch((error) => {
 				this.showTreeInPane();
 			});
+
 	}
 
 	/**
@@ -370,7 +370,6 @@ class TreeController implements ng.IController {
 			return;
 		}
 
-		console.log("selectNode");
 		return this.TreeService.selectNodes(
 			[node],
 			this.MultiSelectService.isMultiMode(),
