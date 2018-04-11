@@ -676,7 +676,6 @@ export class TreeService {
 
 				if (childNode && childNode.hasOwnProperty("name")) {
 					if (this.nodesToShow.indexOf(childNode) === -1) {
-
 						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
 						position++;
 					}
@@ -686,6 +685,7 @@ export class TreeService {
 
 			nodeToExpand.expanded = true;
 		}
+
 	}
 
 	/**
@@ -1340,7 +1340,7 @@ export class TreeService {
 			.then((nodes) => {
 
 				if (nodes && nodes.length) {
-					this.initNodesToShow([this.allNodes[0]]);
+
 					this.selectNodes(nodes, true, undefined, false);
 
 					const lastNodeId = nodes[nodes.length - 1]._id;
