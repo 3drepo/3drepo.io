@@ -88,17 +88,21 @@ function login(req, res, next){
 	User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
 		let responseData = { username: user.user };
-		
+
 		req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
-		
+
 		responseData.roles = user.roles;
 		responseData.flags = {};
-		
+
 		if (!user.hasReadLatestTerms()) {
-			responseData.flags.termsPrompt = true;
+			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
 		}
 
-		createSession(responsePlace, req, res, next, responseData);
+		user.customData.lastLoginAt = new Date();
+
+		user.save().then(() => {
+			createSession(responsePlace, req, res, next, responseData);
+		});
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});

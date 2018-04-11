@@ -127,8 +127,6 @@ schema.statics.authenticate = function(logger, username, password){
 			user.customData = {};
 		}
 
-		user.customData.lastLoginAt = new Date();
-
 		return user.save();
 
 	}).catch( err => {
