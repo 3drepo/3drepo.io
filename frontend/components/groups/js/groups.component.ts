@@ -20,6 +20,7 @@ class GroupsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"GroupsService",
 		"DialogService",
@@ -48,8 +49,9 @@ class GroupsController implements ng.IController {
 	private savedGroupData: any;
 
 	constructor(
-		private $scope: any,
-		private $timeout: any,
+		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private GroupsService: any,
 		private DialogService: any,
@@ -140,7 +142,7 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public resetToSavedGroup() { 
+	public resetToSavedGroup() {
 		if (this.selectedGroup && this.savedGroupData) {
 			this.selectedGroup.name = this.savedGroupData.name;
 			this.selectedGroup.description = this.savedGroupData.description;
@@ -321,7 +323,15 @@ class GroupsController implements ng.IController {
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
-		// this.GroupsService.updateSelectedGroupColor();
+		this.focusGroupName();
+
+	}
+
+	public focusGroupName() {
+		this.$timeout(() => {
+			const input: HTMLElement = this.$element[0].querySelector("#groupName");
+			input.focus();
+		});
 	}
 
 	public selectGroup(group: any) {
