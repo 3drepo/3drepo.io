@@ -48,7 +48,7 @@ const uuid = require("node-uuid");
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
-	// These error codes correspons to the error messages to 3drepobouncer
+	// These error codes correspond to the error messages to 3drepobouncer
 	// refer to bouncer/repo/error_codes.h for what they are.
 	const bouncerErrToWebErr = [
 		responseCodes.OK, 
