@@ -48,23 +48,21 @@ const uuid = require("node-uuid");
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
-
-	let errObj;
 	const bouncerErrToWebErr = [
 		responseCodes.OK,
-		responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT,
-		responseCodes.NOT_AUTHORIZED,
-		responseCodes.FILE_IMPORT_UNKNOWN_CMD,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL,
+		responseCodes.NOT_AUTHORIZED,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
 		responseCodes.FILE_IMPORT_MISSING_TEXTURES,
 		responseCodes.FILE_IMPORT_INVALID_ARGS,
 		responseCodes.REPOERR_FED_GEN_FAIL,
 		responseCodes.FILE_IMPORT_MISSING_NODES,
-		responseCodes.FILE_IMPORT_GET_FILE_FAILED,
-		responseCodes.FILE_IMPORT_CRASHED,
-		responseCodes.FILE_IMPORT_FILE_READ_FAILED,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED,
 		responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES,
 		responseCodes.FILE_IMPORT_PROCESS_ERR,
@@ -74,13 +72,15 @@ function convertToErrorCode(bouncerErrorCode){
 		responseCodes.FILE_IMPORT_PROCESS_ERR,
 		responseCodes.FILE_IMPORT_PROCESS_ERR,
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM,
-		responseCodes.FILE_IMPORT_PROCESS_VERSION_FBX,
-		responseCodes.FILE_IMPORT_PROCESS_VERSION
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION
 	];
 
 
-	return bouncerErrorToWeb.length > bouncerErrorCode ? 
+	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ? 
 		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+	
+	return Object.assign({bouncerErrorCode}, errObj);
 }
 
 function importSuccess(account, model, sharedSpacePath) {
@@ -120,7 +120,7 @@ function importSuccess(account, model, sharedSpacePath) {
 			setting.save();
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importSuccess:`, err);
+		systemLogger.logError(`Failed to invoke importSuccess:` +  err);
 	});
 }
 
@@ -159,7 +159,7 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 			});
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importFail:`, err);
+		systemLogger.logError(`Failed to invoke importFail:` +  err);
 	});
 }
 
