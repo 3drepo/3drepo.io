@@ -27,6 +27,7 @@ class GroupsController implements ng.IController {
 		"TreeService",
 		"AuthService",
 		"ClientConfigService",
+		"IconsConstant",
 	];
 
 	private onContentHeightRequest: any;
@@ -47,6 +48,7 @@ class GroupsController implements ng.IController {
 	private canAddGroup: boolean;
 	private modelSettings: any;
 	private savedGroupData: any;
+	private customIcons: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -58,9 +60,13 @@ class GroupsController implements ng.IController {
 		private TreeService: any,
 		private AuthService: any,
 		private ClientConfigService: any,
+		private IconsConstant: any,
 	) {}
 
 	public $onInit() {
+
+		this.customIcons = this.IconsConstant;
+
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.changed = false;

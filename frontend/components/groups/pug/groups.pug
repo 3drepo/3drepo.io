@@ -36,7 +36,9 @@ div.groupsContainer
                     md-button.md-icon-button(
                         aria-label="Invert Colors"
                         ng-click="vm.isolateGroup($event, group)")
-                        md-icon.angular-material-icons visibility
+                        svg(width="24px" height="24px" viewBox="0 0 24 24")
+                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate1}}")
+                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate2}}")
                     md-tooltip Isolate
 
                 div
