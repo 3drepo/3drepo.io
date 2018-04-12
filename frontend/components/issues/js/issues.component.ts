@@ -15,7 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 class IssuesController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -117,7 +116,7 @@ class IssuesController implements ng.IController {
 
 		// Get all the Issues
 		this.issuesPromise = this.getIssuesData();
-				
+
 		// Get all the available roles for the model
 		this.jobsPromise = this.getJobsData();
 
@@ -132,14 +131,13 @@ class IssuesController implements ng.IController {
 
 		this.watchers();
 
-
 	}
 
 	public getIssuesData() {
 
 		return this.IssuesService.getIssues(this.account, this.model, this.revision)
 			.then((data) => {
-				
+
 				if (data) {
 					this.IssuesService.populateNewIssues(data);
 
@@ -150,11 +148,10 @@ class IssuesController implements ng.IController {
 							this.showProgress = false;
 						});
 					}, 1000);
-					
+
 				} else {
-					throw "Error";
+					throw new Error("Error");
 				}
-				
 
 			})
 			.catch((error) => {
@@ -184,13 +181,13 @@ class IssuesController implements ng.IController {
 						toggle: true,
 						selected: true,
 						firstSelected: false,
-						secondSelected: false
+						secondSelected: false,
 					});
 				});
 
 				this.EventService.send(this.EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
 					type: "issues",
-					menu: menu
+					menu,
 				});
 
 			})
@@ -222,7 +219,7 @@ class IssuesController implements ng.IController {
 	}
 
 	public watchers() {
-		
+
 		// New issue must have type and non-empty title
 		this.$scope.$watch("vm.title", () => {
 			this.saveIssueDisabled = (angular.isUndefined(this.title) || (this.title.toString() === ""));
@@ -232,22 +229,17 @@ class IssuesController implements ng.IController {
 			if (this.modelSettings) {
 
 				this.issuesReady.then(() => {
-					const hasPerm = this.AuthService.hasPermission(
-						this.ClientConfigService.permissions.PERM_CREATE_ISSUE, 
-						this.modelSettings.permissions
+					this.canAddIssue = this.AuthService.hasPermission(
+						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+						this.modelSettings.permissions,
 					);
-	
-					if(hasPerm) {
-						this.canAddIssue = true;
-					} 
 				});
-								
+
 				this.subModels = this.modelSettings.subModels || [];
 				this.watchNotification();
-				
+
 			}
 		});
-
 
 		this.$scope.$watch(() => {
 			return this.RevisionsService.status.data;
@@ -270,7 +262,7 @@ class IssuesController implements ng.IController {
 			if (this.issuesToShow !== this.IssuesService.state.issuesToShow) {
 				this.issuesToShow = this.IssuesService.state.issuesToShow;
 			}
-			
+
 		}, true);
 
 		/**
@@ -279,7 +271,7 @@ class IssuesController implements ng.IController {
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.CLICK_PIN) {
-				
+
 				for (let i = 0; i < this.IssuesService.state.allIssues.length; i++) {
 					const iterIssue = this.IssuesService.state.allIssues;
 					if (iterIssue[i]._id === event.value.id) {
@@ -288,7 +280,7 @@ class IssuesController implements ng.IController {
 					}
 				}
 
-			} 
+			}
 
 		});
 
@@ -303,25 +295,24 @@ class IssuesController implements ng.IController {
 
 				if (this.IssuesService.state.selectedIssue && this.IssuesService.state.selectedIssue._id) {
 					issueListItemId = "issue" + this.IssuesService.state.selectedIssue._id;
-				}	
-				
+				}
+
 				this.IssuesService.state.displayIssue = null;
-				
-				this.$state.go("home.account.model", 
+
+				this.$state.go("home.account.model",
 					{
-						account: this.account, 
-						model: this.model, 
+						account: this.account,
+						model: this.model,
 						revision: this.revision,
-						noSet: true
-					}, 
-					{notify: false}
+						noSet: true,
+					},
+					{notify: false},
 				).then(() => {
 					const element = document.getElementById(issueListItemId);
 					if (element && element.scrollIntoView) {
-						element.scrollIntoView(); 
+						element.scrollIntoView();
 					}
 				});
-
 
 			}
 		});
@@ -331,11 +322,11 @@ class IssuesController implements ng.IController {
 	public removeUnsavedPin() {
 		this.ViewerService.removePin({id: this.ViewerService.newPinId });
 		this.ViewerService.setPin({data: null});
-	};
+	}
 
 	public modelLoaded() {
 		return !!this.ViewerService.currentModel.model;
-	};
+	}
 
 	/**
 	 * Close the add alert
@@ -343,41 +334,45 @@ class IssuesController implements ng.IController {
 	public closeAddAlert() {
 		this.showAddAlert = false;
 		this.addAlertText = "";
-	};
+	}
 
 	/**
 	 * Set the content height
 	 */
 	public setContentHeight(height) {
-		this.onContentHeightRequest({height: height});
-	};
-
+		this.onContentHeightRequest({height});
+	}
 
 	public watchNotification() {
 
 		// Watch for new issues
-		this.NotificationService.subscribe.newIssues(this.account, this.model, this.newIssueListener);
-
+		this.NotificationService.subscribe.newIssues(
+			this.account,
+			this.model,
+			this.newIssueListener.bind(this),
+		);
 
 		// Watch for status changes for all issues
-		this.NotificationService.subscribe.issueChanged(this.account, this.model, this.handleIssueChanged);
+		this.NotificationService.subscribe.issueChanged(
+			this.account,
+			this.model,
+			this.handleIssueChanged.bind(this),
+		);
 
 		// Do the same for all subModels
-		if(this.subModels){
+		if (this.subModels) {
 			this.subModels.forEach((subModel) => {
-				// const submodel = true;
+
 				if (subModel) {
 					this.NotificationService.subscribe.newIssues(
 						subModel.database,
 						subModel.model,
-						(issues) => {
-							this.newIssueListener(issues, subModel);
-						}
+						this.newIssueListener.bind(this),
 					);
 					this.NotificationService.subscribe.issueChanged(
 						subModel.database,
 						subModel.model,
-						this.handleIssueChanged
+						this.handleIssueChanged.bind(this),
 					);
 				} else {
 					console.error("Submodel was expected to be defined for issue subscription: ", subModel);
@@ -386,7 +381,7 @@ class IssuesController implements ng.IController {
 			});
 		}
 
-	};
+	}
 
 	public newIssueListener(issues, submodel) {
 
@@ -394,11 +389,11 @@ class IssuesController implements ng.IController {
 			this.shouldShowIssue(issue, submodel);
 		});
 
-	};
+	}
 
 	public handleIssueChanged(issue) {
 		this.IssuesService.updateIssues(issue);
-	};
+	}
 
 	public shouldShowIssue(issue, submodel) {
 
@@ -451,7 +446,7 @@ class IssuesController implements ng.IController {
 			}
 		}
 
-	};
+	}
 
 	public checkIssueShouldAdd(issue, currentRevision, revisions) {
 
@@ -467,7 +462,7 @@ class IssuesController implements ng.IController {
 		const issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
 		return issueRevision && issueInDate;
 
-	};
+	}
 
 	/**
 	* import bcf
@@ -521,7 +516,7 @@ class IssuesController implements ng.IController {
 					model: this.model,
 					revision: this.revision,
 					issue: issue._id,
-					noSet: true
+					noSet: true,
 				},
 				{notify: false},
 			);

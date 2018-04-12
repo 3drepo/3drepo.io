@@ -254,7 +254,7 @@ class HomeController implements ng.IController {
 						});
 					}
 
-				} else if (currentData.initialiser && !currentData.username) {
+				} else if (!currentData.username) {
 
 					this.StateManager.setHomeState({
 						loggedIn: false,
@@ -266,6 +266,17 @@ class HomeController implements ng.IController {
 						this.$location.search("token", this.StateManager.query.token);
 					}
 
+				}
+
+				if (currentData.flags && currentData.flags.termsPrompt) {
+					this.DialogService.showDialog(
+						"new-terms-dialog.html",
+						this.$scope,
+						event,
+						false,
+						null,
+						false,
+					);
 				}
 			} else {
 				this.AuthService.logout();
