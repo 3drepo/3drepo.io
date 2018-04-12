@@ -48,16 +48,18 @@ const uuid = require("node-uuid");
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
+	// These error codes correspons to the error messages to 3drepobouncer
+	// refer to bouncer/repo/error_codes.h for what they are.
 	const bouncerErrToWebErr = [
-		responseCodes.OK,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.NOT_AUTHORIZED,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.OK, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.NOT_AUTHORIZED, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
 		responseCodes.FILE_IMPORT_MISSING_TEXTURES,
-		responseCodes.FILE_IMPORT_INVALID_ARGS,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.REPOERR_FED_GEN_FAIL,
 		responseCodes.FILE_IMPORT_MISSING_NODES,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
@@ -155,7 +157,8 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 				model,
 				username: account,
 				err: errMsg,
-				corID: setting.corID
+				corID: setting.corID,
+				bouncerErr: errCode
 			});
 		}
 	}).catch(err => {
