@@ -26,6 +26,7 @@ class TreeController implements ng.IController {
 		"EventService",
 		"MultiSelectService",
 		"ViewerService",
+		"GroupsService",
 	];
 
 	public showProgress: boolean; // in pug
@@ -62,6 +63,7 @@ class TreeController implements ng.IController {
 		private EventService,
 		private MultiSelectService,
 		private ViewerService,
+		private GroupsService,
 	) {
 
 		this.promise = null,
@@ -120,6 +122,7 @@ class TreeController implements ng.IController {
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
+				this.GroupsService.clearSelectionHighlights();
 				this.nodes.forEach((n) => n.selected = false);
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 

@@ -133,7 +133,7 @@ groups .groupDescription {
 }
 
 groups .group:hover {
-    background: rgba(130, 130, 130, 0.26);
+    background:  rgba(186, 197, 225, 0.20);
 }
 
 groups .group {

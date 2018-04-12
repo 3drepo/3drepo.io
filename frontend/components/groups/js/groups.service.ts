@@ -298,6 +298,12 @@ export class GroupsService {
 		});
 	}
 
+	public clearSelectionHighlights() {
+		this.state.groups.forEach((group) => {
+			group.highlighted = false;
+		});
+	}
+
 	/**
 	 * Select a group
 	 * @param group the group to select
@@ -312,6 +318,7 @@ export class GroupsService {
 		}
 		this.state.selectedGroup = group;
 		this.state.selectedGroup.selected = true;
+		this.state.selectedGroup.highlighted = !this.state.selectedGroup.highlighted; // Toggle
 		this.state.selectedGroup.totalSavedMeshes = 0;
 
 		let color = this.ViewerService.getDefaultHighlightColor();
@@ -323,7 +330,8 @@ export class GroupsService {
 
 		if (!multi) {
 			this.state.multiSelectedGroups = [group];
-
+			this.clearSelectionHighlights();
+			this.state.selectedGroup.highlighted = true;
 		} else if (!this.state.multiSelectedGroups.includes(group)) {
 
 			// selecting group that's not selected

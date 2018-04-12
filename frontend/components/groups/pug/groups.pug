@@ -15,6 +15,7 @@ div.groupsContainer
             layout="row"
             ng-if="vm.groups.length > 0"
             ng-click="vm.selectGroup(group)"
+            style="background-color: {{group.highlighted ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
             ng-repeat="group in vm.groups")
 
             div.groupMain(layout="row")
