@@ -53,7 +53,20 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
-			return results;
+			let meshResultsPromises = [];
+
+			for (let i = 0; i < results.length; i++) {
+				const meshQuery = { shared_id: { $in: results[i].parents }, type: "mesh" };
+				const meshProject = { shared_id: 1, _id: 0 };
+
+				meshResultsPromises.push(
+					dbCol.find(meshQuery, meshProject).toArray()
+				);
+			}
+
+			return Promise.all(meshResultsPromises).then(meshResults => {
+				return meshResults.reduce((acc, val) => acc.concat(val), []);
+			});
 		});
 	});
 
@@ -180,12 +193,11 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 			sharedIdPromises.push(Group.ifcGuidsToUUIDs(account, model,
 				ifcObjectByAccount[namespace]).then(results => {
 				for (let i = 0; i < results.length; i++) {
-					results[i].parents.forEach( id => {
-						if(convertSharedIDsToString) {
-							id =  utils.uuidToString(id);
-						}
-						sharedIdObjects.push({account, model, shared_id: id});
-					});
+					let id = results[i].shared_id;
+					if(convertSharedIDsToString) {
+						id =  utils.uuidToString(id);
+					}
+					sharedIdObjects.push({account, model, shared_id: id});
 				}
 			}));
 		}
