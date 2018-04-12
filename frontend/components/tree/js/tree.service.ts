@@ -1042,10 +1042,21 @@ export class TreeService {
 		});
 	}
 
+	public getCurrentMeshHighlightsFromViewer() {
+		const objectsDefer = this.$q.defer();
+
+		// Get selected objects
+		this.ViewerService.getObjectsStatus({
+			promise: objectsDefer,
+		});
+		return objectsDefer.promise;
+	}
+
 	/**
 	 * Return a map of currently selected meshes
 	 */
 	public getCurrentMeshHighlights() {
+		const objectsPromise = this.$q.defer();
 		return this.getMeshHighlights(this.currentSelectedNodes.concat());
 	}
 
@@ -1215,16 +1226,6 @@ export class TreeService {
 
 			return nodes;
 
-		});
-	}
-
-	/**
-	 * Get the mesh map for a set of shared ids
-	 * @param objects the array of shared id objects
-	 */
-	public getMeshHighlightsBySharedId(objects) {
-		return this.getNodesFromSharedIds(objects).then((nodes) => {
-			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
 	}
 
