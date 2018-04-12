@@ -83,9 +83,20 @@
 		FILE_IMPORT_INVALID_ARGS: { message: "Invalid arguments", status: 500 },
 		FILE_IMPORT_UNKNOWN_ERR: { message: "Unknown error", status: 500 },
 		FILE_IMPORT_UNKNOWN_CMD: { message: "Unknown command", status: 500 },
-
 		FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT: { message: "File processing failed to start", status: 500 },
 		FILE_IMPORT_LOAD_SCENE_FAIL: { message: "Failed to import file to scene", status: 500},
+		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 400 },
+		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 400 },
+		FILE_IMPORT_GET_FILE_FAILED: { message: "Failed to get file from project", status: 500 },
+		FILE_IMPORT_CRASHED: { message: "Failed to finish", status: 500 },
+		FILE_IMPORT_FILE_READ_FAILED: { message: "Failed to read import parameters from file (Unity)", status: 500 },
+		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Failed to generate asset bundles (Unity)", status: 500 },
+		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Untriangulated meshes", status: 400 },
+		FILE_IMPORT_NO_MESHES: { message: "Model does not have geometry", status: 400 },
+		FILE_IMPORT_BAD_EXT: { message: "Unsupported file type", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Unsupported navisworks plugin version", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Unsupported FBX version", status: 400 },
+
 
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
 		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
@@ -132,16 +143,6 @@
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
-		
-		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 500 },
-		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 500 },
-
-
-		FILE_IMPORT_GET_FILE_FAILED: { message: "Failed to get file from project", status: 500 },
-		FILE_IMPORT_CRASHED: { message: "Failed to finish", status: 500 },
-		FILE_IMPORT_FILE_READ_FAILED: { message: "Failed to read import parameters from file (Unity)", status: 500 },
-		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Failed to generate asset bundles (Unity)", status: 500 },
-		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Untriangulated meshes", status: 500 },
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_INVALID_INDEX: { message: "Invalid comment index", status: 400 },
