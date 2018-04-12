@@ -38,7 +38,6 @@ class TreeController implements ng.IController {
 	private allNodes;
 	private nodesToShow; // in pug
 	private showTree; // in pug
-	private showFilterList; // in pug
 	private viewerSelectedObject;
 	private progressInfo; // in pug
 	private visible;
@@ -52,6 +51,7 @@ class TreeController implements ng.IController {
 	private showNodes;
 	private currentSelectedIndex;
 	private latestSearch: string;
+	private showFilter: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -70,10 +70,10 @@ class TreeController implements ng.IController {
 
 	public $onInit() {
 		this.TreeService.reset();
+		this.filterItemsFound = false;
 		this.showNodes = true;
 		this.nodes = [];
 		this.showTree = true;
-		this.showFilterList = false;
 		this.TreeService.clearCurrentlySelected();
 		this.viewerSelectedObject = null;
 		this.showProgress = true;
@@ -209,7 +209,6 @@ class TreeController implements ng.IController {
 
 	public showTreeInPane() {
 		this.showTree = true;
-		this.showFilterList = false;
 		this.showProgress = false;
 		this.nodes = this.fetchNodesToShow();
 		this.setContentHeight(this.nodes);
@@ -316,20 +315,25 @@ class TreeController implements ng.IController {
 	public performSearch(filterText) {
 
 		this.latestSearch = filterText;
-
+		this.filterItemsFound = false;
 		this.showTree = false;
-		this.showFilterList = false;
 		this.showProgress = true;
 		this.progressInfo = "Filtering tree for objects";
 
 		this.TreeService.search(filterText, this.revision)
 			.then((json) => {
 
+				if (!this.showFilter) {
+					// If we've stopped filtering reset everything all flags
+					this.showTree = true;
+					this.showProgress = false;
+					this.filterItemsFound = false;
+				}
+
 				if (this.latestSearch !== filterText || this.showTree) {
 					return;
 				}
 
-				this.showFilterList = true;
 				this.showProgress = false;
 				this.nodes = json.data;
 				this.filterItemsFound = this.nodes.length > 0;
@@ -444,6 +448,7 @@ export const TreeComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		filterText: "=",
+		showFilter: "=",
 		model:  "=",
 		onContentHeightRequest: "&",
 		revision: "=",

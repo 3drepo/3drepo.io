@@ -29,7 +29,6 @@ class PanelCardFilterController implements ng.IController {
 	private filterText;
 	private showClearFilterButton;
 	private showFilter: boolean;
-	private showFilterButton: boolean;
 
 	constructor(
 		private $timeout: ng.ITimeoutService,
@@ -48,7 +47,7 @@ class PanelCardFilterController implements ng.IController {
 		this.$scope.$watch("vm.filterInputText", (newValue) => {
 			if (this.isDefined(newValue)) {
 				this.filterText = this.filterInputText;
-				this.showClearFilterButton = (this.filterInputText !== "");
+				// this.showClearFilterButton = (this.filterInputText !== "");
 			}
 		});
 
@@ -66,7 +65,6 @@ class PanelCardFilterController implements ng.IController {
 		this.filterInputText = "";
 		this.filterInput.focus();
 		this.showFilter = false;
-		this.showFilterButton = true;
 	}
 
 }
@@ -75,7 +73,6 @@ export const PanelCardFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		filterText: "=",
 		showFilter: "=",
-		showFilterButton: "=",
 	},
 	controller: PanelCardFilterController,
 	controllerAs: "vm",

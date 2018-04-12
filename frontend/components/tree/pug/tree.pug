@@ -64,7 +64,7 @@ tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 			md-divider(ng-if="item.name")
 
 // Filter list
-div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterItemsFound")
+div(class="virtualRepeatInfiniteScroll" ng-if="!vm.showTree && vm.filterItemsFound")
 	md-virtual-repeat-container.vertical-container
 		//.treeNodes.filterNode.repeated-item(md-virtual-repeat="item in vm.infiniteItemsFilter", md-on-demand="", flex="", layout="row", layout-align="start center")
 		.treeNodes.filterNode.repeated-item(md-virtual-repeat="item in vm.nodes")
@@ -83,5 +83,5 @@ div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterIte
 
 			md-divider(ng-if="item")
 
-.cardInfo(ng-if="vm.showFilterList && !vm.filterItemsFound")
+.cardInfo(ng-if="!vm.showTree && !vm.filterItemsFound && !vm.showProgress")
 	p No items found
