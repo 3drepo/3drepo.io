@@ -1295,7 +1295,7 @@ class IssueController implements ng.IController {
 			}
 			// Comments
 			if (this.issueData && this.issueData.comments) {
-				for (let i = 0, i < this.issueData.comments.length; i++) {
+				for (let i = 0; i < this.issueData.comments.length; i++) {
 					height += commentTextHeight;
 					if (this.issueData.comments[i].viewpoint && this.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
 						height += commentImageHeight;
