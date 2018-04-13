@@ -1083,7 +1083,7 @@ export class TreeService {
 	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
 	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
-
+		console.log("select node", multi);
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
@@ -1167,7 +1167,6 @@ export class TreeService {
 	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
 		return this.ready.promise.then(() => {
-
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
@@ -1176,14 +1175,13 @@ export class TreeService {
 			}
 
 			for (const key in highlightMap) {
-				if (!highlightMap.hasOwnProperty(key)) {
+				if (!highlightMap.hasOwnProperty(key) || !highlightMap[key].meshes) {
 					continue;
 				}
 
 				const vals = key.split("@");
 				const account = vals[0];
 				const model = vals[1];
-
 				// Separately highlight the children
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({
