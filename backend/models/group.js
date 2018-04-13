@@ -273,7 +273,7 @@ groupSchema.methods.updateAttrs = function(data){
 				if ("[object String]" === Object.prototype.toString.call(obj.shared_id)) {
 					obj.shared_id = utils.stringToUUID(obj.shared_id);
 				}
-				sharedIDSets.add(obj.shared_id);
+				sharedIDSets.add(utils.uuidToString(obj.shared_id));
 				
 				if(!sharedIdsByAccount[ns]) {
 					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
@@ -302,7 +302,8 @@ groupSchema.methods.updateAttrs = function(data){
 						}
 
 						//if sharedIDSets.size > 0 , it means there are sharedIDs with no IFC GUIDs
-						sharedIDSets.forEach((sharedId) => {
+						sharedIDSets.forEach((sharedIdString) => {
+							const sharedId = utils.stringToUUID(sharedIdString);
 							modifiedObjectList.push({
 								account,
 								model,
