@@ -242,7 +242,21 @@ groupSchema.statics.listGroups = function(dbCol, queryParams){
 	if (queryParams.noIssues) {
 		query.issue_id = { $exists: false };
 	}
-	return this.find(dbCol, query);
+	return this.find(dbCol, query).then(results => {
+		const sharedIdConversionPromises = [];
+
+		results.forEach(result => {
+			sharedIdConversionPromises.push(
+				result.getObjectsArrayAsSharedIDs(false).then(sharedIdObjects => {
+					result.objects = sharedIdObjects;
+				})
+			);
+		});
+
+		return Promise.all(sharedIdConversionPromises).then(() => {
+			return results;
+		});
+	});
 };
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
