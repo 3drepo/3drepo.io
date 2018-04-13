@@ -159,10 +159,10 @@ html(lang="en" ng-app="3drepo")
 				tr
 					td.tableCell.productCol 
 						p Refund
-					td.tableCell £#{billing.netAmount}
-					td.tableCell #{billing.taxPercentage}%
-					td.tableCell £#{billing.taxAmount}
-					td.tableCell £#{billing.amount}
+					td.tableCell £#{parseFloat(billing.netAmount).toFixed(2)}
+					td.tableCell #{parseFloat(billing.taxPercentage).toFixed(2)}%
+					td.tableCell £#{parseFloat(billing.taxAmount).toFixed(2)}
+					td.tableCell £#{parseFloat(billing.amount).toFixed(2)}
 
 			
 			br

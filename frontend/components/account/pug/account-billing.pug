@@ -8,14 +8,22 @@
 			md-tab(label="Subscription")
 
 				div.assignTabHolder.loadingHolder(
-					ng-if="!vm.billings || !vm.subscriptions"
+					ng-if="(!vm.billings || !vm.subscriptions) && !vm.billingError"
 					layout="row")
 
 					md-progress-circular.loading
 					br
 					h3 Loading Billing Data
 
-				div.userContent#accountBillingSubscription(ng-if="vm.billings && vm.subscriptions")
+				div.assignTabHolder.loadingHolder(
+					ng-if="vm.billingError"
+					layout="row")
+
+					br
+					h3 There was an error loading billing data
+					br
+
+				div.userContent#accountBillingSubscription(ng-if="vm.billings && vm.subscriptions && !vm.billingError")
 
 					div(layout="row")
 						md-input-container(flex)

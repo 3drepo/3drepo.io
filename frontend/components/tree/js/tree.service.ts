@@ -1042,10 +1042,21 @@ export class TreeService {
 		});
 	}
 
+	public getCurrentMeshHighlightsFromViewer() {
+		const objectsDefer = this.$q.defer();
+
+		// Get selected objects
+		this.ViewerService.getObjectsStatus({
+			promise: objectsDefer,
+		});
+		return objectsDefer.promise;
+	}
+
 	/**
 	 * Return a map of currently selected meshes
 	 */
 	public getCurrentMeshHighlights() {
+		const objectsPromise = this.$q.defer();
 		return this.getMeshHighlights(this.currentSelectedNodes.concat());
 	}
 
@@ -1072,7 +1083,6 @@ export class TreeService {
 	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
 	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
-
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
@@ -1156,7 +1166,6 @@ export class TreeService {
 	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
 		return this.ready.promise.then(() => {
-
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
@@ -1165,14 +1174,15 @@ export class TreeService {
 			}
 
 			for (const key in highlightMap) {
-				if (!highlightMap.hasOwnProperty(key)) {
+				if (!highlightMap.hasOwnProperty(key) ||
+					!highlightMap[key].meshes ||
+					highlightMap[key].meshes.length === 0) {
 					continue;
 				}
 
 				const vals = key.split("@");
 				const account = vals[0];
 				const model = vals[1];
-
 				// Separately highlight the children
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({
@@ -1180,7 +1190,7 @@ export class TreeService {
 					ids: highlightMap[key].meshes,
 					colour: highlightMap[key].colour,
 					model,
-					multi,
+					multi: true,
 					source: "tree",
 					forceReHighlight,
 				});
@@ -1219,6 +1229,7 @@ export class TreeService {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Get the mesh map for a set of shared ids
 	 * @param objects the array of shared id objects
 	 */
@@ -1243,6 +1254,8 @@ export class TreeService {
 	}
 
 	/**
+=======
+>>>>>>> f5933ee6495a0b8b7d757f82c0e3d1dfba761bbc
 	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled

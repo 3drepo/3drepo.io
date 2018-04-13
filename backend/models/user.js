@@ -16,27 +16,26 @@
  */
 "use strict";
 
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
-let responseCodes = require("../response_codes.js");
-let _ = require("lodash");
-let DB = require("../db/db");
-let crypto = require("crypto");
-let utils = require("../utils");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const responseCodes = require("../response_codes.js");
+const _ = require("lodash");
+const DB = require("../db/db");
+const crypto = require("crypto");
+const utils = require("../utils");
 const Role = require("./role");
 const Job = require("./job");
 
-let systemLogger = require("../logger.js").systemLogger;
+const systemLogger = require("../logger.js").systemLogger;
 
-let config = require("../config");
+const config = require("../config");
 
-
-let ModelSetting = require("./modelSetting");
-let C = require("../constants");
-let userBilling = require("./userBilling");
-let permissionTemplate = require("./permissionTemplate");
-let accountPermission = require("./accountPermission");
-let Project = require("./project");
+const ModelSetting = require("./modelSetting");
+const C = require("../constants");
+const userBilling = require("./userBilling");
+const permissionTemplate = require("./permissionTemplate");
+const accountPermission = require("./accountPermission");
+const Project = require("./project");
 
 let schema = mongoose.Schema({
 	_id : String,
@@ -127,8 +126,7 @@ schema.statics.authenticate = function(logger, username, password){
 		if(!user.customData){
 			user.customData = {};
 		}
-		
-		user.customData.lastLoginAt = new Date();
+
 		return user.save();
 
 	}).catch( err => {
@@ -243,10 +241,10 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 		return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
 			let cleanedCustomData = {};
-			let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+			let emailRegex = /^(['a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
 			if (config.auth.allowPlusSignInEmail) {
-				emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+				emailRegex = /^(['+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 			}
 
 			if (!customData.email || !customData.email.match(emailRegex)) {
@@ -412,6 +410,10 @@ schema.statics.verify = function(username, token, options){
 		Job.addDefaultJobs(username);
 
 	});
+};
+
+schema.methods.hasReadLatestTerms = function() {
+	return new Date(config.termsUpdatedAt) < this.customData.lastLoginAt;
 };
 
 schema.methods.getAvatar = function(){
@@ -956,10 +958,10 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 
 	let teamspacePerm = this.customData.permissions.findByUser(username);
 	//check if they have any permissions assigned
-	return Project.find({ account: this.user }, { 'permissions.user':  username}).then(projects => {
+	return Project.find({ account: this.user }, { "permissions.user":  username}).then(projects => {
 		
 		foundProjects = projects;
-		return ModelSetting.find({ account: this.user }, { 'permissions.user': username});
+		return ModelSetting.find({ account: this.user }, { "permissions.user": username});
 	
 	}).then(models => {
 
