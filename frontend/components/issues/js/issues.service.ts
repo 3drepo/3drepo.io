@@ -108,7 +108,7 @@ export class IssuesService {
 
 	// Helper  for searching strings
 	public stringSearch(superString, subString) {
-		if(!superString){
+		if(!superString) {
 			return false;
 		}
 
@@ -160,7 +160,7 @@ export class IssuesService {
 				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
 			});
 
-			//Roles Filter
+			// Roles Filter
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 			});
@@ -219,7 +219,7 @@ export class IssuesService {
 
 	public resetSelectedIssue() {
 		this.state.selectedIssue = undefined;
-		//showIssuePins();
+		// showIssuePins();
 	}
 
 	public isSelectedIssue(issue) {
@@ -304,7 +304,7 @@ export class IssuesService {
 		this.populateIssue(issue);
 
 		this.state.allIssues.forEach((oldIssue, i) => {
-			let matchs = oldIssue._id === issue._id;
+			const matchs = oldIssue._id === issue._id;
 			if(matchs) {
 
 				if(issue.status === "closed") {
@@ -373,15 +373,13 @@ export class IssuesService {
 	}
 
 	public isViewer(permissions) {
-		// console.log("isViewer", permissions);
 		return !this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-			permissions
+			permissions,
 		);
 	}
 
 	public isAssignedJob(userJob, issueData, permissions) {
-		// console.log("isAssignedJob", permissions);
 		return (userJob._id &&
 				issueData.assigned_roles[0] &&
 				userJob._id === issueData.assigned_roles[0]) &&
@@ -391,7 +389,7 @@ export class IssuesService {
 	public isAdmin(permissions) {
 		return this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
-			permissions
+			permissions,
 		);
 	}
 

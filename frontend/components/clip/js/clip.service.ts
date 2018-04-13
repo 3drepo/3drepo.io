@@ -168,7 +168,7 @@ export class ClipService {
 	public setBoundingBox(bbox: any) {
 		if (bbox) {
 			this.state.bbox = bbox;
-			if(!this.state.normal) {				
+			if(!this.state.normal) {
 				this.setDisplayValues(
 					"X",
 					this.state.bbox.max[0],
@@ -276,7 +276,7 @@ export class ClipService {
 			}
 		}
 
-		if(!res) {
+		if (!res) {
 			this.state.normal = normal;
 		}
 
@@ -379,7 +379,7 @@ export class ClipService {
 	 * Update displayed Distance based on slider position and axis
 	 */
 	public updateDisplayedDistance(updateSlider, moveClip) {
-		if(this.state.normal) {
+		if (this.state.normal) {
 			return;
 		}
 		const minMax = this.getMinMax();
@@ -502,7 +502,6 @@ export class ClipService {
 	}
 
 	public initClip(modelUnits) {
-		console.log("initClip", modelUnits);
 		this.state.modelUnits = modelUnits;
 		this.state.units = modelUnits;
 		this.updateDisplayedDistance(true, this.state.visible);
