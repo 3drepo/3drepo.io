@@ -53,7 +53,13 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
-			return results;
+
+			const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+			const meshQuery = { shared_id: { $in: parents }, type: "mesh" };
+			const meshProject = { shared_id: 1, _id: 0 };
+
+			return dbCol.find(meshQuery, meshProject).toArray();
 		});
 	});
 
@@ -180,12 +186,11 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 			sharedIdPromises.push(Group.ifcGuidsToUUIDs(account, model,
 				ifcObjectByAccount[namespace]).then(results => {
 				for (let i = 0; i < results.length; i++) {
-					results[i].parents.forEach( id => {
-						if(convertSharedIDsToString) {
-							id =  utils.uuidToString(id);
-						}
-						sharedIdObjects.push({account, model, shared_id: id});
-					});
+					let id = results[i].shared_id;
+					if(convertSharedIDsToString) {
+						id =  utils.uuidToString(id);
+					}
+					sharedIdObjects.push({account, model, shared_id: id});
 				}
 			}));
 		}
@@ -268,7 +273,7 @@ groupSchema.methods.updateAttrs = function(data){
 				if ("[object String]" === Object.prototype.toString.call(obj.shared_id)) {
 					obj.shared_id = utils.stringToUUID(obj.shared_id);
 				}
-				sharedIDSets.add(obj.shared_id);
+				sharedIDSets.add(utils.uuidToString(obj.shared_id));
 				
 				if(!sharedIdsByAccount[ns]) {
 					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
@@ -297,7 +302,8 @@ groupSchema.methods.updateAttrs = function(data){
 						}
 
 						//if sharedIDSets.size > 0 , it means there are sharedIDs with no IFC GUIDs
-						sharedIDSets.forEach((sharedId) => {
+						sharedIDSets.forEach((sharedIdString) => {
+							const sharedId = utils.stringToUUID(sharedIdString);
 							modifiedObjectList.push({
 								account,
 								model,
