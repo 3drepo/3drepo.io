@@ -1,5 +1,6 @@
 This fixes #<!-- Enter issue number here -->
 
+#### Description
 <!-- Add a high level description of the changes made (possibly quite similar to task list if it was a feature) 
 e.g.
 - Support new error codes
@@ -11,4 +12,6 @@ e.g.
 -->
 
 
+#### Test cases
+<!-- Test cases that this pull request expect to pass -->
 
