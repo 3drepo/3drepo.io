@@ -213,7 +213,7 @@ class PanelCardController implements ng.IController {
 
 		switch (optionType) {
 		case "filter":
-			return " show-filter='vm.showFilter'";
+			return "show-filter='vm.showFilter'";
 
 		case "visible":
 			return " visible='vm.visible'";
@@ -247,7 +247,6 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		model: "=",
 		modelSettings: "=",
 		onHeightRequest: "&",
-		onShowFilter: "&",
 		position: "=",
 		revision: "=",
 		selectedObjects: "=",

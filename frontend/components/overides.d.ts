@@ -7,6 +7,7 @@ declare global {
 		Module: any;
 		zxcvbn: any;
 		ClientConfig: any;
+		requestIdleCallback: any;
 	}
 }
 export {};
