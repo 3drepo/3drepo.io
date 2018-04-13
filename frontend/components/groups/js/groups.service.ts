@@ -347,15 +347,16 @@ export class GroupsService {
 
 		if (selectNodes) {
 
-			return this.TreeService.selectNodesBySharedIds(
-				this.state.selectedGroup.objects,
-				multi, // multi
-				color,
-				true,
-			).then((meshes) => {
+			return this.TreeService.showTreeNodesBySharedIds(this.state.selectedGroup.objects).then(() => {
+				return this.TreeService.selectNodesBySharedIds(
+					this.state.selectedGroup.objects,
+					multi, // multi
+					color,
+					true,
+				).then((meshes) => {
+					this.setTotalSavedMeshes();
 
-				this.setTotalSavedMeshes();
-
+				});
 			});
 
 		} else {

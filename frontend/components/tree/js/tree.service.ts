@@ -1229,6 +1229,23 @@ export class TreeService {
 	}
 
 	/**
+	 * Show a series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects	Nodes to show
+	 */
+	public showTreeNodesBySharedIds(objects: any[]) {
+
+		return this.getNodesFromSharedIds(objects)
+			.then((nodes) => {
+				this.setVisibilityOfNodes(nodes, "visible");
+				this.updateModelVisibility(this.allNodes[0]);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
+	}
+
+	/**
 	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled
