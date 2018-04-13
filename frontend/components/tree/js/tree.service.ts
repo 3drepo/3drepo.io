@@ -1175,7 +1175,9 @@ export class TreeService {
 			}
 
 			for (const key in highlightMap) {
-				if (!highlightMap.hasOwnProperty(key) || !highlightMap[key].meshes) {
+				if (!highlightMap.hasOwnProperty(key) || 
+					!highlightMap[key].meshes ||
+					highlightMap[key].meshes.length === 0) {
 					continue;
 				}
 
