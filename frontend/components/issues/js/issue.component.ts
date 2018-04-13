@@ -1279,15 +1279,9 @@ class IssueController implements ng.IController {
 		const issueMinHeight = 370;
 
 		let height = issueMinHeight;
-		let i;
-		let length;
 
 		if (this.data) {
 
-			// Additional info
-			if (this.showAdditional) {
-				height += additionalInfoHeight;
-			}
 			// Description text
 			if (this.canEditDescription || (this.issueData && this.issueData.hasOwnProperty("desc")) ) {
 				height += descriptionTextHeight;
@@ -1300,7 +1294,7 @@ class IssueController implements ng.IController {
 			}
 			// Comments
 			if (this.issueData && this.issueData.comments) {
-				for (i = 0, length = this.issueData.comments.length; i < length; i += 1) {
+				for (let i = 0, i < this.issueData.comments.length; i++) {
 					height += commentTextHeight;
 					if (this.issueData.comments[i].viewpoint && this.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
 						height += commentImageHeight;
@@ -1310,13 +1304,15 @@ class IssueController implements ng.IController {
 
 		} else {
 			height = newIssueHeight;
-			if (this.showAdditional) {
-				height += additionalInfoHeight;
-			}
 			// Description thumbnail
 			if (this.issueData && this.issueData.descriptionThumbnail) {
 				height += thumbnailHeight;
 			}
+		}
+
+		// Additional info
+		if (this.showAdditional) {
+			height += additionalInfoHeight;
 		}
 
 		if (height) {
