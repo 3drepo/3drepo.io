@@ -460,7 +460,7 @@ export class GroupsService {
 				cleanedObjects[i] = {
 					shared_id:  objects[i].shared_id,
 					account:  objects[i].account,
-					model: objects[i].project,
+					model: objects[i].project || objects[i].model,
 				};
 			}
 
