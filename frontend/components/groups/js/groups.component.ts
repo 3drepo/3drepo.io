@@ -330,7 +330,6 @@ class GroupsController implements ng.IController {
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
-<<<<<<< HEAD
 		this.focusGroupName();
 
 	}
@@ -340,8 +339,6 @@ class GroupsController implements ng.IController {
 			const input: HTMLElement = this.$element[0].querySelector("#groupName");
 			input.focus();
 		});
-=======
->>>>>>> f5933ee6495a0b8b7d757f82c0e3d1dfba761bbc
 	}
 
 	public selectGroup(group: any) {

@@ -1229,33 +1229,6 @@ export class TreeService {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Get the mesh map for a set of shared ids
-	 * @param objects the array of shared id objects
-	 */
-	public getMeshHighlightsBySharedId(objects) {
-		return this.getNodesFromSharedIds(objects).then((nodes) => {
-			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
-		});
-	}
-
-	/**
-	 * Show tree nodes based on shared id objects
-	 * @param objects the array of shared id objects
-	 */
-	public showTreeNodesBySharedIds(objects: any[]) {
-		return this.getNodesFromSharedIds(objects)
-			.then((nodes) => {
-				return this.showTreeNodes(nodes);
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	}
-
-	/**
-=======
->>>>>>> f5933ee6495a0b8b7d757f82c0e3d1dfba761bbc
 	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to select
 	 * @param multi	Is multi select enabled

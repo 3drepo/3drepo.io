@@ -319,7 +319,11 @@ export class GroupsService {
 		this.state.selectedGroup = group;
 		this.state.selectedGroup.selected = true;
 		this.state.selectedGroup.highlighted = !this.state.selectedGroup.highlighted; // Toggle
-		this.state.selectedGroup.totalSavedMeshes = 0;
+
+		// If it has no set totalSavedMeshes
+		if (this.state.selectedGroup.totalSavedMeshes === undefined) {
+			this.state.selectedGroup.totalSavedMeshes = 0;
+		}
 
 		let color = this.ViewerService.getDefaultHighlightColor();
 		if (!this.state.selectedGroup.new) {
@@ -343,24 +347,16 @@ export class GroupsService {
 
 		if (selectNodes) {
 
-			return this.TreeService.showTreeNodesBySharedIds(this.state.selectedGroup.objects)
-				.then(() => {
-					return this.TreeService.selectNodesBySharedIds(
-						this.state.selectedGroup.objects,
-						multi, // multi
-						color,
-						true,
-					)
-						.then((meshes) => {
+			return this.TreeService.selectNodesBySharedIds(
+				this.state.selectedGroup.objects,
+				multi, // multi
+				color,
+				true,
+			).then((meshes) => {
 
-							// If we haven't saved don't update saved meshes
-							if (!this.state.selectedGroup.new) {
-								const total = this.getTotalMeshes(meshes);
-								this.state.selectedGroup.totalSavedMeshes = total;
-							}
+				this.setTotalSavedMeshes();
 
-						});
-				});
+			});
 
 		} else {
 
@@ -373,11 +369,7 @@ export class GroupsService {
 				.then((nodes) => {
 
 					this.TreeService.deselectNodes(nodes).then((meshes) => {
-						// If we haven't saved don't update saved meshes
-						if (!this.state.selectedGroup.new) {
-							const total = this.getTotalMeshes(meshes);
-							this.state.selectedGroup.totalSavedMeshes = total;
-						}
+						this.setTotalSavedMeshes();
 					});
 
 				});
@@ -385,15 +377,26 @@ export class GroupsService {
 
 	}
 
-	public getTotalMeshes(meshes) {
-		let total = 0;
-		for (const key in meshes) {
-			if (key && meshes[key] && meshes[key].meshes) {
-				total += meshes[key].meshes.length;
+	public setTotalSavedMeshes() {
+		this.TreeService.getCurrentMeshHighlightsFromViewer().then((viewerState) => {
+			// If we haven't saved don't update saved meshes
+			if (!this.state.selectedGroup.new) {
+				const total = viewerState.highlightedNodes.length;
+				this.state.selectedGroup.totalSavedMeshes = total;
 			}
-		}
-		return total;
+		});
 	}
+
+	// This is how we would calculate total meshes if we didn't use the viewer:
+	// public getTotalMeshes(meshes) {
+	// 	let total = 0;
+	// 	for (const key in meshes) {
+	// 		if (key && meshes[key] && meshes[key].meshes) {
+	// 			total += meshes[key].meshes.length;
+	// 		}
+	// 	}
+	// 	return total;
+	// }
 
 	/**
 	 * Generate a placeholder object for a new group
