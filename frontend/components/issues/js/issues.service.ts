@@ -304,8 +304,8 @@ export class IssuesService {
 		this.populateIssue(issue);
 
 		this.state.allIssues.forEach((oldIssue, i) => {
-			const matchs = oldIssue._id === issue._id;
-			if(matchs) {
+			const matches = oldIssue._id === issue._id;
+			if(matches) {
 
 				if(issue.status === "closed") {
 
