@@ -281,7 +281,9 @@ export class UnityUtil {
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
-		UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		if (UnityUtil.objectStatusPromise) {
+			UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		}
 		UnityUtil.objectStatusPromise = null;
 	}
 

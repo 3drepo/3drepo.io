@@ -131,8 +131,8 @@ class GroupsController implements ng.IController {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
 
-			this.GroupsService.getCurrentMeshHighlights().then((length) => {
-				this.selectedObjectsLen = length;
+			this.TreeService.getCurrentMeshHighlightsFromViewer().then((objects) => {
+				this.selectedObjectsLen = objects.highlightedNodes.length;
 				this.changed = true;
 			});
 
@@ -140,7 +140,7 @@ class GroupsController implements ng.IController {
 
 	}
 
-	public resetToSavedGroup() { 
+	public resetToSavedGroup() {
 		if (this.selectedGroup && this.savedGroupData) {
 			this.selectedGroup.name = this.savedGroupData.name;
 			this.selectedGroup.description = this.savedGroupData.description;
@@ -194,9 +194,10 @@ class GroupsController implements ng.IController {
 
 	public addGroup() {
 
-		const newGroup = this.GroupsService.generateNewGroup();
-		this.GroupsService.selectGroup(newGroup);
-		this.showGroupPane();
+		this.GroupsService.generateNewGroup().then((newGroup) => {
+			this.GroupsService.selectGroup(newGroup);
+			this.showGroupPane();
+		});
 
 	}
 
@@ -321,7 +322,6 @@ class GroupsController implements ng.IController {
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
-		// this.GroupsService.updateSelectedGroupColor();
 	}
 
 	public selectGroup(group: any) {
