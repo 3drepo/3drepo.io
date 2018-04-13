@@ -53,7 +53,13 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
-			return results;
+
+			const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+			const meshQuery = { shared_id: { $in: parents }, type: "mesh" };
+			const meshProject = { shared_id: 1, _id: 0 };
+
+			return dbCol.find(meshQuery, meshProject).toArray();
 		});
 	});
 
@@ -180,12 +186,11 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 			sharedIdPromises.push(Group.ifcGuidsToUUIDs(account, model,
 				ifcObjectByAccount[namespace]).then(results => {
 				for (let i = 0; i < results.length; i++) {
-					results[i].parents.forEach( id => {
-						if(convertSharedIDsToString) {
-							id =  utils.uuidToString(id);
-						}
-						sharedIdObjects.push({account, model, shared_id: id});
-					});
+					let id = results[i].shared_id;
+					if(convertSharedIDsToString) {
+						id =  utils.uuidToString(id);
+					}
+					sharedIdObjects.push({account, model, shared_id: id});
 				}
 			}));
 		}
