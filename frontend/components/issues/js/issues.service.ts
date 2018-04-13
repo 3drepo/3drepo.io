@@ -272,7 +272,7 @@ export class IssuesService {
 	public setSelectedIssue(issue, isCorrectState) {
 
 		if (this.state.selectedIssue) {
-			let different = (this.state.selectedIssue._id !== issue._id);
+			const different = (this.state.selectedIssue._id !== issue._id);
 			if (different) {
 				this.deselectPin(this.state.selectedIssue);
 			}
@@ -305,7 +305,7 @@ export class IssuesService {
 
 		this.state.allIssues.forEach((oldIssue, i) => {
 			let matchs = oldIssue._id === issue._id;
-			if(matchs){
+			if(matchs) {
 
 				if(issue.status === "closed") {
 
@@ -397,15 +397,15 @@ export class IssuesService {
 
 	public canChangePriority(issueData, userJob, permissions) {
 
-		let notViewer = !this.isViewer(permissions);
-		let matches = this.userJobMatchesCreator(userJob, issueData);
+		const notViewer = !this.isViewer(permissions);
+		const matches = this.userJobMatchesCreator(userJob, issueData);
 
 		return this.isAdmin(permissions) || (matches && notViewer);
 	}
 
 	public canChangeStatusToClosed(issueData, userJob, permissions) {
 
-		let jobOwner = (this.userJobMatchesCreator(userJob, issueData) &&
+		const jobOwner = (this.userJobMatchesCreator(userJob, issueData) &&
 						!this.isViewer(permissions));
 
 		return this.isAdmin(permissions) || jobOwner;
@@ -525,7 +525,7 @@ export class IssuesService {
 
 	public handleShowIssue(issue) {
 
-		if(issue && issue.viewpoint ) {
+		if (issue && issue.viewpoint ) {
 
 			if (issue.viewpoint.position && issue.viewpoint.position.length > 0) {
 				this.handleCameraView(issue);
@@ -668,12 +668,12 @@ export class IssuesService {
 
 	public handleHighlights(objects) {
 		this.TreeService.selectedIndex = undefined;
-		this.$timeout(() => {
 		this.TreeService.highlightsBySharedId(objects)
 			.then(() => {
-				angular.element((window as any)).triggerHandler("resize");
+				this.$timeout(() => {
+					angular.element((window as any)).triggerHandler("resize");
+				}); // Force a digest cycle
 			});
-		}); // Force a digest cycle
 	}
 
 	public handleHidden(objects) {
