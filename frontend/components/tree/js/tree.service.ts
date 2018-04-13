@@ -1083,7 +1083,6 @@ export class TreeService {
 	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
 	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
-		console.log("select node", multi);
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
@@ -1175,7 +1174,7 @@ export class TreeService {
 			}
 
 			for (const key in highlightMap) {
-				if (!highlightMap.hasOwnProperty(key) || 
+				if (!highlightMap.hasOwnProperty(key) ||
 					!highlightMap[key].meshes ||
 					highlightMap[key].meshes.length === 0) {
 					continue;
