@@ -53,20 +53,13 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
-			let meshResultsPromises = [];
 
-			for (let i = 0; i < results.length; i++) {
-				const meshQuery = { shared_id: { $in: results[i].parents }, type: "mesh" };
-				const meshProject = { shared_id: 1, _id: 0 };
+			const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
 
-				meshResultsPromises.push(
-					dbCol.find(meshQuery, meshProject).toArray()
-				);
-			}
+			const meshQuery = { shared_id: { $in: parents }, type: "mesh" };
+			const meshProject = { shared_id: 1, _id: 0 };
 
-			return Promise.all(meshResultsPromises).then(meshResults => {
-				return meshResults.reduce((acc, val) => acc.concat(val), []);
-			});
+			return dbCol.find(meshQuery, meshProject).toArray();
 		});
 	});
 
