@@ -1047,12 +1047,13 @@ class IssueController implements ng.IController {
 					{notify: false},
 				);
 
+				this.AnalyticService.sendEvent({
+					eventCategory: "Issue",
+					eventAction: "create",
+				});
+
 			});
 
-		this.AnalyticService.sendEvent({
-			eventCategory: "Issue",
-			eventAction: "create",
-		});
 	}
 
 	public saveComment() {
