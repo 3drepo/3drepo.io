@@ -671,7 +671,6 @@ export class TreeService {
 			for (let i = 0; i < numChildren; i++) {
 
 				const childNode = nodeToExpand.children[i];
-				childNode.expanded = false;
 				childNode.level = nodeToExpand.level + 1;
 
 				if (childNode && childNode.hasOwnProperty("name")) {
@@ -682,7 +681,6 @@ export class TreeService {
 				}
 
 			}
-
 			nodeToExpand.expanded = true;
 		}
 
