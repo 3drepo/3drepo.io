@@ -13,6 +13,7 @@ div(layout="column", class="md-whiteframe-1dp")
 					ng-if="vm.hasFilter()"
 					show-filter='vm.showFilter' 
 					filter-text='vm.filterText')
+
 			div(flex, ng-if="!vm.showFilter")
 
 			// Options
@@ -101,7 +102,7 @@ div(layout="column", class="md-whiteframe-1dp")
 
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-
+				show-filter="vm.showFilter"
 				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
 
