@@ -48,63 +48,39 @@ const uuid = require("node-uuid");
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
+	// These error codes correspond to the error messages to 3drepobouncer
+	// refer to bouncer/repo/error_codes.h for what they are.
+	const bouncerErrToWebErr = [
+		responseCodes.OK, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.NOT_AUTHORIZED, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
+		responseCodes.FILE_IMPORT_MISSING_TEXTURES,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.REPOERR_FED_GEN_FAIL,
+		responseCodes.FILE_IMPORT_MISSING_NODES,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED,
+		responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_NO_MESHES,
+		responseCodes.FILE_IMPORT_BAD_EXT,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION
+	];
 
-	let errObj;
 
-	switch (bouncerErrorCode) {
-		case 0:
-			errObj = responseCodes.OK;
-			break;
-		case 1:
-			errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
-			break;
-		case 2:
-			errObj = responseCodes.NOT_AUTHORIZED;
-			break;
-		case 3:
-			errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-			break;
-		case 4:
-			errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-			break;
-		case 5:
-			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
-			break;
-		case 6:
-			errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
-			break;
-		case 7:
-			errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
-			break;
-		case 8:
-			errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-			break;
-		case 9:
-			errObj = responseCodes.REPOERR_FED_GEN_FAIL;
-			break;
-		case 10:
-			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
-			break;
-		case 11:
-			errObj = responseCodes.FILE_IMPORT_GET_FILE_FAILED;
-			break;
-		case 12:
-			errObj = responseCodes.FILE_IMPORT_CRASHED;
-			break;
-		case 13:
-			errObj = responseCodes.FILE_IMPORT_FILE_READ_FAILED;
-			break;
-		case 14:
-			errObj = responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED;
-			break;
-		case 15:
-			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
-			break;
-		default:
-			errObj = (bouncerErrorCode) ? bouncerErrorCode : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-			break;
-
-	}
+	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ? 
+		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
 	
 	return Object.assign({bouncerErrorCode}, errObj);
 }
@@ -146,7 +122,7 @@ function importSuccess(account, model, sharedSpacePath) {
 			setting.save();
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importSuccess:`, err);
+		systemLogger.logError(`Failed to invoke importSuccess:` +  err);
 	});
 }
 
@@ -181,11 +157,12 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 				model,
 				username: account,
 				err: errMsg,
-				corID: setting.corID
+				corID: setting.corID,
+				bouncerErr: errCode
 			});
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importFail:`, err);
+		systemLogger.logError(`Failed to invoke importFail:` +  err);
 	});
 }
 
@@ -1484,9 +1461,10 @@ function uploadFile(req){
 					return cb({ resCode: responseCodes.SIZE_LIMIT });
 				}
 
+				const sizeInMB = size / (1024*1024);
 				middlewares.freeSpace(account).then(space => {
 
-					if(size > space){
+					if(sizeInMB > space){
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
 						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
 					} else {

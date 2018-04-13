@@ -605,6 +605,10 @@ account-licenses .colorOption {
   width: 119px;
 }
 
+account-licenses .accountLicensesSubheader {
+  margin-bottom: 10px;
+}
+
 account-licenses #accountLicensesAdd {
   margin-top: -10px;
 }

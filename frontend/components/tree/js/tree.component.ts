@@ -20,11 +20,13 @@ class TreeController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"TreeService",
 		"EventService",
 		"MultiSelectService",
 		"ViewerService",
+		"GroupsService",
 	];
 
 	public showProgress: boolean; // in pug
@@ -33,13 +35,10 @@ class TreeController implements ng.IController {
 	private highlightSelectedViewerObject: boolean;
 	private clickedHidden;
 	private clickedShown;
-	// private lastParentWithName = null;
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
 	private showTree; // in pug
-	private showFilterList; // in pug
-	private currentFilterItemSelected = null;
 	private viewerSelectedObject;
 	private progressInfo; // in pug
 	private visible;
@@ -52,16 +51,19 @@ class TreeController implements ng.IController {
 	private hideIfc;
 	private showNodes;
 	private currentSelectedIndex;
-	private searching;
+	private latestSearch: string;
+	private showFilter: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private TreeService,
 		private EventService,
 		private MultiSelectService,
 		private ViewerService,
+		private GroupsService,
 	) {
 
 		this.promise = null,
@@ -70,10 +72,10 @@ class TreeController implements ng.IController {
 
 	public $onInit() {
 		this.TreeService.reset();
+		this.filterItemsFound = false;
 		this.showNodes = true;
 		this.nodes = [];
 		this.showTree = true;
-		this.showFilterList = false;
 		this.TreeService.clearCurrentlySelected();
 		this.viewerSelectedObject = null;
 		this.showProgress = true;
@@ -92,7 +94,7 @@ class TreeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
+		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 
@@ -100,35 +102,28 @@ class TreeController implements ng.IController {
 					const objectID = event.value.id;
 
 					if (objectID && this.TreeService.getCachedIdToPath()) {
+
 						const path = this.TreeService.getPath(objectID);
 						if (!path) {
 							console.error("Couldn't find the object path");
-						} else {
-
-							this.initNodesToShow();
+						} else if (this.showTree) {
 
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
-
-							// all these init and expanding unselects the selected, so let's select them again
-							// FIXME: ugly as hell but this is the easiest solution until we refactor this.
-							this.TreeService.getCurrentSelectedNodes().forEach((selectedNode) => {
-								selectedNode.selected = true;
-							});
-
-							this.TreeService.updateModelState(this.allNodes[0]);
-
+							this.TreeService.updateModelVisibility(this.allNodes[0]);
 							angular.element((window as any).window).triggerHandler("resize");
 
+						} else {
+							const nodes = [this.TreeService.getNodeById(objectID)];
+							this.TreeService.selectNodes(nodes, this.MultiSelectService.isMultiMode(), undefined, true);
 						}
+
 					}
 				}
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
-				if (this.currentFilterItemSelected !== null) {
-					this.currentFilterItemSelected.class = "";
-					this.currentFilterItemSelected = null;
-				}
+				this.GroupsService.clearSelectionHighlights();
+				this.nodes.forEach((n) => n.selected = false);
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
 				this.allNodes = this.TreeService.getAllNodes();
@@ -139,55 +134,24 @@ class TreeController implements ng.IController {
 				this.setupInfiniteItemsFilter();
 				this.TreeService.expandFirstNode();
 				this.setContentHeight(this.fetchNodesToShow());
-				this.$timeout(() => {}).then(() => {
-					// this.TreeService.showAllTreeNodes();
-					// this.TreeService.setVisibilityOfNodes(this.TreeService.getHiddenByDefaultNodes(), "invisible");
-				});
-
+				this.$timeout(); // Force digest
 			}
 		});
 
 		this.$scope.$watch("vm.filterText", (newValue) => {
-			const noFilterItemsFoundHeight = 82;
+
 			if (newValue !== undefined) {
 				if (newValue.toString() === "") {
 					this.showTreeInPane();
-				} else if (!this.searching) {
-					this.showTree = false;
-					this.showFilterList = false;
-					this.showProgress = true;
-					this.progressInfo = "Filtering tree for objects";
-
-					this.searching = true;
-
-					this.TreeService.search(newValue, this.revision)
-						.then((json) => {
-
-							if (!this.showFilterList) {
-								this.searching = false;
-								this.showFilterList = true;
-								this.showProgress = false;
-								this.nodes = json.data;
-								if (this.nodes.length > 0) {
-									this.filterItemsFound = true;
-									for (let i = 0; i < this.nodes.length; i ++) {
-										this.nodes[i].index = i;
-										this.nodes[i].toggleState = "visible";
-										this.nodes[i].class = "unselectedFilterItem";
-										this.nodes[i].level = 0;
-									}
-									this.setupInfiniteItemsFilter();
-									this.setContentHeight(this.nodes);
-								} else {
-									this.filterItemsFound = false;
-									this.onContentHeightRequest({height: noFilterItemsFoundHeight});
-								}
-							}
-
-						})
-						.catch((error) => {
-							this.showTreeInPane();
+				} else {
+					// Use rIC if available for smoother interactions
+					if (window.requestIdleCallback) {
+						window.requestIdleCallback(() => {
+							this.performSearch(newValue);
 						});
+					} else {
+						this.performSearch(newValue);
+					}
 				}
 			}
 		});
@@ -233,7 +197,7 @@ class TreeController implements ng.IController {
 
 		this.$scope.$watch(() => this.TreeService.selectedIndex,
 			(selectedIndex) => {
-				if (selectedIndex) {
+				if (selectedIndex !== undefined) {
 
 					this.setContentHeight(this.fetchNodesToShow());
 
@@ -244,110 +208,13 @@ class TreeController implements ng.IController {
 				}
 			});
 
-		// TODO - interval for redrawing highlights and object visibility is not ideal
-		let lastViewerUpdateTime = Date.now();
-		setInterval(() => {
-
-			if (this.TreeService.highlightMapUpdateTime) {
-				if (lastViewerUpdateTime < this.TreeService.highlightMapUpdateTime) {
-					this.handleSelection(this.TreeService.highlightMap);
-				}
-			}
-
-			if (this.TreeService.visibilityUpdateTime) {
-				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
-					this.handleVisibility(this.TreeService.getClickedHidden(), false);
-					this.handleVisibility(this.TreeService.getClickedShown(), true);
-				}
-			}
-
-			lastViewerUpdateTime = Date.now();
-
-		}, 150);
-
 	}
 
 	public showTreeInPane() {
-		this.searching = false;
 		this.showTree = true;
-		this.showFilterList = false;
 		this.showProgress = false;
 		this.nodes = this.fetchNodesToShow();
 		this.setContentHeight(this.nodes);
-	}
-
-	/**
-	 * Handle visibility changes from tree service to viewer service.
-	 * @param clickedIds	Collection of ids to show/hide.
-	 * @param visible	Set ids to visibile.
-	 */
-	public handleVisibility(clickedIds: any, visible: boolean) {
-		const objectIds = [];
-
-		for (const id in clickedIds) {
-			if (id) {
-				const account = clickedIds[id].account;
-				const model = clickedIds[id].model || clickedIds[id].project; // TODO: Kill .project from backend
-				const key = account + "@" + model;
-
-				if (!objectIds[key]) {
-					objectIds[key] = [];
-				}
-
-				objectIds[key].push(id);
-			}
-		}
-
-		// Update viewer object visibility
-		for (const key in objectIds) {
-			if (key) {
-				const vals = key.split("@");
-				const account = vals[0];
-				const model = vals[1];
-
-				if (this.ViewerService.viewer) {
-					this.ViewerService.switchObjectVisibility(
-						account,
-						model,
-						objectIds[key],
-						visible,
-					);
-				}
-
-			}
-		}
-	}
-
-	/**
-	 * Handle highlight changes from tree service to viewer service.
-	 * @param highlightMap	Collection of ids to highlight.
-	 */
-	public handleSelection(highlightMap: any) {
-		// Update viewer highlights
-		this.ViewerService.clearHighlights();
-
-		for (const key in highlightMap) {
-			if (key) {
-
-				const vals = key.split("@");
-				const account = vals[0];
-				const model = vals[1];
-
-				// Separately highlight the children
-				// but only for multipart meshes
-				this.ViewerService.highlightObjects({
-					account,
-					ids: highlightMap[key],
-					model,
-					multi: true,
-					source: "tree",
-				});
-			}
-		}
-
-		// Reset highlight map to prevent extra triggers of handleSelection
-		// (currently not needed as a timestamp is used to check sync)
-		// this.TreeService.resetHighlightMap();
 	}
 
 	/**
@@ -406,10 +273,102 @@ class TreeController implements ng.IController {
 		this.setContentHeight(this.fetchNodesToShow());
 	}
 
-	public toggleTreeNode(node) {
+	public toggleTreeNode($event, node) {
+		$event.stopPropagation();
+
 		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+
+		// Unhighlight the node in the viewer if we're making it invisible
+		if (newState === "invisible" && node.selected) {
+			this.TreeService.deselectNodes([node]);
+		}
+
 		this.TreeService.setTreeNodeStatus(node, newState);
-		this.TreeService.updateModelState(node);
+		this.TreeService.updateModelVisibility(node);
+
+	}
+
+	public selectAndCentreNode(node: any) {
+
+		if (node.toggleState === "invisible") {
+			return;
+		}
+
+		// Get everything selected and center to it
+		this.TreeService.getCurrentMeshHighlights().then((selectionMap) => {
+
+			if (Object.keys(selectionMap).length === 0) {
+				return;
+			}
+			const meshIDArrs = [];
+			const keys = Object.keys(selectionMap);
+			keys.forEach((key) => {
+				meshIDArrs.push({
+					model: key.replace("@", "."),
+					meshID: selectionMap[key].meshes,
+				});
+			});
+
+			this.ViewerService.centreToPoint(meshIDArrs);
+
+		});
+
+	}
+
+	public performSearch(filterText) {
+
+		this.latestSearch = filterText;
+		this.filterItemsFound = false;
+		this.showTree = false;
+		this.showProgress = true;
+		this.progressInfo = "Filtering tree for objects";
+
+		this.TreeService.search(filterText, this.revision)
+			.then((json) => {
+
+				if (!this.showFilter) {
+					// If we've stopped filtering reset everything all flags
+					this.showTree = true;
+					this.showProgress = false;
+					this.filterItemsFound = false;
+				}
+
+				if (this.latestSearch !== filterText || this.showTree) {
+					return;
+				}
+
+				this.showProgress = false;
+				this.nodes = json.data;
+				this.filterItemsFound = this.nodes.length > 0;
+
+				if (this.filterItemsFound) {
+					for (let i = 0; i < this.nodes.length; i++) {
+						this.nodes[i].index = i;
+						this.nodes[i].level = 0;
+					}
+					this.setupInfiniteItemsFilter();
+					this.setContentHeight(this.nodes);
+				} else {
+					const noFilterItemsFoundHeight = 82;
+					this.onContentHeightRequest({height: noFilterItemsFoundHeight});
+				}
+
+			})
+			.catch((error) => {
+				this.showTreeInPane();
+			});
+
+	}
+
+	/**
+	 * Check if we should ignore trying to select a node
+	 */
+	public ignoreSelection($event: any, node: any): boolean {
+		const doubleClick = $event.detail > 1;
+		if (doubleClick || node.toggleState === "invisible") {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -417,33 +376,40 @@ class TreeController implements ng.IController {
 	 *
 	 * @param node
 	 */
-	public selectNode(node) {
-		this.TreeService.selectNode(node, this.MultiSelectService.isMultiMode(), true);
-		this.TreeService.updateModelState(node);
-	}
+	public selectNode($event: any, node: any) {
 
-	public filterItemSelected(item) {
-
-		if (this.currentFilterItemSelected === null) {
-			this.nodes[item.index].class = "treeNodeSelected";
-			this.currentFilterItemSelected = item;
-		} else if (item.index === this.currentFilterItemSelected.index) {
-			this.nodes[item.index].class = "";
-			this.currentFilterItemSelected = null;
-		} else {
-			this.nodes[this.currentFilterItemSelected.index].class = "";
-			this.nodes[item.index].class = "treeNodeSelected";
-			this.currentFilterItemSelected = item;
+		if (this.ignoreSelection($event, node)) {
+			return;
 		}
 
-		const selectedComponentNode = this.nodes[item.index];
+		return this.TreeService.selectNodes(
+			[node],
+			this.MultiSelectService.isMultiMode(),
+			undefined,
+			false,
+		);
+	}
+
+	public filterNodeSelected($event: any, node: any) {
+
+		if (this.ignoreSelection($event, node)) {
+			return;
+		}
+
+		const multi = this.MultiSelectService.isMultiMode();
+
+		if (!multi) {
+			this.nodes.forEach((n) => n.selected = false);
+			this.nodes[node.index].selected = true;
+		} else {
+			this.nodes[node.index].selected = !this.nodes[node.index].selected;
+		}
+
+		const selectedComponentNode = this.nodes[node.index];
 
 		if (selectedComponentNode) {
-			// TODO: This throws a unity error when filtering
-
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNode(serviceNode, this.MultiSelectService.isMultiMode(), true);
-			this.TreeService.updateModelState(serviceNode);
+			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
 		}
 
 	}
@@ -485,6 +451,7 @@ export const TreeComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		filterText: "=",
+		showFilter: "=",
 		model:  "=",
 		onContentHeightRequest: "&",
 		revision: "=",

@@ -427,7 +427,7 @@ class IssueScreenshotController implements ng.IController {
 		screenShotCanvasContext.drawImage(this.scribbleCanvas, 0, 0);
 
 		screenShot = screenShotCanvas.toDataURL("image/png");
-		this.screenShotSave({screenShot});
+		this.screenShotSave({screenShot: screenShot});
 
 		this.closeDialog();
 	}

@@ -26,6 +26,7 @@ class ModelController implements ng.IController {
 		"$compile",
 		"$mdDialog",
 
+		"ClipService",
 		"EventService",
 		"TreeService",
 		"RevisionsService",
@@ -47,7 +48,6 @@ class ModelController implements ng.IController {
 	private revision;
 	private settings;
 	private issueId;
-	private keysDown;
 	private treeMap;
 	private selectedObjects;
 	private initialSelectedObjects;
@@ -61,6 +61,7 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
+		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -74,7 +75,7 @@ class ModelController implements ng.IController {
 
 	public $onInit() {
 
-		this.issuesCardIndex = 0;
+		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
 		this.pointerEvents = "inherit";
 
 		history.pushState(null, null, document.URL);
@@ -113,10 +114,6 @@ class ModelController implements ng.IController {
 					this.setupModelInfo();
 				});
 			}
-		});
-
-		this.$scope.$watch("vm.keysDown", () => {
-			this.MultiSelectService.handleKeysDown(this.keysDown);
 		});
 
 		this.$scope.$watch("vm.issueId", () => {
@@ -199,10 +196,8 @@ class ModelController implements ng.IController {
 					this.PanelService.hideSubModels(this.issuesCardIndex, true);
 				}
 
-				this.EventService.send(
-					this.EventService.EVENT.MODEL_SETTINGS_READY,
-					data,
-				);
+				this.ViewerService.updateViewerSettings(data.updateViewerSettings);
+				this.ClipService.initClip(data.properties.unit);
 
 				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
 					.then((tree) => {
@@ -242,7 +237,6 @@ export const ModelComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		issueId: "=",
-		keysDown: "<",
 		model:  "=",
 		revision: "=",
 		state:    "=",
