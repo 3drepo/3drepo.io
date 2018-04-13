@@ -36,9 +36,11 @@ Adding the Groups feature into 3D Repo, allowing the user to create/edit/delete 
 Highlighting objects on a federation node that would highlight multiple sub models is not functioning.
 
 ### Steps to replicate
-<!-- Picture, gifs would be really useful here -->
 - click on the root node of a federated tree
 - The entire model should be highlighted, but only one of the models was highlighted.
+
+### Pictures/ Gifs of the error
+<!-- to help visualise what is wrong -->
 
 <!-- END OF BUG(S) REPORT TEMPLATE -->
 <!-- BUG LIST TEMPLATE (delete as appropriate) -->
