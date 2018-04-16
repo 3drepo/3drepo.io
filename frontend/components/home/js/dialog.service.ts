@@ -81,7 +81,6 @@ export class DialogService {
 				this.disconnectedDialogOpen = false;
 			})
 			.catch(() => {
-				console.log("Notifications - Muting notifications");
 				this.disconnectedDialogOpen = false;
 				this.muteNotifications = true;
 			});
@@ -170,7 +169,7 @@ export class DialogService {
 					.textContent(content)
 					.ariaLabel(title)
 					.ok(ok)
-					.cancel(cancel)
+					.cancel(cancel),
 			);
 
 		} else {
@@ -253,7 +252,7 @@ export class DialogService {
 				window.location.reload();
 			})
 			.catch(() => {
-				console.log("User didn't reload");
+				console.debug("User didn't reload");
 			});
 
 	}

@@ -37,7 +37,9 @@ div.groupsContainer
                     md-button.md-icon-button(
                         aria-label="Invert Colors"
                         ng-click="vm.isolateGroup($event, group)")
-                        md-icon.angular-material-icons visibility
+                        svg(width="24px" height="24px" viewBox="0 0 24 24")
+                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate1}}")
+                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate2}}")
                     md-tooltip Isolate
 
                 div
@@ -79,7 +81,8 @@ div.groupsContainer
             div(layout="column" flex)
                 md-input-container
                     label Group Name
-                    input(
+                    input#groupName(
+                        type="text"
                         ng-disabled="!vm.canAddGroup"
                         ng-model="vm.selectedGroup.name" 
                         ng-maxlength="80")
@@ -128,7 +131,7 @@ div.groupsContainer
                 type="button"
                 ng-if="vm.groups.length > 0"
                 aria-label="Delete"
-                ng-show="vm.toShow === 'groups' && vm.selectedGroup"
+                ng-show="vm.toShow === 'groups'"
                 ng-click="vm.deleteGroup()")
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
