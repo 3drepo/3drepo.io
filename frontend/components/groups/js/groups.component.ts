@@ -163,7 +163,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public handleGroupError(method: string) {
-		const content = `We tried to ${method} your issue but it failed.
+		const content = `We tried to ${method} your group but it failed.
 			If this continues please message support@3drepo.io.`;
 		const escapable = true;
 		this.DialogService.text(`Group Error`, content, escapable);
