@@ -110,7 +110,7 @@ class TreeController implements ng.IController {
 
 							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
 							this.TreeService.updateModelVisibility(this.allNodes[0]);
-							angular.element((window as any).window).triggerHandler("resize");
+							this.resize();
 
 						} else {
 							const nodes = [this.TreeService.getNodeById(objectID)];
@@ -198,13 +198,8 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.TreeService.selectedIndex,
 			(selectedIndex) => {
 				if (selectedIndex !== undefined) {
-
 					this.setContentHeight(this.fetchNodesToShow());
-
-					this.$timeout(() => {}).then(() => {
-						this.topIndex = selectedIndex;
-					});
-
+					this.topIndex = selectedIndex;
 				}
 			});
 
@@ -243,8 +238,13 @@ class TreeController implements ng.IController {
 			height = 70;
 		}
 		this.onContentHeightRequest({height});
-		angular.element((window as any).window).triggerHandler("resize");
+		this.resize();
+	}
 
+	public resize() {
+		this.$timeout().then(() => {
+			angular.element((window as any).window).triggerHandler("resize");
+		});
 	}
 
 	/**
