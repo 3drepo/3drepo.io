@@ -896,10 +896,10 @@ class IssueController implements ng.IController {
 	public createGroup(viewpoint, screenShot, objectInfo) {
 
 		// Create a group of selected objects
-		const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes, "selected");
+		const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes);
 
 		// Create a group of hidden objects
-		const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes, "toggleState");
+		const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes);
 
 		const promises = [];
 
@@ -1040,10 +1040,10 @@ class IssueController implements ng.IController {
 		Promise.all(initPromises).then( () => {
 			// FIXME: this is duplicated code - something similar already exists in CreateGroup
 			// Create a group of selected objects
-			const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes, "selected");
+			const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes);
 
 			// Create a group of hidden objects
-			const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes, "toggleState");
+			const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes);
 
 			const promises = [];
 
