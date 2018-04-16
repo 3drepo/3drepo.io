@@ -37,10 +37,10 @@ const groupSchema = Schema({
 	updatedBy: String,
 	objects: [{
 		_id : false,
-		shared_id: Object,
 		account: String,
 		model: String,
-		ifc_guid: String
+		shared_ids: [Object],
+		ifc_guids: [String]
 	}],
 	issue_id: Object,
 	color: [Number]
