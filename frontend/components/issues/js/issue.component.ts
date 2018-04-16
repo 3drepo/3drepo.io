@@ -268,7 +268,7 @@ class IssueController implements ng.IController {
 						this.setEditIssueData(fetchedIssue);
 						this.startNotification();
 						this.issueFailedToLoad = false;
-						//Update the issue data on issue service so search would work better
+						// Update the issue data on issue service so search would work better
 						this.IssuesService.updateIssues(this.issueData);
 					})
 					.catch((error) => {
@@ -286,10 +286,6 @@ class IssueController implements ng.IController {
 
 		});
 
-	}
-
-	public createStatusLabel(status) {
-		status.charAt(0).toUpperCase() + status.slice(1);
 	}
 
 	public handleBCFPriority(BCFPriority: string) {
@@ -333,7 +329,7 @@ class IssueController implements ng.IController {
 			if (this.modelJobs.indexOf(unknownJob) === -1) {
 				this.modelJobs.push(unknownJob);
 				this.$timeout(() => {});
-			};
+			}
 		});
 
 	}
@@ -398,7 +394,6 @@ class IssueController implements ng.IController {
 		this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
 		this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
 		this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
-
 
 		this.handleBCFPriority(this.issueData.priority);
 		this.handleBCFStatus(this.issueData.status);
@@ -836,19 +831,23 @@ class IssueController implements ng.IController {
 			promise: objectsPromise,
 		});
 
-		viewpointPromise.promise
-			.then((viewpoint) => {
-				objectsPromise.promise
-					.then((objectInfo) => {
-						viewpoint.hideIfc = this.TreeService.getHideIfc();
-						this.handleObjects(viewpoint, objectInfo, screenShotPromise);
-					})
-					.catch((error) => {
-						console.error(error);
-					});
+		return Promise.all([viewpointPromise.promise, objectsPromise.promise])
+			.then((results) => {
+				const [viewpoint, objectInfo] = results;
+				viewpoint.hideIfc = this.TreeService.getHideIfc();
+				return this.handleObjects(viewpoint, objectInfo, screenShotPromise);
 			})
 			.catch((error) => {
-				console.error(error);
+				// We have a top level catch which will
+				// show the user a popup if something goes wrong at any point
+
+				this.saving = false;
+				const content = "Something went wrong saving the issue. " +
+				"If this continues please message support@3drepo.io.";
+				const escapable = true;
+
+				this.DialogService.text("Error Saving Issue", content, escapable);
+				console.error("Something went wrong saving the Issue: ", error);
 			});
 
 	}
@@ -860,25 +859,22 @@ class IssueController implements ng.IController {
 
 			if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 				// Create a group of selected objects
-				this.createGroup(viewpoint, this.savedScreenShot, objectInfo);
+				return this.createGroup(viewpoint, this.savedScreenShot, objectInfo);
 			} else {
-				this.doSaveIssue(viewpoint, this.savedScreenShot);
+				return this.doSaveIssue(viewpoint, this.savedScreenShot);
 			}
 
 		} else {
 			// Get a screen shot if not already created
 			this.ViewerService.getScreenshot(screenShotPromise);
 
-			screenShotPromise.promise
+			return screenShotPromise.promise
 				.then((screenShot) => {
 					if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-						this.createGroup(viewpoint, screenShot, objectInfo);
+						return this.createGroup(viewpoint, screenShot, objectInfo);
 					} else {
-						this.doSaveIssue(viewpoint, screenShot);
+						return this.doSaveIssue(viewpoint, screenShot);
 					}
-				})
-				.catch((error) => {
-					console.error(error);
 				});
 
 		}
@@ -939,7 +935,7 @@ class IssueController implements ng.IController {
 			color: [255, 0, 0],
 			objects: nodes,
 		};
-		return nodes.length === 0? null : groupData;
+		return nodes.length === 0 ? null : groupData;
 	}
 
 	public createGroup(viewpoint, screenShot, objectInfo) {
@@ -956,9 +952,6 @@ class IssueController implements ng.IController {
 			const highlightPromise = this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-				})
-				.catch((error) => {
-					console.error(error);
 				});
 			promises.push(highlightPromise);
 		}
@@ -967,17 +960,12 @@ class IssueController implements ng.IController {
 			const hiddenPromise = this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
 				.then((hiddenGroupResponse) => {
 					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-				})
-				.catch((error) => {
-					console.error(error);
 				});
 			promises.push(hiddenPromise);
 		}
 
-		Promise.all(promises).then(() => {
+		return Promise.all(promises).then(() => {
 			this.doSaveIssue(viewpoint, screenShot);
-		}).catch((error) => {
-			console.error(error);
 		});
 
 	}
@@ -1020,7 +1008,7 @@ class IssueController implements ng.IController {
 			issue.pickedNorm = pinData.pickedNorm;
 		}
 
-		this.IssuesService.saveIssue(issue)
+		return this.IssuesService.saveIssue(issue)
 			.then((response) => {
 				this.data = response.data; // So that new changes are registered as updates
 				const responseIssue = response.data;
@@ -1059,21 +1047,13 @@ class IssueController implements ng.IController {
 					{notify: false},
 				);
 
-			})
-			.catch((error) => {
-				this.saving = false;
-				const content = "Something went wrong saving the issue. " +
-				"If this continues please message support@3drepo.io.";
-				const escapable = true;
+				this.AnalyticService.sendEvent({
+					eventCategory: "Issue",
+					eventAction: "create",
+				});
 
-				this.DialogService.text("Error Saving Issue", content, escapable);
-				console.error("Something went wrong saving the Issue: ", error);
 			});
 
-		this.AnalyticService.sendEvent({
-			eventCategory: "Issue",
-			eventAction: "create",
-		});
 	}
 
 	public saveComment() {
@@ -1088,14 +1068,14 @@ class IssueController implements ng.IController {
 
 		let objectInfo;
 
-		initPromises.push(objectsPromise.promise.then((_objectInfo) => {
-			objectInfo = _objectInfo;
+		initPromises.push(objectsPromise.promise.then((returnedObjectInfo) => {
+			objectInfo = returnedObjectInfo;
 		}));
 
 		if (!angular.isDefined(this.commentThumbnail)) {
-			var viewpointPromise = this.$q.defer();
+			const viewpointPromise = this.$q.defer();
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
+				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model},
 			);
 			initPromises.push(viewpointPromise.promise.then((viewpoint) => {
 				this.commentViewpoint = viewpoint;
@@ -1103,7 +1083,7 @@ class IssueController implements ng.IController {
 		}
 
 		Promise.all(initPromises).then( () => {
-			//FIXME: this is duplicated code - something similar already exists in CreateGroup
+			// FIXME: this is duplicated code - something similar already exists in CreateGroup
 			// Create a group of selected objects
 			const highlightedGroupData = this.createGroupData(this.pruneNodes(objectInfo.highlightedNodes, "selected"));
 
@@ -1112,14 +1092,14 @@ class IssueController implements ng.IController {
 
 			const promises = [];
 
-			if(highlightedGroupData) {
+			if (highlightedGroupData) {
 			promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 				}));
 			}
 
-			if(hiddenGroupData) {
+			if (hiddenGroupData) {
 				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
 					.then((hiddenGroupResponse) => {
 						this.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
@@ -1290,22 +1270,19 @@ class IssueController implements ng.IController {
 	 * Set the content height
 	 */
 	public setContentHeight() {
-		let i, length,
-			newIssueHeight = 305,
-			descriptionTextHeight = 80,
-			commentTextHeight = 80,
-			commentImageHeight = 170,
-			additionalInfoHeight = 160,
-			thumbnailHeight = 180,
-			issueMinHeight = 370,
-			height = issueMinHeight;
+
+		const newIssueHeight = 305;
+		const descriptionTextHeight = 80;
+		const commentTextHeight = 80;
+		const commentImageHeight = 170;
+		const additionalInfoHeight = 160;
+		const thumbnailHeight = 180;
+		const issueMinHeight = 370;
+
+		let height = issueMinHeight;
 
 		if (this.data) {
 
-			// Additional info
-			if (this.showAdditional) {
-				height += additionalInfoHeight;
-			}
 			// Description text
 			if (this.canEditDescription || (this.issueData && this.issueData.hasOwnProperty("desc")) ) {
 				height += descriptionTextHeight;
@@ -1318,7 +1295,7 @@ class IssueController implements ng.IController {
 			}
 			// Comments
 			if (this.issueData && this.issueData.comments) {
-				for (i = 0, length = this.issueData.comments.length; i < length; i += 1) {
+				for (let i = 0; i < this.issueData.comments.length; i++) {
 					height += commentTextHeight;
 					if (this.issueData.comments[i].viewpoint && this.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
 						height += commentImageHeight;
@@ -1328,13 +1305,15 @@ class IssueController implements ng.IController {
 
 		} else {
 			height = newIssueHeight;
-			if (this.showAdditional) {
-				height += additionalInfoHeight;
-			}
 			// Description thumbnail
 			if (this.issueData && this.issueData.descriptionThumbnail) {
 				height += thumbnailHeight;
 			}
+		}
+
+		// Additional info
+		if (this.showAdditional) {
+			height += additionalInfoHeight;
 		}
 
 		if (height) {
@@ -1384,55 +1363,68 @@ class IssueController implements ng.IController {
 			/*
 			* Watch for new comments
 			*/
-			this.NotificationService.subscribe.newComment(this.data.account, this.data.model, this.data._id, (comment) => {
+			this.NotificationService.subscribe.newComment(
+				this.data.account,
+				this.data.model,
+				this.data._id,
+				(comment) => {
+					if (comment.action) {
+						this.IssuesService.convertActionCommentToText(comment, this.topic_types);
+					}
 
-				if (comment.action) {
-					this.IssuesService.convertActionCommentToText(comment, this.topic_types);
-				}
+					this.afterNewComment(comment, true);
 
-				this.afterNewComment(comment, true);
-
-				// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
-				this.$scope.$apply();
-				this.commentAreaScrollToBottom();
-			});
+					// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
+					this.$scope.$apply();
+					this.commentAreaScrollToBottom();
+				},
+			);
 
 			/*
 			* Watch for comment changed
 			*/
-			this.NotificationService.subscribe.commentChanged(this.data.account, this.data.model, this.data._id, (newComment) => {
+			this.NotificationService.subscribe.commentChanged(
+				this.data.account,
+				this.data.model,
+				this.data._id,
+				(newComment) => {
+					const comment = this.issueData.comments.find((oldComment) => {
+						return oldComment.guid === newComment.guid;
+					});
 
-				const comment = this.issueData.comments.find((oldComment) => {
-					return oldComment.guid === newComment.guid;
-				});
+					comment.comment = newComment.comment;
 
-				comment.comment = newComment.comment;
-
-				this.$scope.$apply();
-				this.commentAreaScrollToBottom();
-			});
+					this.$scope.$apply();
+					this.commentAreaScrollToBottom();
+				},
+			);
 
 			/*
 			* Watch for comment deleted
 			*/
-			this.NotificationService.subscribe.commentDeleted(this.data.account, this.data.model, this.data._id, (newComment) => {
+			this.NotificationService.subscribe.commentDeleted(
+				this.data.account,
+				this.data.model,
+				this.data._id,
+				(newComment) => {
 
-				let deleteIndex;
-				this.issueData.comments.forEach((comment, i) => {
-					if (comment.guid === newComment.guid) {
-						deleteIndex = i;
-					}
-				});
+					let deleteIndex;
+					this.issueData.comments.forEach((comment, i) => {
+						if (comment.guid === newComment.guid) {
+							deleteIndex = i;
+						}
+					});
 
-				this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
+					this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
 
-				this.$scope.$apply();
-				this.commentAreaScrollToBottom();
+					this.$scope.$apply();
+					this.commentAreaScrollToBottom();
 
-				this.$timeout(() => {
-					this.issueData.comments.splice(deleteIndex, 1);
-				}, 4000);
-			});
+					this.$timeout(() => {
+						this.issueData.comments.splice(deleteIndex, 1);
+					}, 4000);
+				},
+			);
 
 		}
 }

@@ -31,10 +31,7 @@ class PanelCardOptionVisibleController implements ng.IController {
 	}
 
 	public $ngInit() {
-		this.$scope.$watch("vm.visible", () => {
-			// console.log("vm.visible", this.visible);
-			//
-		});
+		this.$scope.$watch("vm.visible", () => {});
 	}
 
 	public toggleVisible(event) {

@@ -242,7 +242,21 @@ groupSchema.statics.listGroups = function(dbCol, queryParams){
 	if (queryParams.noIssues) {
 		query.issue_id = { $exists: false };
 	}
-	return this.find(dbCol, query);
+	return this.find(dbCol, query).then(results => {
+		const sharedIdConversionPromises = [];
+
+		results.forEach(result => {
+			sharedIdConversionPromises.push(
+				result.getObjectsArrayAsSharedIDs(false).then(sharedIdObjects => {
+					result.objects = sharedIdObjects;
+				})
+			);
+		});
+
+		return Promise.all(sharedIdConversionPromises).then(() => {
+			return results;
+		});
+	});
 };
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
@@ -273,7 +287,7 @@ groupSchema.methods.updateAttrs = function(data){
 				if ("[object String]" === Object.prototype.toString.call(obj.shared_id)) {
 					obj.shared_id = utils.stringToUUID(obj.shared_id);
 				}
-				sharedIDSets.add(obj.shared_id);
+				sharedIDSets.add(utils.uuidToString(obj.shared_id));
 				
 				if(!sharedIdsByAccount[ns]) {
 					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
@@ -302,7 +316,8 @@ groupSchema.methods.updateAttrs = function(data){
 						}
 
 						//if sharedIDSets.size > 0 , it means there are sharedIDs with no IFC GUIDs
-						sharedIDSets.forEach((sharedId) => {
+						sharedIDSets.forEach((sharedIdString) => {
+							const sharedId = utils.stringToUUID(sharedIdString);
 							modifiedObjectList.push({
 								account,
 								model,

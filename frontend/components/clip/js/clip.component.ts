@@ -96,7 +96,6 @@ class ClipController implements ng.IController {
 				return this.ClipService.state;
 			},
 			(state) => {
-				// console.log(this, state);
 				angular.extend(this, state);
 			},
 			true,
