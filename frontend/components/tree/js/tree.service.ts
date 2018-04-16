@@ -490,6 +490,11 @@ export class TreeService {
 		while (stack.length > 0) {
 
 			const childNode = stack.pop();
+			if (childNode === undefined) {
+				console.error("childNode is undefined");
+				continue;
+			}
+
 			const model = childNode.model || childNode.project;
 			const key = childNode.account + "@" + model;
 
@@ -948,6 +953,8 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node) {
 
+		if (node === undefined) { return; }
+
 		this.ready.promise.then(() => {
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
@@ -1211,7 +1218,7 @@ export class TreeService {
 			return Promise.resolve([]);
 		}
 
-		return this.getMap().then(() => {
+		return this.ready.promise.then(() => {
 
 			const nodes = [];
 
@@ -1358,7 +1365,7 @@ export class TreeService {
 
 				if (nodes && nodes.length) {
 
-					this.selectNodes(nodes, true, undefined, false);
+					this.selectNodes(nodes, true, undefined, true);
 
 					const lastNodeId = nodes[nodes.length - 1]._id;
 					const lastNodePath = this.getPath(lastNodeId);

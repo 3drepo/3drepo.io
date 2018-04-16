@@ -94,7 +94,7 @@ export class IssuesService {
 	}
 
 	public getDisplayIssue() {
-		if (this.state.displayIssue && this.state.allIssues.length > 0){
+		if (this.state.displayIssue && this.state.allIssues.length > 0) {
 
 			let issueToDisplay = this.state.allIssues.find((issue) => {
 				return issue._id === this.state.displayIssue;
@@ -205,7 +205,7 @@ export class IssuesService {
 		// Search the comments
 		if (issue.hasOwnProperty("comments")) {
 			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
-				if (!issue.comments[commentIdx].action &&  //skip any action comments (i.e system messages)
+				if (!issue.comments[commentIdx].action &&  // skip any action comments (i.e system messages)
 					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
 					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
 					return true;
@@ -258,7 +258,7 @@ export class IssuesService {
 					pickedPos: issue.position,
 					pickedNorm: issue.norm,
 					colours: pinColor,
-					viewpoint: issue.viewpoint
+					viewpoint: issue.viewpoint,
 				});
 
 			} else {
@@ -305,9 +305,9 @@ export class IssuesService {
 
 		this.state.allIssues.forEach((oldIssue, i) => {
 			const matches = oldIssue._id === issue._id;
-			if(matches) {
+			if (matches) {
 
-				if(issue.status === "closed") {
+				if (issue.status === "closed") {
 
 					this.state.allIssues[i].justClosed = true;
 
@@ -543,7 +543,7 @@ export class IssuesService {
 			this.ViewerService.goToExtent();
 		}
 
-		this.TreeService.getMap().then(() => {
+		this.TreeService.onReady().then(() => {
 			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
 		});
 	}
