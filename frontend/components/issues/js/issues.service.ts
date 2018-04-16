@@ -108,7 +108,7 @@ export class IssuesService {
 
 	// Helper  for searching strings
 	public stringSearch(superString, subString) {
-		if(!superString){
+		if(!superString) {
 			return false;
 		}
 
@@ -160,7 +160,7 @@ export class IssuesService {
 				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
 			});
 
-			//Roles Filter
+			// Roles Filter
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 			});
@@ -219,7 +219,7 @@ export class IssuesService {
 
 	public resetSelectedIssue() {
 		this.state.selectedIssue = undefined;
-		//showIssuePins();
+		// showIssuePins();
 	}
 
 	public isSelectedIssue(issue) {
@@ -272,7 +272,7 @@ export class IssuesService {
 	public setSelectedIssue(issue, isCorrectState) {
 
 		if (this.state.selectedIssue) {
-			let different = (this.state.selectedIssue._id !== issue._id);
+			const different = (this.state.selectedIssue._id !== issue._id);
 			if (different) {
 				this.deselectPin(this.state.selectedIssue);
 			}
@@ -304,8 +304,8 @@ export class IssuesService {
 		this.populateIssue(issue);
 
 		this.state.allIssues.forEach((oldIssue, i) => {
-			let matchs = oldIssue._id === issue._id;
-			if(matchs){
+			const matches = oldIssue._id === issue._id;
+			if(matches) {
 
 				if(issue.status === "closed") {
 
@@ -373,15 +373,13 @@ export class IssuesService {
 	}
 
 	public isViewer(permissions) {
-		// console.log("isViewer", permissions);
 		return !this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-			permissions
+			permissions,
 		);
 	}
 
 	public isAssignedJob(userJob, issueData, permissions) {
-		// console.log("isAssignedJob", permissions);
 		return (userJob._id &&
 				issueData.assigned_roles[0] &&
 				userJob._id === issueData.assigned_roles[0]) &&
@@ -391,21 +389,21 @@ export class IssuesService {
 	public isAdmin(permissions) {
 		return this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
-			permissions
+			permissions,
 		);
 	}
 
 	public canChangePriority(issueData, userJob, permissions) {
 
-		let notViewer = !this.isViewer(permissions);
-		let matches = this.userJobMatchesCreator(userJob, issueData);
+		const notViewer = !this.isViewer(permissions);
+		const matches = this.userJobMatchesCreator(userJob, issueData);
 
 		return this.isAdmin(permissions) || (matches && notViewer);
 	}
 
 	public canChangeStatusToClosed(issueData, userJob, permissions) {
 
-		let jobOwner = (this.userJobMatchesCreator(userJob, issueData) &&
+		const jobOwner = (this.userJobMatchesCreator(userJob, issueData) &&
 						!this.isViewer(permissions));
 
 		return this.isAdmin(permissions) || jobOwner;
@@ -525,7 +523,7 @@ export class IssuesService {
 
 	public handleShowIssue(issue) {
 
-		if(issue && issue.viewpoint ) {
+		if (issue && issue.viewpoint ) {
 
 			if (issue.viewpoint.position && issue.viewpoint.position.length > 0) {
 				this.handleCameraView(issue);
@@ -668,12 +666,12 @@ export class IssuesService {
 
 	public handleHighlights(objects) {
 		this.TreeService.selectedIndex = undefined;
-		this.$timeout(() => {
 		this.TreeService.highlightsBySharedId(objects)
 			.then(() => {
-				angular.element((window as any)).triggerHandler("resize");
+				this.$timeout(() => {
+					angular.element((window as any)).triggerHandler("resize");
+				}); // Force a digest cycle
 			});
-		}); // Force a digest cycle
 	}
 
 	public handleHidden(objects) {

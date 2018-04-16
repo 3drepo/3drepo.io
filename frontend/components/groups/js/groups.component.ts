@@ -20,12 +20,14 @@ class GroupsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"GroupsService",
 		"DialogService",
 		"TreeService",
 		"AuthService",
 		"ClientConfigService",
+		"IconsConstant",
 	];
 
 	private onContentHeightRequest: any;
@@ -46,19 +48,25 @@ class GroupsController implements ng.IController {
 	private canAddGroup: boolean;
 	private modelSettings: any;
 	private savedGroupData: any;
+	private customIcons: any;
 
 	constructor(
-		private $scope: any,
-		private $timeout: any,
+		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private GroupsService: any,
 		private DialogService: any,
 		private TreeService: any,
 		private AuthService: any,
 		private ClientConfigService: any,
+		private IconsConstant: any,
 	) {}
 
 	public $onInit() {
+
+		this.customIcons = this.IconsConstant;
+
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.changed = false;
@@ -322,6 +330,15 @@ class GroupsController implements ng.IController {
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
+		this.focusGroupName();
+
+	}
+
+	public focusGroupName() {
+		this.$timeout(() => {
+			const input: HTMLElement = this.$element[0].querySelector("#groupName");
+			input.focus();
+		});
 	}
 
 	public selectGroup(group: any) {
