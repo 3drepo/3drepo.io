@@ -20,12 +20,14 @@ class GroupsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"GroupsService",
 		"DialogService",
 		"TreeService",
 		"AuthService",
 		"ClientConfigService",
+		"IconsConstant",
 	];
 
 	private onContentHeightRequest: any;
@@ -46,19 +48,25 @@ class GroupsController implements ng.IController {
 	private canAddGroup: boolean;
 	private modelSettings: any;
 	private savedGroupData: any;
+	private customIcons: any;
 
 	constructor(
-		private $scope: any,
-		private $timeout: any,
+		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private GroupsService: any,
 		private DialogService: any,
 		private TreeService: any,
 		private AuthService: any,
 		private ClientConfigService: any,
+		private IconsConstant: any,
 	) {}
 
 	public $onInit() {
+
+		this.customIcons = this.IconsConstant;
+
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.changed = false;
@@ -131,8 +139,8 @@ class GroupsController implements ng.IController {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
 
-			this.GroupsService.getCurrentMeshHighlights().then((length) => {
-				this.selectedObjectsLen = length;
+			this.TreeService.getCurrentMeshHighlightsFromViewer().then((objects) => {
+				this.selectedObjectsLen = objects.highlightedNodes.length;
 				this.changed = true;
 			});
 
@@ -141,11 +149,12 @@ class GroupsController implements ng.IController {
 	}
 
 	public resetToSavedGroup() {
-		this.selectedGroup.name = this.savedGroupData.name;
-		this.selectedGroup.description = this.savedGroupData.description;
-		this.selectedGroup.color = this.savedGroupData.color;
-		this.GroupsService.updateSelectedGroupColor();
-
+		if (this.selectedGroup && this.savedGroupData) {
+			this.selectedGroup.name = this.savedGroupData.name;
+			this.selectedGroup.description = this.savedGroupData.description;
+			this.selectedGroup.color = this.savedGroupData.color;
+			this.GroupsService.updateSelectedGroupColor();
+		}
 	}
 
 	public toggleColorOverride($event, group: any) {
@@ -193,9 +202,10 @@ class GroupsController implements ng.IController {
 
 	public addGroup() {
 
-		const newGroup = this.GroupsService.generateNewGroup();
-		this.GroupsService.selectGroup(newGroup);
-		this.showGroupPane();
+		this.GroupsService.generateNewGroup().then((newGroup) => {
+			this.GroupsService.selectGroup(newGroup);
+			this.showGroupPane();
+		});
 
 	}
 
@@ -320,7 +330,15 @@ class GroupsController implements ng.IController {
 		this.hexColor = "";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
-		// this.GroupsService.updateSelectedGroupColor();
+		this.focusGroupName();
+
+	}
+
+	public focusGroupName() {
+		this.$timeout(() => {
+			const input: HTMLElement = this.$element[0].querySelector("#groupName");
+			input.focus();
+		});
 	}
 
 	public selectGroup(group: any) {

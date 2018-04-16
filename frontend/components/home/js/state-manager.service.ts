@@ -302,7 +302,6 @@ export class StateManagerService {
 				this.changedState[letName] = value;
 			}
 		}
-		// console.log(letName, value);
 		this.state[letName] = value;
 	}
 

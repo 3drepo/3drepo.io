@@ -1,7 +1,7 @@
 md-container(ng-if="!vm.showMemorySelected" layout-padding, style="max-width: 500px;")
     h2(style="margin: 0px;") 3D Repo Lite
-    p We have detected you are on a mobile/table device. To improve experience we can show a version of 3drepo.io 
-        | optimised for mobile experience. This removes the 3D model viewer, but drastically improves performance. 
+    p We have detected you are on a mobile/tablet device. To improve your experience, we can show a version of 3drepo.io 
+        | optimised for mobile devices. This removes the 3D model viewer, but drastically improves performance. 
         | Let us know which version works for you:
   
     md-container(style="float: right;")
@@ -12,9 +12,9 @@ md-container(ng-if="!vm.showMemorySelected" layout-padding, style="max-width: 50
 
 
 md-container(ng-if="vm.showMemorySelected" layout-padding, style="max-width: 500px;")
-    h2(style="margin: 0px;") Select Available Memeory
+    h2(style="margin: 0px;") Select Available Memory
     p 3D models can be large, requiring a substantial chunk of memory (RAM). 
-        | To help us give you a smooth experience please indiciate the memory (RAM) your device has:
+        | To help us give you a smooth experience please indicate the memory (RAM) your device has:
 
     md-select(ng-model="vm.deviceMemory")
         md-option(ng-value="1") 1GB (Low-Mid Level Phones)

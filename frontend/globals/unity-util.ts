@@ -116,6 +116,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Check if an error is Unity related
+	 */
+	public static isUnityError(err) {
+		const checks = ["Array buffer allocation failed", "Invalid typed array length", "Unity", "unity"];
+		const hasUnityError = !checks.every((check) => err.indexOf(check) === -1);
+		return hasUnityError;
+	}
+
+	/**
 	 * Handle a error from Unity
 	 */
 	public static onUnityError(errorObject) {
@@ -125,8 +134,7 @@ export class UnityUtil {
 		let reload = false;
 		let conf;
 
-		if (err.indexOf("Array buffer allocation failed") !== -1 ||
-			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
+		if (UnityUtil.isUnityError(err)) {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
 					<br><br> <code>Error ${err} occured at line ${line}</code>
@@ -273,7 +281,9 @@ export class UnityUtil {
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
-		UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		if (UnityUtil.objectStatusPromise) {
+			UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		}
 		UnityUtil.objectStatusPromise = null;
 	}
 
