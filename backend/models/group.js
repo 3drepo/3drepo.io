@@ -27,7 +27,6 @@ const Meta = require("./meta");
 
 
 const groupSchema = Schema({
-	// no extra attributes
 	_id: Object,
 	name: String,
 	author: String,
@@ -266,17 +265,16 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 			issue_id: issueId
 		};
 
-		return group.updateAttrs(issueIdData);
+		return group.updateAttrs(dbCol, issueIdData);
 	});
 };
 
-groupSchema.methods.updateAttrs = function(data){
+groupSchema.methods.updateAttrs = function(dbCol, data){
 
 	const ifcGuidPromises = [];
 	const sharedIdsByAccount = {};	
 	const sharedIDSets = new Set();
 	let modifiedObjectList = null;
-
 	if (data.objects) {
 		modifiedObjectList = [];
 		for (let i = 0; i < data.objects.length; i++) {
@@ -337,17 +335,27 @@ groupSchema.methods.updateAttrs = function(data){
 	}
 
 	return Promise.all(ifcGuidPromises).then(() => {
-		this.description = data.description || this.description;
-		this.name = data.name || this.name;
-		this.author = data.author || this.author;
-		this.createdAt = data.createdAt || this.createdAt;
-		this.updatedAt = data.updatedAt || this.updatedAt;
-		this.updatedBy = data.updatedBy || this.updatedBy;
-		this.objects = modifiedObjectList || this.objects;
-		this.color = data.color || this.color;
-		this.issue_id = data.issue_id || this.issue_id;
-		this.markModified("objects");
-		return this.save();
+		const toUpdate = {};
+		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
+		
+		fieldsCanBeUpdated.forEach((key) => {
+			if(data[key]) {
+				if(key === "objects") {
+					toUpdate.objects = modifiedObjectList;
+				}
+				else {
+					toUpdate[key] = data[key];
+				}
+			}
+		});
+
+		
+		const db = require("../db/db");
+		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(dbCol => {
+			return dbCol.update({_id: this._id}, {$set: toUpdate}).then( ()=>{
+				return {_id: utils.uuidToString(this._id)};
+			}); 
+		});
 	});
 
 };
@@ -359,7 +367,14 @@ groupSchema.statics.createGroup = function(dbCol, data){
 	});
 
 	group._id = utils.stringToUUID(uuid.v1());
-	return group.updateAttrs(data);
+	return group.save().then( (savedGroup)=>{
+		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
+			//remove the recently saved new group as update attributes failed
+			return Group.deleteGroup(dbCol, group._id).then(() => {
+				return Promise.reject(err);
+			});
+		});
+	});
 };
 
 groupSchema.methods.clean = function(){
@@ -372,7 +387,6 @@ groupSchema.methods.clean = function(){
 			const object = cleaned.objects[i];
 			if (object.shared_id &&
 				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-				//object.id = utils.uuidToString(object.id);
 				object.shared_id = utils.uuidToString(object.shared_id);
 			}
 		}
