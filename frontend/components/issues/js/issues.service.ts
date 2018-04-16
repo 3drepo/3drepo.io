@@ -94,7 +94,7 @@ export class IssuesService {
 	}
 
 	public getDisplayIssue() {
-		if (this.state.displayIssue && this.state.allIssues.length > 0){
+		if (this.state.displayIssue && this.state.allIssues.length > 0) {
 
 			let issueToDisplay = this.state.allIssues.find((issue) => {
 				return issue._id === this.state.displayIssue;
@@ -205,7 +205,7 @@ export class IssuesService {
 		// Search the comments
 		if (issue.hasOwnProperty("comments")) {
 			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
-				if (!issue.comments[commentIdx].action &&  //skip any action comments (i.e system messages)
+				if (!issue.comments[commentIdx].action &&  // skip any action comments (i.e system messages)
 					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
 					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
 					return true;
@@ -665,7 +665,7 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.selectedIndex = undefined;
+		// this.TreeService.selectedIndex = undefined;
 		this.TreeService.highlightsBySharedId(objects)
 			.then(() => {
 				this.$timeout(() => {

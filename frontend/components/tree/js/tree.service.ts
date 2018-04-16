@@ -1356,7 +1356,7 @@ export class TreeService {
 
 				if (nodes && nodes.length) {
 
-					this.selectNodes(nodes, true, undefined, false);
+					this.selectNodes(nodes, true, undefined, true);
 
 					const lastNodeId = nodes[nodes.length - 1]._id;
 					const lastNodePath = this.getPath(lastNodeId);
