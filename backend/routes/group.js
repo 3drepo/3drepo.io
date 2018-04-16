@@ -26,11 +26,13 @@ const Group = require("../models/group");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get("/", middlewares.issue.canView, listGroups);
-router.get("/:uid", middlewares.issue.canView, findGroup);
-router.put("/:uid", middlewares.issue.canCreate, updateGroup);
-router.post("/", middlewares.issue.canCreate, createGroup);
-router.delete("/:id", middlewares.issue.canCreate, deleteGroup);
+router.get('/groups/', middlewares.issue.canView, listGroups);
+router.get('/groups/:uid', middlewares.issue.canView, findGroup);
+router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
+
+router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
+router.post('/groups/', middlewares.issue.canCreate, createGroup);
+router.delete('/groups/:id', middlewares.issue.canCreate, deleteGroup);
 
 const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
@@ -60,7 +62,14 @@ function findGroup(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	Group.findByUIDSerialised(getDbColOptions(req), req.params.uid).then( group => {
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, "master", null);
+	}
+
+	groupItem.then( group => {
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
@@ -108,7 +117,14 @@ function updateGroup(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, "master", null);
+	}
+
+	groupItem.then( group => {
 
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});

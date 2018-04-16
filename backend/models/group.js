@@ -201,7 +201,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 	});
 }
 
-groupSchema.statics.findByUID = function(dbCol, uid){
+groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
