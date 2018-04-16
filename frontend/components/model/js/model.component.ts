@@ -196,7 +196,7 @@ class ModelController implements ng.IController {
 					this.PanelService.hideSubModels(this.issuesCardIndex, true);
 				}
 
-				this.ViewerService.updateViewerSettings(data.updateViewerSettings);
+				this.ViewerService.updateViewerSettings(data);
 				this.ClipService.initClip(data.properties.unit);
 
 				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
