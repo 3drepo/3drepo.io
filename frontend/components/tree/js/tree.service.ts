@@ -702,8 +702,19 @@ export class TreeService {
 
 		for (let i = 0; i < path.length; i++) {
 			const node = this.getNodeById(path[i]);
+			const nextNode = this.getNodeById(path[i + 1]);
 
 			this.expandTreeNode(node);
+
+			// Collapse all the children that aren't next
+			// down the expansion path
+			if (node.children) {
+				node.children.forEach((n) => {
+					if (n !== nextNode || nextNode === undefined) {
+						this.collapseTreeNode(n);
+					}
+				});
+			}
 
 			// If it's the last node in the path
 			// scroll to it
