@@ -370,8 +370,9 @@ groupSchema.statics.createGroup = function(dbCol, data){
 	return group.save().then( (savedGroup)=>{
 		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
 			//remove the recently saved new group as update attributes failed
-			Group.deleteGroup(dbCol, group._id);
-			return Promise.reject(err);
+			return Group.deleteGroup(dbCol, group._id).then(() => {
+				return Promise.reject(err);
+			});
 		});
 	});
 };
@@ -386,7 +387,6 @@ groupSchema.methods.clean = function(){
 			const object = cleaned.objects[i];
 			if (object.shared_id &&
 				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-				//object.id = utils.uuidToString(object.id);
 				object.shared_id = utils.uuidToString(object.shared_id);
 			}
 		}
