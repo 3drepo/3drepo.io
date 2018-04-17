@@ -96,12 +96,12 @@ export class IssuesService {
 	public getDisplayIssue() {
 		if (this.state.displayIssue && this.state.allIssues.length > 0) {
 
-			let issueToDisplay = this.state.allIssues.find((issue) => {
+			const issueToDisplay = this.state.allIssues.find((issue) => {
 				return issue._id === this.state.displayIssue;
 			});
-			
+
 			return issueToDisplay;
-				
+
 		}
 		return false;
 	}
@@ -153,7 +153,6 @@ export class IssuesService {
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
 			});
-	
 
 			// Sub models
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
@@ -164,7 +163,7 @@ export class IssuesService {
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 			});
-		
+
 		}
 
 	}
@@ -172,10 +171,10 @@ export class IssuesService {
 	public filteredIssues(filterText: string) {
 		return (this.$filter("filter")(
 			this.state.issuesToShow,
-			(issue) => { 
-				return this.handleIssueFilter(issue, filterText); 
-			}
-			
+			(issue) => {
+				return this.handleIssueFilter(issue, filterText);
+			},
+
 		));
 	}
 
@@ -186,7 +185,7 @@ export class IssuesService {
 		// Exit the function as soon as we found a match.
 
 		// Search the title, timestamp, type and owner
-		if( this.stringSearch(issue.title, filterText) ||
+		if ( this.stringSearch(issue.title, filterText) ||
 				this.stringSearch(issue.timeStamp, filterText) ||
 			this.stringSearch(issue.owner, filterText) ||
 			this.stringSearch(issue.topic_type, filterText)) {
@@ -195,16 +194,16 @@ export class IssuesService {
 
 		// Search the list of assigned issues
 		if (issue.hasOwnProperty("assigned_roles")) {
-			for(let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
-				if(this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
+			for (let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
+				if (this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
 					return true;
 				}
 			}
 		}
-		
+
 		// Search the comments
 		if (issue.hasOwnProperty("comments")) {
-			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
+			for (let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
 				if (!issue.comments[commentIdx].action &&  // skip any action comments (i.e system messages)
 					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
 					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
@@ -504,6 +503,7 @@ export class IssuesService {
 			this.TreeService.showProgress = false;
 			this.handleShowIssue(issue);
 		}
+
 	}
 
 	public handleCameraView(issue) {
@@ -546,6 +546,7 @@ export class IssuesService {
 		this.TreeService.onReady().then(() => {
 			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
 		});
+
 	}
 
 	public showMultiIds(issue) {
