@@ -897,10 +897,10 @@ class IssueController implements ng.IController {
 			}
 
 			if (!groupData.objects[nodes[i].account][nodes[i].model]) {
-				groupData.objects[nodes[i].account][nodes[i].model] = [];
+				groupData.objects[nodes[i].account][nodes[i].model] = { shared_ids: [] };
 			}
 
-			groupData.objects[nodes[i].account][nodes[i].model].push(nodes[i].shared_id);
+			groupData.objects[nodes[i].account][nodes[i].model].shared_ids.push(nodes[i].shared_id);
 		}
 
 		return nodes.length === 0 ? null : groupData;
