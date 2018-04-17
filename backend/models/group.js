@@ -38,7 +38,7 @@ const groupSchema = Schema({
 		_id : false,
 		account: String,
 		model: String,
-		shared_ids: [Object],
+		shared_ids: [],
 		ifc_guids: [String]
 	}],
 	issue_id: Object,
@@ -104,6 +104,8 @@ groupSchema.statics.isIfcGuid = function(value) {
 
 groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 
+	console.log("findIfcGroupByUID");
+
 	// Extract a unique list of IDs only
 	let groupObjectsMap = [];
 
@@ -157,11 +159,15 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
 groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToString) {
+
+	console.log("getObjectsArrayAsSharedIDs");
+
 	const sharedIdObjects = [];
 	const sharedIdPromises = [];
 	const ifcObjectByAccount = {};
 
 	for (let i = 0; i < this.objects.length; i++) {
+
 		if (Group.isIfcGuid(this.objects[i].ifc_guid)) {
 			const namespace = this.objects[i].account + "__" + this.objects[i].model;
 			if(!ifcObjectByAccount[namespace]) {
@@ -196,11 +202,14 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 	}
 
 	return Promise.all(sharedIdPromises).then(() => { 
-		return sharedIdObjects; 
+		//return sharedIdObjects;
+		return this.objects;
 	});
 }
 
 groupSchema.statics.findByUID = function(dbCol, uid){
+
+	console.log("findByUID");
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -219,14 +228,20 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 
+	console.log("findByUIDSerialised");
+
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
+
+			console.log("findByUIDSerialised 2");
 
 			if (!group) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
 			return group.getObjectsArrayAsSharedIDs(true).then((sharedIdObjects) => {
+
+				console.log("findByUIDSerialised 3");
 				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
 				returnGroup.objects = sharedIdObjects;
 				return returnGroup;
@@ -235,6 +250,8 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 };
 
 groupSchema.statics.listGroups = function(dbCol, queryParams){
+
+	console.log("listGroups");
 	const query = {};
 
 	// If we want groups that aren't from issues
@@ -271,77 +288,80 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
 groupSchema.methods.updateAttrs = function(dbCol, data){
 
+	console.log("updateAttrs");
+
 	const ifcGuidPromises = [];
 	const sharedIdsByAccount = {};	
-	const sharedIDSets = new Set();
 	let modifiedObjectList = null;
 	if (data.objects) {
 		modifiedObjectList = [];
-		for (let i = 0; i < data.objects.length; i++) {
-			const obj = data.objects[i];
+		for (let account in data.objects) {
+			for (let model in data.objects[account]) {
+				const sharedIdsSet = new Set();
+				const ifcGuidsSet = new Set();
 
-			if (obj.shared_id) {
-				const ns = obj.account + "__" + obj.model;
-				if ("[object String]" === Object.prototype.toString.call(obj.shared_id)) {
-					obj.shared_id = utils.stringToUUID(obj.shared_id);
-				}
-				sharedIDSets.add(utils.uuidToString(obj.shared_id));
+				let sharedIds = data.objects[account][model].shared_ids ? data.objects[account][model].shared_ids : [];
 				
-				if(!sharedIdsByAccount[ns]) {
-					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
-				}
-				sharedIdsByAccount[ns].sharedIDArr.push(obj.shared_id);
-				sharedIdsByAccount[ns].org.push(obj);
-				
-			}
-			else {
-				modifiedObjectList.push(obj);
-			}
-		}
+				for (let i = 0; i < sharedIds.length; i++) {
+					if ("[object String]" === Object.prototype.toString.call(sharedIds[i])) {
+						sharedIds[i] = utils.stringToUUID(sharedIds[i]);
+					}
 
-		for (let namespace in sharedIdsByAccount) {
-			const nsSplitArr = namespace.split("__");
-			const account = nsSplitArr[0];
-			const model = nsSplitArr[1];
-			ifcGuidPromises.push(
-				uuidsToIfcGuids(account, model, sharedIdsByAccount[namespace].sharedIDArr).then(ifcGuids => {
-					if (ifcGuids && ifcGuids.length > 0) {
-						for (let i = 0; i < ifcGuids.length; i++) {
-							modifiedObjectList.push({account, model, ifc_guid: ifcGuids[i].metadata["IFC GUID"]});
-							for(let j = 0; j < ifcGuids[i].parents.length; j++) {
-								sharedIDSets.delete(utils.uuidToString(ifcGuids[i].parents[j]));		
+					sharedIdsSet.add(utils.uuidToString(sharedIds[i]));
+				}
+
+				if (data.objects[account][model].ifc_guids) {
+					data.objects[account][model].ifc_guids.forEach(ifcGuid => {
+						ifcGuidsSet.add(ifcGuid);
+					});
+				}
+
+				ifcGuidPromises.push(
+					uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
+						if (ifcGuids && ifcGuids.length > 0) {
+							for (let i = 0; i < ifcGuids.length; i++) {
+								ifcGuidsSet.add(ifcGuids[i].metadata["IFC GUID"]);
+
+								for (let j = 0; j < ifcGuids[i].parents.length; j++) {
+									sharedIdsSet.delete(utils.uuidToString(ifcGuids[i].parents[j]));
+								}
 							}
 						}
 
-						//if sharedIDSets.size > 0 , it means there are sharedIDs with no IFC GUIDs
-						sharedIDSets.forEach((sharedIdString) => {
-							const sharedId = utils.stringToUUID(sharedIdString);
-							modifiedObjectList.push({
-								account,
-								model,
-								shared_id: sharedId
-							});
-						});
-					}
-					else {
-						//this isn't a IFC GUID model.
-						modifiedObjectList = modifiedObjectList.concat(sharedIdsByAccount[namespace].org);
-					}
-					
-				})
-			);
-		}
+						const convertedObjectsResponse = {
+							account,
+							model
+						};
 
+						if (sharedIdsSet.size > 0) {
+							convertedObjectsResponse.shared_ids = [];
+							sharedIdsSet.forEach(id => {
+								convertedObjectsResponse.shared_ids.push(id);
+							});
+						}
+
+						if (ifcGuidsSet.size > 0) {
+							convertedObjectsResponse.ifc_guids = [];
+							ifcGuidsSet.forEach(id => {
+								convertedObjectsResponse.ifc_guids.push(id);
+							});
+						}
+
+						return convertedObjectsResponse;
+					})
+				);
+			}
+		}
 	}
 
-	return Promise.all(ifcGuidPromises).then(() => {
+	return Promise.all(ifcGuidPromises).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
 		
 		fieldsCanBeUpdated.forEach((key) => {
-			if(data[key]) {
-				if(key === "objects") {
-					toUpdate.objects = modifiedObjectList;
+			if (data[key]) {
+				if (key === "objects") {
+					toUpdate.objects = convertedObjects;
 				}
 				else {
 					toUpdate[key] = data[key];
@@ -378,6 +398,8 @@ groupSchema.statics.createGroup = function(dbCol, data){
 };
 
 groupSchema.methods.clean = function(){
+
+	console.log("clean");
 
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
