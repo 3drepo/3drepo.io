@@ -888,8 +888,21 @@ class IssueController implements ng.IController {
 		const groupData = {
 			name: this.issueData.name,
 			color: [255, 0, 0],
-			objects: nodes,
+			objects: {},
 		};
+
+		for (let i = 0; nodes && i < nodes.length; i++) {
+			if (!groupData.objects[nodes[i].account]) {
+				groupData.objects[nodes[i].account] = {};
+			}
+
+			if (!groupData.objects[nodes[i].account][nodes[i].model]) {
+				groupData.objects[nodes[i].account][nodes[i].model] = [];
+			}
+
+			groupData.objects[nodes[i].account][nodes[i].model].push(nodes[i].shared_id);
+		}
+
 		return nodes.length === 0 ? null : groupData;
 	}
 
@@ -1048,10 +1061,10 @@ class IssueController implements ng.IController {
 			const promises = [];
 
 			if (highlightedGroupData) {
-			promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
-				.then((highlightedGroupResponse) => {
-					this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-				}));
+				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
+					.then((highlightedGroupResponse) => {
+						this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+					}));
 			}
 
 			if (hiddenGroupData) {
