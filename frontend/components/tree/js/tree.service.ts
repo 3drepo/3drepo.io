@@ -465,7 +465,9 @@ export class TreeService {
 	 * Show the first set of children using the expand function but deselect the child used for this.
 	 */
 	public expandFirstNode() {
-		this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
+		if (this.nodesToShow.length > 0) {
+			this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
+		}
 	}
 
 	/**
@@ -733,12 +735,16 @@ export class TreeService {
 
 		if (!noHighlight) {
 
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
+			return this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
 				this.selectedIndex = selectedIndex;
+				return selectedIndex;
 			});
-		} else {
-			this.selectedIndex = selectedIndex;
+
 		}
+
+		this.selectedIndex = selectedIndex;
+		return Promise.resolve(selectedIndex);
+
 	}
 
 	/**
@@ -957,7 +963,7 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node) {
 
-		this.ready.promise.then(() => {
+		return this.ready.promise.then(() => {
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
@@ -1367,12 +1373,13 @@ export class TreeService {
 
 				if (nodes && nodes.length) {
 
-					this.selectNodes(nodes, true, undefined, true);
+					const selectedIndex = this.selectNodes(nodes, true, undefined, true);
 
 					const lastNodeId = nodes[nodes.length - 1]._id;
 					const lastNodePath = this.getPath(lastNodeId);
 
 					this.expandToSelection(lastNodePath, 0, true, true);
+					return selectedIndex;
 				}
 
 			})

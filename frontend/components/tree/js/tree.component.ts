@@ -108,9 +108,11 @@ class TreeController implements ng.IController {
 							console.error("Couldn't find the object path");
 						} else if (this.showTree) {
 
-							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
+							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode())
+								.then((selectedIndex) => {
+									this.updateTopIndex(selectedIndex);
+								});
 							this.TreeService.updateModelVisibility(this.allNodes[0]);
-							this.resize();
 
 						} else {
 							const nodes = [this.TreeService.getNodeById(objectID)];
@@ -198,8 +200,7 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.TreeService.selectedIndex,
 			(selectedIndex) => {
 				if (selectedIndex !== undefined) {
-					this.setContentHeight(this.fetchNodesToShow());
-					this.topIndex = selectedIndex;
+					this.updateTopIndex(selectedIndex);
 				}
 			});
 
@@ -242,7 +243,7 @@ class TreeController implements ng.IController {
 	}
 
 	public resize() {
-		this.$timeout().then(() => {
+		return this.$timeout().then(() => {
 			angular.element((window as any).window).triggerHandler("resize");
 		});
 	}
@@ -390,6 +391,15 @@ class TreeController implements ng.IController {
 		);
 	}
 
+	public updateTopIndex(selectedIndex) {
+		this.setContentHeight(this.fetchNodesToShow());
+		this.$timeout(() => {
+			this.resize().then(() => {
+				this.topIndex = selectedIndex;
+			});
+		});
+	}
+
 	public filterNodeSelected($event: any, node: any) {
 
 		if (this.ignoreSelection($event, node)) {
@@ -409,7 +419,10 @@ class TreeController implements ng.IController {
 
 		if (selectedComponentNode) {
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
+			this.TreeService.selectNodes([serviceNode], multi, undefined, false)
+				.then((selectedIndex) => {
+					this.updateTopIndex(selectedIndex);
+				});
 		}
 
 	}
