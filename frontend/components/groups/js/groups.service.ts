@@ -499,12 +499,10 @@ export class GroupsService {
 
 			return this.APIService.put(groupUrl, group)
 				.then((response) => {
-					const newGroup = response.data;
-					newGroup.new = false;
-					newGroup.totalSavedMeshes = savedMeshesLength;
-					this.replaceStateGroup(newGroup);
+					group.totalSavedMeshes = savedMeshesLength;
+					this.replaceStateGroup(group);
 					this.updateSelectedGroupColor();
-					return newGroup;
+					return group;
 				});
 		});
 	}
@@ -527,13 +525,12 @@ export class GroupsService {
 
 			return this.APIService.post(groupUrl, group)
 				.then((response) => {
-					const newGroup = response.data;
-					newGroup.new = false;
-					this.state.groups.push(newGroup);
-					this.state.selectedGroup = newGroup;
+					group._id = response.data._id;
+					this.state.groups.push(group);
+					this.state.selectedGroup = group;
 					this.state.selectedGroup.totalSavedMeshes = savedMeshesLength;
 					this.updateSelectedGroupColor();
-					return newGroup;
+					return group;
 				});
 		});
 
