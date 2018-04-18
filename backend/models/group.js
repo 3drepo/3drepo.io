@@ -160,50 +160,54 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
  */
 groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToString) {
 
-	console.log("getObjectsArrayAsSharedIDs");
-
-	const sharedIdObjects = [];
 	const sharedIdPromises = [];
-	const ifcObjectByAccount = {};
 
 	for (let i = 0; i < this.objects.length; i++) {
 
-		if (Group.isIfcGuid(this.objects[i].ifc_guid)) {
-			const namespace = this.objects[i].account + "__" + this.objects[i].model;
-			if(!ifcObjectByAccount[namespace]) {
-				ifcObjectByAccount[namespace] = [];
+		const sharedIdsSet = new Set();
+
+		const sharedIdObject = {};
+		sharedIdObject.account = this.objects[i].account;
+		sharedIdObject.model = this.objects[i].model;
+
+		let ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
+
+		for (let j = 0; this.objects[i].shared_ids && j < this.objects[i].shared_ids.length; j++) {
+			let sharedId = this.objects[i].shared_ids[j];
+			if ("[object String]" !== Object.prototype.toString.call(sharedId)) {
+				sharedId = utils.uuidToString(sharedId);
 			}
-			ifcObjectByAccount[namespace].push(this.objects[i].ifc_guid);
+			sharedIdsSet.add(sharedId);
 		}
-		else {
-			if(convertSharedIDsToString) {
-				this.objects[i].shared_id = utils.uuidToString(this.objects[i].shared_id);
-			}
-			sharedIdObjects.push(this.objects[i]);
-		}
-	}
-		
-	for (let namespace in ifcObjectByAccount) {
-		const nsSplitArr = namespace.split("__");
-		const account = nsSplitArr[0];
-		const model = nsSplitArr[1];
-		if(account && model) {
-			sharedIdPromises.push(Group.ifcGuidsToUUIDs(account, model,
-				ifcObjectByAccount[namespace]).then(results => {
-				for (let i = 0; i < results.length; i++) {
-					let id = results[i].shared_id;
-					if(convertSharedIDsToString) {
-						id =  utils.uuidToString(id);
-					}
-					sharedIdObjects.push({account, model, shared_id: id});
+
+		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
+					sharedIdObject.account,
+					sharedIdObject.model,
+					ifcGuids
+					).then(sharedIdResults => {
+			for (let j = 0; j < sharedIdResults.length; j++) {
+				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+					sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
 				}
-			}));
-		}
+				sharedIdsSet.add(sharedIdResults[j].shared_id);
+			}
+
+			if (sharedIdsSet.size > 0) {
+				sharedIdObject.shared_ids = [];
+				sharedIdsSet.forEach(id => {
+					if (!convertSharedIDsToString) {
+						id = utils.stringToUUID(id);
+					}
+					sharedIdObject.shared_ids.push(id);
+				});
+			}
+
+			return sharedIdObject;
+		}));
 	}
 
-	return Promise.all(sharedIdPromises).then(() => { 
-		//return sharedIdObjects;
-		return this.objects;
+	return Promise.all(sharedIdPromises).then(sharedIdObjects => {
+		return sharedIdObjects;
 	});
 }
 
@@ -228,12 +232,8 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 
-	console.log("findByUIDSerialised");
-
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
-
-			console.log("findByUIDSerialised 2");
 
 			if (!group) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
@@ -241,7 +241,6 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 
 			return group.getObjectsArrayAsSharedIDs(true).then((sharedIdObjects) => {
 
-				console.log("findByUIDSerialised 3");
 				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
 				returnGroup.objects = sharedIdObjects;
 				return returnGroup;
@@ -288,13 +287,9 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
 groupSchema.methods.updateAttrs = function(dbCol, data){
 
-	console.log("updateAttrs");
-
 	const ifcGuidPromises = [];
-	const sharedIdsByAccount = {};	
-	let modifiedObjectList = null;
+
 	if (data.objects) {
-		modifiedObjectList = [];
 		for (let account in data.objects) {
 			for (let model in data.objects[account]) {
 				const sharedIdsSet = new Set();
@@ -336,7 +331,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 						if (sharedIdsSet.size > 0) {
 							convertedObjectsResponse.shared_ids = [];
 							sharedIdsSet.forEach(id => {
-								convertedObjectsResponse.shared_ids.push(id);
+								convertedObjectsResponse.shared_ids.push(utils.stringToUUID(id));
 							});
 						}
 
