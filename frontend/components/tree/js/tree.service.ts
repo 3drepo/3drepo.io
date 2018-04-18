@@ -1216,15 +1216,16 @@ export class TreeService {
 			const nodes = [];
 
 			for (let i = 0; i < objects.length; i++) {
-				const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
-				const node = this.getNodeById(objUid);
-				if (node) {
-					nodes.push(node);
+				for (let j = 0; j < objects[i].shared_ids.length; j++) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_ids[j]];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
 				}
 			}
 
 			return nodes;
-
 		});
 	}
 
