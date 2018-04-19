@@ -290,62 +290,63 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 	const ifcGuidPromises = [];
 
 	if (data.objects) {
-		for (let account in data.objects) {
-			for (let model in data.objects[account]) {
-				const sharedIdsSet = new Set();
-				const ifcGuidsSet = new Set();
+		for (let i = 0; i < data.objects.length; i++) {
+			const account = data.objects[i].account;
+			const model = data.objects[i].model;
 
-				let sharedIds = data.objects[account][model].shared_ids ? data.objects[account][model].shared_ids : [];
+			const sharedIdsSet = new Set();
+			const ifcGuidsSet = new Set();
+
+			let sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
 				
-				for (let i = 0; i < sharedIds.length; i++) {
-					if ("[object String]" === Object.prototype.toString.call(sharedIds[i])) {
-						sharedIds[i] = utils.stringToUUID(sharedIds[i]);
-					}
-
-					sharedIdsSet.add(utils.uuidToString(sharedIds[i]));
+			for (let j = 0; j < sharedIds.length; j++) {
+				if ("[object String]" === Object.prototype.toString.call(sharedIds[j])) {
+					sharedIds[j] = utils.stringToUUID(sharedIds[j]);
 				}
 
-				if (data.objects[account][model].ifc_guids) {
-					data.objects[account][model].ifc_guids.forEach(ifcGuid => {
-						ifcGuidsSet.add(ifcGuid);
-					});
-				}
+				sharedIdsSet.add(utils.uuidToString(sharedIds[j]));
+			}
 
-				ifcGuidPromises.push(
-					uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
-						if (ifcGuids && ifcGuids.length > 0) {
-							for (let i = 0; i < ifcGuids.length; i++) {
-								ifcGuidsSet.add(ifcGuids[i].metadata["IFC GUID"]);
+			if (data.objects[i].ifc_guids) {
+				data.objects[i].ifc_guids.forEach(ifcGuid => {
+					ifcGuidsSet.add(ifcGuid);
+				});
+			}
 
-								for (let j = 0; j < ifcGuids[i].parents.length; j++) {
-									sharedIdsSet.delete(utils.uuidToString(ifcGuids[i].parents[j]));
-								}
+			ifcGuidPromises.push(
+				uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
+					if (ifcGuids && ifcGuids.length > 0) {
+						for (let j = 0; j < ifcGuids.length; j++) {
+							ifcGuidsSet.add(ifcGuids[j].metadata["IFC GUID"]);
+
+							for (let k = 0; k < ifcGuids[j].parents.length; k++) {
+								sharedIdsSet.delete(utils.uuidToString(ifcGuids[j].parents[k]));
 							}
 						}
+					}
 
-						const convertedObjectsResponse = {
-							account,
-							model
-						};
+					const convertedObjectsResponse = {
+						account,
+						model
+					};
 
-						if (sharedIdsSet.size > 0) {
-							convertedObjectsResponse.shared_ids = [];
-							sharedIdsSet.forEach(id => {
-								convertedObjectsResponse.shared_ids.push(utils.stringToUUID(id));
-							});
-						}
+					if (sharedIdsSet.size > 0) {
+						convertedObjectsResponse.shared_ids = [];
+						sharedIdsSet.forEach(id => {
+							convertedObjectsResponse.shared_ids.push(utils.stringToUUID(id));
+						});
+					}
 
-						if (ifcGuidsSet.size > 0) {
-							convertedObjectsResponse.ifc_guids = [];
-							ifcGuidsSet.forEach(id => {
-								convertedObjectsResponse.ifc_guids.push(id);
-							});
-						}
+					if (ifcGuidsSet.size > 0) {
+						convertedObjectsResponse.ifc_guids = [];
+						ifcGuidsSet.forEach(id => {
+							convertedObjectsResponse.ifc_guids.push(id);
+						});
+					}
 
-						return convertedObjectsResponse;
-					})
-				);
-			}
+					return convertedObjectsResponse;
+				})
+			);
 		}
 	}
 
@@ -415,7 +416,11 @@ groupSchema.methods.clean = function(){
 
 groupSchema.statics.deleteGroup = function(dbCol, id){
 
-	return Group.findOneAndRemove(dbCol, { _id : utils.stringToUUID(id)}).then(group => {
+	if ("[object String]" === Object.prototype.toString.call(id)) {
+		id = utils.stringToUUID(id);
+	}
+
+	return Group.findOneAndRemove(dbCol, { _id : id}).then(group => {
 
 		if(!group){
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
