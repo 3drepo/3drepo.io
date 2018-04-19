@@ -4,12 +4,14 @@ tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 // Tree
 .virtualRepeatInfiniteScroll(ng-show="!vm.showProgress && vm.showTree")
 	md-virtual-repeat-container.vertical-container.virtual-repeat-full-height(
+		id="treeInfiniteScroll"
+		md-item-size="45"
 		md-top-index="vm.topIndex"
 		ng-show="vm.showNodes")
 
 		.treeNodes.repeated-item(id="{{item._id}}" md-virtual-repeat="item in vm.nodesToShow")
 			.treeNode(
-			style="margin-left:{{item.level * 20}}px"
+			style="margin-left:{{item.level * 15}}px"
 			ng-if="item.name"
 			layout="row"
 			layout-align="start center"

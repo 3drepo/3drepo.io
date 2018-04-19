@@ -26,7 +26,7 @@ export class IssuesService {
 		"$filter",
 
 		"ClientConfigService",
-		"EventService", 
+		"EventService",
 		"APIService",
 		"TreeService",
 		"AuthService",
@@ -48,7 +48,7 @@ export class IssuesService {
 		private $filter,
 
 		private ClientConfigService,
-		private EventService, 
+		private EventService,
 		private APIService,
 		private TreeService,
 		private AuthService,
@@ -67,7 +67,7 @@ export class IssuesService {
 		this.state = {
 			heights : {
 				infoHeight : 135,
-				issuesListItemHeight : 141
+				issuesListItemHeight : 141,
 			},
 			selectedIssue: null,
 			allIssues: [],
@@ -78,7 +78,7 @@ export class IssuesService {
 				showClosed: false,
 				sortOldestFirst : false,
 				excludeRoles: []
-			}
+			},
 		};
 	}
 
@@ -89,26 +89,26 @@ export class IssuesService {
 			status: "open",
 			assigned_roles: [],
 			topic_type: "for_information",
-			viewpoint: {}
+			viewpoint: {},
 		};
 	}
 
 	public getDisplayIssue() {
-		if (this.state.displayIssue && this.state.allIssues.length > 0){
+		if (this.state.displayIssue && this.state.allIssues.length > 0) {
 
-			let issueToDisplay = this.state.allIssues.find((issue) => {
+			const issueToDisplay = this.state.allIssues.find((issue) => {
 				return issue._id === this.state.displayIssue;
 			});
-			
+
 			return issueToDisplay;
-				
+
 		}
 		return false;
 	}
 
 	// Helper  for searching strings
 	public stringSearch(superString, subString) {
-		if(!superString) {
+		if (!superString) {
 			return false;
 		}
 
@@ -131,7 +131,7 @@ export class IssuesService {
 					return b.created - a.created;
 				});
 			}
-			
+
 			// TODO: There is certainly a better way of doing this, but I don't want to
 			// dig into it right before release
 
@@ -139,7 +139,7 @@ export class IssuesService {
 			const notEmpty = angular.isDefined(filterText) && filterText !== "";
 			if (notEmpty) {
 				this.state.issuesToShow = this.filteredIssues(filterText);
-			} 
+			}
 
 			// Closed
 			for (let i = this.state.issuesToShow.length - 1; i >= 0; i--) {
@@ -153,7 +153,6 @@ export class IssuesService {
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
 			});
-	
 
 			// Sub models
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
@@ -164,7 +163,7 @@ export class IssuesService {
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
 				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 			});
-		
+
 		}
 
 	}
@@ -172,10 +171,10 @@ export class IssuesService {
 	public filteredIssues(filterText: string) {
 		return (this.$filter("filter")(
 			this.state.issuesToShow,
-			(issue) => { 
-				return this.handleIssueFilter(issue, filterText); 
-			}
-			
+			(issue) => {
+				return this.handleIssueFilter(issue, filterText);
+			},
+
 		));
 	}
 
@@ -186,7 +185,7 @@ export class IssuesService {
 		// Exit the function as soon as we found a match.
 
 		// Search the title, timestamp, type and owner
-		if( this.stringSearch(issue.title, filterText) ||
+		if ( this.stringSearch(issue.title, filterText) ||
 				this.stringSearch(issue.timeStamp, filterText) ||
 			this.stringSearch(issue.owner, filterText) ||
 			this.stringSearch(issue.topic_type, filterText)) {
@@ -195,17 +194,17 @@ export class IssuesService {
 
 		// Search the list of assigned issues
 		if (issue.hasOwnProperty("assigned_roles")) {
-			for(let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
-				if(this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
+			for (let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
+				if (this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
 					return true;
 				}
 			}
 		}
-		
+
 		// Search the comments
 		if (issue.hasOwnProperty("comments")) {
-			for(let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
-				if (!issue.comments[commentIdx].action &&  //skip any action comments (i.e system messages)
+			for (let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
+				if (!issue.comments[commentIdx].action &&  // skip any action comments (i.e system messages)
 					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
 					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
 					return true;
@@ -258,7 +257,7 @@ export class IssuesService {
 					pickedPos: issue.position,
 					pickedNorm: issue.norm,
 					colours: pinColor,
-					viewpoint: issue.viewpoint
+					viewpoint: issue.viewpoint,
 				});
 
 			} else {
@@ -305,9 +304,9 @@ export class IssuesService {
 
 		this.state.allIssues.forEach((oldIssue, i) => {
 			const matches = oldIssue._id === issue._id;
-			if(matches) {
+			if (matches) {
 
-				if(issue.status === "closed") {
+				if (issue.status === "closed") {
 
 					this.state.allIssues[i].justClosed = true;
 
@@ -665,13 +664,13 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.selectedIndex = undefined;
+		this.TreeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
+		this.$timeout(() => {
 		this.TreeService.highlightsBySharedId(objects)
 			.then(() => {
-				this.$timeout(() => {
-					angular.element((window as any)).triggerHandler("resize");
-				}); // Force a digest cycle
+				angular.element((window as any)).triggerHandler("resize");
 			});
+		});
 	}
 
 	public handleHidden(objects) {
