@@ -219,26 +219,9 @@ class TreeController implements ng.IController {
 	 * @param {Array} nodesToShow
 	 */
 	public setContentHeight(nodesToShow) {
-		let height = 0;
-		let maxStringLengthForLevel = 0;
-		const lineHeight = 18;
-		const levelOffset = 2;
-		const nodeMinHeight = 42;
-		const maxStringLength = 35;
-
-		for (let i = 0; i < nodesToShow.length ; i ++) {
-			maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
-			if (nodesToShow[i].hasOwnProperty("name")) {
-				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
-			} else {
-				height += nodeMinHeight + lineHeight;
-			}
-		}
-
-		if (height === 0) {
-			height = 70;
-		}
-		this.onContentHeightRequest({height});
+		const nodeMinHeight = 45;
+		const height = nodesToShow.length * nodeMinHeight + 5;
+		this.onContentHeightRequest({height });
 		this.resize();
 	}
 
@@ -392,12 +375,27 @@ class TreeController implements ng.IController {
 	}
 
 	public updateTopIndex(selectedIndex) {
-		this.setContentHeight(this.fetchNodesToShow());
-		this.$timeout(() => {
-			this.resize().then(() => {
-				this.topIndex = selectedIndex;
-			});
+
+		// We get a weird whitespace bug if the
+		// new topIndex (the element we want to place
+		// at the top of the infinite scroll) is greater
+		// the maximum top index that can be set
+
+		const nodesToShow = this.fetchNodesToShow();
+		const height = document.getElementById("treeInfiniteScroll").clientHeight;
+		const maxInTree = Math.ceil(height / 45);
+		const maximumTopIndex = nodesToShow.length - maxInTree;
+
+		if (selectedIndex > maximumTopIndex) {
+			selectedIndex = maximumTopIndex;
+		}
+
+		this.setContentHeight(nodesToShow);
+
+		this.resize().then(() => {
+			this.topIndex = selectedIndex;
 		});
+
 	}
 
 	public filterNodeSelected($event: any, node: any) {

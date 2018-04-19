@@ -35,7 +35,12 @@ tree .treeNodes p {
 
 tree .treeNode {
   outline: none;
+  height: 45px;
+  max-height: 45px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
+
 tree .treeNode:hover {
   cursor: pointer;
   border-top-left-radius: 2px;
