@@ -69,7 +69,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 	const model = obj.model;
 	const uid =("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
 	const parent = utils.stringToUUID(uid);
-	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
+
 	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let ifcGuids = [];
@@ -92,8 +92,6 @@ function uuidsToIfcGuids(account, model, ids) {
 		});
 	});
 }
-
-
 
 /**
  * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
@@ -209,7 +207,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 	return Promise.all(sharedIdPromises).then(sharedIdObjects => {
 		return sharedIdObjects;
 	});
-}
+};
 
 groupSchema.statics.findByUID = function(dbCol, uid){
 
@@ -250,7 +248,6 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 
 groupSchema.statics.listGroups = function(dbCol, queryParams){
 
-	console.log("listGroups");
 	const query = {};
 
 	// If we want groups that aren't from issues
@@ -262,14 +259,15 @@ groupSchema.statics.listGroups = function(dbCol, queryParams){
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				result.getObjectsArrayAsSharedIDs(false).then(sharedIdObjects => {
+				result.getObjectsArrayAsSharedIDs(true).then(sharedIdObjects => {
 					result.objects = sharedIdObjects;
+					return result;
 				})
 			);
 		});
 
-		return Promise.all(sharedIdConversionPromises).then(() => {
-			return results;
+		return Promise.all(sharedIdConversionPromises).then((sharedIdGroups) => {
+			return sharedIdGroups;
 		});
 	});
 };
@@ -365,15 +363,13 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 			}
 		});
 
-		
 		const db = require("../db/db");
-		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(dbCol => {
-			return dbCol.update({_id: this._id}, {$set: toUpdate}).then( ()=>{
+		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
+			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
 				return {_id: utils.uuidToString(this._id)};
 			}); 
 		});
 	});
-
 };
 
 groupSchema.statics.createGroup = function(dbCol, data){
@@ -403,14 +399,26 @@ groupSchema.methods.clean = function(){
 	if (cleaned.objects) {
 		for (let i = 0; i < cleaned.objects.length; i++) {
 			const object = cleaned.objects[i];
-			if (object.shared_id &&
-				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-				object.shared_id = utils.uuidToString(object.shared_id);
+
+			if (object.shared_id) {
+				if ("[object String]" !== Object.prototype.toString.call(object.shared_id)) {
+					object.shared_id = utils.uuidToString(object.shared_id);
+				}
+			}
+			else {
+				delete object.shared_id;
+			}
+
+			if (!object.ifc_guids) {
+				delete object.ifc_guids;
+			}
+
+			if (!object.shared_ids) {
+				delete object.shared_ids;
 			}
 		}
 	}
 	return cleaned;
-
 };
 
 

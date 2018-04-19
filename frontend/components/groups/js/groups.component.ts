@@ -139,8 +139,7 @@ class GroupsController implements ng.IController {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
 
-			this.TreeService.getCurrentMeshHighlightsFromViewer().then((objects) => {
-				this.selectedObjectsLen = objects.highlightedNodes.length;
+			this.GroupsService.updateSelectedObjectsLen().then(() => {
 				this.changed = true;
 			});
 
@@ -164,7 +163,7 @@ class GroupsController implements ng.IController {
 
 	public handleGroupError(method: string) {
 		const content = `We tried to ${method} your issue but it failed.
-			If this continues please message support@3drepo.io.`;
+			If this continues please message support@3drepo.org.`;
 		const escapable = true;
 		this.DialogService.text(`Group Error`, content, escapable);
 	}
@@ -188,10 +187,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public deleteGroup(group: any) {
-		if (
-			this.selectedGroup &&
-			this.selectedGroup._id
-		) {
+		if (this.selectedGroup && this.selectedGroup._id) {
 			this.GroupsService.deleteGroup(
 				this.teamspace,
 				this.model,
@@ -220,7 +216,7 @@ class GroupsController implements ng.IController {
 			const presentConfirmation = this.selectedObjectsLen < threshold;
 
 			if (presentConfirmation) {
-				this.confirmUpdateDialog(this.selectedGroup.totalSavedMeshes,  this.selectedObjectsLen);
+				this.confirmUpdateDialog(this.selectedGroup.totalSavedMeshes, this.selectedObjectsLen);
 			} else {
 				this.updateGroup();
 			}
