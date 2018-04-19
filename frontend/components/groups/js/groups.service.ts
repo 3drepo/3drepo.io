@@ -393,7 +393,7 @@ export class GroupsService {
 		return this.getTotalMeshes().then((totalMeshes) => {
 			this.state.selectedObjectsLen = totalMeshes;
 			return totalMeshes;
-		}
+		});
 	}
 
 	public setTotalSavedMeshes() {
