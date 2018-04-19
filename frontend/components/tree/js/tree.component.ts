@@ -53,6 +53,7 @@ class TreeController implements ng.IController {
 	private currentSelectedIndex;
 	private latestSearch: string;
 	private showFilter: boolean;
+	private nodeHeight = 45;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -219,8 +220,7 @@ class TreeController implements ng.IController {
 	 * @param {Array} nodesToShow
 	 */
 	public setContentHeight(nodesToShow) {
-		const nodeMinHeight = 45;
-		const height = nodesToShow.length * nodeMinHeight + 5;
+		const height = nodesToShow.length * this.nodeHeight + 5;
 		this.onContentHeightRequest({height });
 		this.resize();
 	}
@@ -383,7 +383,7 @@ class TreeController implements ng.IController {
 
 		const nodesToShow = this.fetchNodesToShow();
 		const height = document.getElementById("treeInfiniteScroll").clientHeight;
-		const maxInTree = Math.ceil(height / 45);
+		const maxInTree = Math.ceil(height / this.nodeHeight);
 		const maximumTopIndex = nodesToShow.length - maxInTree;
 
 		if (selectedIndex > maximumTopIndex) {
