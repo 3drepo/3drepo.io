@@ -53,6 +53,7 @@ class TreeController implements ng.IController {
 	private currentSelectedIndex;
 	private latestSearch: string;
 	private showFilter: boolean;
+	private nodeHeight = 45;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -108,9 +109,11 @@ class TreeController implements ng.IController {
 							console.error("Couldn't find the object path");
 						} else if (this.showTree) {
 
-							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode());
+							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode())
+								.then((selectedIndex) => {
+									this.updateTopIndex(selectedIndex);
+								});
 							this.TreeService.updateModelVisibility(this.allNodes[0]);
-							angular.element((window as any).window).triggerHandler("resize");
 
 						} else {
 							const nodes = [this.TreeService.getNodeById(objectID)];
@@ -198,13 +201,7 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.TreeService.selectedIndex,
 			(selectedIndex) => {
 				if (selectedIndex !== undefined) {
-
-					this.setContentHeight(this.fetchNodesToShow());
-
-					this.$timeout(() => {}).then(() => {
-						this.topIndex = selectedIndex;
-					});
-
+					this.updateTopIndex(selectedIndex);
 				}
 			});
 
@@ -223,28 +220,15 @@ class TreeController implements ng.IController {
 	 * @param {Array} nodesToShow
 	 */
 	public setContentHeight(nodesToShow) {
-		let height = 0;
-		let maxStringLengthForLevel = 0;
-		const lineHeight = 18;
-		const levelOffset = 2;
-		const nodeMinHeight = 42;
-		const maxStringLength = 35;
+		const height = nodesToShow.length * this.nodeHeight + 5;
+		this.onContentHeightRequest({height });
+		this.resize();
+	}
 
-		for (let i = 0; i < nodesToShow.length ; i ++) {
-			maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
-			if (nodesToShow[i].hasOwnProperty("name")) {
-				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
-			} else {
-				height += nodeMinHeight + lineHeight;
-			}
-		}
-
-		if (height === 0) {
-			height = 70;
-		}
-		this.onContentHeightRequest({height});
-		angular.element((window as any).window).triggerHandler("resize");
-
+	public resize() {
+		return this.$timeout().then(() => {
+			angular.element((window as any).window).triggerHandler("resize");
+		});
 	}
 
 	/**
@@ -390,6 +374,30 @@ class TreeController implements ng.IController {
 		);
 	}
 
+	public updateTopIndex(selectedIndex) {
+
+		// We get a weird whitespace bug if the
+		// new topIndex (the element we want to place
+		// at the top of the infinite scroll) is greater
+		// the maximum top index that can be set
+
+		const nodesToShow = this.fetchNodesToShow();
+		const height = document.getElementById("treeInfiniteScroll").clientHeight;
+		const maxInTree = Math.ceil(height / this.nodeHeight);
+		const maximumTopIndex = nodesToShow.length - maxInTree;
+
+		if (selectedIndex > maximumTopIndex) {
+			selectedIndex = maximumTopIndex;
+		}
+
+		this.setContentHeight(nodesToShow);
+
+		this.resize().then(() => {
+			this.topIndex = selectedIndex;
+		});
+
+	}
+
 	public filterNodeSelected($event: any, node: any) {
 
 		if (this.ignoreSelection($event, node)) {
@@ -409,7 +417,10 @@ class TreeController implements ng.IController {
 
 		if (selectedComponentNode) {
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
+			this.TreeService.selectNodes([serviceNode], multi, undefined, false)
+				.then((selectedIndex) => {
+					this.updateTopIndex(selectedIndex);
+				});
 		}
 
 	}

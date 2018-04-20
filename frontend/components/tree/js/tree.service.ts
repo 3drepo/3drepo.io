@@ -465,7 +465,9 @@ export class TreeService {
 	 * Show the first set of children using the expand function but deselect the child used for this.
 	 */
 	public expandFirstNode() {
-		this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
+		if (this.nodesToShow.length > 0) {
+			this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
+		}
 	}
 
 	/**
@@ -676,7 +678,6 @@ export class TreeService {
 			for (let i = 0; i < numChildren; i++) {
 
 				const childNode = nodeToExpand.children[i];
-				childNode.expanded = false;
 				childNode.level = nodeToExpand.level + 1;
 
 				if (childNode && childNode.hasOwnProperty("name")) {
@@ -687,7 +688,6 @@ export class TreeService {
 				}
 
 			}
-
 			nodeToExpand.expanded = true;
 		}
 
@@ -709,8 +709,19 @@ export class TreeService {
 
 		for (let i = 0; i < path.length; i++) {
 			const node = this.getNodeById(path[i]);
+			const nextNode = this.getNodeById(path[i + 1]);
 
 			this.expandTreeNode(node);
+
+			// Collapse all the children that aren't next
+			// down the expansion path
+			if (node.children) {
+				node.children.forEach((n) => {
+					if (n !== nextNode || nextNode === undefined) {
+						this.collapseTreeNode(n);
+					}
+				});
+			}
 
 			// If it's the last node in the path
 			// scroll to it
@@ -729,12 +740,16 @@ export class TreeService {
 
 		if (!noHighlight) {
 
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
+			return this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
 				this.selectedIndex = selectedIndex;
+				return selectedIndex;
 			});
-		} else {
-			this.selectedIndex = selectedIndex;
+
 		}
+
+		this.selectedIndex = selectedIndex;
+		return Promise.resolve(selectedIndex);
+
 	}
 
 	/**
@@ -953,9 +968,13 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node) {
 
+<<<<<<< HEAD
 		if (node === undefined) { return; }
 
 		this.ready.promise.then(() => {
+=======
+		return this.ready.promise.then(() => {
+>>>>>>> 3d41c7ef86ac85306309e4b3ca63bac6024d315a
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
@@ -1365,12 +1384,13 @@ export class TreeService {
 
 				if (nodes && nodes.length) {
 
-					this.selectNodes(nodes, true, undefined, true);
+					const selectedIndex = this.selectNodes(nodes, true, undefined, true);
 
 					const lastNodeId = nodes[nodes.length - 1]._id;
 					const lastNodePath = this.getPath(lastNodeId);
 
 					this.expandToSelection(lastNodePath, 0, true, true);
+					return selectedIndex;
 				}
 
 			})

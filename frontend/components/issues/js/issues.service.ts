@@ -26,7 +26,7 @@ export class IssuesService {
 		"$filter",
 
 		"ClientConfigService",
-		"EventService", 
+		"EventService",
 		"APIService",
 		"TreeService",
 		"AuthService",
@@ -48,7 +48,7 @@ export class IssuesService {
 		private $filter,
 
 		private ClientConfigService,
-		private EventService, 
+		private EventService,
 		private APIService,
 		private TreeService,
 		private AuthService,
@@ -67,7 +67,7 @@ export class IssuesService {
 		this.state = {
 			heights : {
 				infoHeight : 135,
-				issuesListItemHeight : 141
+				issuesListItemHeight : 141,
 			},
 			selectedIssue: null,
 			allIssues: [],
@@ -78,7 +78,7 @@ export class IssuesService {
 				showClosed: false,
 				sortOldestFirst : false,
 				excludeRoles: []
-			}
+			},
 		};
 	}
 
@@ -89,7 +89,7 @@ export class IssuesService {
 			status: "open",
 			assigned_roles: [],
 			topic_type: "for_information",
-			viewpoint: {}
+			viewpoint: {},
 		};
 	}
 
@@ -108,7 +108,7 @@ export class IssuesService {
 
 	// Helper  for searching strings
 	public stringSearch(superString, subString) {
-		if(!superString) {
+		if (!superString) {
 			return false;
 		}
 
@@ -131,7 +131,7 @@ export class IssuesService {
 					return b.created - a.created;
 				});
 			}
-			
+
 			// TODO: There is certainly a better way of doing this, but I don't want to
 			// dig into it right before release
 
@@ -139,7 +139,7 @@ export class IssuesService {
 			const notEmpty = angular.isDefined(filterText) && filterText !== "";
 			if (notEmpty) {
 				this.state.issuesToShow = this.filteredIssues(filterText);
-			} 
+			}
 
 			// Closed
 			for (let i = this.state.issuesToShow.length - 1; i >= 0; i--) {
@@ -666,13 +666,13 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.selectedIndex = undefined;
+		this.TreeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
+		this.$timeout(() => {
 		this.TreeService.highlightsBySharedId(objects)
 			.then(() => {
-				this.$timeout(() => {
-					angular.element((window as any)).triggerHandler("resize");
-				}); // Force a digest cycle
+				angular.element((window as any)).triggerHandler("resize");
 			});
+		});
 	}
 
 	public handleHidden(objects) {
