@@ -968,13 +968,7 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node) {
 
-<<<<<<< HEAD
-		if (node === undefined) { return; }
-
-		this.ready.promise.then(() => {
-=======
 		return this.ready.promise.then(() => {
->>>>>>> 3d41c7ef86ac85306309e4b3ca63bac6024d315a
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
