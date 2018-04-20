@@ -547,7 +547,9 @@ export class GroupsService {
 	}
 
 	public selectNextGroup() {
-		this.selectGroup(this.state.groups[0]);
+		if (this.state.groups.length) {
+			this.selectGroup(this.state.groups[0]);
+		}
 	}
 
 	/**
@@ -560,7 +562,9 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
 		return this.APIService.delete(groupUrl)
 			.then((response) => {
-				this.TreeService.deselectNodes(deleteGroup.objects);
+				this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
+					this.TreeService.deselectNodes(nodes);
+				});
 				this.removeColorOverride(deleteGroup._id);
 				this.deleteStateGroup(deleteGroup);
 				return response;
