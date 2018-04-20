@@ -510,6 +510,7 @@ export class GroupsService {
 					group.totalSavedMeshes = savedMeshesLength;
 					this.replaceStateGroup(group);
 					this.updateSelectedGroupColor();
+					this.selectGroup(group);
 					return group;
 				});
 		});
@@ -538,6 +539,7 @@ export class GroupsService {
 					this.state.selectedGroup = group;
 					this.state.selectedGroup.totalSavedMeshes = savedMeshesLength;
 					this.updateSelectedGroupColor();
+					this.selectGroup(group);
 					return group;
 				});
 		});
@@ -554,10 +556,12 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
 		return this.APIService.delete(groupUrl)
 			.then((response) => {
-				this.TreeService.deselectNodes(deleteGroup.objects);
-				this.removeColorOverride(deleteGroup._id);
-				this.deleteStateGroup(deleteGroup);
-				return response;
+				return this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
+					this.TreeService.deselectNodes(nodes);
+					this.removeColorOverride(deleteGroup._id);
+					this.deleteStateGroup(deleteGroup);
+					return response;
+				});
 			});
 	}
 
