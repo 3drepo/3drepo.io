@@ -126,7 +126,7 @@ class TreeController implements ng.IController {
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
 				this.GroupsService.clearSelectionHighlights();
-				this.nodes.forEach((n) => n.selected = false);
+				this.nodes.forEach((n) => n.selected = "notSelected");
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
 				this.allNodes = this.TreeService.getAllNodes();
@@ -365,7 +365,6 @@ class TreeController implements ng.IController {
 		if (this.ignoreSelection($event, node)) {
 			return;
 		}
-
 		return this.TreeService.selectNodes(
 			[node],
 			this.MultiSelectService.isMultiMode(),
@@ -407,10 +406,10 @@ class TreeController implements ng.IController {
 		const multi = this.MultiSelectService.isMultiMode();
 
 		if (!multi) {
-			this.nodes.forEach((n) => n.selected = false);
-			this.nodes[node.index].selected = true;
+			this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
 		} else {
-			this.nodes[node.index].selected = !this.nodes[node.index].selected;
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
 		}
 
 		const selectedComponentNode = this.nodes[node.index];

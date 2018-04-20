@@ -52,6 +52,7 @@ export class TreeService {
 	private ready;
 	private idToPath;
 	private idToObjRef;
+	private SELECTION_STATES;
 
 	constructor(
 		private $q: ng.IQService,
@@ -83,6 +84,13 @@ export class TreeService {
 		this.idToObjRef = {};
 		this.highlightMapUpdateTime = Date.now();
 		this.highlightSelectedViewerObject = true;
+
+		this.SELECTION_STATES = {
+			parentOfUnselected : "parentOfUnselected",
+			selected : "selected",
+			unselected : "unselected",
+		};
+
 	}
 
 	public onReady() {
@@ -457,7 +465,7 @@ export class TreeService {
 		this.nodesToShow = nodes;
 		this.nodesToShow[0].level = 0;
 		this.nodesToShow[0].expanded = false;
-		this.nodesToShow[0].selected = false;
+		this.nodesToShow[0].selected = this.SELECTION_STATES.unselected;
 		this.nodesToShow[0].hasChildren = this.nodesToShow[0].children;
 	}
 
@@ -1015,22 +1023,119 @@ export class TreeService {
 		this.ViewerService.clearHighlights();
 		this.DocsService.closeDocs();
 
-		if (this.currentSelectedNodes) {
-			this.traverseNodesAndSetSelected(this.currentSelectedNodes, false);
+		if (this.currentSelectedNodes.length) {
+			while (this.currentSelectedNodes.length) {
+				const currentNode = this.currentSelectedNodes.pop();
+				currentNode.selected = this.SELECTION_STATES.unselected;
+				this.setParentNodes(currentNode, this.SELECTION_STATES.unselected);
+				if (currentNode.children && currentNode.children.length) {
+					this.currentSelectedNodes = this.currentSelectedNodes.concat(currentNode.children);
+				}
+			}
 		}
 
 		this.currentSelectedNodes = [];
 	}
 
-	public traverseNodesAndSetSelected(nodes, selected) {
+	// public allSiblingsAreSelectionState(node, state) {
+
+	// 	const path = this.getPath(node._id);
+
+	// 	// console.log("path", path);
+	// 	const parentNodeId = path[path.length - 2] || path[path.length - 1]; // If no parent
+	// 	const parentNode = this.getNodeById(parentNodeId);
+	// 	// console.log("path - parentNode", parentNode);
+
+	// 	let allUnselected = true;
+	// 	let allSelected = true;
+
+	// 	parentNode.children.forEach((n) => {
+	// 		allUnselected = allUnselected && n.selected === "unselected";
+	// 		allSelected = allSelected && n.selected === "selected";
+	// 	});
+
+	// 	return { allUnselected, allSelected };
+	// }
+
+	public traverseNodesAndSetSelected(nodes, select) {
+
 		nodes = nodes.concat(); // make a copy
+		const nodesForAfter = nodes.concat();
 		let currentNode;
+
 		while (nodes.length) {
 			currentNode = nodes.pop();
-			currentNode.selected = selected;
-			if (currentNode.children && currentNode.children.length) {
-				nodes = nodes.concat(currentNode.children);
+
+			const nodeIndex = this.currentSelectedNodes.indexOf(currentNode);
+			const notParentOfUnselected = currentNode.selected !== this.SELECTION_STATES.parentOfUnselected;
+
+			if (select && notParentOfUnselected) {
+				if (nodeIndex === -1) {
+					this.currentSelectedNodes.push(currentNode);
+				}
+			} else {
+				if (nodeIndex > -1) {
+					this.currentSelectedNodes.splice(nodeIndex, 1);
+				}
 			}
+
+			if (currentNode.toggleState !== "invisible") {
+
+				if (currentNode.toggleState !== "parentOfInvisible" && select) {
+					currentNode.selected = this.SELECTION_STATES.selected;
+				} else if (!select) {
+					currentNode.selected = this.SELECTION_STATES.unselected;
+				} else {
+					currentNode.selected = this.SELECTION_STATES.parentOfUnselected;
+				}
+
+				if (currentNode.children && currentNode.children.length) {
+					nodes = nodes.concat(currentNode.children);
+				}
+			}
+
+		}
+
+		nodesForAfter.forEach((node) => {
+			this.setParentNodes(node);
+		});
+
+	}
+
+	public setParentNodes(currentNode, forceState?: string) {
+		const parentPath = this.getPath(currentNode._id);
+		parentPath.pop(); // Remove the node itself
+
+		// console.log(parentPath);
+
+		for (let i = parentPath.length - 1; i >= 0; i--) {
+			const parentNode = this.getNodeById(parentPath[i]);
+			// console.log(parentNode);
+			// if (parentNode.selected === state) {
+			// 	break;
+			// }
+
+			if (forceState) {
+				parentNode.selected = forceState;
+				continue;
+			}
+
+			let allUnselected = true;
+			let allSelected = true;
+
+			parentNode.children.forEach((n) => {
+				allUnselected = allUnselected && n.selected === "unselected";
+				allSelected = allSelected && n.selected === "selected";
+			});
+
+			if (allUnselected) {
+				parentNode.selected = this.SELECTION_STATES.unselected;
+			} else if (allSelected) {
+				parentNode.selected = this.SELECTION_STATES.selected;
+			} else {
+				parentNode.selected = this.SELECTION_STATES.parentOfUnselected;
+			}
+
 		}
 
 	}
@@ -1042,29 +1147,15 @@ export class TreeService {
 	 */
 	public setNodeSelection(node: any, select: boolean) {
 
-		// If node
-		if (node.selected !== undefined && node.selected === select) {
+		const selected = select ? this.SELECTION_STATES.selected : this.SELECTION_STATES.unselected;
+
+		if (node.selected === selected || node.toggleState === "invisible") {
 			return;
 		}
+		// console.log(node, select);
+		this.traverseNodesAndSetSelected([node], select);
 
-		const nodeIndex = this.currentSelectedNodes.indexOf(node);
-		console.log(nodeIndex);
-
-		if (select) {
-			if (nodeIndex === -1) {
-				node.selected = true;
-				this.currentSelectedNodes.push(node);
-				this.traverseNodesAndSetSelected([node], true);
-			}
-		} else {
-			if (nodeIndex > -1) {
-				this.currentSelectedNodes[nodeIndex].selected = false;
-				this.currentSelectedNodes.splice(nodeIndex, 1);
-				this.traverseNodesAndSetSelected([node], false);
-			}
-		}
-
-		console.log("this.currentSelectedNodes", this.currentSelectedNodes);
+		// console.log("this.currentSelectedNodes", this.currentSelectedNodes);
 	}
 
 	public getMeshHighlights(nodes) {
@@ -1114,6 +1205,7 @@ export class TreeService {
 	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
 	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
+		console.log("selectNodes", multi, forceReHighlight);
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
@@ -1130,7 +1222,16 @@ export class TreeService {
 				continue;
 			}
 
-			const shouldSelect = !multi || forceReHighlight || !node.selected;
+			console.log("node is unselected:", node.selected);
+			console.log("node is parentOfunselected and has unselected children",
+				node.selected === this.SELECTION_STATES.parentOfUnselected &&
+				node.children[0].selected === this.SELECTION_STATES.unselected,
+			);
+			const selected = node.selected === this.SELECTION_STATES.unselected || node.selected === undefined ||
+							(node.selected !== this.SELECTION_STATES.parentOfUnselected && node.selected !== this.SELECTION_STATES.selected) ;
+
+			const shouldSelect = !multi || forceReHighlight || !!selected; // && node.selected !== "parentOfUnselected");
+			console.log("shouldSelect", shouldSelect, node.selected);
 			this.setNodeSelection(node, shouldSelect);
 
 		}

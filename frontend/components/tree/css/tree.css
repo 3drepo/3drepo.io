@@ -47,7 +47,13 @@ tree .treeNode:hover {
   border-bottom-left-radius: 2px;
 }
 tree .treeNodeSelected {
-  background:  rgba(186, 197, 225, 0.20);
+  background:  rgba(186, 197, 225, 0.30);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+tree .treeNodeParentOfUnselected {
+  background:  rgba(135, 255, 149, 0.3);
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }
