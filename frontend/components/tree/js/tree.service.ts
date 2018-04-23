@@ -1054,14 +1054,10 @@ export class TreeService {
 			const nodeIndex = this.currentSelectedNodes.indexOf(currentNode);
 			const notParentOfUnselected = currentNode.selected !== this.SELECTION_STATES.parentOfUnselected;
 
-			if (select && notParentOfUnselected) {
-				if (nodeIndex === -1) {
-					this.currentSelectedNodes.push(currentNode);
-				}
-			} else {
-				if (nodeIndex > -1) {
-					this.currentSelectedNodes.splice(nodeIndex, 1);
-				}
+			if (select && notParentOfUnselected && nodeIndex === -1) {
+				this.currentSelectedNodes.push(currentNode);
+			} else if (nodeIndex > -1) {
+				this.currentSelectedNodes.splice(nodeIndex, 1);
 			}
 
 			if (currentNode.toggleState !== "invisible") {
