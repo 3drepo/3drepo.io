@@ -140,15 +140,10 @@ describe('Projects', function () {
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 				.expect(200, function(err, res){
-
-
-					// const account = res.body.accounts.find(account => account.account === username);
-					// expect(account).to.exist;
-
-					// const pg = account.projects.find(pg => pg.name === project.name);
-					// expect(pg).to.exist;
-
-					expect(res.body.permissions).to.deep.equal(project.permissions);
+					var entriesFiltered = res.body.permissions.filter((entry => {
+						return entry.permissions.length > 0;
+					}));
+					expect(entriesFiltered).to.deep.equal(project.permissions);
 					callback(err);
 				});
 			}
@@ -210,29 +205,11 @@ describe('Projects', function () {
 		});
 	});
 
-	it('should fail to update project for invalid permission object structure', function(done){
-
-		const project = {
-			name: 'project3',
-			permissions: [{
-				permissions: ['edit_project']
-			}]
-		};
-
-		agent.put(`/${username}/projects/${project.name}`)
-		.send(project)
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(900); // mongoose invalid code
-			done(err);
-		});
-	});
-
-
 	it('should fail to assign permission to unlicensed user', function(done){
 		const project = {
 			name: 'project3',
 			permissions: [{
-				user: "job",
+				user: "metaTest",
 				permissions: ['edit_project']
 			}]
 		};

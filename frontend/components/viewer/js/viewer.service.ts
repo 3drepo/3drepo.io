@@ -1,5 +1,3 @@
-import { UnityUtil } from "../../../_built/amd/globals/unity-util";
-
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -28,7 +26,6 @@ export class ViewerService {
 		"APIService",
 		"DialogService",
 		"EventService",
-		"DocsService",
 	];
 
 	private newPinId: string;
@@ -46,8 +43,6 @@ export class ViewerService {
 		public APIService: any,
 		public DialogService: any,
 		public EventService: any,
-		public DocsService: any,
-
 	) {
 
 		this.newPinId = "newPinId";
@@ -74,6 +69,19 @@ export class ViewerService {
 		this.pinData = newPinData.data;
 	}
 
+	public updateViewerSettings(settings) {
+		this.viewer.updateSettings(settings);
+	}
+
+	public updateClippingPlanes(params) {
+		this.viewer.updateClippingPlanes(
+			params.clippingPlanes,
+			params.fromClipPanel,
+			params.account,
+			params.model,
+		);
+	}
+
 	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
@@ -83,12 +91,12 @@ export class ViewerService {
 
 			switch (event.type) {
 
-			case this.EventService.EVENT.MODEL_SETTINGS_READY:
-				if (event.value.account === account && event.value.model === model) {
-					this.viewer.updateSettings(event.value);
-					// mapTile && mapTile.updateSettings(event.value.settings);
-				}
-				break;
+			// case this.EventService.EVENT.MODEL_SETTINGS_READY:
+			// 	if (event.value.account === account && event.value.model === model) {
+			// 		this.viewer.updateSettings(event.value);
+			// 		// mapTile && mapTile.updateSettings(event.value.settings);
+			// 	}
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
 				this.viewer.clickPin(event.value.id);
@@ -101,23 +109,11 @@ export class ViewerService {
 				);
 				break;
 
-			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-				this.viewer.updateClippingPlanes(
-					event.value.clippingPlanes, event.value.fromClipPanel,
-					event.value.account, event.value.model,
-				);
-				break;
-
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.DocsService.state.show = false;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				if (valid) {
-					this.DocsService.handleObjectSelected(event);
-				}
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
@@ -181,6 +177,10 @@ export class ViewerService {
 
 		});
 
+	}
+
+	public centreToPoint(params: any) {
+		this.viewer.centreToPoint(params);
 	}
 
 	public setCamera(params) {
@@ -270,8 +270,23 @@ export class ViewerService {
 				params.zoom,
 				params.colour,
 				params.multi,
+				params.forceReHighlight,
 			);
 		}
+	}
+
+	public unhighlightObjects(params)  {
+		if (this.viewer) {
+			this.viewer.unhighlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids,
+			);
+		}
+	}
+
+	public getMultiSelectMode() {
+		return this.viewer.multiSelectMode;
 	}
 
 	public setMultiSelectMode(value)  {
@@ -535,6 +550,22 @@ export class ViewerService {
 		if (this.viewer) {
 			this.viewer.mapStop();
 		}
+	}
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		if (this.viewer) {
+			this.viewer.overrideMeshColor(account, model, meshIDs, color);
+		}
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		if (this.viewer) {
+			this.viewer.resetMeshColor(account, model, meshIDs);
+		}
+	}
+
+	public getDefaultHighlightColor() {
+		return this.viewer.getDefaultHighlightColor();
 	}
 
 }

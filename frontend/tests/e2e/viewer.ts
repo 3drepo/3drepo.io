@@ -23,7 +23,7 @@ describe("Viewer page", function() {
 			expect(element(by.id("homeLogo")).isDisplayed()).to.eventually.equal(true);
 		});
 
-		describe("with the left bottom buttons", () => {
+		describe("with the middle bottom buttons", () => {
 
 			it("visible", () => {
 				expect(element(by.id("middleButtons")).isDisplayed()).to.eventually.equal(true);

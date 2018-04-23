@@ -24,6 +24,8 @@ var html = data => `
 	<br>
 	Error: ${data.err}
 	<br>
+	Bouncer Error Code : ${data.bouncerErr}
+	<br>
 	correlationId: ${data.corID}
 	<br>
 	appId: ${data.appId}

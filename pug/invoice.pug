@@ -144,7 +144,7 @@ html(lang="en" ng-app="3drepo")
 								p #{billing.info.line2}
 							p #{billing.info.city}
 							p #{billing.info.postalCode}
-							p #{billing.info.country}
+							p #{billing.info.countryName}
 							if billing.info.vat
 								p VAT ID: #{billing.info.vat}
 
@@ -172,15 +172,16 @@ html(lang="en" ng-app="3drepo")
 						p#billingPeriod (#{billing.periodStart} to #{billing.periodEnd})
 
 					td.tableCell #{billing.items.length}
-					td.tableCell £#{billing.unitPrice}
-					td.tableCell £#{billing.netAmount}
-					td.tableCell #{billing.taxPercentage}%
-					td.tableCell £#{billing.taxAmount}
-					td.tableCell £#{billing.amount}
+					td.tableCell £#{parseFloat(billing.unitPrice).toFixed(2)}
+					td.tableCell £#{parseFloat(billing.netAmount).toFixed(2)}
+					td.tableCell #{parseFloat(billing.taxPercentage).toFixed(2)}%
+					td.tableCell £#{parseFloat(billing.taxAmount).toFixed(2)}
+					td.tableCell £#{parseFloat(billing.amount).toFixed(2)}
 
 			
 			br
-			p You next regular monthly payment £#{billing.nextPaymentAmount} will be billed on #{billing.nextPaymentDate}
+
+			p Your next regular monthly payment of £#{billing.nextPaymentAmount.toFixed(2)} will be billed on #{billing.nextPaymentDate}
 			if billing.B2B_EU
 				div
 					p

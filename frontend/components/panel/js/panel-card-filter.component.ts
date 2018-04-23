@@ -28,7 +28,7 @@ class PanelCardFilterController implements ng.IController {
 	private filterInput;
 	private filterText;
 	private showClearFilterButton;
-	private showFilter;
+	private showFilter: boolean;
 
 	constructor(
 		private $timeout: ng.ITimeoutService,
@@ -46,13 +46,7 @@ class PanelCardFilterController implements ng.IController {
 
 		this.$scope.$watch("vm.filterInputText", (newValue) => {
 			if (this.isDefined(newValue)) {
-				if (this.filterTimeout !== null) {
-					this.$timeout.cancel(this.filterTimeout);
-				}
-				this.filterTimeout = this.$timeout(() => {
-					this.filterText = this.filterInputText;
-					this.showClearFilterButton = (this.filterInputText !== "");
-				}, 50);
+				this.filterText = this.filterInputText;
 			}
 		});
 

@@ -1,0 +1,19 @@
+md-container(layout-padding, style="max-width: 500px;")
+    h2(style="margin: 0px;") Terms and Privacy Policy Update
+    p
+        | By continuing to use our service, you agree to accept the changes to our
+        =" "
+        a(href="terms", target="_blank") terms of use
+        =" "
+        | and acknowledge the changes to our
+        =" "
+        a(href="privacy", target="_blank") privacy policy
+        |. If you have any questions about these updated versions, please contact us at
+        =" "
+        a(href="mailto:support@3drepo.org") support@3drepo.org
+        |.
+  
+    md-container(style="float: right;")
+        md-button(ng-click="vm.DialogService.closeDialog()" class="md-primary")
+            span OK
+

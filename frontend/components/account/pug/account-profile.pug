@@ -42,7 +42,8 @@
 						label Old password
 						input(ng-model="vm.oldPassword", type="password", required)
 					md-input-container(flex="50")
-						label New password ({{vm.passwordStrength}})
+						label(ng-if="vm.passwordStrength") New password ({{vm.passwordStrength}})
+						label(ng-if="!vm.passwordStrength") New password 
 						label(ng-if="vm.passwordStrength === undefined") New password
 						input(name="new" ng-model="vm.newPassword", type="password", required)
 				.updateContainer(layout="row", layout-align="start center")

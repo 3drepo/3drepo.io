@@ -26,7 +26,6 @@
 	const pug = require("pug");
 	const phantom = require("phantom");
 	const config = require("../config");
-	const Subscription = require("./subscription");
 	const systemLogger = require("../logger.js").systemLogger;
 	const Counter = require("./counter");
 	const Mailer = require("../mailer/mailer");
@@ -57,8 +56,7 @@
 	});
 
 	itemSchema.virtual('description').get(function(){
-//		console.log('this desc', this);
-		return Subscription.getSubscription(this.name).description;
+		return config.subscriptions.plans[this.name]?  config.subscriptions.plans[this.name].label : "Unknown license";
 	});
 
 	itemSchema.set('toJSON', { virtuals: true, getters:true });
@@ -81,7 +79,6 @@
 		taxAmount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
 		state: {type: String, default: C.INV_INIT, enum: [C.INV_INIT, C.INV_PENDING, C.INV_COMPLETE]},
-		pdf: Object,
 		paypalPaymentToken: String
 	});
 
@@ -124,7 +121,7 @@
 	});
 
 	schema.virtual('proRata').get(function(){
-		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === Subscription.getSubscription(this.items[0].name).amount.toFixed(2)){
+		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === config.subscriptions.plans[this.items[0].name].price.toFixed(2)){
 			return false;
 		}
 
@@ -163,7 +160,6 @@
 
 		this.createdAt = new Date();
 		this.nextPaymentDate = data.nextPaymentDate;
-//		console.log('init inv', data.billingInfo);
 		this.info = data.billingInfo;
 		this.paypalPaymentToken = data.paypalPaymentToken;
 
@@ -208,17 +204,15 @@
 			// add items bought in the invoice
 			plans.forEach(plan => {
 				for(let i=0 ; i< plan.quantity; i++){
-					//console.log('init invoice add items', plan, Subscription.getSubscription(plan.plan).plan);
 					this.items.push({
-						name: Subscription.getSubscription(plan.plan).plan,
-						currency: Subscription.getSubscription(plan.plan).currency,
+						name: plan.plan,
+						currency: "GBP",
 						amount: plan.amount,  //gross+tax
 						taxAmount: plan.taxAmount
 					});
 				}
 			});
 
-			//console.log(this.items);
 			return this;
 
 		} else if (data.billingAgreementId) {
@@ -285,7 +279,6 @@
 	};
 
 	schema.statics.findPendingInvoice = function(account, billingAgreementId){
-		//console.log(account, { billingAgreementId, state: C.INV_PENDING });
 		return this.findOne({ account }, { billingAgreementId, state: C.INV_PENDING });
 	};
 
@@ -330,9 +323,7 @@
 		//save first to generate invoice no before generating pdf
 		return invoice.save().then(invoice => {
 
-			// also save the pdf to database for ref.
 			return invoice.generatePDF().then(pdf => {
-				invoice.pdf = pdf;
 				return invoice;
 			});
 
@@ -482,19 +473,6 @@
 				return Promise.reject(err);
 			});
 
-	};
-
-	schema.methods.getPDF = function (options) {
-		options = options || {};
-
-		if (options.regenerate || !this.pdf) {
-
-			return this.generatePDF();
-
-		} else {
-			//console.log('from cache')
-			return Promise.resolve(this.pdf.buffer);
-		}
 	};
 
 	var Invoice = ModelFactory.createClass(

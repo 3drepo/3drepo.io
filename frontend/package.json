@@ -15,7 +15,7 @@
     "e2e:ie": "protractor ./tests/e2e/built/ie/ie-config.js --specs ./tests/e2e/built/ie/ie.js",
     "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js && yarn run e2e:ie",
     "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
-    "tsc:tests": "tsc --project ./"
+    "tsc:tests": "tsc --project ./tests"
   },
   "keywords": [
     "3drepo",
@@ -64,7 +64,7 @@
     "gulp-util": "3.0.8",
     "gulp-watch": "4.3.11",
     "mocha": "4.0.1",
-    "protractor": "5.2.2",
+    "protractor": "5.3.0",
     "tslint": "5.8.0",
     "typedoc": "0.9.0",
     "typescript": "2.6.2",
