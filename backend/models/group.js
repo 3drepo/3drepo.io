@@ -115,6 +115,10 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 		const account = data.objects[i].account;
 		const model = data.objects[i].model;
 
+		if (!(account && model) || data.objects[i].ifc_guid || data.objects[i].shared_id) {
+			return Promise.reject(responseCodes.INVALID_GROUP);
+		}
+
 		const sharedIdsSet = new Set();
 		const ifcGuidsSet = new Set();
 
