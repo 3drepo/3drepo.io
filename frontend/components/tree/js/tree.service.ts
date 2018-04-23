@@ -466,7 +466,6 @@ export class TreeService {
 		this.nodesToShow[0].level = 0;
 		this.nodesToShow[0].expanded = false;
 		this.nodesToShow[0].selected = this.SELECTION_STATES.unselected;
-		this.nodesToShow[0].hasChildren = this.nodesToShow[0].children;
 	}
 
 	/**
