@@ -1045,7 +1045,7 @@ export class TreeService {
 	public traverseNodesAndSetSelected(nodes: any[], select: boolean) {
 
 		nodes = nodes.concat(); // make a copy
-		const nodesForAfter = nodes.concat();
+		const setParentNodes = nodes.concat();
 		let currentNode;
 
 		while (nodes.length) {
@@ -1077,7 +1077,7 @@ export class TreeService {
 
 		}
 
-		nodesForAfter.forEach((node) => {
+		setParentNodes.forEach((node) => {
 			this.setSelectionOnParentNodes(node);
 		});
 
