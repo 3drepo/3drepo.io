@@ -53,7 +53,7 @@ tree .treeNodeSelected {
 }
 
 tree .treeNodeParentOfUnselected {
-  background:  rgba(204, 204, 204, 0.33);
+  background:  rgba(235, 238, 245, 0.5);
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }

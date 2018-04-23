@@ -1084,17 +1084,10 @@ export class TreeService {
 
 	public setParentNodes(currentNode, forceState?: string) {
 		const parentPath = this.getPath(currentNode._id);
-		// console.log("PARENT PATH", parentPath);
 		parentPath.pop(); // Remove the node itself
-
-		// console.log(parentPath);
 
 		for (let i = parentPath.length - 1; i >= 0; i--) {
 			const parentNode = this.getNodeById(parentPath[i]);
-			// console.log(parentNode);
-			// if (parentNode.selected === state) {
-			// 	break;
-			// }
 
 			if (forceState) {
 				parentNode.selected = forceState;
@@ -1104,15 +1097,10 @@ export class TreeService {
 			let allUnselected = true;
 			let allSelected = true;
 
-			// console.log("checking chilkdren", parentNode.children);
-
 			parentNode.children.forEach((n) => {
 				allUnselected = allUnselected && (n.selected === "unselected" || n.selected === undefined);
 				allSelected = allSelected && n.selected === "selected";
 			});
-
-			// console.log("allUnselected", allUnselected);
-			// console.log("allSelected", allSelected);
 
 			if (allUnselected) {
 				parentNode.selected = this.SELECTION_STATES.unselected;
