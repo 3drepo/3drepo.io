@@ -1037,26 +1037,6 @@ export class TreeService {
 		this.currentSelectedNodes = [];
 	}
 
-	// public allSiblingsAreSelectionState(node, state) {
-
-	// 	const path = this.getPath(node._id);
-
-	// 	// console.log("path", path);
-	// 	const parentNodeId = path[path.length - 2] || path[path.length - 1]; // If no parent
-	// 	const parentNode = this.getNodeById(parentNodeId);
-	// 	// console.log("path - parentNode", parentNode);
-
-	// 	let allUnselected = true;
-	// 	let allSelected = true;
-
-	// 	parentNode.children.forEach((n) => {
-	// 		allUnselected = allUnselected && n.selected === "unselected";
-	// 		allSelected = allSelected && n.selected === "selected";
-	// 	});
-
-	// 	return { allUnselected, allSelected };
-	// }
-
 	public traverseNodesAndSetSelected(nodes, select) {
 
 		nodes = nodes.concat(); // make a copy
@@ -1104,6 +1084,7 @@ export class TreeService {
 
 	public setParentNodes(currentNode, forceState?: string) {
 		const parentPath = this.getPath(currentNode._id);
+		// console.log("PARENT PATH", parentPath);
 		parentPath.pop(); // Remove the node itself
 
 		// console.log(parentPath);
@@ -1123,10 +1104,15 @@ export class TreeService {
 			let allUnselected = true;
 			let allSelected = true;
 
+			// console.log("checking chilkdren", parentNode.children);
+
 			parentNode.children.forEach((n) => {
-				allUnselected = allUnselected && n.selected === "unselected";
+				allUnselected = allUnselected && (n.selected === "unselected" || n.selected === undefined);
 				allSelected = allSelected && n.selected === "selected";
 			});
+
+			// console.log("allUnselected", allUnselected);
+			// console.log("allSelected", allSelected);
 
 			if (allUnselected) {
 				parentNode.selected = this.SELECTION_STATES.unselected;
@@ -1205,7 +1191,7 @@ export class TreeService {
 	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
 	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
-		console.log("selectNodes", multi, forceReHighlight);
+
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
 			this.clearCurrentlySelected();
@@ -1215,6 +1201,8 @@ export class TreeService {
 			return Promise.resolve("No nodes specified");
 		}
 
+		const parentsOfUnselected = [];
+
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 
@@ -1222,21 +1210,30 @@ export class TreeService {
 				continue;
 			}
 
-			console.log("node is unselected:", node.selected);
-			console.log("node is parentOfunselected and has unselected children",
-				node.selected === this.SELECTION_STATES.parentOfUnselected &&
-				node.children[0].selected === this.SELECTION_STATES.unselected,
-			);
-			const selected = node.selected === this.SELECTION_STATES.unselected || node.selected === undefined ||
-							(node.selected !== this.SELECTION_STATES.parentOfUnselected && node.selected !== this.SELECTION_STATES.selected) ;
+			if (node.selected === this.SELECTION_STATES.parentOfUnselected) {
+				parentsOfUnselected.push(node);
+			}
+
+			const selected = node.selected === this.SELECTION_STATES.unselected ||
+							node.selected === undefined ||
+								(node.selected !== this.SELECTION_STATES.parentOfUnselected
+									&& node.selected !== this.SELECTION_STATES.selected) ;
 
 			const shouldSelect = !multi || forceReHighlight || !!selected; // && node.selected !== "parentOfUnselected");
-			console.log("shouldSelect", shouldSelect, node.selected);
+
 			this.setNodeSelection(node, shouldSelect);
 
 		}
 
-		console.log(nodes);
+		// If we have any nodes that are parents of unselected nodes, we can't
+		// just highlight them as it leads to an unsyncronised state. So we unhighlight
+		// those nodes in the viewer
+		if (parentsOfUnselected.length) {
+			nodes = nodes.filter((n, i) => {
+				return parentsOfUnselected.indexOf(n) === -1;
+			});
+			this.unhighlightNodes(parentsOfUnselected);
+		}
 
 		const lastNode = nodes[nodes.length - 1] ;
 		this.handleMetadata(lastNode);
