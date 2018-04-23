@@ -1207,10 +1207,8 @@ export class TreeService {
 				parentsOfUnselected.push(node);
 			}
 
-			const selected = node.selected === this.SELECTION_STATES.unselected ||
-							node.selected === undefined ||
-							(node.selected !== this.SELECTION_STATES.parentOfUnselected
-								&& node.selected !== this.SELECTION_STATES.selected);
+			const selected = (node.selected !== this.SELECTION_STATES.parentOfUnselected &&
+								node.selected !== this.SELECTION_STATES.selected);
 
 			const shouldSelect = !multi || forceReHighlight || !!selected; // && node.selected !== "parentOfUnselected");
 
