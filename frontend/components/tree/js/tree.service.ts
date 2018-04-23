@@ -1104,8 +1104,8 @@ export class TreeService {
 			let allSelected = true;
 
 			parentNode.children.forEach((n) => {
-				allUnselected = allUnselected && (n.selected === "unselected" || n.selected === undefined);
-				allSelected = allSelected && n.selected === "selected";
+				allUnselected = allUnselected && (n.selected === this.SELECTION_STATES.unselected || n.selected === undefined);
+				allSelected = allSelected && n.selected === this.SELECTION_STATES.selected;
 			});
 
 			if (allUnselected) {
