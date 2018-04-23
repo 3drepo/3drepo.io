@@ -105,7 +105,6 @@ groupSchema.statics.isIfcGuid = function(value) {
  */
 groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsToString) {
 
-	console.log("getObjectsArrayAsIfcGuids");
 	const ifcGuidPromises = [];
 
 	if (!data) {
@@ -177,8 +176,6 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 };
 
 groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
-
-	console.log("findIfcGroupByUID");
 
 	// Extract a unique list of IDs only
 	let groupObjectsMap = [];
@@ -254,8 +251,6 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 };
 
 groupSchema.statics.findByUID = function(dbCol, uid){
-
-	console.log("findByUID");
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
