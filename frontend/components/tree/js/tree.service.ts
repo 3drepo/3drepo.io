@@ -969,7 +969,7 @@ export class TreeService {
 	 * to apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public updateModelVisibility(node) {
+	public updateModelVisibility(node: any) {
 
 		return this.ready.promise.then(() => {
 
@@ -1027,7 +1027,7 @@ export class TreeService {
 			while (this.currentSelectedNodes.length) {
 				const currentNode = this.currentSelectedNodes.pop();
 				currentNode.selected = this.SELECTION_STATES.unselected;
-				this.setParentNodes(currentNode, this.SELECTION_STATES.unselected);
+				this.setSelectionOnParentNodes(currentNode, this.SELECTION_STATES.unselected);
 				if (currentNode.children && currentNode.children.length) {
 					this.currentSelectedNodes = this.currentSelectedNodes.concat(currentNode.children);
 				}
@@ -1037,7 +1037,12 @@ export class TreeService {
 		this.currentSelectedNodes = [];
 	}
 
-	public traverseNodesAndSetSelected(nodes, select) {
+	/**
+	 * Set the selection state of a nodes parents to represent it's children
+	 * @param nodes the nodes to set a new selection state on
+	 * @param select wether the node should be selected or not
+	 */
+	public traverseNodesAndSetSelected(nodes: any[], select: boolean) {
 
 		nodes = nodes.concat(); // make a copy
 		const nodesForAfter = nodes.concat();
@@ -1077,12 +1082,17 @@ export class TreeService {
 		}
 
 		nodesForAfter.forEach((node) => {
-			this.setParentNodes(node);
+			this.setSelectionOnParentNodes(node);
 		});
 
 	}
 
-	public setParentNodes(currentNode, forceState?: string) {
+	/**
+	 * Set the selection state of a nodes parents to represent it's children
+	 * @param currentNode the node who's parents to traverse up
+	 * @param forceState a selected state to enforce upon parents
+	 */
+	public setSelectionOnParentNodes(currentNode: any, forceState?: string) {
 		const parentPath = this.getPath(currentNode._id);
 		parentPath.pop(); // Remove the node itself
 
@@ -1116,7 +1126,7 @@ export class TreeService {
 
 	/**
 	 * Set selection status of node.
-	 * @param node	Node to set selection status of
+	 * @param node node to set selection status of
 	 * @param select whether the node should be selected or not
 	 */
 	public setNodeSelection(node: any, select: boolean) {
@@ -1126,13 +1136,12 @@ export class TreeService {
 		if (node.selected === selected || node.toggleState === "invisible") {
 			return;
 		}
-		// console.log(node, select);
+
 		this.traverseNodesAndSetSelected([node], select);
 
-		// console.log("this.currentSelectedNodes", this.currentSelectedNodes);
 	}
 
-	public getMeshHighlights(nodes) {
+	public getMeshHighlights(nodes: any) {
 		return this.ready.promise.then(() => {
 			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
@@ -1204,8 +1213,8 @@ export class TreeService {
 
 			const selected = node.selected === this.SELECTION_STATES.unselected ||
 							node.selected === undefined ||
-								(node.selected !== this.SELECTION_STATES.parentOfUnselected
-									&& node.selected !== this.SELECTION_STATES.selected) ;
+							(node.selected !== this.SELECTION_STATES.parentOfUnselected
+								&& node.selected !== this.SELECTION_STATES.selected);
 
 			const shouldSelect = !multi || forceReHighlight || !!selected; // && node.selected !== "parentOfUnselected");
 
@@ -1234,7 +1243,7 @@ export class TreeService {
 	 * Show metadata in the metadata panel if necessary
 	 * @param node the node to show the metadata for
 	 */
-	public handleMetadata(node) {
+	public handleMetadata(node: any) {
 
 		if (node && node.meta) {
 			this.DocsService.displayDocs(
@@ -1325,7 +1334,7 @@ export class TreeService {
 	 * Get a series of nodes with unique ID bu a series of objects that contain a shared_id
 	 * @param objects the array of shared id objects
 	 */
-	public getNodesFromSharedIds(objects) {
+	public getNodesFromSharedIds(objects: any) {
 		if (!objects || objects.length === 0) {
 			return Promise.resolve([]);
 		}
