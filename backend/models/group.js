@@ -367,33 +367,10 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 groupSchema.methods.clean = function(){
 
-	console.log("clean");
-
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	if (cleaned.objects) {
-		for (let i = 0; i < cleaned.objects.length; i++) {
-			const object = cleaned.objects[i];
 
-			if (object.shared_id) {
-				if ("[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-					object.shared_id = utils.uuidToString(object.shared_id);
-				}
-			}
-			else {
-				delete object.shared_id;
-			}
-
-			if (!object.ifc_guids) {
-				delete object.ifc_guids;
-			}
-
-			if (!object.shared_ids) {
-				delete object.shared_ids;
-			}
-		}
-	}
 	return cleaned;
 };
 
