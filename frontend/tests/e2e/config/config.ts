@@ -20,6 +20,7 @@ export let config: Config = {
 			],
 		},
 	},
+	allScriptsTimeout: 20000,
 	framework: "mocha",
 	mochaOpts: {
 		bail: true,

@@ -297,6 +297,16 @@ export class GroupsService {
 		});
 	}
 
+	public deleteGroups(teamspace, model) {
+		const deleteGroupPromises = [];
+		this.state.groups.forEach((group) => {
+			if (group.highlighted) {
+				deleteGroupPromises.push(this.deleteGroup(teamspace, model, group));
+			}
+		});
+		return Promise.all(deleteGroupPromises);
+	}
+
 	/**
 	 * Select a group
 	 * @param group the group to select
@@ -543,6 +553,12 @@ export class GroupsService {
 
 	}
 
+	public selectNextGroup() {
+		if (this.state.groups.length) {
+			this.selectGroup(this.state.groups[0]);
+		}
+	}
+
 	/**
 	 * Delete a group in the backend
 	 * @param teamspace the teamspace name for the group
@@ -553,12 +569,12 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
 		return this.APIService.delete(groupUrl)
 			.then((response) => {
-				return this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
+				this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
 					this.TreeService.deselectNodes(nodes);
-					this.removeColorOverride(deleteGroup._id);
-					this.deleteStateGroup(deleteGroup);
-					return response;
 				});
+				this.removeColorOverride(deleteGroup._id);
+				this.deleteStateGroup(deleteGroup);
+				return response;
 			});
 	}
 
@@ -571,9 +587,11 @@ export class GroupsService {
 		this.state.groups = this.state.groups.filter((g) => {
 			return deleteGroup._id !== g._id;
 		});
-		if (deleteGroup._id === this.state.selectedGroup._id) {
+
+		if (this.state.selectedGroup && deleteGroup._id === this.state.selectedGroup._id) {
 			this.state.selectedGroup = null;
 		}
+
 	}
 
 	/**

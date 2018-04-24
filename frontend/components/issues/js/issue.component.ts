@@ -270,6 +270,7 @@ class IssueController implements ng.IController {
 						this.issueFailedToLoad = false;
 						// Update the issue data on issue service so search would work better
 						this.IssuesService.updateIssues(this.issueData);
+						this.IssuesService.showIssue(this.issueData);
 					})
 					.catch((error) => {
 						this.issueFailedToLoad = true;
@@ -661,7 +662,6 @@ class IssueController implements ng.IController {
 	 * @param viewpoint Can be undefined for action comments
 	 */
 	public showViewpoint(event, viewpoint) {
-
 		// README: vm should also highlight selected objects within vm issue, but
 		// will require a lot of rewriting for vm to work at present!
 		if (viewpoint && (event.type === "click")) {

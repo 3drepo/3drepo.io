@@ -390,7 +390,7 @@ export class ViewerService {
 	}
 
 	public initViewer() {
-
+		console.debug("Initiating Viewer");
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else if (this.viewer) {
@@ -432,6 +432,7 @@ export class ViewerService {
 
 		if (!account || !model) {
 			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
+			return Promise.reject("Account, model, branch or revision was not defined!");
 		} else {
 			this.currentModel.promise = this.viewer.loadModel(
 				account,
@@ -447,6 +448,7 @@ export class ViewerService {
 				.catch((error) => {
 					console.error("Error loading model: ", error);
 				});
+			return this.currentModel.promise;
 		}
 
 	}

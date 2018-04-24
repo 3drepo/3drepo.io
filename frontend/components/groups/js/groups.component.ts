@@ -162,7 +162,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public handleGroupError(method: string) {
-		const content = `We tried to ${method} your issue but it failed.
+		const content = `We tried to ${method} your group but it failed.
 			If this continues please message support@3drepo.org.`;
 		const escapable = true;
 		this.DialogService.text(`Group Error`, content, escapable);
@@ -187,13 +187,14 @@ class GroupsController implements ng.IController {
 	}
 
 	public deleteGroup(group: any) {
-		if (this.selectedGroup && this.selectedGroup._id) {
-			this.GroupsService.deleteGroup(
-				this.teamspace,
-				this.model,
-				this.selectedGroup,
-			);
-		}
+		const deletePromises = this.GroupsService.deleteGroups(this.teamspace, this.model);
+		deletePromises
+		.then(() => {
+			this.GroupsService.selectNextGroup();
+		})
+		.catch((error) => {
+			this.errorDialog(error);
+		});
 	}
 
 	public addGroup() {
@@ -223,6 +224,14 @@ class GroupsController implements ng.IController {
 
 		}
 
+	}
+
+	public errorDialog(error) {
+		const content = "We tried to delete your selected groups but there was an error. " +
+		"If this continues please message support@3drepo.io.";
+		const escapable = true;
+		console.error(error);
+		this.DialogService.text("Error Deleting Groups", content, escapable);
 	}
 
 	public confirmUpdateDialog(saved: number, selected: number) {
