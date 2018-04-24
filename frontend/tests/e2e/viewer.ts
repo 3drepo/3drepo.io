@@ -11,7 +11,6 @@ describe("Viewer page", function() {
 		const url = env.baseUrl + "/" + USER.USERNAME + "/" + USER.MODEL_ID;
 		browser.get(url);
 		browser.waitForAngular();
-		//browser.waitForAngularEnabled(false);
 	});
 
 	after(() => {
