@@ -126,7 +126,7 @@ class TreeController implements ng.IController {
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
 				this.GroupsService.clearSelectionHighlights();
-				this.nodes.forEach((n) => n.selected = "notSelected");
+				this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
 			} else if (event.type === this.EventService.EVENT.TREE_READY) {
 
 				this.allNodes = this.TreeService.getAllNodes();

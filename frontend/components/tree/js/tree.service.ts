@@ -86,9 +86,9 @@ export class TreeService {
 		this.highlightSelectedViewerObject = true;
 
 		this.SELECTION_STATES = {
-			parentOfUnselected : "parentOfUnselected",
-			selected : "selected",
-			unselected : "unselected",
+			parentOfUnselected : 0,
+			selected : 1,
+			unselected : 2,
 		};
 
 	}
@@ -1022,15 +1022,33 @@ export class TreeService {
 		this.ViewerService.clearHighlights();
 		this.DocsService.closeDocs();
 
-		if (this.currentSelectedNodes.length) {
-			while (this.currentSelectedNodes.length) {
-				const currentNode = this.currentSelectedNodes.pop();
-				currentNode.selected = this.SELECTION_STATES.unselected;
-				this.setSelectionOnParentNodes(currentNode, this.SELECTION_STATES.unselected);
+		const visitedParents = [];
+		const visitedChildren = [];
+
+		while (this.currentSelectedNodes.length) {
+			const currentNode = this.currentSelectedNodes.pop();
+			currentNode.selected = this.SELECTION_STATES.unselected;
+
+			// Skip over any node that has already been visited
+			if (visitedChildren.indexOf(currentNode) === -1) {
+
+				// Skip over any parent that has been visited
+				if (visitedParents.indexOf(currentNode) === -1) {
+					const parents = this.setSelectionOnParentNodes(currentNode, this.SELECTION_STATES.unselected);
+					for (let i = 0; i < parents.length; i++) {
+						if (visitedParents.indexOf(parents[i]) === -1) {
+							visitedParents.push(parents[i]);
+						}
+					}
+				}
+
 				if (currentNode.children && currentNode.children.length) {
 					this.currentSelectedNodes = this.currentSelectedNodes.concat(currentNode.children);
 				}
+
 			}
+
+			visitedChildren.push(currentNode);
 		}
 
 		this.currentSelectedNodes = [];
@@ -1045,10 +1063,9 @@ export class TreeService {
 
 		nodes = nodes.concat(); // make a copy
 		const setParentNodes = nodes.concat();
-		let currentNode;
 
 		while (nodes.length) {
-			currentNode = nodes.pop();
+			const currentNode = nodes.pop();
 
 			const nodeIndex = this.currentSelectedNodes.indexOf(currentNode);
 			const notParentOfUnselected = currentNode.selected !== this.SELECTION_STATES.parentOfUnselected;
@@ -1061,12 +1078,12 @@ export class TreeService {
 
 			if (currentNode.toggleState !== "invisible") {
 
-				if (currentNode.toggleState !== "parentOfInvisible" && select) {
-					currentNode.selected = this.SELECTION_STATES.selected;
-				} else if (!select) {
+				if (!select) {
 					currentNode.selected = this.SELECTION_STATES.unselected;
-				} else {
+				} else if (currentNode.toggleState !== "parentOfInvisible") {
 					currentNode.selected = this.SELECTION_STATES.parentOfUnselected;
+				} else {
+					currentNode.selected = this.SELECTION_STATES.selected;
 				}
 
 				if (currentNode.children && currentNode.children.length) {
@@ -1087,12 +1104,14 @@ export class TreeService {
 	 * @param currentNode the node who's parents to traverse up
 	 * @param forceState a selected state to enforce upon parents
 	 */
-	public setSelectionOnParentNodes(currentNode: any, forceState?: string) {
+	public setSelectionOnParentNodes(currentNode: any, forceState?: string): any[] {
 		const parentPath = this.getPath(currentNode._id);
 		parentPath.pop(); // Remove the node itself
+		const seenParents = [];
 
 		for (let i = parentPath.length - 1; i >= 0; i--) {
 			const parentNode = this.getNodeById(parentPath[i]);
+			seenParents.push(parentNode);
 
 			if (forceState) {
 				parentNode.selected = forceState;
@@ -1102,10 +1121,14 @@ export class TreeService {
 			let allUnselected = true;
 			let allSelected = true;
 
-			parentNode.children.forEach((n) => {
+			for (let j = 0; j < parentNode.children.length; j++) {
+				const n = parentNode.children[j];
 				allUnselected = allUnselected && (n.selected === this.SELECTION_STATES.unselected || n.selected === undefined);
 				allSelected = allSelected && n.selected === this.SELECTION_STATES.selected;
-			});
+				if (!allUnselected && !allSelected) {
+					break;
+				}
+			}
 
 			if (allUnselected) {
 				parentNode.selected = this.SELECTION_STATES.unselected;
@@ -1116,6 +1139,8 @@ export class TreeService {
 			}
 
 		}
+
+		return seenParents;
 
 	}
 
