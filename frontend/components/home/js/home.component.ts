@@ -272,7 +272,7 @@ class HomeController implements ng.IController {
 					this.DialogService.showDialog(
 						"new-terms-dialog.html",
 						this.$scope,
-						event,
+						null,
 						false,
 						null,
 						false,

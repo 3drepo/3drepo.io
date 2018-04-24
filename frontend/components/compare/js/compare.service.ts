@@ -136,12 +136,6 @@ export class CompareService {
 			return null;
 		}
 
-		const headRevision = modelSettings.headRevisions.master;
-		const headRevisionObj = revisions.find((r) => {
-			return r._id === headRevision;
-		});
-		const headRevisionTag = headRevisionObj.tag || headRevisionObj.name;
-
 		let baseRevision;
 
 		if (!this.isFederation()) {
@@ -158,8 +152,6 @@ export class CompareService {
 
 		return {
 			account: modelSettings.account,
-			headRevision,
-			headRevisionTag,
 			model: modelSettings.model,
 			name: modelSettings.name,
 			revisions,

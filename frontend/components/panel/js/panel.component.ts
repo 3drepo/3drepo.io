@@ -29,6 +29,7 @@ class PanelController implements ng.IController {
 
 	public maxHeightAvailable;
 	public panelTopBottomGap;
+	public bottomButtonGap;
 	public contentItems;
 	public showPanel;
 	public activate;
@@ -49,15 +50,16 @@ class PanelController implements ng.IController {
 
 	public $onInit() {
 
-		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap;
 		this.contentItems = [];
 		this.showPanel = true;
 		this.activate = true;
 
 		this.panelTopBottomGap = 55,
+		this.bottomButtonGap = 64;
 		this.itemGap = 30,
 		this.panelToolbarHeight = 40,
 		this.contentItemsShown = [];
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
 		this.resize(); // We need to set the correct height for the issues
 		this.bindEvents();
@@ -148,7 +150,7 @@ class PanelController implements ng.IController {
 	}
 
 	public resize() {
-		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap;
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		this.calculateContentHeights();
 	}
 

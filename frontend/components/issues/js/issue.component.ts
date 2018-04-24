@@ -270,6 +270,7 @@ class IssueController implements ng.IController {
 						this.issueFailedToLoad = false;
 						// Update the issue data on issue service so search would work better
 						this.IssuesService.updateIssues(this.issueData);
+						this.IssuesService.showIssue(this.issueData);
 					})
 					.catch((error) => {
 						this.issueFailedToLoad = true;
@@ -661,7 +662,6 @@ class IssueController implements ng.IController {
 	 * @param viewpoint Can be undefined for action comments
 	 */
 	public showViewpoint(event, viewpoint) {
-
 		// README: vm should also highlight selected objects within vm issue, but
 		// will require a lot of rewriting for vm to work at present!
 		if (viewpoint && (event.type === "click")) {
@@ -882,51 +882,6 @@ class IssueController implements ng.IController {
 	}
 
 	/**
-	 * Prune node from group if its parent is already a part of the group.
-	 * @returns prunedNodes	List of nodes with children pruned out.
-	 */
-	public pruneNodes(nodes, property) {
-		let prunedNodes = [];
-
-		if (property) {
-			const prunedNodesMap = [];
-			for (let i = 0; i < nodes.length; i++) {
-				let nodePath = this.TreeService.getPath(nodes[i].id);
-				const node = this.TreeService.getNodeById(nodes[i].id);
-				while (nodePath && nodePath.length > 0) {
-					const parentNodeId = nodePath.shift();
-					const parentNode = this.TreeService.getNodeById(parentNodeId);
-					if (
-						node.project === parentNode.project && // Do not prune node if parent is a federation node
-						(node[property] && node[property] === parentNode[property]) ||
-						(!node[property] && 1 === nodePath.length)
-					) {
-						prunedNodesMap[parentNode._id] = {
-							account: parentNode.account,
-							id: parentNode._id,
-							model: parentNode.project,
-							shared_id: parentNode.shared_id,
-						};
-						nodePath = undefined;
-					}
-				}
-			}
-
-			for (const nodeId in prunedNodesMap) {
-				if (nodeId) {
-					prunedNodes.push(prunedNodesMap[nodeId]);
-				}
-			}
-
-		} else {
-			console.error("pruneNodes - arg. property (\"toggleState\" | \"selected\") undefined! Returning nodes.");
-			prunedNodes = nodes;
-		}
-
-		return prunedNodes;
-	}
-
-	/**
 	 * @returns groupData	Object with list of nodes for group creation.
 	 */
 	public createGroupData(nodes) {
@@ -935,16 +890,17 @@ class IssueController implements ng.IController {
 			color: [255, 0, 0],
 			objects: nodes,
 		};
+
 		return nodes.length === 0 ? null : groupData;
 	}
 
 	public createGroup(viewpoint, screenShot, objectInfo) {
 
 		// Create a group of selected objects
-		const highlightedGroupData = this.createGroupData(this.pruneNodes(objectInfo.highlightedNodes, "selected"));
+		const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes);
 
 		// Create a group of hidden objects
-		const hiddenGroupData = this.createGroupData(this.pruneNodes(objectInfo.hiddenNodes, "toggleState"));
+		const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes);
 
 		const promises = [];
 
@@ -1085,18 +1041,18 @@ class IssueController implements ng.IController {
 		Promise.all(initPromises).then( () => {
 			// FIXME: this is duplicated code - something similar already exists in CreateGroup
 			// Create a group of selected objects
-			const highlightedGroupData = this.createGroupData(this.pruneNodes(objectInfo.highlightedNodes, "selected"));
+			const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes);
 
 			// Create a group of hidden objects
-			const hiddenGroupData = this.createGroupData(this.pruneNodes(objectInfo.hiddenNodes, "toggleState"));
+			const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes);
 
 			const promises = [];
 
 			if (highlightedGroupData) {
-			promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
-				.then((highlightedGroupResponse) => {
-					this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-				}));
+				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
+					.then((highlightedGroupResponse) => {
+						this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+					}));
 			}
 
 			if (hiddenGroupData) {

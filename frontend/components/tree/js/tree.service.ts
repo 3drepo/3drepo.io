@@ -499,6 +499,11 @@ export class TreeService {
 		while (stack.length > 0) {
 
 			const childNode = stack.pop();
+			if (childNode === undefined) {
+				console.error("childNode is undefined");
+				continue;
+			}
+
 			const model = childNode.model || childNode.project;
 			const key = childNode.account + "@" + model;
 
@@ -970,7 +975,7 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node: any) {
 
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
@@ -1161,20 +1166,10 @@ export class TreeService {
 
 	}
 
-	public getMeshHighlights(nodes: any) {
-		return this.ready.promise.then(() => {
+	public getMeshHighlights(nodes) {
+		return this.onReady().then(() => {
 			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
-	}
-
-	public getCurrentMeshHighlightsFromViewer() {
-		const objectsDefer = this.$q.defer();
-
-		// Get selected objects
-		this.ViewerService.getObjectsStatus({
-			promise: objectsDefer,
-		});
-		return objectsDefer.promise;
 	}
 
 	/**
@@ -1278,7 +1273,7 @@ export class TreeService {
 	 * @param nodes	Nodes to unhighlight in the viewer
 	 */
 	public unhighlightNodes(nodes: any) {
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, undefined);
 
@@ -1311,7 +1306,7 @@ export class TreeService {
 	 */
 	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
@@ -1357,20 +1352,28 @@ export class TreeService {
 			return Promise.resolve([]);
 		}
 
-		return this.getMap().then(() => {
+		return this.onReady().then(() => {
 
 			const nodes = [];
 
 			for (let i = 0; i < objects.length; i++) {
-				const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
-				const node = this.getNodeById(objUid);
-				if (node) {
-					nodes.push(node);
+				for (let j = 0; objects[i].shared_ids && j < objects[i].shared_ids.length; j++) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_ids[j]];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
+				}
+				if (objects[i].shared_id) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
 				}
 			}
 
 			return nodes;
-
 		});
 	}
 

@@ -25,11 +25,11 @@ class IssuesController implements ng.IController {
 
 		"IssuesService",
 		"EventService",
-		"AuthService", 
+		"AuthService",
 		"APIService",
 		"NotificationService",
 		"RevisionsService",
-		"ClientConfigService", 
+		"ClientConfigService",
 		"AnalyticService",
 		"DialogService",
 		"ViewerService"
@@ -74,11 +74,11 @@ class IssuesController implements ng.IController {
 
 		private IssuesService,
 		private EventService,
-		private AuthService, 
+		private AuthService,
 		private APIService,
 		private NotificationService,
 		private RevisionsService,
-		private ClientConfigService, 
+		private ClientConfigService,
 		private AnalyticService,
 		private DialogService,
 		private ViewerService
@@ -87,7 +87,7 @@ class IssuesController implements ng.IController {
 	public $onInit() {
 
 		this.ViewerService.setPin({data: null});
-			
+
 		this.saveIssueDisabled = true;
 		this.allIssues = [];
 		this.issuesToShow = [];
@@ -521,7 +521,7 @@ class IssuesController implements ng.IController {
 				{notify: false},
 			);
 
-			this.IssuesService.setSelectedIssue(issue);
+			this.IssuesService.setSelectedIssue(issue, true);
 
 		} else {
 			this.IssuesService.resetSelectedIssue();
