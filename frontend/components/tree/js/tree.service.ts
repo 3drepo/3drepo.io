@@ -968,7 +968,7 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node) {
 
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
@@ -1057,7 +1057,7 @@ export class TreeService {
 	}
 
 	public getMeshHighlights(nodes) {
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
 	}
@@ -1152,7 +1152,7 @@ export class TreeService {
 	 * @param nodes	Nodes to unhighlight in the viewer
 	 */
 	public unhighlightNodes(nodes: any) {
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, undefined);
 
@@ -1185,7 +1185,7 @@ export class TreeService {
 	 */
 	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
@@ -1231,7 +1231,7 @@ export class TreeService {
 			return Promise.resolve([]);
 		}
 
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const nodes = [];
 
