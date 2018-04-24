@@ -503,6 +503,7 @@ export class IssuesService {
 			this.TreeService.showProgress = false;
 			this.handleShowIssue(issue);
 		}
+
 	}
 
 	public handleCameraView(issue) {
@@ -542,9 +543,10 @@ export class IssuesService {
 			this.ViewerService.goToExtent();
 		}
 
-		this.TreeService.getMap().then(() => {
+		this.TreeService.onReady().then(() => {
 			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
 		});
+
 	}
 
 	public showMultiIds(issue) {
