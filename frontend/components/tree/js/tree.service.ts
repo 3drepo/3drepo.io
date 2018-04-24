@@ -1062,16 +1062,6 @@ export class TreeService {
 		});
 	}
 
-	public getCurrentMeshHighlightsFromViewer() {
-		const objectsDefer = this.$q.defer();
-
-		// Get selected objects
-		this.ViewerService.getObjectsStatus({
-			promise: objectsDefer,
-		});
-		return objectsDefer.promise;
-	}
-
 	/**
 	 * Return a map of currently selected meshes
 	 */
@@ -1236,15 +1226,23 @@ export class TreeService {
 			const nodes = [];
 
 			for (let i = 0; i < objects.length; i++) {
-				const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
-				const node = this.getNodeById(objUid);
-				if (node) {
-					nodes.push(node);
+				for (let j = 0; objects[i].shared_ids && j < objects[i].shared_ids.length; j++) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_ids[j]];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
+				}
+				if (objects[i].shared_id) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
 				}
 			}
 
 			return nodes;
-
 		});
 	}
 
