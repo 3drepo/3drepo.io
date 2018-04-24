@@ -6,7 +6,6 @@ var databaseList = db.adminCommand('listDatabases');
 
 databaseList.databases.forEach(function(dbEntry) {
 	if(dbEntry.name === "local" || dbEntry.name === "admin") return;
-	if(dbEntry.name !== "groupTest") return;
 	var dbConn = db.getSiblingDB(dbEntry.name);
 	print("============================== " + dbEntry.name + " =====================================");
 	dbConn.getCollectionNames().forEach(function(colName){
