@@ -186,10 +186,13 @@ class GroupsController implements ng.IController {
 
 	public editGroup() {
 		this.changed = false;
-		// We don't want color over ride when we're editing
+
+		// Save the color override to be re-enabled later
 		if (this.GroupsService.hasColorOverride(this.selectedGroup)) {
 			this.lastColorOverride = this.selectedGroup;
 		}
+
+		// We don't want color over ride when we're editing
 		this.GroupsService.removeColorOverride(this.selectedGroup._id);
 		this.showGroupPane();
 	}
