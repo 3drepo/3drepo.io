@@ -313,7 +313,12 @@ export class UnityUtil {
 
 	public static viewpointReturned(vpInfo) {
 		if (UnityUtil.vpPromise != null) {
-			const viewpoint = JSON.parse(vpInfo);
+			let viewpoint = {} ;
+			try {
+				viewpoint = JSON.parse(vpInfo);
+			} catch {
+				console.error("Failed to parse viewpoint", vpInfo);
+			}
 			UnityUtil.vpPromise.resolve(viewpoint);
 			UnityUtil.vpPromise = null;
 		}
