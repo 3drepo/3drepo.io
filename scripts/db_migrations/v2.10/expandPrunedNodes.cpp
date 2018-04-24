@@ -247,8 +247,7 @@ int main(int argc, char* argv[])
 	auto dbNames = controller->getDatabases(token);
 
 	for (const auto &db : dbNames) {
-		if (db == "groupTest")
-			unpruneDB(controller, token, db);
+		unpruneDB(controller, token, db);
 	}
 }
 
