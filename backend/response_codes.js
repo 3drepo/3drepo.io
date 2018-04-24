@@ -107,6 +107,7 @@
 		ROLE_SETTINGS_NOT_FOUND: { message: "Role settings not found", status: 500 },
 
 		GROUP_NOT_FOUND: { message: "Group not found", status: 404 },
+		INVALID_GROUP: { message: "Group request malformed", status: 400 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },

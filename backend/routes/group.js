@@ -91,7 +91,7 @@ function createGroup(req, res, next){
 
 	create.then(group => {
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -115,6 +115,7 @@ function deleteGroup(req, res, next){
 
 function updateGroup(req, res, next){
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
 	let groupItem;
@@ -129,11 +130,11 @@ function updateGroup(req, res, next){
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			return group.updateAttrs(req.body);
+			return group.updateAttrs(dbCol, req.body);
 		}
 
 	}).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

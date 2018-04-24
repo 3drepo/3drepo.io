@@ -459,12 +459,6 @@ export class Viewer {
 	public updateSettings(settings) {
 		if (settings) {
 			this.settings = settings;
-			this.applySettings();
-		}
-	}
-
-	public applySettings() {
-		if (this.settings) {
 			if (this.settings.properties && this.settings.properties.unit) {
 				this.setUnits(this.settings.properties.unit);
 			}

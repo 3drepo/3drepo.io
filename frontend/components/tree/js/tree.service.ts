@@ -465,7 +465,9 @@ export class TreeService {
 	 * Show the first set of children using the expand function but deselect the child used for this.
 	 */
 	public expandFirstNode() {
-		this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
+		if (this.nodesToShow.length > 0) {
+			this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
+		}
 	}
 
 	/**
@@ -490,6 +492,11 @@ export class TreeService {
 		while (stack.length > 0) {
 
 			const childNode = stack.pop();
+			if (childNode === undefined) {
+				console.error("childNode is undefined");
+				continue;
+			}
+
 			const model = childNode.model || childNode.project;
 			const key = childNode.account + "@" + model;
 
@@ -671,7 +678,6 @@ export class TreeService {
 			for (let i = 0; i < numChildren; i++) {
 
 				const childNode = nodeToExpand.children[i];
-				childNode.expanded = false;
 				childNode.level = nodeToExpand.level + 1;
 
 				if (childNode && childNode.hasOwnProperty("name")) {
@@ -682,7 +688,6 @@ export class TreeService {
 				}
 
 			}
-
 			nodeToExpand.expanded = true;
 		}
 
@@ -704,8 +709,19 @@ export class TreeService {
 
 		for (let i = 0; i < path.length; i++) {
 			const node = this.getNodeById(path[i]);
+			const nextNode = this.getNodeById(path[i + 1]);
 
 			this.expandTreeNode(node);
+
+			// Collapse all the children that aren't next
+			// down the expansion path
+			if (node.children) {
+				node.children.forEach((n) => {
+					if (n !== nextNode || nextNode === undefined) {
+						this.collapseTreeNode(n);
+					}
+				});
+			}
 
 			// If it's the last node in the path
 			// scroll to it
@@ -724,12 +740,16 @@ export class TreeService {
 
 		if (!noHighlight) {
 
-			this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
+			return this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
 				this.selectedIndex = selectedIndex;
+				return selectedIndex;
 			});
-		} else {
-			this.selectedIndex = selectedIndex;
+
 		}
+
+		this.selectedIndex = selectedIndex;
+		return Promise.resolve(selectedIndex);
+
 	}
 
 	/**
@@ -948,7 +968,7 @@ export class TreeService {
 	 */
 	public updateModelVisibility(node) {
 
-		this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
 
@@ -1037,19 +1057,9 @@ export class TreeService {
 	}
 
 	public getMeshHighlights(nodes) {
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
 		});
-	}
-
-	public getCurrentMeshHighlightsFromViewer() {
-		const objectsDefer = this.$q.defer();
-
-		// Get selected objects
-		this.ViewerService.getObjectsStatus({
-			promise: objectsDefer,
-		});
-		return objectsDefer.promise;
 	}
 
 	/**
@@ -1132,7 +1142,7 @@ export class TreeService {
 	 * @param nodes	Nodes to unhighlight in the viewer
 	 */
 	public unhighlightNodes(nodes: any) {
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, undefined);
 
@@ -1165,7 +1175,7 @@ export class TreeService {
 	 */
 	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
 
-		return this.ready.promise.then(() => {
+		return this.onReady().then(() => {
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
 
 			// Update viewer highlights
@@ -1211,20 +1221,28 @@ export class TreeService {
 			return Promise.resolve([]);
 		}
 
-		return this.getMap().then(() => {
+		return this.onReady().then(() => {
 
 			const nodes = [];
 
 			for (let i = 0; i < objects.length; i++) {
-				const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
-				const node = this.getNodeById(objUid);
-				if (node) {
-					nodes.push(node);
+				for (let j = 0; objects[i].shared_ids && j < objects[i].shared_ids.length; j++) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_ids[j]];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
+				}
+				if (objects[i].shared_id) {
+					const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
+					const node = this.getNodeById(objUid);
+					if (node) {
+						nodes.push(node);
+					}
 				}
 			}
 
 			return nodes;
-
 		});
 	}
 
@@ -1358,12 +1376,13 @@ export class TreeService {
 
 				if (nodes && nodes.length) {
 
-					this.selectNodes(nodes, true, undefined, false);
+					const selectedIndex = this.selectNodes(nodes, true, undefined, true);
 
 					const lastNodeId = nodes[nodes.length - 1]._id;
 					const lastNodePath = this.getPath(lastNodeId);
 
 					this.expandToSelection(lastNodePath, 0, true, true);
+					return selectedIndex;
 				}
 
 			})
