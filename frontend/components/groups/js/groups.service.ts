@@ -379,12 +379,10 @@ export class GroupsService {
 	}
 
 	public getTotalMeshes() {
-		return this.getObjectsStatus().then((objectsStatus) => {
-			// @ts-ignore
+		return this.getObjectsStatus().then((objectsStatus: any) => {
 			return (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length > 0) ?
-				// @ts-ignore
 				objectsStatus.highlightedNodes
-					.map(x => x.shared_ids.length)
+					.map((x) => x.shared_ids.length)
 					.reduce((acc, val) => acc + val) : 0;
 		});
 	}
@@ -470,8 +468,7 @@ export class GroupsService {
 	 * Get the selected objects fit for sending to the backend
 	 */
 	public getSelectedObjects() {
-		return this.getObjectsStatus().then((objects) => {
-			// @ts-ignore
+		return this.getObjectsStatus().then((objects: any) => {
 			return objects.highlightedNodes;
 		});
 	}
