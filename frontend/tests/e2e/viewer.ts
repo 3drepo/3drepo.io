@@ -10,7 +10,8 @@ describe("Viewer page", function() {
 		const EC = browser.ExpectedConditions;
 		const url = env.baseUrl + "/" + USER.USERNAME + "/" + USER.MODEL_ID;
 		browser.get(url);
-		browser.waitForAngularEnabled(false);
+		browser.waitForAngular();
+		//browser.waitForAngularEnabled(false);
 	});
 
 	after(() => {
