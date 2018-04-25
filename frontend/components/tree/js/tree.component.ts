@@ -223,6 +223,7 @@ class TreeController implements ng.IController {
 		const height = nodesToShow.length * this.nodeHeight + 5;
 		this.onContentHeightRequest({height });
 		this.resize();
+		console.log(height);
 	}
 
 	public resize() {
@@ -331,7 +332,7 @@ class TreeController implements ng.IController {
 						this.nodes[i].level = 0;
 					}
 					this.setupInfiniteItemsFilter();
-					this.setContentHeight(this.nodes);
+					this.onContentHeightRequest({height: this.nodeHeight * this.nodes.length});
 				} else {
 					const noFilterItemsFoundHeight = 82;
 					this.onContentHeightRequest({height: noFilterItemsFoundHeight});
@@ -409,17 +410,16 @@ class TreeController implements ng.IController {
 			this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
 			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
 		} else {
-			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
+			this.nodes[node.index].selected = (this.nodes[node.index].selected !== this.TreeService.SELECTION_STATES.selected) ?
+												this.TreeService.SELECTION_STATES.selected :
+												this.TreeService.SELECTION_STATES.unselected;
 		}
 
 		const selectedComponentNode = this.nodes[node.index];
 
 		if (selectedComponentNode) {
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], multi, undefined, false)
-				.then((selectedIndex) => {
-					this.updateTopIndex(selectedIndex);
-				});
+			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
 		}
 
 	}
