@@ -60,9 +60,9 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static onProgress(gameInstance, progress: number, appendTo: string) {
+	public static onProgress(gameInstance, progress: number) {
 
-		appendTo = appendTo || "viewer"
+		const appendTo = "viewer"
 
 		if (!gameInstance.progress) {
 			gameInstance.progress = document.createElement("div");
