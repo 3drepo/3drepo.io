@@ -261,10 +261,10 @@ class TreeController implements ng.IController {
 	public toggleTreeNode($event, node) {
 		$event.stopPropagation();
 
-		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		const newState = (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState) ? this.TreeService.VISIBILITY_STATES.visible : this.TreeService.VISIBILITY_STATES.invisible;
 
 		// Unhighlight the node in the viewer if we're making it invisible
-		if (newState === "invisible" && node.selected) {
+		if (newState === this.TreeService.VISIBILITY_STATES.invisible && node.selected) {
 			this.TreeService.deselectNodes([node]);
 		}
 
@@ -275,7 +275,7 @@ class TreeController implements ng.IController {
 
 	public selectAndCentreNode(node: any) {
 
-		if (node.toggleState === "invisible") {
+		if (node.toggleState === this.TreeService.VISIBILITY_STATES.invisible) {
 			return;
 		}
 
@@ -350,7 +350,7 @@ class TreeController implements ng.IController {
 	 */
 	public ignoreSelection($event: any, node: any): boolean {
 		const doubleClick = $event.detail > 1;
-		if (doubleClick || node.toggleState === "invisible") {
+		if (doubleClick || node.toggleState === this.TreeService.VISIBILITY_STATES.invisible) {
 			return true;
 		}
 		return false;

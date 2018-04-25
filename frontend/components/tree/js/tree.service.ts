@@ -53,6 +53,7 @@ export class TreeService {
 	private idToPath;
 	private idToObjRef;
 	private SELECTION_STATES;
+	private VISIBILITY_STATES;
 
 	constructor(
 		private $q: ng.IQService,
@@ -89,6 +90,12 @@ export class TreeService {
 			parentOfUnselected : 0,
 			selected : 1,
 			unselected : 2,
+		};
+
+		this.VISIBILITY_STATES = {
+			parentOfInvisible : "parentOfInvisible",
+			visible : "visible",
+			invisible : "invisible",
 		};
 
 	}
@@ -551,24 +558,24 @@ export class TreeService {
 
 			for (let i = 0; 0 === parentOfInvisibleChildCount && node.children && i < node.children.length; i++) {
 				switch (node.children[i].toggleState) {
-					case "visible":
+					case this.VISIBILITY_STATES.visible:
 						visibleChildCount++;
 						break;
-					case "parentOfInvisible":
+					case this.VISIBILITY_STATES.parentOfInvisible:
 						parentOfInvisibleChildCount++;
 						break;
 				}
 			}
 
 			if (parentOfInvisibleChildCount > 0) {
-				node.toggleState = "parentOfInvisible";
+				node.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
 			} else if (node.children.length === visibleChildCount) {
-				node.toggleState = "visible";
+				node.toggleState = this.VISIBILITY_STATES.visible;
 			} else if (0 === visibleChildCount) {
-				node.toggleState = "invisible";
+				node.toggleState = this.VISIBILITY_STATES.invisible;
 				this.setNodeSelection(node, false);
 			} else {
-				node.toggleState = "parentOfInvisible";
+				node.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
 			}
 		}
 	}
@@ -596,10 +603,10 @@ export class TreeService {
 
 				if (path && path.length > 1) {
 					// Fast forward up path for parentOfInvisible state
-					if ("parentOfInvisible" === currentNode.toggleState) {
+					if (this.VISIBILITY_STATES.parentOfInvisible === currentNode.toggleState) {
 						for (let i = path.length - 2; i >= 0; i--) {
 							const parentNode = this.getNodeById(path[i]);
-							parentNode.toggleState = "parentOfInvisible";
+							parentNode.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
 						}
 					} else {
 						nodes.push(this.getNodeById(path[path.length - 2]));
@@ -801,7 +808,7 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be hidden.
 	 */
 	public hideTreeNodes(nodes: any[]) {
-		this.setVisibilityOfNodes(nodes, "invisible");
+		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
 		this.updateModelVisibility(this.allNodes[0]);
 	}
 
@@ -810,13 +817,13 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be shown.
 	 */
 	public showTreeNodes(nodes: any[]) {
-		this.setVisibilityOfNodes(nodes, "visible");
+		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
 		this.updateModelVisibility(this.allNodes[0]);
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
-
-		if (node && ("parentOfInvisible" === visibility || visibility !== node.toggleState)) {
+		console.log(node);
+		if (node && (this.VISIBILITY_STATES.parentOfInvisible === visibility || visibility !== node.toggleState)) {
 			const priorToggleState = node.toggleState;
 
 			let children = [];
@@ -837,17 +844,17 @@ export class TreeService {
 				}
 
 				if (!child.hasOwnProperty("defaultState")) {
-					if (visibility === "visible" && this.canShowNode(child)) {
-						child.toggleState = "visible";
+					if (visibility === this.VISIBILITY_STATES.visible && this.canShowNode(child)) {
+						child.toggleState = this.VISIBILITY_STATES.visible;
 					} else {
-						child.toggleState = "invisible";
+						child.toggleState = this.VISIBILITY_STATES.invisible;
 						this.setNodeSelection(child, false);
 					}
 				} else {
-					if (visibility === "visible") {
-						child.toggleState = (this.getHideIfc()) ? child.defaultState : "visible";
+					if (visibility === this.VISIBILITY_STATES.visible) {
+						child.toggleState = (this.getHideIfc()) ? child.defaultState : this.VISIBILITY_STATES.visible;
 					} else {
-						child.toggleState = "invisible";
+						child.toggleState = this.VISIBILITY_STATES.invisible;
 						this.setNodeSelection(child, false);
 					}
 				}
@@ -861,7 +868,7 @@ export class TreeService {
 	 * Hide all tree nodes.
 	 */
 	public hideAllTreeNodes(updateModel) {
-		this.setTreeNodeStatus(this.allNodes[0], "invisible");
+		this.setTreeNodeStatus(this.allNodes[0], this.VISIBILITY_STATES.invisible);
 		if (updateModel) {
 			this.updateModelVisibility(this.allNodes[0]);
 		}
@@ -871,7 +878,7 @@ export class TreeService {
 	 * Show all tree nodes.
 	 */
 	public showAllTreeNodes(updateModel) {
-		this.setTreeNodeStatus(this.allNodes[0], "visible");
+		this.setTreeNodeStatus(this.allNodes[0], this.VISIBILITY_STATES.visible);
 
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
@@ -913,7 +920,7 @@ export class TreeService {
 	 */
 	public canShowNode(node: any) {
 		return !(this.state.hideIfc && (
-			(node.defaultState && "invisible" === node.defaultState) ||
+			(node.defaultState && this.VISIBILITY_STATES.invisible === node.defaultState) ||
 			this.getHiddenByDefaultNodes().indexOf(node) !== -1));
 	}
 
@@ -996,13 +1003,13 @@ export class TreeService {
 
 					if (childNode) {
 
-						if (childNode.toggleState === "invisible") {
+						if (childNode.toggleState === this.VISIBILITY_STATES.invisible) {
 							this.clickedHidden[childNode._id] = childNode;
 						} else {
 							delete this.clickedHidden[childNode._id];
 						}
 
-						if (childNode.toggleState === "visible") {
+						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
 							this.clickedShown[childNode._id] = childNode;
 						} else {
 							delete this.clickedShown[childNode._id];
@@ -1083,11 +1090,11 @@ export class TreeService {
 				this.currentSelectedNodes.splice(nodeIndex, 1);
 			}
 
-			if (currentNode.toggleState !== "invisible") {
+			if (currentNode.toggleState !== this.VISIBILITY_STATES.invisible) {
 
 				if (!select) {
 					currentNode.selected = this.SELECTION_STATES.unselected;
-				} else if (currentNode.toggleState === "parentOfInvisible") {
+				} else if (currentNode.toggleState === this.VISIBILITY_STATES.parentOfInvisible) {
 					currentNode.selected = this.SELECTION_STATES.parentOfUnselected;
 				} else {
 					currentNode.selected = this.SELECTION_STATES.selected;
@@ -1158,7 +1165,7 @@ export class TreeService {
 
 		const selected = select ? this.SELECTION_STATES.selected : this.SELECTION_STATES.unselected;
 
-		if (node.selected === selected || node.toggleState === "invisible") {
+		if (node.selected === selected || node.toggleState === this.VISIBILITY_STATES.invisible) {
 			return;
 		}
 
@@ -1385,7 +1392,7 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				this.setVisibilityOfNodes(nodes, "visible");
+				this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
 				this.updateModelVisibility(this.allNodes[0]);
 			})
 			.catch((error) => {
@@ -1582,10 +1589,10 @@ export class TreeService {
 
 				if (node._id) {
 					this.idToNodeMap[node._id] = node;
-					if (node.toggleState === "visible" && (!node.children || node.children.length === 0)) {
+					if (node.toggleState === this.VISIBILITY_STATES.visible && (!node.children || node.children.length === 0)) {
 						this.shownByDefaultNodes.push(node);
 					}
-					if (node.toggleState === "invisible") {
+					if (node.toggleState === this.VISIBILITY_STATES.invisible) {
 						this.hiddenByDefaultNodes.push(node);
 					}
 					node.defaultState = node.toggleState;
