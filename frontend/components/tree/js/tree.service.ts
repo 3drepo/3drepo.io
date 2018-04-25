@@ -1061,21 +1061,23 @@ export class TreeService {
 
 	/**
 	 * Set the selection state of a nodes parents to represent it's children
-	 * @param nodes the nodes to set a new selection state on
+	 * @param node the node to set a new selection state on
 	 * @param select wether the node should be selected or not
 	 */
-	public traverseNodesAndSetSelected(nodes: any[], select: boolean) {
+	public traverseNodeAndSetSelected(node: any[], select: boolean) {
 
-		nodes = nodes.concat(); // make a copy
-		const setParentNodes = nodes.concat();
+		let nodes: any[] = [node]; // make a copy
 
 		while (nodes.length) {
 			const currentNode = nodes.pop();
 
 			const nodeIndex = this.currentSelectedNodes.indexOf(currentNode);
-			const notParentOfUnselected = currentNode.selected !== this.SELECTION_STATES.parentOfUnselected;
 
-			if (select && notParentOfUnselected && nodeIndex === -1) {
+			if (
+				select &&
+				currentNode.selected !== this.SELECTION_STATES.parentOfUnselected &&
+				nodeIndex === -1
+			) {
 				this.currentSelectedNodes.push(currentNode);
 			} else if (nodeIndex > -1) {
 				this.currentSelectedNodes.splice(nodeIndex, 1);
@@ -1085,7 +1087,7 @@ export class TreeService {
 
 				if (!select) {
 					currentNode.selected = this.SELECTION_STATES.unselected;
-				} else if (currentNode.toggleState !== "parentOfInvisible") {
+				} else if (currentNode.toggleState === "parentOfInvisible") {
 					currentNode.selected = this.SELECTION_STATES.parentOfUnselected;
 				} else {
 					currentNode.selected = this.SELECTION_STATES.selected;
@@ -1098,9 +1100,7 @@ export class TreeService {
 
 		}
 
-		setParentNodes.forEach((node) => {
-			this.setSelectionOnParentNodes(node);
-		});
+		this.setSelectionOnParentNodes(node);
 
 	}
 
@@ -1162,7 +1162,7 @@ export class TreeService {
 			return;
 		}
 
-		this.traverseNodesAndSetSelected([node], select);
+		this.traverseNodeAndSetSelected(node, select);
 
 	}
 
@@ -1229,7 +1229,7 @@ export class TreeService {
 			const selected = (node.selected !== this.SELECTION_STATES.parentOfUnselected &&
 								node.selected !== this.SELECTION_STATES.selected);
 
-			const shouldSelect = !multi || forceReHighlight || !!selected; // && node.selected !== "parentOfUnselected");
+			const shouldSelect = !multi || forceReHighlight || selected;
 
 			this.setNodeSelection(node, shouldSelect);
 
