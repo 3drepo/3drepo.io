@@ -49,6 +49,7 @@ class GroupsController implements ng.IController {
 	private modelSettings: any;
 	private savedGroupData: any;
 	private customIcons: any;
+	private lastColorOverride: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -114,6 +115,10 @@ class GroupsController implements ng.IController {
 				this.toShow = "groups";
 				this.setContentHeight();
 				this.resetToSavedGroup();
+				if (this.lastColorOverride) {
+					this.GroupsService.colorOverride(this.lastColorOverride);
+					this.lastColorOverride = null;
+				}
 			}
 		});
 
@@ -181,6 +186,12 @@ class GroupsController implements ng.IController {
 
 	public editGroup() {
 		this.changed = false;
+
+		// Save the color override to be re-enabled later
+		if (this.GroupsService.hasColorOverride(this.selectedGroup)) {
+			this.lastColorOverride = this.selectedGroup;
+		}
+
 		// We don't want color over ride when we're editing
 		this.GroupsService.removeColorOverride(this.selectedGroup._id);
 		this.showGroupPane();
