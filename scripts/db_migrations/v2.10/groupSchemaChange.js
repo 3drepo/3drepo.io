@@ -14,7 +14,7 @@ databaseList.databases.forEach(function(dbEntry) {
 			print("processing " + colName);
 			dbConn.getCollection(colName).find().forEach(function(group){
 				if(group.objects && group.objects.length > 0) {
-					if(group.objects.shared_ids || group.objects.ifc_guids) 
+					if(group.objects[0].shared_ids || group.objects[0].ifc_guids) 
 						return; //group already processed
 
 					//It should be save to assume that all objects belong in
