@@ -60,12 +60,14 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
-	public static onProgress(gameInstance, progress: number) {
+	public static onProgress(gameInstance, progress: number, appendTo: string) {
+
+		appendTo = appendTo || "viewer"
 
 		if (!gameInstance.progress) {
 			gameInstance.progress = document.createElement("div");
 			gameInstance.progress.className = "unityProgressBar";
-			document.getElementById("viewer").appendChild(gameInstance.progress);
+			document.getElementById(appendTo).appendChild(gameInstance.progress);
 		}
 
 		requestAnimationFrame(() => {
@@ -80,7 +82,10 @@ export class UnityUtil {
 
 	}
 
-	public static loadUnity(divId: any) {
+	public static loadUnity(divId: any, unityJsonPath?: string) {
+
+		unityJsonPath = unityJsonPath || "unity/Build/unity.json";
+
 		const unitySettings: any = {
 			onProgress: this.onProgress,
 		};
@@ -89,13 +94,13 @@ export class UnityUtil {
 			unitySettings.Module = (window as any).Module;
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
-				"unity/Build/unity.json",
+				unityJsonPath,
 				unitySettings,
 			);
 		} else {
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
-				"unity/Build/unity.json",
+				unityJsonPath,
 			);
 		}
 
