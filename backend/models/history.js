@@ -43,6 +43,21 @@ var historySchema = Schema({
 		current: []
 });
 
+historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
+
+	let history;
+
+	if (revId && utils.isUUID(revId)) {
+		history = this.findByUID(dbColOptions, revId, projection);
+	} else if (revId && !utils.isUUID(revId)) {
+		history = this.findByTag(dbColOptions, revId, projection);
+	} else if (branch) {
+		history = this.findByBranch(dbColOptions, branch, projection);
+	}
+
+	return history;
+};
+
 historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection){

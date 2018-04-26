@@ -53,18 +53,7 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch,
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
-
-			let getHistory;
-
-			if (revId && utils.isUUID(revId)) {
-				getHistory = History.findByUID({ account, model }, revId);
-			} else if (revId && !utils.isUUID(revId)) {
-				getHistory = History.findByTag({ account, model }, revId);
-			} else if (branch) {
-				getHistory = History.findByBranch({ account, model }, branch);
-			}
-
-			return getHistory.then(history => {
+			return History.getHistory({ account, model }, branch, revId).then(history => {
 				if (!history) {
 					return Promise.reject(responseCodes.INVALID_TAG_NAME);
 				} else {
