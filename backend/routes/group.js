@@ -28,6 +28,7 @@ const systemLogger = require("../logger.js").systemLogger;
 
 router.get('/groups/', middlewares.issue.canView, listGroups);
 router.get('/groups/:uid', middlewares.issue.canView, findGroup);
+router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, listGroups);
 router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
 
 router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
@@ -40,10 +41,17 @@ const getDbColOptions = function(req){
 
 function listGroups(req, res, next){
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	// TODO: Add revID support
-	Group.listGroups(getDbColOptions(req), req.query, "master", null).then(groups => {
+	let groupList;
+	if (req.params.rid) {
+		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid);
+	} else {
+		groupList = Group.listGroups(dbCol, req.query, "master", null);
+	}
+
+	groupList.then(groups => {
 
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
@@ -61,13 +69,14 @@ function listGroups(req, res, next){
 
 function findGroup(req, res, next){
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUIDSerialised(getDbColOptions(req), req.params.uid, null, req.params.rid);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid);
 	} else {
-		groupItem = Group.findByUIDSerialised(getDbColOptions(req), req.params.uid, "master", null);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null);
 	}
 
 	groupItem.then( group => {
@@ -121,9 +130,9 @@ function updateGroup(req, res, next){
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, null, req.params.rid);
+		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid);
 	} else {
-		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, "master", null);
+		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
 	}
 
 	groupItem.then( group => {
