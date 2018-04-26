@@ -268,7 +268,7 @@ export class IssuesService {
 
 	}
 
-	public setSelectedIssue(issue, isCorrectState) {
+	public setSelectedIssue(issue, isCorrectState, revision) {
 
 		if (this.state.selectedIssue) {
 			const different = (this.state.selectedIssue._id !== issue._id);
@@ -283,7 +283,7 @@ export class IssuesService {
 		// highlights in place
 		if (!isCorrectState) {
 			this.showIssuePins();
-			this.showIssue(issue);
+			this.showIssue(issue, revision);
 		}
 
 	}
@@ -470,7 +470,7 @@ export class IssuesService {
 		}
 	}
 
-	public showIssue(issue) {
+	public showIssue(issue, revision) {
 
 		this.TreeService.showProgress = true;
 
@@ -494,7 +494,7 @@ export class IssuesService {
 						issue.viewpoint.hasOwnProperty("group_id"))) ||
 				issue.hasOwnProperty("group_id")) {
 
-			this.showMultiIds(issue).then(() => {
+			this.showMultiIds(issue, revision).then(() => {
 				this.TreeService.showProgress = false;
 				this.handleShowIssue(issue);
 			});
@@ -549,7 +549,7 @@ export class IssuesService {
 
 	}
 
-	public showMultiIds(issue) {
+	public showMultiIds(issue, revision) {
 
 		const promises = [];
 
@@ -560,7 +560,12 @@ export class IssuesService {
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
-				const hiddenGroupUrl = `${issue.account}/${issue.model}/groups/${hiddenGroupId}`;
+				const hiddenGroupUrl;
+				if (revision) {
+					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${hiddenGroupId}`;
+				} else {
+					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/${hiddenGroupId}`;
+				}
 
 				let hiddenPromise;
 
@@ -586,7 +591,12 @@ export class IssuesService {
 			if (issue.viewpoint.shown_group_id) {
 
 				const shownGroupId = issue.viewpoint.shown_group_id;
-				const shownGroupUrl = issue.account + "/" + issue.model + "/groups/" + shownGroupId;
+				const shownGroupUrl;
+				if (revision) {
+					shownGroupUrl = issue.account + "/" + issue.model + "/groups/revision/" + revision + "/" + shownGroupId;
+				} else {
+					shownGroupUrl = issue.account + "/" + issue.model + "/groups/" + shownGroupId;
+				}
 
 				let shownPromise;
 
@@ -610,7 +620,12 @@ export class IssuesService {
 			if (issue.viewpoint.highlighted_group_id) {
 
 				const highlightedGroupId = issue.viewpoint.highlighted_group_id;
-				const highlightedGroupUrl = `${issue.account}/${issue.model}/groups/${highlightedGroupId}`;
+				const highlightedGroupUrl;
+				if (revision) {
+					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${highlightedGroupId}`;
+				} else {
+					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/${highlightedGroupId}`;
+				}
 
 				let highlightPromise;
 
@@ -636,7 +651,13 @@ export class IssuesService {
 
 			const hasGroup = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id"));
 			const groupId = hasGroup ? issue.viewpoint.group_id : issue.group_id;
-			const groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+			const groupUrl;
+			if (revision) {
+				groupUrl = issue.account + "/" + issue.model + "/groups/revision/" + revision + "/" + groupId;
+			} else {
+				groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+			}
+
 			let handleTreePromise;
 
 			if (this.groupsCache[groupUrl]) {

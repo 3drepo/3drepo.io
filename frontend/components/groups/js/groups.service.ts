@@ -55,8 +55,8 @@ export class GroupsService {
 	/**
 	 * Initialise the groups state from the backend
 	 */
-	public initGroups(teamspace, model) {
-		return this.getGroups(teamspace, model)
+	public initGroups(teamspace, model, revision) {
+		return this.getGroups(teamspace, model, revision)
 			.then((groups) => {
 				this.state.groups = groups;
 				this.cleanGroups(this.state.groups);
@@ -486,8 +486,13 @@ export class GroupsService {
 	/**
 	 * Get the groups from the backend
 	 */
-	public getGroups(teamspace: string, model: string) {
-		const groupUrl = `${teamspace}/${model}/groups?noIssues=true`;
+	public getGroups(teamspace: string, model: string, revision: string) {
+		const groupUrl;
+		if (revision) {
+			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
+		} else {
+			groupUrl = `${teamspace}/${model}/groups?noIssues=true`;
+		}
 
 		return this.APIService.get(groupUrl)
 			.then((response) => {

@@ -270,7 +270,7 @@ class IssueController implements ng.IController {
 						this.issueFailedToLoad = false;
 						// Update the issue data on issue service so search would work better
 						this.IssuesService.updateIssues(this.issueData);
-						this.IssuesService.showIssue(this.issueData);
+						this.IssuesService.showIssue(this.issueData, this.revision);
 					})
 					.catch((error) => {
 						this.issueFailedToLoad = true;
@@ -670,7 +670,7 @@ class IssueController implements ng.IController {
 			// overwrite the original issue data itself
 			const newViewpointData = angular.copy(this.issueData);
 			newViewpointData.viewpoint = viewpoint;
-			this.IssuesService.showIssue(newViewpointData);
+			this.IssuesService.showIssue(newViewpointData, this.revision);
 
 		}
 	}
@@ -976,7 +976,7 @@ class IssueController implements ng.IController {
 				this.IssuesService.populateIssue(responseIssue);
 				this.issueData = responseIssue;
 				this.IssuesService.addIssue(this.issueData);
-				this.IssuesService.setSelectedIssue(this.issueData, true);
+				this.IssuesService.setSelectedIssue(this.issueData, true, this.revision);
 
 				// Hide some actions
 				this.ViewerService.pin.pinDropMode = false;
