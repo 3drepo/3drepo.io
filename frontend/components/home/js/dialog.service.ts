@@ -81,7 +81,6 @@ export class DialogService {
 				this.disconnectedDialogOpen = false;
 			})
 			.catch(() => {
-				console.log("Notifications - Muting notifications");
 				this.disconnectedDialogOpen = false;
 				this.muteNotifications = true;
 			});
@@ -147,6 +146,31 @@ export class DialogService {
 			).then(() => {
 				this.expiredDialogOpen = false;
 			});
+
+		} else {
+			return Promise.resolve();
+		}
+
+	}
+
+	public confirm(title, content, escapable, ok, cancel) {
+
+		if (!this.expiredDialogOpen) {
+
+			if (escapable === undefined) {
+				escapable = true;
+			}
+
+			return this.$mdDialog.show(
+				this.$mdDialog.confirm()
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
+					.title(title)
+					.textContent(content)
+					.ariaLabel(title)
+					.ok(ok)
+					.cancel(cancel),
+			);
 
 		} else {
 			return Promise.resolve();
@@ -228,7 +252,7 @@ export class DialogService {
 				window.location.reload();
 			})
 			.catch(() => {
-				console.log("User didn't reload");
+				console.debug("User didn't reload");
 			});
 
 	}

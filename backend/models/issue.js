@@ -93,23 +93,6 @@ let schema = Schema({
         	type: String
 	},
 
-
-	// TO-DO: remove this after db migration => viewpoints[0]=viewpoint
-	viewpoint: {
-		up: [Number],
-		position: [Number],
-		look_at: [Number],
-		view_dir: [Number],
-		right: [Number],
-		unityHeight : Number,
-		fov : Number,
-		aspect_ratio: Number,
-		far : Number,
-		near : Number,
-		clippingPlanes : [Schema.Types.Mixed ],
-		guid: Object
-	},
-
 	viewpoints: [{
 		up: [Number],
 		position: [Number],
@@ -177,6 +160,10 @@ let schema = Schema({
 	priority_last_changed: Number,
 	creator_role: String,
 	due_date: Number,
+
+	// Temporary issue origin information
+	origin_account: String,
+	origin_model: String,
 
 	//to be remove
 	scribble: Object,
@@ -294,7 +281,6 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 
 			});
 
-			//console.log('some refs', refs)
 			allRefs = allRefs.concat(refs);
 
 			return Promise.all(promises);
@@ -308,7 +294,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 };
 
 
-schema.statics.findByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
+schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
 
 	let issues;
 	let self = this;
@@ -358,8 +344,6 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 			if(histories.length > 0){
 
 				let history = histories[0];
-				//console.log('next history found', history);
-
 				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
 				filter = {
 					"created" : { "$lt": history.timestamp.valueOf() },
@@ -408,7 +392,7 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 
 	}).then(refs => {
 
-		if(!refs.length){
+		if(!refs.length || (ids && ids.length === issues.length)){
 			return Promise.resolve(issues);
 		} else {
 
@@ -429,7 +413,14 @@ schema.statics.findByModelName = function(dbColOptions, username, branch, revId,
 								};
 							}
 
-							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean);
+							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean)
+								.then(subModelIssues => {
+									return subModelIssues.map(issue => {
+										issue.origin_account = childDbName;
+										issue.origin_model = childModel;
+										return issue;
+									});
+								});
 						} else {
 							return Promise.resolve([]);
 						}
@@ -462,7 +453,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return this.findByModelName({account, model}, username, branch, revId, projection, noClean, ids);
+		return this.findIssuesByModelName({account, model}, username, branch, revId, projection, noClean, ids);
 
 	}).then(issues => {
 
@@ -470,8 +461,11 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 		issues.forEach(issue => {
 
+			const issueAccount = (issue.origin_account) ? issue.origin_account : account;
+			const issueModel = (issue.origin_model) ? issue.origin_model : model;
+
 			bcfPromises.push(
-				issue.getBCFMarkup(account, model, _.get(settings, "properties.unit")).then(bcf => {
+				issue.getBCFMarkup(issueAccount, issueModel, _.get(settings, "properties.unit")).then(bcf => {
 
 					zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${uuidToString(issue._id)}/markup.bcf`});
 
@@ -584,14 +578,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
-		// if(_.map(statusEnum).indexOf(data.status) === -1){
-		// 	return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
-		// }
-
-		if(_.map(priorityEnum).indexOf(data.priority) === -1){
-			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
-		}
-
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
 		issue.name = data.name;
@@ -607,13 +593,22 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.priority = data.priority;
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
 		if (data.due_date) {
-			issue.due_date = Date.parse(data.due_date);
+			issue.due_date = data.due_date;
 		}
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
 			data.viewpoint.group_id = data.group_id;
-			
+			if (data.viewpoint.highlighted_group_id) {
+				data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
+			}
+			if (data.viewpoint.hidden_group_id) {
+				data.viewpoint.hidden_group_id = stringToUUID(data.viewpoint.hidden_group_id);
+			}
+			if (data.viewpoint.shown_group_id) {
+				data.viewpoint.shown_group_id = stringToUUID(data.viewpoint.shown_group_id);
+			}
+
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer.from(data.viewpoint.scribble, "base64"),
 				flag: 1
@@ -680,8 +675,8 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
-	let checkGroup = function(group_id){
-		return Group.findByUID(dbColOptions, group_id).then(group => {
+	let updateGroup = function(group_id){
+		return Group.updateIssueId(dbColOptions, group_id, issueId).then(group => {
 			if(!group){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			} else {
@@ -690,47 +685,39 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 		});
 	};
 
-	let groupCheckPromises = [];
+	let groupUpdatePromises = [];
 
 	if (data.group_id){
-		groupCheckPromises.push(checkGroup(data.group_id));
+		groupUpdatePromises.push(updateGroup(data.group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.highlighted_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.highlighted_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.highlighted_group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.hidden_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.hidden_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.hidden_group_id));
 	}
 
 	if (data.viewpoint && data.viewpoint.shown_group_id) {
-		groupCheckPromises.push(checkGroup(data.viewpoint.shown_group_id));
+		groupUpdatePromises.push(updateGroup(data.viewpoint.shown_group_id));
 	}
 
 	if (data.viewpoints) {
 		for (let i = 0; i < data.viewpoints.length; i++) {
 			if (data.viewpoints[i].highlighted_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].highlighted_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].highlighted_group_id));
 			}
 			if (data.viewpoints[i].hidden_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].hidden_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].hidden_group_id));
 			}
 			if (data.viewpoints[i].shown_group_id) {
-				groupCheckPromises.push(checkGroup(data.viewpoints[i].shown_group_id));
+				groupUpdatePromises.push(updateGroup(data.viewpoints[i].shown_group_id));
 			}
 		}
 	}
 
-	return Promise.all(groupCheckPromises).then(groups => {
-
-		for (let i = 0; groups && i < groups.length; i++) {
-			groups[i].issue_id = issueId;
-			groups[i].save();
-		}
-
-		return Promise.resolve();
-	});
+	return Promise.all(groupUpdatePromises);
 };
 
 schema.statics.getScreenshot = function(dbColOptions, uid, vid){
@@ -879,6 +866,15 @@ schema.methods.updateComment = function(commentIndex, data){
 
 				data.viewpoint = data.viewpoint || {};
 				data.viewpoint.guid = utils.generateUUID();
+				if (data.viewpoint.highlighted_group_id) {
+					data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
+				}
+				if (data.viewpoint.hidden_group_id) {
+					data.viewpoint.hidden_group_id = stringToUUID(data.viewpoint.hidden_group_id);
+				}
+				if (data.viewpoint.shown_group_id) {
+					data.viewpoint.shown_group_id = stringToUUID(data.viewpoint.shown_group_id);
+				}
 
 				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
 					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
@@ -1094,11 +1090,12 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if(data.hasOwnProperty("priority")){
-		if (_.map(priorityEnum).indexOf(data.priority) === -1){
-
-			throw responseCodes.ISSUE_INVALID_PRIORITY;
-
-		} else if(data.priority !== this.priority) {
+		// if (_.map(priorityEnum).indexOf(data.priority) === -1){
+		// 
+		// 	throw responseCodes.ISSUE_INVALID_PRIORITY;
+		// 
+		// } else 
+		if (data.priority !== this.priority) {
 
 			const canChangeStatus = isAdmin || hasOwnerJob;
 
@@ -1129,13 +1126,20 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
-		const canChangeStatus = isAdmin || hasOwnerJob;
-		if (canChangeStatus) {
-			systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, Date.parse(data.due_date));
-			this.due_date = Date.parse(data.due_date);
-		} else {
-			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+		if(!(!data.due_date && !this.due_date))
+		{
+			if(data.due_date === null) {
+				data.due_date = undefined;
+			}
+			const canChangeStatus = isAdmin || hasOwnerJob;
+			if (canChangeStatus) {
+				systemComment = this.addSystemComment(data.owner, "due_date", this.due_date, data.due_date);
+				this.due_date = data.due_date;
+			} else {
+				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+			}
 		}
+
 	}
 
 	let settings;
@@ -1166,12 +1170,20 @@ schema.methods.clean = function(typePrefix, modelCode){
 	cleaned.model = this._dbcolOptions.model;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
-	cleaned.highlighted_group_id = cleaned.highlighted_group_id ? uuidToString(cleaned.highlighted_group_id) : undefined;
-	cleaned.hidden_group_id = cleaned.hidden_group_id ? uuidToString(cleaned.hidden_group_id) : undefined;
-	cleaned.shown_group_id = cleaned.shown_group_id ? uuidToString(cleaned.shown_group_id) : undefined;
 	cleaned.viewpoints.forEach((vp, i) => {
 
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
+
+		cleaned.viewpoints[i].group_id = cleaned.viewpoints[i].group_id ? uuidToString(cleaned.viewpoints[i].group_id) : undefined;
+		cleaned.viewpoints[i].highlighted_group_id = cleaned.viewpoints[i].highlighted_group_id &&
+			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].highlighted_group_id) ?
+			uuidToString(cleaned.viewpoints[i].highlighted_group_id) : undefined;
+		cleaned.viewpoints[i].hidden_group_id = cleaned.viewpoints[i].hidden_group_id &&
+			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].hidden_group_id) ?
+			uuidToString(cleaned.viewpoints[i].hidden_group_id) : undefined;
+		cleaned.viewpoints[i].shown_group_id = cleaned.viewpoints[i].shown_group_id &&
+			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].shown_group_id) ?
+			uuidToString(cleaned.viewpoints[i].shown_group_id) : undefined;
 
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshot.png";
@@ -1236,21 +1248,13 @@ schema.methods.generateCommentsGUID = function(){
 		if(!comment.guid && !isSystemComment(comment)){
 			comment.guid = utils.generateUUID();
 		}
-		if(!comment.viewpoint && !isSystemComment(comment)){
-			comment.viewpoint = this.viewpoint.guid;
+		if(!comment.viewpoint && !isSystemComment(comment) && this.viewpoints.length > 0){
+			comment.viewpoint = this.viewpoints[0].guid;
 		}
 	});
 };
 
-schema.methods.generateViewpointGUID = function(){
-	if(!this.viewpoint.guid){
-		this.viewpoint.guid = utils.generateUUID();
-	}
-};
-
 schema.methods.getBCFMarkup = function(account, model, unit){
-
-	this.generateViewpointGUID();
 	this.generateCommentsGUID();
 	this.save();
 
@@ -1306,7 +1310,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 	_.get(this, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(this, "extras.Labels"));
 	_.get(this, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(this, "extras.ModifiedDate"));
 	_.get(this, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(this, "extras.ModifiedAuthor"));
-	_.get(this, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = _.get(this, "extras.AssignedTo"));
+	_.get(this, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = this.assigned_roles.toString());
 	_.get(this, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(this, "extras.BimSnippet"));
 	_.get(this, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(this, "extras.DocumentReference"));
 	_.get(this, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(this, "extras.RelatedTopic"));
@@ -1326,7 +1330,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
-				"@": {Guid: utils.uuidToString(comment.viewpoint)}
+				"@": {Guid: utils.uuidToString(comment.viewpoint ? comment.viewpoint :  utils.generateUUID())}
 			},
 			// bcf 1.0 for back comp
 			"Status": this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, " ")) : "",
@@ -1412,10 +1416,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		let componentsPromises = [];
 
 		if (_.get(vp, "highlighted_group_id")) {
-			let highlightedGroupId = _.get(vp, "highlighted_group_id");
+			const highlightedGroupId = _.get(vp, "highlighted_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1425,10 +1429,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.Selection = {};
 								viewpointXmlObj.VisualizationInfo.Components.Selection.Component = [];
 							}
-							if (groupObject.ifc_guid) {
+							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
 								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
 									"@": {
-										IfcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guids[j]
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1440,10 +1444,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		}
 
 		if (_.get(vp, "hidden_group_id")) {
-			let hiddenGroupId = _.get(vp, "hidden_group_id");
+			const hiddenGroupId = _.get(vp, "hidden_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1458,10 +1462,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
-							if (groupObject.ifc_guid) {
+							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
 									"@": {
-										IfcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guids[j]
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1473,10 +1477,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		}
 
 		if (_.get(vp, "shown_group_id")) {
-			let shownGroupId = _.get(vp, "shown_group_id");
+			const shownGroupId = _.get(vp, "shown_group_id");
 			componentsPromises.push(
 				Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
-					if (group.objects && group.objects.length > 0) {
+					if (group && group.objects && group.objects.length > 0) {
 						for (let i = 0; i < group.objects.length; i++) {
 							const groupObject = group.objects[i];
 							if (!viewpointXmlObj.VisualizationInfo.Components) {
@@ -1491,10 +1495,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
-							if (groupObject.ifc_guid) {
+							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
 									"@": {
-										IfcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guids[j]
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1671,7 +1675,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 	
 						issues.forEach(issue => {
-
 							saveIssueProms.push(
 								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
 									// System notification of BCF import
@@ -1696,7 +1699,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
 										for (let simpleAttrIndex in simpleAttrs) {
 											const simpleAttr = simpleAttrs[simpleAttrIndex];
-											if (undefined === matchingIssue[simpleAttr] && undefined !== issue[simpleAttr]) {
+											if (undefined !== issue[simpleAttr] 
+											 && (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
+												matchingIssue.comments.push({
+												guid: utils.generateUUID(),
+													created: timeStamp,
+													action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
+													owner: requester.user + "(BCF Import)"
+												});
 												matchingIssue[simpleAttr] = issue[simpleAttr];
 											}
 										}
@@ -1784,6 +1794,76 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				return Promise.all(promises).then(() => viewpoints);
 			}
 
+			function sanitise(data, list) {
+				if (!data) {
+					return data;
+				}
+
+				const dataSanitised = data.toLowerCase();
+				if(_.map(list).indexOf(dataSanitised) === -1) {
+					return data;
+				}
+				return dataSanitised;
+				
+			}
+
+			function createGroupData(groupObject) {
+
+				let groupData = {};
+
+				groupData.name = groupObject.name;
+				groupData.color = groupObject.color;
+
+				for (let account in groupObject.objects) {
+					for (let model in groupObject.objects[account]) {
+						if (!groupData.objects) {
+							groupData.objects = [];
+						}
+
+						groupData.objects.push({
+							account,
+							model,
+							ifc_guids: groupObject.objects[account][model].ifc_guids
+						});
+					}
+				}
+
+				return groupData;
+			}
+
+			function createGroupObject(group, name, color, account, model, ifc_guid) {
+
+				if (account && model && ifc_guid) {
+					if (!group) {
+						group = {};
+					}
+
+					if (name) {
+						group.name = name;
+					}
+
+					if (color) {
+						group.color = color;
+					}
+
+					if (!group.objects) {
+						group.objects = {};
+					}
+
+					if (!group.objects[account]) {
+						group.objects[account] = {};
+					}
+
+					if (!group.objects[account][model]) {
+						group.objects[account][model] = { ifc_guids: [] };
+					}
+
+					group.objects[account][model].ifc_guids.push(ifc_guid);
+				}
+
+				return group;
+			}
+
 			function createIssue(guid){
 
 				let issueFiles = files[guid];
@@ -1808,10 +1888,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
-						issue.status =_.get(xml, "Markup.Topic[0].@.TopicStatus");
+						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
+						if( !issue.status || issue.status === "") {
+							issue.status = "open";
+						}
 						issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
 						issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
-						issue.priority =  _.get(xml, "Markup.Topic[0].Priority[0]._");
+						issue.priority =  sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
 						issue.extras.Index =  _.get(xml, "Markup.Topic[0].Index[0]._");
 						issue.extras.Labels =  _.get(xml, "Markup.Topic[0].Labels[0]._");
 						issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x");
@@ -1821,14 +1904,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
 							issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).format("x");
 						}
-						issue.extras.AssignedTo = _.get(xml, "Markup.Topic[0].AssignedTo[0]._");
-						issue.desc = _.get(xml, "Markup.Topic[0].Description[0]._");
+						if(_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
+							issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
+						}
+						issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
 						issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
 						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
 						issue.markModified("extras");
 
-					}
+				}
 
 					_.get(xml ,"Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 						let obj = {
@@ -1869,7 +1954,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						extras.Openings = _.get(vpXML, "VisualizationInfo.Openings");
 						extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
 						extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
-						extras.ClippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
 						extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
 						extras.Index = viewpoints[guid].Viewpoint;
 						extras.Snapshot = viewpoints[guid].Snapshot;
@@ -1899,6 +1983,37 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						} else if (unit === "ft") {
 							scale = 3.28084;
 						}	
+
+						if(_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
+							const clippingPlanes = 	_.get(vpXML, "VisualizationInfo.ClippingPlanes");
+							const planes = [];
+							if(clippingPlanes[0].ClippingPlane) {
+								for(let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
+									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
+									let clip = {};									
+									clip.normal = [
+										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
+										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
+										-parseFloat(_.get(vpXML, fieldName + ".Direction[0].Y[0]._"))
+									];
+									const position = [
+										parseFloat(_.get(vpXML, fieldName + ".Location[0].X[0]._")) * scale,
+										parseFloat(_.get(vpXML, fieldName + ".Location[0].Z[0]._")) * scale,
+										-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
+									];
+
+									clip.distance = - (position[0] * clip.normal[0] 
+										+ position[1] * clip.normal[1] 
+										+ position[2] * clip.normal[2]);
+
+									clip.clipDirection = 1; 
+									planes.push(clip);
+								}
+							}
+
+							vp.clippingPlanes = planes;
+
+						}
 
 						if(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")){
 							vp.up = [
@@ -1956,53 +2071,82 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							for (let i = 0; i < vpComponents.length; i++) {
 
-								let highlightedObjects = [];
+								let highlightedGroupObject;
 
 								// TODO: refactor to reduce duplication?
 								if (vpComponents[i].Selection) {
 
 									for (let j = 0; j < vpComponents[i].Selection.length; j++) {
-										for (let k = 0; k < vpComponents[i].Selection[j].Component.length; k++) {
+										for (let k = 0; vpComponents[i].Selection[j].Component && k < vpComponents[i].Selection[j].Component.length; k++) {
 											let objectModel = model;
 
 											if (settings.federate) {
 												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
 											}
 
-											highlightedObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
-											});
+											highlightedGroupObject = createGroupObject(
+													highlightedGroupObject,
+													issue.name,
+													[255, 0, 0],
+													account,
+													objectModel,
+													vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
+											);
 										}
 									}
 
-									if (highlightedObjects.length > 0) {
-										let highlightedObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: highlightedObjects
-										};
+								
+								}
+								if (vpComponents[i].Coloring) {
+									//FIXME: this is essentially copy of selection with slight modification. Should merge common code.
+									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
+										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
+											const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
+											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
+												let objectModel = model;
 
-										groupPromises.push(
-											Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
-												vp.highlighted_group_id = utils.uuidToString(group._id);
-											})
-										);
+												if (settings.federate) {
+													objectModel = ifcToModelMap[vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
+												}
+
+												highlightedGroupObject = createGroupObject(
+														highlightedGroupObject,
+														issue.name,
+														[255, 0, 0],
+														account,
+														objectModel,
+														vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
+												);
+											}
+										}
 									}
+
+								}
+
+								let highlightedGroupData;
+								let highlightedObjectsMap;
+
+								if (highlightedGroupObject) {
+									highlightedGroupData = createGroupData(highlightedGroupObject);
+									groupPromises.push(
+										Group.createGroup(groupDbCol, highlightedGroupData).then(group => {
+											vp.highlighted_group_id = utils.stringToUUID(group._id);
+										})
+									);
+
+									highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
 								}
 
 								if (vpComponents[i].Visibility) {
-									let hiddenObjects = [];
-									let shownObjects = [];
-
-									shownObjects = shownObjects.concat(highlightedObjects);
+									let hiddenGroupObject;
+									let shownGroupObject;
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
+										const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
 										let componentsToHide = [];
 										let componentsToShow = [];
 
-										if (JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility)) {
+										if (defaultVisibility) {
 											componentsToShow = vpComponents[i].Visibility[j].Component;
 											if (vpComponents[i].Visibility[j].Exceptions) {
 												componentsToHide = vpComponents[i].Visibility[j].Exceptions[0].Component;
@@ -2021,11 +2165,17 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												objectModel = ifcToModelMap[componentsToHide[k]["@"].IfcGuid];
 											}
 
-											hiddenObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: componentsToHide[k]["@"].IfcGuid
-											});
+											// Exclude items selected
+											if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
+												hiddenGroupObject = createGroupObject(
+														hiddenGroupObject,
+														issue.name,
+														[255, 0, 0],
+														account,
+														objectModel,
+														componentsToHide[k]["@"].IfcGuid
+												);
+											}
 										}
 
 										for (let k = 0; componentsToShow && k < componentsToShow.length; k++) {
@@ -2035,52 +2185,44 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
 											}
 
-											shownObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: componentsToShow[k]["@"].IfcGuid
-											});
+											shownGroupObject = createGroupObject(
+													shownGroupObject,
+													issue.name,
+													[255, 0, 0],
+													account,
+													objectModel,
+													componentsToShow[k]["@"].IfcGuid
+											);
 										}
 									}
 
-									if (hiddenObjects.length > 0) {
-										let hiddenObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: hiddenObjects
-										};
+									// TODO: May need a better way to combine hidden/shown
+									// as it is not ideal to save both hidden and shown objects
+									if (shownGroupObject) {
+										let shownGroupData = createGroupData(shownGroupObject);
+
+										if (highlightedGroupData) {
+											shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
+										}
 
 										groupPromises.push(
-											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
-												vp.hidden_group_id = utils.uuidToString(group._id);
+											Group.createGroup(groupDbCol, shownGroupData).then(group => {
+												vp.shown_group_id = utils.stringToUUID(group._id);
 											})
 										);
-									}
-
-									if (shownObjects.length > 0) {
-										let shownObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: shownObjects
-										};
-
+									} else if (hiddenGroupObject) {
 										groupPromises.push(
-											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
-												vp.shown_group_id = utils.uuidToString(group._id);
+											Group.createGroup(groupDbCol, createGroupData(hiddenGroupObject)).then(group => {
+												vp.hidden_group_id = utils.stringToUUID(group._id);
 											})
 										);
 									}
 								}
 
-								if (vpComponents[i].Coloring) {
-									vp.extras.Coloring = vpComponents[i].Coloring;
-									systemLogger.logInfo("Colouring not fully supported for BCF import!");
-								}
 
 								if (vpComponents[i].ViewSetupHints) {
 									// TODO: Full ViewSetupHints support -
 									// SpaceVisible should correspond to !hideIfc
-									//console.log(vpComponents[i].ViewSetupHints);
 									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
 									systemLogger.logInfo("ViewSetupHints not fully supported for BCF import!");
 								}

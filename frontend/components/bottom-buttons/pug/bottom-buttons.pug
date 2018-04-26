@@ -20,6 +20,11 @@ div(
 					width="24px" height="24px" viewBox="0 0 24 24")
 					path(fill="#ffffff" ng-attr-d="{{vm.customIcons.isolate1}}")
 					path(fill="#ffffff" ng-attr-d="{{vm.customIcons.isolate2}}")
+
+				svg(ng-if="button.label === 'Hide'"
+					width="24px" height="24px" viewBox="0 0 48 48")
+					path(fill="none" ng-attr-d="{{vm.customIcons.hide1}}")
+					path(fill="#fff" ng-attr-d="{{vm.customIcons.hide2}}")
 		
 				svg(ng-if="button.label === 'Focus'"
 					width="24px" height="24px" viewBox="0 0 1024 1024")

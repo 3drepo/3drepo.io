@@ -146,47 +146,37 @@ schema.methods.changePermissions = function(permissions){
 		let promises = [];
 
 		permissions.forEach(permission => {
-
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
+			promises.push(User.findByUserName(permission.user).then( assignedUser => {
+				if(!assignedUser) {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
 
-			if(!dbUser.customData.billing.subscriptions.findByAssignedUser(permission.user)){
-				return promises.push(Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE));
-			}
+				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
+				if(!isMember) {
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+				}
+				let perm = this.permissions.find(perm => perm.user === permission.user);
 
-			let perm = this.permissions.find(perm => perm.user === permission.user);
+				if(perm) {
+	
+					perm.permission = permission.permission;
 
-			if(perm) {
+				}
+			}));
 
-				perm.permission = permission.permission;
 
-			} else {
-
-				promises.push(
-					User.findByUserName(permission.user).then(user => {
-						if(!user){
-							return Promise.reject(responseCodes.USER_NOT_FOUND);
-						} else {
-							return;
-						}
-					})
-				);
-			}
-
+			
 		});
 
-		return Promise.all(promises);
+		return Promise.all(promises).then( () => {
+			this.permissions = permissions;
+			return this.save();
+		});
 
-	}).then(() => {
-		
-		this.permissions = permissions;
-
-		return this.save();		
-	}).then(
-		() => this.permissions
-	);
-
+	});
 };
 
 schema.methods.isPermissionAssigned = function(permission){
@@ -200,22 +190,20 @@ schema.methods.findPermissionByUser = function(username){
 schema.statics.populateUsers = function(account, permissions){
 
 	const User = require("./user");
+	
+	return User.getAllUsersInTeamspace(account).then(users => {
 
-	return User.findByUserName(account).then(user => {
+		users.forEach(user => {
+			const permissionFound = permissions && permissions.find(p => p.user ===  user);
 
-		const subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
-
-		subscriptions.forEach(sub => {
-			const permissionFound = permissions && permissions.find(p => p.user === sub.assignedUser);
-
-			if(!permissionFound && sub.assignedUser){
-				permissions.push({ user: sub.assignedUser });
+			if(!permissionFound){
+				permissions.push({ user });
 			}
 		});
 
 		return permissions;
 
-	});
+	}); 
 
 };
 

@@ -25,8 +25,6 @@ class AccountTeamspacesController implements ng.IController {
 	private account;
 	private accounts;
 	private onShowPage;
-	private quota;
-	private subscriptions;
 
 	constructor(
 	) {}
@@ -44,8 +42,6 @@ export const AccountTeamspacesComponent: ng.IComponentOptions = {
 		account: "=",
 		accounts: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
 		loading: "=",
 		selectedIndex: "=",
 		itemToShow: "=",

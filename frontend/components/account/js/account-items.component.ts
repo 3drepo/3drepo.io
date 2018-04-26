@@ -515,11 +515,14 @@ class AccountItemsController implements ng.IController {
 		const empty = this.federationData.subModels === undefined ||
 					this.federationData.subModels.length === 0;
 
-		if (empty) {
-			this.federationErrorMessage = "Federation can't be empty";
+		if (this.federationData.name.length > 120) {
+			this.federationErrorMessage = "Federationame can't be over 120 characters";
 			this.federationSaveDisabled = true;
 		} else if (this.isDuplicateName()) {
 			this.federationErrorMessage = "Federation name taken";
+			this.federationSaveDisabled = true;
+		} else if (empty) {
+			this.federationErrorMessage = "Federation can't be empty";
 			this.federationSaveDisabled = true;
 		} else {
 			this.federationErrorMessage = "";
@@ -1224,8 +1227,6 @@ export const AccountItemsComponent: ng.IComponentOptions = {
 		account: "=",
 		accounts: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
 		isLiteMode: "<",
 	},
 	controller: AccountItemsController,

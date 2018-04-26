@@ -26,7 +26,6 @@ export class ViewerService {
 		"APIService",
 		"DialogService",
 		"EventService",
-		"DocsService",
 	];
 
 	private newPinId: string;
@@ -44,8 +43,6 @@ export class ViewerService {
 		public APIService: any,
 		public DialogService: any,
 		public EventService: any,
-		public DocsService: any,
-
 	) {
 
 		this.newPinId = "newPinId";
@@ -112,25 +109,11 @@ export class ViewerService {
 				);
 				break;
 
-			// case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-			// 	this.viewer.updateClippingPlanes(
-			// 		event.value.clippingPlanes,
-			// 		event.value.fromClipPanel,
-			// 		event.value.account,
-			// 		event.value.model,
-			// 	);
-			// 	break;
-
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.DocsService.state.show = false;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				if (valid) {
-					this.DocsService.handleObjectSelected(event);
-				}
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
@@ -194,6 +177,10 @@ export class ViewerService {
 
 		});
 
+	}
+
+	public centreToPoint(params: any) {
+		this.viewer.centreToPoint(params);
 	}
 
 	public setCamera(params) {
@@ -283,8 +270,23 @@ export class ViewerService {
 				params.zoom,
 				params.colour,
 				params.multi,
+				params.forceReHighlight,
 			);
 		}
+	}
+
+	public unhighlightObjects(params)  {
+		if (this.viewer) {
+			this.viewer.unhighlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids,
+			);
+		}
+	}
+
+	public getMultiSelectMode() {
+		return this.viewer.multiSelectMode;
 	}
 
 	public setMultiSelectMode(value)  {
@@ -388,7 +390,7 @@ export class ViewerService {
 	}
 
 	public initViewer() {
-
+		console.debug("Initiating Viewer");
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else if (this.viewer) {
@@ -430,6 +432,7 @@ export class ViewerService {
 
 		if (!account || !model) {
 			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
+			return Promise.reject("Account, model, branch or revision was not defined!");
 		} else {
 			this.currentModel.promise = this.viewer.loadModel(
 				account,
@@ -445,6 +448,7 @@ export class ViewerService {
 				.catch((error) => {
 					console.error("Error loading model: ", error);
 				});
+			return this.currentModel.promise;
 		}
 
 	}
@@ -548,6 +552,22 @@ export class ViewerService {
 		if (this.viewer) {
 			this.viewer.mapStop();
 		}
+	}
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		if (this.viewer) {
+			this.viewer.overrideMeshColor(account, model, meshIDs, color);
+		}
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		if (this.viewer) {
+			this.viewer.resetMeshColor(account, model, meshIDs);
+		}
+	}
+
+	public getDefaultHighlightColor() {
+		return this.viewer.getDefaultHighlightColor();
 	}
 
 }

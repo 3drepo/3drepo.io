@@ -24,11 +24,10 @@ issues-list(
 
 // Issue
 issue(
-	ng-if="!vm.showProgress && vm.toShow === 'showIssue'"
+	ng-if="!vm.showProgress && vm.toShow === 'showIssue' && vm.modelSettings !== undefined"
 	account="vm.account"
 	data="vm.selectedIssue"
 	model="vm.model"
-	keys-down="vm.keysDown"
 	exit="vm.editIssueExit(issue)"
 	model-settings="vm.modelSettings"
 	event="vm.event"

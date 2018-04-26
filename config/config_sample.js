@@ -130,6 +130,7 @@ module.exports = {
 			skipChecking: true
 		}
 	},
+	termsUpdatedAt: 1520592720000,
 	bcf_dir: '/tmp',
 	unitySettings: {
         TOTAL_MEMORY: 2130706432,

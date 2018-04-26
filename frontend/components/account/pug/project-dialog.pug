@@ -23,18 +23,18 @@ md-dialog.newModelDialog(aria-label="New project")
 			md-input-container
 				input(
 					placeholder="Project"
+					ng-maxlength="120"
 					ng-model="vm.projectData.newProjectName")
 
 			md-input-container()
 				md-button.md-raised.md-accent(
 					ng-if="vm.projectData.oldProjectName == ''"
-					ng-disabled="!vm.projectData.newProjectName"
+					ng-disabled="!vm.projectData.newProjectName || vm.projectData.newProjectName.length > 120"
 					ng-click="vm.saveNewProject(vm.projectData.teamspaceName, vm.projectData.newProjectName)") Save
 
 				md-button.md-raised.md-accent(
 					ng-if="vm.projectData.oldProjectName != ''"
-					ng-disabled="vm.projectData.newProjectName == vm.projectData.oldProjectName"
+					ng-disabled="vm.projectData.newProjectName == vm.projectData.oldProjectName || vm.projectData.newProjectName.length > 120"
 					ng-click="vm.updateProject(vm.projectData.teamspaceName, vm.projectData.oldProjectName, vm.projectData.newProjectName)") Update
 
 				p#modelDialogError(ng-if="vm.projectData.errorMessage") {{vm.projectData.errorMessage}}
-

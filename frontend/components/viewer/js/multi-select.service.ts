@@ -19,6 +19,7 @@ export class MultiSelectService {
 
 	public static $inject: string[] = [
 		"ViewerService",
+		"$document",
 	];
 
 	private keys = {
@@ -29,10 +30,49 @@ export class MultiSelectService {
 
 	private isMac = (navigator.platform.indexOf("Mac") !== -1);
 	private multiMode = false;
+	private keysDown: number[] = [];
 
 	constructor(
 		public ViewerService: any,
-	) {}
+		public $document: any,
+	) {
+
+		this.initKeyWatchers();
+
+	}
+
+	public initKeyWatchers() {
+
+		this.$document.bind("keydown", (event) => {
+			if (this.keysDown.indexOf(event.which) === -1) {
+
+				this.keysDown.push(event.which);
+
+				// Recreate list so that it changes are registered in components
+				this.keysDown = this.keysDown.slice();
+
+			}
+
+			this.handleKeysDown(this.keysDown);
+
+		});
+
+		this.$document.bind("keyup", (event) => {
+			// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
+			for (let i = (this.keysDown.length - 1); i >= 0; i -= 1) {
+				if (this.keysDown[i] === event.which) {
+					this.keysDown.splice(i, 1);
+				}
+			}
+
+			// Recreate list so that it changes are registered in components
+			this.keysDown = this.keysDown.slice();
+
+			this.handleKeysDown(this.keysDown);
+
+		});
+
+	}
 
 	public handleKeysDown(keysDown: any[]) {
 

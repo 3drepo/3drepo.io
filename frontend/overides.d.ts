@@ -11,6 +11,7 @@ declare global {
 		UnityUtil: any;
 		Viewer: any;
 		Pin: any;
+		requestIdleCallback: any;
 	}
 }
 export {};

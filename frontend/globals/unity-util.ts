@@ -29,6 +29,7 @@ export class UnityUtil {
 		MODEL_LOADED : 3, // Models
 	};
 
+
 	public static unityInstance;
 
 	public static readyPromise;
@@ -51,6 +52,7 @@ export class UnityUtil {
 	public static objectStatusPromise = null;
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = "WebGLInterface";
+	public static defaultHighlightColor = [1, 1, 0];
 
 	public static init(
 		errorCallback: any,
@@ -114,6 +116,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Check if an error is Unity related
+	 */
+	public static isUnityError(err) {
+		const checks = ["Array buffer allocation failed", "Invalid typed array length", "Unity", "unity"];
+		const hasUnityError = !checks.every((check) => err.indexOf(check) === -1);
+		return hasUnityError;
+	}
+
+	/**
 	 * Handle a error from Unity
 	 */
 	public static onUnityError(errorObject) {
@@ -123,8 +134,7 @@ export class UnityUtil {
 		let reload = false;
 		let conf;
 
-		if (err.indexOf("Array buffer allocation failed") !== -1 ||
-			err.indexOf("Unity") !== -1 || err.indexOf("unity") !== -1) {
+		if (UnityUtil.isUnityError(err)) {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
 					<br><br> <code>Error ${err} occured at line ${line}</code>
@@ -271,7 +281,9 @@ export class UnityUtil {
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
-		UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		if (UnityUtil.objectStatusPromise) {
+			UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		}
 		UnityUtil.objectStatusPromise = null;
 	}
 
@@ -301,7 +313,12 @@ export class UnityUtil {
 
 	public static viewpointReturned(vpInfo) {
 		if (UnityUtil.vpPromise != null) {
-			const viewpoint = JSON.parse(vpInfo);
+			let viewpoint = {} ;
+			try {
+				viewpoint = JSON.parse(vpInfo);
+			} catch {
+				console.error("Failed to parse viewpoint", vpInfo);
+			}
 			UnityUtil.vpPromise.resolve(viewpoint);
 			UnityUtil.vpPromise = null;
 		}
@@ -313,13 +330,11 @@ export class UnityUtil {
 
 	/**
 	 * Centres the viewpoint to the object
-	 * @param {string} ns - namespace for the object, i.e. teamspace + "." + model
-	 * @param {string} id - unique ID of the object to centre on
+	 * @param {Object[]}  - array of json objects each recording {model: <account.modelID>, meshID: [array of mesh IDs]}
 	 */
-	public static centreToPoint(model, id) {
+	public static centreToPoint(meshIDs) {
 		const params = {
-			model,
-			meshID: id,
+			groups: meshIDs
 		};
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -548,22 +563,42 @@ export class UnityUtil {
 	 *  @param {number[]} color - RGB value of the highlighting colour
 	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted.
 	 *  				Also any objects that are already highlighted will be unhighlighted
+	 *  @param {bool} forceReHighlight - If set to true, existing highlighted objects will be forced to re-highlight itself. 
+	 *  				This is typically used for re-colouring a highlight or when you want a specific set of objects
+	 *  				to stay highlighted when toggle mode is on
 	 */
-	public static highlightObjects(account, model, idArr, color, toggleMode) {
+	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
 		const params: any = {
 			database : account,
 			model,
 			ids : idArr,
 			toggle : toggleMode,
+			forceReHighlight			
 		};
 
 		if (color) {
 			params.color = color;
 		} else  {
-			params.color = [1, 1, 0];
+			params.color = UnityUtil.defaultHighlightColor;
 		}
 
 		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+	}
+
+	/**
+	 *  Unhighlight objects
+	 *  @param {string} account - name of teamspace
+	 *  @param {string} model - name of model
+	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
+	 */
+	public static unhighlightObjects(account, model, idArr) {
+		const params: any = {
+			database : account,
+			model,
+			ids : idArr
+		};
+
+		UnityUtil.toUnity("UnhighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
 	/**
@@ -620,6 +655,38 @@ export class UnityUtil {
 	 */
 	public static mapStop() {
 		UnityUtil.toUnity("HideMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+	
+	/**
+	 * Override the diffuse colour of the given meshes
+	 * @param {string} account - teamspace the meshes resides in
+	 * @param {string} model - model ID the meshes resides in
+	 * @param {string[]} meshIDs - unique IDs of the meshes to operate on
+	 * @param {number[]} color - RGB value of the override color (note: alpha will be ignored)
+	 */
+	public static overrideMeshColor(account, model, meshIDs, color) {
+		const param: any = {};
+		if (account && model) {
+			param.nameSpace = account + "."  + model;
+		}
+		param.ids = meshIDs;
+		param.color = color;
+		UnityUtil.toUnity("OverrideMeshColor", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Restore the meshes to its original color values
+	 * @param {string} account - teamspace the meshes resides in
+	 * @param {string} model - model ID the meshes resides in
+	 * @param {string[]} meshIDs - unique IDs of the meshes to operate on
+	 */
+	public static resetMeshColor(account, model, meshIDs) {
+		const param: any = {};
+		if (account && model) {
+			param.nameSpace = account + "."  + model;
+		}
+		param.ids = meshIDs;
+		UnityUtil.toUnity("ResetMeshColor", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 	}
 
 	/**

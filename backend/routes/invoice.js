@@ -72,11 +72,6 @@
 
 		let responsePlace = utils.APIInfo(req);
 		let invoice;
-		let regenerate;
-
-		if(config.pdf && config.pdf.debug && config.pdf.debug.allowRegenerate){
-			regenerate = req.query.regenerate;
-		}
 
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_invoice => {
 
@@ -85,7 +80,7 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			return invoice.getPDF({regenerate: regenerate});
+			return invoice.generatePDF();
 
 		}).then(pdf => {
 

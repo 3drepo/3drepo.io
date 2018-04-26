@@ -52,7 +52,6 @@ class HomeController implements ng.IController {
 	private pointerEvents;
 	private goToAccount;
 	private goToUserPage;
-	private keysDown;
 	private firstState;
 	private state;
 	private query;
@@ -101,7 +100,6 @@ class HomeController implements ng.IController {
 		this.AnalyticService.init();
 		this.SWService.init();
 
-		this.initKeyWatchers();
 		this.precacheTeamspaceTemplate();
 
 		// Pages to not attempt a interval triggered logout from
@@ -118,7 +116,7 @@ class HomeController implements ng.IController {
 		this.pointerEvents = "inherit";
 		this.goToAccount = false;
 		this.goToUserPage = false;
-		this.keysDown = [];
+
 		this.firstState = true;
 
 		// Required for everything to work
@@ -137,7 +135,6 @@ class HomeController implements ng.IController {
 		this.showMemorySelected = false;
 
 		this.watchers();
-		this.initKeyWatchers();
 
 		/**
 		 * Close the dialog
@@ -200,7 +197,6 @@ class HomeController implements ng.IController {
 
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
-
 					this.loggedOutPages.forEach((page) => {
 						this.setPage(newState, page);
 					});
@@ -258,13 +254,29 @@ class HomeController implements ng.IController {
 						});
 					}
 
-				} else if (currentData.initialiser && !currentData.username) {
+				} else if (!currentData.username) {
 
 					this.StateManager.setHomeState({
 						loggedIn: false,
 						account: null,
 					});
 
+					if (this.StateManager.query) {
+						this.$location.search("username", this.StateManager.query.username);
+						this.$location.search("token", this.StateManager.query.token);
+					}
+
+				}
+
+				if (currentData.flags && currentData.flags.termsPrompt) {
+					this.DialogService.showDialog(
+						"new-terms-dialog.html",
+						this.$scope,
+						null,
+						false,
+						null,
+						false,
+					);
 				}
 			} else {
 				this.AuthService.logout();
@@ -495,33 +507,6 @@ class HomeController implements ng.IController {
 
 	public legalDisplay(event, display) {
 		this.$window.open("/" + display.value);
-	}
-
-	public initKeyWatchers() {
-
-		this.$document.bind("keydown", (event) => {
-			if (this.keysDown.indexOf(event.which) === -1) {
-
-				this.keysDown.push(event.which);
-
-				// Recreate list so that it changes are registered in components
-				this.keysDown = this.keysDown.slice();
-
-			}
-		});
-
-		this.$document.bind("keyup", (event) => {
-			// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-			for (let i = (this.keysDown.length - 1); i >= 0; i -= 1) {
-				if (this.keysDown[i] === event.which) {
-					this.keysDown.splice(i, 1);
-				}
-			}
-
-			// Recreate list so that it changes are registered in components
-			this.keysDown = this.keysDown.slice();
-		});
-
 	}
 
 }

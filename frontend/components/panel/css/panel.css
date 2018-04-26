@@ -64,6 +64,7 @@ panel {
 
 panel #docsPanel #panelCardContainer {
   max-height: 85vh;
+  overflow: hidden;
 }
 
 panel #buttons {
