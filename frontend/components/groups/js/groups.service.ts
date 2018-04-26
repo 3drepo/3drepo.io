@@ -491,7 +491,7 @@ export class GroupsService {
 		if (revision) {
 			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
 		} else {
-			groupUrl = `${teamspace}/${model}/groups?noIssues=true`;
+			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true`;
 		}
 
 		return this.APIService.get(groupUrl)

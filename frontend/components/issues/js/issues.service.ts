@@ -564,7 +564,7 @@ export class IssuesService {
 				if (revision) {
 					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${hiddenGroupId}`;
 				} else {
-					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/${hiddenGroupId}`;
+					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/revision/master/head/${hiddenGroupId}`;
 				}
 
 				let hiddenPromise;
@@ -595,7 +595,7 @@ export class IssuesService {
 				if (revision) {
 					shownGroupUrl = issue.account + "/" + issue.model + "/groups/revision/" + revision + "/" + shownGroupId;
 				} else {
-					shownGroupUrl = issue.account + "/" + issue.model + "/groups/" + shownGroupId;
+					shownGroupUrl = issue.account + "/" + issue.model + "/groups/revision/master/head/" + shownGroupId;
 				}
 
 				let shownPromise;
@@ -624,7 +624,7 @@ export class IssuesService {
 				if (revision) {
 					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${highlightedGroupId}`;
 				} else {
-					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/${highlightedGroupId}`;
+					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/revision/master/head/${highlightedGroupId}`;
 				}
 
 				let highlightPromise;
@@ -655,7 +655,7 @@ export class IssuesService {
 			if (revision) {
 				groupUrl = issue.account + "/" + issue.model + "/groups/revision/" + revision + "/" + groupId;
 			} else {
-				groupUrl = issue.account + "/" + issue.model + "/groups/" + groupId;
+				groupUrl = issue.account + "/" + issue.model + "/groups/revision/master/head/" + groupId;
 			}
 
 			let handleTreePromise;

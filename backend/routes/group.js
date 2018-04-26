@@ -26,9 +26,9 @@ const Group = require("../models/group");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get('/groups/', middlewares.issue.canView, listGroups);
-router.get('/groups/:uid', middlewares.issue.canView, findGroup);
+router.get('/groups/revision/master/head/', middlewares.issue.canView, listGroups);
 router.get('/groups/revision/:rid/', middlewares.issue.canView, listGroups);
+router.get('/groups/revision/master/head/:uid', middlewares.issue.canView, findGroup);
 router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
 
 router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
