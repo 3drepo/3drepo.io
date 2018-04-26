@@ -560,7 +560,7 @@ export class IssuesService {
 			if (issue.viewpoint.hidden_group_id) {
 
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
-				const hiddenGroupUrl;
+				let hiddenGroupUrl;
 				if (revision) {
 					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${hiddenGroupId}`;
 				} else {
@@ -591,7 +591,7 @@ export class IssuesService {
 			if (issue.viewpoint.shown_group_id) {
 
 				const shownGroupId = issue.viewpoint.shown_group_id;
-				const shownGroupUrl;
+				let shownGroupUrl;
 				if (revision) {
 					shownGroupUrl = issue.account + "/" + issue.model + "/groups/revision/" + revision + "/" + shownGroupId;
 				} else {
@@ -620,7 +620,7 @@ export class IssuesService {
 			if (issue.viewpoint.highlighted_group_id) {
 
 				const highlightedGroupId = issue.viewpoint.highlighted_group_id;
-				const highlightedGroupUrl;
+				let highlightedGroupUrl;
 				if (revision) {
 					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${highlightedGroupId}`;
 				} else {
@@ -651,7 +651,7 @@ export class IssuesService {
 
 			const hasGroup = (issue.viewpoint && issue.viewpoint.hasOwnProperty("group_id"));
 			const groupId = hasGroup ? issue.viewpoint.group_id : issue.group_id;
-			const groupUrl;
+			let groupUrl;
 			if (revision) {
 				groupUrl = issue.account + "/" + issue.model + "/groups/revision/" + revision + "/" + groupId;
 			} else {

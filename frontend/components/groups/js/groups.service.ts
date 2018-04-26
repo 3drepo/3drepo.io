@@ -487,7 +487,7 @@ export class GroupsService {
 	 * Get the groups from the backend
 	 */
 	public getGroups(teamspace: string, model: string, revision: string) {
-		const groupUrl;
+		let groupUrl;
 		if (revision) {
 			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
 		} else {
