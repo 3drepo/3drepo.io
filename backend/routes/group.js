@@ -42,7 +42,8 @@ function listGroups(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	Group.listGroups(getDbColOptions(req), req.query).then(groups => {
+	// TODO: Add revID support
+	Group.listGroups(getDbColOptions(req), req.query, "master", null).then(groups => {
 
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
@@ -64,9 +65,9 @@ function findGroup(req, res, next){
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, null, req.params.rid);
+		groupItem = Group.findByUIDSerialised(getDbColOptions(req), req.params.uid, null, req.params.rid);
 	} else {
-		groupItem = Group.findByUID(getDbColOptions(req), req.params.uid, "master", null);
+		groupItem = Group.findByUIDSerialised(getDbColOptions(req), req.params.uid, "master", null);
 	}
 
 	groupItem.then( group => {
