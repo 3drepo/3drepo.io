@@ -223,7 +223,6 @@ class TreeController implements ng.IController {
 		const height = nodesToShow.length * this.nodeHeight + 5;
 		this.onContentHeightRequest({height });
 		this.resize();
-		console.log(height);
 	}
 
 	public resize() {
@@ -261,7 +260,9 @@ class TreeController implements ng.IController {
 	public toggleTreeNode($event, node) {
 		$event.stopPropagation();
 
-		const newState = (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState) ? this.TreeService.VISIBILITY_STATES.visible : this.TreeService.VISIBILITY_STATES.invisible;
+		const newState = (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState) ?
+							this.TreeService.VISIBILITY_STATES.visible :
+							this.TreeService.VISIBILITY_STATES.invisible;
 
 		// Unhighlight the node in the viewer if we're making it invisible
 		if (newState === this.TreeService.VISIBILITY_STATES.invisible && node.selected) {
@@ -270,6 +271,7 @@ class TreeController implements ng.IController {
 
 		this.TreeService.setTreeNodeStatus(node, newState);
 		this.TreeService.updateModelVisibility(node);
+		this.nodesToShow = this.nodesToShow.concat();
 
 	}
 
@@ -350,10 +352,7 @@ class TreeController implements ng.IController {
 	 */
 	public ignoreSelection($event: any, node: any): boolean {
 		const doubleClick = $event.detail > 1;
-		if (doubleClick || node.toggleState === this.TreeService.VISIBILITY_STATES.invisible) {
-			return true;
-		}
-		return false;
+		return doubleClick || node.toggleState === this.TreeService.VISIBILITY_STATES.invisible;
 	}
 
 	/**

@@ -822,7 +822,7 @@ export class TreeService {
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
-		console.log(node);
+
 		if (node && (this.VISIBILITY_STATES.parentOfInvisible === visibility || visibility !== node.toggleState)) {
 			const priorToggleState = node.toggleState;
 
@@ -1034,33 +1034,34 @@ export class TreeService {
 		this.ViewerService.clearHighlights();
 		this.DocsService.closeDocs();
 
-		const visitedParents = [];
-		const visitedChildren = [];
+		const visitedNodes = {};
 
 		while (this.currentSelectedNodes.length) {
+
 			const currentNode = this.currentSelectedNodes.pop();
-			currentNode.selected = this.SELECTION_STATES.unselected;
 
 			// Skip over any node that has already been visited
-			if (visitedChildren.indexOf(currentNode) === -1) {
-
-				// Skip over any parent that has been visited
-				if (visitedParents.indexOf(currentNode) === -1) {
-					const parents = this.setSelectionOnParentNodes(currentNode, this.SELECTION_STATES.unselected);
-					for (let i = 0; i < parents.length; i++) {
-						if (visitedParents.indexOf(parents[i]) === -1) {
-							visitedParents.push(parents[i]);
-						}
-					}
-				}
-
-				if (currentNode.children && currentNode.children.length) {
-					this.currentSelectedNodes = this.currentSelectedNodes.concat(currentNode.children);
-				}
-
+			if (visitedNodes[currentNode._id]) {
+				continue;
 			}
 
-			visitedChildren.push(currentNode);
+			currentNode.selected = this.SELECTION_STATES.unselected;
+
+			// Skip over any parent that has been visited
+			const parentPath = this.getPath(currentNode._id);
+			parentPath.pop(); // Remove the node itself
+
+			for (let i = parentPath.length - 1; i >= 0; i--) {
+				const parentId = parentPath[i];
+				if (visitedNodes[parentId]) {
+					break;
+				}
+				visitedNodes[parentId] = true;
+				this.getNodeById(parentId).selected =  this.SELECTION_STATES.unselected;
+			}
+
+			visitedNodes[currentNode._id] = true;
+
 		}
 
 		this.currentSelectedNodes = [];
