@@ -1,12 +1,14 @@
+// This file acts a way for Webpack to get all the required dependencies in one place
+// then compile everything down to one file that the browser can understand
 
 // npm dependencies
 import "angular";
-import "angular-ui-router"
-import "angular-material"
-import "angular-sanitize"
-import "angular-aria"
-import "angular-recaptcha"
-import * as io from 'socket.io-client'; 
+import "angular-ui-router";
+import "angular-material";
+import "angular-sanitize";
+import "angular-aria";
+import "angular-recaptcha";
+import * as io from "socket.io-client";
 
 // TypeScript compiled globals
 import { UnityUtil } from "../globals/unity-util";
@@ -99,5 +101,5 @@ import "./viewer/js/multi-select.service";
 import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
 
-// Kickstart the application 
+// Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });
