@@ -6,6 +6,7 @@ declare global {
 	interface Window {
 		Module: any;
 		zxcvbn: any;
+		io: any;
 		ClientConfig: any;
 		TDR: any;
 		UnityUtil: any;

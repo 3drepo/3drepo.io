@@ -16,6 +16,7 @@ import { Pin } from "../globals/pin";
 import { Viewer } from "../globals/viewer";
 import { TDR } from "./init";
 
+window.io = io;
 window.UnityUtil = UnityUtil;
 window.Viewer = Viewer;
 window.Pin = Pin;
