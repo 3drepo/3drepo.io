@@ -1,6 +1,6 @@
 
-var PREFIX = "https://www.3drepo.io";
-var API_PREFIX = "https://api1.www.3drepo.io";
+var PREFIX = "https://dev.3drepo.io";
+var API_PREFIX = "https://dev.3drepo.io";
 
 // Unity requires its setting in a global 
 // variable called Module

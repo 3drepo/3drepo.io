@@ -1,5 +1,4 @@
 const gulp = require("gulp");
-const webpack = require('webpack-stream');
 const gutil = require('gulp-util');
 const print = require('gulp-print');
 const livereload = require('gulp-livereload');
@@ -12,10 +11,7 @@ const size = require('gulp-size');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
 const typedoc = require("gulp-typedoc");
-
 const del = require('del');
-
-const localWebpack = require('webpack');
 
 let isWatch = false;
 
@@ -146,21 +142,6 @@ gulp.task('manifest-icons', function(done) {
     .on("end", done);
 });
 
-gulp.task('unity-util', function(done) {
-  return gulp.src('./_built/amd/globals/unity-util.js')
-    .on('error', swallowError)
-    .pipe(webpack({
-      output: {
-        filename: 'unity-util.js',
-        libraryTarget: 'umd',
-      },
-    }, localWebpack))
-    .pipe(gulp.dest('./../public/unity/'))
-    .on("end", done);
-    //.pipe(livereload())
-});
-
-
 const sw = function(callback, verbose) {
   var swPrecache = require('sw-precache');
   var serviceWorkerName = "service-worker";
@@ -202,6 +183,10 @@ gulp.task("typedoc", function() {
     ;
 });
 
+gulp.task("reload", function() { 
+  return livereload() 
+});
+
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
   isWatch = true;
@@ -209,7 +194,7 @@ gulp.task('watch', function() {
 
   // WATCHERS
   gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
+  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev", "reload"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))
@@ -232,7 +217,6 @@ gulp.task('build', gulp.series(
     'manifest-icons', 
     'manifest-file'
   ),
-  'unity-util',
   'service-workers'
   )
 );
