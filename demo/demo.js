@@ -46,8 +46,6 @@ function init() {
 
         var LOGIN_URL = API + "login";
 
-        console.log(LOGIN_URL);
-        
         // Use the Fetch API
         fetch(LOGIN_URL, post)
             .then(function(response) {
@@ -56,7 +54,6 @@ function init() {
 
                 response.json()
                     .then(function(json){
-                        console.log(json)
                         if (validResponse) {
                            
                             if (json.code === "ALREADY_LOGGED_IN") {
@@ -72,13 +69,11 @@ function init() {
                         }
                     })
                     .catch(function(error){
-                        console.log(error);
                         confirm("Error getting JSON: ", error)
                     })
             
             })
             .catch(function(error) {
-                console.log(error);
                 if (error.code === "ALREADY_LOGGED_IN") {
                     initialiseViewer()
                 } else {
@@ -165,7 +160,7 @@ function init() {
             UnityUtil.init(function(error) {
                 console.error(error);
             });
-            UnityUtil.loadUnity("unity", "./../public/unity/Build/unity.json");
+            UnityUtil.loadUnity("unity", PREFIX + "/unity/Build/unity.json");
             
             UnityUtil.onReady().then(function() {
                 changeStatus("")
