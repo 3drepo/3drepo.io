@@ -183,7 +183,12 @@ class IssueScreenshotController implements ng.IController {
 
 		raf(() => {
 			const imgObj = new Image();
-			imgObj.src = this.scribbleCanvas.toDataURL("image/png");
+			try {
+				imgObj.src = this.scribbleCanvas.toDataURL("image/png");
+			} catch (error) {
+				this.handleScreenshotError(error);
+			}
+
 			imgObj.onload = () => {
 
 				// Very rarely this fails on Firefox
