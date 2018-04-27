@@ -1,4 +1,4 @@
-html, body, #viewer, #canvas, #unity {
+html, body, .viewer, #canvas {
     height: 100%;
     width: 100%;
     border: none;
@@ -14,7 +14,6 @@ html, body, #viewer, #canvas, #unity {
   width: 100%;
 }
 #changeModel {
-  z-index: 3;
   margin: 0;
   display: flex;
   position: absolute;
@@ -44,7 +43,6 @@ html, body, #viewer, #canvas, #unity {
   display: initial;
 }
 #status {
-    z-index: 3;
     position: absolute;
     top: 45vh;
     width: 100%;
