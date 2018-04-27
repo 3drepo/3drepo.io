@@ -41,6 +41,7 @@ class IssuesListController implements ng.IController {
 	private model: string;
 	private revision: string;
 	private filterText: string;
+	private bcfInputHandler: any;
 
 	constructor(
 		private $scope,
@@ -54,6 +55,7 @@ class IssuesListController implements ng.IController {
 
 	public $onInit() {
 
+		this.setupBcfImportInput();
 		this.toShow = "list";
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
@@ -122,6 +124,19 @@ class IssuesListController implements ng.IController {
 
 	}
 
+	public setupBcfImportInput() {
+		this.bcfInputHandler = document.createElement("input");
+		this.bcfInputHandler.setAttribute("type", "file");
+		this.bcfInputHandler.setAttribute("accept", ".zip,.bcfzip,.bcf");
+		this.bcfInputHandler.addEventListener("change", () => {
+			if (this.bcfInputHandler && this.bcfInputHandler.files) {
+				this.importBcf({file: this.bcfInputHandler.files[0]});
+			} else {
+				console.error("No file selected");
+			}
+		});
+	}
+
 	public handleMenuOptions() {
 		const ids = [];
 		this.IssuesService.state.issuesToShow.forEach((issue) => {
@@ -155,18 +170,7 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "importBCF":
-				const file = document.createElement("input");
-				file.setAttribute("type", "file");
-				file.setAttribute("accept", ".zip,.bcfzip,.bcf");
-				file.addEventListener("change", () => {
-					if (file && file.files) {
-						this.importBcf({file: file.files[0]});
-					} else {
-						console.error("No file selected");
-					}
-				});
-				file.click();
-
+				this.bcfInputHandler.click();
 				break;
 
 			case "filterRole":

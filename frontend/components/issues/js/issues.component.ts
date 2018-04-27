@@ -32,7 +32,7 @@ class IssuesController implements ng.IController {
 		"ClientConfigService",
 		"AnalyticService",
 		"DialogService",
-		"ViewerService"
+		"ViewerService",
 	];
 
 	private model: string;
@@ -81,7 +81,7 @@ class IssuesController implements ng.IController {
 		private ClientConfigService,
 		private AnalyticService,
 		private DialogService,
-		private ViewerService
+		private ViewerService,
 	) {}
 
 	public $onInit() {
@@ -470,9 +470,11 @@ class IssuesController implements ng.IController {
 	*/
 	public importBcf(file) {
 
-		this.$scope.$apply();
+		console.log("importBcf");
 
-		this.importingBCF = true;
+		this.$timeout(() => {
+			this.importingBCF = true;
+		});
 
 		this.IssuesService.importBcf(this.account, this.model, this.revision, file)
 			.then(() => {
@@ -482,6 +484,7 @@ class IssuesController implements ng.IController {
 
 				this.importingBCF = false;
 				this.IssuesService.state.allIssues = (data === "") ? [] : data;
+				this.$timeout();
 
 			})
 			.catch((error) => {
@@ -492,6 +495,7 @@ class IssuesController implements ng.IController {
 				const escapable = true;
 				this.DialogService.text("Error Getting User Job", content, escapable);
 				console.error(error);
+				this.$timeout();
 
 			});
 
