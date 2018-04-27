@@ -29,7 +29,6 @@ var User = require("../models/user");
 var addressMeta = require("../models/addressMeta");
 var Mailer = require("../mailer/mailer");
 var httpsPost = require("../libs/httpsReq").post;
-//var crypto = require('crypto');
 
 var multer = require("multer");
 
@@ -56,14 +55,6 @@ router.post('/:account/forgot-password', forgotPassword);
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
-// function expireSession(req) {
-// 	if (req.session)
-// 	{
-// 		req.session.cookie.expires = new Date(0);
-// 		req.session.cookie.maxAge = 0;
-// 	}
-// }
-
 function createSession(place, req, res, next, user){
 
 	req.session.regenerate(function(err) {
@@ -80,7 +71,7 @@ function createSession(place, req, res, next, user){
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles, flags: user.flags});
 		}
 	});
 }
@@ -95,8 +86,21 @@ function login(req, res, next){
 	}
 
 	User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-		req[C.REQ_REPO].logger.logInfo("User is logged in", { username: req.body.username});
-		createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
+
+		let responseData = { username: user.user };
+
+		req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
+
+		responseData.roles = user.roles;
+		responseData.flags = {};
+
+		responseData.flags.termsPrompt = !user.hasReadLatestTerms();
+
+		user.customData.lastLoginAt = new Date();
+
+		user.save().then(() => {
+			createSession(responsePlace, req, res, next, responseData);
+		});
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 	});
@@ -181,10 +185,9 @@ function signUp(req, res, next){
 				email: req.body.email,
 				firstName: req.body.firstName,
 				lastName: req.body.lastName,
-				phoneNo: req.body.phoneNo,
 				countryCode: req.body.countryCode,
-				jobTitle: req.body.jobTitle,
 				company: req.body.company,
+				mailListOptOut: !req.body.mailListAgreed,
 
 			}, config.tokenExpiry.emailVerify);
 		} else {
@@ -198,12 +201,11 @@ function signUp(req, res, next){
 		let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
 		//send to sales
 		Mailer.sendNewUser({
+			user: req.params.account,
 			email: req.body.email,
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
-			phoneNo: req.body.phoneNo,
 			country: country && country.name,
-			jobTitle: req.body.jobTitle,
 			company: req.body.company,
 		}).catch( err => {
 			// catch email error instead of returning to client
@@ -381,7 +383,6 @@ function listUserInfo(req, res, next){
 			email: customData.email,
 			billingInfo: customData.billing.billingInfo,
 			hasAvatar: customData.avatar ? true : false,
-			jobs: customData.jobs
 		});
 
 	}).catch(err => {

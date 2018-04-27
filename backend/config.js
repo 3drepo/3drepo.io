@@ -231,6 +231,13 @@ if (config.db.host.length > 1 && !config.db.replicaSet)
 config.db.username = coalesce(config.db.username, "username");
 config.db.password = coalesce(config.db.password, "password");
 
+//Subscription info
+config.subscriptions = coalesce(config.subscriptions, {});
+config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
+
+// Terms & Conditions update date
+config.termsUpdatedAt = coalesce(config.termsUpdatedAt, 0);
+
 // Other options
 config.js_debug_level = coalesce(config.js_debug_level, "debug"); // Loading prod or debug scripts
 

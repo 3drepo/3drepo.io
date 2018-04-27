@@ -26,6 +26,7 @@ class ModelController implements ng.IController {
 		"$compile",
 		"$mdDialog",
 
+		"ClipService",
 		"EventService",
 		"TreeService",
 		"RevisionsService",
@@ -47,7 +48,6 @@ class ModelController implements ng.IController {
 	private revision;
 	private settings;
 	private issueId;
-	private keysDown;
 	private treeMap;
 	private selectedObjects;
 	private initialSelectedObjects;
@@ -61,6 +61,7 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
+		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -74,7 +75,7 @@ class ModelController implements ng.IController {
 
 	public $onInit() {
 
-		this.issuesCardIndex = 0;
+		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
 		this.pointerEvents = "inherit";
 
 		history.pushState(null, null, document.URL);
@@ -113,10 +114,6 @@ class ModelController implements ng.IController {
 					this.setupModelInfo();
 				});
 			}
-		});
-
-		this.$scope.$watch("vm.keysDown", () => {
-			this.MultiSelectService.handleKeysDown(this.keysDown);
 		});
 
 		this.$scope.$watch("vm.issueId", () => {
@@ -165,46 +162,55 @@ class ModelController implements ng.IController {
 		this.RevisionsService.listAll(this.account, this.model);
 
 		if (!this.ViewerService.currentModel.model) {
-			console.debug("Initiating Viewer");
 			if (this.ViewerService.viewer) {
-				this.ViewerService.initViewer()
-					.then(() => {
-						this.ViewerService.loadViewerModel(
-							this.account,
-							this.model,
-							this.branch,
-							this.revision,
-						);
-					});
+				this.ViewerService.initViewer().then(() => {
+					this.loadModel();
+				}).catch((err) => {
+					console.error("Failed to load model: ", err);
+				});
+			} else {
+				console.error("Failed to locate viewer");
 			}
 		} else {
-			// Load the model
-			this.ViewerService.loadViewerModel(
-				this.account,
-				this.model,
-				this.branch,
-				this.revision,
-			);
+			this.loadModel();
 		}
+	}
 
+	public setSelectedObjects(selectedObjects) {
+		this.selectedObjects = selectedObjects;
+	}
+
+	public setInitialSelectedObjects(data) {
+		this.initialSelectedObjects = data.selectedObjects;
+		// Set the value to null so that it will be registered again
+		this.$timeout(() => {
+			this.initialSelectedObjects = null;
+		});
+	}
+
+	private loadModel() {
+		this.ViewerService.loadViewerModel(
+			this.account,
+			this.model,
+			this.branch,
+			this.revision,
+		).then( () => {
+			// IMPORTANT: only load model settings after it has started loading the model
+			// loadViewerModel can cancel previous model loads which will kill off old unity promises
+			this.loadModelSettings();
+		});
+	}
+
+	private loadModelSettings() {
 		this.ViewerService.getModelInfo(this.account, this.model)
 			.then((response) => {
-				const data = response.data;
-				this.settings = data;
+				this.settings = response.data;
+				this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
 
-				const isFederation = data.federate;
-				if (isFederation) {
-					this.PanelService.hideSubModels(this.issuesCardIndex, false);
-				} else {
-					this.PanelService.hideSubModels(this.issuesCardIndex, true);
-				}
+				this.ViewerService.updateViewerSettings(this.settings);
+				this.ClipService.initClip(this.settings.properties.unit);
 
-				this.EventService.send(
-					this.EventService.EVENT.MODEL_SETTINGS_READY,
-					data,
-				);
-
-				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
+				this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
 					.then((tree) => {
 						this.EventService.send(this.EventService.EVENT.TREE_READY, tree);
 					})
@@ -220,21 +226,7 @@ class ModelController implements ng.IController {
 					this.handleModelError();
 				}
 			});
-
 	}
-
-	public setSelectedObjects(selectedObjects) {
-		this.selectedObjects = selectedObjects;
-	}
-
-	public setInitialSelectedObjects(data) {
-		this.initialSelectedObjects = data.selectedObjects;
-		// Set the value to null so that it will be registered again
-		this.$timeout(() => {
-			this.initialSelectedObjects = null;
-		});
-	}
-
 }
 
 export const ModelComponent: ng.IComponentOptions = {
@@ -242,7 +234,6 @@ export const ModelComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		issueId: "=",
-		keysDown: "<",
 		model:  "=",
 		revision: "=",
 		state:    "=",

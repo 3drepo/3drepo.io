@@ -15,9 +15,8 @@
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
 
-import { Pin } from "./pin";
-import { UnityUtil } from "./unity-util";
-
+declare const Pin;
+declare const UnityUtil; 
 declare const ClientConfig;
 declare const Module;
 
@@ -305,6 +304,10 @@ export class Viewer {
 
 	}
 
+	public getDefaultHighlightColor() {
+		return UnityUtil.defaultHighlightColor;
+	}
+
 	public handleError(message) {
 		this.errCallback(message);
 	}
@@ -315,6 +318,10 @@ export class Viewer {
 
 	public showAll() {
 		UnityUtil.resetCamera();
+	}
+
+	public centreToPoint(params) {
+		UnityUtil.centreToPoint(params);
 	}
 
 	public setUnity() {
@@ -407,7 +414,20 @@ export class Viewer {
 		UnityUtil.clearHighlights();
 	}
 
-	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride) {
+	public unhighlightObjects(account, model, idsIn) {
+
+		if (idsIn) {
+			const uniqueIds = Array.from(new Set(idsIn));
+			if (uniqueIds.length) {
+				UnityUtil.unhighlightObjects(account, model, uniqueIds);
+				return;
+			}
+		}
+
+		
+	}
+
+	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride, forceReHighlight) {
 
 		const canHighlight = this.initialized && !this.pinDropMode && !this.measureMode;
 
@@ -417,7 +437,7 @@ export class Viewer {
 				const uniqueIds = Array.from(new Set(idsIn));
 				if (uniqueIds.length) {
 					const multi = multiOverride || this.multiSelectMode;
-					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 					return;
 				}
 			}
@@ -439,12 +459,6 @@ export class Viewer {
 	public updateSettings(settings) {
 		if (settings) {
 			this.settings = settings;
-			this.applySettings();
-		}
-	}
-
-	public applySettings() {
-		if (this.settings) {
 			if (this.settings.properties && this.settings.properties.unit) {
 				this.setUnits(this.settings.properties.unit);
 			}
@@ -717,6 +731,15 @@ export class Viewer {
 	 */
 	public mapStop() {
 		UnityUtil.mapStop();
+	}
+
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 
 }

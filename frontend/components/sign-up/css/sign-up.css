@@ -30,6 +30,12 @@ sign-up #tc a {
     outline: none;
 }
 
+sign-up #sub p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+    margin: 2px 0 20px 10px;
+}
+
 sign-up .sign-up-button {
     margin-left: 10%;
     margin-right: 10%;

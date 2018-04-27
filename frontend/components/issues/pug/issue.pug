@@ -42,9 +42,12 @@ md-content#issueInformation(
 					label#issueTitle(ng-if="vm.data") {{vm.issueData.title}}
 
 				span(flex="5")
-				md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
-					md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
-					md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
+				div
+					md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
+						md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
+						md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
+					md-tooltip(ng-if="!vm.showAdditional") Show additional information
+					md-tooltip(ng-if="vm.showAdditional") Hide additional information
 
 	// Info
 	.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
@@ -210,7 +213,7 @@ md-content#issueInformation(
 								md-tooltip(md-direction="bottom") edit
 								md-icon.angular-material-icons(style="color:{{vm.editCommentColor}}") mode_edit
 							md-button.md-icon-button.md-accent(aria-label="Delete Comment", ng-click="vm.deleteComment($event, $index)")
-								md-tooltip(md-direction="bottom") delete
+								md-tooltip(md-direction="bottom") Delete
 								md-icon.angular-material-icons close
 
 					// Info

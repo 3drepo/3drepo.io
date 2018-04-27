@@ -5,9 +5,6 @@ var utils = require("../utils");
 var User = require('../models/user');
 var Paypal = require("../models/paypal.js");
 
-// var moment = require('moment');
-// var getSubscription = require('../models/subscription').getSubscription;
-
 // endpoints for paypal IPN message
 router.post("/paypal/ipn", handleIPN);
 

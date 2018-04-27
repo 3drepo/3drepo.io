@@ -29,6 +29,7 @@ class PanelController implements ng.IController {
 
 	public maxHeightAvailable;
 	public panelTopBottomGap;
+	public bottomButtonGap;
 	public contentItems;
 	public showPanel;
 	public activate;
@@ -49,15 +50,16 @@ class PanelController implements ng.IController {
 
 	public $onInit() {
 
-		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap;
 		this.contentItems = [];
 		this.showPanel = true;
 		this.activate = true;
 
 		this.panelTopBottomGap = 55,
+		this.bottomButtonGap = 64;
 		this.itemGap = 30,
 		this.panelToolbarHeight = 40,
 		this.contentItemsShown = [];
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
 		this.resize(); // We need to set the correct height for the issues
 		this.bindEvents();
@@ -74,7 +76,6 @@ class PanelController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
-			// console.log(newValue, oldValue);
 			if (oldValue.length && newValue.length) {
 				for (let i = 0; i < newValue.length; i ++) {
 
@@ -129,7 +130,6 @@ class PanelController implements ng.IController {
 			// If we have clicked on a canvas, we are probably moving the model around
 			if (event.target.tagName === "CANVAS") {
 				this.activate = false;
-				this.$scope.$apply();
 			}
 		});
 
@@ -138,7 +138,6 @@ class PanelController implements ng.IController {
 		*/
 		angular.element(document).bind("mouseup", () => {
 			this.activate = true;
-			this.$scope.$apply();
 		});
 
 		/*
@@ -151,7 +150,7 @@ class PanelController implements ng.IController {
 	}
 
 	public resize() {
-		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap;
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		this.calculateContentHeights();
 	}
 
@@ -214,9 +213,6 @@ class PanelController implements ng.IController {
 	public calculateContentHeights() {
 		const tempContentItemsShown = angular.copy(this.contentItemsShown);
 		this.assignHeights(this.maxHeightAvailable, tempContentItemsShown, null);
-		this.$timeout(() => {
-			this.$scope.$apply();
-		});
 	}
 
 	public assignHeights(heightAvailable: number, contentItems: any[], previousContentItems: any[]) {
@@ -300,7 +296,6 @@ export const PanelComponent: ng.IComponentOptions = {
 	bindings: {
 		account:  "=",
 		branch:   "=",
-		keysDown: "=",
 		model:  "=",
 		modelSettings: "=",
 		position: "@",
