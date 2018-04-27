@@ -292,9 +292,11 @@ export class GroupsService {
 	}
 
 	public clearSelectionHighlights() {
-		this.state.groups.forEach((group) => {
-			group.highlighted = false;
-		});
+		if (this.state.groups) {
+			this.state.groups.forEach((group) => {
+				group.highlighted = false;
+			});
+		}
 	}
 
 	public deleteGroups(teamspace, model) {
