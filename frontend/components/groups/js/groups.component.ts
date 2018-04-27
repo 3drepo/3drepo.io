@@ -35,6 +35,7 @@ class GroupsController implements ng.IController {
 	private selectedGroup: any;
 	private teamspace: string;
 	private model: string;
+	private revision: string;
 	private loading: boolean;
 	private account: string;
 	private onShowItem;
@@ -77,7 +78,7 @@ class GroupsController implements ng.IController {
 		this.watchers();
 		this.toShow = "groups";
 		this.loading = true;
-		this.GroupsService.getGroups(this.account, this.model)
+		this.GroupsService.getGroups(this.account, this.model, this.revision)
 			.then(() => {
 				this.loading = false;
 			});

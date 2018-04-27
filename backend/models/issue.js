@@ -229,15 +229,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 
 	function _get(dbColOptions, branch, revision){
 
-		let getHistory;
-
-		if(branch){
-			getHistory = History.findByBranch(dbColOptions, branch);
-		} else if (revision) {
-			getHistory = utils.isUUID(revision) ? History.findByUID(dbColOptions, revision) : History.findByTag(dbColOptions, revision);
-		}
-
-		return getHistory.then(history => {
+		return History.getHistory(dbColOptions, branch, revision).then(history => {
 
 			if(!history){
 				return Promise.resolve([]);
@@ -318,11 +310,11 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 		sort = {sort: {"created": -1}};
 	}
 
+	// Why is branch not used here?
 	if (revId) {
 
-		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
 		let currHistory;
-		addRevFilter = findHistory(dbColOptions, revId).then(history => {
+		addRevFilter = History.getHistory(dbColOptions, branch, revId).then(history => {
 
 			if(!history){
 				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
@@ -554,17 +546,14 @@ schema.statics.createIssue = function(dbColOptions, data){
 		);
 	}
 
-	let getHistory;
+	let branch;
 
-	if(data.revId){
-		getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
-		getHistory = getHistory(dbColOptions, data.revId, {_id: 1});
-	} else {
-		getHistory = History.findByBranch(dbColOptions, "master", {_id: 1});
+	if (!data.revId){
+		branch = "master";
 	}
 
 	//assign rev_id for issue
-	promises.push(getHistory.then(history => {
+	promises.push(History.getHistory(dbColOptions, branch, data.revId, {_id: 1}).then(history => {
 		if(!history && data.revId){
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history){
@@ -849,17 +838,14 @@ schema.methods.updateComment = function(commentIndex, data){
 	if(commentIndex === null || typeof commentIndex === "undefined"){
 
 		let commentGuid = utils.generateUUID();
-		let getHistory;
+		let branch;
 
-		if(data.revId){
-			getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
-			getHistory = getHistory(this._dbcolOptions, data.revId, {_id: 1});
-		} else {
-			getHistory = History.findByBranch(this._dbcolOptions, "master", {_id: 1});
+		if (!data.revId){
+			branch = "master";
 		}
 
 		//assign rev_id for issue
-		return getHistory.then(history => {
+		return History.getHistory(this._dbcolOptions, branch, data.revId, {_id: 1}).then(history => {
 			if(!history && data.revId){
 				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 			} else {
@@ -1580,17 +1566,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 	let self = this;
 	let settings;
-	let getHistory;
+	let branch;
 
-	if(revId){
-		getHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
-		getHistory = getHistory({account, model}, revId, {_id: 1});
-	} else {
-		getHistory = History.findByBranch({account, model}, "master", {_id: 1});
+	if (!revId){
+		branch = "master";
 	}
 
 	//assign revId for issue
-	return getHistory.then(history => {
+	return History.getHistory({ account, model }, branch, revId, {_id: 1}).then(history => {
 		if(!history){
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history){

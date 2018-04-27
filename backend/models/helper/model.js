@@ -517,18 +517,10 @@ function getAllMeshes(account, model, branch, rev, username){
 
 	let subModelMeshes;
 	let revId;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -611,18 +603,10 @@ function getIdMap(account, model, branch, rev, username){
 	'use strict'	
 	let subIdMaps;
 	let revId, idMapsFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -712,18 +696,10 @@ function getIdToMeshes(account, model, branch, rev, username){
 	'use strict'	
 	let subIdToMeshes;
 		let revId, idToMeshesFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -805,18 +781,10 @@ function getModelProperties(account, model, branch, rev, username){
 	
 	let subProperties;
 	let revId, modelPropertiesFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -908,18 +876,10 @@ function getTreePath(account, model, branch, rev, username){
 	'use strict'	
 	let subTreePaths;
 	let revId, treePathsFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -1011,18 +971,10 @@ function getUnityAssets(account, model, branch, rev, username){
 
 	let subAssets;
 	let revId, assetsFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -1123,26 +1075,11 @@ function getUnityBundle(account, model, uid){
 // return main tree and urls of sub trees only and let frontend to do the remaining work :)
 // returning a readstream for piping and a promise for error catching while streaming
 function getFullTree_noSubTree(account, model, branch, rev){
-	
 
-	let getHistory;
 	let history;
 	let stashRs;
 
-	if(rev && utils.isUUID(rev)){
-
-		getHistory = History.findByUID({ account, model }, rev);
-
-	} else if (rev && !utils.isUUID(rev)) {
-
-		getHistory = History.findByTag({ account, model }, rev);
-
-	} else if (branch) {
-
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	const readStreamPromise = getHistory.then(_history => {
+	const readStreamPromise = History.getHistory({ account, model }, branch, rev).then(_history => {
 
 		history = _history;
 
@@ -1312,17 +1249,7 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 		if(granted){
 
-			let getHistory;
-
-			if(rev && utils.isUUID(rev)){
-				getHistory = History.findByUID({account, model}, rev);
-			} else if (rev && !utils.isUUID(rev)){
-				getHistory = History.findByTag({account, model}, rev);
-			} else {
-				getHistory = History.findByBranch({account, model}, branch);
-			}
-
-			return getHistory.then(history => {
+			return History.getHistory({ account, model }, branch, rev).then(history => {
 				if(history){
 					return search(history);
 				} else {
@@ -1709,7 +1636,6 @@ function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 
 function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username){
 	//Get the revision object to find all relevant IDs
-	let getHistory;
 	let history;
 	let fullFieldName = "metadata";
 
@@ -1717,14 +1643,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 		fullFieldName += "." + fieldName;
 	}
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		if(!history){
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
