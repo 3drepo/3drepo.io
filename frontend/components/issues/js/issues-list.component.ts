@@ -158,11 +158,15 @@ class IssuesListController implements ng.IController {
 				const file = document.createElement("input");
 				file.setAttribute("type", "file");
 				file.setAttribute("accept", ".zip,.bcfzip,.bcf");
+				file.addEventListener("change", () => {
+					if (file && file.files) {
+						this.importBcf({file: file.files[0]});
+					} else {
+						console.error("No file selected");
+					}
+				});
 				file.click();
 
-				file.addEventListener("change", () => {
-					this.importBcf({file: file.files[0]});
-				});
 				break;
 
 			case "filterRole":
