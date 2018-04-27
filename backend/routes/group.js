@@ -26,11 +26,14 @@ const Group = require("../models/group");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get("/", middlewares.issue.canView, listGroups);
-router.get("/:uid", middlewares.issue.canView, findGroup);
-router.put("/:uid", middlewares.issue.canCreate, updateGroup);
-router.post("/", middlewares.issue.canCreate, createGroup);
-router.delete("/:id", middlewares.issue.canCreate, deleteGroup);
+router.get('/groups/revision/master/head/', middlewares.issue.canView, listGroups);
+router.get('/groups/revision/:rid/', middlewares.issue.canView, listGroups);
+router.get('/groups/revision/master/head/:uid', middlewares.issue.canView, findGroup);
+router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
+
+router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
+router.post('/groups/', middlewares.issue.canCreate, createGroup);
+router.delete('/groups/:id', middlewares.issue.canCreate, deleteGroup);
 
 const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
@@ -38,9 +41,17 @@ const getDbColOptions = function(req){
 
 function listGroups(req, res, next){
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	Group.listGroups(getDbColOptions(req), req.query).then(groups => {
+	let groupList;
+	if (req.params.rid) {
+		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid);
+	} else {
+		groupList = Group.listGroups(dbCol, req.query, "master", null);
+	}
+
+	groupList.then(groups => {
 
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
@@ -58,9 +69,17 @@ function listGroups(req, res, next){
 
 function findGroup(req, res, next){
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	Group.findByUIDSerialised(getDbColOptions(req), req.params.uid).then( group => {
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null);
+	}
+
+	groupItem.then( group => {
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
@@ -106,9 +125,17 @@ function deleteGroup(req, res, next){
 
 function updateGroup(req, res, next){
 
-	let place = utils.APIInfo(req);
 	const dbCol = getDbColOptions(req);
-	Group.findByUID(dbCol, req.params.uid).then( group => {
+	let place = utils.APIInfo(req);
+
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
+	}
+
+	groupItem.then( group => {
 
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});

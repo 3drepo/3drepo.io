@@ -24,6 +24,7 @@ const uuid = require("node-uuid");
 const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
+const History = require('./history');
 
 
 const groupSchema = Schema({
@@ -45,20 +46,26 @@ const groupSchema = Schema({
 	color: [Number]
 });
 
-groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
+groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch, revId) {
 	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
 	const project = { parents: 1, _id: 0 };
 
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
+			return History.getHistory({ account, model }, branch, revId).then(history => {
+				if (!history) {
+					return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				} else {
 
-			const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
 
-			const meshQuery = { shared_id: { $in: parents }, type: "mesh" };
-			const meshProject = { shared_id: 1, _id: 0 };
+					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+					const meshProject = { shared_id: 1, _id: 0 };
 
-			return dbCol.find(meshQuery, meshProject).toArray();
+					return dbCol.find(meshQuery, meshProject).toArray();
+				}
+			});
 		});
 	});
 
@@ -201,7 +208,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 /**
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToString) {
+groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToString, branch, revId) {
 
 	const sharedIdPromises = [];
 
@@ -226,7 +233,9 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
 					sharedIdObject.account,
 					sharedIdObject.model,
-					ifcGuids
+					ifcGuids,
+					branch,
+					revId
 					).then(sharedIdResults => {
 			for (let j = 0; j < sharedIdResults.length; j++) {
 				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
@@ -254,7 +263,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 	});
 };
 
-groupSchema.statics.findByUID = function(dbCol, uid){
+groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -263,7 +272,7 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsSharedIDs(false).then((sharedIdObjects) => {
+			return group.getObjectsArrayAsSharedIDs(false, branch, revId).then((sharedIdObjects) => {
 				group.objects = sharedIdObjects;
 				return group;
 			});
@@ -271,7 +280,7 @@ groupSchema.statics.findByUID = function(dbCol, uid){
 
 };
 
-groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
+groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -280,7 +289,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsSharedIDs(true).then((sharedIdObjects) => {
+			return group.getObjectsArrayAsSharedIDs(true, branch, revId).then((sharedIdObjects) => {
 
 				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
 				returnGroup.objects = sharedIdObjects;
@@ -289,7 +298,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid){
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol, queryParams){
+groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
 
 	const query = {};
 
@@ -302,7 +311,7 @@ groupSchema.statics.listGroups = function(dbCol, queryParams){
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				result.getObjectsArrayAsSharedIDs(true).then(sharedIdObjects => {
+				result.getObjectsArrayAsSharedIDs(true, branch, revId).then(sharedIdObjects => {
 					result.objects = sharedIdObjects;
 					return result;
 				})
