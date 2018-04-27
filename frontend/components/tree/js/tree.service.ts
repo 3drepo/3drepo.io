@@ -76,7 +76,7 @@ export class TreeService {
 		this.state.hideIfc = true;
 		this.allNodes = [];
 		this.idToPath = {};
-		this.currentSelectedNodes = [];
+		this.currentSelectedNodes = {};
 		this.clickedHidden = {}; // or reset?
 		this.clickedShown = {}; // or reset?
 		this.nodesToShow = [];
@@ -415,8 +415,19 @@ export class TreeService {
 
 	}
 
+	public getCurrentSelectedNodesAsArray() {
+		return Object.keys(this.currentSelectedNodes).map((key) => this.currentSelectedNodes[key]);
+	}
+
 	public getCurrentSelectedNodes() {
 		return this.currentSelectedNodes;
+	}
+
+	public setCurrentSelectedNodesFromArray(nodes) {
+		this.currentSelectedNodes = {};
+		for (let i = 0; i < nodes.length; i++) {
+			this.currentSelectedNodes[nodes[i]._id] = nodes[i];
+		}
 	}
 
 	public setCurrentSelectedNodes(nodes) {
@@ -892,7 +903,7 @@ export class TreeService {
 	 */
 	public hideSelected() {
 
-		const selected = this.getCurrentSelectedNodes().concat();
+		const selected = this.getCurrentSelectedNodesAsArray();
 		if (selected && selected.length) {
 			this.hideTreeNodes(selected);
 		}
@@ -904,13 +915,13 @@ export class TreeService {
 	 */
 	public isolateSelected() {
 
-		const selectedNodes = this.getCurrentSelectedNodes().concat();
+		const selectedNodes = this.getCurrentSelectedNodesAsArray();
 
 		// Hide all
 		this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
 		// Show selected
 		if (selectedNodes) {
-			this.setCurrentSelectedNodes(selectedNodes);
+			this.setCurrentSelectedNodesFromArray(selectedNodes);
 			this.showTreeNodes(selectedNodes);
 		}
 	}
@@ -1036,9 +1047,11 @@ export class TreeService {
 
 		const visitedNodes = {};
 
-		while (this.currentSelectedNodes.length) {
+		for (const id in this.currentSelectedNodes) {
 
-			const currentNode = this.currentSelectedNodes.pop();
+			if (!id) { continue; }
+
+			const currentNode = this.currentSelectedNodes[id];
 
 			// Skip over any node that has already been visited
 			if (visitedNodes[currentNode._id]) {
@@ -1061,10 +1074,9 @@ export class TreeService {
 			}
 
 			visitedNodes[currentNode._id] = true;
-
 		}
 
-		this.currentSelectedNodes = [];
+		this.currentSelectedNodes = {};
 	}
 
 	/**
@@ -1079,16 +1091,16 @@ export class TreeService {
 		while (nodes.length) {
 			const currentNode = nodes.pop();
 
-			const nodeIndex = this.currentSelectedNodes.indexOf(currentNode);
+			const nodeSelected = this.currentSelectedNodes[currentNode];
 
 			if (
 				select &&
 				currentNode.selected !== this.SELECTION_STATES.parentOfUnselected &&
-				nodeIndex === -1
+				!nodeSelected
 			) {
-				this.currentSelectedNodes.push(currentNode);
-			} else if (nodeIndex > -1) {
-				this.currentSelectedNodes.splice(nodeIndex, 1);
+				this.currentSelectedNodes[currentNode._id] = currentNode;
+			} else if (nodeSelected) {
+				delete this.currentSelectedNodes[currentNode._id];
 			}
 
 			if (currentNode.toggleState !== this.VISIBILITY_STATES.invisible) {
@@ -1453,7 +1465,7 @@ export class TreeService {
 				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
 				// Show selected
 
-				this.setCurrentSelectedNodes(nodes);
+				this.setCurrentSelectedNodesFromArray(nodes);
 				this.showTreeNodes(nodes);
 
 			})
