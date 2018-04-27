@@ -6,12 +6,9 @@ const watch = require('gulp-watch');
 const concat = require('gulp-concat');
 const cssnano = require('gulp-cssnano');
 const path = require('path');
-const sourcemaps = require('gulp-sourcemaps');
-const size = require('gulp-size');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
 const typedoc = require("gulp-typedoc");
-const del = require('del');
 
 let isWatch = false;
 
@@ -81,13 +78,6 @@ gulp.task('css', function(done) {
          .on("end", done);
 
 });
-
-gulp.task('clean', function(done){
-  return del('./_built').then(function(){
-    done();
-  })
-   
-})
 
 gulp.task('icons', function (done) {
   return gulp.src('./icons/*.svg')
