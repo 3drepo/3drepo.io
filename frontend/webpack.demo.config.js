@@ -1,7 +1,6 @@
 module.exports = {
-    mode: "development",
-    devtool: "inline-source-map",
-    entry: "./globals/unity-util.ts",
+    mode: "production",
+    entry: "./globals/demo.ts",
     output: {
       path: __dirname + "./../public/unity/",
       filename: "unity-util.js"
