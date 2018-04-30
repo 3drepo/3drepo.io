@@ -37,8 +37,9 @@ class IssuesListController implements ng.IController {
 	private allIssues: any;
 	private menuOption: any;
 	private importBcf: any;
-	private account: any;
-	private model: any;
+	private account: string;
+	private model: string;
+	private revision: string;
 	private filterText: string;
 
 	constructor(
@@ -203,7 +204,7 @@ class IssuesListController implements ng.IController {
 	}
 
 	public selectIssue(issue) {
-		this.IssuesService.setSelectedIssue(issue, false);
+		this.IssuesService.setSelectedIssue(issue, false, this.revision);
 		angular.element(this.$window).triggerHandler("resize");
 	}
 
@@ -221,6 +222,7 @@ export const IssuesListComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
 		model: "<",
+		revision: "<",
 		allIssues: "<",
 		issuesToShow: "<",
 		filterText: "<",
