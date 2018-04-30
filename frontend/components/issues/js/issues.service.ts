@@ -722,11 +722,11 @@ export class IssuesService {
 
 	// TODO: Internationalise and make globally accessible
 	public getPrettyTime(time) {
-		let date = new Date(time),
-			currentDate = new Date(),
-			prettyTime,
-			postFix,
-			hours;
+		const date = new Date(time);
+		const currentDate = new Date();
+		let	prettyTime;
+		let	postFix;
+		let	hours;
 
 		const	monthToText = [
 			"Jan", "Feb", "Mar", "Apr",
@@ -1067,7 +1067,7 @@ export class IssuesService {
 		formData.append("file", file);
 
 		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
-			.then(function(res) {
+			.then((res) => {
 				if (res.status !== 200) {
 					throw res.data;
 				}
@@ -1080,7 +1080,7 @@ export class IssuesService {
 	 * @param comment
 	 * @returns {string}
 	 */
-	public convertActionCommentToText(comment, topic_types) {
+	public convertActionCommentToText(comment, topicTypes) {
 		let text = "";
 
 		if (comment) {
@@ -1109,14 +1109,14 @@ export class IssuesService {
 			case "topic_type":
 
 				comment.action.propertyText = "Type";
-				if (topic_types) {
+				if (topicTypes) {
 
-					const from = topic_types.find((topic_type) => {
-						return topic_type.value === comment.action.from;
+					const from = topicTypes.find((topicType) => {
+						return topicType.value === comment.action.from;
 					});
 
-					const to = topic_types.find((topic_type) => {
-						return topic_type.value === comment.action.to;
+					const to = topicTypes.find((topicType) => {
+						return topicType.value === comment.action.to;
 					});
 
 					if (from && from.label) {
@@ -1138,10 +1138,10 @@ export class IssuesService {
 
 				comment.action.propertyText = "Due Date";
 				if (comment.action.to) {
-					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+					comment.action.to = (new Date(parseInt(comment.action.to, 10))).toLocaleDateString();
 				}
 				if (comment.action.from) {
-					comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
+					comment.action.from = (new Date(parseInt(comment.action.from, 10))).toLocaleDateString();
 				} else {
 					text = comment.action.propertyText + " set to " +
 						comment.action.to + " by " +

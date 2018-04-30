@@ -37,7 +37,9 @@ class AccountModelSettingController implements ng.IController {
 	private targetProj;
 
 	private modelType;
-	private topicTypes;
+	/* tslint:disable */
+	private topic_types;
+	/* tslint:enable */
 	private code;
 	private unit;
 	private oldUnit;
@@ -120,8 +122,8 @@ class AccountModelSettingController implements ng.IController {
 					if (response.data.type) {
 						this.modelType = response.data.type;
 					}
-					if (props.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(props.topicTypes);
+					if (props.topic_types) {
+						this.topic_types = this.convertTopicTypesToString(props.topic_types);
 					}
 					if (props.code) {
 						this.code = props.code;
@@ -219,7 +221,7 @@ class AccountModelSettingController implements ng.IController {
 			name: this.modelName,
 			unit: this.unit,
 			code: this.code,
-			topicTypes: this.topicTypes.replace(/\r/g, "").split("\n"),
+			topic_types: this.topic_types.replace(/\r/g, "").split("\n"),
 			fourDSequenceTag: this.fourDSequenceTag,
 		};
 
@@ -258,8 +260,8 @@ class AccountModelSettingController implements ng.IController {
 				if (response.status === 200) {
 					this.updateModel();
 					this.message = "Saved";
-					if (response.data && response.data.properties && response.data.properties.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(response.data.properties.topicTypes);
+					if (response.data && response.data.properties && response.data.properties.topic_types) {
+						this.topic_types = this.convertTopicTypesToString(response.data.properties.topic_types);
 					}
 					this.oldUnit = this.unit;
 				} else {

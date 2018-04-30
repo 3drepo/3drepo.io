@@ -131,15 +131,18 @@ class IssuesListController implements ng.IController {
 		switch (this.menuOption.value) {
 
 			case "sortByDate":
-				this.IssuesService.state.issueDisplay.sortOldestFirst = !this.IssuesService.state.issueDisplay.sortOldestFirst;
+				this.IssuesService.state.issueDisplay.sortOldestFirst =
+					!this.IssuesService.state.issueDisplay.sortOldestFirst;
 				break;
 
 			case "showClosed":
-				this.IssuesService.state.issueDisplay.showClosed = !this.IssuesService.state.issueDisplay.showClosed;
+				this.IssuesService.state.issueDisplay.showClosed =
+					!this.IssuesService.state.issueDisplay.showClosed;
 				break;
 
 			case "showSubModels":
-				this.IssuesService.state.issueDisplay.showSubModelIssues = !this.IssuesService.state.issueDisplay.showSubModelIssues;
+				this.IssuesService.state.issueDisplay.showSubModelIssues =
+					!this.IssuesService.state.issueDisplay.showSubModelIssues;
 				break;
 
 			case "print":

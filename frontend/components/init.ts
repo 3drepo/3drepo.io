@@ -14,7 +14,9 @@ export const TDR = () => {
 			}
 
 			if (window.ClientConfig.VERSION) {
+				/* tslint:disable */
 				console.log(`===== 3D REPO - Version ${window.ClientConfig.VERSION} =====`);
+				/* tslint:enable */
 			} else {
 				console.error("No version number in config...");
 			}

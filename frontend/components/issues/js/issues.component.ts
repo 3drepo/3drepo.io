@@ -94,7 +94,6 @@ class IssuesController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading issues";
 		this.availableJobs = null;
-		this.modelUserJob;
 		this.selectedIssue = null;
 		this.autoSaveComment = false;
 		this.onContentHeightRequest({height: 70}); // To show the loading progress

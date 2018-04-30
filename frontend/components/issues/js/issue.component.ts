@@ -70,7 +70,9 @@ class IssueController implements ng.IController {
 	private comment;
 	private issueData;
 	private modelSettings;
+	/* tslint:disable */
 	private topic_types;
+	/* tslint:enable */
 	private modelJobs;
 	private availableJobs;
 	private userJob;
@@ -234,7 +236,7 @@ class IssueController implements ng.IController {
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
-				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
+				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topic_types || [];
 				this.checkCanComment();
 				this.convertCommentTopicType();
 			}

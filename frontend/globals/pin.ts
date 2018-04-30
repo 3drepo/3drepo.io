@@ -18,6 +18,11 @@
 declare const UnityUtil;
 export class Pin {
 
+	public static pinColours = {
+		blue : [12 / 255, 47 / 255, 84 / 255], // [0, 69/255, 148/255],
+		yellow : [255 / 255, 255 / 255, 54 / 255],
+	};
+
 	public id: number;
 	public position: string;
 	public highlighted: boolean;
@@ -26,11 +31,6 @@ export class Pin {
 	public viewpoint;
 	public account;
 	public model;
-
-	public static pinColours = {
-		blue : [12 / 255, 47 / 255, 84 / 255], // [0, 69/255, 148/255],
-		yellow : [255 / 255, 255 / 255, 54 / 255],
-	};
 
 	public pinHeadIsHighlighted;
 	public ghostPinHeadIsHighlighted;
@@ -66,8 +66,8 @@ export class Pin {
 
 		this.highlighted = !this.highlighted;
 
-		let depthMode = this.highlighted ? "ALWAYS" : "LESS" ;
-		let highlighted = this.highlighted.toString();
+		const depthMode = this.highlighted ? "ALWAYS" : "LESS" ;
+		const highlighted = this.highlighted.toString();
 
 		this.pinHeadIsHighlighted.setAttribute("value", highlighted);
 		this.ghostPinHeadIsHighlighted.setAttribute("value", highlighted);
