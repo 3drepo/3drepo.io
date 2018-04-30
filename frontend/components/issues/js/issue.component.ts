@@ -236,7 +236,7 @@ class IssueController implements ng.IController {
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
-				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topic_types || [];
+				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
 				this.checkCanComment();
 				this.convertCommentTopicType();
 			}
