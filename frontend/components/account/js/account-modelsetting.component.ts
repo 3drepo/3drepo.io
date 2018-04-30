@@ -123,7 +123,6 @@ class AccountModelSettingController implements ng.IController {
 						this.modelType = response.data.type;
 					}
 
-					console.log("PROPS", props);
 					if (props.topicTypes) {
 						this.topicTypes = this.convertTopicTypesToString(props.topicTypes);
 					}
