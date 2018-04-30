@@ -1049,14 +1049,9 @@ export class TreeService {
 
 		for (const id in this.currentSelectedNodes) {
 
-			if (!id) { continue; }
-
 			const currentNode = this.currentSelectedNodes[id];
 
-			// Skip over any node that has already been visited
-			if (visitedNodes[currentNode._id]) {
-				continue;
-			}
+			if (!id || visitedNodes[currentNode._id]) { continue; }
 
 			currentNode.selected = this.SELECTION_STATES.unselected;
 
@@ -1093,14 +1088,10 @@ export class TreeService {
 
 			const nodeSelected = this.currentSelectedNodes[currentNode];
 
-			if (
-				select &&
-				currentNode.selected !== this.SELECTION_STATES.parentOfUnselected &&
-				!nodeSelected
-			) {
-				this.currentSelectedNodes[currentNode._id] = currentNode;
-			} else if (nodeSelected) {
+			if (nodeSelected) {
 				delete this.currentSelectedNodes[currentNode._id];
+			} else if (select && currentNode.selected !== this.SELECTION_STATES.parentOfUnselected) {
+				this.currentSelectedNodes[currentNode._id] = currentNode;
 			}
 
 			if (currentNode.toggleState !== this.VISIBILITY_STATES.invisible) {
