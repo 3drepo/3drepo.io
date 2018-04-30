@@ -29,7 +29,6 @@ export class UnityUtil {
 		MODEL_LOADED : 3, // Models
 	};
 
-
 	public static unityInstance;
 
 	public static readyPromise;
@@ -568,7 +567,7 @@ export class UnityUtil {
 	 *  @param {number[]} color - RGB value of the highlighting colour
 	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted.
 	 *  				Also any objects that are already highlighted will be unhighlighted
-	 *  @param {bool} forceReHighlight - If set to true, existing highlighted objects will be forced to re-highlight itself. 
+	 *  @param {bool} forceReHighlight - If set to true, existing highlighted objects will be forced to re-highlight itself.
 	 *  				This is typically used for re-colouring a highlight or when you want a specific set of objects
 	 *  				to stay highlighted when toggle mode is on
 	 */
@@ -578,7 +577,7 @@ export class UnityUtil {
 			model,
 			ids : idArr,
 			toggle : toggleMode,
-			forceReHighlight			
+			forceReHighlight
 		};
 
 		if (color) {
@@ -661,7 +660,7 @@ export class UnityUtil {
 	public static mapStop() {
 		UnityUtil.toUnity("HideMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
-	
+
 	/**
 	 * Override the diffuse colour of the given meshes
 	 * @param {string} account - teamspace the meshes resides in
