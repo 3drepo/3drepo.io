@@ -37,7 +37,6 @@
     "gm": "1.23.0",
     "json2csv": "3.7.3",
     "lodash": "3.10.1",
-    "mathjs": "1.7.1",
     "moment": "2.21.0",
     "moment-timezone": "0.5.14",
     "mongodb": "2.2.21",

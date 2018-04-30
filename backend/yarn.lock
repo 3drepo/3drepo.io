@@ -1084,10 +1084,6 @@ decamelize@^1.0.0, decamelize@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
 
-decimal.js@~4.0.1:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-4.0.4.tgz#af3249465e133988c30750f77eaaf44505caa5e3"
-
 decompress-tar@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/decompress-tar/-/decompress-tar-3.1.0.tgz#217c789f9b94450efaadc5c5e537978fc333c466"
@@ -3309,12 +3305,6 @@ mailcomposer@3.7.0:
 map-cache@^0.2.0:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/map-cache/-/map-cache-0.2.2.tgz#c32abd0bd6525d9b051645bb4f26ac5dc98a0dbf"
-
-mathjs@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-1.7.1.tgz#84a9733d025fded4405111a065a98cb11e2102c1"
-  dependencies:
-    decimal.js "~4.0.1"
 
 md5-hex@^1.2.0:
   version "1.3.0"
