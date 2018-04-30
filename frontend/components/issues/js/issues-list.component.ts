@@ -203,13 +203,9 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "importBCF":
-<<<<<<< Updated upstream
-				this.bcfInputHandler.click();
-=======
 				this.$timeout(() => {
 					this.bcfInputHandler.click();
 				});
->>>>>>> Stashed changes
 				break;
 
 			case "filterRole":
