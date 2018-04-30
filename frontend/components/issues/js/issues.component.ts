@@ -521,7 +521,7 @@ class IssuesController implements ng.IController {
 				{notify: false},
 			);
 
-			this.IssuesService.setSelectedIssue(issue, true);
+			this.IssuesService.setSelectedIssue(issue, true, this.revision);
 
 		} else {
 			this.IssuesService.resetSelectedIssue();
