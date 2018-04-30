@@ -44,10 +44,6 @@ class IssuesListController implements ng.IController {
 	private revision: string;
 	private filterText: string;
 	private bcfInputHandler: any;
-<<<<<<< Updated upstream
-=======
-	private bcfFile: any;
->>>>>>> Stashed changes
 
 	constructor(
 		private $scope,
@@ -69,7 +65,6 @@ class IssuesListController implements ng.IController {
 		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
 		this.setupBcfImportInput();
-		this.bcfFile = null;
 		this.watchers();
 
 	}
@@ -109,12 +104,6 @@ class IssuesListController implements ng.IController {
 
 		});
 
-		// this.$scope.$watch("vm.bcfFile", (bcfFile) => {
-		// 	if (this.bcfFile) {
-		// 		console.log("vm.bcfFile changed");
-		// 		this.onBcfFileChange();
-		// 	}
-		// });
 
 		this.$scope.$watch("vm.menuOption", () => {
 
