@@ -21,14 +21,14 @@ export class AccountUploadService {
 		"$q",
 		"ClientConfigService",
 		"APIService",
-		"RevisionsService",
+		"RevisionsService"
 	];
 
 	constructor(
 		private $q,
 		private ClientConfigService,
 		private APIService,
-		private RevisionsService,
+		private RevisionsService
 	) {}
 
 	public $onInit() {}
@@ -45,7 +45,7 @@ export class AccountUploadService {
 			type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
 			unit: modelData.unit,
 			code: modelData.code,
-			modelName: modelData.name,
+			modelName: modelData.name
 		};
 		return this.APIService.post(modelData.teamspace + "/model", data);
 	}

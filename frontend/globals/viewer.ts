@@ -27,7 +27,7 @@ export class Viewer {
 		HELICOPTER: "HELICOPTER",
 		TURNTABLE: "TURNTABLE",
 		WALK: "WALK",
-		WAYFINDER: "WAYFINDER",
+		WAYFINDER: "WAYFINDER"
 	};
 
 	public static EVENT = {
@@ -69,11 +69,11 @@ export class Viewer {
 		UNITY_ERROR: "VIEWER_EVENT_UNITY_ERROR",
 		UNITY_READY: "VIEWER_EVENT_UNITY_READY",
 		UPDATE_CLIPPING_PLANES: "VIEWER_UPDATE_CLIPPING_PLANE",
-		VR_READY: "VIEWER_EVENT_VR_READY",
+		VR_READY: "VIEWER_EVENT_VR_READY"
 	};
 
 	public ERROR = {
-		PIN_ID_TAKEN : "VIEWER_PIN_ID_TAKEN",
+		PIN_ID_TAKEN : "VIEWER_PIN_ID_TAKEN"
 	};
 
 	public pins = {};
@@ -159,7 +159,7 @@ export class Viewer {
 		name: string,
 		element: HTMLElement,
 		callback: any,
-		errCallback: any,
+		errCallback: any
 	) {
 
 		// If not given the tag by the manager create here
@@ -290,7 +290,7 @@ export class Viewer {
 				this.loadingDivText.style.display = "none";
 				this.callback(Viewer.EVENT.UNITY_READY, {
 					model: this.modelString,
-					name: this.name,
+					name: this.name
 				});
 				resolve();
 			}).catch((error) => {
@@ -368,7 +368,7 @@ export class Viewer {
 			normal : pointInfo.normal,
 			position: pointInfo.position,
 			screenPos : pointInfo.mousePos,
-			selectColour : Pin.pinColours.yellow,
+			selectColour : Pin.pinColours.yellow
 		});
 
 	}
@@ -388,7 +388,7 @@ export class Viewer {
 				if (pointInfo.pin) {
 					// User clicked a pin
 					this.callback(Viewer.EVENT.CLICK_PIN, {
-						id: pointInfo.id,
+						id: pointInfo.id
 					});
 
 				} else {
@@ -396,7 +396,7 @@ export class Viewer {
 						account: pointInfo.database,
 						id: pointInfo.id,
 						model: pointInfo.model,
-						source: "viewer",
+						source: "viewer"
 					});
 				}
 			} else {
@@ -472,7 +472,7 @@ export class Viewer {
 					account,
 					model,
 					properties.hiddenNodes,
-					false,
+					false
 				);
 			}
 
@@ -651,7 +651,7 @@ export class Viewer {
 			// Replace with
 			this.callback(Viewer.EVENT.CHANGE_PIN_COLOUR, {
 				colours: Pin.pinColours.yellow,
-				id,
+				id
 			});
 
 			this.callback(Viewer.EVENT.SET_CAMERA, {
@@ -659,14 +659,14 @@ export class Viewer {
 				model: pin.model,
 				position : pin.viewpoint.position,
 				up: pin.viewpoint.up,
-				view_dir : pin.viewpoint.view_dir,
+				view_dir : pin.viewpoint.view_dir
 			});
 
 			this.callback(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
 				account: pin.account,
 				clippingPlanes: pin.viewpoint.clippingPlanes,
 				fromClipPanel: false,
-				model: pin.model,
+				model: pin.model
 			});
 		}
 

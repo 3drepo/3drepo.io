@@ -18,17 +18,17 @@
 export class MeasureService {
 
 	public static $inject: string[] = [
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private state: any;
 
 	constructor(
-		private ViewerService: any,
+		private ViewerService: any
 	) {
 		this.state = {
 			active: false,
-			disabled: false,
+			disabled: false
 		};
 	}
 

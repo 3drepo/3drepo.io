@@ -18,7 +18,7 @@
 class TermsController implements ng.IController {
 
 	public static $inject: string[] = [
-		"StateManager",
+		"StateManager"
 	];
 
 	constructor(private StateManager) {}
@@ -34,7 +34,7 @@ export const TermsComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: TermsController,
 	controllerAs: "vm",
-	templateUrl: "templates/terms.html",
+	templateUrl: "templates/terms.html"
 };
 
 export const TermsComponentModule = angular

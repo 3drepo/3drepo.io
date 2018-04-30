@@ -20,11 +20,11 @@ declare const ga;
 export class AnalyticService {
 
 	public static $inject: string[] = [
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	constructor(
-		private ClientConfigService: any,
+		private ClientConfigService: any
 	) {
 	}
 

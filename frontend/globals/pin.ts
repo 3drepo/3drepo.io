@@ -20,7 +20,7 @@ export class Pin {
 
 	public static pinColours = {
 		blue : [12 / 255, 47 / 255, 84 / 255], // [0, 69/255, 148/255],
-		yellow : [255 / 255, 255 / 255, 54 / 255],
+		yellow : [255 / 255, 255 / 255, 54 / 255]
 	};
 
 	public id: number;
@@ -41,7 +41,7 @@ export class Pin {
 
 	constructor(
 		id: number, position: string, norm, colours, viewpoint,
-		account: string, model: string,
+		account: string, model: string
 	) {
 
 		this.id = id;

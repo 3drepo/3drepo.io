@@ -19,13 +19,13 @@ export class MultiSelectService {
 
 	public static $inject: string[] = [
 		"ViewerService",
-		"$document",
+		"$document"
 	];
 
 	private keys = {
 		cmdKey : 91,
 		ctrlKey : 17,
-		escKey : 27,
+		escKey : 27
 	};
 
 	private isMac = (navigator.platform.indexOf("Mac") !== -1);
@@ -34,7 +34,7 @@ export class MultiSelectService {
 
 	constructor(
 		public ViewerService: any,
-		public $document: any,
+		public $document: any
 	) {
 
 		this.initKeyWatchers();

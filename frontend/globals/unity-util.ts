@@ -26,7 +26,7 @@ export class UnityUtil {
 	public static LoadingState = {
 		VIEWER_READY : 1,  // Viewer has been loaded
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
-		MODEL_LOADED : 3, // Models
+		MODEL_LOADED : 3 // Models
 	};
 
 	public static unityInstance;
@@ -54,7 +54,7 @@ export class UnityUtil {
 	public static defaultHighlightColor = [1, 1, 0];
 
 	public static init(
-		errorCallback: any,
+		errorCallback: any
 	) {
 		UnityUtil.errorCallback = errorCallback;
 	}
@@ -86,7 +86,7 @@ export class UnityUtil {
 		unityJsonPath = unityJsonPath || "unity/Build/unity.json";
 
 		const unitySettings: any = {
-			onProgress: this.onProgress,
+			onProgress: this.onProgress
 		};
 		UnityLoader.Error.handler = this.onUnityError;
 		if (window && (window as any).Module) {
@@ -94,12 +94,12 @@ export class UnityUtil {
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
 				unityJsonPath,
-				unitySettings,
+				unitySettings
 			);
 		} else {
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
-				unityJsonPath,
+				unityJsonPath
 			);
 		}
 
@@ -269,7 +269,7 @@ export class UnityUtil {
 
 	public static loaded(bboxStr) {
 		const res = {
-			bbox: JSON.parse(bboxStr),
+			bbox: JSON.parse(bboxStr)
 		};
 		UnityUtil.loadedResolve.resolve(res);
 		UnityUtil.loadedFlag = true;
@@ -338,7 +338,7 @@ export class UnityUtil {
 	 */
 	public static centreToPoint(meshIDs) {
 		const params = {
-			groups: meshIDs,
+			groups: meshIDs
 		};
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -351,7 +351,7 @@ export class UnityUtil {
 	public static changePinColour(id, colour) {
 		const params =  {
 			color : colour,
-			pinName : id,
+			pinName : id
 		};
 
 		UnityUtil.toUnity("ChangePinColor", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
@@ -407,7 +407,7 @@ export class UnityUtil {
 
 		const params: any = {
 			database : account,
-			model,
+			model
 		};
 
 		if (revision !== "head") {
@@ -432,7 +432,7 @@ export class UnityUtil {
 	public static diffToolSetAsComparator(account, model) {
 		const params: any = {
 			database : account,
-			model,
+			model
 		};
 		UnityUtil.toUnity("DiffToolAssignAsComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
@@ -510,7 +510,7 @@ export class UnityUtil {
 			id,
 			position,
 			normal,
-			color : colour,
+			color : colour
 		};
 		UnityUtil.toUnity("DropPin", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -577,7 +577,7 @@ export class UnityUtil {
 			model,
 			ids : idArr,
 			toggle : toggleMode,
-			forceReHighlight,
+			forceReHighlight
 		};
 
 		if (color) {
@@ -599,7 +599,7 @@ export class UnityUtil {
 		const params: any = {
 			database : account,
 			model,
-			ids : idArr,
+			ids : idArr
 		};
 
 		UnityUtil.toUnity("UnhighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
@@ -625,7 +625,7 @@ export class UnityUtil {
 
 		const params: any = {
 			database : account,
-			model,
+			model
 		};
 
 		if (revision !== "head") {

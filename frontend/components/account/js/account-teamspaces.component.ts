@@ -45,11 +45,11 @@ export const AccountTeamspacesComponent: ng.IComponentOptions = {
 		loading: "=",
 		selectedIndex: "=",
 		itemToShow: "=",
-		isLiteMode: "<",
+		isLiteMode: "<"
 	},
 	controller: AccountTeamspacesController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-teamspaces.html",
+	templateUrl: "templates/account-teamspaces.html"
 };
 
 export const AccountTeamspacesComponentModule = angular

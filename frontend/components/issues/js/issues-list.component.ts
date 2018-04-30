@@ -24,7 +24,7 @@ class IssuesListController implements ng.IController {
 
 		"APIService",
 		"IssuesService",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	private toShow: string;
@@ -49,7 +49,7 @@ class IssuesListController implements ng.IController {
 
 		private APIService,
 		private IssuesService,
-		private ClientConfigService,
+		private ClientConfigService
 	) {}
 
 	public $onInit() {
@@ -87,7 +87,7 @@ class IssuesListController implements ng.IController {
 				this.allIssues = this.IssuesService.state.allIssues;
 
 			},
-			true,
+			true
 		);
 
 		this.$scope.$watch("vm.filterText", () => {
@@ -117,7 +117,7 @@ class IssuesListController implements ng.IController {
 					this.editIssue(issueToDisplay);
 				}
 			},
-			true,
+			true
 		);
 
 	}
@@ -235,11 +235,11 @@ export const IssuesListComponent: ng.IComponentOptions = {
 		menuOption: "<",
 		importBcf: "&",
 		selectedIssue: "<",
-		issueDisplay: "<",
+		issueDisplay: "<"
 	},
 	controller: IssuesListController,
 	controllerAs: "vm",
-	templateUrl: "templates/issues-list.html",
+	templateUrl: "templates/issues-list.html"
 };
 
 export const IssuesListComponentModule = angular

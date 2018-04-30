@@ -18,7 +18,7 @@
 class PanelCardOptionMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$timeout",
+		"$timeout"
 	];
 
 	public menu;
@@ -26,7 +26,7 @@ class PanelCardOptionMenuController implements ng.IController {
 	public sortIndex;
 
 	constructor(
-		private $timeout: ng.ITimeoutService,
+		private $timeout: ng.ITimeoutService
 	) {}
 
 	public $ngInit() {}
@@ -64,11 +64,11 @@ class PanelCardOptionMenuController implements ng.IController {
 export const PanelCardOptionMenuComponent: ng.IComponentOptions = {
 	bindings: {
 		menu: "=",
-		selectedMenuOption: "=",
+		selectedMenuOption: "="
 	},
 	controller: PanelCardOptionMenuController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-menu.html",
+	templateUrl: "templates/panel-card-option-menu.html"
 };
 
 export const PanelCardOptionMenuComponentModule = angular

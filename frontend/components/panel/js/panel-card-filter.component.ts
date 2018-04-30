@@ -20,7 +20,7 @@ class PanelCardFilterController implements ng.IController {
 	public static $inject: string[] = [
 		"$timeout",
 		"$scope",
-		"$element",
+		"$element"
 	];
 
 	private filterTimeout = null;
@@ -33,7 +33,7 @@ class PanelCardFilterController implements ng.IController {
 	constructor(
 		private $timeout: ng.ITimeoutService,
 		private $scope: ng.IScope,
-		private $element: ng.IRootElementService,
+		private $element: ng.IRootElementService
 	) {
 		this.watchers();
 	}
@@ -71,11 +71,11 @@ class PanelCardFilterController implements ng.IController {
 export const PanelCardFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		filterText: "=",
-		showFilter: "=",
+		showFilter: "="
 	},
 	controller: PanelCardFilterController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card-filter.html",
+	templateUrl: "templates/panel-card-filter.html"
 };
 
 export const PanelCardFilterComponentComponentModule = angular

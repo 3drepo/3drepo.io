@@ -23,7 +23,7 @@ export class EventService {
 	public static timeout;
 
 	public static $inject: string[] = [
-		"$timeout",
+		"$timeout"
 	];
 
 	private EVENT = {
@@ -84,15 +84,15 @@ export class EventService {
 		STATE_CHANGED: "EVENT_STATE_CHANGED",
 		SELECT_ISSUE: "EVENT_SELECT_ISSUE",
 		UPDATE_STATE: "EVENT_UPDATE_STATE",
-		ISSUES_READY: "EVENT_ISSUES_READY",
+		ISSUES_READY: "EVENT_ISSUES_READY"
 	};
 
 	private ERROR = {
-		DUPLICATE_VIEWER_NAME: "ERROR_DUPLICATE_VIEWER_NAME",
+		DUPLICATE_VIEWER_NAME: "ERROR_DUPLICATE_VIEWER_NAME"
 	};
 
 	constructor(
-		private $timeout: ng.ITimeoutService,
+		private $timeout: ng.ITimeoutService
 	) {
 		EventService.internalCurrentEvent = {};
 		EventService.internalCurrentError = {};

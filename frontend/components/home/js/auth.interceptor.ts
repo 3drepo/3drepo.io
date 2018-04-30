@@ -18,13 +18,13 @@
 export class AuthInterceptor {
 
 	public static $inject: string[] = [
-		"$injector",
+		"$injector"
 	];
 
 	private dialogOpen = false;
 
 	constructor(
-		private $injector: any,
+		private $injector: any
 	) {
 	}
 
