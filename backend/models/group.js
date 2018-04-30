@@ -326,6 +326,10 @@ groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
+	if ("[object String]" === Object.prototype.toString.call(uid)) {
+		uid = utils.stringToUUID(uid);
+	}
+
 	return this.findOne(dbCol, { _id: uid }).then(group => {
 		if (group) {
 			const issueIdData = {
