@@ -142,18 +142,6 @@ class IssuesListController implements ng.IController {
 	}
 
 	public setupBcfImportInput() {
-<<<<<<< Updated upstream
-		this.bcfInputHandler = document.createElement("input");
-		this.bcfInputHandler.setAttribute("type", "file");
-		this.bcfInputHandler.setAttribute("accept", ".zip,.bcfzip,.bcf");
-		this.bcfInputHandler.addEventListener("change", () => {
-			if (this.bcfInputHandler && this.bcfInputHandler.files) {
-				this.importBcf({file: this.bcfInputHandler.files[0]});
-			} else {
-				console.error("No file selected");
-			}
-		});
-=======
 
 		if (this.bcfInputHandler) {
 			return;
@@ -180,7 +168,6 @@ class IssuesListController implements ng.IController {
 			});
 		});
 
->>>>>>> Stashed changes
 	}
 
 	public handleMenuOptions() {

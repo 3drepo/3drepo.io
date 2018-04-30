@@ -470,8 +470,6 @@ class IssuesController implements ng.IController {
 	*/
 	public importBcf(file) {
 
-		console.log("importBcf");
-
 		this.$timeout(() => {
 			this.importingBCF = true;
 		});
