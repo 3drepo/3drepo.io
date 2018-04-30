@@ -327,11 +327,16 @@ groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
 	return this.findOne(dbCol, { _id: uid }).then(group => {
-		const issueIdData = {
-			issue_id: issueId
-		};
+		if (group) {
+			const issueIdData = {
+				issue_id: issueId
+			};
 
-		return group.updateAttrs(dbCol, issueIdData);
+			return group.updateAttrs(dbCol, issueIdData);
+		}
+		else {
+			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		}
 	});
 };
 
