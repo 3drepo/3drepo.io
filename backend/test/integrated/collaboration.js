@@ -160,7 +160,7 @@ describe('Sharing/Unsharing a model', function () {
 				},
 				function ableToViewModel(done){
 
-					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/unityAssets.json`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
