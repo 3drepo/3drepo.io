@@ -21,6 +21,8 @@ class IssuesListController implements ng.IController {
 		"$scope",
 		"$window",
 		"$timeout",
+		"$compile",
+		"$element",
 
 		"APIService",
 		"IssuesService",
@@ -42,11 +44,17 @@ class IssuesListController implements ng.IController {
 	private revision: string;
 	private filterText: string;
 	private bcfInputHandler: any;
+<<<<<<< Updated upstream
+=======
+	private bcfFile: any;
+>>>>>>> Stashed changes
 
 	constructor(
 		private $scope,
 		private $window,
 		private $timeout,
+		private $compile,
+		private $element,
 
 		private APIService,
 		private IssuesService,
@@ -60,6 +68,8 @@ class IssuesListController implements ng.IController {
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
+		this.setupBcfImportInput();
+		this.bcfFile = null;
 		this.watchers();
 
 	}
@@ -99,6 +109,13 @@ class IssuesListController implements ng.IController {
 
 		});
 
+		// this.$scope.$watch("vm.bcfFile", (bcfFile) => {
+		// 	if (this.bcfFile) {
+		// 		console.log("vm.bcfFile changed");
+		// 		this.onBcfFileChange();
+		// 	}
+		// });
+
 		this.$scope.$watch("vm.menuOption", () => {
 
 			// Menu option
@@ -125,6 +142,7 @@ class IssuesListController implements ng.IController {
 	}
 
 	public setupBcfImportInput() {
+<<<<<<< Updated upstream
 		this.bcfInputHandler = document.createElement("input");
 		this.bcfInputHandler.setAttribute("type", "file");
 		this.bcfInputHandler.setAttribute("accept", ".zip,.bcfzip,.bcf");
@@ -135,6 +153,34 @@ class IssuesListController implements ng.IController {
 				console.error("No file selected");
 			}
 		});
+=======
+
+		if (this.bcfInputHandler) {
+			return;
+		}
+
+		const template = `<input
+							id='bcfImportInput'
+							type='file'
+							accept='.zip,.bcfzip,.bcf'>`;
+
+		const linkFn = this.$compile(template);
+		const content = linkFn(this.$scope);
+		this.$element.append(content);
+
+		this.$timeout(() => {
+			this.bcfInputHandler = document.getElementById("bcfImportInput");
+			this.bcfInputHandler.addEventListener("change", () => {
+				if (this.bcfInputHandler && this.bcfInputHandler.files) {
+					this.importBcf({file: this.bcfInputHandler.files[0]});
+				} else {
+					console.error("No file selected");
+				}
+				this.bcfInputHandler.value = null; // Reset the change watcher
+			});
+		});
+
+>>>>>>> Stashed changes
 	}
 
 	public handleMenuOptions() {
@@ -170,7 +216,13 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "importBCF":
+<<<<<<< Updated upstream
 				this.bcfInputHandler.click();
+=======
+				this.$timeout(() => {
+					this.bcfInputHandler.click();
+				});
+>>>>>>> Stashed changes
 				break;
 
 			case "filterRole":
