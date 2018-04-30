@@ -32,7 +32,7 @@ class IssuesController implements ng.IController {
 		"ClientConfigService",
 		"AnalyticService",
 		"DialogService",
-		"ViewerService"
+		"ViewerService",
 	];
 
 	private model: string;
@@ -81,7 +81,7 @@ class IssuesController implements ng.IController {
 		private ClientConfigService,
 		private AnalyticService,
 		private DialogService,
-		private ViewerService
+		private ViewerService,
 	) {}
 
 	public $onInit() {

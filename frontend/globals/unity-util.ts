@@ -61,7 +61,7 @@ export class UnityUtil {
 
 	public static onProgress(gameInstance, progress: number) {
 
-		const appendTo = "viewer"
+		const appendTo = "viewer";
 
 		if (!gameInstance.progress) {
 			gameInstance.progress = document.createElement("div");
@@ -338,7 +338,7 @@ export class UnityUtil {
 	 */
 	public static centreToPoint(meshIDs) {
 		const params = {
-			groups: meshIDs
+			groups: meshIDs,
 		};
 		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -577,7 +577,7 @@ export class UnityUtil {
 			model,
 			ids : idArr,
 			toggle : toggleMode,
-			forceReHighlight
+			forceReHighlight,
 		};
 
 		if (color) {
@@ -599,7 +599,7 @@ export class UnityUtil {
 		const params: any = {
 			database : account,
 			model,
-			ids : idArr
+			ids : idArr,
 		};
 
 		UnityUtil.toUnity("UnhighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));

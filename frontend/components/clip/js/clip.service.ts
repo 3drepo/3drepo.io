@@ -61,7 +61,7 @@ export class ClipService {
 			direction: false,
 			availableUnits: this.ClientConfigService.units,
 			progressInfo: "Model loading...",
-			normal: null
+			normal: null,
 		};
 	}
 
@@ -168,7 +168,7 @@ export class ClipService {
 	public setBoundingBox(bbox: any) {
 		if (bbox) {
 			this.state.bbox = bbox;
-			if(!this.state.normal) {
+			if (!this.state.normal) {
 				this.setDisplayValues(
 					"X",
 					this.state.bbox.max[0],

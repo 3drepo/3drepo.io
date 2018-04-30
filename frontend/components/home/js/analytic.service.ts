@@ -34,8 +34,8 @@ export class AnalyticService {
 			console.debug("Development - Not loading Google Analyitics or remarketing");
 		}
 
-		if (this.ClientConfigService && 
-			!this.ClientConfigService.development && 
+		if (this.ClientConfigService &&
+			!this.ClientConfigService.development &&
 			this.ClientConfigService.gaTrackId
 		) {
 			console.debug("Adding Google Analytics and Remarketing");
@@ -60,10 +60,10 @@ export class AnalyticService {
 
 	public insertRemarketing() {
 
-		const script = "" + 
+		const script = "" +
 			"/* <![CDATA[ */" +
 			" const google_conversion_id = !{googleConversionId}; " +
-			" const google_custom_params = window.google_tag_params; " + 
+			" const google_custom_params = window.google_tag_params; " +
 			" const google_remarketing_only = true; " +
 			"/* ]]> */";
 
@@ -73,7 +73,6 @@ export class AnalyticService {
 		this.addScriptBySrc(src);
 
 	}
-
 
 	public insertGA() {
 		console.debug("Initialising GA...");

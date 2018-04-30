@@ -22,7 +22,7 @@ export const TDR = () => {
 			if (window.ClientConfig.unitySettings) {
 				// Assign unity settings
 				window.Module = ClientConfig.unitySettings;
-				
+
 			} else {
 				console.error("ClientConfig does not have any provided Unity settings!");
 			}

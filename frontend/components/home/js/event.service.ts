@@ -23,7 +23,7 @@ export class EventService {
 	public static timeout;
 
 	public static $inject: string[] = [
-		"$timeout"
+		"$timeout",
 	];
 
 	private EVENT = {
@@ -92,7 +92,7 @@ export class EventService {
 	};
 
 	constructor(
-		private $timeout: ng.ITimeoutService
+		private $timeout: ng.ITimeoutService,
 	) {
 		EventService.internalCurrentEvent = {};
 		EventService.internalCurrentError = {};

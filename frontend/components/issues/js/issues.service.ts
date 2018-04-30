@@ -77,7 +77,7 @@ export class IssuesService {
 				showSubModelIssues: false,
 				showClosed: false,
 				sortOldestFirst : false,
-				excludeRoles: []
+				excludeRoles: [],
 			},
 		};
 	}

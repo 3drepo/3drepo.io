@@ -16,7 +16,7 @@
  **/
 
 declare const Pin;
-declare const UnityUtil; 
+declare const UnityUtil;
 declare const ClientConfig;
 declare const Module;
 
@@ -424,7 +424,6 @@ export class Viewer {
 			}
 		}
 
-		
 	}
 
 	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride, forceReHighlight) {
@@ -732,7 +731,6 @@ export class Viewer {
 	public mapStop() {
 		UnityUtil.mapStop();
 	}
-
 
 	public overrideMeshColor(account, model, meshIDs, color) {
 		UnityUtil.overrideMeshColor(account, model, meshIDs, color);

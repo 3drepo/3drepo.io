@@ -18,31 +18,30 @@
 declare const UnityUtil;
 export class Pin {
 
-	id: number;
-	position: string;
-	highlighted: boolean;
-	norm;
-	colours
-	viewpoint;
-	account;
-	model;
+	public id: number;
+	public position: string;
+	public highlighted: boolean;
+	public norm;
+	public colours;
+	public viewpoint;
+	public account;
+	public model;
 
-	static pinColours = {
-		blue : [12/255, 47/255, 84/255], // [0, 69/255, 148/255],
-		yellow : [255/255, 255/255, 54/255]
+	public static pinColours = {
+		blue : [12 / 255, 47 / 255, 84 / 255], // [0, 69/255, 148/255],
+		yellow : [255 / 255, 255 / 255, 54 / 255],
 	};
 
-	pinHeadIsHighlighted;
-	ghostPinHeadIsHighlighted;
-	coneIsHighlighted;
-	ghostConeIsHighlighted;
-	pinHeadDepth;
-	coneDepth;
-	
+	public pinHeadIsHighlighted;
+	public ghostPinHeadIsHighlighted;
+	public coneIsHighlighted;
+	public ghostConeIsHighlighted;
+	public pinHeadDepth;
+	public coneDepth;
 
 	constructor(
-		id: number, position: string, norm, colours, viewpoint, 
-		account: string, model: string
+		id: number, position: string, norm, colours, viewpoint,
+		account: string, model: string,
 	) {
 
 		this.id = id;
@@ -52,23 +51,23 @@ export class Pin {
 		this.account = account;
 		this.model = model;
 		UnityUtil.dropPin(id, position, norm, colours);
-		
-	};
 
-	remove(id) {
+	}
+
+	public remove(id) {
 		UnityUtil.removePin(id);
-	};
+	}
 
-	changeColour(colours) {
+	public changeColour(colours) {
 		UnityUtil.changePinColour(this.id, colours);
-	};
+	}
 
-	highlight() {
+	public highlight() {
 
 		this.highlighted = !this.highlighted;
 
-		var depthMode = this.highlighted ? "ALWAYS" : "LESS" ;
-		var highlighted = this.highlighted.toString();
+		let depthMode = this.highlighted ? "ALWAYS" : "LESS" ;
+		let highlighted = this.highlighted.toString();
 
 		this.pinHeadIsHighlighted.setAttribute("value", highlighted);
 		this.ghostPinHeadIsHighlighted.setAttribute("value", highlighted);
@@ -77,8 +76,6 @@ export class Pin {
 
 		this.pinHeadDepth.setAttribute("depthFunc", depthMode);
 		this.coneDepth.setAttribute("depthFunc", depthMode);
-	};
-
-	
+	}
 
 }
