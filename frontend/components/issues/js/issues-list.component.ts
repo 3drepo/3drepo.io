@@ -103,7 +103,6 @@ class IssuesListController implements ng.IController {
 
 		});
 
-
 		this.$scope.$watch("vm.menuOption", () => {
 
 			// Menu option
