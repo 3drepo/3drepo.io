@@ -23,11 +23,11 @@ class TdrProgressController implements ng.IController {
 
 export const TdrProgress: ng.IComponentOptions = {
 	bindings: {
-		info: "=",
+		info: "="
 	},
 	controller: TdrProgressController,
 	controllerAs: "vm",
-	templateUrl: "templates/tdr-progress.html",
+	templateUrl: "templates/tdr-progress.html"
 };
 
 export const TdrProgressModule = angular

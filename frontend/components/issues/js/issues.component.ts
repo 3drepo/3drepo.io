@@ -94,7 +94,6 @@ class IssuesController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading issues";
 		this.availableJobs = null;
-		this.modelUserJob;
 		this.selectedIssue = null;
 		this.autoSaveComment = false;
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
@@ -181,13 +180,13 @@ class IssuesController implements ng.IController {
 						toggle: true,
 						selected: true,
 						firstSelected: false,
-						secondSelected: false,
+						secondSelected: false
 					});
 				});
 
 				this.EventService.send(this.EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
 					type: "issues",
-					menu,
+					menu
 				});
 
 			})
@@ -231,7 +230,7 @@ class IssuesController implements ng.IController {
 				this.issuesReady.then(() => {
 					this.canAddIssue = this.AuthService.hasPermission(
 						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
-						this.modelSettings.permissions,
+						this.modelSettings.permissions
 					);
 				});
 
@@ -304,9 +303,9 @@ class IssuesController implements ng.IController {
 						account: this.account,
 						model: this.model,
 						revision: this.revision,
-						noSet: true,
+						noSet: true
 					},
-					{notify: false},
+					{notify: false}
 				).then(() => {
 					const element = document.getElementById(issueListItemId);
 					if (element && element.scrollIntoView) {
@@ -349,14 +348,14 @@ class IssuesController implements ng.IController {
 		this.NotificationService.subscribe.newIssues(
 			this.account,
 			this.model,
-			this.newIssueListener.bind(this),
+			this.newIssueListener.bind(this)
 		);
 
 		// Watch for status changes for all issues
 		this.NotificationService.subscribe.issueChanged(
 			this.account,
 			this.model,
-			this.handleIssueChanged.bind(this),
+			this.handleIssueChanged.bind(this)
 		);
 
 		// Do the same for all subModels
@@ -367,12 +366,12 @@ class IssuesController implements ng.IController {
 					this.NotificationService.subscribe.newIssues(
 						subModel.database,
 						subModel.model,
-						this.newIssueListener.bind(this),
+						this.newIssueListener.bind(this)
 					);
 					this.NotificationService.subscribe.issueChanged(
 						subModel.database,
 						subModel.model,
-						this.handleIssueChanged.bind(this),
+						this.handleIssueChanged.bind(this)
 					);
 				} else {
 					console.error("Submodel was expected to be defined for issue subscription: ", subModel);
@@ -518,9 +517,9 @@ class IssuesController implements ng.IController {
 					model: this.model,
 					revision: this.revision,
 					issue: issue._id,
-					noSet: true,
+					noSet: true
 				},
-				{notify: false},
+				{notify: false}
 			);
 
 			this.IssuesService.setSelectedIssue(issue, true, this.revision);
@@ -561,11 +560,11 @@ export const IssuesComponent: ng.IComponentOptions = {
 		onShowItem : "&",
 		hideItem: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&",
+		setInitialSelectedObjects: "&"
 	},
 	controller: IssuesController,
 	controllerAs: "vm",
-	templateUrl: "templates/issues.html",
+	templateUrl: "templates/issues.html"
 };
 
 export const IssuesComponentModule = angular

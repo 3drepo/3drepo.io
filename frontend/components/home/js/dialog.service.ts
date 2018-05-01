@@ -18,7 +18,7 @@
 export class DialogService {
 
 	public static $inject: string[] = [
-		"$mdDialog",
+		"$mdDialog"
 	];
 
 	private expiredDialogOpen;
@@ -28,7 +28,7 @@ export class DialogService {
 	private thirtySeconds;
 
 	constructor(
-		private $mdDialog,
+		private $mdDialog
 	) {
 		this.expiredDialogOpen = false;
 		this.disconnectedDialogOpen = false;
@@ -75,7 +75,7 @@ export class DialogService {
 				.htmlContent(content)
 				.ariaLabel(title)
 				.ok("Continue")
-				.cancel("Mute Notifications"),
+				.cancel("Mute Notifications")
 		)
 			.then(() => {
 				this.disconnectedDialogOpen = false;
@@ -96,7 +96,7 @@ export class DialogService {
 	}
 
 	public showDialog(
-		dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo,
+		dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo
 	) {
 
 		// Allow the dialog to have cancel ability
@@ -108,7 +108,7 @@ export class DialogService {
 			templateUrl: "/templates/" + dialogTemplate,
 			onRemoving: () => {
 				this.$mdDialog.cancel();
-			},
+			}
 		};
 
 		data.parent = angular.element(this.isDefined(parent) ? parent : document.body);
@@ -142,7 +142,7 @@ export class DialogService {
 					.title("Session Expired")
 					.textContent(content)
 					.ariaLabel("Session Expired")
-					.ok("OK"),
+					.ok("OK")
 			).then(() => {
 				this.expiredDialogOpen = false;
 			});
@@ -169,7 +169,7 @@ export class DialogService {
 					.textContent(content)
 					.ariaLabel(title)
 					.ok(ok)
-					.cancel(cancel),
+					.cancel(cancel)
 			);
 
 		} else {
@@ -193,7 +193,7 @@ export class DialogService {
 					.title(title)
 					.textContent(content)
 					.ariaLabel(title)
-					.ok("OK"),
+					.ok("OK")
 			);
 
 		} else {
@@ -217,7 +217,7 @@ export class DialogService {
 					.title(title)
 					.htmlContent(content)
 					.ariaLabel(title)
-					.ok("OK"),
+					.ok("OK")
 			);
 		} else {
 			return Promise.resolve();
@@ -246,7 +246,7 @@ export class DialogService {
 				.htmlContent(content)
 				.ariaLabel(title)
 				.ok("Reload")
-				.cancel("I'll reload in a moment"),
+				.cancel("I'll reload in a moment")
 		)
 			.then(() => {
 				window.location.reload();

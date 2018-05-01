@@ -36,11 +36,11 @@ class PanelCardOptionFilterController implements ng.IController {
 
 export const PanelCardOptionFilterComponent: ng.IComponentOptions = {
 	bindings: {
-		showFilter: "=",
+		showFilter: "="
 	},
 	controller: PanelCardOptionFilterController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-filter.html",
+	templateUrl: "templates/panel-card-option-filter.html"
 };
 
 export const PanelCardOptionFilterComponentModule = angular

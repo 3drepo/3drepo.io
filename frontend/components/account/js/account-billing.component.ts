@@ -23,7 +23,7 @@ class AccountBillingController implements ng.IController {
 
 		"ClientConfigService",
 		"DialogService",
-		"APIService",
+		"APIService"
 	];
 
 	private showInfo;
@@ -58,7 +58,7 @@ class AccountBillingController implements ng.IController {
 
 		private ClientConfigService,
 		private DialogService,
-		private APIService,
+		private APIService
 	) {}
 
 	public $onInit() {
@@ -231,9 +231,9 @@ class AccountBillingController implements ng.IController {
 		const data = {
 			plans: [{
 				plan: this.planId,
-				quantity: this.numNewLicenses,
+				quantity: this.numNewLicenses
 			}],
-			billingAddress: this.newBillingAddress,
+			billingAddress: this.newBillingAddress
 		};
 
 		const licenceCountChanged = this.numLicenses !== this.numNewLicenses;
@@ -334,11 +334,11 @@ class AccountBillingController implements ng.IController {
 export const AccountBillingComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "=",
-		billingAddress: "=",
+		billingAddress: "="
 	},
 	controller: AccountBillingController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-billing.html",
+	templateUrl: "templates/account-billing.html"
 };
 
 export const AccountBillingComponentModule = angular

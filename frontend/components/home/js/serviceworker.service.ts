@@ -19,7 +19,7 @@ export class SWService {
 
 	public static $inject: string[] = [
 		"DialogService",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	private sw: string;
@@ -28,7 +28,7 @@ export class SWService {
 
 	constructor(
 		private DialogService: any,
-		private ClientConfigService: any,
+		private ClientConfigService: any
 	) {
 		this.path = "/";
 		this.newVersionDialogOpen = false;
@@ -72,7 +72,7 @@ export class SWService {
 			(err) => {
 				// registration failed :(
 				this.debugSW("registration failed: " + err);
-			},
+			}
 		);
 
 	}

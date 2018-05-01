@@ -39,7 +39,7 @@ class HomeController implements ng.IController {
 		"AnalyticService",
 		"ViewerService",
 		"TemplateService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private doNotLogout;
@@ -88,7 +88,7 @@ class HomeController implements ng.IController {
 		private AnalyticService,
 		private ViewerService,
 		private TemplateService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -152,7 +152,7 @@ class HomeController implements ng.IController {
 				return this.$location.path();
 			}, () => {
 				this.handlePaths();
-			},
+			}
 		);
 
 		// TODO: This feels like a bit of a hack. Let's come up with
@@ -250,7 +250,7 @@ class HomeController implements ng.IController {
 							console.error("Username is not defined for statemanager!");
 						}
 						this.StateManager.setHomeState({
-							account: username,
+							account: username
 						});
 					}
 
@@ -258,7 +258,7 @@ class HomeController implements ng.IController {
 
 					this.StateManager.setHomeState({
 						loggedIn: false,
-						account: null,
+						account: null
 					});
 
 					if (this.StateManager.query) {
@@ -275,7 +275,7 @@ class HomeController implements ng.IController {
 						null,
 						false,
 						null,
-						false,
+						false
 					);
 				}
 			} else {
@@ -292,7 +292,7 @@ class HomeController implements ng.IController {
 			if (this.doNotLogout.indexOf(currentPage) === -1) {
 				this.StateManager.setHomeState({
 					loggedIn: false,
-					account: null,
+					account: null
 				});
 			}
 			break;
@@ -411,7 +411,7 @@ class HomeController implements ng.IController {
 			"templates/account-teamspaces.html",
 			"templates/account-info.html",
 			"templates/sign-up.html",
-			"templates/register-request.html",
+			"templates/register-request.html"
 		];
 
 		this.TemplateService.precache(preCacheTemplates);
@@ -437,7 +437,7 @@ class HomeController implements ng.IController {
 				event,
 				false,
 				null,
-				false,
+				false
 			);
 			return;
 		}
@@ -516,11 +516,11 @@ export const HomeComponent: ng.IComponentOptions = {
 		account: "@",
 		password: "@",
 		loggedInUrl: "@",
-		loggedOutUrl: "@",
+		loggedOutUrl: "@"
 	},
 	controller: HomeController,
 	controllerAs: "vm",
-	templateUrl: "templates/home.html",
+	templateUrl: "templates/home.html"
 };
 
 export const HomeComponentModule = angular

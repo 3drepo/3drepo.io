@@ -23,7 +23,7 @@ class AccountLicensesController implements ng.IController {
 
 		"APIService",
 		"StateManager",
-		"DialogService",
+		"DialogService"
 	];
 
 	private showPage;
@@ -52,7 +52,7 @@ class AccountLicensesController implements ng.IController {
 
 		private APIService: any,
 		private StateManager: any,
-		private DialogService: any,
+		private DialogService: any
 	) {}
 
 	public $onInit() {
@@ -111,7 +111,7 @@ class AccountLicensesController implements ng.IController {
 			"#ffff99",
 			"#b15928",
 			"#cab2d6",
-			"#6a3d9a",
+			"#6a3d9a"
 		];
 
 		this.watchers();
@@ -247,7 +247,7 @@ class AccountLicensesController implements ng.IController {
 
 		if (doSave) {
 			this.APIService.post(
-				this.account + "/members/" + this.newLicenseAssignee,
+				this.account + "/members/" + this.newLicenseAssignee
 			)
 				.then((response) => {
 					if (response.status === 200) {
@@ -354,11 +354,11 @@ class AccountLicensesController implements ng.IController {
 export const AccountLicensesComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
-		showPage: "&",
+		showPage: "&"
 	},
 	controller: AccountLicensesController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-licenses.html",
+	templateUrl: "templates/account-licenses.html"
 };
 
 export const AccountLicensesComponentModule = angular

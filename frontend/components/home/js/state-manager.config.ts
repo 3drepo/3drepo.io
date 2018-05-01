@@ -40,8 +40,8 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 					});
 
 				return finishedAuth.promise;
-			}],
-		},
+			}]
+		}
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
@@ -66,8 +66,8 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 					$stateParams[childFunctionKebabCase] = true;
 
 					StateManager.setState($stateParams);
-				}],
-			},
+				}]
+			}
 		});
 	};
 
@@ -84,9 +84,9 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 					"$stateParams",
 					(StateManager, $location, $stateParams) => {
 						StateManager.setState($stateParams);
-					},
-				],
-			},
+					}
+				]
+			}
 		});
 	};
 
@@ -137,5 +137,5 @@ export const StateManagerConfigModule = angular
 		"$urlRouterProvider",
 		"$locationProvider",
 		"$httpProvider",
-		StateManagerConfig,
+		StateManagerConfig
 	]);

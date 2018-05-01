@@ -21,7 +21,7 @@ export class NotificationService {
 	public static $inject: string[] = [
 		"$injector",
 		"ClientConfigService",
-		"DialogService",
+		"DialogService"
 	];
 
 	public subscribe: any;
@@ -35,7 +35,7 @@ export class NotificationService {
 	constructor(
 		private $injector,
 		private ClientConfigService,
-		private DialogService,
+		private DialogService
 	) {
 		this.dialogOpen = false;
 
@@ -49,7 +49,7 @@ export class NotificationService {
 			transports: ["websocket"],
 			reconnection: true,
 			reconnectionDelay: 500,
-			reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity,
+			reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity
 		});
 
 		this.joined = [];
@@ -68,7 +68,7 @@ export class NotificationService {
 			commentDeleted: this.subscribeCommentDeleted,
 			issueChanged: this.subscribeIssueChanged,
 			modelStatusChanged: this.subscribeModelStatusChanged,
-			newModel: this.subscribeNewModel,
+			newModel: this.subscribeNewModel
 		};
 
 		this.unsubscribe = {
@@ -84,7 +84,7 @@ export class NotificationService {
 			commentDeleted: this.unsubscribeCommentDeleted,
 			issueChanged: this.unsubscribeIssueChanged,
 			modelStatusChanged: this.unsubscribeModelStatusChanged,
-			newModel: this.unsubscribeNewModel,
+			newModel: this.unsubscribeNewModel
 		};
 
 	}

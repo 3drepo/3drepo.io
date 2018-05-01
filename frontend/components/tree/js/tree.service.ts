@@ -21,7 +21,7 @@ export class TreeService {
 		"$q",
 		"APIService",
 		"ViewerService",
-		"DocsService",
+		"DocsService"
 	];
 
 	public highlightSelectedViewerObject;
@@ -57,7 +57,7 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
-		private DocsService,
+		private DocsService
 	) {
 		this.reset();
 
@@ -129,7 +129,7 @@ export class TreeService {
 
 		const meshesAndTrees = [
 			this.getIdToMeshes(),
-			this.getTrees(url, setting),
+			this.getTrees(url, setting)
 		];
 
 		return Promise.all(meshesAndTrees)
@@ -155,8 +155,8 @@ export class TreeService {
 		const url = this.baseURL + "idToMeshes.json";
 		const options = {
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		};
 
 		return this.APIService.get(url, options)
@@ -173,8 +173,8 @@ export class TreeService {
 
 		return this.APIService.get(url, {
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 			.then((json) => {
 
@@ -246,7 +246,7 @@ export class TreeService {
 									subtree,
 									mainTree,
 									subTreesById,
-									awaitedSubTrees,
+									awaitedSubTrees
 								);
 							});
 						}
@@ -273,8 +273,8 @@ export class TreeService {
 		const url = this.baseURL + "tree_path.json";
 		return this.APIService.get(url, {
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 			.then((response) => {
 				return response.data;
@@ -388,7 +388,7 @@ export class TreeService {
 				this.treeMap = {
 					oIdToMetaId: {},
 					sharedIdToUid: {},
-					uidToSharedId: {},
+					uidToSharedId: {}
 				};
 				this.treeMap.idToMeshes = this.idToMeshes;
 				this.generatedMaps = this.genMap(tree.nodes, this.treeMap);
@@ -953,7 +953,7 @@ export class TreeService {
 						account,
 						model,
 						objectIds[key],
-						visible,
+						visible
 					);
 				}
 
@@ -1131,7 +1131,7 @@ export class TreeService {
 			this.DocsService.displayDocs(
 				node.account,
 				node.model || node.project,
-				node.meta,
+				node.meta
 			);
 		}
 
@@ -1158,7 +1158,7 @@ export class TreeService {
 				this.ViewerService.unhighlightObjects({
 					account,
 					model,
-					ids: highlightMap[key].meshes,
+					ids: highlightMap[key].meshes
 				});
 			}
 
@@ -1202,7 +1202,7 @@ export class TreeService {
 					model,
 					multi: true,
 					source: "tree",
-					forceReHighlight,
+					forceReHighlight
 				});
 
 			}
@@ -1289,7 +1289,7 @@ export class TreeService {
 	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
 	public highlightNodesBySharedId(
-		objects: any[], multi: boolean, colour: number[], forceReHighlight: boolean,
+		objects: any[], multi: boolean, colour: number[], forceReHighlight: boolean
 	) {
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {

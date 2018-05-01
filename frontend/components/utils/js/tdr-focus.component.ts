@@ -28,7 +28,7 @@ function tdrFocus($timeout) {
 				}
 			});
 		},
-		scope: { trigger: "@tdrFocus" },
+		scope: { trigger: "@tdrFocus" }
 	};
 }
 

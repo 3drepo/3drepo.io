@@ -21,7 +21,7 @@ class RegisterVerifyController implements ng.IController {
 		"$window",
 
 		"APIService",
-		"StateManager",
+		"StateManager"
 	];
 
 	private username;
@@ -36,7 +36,7 @@ class RegisterVerifyController implements ng.IController {
 		private $window: ng.IWindowService,
 
 		private APIService,
-		private StateManager,
+		private StateManager
 	) {}
 
 	public $onInit() {
@@ -90,7 +90,7 @@ export const RegisterVerifyComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: RegisterVerifyController,
 	controllerAs: "vm",
-	templateUrl: "templates/register-verify.html",
+	templateUrl: "templates/register-verify.html"
 };
 
 export const RegisterVerifyComponentModule = angular

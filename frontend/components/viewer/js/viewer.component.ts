@@ -25,7 +25,7 @@ class ViewerController implements ng.IController {
 
 		"ClientConfigService",
 		"EventService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private account: any;
@@ -45,7 +45,7 @@ class ViewerController implements ng.IController {
 
 		private ClientConfigService,
 		private EventService,
-		private ViewerService,
+		private ViewerService
 	) {}
 
 	public $onInit() {
@@ -104,10 +104,10 @@ export const ViewerComponent: ng.IComponentOptions = {
 			branch: "<",
 			model: "<",
 			revision: "<",
-			deviceMemory: "<",
+			deviceMemory: "<"
 		},
 		controller: ViewerController,
-		controllerAs: "vm",
+		controllerAs: "vm"
 };
 
 export const ViewerComponentModule = angular

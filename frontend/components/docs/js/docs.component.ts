@@ -24,7 +24,7 @@ class DocsController implements ng.IController {
 		"$filter",
 
 		"DocsService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private onContentHeightRequest;
@@ -42,7 +42,7 @@ class DocsController implements ng.IController {
 		private $filter: any,
 
 		private DocsService: any,
-		private ViewerService: any,
+		private ViewerService: any
 	) {}
 
 	public $onInit() {
@@ -113,11 +113,11 @@ class DocsController implements ng.IController {
 export const DocsComponent: ng.IComponentOptions = {
 	bindings: {
 		onContentHeightRequest: "&",
-		show: "=",
+		show: "="
 	},
 	controller: DocsController,
 	controllerAs: "vm",
-	templateUrl: "templates/docs.html",
+	templateUrl: "templates/docs.html"
 };
 
 export const DocsComponentModule = angular
