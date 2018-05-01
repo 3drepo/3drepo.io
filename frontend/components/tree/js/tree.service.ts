@@ -583,8 +583,8 @@ export class TreeService {
 			} else if (node.children.length === visibleChildCount) {
 				node.toggleState = this.VISIBILITY_STATES.visible;
 			} else if (0 === visibleChildCount) {
-				node.toggleState = this.VISIBILITY_STATES.invisible;
 				this.setNodeSelection(node, false);
+				node.toggleState = this.VISIBILITY_STATES.invisible;
 			} else {
 				node.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
 			}
@@ -858,15 +858,15 @@ export class TreeService {
 					if (visibility === this.VISIBILITY_STATES.visible && this.canShowNode(child)) {
 						child.toggleState = this.VISIBILITY_STATES.visible;
 					} else {
-						child.toggleState = this.VISIBILITY_STATES.invisible;
 						this.setNodeSelection(child, false);
+						child.toggleState = this.VISIBILITY_STATES.invisible;
 					}
 				} else {
 					if (visibility === this.VISIBILITY_STATES.visible) {
 						child.toggleState = (this.getHideIfc()) ? child.defaultState : this.VISIBILITY_STATES.visible;
 					} else {
-						child.toggleState = this.VISIBILITY_STATES.invisible;
 						this.setNodeSelection(child, false);
+						child.toggleState = this.VISIBILITY_STATES.invisible;
 					}
 				}
 			}
@@ -1107,6 +1107,7 @@ export class TreeService {
 				if (currentNode.children && currentNode.children.length) {
 					nodes = nodes.concat(currentNode.children);
 				}
+
 			}
 
 		}
@@ -1332,6 +1333,11 @@ export class TreeService {
 					continue;
 				}
 
+				// Remove any unselected meshes
+				const meshes = highlightMap[key].meshes.filter((mesh) => {
+					return this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected;
+				});
+
 				const vals = key.split("@");
 				const account = vals[0];
 				const model = vals[1];
@@ -1339,7 +1345,7 @@ export class TreeService {
 				// but only for multipart meshes
 				this.ViewerService.highlightObjects({
 					account,
-					ids: highlightMap[key].meshes,
+					ids: meshes,
 					colour: highlightMap[key].colour,
 					model,
 					multi: true,
