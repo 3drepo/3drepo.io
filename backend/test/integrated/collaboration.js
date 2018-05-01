@@ -159,8 +159,7 @@ describe('Sharing/Unsharing a model', function () {
 					});
 				},
 				function ableToViewModel(done){
-					const unityAssetURL = `/${username}/${model}/revision/master/head/unityAssets.json`;
-					agent.get(unityAssetURL)
+					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
