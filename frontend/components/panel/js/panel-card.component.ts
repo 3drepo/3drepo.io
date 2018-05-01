@@ -26,7 +26,7 @@ class PanelCardController implements ng.IController {
 		"$compile",
 
 		"PanelService",
-		"EventService",
+		"EventService"
 	];
 
 	public vm = this;
@@ -54,7 +54,7 @@ class PanelCardController implements ng.IController {
 		private $compile: ng.ICompileService,
 
 		private PanelService: any,
-		private EventService: any,
+		private EventService: any
 	) {}
 
 	public $onInit() {
@@ -90,12 +90,6 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
-		// this.$scope.$watch("vm.showAdd", (newValue)  => {
-		// 	if (this.isDefined(newValue)) {
-		// 		this.toggleAdd(newValue);
-		// 	}
-		// });
-
 		/*
 		* Watch show on contentData to toggle elements off
 		*/
@@ -110,11 +104,6 @@ class PanelCardController implements ng.IController {
 		*/
 		this.$scope.$watch("vm.showEdit", (newValue) => {
 			if (this.isDefined(newValue)) {
-				// this.PanelService.handlePanelEvent(
-				// 	this.contentData.type,
-				// 	this.EventService.EVENT.PANEL_CARD_EDIT_MODE,
-				// 	{on: true},
-				// );
 				this.hideItem();
 			}
 		});
@@ -128,19 +117,6 @@ class PanelCardController implements ng.IController {
 			}
 		});
 	}
-
-	// public toggleAdd(on) {
-	// 	if (this.contentData.type === "issues") {
-	// 		this.showToolbarOptions(["filter", "menu"], !on);
-	// 	}
-	// 	this.hideItem();
-	// 	this.$timeout();
-	// 	// this.PanelService.handlePanelEvent(
-	// 	// 	this.contentData.type,
-	// 	// 	this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-	// 	// 	{on},
-	// 	// );
-	// }
 
 	/*
 	* Watch type on contentData to create content and tool bar options
@@ -160,7 +136,7 @@ class PanelCardController implements ng.IController {
 		this.contentHeight = height;
 		this.onHeightRequest({
 			contentItem: this.contentData,
-			height: this.contentHeight,
+			height: this.contentHeight
 		});
 	}
 
@@ -237,7 +213,7 @@ class PanelCardController implements ng.IController {
 
 		switch (optionType) {
 		case "filter":
-			return " show-filter='vm.showFilter'";
+			return "show-filter='vm.showFilter'";
 
 		case "visible":
 			return " visible='vm.visible'";
@@ -268,19 +244,17 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		account: "=",
 		branch: "=",
 		contentData: "=",
-		keysDown: "=",
 		model: "=",
 		modelSettings: "=",
 		onHeightRequest: "&",
-		onShowFilter: "&",
 		position: "=",
 		revision: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&",
+		setInitialSelectedObjects: "&"
 	},
 	controller: PanelCardController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card.html",
+	templateUrl: "templates/panel-card.html"
 };
 
 export const PanelCardComponentModule = angular

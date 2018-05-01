@@ -20,7 +20,7 @@ class PanelCardFilterController implements ng.IController {
 	public static $inject: string[] = [
 		"$timeout",
 		"$scope",
-		"$element",
+		"$element"
 	];
 
 	private filterTimeout = null;
@@ -28,12 +28,12 @@ class PanelCardFilterController implements ng.IController {
 	private filterInput;
 	private filterText;
 	private showClearFilterButton;
-	private showFilter;
+	private showFilter: boolean;
 
 	constructor(
 		private $timeout: ng.ITimeoutService,
 		private $scope: ng.IScope,
-		private $element: ng.IRootElementService,
+		private $element: ng.IRootElementService
 	) {
 		this.watchers();
 	}
@@ -46,13 +46,7 @@ class PanelCardFilterController implements ng.IController {
 
 		this.$scope.$watch("vm.filterInputText", (newValue) => {
 			if (this.isDefined(newValue)) {
-				if (this.filterTimeout !== null) {
-					this.$timeout.cancel(this.filterTimeout);
-				}
-				this.filterTimeout = this.$timeout(() => {
-					this.filterText = this.filterInputText;
-					this.showClearFilterButton = (this.filterInputText !== "");
-				}, 50);
+				this.filterText = this.filterInputText;
 			}
 		});
 
@@ -77,11 +71,11 @@ class PanelCardFilterController implements ng.IController {
 export const PanelCardFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		filterText: "=",
-		showFilter: "=",
+		showFilter: "="
 	},
 	controller: PanelCardFilterController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card-filter.html",
+	templateUrl: "templates/panel-card-filter.html"
 };
 
 export const PanelCardFilterComponentComponentModule = angular

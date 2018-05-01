@@ -15,62 +15,74 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
+
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const utils = require("../utils");
+const uuid = require("node-uuid");
+const Schema = mongoose.Schema;
+const responseCodes = require("../response_codes.js");
+const Meta = require("./meta");
+const History = require('./history');
 
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var utils = require('../utils');
-var uuid = require('node-uuid');
-var _ = require('lodash');
-var Schema = mongoose.Schema;
-var Mesh = require('./mesh');
-var responseCodes = require('../response_codes.js');
-var Meta = require('./meta');
-var systemLogger = require("../logger.js").systemLogger;
-var ifcIdMaps;
-
-var groupSchema = Schema({
-	// no extra attributes
+const groupSchema = Schema({
 	_id: Object,
+	name: String,
+	author: String,
+	description: String,
+	createdAt: Date,
+	updatedAt: Date,
+	updatedBy: String,
 	objects: [{
 		_id : false,
-		shared_id: Object,
 		account: String,
 		model: String,
-		ifc_guid: String
+		shared_ids: [],
+		ifc_guids: [String]
 	}],
 	issue_id: Object,
 	color: [Number]
 });
 
-groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids) {
+groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch, revId) {
 	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
 	const project = { parents: 1, _id: 0 };
 
 	const db = require("../db/db");
 	return db.getCollection(account, model+ ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
-			return results;
+			return History.getHistory({ account, model }, branch, revId).then(history => {
+				if (!history) {
+					return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				} else {
+
+					const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+					const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
+					const meshProject = { shared_id: 1, _id: 0 };
+
+					return dbCol.find(meshQuery, meshProject).toArray();
+				}
+			});
 		});
 	});
 
 };
 
 groupSchema.statics.uuidToIfcGuids = function(obj) {
-	var account = obj.account;
-	var model = obj.model;
-	var uid = obj.shared_id;
-	if ("[object String]" !== Object.prototype.toString.call(uid)) {
-		uid = utils.uuidToString(uid);
-	}
-	var parent = utils.stringToUUID(uid);
-	//Meta.find({ account, model }, { type: "meta", parents: { $in: objects } }, { "parents": 1, "metadata.IFC GUID": 1 })
+	const account = obj.account;
+	const model = obj.model;
+	const uid =("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
+	const parent = utils.stringToUUID(uid);
+
 	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			let ifcGuids = [];
 			results.forEach(res => {
-				if (this.isIfcGuid(res.metadata['IFC GUID'])) {
-					ifcGuids.push(res.metadata['IFC GUID']);
+				if (this.isIfcGuid(res.metadata["IFC GUID"])) {
+					ifcGuids.push(res.metadata["IFC GUID"]);
 				}
 			});
 			return ifcGuids;
@@ -86,7 +98,7 @@ function uuidsToIfcGuids(account, model, ids) {
 			return results;
 		});
 	});
-};
+}
 
 /**
  * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
@@ -95,256 +107,304 @@ groupSchema.statics.isIfcGuid = function(value) {
 	return value && 22 === value.length;
 };
 
+/**
+ * Converts all shared IDs to IFC Guids if applicable and return the objects array.
+ */
+groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsToString) {
+
+	const ifcGuidPromises = [];
+
+	if (!data) {
+		data = this;
+	}
+
+	for (let i = 0; data.objects && i < data.objects.length; i++) {
+		const account = data.objects[i].account;
+		const model = data.objects[i].model;
+
+		if (!(account && model) || data.objects[i].ifc_guid || data.objects[i].shared_id) {
+			return Promise.reject(responseCodes.INVALID_GROUP);
+		}
+
+		const sharedIdsSet = new Set();
+		const ifcGuidsSet = new Set();
+
+		let sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+
+		for (let j = 0; j < sharedIds.length; j++) {
+			if ("[object String]" === Object.prototype.toString.call(sharedIds[j])) {
+				sharedIds[j] = utils.stringToUUID(sharedIds[j]);
+			}
+
+			sharedIdsSet.add(utils.uuidToString(sharedIds[j]));
+		}
+
+		if (data.objects[i].ifc_guids) {
+			data.objects[i].ifc_guids.forEach(ifcGuid => {
+				ifcGuidsSet.add(ifcGuid);
+			});
+		}
+
+		ifcGuidPromises.push(
+			uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
+				if (ifcGuids && ifcGuids.length > 0) {
+					for (let j = 0; j < ifcGuids.length; j++) {
+						ifcGuidsSet.add(ifcGuids[j].metadata["IFC GUID"]);
+
+						for (let k = 0; k < ifcGuids[j].parents.length; k++) {
+							sharedIdsSet.delete(utils.uuidToString(ifcGuids[j].parents[k]));
+						}
+					}
+				}
+
+				const convertedObjectsResponse = {
+					account,
+					model
+				};
+
+				if (sharedIdsSet.size > 0) {
+					convertedObjectsResponse.shared_ids = [];
+					sharedIdsSet.forEach(id => {
+						convertedObjectsResponse.shared_ids.push(utils.stringToUUID(id));
+					});
+				}
+
+				if (ifcGuidsSet.size > 0) {
+					convertedObjectsResponse.ifc_guids = [];
+					ifcGuidsSet.forEach(id => {
+						convertedObjectsResponse.ifc_guids.push(id);
+					});
+				}
+
+				return convertedObjectsResponse;
+			})
+		);
+	}
+
+	return Promise.all(ifcGuidPromises).then(ifcObjects => {
+		return ifcObjects;
+	});
+};
+
 groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
-	'use strict';
 
 	// Extract a unique list of IDs only
 	let groupObjectsMap = [];
 
 	return this.findOne(dbCol, { _id: uid })
 		.then(group => {
-			let ifcGuidPromises = [];
 
-			for (let i = 0; group && i < group.objects.length; i++) {
-				const obj = group.objects[i];
-				if (obj.ifc_guid) {
-					groupObjectsMap[obj.ifc_guid] = obj;
-				}
-				if (obj.shared_id) {
-					// Convert sharedIds to IFC Guids
-					ifcGuidPromises.push(
-						this.uuidToIfcGuids(obj).then(ifcGuids => {
-							if (ifcGuids && ifcGuids.length > 0) {
-								for (let i = 0; i < ifcGuids.length; i++) {
-									obj.ifc_guid = ifcGuids[i];
-									delete obj.shared_id;
-									groupObjectsMap[obj.ifc_guid] = obj;
-								}
-							} else {
-								groupObjectsMap[obj.shared_id] = obj;
-							}
-						})
-					);
-				}
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return Promise.all(ifcGuidPromises).then(() => {
-				if (groupObjectsMap && groupObjectsMap.length > 0) {
-					group.objects = [];
-					for (let id in groupObjectsMap) {
-						group.objects.push(groupObjectsMap[id]);
-					}
-				}
+			return group.getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
+				group.objects = ifcObjects;
 				return group;
 			});
 		});
 };
 
-groupSchema.statics.findByUID = function(dbCol, uid){
-	'use strict';
+/**
+ * Converts all IFC Guids to shared IDs if applicable and return the objects array.
+ */
+groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToString, branch, revId) {
+
+	const sharedIdPromises = [];
+
+	for (let i = 0; i < this.objects.length; i++) {
+
+		const sharedIdsSet = new Set();
+
+		const sharedIdObject = {};
+		sharedIdObject.account = this.objects[i].account;
+		sharedIdObject.model = this.objects[i].model;
+
+		let ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
+
+		for (let j = 0; this.objects[i].shared_ids && j < this.objects[i].shared_ids.length; j++) {
+			let sharedId = this.objects[i].shared_ids[j];
+			if ("[object String]" !== Object.prototype.toString.call(sharedId)) {
+				sharedId = utils.uuidToString(sharedId);
+			}
+			sharedIdsSet.add(sharedId);
+		}
+
+		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
+					sharedIdObject.account,
+					sharedIdObject.model,
+					ifcGuids,
+					branch,
+					revId
+					).then(sharedIdResults => {
+			for (let j = 0; j < sharedIdResults.length; j++) {
+				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+					sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
+				}
+				sharedIdsSet.add(sharedIdResults[j].shared_id);
+			}
+
+			if (sharedIdsSet.size > 0) {
+				sharedIdObject.shared_ids = [];
+				sharedIdsSet.forEach(id => {
+					if (!convertSharedIDsToString) {
+						id = utils.stringToUUID(id);
+					}
+					sharedIdObject.shared_ids.push(id);
+				});
+			}
+
+			return sharedIdObject;
+		}));
+	}
+
+	return Promise.all(sharedIdPromises).then(sharedIdObjects => {
+		return sharedIdObjects;
+	});
+};
+
+groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
-			const sharedIdObjects = [];
-			const sharedIdPromises = [];
-			const ifcObjectByAccount = {};
 
-			for (let i = 0; i < group.objects.length; i++) {
-				if (this.isIfcGuid(group.objects[i].ifc_guid)) {
-					const namespace = group.objects[i].account + "__" + group.objects[i].model;
-					if(!ifcObjectByAccount[namespace]) {
-						ifcObjectByAccount[namespace] = [];
-					}
-					ifcObjectByAccount[namespace].push(group.objects[i].ifc_guid);
-				}
-				else {
-					sharedIdObjects.push(group.objects[i]);
-				}
-
-			}
-			
-			for (let namespace in ifcObjectByAccount) {
-				const nsSplitArr = namespace.split("__");
-				const account = nsSplitArr[0];
-				const model = nsSplitArr[1];
-				if(account && model) {
-					sharedIdPromises.push(this.ifcGuidsToUUIDs(account, model,
-						ifcObjectByAccount[namespace]).then(results => {
-						for (let i = 0; i < results.length; i++) {
-							results[i].parents.forEach( id => {
-								sharedIdObjects.push({account, model, shared_id: utils.uuidToString(id)});
-							});
-						}
-					}));
-				}
-
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return Promise.all(sharedIdPromises).then(() => {
-				let returnGroup = { _id: utils.uuidToString(group._id), color: group.color}
+			return group.getObjectsArrayAsSharedIDs(false, branch, revId).then((sharedIdObjects) => {
+				group.objects = sharedIdObjects;
+				return group;
+			});
+		});
+
+};
+
+groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
+
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
+		.then(group => {
+
+			if (!group) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+
+			return group.getObjectsArrayAsSharedIDs(true, branch, revId).then((sharedIdObjects) => {
+
+				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
 				returnGroup.objects = sharedIdObjects;
 				return returnGroup;
 			});
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol){
-	'use strict';
+groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
 
-	return this.find(dbCol, {});
+	const query = {};
+
+	// If we want groups that aren't from issues
+	if (queryParams.noIssues) {
+		query.issue_id = { $exists: false };
+	}
+	return this.find(dbCol, query).then(results => {
+		const sharedIdConversionPromises = [];
+
+		results.forEach(result => {
+			sharedIdConversionPromises.push(
+				result.getObjectsArrayAsSharedIDs(true, branch, revId).then(sharedIdObjects => {
+					result.objects = sharedIdObjects;
+					return result;
+				})
+			);
+		});
+
+		return Promise.all(sharedIdConversionPromises).then((sharedIdGroups) => {
+			return sharedIdGroups;
+		});
+	});
 };
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
-	'use strict';
 
 	return this.findOne(dbCol, { _id: uid }).then(group => {
 		const issueIdData = {
 			issue_id: issueId
 		};
 
-		return group.updateAttrs(issueIdData);
+		return group.updateAttrs(dbCol, issueIdData);
 	});
 };
 
-groupSchema.methods.updateAttrs = function(data){
-	'use strict';
+groupSchema.methods.updateAttrs = function(dbCol, data){
 
-	const ifcGuidPromises = [];
-	const sharedIdsByAccount = {};	
-	const sharedIDSets = new Set();
-	let modifiedObjectList = null;
-
-	if (data.objects) {
-		modifiedObjectList = []
-		for (let i = 0; i < data.objects.length; i++) {
-			const obj = data.objects[i];
-
-			if (obj.shared_id) {
-				const ns = obj.account + "__" + obj.model;
-				if ("[object String]" === Object.prototype.toString.call(obj.id)) {
-					obj.id = utils.stringToUUID(obj.shared_id);
+	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+		const toUpdate = {};
+		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
+		
+		fieldsCanBeUpdated.forEach((key) => {
+			if (data[key]) {
+				if (key === "objects" && data.objects) {
+					toUpdate.objects = convertedObjects;
 				}
-				sharedIDSets.add(obj.id);
-				if(!sharedIdsByAccount[ns]) {
-					sharedIdsByAccount[ns] = { sharedIDArr : [], org: []};
+				else {
+					toUpdate[key] = data[key];
 				}
-				sharedIdsByAccount[ns].sharedIDArr.push(obj.id);
-				sharedIdsByAccount[ns].org.push(obj);
-				
 			}
-			else {
-				modifiedObjectList.push(obj);
-			}
-		}
+		});
 
-		for (let namespace in sharedIdsByAccount) {
-			const nsSplitArr = namespace.split("__");
-			const account = nsSplitArr[0];
-			const model = nsSplitArr[1];
-			ifcGuidPromises.push(
-				uuidsToIfcGuids(account, model, sharedIdsByAccount[namespace].sharedIDArr).then(ifcGuids => {
-					if (ifcGuids && ifcGuids.length > 0) {
-						for (let i = 0; i < ifcGuids.length; i++) {
-							modifiedObjectList.push({account, model, ifc_guid: ifcGuids[i].metadata["IFC GUID"]});
-							for(let j = 0; j < ifcGuids[i].parents.length; j++) {
-								sharedIDSets.delete(utils.uuidToString(ifcGuids[i].parents[j]));		
-							}
-						}
-
-						//if sharedIDSets.size > 0 , it means there are sharedIDs with no IFC GUIDs
-						sharedIDSets.forEach((sharedId) => {
-							modifiedObjectList.push({
-								account,
-								model,
-								shared_id: sharedId
-							});
-						});
-					}
-					else {
-						//this isn't a IFC GUID model.
-						modifiedObjectList = modifiedObjectList.concat(sharedIdsByAccount[namespace].org);
-					}
-					
-				})
-			);
-		}
-
-
-
-	}
-
-	return Promise.all(ifcGuidPromises).then(() => {
-
-		this.name = data.name || this.name;
-		this.objects = modifiedObjectList || this.objects;
-		this.color = data.color || this.color;
-		this.issue_id = data.issue_id || this.issue_id;
-
-		this.markModified('objects');
-		return this.save();
+		const db = require("../db/db");
+		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
+			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
+				return {_id: utils.uuidToString(this._id)};
+			}); 
+		});
 	});
 };
 
 groupSchema.statics.createGroup = function(dbCol, data){
-	'use strict';
-
-	let group = this.model('Group').createInstance({
+	const group = this.model("Group").createInstance({
 		account: dbCol.account, 
 		model: dbCol.model
 	});
 
 	group._id = utils.stringToUUID(uuid.v1());
-	return group.updateAttrs(data);
+	return group.save().then( (savedGroup)=>{
+		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
+			//remove the recently saved new group as update attributes failed
+			return Group.deleteGroup(dbCol, group._id).then(() => {
+				return Promise.reject(err);
+			});
+		});
+	});
 };
 
 groupSchema.methods.clean = function(){
-	'use strict';
 
 	let cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
-	if (cleaned.objects) {
-		for (let i = 0; i < cleaned.objects.length; i++) {
-			const object = cleaned.objects[i];
-			if (object.shared_id &&
-				"[object String]" !== Object.prototype.toString.call(object.shared_id)) {
-				//object.id = utils.uuidToString(object.id);
-				object.shared_id = utils.uuidToString(object.shared_id);
-			}
-		}
-	}
-	return cleaned;
 
+	return cleaned;
 };
 
 
 groupSchema.statics.deleteGroup = function(dbCol, id){
-	'use strict';
 
-	return Group.findOneAndRemove(dbCol, { _id : utils.stringToUUID(id)}).then(group => {
+	if ("[object String]" === Object.prototype.toString.call(id)) {
+		id = utils.stringToUUID(id);
+	}
+
+	return Group.findOneAndRemove(dbCol, { _id : id}).then(group => {
 
 		if(!group){
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 
-		let removePromises = [];
-
-		group.objects.forEach(obj => removePromises.push(
-			Mesh.removeGroup(
-				obj.account,
-				obj.model,
-				utils.uuidToString(obj.id),
-				id
-			)
-		));
-
-		return Promise.all(removePromises);
-
 	});
 };
 
-var Group = ModelFactory.createClass(
-	'Group', 
+const Group = ModelFactory.createClass(
+	"Group", 
 	groupSchema, 
 	arg => { 
 		return `${arg.model}.groups`;

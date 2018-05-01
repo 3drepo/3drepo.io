@@ -23,7 +23,7 @@ class AccountModelSettingController implements ng.IController {
 
 		"APIService",
 		"ClientConfigService",
-		"AccountService",
+		"AccountService"
 	];
 
 	private accounts;
@@ -37,7 +37,9 @@ class AccountModelSettingController implements ng.IController {
 	private targetProj;
 
 	private modelType;
+	/* tslint:disable */
 	private topicTypes;
+	/* tslint:enable */
 	private code;
 	private unit;
 	private oldUnit;
@@ -54,7 +56,7 @@ class AccountModelSettingController implements ng.IController {
 
 		private APIService: any,
 		private ClientConfigService: any,
-		private AccountService: any,
+		private AccountService: any
 	) {}
 
 	public $onInit() {
@@ -73,15 +75,15 @@ class AccountModelSettingController implements ng.IController {
 		this.referencePoints = {
 			latLong : {
 				latitude: 0.0,
-				longitude: 0.0,
+				longitude: 0.0
 			},
 			angleFromNorth: 0.0,
 			elevation: 0.0,
 			position: {
 				x : 0.0,
 				y: 0.0,
-				z: 0.0,
-			},
+				z: 0.0
+			}
 		};
 
 		this.fetchModelSettings();
@@ -120,6 +122,7 @@ class AccountModelSettingController implements ng.IController {
 					if (response.data.type) {
 						this.modelType = response.data.type;
 					}
+
 					if (props.topicTypes) {
 						this.topicTypes = this.convertTopicTypesToString(props.topicTypes);
 					}
@@ -183,7 +186,7 @@ class AccountModelSettingController implements ng.IController {
 			this.accounts,
 			this.targetAcct,
 			this.targetProj,
-			this.modelId,
+			this.modelId
 		);
 
 		model.name = this.modelName;
@@ -193,7 +196,7 @@ class AccountModelSettingController implements ng.IController {
 	public getLatLong() {
 		return [
 			parseFloat(this.referencePoints.latLong.latitude) || 0.0,
-			parseFloat(this.referencePoints.latLong.longitude) || 0.0,
+			parseFloat(this.referencePoints.latLong.longitude) || 0.0
 		];
 	}
 
@@ -205,7 +208,7 @@ class AccountModelSettingController implements ng.IController {
 		return [
 			parseFloat(this.referencePoints.position.x) || 0.0,
 			-parseFloat(this.referencePoints.position.z) || 0.0,
-			-parseFloat(this.referencePoints.position.y) || 0.0,
+			-parseFloat(this.referencePoints.position.y) || 0.0
 		];
 
 	}
@@ -220,13 +223,13 @@ class AccountModelSettingController implements ng.IController {
 			unit: this.unit,
 			code: this.code,
 			topicTypes: this.topicTypes.replace(/\r/g, "").split("\n"),
-			fourDSequenceTag: this.fourDSequenceTag,
+			fourDSequenceTag: this.fourDSequenceTag
 		};
 
 		if (this.referencePoints.position) {
 			if (!data.surveyPoints) {
 				data.surveyPoints = [{
-					position: this.getPosition(),
+					position: this.getPosition()
 				}];
 			} else {
 				data.surveyPoints[0].position = this.getPosition();
@@ -244,7 +247,7 @@ class AccountModelSettingController implements ng.IController {
 		if (this.referencePoints.latLong) {
 			if (!data.surveyPoints) {
 				data.surveyPoints = [{
-					latLong: this.getLatLong(),
+					latLong: this.getLatLong()
 				}];
 			} else {
 				data.surveyPoints[0].latLong = this.getLatLong();
@@ -281,11 +284,11 @@ export const AccountModelSettingComponent: ng.IComponentOptions = {
 		accounts: "=",
 		model: "=",
 		showPage: "&",
-		data: "=",
+		data: "="
 	},
 	controller: AccountModelSettingController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-modelsetting.html",
+	templateUrl: "templates/account-modelsetting.html"
 };
 
 export const AccountModelSettingComponentModule = angular

@@ -18,23 +18,20 @@
 class PanelCardOptionVisibleController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
+		"$scope"
 	];
 
 	private visible;
 	private icon;
 
 	constructor(
-		private $scope: ng.IScope,
+		private $scope: ng.IScope
 	) {
 		this.icon = "visibility";
 	}
 
 	public $ngInit() {
-		this.$scope.$watch("vm.visible", () => {
-			// console.log("vm.visible", this.visible);
-			//
-		});
+		this.$scope.$watch("vm.visible", () => {});
 	}
 
 	public toggleVisible(event) {
@@ -47,11 +44,11 @@ class PanelCardOptionVisibleController implements ng.IController {
 
 export const PanelCardOptionVisibleComponent: ng.IComponentOptions = {
 	bindings: {
-		visible: "=",
+		visible: "="
 	},
 	controller: PanelCardOptionVisibleController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-visible.html",
+	templateUrl: "templates/panel-card-option-visible.html"
 };
 
 export const PanelCardOptionVisibleComponentModule = angular

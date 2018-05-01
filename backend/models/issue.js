@@ -229,15 +229,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 
 	function _get(dbColOptions, branch, revision){
 
-		let getHistory;
-
-		if(branch){
-			getHistory = History.findByBranch(dbColOptions, branch);
-		} else if (revision) {
-			getHistory = utils.isUUID(revision) ? History.findByUID(dbColOptions, revision) : History.findByTag(dbColOptions, revision);
-		}
-
-		return getHistory.then(history => {
+		return History.getHistory(dbColOptions, branch, revision).then(history => {
 
 			if(!history){
 				return Promise.resolve([]);
@@ -318,11 +310,11 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 		sort = {sort: {"created": -1}};
 	}
 
+	// Why is branch not used here?
 	if (revId) {
 
-		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
 		let currHistory;
-		addRevFilter = findHistory(dbColOptions, revId).then(history => {
+		addRevFilter = History.getHistory(dbColOptions, branch, revId).then(history => {
 
 			if(!history){
 				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
@@ -554,17 +546,14 @@ schema.statics.createIssue = function(dbColOptions, data){
 		);
 	}
 
-	let getHistory;
+	let branch;
 
-	if(data.revId){
-		getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
-		getHistory = getHistory(dbColOptions, data.revId, {_id: 1});
-	} else {
-		getHistory = History.findByBranch(dbColOptions, "master", {_id: 1});
+	if (!data.revId){
+		branch = "master";
 	}
 
 	//assign rev_id for issue
-	promises.push(getHistory.then(history => {
+	promises.push(History.getHistory(dbColOptions, branch, data.revId, {_id: 1}).then(history => {
 		if(!history && data.revId){
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history){
@@ -849,17 +838,14 @@ schema.methods.updateComment = function(commentIndex, data){
 	if(commentIndex === null || typeof commentIndex === "undefined"){
 
 		let commentGuid = utils.generateUUID();
-		let getHistory;
+		let branch;
 
-		if(data.revId){
-			getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
-			getHistory = getHistory(this._dbcolOptions, data.revId, {_id: 1});
-		} else {
-			getHistory = History.findByBranch(this._dbcolOptions, "master", {_id: 1});
+		if (!data.revId){
+			branch = "master";
 		}
 
 		//assign rev_id for issue
-		return getHistory.then(history => {
+		return History.getHistory(this._dbcolOptions, branch, data.revId, {_id: 1}).then(history => {
 			if(!history && data.revId){
 				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 			} else {
@@ -1429,10 +1415,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.Selection = {};
 								viewpointXmlObj.VisualizationInfo.Components.Selection.Component = [];
 							}
-							if (groupObject.ifc_guid) {
+							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
 								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
 									"@": {
-										IfcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guids[j]
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1462,10 +1448,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
-							if (groupObject.ifc_guid) {
+							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
 									"@": {
-										IfcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guids[j]
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1495,10 +1481,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
-							if (groupObject.ifc_guid) {
+							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
 									"@": {
-										IfcGuid: groupObject.ifc_guid
+										IfcGuid: groupObject.ifc_guids[j]
 									},
 									OriginatingSystem: "3D Repo"
 								});
@@ -1580,17 +1566,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 	let self = this;
 	let settings;
-	let getHistory;
+	let branch;
 
-	if(revId){
-		getHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
-		getHistory = getHistory({account, model}, revId, {_id: 1});
-	} else {
-		getHistory = History.findByBranch({account, model}, "master", {_id: 1});
+	if (!revId){
+		branch = "master";
 	}
 
 	//assign revId for issue
-	return getHistory.then(history => {
+	return History.getHistory({ account, model }, branch, revId, {_id: 1}).then(history => {
 		if(!history){
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history){
@@ -1807,6 +1790,63 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				
 			}
 
+			function createGroupData(groupObject) {
+
+				let groupData = {};
+
+				groupData.name = groupObject.name;
+				groupData.color = groupObject.color;
+
+				for (let account in groupObject.objects) {
+					for (let model in groupObject.objects[account]) {
+						if (!groupData.objects) {
+							groupData.objects = [];
+						}
+
+						groupData.objects.push({
+							account,
+							model,
+							ifc_guids: groupObject.objects[account][model].ifc_guids
+						});
+					}
+				}
+
+				return groupData;
+			}
+
+			function createGroupObject(group, name, color, account, model, ifc_guid) {
+
+				if (account && model && ifc_guid) {
+					if (!group) {
+						group = {};
+					}
+
+					if (name) {
+						group.name = name;
+					}
+
+					if (color) {
+						group.color = color;
+					}
+
+					if (!group.objects) {
+						group.objects = {};
+					}
+
+					if (!group.objects[account]) {
+						group.objects[account] = {};
+					}
+
+					if (!group.objects[account][model]) {
+						group.objects[account][model] = { ifc_guids: [] };
+					}
+
+					group.objects[account][model].ifc_guids.push(ifc_guid);
+				}
+
+				return group;
+			}
+
 			function createIssue(guid){
 
 				let issueFiles = files[guid];
@@ -1850,7 +1890,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						if(_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
 							issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
 						}
-						issue.desc = _.get(xml, "Markup.Topic[0].Description[0]._");
+						issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
 						issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
 						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
@@ -2014,7 +2054,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							for (let i = 0; i < vpComponents.length; i++) {
 
-								let highlightedObjects = [];
+								let highlightedGroupObject;
 
 								// TODO: refactor to reduce duplication?
 								if (vpComponents[i].Selection) {
@@ -2027,11 +2067,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												objectModel = ifcToModelMap[vpComponents[i].Selection[j].Component[k]["@"].IfcGuid];
 											}
 
-											highlightedObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
-											});
+											highlightedGroupObject = createGroupObject(
+													highlightedGroupObject,
+													issue.name,
+													[255, 0, 0],
+													account,
+													objectModel,
+													vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
+											);
 										}
 									}
 
@@ -2048,33 +2091,38 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												if (settings.federate) {
 													objectModel = ifcToModelMap[vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid];
 												}
-												highlightedObjects.push({
-													account: account,
-													model: objectModel,
-													ifc_guid: vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
-												});
+
+												highlightedGroupObject = createGroupObject(
+														highlightedGroupObject,
+														issue.name,
+														[255, 0, 0],
+														account,
+														objectModel,
+														vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
+												);
 											}
 										}
 									}
 
 								}
 
-								if (highlightedObjects.length > 0) {
-									let highlightedObjectsData = {
-										name: issue.name,
-										color: [255, 0, 0],
-										objects: highlightedObjects
-									};
+								let highlightedGroupData;
+								let highlightedObjectsMap;
+
+								if (highlightedGroupObject) {
+									highlightedGroupData = createGroupData(highlightedGroupObject);
 									groupPromises.push(
-										Group.createGroup(groupDbCol, highlightedObjectsData).then(group => {
-											vp.highlighted_group_id = group._id;
+										Group.createGroup(groupDbCol, highlightedGroupData).then(group => {
+											vp.highlighted_group_id = utils.stringToUUID(group._id);
 										})
 									);
+
+									highlightedObjectsMap = highlightedGroupData.objects.reduce((acc, val) => acc.concat(val.ifc_guids), []);
 								}
 
 								if (vpComponents[i].Visibility) {
-									let hiddenObjects = [];
-									let shownObjects = [];
+									let hiddenGroupObject;
+									let shownGroupObject;
 
 									for (let j = 0; j < vpComponents[i].Visibility.length; j++) {
 										const defaultVisibility = JSON.parse(vpComponents[i].Visibility[j]["@"].DefaultVisibility);
@@ -2101,14 +2149,15 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											}
 
 											// Exclude items selected
-											if (-1 === highlightedObjects.map(highlightObject => {
-														return highlightObject.ifc_guid;
-													}).indexOf(componentsToHide[k]["@"].IfcGuid)) {
-												hiddenObjects.push({
-													account: account,
-													model: objectModel,
-													ifc_guid: componentsToHide[k]["@"].IfcGuid
-												});
+											if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
+												hiddenGroupObject = createGroupObject(
+														hiddenGroupObject,
+														issue.name,
+														[255, 0, 0],
+														account,
+														objectModel,
+														componentsToHide[k]["@"].IfcGuid
+												);
 											}
 										}
 
@@ -2119,45 +2168,35 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												objectModel = ifcToModelMap[componentsToShow[k]["@"].IfcGuid];
 											}
 
-											shownObjects.push({
-												account: account,
-												model: objectModel,
-												ifc_guid: componentsToShow[k]["@"].IfcGuid
-											});
+											shownGroupObject = createGroupObject(
+													shownGroupObject,
+													issue.name,
+													[255, 0, 0],
+													account,
+													objectModel,
+													componentsToShow[k]["@"].IfcGuid
+											);
 										}
 									}
 
 									// TODO: May need a better way to combine hidden/shown
 									// as it is not ideal to save both hidden and shown objects
-									if (shownObjects.length > 0) {
-										for (let j = 0; highlightedObjects && j < highlightedObjects.length; j++) {
-											if (-1 === shownObjects.map(shownObject => {
-														return shownObject.ifc_guid;
-													}).indexOf(highlightedObjects[j].ifc_guid)) {
-												shownObjects.push(highlightedObjects[j]);
-											}
+									if (shownGroupObject) {
+										let shownGroupData = createGroupData(shownGroupObject);
+
+										if (highlightedGroupData) {
+											shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
 										}
-										let shownObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: shownObjects
-										};
 
 										groupPromises.push(
-											Group.createGroup(groupDbCol, shownObjectsData).then(group => {
-												vp.shown_group_id = group._id;
+											Group.createGroup(groupDbCol, shownGroupData).then(group => {
+												vp.shown_group_id = utils.stringToUUID(group._id);
 											})
 										);
-									} else if (hiddenObjects.length > 0) {
-										let hiddenObjectsData = {
-											name: issue.name,
-											color: [255, 0, 0],
-											objects: hiddenObjects
-										};
-
+									} else if (hiddenGroupObject) {
 										groupPromises.push(
-											Group.createGroup(groupDbCol, hiddenObjectsData).then(group => {
-												vp.hidden_group_id = group._id;
+											Group.createGroup(groupDbCol, createGroupData(hiddenGroupObject)).then(group => {
+												vp.hidden_group_id = utils.stringToUUID(group._id);
 											})
 										);
 									}

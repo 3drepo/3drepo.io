@@ -25,7 +25,7 @@ class CompareController implements ng.IController {
 		"ViewerService",
 		"RevisionsService",
 		"CompareService",
-		"TreeService",
+		"TreeService"
 	];
 
 	private revision: any;
@@ -53,7 +53,7 @@ class CompareController implements ng.IController {
 		private ViewerService: any,
 		private RevisionsService: any,
 		private CompareService: any,
-		private TreeService: any,
+		private TreeService: any
 	) {}
 
 	public $onInit() {
@@ -159,7 +159,7 @@ class CompareController implements ng.IController {
 
 			modelsReady.push(this.CompareService.addModelsForFederationCompare(
 				this.modelSettings,
-				this.revision,
+				this.revision
 			));
 
 		} else {
@@ -168,7 +168,7 @@ class CompareController implements ng.IController {
 				this.account,
 				this.model,
 				this.modelSettings,
-				this.revision,
+				this.revision
 			));
 
 		}
@@ -230,11 +230,11 @@ export const CompareComponent: ng.IComponentOptions = {
 		account: "<",
 		model: "<",
 		revision: "<",
-		modelSettings: "<",
+		modelSettings: "<"
 	},
 	controller: CompareController,
 	controllerAs: "vm",
-	templateUrl: "templates/compare.html",
+	templateUrl: "templates/compare.html"
 };
 
 export const CompareComponentModule = angular

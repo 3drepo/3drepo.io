@@ -166,12 +166,6 @@ function getModelSetting(req, res, next){
 		let account = req.params.account;
 		let model = req.params.model;
 
-		// Calculate revision heads
-		return History.getHeadRevisions({account, model});
-
-	}).then(headRevisions => {
-		
-		resObj.headRevisions = headRevisions;
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
 
 	}).catch(err => {

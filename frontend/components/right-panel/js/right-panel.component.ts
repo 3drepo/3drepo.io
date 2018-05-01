@@ -22,7 +22,7 @@ class RightPanelController implements ng.IController {
 		"$timeout",
 		"EventService",
 		"DocsService",
-		"MeasureService",
+		"MeasureService"
 	];
 
 	private highlightBackground;
@@ -38,7 +38,7 @@ class RightPanelController implements ng.IController {
 		private $timeout,
 		private EventService,
 		private DocsService,
-		private MeasureService,
+		private MeasureService
 	) {}
 
 	public $onInit() {
@@ -148,7 +148,7 @@ export const RightPanelComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: RightPanelController,
 	controllerAs: "vm",
-	templateUrl: "templates/right-panel.html",
+	templateUrl: "templates/right-panel.html"
 };
 
 export const RightPanelComponentModule = angular

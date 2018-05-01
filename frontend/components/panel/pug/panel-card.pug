@@ -13,6 +13,7 @@ div(layout="column", class="md-whiteframe-1dp")
 					ng-if="vm.hasFilter()"
 					show-filter='vm.showFilter' 
 					filter-text='vm.filterText')
+
 			div(flex, ng-if="!vm.showFilter")
 
 			// Options
@@ -25,24 +26,34 @@ div(layout="column", class="md-whiteframe-1dp")
 		md-content(id="content", style="height:{{vm.contentData.height}}px")
 			issues(
 				ng-if="vm.contentData.type === 'issues'"
+				account='vm.account'
+				model='vm.model'
 				show-add='vm.showAdd'
 				show='vm.contentData.show'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				on-show-item='vm.showItem()'
 				hide-item='vm.hideSelectedItem'
 				show-edit='vm.showEdit'
-				account='vm.account'
-				model='vm.model'
+
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				keys-down='vm.keysDown'
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
 				
 				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
-			
+
+			groups(
+				ng-if="vm.contentData.type === 'groups'"
+				account='vm.account'
+				model='vm.model'
+				revision='vm.revision'
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				model-settings='vm.modelSettings')
+
 			docs(
 				ng-if="vm.contentData.type === 'docs'"
 				show-add='vm.showAdd'
@@ -56,7 +67,6 @@ div(layout="column", class="md-whiteframe-1dp")
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				keys-down='vm.keysDown'
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})')
 
@@ -73,7 +83,6 @@ div(layout="column", class="md-whiteframe-1dp")
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				keys-down='vm.keysDown'
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
 				visible='vm.visible')
@@ -91,10 +100,10 @@ div(layout="column", class="md-whiteframe-1dp")
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				keys-down='vm.keysDown'
+
 				selected-objects='vm.selectedObjects' 
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-
+				show-filter="vm.showFilter"
 				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
 
@@ -109,6 +118,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings'
 				ng-if="vm.contentData.type === 'gis'")
+
 
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")

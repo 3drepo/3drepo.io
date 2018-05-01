@@ -43,6 +43,21 @@ var historySchema = Schema({
 		current: []
 });
 
+historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
+
+	let history;
+
+	if (revId && utils.isUUID(revId)) {
+		history = this.findByUID(dbColOptions, revId, projection);
+	} else if (revId && !utils.isUUID(revId)) {
+		history = this.findByTag(dbColOptions, revId, projection);
+	} else if (branch) {
+		history = this.findByBranch(dbColOptions, branch, projection);
+	}
+
+	return history;
+};
+
 historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
@@ -132,33 +147,6 @@ historySchema.methods.clean = function(){
 	clean.name = clean._id;
 	return clean;
 };
-
-historySchema.statics.getHeadRevisions = function(dbColOptions){
-	'use strict';
-
-	let proj  = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
-	let sort  = {sort: {branch: -1, timestamp: -1}};
-
-	return History.find(dbColOptions, {'incomplete': {'$exists': false}}, proj, sort).then(histories => {
-
-		histories = History.clean(histories);
-		let headRevisions = {};
-
-		histories.forEach(history => {
-
-			var branch = history.branch || C.MASTER_BRANCH_NAME;
-
-			if (!headRevisions[branch])
-			{
-				headRevisions[branch] = history._id;
-			}
-		});
-
-		return headRevisions;
-	});
-
-};
-
 
 var History = ModelFactory.createClass(
 	'History', 

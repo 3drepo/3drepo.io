@@ -25,7 +25,7 @@ class ClipController implements ng.IController {
 		"ClipService",
 		"EventService",
 		"ViewerService",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	public account: string;
@@ -64,7 +64,7 @@ class ClipController implements ng.IController {
 		private ClipService: any,
 		private EventService: any,
 		private ViewerService: any,
-		private ClientConfigService: any,
+		private ClientConfigService: any
 	) {}
 
 	public $onInit() {
@@ -96,10 +96,9 @@ class ClipController implements ng.IController {
 				return this.ClipService.state;
 			},
 			(state) => {
-				// console.log(this, state);
 				angular.extend(this, state);
 			},
-			true,
+			true
 		);
 
 		this.$scope.$watch("vm.displayDistance", (value) => {
@@ -256,11 +255,11 @@ export const ClipComponent: ng.IComponentOptions = {
 		visible: "=",
 		onContentHeightRequest: "&",
 		account: "<",
-		model: "<",
+		model: "<"
 	},
 	controller: ClipController,
 	controllerAs: "vm",
-	templateUrl: "templates/clip.html",
+	templateUrl: "templates/clip.html"
 };
 
 export const ClipComponentModule = angular

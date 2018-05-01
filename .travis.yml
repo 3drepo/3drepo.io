@@ -40,7 +40,8 @@ install:
     - yarn install
     - cd ./../frontend 
     - yarn install
-    - yarn run gulp build
+    - yarn run lint
+    - yarn run build
 
 cache:
   yarn: true

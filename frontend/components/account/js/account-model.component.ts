@@ -33,7 +33,7 @@ class AccountModelController implements ng.IController {
 		"AuthService",
 		"AnalyticService",
 		"AccountService",
-		"AccountUploadService",
+		"AccountUploadService"
 	];
 
 	private infoTimeout;
@@ -77,7 +77,7 @@ class AccountModelController implements ng.IController {
 		private AuthService: any,
 		private AnalyticService: any,
 		private AccountService: any,
-		private AccountUploadService: any,
+		private AccountUploadService: any
 	) {}
 
 	public $onInit() {
@@ -101,30 +101,30 @@ class AccountModelController implements ng.IController {
 			upload: {
 				label: "Upload file",
 				icon: "cloud_upload",
-				hidden: !this.AuthService.hasPermission(perms.PERM_UPLOAD_FILES, this.model.permissions),
+				hidden: !this.AuthService.hasPermission(perms.PERM_UPLOAD_FILES, this.model.permissions)
 			},
 			permissions: {
 				label: "Permissions",
 				icon: "group",
-				hidden: !this.AuthService.hasPermission("manage_model_permission", this.model.permissions),
+				hidden: !this.AuthService.hasPermission("manage_model_permission", this.model.permissions)
 			},
 			revision: {
 				label: "Revisions",
 				icon: "settings_backup_restore",
-				hidden: false,
+				hidden: false
 			},
 			modelsetting: {
 				label: "Settings",
 				icon: "settings",
-				hidden: !this.AuthService.hasPermission(perms.PERM_CHANGE_MODEL_SETTINGS, this.model.permissions),
-			},
+				hidden: !this.AuthService.hasPermission(perms.PERM_CHANGE_MODEL_SETTINGS, this.model.permissions)
+			}
 		};
 
 		if (this.model.timestamp && !this.model.federate) {
 			this.modelOptions.download = {
 				label: "Download",
 				icon: "cloud_download",
-				hidden: !this.AuthService.hasPermission(perms.PERM_DOWNLOAD_MODEL, this.model.permissions),
+				hidden: !this.AuthService.hasPermission(perms.PERM_DOWNLOAD_MODEL, this.model.permissions)
 			};
 		}
 		this.uploadButtonDisabled = true;
@@ -132,7 +132,7 @@ class AccountModelController implements ng.IController {
 			label: "Delete",
 			icon: "delete",
 			hidden: !this.AuthService.hasPermission(perms.PERM_DELETE_MODEL, this.model.permissions),
-			color: "#F44336",
+			color: "#F44336"
 		};
 
 		this.watchModelStatus();
@@ -196,7 +196,7 @@ class AccountModelController implements ng.IController {
 						true,
 						null,
 						false,
-						this.dialogCloseToId,
+						this.dialogCloseToId
 					);
 				} else {
 					console.warn("Incorrect permissions");
@@ -205,7 +205,7 @@ class AccountModelController implements ng.IController {
 				this.$location.path("/" + this.account + "/" + this.model.model, "_self").search("page", null);
 				this.AnalyticService.sendEvent({
 					eventCategory: "Model",
-					eventAction: "view",
+					eventAction: "view"
 				});
 			}
 		}
@@ -241,7 +241,7 @@ class AccountModelController implements ng.IController {
 				true,
 				null,
 				false,
-				this.dialogCloseToId,
+				this.dialogCloseToId
 			);
 
 			break;
@@ -250,12 +250,12 @@ class AccountModelController implements ng.IController {
 			const url = `${this.account}/${this.model.model}/download/latest`;
 			window.open(
 				this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, url),
-				"_blank",
+				"_blank"
 			);
 
 			this.AnalyticService.sendEvent({
 				eventCategory: "Model",
-				eventAction: "download",
+				eventAction: "download"
 			});
 
 			break;
@@ -269,7 +269,7 @@ class AccountModelController implements ng.IController {
 				event,
 				model: this.model,
 				account: this.account,
-				project: this.project,
+				project: this.project
 			});
 			break;
 
@@ -325,7 +325,7 @@ class AccountModelController implements ng.IController {
 			account: this.account,
 			file: this.modelToUpload,
 			tag: this.tag,
-			desc: this.desc,
+			desc: this.desc
 		};
 
 		this.AccountUploadService.uploadRevisionToModel(uploadFileData)
@@ -353,7 +353,7 @@ class AccountModelController implements ng.IController {
 		this.$location.path(`/${this.account}/${this.model.model}/${revId}`, "_self");
 		this.AnalyticService.sendEvent({
 			eventCategory: "Model",
-			eventAction: "view",
+			eventAction: "view"
 		});
 	}
 
@@ -369,7 +369,7 @@ class AccountModelController implements ng.IController {
 		this.NotificationService.subscribe.modelStatusChanged(
 			this.account,
 			this.model.model,
-			this.handleModelStatus.bind(this),
+			this.handleModelStatus.bind(this)
 		);
 
 	}
@@ -471,11 +471,11 @@ export const AccountModelComponent: ng.IComponentOptions = {
 		modelToUpload: "=",
 		onShowPage: "&",
 		onSetupDeleteModel: "&",
-		isAccountAdmin: "=",
+		isAccountAdmin: "="
 	},
 	controller: AccountModelController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-model.html",
+	templateUrl: "templates/account-model.html"
 };
 
 export const AccountModelComponentModule = angular

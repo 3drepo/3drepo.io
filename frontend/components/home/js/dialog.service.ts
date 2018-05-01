@@ -18,7 +18,7 @@
 export class DialogService {
 
 	public static $inject: string[] = [
-		"$mdDialog",
+		"$mdDialog"
 	];
 
 	private expiredDialogOpen;
@@ -28,7 +28,7 @@ export class DialogService {
 	private thirtySeconds;
 
 	constructor(
-		private $mdDialog,
+		private $mdDialog
 	) {
 		this.expiredDialogOpen = false;
 		this.disconnectedDialogOpen = false;
@@ -75,13 +75,12 @@ export class DialogService {
 				.htmlContent(content)
 				.ariaLabel(title)
 				.ok("Continue")
-				.cancel("Mute Notifications"),
+				.cancel("Mute Notifications")
 		)
 			.then(() => {
 				this.disconnectedDialogOpen = false;
 			})
 			.catch(() => {
-				console.log("Notifications - Muting notifications");
 				this.disconnectedDialogOpen = false;
 				this.muteNotifications = true;
 			});
@@ -97,7 +96,7 @@ export class DialogService {
 	}
 
 	public showDialog(
-		dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo,
+		dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo
 	) {
 
 		// Allow the dialog to have cancel ability
@@ -109,7 +108,7 @@ export class DialogService {
 			templateUrl: "/templates/" + dialogTemplate,
 			onRemoving: () => {
 				this.$mdDialog.cancel();
-			},
+			}
 		};
 
 		data.parent = angular.element(this.isDefined(parent) ? parent : document.body);
@@ -143,10 +142,35 @@ export class DialogService {
 					.title("Session Expired")
 					.textContent(content)
 					.ariaLabel("Session Expired")
-					.ok("OK"),
+					.ok("OK")
 			).then(() => {
 				this.expiredDialogOpen = false;
 			});
+
+		} else {
+			return Promise.resolve();
+		}
+
+	}
+
+	public confirm(title, content, escapable, ok, cancel) {
+
+		if (!this.expiredDialogOpen) {
+
+			if (escapable === undefined) {
+				escapable = true;
+			}
+
+			return this.$mdDialog.show(
+				this.$mdDialog.confirm()
+					.clickOutsideToClose(escapable)
+					.escapeToClose(escapable)
+					.title(title)
+					.textContent(content)
+					.ariaLabel(title)
+					.ok(ok)
+					.cancel(cancel)
+			);
 
 		} else {
 			return Promise.resolve();
@@ -169,7 +193,7 @@ export class DialogService {
 					.title(title)
 					.textContent(content)
 					.ariaLabel(title)
-					.ok("OK"),
+					.ok("OK")
 			);
 
 		} else {
@@ -193,7 +217,7 @@ export class DialogService {
 					.title(title)
 					.htmlContent(content)
 					.ariaLabel(title)
-					.ok("OK"),
+					.ok("OK")
 			);
 		} else {
 			return Promise.resolve();
@@ -222,13 +246,13 @@ export class DialogService {
 				.htmlContent(content)
 				.ariaLabel(title)
 				.ok("Reload")
-				.cancel("I'll reload in a moment"),
+				.cancel("I'll reload in a moment")
 		)
 			.then(() => {
 				window.location.reload();
 			})
 			.catch(() => {
-				console.log("User didn't reload");
+				console.debug("User didn't reload");
 			});
 
 	}

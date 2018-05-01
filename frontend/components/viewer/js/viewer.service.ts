@@ -25,8 +25,7 @@ export class ViewerService {
 		"ClientConfigService",
 		"APIService",
 		"DialogService",
-		"EventService",
-		"DocsService",
+		"EventService"
 	];
 
 	private newPinId: string;
@@ -43,9 +42,7 @@ export class ViewerService {
 		public ClientConfigService: any,
 		public APIService: any,
 		public DialogService: any,
-		public EventService: any,
-		public DocsService: any,
-
+		public EventService: any
 	) {
 
 		this.newPinId = "newPinId";
@@ -54,11 +51,11 @@ export class ViewerService {
 
 		this.currentModel = {
 			model : null,
-			promise : null,
+			promise : null
 		};
 
 		this.pin = {
-			pinDropMode : false,
+			pinDropMode : false
 		};
 
 		this.initialised = $q.defer();
@@ -81,7 +78,7 @@ export class ViewerService {
 			params.clippingPlanes,
 			params.fromClipPanel,
 			params.account,
-			params.model,
+			params.model
 		);
 	}
 
@@ -108,29 +105,15 @@ export class ViewerService {
 			case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
 				this.viewer.changePinColours(
 					event.value.id,
-					event.value.colours,
+					event.value.colours
 				);
 				break;
 
-			// case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-			// 	this.viewer.updateClippingPlanes(
-			// 		event.value.clippingPlanes,
-			// 		event.value.fromClipPanel,
-			// 		event.value.account,
-			// 		event.value.model,
-			// 	);
-			// 	break;
-
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.DocsService.state.show = false;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				if (valid) {
-					this.DocsService.handleObjectSelected(event);
-				}
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
@@ -142,7 +125,7 @@ export class ViewerService {
 					event.value.animate !== undefined ? event.value.animate : true,
 					event.value.rollerCoasterMode,
 					event.value.account,
-					event.value.model,
+					event.value.model
 				);
 				break;
 
@@ -170,7 +153,7 @@ export class ViewerService {
 						model,
 						pickedNorm: normal,
 						pickedPos: position,
-						selectedObjectId: event.value.id,
+						selectedObjectId: event.value.id
 					};
 
 					this.addPin(data);
@@ -210,7 +193,7 @@ export class ViewerService {
 				params.animate !== undefined ? params.animate : true,
 				params.rollerCoasterMode,
 				params.account,
-				params.model,
+				params.model
 			);
 		}
 	}
@@ -223,7 +206,7 @@ export class ViewerService {
 	public changePinColours(params) {
 		this.viewer.changePinColours(
 			params.id,
-			params.colours,
+			params.colours
 		);
 	}
 
@@ -238,7 +221,7 @@ export class ViewerService {
 		this.viewer.getCurrentViewpointInfo(
 			params.account,
 			params.model,
-			params.promise,
+			params.promise
 		);
 	}
 
@@ -251,7 +234,7 @@ export class ViewerService {
 				params.pickedPos,
 				params.pickedNorm,
 				params.colours,
-				params.viewpoint,
+				params.viewpoint
 			);
 		});
 	}
@@ -259,7 +242,7 @@ export class ViewerService {
 	public removePin(params) {
 		this.initialised.promise.then(() => {
 			this.viewer.removePin(
-				params.id,
+				params.id
 			);
 		});
 	}
@@ -274,7 +257,7 @@ export class ViewerService {
 		this.viewer.getObjectsStatus(
 			params.account,
 			params.model,
-			params.promise,
+			params.promise
 		);
 	}
 
@@ -287,8 +270,23 @@ export class ViewerService {
 				params.zoom,
 				params.colour,
 				params.multi,
+				params.forceReHighlight
 			);
 		}
+	}
+
+	public unhighlightObjects(params)  {
+		if (this.viewer) {
+			this.viewer.unhighlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids
+			);
+		}
+	}
+
+	public getMultiSelectMode() {
+		return this.viewer.multiSelectMode;
 	}
 
 	public setMultiSelectMode(value)  {
@@ -381,7 +379,7 @@ export class ViewerService {
 				"viewer",
 				document.getElementById("viewer"),
 				this.EventService.send,
-				this.handleUnityError.bind(this),
+				this.handleUnityError.bind(this)
 			);
 
 			this.viewer.setUnity();
@@ -392,7 +390,7 @@ export class ViewerService {
 	}
 
 	public initViewer() {
-
+		console.debug("Initiating Viewer");
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else if (this.viewer) {
@@ -420,9 +418,9 @@ export class ViewerService {
 		return this.getViewer()
 			.init({
 				getAPI: {
-					hostNames: this.ClientConfigService.apiUrls.all,
+					hostNames: this.ClientConfigService.apiUrls.all
 				},
-				showAll : true,
+				showAll : true
 			})
 			.catch((error) => {
 				console.error("Error creating Viewer Directive: ", error);
@@ -434,12 +432,13 @@ export class ViewerService {
 
 		if (!account || !model) {
 			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
+			return Promise.reject("Account, model, branch or revision was not defined!");
 		} else {
 			this.currentModel.promise = this.viewer.loadModel(
 				account,
 				model,
 				branch,
-				revision,
+				revision
 			)
 				.then(() => {
 					// Set the current model in the viewer
@@ -449,6 +448,7 @@ export class ViewerService {
 				.catch((error) => {
 					console.error("Error loading model: ", error);
 				});
+			return this.currentModel.promise;
 		}
 
 	}
@@ -552,6 +552,22 @@ export class ViewerService {
 		if (this.viewer) {
 			this.viewer.mapStop();
 		}
+	}
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		if (this.viewer) {
+			this.viewer.overrideMeshColor(account, model, meshIDs, color);
+		}
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		if (this.viewer) {
+			this.viewer.resetMeshColor(account, model, meshIDs);
+		}
+	}
+
+	public getDefaultHighlightColor() {
+		return this.viewer.getDefaultHighlightColor();
 	}
 
 }

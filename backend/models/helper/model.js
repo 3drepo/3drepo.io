@@ -48,63 +48,39 @@ const uuid = require("node-uuid");
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
 function convertToErrorCode(bouncerErrorCode){
+	// These error codes correspond to the error messages to 3drepobouncer
+	// refer to bouncer/repo/error_codes.h for what they are.
+	const bouncerErrToWebErr = [
+		responseCodes.OK, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.NOT_AUTHORIZED, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
+		responseCodes.FILE_IMPORT_MISSING_TEXTURES,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.REPOERR_FED_GEN_FAIL,
+		responseCodes.FILE_IMPORT_MISSING_NODES,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED,
+		responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_NO_MESHES,
+		responseCodes.FILE_IMPORT_BAD_EXT,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_PROCESS_ERR,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX,
+		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION
+	];
 
-	let errObj;
 
-	switch (bouncerErrorCode) {
-		case 0:
-			errObj = responseCodes.OK;
-			break;
-		case 1:
-			errObj = responseCodes.FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT;
-			break;
-		case 2:
-			errObj = responseCodes.NOT_AUTHORIZED;
-			break;
-		case 3:
-			errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-			break;
-		case 4:
-			errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-			break;
-		case 5:
-			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_FAIL;
-			break;
-		case 6:
-			errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
-			break;
-		case 7:
-			errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
-			break;
-		case 8:
-			errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-			break;
-		case 9:
-			errObj = responseCodes.REPOERR_FED_GEN_FAIL;
-			break;
-		case 10:
-			errObj = responseCodes.FILE_IMPORT_MISSING_NODES;
-			break;
-		case 11:
-			errObj = responseCodes.FILE_IMPORT_GET_FILE_FAILED;
-			break;
-		case 12:
-			errObj = responseCodes.FILE_IMPORT_CRASHED;
-			break;
-		case 13:
-			errObj = responseCodes.FILE_IMPORT_FILE_READ_FAILED;
-			break;
-		case 14:
-			errObj = responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED;
-			break;
-		case 15:
-			errObj = responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES;
-			break;
-		default:
-			errObj = (bouncerErrorCode) ? bouncerErrorCode : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-			break;
-
-	}
+	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ? 
+		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
 	
 	return Object.assign({bouncerErrorCode}, errObj);
 }
@@ -146,7 +122,7 @@ function importSuccess(account, model, sharedSpacePath) {
 			setting.save();
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importSuccess:`, err);
+		systemLogger.logError(`Failed to invoke importSuccess:` +  err);
 	});
 }
 
@@ -181,11 +157,12 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 				model,
 				username: account,
 				err: errMsg,
-				corID: setting.corID
+				corID: setting.corID,
+				bouncerErr: errCode
 			});
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importFail:`, err);
+		systemLogger.logError(`Failed to invoke importFail:` +  err);
 	});
 }
 
@@ -400,9 +377,9 @@ function importToyProject(account, username){
 
 		return Promise.all([
 
-			importToyModel(account, username, 'Lego_House_Architecture', '9d8e8a6a-466e-46ea-b1bc-965dff2e143a', project.name),
-			importToyModel(account, username, 'Lego_House_Landscape', 'b0d6e585-c5d6-4015-98a6-5e123112098a', project.name),
-			importToyModel(account, username, 'Lego_House_Structure', 'f4cbbffd-9ba5-48ac-b3a5-22dd2bcf5190', project.name)
+			importToyModel(account, username, 'Lego_House_Architecture', 'ae234e5d-3b75-4b8c-b461-7529d5bec583', project.name),
+			importToyModel(account, username, 'Lego_House_Landscape', '39b51fe5-0fcb-4734-8e10-d8088bec9d45', project.name),
+			importToyModel(account, username, 'Lego_House_Structure', '3749c3cc-375d-406a-9f0d-2d059e8e782f', project.name)
 
 		]).then(models => {
 
@@ -421,7 +398,7 @@ function importToyProject(account, username){
 				};
 			});
 
-			return importToyModel(account, username, 'Lego_House_Federation', 'cfffd7e4-9fec-4f31-b606-32e6239df076', project.name, subModels, skip);
+			return importToyModel(account, username, 'Lego_House_Federation', 'b50fd608-46b4-4ba6-a97f-7bbc18c51932', project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -540,18 +517,10 @@ function getAllMeshes(account, model, branch, rev, username){
 
 	let subModelMeshes;
 	let revId;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -634,18 +603,10 @@ function getIdMap(account, model, branch, rev, username){
 	'use strict'	
 	let subIdMaps;
 	let revId, idMapsFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -735,18 +696,10 @@ function getIdToMeshes(account, model, branch, rev, username){
 	'use strict'	
 	let subIdToMeshes;
 		let revId, idToMeshesFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -828,18 +781,10 @@ function getModelProperties(account, model, branch, rev, username){
 	
 	let subProperties;
 	let revId, modelPropertiesFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -931,18 +876,10 @@ function getTreePath(account, model, branch, rev, username){
 	'use strict'	
 	let subTreePaths;
 	let revId, treePathsFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -1034,18 +971,10 @@ function getUnityAssets(account, model, branch, rev, username){
 
 	let subAssets;
 	let revId, assetsFileName;
-	let getHistory, history;
+	let history;
 	let status;
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
@@ -1146,26 +1075,11 @@ function getUnityBundle(account, model, uid){
 // return main tree and urls of sub trees only and let frontend to do the remaining work :)
 // returning a readstream for piping and a promise for error catching while streaming
 function getFullTree_noSubTree(account, model, branch, rev){
-	
 
-	let getHistory;
 	let history;
 	let stashRs;
 
-	if(rev && utils.isUUID(rev)){
-
-		getHistory = History.findByUID({ account, model }, rev);
-
-	} else if (rev && !utils.isUUID(rev)) {
-
-		getHistory = History.findByTag({ account, model }, rev);
-
-	} else if (branch) {
-
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-
-	const readStreamPromise = getHistory.then(_history => {
+	const readStreamPromise = History.getHistory({ account, model }, branch, rev).then(_history => {
 
 		history = _history;
 
@@ -1335,17 +1249,7 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 		if(granted){
 
-			let getHistory;
-
-			if(rev && utils.isUUID(rev)){
-				getHistory = History.findByUID({account, model}, rev);
-			} else if (rev && !utils.isUUID(rev)){
-				getHistory = History.findByTag({account, model}, rev);
-			} else {
-				getHistory = History.findByBranch({account, model}, branch);
-			}
-
-			return getHistory.then(history => {
+			return History.getHistory({ account, model }, branch, rev).then(history => {
 				if(history){
 					return search(history);
 				} else {
@@ -1732,7 +1636,6 @@ function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 
 function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username){
 	//Get the revision object to find all relevant IDs
-	let getHistory;
 	let history;
 	let fullFieldName = "metadata";
 
@@ -1740,14 +1643,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 		fullFieldName += "." + fieldName;
 	}
 
-	if(rev && utils.isUUID(rev)){
-		getHistory = History.findByUID({ account, model }, rev);
-	} else if (rev && !utils.isUUID(rev)) {
-		getHistory = History.findByTag({ account, model }, rev);
-	} else if (branch) {
-		getHistory = History.findByBranch({ account, model }, branch);
-	}
-	return getHistory.then(_history => {
+	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
 		if(!history){
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);

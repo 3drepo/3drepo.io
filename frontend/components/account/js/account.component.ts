@@ -25,7 +25,7 @@ class AccountController implements ng.IController {
 		"AccountService",
 		"AuthService",
 		"APIService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private accountInitialised;
@@ -57,7 +57,7 @@ class AccountController implements ng.IController {
 		private AccountService,
 		private AuthService,
 		private APIService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -261,14 +261,13 @@ export const AccountComponent: ng.IComponentOptions = {
 		state: "=",
 		query: "=",
 		account: "=",
-		keysDown: "=",
 		isLiteMode: "=",
-		showLiteModeButton: "<",
+		showLiteModeButton: "<"
 
 	},
 	controller: AccountController,
 	controllerAs: "vm",
-	templateUrl: "templates/account.html",
+	templateUrl: "templates/account.html"
 };
 
 export const AccountComponentModule = angular

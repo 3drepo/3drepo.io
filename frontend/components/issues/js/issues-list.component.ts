@@ -22,9 +22,9 @@ class IssuesListController implements ng.IController {
 		"$window",
 		"$timeout",
 
-		"APIService", 
+		"APIService",
 		"IssuesService",
-		"ClientConfigService", 
+		"ClientConfigService"
 	];
 
 	private toShow: string;
@@ -37,18 +37,19 @@ class IssuesListController implements ng.IController {
 	private allIssues: any;
 	private menuOption: any;
 	private importBcf: any;
-	private account: any;
-	private model: any;
+	private account: string;
+	private model: string;
+	private revision: string;
 	private filterText: string;
 
 	constructor(
 		private $scope,
 		private $window,
 		private $timeout,
-		
+
 		private APIService,
-		private IssuesService, 
-		private ClientConfigService,
+		private IssuesService,
+		private ClientConfigService
 	) {}
 
 	public $onInit() {
@@ -66,17 +67,17 @@ class IssuesListController implements ng.IController {
 		this.$scope.$watch(
 			() => {
 				return this.IssuesService.state.allIssues;
-			}, 
+			},
 			() => {
-		
+
 				if (this.IssuesService.state.allIssues) {
 					if (this.IssuesService.state.allIssues.length > 0) {
 
 						this.toShow = "list";
 						this.setupIssuesToShow();
+						// this.checkShouldShowIssue();
 
 					} else {
-						
 						this.toShow = "info";
 						this.info = "There are currently no open issues";
 						this.contentHeight({height: this.IssuesService.state.heights.infoHeight});
@@ -84,9 +85,8 @@ class IssuesListController implements ng.IController {
 				}
 
 				this.allIssues = this.IssuesService.state.allIssues;
-				this.checkShouldShowIssue();
 
-			}, 
+			},
 			true
 		);
 
@@ -103,19 +103,20 @@ class IssuesListController implements ng.IController {
 			if (this.menuOption && this.menuOption.value) {
 
 				this.handleMenuOptions();
-				
+
 			}
 
 		});
 
-
 		this.$scope.$watch(
 			() => {
-				this.IssuesService.state.displayIssue;
-			}, 
-			() => {
-				this.checkShouldShowIssue();
-			}, 
+				return this.IssuesService.getDisplayIssue();
+			},
+			(issueToDisplay) => {
+				if (issueToDisplay) {
+					this.editIssue(issueToDisplay);
+				}
+			},
 			true
 		);
 
@@ -127,18 +128,21 @@ class IssuesListController implements ng.IController {
 			ids.push(issue._id);
 		});
 
-		switch(this.menuOption.value) {
+		switch (this.menuOption.value) {
 
 			case "sortByDate":
-				this.IssuesService.state.issueDisplay.sortOldestFirst = !this.IssuesService.state.issueDisplay.sortOldestFirst;
+				this.IssuesService.state.issueDisplay.sortOldestFirst =
+					!this.IssuesService.state.issueDisplay.sortOldestFirst;
 				break;
 
 			case "showClosed":
-				this.IssuesService.state.issueDisplay.showClosed = !this.IssuesService.state.issueDisplay.showClosed;
+				this.IssuesService.state.issueDisplay.showClosed =
+					!this.IssuesService.state.issueDisplay.showClosed;
 				break;
 
 			case "showSubModels":
-				this.IssuesService.state.issueDisplay.showSubModelIssues = !this.IssuesService.state.issueDisplay.showSubModelIssues;
+				this.IssuesService.state.issueDisplay.showSubModelIssues =
+					!this.IssuesService.state.issueDisplay.showSubModelIssues;
 				break;
 
 			case "print":
@@ -166,12 +170,12 @@ class IssuesListController implements ng.IController {
 
 			case "filterRole":
 				const roleIndex = this.IssuesService.state.issueDisplay.excludeRoles.indexOf(this.menuOption.role);
-				if(this.menuOption.selected){
-					if(roleIndex !== -1){
+				if (this.menuOption.selected) {
+					if (roleIndex !== -1) {
 						this.IssuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
 					}
 				} else {
-					if(roleIndex === -1){
+					if (roleIndex === -1) {
 						this.IssuesService.state.issueDisplay.excludeRoles.push(this.menuOption.role);
 					}
 				}
@@ -200,30 +204,20 @@ class IssuesListController implements ng.IController {
 		}
 
 		this.IssuesService.showIssuePins(this.account, this.model);
-	};
+	}
 
 	public selectIssue(issue) {
-		this.IssuesService.setSelectedIssue(issue);
+		this.IssuesService.setSelectedIssue(issue, false, this.revision);
 		angular.element(this.$window).triggerHandler("resize");
-	};
+	}
 
 	public isSelectedIssue(issue) {
 		return this.IssuesService.isSelectedIssue(issue);
-	};
+	}
 
 	public editIssue(issue) {
-		this.onEditIssue({issue: issue});
-	};
-
-	public checkShouldShowIssue() {
-		const issueToDisplay = this.IssuesService.getDisplayIssue();
-		if (issueToDisplay) {
-			this.editIssue(issueToDisplay);
-			this.$timeout(() => {
-				this.IssuesService.showIssue(issueToDisplay);
-			}, 50);
-		}
-	};
+		this.onEditIssue({issue});
+	}
 
 }
 
@@ -231,6 +225,7 @@ export const IssuesListComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
 		model: "<",
+		revision: "<",
 		allIssues: "<",
 		issuesToShow: "<",
 		filterText: "<",
@@ -240,11 +235,11 @@ export const IssuesListComponent: ng.IComponentOptions = {
 		menuOption: "<",
 		importBcf: "&",
 		selectedIssue: "<",
-		issueDisplay: "<",
+		issueDisplay: "<"
 	},
 	controller: IssuesListController,
 	controllerAs: "vm",
-	templateUrl: "templates/issues-list.html",
+	templateUrl: "templates/issues-list.html"
 };
 
 export const IssuesListComponentModule = angular

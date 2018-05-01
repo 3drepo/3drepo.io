@@ -24,7 +24,7 @@ class AccountMenuController implements ng.IController {
 		"ViewerService",
 		"IssuesService",
 		"CompareService",
-		"StateManager",
+		"StateManager"
 	];
 
 	private $mdOpenMenu;
@@ -39,7 +39,7 @@ class AccountMenuController implements ng.IController {
 		private AuthService: any,
 		private ViewerService: any,
 		private IssuesService: any,
-		private CompareService: any,
+		private CompareService: any
 	) {}
 
 	public $onInit() {
@@ -102,11 +102,11 @@ class AccountMenuController implements ng.IController {
 export const AccountMenuComponent: ng.IComponentOptions = {
 	bindings: {
 		showLiteModeButton: "=",
-		isLiteMode: "=",
+		isLiteMode: "="
 	},
 	controller: AccountMenuController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-menu.html",
+	templateUrl: "templates/account-menu.html"
 };
 
 export const AccountMenuComponentModule = angular

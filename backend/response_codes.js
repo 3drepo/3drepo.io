@@ -79,13 +79,18 @@
 
 		HEAD_REVISION_NOT_FOUND: { message: "Head revision not found", status: 404 },
 
-		FILE_IMPORT_PROCESS_ERR: { message: "Failed to process file", status: 400 },
-		FILE_IMPORT_INVALID_ARGS: { message: "Invalid arguments", status: 500 },
-		FILE_IMPORT_UNKNOWN_ERR: { message: "Unknown error", status: 500 },
-		FILE_IMPORT_UNKNOWN_CMD: { message: "Unknown command", status: 500 },
+		FILE_IMPORT_PROCESS_ERR: { message: "Import failed: Failed to process file", status: 400 },
+		FILE_IMPORT_UNKNOWN_ERR: { message: "Import failed: Unknown error", status: 500 },
+		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 400 },
+		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 400 },
+		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Import failed: Failed to generate unity files", status: 500 },
+		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Import failed: Untriangulated meshes", status: 400 },
+		FILE_IMPORT_NO_MESHES: { message: "Import failed: Model does not have geometry", status: 400 },
+		FILE_IMPORT_BAD_EXT: { message: "Import failed: Unsupported file type", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Import failed: Unsupported navisworks plugin version", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Import failed: Unsupported FBX version (Supported: 2011, 2012, 2013)", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 
-		FILE_IMPORT_LAUNCHING_COMPUTE_CLIENT: { message: "File processing failed to start", status: 500 },
-		FILE_IMPORT_LOAD_SCENE_FAIL: { message: "Failed to import file to scene", status: 500},
 
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
 		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
@@ -102,6 +107,7 @@
 		ROLE_SETTINGS_NOT_FOUND: { message: "Role settings not found", status: 500 },
 
 		GROUP_NOT_FOUND: { message: "Group not found", status: 404 },
+		INVALID_GROUP: { message: "Group request malformed", status: 400 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
@@ -132,16 +138,6 @@
 
 		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
-		
-		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 500 },
-		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 500 },
-
-
-		FILE_IMPORT_GET_FILE_FAILED: { message: "Failed to get file from project", status: 500 },
-		FILE_IMPORT_CRASHED: { message: "Failed to finish", status: 500 },
-		FILE_IMPORT_FILE_READ_FAILED: { message: "Failed to read import parameters from file (Unity)", status: 500 },
-		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Failed to generate asset bundles (Unity)", status: 500 },
-		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Untriangulated meshes", status: 500 },
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_INVALID_INDEX: { message: "Invalid comment index", status: 400 },

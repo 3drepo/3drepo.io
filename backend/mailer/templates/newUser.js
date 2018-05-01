@@ -18,17 +18,15 @@
 var html = data => `
 	We have one more new user signed up on ${data.url}!
 	<br><br>
-	Email: ${data.email}
+	Username: ${data.user}
+	<br>
+	E-mail: ${data.email}
 	<br>
 	Name: ${data.firstName} ${data.lastName}
 	<br>
 	Company: ${data.company} 
 	<br>
-	Job title: ${data.jobTitle} 
-	<br>
 	Country: ${data.country}
-	<br>
-	Phone: ${data.phoneNo}
 `;
 
 var subject = data => `[New User][${data.company}] New user from ${data.company} signed up`;

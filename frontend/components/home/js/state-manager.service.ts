@@ -30,7 +30,7 @@ export class StateManagerService {
 		"ClientConfigService",
 		"ViewerService",
 		"IssuesService",
-		"CompareService",
+		"CompareService"
 	];
 
 	private state: any;
@@ -55,14 +55,14 @@ export class StateManagerService {
 		private ClientConfigService,
 		private ViewerService,
 		private IssuesService,
-		private CompareService,
+		private CompareService
 	) {
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
 		// One day this might change.
 		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 		this.state = {
-			changing: true,
+			changing: true
 		};
 
 		this.changedState = {};
@@ -302,7 +302,6 @@ export class StateManagerService {
 				this.changedState[letName] = value;
 			}
 		}
-		// console.log(letName, value);
 		this.state[letName] = value;
 	}
 
@@ -370,7 +369,7 @@ export class StateManagerService {
 					.textContent(message)
 					.ariaLabel(title + " Dialog")
 					.cancel("Cancel")
-					.ok("Confirm"),
+					.ok("Confirm")
 
 			).then(
 				() => {
@@ -380,7 +379,7 @@ export class StateManagerService {
 					this.IssuesService.resetIssues();
 				}, () => {
 					// Pass
-				},
+				}
 			);
 		}
 

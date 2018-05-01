@@ -19,18 +19,18 @@ export class PanelService {
 
 	public static $inject: string[] = [
 		"EventService",
-		"TreeService",
+		"TreeService"
 	];
 
 	private issuesPanelCard: any;
 
 	constructor(
 		private EventService: any,
-		private TreeService: any,
+		private TreeService: any
 	) {
 		this.issuesPanelCard = {
 			left: [],
-			right: [],
+			right: []
 		};
 
 		this.issuesPanelCard.left.push({
@@ -46,7 +46,7 @@ export class PanelService {
 					label: "Print",
 					selected: false,
 					noToggle: true,
-					icon: "fa-print",
+					icon: "fa-print"
 				},
 				{
 					hidden: false,
@@ -54,7 +54,7 @@ export class PanelService {
 					label: "Import BCF",
 					selected: false,
 					noToggle: true,
-					icon: "fa-upload",
+					icon: "fa-upload"
 				},
 				{
 					hidden: false,
@@ -63,7 +63,7 @@ export class PanelService {
 					selected: false,
 					noToggle: true,
 					icon: "fa-cloud-download",
-					divider: true,
+					divider: true
 				},
 				{
 					hidden: false,
@@ -74,7 +74,7 @@ export class PanelService {
 					toggle: false,
 					selected: true,
 					firstSelected: true,
-					secondSelected: false,
+					secondSelected: false
 				},
 				{
 					hidden: false,
@@ -83,7 +83,7 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false,
+					secondSelected: false
 				},
 				{
 					hidden: false,
@@ -92,20 +92,31 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false,
+					secondSelected: false
 				}, {
 					hidden: false,
 					upperDivider: true,
-					label: "Created by: ",
-				},
+					label: "Created by: "
+				}
 			],
 			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
-				{type: "filter", visible: true},
+				{type: "filter", visible: true}
 			],
-			add: true,
+			add: true
+		});
+
+		this.issuesPanelCard.left.push({
+			type: "groups",
+			title: "Groups",
+			show: false,
+			help: "List current groups",
+			icon: "group_work",
+			minHeight: 80,
+			fixedHeight: false,
+			options: []
 		});
 
 		this.issuesPanelCard.left.push({
@@ -123,7 +134,7 @@ export class PanelService {
 					label: "Show All",
 					selected: false,
 					noToggle: true,
-					icon: "fa-eye",
+					icon: "fa-eye"
 				},
 				{
 					hidden: false,
@@ -131,7 +142,7 @@ export class PanelService {
 					label: "Isolate Selected",
 					selected: false,
 					noToggle: true,
-					icon: "fa-scissors",
+					icon: "fa-scissors"
 				},
 				{
 					hidden: false,
@@ -140,13 +151,13 @@ export class PanelService {
 					selected: true,
 					toggle: true,
 					keepCheckSpace: true,
-					icon: "fa-home",
-				},
+					icon: "fa-home"
+				}
 			],
 			options: [
 				{type: "menu", visible: true},
-				{type: "filter", visible: true},
-			],
+				{type: "filter", visible: true}
+			]
 		});
 
 		this.issuesPanelCard.left.push({
@@ -157,8 +168,8 @@ export class PanelService {
 			icon: "crop_original",
 			fixedHeight: true,
 			options: [
-				{type: "visible", visible: true},
-			],
+				{type: "visible", visible: true}
+			]
 		});
 
 		this.issuesPanelCard.left.push({
@@ -169,7 +180,7 @@ export class PanelService {
 			icon: "compare",
 			minHeight: 80,
 			fixedHeight: false,
-			options: [],
+			options: []
 		});
 
 		this.issuesPanelCard.left.push({
@@ -180,7 +191,7 @@ export class PanelService {
 			icon: "landscape",
 			minHeight: 80,
 			fixedHeight: false,
-			options: [],
+			options: []
 		});
 
 		this.issuesPanelCard.right.push({
@@ -192,8 +203,8 @@ export class PanelService {
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "close", visible: true},
-			],
+				{type: "close", visible: true}
+			]
 		});
 
 		this.issuesPanelCard.right.push({
@@ -204,7 +215,7 @@ export class PanelService {
 			icon: "fa-cubes",
 			fixedHeight: true,
 			options: [
-			],
+			]
 		});
 	}
 
@@ -219,22 +230,20 @@ export class PanelService {
 
 	}
 
-	// public handlePanelEvent(panelType, event, eventData) {
-
-	// 		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
-	// 			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
-	// 		) {
-	// 			if (panelType === "tree") {
-	// 				// If another card is in modify mode don't show a node if an object is clicked in the viewer
-	// 				this.TreeService.setHighlightSelected(!eventData.on);
-	// 			}
-	// 		}
-
-	// 	}
+	public getCardIndex(type) {
+		let index = -1;
+		const obj = this.issuesPanelCard.left.forEach((panel, i) => {
+			if (panel.type === type) {
+				index = i;
+			}
+		});
+		return index;
+	}
 
 	public setHideIfc(value: boolean) {
-		const issuesCardIndex = 1; // index of tree panel
-		const menuItemIndex = 2; // index of hideIfc
+
+		const issuesCardIndex = this.getCardIndex("issues"); // index of tree panel
+		const menuItemIndex = this.getCardIndex("issues"); // index of hideIfc
 
 		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
 			.menu[menuItemIndex];

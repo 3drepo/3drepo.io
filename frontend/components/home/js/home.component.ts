@@ -39,7 +39,7 @@ class HomeController implements ng.IController {
 		"AnalyticService",
 		"ViewerService",
 		"TemplateService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private doNotLogout;
@@ -52,7 +52,6 @@ class HomeController implements ng.IController {
 	private pointerEvents;
 	private goToAccount;
 	private goToUserPage;
-	private keysDown;
 	private firstState;
 	private state;
 	private query;
@@ -89,7 +88,7 @@ class HomeController implements ng.IController {
 		private AnalyticService,
 		private ViewerService,
 		private TemplateService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -101,7 +100,6 @@ class HomeController implements ng.IController {
 		this.AnalyticService.init();
 		this.SWService.init();
 
-		this.initKeyWatchers();
 		this.precacheTeamspaceTemplate();
 
 		// Pages to not attempt a interval triggered logout from
@@ -118,7 +116,7 @@ class HomeController implements ng.IController {
 		this.pointerEvents = "inherit";
 		this.goToAccount = false;
 		this.goToUserPage = false;
-		this.keysDown = [];
+
 		this.firstState = true;
 
 		// Required for everything to work
@@ -137,7 +135,6 @@ class HomeController implements ng.IController {
 		this.showMemorySelected = false;
 
 		this.watchers();
-		this.initKeyWatchers();
 
 		/**
 		 * Close the dialog
@@ -155,7 +152,7 @@ class HomeController implements ng.IController {
 				return this.$location.path();
 			}, () => {
 				this.handlePaths();
-			},
+			}
 		);
 
 		// TODO: This feels like a bit of a hack. Let's come up with
@@ -253,22 +250,33 @@ class HomeController implements ng.IController {
 							console.error("Username is not defined for statemanager!");
 						}
 						this.StateManager.setHomeState({
-							account: username,
+							account: username
 						});
 					}
 
-				} else if (currentData.initialiser && !currentData.username) {
+				} else if (!currentData.username) {
 
 					this.StateManager.setHomeState({
 						loggedIn: false,
-						account: null,
+						account: null
 					});
 
 					if (this.StateManager.query) {
-						this.$location.search('username', this.StateManager.query.username);
-						this.$location.search('token', this.StateManager.query.token);
+						this.$location.search("username", this.StateManager.query.username);
+						this.$location.search("token", this.StateManager.query.token);
 					}
 
+				}
+
+				if (currentData.flags && currentData.flags.termsPrompt) {
+					this.DialogService.showDialog(
+						"new-terms-dialog.html",
+						this.$scope,
+						null,
+						false,
+						null,
+						false
+					);
 				}
 			} else {
 				this.AuthService.logout();
@@ -284,7 +292,7 @@ class HomeController implements ng.IController {
 			if (this.doNotLogout.indexOf(currentPage) === -1) {
 				this.StateManager.setHomeState({
 					loggedIn: false,
-					account: null,
+					account: null
 				});
 			}
 			break;
@@ -403,7 +411,7 @@ class HomeController implements ng.IController {
 			"templates/account-teamspaces.html",
 			"templates/account-info.html",
 			"templates/sign-up.html",
-			"templates/register-request.html",
+			"templates/register-request.html"
 		];
 
 		this.TemplateService.precache(preCacheTemplates);
@@ -429,7 +437,7 @@ class HomeController implements ng.IController {
 				event,
 				false,
 				null,
-				false,
+				false
 			);
 			return;
 		}
@@ -501,33 +509,6 @@ class HomeController implements ng.IController {
 		this.$window.open("/" + display.value);
 	}
 
-	public initKeyWatchers() {
-
-		this.$document.bind("keydown", (event) => {
-			if (this.keysDown.indexOf(event.which) === -1) {
-
-				this.keysDown.push(event.which);
-
-				// Recreate list so that it changes are registered in components
-				this.keysDown = this.keysDown.slice();
-
-			}
-		});
-
-		this.$document.bind("keyup", (event) => {
-			// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-			for (let i = (this.keysDown.length - 1); i >= 0; i -= 1) {
-				if (this.keysDown[i] === event.which) {
-					this.keysDown.splice(i, 1);
-				}
-			}
-
-			// Recreate list so that it changes are registered in components
-			this.keysDown = this.keysDown.slice();
-		});
-
-	}
-
 }
 
 export const HomeComponent: ng.IComponentOptions = {
@@ -535,11 +516,11 @@ export const HomeComponent: ng.IComponentOptions = {
 		account: "@",
 		password: "@",
 		loggedInUrl: "@",
-		loggedOutUrl: "@",
+		loggedOutUrl: "@"
 	},
 	controller: HomeController,
 	controllerAs: "vm",
-	templateUrl: "templates/home.html",
+	templateUrl: "templates/home.html"
 };
 
 export const HomeComponentModule = angular

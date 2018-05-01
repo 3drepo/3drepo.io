@@ -20,7 +20,7 @@ class AccountProfileController implements ng.IController {
 		"AccountService",
 		"PasswordService",
 
-		"$scope",
+		"$scope"
 	];
 
 	private emailNew;
@@ -45,7 +45,7 @@ class AccountProfileController implements ng.IController {
 		private AccountService: any,
 		private PasswordService: any,
 
-		private $scope: any,
+		private $scope: any
 	) {}
 
 	/*
@@ -64,15 +64,26 @@ class AccountProfileController implements ng.IController {
 
 	public watchers() {
 		this.$scope.$watch("vm.newPassword", (newPassword) => {
-			if (newPassword !== undefined) {
-				const result = this.PasswordService.evaluatePassword(this.newPassword);
-				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
-				this.checkInvalidPassword(result);
+
+			if (newPassword === undefined) {
+				newPassword = "";
 			}
+
+			const result = this.PasswordService.evaluatePassword(newPassword);
+			this.passwordStrength = this.PasswordService.getPasswordStrength(newPassword, result.score);
+			this.checkInvalidPassword(result);
+
 		});
 	}
 
 	public checkInvalidPassword(result) {
+
+		if (this.newPassword.length  < 8) {
+			this.invalidatePassword();
+			this.passwordSaveError = "Password must be at least 8 characters";
+			return;
+		}
+
 		switch (result.score) {
 		case 0:
 			this.invalidatePassword();
@@ -114,7 +125,7 @@ class AccountProfileController implements ng.IController {
 		this.AccountService.updateInfo(this.username, {
 			email: this.emailNew,
 			firstName: this.firstNameNew,
-			lastName: this.lastNameNew,
+			lastName: this.lastNameNew
 		})
 			.then((response) => {
 				if (response.status === 200) {
@@ -143,7 +154,7 @@ class AccountProfileController implements ng.IController {
 	public updatePassword() {
 		this.AccountService.updatePassword(this.username, {
 			oldPassword: this.oldPassword,
-			newPassword: this.newPassword,
+			newPassword: this.newPassword
 		})
 			.then((response) => {
 				if (response.status === 200) {
@@ -155,7 +166,11 @@ class AccountProfileController implements ng.IController {
 			})
 			.catch((error) =>  {
 				if (error && error.data && error.data.message) {
-					this.passwordSaveError = error.data.message;
+					if (error.data.code === "INCORRECT_USERNAME_OR_PASSWORD") {
+						this.passwordSaveError = "Your old password was incorrect";
+					} else {
+						this.passwordSaveError = error.data.message;
+					}
 				} else {
 					this.passwordSaveError = "Unknown error updating password";
 				}
@@ -210,11 +225,11 @@ export const AccountProfileComponent: ng.IComponentOptions = {
 		username: "=",
 		firstName: "=",
 		lastName: "=",
-		email: "=",
+		email: "="
 	},
 	controller: AccountProfileController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-profile.html",
+	templateUrl: "templates/account-profile.html"
 };
 
 export const AccountProfileComponentModule = angular
