@@ -9,6 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "gulp": "gulp",
+    "build": "webpack --config webpack.prod.config.js && gulp build",
+    "watch": "webpack --watch --config webpack.dev.config.js & gulp watch &",
     "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
     "wdm:update": "webdriver-manager update --standalone",
@@ -16,7 +18,7 @@
     "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js && yarn run e2e:ie",
     "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./tests",
-    "unity-util": "gulp unity-util"
+    "unity-util": "webpack --config webpack.demo.config.js"
   },
   "keywords": [
     "3drepo",
@@ -48,28 +50,23 @@
     "@types/protractor": "4.0.0",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
-    "del": "3.0.0",
     "gulp": "gulpjs/gulp.git#4.0",
-    "gulp-concat": "2.6.1",
     "gulp-cssnano": "2.1.2",
     "gulp-livereload": "3.8.1",
-    "gulp-order": "1.1.1",
     "gulp-print": "2.0.1",
     "gulp-pug": "3.3.0",
+    "gulp-concat": "2.6.1",
     "gulp-rename": "1.2.2",
-    "gulp-size": "2.1.0",
-    "gulp-sourcemaps": "2.6.2",
     "gulp-typedoc": "2.1.2",
-    "gulp-typescript": "3.2.3",
-    "gulp-uglify": "3.0.0",
     "gulp-util": "3.0.8",
     "gulp-watch": "4.3.11",
     "mocha": "4.0.1",
     "protractor": "5.3.0",
-    "tslint": "5.8.0",
-    "typedoc": "0.9.0",
-    "typescript": "2.6.2",
-    "webpack": "3.10.0",
-    "webpack-stream": "4.0.0"
+    "ts-loader": "4.0.1",
+    "tslint": "5.9.1",
+    "typedoc": "0.11.1",
+    "typescript": "2.7.2",
+    "webpack": "4.6.0",
+    "webpack-cli": "2.0.15"
   }
 }

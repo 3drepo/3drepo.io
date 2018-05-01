@@ -1313,7 +1313,7 @@ class IssueController implements ng.IController {
 				this.data.account,
 				this.data.model,
 				this.data._id,
-				this.handleIssueChange,
+				this.handleIssueChange.bind(this),
 			);
 
 			/*

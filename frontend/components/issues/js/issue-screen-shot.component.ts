@@ -153,7 +153,7 @@ class IssueScreenshotController implements ng.IController {
 				this.screenShotPromise.promise.then((screenShot) => {
 					this.screenShotUse = screenShot;
 				}).catch((error) => {
-					console.error("Screenshot Error:", error);
+					this.handleScreenshotError(error);
 				});
 
 				// Set up action buttons
@@ -169,56 +169,50 @@ class IssueScreenshotController implements ng.IController {
 
 	}
 
+	public handleScreenshotError(error) {
+		console.error(error);
+		const title = "Error With Screenshot";
+		const content = "Something went wrong creating or rendering the screenshot. Please try again.";
+		this.DialogService.text(title, content, true);
+	}
+
 	public handleResize() {
 
-		requestAnimationFrame(() => {
+		const fallback = (cb) => { cb(); };
+		const raf = window.requestAnimationFrame || fallback;
+
+		raf(() => {
 			const imgObj = new Image();
-			imgObj.src = this.scribbleCanvas.toDataURL("image/png");
+			try {
+				imgObj.src = this.scribbleCanvas.toDataURL("image/png");
+			} catch (error) {
+				this.handleScreenshotError(error);
+			}
+
 			imgObj.onload = () => {
-				// Inspired by confile's answer - http://stackoverflow.com/a/28241682/782358
-				this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-				this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
-				// resize & clear the original canvas and copy back in the cached pixel data //
-				this.scribbleCanvas.width = (this.innerWidth * 80) / 100;
-				this.scribbleCanvas.height = (this.innerHeight * 80) / 100;
+				// Very rarely this fails on Firefox
+				try {
+					// Inspired by confile's answer - http://stackoverflow.com/a/28241682/782358
+					this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+					this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
-				// var hRatio = this.scribbleCanvas.width / imgObj.width    ;
-				// var vRatio = this.scribbleCanvas.width / imgObj.height  ;
-				// var ratio  = Math.min ( hRatio, vRatio );
-				// ctx.drawImage(img, 0,0, img.width, img.height, 0,0,img.width*ratio, img.height*ratio);
-				this.scribbleCanvasContext.drawImage(
-					imgObj, 0, 0, imgObj.width, imgObj.height,  // source rectangle
-					0, 0, this.scribbleCanvas.width, this.scribbleCanvas.height,  // destination rectangle
-				);
-				// this.scribbleCanvasContext.drawImage(
-				// 	imgObj, 0, 0,
-				// 	imgObj.width, imgObj.height,
-				// 	imgObj.width * ratio, imgObj.height * ratio,
-				// );
+					// resize & clear the original canvas and copy back in the cached pixel data //
+					this.scribbleCanvas.width = (this.innerWidth * 80) / 100;
+					this.scribbleCanvas.height = (this.innerHeight * 80) / 100;
+
+					this.scribbleCanvasContext.drawImage(
+						imgObj, 0, 0, imgObj.width, imgObj.height,  // source rectangle
+						0, 0, this.scribbleCanvas.width, this.scribbleCanvas.height,  // destination rectangle
+					);
+
+				} catch (error) {
+					this.handleScreenshotError(error);
+				}
+
 			};
 
 		});
-		// requestAnimationFrame(() => {
-		// 	this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		// 	this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-
-		// 	const oldWidth = this.scribbleCanvas.style.width;
-		// 	const oldHeight = this.scribbleCanvas.style.height;
-
-		// 	this.scribbleCanvas.style.width = (this.innerWidth * 80) / 100;
-		// 	this.scribbleCanvas.style.height = (this.innerHeight * 80) / 100;
-
-		// 	const widthRatio = oldWidth / this.scribbleCanvas.style.width;
-		// 	const heightRatio = oldHeight / this.scribbleCanvas.style.height;
-
-		// 	this.scribbleCanvasContext.scale(widthRatio, heightRatio);
-		// });
-
-		// const currentImage = this.scribbleCanvas.toDataURL("image/png");
-		// this.scribbleCanvas.style.width = (this.innerWidth * 80) / 100;
-		// this.scribbleCanvas.style.height = (this.innerHeight * 80) / 100;
-		// this.scribbleCanvasContext.drawImage(currentImage, 0, 0);
 
 	}
 
@@ -427,7 +421,7 @@ class IssueScreenshotController implements ng.IController {
 		screenShotCanvasContext.drawImage(this.scribbleCanvas, 0, 0);
 
 		screenShot = screenShotCanvas.toDataURL("image/png");
-		this.screenShotSave({screenShot: screenShot});
+		this.screenShotSave({screenShot});
 
 		this.closeDialog();
 	}
