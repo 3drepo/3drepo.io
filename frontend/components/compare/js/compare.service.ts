@@ -50,12 +50,12 @@ export class CompareService {
 			compareTypes : {
 				diff : {
 					label: "3D Diff",
-					type: "diff",
+					type: "diff"
 				},
 				clash : {
-				 	label: "3D Clash",
-				 	type: "clash",
-				},
+					label: "3D Clash",
+					type: "clash"
+				}
 			},
 			baseModels: [],
 			targetModels: [],
@@ -271,11 +271,27 @@ export class CompareService {
 
 	public loadModels(compareType: string) {
 		const allModels = [];
-		this.state.targetModels.forEach((model) => {
-			if (model && model.visible === "visible") {
+		console.log(this.state.targetModels);
+		console.log(this.state.baseModels);
 
-				this.state.loadingComparison = true;
-				const loadModel = this.ViewerService.diffToolLoadComparator(
+		this.state.loadingComparison = true;
+
+		this.state.targetModels.forEach((model) => {
+
+			const sharedRevision = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision);
+			let loadModel;
+
+			if (sharedRevision) {
+				console.log("Using base model as its shared", sharedRevision);
+				this.ViewerService.diffToolSetAsComparator(
+					model.account,
+					model.model,
+					model.targetRevision
+				);
+
+			} else if (model && model.visible === "visible") {
+
+				loadModel = this.ViewerService.diffToolLoadComparator(
 					model.account,
 					model.model,
 					model.targetRevision
@@ -284,8 +300,8 @@ export class CompareService {
 						console.error(error);
 					});
 
-				allModels.push(loadModel);
 			}
+			allModels.push(loadModel);
 		});
 
 		return Promise.all(allModels);
@@ -328,9 +344,9 @@ export class CompareService {
 		} else if (this.state.mode === "clash") {
 
 			if (this.state.isFed) {
-			 	this.ViewerService.diffToolEnableWithClashMode();
+				this.ViewerService.diffToolEnableWithClashMode();
 			} else {
-			 	this.ViewerService.diffToolShowBaseModel();
+				this.ViewerService.diffToolShowBaseModel();
 			}
 
 			this.changeCompareState("compare");
@@ -406,15 +422,15 @@ export class CompareService {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-	 	this.loadModels("clash")
-	 		.then(() => {
-	 			this.ViewerService.diffToolEnableWithClashMode();
-	 			this.modelsLoaded();
+		this.loadModels("clash")
+			.then(() => {
+				this.ViewerService.diffToolEnableWithClashMode();
+				this.modelsLoaded();
 			})
-	 		.catch((error) => {
-	 			this.modelsLoaded();
-	 			console.error(error);
-	 		});
+			.catch((error) => {
+				this.modelsLoaded();
+				console.error(error);
+			});
 
 	}
 
@@ -448,7 +464,6 @@ export class CompareService {
 				}
 			});
 		}
-		
 
 	}
 
