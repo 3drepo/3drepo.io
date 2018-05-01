@@ -584,6 +584,11 @@ export class TreeService {
 				node.toggleState = this.VISIBILITY_STATES.visible;
 			} else if (0 === visibleChildCount) {
 				this.setNodeSelection(node, false);
+				this.ViewerService.unhighlightObjects({
+					account: node.account,
+					model: node.model,
+					ids: node.meshes
+				});
 				node.toggleState = this.VISIBILITY_STATES.invisible;
 			} else {
 				node.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
@@ -869,6 +874,10 @@ export class TreeService {
 						child.toggleState = this.VISIBILITY_STATES.invisible;
 					}
 				}
+			}
+
+			if (node && visibility === this.VISIBILITY_STATES.invisible) {
+				this.deselectNodes([node]);
 			}
 
 			this.updateParentVisibility(parentNode);
@@ -1188,7 +1197,7 @@ export class TreeService {
 	 */
 	public getCurrentMeshHighlights() {
 		const objectsPromise = this.$q.defer();
-		return this.getMeshHighlights(this.currentSelectedNodes.concat());
+		return this.getMeshHighlights(this.getCurrentSelectedNodesAsArray());
 	}
 
 	/**
