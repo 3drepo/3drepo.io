@@ -27,7 +27,7 @@ export class AuthService {
 
 		"ClientConfigService",
 		"AnalyticService",
-		"APIService",
+		"APIService"
 	];
 
 	public authDefer;
@@ -52,7 +52,7 @@ export class AuthService {
 
 		private ClientConfigService: any,
 		private AnalyticService: any,
-		private APIService: any,
+		private APIService: any
 	) {
 
 		this.authDefer = $q.defer();
@@ -64,13 +64,13 @@ export class AuthService {
 			"/passwordForgot",
 			"/passwordChange",
 			"/registerRequest",
-			"/registerVerify",
+			"/registerVerify"
 		];
 
 		this.legalPages = [
 			"terms",
 			"privacy",
-			"cookies",
+			"cookies"
 		];
 
 		this.loggedOutPages = [
@@ -78,7 +78,7 @@ export class AuthService {
 			"password-forgot",
 			"register-request",
 			"register-verify",
-			"password-change",
+			"password-change"
 		];
 
 		this.loggedOutPagesCamel = [
@@ -86,7 +86,7 @@ export class AuthService {
 			"passwordForgot",
 			"registerRequest",
 			"registerVerify",
-			"passwordChange",
+			"passwordChange"
 		];
 
 		// TODO: null means it"s the first login,
@@ -98,7 +98,7 @@ export class AuthService {
 		this.state = {};
 		this.events = {
 			USER_LOGGED_IN : "USER_LOGGED_IN",
-			USER_LOGGED_OUT : "USER_LOGGED_OUT",
+			USER_LOGGED_OUT : "USER_LOGGED_OUT"
 		};
 
 	}
@@ -129,7 +129,7 @@ export class AuthService {
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: response.data.username,
 			initialiser: response.data.initialiser,
-			flags: response.data.flags,
+			flags: response.data.flags
 		});
 
 		this.AnalyticService.setUserId(this.username);
@@ -149,7 +149,7 @@ export class AuthService {
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: null,
 			initialiser,
-			error: response.data,
+			error: response.data
 		});
 
 		this.authDefer.resolve(response.data);
@@ -170,7 +170,7 @@ export class AuthService {
 		this.username  = null;
 
 		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {
-			error: reason,
+			error: reason
 		});
 
 		this.authDefer.resolve(this.loggedIn);

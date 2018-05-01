@@ -19,14 +19,14 @@ export class PasswordService {
 
 	public static $inject: string[] = [
 		"$q",
-		"APIService",
+		"APIService"
 	];
 
 	public accountDefer;
 
 	constructor(
 		private $q,
-		private APIService,
+		private APIService
 	) {
 		this.accountDefer = $q.defer();
 	}

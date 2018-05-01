@@ -18,11 +18,11 @@
 class PaymentController implements ng.IController {
 
 	public static $inject: string[] = [
-		"StateManager",
+		"StateManager"
 	];
 
 	constructor(
-		private StateManager: any,
+		private StateManager: any
 	) {}
 
 	public $onInit() {}
@@ -37,7 +37,7 @@ export const PaymentComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: PaymentController,
 	controllerAs: "vm",
-	templateUrl: "templates/payment.html",
+	templateUrl: "templates/payment.html"
 };
 
 export const PaymentComponentModule = angular

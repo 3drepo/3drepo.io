@@ -19,7 +19,7 @@ export class ClipService {
 
 	public static $inject: string[] = [
 		"ClientConfigService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	public state: any;
@@ -46,7 +46,7 @@ export class ClipService {
 
 	constructor(
 		private ClientConfigService: any,
-		private ViewerService: any,
+		private ViewerService: any
 	) {
 		this.state = {
 			sliderMin: 0,
@@ -161,20 +161,20 @@ export class ClipService {
 			params.distance,
 			false,
 			params.clipDirection === 1,
-			undefined,
+			undefined
 		);
 	}
 
 	public setBoundingBox(bbox: any) {
 		if (bbox) {
 			this.state.bbox = bbox;
-			if(!this.state.normal) {
+			if (!this.state.normal) {
 				this.setDisplayValues(
 					"X",
 					this.state.bbox.max[0],
 					this.state.visible,
 					false,
-					this.state.direction,
+					this.state.direction
 				);
 			}
 			this.updateDisplayedDistance(true, this.state.visible);
@@ -225,9 +225,9 @@ export class ClipService {
 			clippingPlanes: [{
 				clipDirection: this.state.direction ? 1 : -1,
 				distance: this.state.displayDistance * scaler,
-				normal: this.getNormal(),
+				normal: this.getNormal()
 			}],
-			fromClipPanel: true,
+			fromClipPanel: true
 		};
 
 		this.updateClippingPlane(params);
@@ -249,7 +249,7 @@ export class ClipService {
 					clip.distance,
 					false,
 					clip.clipDirection === 1,
-					undefined,
+					undefined
 				);
 				this.updateDisplayedDistance(true, this.state.visible);
 			} else {
@@ -473,7 +473,7 @@ export class ClipService {
 
 		return {
 			min,
-			max,
+			max
 		};
 	}
 

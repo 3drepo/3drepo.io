@@ -35,7 +35,7 @@ class ModelController implements ng.IController {
 		"MultiSelectService",
 		"StateManager",
 		"PanelService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private issuesCardIndex;
@@ -70,7 +70,7 @@ class ModelController implements ng.IController {
 		private MultiSelectService,
 		private StateManager,
 		private PanelService,
-		private ViewerService,
+		private ViewerService
 	) {}
 
 	public $onInit() {
@@ -99,7 +99,7 @@ class ModelController implements ng.IController {
 		this.$timeout(() => {
 			// Get the model element
 			this.modelUI = angular.element(
-				this.$element[0].querySelector("#modelUI"),
+				this.$element[0].querySelector("#modelUI")
 			);
 		});
 
@@ -149,7 +149,7 @@ class ModelController implements ng.IController {
 				.title("Model Error")
 				.textContent(message)
 				.ariaLabel("Model Error")
-				.ok("OK"),
+				.ok("OK")
 		);
 
 		this.$location.path(this.AuthService.getUsername());
@@ -193,7 +193,7 @@ class ModelController implements ng.IController {
 			this.account,
 			this.model,
 			this.branch,
-			this.revision,
+			this.revision
 		).then( () => {
 			// IMPORTANT: only load model settings after it has started loading the model
 			// loadViewerModel can cancel previous model loads which will kill off old unity promises
@@ -237,11 +237,11 @@ export const ModelComponent: ng.IComponentOptions = {
 		model:  "=",
 		revision: "=",
 		state:    "=",
-		isLiteMode: "=",
+		isLiteMode: "="
 	},
 	controller: ModelController,
 	controllerAs: "vm",
-	templateUrl: "templates/model.html",
+	templateUrl: "templates/model.html"
 };
 
 export const ModelComponentModule = angular

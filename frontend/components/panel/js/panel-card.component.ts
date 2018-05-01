@@ -26,7 +26,7 @@ class PanelCardController implements ng.IController {
 		"$compile",
 
 		"PanelService",
-		"EventService",
+		"EventService"
 	];
 
 	public vm = this;
@@ -54,7 +54,7 @@ class PanelCardController implements ng.IController {
 		private $compile: ng.ICompileService,
 
 		private PanelService: any,
-		private EventService: any,
+		private EventService: any
 	) {}
 
 	public $onInit() {
@@ -136,7 +136,7 @@ class PanelCardController implements ng.IController {
 		this.contentHeight = height;
 		this.onHeightRequest({
 			contentItem: this.contentData,
-			height: this.contentHeight,
+			height: this.contentHeight
 		});
 	}
 
@@ -250,11 +250,11 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		position: "=",
 		revision: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&",
+		setInitialSelectedObjects: "&"
 	},
 	controller: PanelCardController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card.html",
+	templateUrl: "templates/panel-card.html"
 };
 
 export const PanelCardComponentModule = angular
