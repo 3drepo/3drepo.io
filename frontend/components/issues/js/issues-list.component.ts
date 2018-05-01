@@ -21,6 +21,8 @@ class IssuesListController implements ng.IController {
 		"$scope",
 		"$window",
 		"$timeout",
+		"$compile",
+		"$element",
 
 		"APIService",
 		"IssuesService",
@@ -41,11 +43,14 @@ class IssuesListController implements ng.IController {
 	private model: string;
 	private revision: string;
 	private filterText: string;
+	private bcfInputHandler: any;
 
 	constructor(
 		private $scope,
 		private $window,
 		private $timeout,
+		private $compile,
+		private $element,
 
 		private APIService,
 		private IssuesService,
@@ -58,6 +63,7 @@ class IssuesListController implements ng.IController {
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
+		this.setupBcfImportInput();
 		this.watchers();
 
 	}
@@ -122,6 +128,36 @@ class IssuesListController implements ng.IController {
 
 	}
 
+	public setupBcfImportInput() {
+
+		if (this.bcfInputHandler) {
+			return;
+		}
+
+		const template = `<input
+							id='bcfImportInput'
+							type='file'
+							style='display: none;'
+							accept='.zip,.bcfzip,.bcf'>`;
+
+		const linkFn = this.$compile(template);
+		const content = linkFn(this.$scope);
+		this.$element.append(content);
+
+		this.$timeout(() => {
+			this.bcfInputHandler = document.getElementById("bcfImportInput");
+			this.bcfInputHandler.addEventListener("change", () => {
+				if (this.bcfInputHandler && this.bcfInputHandler.files) {
+					this.importBcf({file: this.bcfInputHandler.files[0]});
+				} else {
+					console.error("No file selected");
+				}
+				this.bcfInputHandler.value = null; // Reset the change watcher
+			});
+		});
+
+	}
+
 	public handleMenuOptions() {
 		const ids = [];
 		this.IssuesService.state.issuesToShow.forEach((issue) => {
@@ -158,13 +194,8 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "importBCF":
-				const file = document.createElement("input");
-				file.setAttribute("type", "file");
-				file.setAttribute("accept", ".zip,.bcfzip,.bcf");
-				file.click();
-
-				file.addEventListener("change", () => {
-					this.importBcf({file: file.files[0]});
+				this.$timeout(() => {
+					this.bcfInputHandler.click();
 				});
 				break;
 
