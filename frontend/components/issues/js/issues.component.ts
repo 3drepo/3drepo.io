@@ -469,9 +469,9 @@ class IssuesController implements ng.IController {
 	*/
 	public importBcf(file) {
 
-		this.$scope.$apply();
-
-		this.importingBCF = true;
+		this.$timeout(() => {
+			this.importingBCF = true;
+		});
 
 		this.IssuesService.importBcf(this.account, this.model, this.revision, file)
 			.then(() => {
@@ -481,6 +481,7 @@ class IssuesController implements ng.IController {
 
 				this.importingBCF = false;
 				this.IssuesService.state.allIssues = (data === "") ? [] : data;
+				this.$timeout();
 
 			})
 			.catch((error) => {
@@ -491,6 +492,7 @@ class IssuesController implements ng.IController {
 				const escapable = true;
 				this.DialogService.text("Error Getting User Job", content, escapable);
 				console.error(error);
+				this.$timeout();
 
 			});
 
