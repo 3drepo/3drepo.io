@@ -89,13 +89,13 @@ export class TreeService {
 		this.SELECTION_STATES = {
 			parentOfUnselected : 0,
 			selected : 1,
-			unselected : 2,
+			unselected : 2
 		};
 
 		this.VISIBILITY_STATES = {
 			parentOfInvisible : "parentOfInvisible",
 			visible : "visible",
-			invisible : "invisible",
+			invisible : "invisible"
 		};
 
 	}
@@ -1173,7 +1173,6 @@ export class TreeService {
 		if (node.selected === selected || node.toggleState === this.VISIBILITY_STATES.invisible) {
 			return;
 		}
-
 		this.traverseNodeAndSetSelected(node, select);
 
 	}
@@ -1338,20 +1337,22 @@ export class TreeService {
 					return this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected;
 				});
 
-				const vals = key.split("@");
-				const account = vals[0];
-				const model = vals[1];
-				// Separately highlight the children
-				// but only for multipart meshes
-				this.ViewerService.highlightObjects({
-					account,
-					ids: meshes,
-					colour: highlightMap[key].colour,
-					model,
-					multi: true,
-					source: "tree",
-					forceReHighlight
-				});
+				if (meshes.length) {
+					const vals = key.split("@");
+					const account = vals[0];
+					const model = vals[1];
+					// Separately highlight the children
+					// but only for multipart meshes
+					this.ViewerService.highlightObjects({
+						account,
+						ids: meshes,
+						colour: highlightMap[key].colour,
+						model,
+						multi: true,
+						source: "tree",
+						forceReHighlight
+					});
+				}
 
 			}
 
