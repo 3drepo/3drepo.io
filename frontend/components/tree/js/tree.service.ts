@@ -1332,10 +1332,15 @@ export class TreeService {
 					continue;
 				}
 
-				// Remove any unselected meshes
-				const meshes = highlightMap[key].meshes.filter((mesh) => {
-					return this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected;
-				});
+				const meshes = [];
+
+				// Remove any unselected meshes - use for loop for perfomance
+				for (let i = 0; i < highlightMap[key].meshes.length; i++) {
+					const mesh = highlightMap[key].meshes[i];
+					if (this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected) {
+						meshes.push(mesh);
+					}
+				}
 
 				if (meshes.length) {
 					const vals = key.split("@");
