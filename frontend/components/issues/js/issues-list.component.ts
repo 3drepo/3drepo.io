@@ -59,7 +59,6 @@ class IssuesListController implements ng.IController {
 
 	public $onInit() {
 
-		this.setupBcfImportInput();
 		this.toShow = "list";
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
@@ -139,6 +138,7 @@ class IssuesListController implements ng.IController {
 		const template = `<input
 							id='bcfImportInput'
 							type='file'
+							style='display: none;'
 							accept='.zip,.bcfzip,.bcf'>`;
 
 		const linkFn = this.$compile(template);
