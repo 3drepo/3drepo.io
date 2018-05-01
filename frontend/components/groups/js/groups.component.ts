@@ -27,7 +27,7 @@ class GroupsController implements ng.IController {
 		"TreeService",
 		"AuthService",
 		"ClientConfigService",
-		"IconsConstant",
+		"IconsConstant"
 	];
 
 	private onContentHeightRequest: any;
@@ -62,7 +62,7 @@ class GroupsController implements ng.IController {
 		private TreeService: any,
 		private AuthService: any,
 		private ClientConfigService: any,
-		private IconsConstant: any,
+		private IconsConstant: any
 	) {}
 
 	public $onInit() {
@@ -87,7 +87,7 @@ class GroupsController implements ng.IController {
 			[[255, 195, 18], [196, 229, 56], [52, 152, 219], [253, 167, 223], [237, 76, 103]],
 			[[247, 159, 31], [163, 203, 56], [18, 137, 167], [217, 128, 250], [181, 52, 113]],
 			[[238, 90, 36], [0, 148, 50], [6, 82, 221], [153, 128, 250], [131, 52, 113]],
-			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]],
+			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]]
 		];
 
 	}
@@ -136,7 +136,7 @@ class GroupsController implements ng.IController {
 			if (this.modelSettings) {
 				this.canAddGroup = this.AuthService.hasPermission(
 					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
-					this.modelSettings.permissions,
+					this.modelSettings.permissions
 				);
 			}
 		});
@@ -291,7 +291,7 @@ class GroupsController implements ng.IController {
 			this.teamspace,
 			this.model,
 			this.selectedGroup._id,
-			this.selectedGroup,
+			this.selectedGroup
 		)
 			.then(() => {
 				this.savingGroup = false;
@@ -314,7 +314,7 @@ class GroupsController implements ng.IController {
 		this.GroupsService.createGroup(
 			this.teamspace,
 			this.model,
-			this.selectedGroup,
+			this.selectedGroup
 		)
 			.then(() => {
 				this.savingGroup = false;
@@ -392,11 +392,11 @@ export const GroupsComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
-		hideItem: "<",
+		hideItem: "<"
 	},
 	controller: GroupsController,
 	controllerAs: "vm",
-	templateUrl: "templates/groups.html",
+	templateUrl: "templates/groups.html"
 };
 
 export const GroupsComponentModule = angular

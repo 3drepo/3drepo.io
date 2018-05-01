@@ -24,7 +24,7 @@ class PanelController implements ng.IController {
 
 		"PanelService",
 		"EventService",
-		"TreeService",
+		"TreeService"
 	];
 
 	public maxHeightAvailable;
@@ -45,7 +45,7 @@ class PanelController implements ng.IController {
 
 		private PanelService: any,
 		private EventService: any,
-		private TreeService: any,
+		private TreeService: any
 	) {}
 
 	public $onInit() {
@@ -301,11 +301,11 @@ export const PanelComponent: ng.IComponentOptions = {
 		position: "@",
 		revision: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&",
+		setInitialSelectedObjects: "&"
 	},
 	controller: PanelController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel.html",
+	templateUrl: "templates/panel.html"
 };
 
 export const PanelComponentModule = angular

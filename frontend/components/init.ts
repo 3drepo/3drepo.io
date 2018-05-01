@@ -14,7 +14,9 @@ export const TDR = () => {
 			}
 
 			if (window.ClientConfig.VERSION) {
+				/* tslint:disable */
 				console.log(`===== 3D REPO - Version ${window.ClientConfig.VERSION} =====`);
+				/* tslint:enable */
 			} else {
 				console.error("No version number in config...");
 			}
@@ -22,7 +24,7 @@ export const TDR = () => {
 			if (window.ClientConfig.unitySettings) {
 				// Assign unity settings
 				window.Module = ClientConfig.unitySettings;
-				
+
 			} else {
 				console.error("ClientConfig does not have any provided Unity settings!");
 			}

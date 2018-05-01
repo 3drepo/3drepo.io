@@ -22,7 +22,7 @@ class GISController implements ng.IController {
 		"$q",
 
 		"ViewerService",
-		"GISService",
+		"GISService"
 	];
 
 	private selectedProvider: any;
@@ -35,7 +35,7 @@ class GISController implements ng.IController {
 		private $q: any,
 
 		private ViewerService: any,
-		private GISService: any,
+		private GISService: any
 	) {}
 
 	public $onInit() {
@@ -64,7 +64,7 @@ class GISController implements ng.IController {
 					const surveySettings = {
 						surveyPoints: this.modelSettings.surveyPoints,
 						elevation: this.modelSettings.elevation || 0,
-						angleFromNorth: this.modelSettings.angleFromNorth || 0,
+						angleFromNorth: this.modelSettings.angleFromNorth || 0
 					};
 					this.GISService.mapInitialise(surveySettings);
 				});
@@ -79,7 +79,7 @@ class GISController implements ng.IController {
 				if (loaded) {
 					modelsLoaded.resolve();
 				}
-			},
+			}
 		);
 	}
 
@@ -95,11 +95,11 @@ export const GISComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
-		onContentHeightRequest: "&",
+		onContentHeightRequest: "&"
 	},
 	controller: GISController,
 	controllerAs: "vm",
-	templateUrl: "templates/gis.html",
+	templateUrl: "templates/gis.html"
 };
 
 export const GISComponentModule = angular

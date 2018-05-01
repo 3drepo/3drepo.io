@@ -26,7 +26,7 @@ class IssuesListController implements ng.IController {
 
 		"APIService",
 		"IssuesService",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	private toShow: string;
@@ -54,7 +54,7 @@ class IssuesListController implements ng.IController {
 
 		private APIService,
 		private IssuesService,
-		private ClientConfigService,
+		private ClientConfigService
 	) {}
 
 	public $onInit() {
@@ -93,7 +93,7 @@ class IssuesListController implements ng.IController {
 				this.allIssues = this.IssuesService.state.allIssues;
 
 			},
-			true,
+			true
 		);
 
 		this.$scope.$watch("vm.filterText", () => {
@@ -124,7 +124,7 @@ class IssuesListController implements ng.IController {
 					this.editIssue(issueToDisplay);
 				}
 			},
-			true,
+			true
 		);
 
 	}
@@ -168,15 +168,18 @@ class IssuesListController implements ng.IController {
 		switch (this.menuOption.value) {
 
 			case "sortByDate":
-				this.IssuesService.state.issueDisplay.sortOldestFirst = !this.IssuesService.state.issueDisplay.sortOldestFirst;
+				this.IssuesService.state.issueDisplay.sortOldestFirst =
+					!this.IssuesService.state.issueDisplay.sortOldestFirst;
 				break;
 
 			case "showClosed":
-				this.IssuesService.state.issueDisplay.showClosed = !this.IssuesService.state.issueDisplay.showClosed;
+				this.IssuesService.state.issueDisplay.showClosed =
+					!this.IssuesService.state.issueDisplay.showClosed;
 				break;
 
 			case "showSubModels":
-				this.IssuesService.state.issueDisplay.showSubModelIssues = !this.IssuesService.state.issueDisplay.showSubModelIssues;
+				this.IssuesService.state.issueDisplay.showSubModelIssues =
+					!this.IssuesService.state.issueDisplay.showSubModelIssues;
 				break;
 
 			case "print":
@@ -264,11 +267,11 @@ export const IssuesListComponent: ng.IComponentOptions = {
 		menuOption: "<",
 		importBcf: "&",
 		selectedIssue: "<",
-		issueDisplay: "<",
+		issueDisplay: "<"
 	},
 	controller: IssuesListController,
 	controllerAs: "vm",
-	templateUrl: "templates/issues-list.html",
+	templateUrl: "templates/issues-list.html"
 };
 
 export const IssuesListComponentModule = angular

@@ -36,7 +36,7 @@ class IssueController implements ng.IController {
 		"MeasureService",
 		"ViewerService",
 		"TreeService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private canEditDescription: boolean;
@@ -70,7 +70,9 @@ class IssueController implements ng.IController {
 	private comment;
 	private issueData;
 	private modelSettings;
+	/* tslint:disable */
 	private topic_types;
+	/* tslint:enable */
 	private modelJobs;
 	private availableJobs;
 	private userJob;
@@ -100,7 +102,7 @@ class IssueController implements ng.IController {
 		private MeasureService,
 		private ViewerService,
 		private TreeService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -129,13 +131,13 @@ class IssueController implements ng.IController {
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
 			{value: "medium", label: "Medium"},
-			{value: "high", label: "High"},
+			{value: "high", label: "High"}
 		];
 		this.statuses = [
 			{value: "open", label: "Open"},
 			{value: "in progress", label: "In progress"},
 			{value: "for approval", label: "For approval"},
-			{value: "closed", label: "Closed"},
+			{value: "closed", label: "Closed"}
 		];
 
 		this.actions = {
@@ -153,7 +155,7 @@ class IssueController implements ng.IController {
 				visible: () => {
 					return true;
 				},
-				selected: false,
+				selected: false
 			},
 			pin: {
 				id: "pin",
@@ -165,8 +167,8 @@ class IssueController implements ng.IController {
 				visible: () => {
 					return !this.data;
 				},
-				selected: false,
-			},
+				selected: false
+			}
 		};
 
 		this.notificationStarted = false;
@@ -298,7 +300,7 @@ class IssueController implements ng.IController {
 		if (!exists) {
 			const newPriority = {
 				value: BCFPriority,
-				label: BCFPriority,
+				label: BCFPriority
 			};
 			this.priorities.push(newPriority);
 			this.$timeout(() => {});
@@ -316,7 +318,7 @@ class IssueController implements ng.IController {
 		if (!exists) {
 			const newStatus = {
 				value: BCFStatus,
-				label: BCFStatus,
+				label: BCFStatus
 			};
 			this.statuses.push(newStatus);
 			this.$timeout(() => {});
@@ -344,7 +346,7 @@ class IssueController implements ng.IController {
 		if (!exists) {
 			const newType = {
 				value: BCFType,
-				label: BCFType,
+				label: BCFType
 			};
 			this.topic_types.push(newType);
 			this.$timeout(() => {});
@@ -417,7 +419,7 @@ class IssueController implements ng.IController {
 		const canEditDesc = this.IssuesService.canChangeStatusToClosed(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 		if (!canEditDesc) {
@@ -458,7 +460,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canComment(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -472,7 +474,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canChangePriority(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -483,7 +485,7 @@ class IssueController implements ng.IController {
 			return !this.IssuesService.canChangeStatusToClosed(
 				this.issueData,
 				this.userJob,
-				this.modelSettings.permissions,
+				this.modelSettings.permissions
 			);
 		}
 
@@ -499,7 +501,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canChangeStatus(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -513,7 +515,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canChangeType(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -527,7 +529,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canChangeDueDate(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -541,7 +543,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canChangeAssigned(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -555,7 +557,7 @@ class IssueController implements ng.IController {
 		return this.IssuesService.canComment(
 			this.issueData,
 			this.userJob,
-			this.modelSettings.permissions,
+			this.modelSettings.permissions
 		);
 
 	}
@@ -576,7 +578,7 @@ class IssueController implements ng.IController {
 				status: this.issueData.status,
 				topic_type: this.issueData.topic_type,
 				due_date: Date.parse(this.issueData.due_date),
-				assigned_roles: this.issueData.assigned_roles,
+				assigned_roles: this.issueData.assigned_roles
 			};
 
 			this.IssuesService.updateIssue(this.issueData, statusChangeData)
@@ -617,7 +619,7 @@ class IssueController implements ng.IController {
 
 			this.AnalyticService.sendEvent({
 				eventCategory: "Issue",
-				eventAction: "edit",
+				eventAction: "edit"
 			});
 		}
 
@@ -706,7 +708,7 @@ class IssueController implements ng.IController {
 			},
 			controllerAs: "vm",
 			templateUrl: "templates/issue-screen-shot-dialog.html",
-			targetEvent: event,
+			targetEvent: event
 		});
 	}
 
@@ -770,7 +772,7 @@ class IssueController implements ng.IController {
 
 			if (this.issueData.desc !== this.savedDescription) {
 				const data = {
-					desc: this.issueData.desc,
+					desc: this.issueData.desc
 				};
 				this.IssuesService.updateIssue(this.issueData, data)
 					.then((issueData) => {
@@ -822,13 +824,13 @@ class IssueController implements ng.IController {
 		} else {
 			// Get the viewpoint
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.account, model: this.model},
+				{promise: viewpointPromise, account: this.account, model: this.model}
 			);
 		}
 
 		// Get selected objects
 		this.ViewerService.getObjectsStatus({
-			promise: objectsPromise,
+			promise: objectsPromise
 		});
 
 		return Promise.all([viewpointPromise.promise, objectsPromise.promise])
@@ -888,7 +890,7 @@ class IssueController implements ng.IController {
 		const groupData = {
 			name: this.issueData.name,
 			color: [255, 0, 0],
-			objects: nodes,
+			objects: nodes
 		};
 
 		return nodes.length === 0 ? null : groupData;
@@ -954,7 +956,7 @@ class IssueController implements ng.IController {
 			topic_type: this.issueData.topic_type,
 			due_date: Date.parse(this.issueData.due_date),
 			desc: this.issueData.desc,
-			rev_id: this.revision,
+			rev_id: this.revision
 		};
 
 		// Pin data
@@ -992,7 +994,7 @@ class IssueController implements ng.IController {
 					model: this.model,
 					revision: this.revision,
 					issue: this.data._id,
-					noSet: true,
+					noSet: true
 				};
 
 				this.disabledReason = this.reasonCommentText;
@@ -1000,12 +1002,12 @@ class IssueController implements ng.IController {
 				this.$state.go(
 					"home.account.model.issue",
 					issueState,
-					{notify: false},
+					{notify: false}
 				);
 
 				this.AnalyticService.sendEvent({
 					eventCategory: "Issue",
-					eventAction: "create",
+					eventAction: "create"
 				});
 
 			});
@@ -1017,7 +1019,7 @@ class IssueController implements ng.IController {
 
 		// Get selected objects
 		this.ViewerService.getObjectsStatus({
-			promise: objectsPromise,
+			promise: objectsPromise
 		});
 
 		const initPromises = [];
@@ -1031,7 +1033,7 @@ class IssueController implements ng.IController {
 		if (!angular.isDefined(this.commentThumbnail)) {
 			const viewpointPromise = this.$q.defer();
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model},
+				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
 			);
 			initPromises.push(viewpointPromise.promise.then((viewpoint) => {
 				this.commentViewpoint = viewpoint;
@@ -1079,7 +1081,7 @@ class IssueController implements ng.IController {
 
 			this.AnalyticService.sendEvent({
 				eventCategory: "Issue",
-				eventAction: "comment",
+				eventAction: "comment"
 			});
 		});
 
@@ -1140,7 +1142,7 @@ class IssueController implements ng.IController {
 			owner: comment.owner,
 			timeStamp: this.IssuesService.getPrettyTime(comment.created),
 			viewpoint: comment.viewpoint,
-			action: comment.action,
+			action: comment.action
 		});
 
 		if (!noDeleteInput) {
@@ -1176,7 +1178,7 @@ class IssueController implements ng.IController {
 
 		this.AnalyticService.sendEvent({
 			eventCategory: "Issue",
-			eventAction: "deleteComment",
+			eventAction: "deleteComment"
 		});
 
 		this.setContentHeight();
@@ -1199,7 +1201,7 @@ class IssueController implements ng.IController {
 			// Get the viewpoint and add the screen shot to it
 			// Remove base64 header text from screen shot
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model},
+				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
 			);
 
 		} else {
@@ -1207,7 +1209,7 @@ class IssueController implements ng.IController {
 			this.issueData.descriptionThumbnail = data.screenShot;
 
 			this.ViewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.account, model: this.model},
+				{promise: viewpointPromise, account: this.account, model: this.model}
 			);
 		}
 
@@ -1313,7 +1315,7 @@ class IssueController implements ng.IController {
 				this.data.account,
 				this.data.model,
 				this.data._id,
-				this.handleIssueChange.bind(this),
+				this.handleIssueChange.bind(this)
 			);
 
 			/*
@@ -1333,7 +1335,7 @@ class IssueController implements ng.IController {
 					// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
 					this.$scope.$apply();
 					this.commentAreaScrollToBottom();
-				},
+				}
 			);
 
 			/*
@@ -1352,7 +1354,7 @@ class IssueController implements ng.IController {
 
 					this.$scope.$apply();
 					this.commentAreaScrollToBottom();
-				},
+				}
 			);
 
 			/*
@@ -1379,7 +1381,7 @@ class IssueController implements ng.IController {
 					this.$timeout(() => {
 						this.issueData.comments.splice(deleteIndex, 1);
 					}, 4000);
-				},
+				}
 			);
 
 		}
@@ -1401,11 +1403,11 @@ export const IssueComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		setInitialSelectedObjects: "&",
 		userJob: "<",
-		availableJobs: "<",
+		availableJobs: "<"
 	},
 	controller: IssueController,
 	controllerAs: "vm",
-	templateUrl: "templates/issue.html",
+	templateUrl: "templates/issue.html"
 };
 
 export const IssueComponentModule = angular

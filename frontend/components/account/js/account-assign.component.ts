@@ -24,7 +24,7 @@ class AccountAssignController implements ng.IController {
 		"$mdDialog",
 		"$location",
 
-		"APIService",
+		"APIService"
 	];
 
 	private account;
@@ -57,7 +57,7 @@ class AccountAssignController implements ng.IController {
 		private $mdDialog: any,
 		private $location: ng.ILocationService,
 
-		private APIService,
+		private APIService
 	) {}
 
 	public $onInit() {
@@ -79,7 +79,7 @@ class AccountAssignController implements ng.IController {
 
 		this.teamspacePermissions = {
 
-			teamspace_admin : "Admin",
+			teamspace_admin : "Admin"
 			// assign_licence	: "Assign Licence",
 			// revoke_licence	: "Revoke Licence",
 			// create_project	: "Create Project",
@@ -94,7 +94,7 @@ class AccountAssignController implements ng.IController {
 			// create_federation : "Create Federation",
 			// delete_project : "Delete Project",
 			// edit_project :  "Edit Project",
-			admin_project : "Admin Project",
+			admin_project : "Admin Project"
 		};
 
 		this.modelRoles = ["unassigned"];
@@ -193,7 +193,7 @@ class AccountAssignController implements ng.IController {
 					if (this.selectedTeamspace.account === this.account && users.length === 0) {
 						users.push({
 							permissions: ["admin"],
-							user : this.account,
+							user : this.account
 						});
 					}
 
@@ -319,7 +319,7 @@ class AccountAssignController implements ng.IController {
 
 			const permissionData = {
 				user : user.user,
-				permissions: user.permissions,
+				permissions: user.permissions
 			};
 
 			// Move them to unassigned role if we remove there admin privilidges
@@ -475,7 +475,7 @@ class AccountAssignController implements ng.IController {
 
 			this.selectedProject.userPermissions.push({
 				permissions: ["admin_project"],
-				user : this.account,
+				user : this.account
 			});
 
 		}
@@ -547,7 +547,7 @@ class AccountAssignController implements ng.IController {
 					// Else we create a new object and add it in
 					this.selectedProject.userPermissions.push({
 						user : user.user,
-						permissions: [permission],
+						permissions: [permission]
 					});
 				}
 
@@ -576,7 +576,7 @@ class AccountAssignController implements ng.IController {
 							"/projects/" + this.selectedProject.name;
 
 			this.APIService.put(endpoint, {
-				permissions: this.selectedProject.userPermissions,
+				permissions: this.selectedProject.userPermissions
 			}).catch((error) => {
 				const title = "Issue Updating Project Permissions";
 				this.showError(title, error);
@@ -716,7 +716,7 @@ class AccountAssignController implements ng.IController {
 				if (notUnassigned) {
 					permissionsToSend.push({
 						user : roleUser,
-						permission,
+						permission
 					});
 
 				}
@@ -764,7 +764,7 @@ class AccountAssignController implements ng.IController {
 					.title("Reminder about Federation Permissions")
 					.htmlContent(content)
 					.ariaLabel("Reminder about Federations")
-					.ok("OK"),
+					.ok("OK")
 			);
 		}
 
@@ -797,7 +797,7 @@ class AccountAssignController implements ng.IController {
 					.title(title)
 					.htmlContent(conf)
 					.ariaLabel(title)
-					.ok("OK"),
+					.ok("OK")
 			);
 		} else {
 			console.error("Error, but no error response: ", error);
@@ -809,11 +809,11 @@ class AccountAssignController implements ng.IController {
 
 export const AccountAssignComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "=",
+		account: "="
 	},
 	controller: AccountAssignController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-assign.html",
+	templateUrl: "templates/account-assign.html"
 };
 
 export const AccountAssignComponentModule = angular

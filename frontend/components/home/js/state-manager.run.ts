@@ -25,7 +25,7 @@ function StateManagerRun(
 
 	StateManager,
 	AuthService,
-	AnalyticService,
+	AnalyticService
 ) {
 
 	const dateFilter = $filter("date");
@@ -59,7 +59,7 @@ function StateManagerRun(
 			toState,
 			toParams,
 			fromState,
-			fromParams,
+			fromParams
 		};
 
 		StateManager.startStateChange(stateChangeObject);
@@ -71,7 +71,7 @@ function StateManagerRun(
 			toState,
 			toParams,
 			fromState,
-			fromParams,
+			fromParams
 		};
 
 		StateManager.handleStateChange(stateChangeObject);
@@ -106,5 +106,5 @@ export const StateManagerRunModule = angular
 		"StateManager",
 		"AuthService",
 		"AnalyticService",
-		StateManagerRun,
+		StateManagerRun
 	]);

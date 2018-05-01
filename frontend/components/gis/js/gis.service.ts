@@ -18,13 +18,13 @@
 export class GISService {
 
 	public static $inject: string[] = [
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private initialised: boolean;
 
 	constructor(
-		private ViewerService: any,
+		private ViewerService: any
 	) {
 		this.initialised = false;
 	}
@@ -36,10 +36,10 @@ export class GISService {
 				layers: [
 					{
 						name: "Map Tiles",
-						visibility: "invisible",
-					},
-				],
-			},
+						visibility: "invisible"
+					}
+				]
+			}
 		];
 	}
 
