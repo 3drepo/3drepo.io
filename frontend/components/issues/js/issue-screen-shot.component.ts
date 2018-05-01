@@ -25,7 +25,7 @@ class IssueScreenshotController implements ng.IController {
 		"APIService",
 		"EventService",
 		"ViewerService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private highlightBackground: string; // = "#FF9800";
@@ -73,7 +73,7 @@ class IssueScreenshotController implements ng.IController {
 		private APIService,
 		private EventService,
 		private ViewerService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -96,20 +96,20 @@ class IssueScreenshotController implements ng.IController {
 		this.penColors = {
 			red : {
 				color: "#DD0000",
-				label:  "Red",
+				label:  "Red"
 			},
 			green : {
 				color: "#00dd44",
-				label:  "Green",
+				label:  "Green"
 			},
 			blue : {
 				color: "#004edd",
-				label:  "Blue",
+				label:  "Blue"
 			},
 			eraser : {
 				color: "rgba(0, 0, 0, 1)",
-				label: "Eraser",
-			},
+				label: "Eraser"
+			}
 		};
 
 		if (typeof this.screenShot !== "undefined") {
@@ -159,7 +159,7 @@ class IssueScreenshotController implements ng.IController {
 				// Set up action buttons
 				this.actions = {
 					draw : {icon: "border_color", action: "draw", label: "Draw", color: this.highlightBackground},
-					erase : {icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""},
+					erase : {icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
 				};
 
 				this.currentAction = "draw";
@@ -203,7 +203,7 @@ class IssueScreenshotController implements ng.IController {
 
 					this.scribbleCanvasContext.drawImage(
 						imgObj, 0, 0, imgObj.width, imgObj.height,  // source rectangle
-						0, 0, this.scribbleCanvas.width, this.scribbleCanvas.height,  // destination rectangle
+						0, 0, this.scribbleCanvas.width, this.scribbleCanvas.height  // destination rectangle
 					);
 
 				} catch (error) {
@@ -443,11 +443,11 @@ class IssueScreenshotController implements ng.IController {
 export const IssuesScreenshotComponent: ng.IComponentOptions = {
 	bindings: {
 		screenShotSave: "&",
-		screenShot: "=",
+		screenShot: "="
 	},
 	controller: IssueScreenshotController,
 	controllerAs: "vm",
-	templateUrl: "templates/issue-screen-shot.html",
+	templateUrl: "templates/issue-screen-shot.html"
 };
 
 export const IssuesScreenShotComponentModule = angular

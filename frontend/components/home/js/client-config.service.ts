@@ -37,7 +37,7 @@ export class ClientConfigService {
 
 		const roundRobin: any = {
 			apiUrls : this.apiUrls,
-			apiUrlCounter: {},
+			apiUrlCounter: {}
 		};
 
 		roundRobin.apiUrl = function(type, path) {

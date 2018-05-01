@@ -18,11 +18,11 @@
 class PrivacyController implements ng.IController {
 
 	public static $inject: string[] = [
-		"StateManager",
+		"StateManager"
 	];
 
 	constructor(
-		private StateManager: any,
+		private StateManager: any
 	) {}
 
 	public $onInit() {}
@@ -37,7 +37,7 @@ export const PrivacyComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: PrivacyController,
 	controllerAs: "vm",
-	templateUrl: "templates/privacy.html",
+	templateUrl: "templates/privacy.html"
 };
 
 export const PrivacyComponentModule = angular

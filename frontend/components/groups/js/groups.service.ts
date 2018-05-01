@@ -23,7 +23,7 @@ export class GroupsService {
 		"TreeService",
 		"MultiSelectService",
 		"AuthService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private state;
@@ -34,7 +34,7 @@ export class GroupsService {
 		private TreeService: any,
 		private MultiSelectService: any,
 		private AuthService: any,
-		private ViewerService: any,
+		private ViewerService: any
 	) {
 		this.reset();
 	}
@@ -48,7 +48,7 @@ export class GroupsService {
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes : 0,
-			multiSelectedGroups: [],
+			multiSelectedGroups: []
 		};
 	}
 
@@ -114,7 +114,7 @@ export class GroupsService {
 				}
 
 				this.state.colorOverride[group._id] = {
-					models: meshes, color,
+					models: meshes, color
 				};
 			});
 		});
@@ -157,7 +157,7 @@ export class GroupsService {
 				account,
 				model,
 				meshIds,
-				group.color,
+				group.color
 			);
 		}
 
@@ -244,7 +244,7 @@ export class GroupsService {
 		return [
 			parseInt((Math.random() * 255).toFixed(0), 10),
 			parseInt((Math.random() * 255).toFixed(0), 10),
-			parseInt((Math.random() * 255).toFixed(0), 10),
+			parseInt((Math.random() * 255).toFixed(0), 10)
 		];
 	}
 
@@ -265,7 +265,7 @@ export class GroupsService {
 		return result ? [
 			parseInt(result[1], 16),
 			parseInt(result[2], 16),
-			parseInt(result[3], 16),
+			parseInt(result[3], 16)
 		] : [];
 
 	}
@@ -352,7 +352,7 @@ export class GroupsService {
 					this.state.selectedGroup.objects,
 					multi, // multi
 					color,
-					true,
+					true
 				).then((meshes) => {
 					this.setTotalSavedMeshes();
 
@@ -383,7 +383,7 @@ export class GroupsService {
 
 		// Get selected objects
 		this.ViewerService.getObjectsStatus({
-			promise: objectsDefer,
+			promise: objectsDefer
 		});
 		return objectsDefer.promise;
 	}
@@ -438,7 +438,7 @@ export class GroupsService {
 				description: "",
 				name: this.getDefaultGroupName(this.state.groups),
 				color: this.getRandomColor(),
-				objects,
+				objects
 			};
 		});
 	}
@@ -468,7 +468,7 @@ export class GroupsService {
 				intersection,
 				true, // multi
 				color,
-				true,
+				true
 			);
 		}
 

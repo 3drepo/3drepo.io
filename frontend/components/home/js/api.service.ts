@@ -19,12 +19,12 @@ export class APIService {
 
 	public static $inject: string[] = [
 		"$http",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	constructor(
 		private $http: any,
-		private ClientConfigService: any,
+		private ClientConfigService: any
 	) {
 	}
 
@@ -40,7 +40,7 @@ export class APIService {
 			USER_NOT_VERIFIED: "Please click on the link in the verify email sent to your account",
 			ALREADY_VERIFIED: "You have already verified your account successfully. You may now login to your account.",
 			INVALID_CAPTCHA_RES: "Please prove you're not a robot",
-			USER_EXISTS: "User already exists",
+			USER_EXISTS: "User already exists"
 		};
 
 		let message;
@@ -75,10 +75,10 @@ export class APIService {
 		url = encodeURI(url);
 		const urlUse = this.ClientConfigService.apiUrl(
 			this.ClientConfigService.GET_API,
-			url,
+			url
 		);
 		const config = {
-			withCredentials: true,
+			withCredentials: true
 		};
 
 		const request = this.$http.get(urlUse, config);
@@ -102,10 +102,10 @@ export class APIService {
 
 		const urlUse = this.ClientConfigService.apiUrl(
 			this.ClientConfigService.POST_API,
-			url,
+			url
 		);
 		const config: any = {
-			withCredentials: true,
+			withCredentials: true
 		};
 
 		if (headers) {
@@ -131,7 +131,7 @@ export class APIService {
 
 		const urlUse = this.ClientConfigService.apiUrl(
 			this.ClientConfigService.POST_API,
-			url,
+			url
 		);
 		const config = {withCredentials: true};
 
@@ -154,15 +154,15 @@ export class APIService {
 		url = encodeURI(url);
 		url = this.ClientConfigService.apiUrl(
 			this.ClientConfigService.POST_API,
-			url,
+			url
 		);
 
 		const config = {
 			data,
 			withCredentials: true,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		};
 
 		const request = this.$http.delete(url, config);

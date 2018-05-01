@@ -19,7 +19,7 @@ class PasswordForgotController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
-		"APIService",
+		"APIService"
 	];
 
 	private showProgress;
@@ -34,7 +34,7 @@ class PasswordForgotController implements ng.IController {
 
 	constructor(
 		private $scope: ng.IScope,
-		private APIService: any,
+		private APIService: any
 	) {}
 
 	public $onInit() {
@@ -104,7 +104,7 @@ export const PasswordForgotComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: PasswordForgotController,
 	controllerAs: "vm",
-	templateUrl: "templates/password-forgot.html",
+	templateUrl: "templates/password-forgot.html"
 };
 
 export const PasswordForgotComponentModule = angular

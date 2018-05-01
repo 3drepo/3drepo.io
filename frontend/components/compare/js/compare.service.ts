@@ -23,7 +23,7 @@ export class CompareService {
 
 		"TreeService",
 		"RevisionsService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	public state: any;
@@ -36,7 +36,7 @@ export class CompareService {
 
 		private TreeService: any,
 		private RevisionsService: any,
-		private ViewerService: any,
+		private ViewerService: any
 	) {
 		this.reset();
 	}
@@ -50,8 +50,8 @@ export class CompareService {
 			compareTypes : {
 				diff : {
 					label: "3D Diff",
-					type: "diff",
-				},
+					type: "diff"
+				}
 				// clash : {
 				// 	label: "3D Clash",
 				// 	type: "clash",
@@ -61,7 +61,7 @@ export class CompareService {
 			targetModels: [],
 			mode : "diff",
 			modelType : "base",
-			ready : this.readyDefer.promise,
+			ready : this.readyDefer.promise
 		};
 
 	}
@@ -159,14 +159,14 @@ export class CompareService {
 			baseRevisionTag: baseRevision.tag || baseTimestamp || baseRevision.name,
 			targetRevision: targetRevision.name,
 			targetRevisionTag: targetRevision.tag || targetTimestamp || targetRevision.name,
-			visible: "visible",
+			visible: "visible"
 		};
 	}
 
 	public getSettings(model: any) {
 		return this.ViewerService.getModelInfo(
 			model.database,
-			model.model,
+			model.model
 		);
 	}
 
@@ -177,11 +177,11 @@ export class CompareService {
 
 		return this.RevisionsService.listAll(account, model).then((revisions) => {
 			this.state.targetModels = [
-				this.getCompareModelData(modelSettings, revisions, revision, "target"),
+				this.getCompareModelData(modelSettings, revisions, revision, "target")
 			];
 
 			this.state.baseModels = [
-				this.getCompareModelData(modelSettings, revisions, revision, "base"),
+				this.getCompareModelData(modelSettings, revisions, revision, "base")
 			];
 
 		});
@@ -278,7 +278,7 @@ export class CompareService {
 				const loadModel = this.ViewerService.diffToolLoadComparator(
 					model.account,
 					model.model,
-					model.targetRevision,
+					model.targetRevision
 				)
 					.catch((error) => {
 						console.error(error);

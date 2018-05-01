@@ -26,7 +26,7 @@ class TreeController implements ng.IController {
 		"EventService",
 		"MultiSelectService",
 		"ViewerService",
-		"GroupsService",
+		"GroupsService"
 	];
 
 	public showProgress: boolean; // in pug
@@ -64,7 +64,7 @@ class TreeController implements ng.IController {
 		private EventService,
 		private MultiSelectService,
 		private ViewerService,
-		private GroupsService,
+		private GroupsService
 	) {
 
 		this.promise = null,
@@ -289,7 +289,7 @@ class TreeController implements ng.IController {
 			keys.forEach((key) => {
 				meshIDArrs.push({
 					model: key.replace("@", "."),
-					meshID: selectionMap[key].meshes,
+					meshID: selectionMap[key].meshes
 				});
 			});
 
@@ -370,7 +370,7 @@ class TreeController implements ng.IController {
 			[node],
 			this.MultiSelectService.isMultiMode(),
 			undefined,
-			false,
+			false
 		);
 	}
 
@@ -451,7 +451,7 @@ class TreeController implements ng.IController {
 						this.numLoaded_ = this.toLoad_;
 					});
 				}
-			},
+			}
 		};
 	}
 
@@ -466,11 +466,11 @@ export const TreeComponent: ng.IComponentOptions = {
 		model:  "=",
 		onContentHeightRequest: "&",
 		revision: "=",
-		selectedMenuOption: "=",
+		selectedMenuOption: "="
 	},
 	controller: TreeController,
 	controllerAs: "vm",
-	templateUrl: "templates/tree.html",
+	templateUrl: "templates/tree.html"
 };
 
 export const TreeComponentModule = angular

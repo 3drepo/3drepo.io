@@ -174,7 +174,9 @@ gulp.task("typedoc", function() {
 });
 
 gulp.task("reload", function() { 
-  return livereload() 
+  return gulp
+    .src(["./../public/dist/three_d_repo.min.js"])
+    .pipe(livereload())
 });
 
 // Watch for changes and live reload in development

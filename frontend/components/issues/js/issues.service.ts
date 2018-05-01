@@ -32,7 +32,7 @@ export class IssuesService {
 		"AuthService",
 		"MultiSelectService",
 		"ClipService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private state: any;
@@ -54,7 +54,7 @@ export class IssuesService {
 		private AuthService,
 		private MultiSelectService,
 		private ClipService,
-		private ViewerService,
+		private ViewerService
 	) {
 		this.groupsCache = {};
 		this.initDefer = $q.defer();
@@ -67,7 +67,7 @@ export class IssuesService {
 		this.state = {
 			heights : {
 				infoHeight : 135,
-				issuesListItemHeight : 141,
+				issuesListItemHeight : 141
 			},
 			selectedIssue: null,
 			allIssues: [],
@@ -78,7 +78,7 @@ export class IssuesService {
 				showClosed: false,
 				sortOldestFirst : false,
 				excludeRoles: []
-			},
+			}
 		};
 	}
 
@@ -89,7 +89,7 @@ export class IssuesService {
 			status: "open",
 			assigned_roles: [],
 			topic_type: "for_information",
-			viewpoint: {},
+			viewpoint: {}
 		};
 	}
 
@@ -173,7 +173,7 @@ export class IssuesService {
 			this.state.issuesToShow,
 			(issue) => {
 				return this.handleIssueFilter(issue, filterText);
-			},
+			}
 
 		));
 	}
@@ -257,7 +257,7 @@ export class IssuesService {
 					pickedPos: issue.position,
 					pickedNorm: issue.norm,
 					colours: pinColor,
-					viewpoint: issue.viewpoint,
+					viewpoint: issue.viewpoint
 				});
 
 			} else {
@@ -374,7 +374,7 @@ export class IssuesService {
 	public isViewer(permissions) {
 		return !this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-			permissions,
+			permissions
 		);
 	}
 
@@ -388,7 +388,7 @@ export class IssuesService {
 	public isAdmin(permissions) {
 		return this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
-			permissions,
+			permissions
 		);
 	}
 
@@ -453,7 +453,7 @@ export class IssuesService {
 
 		const ableToComment = this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-			permissions,
+			permissions
 		);
 
 		return ableToComment && isNotClosed;
@@ -465,7 +465,7 @@ export class IssuesService {
 		if (issue.position.length > 0 && issue._id) {
 			this.ViewerService.changePinColours({
 				id: issue._id,
-				colours: Pin.pinColours.blue,
+				colours: Pin.pinColours.blue
 			});
 		}
 	}
@@ -514,7 +514,7 @@ export class IssuesService {
 			look_at : issue.viewpoint.look_at,
 			up: issue.viewpoint.up,
 			account: issue.account,
-			model: issue.model,
+			model: issue.model
 		};
 
 		this.ViewerService.setCamera(issueData);
@@ -533,7 +533,7 @@ export class IssuesService {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
 				fromClipPanel: false,
 				account: issue.account,
-				model: issue.model,
+				model: issue.model
 			};
 
 			this.ClipService.updateClippingPlane(issueData);
@@ -722,16 +722,16 @@ export class IssuesService {
 
 	// TODO: Internationalise and make globally accessible
 	public getPrettyTime(time) {
-		let date = new Date(time),
-			currentDate = new Date(),
-			prettyTime,
-			postFix,
-			hours;
+		const date = new Date(time);
+		const currentDate = new Date();
+		let	prettyTime;
+		let	postFix;
+		let	hours;
 
 		const	monthToText = [
 			"Jan", "Feb", "Mar", "Apr",
 			"May", "Jun", "Jul", "Aug",
-			"Sep", "Oct", "Nov", "Dec",
+			"Sep", "Oct", "Nov", "Dec"
 		];
 
 		if ((date.getFullYear() === currentDate.getFullYear()) &&
@@ -870,7 +870,7 @@ export class IssuesService {
 		}
 		return this.doPut(issue, {
 			closed,
-			number: issue.number,
+			number: issue.number
 		});
 	}
 
@@ -879,15 +879,15 @@ export class IssuesService {
 			issue,
 			{
 				assigned_roles: issue.assigned_roles,
-				number: 0, // issue.number
-			},
+				number: 0 // issue.number
+			}
 		);
 	}
 
 	public saveComment(issue, comment, viewpoint) {
 		return this.doPut(issue, {
 			comment,
-			viewpoint,
+			viewpoint
 		});
 	}
 
@@ -896,7 +896,7 @@ export class IssuesService {
 			comment,
 			number: issue.number,
 			edit: true,
-			commentIndex,
+			commentIndex
 		});
 	}
 
@@ -905,7 +905,7 @@ export class IssuesService {
 			comment: "",
 			number: issue.number,
 			delete: true,
-			commentIndex: index,
+			commentIndex: index
 			// commentCreated: issue.comments[index].created
 		});
 	}
@@ -915,7 +915,7 @@ export class IssuesService {
 			comment: "",
 			number: issue.number,
 			sealed: true,
-			commentIndex,
+			commentIndex
 		});
 	}
 
@@ -930,7 +930,7 @@ export class IssuesService {
 			},
 			() => {
 				this.jobsDeferred.resolve([]);
-			},
+			}
 		);
 
 		return this.jobsDeferred.promise;
@@ -946,7 +946,7 @@ export class IssuesService {
 			},
 			() => {
 				deferred.resolve();
-			},
+			}
 		);
 
 		return deferred.promise;
@@ -979,7 +979,7 @@ export class IssuesService {
 		return [
 			(parseInt(hexColours[0], 16) / 255.0),
 			(parseInt(hexColours[1], 16) / 255.0),
-			(parseInt(hexColours[2], 16) / 255.0),
+			(parseInt(hexColours[2], 16) / 255.0)
 		];
 	}
 
@@ -1067,7 +1067,7 @@ export class IssuesService {
 		formData.append("file", file);
 
 		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
-			.then(function(res) {
+			.then((res) => {
 				if (res.status !== 200) {
 					throw res.data;
 				}
@@ -1080,7 +1080,7 @@ export class IssuesService {
 	 * @param comment
 	 * @returns {string}
 	 */
-	public convertActionCommentToText(comment, topic_types) {
+	public convertActionCommentToText(comment, topicTypes) {
 		let text = "";
 
 		if (comment) {
@@ -1109,14 +1109,14 @@ export class IssuesService {
 			case "topic_type":
 
 				comment.action.propertyText = "Type";
-				if (topic_types) {
+				if (topicTypes) {
 
-					const from = topic_types.find((topic_type) => {
-						return topic_type.value === comment.action.from;
+					const from = topicTypes.find((topicType) => {
+						return topicType.value === comment.action.from;
 					});
 
-					const to = topic_types.find((topic_type) => {
-						return topic_type.value === comment.action.to;
+					const to = topicTypes.find((topicType) => {
+						return topicType.value === comment.action.to;
 					});
 
 					if (from && from.label) {
@@ -1138,10 +1138,10 @@ export class IssuesService {
 
 				comment.action.propertyText = "Due Date";
 				if (comment.action.to) {
-					comment.action.to = (new Date(parseInt(comment.action.to))).toLocaleDateString();
+					comment.action.to = (new Date(parseInt(comment.action.to, 10))).toLocaleDateString();
 				}
 				if (comment.action.from) {
-					comment.action.from = (new Date(parseInt(comment.action.from))).toLocaleDateString();
+					comment.action.from = (new Date(parseInt(comment.action.from, 10))).toLocaleDateString();
 				} else {
 					text = comment.action.propertyText + " set to " +
 						comment.action.to + " by " +
@@ -1220,7 +1220,7 @@ export class IssuesService {
 			"open": "Open",
 			"in progress": "In progress",
 			"for approval": "For approval",
-			"closed": "Closed",
+			"closed": "Closed"
 		};
 
 		let actionText = value;
