@@ -24,7 +24,7 @@ class LoginController implements ng.IController {
 		"AuthService",
 		"EventService",
 		"ClientConfigService",
-		"APIService",
+		"APIService"
 	];
 
 	private version: string;
@@ -41,7 +41,7 @@ class LoginController implements ng.IController {
 		private AuthService,
 		private EventService,
 		private ClientConfigService,
-		private APIService,
+		private APIService
 	) {}
 
 	public $onInit() {
@@ -116,11 +116,11 @@ class LoginController implements ng.IController {
 
 export const LoginComponent: ng.IComponentOptions = {
 	bindings: {
-		loginMessage : "<",
+		loginMessage : "<"
 	},
 	controller: LoginController,
 	controllerAs: "vm",
-	templateUrl: "templates/login.html",
+	templateUrl: "templates/login.html"
 };
 
 export const LoginComponentModule = angular

@@ -8,6 +8,8 @@
         "no-console": [true, "log", "warning"],
         "object-literal-sort-keys": false,
         "no-empty": false,
-        "ordered-imports": false
+        "ordered-imports": false,
+        "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
+        "forin": false
     }
 }

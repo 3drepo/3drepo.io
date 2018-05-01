@@ -22,7 +22,7 @@ class BottomButtonsController implements ng.IController {
 	public static $inject: string[] = [
 		"ViewerService",
 		"TreeService",
-		"IconsConstant",
+		"IconsConstant"
 	];
 
 	private showButtons: boolean;
@@ -38,7 +38,7 @@ class BottomButtonsController implements ng.IController {
 	constructor(
 		private ViewerService: any,
 		private TreeService: any,
-		private IconsConstant: any,
+		private IconsConstant: any
 	) {
 
 		this.customIcons = this.IconsConstant;
@@ -51,11 +51,11 @@ class BottomButtonsController implements ng.IController {
 
 		this.viewingOptions = {
 			Helicopter : {
-				mode: Viewer.NAV_MODES.HELICOPTER,
+				mode: Viewer.NAV_MODES.HELICOPTER
 			},
 			Turntable : {
-				mode: Viewer.NAV_MODES.TURNTABLE,
-			},
+				mode: Viewer.NAV_MODES.TURNTABLE
+			}
 		};
 
 		document.addEventListener("click", (event: any) => {
@@ -73,34 +73,34 @@ class BottomButtonsController implements ng.IController {
 			label: "Extent",
 			icon: "fa fa-home",
 			month: (new Date()).getMonth(),
-			click: () => { this.extent(); },
+			click: () => { this.extent(); }
 		});
 
 		this.leftButtons.push({
 			isViewingOptionButton: true,
 			click: () => {
 				this.showViewingOptions = !this.showViewingOptions;
-			},
+			}
 		});
 
 		this.leftButtons.push({
 			label: "Show All",
-			click: () => { this.showAll(); },
+			click: () => { this.showAll(); }
 		});
 
 		this.leftButtons.push({
 			label: "Hide",
-			click: () => { this.hide(); },
+			click: () => { this.hide(); }
 		});
 
 		this.leftButtons.push({
 			label: "Isolate",
-			click: () => { this.isolate(); },
+			click: () => { this.isolate(); }
 		});
 
 		this.leftButtons.push({
 			label: "Focus",
-			click: () => { this.focusMode(); },
+			click: () => { this.focusMode(); }
 		});
 
 		this.selectedMode = "Turntable";
@@ -176,7 +176,7 @@ export const BottomButtonsComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: BottomButtonsController,
 	controllerAs: "vm",
-	templateUrl: "templates/bottom-buttons.html",
+	templateUrl: "templates/bottom-buttons.html"
 };
 
 export const BottomButtonsComponentModule = angular

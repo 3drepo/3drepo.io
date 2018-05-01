@@ -25,7 +25,7 @@ export class ViewerService {
 		"ClientConfigService",
 		"APIService",
 		"DialogService",
-		"EventService",
+		"EventService"
 	];
 
 	private newPinId: string;
@@ -42,7 +42,7 @@ export class ViewerService {
 		public ClientConfigService: any,
 		public APIService: any,
 		public DialogService: any,
-		public EventService: any,
+		public EventService: any
 	) {
 
 		this.newPinId = "newPinId";
@@ -51,11 +51,11 @@ export class ViewerService {
 
 		this.currentModel = {
 			model : null,
-			promise : null,
+			promise : null
 		};
 
 		this.pin = {
-			pinDropMode : false,
+			pinDropMode : false
 		};
 
 		this.initialised = $q.defer();
@@ -78,7 +78,7 @@ export class ViewerService {
 			params.clippingPlanes,
 			params.fromClipPanel,
 			params.account,
-			params.model,
+			params.model
 		);
 	}
 
@@ -105,7 +105,7 @@ export class ViewerService {
 			case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
 				this.viewer.changePinColours(
 					event.value.id,
-					event.value.colours,
+					event.value.colours
 				);
 				break;
 
@@ -125,7 +125,7 @@ export class ViewerService {
 					event.value.animate !== undefined ? event.value.animate : true,
 					event.value.rollerCoasterMode,
 					event.value.account,
-					event.value.model,
+					event.value.model
 				);
 				break;
 
@@ -153,7 +153,7 @@ export class ViewerService {
 						model,
 						pickedNorm: normal,
 						pickedPos: position,
-						selectedObjectId: event.value.id,
+						selectedObjectId: event.value.id
 					};
 
 					this.addPin(data);
@@ -193,7 +193,7 @@ export class ViewerService {
 				params.animate !== undefined ? params.animate : true,
 				params.rollerCoasterMode,
 				params.account,
-				params.model,
+				params.model
 			);
 		}
 	}
@@ -206,7 +206,7 @@ export class ViewerService {
 	public changePinColours(params) {
 		this.viewer.changePinColours(
 			params.id,
-			params.colours,
+			params.colours
 		);
 	}
 
@@ -221,7 +221,7 @@ export class ViewerService {
 		this.viewer.getCurrentViewpointInfo(
 			params.account,
 			params.model,
-			params.promise,
+			params.promise
 		);
 	}
 
@@ -234,7 +234,7 @@ export class ViewerService {
 				params.pickedPos,
 				params.pickedNorm,
 				params.colours,
-				params.viewpoint,
+				params.viewpoint
 			);
 		});
 	}
@@ -242,7 +242,7 @@ export class ViewerService {
 	public removePin(params) {
 		this.initialised.promise.then(() => {
 			this.viewer.removePin(
-				params.id,
+				params.id
 			);
 		});
 	}
@@ -257,7 +257,7 @@ export class ViewerService {
 		this.viewer.getObjectsStatus(
 			params.account,
 			params.model,
-			params.promise,
+			params.promise
 		);
 	}
 
@@ -270,7 +270,7 @@ export class ViewerService {
 				params.zoom,
 				params.colour,
 				params.multi,
-				params.forceReHighlight,
+				params.forceReHighlight
 			);
 		}
 	}
@@ -280,7 +280,7 @@ export class ViewerService {
 			this.viewer.unhighlightObjects(
 				params.account,
 				params.model,
-				params.id ? [params.id] : params.ids,
+				params.id ? [params.id] : params.ids
 			);
 		}
 	}
@@ -379,7 +379,7 @@ export class ViewerService {
 				"viewer",
 				document.getElementById("viewer"),
 				this.EventService.send,
-				this.handleUnityError.bind(this),
+				this.handleUnityError.bind(this)
 			);
 
 			this.viewer.setUnity();
@@ -418,9 +418,9 @@ export class ViewerService {
 		return this.getViewer()
 			.init({
 				getAPI: {
-					hostNames: this.ClientConfigService.apiUrls.all,
+					hostNames: this.ClientConfigService.apiUrls.all
 				},
-				showAll : true,
+				showAll : true
 			})
 			.catch((error) => {
 				console.error("Error creating Viewer Directive: ", error);
@@ -438,7 +438,7 @@ export class ViewerService {
 				account,
 				model,
 				branch,
-				revision,
+				revision
 			)
 				.then(() => {
 					// Set the current model in the viewer

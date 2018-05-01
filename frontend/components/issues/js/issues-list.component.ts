@@ -21,10 +21,12 @@ class IssuesListController implements ng.IController {
 		"$scope",
 		"$window",
 		"$timeout",
+		"$compile",
+		"$element",
 
 		"APIService",
 		"IssuesService",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	private toShow: string;
@@ -41,15 +43,18 @@ class IssuesListController implements ng.IController {
 	private model: string;
 	private revision: string;
 	private filterText: string;
+	private bcfInputHandler: any;
 
 	constructor(
 		private $scope,
 		private $window,
 		private $timeout,
+		private $compile,
+		private $element,
 
 		private APIService,
 		private IssuesService,
-		private ClientConfigService,
+		private ClientConfigService
 	) {}
 
 	public $onInit() {
@@ -58,6 +63,7 @@ class IssuesListController implements ng.IController {
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
+		this.setupBcfImportInput();
 		this.watchers();
 
 	}
@@ -87,7 +93,7 @@ class IssuesListController implements ng.IController {
 				this.allIssues = this.IssuesService.state.allIssues;
 
 			},
-			true,
+			true
 		);
 
 		this.$scope.$watch("vm.filterText", () => {
@@ -117,8 +123,38 @@ class IssuesListController implements ng.IController {
 					this.editIssue(issueToDisplay);
 				}
 			},
-			true,
+			true
 		);
+
+	}
+
+	public setupBcfImportInput() {
+
+		if (this.bcfInputHandler) {
+			return;
+		}
+
+		const template = `<input
+							id='bcfImportInput'
+							type='file'
+							style='display: none;'
+							accept='.zip,.bcfzip,.bcf'>`;
+
+		const linkFn = this.$compile(template);
+		const content = linkFn(this.$scope);
+		this.$element.append(content);
+
+		this.$timeout(() => {
+			this.bcfInputHandler = document.getElementById("bcfImportInput");
+			this.bcfInputHandler.addEventListener("change", () => {
+				if (this.bcfInputHandler && this.bcfInputHandler.files) {
+					this.importBcf({file: this.bcfInputHandler.files[0]});
+				} else {
+					console.error("No file selected");
+				}
+				this.bcfInputHandler.value = null; // Reset the change watcher
+			});
+		});
 
 	}
 
@@ -131,15 +167,18 @@ class IssuesListController implements ng.IController {
 		switch (this.menuOption.value) {
 
 			case "sortByDate":
-				this.IssuesService.state.issueDisplay.sortOldestFirst = !this.IssuesService.state.issueDisplay.sortOldestFirst;
+				this.IssuesService.state.issueDisplay.sortOldestFirst =
+					!this.IssuesService.state.issueDisplay.sortOldestFirst;
 				break;
 
 			case "showClosed":
-				this.IssuesService.state.issueDisplay.showClosed = !this.IssuesService.state.issueDisplay.showClosed;
+				this.IssuesService.state.issueDisplay.showClosed =
+					!this.IssuesService.state.issueDisplay.showClosed;
 				break;
 
 			case "showSubModels":
-				this.IssuesService.state.issueDisplay.showSubModelIssues = !this.IssuesService.state.issueDisplay.showSubModelIssues;
+				this.IssuesService.state.issueDisplay.showSubModelIssues =
+					!this.IssuesService.state.issueDisplay.showSubModelIssues;
 				break;
 
 			case "print":
@@ -155,13 +194,8 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "importBCF":
-				const file = document.createElement("input");
-				file.setAttribute("type", "file");
-				file.setAttribute("accept", ".zip,.bcfzip,.bcf");
-				file.click();
-
-				file.addEventListener("change", () => {
-					this.importBcf({file: file.files[0]});
+				this.$timeout(() => {
+					this.bcfInputHandler.click();
 				});
 				break;
 
@@ -232,11 +266,11 @@ export const IssuesListComponent: ng.IComponentOptions = {
 		menuOption: "<",
 		importBcf: "&",
 		selectedIssue: "<",
-		issueDisplay: "<",
+		issueDisplay: "<"
 	},
 	controller: IssuesListController,
 	controllerAs: "vm",
-	templateUrl: "templates/issues-list.html",
+	templateUrl: "templates/issues-list.html"
 };
 
 export const IssuesListComponentModule = angular

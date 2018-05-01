@@ -24,7 +24,7 @@ class AccountInfoController implements ng.IController {
 		"$mdDialog",
 
 		"ClientConfigService",
-		"APIService",
+		"APIService"
 	];
 
 	private accountOptions;
@@ -42,7 +42,7 @@ class AccountInfoController implements ng.IController {
 		private $mdDialog: any,
 
 		private ClientConfigService: any,
-		private APIService: any,
+		private APIService: any
 	) {}
 
 	public $onInit() {
@@ -51,7 +51,7 @@ class AccountInfoController implements ng.IController {
 			profile: {label: "Profile"},
 			billing: {label: "Billing"},
 			licenses: {label: "Licences & Jobs"},
-			assign: {label: "Assign Permissions" },
+			assign: {label: "Assign Permissions" }
 		};
 		this.imageLoaded = false;
 		this.registerUrlCallback();
@@ -168,7 +168,7 @@ class AccountInfoController implements ng.IController {
 				.title("Upload Avatar Error")
 				.content(content)
 				.ariaLabel("Upload Avatar Error")
-				.ok("OK"),
+				.ok("OK")
 		);
 	}
 
@@ -182,11 +182,11 @@ export const AccountInfoComponent: ng.IComponentOptions = {
 		email: "=",
 		itemToShow: "=",
 		hasAvatar: "=",
-		loading: "=",
+		loading: "="
 	},
 	controller: AccountInfoController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-info.html",
+	templateUrl: "templates/account-info.html"
 };
 
 export const AccountInfoComponentModule = angular

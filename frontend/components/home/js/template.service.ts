@@ -19,12 +19,12 @@ export class TemplateService {
 
 	public static $inject: string[] = [
 		"$http",
-		"$templateCache",
+		"$templateCache"
 	];
 
 	constructor(
 		private $http: any,
-		private $templateCache: any,
+		private $templateCache: any
 	) {
 	}
 
