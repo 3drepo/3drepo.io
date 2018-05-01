@@ -27,7 +27,7 @@ class SignupController implements ng.IController {
 		"ClientConfigService",
 		"APIService",
 		"AuthService",
-		"PasswordService",
+		"PasswordService"
 	];
 
 	private reCaptchaResponse;
@@ -65,7 +65,7 @@ class SignupController implements ng.IController {
 		private ClientConfigService,
 		private APIService,
 		private AuthService,
-		private PasswordService,
+		private PasswordService
 	) {
 
 	}
@@ -339,7 +339,7 @@ class SignupController implements ng.IController {
 			firstName: this.newUser.firstName,
 			lastName: this.newUser.lastName,
 			password: this.newUser.password,
-			mailListAgreed: this.newUser.mailListAgreed,
+			mailListAgreed: this.newUser.mailListAgreed
 		};
 
 		if (this.useReCAPTCHA) {
@@ -377,7 +377,7 @@ export const SignupComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: SignupController,
 	controllerAs: "vm",
-	templateUrl: "templates/sign-up.html",
+	templateUrl: "templates/sign-up.html"
 };
 
 export const SignupComponentModule = angular

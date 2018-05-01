@@ -22,7 +22,7 @@ export class DocsService {
 
 		"ClientConfigService",
 		"APIService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private state: any;
@@ -34,7 +34,7 @@ export class DocsService {
 
 		private ClientConfigService: any,
 		private APIService: any,
-		private ViewerService: any,
+		private ViewerService: any
 	) {
 		this.noMetadata = false;
 		this.docTypeHeight = 50;
@@ -44,7 +44,7 @@ export class DocsService {
 			show: false,
 			updated: false,
 			docs: false,
-			allDocTypesHeight: 0,
+			allDocTypesHeight: 0
 		};
 	}
 
@@ -101,7 +101,7 @@ export class DocsService {
 				this.updateDocs(
 					account,
 					model,
-					metadataIds[0],
+					metadataIds[0]
 				);
 
 			} else {
@@ -142,7 +142,7 @@ export class DocsService {
 			const endpoint = account + "/" + model + "/" + meta._id + ".pdf";
 			meta.url = this.ClientConfigService.apiUrl(
 				this.ClientConfigService.GET_API,
-				endpoint,
+				endpoint
 			);
 		}
 

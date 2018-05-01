@@ -39,7 +39,7 @@ class RegisterRequestController implements ng.IController {
 		"$window",
 
 		"AuthService",
-		"$location",
+		"$location"
 	];
 
 	constructor(
@@ -47,7 +47,7 @@ class RegisterRequestController implements ng.IController {
 		private $window: ng.IWindowService,
 
 		private AuthService,
-		private $location,
+		private $location
 	) {}
 
 	public $onInit() {
@@ -82,11 +82,11 @@ class RegisterRequestController implements ng.IController {
 
 export const RegisterRequestComponent: ng.IComponentOptions = {
 	bindings: {
-		state: "=",
+		state: "="
 	},
 	controller: RegisterRequestController,
 	controllerAs: "vm",
-	templateUrl: "templates/register-request.html",
+	templateUrl: "templates/register-request.html"
 };
 
 export const RegisterRequestComponentModule = angular

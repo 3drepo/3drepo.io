@@ -7,7 +7,7 @@ class RevisionsController implements ng.IController {
 
 		"DialogService",
 		"RevisionsService",
-		"APIService",
+		"APIService"
 	];
 
 	private revisionsLoading;
@@ -24,7 +24,7 @@ class RevisionsController implements ng.IController {
 
 		private DialogService,
 		private RevisionsService,
-		private APIService,
+		private APIService
 	) {}
 
 	public $onInit() {
@@ -113,11 +113,11 @@ export const RevisionsComponent: ng.IComponentOptions = {
 		account: "=",
 		model: "=",
 		modelName: "=",
-		revision: "=",
+		revision: "="
 	},
 	controller: RevisionsController,
 	controllerAs: "vm",
-	templateUrl: "templates/revisions.html",
+	templateUrl: "templates/revisions.html"
 };
 
 export const RevisionsComponentModule = angular

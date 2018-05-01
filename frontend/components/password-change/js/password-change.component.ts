@@ -39,7 +39,7 @@ class PasswordChangeController implements ng.IController {
 
 		"APIService",
 		"StateManager",
-		"PasswordService",
+		"PasswordService"
 	];
 
 	private promise;
@@ -62,7 +62,7 @@ class PasswordChangeController implements ng.IController {
 
 		private APIService: any,
 		private StateManager: any,
-		private PasswordService: any,
+		private PasswordService: any
 	) {}
 
 	public $onInit() {
@@ -165,7 +165,7 @@ class PasswordChangeController implements ng.IController {
 
 				this.APIService.put(url, {
 					newPassword: this.newPassword,
-					token: this.token,
+					token: this.token
 				})
 					.then((response) => {
 
@@ -207,11 +207,11 @@ class PasswordChangeController implements ng.IController {
 export const PasswordChangeComponent: ng.IComponentOptions = {
 	bindings: {
 		token: "=",
-		username: "=",
+		username: "="
 	},
 	controller: PasswordChangeController,
 	controllerAs: "vm",
-	templateUrl: "templates/password-change.html",
+	templateUrl: "templates/password-change.html"
 };
 
 export const PasswordChangeComponentModule = angular
