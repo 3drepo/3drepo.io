@@ -590,7 +590,7 @@ export class TreeService {
 						model: node.model,
 						ids: node.meshes
 					});
-				})
+				});
 				node.toggleState = this.VISIBILITY_STATES.invisible;
 			} else {
 				node.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
