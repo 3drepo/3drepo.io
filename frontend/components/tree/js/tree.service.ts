@@ -584,11 +584,13 @@ export class TreeService {
 				node.toggleState = this.VISIBILITY_STATES.visible;
 			} else if (0 === visibleChildCount) {
 				this.setNodeSelection(node, false);
-				this.ViewerService.unhighlightObjects({
-					account: node.account,
-					model: node.model,
-					ids: node.meshes
-				});
+				requestAnimationFrame(() => {
+					this.ViewerService.unhighlightObjects({
+						account: node.account,
+						model: node.model,
+						ids: node.meshes
+					});
+				})
 				node.toggleState = this.VISIBILITY_STATES.invisible;
 			} else {
 				node.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
@@ -770,10 +772,11 @@ export class TreeService {
 
 		if (!noHighlight) {
 
-			return this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false).then(() => {
-				this.selectedIndex = selectedIndex;
-				return selectedIndex;
-			});
+			return this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false)
+				.then(() => {
+					this.selectedIndex = selectedIndex;
+					return selectedIndex;
+				});
 
 		}
 
@@ -983,12 +986,15 @@ export class TreeService {
 
 				if (this.ViewerService.viewer) {
 
-					this.ViewerService.switchObjectVisibility(
-						account,
-						model,
-						objectIds[key],
-						visible
-					);
+					requestAnimationFrame(() => {
+						this.ViewerService.switchObjectVisibility(
+							account,
+							model,
+							objectIds[key],
+							visible
+						);
+					});
+
 				}
 
 			}
@@ -1058,9 +1064,9 @@ export class TreeService {
 
 		for (const id in this.currentSelectedNodes) {
 
-			const currentNode = this.currentSelectedNodes[id];
+			if (!id || visitedNodes[id]) { continue; }
 
-			if (!id || visitedNodes[currentNode._id]) { continue; }
+			const currentNode = this.currentSelectedNodes[id];
 
 			currentNode.selected = this.SELECTION_STATES.unselected;
 
@@ -1222,7 +1228,7 @@ export class TreeService {
 	 * @param colour the colour array for selection in the viewer
 	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
 	 */
-	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean) {
+	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean): any {
 
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
@@ -1233,17 +1239,15 @@ export class TreeService {
 			return Promise.resolve("No nodes specified");
 		}
 
-		const parentsOfUnselected = [];
+		const highlight = [];
+		const unhighlight = [];
+		const promises = [];
 
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 
 			if (!node) {
 				continue;
-			}
-
-			if (node.selected === this.SELECTION_STATES.parentOfUnselected) {
-				parentsOfUnselected.push(node);
 			}
 
 			const selected = (node.selected !== this.SELECTION_STATES.parentOfUnselected &&
@@ -1253,22 +1257,25 @@ export class TreeService {
 
 			this.setNodeSelection(node, shouldSelect);
 
+			if (shouldSelect) {
+				highlight.push(node);
+			} else {
+				unhighlight.push(node);
+			}
+
 		}
 
-		// If we have any nodes that are parents of unselected nodes, we can't
-		// just highlight them as it leads to an unsyncronised state. So we unhighlight
-		// those nodes in the viewer
-		if (parentsOfUnselected.length) {
-			nodes = nodes.filter((n, i) => {
-				return parentsOfUnselected.indexOf(n) === -1;
-			});
-			this.unhighlightNodes(parentsOfUnselected);
+		if (highlight.length) {
+			const lastNode = nodes[nodes.length - 1] ;
+			this.handleMetadata(lastNode);
+			promises.push(this.highlightNodes(highlight, multi, colour, forceReHighlight));
 		}
 
-		const lastNode = nodes[nodes.length - 1] ;
-		this.handleMetadata(lastNode);
+		if (unhighlight.length) {
+			promises.push(this.unhighlightNodes(unhighlight));
+		}
 
-		return this.highlightNodes(nodes, multi, colour, forceReHighlight);
+		return Promise.all(promises);
 
 	}
 
@@ -1305,11 +1312,12 @@ export class TreeService {
 				const vals = key.split("@");
 				const account = vals[0];
 				const model = vals[1];
-
-				this.ViewerService.unhighlightObjects({
-					account,
-					model,
-					ids: highlightMap[key].meshes
+				requestAnimationFrame(() => {
+					this.ViewerService.unhighlightObjects({
+						account,
+						model,
+						ids: highlightMap[key].meshes
+					});
 				});
 			}
 
@@ -1331,7 +1339,9 @@ export class TreeService {
 
 			// Update viewer highlights
 			if (!multi) {
-				this.ViewerService.clearHighlights();
+				requestAnimationFrame(() => {
+					this.ViewerService.clearHighlights();
+				});
 			}
 
 			for (const key in highlightMap) {
@@ -1357,15 +1367,18 @@ export class TreeService {
 					const model = vals[1];
 					// Separately highlight the children
 					// but only for multipart meshes
-					this.ViewerService.highlightObjects({
-						account,
-						ids: meshes,
-						colour: highlightMap[key].colour,
-						model,
-						multi: true,
-						source: "tree",
-						forceReHighlight
+					requestAnimationFrame(() => {
+						this.ViewerService.highlightObjects({
+							account,
+							ids: meshes,
+							colour: highlightMap[key].colour,
+							model,
+							multi: true,
+							source: "tree",
+							forceReHighlight
+						});
 					});
+
 				}
 
 			}
