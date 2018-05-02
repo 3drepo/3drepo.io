@@ -278,11 +278,12 @@ export class CompareService {
 
 		this.state.targetModels.forEach((model) => {
 
-			const sharedRevision = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision);
+			const sharedRevision = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
+			const canReuseModel = sharedRevision && sharedRevision.visible === "invisible";
 			let loadModel;
 
-			if (sharedRevision) {
-				console.log("Using base model as its shared", sharedRevision);
+			if (canReuseModel) {
+				console.log("Reusing model", model);
 				this.ViewerService.diffToolSetAsComparator(
 					model.account,
 					model.model,
