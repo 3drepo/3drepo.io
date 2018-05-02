@@ -340,7 +340,6 @@
 		"src": "text/plain",
 		"gltf": "application/json",
 		"bin": "text/plain",
-		"x3d": "application/xml",
 		"json": "application/json",
 		"png": "image/png",
 		"jpg": "image/jpg"
