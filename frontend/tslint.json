@@ -9,6 +9,7 @@
         "object-literal-sort-keys": false,
         "no-empty": false,
         "ordered-imports": false,
-        "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}]
+        "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
+        "forin": false
     }
 }
