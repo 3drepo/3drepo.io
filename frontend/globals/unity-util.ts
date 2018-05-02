@@ -250,14 +250,14 @@ export class UnityUtil {
 	 */
 
 	public static clipBroadcast(clipInfo) {
-		if (UnityUtil.viewer.clipBroadcast) {
+		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
 			UnityUtil.viewer.clipBroadcast(JSON.parse(clipInfo));
 		}
 	}
 
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if (UnityUtil.viewer.objectSelected) {
+		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
 		}
 	}
@@ -301,7 +301,7 @@ export class UnityUtil {
 
 	public static pickPointAlert(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if (UnityUtil.viewer.pickPointEvent) {
+		if (UnityUtil.viewer && UnityUtil.viewer.pickPointEvent) {
 			UnityUtil.viewer.pickPointEvent(point);
 		}
 	}
