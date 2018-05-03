@@ -102,6 +102,7 @@ schema.methods.updateProperties = function(updateObj){
 				if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
 					throw responseCodes.INVALID_MODEL_CODE;
 				}
+				this.properties[key] = updateObj[key];
 				break;
 			case "unit":
 				this.properties[key] = updateObj[key];
