@@ -29,6 +29,7 @@ let GenericObject = require("./base/repo").GenericObject;
 let uuid = require("node-uuid");
 let responseCodes = require("../response_codes.js");
 let middlewares = require("../middlewares/middlewares");
+const sharp = require("sharp");
 const _ = require("lodash");
 
 let ChatEvent = require("./chatEvent");
@@ -781,6 +782,8 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 		// });
 
 	}).then(size => {
+
+		console.log(sharp);
 
 		return pngBuffer;
 		// destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
