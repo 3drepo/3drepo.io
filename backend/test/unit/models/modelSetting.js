@@ -100,6 +100,30 @@ describe("Model Settings", function(){
 		});
 	});
 
+	describe("#updateProperties", function(){
+
+		it("should have updateProperties function", function(){
+			let modelSetting = new ModelSetting();
+			expect(modelSetting).to.have.property("updateProperties");
+		});
+
+		it("should fail to update properties with invalid types", function(){
+
+			let props =  {
+				unit: "metre",
+				topicTypes: [{
+					label: undefined,
+					value: undefined
+				}],
+				code: "09ABC"
+			};
+
+			let modelSetting = new ModelSetting();
+			expect(modelSetting.updateProperties(props)).to.throw();
+
+		});
+	});
+
 	after(function(done){
 		mockgoose.reset(function() {
 			mongoose.unmock(function(){

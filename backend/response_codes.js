@@ -211,6 +211,7 @@
 
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
+		ISSUE_INVALID_TOPIC_TYPE: { message: "The topic type is missing a value and/or label", status: 400 },
 
 		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404},
 		BUNDLE_STASH_NOT_FOUND: { message: "Asset bundle not found", status: 404},

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,42 +17,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
+let request = require("supertest");
+let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 let logger = require("../../logger.js");
 let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
-let C = require('../../constants');
-let async = require('async');
-let ModelSetting = require('../../models/modelSetting');
-let User = require('../../models/user');
-describe('Model', function () {
-	let User = require('../../models/user');
+let C = require("../../constants");
+let async = require("async");
+let ModelSetting = require("../../models/modelSetting");
+let User = require("../../models/user");
+describe("Model", function () {
+	let User = require("../../models/user");
 	let server;
 	let agent;
-	let username = 'project_username';
-	let password = 'project_username';
-	let model = 'model12345';
+	let username = "project_username";
+	let password = "project_username";
+	let model = "model12345";
 	let modelId;
-	let modelFed = 'projectFed1';
-	let project = 'projectgroup'
-	let desc = 'desc';
-	let type = 'type';
-	let unit = 'm';
-	let code = '00011';
+	let modelFed = "projectFed1";
+	let project = "projectgroup";
+	let desc = "desc";
+	let type = "type";
+	let unit = "m";
+	let code = "00011";
 
 
 	before(function(done){
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			agent = request.agent(server);
-			agent.post('/login')
+			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
@@ -64,7 +64,7 @@ describe('Model', function () {
 	});
 
 	after(function(done){
-		let q = require('../../services/queue');
+		let q = require("../../services/queue");
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {
@@ -72,14 +72,14 @@ describe('Model', function () {
 				return q.channel.purgeQueue(q.modelQName);
 			}).then(() => {
 				server.close(function(){
-					console.log('API test server is closed');
+					console.log("API test server is closed");
 					done();
 				});
 			});
 		});
 	});
 
-	it('should be created successfully', function(done){
+	it("should be created successfully", function(done){
 
 		async.series([
 			callback => {
@@ -125,7 +125,7 @@ describe('Model', function () {
 
 	});
 
-	it('model added to a project should be listed on top level models array', function(done){
+	it("model added to a project should be listed on top level models array", function(done){
 
 		agent.get(`/${username}.json`)
 		.expect(200, function(err, res){
@@ -143,10 +143,10 @@ describe('Model', function () {
 		});
 	});
 
-	it('should fail if project supplied is not found', function(done){
+	it("should fail if project supplied is not found", function(done){
 
 		agent.post(`/${username}/model`)
-		.send({ modelName: "model2", desc, type, unit, code, project: 'noexist' })
+		.send({ modelName: "model2", desc, type, unit, code, project: "noexist" })
 		.expect(404, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
 			done(err);
@@ -154,7 +154,7 @@ describe('Model', function () {
 
 	});
 
-	it('should fail if no unit specified', function(done){
+	it("should fail if no unit specified", function(done){
 
 		agent.post(`/${username}/model`)
 		.send({ desc, type, modelName: "model3" })
@@ -166,12 +166,12 @@ describe('Model', function () {
 		});
 	});
 
-	it('update model code with invalid format', function(done){
+	it("update model code with invalid format", function(done){
 
 
 		function updateModelCode(code, done){
 
-			let model = 'project4';
+			let model = "project4";
 
 			agent.put(`/${username}/${model}/settings`)
 			.send({code}).expect(400, function(err ,res) {
@@ -182,22 +182,25 @@ describe('Model', function () {
 
 		async.series([
 			function(done){
-				updateModelCode('$', done)
+				updateModelCode("$", done);
 			}, 
 			function(done){
-				updateModelCode('123456', done)
+				updateModelCode("123456", done);
 			}
-		], done)
+		], done);
 
 	});
 
-	it('update issues type with duplicate values', function(done){
+	it("update issues type with duplicate values", function(done){
 
-			let model = 'project5';
+			let model = "project5";
 
 			agent.put(`/${username}/${model}/settings`)
 			.send({
-				topicTypes: ['For Info', 'for info']
+				topicTypes: [{
+					label: "For Info", 
+					value: "for_info"
+				}]
 			}).expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE.value);
 				done(err);
@@ -205,29 +208,38 @@ describe('Model', function () {
 	});
 	
 
-	it('update settings should be successful', function(done){
+	it("update settings should be successful", function(done){
 
 		let body = {
 
-				unit: 'cm',
-				code: '00222',
-				topicTypes: ['For Info', '3D Repo', 'Vr']
+				unit: "cm",
+				code: "00222",
+				topicTypes: [{
+					label: "For Info", 
+					value: "for_info"
+				}, {
+					label: "3D Repo",
+					value: "3d_repo"
+				}, {
+					label: "Vr",
+					value: "vr"
+				}]
 
 		};
 		
 		let expectedReturn = {
 
-				unit: 'cm',
-				code: '00222',
+				unit: "cm",
+				code: "00222",
 				topicTypes: [{
-					label: 'For Info', 
-					value: 'for_info'
+					label: "For Info", 
+					value: "for_info"
 				}, {
-					label: '3D Repo',
-					value: '3d_repo'
+					label: "3D Repo",
+					value: "3d_repo"
 				}, {
-					label: 'Vr',
-					value: 'vr'
+					label: "Vr",
+					value: "vr"
 				}]
 
 		};
@@ -246,16 +258,16 @@ describe('Model', function () {
 			.expect(200, function(err, res){
 				expect(res.body.properties).to.deep.equal(expectedReturn);
 				done(err);
-			})
+			});
 			
 		});
 	});
 
 
 
-	it('should return error message if model name already exists', function(done){
+	it("should return error message if model name already exists", function(done){
 
-		let model = 'project7';
+		let model = "project7";
 		
 		agent.post(`/${username}/model`)
 		.send({ desc, type, unit, modelName: model })
@@ -272,11 +284,11 @@ describe('Model', function () {
 		it(`should return error message if model name is blacklisted - ${modelName}`, function(done){
 
 			if([
-				'database',
-				'verify',
-				'forgot-password',
-				'subscriptions',
-				'projects'
+				"database",
+				"verify",
+				"forgot-password",
+				"subscriptions",
+				"projects"
 			].indexOf(modelName) !== -1){
 				//skip these model name because they are actually other APIs.
 				return done();
@@ -294,9 +306,9 @@ describe('Model', function () {
 
 
 
-	it('should succeed if model name contains spaces', function(done){
+	it("should succeed if model name contains spaces", function(done){
 
-		let spacedName = 'you are genius';
+		let spacedName = "you are genius";
 		agent.post(`/${username}/model`)
 		.send({ desc, type, unit, modelName: spacedName })
 		.expect(200, function(err ,res) {
@@ -306,7 +318,7 @@ describe('Model', function () {
 	});
 
 
-	it('should return error if creating a model in a database that doesn\'t exists or not authorized for', function(done){
+	it("should return error if creating a model in a database that doesn't exists or not authorized for", function(done){
 
 		agent.post(`/${username}_someonelese/model`)
 		.send({ modelName: "testmodel", desc, type, unit })
@@ -315,29 +327,29 @@ describe('Model', function () {
 		});
 	});
 
-	describe('Download latest file', function(){ 
+	describe("Download latest file", function(){ 
 
-		let username = 'testing';
-		let password = 'testing';
-		let model = 'testproject';
+		let username = "testing";
+		let password = "testing";
+		let model = "testproject";
 
 		before(function(done){
 			async.series([
 				function logout(done){
-					agent.post('/logout').send({}).expect(200, done);
+					agent.post("/logout").send({}).expect(200, done);
 				},
 				function login(done){
-					agent.post('/login').send({
+					agent.post("/login").send({
 						username, password
 					}).expect(200, done);
 				}
 			], done);
 		});
 
-		it('should succeed and get the latest file', function(done){
+		it("should succeed and get the latest file", function(done){
 			agent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res){
 
-				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
+				expect(res.headers["content-disposition"]).to.equal("attachment;filename=3DrepoBIM.obj");
 				
 				done(err);
 			});
@@ -346,21 +358,21 @@ describe('Model', function () {
 	});
 
 
-	describe('Delete a model', function(){
+	describe("Delete a model", function(){
 
-		let username = 'projectshared';
-		let password = 'password';
-		let model = 'sample_project';
+		let username = "projectshared";
+		let password = "password";
+		let model = "sample_project";
 
-		let collaboratorUsername = 'testing';
+		let collaboratorUsername = "testing";
 
 		before(function(done){
 			async.series([
 				function logout(done){
-					agent.post('/logout').send({}).expect(200, done);
+					agent.post("/logout").send({}).expect(200, done);
 				},
 				function login(done){
-					agent.post('/login').send({
+					agent.post("/login").send({
 						username, password
 					}).expect(200, done);
 				},
@@ -370,11 +382,11 @@ describe('Model', function () {
 		});
 
 
-		it('should succeed', function(done){
+		it("should succeed", function(done){
 			agent.delete(`/${username}/${model}`).expect(200, done);
 		});
 
-		it('should fail if delete again', function(done){
+		it("should fail if delete again", function(done){
 			agent.delete(`/${username}/${model}`).expect(404, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
 				done(err);
@@ -383,23 +395,23 @@ describe('Model', function () {
 
 
 
-		it('should remove setting in settings collection', function() {
+		it("should remove setting in settings collection", function() {
 			return ModelSetting.findById({account: username, model: model}, model).then(setting => {
 				expect(setting).to.be.null;
 			});
 		});
 
 
-		it('should be removed from collaborator\'s model listing', function(done){
+		it("should be removed from collaborator's model listing", function(done){
 
 			const agent2 = request.agent(server);
 
 			async.series([
 				callback => {
-					agent2.post('/login').send({ username: 'testing', password: 'testing' }).expect(200, callback);
+					agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200, callback);
 				},
 				callback => {
-					agent2.get(`/testing.json`).expect(200, function(err, res){
+					agent2.get("/testing.json").expect(200, function(err, res){
 						
 						const account = res.body.accounts.find(account => account.account === username);
 						expect(account).to.not.exist;
@@ -415,21 +427,21 @@ describe('Model', function () {
 
 		});
 
-		it('should be removed from model group', function(done){
+		it("should be removed from model group", function(done){
 			agent.get(`/${username}.json`).expect(200, function(err, res){
 				
 				const account = res.body.accounts.find(account => account.account === username);
 				expect(account).to.exist;
 
-				const pg = account.projects.find(pg => pg.name === 'project1');
+				const pg = account.projects.find(pg => pg.name === "project1");
 				expect(pg).to.exist;
 
-				const myModel = pg.models.find(_model => _model.model === 'sample_project');
+				const myModel = pg.models.find(_model => _model.model === "sample_project");
 				expect(myModel).to.not.exist;
 
 				done(err);
 			});
 		});
 
-	})
+	});
 });

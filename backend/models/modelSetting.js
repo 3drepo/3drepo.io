@@ -98,11 +98,21 @@ schema.methods.updateProperties = function(updateObj){
 			case "topicTypes": {
 				const duplicateTopicTypes = {};
 				updateObj[key].forEach(topic => {
+
+					if (
+						topic === undefined || 
+						topic.value === undefined || 
+						topic.label === undefined
+					) {
+						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+					}
+				
 					if(duplicateTopicTypes[topic.value]){
 						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
 					} else {	
 						duplicateTopicTypes[topic.value] = topic;
 					}
+
 				});
 
 				this.properties[key] = updateObj[key];
