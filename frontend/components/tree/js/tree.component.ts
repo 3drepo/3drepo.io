@@ -277,28 +277,9 @@ class TreeController implements ng.IController {
 
 	public selectAndCentreNode(node: any) {
 
-		if (node.toggleState === this.TreeService.VISIBILITY_STATES.invisible) {
-			return;
+		if (node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible) {
+			this.ViewerService.zoomToHighlightedMeshes();
 		}
-
-		// Get everything selected and center to it
-		this.TreeService.getCurrentMeshHighlights().then((selectionMap) => {
-
-			if (Object.keys(selectionMap).length === 0) {
-				return;
-			}
-			const meshIDArrs = [];
-			const keys = Object.keys(selectionMap);
-			keys.forEach((key) => {
-				meshIDArrs.push({
-					model: key.replace("@", "."),
-					meshID: selectionMap[key].meshes
-				});
-			});
-
-			this.ViewerService.centreToPoint(meshIDArrs);
-
-		});
 
 	}
 
