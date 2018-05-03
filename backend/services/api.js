@@ -37,12 +37,6 @@ module.exports.createApp = function (serverConfig) {
 	// Express app
 	const app = express();
 
-	// Attach the encoders to the router
-	// require("../encoders/x3dom_encoder.js")
-	// 	.route(routes);
-	// require("../encoders/json_encoder.js")
-	// 	.route(routes);
-
 	app.disable("etag");
 
 	// put logger in req object
@@ -115,7 +109,6 @@ module.exports.createApp = function (serverConfig) {
 	// invoices handler
 	app.use("/:account", require("../routes/invoice"));
 	// maps handler
-	app.use("/os", require("../routes/osBuilding"));
 	app.use("/:account", require("../routes/maps"));
 	// payment api header
 	app.use("/payment", require("../routes/payment"));
@@ -140,15 +133,8 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
-	//mesh handler
-	app.use("/:account/:model", require("../routes/mesh"));
-	//texture handler
-	app.use("/:account/:model", require("../routes/texture"));
-
 	//history handler
 	app.use("/:account/:model", require("../routes/history"));
-
-	//app.use("/", routes.router);
 
 	app.use(function(err, req, res, next) {
 		if(err){

@@ -587,7 +587,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
-			data.viewpoint.group_id = data.group_id;
+			if (data.group_id || data.viewpoint.group_id) {
+				data.viewpoint.group_id = stringToUUID(data.group_id);
+			}
 			if (data.viewpoint.highlighted_group_id) {
 				data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
 			}

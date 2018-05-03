@@ -70,16 +70,20 @@ export class ViewerService {
 	}
 
 	public updateViewerSettings(settings) {
-		this.viewer.updateSettings(settings);
+		if (this.viewer) {
+			this.viewer.updateSettings(settings);
+		}
 	}
 
 	public updateClippingPlanes(params) {
-		this.viewer.updateClippingPlanes(
-			params.clippingPlanes,
-			params.fromClipPanel,
-			params.account,
-			params.model
-		);
+		if (this.viewer) {
+			this.viewer.updateClippingPlanes(
+				params.clippingPlanes,
+				params.fromClipPanel,
+				params.account,
+				params.model
+			);
+		}
 	}
 
 	// TODO: More EventService to be removed, but these functions broadcast
@@ -180,7 +184,9 @@ export class ViewerService {
 	}
 
 	public centreToPoint(params: any) {
-		this.viewer.centreToPoint(params);
+		if (this.viewer) {
+			this.viewer.centreToPoint(params);
+		}
 	}
 
 	public setCamera(params) {
@@ -204,10 +210,12 @@ export class ViewerService {
 	}
 
 	public changePinColours(params) {
-		this.viewer.changePinColours(
-			params.id,
-			params.colours
-		);
+		if (this.viewer) {
+			this.viewer.changePinColours(
+				params.id,
+				params.colours
+			);
+		}
 	}
 
 	public clearHighlights() {
@@ -217,12 +225,14 @@ export class ViewerService {
 	}
 
 	public getCurrentViewpoint(params) {
-		// Note the Info suffix
-		this.viewer.getCurrentViewpointInfo(
-			params.account,
-			params.model,
-			params.promise
-		);
+		if (this.viewer) {
+			// Note the Info suffix
+			this.viewer.getCurrentViewpointInfo(
+				params.account,
+				params.model,
+				params.promise
+			);
+		}
 	}
 
 	public addPin(params) {
@@ -254,11 +264,13 @@ export class ViewerService {
 	}
 
 	public getObjectsStatus(params) {
-		this.viewer.getObjectsStatus(
-			params.account,
-			params.model,
-			params.promise
-		);
+		if (this.viewer) {
+			this.viewer.getObjectsStatus(
+				params.account,
+				params.model,
+				params.promise
+			);
+		}
 	}
 
 	public highlightObjects(params)  {
@@ -286,7 +298,10 @@ export class ViewerService {
 	}
 
 	public getMultiSelectMode() {
-		return this.viewer.multiSelectMode;
+		if (this.viewer) {
+			return this.viewer.multiSelectMode;
+		}
+		return false;
 	}
 
 	public setMultiSelectMode(value)  {
@@ -406,11 +421,15 @@ export class ViewerService {
 	}
 
 	public activateMeasure() {
-		this.viewer.setMeasureMode(true);
+		if (this.viewer) {
+			this.viewer.setMeasureMode(true);
+		}
 	}
 
 	public disableMeasure() {
-		this.viewer.setMeasureMode(false);
+		if (this.viewer) {
+			this.viewer.setMeasureMode(false);
+		}
 	}
 
 	public callInit() {
@@ -567,7 +586,9 @@ export class ViewerService {
 	}
 
 	public getDefaultHighlightColor() {
-		return this.viewer.getDefaultHighlightColor();
+		if (this.viewer) {
+			return this.viewer.getDefaultHighlightColor();
+		}
 	}
 
 }
