@@ -49,16 +49,16 @@ describe("Model Settings", function(){
 
 		modelFactoryMock.setDB(new DB());
 
-	    mockgoose(mongoose).then(function() {
-	        mongoose.connect("mongodb://example.com/TestingDB", function(err) {
-	            done(err);
-	        });
-	    });
+		mockgoose(mongoose).then(function() {
+			mongoose.connect("mongodb://example.com/TestingDB", function(err) {
+				done(err);
+			});
+		});
 
 	});
 
 
-	describe("#updateProperties", function(){
+	describe("updateProperties", function(){
 
 		it("should have updateProperties function", function(){
 			let modelSetting = new ModelSetting();
@@ -98,14 +98,6 @@ describe("Model Settings", function(){
 		
 
 		});
-	});
-
-	describe("#updateProperties", function(){
-
-		it("should have updateProperties function", function(){
-			let modelSetting = new ModelSetting();
-			expect(modelSetting).to.have.property("updateProperties");
-		});
 
 		it("should fail to update properties with invalid types", function(){
 
@@ -119,9 +111,10 @@ describe("Model Settings", function(){
 			};
 
 			let modelSetting = new ModelSetting();
-			expect(modelSetting.updateProperties(props)).to.throw();
+			expect(() => { modelSetting.updateProperties(props) })).to.throw();
 
 		});
+
 	});
 
 	after(function(done){
