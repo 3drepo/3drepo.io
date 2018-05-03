@@ -90,6 +90,13 @@ class AccountModelSettingController implements ng.IController {
 
 	}
 
+	public newTopicType(chip) {
+		return {
+			value: chip.toLowerCase().replace(/ /g, "_"),
+			label: chip
+		};
+	}
+
 	public fetchModelSettings() {
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
@@ -124,7 +131,8 @@ class AccountModelSettingController implements ng.IController {
 					}
 
 					if (props.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(props.topicTypes);
+						console.log(props.topicTypes);
+						this.topicTypes = props.topicTypes;
 					}
 					if (props.code) {
 						this.code = props.code;
@@ -163,19 +171,7 @@ class AccountModelSettingController implements ng.IController {
 		this.showPage({page: "teamspaces", data: this.data});
 	}
 
-	/**
-	 * Convert a list of topic types to a string
-	 */
-	public convertTopicTypesToString(topicTypes) {
 
-		const result = [];
-
-		topicTypes.forEach((type) => {
-			result.push(type.label);
-		});
-
-		return result.join("\n");
-	}
 
 	/**
 	 * Update the view model name
@@ -222,7 +218,7 @@ class AccountModelSettingController implements ng.IController {
 			name: this.modelName,
 			unit: this.unit,
 			code: this.code,
-			topicTypes: this.topicTypes.replace(/\r/g, "").split("\n"),
+			topicTypes: this.topicTypes,
 			fourDSequenceTag: this.fourDSequenceTag
 		};
 
@@ -262,7 +258,7 @@ class AccountModelSettingController implements ng.IController {
 					this.updateModel();
 					this.message = "Saved";
 					if (response.data && response.data.properties && response.data.properties.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(response.data.properties.topicTypes);
+						this.topicTypes = response.data.properties.topicTypes;
 					}
 					this.oldUnit = this.unit;
 				} else {

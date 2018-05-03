@@ -40,7 +40,19 @@
 
 					div(layout="row" flex)
 						div(flex="50")
-							md-input-container.modelSettingInput(layout-fill layout-margin)
+							md-chips(
+								ng-model="vm.topicTypes"
+								name="topicTypes"
+								md-removable="true"
+								md-transform-chip="vm.newTopicType($chip)"
+								placeholder="Enter topic types...")
+
+								md-chip-template
+									strong {{$chip.label}}
+						
+
+
+							//md-input-container.modelSettingInput(layout-fill layout-margin)
 								label Issue topic types
 								textarea(type="text", ng-model="vm.topicTypes")
 								.inputHint One line per topic type
@@ -51,7 +63,7 @@
 								md-select(ng-model="vm.unit", ng-disabled="vm.oldUnit")
 									md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
 
-
+				br
 				h3.modelSettingSubtitle GIS Reference Information
 				br
 				table(
