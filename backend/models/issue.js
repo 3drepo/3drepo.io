@@ -772,7 +772,7 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 	//let image, sourceX, sourceY, sourceWidth, sourceHeight;
 
 	return new Promise((resolve, reject) => {
-		resolve();
+		resolve(pngBuffer);
 		// image = gm(pngBuffer).size((err, size) => {
 		// 	if(err){
 		// 		reject(err);
@@ -781,11 +781,11 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 		// 	}
 		// });
 
-	}).then(size => {
+	}).then(outputPngBuffer => {
 
 		console.log(sharp);
 
-		return pngBuffer;
+		return outputPngBuffer;
 		// destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
 
 		// if(size.width <= destWidth){
