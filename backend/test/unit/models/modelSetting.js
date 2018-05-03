@@ -99,7 +99,21 @@ describe("Model Settings", function(){
 
 		});
 
-		it("should fail to update properties with invalid types", function(){
+		it("should fail to update properties with an invalid type", function(){
+
+			let props =  {
+				unit: "metre",
+				topicTypes: [undefined],
+				code: "09ABC"
+			};
+
+			let modelSetting = new ModelSetting();
+			expect(() => { modelSetting.updateProperties(props); }).to.throw();
+
+		});
+
+
+		it("should fail to update properties with invalid type properties", function(){
 
 			let props =  {
 				unit: "metre",
@@ -111,7 +125,7 @@ describe("Model Settings", function(){
 			};
 
 			let modelSetting = new ModelSetting();
-			expect(() => { modelSetting.updateProperties(props) })).to.throw();
+			expect(() => { modelSetting.updateProperties(props); }).to.throw();
 
 		});
 
