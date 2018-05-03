@@ -170,8 +170,6 @@ class AccountModelSettingController implements ng.IController {
 		this.showPage({page: "teamspaces", data: this.data});
 	}
 
-
-
 	/**
 	 * Update the view model name
 	 */
