@@ -165,21 +165,6 @@
 	define("REPO_NODE_LABEL_MERGE_MAP_OFFSET", "offset");
 
 	//-----------------------------------------------------------------------------
-	//
-	// X3DOM defines
-	//
-	//-----------------------------------------------------------------------------
-	
-	define("X3DOM_SRC_BYTE", 5120);
-	define("X3DOM_SRC_UBYTE", 5121);
-	define("X3DOM_SRC_SHORT", 5122);
-	define("X3DOM_SRC_USHORT", 5123);
-	define("X3DOM_SRC_INT", 5124);
-	define("X3DOM_SRC_UINT", 5125);
-	define("X3DOM_SRC_FLOAT", 5126);
-	define("X3DOM_SRC_TRIANGLE", 4);
-
-	//-----------------------------------------------------------------------------
 	// Following fields are not stored in the repository,
 	// they are only implied!
 	// TODO: refactor name such as UNUSED_LABEL to distinguishe from DB fields!

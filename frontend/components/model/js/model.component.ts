@@ -169,6 +169,7 @@ class ModelController implements ng.IController {
 					console.error("Failed to load model: ", err);
 				});
 			} else {
+				this.loadModelSettings();
 				console.error("Failed to locate viewer");
 			}
 		} else {
