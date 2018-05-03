@@ -95,9 +95,19 @@ schema.methods.updateProperties = function(updateObj){
 	Object.keys(updateObj).forEach(key => {
 		if(!updateObj[key]) {return;}
 		switch (key) {
-			case "topicTypes":
+			case "topicTypes": {
+				const duplicateTopicTypes = {};
+				updateObj[key].forEach(topic => {
+					if(duplicateTopicTypes[topic.value]){
+						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+					} else {	
+						duplicateTopicTypes[topic.value] = topic;
+					}
+				});
+
 				this.properties[key] = updateObj[key];
 				break;
+			}
 			case "code":
 				if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
 					throw responseCodes.INVALID_MODEL_CODE;
