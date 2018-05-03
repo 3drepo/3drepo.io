@@ -769,65 +769,33 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 
 schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
 
-	//let image, sourceX, sourceY, sourceWidth, sourceHeight;
+	const image = sharp(pngBuffer);
 
-	return new Promise((resolve, reject) => {
-		resolve(pngBuffer);
-		// image = gm(pngBuffer).size((err, size) => {
-		// 	if(err){
-		// 		reject(err);
-		// 	} else {
-		// 		resolve(size);
-		// 	}
-		// });
+	return image.metadata().then(imageData => {
 
-	}).then(outputPngBuffer => {
+		destHeight = destHeight || Math.floor(destWidth / imageData.width * imageData.height);
 
-		console.log(sharp);
-
-		return outputPngBuffer;
-		// destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
-
-		// if(size.width <= destWidth){
-
-		// 	return pngBuffer;
-
-		// } else if (!crop){
-
-		// 	sourceX = 0;
-		// 	sourceY = 0;
-		// 	sourceWidth = size.width;
-		// 	sourceHeight = size.height;
-
-		// } else if (size.width > size.height){
+		if(imageData.width <= destWidth){
 			
-		// 	sourceY = 0;
-		// 	sourceHeight = size.height;
-		// 	sourceX = Math.round(size.width / 2 - size.height / 2);
-		// 	sourceWidth = sourceHeight;
+			return pngBuffer;
 
-		// 	image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
+		} else if (!crop) {
+			
+			return image
+				.resize(destWidth, destHeight)
+				.png()
+				.toBuffer();
 
-		// } else {
+		}
 
-		// 	sourceX = 0;
-		// 	sourceWidth = size.width;
-		// 	sourceY = (size.height / 2 - size.width / 2);
-		// 	sourceHeight = sourceWidth;
+		return image
+			.crop(sharp.gravity.centre)
+			.resize(destWidth, destHeight)
+			.png()
+			.toBuffer();
 
-		// 	image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
-		// }
-
-		// return new Promise((resolve, reject) => {
-		// 	image.resize(destWidth, destHeight, "!").toBuffer("PNG", (err, buffer) => {
-		// 		if (err) {
-		// 			reject(err);
-		// 		} else {
-		// 			resolve(buffer);
-		// 		}
-		// 	});
-		// });
 	});
+
 };
 
 schema.methods.updateComment = function(commentIndex, data){
