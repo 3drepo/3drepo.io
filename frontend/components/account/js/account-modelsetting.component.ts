@@ -131,7 +131,6 @@ class AccountModelSettingController implements ng.IController {
 					}
 
 					if (props.topicTypes) {
-						console.log(props.topicTypes);
 						this.topicTypes = props.topicTypes;
 					}
 					if (props.code) {
