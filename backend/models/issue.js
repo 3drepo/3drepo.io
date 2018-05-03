@@ -41,7 +41,6 @@ let xml2js = require("xml2js");
 let systemLogger = require("../logger.js").systemLogger;
 let Group = require("./group");
 let Meta = require("./meta");
-let gm = require("gm");
 let C = require("../constants");
 
 let xmlBuilder = new xml2js.Builder({
@@ -769,61 +768,62 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 
 schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
 
-	let image, sourceX, sourceY, sourceWidth, sourceHeight;
+	//let image, sourceX, sourceY, sourceWidth, sourceHeight;
 
 	return new Promise((resolve, reject) => {
-
-		image = gm(pngBuffer).size((err, size) => {
-			if(err){
-				reject(err);
-			} else {
-				resolve(size);
-			}
-		});
+		resolve();
+		// image = gm(pngBuffer).size((err, size) => {
+		// 	if(err){
+		// 		reject(err);
+		// 	} else {
+		// 		resolve(size);
+		// 	}
+		// });
 
 	}).then(size => {
 
-		destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
+		return pngBuffer;
+		// destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
 
-		if(size.width <= destWidth){
+		// if(size.width <= destWidth){
 
-			return pngBuffer;
+		// 	return pngBuffer;
 
-		} else if (!crop){
+		// } else if (!crop){
 
-			sourceX = 0;
-			sourceY = 0;
-			sourceWidth = size.width;
-			sourceHeight = size.height;
+		// 	sourceX = 0;
+		// 	sourceY = 0;
+		// 	sourceWidth = size.width;
+		// 	sourceHeight = size.height;
 
-		} else if (size.width > size.height){
+		// } else if (size.width > size.height){
 			
-			sourceY = 0;
-			sourceHeight = size.height;
-			sourceX = Math.round(size.width / 2 - size.height / 2);
-			sourceWidth = sourceHeight;
+		// 	sourceY = 0;
+		// 	sourceHeight = size.height;
+		// 	sourceX = Math.round(size.width / 2 - size.height / 2);
+		// 	sourceWidth = sourceHeight;
 
-			image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
+		// 	image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
 
-		} else {
+		// } else {
 
-			sourceX = 0;
-			sourceWidth = size.width;
-			sourceY = (size.height / 2 - size.width / 2);
-			sourceHeight = sourceWidth;
+		// 	sourceX = 0;
+		// 	sourceWidth = size.width;
+		// 	sourceY = (size.height / 2 - size.width / 2);
+		// 	sourceHeight = sourceWidth;
 
-			image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
-		}
+		// 	image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
+		// }
 
-		return new Promise((resolve, reject) => {
-			image.resize(destWidth, destHeight, "!").toBuffer("PNG", (err, buffer) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve(buffer);
-				}
-			});
-		});
+		// return new Promise((resolve, reject) => {
+		// 	image.resize(destWidth, destHeight, "!").toBuffer("PNG", (err, buffer) => {
+		// 		if (err) {
+		// 			reject(err);
+		// 		} else {
+		// 			resolve(buffer);
+		// 		}
+		// 	});
+		// });
 	});
 };
 
