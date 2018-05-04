@@ -32,7 +32,6 @@ Dependencies
 * npm + [yarn](https://yarnpkg.com/lang/en/docs/install/)
 * MongoDB
 * RabbitMQ 
-* graphicsmagick
 * [3DRepoBouncer](https://github.com/3drepo/3drepobouncer)
 
 Installation
