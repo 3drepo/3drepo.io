@@ -56,3 +56,7 @@ revisions {
     color: rgba(0, 0, 0, 0.5);
     margin: -35px 0 0;
 }
+
+.revisionsDialog .revisionDate {
+    color: rgba(0, 0, 0, 0.5);
+}
