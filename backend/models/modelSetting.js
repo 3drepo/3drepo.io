@@ -104,7 +104,7 @@ schema.methods.updateProperties = function(updateObj){
 						topic.value === undefined || 
 						topic.label === undefined
 					) {
-						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+						throw responseCodes.ISSUE_INVALID_TOPIC_TYPE;
 					}
 				
 					if(duplicateTopicTypes[topic.value]){

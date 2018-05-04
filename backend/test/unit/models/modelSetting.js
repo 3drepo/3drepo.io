@@ -20,20 +20,11 @@ let chai = require("chai");
 let expect = require("chai").expect;
 let mongoose = require("mongoose");
 let mockgoose = require("mockgoose");
-let _ = require("lodash");
-
-
 let proxyquire = require("proxyquire");
 
 let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", { 
 	"mongoose": mongoose, 
 });
-
-
-
-let utils = require("../mock/utils");
-
-let sinon = require("sinon");
 
 let ModelSetting = proxyquire("../../../models/modelSetting", { 
 	"mongoose": mongoose, 
