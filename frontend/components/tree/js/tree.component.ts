@@ -54,6 +54,7 @@ class TreeController implements ng.IController {
 	private latestSearch: string;
 	private showFilter: boolean;
 	private nodeHeight = 45;
+	private lastSelection: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -277,8 +278,11 @@ class TreeController implements ng.IController {
 
 	public selectAndCentreNode(node: any) {
 
-		if (node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible) {
-			this.ViewerService.zoomToHighlightedMeshes();
+		const notInvisible = node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible;
+		if (notInvisible && this.lastSelection) {
+			this.lastSelection.then(() => {
+				this.ViewerService.zoomToHighlightedMeshes();
+			});
 		}
 
 	}
@@ -346,12 +350,14 @@ class TreeController implements ng.IController {
 		if (this.ignoreSelection($event, node)) {
 			return;
 		}
-		return this.TreeService.selectNodes(
+		this.lastSelection = this.TreeService.selectNodes(
 			[node],
 			this.MultiSelectService.isMultiMode(),
 			undefined,
 			false
 		);
+
+		return this.lastSelection;
 	}
 
 	public updateTopIndex(selectedIndex) {
