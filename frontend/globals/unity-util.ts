@@ -123,7 +123,10 @@ export class UnityUtil {
 	 * Check if an error is Unity related
 	 */
 	public static isUnityError(err) {
-		const checks = ["Array buffer allocation failed", "Invalid typed array length", "Unity", "unity"];
+		const checks = [
+			"Array buffer allocation failed", "Invalid typed array length",
+			"Unity", "unity", "emscripten", "blob:http"
+		];
 		const hasUnityError = !checks.every((check) => err.indexOf(check) === -1);
 		return hasUnityError;
 	}

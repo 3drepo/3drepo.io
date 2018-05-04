@@ -86,6 +86,7 @@ class TreeController implements ng.IController {
 		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
 		this.allNodes = [];
+		this.initTreeOnReady();
 		this.watchers();
 	}
 
@@ -95,6 +96,7 @@ class TreeController implements ng.IController {
 
 	public watchers() {
 
+		// TODO: Remove the EventService, just use the ViewerService instead
 		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
@@ -127,17 +129,6 @@ class TreeController implements ng.IController {
 				this.TreeService.clearCurrentlySelected();
 				this.GroupsService.clearSelectionHighlights();
 				this.nodes.forEach((n) => n.selected = false);
-			} else if (event.type === this.EventService.EVENT.TREE_READY) {
-
-				this.allNodes = this.TreeService.getAllNodes();
-				this.nodes = this.allNodes;
-				this.showTree = true;
-				this.showProgress = false;
-				this.initNodesToShow();
-				this.setupInfiniteItemsFilter();
-				this.TreeService.expandFirstNode();
-				this.setContentHeight(this.fetchNodesToShow());
-				this.$timeout(); // Force digest
 			}
 		});
 
@@ -205,6 +196,20 @@ class TreeController implements ng.IController {
 				}
 			});
 
+	}
+
+	public initTreeOnReady() {
+		this.TreeService.onReady().then(() => {
+			this.allNodes = this.TreeService.getAllNodes();
+			this.nodes = this.allNodes;
+			this.showTree = true;
+			this.showProgress = false;
+			this.initNodesToShow();
+			this.setupInfiniteItemsFilter();
+			this.TreeService.expandFirstNode();
+			this.setContentHeight(this.fetchNodesToShow());
+			this.$timeout(); // Force digest
+		});
 	}
 
 	public showTreeInPane() {
