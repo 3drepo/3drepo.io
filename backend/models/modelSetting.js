@@ -93,37 +93,35 @@ schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 schema.methods.updateProperties = function(updateObj){
 	Object.keys(updateObj).forEach(key => {
-		if(!updateObj[key]) {return;}
+		if(!updateObj[key]) return;
 		switch (key) {
-			case "topicTypes": {
-				const duplicateTopicTypes = {};
-				updateObj[key].forEach(topic => {
+			case "topicTypes":
+				let topicTypes = {};
+				updateObj[key].forEach(type => {
 
-					if (
-						topic === undefined || 
-						topic.value === undefined || 
-						topic.label === undefined
-					) {
-						throw responseCodes.ISSUE_INVALID_TOPIC_TYPE;
+					if(!type || !type.trim()){
+						return;
 					}
-				
-					if(duplicateTopicTypes[topic.value]){
+
+					//generate value from label
+					let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");;
+
+					if(topicTypes[value]){
 						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
 					} else {	
-						duplicateTopicTypes[topic.value] = topic;
+						topicTypes[value] = {
+							value,
+							label: type.trim()
+						};
 					}
-
 				});
 
-				this.properties[key] = updateObj[key];
+				this.properties[key] = _.values(topicTypes);
 				break;
-			}
 			case "code":
 				if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
 					throw responseCodes.INVALID_MODEL_CODE;
 				}
-				this.properties[key] = updateObj[key];
-				break;
 			case "unit":
 				this.properties[key] = updateObj[key];
 				break;

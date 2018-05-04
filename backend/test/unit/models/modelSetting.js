@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -17,69 +17,73 @@
  */
 
 let chai = require("chai");
-let expect = require("chai").expect;
-let mongoose = require("mongoose");
-let mockgoose = require("mockgoose");
-let proxyquire = require("proxyquire");
+let expect = require('chai').expect;
+let mongoose = require('mongoose');
+let mockgoose = require('mockgoose');
+let _ = require('lodash');
 
-let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", { 
-	"mongoose": mongoose, 
+
+let proxyquire = require('proxyquire');
+
+let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
+	'mongoose': mongoose, 
 });
 
-let ModelSetting = proxyquire("../../../models/modelSetting", { 
-	"mongoose": mongoose, 
-	"./factory/modelFactory":  modelFactoryMock,
+
+
+let utils = require("../mock/utils");
+
+let sinon = require('sinon');
+
+let ModelSetting = proxyquire('../../../models/modelSetting', { 
+	'mongoose': mongoose, 
+	'./factory/modelFactory':  modelFactoryMock,
 });
 
 
-let DB = require("../mock/db");
+let DB = require('../mock/db');
 
-describe("Model Settings", function(){
+describe('Model Settings', function(){
 
 	before(function(done) {
 
 		modelFactoryMock.setDB(new DB());
 
-		mockgoose(mongoose).then(function() {
-			mongoose.connect("mongodb://example.com/TestingDB", function(err) {
-				done(err);
-			});
-		});
+	    mockgoose(mongoose).then(function() {
+	        mongoose.connect('mongodb://example.com/TestingDB', function(err) {
+	            done(err);
+	        });
+	    });
 
 	});
 
 
-	describe("updateProperties", function(){
+	describe('#updateProperties', function(){
 
-		it("should have updateProperties function", function(){
+		it('should have updateProperties function', function(){
 			let modelSetting = new ModelSetting();
-			expect(modelSetting).to.have.property("updateProperties");
+			expect(modelSetting).to.have.property('updateProperties');
 		});
 
-		it("should update properties", function(){
+		it('should update properties', function(){
 
-			let props =  {
+			let props = {
 				unit: "metre",
-				topicTypes: [{
-					label: "For info",
-					value: "for_info"
-				}, {
-					label: "VR",
-					value: "vr"
-				}],
-				code: "09ABC"
+				topicTypes: ['For info', 'VR'],
+				code: '09ABC'
+
 			};
 
 			let expectedReturn = {
 				unit: "metre",
 				topicTypes: [{
-					label: "For info",
-					value: "for_info"
+					label: 'For info',
+					value: 'for_info'
 				}, {
-					label: "VR",
-					value: "vr"
+					label: 'VR',
+					value: 'vr'
 				}],
-				code: "09ABC"
+				code: '09ABC'
 			};
 
 			let modelSetting = new ModelSetting();
@@ -89,37 +93,6 @@ describe("Model Settings", function(){
 		
 
 		});
-
-		it("should fail to update properties with an invalid type", function(){
-
-			let props =  {
-				unit: "metre",
-				topicTypes: [undefined],
-				code: "09ABC"
-			};
-
-			let modelSetting = new ModelSetting();
-			expect(() => { modelSetting.updateProperties(props); }).to.throw();
-
-		});
-
-
-		it("should fail to update properties with invalid type properties", function(){
-
-			let props =  {
-				unit: "metre",
-				topicTypes: [{
-					label: undefined,
-					value: undefined
-				}],
-				code: "09ABC"
-			};
-
-			let modelSetting = new ModelSetting();
-			expect(() => { modelSetting.updateProperties(props); }).to.throw();
-
-		});
-
 	});
 
 	after(function(done){
