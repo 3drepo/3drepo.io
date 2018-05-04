@@ -131,9 +131,9 @@ class AccountModelSettingController implements ng.IController {
 					}
 
 					if (props.topicTypes) {
-						console.log(props.topicTypes)
 						this.topicTypes = props.topicTypes;
 					}
+
 					if (props.code) {
 						this.code = props.code;
 					}
@@ -212,8 +212,6 @@ class AccountModelSettingController implements ng.IController {
 	 */
 	public save() {
 
-		console.log(this.topicTypes);
-
 		const newTopicTypes = this.topicTypes.map((t) => t.label );
 
 		const data: any = {
@@ -260,7 +258,6 @@ class AccountModelSettingController implements ng.IController {
 					this.updateModel();
 					this.message = "Saved";
 					if (response.data && response.data.properties && response.data.properties.topicTypes) {
-						console.log(response.data.properties.topicTypes)
 						this.topicTypes = response.data.properties.topicTypes;
 					}
 					this.oldUnit = this.unit;
