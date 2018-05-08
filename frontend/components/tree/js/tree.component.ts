@@ -285,8 +285,10 @@ class TreeController implements ng.IController {
 
 		const notInvisible = node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible;
 		if (notInvisible && this.lastSelection) {
-			this.lastSelection.then(() => {
-				this.ViewerService.zoomToHighlightedMeshes();
+			this.$timeout(() => {
+				this.lastSelection.then(() => {
+					this.ViewerService.zoomToHighlightedMeshes();
+				});
 			});
 		}
 
