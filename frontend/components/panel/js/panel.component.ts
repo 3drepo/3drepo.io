@@ -64,13 +64,20 @@ class PanelController implements ng.IController {
 		this.resize(); // We need to set the correct height for the issues
 		this.bindEvents();
 
-		this.contentItems = this.PanelService.issuesPanelCard[this.position];
+		this.PanelService.reset();
+		this.contentItems = this.PanelService.panelCards[this.position];
+
 		this.setupShownCards();
 		this.hideLastItemGap();
 
 		// Setup watchers for this component
 		this.watchers();
 
+	}
+
+	public $onDestroy() {
+		this.PanelService.reset();
+		this.contentItems = [];
 	}
 
 	public watchers() {
@@ -89,29 +96,11 @@ class PanelController implements ng.IController {
 			}
 		}, true);
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
-
-			if (event.type === this.EventService.EVENT.TOGGLE_ELEMENTS) {
-				this.showPanel = !this.showPanel;
-			} else if (event.type === this.EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
-
-				const item = this.contentItems.find((content) => {
-					return content.type === event.value.type;
-				});
-
-				// TODO: This is ugly, why are we doing this?
-				if (item && item.menu && event.value) {
-					event.value.menu.forEach((newItem) => {
-						const exists = item.menu.find((oldItem) => {
-							return oldItem.role === newItem.role;
-						});
-						if (!exists) {
-							item.menu.push(newItem);
-						}
-					});
-				}
-
-			}
+		this.$scope.$watch(() => {
+			return this.PanelService.panelCards;
+		},
+		() => {
+			this.contentItems = this.PanelService.panelCards[this.position];
 		});
 
 		this.$scope.$watch(() => this.TreeService.getHideIfc(),

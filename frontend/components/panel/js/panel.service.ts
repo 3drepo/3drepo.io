@@ -22,18 +22,19 @@ export class PanelService {
 		"TreeService"
 	];
 
-	private issuesPanelCard: any;
+	private panelCards: any;
+	private templatepanelCards: any;
 
 	constructor(
 		private EventService: any,
 		private TreeService: any
 	) {
-		this.issuesPanelCard = {
+		this.panelCards = {
 			left: [],
 			right: []
 		};
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "issues",
 			title: "Issues",
 			showLiteMode: true,
@@ -81,7 +82,7 @@ export class PanelService {
 				{
 					hidden: false,
 					value: "showClosed",
-					label: "Show resolved issues",
+					label: "Show closed issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
@@ -111,7 +112,7 @@ export class PanelService {
 			add: true
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "groups",
 			title: "Groups",
 			showLiteMode: true,
@@ -123,7 +124,7 @@ export class PanelService {
 			options: []
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "tree",
 			title: "Tree",
 			showLiteMode: true,
@@ -165,7 +166,7 @@ export class PanelService {
 			]
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "clip",
 			title: "Clip",
 			showLiteMode: false,
@@ -178,7 +179,7 @@ export class PanelService {
 			]
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "compare",
 			title: "Compare",
 			showLiteMode: false,
@@ -190,7 +191,7 @@ export class PanelService {
 			options: []
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "gis",
 			title: "GIS",
 			showLiteMode: false,
@@ -202,7 +203,7 @@ export class PanelService {
 			options: []
 		});
 
-		this.issuesPanelCard.right.push({
+		this.panelCards.right.push({
 			type: "docs",
 			title: "Meta Data",
 			show: false,
@@ -215,11 +216,54 @@ export class PanelService {
 			]
 		});
 
+		this.memoizepanelCards();
+
+	}
+
+	public setPanelMenu(side, type, menu) {
+
+		const item = this.panelCards[side].find((content) => {
+			return content.type === type;
+		});
+
+		// TODO: This is ugly, why are we doing this?
+		if (item && item.menu) {
+			menu.forEach((newItem) => {
+				const exists = item.menu.find((oldItem) => {
+					return oldItem.role === newItem.role;
+				});
+				if (!exists) {
+					item.menu.push(newItem);
+				}
+			});
+		}
+
+	}
+
+	public createRoleFilters(role) {
+		return {
+			value: "filterRole",
+			role: role._id,
+			label: role._id,
+			keepCheckSpace: true,
+			toggle: true,
+			selected: true,
+			firstSelected: false,
+			secondSelected: false
+		}
+	}
+
+	public memoizepanelCards() {
+		this.templatepanelCards = angular.copy(this.panelCards);
+	}
+
+	public reset() {
+		this.panelCards = angular.copy(this.templatepanelCards);
 	}
 
 	public hideSubModels(issuesCardIndex, hide) {
 
-		this.issuesPanelCard.left[issuesCardIndex].menu
+		this.panelCards.left[issuesCardIndex].menu
 			.forEach((item) => {
 				if (item.value === "showSubModels") {
 					item.hidden = hide;
@@ -230,7 +274,7 @@ export class PanelService {
 
 	public getCardIndex(type) {
 		let index = -1;
-		const obj = this.issuesPanelCard.left.forEach((panel, i) => {
+		const obj = this.panelCards.left.forEach((panel, i) => {
 			if (panel.type === type) {
 				index = i;
 			}
@@ -243,7 +287,7 @@ export class PanelService {
 		const issuesCardIndex = this.getCardIndex("issues"); // index of tree panel
 		const menuItemIndex = this.getCardIndex("issues"); // index of hideIfc
 
-		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
+		const hideIfcMenuItem = this.panelCards.left[issuesCardIndex]
 			.menu[menuItemIndex];
 
 		// Change state if different

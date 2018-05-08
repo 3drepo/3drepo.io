@@ -32,7 +32,8 @@ class IssuesController implements ng.IController {
 		"ClientConfigService",
 		"AnalyticService",
 		"DialogService",
-		"ViewerService"
+		"ViewerService",
+		"PanelService"
 	];
 
 	private model: string;
@@ -81,7 +82,8 @@ class IssuesController implements ng.IController {
 		private ClientConfigService,
 		private AnalyticService,
 		private DialogService,
-		private ViewerService
+		private ViewerService,
+		private PanelService
 	) {}
 
 	public $onInit() {
@@ -172,22 +174,10 @@ class IssuesController implements ng.IController {
 
 				const menu = [];
 				data.forEach((role) => {
-					menu.push({
-						value: "filterRole",
-						role: role._id,
-						label: role._id,
-						keepCheckSpace: true,
-						toggle: true,
-						selected: true,
-						firstSelected: false,
-						secondSelected: false
-					});
+					menu.push(this.PanelService.createRoleFilters(role));
 				});
 
-				this.EventService.send(this.EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS, {
-					type: "issues",
-					menu
-				});
+				this.PanelService.setPanelMenu("left", "issues", menu);
 
 			})
 			.catch((error) => {
