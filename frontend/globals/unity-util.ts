@@ -860,4 +860,11 @@ export class UnityUtil {
 		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
+	/**
+	 * Zoom to highlighted meshes
+	 */
+	public static zoomToHighlightedMeshes() {
+		UnityUtil.toUnity("ZoomToHighlightedMeshes", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
 }
