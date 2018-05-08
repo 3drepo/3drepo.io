@@ -73,9 +73,10 @@ export class PanelService {
 					firstSelectedIcon: "fa-sort-amount-desc",
 					secondSelectedIcon: "fa-sort-amount-asc",
 					toggle: false,
-					selected: true,
+					selected: false,
 					firstSelected: true,
-					secondSelected: false
+					secondSelected: false,
+					keepCheckSpace: false
 				},
 				{
 					hidden: false,
@@ -84,7 +85,8 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
+					keepCheckSpace: true
 				},
 				{
 					hidden: false,
