@@ -20,41 +20,49 @@
 					div(layout="row" flex)
 						div(flex="50")
 							md-input-container.modelSettingInput(layout-fill layout-margin)
+								label Model ID
+								input(ng-disabled="true" type="text", ng-model="vm.modelId")
+						div(flex="50")
+							md-input-container.modelSettingInput(layout-fill layout-margin)
 								label Model name
 								input(type="text", ng-model="vm.modelName")
 
+					div(layout="row" flex)
 						div(flex="50")
 							md-input-container.modelSettingInput(layout-fill layout-margin)
 								label Model type
 								input(type="text", ng-model="vm.modelType", disabled)
-					div(layout="row" flex)
 						div(flex="50")
 							md-input-container.modelSettingInput(layout-fill layout-margin)
 								label Model code
 								input(type="text", ng-model="vm.code", maxlength=5)
 
+					div(layout="row" flex)
 						div(flex="50")
 							md-input-container.modelSettingInput(layout-fill layout-margin)
 								label 4D Sequence Tag
 								input(type="text", ng-model="vm.fourDSequenceTag")
-
-					div(layout="row" flex)
-						div(flex="50")
-							md-chips(
-								ng-model="vm.topicTypes"
-								name="topicTypes"
-								md-removable="true"
-								md-transform-chip="vm.newTopicType($chip)"
-								placeholder="Enter topic types...")
-
-								md-chip-template
-									strong {{$chip.label}}
-
+						
 						div(flex="50")
 							md-input-container.modelSettingInput(layout-fill layout-margin)
 								label Unit
 								md-select(ng-model="vm.unit", ng-disabled="vm.oldUnit")
 									md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+				div(layout="column" layout-align="center center", flex="90")
+					md-chips(
+						style="min-width: 90%;"
+						flex="90"
+						layout-align="center center"
+						ng-model="vm.topicTypes"
+						name="topicTypes"
+						md-removable="true"
+						md-transform-chip="vm.createTopicType($chip)"
+						placeholder="Enter topic types...")
+
+						md-chip-template
+							strong {{$chip.label}}
+
 
 				br
 				h3.modelSettingSubtitle GIS Reference Information

@@ -90,7 +90,7 @@ class AccountModelSettingController implements ng.IController {
 
 	}
 
-	public newTopicType(chip) {
+	public createTopicType(chip) {
 		return {
 			value: chip.toLowerCase().replace(/ /g, "_"),
 			label: chip
@@ -100,6 +100,8 @@ class AccountModelSettingController implements ng.IController {
 	public fetchModelSettings() {
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
+
+				console.log(response.data);
 
 				if (response.status === 200 && response.data && response.data.properties) {
 
@@ -124,6 +126,10 @@ class AccountModelSettingController implements ng.IController {
 							this.referencePoints.position.z = -1 * reference.position[1];
 							this.referencePoints.position.y = -1 * reference.position[2];
 						}
+					}
+
+					if (response.data.model) {
+						this.modelId = response.data.model;
 					}
 
 					if (response.data.type) {
