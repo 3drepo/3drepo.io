@@ -198,6 +198,7 @@ class TreeController implements ng.IController {
 
 	}
 
+
 	public initTreeOnReady() {
 		this.TreeService.onReady().then(() => {
 			this.allNodes = this.TreeService.getAllNodes();
@@ -427,6 +428,7 @@ class TreeController implements ng.IController {
 					this.updateTopIndex(selectedIndex);
 				});
 		}
+
 
 	}
 

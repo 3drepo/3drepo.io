@@ -148,7 +148,7 @@ const sw = function(callback, verbose) {
       `${dir}/unity/**/*.{js,html,data,mem,css,png,jpg}`,
     ],
     stripPrefix: `${dir}`,
-    verbose: false,
+    verbose: verbose,
   }, callback);
 }
 
@@ -182,11 +182,12 @@ gulp.task("reload", function() {
 // Watch for changes and live reload in development
 gulp.task('watch', function() {
   isWatch = true;
-  livereload.listen({host: 'localhost', port: '35729', start: true })
+  livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
 
   // WATCHERS
   gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev", "reload"]))
+  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
+  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))

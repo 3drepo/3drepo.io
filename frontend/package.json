@@ -9,8 +9,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "gulp": "gulp",
+    "kill": "pkill -f -9 webpack && pkill -f -9 gulp",
     "build": "webpack --config webpack.prod.config.js && gulp build",
-    "watch": "webpack --watch --config webpack.dev.config.js & gulp watch &",
+    "watch": "webpack --watch --config webpack.dev.config.js & gulp watch && fg",
     "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
     "wdm:update": "webdriver-manager update --standalone",
