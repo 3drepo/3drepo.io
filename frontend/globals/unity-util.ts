@@ -283,7 +283,6 @@ export class UnityUtil {
 	}
 
 	public static navMethodChanged(newNavMode) {
-		console.log("navMethodChanged in UnityUtil", newNavMode);
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
 			UnityUtil.viewer.navMethodChanged(newNavMode);
 		}
