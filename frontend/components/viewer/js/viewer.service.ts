@@ -21,6 +21,7 @@ export class ViewerService {
 
 	public static $inject: string[] = [
 		"$q",
+		"$timeout",
 
 		"ClientConfigService",
 		"APIService",
@@ -38,6 +39,7 @@ export class ViewerService {
 
 	constructor(
 		public $q: ng.IQService,
+		public $timeout: ng.ITimeoutService,
 
 		public ClientConfigService: any,
 		public APIService: any,
@@ -297,6 +299,7 @@ export class ViewerService {
 
 	public getNavMode() {
 		if (this.viewer) {
+			this.$timeout();
 			return this.viewer.currentNavMode;
 		}
 	}

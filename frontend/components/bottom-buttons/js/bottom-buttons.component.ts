@@ -54,11 +54,13 @@ class BottomButtonsController implements ng.IController {
 		this.showButtons = true;
 
 		this.navigationOptions = {
-			Helicopter : {
-				mode: Viewer.NAV_MODES.HELICOPTER
+			HELICOPTER : {
+				mode: Viewer.NAV_MODES.HELICOPTER,
+				label: "Helicopter"
 			},
-			Turntable : {
-				mode: Viewer.NAV_MODES.TURNTABLE
+			TURNTABLE : {
+				mode: Viewer.NAV_MODES.TURNTABLE,
+				label: "Turntable"
 			}
 		};
 
@@ -107,7 +109,7 @@ class BottomButtonsController implements ng.IController {
 			click: () => { this.focusMode(); }
 		});
 
-		this.selectedMode = "Turntable";
+		this.selectedMode = this.navigationOptions.TURNTABLE.mode;
 		this.setNavigationMode(this.selectedMode);
 
 		this.isFocusMode = false;
@@ -132,11 +134,7 @@ class BottomButtonsController implements ng.IController {
 			return this.ViewerService.getNavMode();
 		}, (newNav, oldNav) => {
 			if (newNav && newNav !== oldNav) {
-				if (newNav === Viewer.NAV_MODES.HELICOPTER) {
-					this.selectedMode = "Helicopter";
-				} else if (newNav === Viewer.NAV_MODES.TURNTABLE) {
-					this.selectedMode = "Turntable";
-				}
+				this.selectedMode = newNav;
 			}
 		}, true);
 	}

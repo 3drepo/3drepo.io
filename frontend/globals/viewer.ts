@@ -23,11 +23,8 @@ declare const Module;
 export class Viewer {
 
 	public static NAV_MODES = {
-		FLY: "FLY",
 		HELICOPTER: "HELICOPTER",
-		TURNTABLE: "TURNTABLE",
-		WALK: "WALK",
-		WAYFINDER: "WAYFINDER"
+		TURNTABLE: "TURNTABLE"
 	};
 
 	public static EVENT = {
