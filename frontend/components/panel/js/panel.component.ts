@@ -88,7 +88,6 @@ class PanelController implements ng.IController {
 
 					if (newValue[i].show !== oldValue[i].show) {
 						this.setupShownCards();
-						// this.getContentItemShownFromType();
 						break;
 					}
 
@@ -100,8 +99,10 @@ class PanelController implements ng.IController {
 			return this.PanelService.panelCards;
 		},
 		() => {
-			this.contentItems = this.PanelService.panelCards[this.position];
-		});
+			if (this.PanelService.panelCards && this.position) {
+				this.contentItems = this.PanelService.panelCards[this.position];
+			}
+		}, true);
 
 		this.$scope.$watch(() => this.TreeService.getHideIfc(),
 			(hideIfc) => {
