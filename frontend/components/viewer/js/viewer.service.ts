@@ -299,7 +299,7 @@ export class ViewerService {
 
 	public getNavMode() {
 		if (this.viewer) {
-			this.$timeout();
+			//this.$timeout();
 			return this.viewer.currentNavMode;
 		}
 	}
