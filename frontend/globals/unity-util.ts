@@ -283,8 +283,10 @@ export class UnityUtil {
 	}
 
 	public static navMethodChanged(newNavMode) {
-		// TODO: do some front end magic to update the navigation button
-		// newNavMode can currently be "Turntable" or "Helicopter"
+		console.log("navMethodChanged in UnityUtil", newNavMode);
+		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
+			UnityUtil.viewer.navMethodChanged(newNavMode);
+		}
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {

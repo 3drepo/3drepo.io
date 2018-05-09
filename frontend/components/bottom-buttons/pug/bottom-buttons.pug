@@ -51,13 +51,13 @@ div(
 			.viewingOptionButtonHolder(layout-align="center center")
 				.viewingOptionButtons(
 					layout="column"
-					ng-if="vm.showViewingOptions && button.isViewingOptionButton"
+					ng-if="vm.showNavigationOptions && button.isViewingOptionButton"
 					layout-align="center center")
 
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
-						ng-repeat="(mode, value) in vm.viewingOptions"
+						ng-repeat="(mode, value) in vm.navigationOptions"
 						ng-if="mode !== vm.selectedMode"
-						ng-click="vm.setViewingOption(mode);"
+						ng-click="vm.setNavigationMode(mode);"
 						aria-label="{{mode}}")
 	
 						// HELICOPTER
