@@ -456,7 +456,7 @@ export class GroupsService {
 
 		if (this.state.selectedGroup.objects && !this.state.selectedGroup.new) {
 
-			const currentSelected = this.TreeService.getCurrentSelectedNodes().concat();
+			const currentSelected = this.TreeService.getCurrentSelectedNodesAsArray();
 			const groupObjects = this.state.selectedGroup.objects.concat();
 
 			// Find the nodes from the group that are currently selected

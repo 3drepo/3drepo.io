@@ -598,6 +598,10 @@ export class Viewer {
 		}
 	}
 
+	public zoomToHighlightedMeshes() {
+		UnityUtil.zoomToHighlightedMeshes();
+	}
+
 	/****************************************************************************
 	 * Clipping planes
 	 ****************************************************************************/
