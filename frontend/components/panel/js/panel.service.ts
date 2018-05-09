@@ -30,8 +30,25 @@ interface IPanelCard {
 	fixedHeight: boolean;
 	options: any[];
 	add?: boolean;
-	menu?: any[];
+	menu?: IMenuItem[];
 	minHeight?: number;
+}
+
+interface IMenuItem {
+	hidden: boolean;
+	label: string;
+	value?: string;
+	selected?: boolean;
+	firstSelectedIcon?: string;
+	secondSelectedIcon?: string;
+	toggle?: boolean;
+	firstSelected?: boolean;
+	secondSelected?: boolean;
+	keepCheckSpace?: boolean;
+	noToggle?: boolean;
+	icon?: string;
+	divider?: boolean;
+	upperDivider?: boolean;
 }
 
 export class PanelService {
