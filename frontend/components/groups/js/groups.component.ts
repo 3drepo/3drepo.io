@@ -141,7 +141,7 @@ class GroupsController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() => {
+		this.$scope.$watchCollection(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
 
@@ -149,7 +149,7 @@ class GroupsController implements ng.IController {
 				this.changed = true;
 			});
 
-		}, true);
+		});
 
 	}
 

@@ -54,6 +54,7 @@ class TreeController implements ng.IController {
 	private latestSearch: string;
 	private showFilter: boolean;
 	private nodeHeight = 45;
+	private lastSelection: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -265,42 +266,31 @@ class TreeController implements ng.IController {
 	public toggleTreeNode($event, node) {
 		$event.stopPropagation();
 
-		const newState = ("invisible" === node.toggleState) ? "visible" : "invisible";
+		const newState = (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState) ?
+							this.TreeService.VISIBILITY_STATES.visible :
+							this.TreeService.VISIBILITY_STATES.invisible;
 
 		// Unhighlight the node in the viewer if we're making it invisible
-		if (newState === "invisible" && node.selected) {
+		if (newState === this.TreeService.VISIBILITY_STATES.invisible && node.selected) {
 			this.TreeService.deselectNodes([node]);
 		}
 
 		this.TreeService.setTreeNodeStatus(node, newState);
 		this.TreeService.updateModelVisibility(node);
+		this.nodesToShow = this.nodesToShow.concat();
 
 	}
 
 	public selectAndCentreNode(node: any) {
 
-		if (node.toggleState === "invisible") {
-			return;
-		}
-
-		// Get everything selected and center to it
-		this.TreeService.getCurrentMeshHighlights().then((selectionMap) => {
-
-			if (Object.keys(selectionMap).length === 0) {
-				return;
-			}
-			const meshIDArrs = [];
-			const keys = Object.keys(selectionMap);
-			keys.forEach((key) => {
-				meshIDArrs.push({
-					model: key.replace("@", "."),
-					meshID: selectionMap[key].meshes
+		const notInvisible = node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible;
+		if (notInvisible && this.lastSelection) {
+			this.$timeout(() => {
+				this.lastSelection.then(() => {
+					this.ViewerService.zoomToHighlightedMeshes();
 				});
 			});
-
-			this.ViewerService.centreToPoint(meshIDArrs);
-
-		});
+		}
 
 	}
 
@@ -336,7 +326,7 @@ class TreeController implements ng.IController {
 						this.nodes[i].level = 0;
 					}
 					this.setupInfiniteItemsFilter();
-					this.setContentHeight(this.nodes);
+					this.onContentHeightRequest({height: this.nodeHeight * this.nodes.length});
 				} else {
 					const noFilterItemsFoundHeight = 82;
 					this.onContentHeightRequest({height: noFilterItemsFoundHeight});
@@ -354,10 +344,7 @@ class TreeController implements ng.IController {
 	 */
 	public ignoreSelection($event: any, node: any): boolean {
 		const doubleClick = $event.detail > 1;
-		if (doubleClick || node.toggleState === "invisible") {
-			return true;
-		}
-		return false;
+		return doubleClick || node.toggleState === this.TreeService.VISIBILITY_STATES.invisible;
 	}
 
 	/**
@@ -370,13 +357,14 @@ class TreeController implements ng.IController {
 		if (this.ignoreSelection($event, node)) {
 			return;
 		}
-
-		return this.TreeService.selectNodes(
+		this.lastSelection = this.TreeService.selectNodes(
 			[node],
 			this.MultiSelectService.isMultiMode(),
 			undefined,
 			false
 		);
+
+		return this.lastSelection;
 	}
 
 	public updateTopIndex(selectedIndex) {
@@ -412,20 +400,19 @@ class TreeController implements ng.IController {
 		const multi = this.MultiSelectService.isMultiMode();
 
 		if (!multi) {
-			this.nodes.forEach((n) => n.selected = false);
-			this.nodes[node.index].selected = true;
+			this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
 		} else {
-			this.nodes[node.index].selected = !this.nodes[node.index].selected;
+			this.nodes[node.index].selected = (this.nodes[node.index].selected !== this.TreeService.SELECTION_STATES.selected) ?
+												this.TreeService.SELECTION_STATES.selected :
+												this.TreeService.SELECTION_STATES.unselected;
 		}
 
 		const selectedComponentNode = this.nodes[node.index];
 
 		if (selectedComponentNode) {
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], multi, undefined, false)
-				.then((selectedIndex) => {
-					this.updateTopIndex(selectedIndex);
-				});
+			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
 		}
 
 	}

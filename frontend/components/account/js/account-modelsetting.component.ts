@@ -90,6 +90,12 @@ class AccountModelSettingController implements ng.IController {
 
 	}
 
+	public createTopicType(chip) {
+		return {
+			label: chip
+		};
+	}
+
 	public fetchModelSettings() {
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
@@ -119,13 +125,18 @@ class AccountModelSettingController implements ng.IController {
 						}
 					}
 
+					if (response.data.model) {
+						this.modelId = response.data.model;
+					}
+
 					if (response.data.type) {
 						this.modelType = response.data.type;
 					}
 
 					if (props.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(props.topicTypes);
+						this.topicTypes = props.topicTypes;
 					}
+
 					if (props.code) {
 						this.code = props.code;
 					}
@@ -161,20 +172,6 @@ class AccountModelSettingController implements ng.IController {
 		this.$location.search("page", null);
 
 		this.showPage({page: "teamspaces", data: this.data});
-	}
-
-	/**
-	 * Convert a list of topic types to a string
-	 */
-	public convertTopicTypesToString(topicTypes) {
-
-		const result = [];
-
-		topicTypes.forEach((type) => {
-			result.push(type.label);
-		});
-
-		return result.join("\n");
 	}
 
 	/**
@@ -218,11 +215,13 @@ class AccountModelSettingController implements ng.IController {
 	 */
 	public save() {
 
+		const newTopicTypes = this.topicTypes.map((t) => t.label );
+
 		const data: any = {
 			name: this.modelName,
 			unit: this.unit,
 			code: this.code,
-			topicTypes: this.topicTypes.replace(/\r/g, "").split("\n"),
+			topicTypes: newTopicTypes,
 			fourDSequenceTag: this.fourDSequenceTag
 		};
 
@@ -262,7 +261,7 @@ class AccountModelSettingController implements ng.IController {
 					this.updateModel();
 					this.message = "Saved";
 					if (response.data && response.data.properties && response.data.properties.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(response.data.properties.topicTypes);
+						this.topicTypes = response.data.properties.topicTypes;
 					}
 					this.oldUnit = this.unit;
 				} else {
