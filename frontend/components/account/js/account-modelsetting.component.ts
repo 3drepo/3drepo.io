@@ -92,7 +92,6 @@ class AccountModelSettingController implements ng.IController {
 
 	public createTopicType(chip) {
 		return {
-			value: chip.toLowerCase().replace(/ /g, "_"),
 			label: chip
 		};
 	}
