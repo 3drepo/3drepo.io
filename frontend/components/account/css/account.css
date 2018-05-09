@@ -30,6 +30,14 @@ account-modelsetting .loading {
     margin-top: 20px;
 }
 
+account-modelsetting md-chips md-chips-wrap {
+  max-width: 82%;
+}
+
+account-modelsetting .md-chip-input-container, account-modelsetting .md-chip-input-container input {
+  width: 100%;
+}
+
 account-modelsetting .gisInput {
   width: 15vw;
   min-width: 130px;
