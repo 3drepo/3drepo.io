@@ -100,8 +100,6 @@ class AccountModelSettingController implements ng.IController {
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
 
-				console.log(response.data);
-
 				if (response.status === 200 && response.data && response.data.properties) {
 
 					const props = response.data.properties;
