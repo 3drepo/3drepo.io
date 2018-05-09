@@ -591,6 +591,12 @@ export class ViewerService {
 		}
 	}
 
+	public zoomToHighlightedMeshes() {
+		if (this.viewer) {
+			this.viewer.zoomToHighlightedMeshes();
+		}
+	}
+
 }
 
 export const ViewerServiceModule = angular
