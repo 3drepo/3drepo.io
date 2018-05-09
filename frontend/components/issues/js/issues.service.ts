@@ -161,7 +161,6 @@ export class IssuesService {
 
 			// Roles Filter
 			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				console.log(issue.creator_role);
 				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
 			});
 
