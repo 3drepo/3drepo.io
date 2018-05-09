@@ -38,6 +38,7 @@ interface IMenuItem {
 	hidden: boolean;
 	label: string;
 	value?: string;
+	role?: string;
 	selected?: boolean;
 	firstSelectedIcon?: string;
 	secondSelectedIcon?: string;
@@ -286,10 +287,11 @@ export class PanelService {
 	}
 
 	public setIssuesMenu(jobsData: any) {
-		const menu = [];
+		const menu: IMenuItem[] = [];
 		jobsData.forEach((role) => {
 			menu.push({
 				value: "filterRole",
+				hidden: false,
 				role: role._id,
 				label: role._id,
 				keepCheckSpace: true,
