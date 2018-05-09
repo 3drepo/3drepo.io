@@ -169,16 +169,8 @@ class IssuesController implements ng.IController {
 
 		return this.IssuesService.getJobs(this.account, this.model)
 			.then((data) => {
-
 				this.availableJobs = data;
-
-				const menu = [];
-				data.forEach((role) => {
-					menu.push(this.PanelService.createRoleFilters(role));
-				});
-
-				this.PanelService.setPanelMenu("left", "issues", menu);
-
+				this.PanelService.setIssuesMenu(data);
 			})
 			.catch((error) => {
 				const content = "We tried to get the jobs for this model but it failed. " +

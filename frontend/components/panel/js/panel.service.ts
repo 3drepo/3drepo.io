@@ -15,6 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+interface IPanelCards {
+	left: IPanelCard[];
+	right: IPanelCard[];
+}
+
+interface IPanelCard {
+	type: string;
+	title: string;
+	showLiteMode: boolean;
+	show: boolean;
+	help: string;
+	icon: string;
+	fixedHeight: boolean;
+	options: any[];
+	add?: boolean;
+	menu?: any[];
+	minHeight?: number;
+}
+
 export class PanelService {
 
 	public static $inject: string[] = [
@@ -22,13 +41,14 @@ export class PanelService {
 		"TreeService"
 	];
 
-	private panelCards: any;
-	private templatepanelCards: any;
+	private panelCards: IPanelCards;
+	private templatepanelCards: IPanelCards;
 
 	constructor(
 		private EventService: any,
 		private TreeService: any
 	) {
+
 		this.panelCards = {
 			left: [],
 			right: []
@@ -207,6 +227,7 @@ export class PanelService {
 			type: "docs",
 			title: "Meta Data",
 			show: false,
+			showLiteMode: false,
 			help: "Documents",
 			icon: "content_copy",
 			minHeight: 80,
@@ -220,39 +241,6 @@ export class PanelService {
 
 	}
 
-	public setPanelMenu(side, type, menu) {
-
-		const item = this.panelCards[side].find((content) => {
-			return content.type === type;
-		});
-
-		// TODO: This is ugly, why are we doing this?
-		if (item && item.menu) {
-			menu.forEach((newItem) => {
-				const exists = item.menu.find((oldItem) => {
-					return oldItem.role === newItem.role;
-				});
-				if (!exists) {
-					item.menu.push(newItem);
-				}
-			});
-		}
-
-	}
-
-	public createRoleFilters(role) {
-		return {
-			value: "filterRole",
-			role: role._id,
-			label: role._id,
-			keepCheckSpace: true,
-			toggle: true,
-			selected: true,
-			firstSelected: false,
-			secondSelected: false
-		}
-	}
-
 	public memoizepanelCards() {
 		this.templatepanelCards = angular.copy(this.panelCards);
 	}
@@ -261,7 +249,44 @@ export class PanelService {
 		this.panelCards = angular.copy(this.templatepanelCards);
 	}
 
-	public hideSubModels(issuesCardIndex, hide) {
+	public setPanelMenu(side: string, panelType: string, newMenu: any[]) {
+
+		// Check if the card exists
+		const item = this.panelCards[side].find((content) => {
+			return content.type === panelType;
+		});
+
+		// Append all the menu items to it
+		if (item && item.menu) {
+			newMenu.forEach((newItem) => {
+				const exists = item.menu.find( (oldItem) => oldItem.role === newItem.role);
+				if (!exists) {
+					item.menu.push(newItem);
+				}
+			});
+		}
+
+	}
+
+	public setIssuesMenu(jobsData: any) {
+		const menu = [];
+		jobsData.forEach((role) => {
+			menu.push({
+				value: "filterRole",
+				role: role._id,
+				label: role._id,
+				keepCheckSpace: true,
+				toggle: true,
+				selected: true,
+				firstSelected: false,
+				secondSelected: false
+			});
+		});
+
+		this.setPanelMenu("left", "issues", menu);
+	}
+
+	public hideSubModels(issuesCardIndex: number, hide: boolean) {
 
 		this.panelCards.left[issuesCardIndex].menu
 			.forEach((item) => {
@@ -272,7 +297,7 @@ export class PanelService {
 
 	}
 
-	public getCardIndex(type) {
+	public getCardIndex(type: string): number {
 		let index = -1;
 		const obj = this.panelCards.left.forEach((panel, i) => {
 			if (panel.type === type) {
