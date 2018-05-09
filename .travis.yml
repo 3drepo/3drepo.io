@@ -52,6 +52,8 @@ script:
     - yarn run wdm:update
     - yarn run wdm:start > /dev/null 2>&1 &
     - cd ./../backend 
+    - sudo service rabbitmq-server stop
+    - sudo service rabbitmq-server start
     - yarn run test
     - cd ./../ 
     - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
