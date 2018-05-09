@@ -21,8 +21,21 @@ const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 const systemLogger = require("../logger.js").systemLogger;
 const httpsGet = require('../libs/httpsReq');
+const config = require("../config");
 
+router.get("/:model/maps/", listMaps);
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
+router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", getHereMapsTile);
+router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", getHereTrafficFlowTile);
+
+function listMaps(req, res, next) {
+	const maps = ["osm", "here", "heretrafficflow"];
+	if (maps.length > 0) {
+		res.status(200).json({ maps });
+	} else {
+		res.status(500).json({ message: "No Maps Available" });
+	}
+}
 
 function getOSMTile(req, res, next){
 	//TODO: we may want to ensure the model has access to tiles
@@ -43,6 +56,46 @@ function getOSMTile(req, res, next){
 		}
 	});
 
+}
+
+function getHereMapsTile(req, res, next){
+	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
+	const domain = "1.base.maps.cit.api.here.com";
+	let uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	systemLogger.logInfo("Fetching Here map tile: " + uri);
+	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	httpsGet.get(domain, uri).then(image => {
+		res.writeHead(200, {'Content-Type': 'image/png' });
+		res.write(image);
+		res.end();
+	}).catch(err => {
+		systemLogger.logError(JSON.stringify(err));
+		if (err.message) {
+			res.status(500).json({ message: err.message });
+		} else if (err.resCode) {
+			res.status(err.resCode).json({ message: err.message });
+		}
+	});
+}
+
+function getHereTrafficFlowTile(req, res, next){
+	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
+	const domain = "1.traffic.maps.cit.api.here.com";
+	let uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
+	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	httpsGet.get(domain, uri).then(image => {
+		res.writeHead(200, {'Content-Type': 'image/png' });
+		res.write(image);
+		res.end();
+	}).catch(err => {
+		systemLogger.logError(JSON.stringify(err));
+		if (err.message) {
+			res.status(500).json({ message: err.message });
+		} else if (err.resCode) {
+			res.status(err.resCode).json({ message: err.message });
+		}
+	});
 }
 
 module.exports = router;
