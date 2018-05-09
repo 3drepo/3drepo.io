@@ -555,6 +555,12 @@ export class ViewerService {
 		}
 	}
 
+	public setMapSource(source) {
+		if (this.viewer) {
+			this.viewer.setMapSource(source);
+		}
+	}
+
 	public mapInitialise(surveyPoints) {
 		if (this.viewer) {
 			this.viewer.mapInitialise(surveyPoints);

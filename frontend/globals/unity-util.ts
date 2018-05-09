@@ -643,6 +643,14 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set map source.
+	 * @param {string} mapSource - This can be either "OSM" or "HERE"
+	 */
+	public static setMapSource(mapSource) {
+		UnityUtil.toUnity("SetMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	}
+
+	/**
 	 * Initialise map creator within unity
 	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */

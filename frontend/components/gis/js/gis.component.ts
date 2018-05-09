@@ -29,6 +29,8 @@ class GISController implements ng.IController {
 	private providers: any[];
 	private modelSettings: any;
 	private onContentHeightRequest: any;
+	private account: string;
+	private model: string;
 
 	constructor(
 		private $scope: any,
@@ -41,8 +43,12 @@ class GISController implements ng.IController {
 	public $onInit() {
 		this.onContentHeightRequest({height: 130});
 		this.watchers();
-		this.providers = this.GISService.getProviders();
-		this.selectedProvider = this.providers[0];
+		this.GISService.getProviders(this.account, this.model)
+			.then((providers) => {
+				this.providers = providers;
+				this.selectedProvider = this.providers[0];
+				this.GISService.setMapSource(this.selectedProvider.source);
+			});
 	}
 
 	public $onDestroy() {
@@ -81,6 +87,17 @@ class GISController implements ng.IController {
 				}
 			}
 		);
+	}
+
+	public setMapSource(source: string) {
+		if (this.selectedProvider.source !== source) {
+			for (let i = 0; this.selectedProvider.layers && i < this.selectedProvider.layers.length; i++) {
+				if (this.selectedProvider.layers[i].visibility === "visible") {
+					this.GISService.toggleLayerVisibility(this.selectedProvider.layers[i]);
+				}
+			}
+			this.GISService.setMapSource(source);
+		}
 	}
 
 	public toggleLayerVisibility(layer: any) {

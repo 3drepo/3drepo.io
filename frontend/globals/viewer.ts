@@ -30,6 +30,11 @@ export class Viewer {
 		WAYFINDER: "WAYFINDER"
 	};
 
+	public static MAP_SOURCES = {
+		OSM: "OSM",
+		HERE: "HERE"
+	};
+
 	public static EVENT = {
 		ADD_PIN: "VIEWER_ADD_PIN",
 		BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
@@ -108,6 +113,7 @@ export class Viewer {
 	public downloadsLeft = 1;
 
 	public defaultNavMode = Viewer.NAV_MODES.TURNTABLE;
+	public defaultMapSource = Viewer.MAP_SOURCES.HERE;
 	public lastMultipart = null;
 
 	public selectionDisabled = false;
@@ -141,6 +147,7 @@ export class Viewer {
 	public options;
 	public Module;
 	public currentNavMode;
+	public currentMapSource;
 	public plugins;
 	public broadcastClippingPlane;
 	public settings;
@@ -272,6 +279,7 @@ export class Viewer {
 			Module.errorhandler = UnityUtil.onUnityError;
 
 			this.currentNavMode = null;
+			this.currentMapSource = null;
 
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
@@ -284,6 +292,7 @@ export class Viewer {
 
 			UnityUtil.setAPIHost(options.getAPI);
 			this.setNavMode(this.defaultNavMode, false);
+			this.setMapSource(this.defaultMapSource, false);
 
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
@@ -711,6 +720,19 @@ export class Viewer {
 	public changePinColours(id, colours) {
 		if (this.pins.hasOwnProperty(id)) {
 			this.pins[id].changeColour(colours);
+		}
+	}
+
+	/**
+	 * Change map source
+	 * @param source Map source (OSM, HERE)
+	 * @param force Set to force source change
+	 */
+	public setMapSource(source, force) {
+		if (this.currentMapSource !== source || force) {
+			// If the map source has changed
+			this.currentMapSource = source;
+			UnityUtil.setMapSource(source);
 		}
 	}
 

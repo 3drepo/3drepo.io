@@ -30,8 +30,8 @@ router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", getHereT
 
 function listMaps(req, res, next) {
 	const maps = [
-		{ name: "Open Street Map", layers: [ { name: "Map Tiles", endpoint: "osm" } ] },
-		{ name: "Here", layers: [ { name: "Base Tiles", endpoint: "here" }, { name: "Traffic Flow", endpoint: "heretrafficflow" } ] }
+		{ source: "OSM", name: "Open Street Map", layers: [ { name: "Map Tiles", endpoint: "osm" } ] },
+		{ source: "HERE", name: "Here", layers: [ { name: "Base Tiles", endpoint: "here" }/*, { name: "Traffic Flow", endpoint: "heretrafficflow" }*/ ] }
 	];
 	if (maps.length > 0) {
 		res.status(200).json({ maps });

@@ -18,29 +18,39 @@
 export class GISService {
 
 	public static $inject: string[] = [
+		"APIService",
 		"ViewerService"
 	];
 
 	private initialised: boolean;
 
 	constructor(
+		private APIService: any,
 		private ViewerService: any
 	) {
 		this.initialised = false;
 	}
 
-	public getProviders() {
-		return [
-			{
-				name: "Open Street Map",
-				layers: [
-					{
-						name: "Map Tiles",
-						visibility: "invisible"
-					}
-				]
-			}
-		];
+	public getProviders(account: string, model: string) {
+		const listMapsUrl = `${account}/${model}/maps/`;
+		return this.APIService.get(listMapsUrl)
+			.then((response) => {
+				let mapProviders = response.data.maps;
+				if (mapProviders && mapProviders.length > 0) {
+					mapProviders.forEach((mapProvider) => {
+						if (mapProvider.layers && mapProvider.layers.length > 0) {
+							mapProvider.layers.forEach((mapLayer) => {
+								mapLayer.visibility = "invisible";
+							});
+						}
+					});
+				}
+				return mapProviders;
+			});
+	}
+
+	public setMapSource(source) {
+		this.ViewerService.setMapSource(source);
 	}
 
 	public mapInitialise(params) {
