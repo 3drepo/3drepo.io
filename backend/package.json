@@ -17,7 +17,9 @@
     "test:int-one": "gulp test:integrated-one --script ",
     "test:clean-and-int": "yarn run test:int-clean && yarn run test:int",
     "test:clean-and-int-one": "yarn run test:int-clean && yarn run test:int-one",
-    "test:add-mongo": "mongo --eval \"username='admintesting'; password='admintesting'\" ../scripts/mongo-admin.js"
+    "test:add-mongo": "mongo --eval \"username='admintesting'; password='admintesting'\" ../scripts/mongo-admin.js",
+    "lint": "eslint ./",
+    "lint:fix": "eslint --fix ./"
   },
   "dependencies": {
     "amqplib": "0.4.1",
@@ -62,11 +64,11 @@
   },
   "devDependencies": {
     "chai": "4.1.2",
-    "eslint": "4.6.1",
-    "eslint-plugin-node": "5.1.1",
+    "eslint": "4.19.1",
+    "eslint-plugin-node": "6.0.1",
     "gulp": "3.9.1",
     "gulp-env": "0.4.0",
-    "gulp-eslint": "4.0.0",
+    "gulp-eslint": "4.0.2",
     "gulp-mocha": "4.3.1",
     "mocha": "3.5.3",
     "mockgoose": "6.0.3",
