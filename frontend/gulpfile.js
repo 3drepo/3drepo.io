@@ -9,6 +9,7 @@ const path = require('path');
 const pug = require('gulp-pug');
 const rename = require('gulp-rename');
 const typedoc = require("gulp-typedoc");
+const exec = require('child_process').exec;
 
 let isWatch = false;
 
@@ -148,7 +149,7 @@ const sw = function(callback, verbose) {
       `${dir}/unity/**/*.{js,html,data,mem,css,png,jpg}`,
     ],
     stripPrefix: `${dir}`,
-    verbose: false,
+    verbose: verbose,
   }, callback);
 }
 
@@ -179,14 +180,32 @@ gulp.task("reload", function() {
     .pipe(livereload())
 });
 
-// Watch for changes and live reload in development
-gulp.task('watch', function() {
-  isWatch = true;
-  livereload.listen({host: 'localhost', port: '35729', start: true })
 
+gulp.task('webpack-build', function (cb) {
+  exec('webpack --config webpack.prod.config.js', function (err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    cb(err);
+  });
+})
+
+gulp.task('webpack-watch', function (cb) {
+  exec('webpack --watch --config webpack.dev.config.js', function (err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    cb(err);
+  });
+})
+
+// Watch for changes and live reload in development
+gulp.task('gulp-watch', function() {
+  isWatch = true;
+  livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
+  
   // WATCHERS
   gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev", "reload"]))
+  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
+  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))
@@ -195,6 +214,7 @@ gulp.task('watch', function() {
 
 });
 
+gulp.task("watch", gulp.parallel(["gulp-watch", "webpack-watch"]));
 
 gulp.task('build', gulp.series(
   gulp.parallel(
@@ -207,7 +227,8 @@ gulp.task('build', gulp.series(
     'unity', 
     'custom',
     'manifest-icons', 
-    'manifest-file'
+    'manifest-file',
+    'webpack-build'
   ),
   'service-workers'
   )
