@@ -23,7 +23,6 @@ before_install:
     - mkdir -p submodules
     - test_ver=`cat backend/test/testDBVersion`
     - cd submodules
-    - sudo apt-get install -y graphicsmagick 
     - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
     - cd tests
     - git checkout $test_ver
