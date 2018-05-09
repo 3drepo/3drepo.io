@@ -764,7 +764,7 @@ export class UnityUtil {
 		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
-	/**
+	/**r
 	 * Set navigation mode.
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */
