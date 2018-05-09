@@ -29,7 +29,10 @@ router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", getHereMapsTile);
 router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", getHereTrafficFlowTile);
 
 function listMaps(req, res, next) {
-	const maps = ["osm", "here", "heretrafficflow"];
+	const maps = [
+		{ name: "Open Street Map", layers: [ { name: "Map Tiles", endpoint: "osm" } ] },
+		{ name: "Here", layers: [ { name: "Base Tiles", endpoint: "here" }, { name: "Traffic Flow", endpoint: "heretrafficflow" } ] }
+	];
 	if (maps.length > 0) {
 		res.status(200).json({ maps });
 	} else {
