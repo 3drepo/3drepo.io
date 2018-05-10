@@ -220,9 +220,9 @@ export class GroupsService {
 	 * Return an CSS friendly RGBA color from an array
 	 */
 	public getRGBA(color) {
-		const red = color[0];
-		const blue = color[1];
-		const green = color[2];
+		const red = parseInt(color[0], 10);
+		const blue = parseInt(color[1], 10);
+		const green = parseInt(color[2], 10);
 		return `rgba(${red}, ${blue}, ${green}, 1)`;
 	}
 

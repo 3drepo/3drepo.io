@@ -24,7 +24,7 @@ const uuid = require("node-uuid");
 const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
-const History = require('./history');
+const History = require("./history");
 
 
 const groupSchema = Schema({
@@ -354,8 +354,9 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 			if (data[key]) {
 				if (key === "objects" && data.objects) {
 					toUpdate.objects = convertedObjects;
-				}
-				else {
+				} else if (key === "color") {
+					toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+				} else {
 					toUpdate[key] = data[key];
 				}
 			}
