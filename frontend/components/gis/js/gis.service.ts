@@ -35,7 +35,7 @@ export class GISService {
 		const listMapsUrl = `${account}/${model}/maps/`;
 		return this.APIService.get(listMapsUrl)
 			.then((response) => {
-				let mapProviders = response.data.maps;
+				const mapProviders = response.data.maps;
 				if (mapProviders && mapProviders.length > 0) {
 					mapProviders.forEach((mapProvider) => {
 						if (mapProvider.layers && mapProvider.layers.length > 0) {
