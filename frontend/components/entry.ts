@@ -104,6 +104,8 @@ import "./utils/js/utils.filter";
 import "./viewer/js/multi-select.service";
 import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
+import "./views/js/views.component";
+import "./views/js/views.service";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

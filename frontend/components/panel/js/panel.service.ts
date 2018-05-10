@@ -122,6 +122,18 @@ export class PanelService {
 		});
 
 		this.issuesPanelCard.left.push({
+			type: "views",
+			title: "Views",
+			showLiteMode: true,
+			show: false,
+			help: "List current groups",
+			icon: "camera_alt",
+			minHeight: 80,
+			fixedHeight: false,
+			options: []
+		});
+
+		this.issuesPanelCard.left.push({
 			type: "tree",
 			title: "Tree",
 			showLiteMode: true,
@@ -169,7 +181,7 @@ export class PanelService {
 			showLiteMode: false,
 			show: false,
 			help: "Clipping plane",
-			icon: "crop_original",
+			icon: "crop",
 			fixedHeight: true,
 			options: [
 				{type: "visible", visible: true}
@@ -194,7 +206,7 @@ export class PanelService {
 			showLiteMode: false,
 			show: false,
 			help: "Add various GIS data to the view",
-			icon: "landscape",
+			icon: "layers",
 			minHeight: 80,
 			fixedHeight: false,
 			options: []
