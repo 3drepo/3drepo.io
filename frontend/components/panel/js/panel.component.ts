@@ -85,7 +85,6 @@ class PanelController implements ng.IController {
 		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
 			if (oldValue.length && newValue.length) {
 				for (let i = 0; i < newValue.length; i ++) {
-
 					if (newValue[i].show !== oldValue[i].show) {
 						this.setupShownCards();
 						break;
@@ -95,14 +94,11 @@ class PanelController implements ng.IController {
 			}
 		}, true);
 
-		this.$scope.$watch(() => {
-			return this.PanelService.panelCards;
-		},
-		() => {
-			if (this.PanelService.panelCards && this.position) {
-				this.contentItems = this.PanelService.panelCards[this.position];
-			}
-		}, true);
+		// Watcher to setup new menus as they come in
+		this.$scope.$watch(() =>  this.PanelService.panelCards[this.position],
+			(newPanels) => {
+				this.updatePanelMenus(newPanels);
+			}, true);
 
 		this.$scope.$watch(() => this.TreeService.getHideIfc(),
 			(hideIfc) => {
@@ -142,6 +138,19 @@ class PanelController implements ng.IController {
 	public resize() {
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		this.calculateContentHeights();
+	}
+
+	/**
+	 * Check new panels data to see if menus have changed
+	 */
+	public updatePanelMenus(newPanels: any) {
+		this.contentItems.forEach((panel) => {
+			const matching = newPanels.find((m) => m.type === panel.type);
+			const exist = matching && panel.menu;
+			if (exist && panel.menu.length !== matching.menu.length) {
+				panel.menu = matching.menu;
+			}
+		});
 	}
 
 	/**
@@ -201,6 +210,7 @@ class PanelController implements ng.IController {
 	 * Start the recursive calculation of the content heghts
 	 */
 	public calculateContentHeights() {
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		const tempContentItemsShown = angular.copy(this.contentItemsShown);
 		this.assignHeights(this.maxHeightAvailable, tempContentItemsShown, null);
 	}
