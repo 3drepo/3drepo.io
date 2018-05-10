@@ -21,6 +21,7 @@ class BottomButtonsController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
+		"$interval",
 
 		"ViewerService",
 		"TreeService",
@@ -38,7 +39,8 @@ class BottomButtonsController implements ng.IController {
 	private escapeFocusModeButton: HTMLElement;
 
 	constructor(
-		private $scope: any,
+		private $scope: ng.IScope,
+		private $interval: ng.IIntervalService,
 
 		private ViewerService: any,
 		private TreeService: any,
@@ -130,13 +132,14 @@ class BottomButtonsController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watch(() => {
-			return this.ViewerService.getNavMode();
-		}, (newNav, oldNav) => {
-			if (newNav && newNav !== oldNav) {
-				this.selectedMode = newNav;
+
+		this.$interval(() => {
+			const newMode = this.ViewerService.getNavMode();
+			if (newMode !== this.selectedMode) {
+				this.selectedMode = newMode;
 			}
-		}, true);
+		}, 1000);
+
 	}
 
 	public extent() {
