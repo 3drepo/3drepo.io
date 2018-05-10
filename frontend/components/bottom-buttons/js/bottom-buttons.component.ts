@@ -133,6 +133,8 @@ class BottomButtonsController implements ng.IController {
 
 	public watchers() {
 
+		// We have to use interval as watcher seems to
+		// break the e2e tests due to Angular timeouts
 		this.$interval(() => {
 			const newMode = this.ViewerService.getNavMode();
 			if (newMode !== this.selectedMode) {
