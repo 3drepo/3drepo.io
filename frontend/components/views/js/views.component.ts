@@ -21,11 +21,15 @@ class ViewsController implements ng.IController {
 		"$scope"
 	];
 
+	private onShowItem: any;
+
 	private onContentHeightRequest: any;
 	private views: any[];
 	private toShow: string;
 	private loading: boolean;
 	private selectedView: any;
+	private savingView: any;
+	private canAddView: any;
 
 	constructor(
 		private $scope: ng.IScope
@@ -48,8 +52,10 @@ class ViewsController implements ng.IController {
 		}];
 		this.toShow = "views";
 		this.loading = false;
+		this.savingView = false;
+		this.canAddView = true;
 		this.selectedView = this.views[0];
-		console.log("VIEW COMPONENT LOADED");
+		this.watchers();
 	}
 
 	public $onDestroy() {
@@ -57,13 +63,39 @@ class ViewsController implements ng.IController {
 	}
 
 	public watchers() {
-
+		this.$scope.$watch("vm.hideItem", (newValue) => {
+			if (newValue) {
+				console.log("show views");
+				this.toShow = "views";
+				// this.setContentHeight();
+				// this.resetToSavedGroup();
+				// if (this.lastColorOverride) {
+				// 	this.GroupsService.colorOverride(this.lastColorOverride);
+				// 	this.lastColorOverride = null;
+				// }
+			}
+		});
 	}
 
 	public selectView(view) {
 		this.selectedView.selected = false;
 		this.selectedView = view;
 		this.selectedView.selected = true;
+	}
+
+	public saveDisabled() {
+		return false;
+	}
+
+	public addView() {
+		this.showGroupPane();
+	}
+
+	public showGroupPane() {
+		this.toShow = "view";
+		this.onContentHeightRequest({height: 310});
+		console.log("calling on showItems")
+		this.onShowItem();
 	}
 
 	// public setContentHeight() {
