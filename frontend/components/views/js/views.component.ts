@@ -18,52 +18,95 @@
 class ViewsController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope"
+		"$scope",
+
+		"ViewsService"
 	];
+
+	private onShowItem: any;
 
 	private onContentHeightRequest: any;
 	private views: any[];
 	private toShow: string;
 	private loading: boolean;
 	private selectedView: any;
+	private savingView: any;
+	private canAddView: any;
+	private savedGroupData: any;
 
 	constructor(
-		private $scope: ng.IScope
+		private $scope: ng.IScope,
+
+		private ViewsService: any
 	) {}
 
 	public $onInit() {
-		this.views = [{
-			name: "View 1",
-			author: "Richard",
-			createdAt: Date.now(),
-			description: "How do I load a big model?",
-			selected: true
-		},
-		{
-			name: "View 2",
-			author: "Richard",
-			createdAt: Date.now(),
-			description: "Will you hire my son?",
-			selected: false
-		}];
+		this.ViewsService.getViews().then(() => {
+			this.loading = false;
+		});
 		this.toShow = "views";
-		this.loading = false;
-		this.selectedView = this.views[0];
-		console.log("VIEW COMPONENT LOADED");
+		this.loading = true;
+		this.savingView = false;
+		this.canAddView = true;
+		this.views = [];
+		this.watchers();
 	}
 
 	public $onDestroy() {
-
+		this.ViewsService.reset();
 	}
 
 	public watchers() {
 
+		this.$scope.$watch(() => {
+			return this.ViewsService.state;
+		}, (newState, oldState) => {
+			angular.extend(this, newState);
+		}, true);
+
+		this.$scope.$watch("vm.hideItem", (newValue) => {
+			if (newValue) {
+				console.log("show views");
+				this.toShow = "views";
+			}
+		});
+
 	}
 
 	public selectView(view) {
-		this.selectedView.selected = false;
+
+		if (this.selectedView === undefined) {
+			this.selectedView = view;
+		} else {
+			this.selectedView.selected = false;
+		}
+
 		this.selectedView = view;
 		this.selectedView.selected = true;
+	}
+
+	public deleteView() {
+		this.ViewsService.deleteView(this.selectedView);
+	}
+
+	public editView() {
+		this.savedGroupData = Object.assign({}, this.selectedView);
+		//this.showGroupPane();
+		//this.focusGroupName();
+	}
+
+	public saveDisabled() {
+		return false;
+	}
+
+	public addView() {
+		this.showGroupPane();
+	}
+
+	public showGroupPane() {
+		this.toShow = "view";
+		this.onContentHeightRequest({height: 310});
+		this.onShowItem();
 	}
 
 	// public setContentHeight() {

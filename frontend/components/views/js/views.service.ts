@@ -18,13 +18,15 @@
 export class ViewsService {
 
 	public static $inject: string[] = [
+		"$timeout",
 		"APIService"
 	];
 
 	private state;
 
 	constructor(
-		private APIService: any,
+		private $timeout: any,
+		private APIService: any
 	) {
 		this.reset();
 	}
@@ -37,6 +39,54 @@ export class ViewsService {
 			views : []
 		};
 	}
+
+	public getViews(teamspace: string, model: string, revision: string) {
+
+		// This is what we would do when we have the API
+		// let viewsUrl;
+		// if (revision) {
+		// 	viewsUrl = `${teamspace}/${model}/views/revision/${revision}/?noIssues=true`;
+		// } else {
+		// 	viewsUrl = `${teamspace}/${model}/views/revision/master/head/?noIssues=true`;
+		// }
+
+		// return this.APIService.get(viewsUrl)
+		// 	.then((response) => {
+		// 		this.state.views = response.data;
+		// 	});
+
+		// Mocked until this can be a real API call
+		return this.$timeout(() => {
+			this.state.views = [{
+				id : 1,
+				name: "View 1",
+				author: "Richard",
+				createdAt: Date.now(),
+				description: "How do I load a big model?",
+				selected: false
+			},
+			{
+				id: 2,
+				name: "View 2",
+				author: "Richard",
+				createdAt: Date.now(),
+				description: "Will you hire my son?",
+				selected: false
+			}];
+		}, 3000);
+
+	}
+
+	public deleteView(view) 	{
+		this.state.views = this.state.views.filter((v) => {
+			return v.id !== view.id;
+		});
+	}
+
+	public editView() {
+		//editGroup
+	}
+
 
 }
 
