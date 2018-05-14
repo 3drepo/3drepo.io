@@ -123,7 +123,10 @@ export class UnityUtil {
 	 * Check if an error is Unity related
 	 */
 	public static isUnityError(err) {
-		const checks = ["Array buffer allocation failed", "Invalid typed array length", "Unity", "unity"];
+		const checks = [
+			"Array buffer allocation failed", "Invalid typed array length",
+			"Unity", "unity", "emscripten", "blob:http"
+		];
 		const hasUnityError = !checks.every((check) => err.indexOf(check) === -1);
 		return hasUnityError;
 	}
@@ -249,14 +252,14 @@ export class UnityUtil {
 	 */
 
 	public static clipBroadcast(clipInfo) {
-		if (UnityUtil.viewer.clipBroadcast) {
+		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
 			UnityUtil.viewer.clipBroadcast(JSON.parse(clipInfo));
 		}
 	}
 
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if (UnityUtil.viewer.objectSelected) {
+		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
 			UnityUtil.viewer.objectSelected(point);
 		}
 	}
@@ -280,8 +283,9 @@ export class UnityUtil {
 	}
 
 	public static navMethodChanged(newNavMode) {
-		// TODO: do some front end magic to update the navigation button
-		// newNavMode can currently be "Turntable" or "Helicopter"
+		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
+			UnityUtil.viewer.navMethodChanged(newNavMode);
+		}
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
@@ -300,7 +304,7 @@ export class UnityUtil {
 
 	public static pickPointAlert(pointInfo) {
 		const point = JSON.parse(pointInfo);
-		if (UnityUtil.viewer.pickPointEvent) {
+		if (UnityUtil.viewer && UnityUtil.viewer.pickPointEvent) {
 			UnityUtil.viewer.pickPointEvent(point);
 		}
 	}
@@ -760,7 +764,7 @@ export class UnityUtil {
 		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
-	/**
+	/**r
 	 * Set navigation mode.
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */
@@ -855,6 +859,13 @@ export class UnityUtil {
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+	}
+
+	/**
+	 * Zoom to highlighted meshes
+	 */
+	public static zoomToHighlightedMeshes() {
+		UnityUtil.toUnity("ZoomToHighlightedMeshes", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 }

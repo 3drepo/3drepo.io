@@ -31,12 +31,12 @@ div(
 					path(fill="#ffffff" ng-attr-d="{{vm.customIcons.focus}}")
 		
 				// HELICOPTER
-				svg(ng-if="vm.selectedMode === 'Helicopter' && button.isViewingOptionButton"
+				svg(ng-if="vm.selectedMode === 'HELICOPTER' && button.isViewingOptionButton"
 					xmlns="http://www.w3.org/2000/svg" 
 					viewBox="0 0 18 10.42")
 					path(fill="#fff" ng-attr-d="{{vm.customIcons.helicopter}}")
 				// TURNTABLE
-				svg(ng-if="vm.selectedMode === 'Turntable' && button.isViewingOptionButton"
+				svg(ng-if="vm.selectedMode === 'TURNTABLE' && button.isViewingOptionButton"
 					xmlns="http://www.w3.org/2000/svg" 
 					viewBox="0 0 23.94 22.46")
 					path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable1}}")
@@ -45,29 +45,29 @@ div(
 					
 			label(ng-if="!button.isViewingOptionButton") {{button.label}} 
 			
-			label(ng-if="button.isViewingOptionButton") {{vm.selectedMode}} 
+			label(ng-if="button.isViewingOptionButton") {{vm.navigationOptions[vm.selectedMode].label}} 
 
 			// OPTIONS
 			.viewingOptionButtonHolder(layout-align="center center")
 				.viewingOptionButtons(
 					layout="column"
-					ng-if="vm.showViewingOptions && button.isViewingOptionButton"
+					ng-if="vm.showNavigationOptions && button.isViewingOptionButton"
 					layout-align="center center")
 
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
-						ng-repeat="(mode, value) in vm.viewingOptions"
+						ng-repeat="(mode, value) in vm.navigationOptions"
 						ng-if="mode !== vm.selectedMode"
-						ng-click="vm.setViewingOption(mode);"
+						ng-click="vm.setNavigationMode(mode);"
 						aria-label="{{mode}}")
 	
 						// HELICOPTER
-						svg(ng-if="mode === 'Helicopter'"
+						svg(ng-if="mode === 'HELICOPTER'"
 							xmlns="http://www.w3.org/2000/svg" 
 							viewBox="0 0 18 10.42")
 							path(fill="#fff" ng-attr-d="{{vm.customIcons.helicopter}}")
 					
 						// TURNTABLE
-						svg(ng-if="mode === 'Turntable'"
+						svg(ng-if="mode === 'TURNTABLE'"
 							xmlns="http://www.w3.org/2000/svg" 
 							viewBox="0 0 23.94 22.46")
 							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable1}}")

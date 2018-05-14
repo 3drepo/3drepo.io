@@ -36,6 +36,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "issues",
 			title: "Issues",
+			showLiteMode: true,
 			show: true,
 			help: "List current issues",
 			icon: "place",
@@ -111,6 +112,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "groups",
 			title: "Groups",
+			showLiteMode: true,
 			show: false,
 			help: "List current groups",
 			icon: "group_work",
@@ -122,6 +124,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "tree",
 			title: "Tree",
+			showLiteMode: true,
 			show: false,
 			help: "Model elements shown in a tree structure",
 			icon: "device_hub",
@@ -163,6 +166,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "clip",
 			title: "Clip",
+			showLiteMode: false,
 			show: false,
 			help: "Clipping plane",
 			icon: "crop_original",
@@ -175,6 +179,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "compare",
 			title: "Compare",
+			showLiteMode: false,
 			show: false,
 			help: "Show clashes and differences between models",
 			icon: "compare",
@@ -186,6 +191,7 @@ export class PanelService {
 		this.issuesPanelCard.left.push({
 			type: "gis",
 			title: "GIS",
+			showLiteMode: false,
 			show: false,
 			help: "Add various GIS data to the view",
 			icon: "landscape",
@@ -207,16 +213,6 @@ export class PanelService {
 			]
 		});
 
-		this.issuesPanelCard.right.push({
-			type: "building",
-			title: "Building",
-			show: false,
-			help: "Building",
-			icon: "fa-cubes",
-			fixedHeight: true,
-			options: [
-			]
-		});
 	}
 
 	public hideSubModels(issuesCardIndex, hide) {

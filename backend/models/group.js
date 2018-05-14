@@ -24,7 +24,7 @@ const uuid = require("node-uuid");
 const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
-const History = require('./history');
+const History = require("./history");
 
 
 const groupSchema = Schema({
@@ -326,12 +326,21 @@ groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
 
 groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
-	return this.findOne(dbCol, { _id: uid }).then(group => {
-		const issueIdData = {
-			issue_id: issueId
-		};
+	if ("[object String]" === Object.prototype.toString.call(uid)) {
+		uid = utils.stringToUUID(uid);
+	}
 
-		return group.updateAttrs(dbCol, issueIdData);
+	return this.findOne(dbCol, { _id: uid }).then(group => {
+		if (group) {
+			const issueIdData = {
+				issue_id: issueId
+			};
+
+			return group.updateAttrs(dbCol, issueIdData);
+		}
+		else {
+			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+		}
 	});
 };
 
@@ -345,8 +354,9 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 			if (data[key]) {
 				if (key === "objects" && data.objects) {
 					toUpdate.objects = convertedObjects;
-				}
-				else {
+				} else if (key === "color") {
+					toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+				} else {
 					toUpdate[key] = data[key];
 				}
 			}

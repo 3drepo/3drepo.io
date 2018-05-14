@@ -169,6 +169,7 @@ class ModelController implements ng.IController {
 					console.error("Failed to load model: ", err);
 				});
 			} else {
+				this.loadModelSettings();
 				console.error("Failed to locate viewer");
 			}
 		} else {
@@ -201,22 +202,21 @@ class ModelController implements ng.IController {
 		});
 	}
 
+	private setupViewer() {
+		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
+		this.ViewerService.updateViewerSettings(this.settings);
+		this.ClipService.initClip(this.settings.properties.unit);
+		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
+			.catch((error) => {
+				console.error("Error initialising tree: ", error);
+			});
+	}
+
 	private loadModelSettings() {
 		this.ViewerService.getModelInfo(this.account, this.model)
 			.then((response) => {
 				this.settings = response.data;
-				this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
-
-				this.ViewerService.updateViewerSettings(this.settings);
-				this.ClipService.initClip(this.settings.properties.unit);
-
-				this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
-					.then((tree) => {
-						this.EventService.send(this.EventService.EVENT.TREE_READY, tree);
-					})
-					.catch((error) => {
-						console.error("Error initialising tree: ", error);
-					});
+				this.setupViewer();
 			})
 			.catch((error) => {
 				console.error(error);

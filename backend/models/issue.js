@@ -29,6 +29,7 @@ let GenericObject = require("./base/repo").GenericObject;
 let uuid = require("node-uuid");
 let responseCodes = require("../response_codes.js");
 let middlewares = require("../middlewares/middlewares");
+const sharp = require("sharp");
 const _ = require("lodash");
 
 let ChatEvent = require("./chatEvent");
@@ -41,7 +42,6 @@ let xml2js = require("xml2js");
 let systemLogger = require("../logger.js").systemLogger;
 let Group = require("./group");
 let Meta = require("./meta");
-let gm = require("gm");
 let C = require("../constants");
 
 let xmlBuilder = new xml2js.Builder({
@@ -587,7 +587,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
-			data.viewpoint.group_id = data.group_id;
+			if (data.group_id || data.viewpoint.group_id) {
+				data.viewpoint.group_id = stringToUUID(data.group_id);
+			}
 			if (data.viewpoint.highlighted_group_id) {
 				data.viewpoint.highlighted_group_id = stringToUUID(data.viewpoint.highlighted_group_id);
 			}
@@ -769,62 +771,33 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 
 schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
 
-	let image, sourceX, sourceY, sourceWidth, sourceHeight;
+	const image = sharp(pngBuffer);
 
-	return new Promise((resolve, reject) => {
+	return image.metadata().then(imageData => {
 
-		image = gm(pngBuffer).size((err, size) => {
-			if(err){
-				reject(err);
-			} else {
-				resolve(size);
-			}
-		});
+		destHeight = destHeight || Math.floor(destWidth / imageData.width * imageData.height);
 
-	}).then(size => {
-
-		destHeight = destHeight || Math.floor(destWidth / size.width * size.height);
-
-		if(size.width <= destWidth){
-
+		if(imageData.width <= destWidth){
+			
 			return pngBuffer;
 
-		} else if (!crop){
-
-			sourceX = 0;
-			sourceY = 0;
-			sourceWidth = size.width;
-			sourceHeight = size.height;
-
-		} else if (size.width > size.height){
+		} else if (!crop) {
 			
-			sourceY = 0;
-			sourceHeight = size.height;
-			sourceX = Math.round(size.width / 2 - size.height / 2);
-			sourceWidth = sourceHeight;
+			return image
+				.resize(destWidth, destHeight)
+				.png()
+				.toBuffer();
 
-			image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
-
-		} else {
-
-			sourceX = 0;
-			sourceWidth = size.width;
-			sourceY = (size.height / 2 - size.width / 2);
-			sourceHeight = sourceWidth;
-
-			image.crop(sourceWidth, sourceHeight, sourceX, sourceY);
 		}
 
-		return new Promise((resolve, reject) => {
-			image.resize(destWidth, destHeight, "!").toBuffer("PNG", (err, buffer) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve(buffer);
-				}
-			});
-		});
+		return image
+			.crop(sharp.gravity.centre)
+			.resize(destWidth, destHeight)
+			.png()
+			.toBuffer();
+
 	});
+
 };
 
 schema.methods.updateComment = function(commentIndex, data){

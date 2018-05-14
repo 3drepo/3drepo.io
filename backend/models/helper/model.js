@@ -1053,12 +1053,25 @@ function getUnityAssets(account, model, branch, rev, username){
 	});
 }
 
+function getJsonMpc(account, model, uid){
+	
+	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
+
+	return stash.findStashByFilename({ account, model }, 'json_mpc', bundleFileName).then(buf => {
+		if(!buf)
+		{
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
+		}
+		else
+		{
+			return Promise.resolve(buf);
+		}
+	});
+}
+
 function getUnityBundle(account, model, uid){
 	
-
-	let bundleFileName;
-
-	bundleFileName = `/${account}/${model}/${uid}.unity3d`;
+	const bundleFileName = `/${account}/${model}/${uid}.unity3d`;
 
 	return stash.findStashByFilename({ account, model }, 'unity3d', bundleFileName).then(buf => {
 		if(!buf)
@@ -1783,6 +1796,7 @@ module.exports = {
 	getIdToMeshes,
 	getModelProperties,
 	getTreePath,
+	getJsonMpc,
 	getUnityAssets,
 	getUnityBundle,
 	searchTree,

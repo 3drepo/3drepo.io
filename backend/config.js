@@ -207,8 +207,6 @@ for (let i = 0; i < config.servers.length; i++) {
 // Change the algorithm for choosing an API server
 config.apiAlgorithm = createRoundRobinAlgorithm(config);
 
-config.disableCache = coalesce(config.disableCache, false);
-
 // Database configuration
 config.db = coalesce(config.db, {});
 config.db.host = coalesce(config.db.host, config.host);

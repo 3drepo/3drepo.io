@@ -56,6 +56,7 @@ router.get("/:model/revision/:rev/meshes.json", middlewares.hasReadAccessToModel
 //Unity information
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
+router.get('/:model/:uid.json.mpc',  middlewares.hasReadAccessToModel, getJsonMpc);
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
 //update federated model
@@ -523,9 +524,9 @@ function getPermissions(req, res, next){
 function getUnityAssets(req, res, next){
 	
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const model = req.params.model;
+	const account = req.params.account;
+	const username = req.session.user.username;
 	let branch;
 
 	if(!req.params.rev){
@@ -539,12 +540,27 @@ function getUnityAssets(req, res, next){
 	});
 }
 
+function getJsonMpc(req, res, next){
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
+
+
+	ModelHelpers.getJsonMpc(account, model, id).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
+	});
+}
+
+
+
 function getUnityBundle(req, res, next){
 	
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let id = req.params.uid;
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
 
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
