@@ -40,7 +40,7 @@ describe("Views", function () {
 
 	let pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
 	let baseView = {
-		"clippingPlanes":[]
+		"clippingPlanes":[],
 		"viewpoint":{
 			"up":[0,1,0],
 			"position":[38,38 ,125.08011914810137],
