@@ -78,9 +78,8 @@ export class ViewsService {
 	}
 
 	public editView() {
-		//editGroup
+		// editGroup
 	}
-
 
 }
 

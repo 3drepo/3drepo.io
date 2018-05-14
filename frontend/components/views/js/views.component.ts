@@ -68,7 +68,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
 			if (newValue) {
-				console.log("show views");
+				//console.log("show views");
 				this.toShow = "views";
 			}
 		});
@@ -93,8 +93,8 @@ class ViewsController implements ng.IController {
 
 	public editView() {
 		this.savedGroupData = Object.assign({}, this.selectedView);
-		//this.showGroupPane();
-		//this.focusGroupName();
+		// this.showGroupPane();
+		// this.focusGroupName();
 	}
 
 	public saveDisabled() {
