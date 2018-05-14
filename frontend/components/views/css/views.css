@@ -57,7 +57,7 @@ views .viewNameInput {
 }
 
 views .viewMain {
-    width: 315px;
+    width: 490px;
 }
 
 views .viewMetaData {
@@ -79,8 +79,7 @@ views .viewColorHolder {
 
 views .viewEnterHolder {
     width: 45px;
-    background: #0c2f54;
-    color: white;
+    color: grey;
 }
 
 views .viewEnterSpace {
@@ -107,9 +106,11 @@ views .viewMeta {
 
 views .viewName {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 20px;
     margin-bottom: 0px;
     height: 100%;
+    display: flex;
+    align-items: center;
 }
 
 views .viewEnterHolder {
@@ -123,6 +124,8 @@ views .viewEnterHolder md-icon {
 views .viewThumbnail {
     margin: 8px;
     margin-left: 15px;
+    width: 120px;
+    height: 120px;
 }
 
 views .openedGroupColorBar {

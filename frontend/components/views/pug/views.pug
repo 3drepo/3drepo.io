@@ -20,15 +20,15 @@ div.viewsContainer
 
             div.viewMain(layout="row")
                 img.viewThumbnail(src="http://192.168.1.6:80/api/carmen/5da556e1-4f45-4b19-8564-f07447df1fe2/issues/9598acd0-52d6-11e8-bc93-6b77d94e3052/thumbnail.png")
-                div.viewMetaData(layout="column", flex="100" layout-margin)
-                    div(layout="row" layout-align="space-between center"  flex="100")
-                        span.viewName {{view.name}}
-                    div(layout="row" flex="100")
+                //div.viewMetaData(layout="row", flex="100" layout-margin)
+                div(layout="column" layout-align="start center")
+                    div.viewName {{view.name}}
+                    input.viewName(ng-if="vm.editSelectedView === true")
+                    //div(layout="row" flex="100")
                         span.viewMeta  {{view.author}}
                         span.viewMeta  {{ view.createdAt  | date:"MM/dd/yyyy"}}
-                    div(layout="row"  flex="100")
+                    //div(layout="row"  flex="100")
                         span.viewDescription {{view.description}}
-               
 
             div.viewEnterHolder(
                 ng-click="vm.editView()"
@@ -36,7 +36,7 @@ div.viewsContainer
                 layout="row"
                 layout-align="center center")
 
-                md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
+                md-icon(class="angular-material-icons material-icons" role="img" aria-label="pencil") edit
 
             div.viewEnterSpace(
                 ng-if="view.selected !== true"
