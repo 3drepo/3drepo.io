@@ -30,8 +30,8 @@ describe("Views", function () {
 	let server;
 	let agent;
 
-	const username = "view_username";
-	const username2 = "view_username2";
+	const username = "issue_username";
+	const username2 = "issue_username2";
 	const password = "password";
 	
 	const projectAdminUser = "imProjectAdmin";
