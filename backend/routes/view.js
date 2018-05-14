@@ -41,7 +41,7 @@ function listViews(req, res, next){
 	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	View.listViews(dbCol, req.query, null, req.params.rid)
+	View.listViews(dbCol, req.query)
 		.then(views => {
 
 			responseCodes.respond(place, req, res, next, responseCodes.OK, views);
@@ -59,11 +59,12 @@ function findView(req, res, next){
 	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	View.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid)
+	View.findByUID(dbCol, req.params.uid)
 		.then(view => {
 			if(!view){
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 			} else {
+				view._id = utils.uuidToString(view._id);
 				return Promise.resolve(view);
 			}
 		}).then(view => {
@@ -78,15 +79,12 @@ function createView(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	let create = View.createView(getDbColOptions(req), req.body);
-
-	create.then(view => {
-
-		responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+	View.createView(getDbColOptions(req), req.body)
+		.then(view => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+		}).catch(err => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
 }
 
 function deleteView(req, res, next){
@@ -94,9 +92,7 @@ function deleteView(req, res, next){
 	let place = utils.APIInfo(req);
 
 	View.deleteView(getDbColOptions(req), req.params.id).then(() => {
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -107,21 +103,19 @@ function updateView(req, res, next){
 	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	View.findByUID(dbCol, req.params.uid, null, req.params.rid)
+	View.findByUID(dbCol, req.params.uid)
 		.then(view => {
-
-		if(!view){
-			return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
-		} else {
-			return view.updateAttrs(dbCol, req.body);
-		}
-
-	}).then(view => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-	}).catch(err => {
-		systemLogger.logError(err.stack);
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+			if(!view){
+				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
+			} else {
+				return view.updateAttrs(dbCol, req.body);
+			}
+		}).then(view => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+		}).catch(err => {
+			systemLogger.logError(err.stack);
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
 }
 
 module.exports = router;
