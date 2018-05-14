@@ -3,7 +3,7 @@ div(
 	flex)
 
 	div#middleButtons(layout-align="space-between" ng-if="vm.showButtons", layout="row")
-		span.middleButtonHolder(ng-repeat="button in vm.leftButtons", layout="column")
+		span.middleButtonHolder(layout-align="center center" ng-repeat="button in vm.bottomButtons", layout="column")
 			md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
 				ng-click="button.click()"
 				aria-label="{{button.label}}")
@@ -45,7 +45,7 @@ div(
 					
 			label(ng-if="!button.isViewingOptionButton") {{button.label}} 
 			
-			label(ng-if="button.isViewingOptionButton") {{vm.navigationOptions[vm.selectedMode].label}} 
+			label(ng-if="button.isViewingOptionButton") {{vm.navigationOptions.MODES[vm.selectedMode].label}} 
 
 			// OPTIONS
 			.viewingOptionButtonHolder(layout-align="center center")
@@ -55,7 +55,16 @@ div(
 					layout-align="center center")
 
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
-						ng-repeat="(mode, value) in vm.navigationOptions"
+						style="background: #FF9800"
+						ng-repeat="(option, value) in vm.navigationOptions.SPEED"
+						aria-label="{{option}}")
+
+							p(ng-if="option === 'INCREASE'" style="margin: 0" ng-click="value.fn()") +
+							p(ng-if="option === 'DECREASE'" style="margin: 0" ng-click="value.fn()") -
+							p(ng-if="option === 'RESET'" style="margin: 0" ng-click="value.fn()") R
+
+					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
+						ng-repeat="(mode, value) in vm.navigationOptions.MODES"
 						ng-if="mode !== vm.selectedMode"
 						ng-click="vm.setNavigationMode(mode);"
 						aria-label="{{mode}}")
@@ -72,5 +81,3 @@ div(
 							viewBox="0 0 23.94 22.46")
 							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable1}}")
 							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable2}}")
-							path(fill="#fff" stroke="rgba(0,0,0,0.01)" ng-attr-d="{{vm.customIcons.turntable3}}")
-

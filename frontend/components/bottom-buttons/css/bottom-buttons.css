@@ -19,7 +19,8 @@ bottom-buttons #middleButtons {
 }
 
 bottom-buttons #middleButtons button {
-  margin: auto !important;
+  margin-bottom: 10px;
+  /* margin: auto; */
 }
 
 bottom-buttons #middleButtons .middleButtonHolder {
@@ -37,11 +38,12 @@ bottom-buttons label {
 bottom-buttons .viewingOptionButtonHolder {
   position: absolute;
   height: 100%;
-  bottom: 50px;
+  bottom: 195px;
 }
 
 bottom-buttons .viewingOptionButtonHolder .viewingOptionButtons {
-  margin-left: 22px;
+  /* margin-left: 22px;
+   */
 }
 
 bottom-buttons label {

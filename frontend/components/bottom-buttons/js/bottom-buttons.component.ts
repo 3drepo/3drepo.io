@@ -31,7 +31,7 @@ class BottomButtonsController implements ng.IController {
 	private showButtons: boolean;
 	private navigationOptions: any;
 	private selectedViewingOptionIndex: number;
-	private leftButtons: any[];
+	private bottomButtons: any[];
 	private selectedMode: string;
 	private showNavigationOptions: boolean;
 	private customIcons: any;
@@ -56,14 +56,41 @@ class BottomButtonsController implements ng.IController {
 		this.showButtons = true;
 
 		this.navigationOptions = {
-			HELICOPTER : {
-				mode: Viewer.NAV_MODES.HELICOPTER,
-				label: "Helicopter"
+
+			MODES : {
+				HELICOPTER : {
+					mode: Viewer.NAV_MODES.HELICOPTER,
+					label: "Helicopter"
+				},
+				TURNTABLE : {
+					mode: Viewer.NAV_MODES.TURNTABLE,
+					label: "Turntable"
+				}
 			},
-			TURNTABLE : {
-				mode: Viewer.NAV_MODES.TURNTABLE,
-				label: "Turntable"
+			SPEED : {
+				INCREASE : {
+					mode: "INCREASE",
+					label: "Increase",
+					fn: () => {
+						console.log("increase")
+					}
+				},
+				DECREASE : {
+					mode: "DECREASE",
+					label: "Decrease",
+					fn: () => {
+						console.log("decrease")
+					}
+				},
+				RESET : {
+					mode: "RESET",
+					label: "Reset",
+					fn: () => {
+						console.log("reset")
+					}
+				}
 			}
+
 		};
 
 		document.addEventListener("click", (event: any) => {
@@ -76,42 +103,9 @@ class BottomButtonsController implements ng.IController {
 
 		this.selectedViewingOptionIndex = 1;
 
-		this.leftButtons = [];
-		this.leftButtons.push({
-			label: "Extent",
-			icon: "fa fa-home",
-			month: (new Date()).getMonth(),
-			click: () => { this.extent(); }
-		});
+		this.addButtons();
 
-		this.leftButtons.push({
-			isViewingOptionButton: true,
-			click: () => {
-				this.showNavigationOptions = !this.showNavigationOptions;
-			}
-		});
-
-		this.leftButtons.push({
-			label: "Show All",
-			click: () => { this.showAll(); }
-		});
-
-		this.leftButtons.push({
-			label: "Hide",
-			click: () => { this.hide(); }
-		});
-
-		this.leftButtons.push({
-			label: "Isolate",
-			click: () => { this.isolate(); }
-		});
-
-		this.leftButtons.push({
-			label: "Focus",
-			click: () => { this.focusMode(); }
-		});
-
-		this.selectedMode = this.navigationOptions.TURNTABLE.mode;
+		this.selectedMode = this.navigationOptions.MODES.TURNTABLE.mode;
 		this.setNavigationMode(this.selectedMode);
 
 		this.isFocusMode = false;
@@ -144,6 +138,43 @@ class BottomButtonsController implements ng.IController {
 
 	}
 
+	public addButtons() {
+		this.bottomButtons = [];
+		this.bottomButtons.push({
+			label: "Extent",
+			icon: "fa fa-home",
+			month: (new Date()).getMonth(),
+			click: () => { this.extent(); }
+		});
+
+		this.bottomButtons.push({
+			isViewingOptionButton: true,
+			click: () => {
+				this.showNavigationOptions = !this.showNavigationOptions;
+			}
+		});
+
+		this.bottomButtons.push({
+			label: "Show All",
+			click: () => { this.showAll(); }
+		});
+
+		this.bottomButtons.push({
+			label: "Hide",
+			click: () => { this.hide(); }
+		});
+
+		this.bottomButtons.push({
+			label: "Isolate",
+			click: () => { this.isolate(); }
+		});
+
+		this.bottomButtons.push({
+			label: "Focus",
+			click: () => { this.focusMode(); }
+		});
+	}
+
 	public extent() {
 		this.ViewerService.goToExtent();
 	}
@@ -153,7 +184,7 @@ class BottomButtonsController implements ng.IController {
 		if (mode !== undefined) {
 			// Set the viewing mode
 			this.selectedMode = mode;
-			this.ViewerService.setNavMode(this.navigationOptions[mode].mode);
+			this.ViewerService.setNavMode(this.navigationOptions.MODES[mode].mode);
 			this.showNavigationOptions = false;
 		}
 
