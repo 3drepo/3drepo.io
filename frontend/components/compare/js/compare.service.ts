@@ -271,8 +271,6 @@ export class CompareService {
 
 	public loadModels(compareType: string) {
 		const allModels = [];
-		console.log(this.state.targetModels);
-		console.log(this.state.baseModels);
 
 		this.state.loadingComparison = true;
 
@@ -283,7 +281,7 @@ export class CompareService {
 			let loadModel;
 
 			if (canReuseModel) {
-				console.log("Reusing model", model);
+
 				this.ViewerService.diffToolSetAsComparator(
 					model.account,
 					model.model,
@@ -452,10 +450,9 @@ export class CompareService {
 			childNodes.forEach((node) => {
 				if (node.name === model.account + ":" + model.name) {
 					// TODO: Fix this
-					if(model.visible === "invisible") {
+					if (model.visible === "invisible") {
 						this.TreeService.showTreeNodes([node]);
-					}
-					else {
+					} else {
 						this.TreeService.hideTreeNodes([node]);
 					}
 
