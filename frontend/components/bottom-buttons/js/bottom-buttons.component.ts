@@ -20,22 +20,28 @@ declare var Viewer;
 class BottomButtonsController implements ng.IController {
 
 	public static $inject: string[] = [
+		"$scope",
+		"$interval",
+
 		"ViewerService",
 		"TreeService",
 		"IconsConstant"
 	];
 
 	private showButtons: boolean;
-	private viewingOptions: any;
+	private navigationOptions: any;
 	private selectedViewingOptionIndex: number;
 	private leftButtons: any[];
 	private selectedMode: string;
-	private showViewingOptions: boolean;
+	private showNavigationOptions: boolean;
 	private customIcons: any;
 	private isFocusMode: boolean;
 	private escapeFocusModeButton: HTMLElement;
 
 	constructor(
+		private $scope: ng.IScope,
+		private $interval: ng.IIntervalService,
+
 		private ViewerService: any,
 		private TreeService: any,
 		private IconsConstant: any
@@ -49,12 +55,14 @@ class BottomButtonsController implements ng.IController {
 
 		this.showButtons = true;
 
-		this.viewingOptions = {
-			Helicopter : {
-				mode: Viewer.NAV_MODES.HELICOPTER
+		this.navigationOptions = {
+			HELICOPTER : {
+				mode: Viewer.NAV_MODES.HELICOPTER,
+				label: "Helicopter"
 			},
-			Turntable : {
-				mode: Viewer.NAV_MODES.TURNTABLE
+			TURNTABLE : {
+				mode: Viewer.NAV_MODES.TURNTABLE,
+				label: "Turntable"
 			}
 		};
 
@@ -62,7 +70,7 @@ class BottomButtonsController implements ng.IController {
 			// If the click is on the scene somewhere, hide the buttons
 			const valid = event && event.target && event.target.classList;
 			if (valid && event.target.classList.contains("emscripten")) {
-				this.showViewingOptions = false;
+				this.showNavigationOptions = false;
 			}
 		}, false);
 
@@ -79,7 +87,7 @@ class BottomButtonsController implements ng.IController {
 		this.leftButtons.push({
 			isViewingOptionButton: true,
 			click: () => {
-				this.showViewingOptions = !this.showViewingOptions;
+				this.showNavigationOptions = !this.showNavigationOptions;
 			}
 		});
 
@@ -103,8 +111,8 @@ class BottomButtonsController implements ng.IController {
 			click: () => { this.focusMode(); }
 		});
 
-		this.selectedMode = "Turntable";
-		this.setViewingOption(this.selectedMode);
+		this.selectedMode = this.navigationOptions.TURNTABLE.mode;
+		this.setNavigationMode(this.selectedMode);
 
 		this.isFocusMode = false;
 
@@ -120,19 +128,33 @@ class BottomButtonsController implements ng.IController {
 		// Bind a click handler to exit focus mode
 		this.escapeFocusModeButton.addEventListener("click", this.focusMode.bind(this));
 
+		this.watchers();
+	}
+
+	public watchers() {
+
+		// We have to use interval as watcher seems to
+		// break the e2e tests due to Angular timeouts
+		this.$interval(() => {
+			const newMode = this.ViewerService.getNavMode();
+			if (newMode !== this.selectedMode) {
+				this.selectedMode = newMode;
+			}
+		}, 1000);
+
 	}
 
 	public extent() {
 		this.ViewerService.goToExtent();
 	}
 
-	public setViewingOption(type) {
+	public setNavigationMode(mode) {
 
-		if (type !== undefined) {
+		if (mode !== undefined) {
 			// Set the viewing mode
-			this.selectedMode = type;
-			this.ViewerService.setNavMode(this.viewingOptions[type].mode);
-			this.showViewingOptions = false;
+			this.selectedMode = mode;
+			this.ViewerService.setNavMode(this.navigationOptions[mode].mode);
+			this.showNavigationOptions = false;
 		}
 
 	}

@@ -283,8 +283,9 @@ export class UnityUtil {
 	}
 
 	public static navMethodChanged(newNavMode) {
-		// TODO: do some front end magic to update the navigation button
-		// newNavMode can currently be "Turntable" or "Helicopter"
+		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
+			UnityUtil.viewer.navMethodChanged(newNavMode);
+		}
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
@@ -771,7 +772,7 @@ export class UnityUtil {
 		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
-	/**
+	/**r
 	 * Set navigation mode.
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */

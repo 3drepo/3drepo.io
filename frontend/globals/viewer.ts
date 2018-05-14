@@ -23,11 +23,8 @@ declare const Module;
 export class Viewer {
 
 	public static NAV_MODES = {
-		FLY: "FLY",
 		HELICOPTER: "HELICOPTER",
-		TURNTABLE: "TURNTABLE",
-		WALK: "WALK",
-		WAYFINDER: "WAYFINDER"
+		TURNTABLE: "TURNTABLE"
 	};
 
 	public static MAP_SOURCES = {
@@ -74,7 +71,8 @@ export class Viewer {
 		UNITY_ERROR: "VIEWER_EVENT_UNITY_ERROR",
 		UNITY_READY: "VIEWER_EVENT_UNITY_READY",
 		UPDATE_CLIPPING_PLANES: "VIEWER_UPDATE_CLIPPING_PLANE",
-		VR_READY: "VIEWER_EVENT_VR_READY"
+		VR_READY: "VIEWER_EVENT_VR_READY",
+		NAV_MODE_CHANGED: "NAV_MODE_CHANGED"
 	};
 
 	public ERROR = {
@@ -502,6 +500,10 @@ export class Viewer {
 			UnityUtil.setNavigation(mode);
 
 		}
+	}
+
+	public navMethodChanged(newNavMode) {
+		this.currentNavMode = newNavMode;
 	}
 
 	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
