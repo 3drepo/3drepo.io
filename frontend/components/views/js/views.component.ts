@@ -25,6 +25,8 @@ class ViewsController implements ng.IController {
 
 	private onShowItem: any;
 
+	private account: string;
+	private model: string;
 	private onContentHeightRequest: any;
 	private views: any[];
 	private toShow: string;
@@ -41,7 +43,7 @@ class ViewsController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.ViewsService.getViews().then(() => {
+		this.ViewsService.getViews(this.account, this.model).then(() => {
 			this.loading = false;
 		});
 		this.toShow = "views";
@@ -66,7 +68,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
 			if (newValue) {
-				console.log("show views");
+				// console.log("show views");
 				this.toShow = "views";
 			}
 		});
@@ -91,8 +93,8 @@ class ViewsController implements ng.IController {
 
 	public editView() {
 		this.savedGroupData = Object.assign({}, this.selectedView);
-		//this.showGroupPane();
-		//this.focusGroupName();
+		// this.showGroupPane();
+		// this.focusGroupName();
 	}
 
 	public saveDisabled() {

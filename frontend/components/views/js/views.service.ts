@@ -40,23 +40,18 @@ export class ViewsService {
 		};
 	}
 
-	public getViews(teamspace: string, model: string, revision: string) {
+	public getViews(teamspace: string, model: string) {
 
-		// This is what we would do when we have the API
-		// let viewsUrl;
-		// if (revision) {
-		// 	viewsUrl = `${teamspace}/${model}/views/revision/${revision}/?noIssues=true`;
-		// } else {
-		// 	viewsUrl = `${teamspace}/${model}/views/revision/master/head/?noIssues=true`;
-		// }
+		const viewsUrl = `${teamspace}/${model}/views/`;
 
-		// return this.APIService.get(viewsUrl)
-		// 	.then((response) => {
-		// 		this.state.views = response.data;
-		// 	});
+		return this.APIService.get(viewsUrl)
+			.then((response) => {
+				console.debug(response);
+				this.state.views = response.data;
+			});
 
 		// Mocked until this can be a real API call
-		return this.$timeout(() => {
+		/*return this.$timeout(() => {
 			this.state.views = [{
 				id : 1,
 				name: "View 1",
@@ -73,8 +68,7 @@ export class ViewsService {
 				description: "Will you hire my son?",
 				selected: false
 			}];
-		}, 3000);
-
+		}, 3000);*/
 	}
 
 	public deleteView(view) 	{
@@ -84,9 +78,8 @@ export class ViewsService {
 	}
 
 	public editView() {
-		//editGroup
+		// editGroup
 	}
-
 
 }
 
