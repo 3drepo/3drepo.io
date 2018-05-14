@@ -25,6 +25,8 @@ class ViewsController implements ng.IController {
 
 	private onShowItem: any;
 
+	private account: string;
+	private model: string;
 	private onContentHeightRequest: any;
 	private views: any[];
 	private toShow: string;
@@ -41,7 +43,7 @@ class ViewsController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.ViewsService.getViews().then(() => {
+		this.ViewsService.getViews(this.account, this.model).then(() => {
 			this.loading = false;
 		});
 		this.toShow = "views";
