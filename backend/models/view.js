@@ -66,22 +66,20 @@ viewSchema.statics.listViews = function(dbCol, queryParams){
 
 viewSchema.methods.updateAttrs = function(dbCol, data){
 
-	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
-		const toUpdate = {};
-		const fieldsCanBeUpdated = ["name", "clippingPlanes", "viewpoint", "screenshot"];
-		
-		fieldsCanBeUpdated.forEach((key) => {
-			if (data[key]) {
-				toUpdate[key] = data[key];
-			}
-		});
+	const toUpdate = {};
+	const fieldsCanBeUpdated = ["name", "clippingPlanes", "viewpoint", "screenshot"];
 
-		const db = require("../db/db");
-		return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
-				return {_id: utils.uuidToString(this._id)};
-			}); 
-		});
+	fieldsCanBeUpdated.forEach((key) => {
+		if (data[key]) {
+			toUpdate[key] = data[key];
+		}
+	});
+
+	const db = require("../db/db");
+	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
+		return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
+			return {_id: utils.uuidToString(this._id)};
+		}); 
 	});
 };
 
