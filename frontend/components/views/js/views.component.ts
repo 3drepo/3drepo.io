@@ -68,7 +68,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
 			if (newValue) {
-				//console.log("show views");
+				// console.log("show views");
 				this.toShow = "views";
 			}
 		});
