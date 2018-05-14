@@ -45,26 +45,28 @@ div(
 					
 			label(ng-if="!button.isViewingOptionButton") {{button.label}} 
 			
-			label(ng-if="button.isViewingOptionButton") {{vm.navigationOptions.MODES[vm.selectedMode].label}} 
+			label(ng-if="button.isViewingOptionButton") {{vm.navigationState.MODES[vm.selectedMode].label}} 
 
 			// OPTIONS
 			.viewingOptionButtonHolder(layout-align="center center")
 				.viewingOptionButtons(
 					layout="column"
-					ng-if="vm.showNavigationOptions && button.isViewingOptionButton"
+					ng-if="vm.shownavigationState && button.isViewingOptionButton"
 					layout-align="center center")
 
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
 						style="background: #FF9800"
-						ng-repeat="(option, value) in vm.navigationOptions.SPEED"
+						ng-show="vm.selectedMode === vm.navigationState.MODES.HELICOPTER.mode"
+						ng-repeat="(option, value) in vm.navigationState.SPEED"
 						aria-label="{{option}}")
 
 							p(ng-if="option === 'INCREASE'" style="margin: 0" ng-click="value.fn()") +
 							p(ng-if="option === 'DECREASE'" style="margin: 0" ng-click="value.fn()") -
-							p(ng-if="option === 'RESET'" style="margin: 0" ng-click="value.fn()") R
+							p(ng-if="option === 'RESET'" style="margin: 0" ng-click="value.fn()") {{ vm.navigationState.VALUE }}
+							md-tooltip(md-direction="top") {{value.label + ' Speed'}}
 
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
-						ng-repeat="(mode, value) in vm.navigationOptions.MODES"
+						ng-repeat="(mode, value) in vm.navigationState.MODES"
 						ng-if="mode !== vm.selectedMode"
 						ng-click="vm.setNavigationMode(mode);"
 						aria-label="{{mode}}")

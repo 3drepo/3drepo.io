@@ -22,6 +22,7 @@ class BottomButtonsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$interval",
+		"$timeout",
 
 		"ViewerService",
 		"TreeService",
@@ -29,11 +30,11 @@ class BottomButtonsController implements ng.IController {
 	];
 
 	private showButtons: boolean;
-	private navigationOptions: any;
+	private navigationState: any;
 	private selectedViewingOptionIndex: number;
 	private bottomButtons: any[];
 	private selectedMode: string;
-	private showNavigationOptions: boolean;
+	private shownavigationState: boolean;
 	private customIcons: any;
 	private isFocusMode: boolean;
 	private escapeFocusModeButton: HTMLElement;
@@ -41,6 +42,7 @@ class BottomButtonsController implements ng.IController {
 	constructor(
 		private $scope: ng.IScope,
 		private $interval: ng.IIntervalService,
+		private $timeout: ng.ITimeoutService,
 
 		private ViewerService: any,
 		private TreeService: any,
@@ -55,7 +57,9 @@ class BottomButtonsController implements ng.IController {
 
 		this.showButtons = true;
 
-		this.navigationOptions = {
+		this.navigationState = {
+
+			VALUE : 0,
 
 			MODES : {
 				HELICOPTER : {
@@ -68,25 +72,31 @@ class BottomButtonsController implements ng.IController {
 				}
 			},
 			SPEED : {
+				RESET : {
+					mode: "RESET",
+					label: "Reset",
+					fn: () => {
+						this.ViewerService.helicopterSpeedReset();
+						this.navigationState.VALUE = 1;
+						this.$timeout(); // Force digest
+					}
+				},
 				INCREASE : {
 					mode: "INCREASE",
 					label: "Increase",
 					fn: () => {
-						console.log("increase")
+						this.ViewerService.helicopterSpeedUp();
+						this.navigationState.VALUE++;
+						this.$timeout();  // Force digest
 					}
 				},
 				DECREASE : {
 					mode: "DECREASE",
 					label: "Decrease",
 					fn: () => {
-						console.log("decrease")
-					}
-				},
-				RESET : {
-					mode: "RESET",
-					label: "Reset",
-					fn: () => {
-						console.log("reset")
+						this.ViewerService.helicopterSpeedDown();
+						this.navigationState.VALUE--;
+						this.$timeout();  // Force digest
 					}
 				}
 			}
@@ -97,7 +107,7 @@ class BottomButtonsController implements ng.IController {
 			// If the click is on the scene somewhere, hide the buttons
 			const valid = event && event.target && event.target.classList;
 			if (valid && event.target.classList.contains("emscripten")) {
-				this.showNavigationOptions = false;
+				this.shownavigationState = false;
 			}
 		}, false);
 
@@ -105,7 +115,7 @@ class BottomButtonsController implements ng.IController {
 
 		this.addButtons();
 
-		this.selectedMode = this.navigationOptions.MODES.TURNTABLE.mode;
+		this.selectedMode = this.navigationState.MODES.TURNTABLE.mode;
 		this.setNavigationMode(this.selectedMode);
 
 		this.isFocusMode = false;
@@ -150,7 +160,7 @@ class BottomButtonsController implements ng.IController {
 		this.bottomButtons.push({
 			isViewingOptionButton: true,
 			click: () => {
-				this.showNavigationOptions = !this.showNavigationOptions;
+				this.shownavigationState = !this.shownavigationState;
 			}
 		});
 
@@ -184,8 +194,8 @@ class BottomButtonsController implements ng.IController {
 		if (mode !== undefined) {
 			// Set the viewing mode
 			this.selectedMode = mode;
-			this.ViewerService.setNavMode(this.navigationOptions.MODES[mode].mode);
-			this.showNavigationOptions = false;
+			this.ViewerService.setNavMode(this.navigationState.MODES[mode].mode);
+			this.shownavigationState = false;
 		}
 
 	}
