@@ -746,7 +746,6 @@ export class Viewer {
 		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 
-
 	// Navigation
 
 	public helicopterSpeedDown() {
