@@ -35,7 +35,7 @@ class BottomButtonsController implements ng.IController {
 	private selectedViewingOptionIndex: number;
 	private bottomButtons: any[];
 	private selectedMode: string;
-	private shownavigationState: boolean;
+	private showNavigationState: boolean;
 	private customIcons: any;
 	private isFocusMode: boolean;
 	private escapeFocusModeButton: HTMLElement;
@@ -113,7 +113,7 @@ class BottomButtonsController implements ng.IController {
 			// If the click is on the scene somewhere, hide the buttons
 			const valid = event && event.target && event.target.classList;
 			if (valid && event.target.classList.contains("emscripten")) {
-				this.shownavigationState = false;
+				this.showNavigationState = false;
 			}
 		}, false);
 
@@ -166,7 +166,7 @@ class BottomButtonsController implements ng.IController {
 		this.bottomButtons.push({
 			isViewingOptionButton: true,
 			click: () => {
-				this.shownavigationState = !this.shownavigationState;
+				this.showNavigationState = !this.showNavigationState;
 			}
 		});
 
@@ -202,7 +202,7 @@ class BottomButtonsController implements ng.IController {
 			this.selectedMode = mode;
 			this.navigationState.SPEED.RESET.fn();
 			this.ViewerService.setNavMode(this.navigationState.MODES[mode].mode);
-			this.shownavigationState = false;
+			this.showNavigationState = false;
 		}
 
 	}
