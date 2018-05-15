@@ -44,12 +44,7 @@ function listMaps(req, res, next) {
 	}
 }
 
-function getOSMTile(req, res, next){
-	//TODO: we may want to ensure the model has access to tiles
-//	const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
-	const domain = "a.tile.openstreetmap.org";
-	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png"
-	systemLogger.logInfo("Fetching osm map tile: " + uri);
+function requestMapTile(req, res, domain, uri) {
 	httpsGet.get(domain, uri).then(image =>{
 		res.writeHead(200, {'Content-Type': 'image/png' });
 		res.write(image);
@@ -62,7 +57,15 @@ function getOSMTile(req, res, next){
 			res.status(err.resCode).json({message: err.message});
 		}
 	});
+}
 
+function getOSMTile(req, res, next){
+	//TODO: we may want to ensure the model has access to tiles
+	//const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
+	const domain = "a.tile.openstreetmap.org";
+	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png"
+	systemLogger.logInfo("Fetching osm map tile: " + uri);
+	requestMapTile(req, res, domain, uri);
 }
 
 function getHereMapsTile(req, res, next){
@@ -71,38 +74,16 @@ function getHereMapsTile(req, res, next){
 	let uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here map tile: " + uri);
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
-	httpsGet.get(domain, uri).then(image => {
-		res.writeHead(200, {'Content-Type': 'image/png' });
-		res.write(image);
-		res.end();
-	}).catch(err => {
-		systemLogger.logError(JSON.stringify(err));
-		if (err.message) {
-			res.status(500).json({ message: err.message });
-		} else if (err.resCode) {
-			res.status(err.resCode).json({ message: err.message });
-		}
-	});
+	requestMapTile(req, res, domain, uri);
 }
 
 function getHereAerialMapsTile(req, res, next){
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
+	const size = 512; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = "1.aerial.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here map tile: " + uri);
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
-	httpsGet.get(domain, uri).then(image => {
-		res.writeHead(200, {'Content-Type': 'image/png' });
-		res.write(image);
-		res.end();
-	}).catch(err => {
-		systemLogger.logError(JSON.stringify(err));
-		if (err.message) {
-			res.status(500).json({ message: err.message });
-		} else if (err.resCode) {
-			res.status(err.resCode).json({ message: err.message });
-		}
-	});
+	requestMapTile(req, res, domain, uri);
 }
 
 function getHereTrafficTile(req, res, next){
@@ -111,18 +92,7 @@ function getHereTrafficTile(req, res, next){
 	let uri = "/maptile/2.1/traffictile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
-	httpsGet.get(domain, uri).then(image => {
-		res.writeHead(200, {'Content-Type': 'image/png' });
-		res.write(image);
-		res.end();
-	}).catch(err => {
-		systemLogger.logError(JSON.stringify(err));
-		if (err.message) {
-			res.status(500).json({ message: err.message });
-		} else if (err.resCode) {
-			res.status(err.resCode).json({ message: err.message });
-		}
-	});
+	requestMapTile(req, res, domain, uri);
 }
 
 function getHereTrafficFlowTile(req, res, next){
@@ -131,18 +101,7 @@ function getHereTrafficFlowTile(req, res, next){
 	let uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
-	httpsGet.get(domain, uri).then(image => {
-		res.writeHead(200, {'Content-Type': 'image/png' });
-		res.write(image);
-		res.end();
-	}).catch(err => {
-		systemLogger.logError(JSON.stringify(err));
-		if (err.message) {
-			res.status(500).json({ message: err.message });
-		} else if (err.resCode) {
-			res.status(err.resCode).json({ message: err.message });
-		}
-	});
+	requestMapTile(req, res, domain, uri);
 }
 
 module.exports = router;
