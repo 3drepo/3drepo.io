@@ -19,14 +19,20 @@ export class ViewsService {
 
 	public static $inject: string[] = [
 		"$timeout",
-		"APIService"
+		"$q",
+
+		"APIService",
+		"ViewerService"
 	];
 
 	private state;
 
 	constructor(
 		private $timeout: any,
-		private APIService: any
+		private $q: any,
+
+		private APIService: any,
+		private ViewerService: any
 	) {
 		this.reset();
 	}
@@ -50,30 +56,41 @@ export class ViewsService {
 				this.state.views = response.data;
 			});
 
-		// Mocked until this can be a real API call
-		/*return this.$timeout(() => {
-			this.state.views = [{
-				id : 1,
-				name: "View 1",
-				author: "Richard",
-				createdAt: Date.now(),
-				description: "How do I load a big model?",
-				selected: false
-			},
-			{
-				id: 2,
-				name: "View 2",
-				author: "Richard",
-				createdAt: Date.now(),
-				description: "Will you hire my son?",
-				selected: false
-			}];
-		}, 3000);*/
+	}
+
+	public createView(teamspace: string, model: string, viewName: string) {
+
+		const viewpointDefer = this.$q.defer();
+		const screenshotDefer = this.$q.defer();
+
+		this.ViewerService.getCurrentViewpoint({
+			promise: viewpointDefer,
+			account: teamspace,
+			model
+		});
+
+		this.ViewerService.getScreenshot(screenshotDefer);
+
+		return Promise.all([viewpointDefer.promise, screenshotDefer.promise]).then((results) => {
+			console.log(results);
+			const viewpoint = results[0];
+			const screenshot = results[1];
+			viewpoint.name = viewName;
+			viewpoint.screenshot = screenshot;
+			const viewsUrl = `${teamspace}/${model}/views/`;
+
+			return this.APIService.post(viewsUrl, viewpoint)
+				.then((response) => {
+					console.log(response);
+					this.state.views.push(viewpoint);
+				});
+		});
+
 	}
 
 	public deleteView(view) 	{
 		this.state.views = this.state.views.filter((v) => {
-			return v.id !== view.id;
+			return v._id !== view._id;
 		});
 	}
 

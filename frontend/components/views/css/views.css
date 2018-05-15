@@ -118,7 +118,7 @@ views .viewEnterHolder {
 }
 
 views .viewEnterHolder md-icon {
-    color: white;
+    color: rgb(65, 65, 65);
 }
 
 views .viewThumbnail {

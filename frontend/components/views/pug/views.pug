@@ -19,19 +19,16 @@ div.viewsContainer
             ng-repeat="view in vm.views track by $index")
 
             div.viewMain(layout="row")
-                img.viewThumbnail(src="http://192.168.1.6:80/api/carmen/5da556e1-4f45-4b19-8564-f07447df1fe2/issues/9598acd0-52d6-11e8-bc93-6b77d94e3052/thumbnail.png")
-                //div.viewMetaData(layout="row", flex="100" layout-margin)
+                img.viewThumbnail(ng-src="{{view.screenshot}}")
                 div(layout="column" layout-align="start center")
-                    div.viewName {{view.name}}
-                    input.viewName(ng-if="vm.editSelectedView === true")
-                    //div(layout="row" flex="100")
-                        span.viewMeta  {{view.author}}
-                        span.viewMeta  {{ view.createdAt  | date:"MM/dd/yyyy"}}
-                    //div(layout="row"  flex="100")
-                        span.viewDescription {{view.description}}
+                    div(
+                        ng-if="vm.editSelectedView !== view").viewName {{view.name || "(Unnamed View)"}}
+                    input.viewName(
+                        ng-model="vm.editSelectedView.name" 
+                        ng-if="vm.editSelectedView === view")
 
             div.viewEnterHolder(
-                ng-click="vm.editView()"
+                ng-click="vm.editView(view)"
                 ng-if="view.selected === true"
                 layout="row"
                 layout-align="center center")
@@ -63,16 +60,16 @@ div.viewsContainer
                     input#viewName(
                         type="text"
                         ng-disabled="!vm.canAddView"
-                        ng-model="vm.selectedView.name" 
+                        ng-model="vm.newView.name" 
                         ng-maxlength="80")
 
-        md-input-container
+        //md-input-container
             label View Description
             textarea.viewDescriptionInput(
                 ng-disabled="!vm.canAddView"
                 ng-model="vm.selectedView.description")
 
-        md-container(
+        //md-container(
             layout="row"
             layout-align="space-between center")
 
@@ -172,7 +169,7 @@ div.viewsContainer
                 aria-label="Add" 
                 ng-disabled="vm.saveDisabled()"
                 ng-show="vm.toShow === 'view' && !vm.savingView"
-                ng-click="vm.handleViewSave()")
+                ng-click="vm.createView()")
 
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"

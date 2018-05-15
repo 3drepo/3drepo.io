@@ -24,7 +24,6 @@ class ViewsController implements ng.IController {
 	];
 
 	private onShowItem: any;
-
 	private account: string;
 	private model: string;
 	private onContentHeightRequest: any;
@@ -34,7 +33,8 @@ class ViewsController implements ng.IController {
 	private selectedView: any;
 	private savingView: any;
 	private canAddView: any;
-	private savedGroupData: any;
+	private newView: any;
+	private editSelectedView: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -43,6 +43,7 @@ class ViewsController implements ng.IController {
 	) {}
 
 	public $onInit() {
+		this.newView = {};
 		this.ViewsService.getViews(this.account, this.model).then(() => {
 			this.loading = false;
 		});
@@ -51,6 +52,7 @@ class ViewsController implements ng.IController {
 		this.savingView = false;
 		this.canAddView = true;
 		this.views = [];
+		this.editSelectedView = false;
 		this.watchers();
 	}
 
@@ -64,6 +66,7 @@ class ViewsController implements ng.IController {
 			return this.ViewsService.state;
 		}, (newState, oldState) => {
 			angular.extend(this, newState);
+			console.log(this.views);
 		}, true);
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
@@ -73,6 +76,14 @@ class ViewsController implements ng.IController {
 			}
 		});
 
+	}
+
+	public createView() {
+		this.ViewsService.createView(this.account, this.model, this.newView.name)
+			.catch((error) => {
+				console.error(error);
+			});
+		this.toShow = "views";
 	}
 
 	public selectView(view) {
@@ -91,10 +102,12 @@ class ViewsController implements ng.IController {
 		this.ViewsService.deleteView(this.selectedView);
 	}
 
-	public editView() {
-		this.savedGroupData = Object.assign({}, this.selectedView);
-		// this.showGroupPane();
-		// this.focusGroupName();
+	public editView(view) {
+		if (this.editSelectedView === view) {
+			this.editSelectedView = null;
+		} else {
+			this.editSelectedView = view;
+		}
 	}
 
 	public saveDisabled() {
