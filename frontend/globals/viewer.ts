@@ -29,7 +29,9 @@ export class Viewer {
 
 	public static MAP_SOURCES = {
 		OSM: "OSM",
-		HERE: "HERE"
+		HERE: "HERE",
+		HERE_AERIAL: "HERE_AERIAL",
+		HERE_TRAFFIC: "HERE_TRAFFIC"
 	};
 
 	public static EVENT = {
