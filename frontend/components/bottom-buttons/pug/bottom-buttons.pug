@@ -70,8 +70,6 @@ div(
 							md-icon.angular-material-icons(ng-if="option === 'RESET'" style="margin: 0") replay
 							md-tooltip(ng-if="option === 'RESET'" md-direction="right") {{value.label + ' Speed to 1'}}
 
-
-
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
 						ng-repeat="(mode, value) in vm.navigationState.MODES"
 						ng-if="mode !== vm.selectedMode"
