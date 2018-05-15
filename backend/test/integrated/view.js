@@ -59,7 +59,6 @@ describe("Views", function () {
 			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
-				console.log(res);
 				expect(res.body.username).to.equal(username);
 				done(err);
 			});
