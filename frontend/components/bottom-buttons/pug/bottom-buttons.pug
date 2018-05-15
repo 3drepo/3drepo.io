@@ -58,12 +58,14 @@ div(
 						style="background: #FF9800"
 						ng-show="vm.selectedMode === vm.navigationState.MODES.HELICOPTER.mode"
 						ng-repeat="(option, value) in vm.navigationState.SPEED"
+						ng-click="value.fn()"
 						aria-label="{{option}}")
 
-							p(ng-if="option === 'INCREASE'" style="margin: 0" ng-click="value.fn()") +
-							p(ng-if="option === 'DECREASE'" style="margin: 0" ng-click="value.fn()") -
-							p(ng-if="option === 'RESET'" style="margin: 0" ng-click="value.fn()") {{ vm.navigationState.VALUE }}
-							md-tooltip(md-direction="top") {{value.label + ' Speed'}}
+							p(ng-if="option === 'INCREASE'" style="margin: 0") +
+							p(ng-if="option === 'DECREASE'" style="margin: 0") -
+							p(ng-if="option === 'RESET'" style="margin: 0") {{ vm.navigationState.VALUE }}
+
+							md-tooltip(md-direction="right") {{value.label + ' Speed'}}
 
 					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
 						ng-repeat="(mode, value) in vm.navigationState.MODES"

@@ -753,7 +753,7 @@ export class Viewer {
 	}
 
 	public helicopterSpeedUp() {
-		UnityUtil.helicopterSpeedReset();
+		UnityUtil.helicopterSpeedUp();
 	}
 
 	public helicopterSpeedReset() {

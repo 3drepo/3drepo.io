@@ -23,6 +23,7 @@ class BottomButtonsController implements ng.IController {
 		"$scope",
 		"$interval",
 		"$timeout",
+		"$element",
 
 		"ViewerService",
 		"TreeService",
@@ -43,6 +44,7 @@ class BottomButtonsController implements ng.IController {
 		private $scope: ng.IScope,
 		private $interval: ng.IIntervalService,
 		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private ViewerService: any,
 		private TreeService: any,
@@ -59,7 +61,7 @@ class BottomButtonsController implements ng.IController {
 
 		this.navigationState = {
 
-			VALUE : 0,
+			VALUE : 1,
 
 			MODES : {
 				HELICOPTER : {
@@ -85,18 +87,22 @@ class BottomButtonsController implements ng.IController {
 					mode: "INCREASE",
 					label: "Increase",
 					fn: () => {
-						this.ViewerService.helicopterSpeedUp();
-						this.navigationState.VALUE++;
-						this.$timeout();  // Force digest
+						if (this.navigationState.VALUE < 99) {
+							this.ViewerService.helicopterSpeedUp();
+							this.navigationState.VALUE++;
+							this.$timeout();  // Force digest
+						}
 					}
 				},
 				DECREASE : {
 					mode: "DECREASE",
 					label: "Decrease",
 					fn: () => {
-						this.ViewerService.helicopterSpeedDown();
-						this.navigationState.VALUE--;
-						this.$timeout();  // Force digest
+						if (this.navigationState.VALUE > -99) {
+							this.ViewerService.helicopterSpeedDown();
+							this.navigationState.VALUE--;
+							this.$timeout();  // Force digest
+						}
 					}
 				}
 			}
@@ -194,6 +200,7 @@ class BottomButtonsController implements ng.IController {
 		if (mode !== undefined) {
 			// Set the viewing mode
 			this.selectedMode = mode;
+			this.navigationState.SPEED.RESET.fn();
 			this.ViewerService.setNavMode(this.navigationState.MODES[mode].mode);
 			this.shownavigationState = false;
 		}
