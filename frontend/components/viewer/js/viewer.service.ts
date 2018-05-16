@@ -21,6 +21,7 @@ export class ViewerService {
 
 	public static $inject: string[] = [
 		"$q",
+		"$timeout",
 
 		"ClientConfigService",
 		"APIService",
@@ -38,6 +39,7 @@ export class ViewerService {
 
 	constructor(
 		public $q: ng.IQService,
+		public $timeout: ng.ITimeoutService,
 
 		public ClientConfigService: any,
 		public APIService: any,
@@ -103,6 +105,10 @@ export class ViewerService {
 			// 	break;
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
+				if (this.newPinId === "newPinId") {
+					this.removeUnsavedPin();
+					return;
+				}
 				this.viewer.clickPin(event.value.id);
 				break;
 
@@ -167,12 +173,6 @@ export class ViewerService {
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
 				if (this.pin.pinDropMode) {
-					this.removeUnsavedPin();
-				}
-				break;
-
-			case this.EventService.EVENT.VIEWER.CLICK_PIN:
-				if (this.newPinId === "newPinId") {
 					this.removeUnsavedPin();
 				}
 				break;
@@ -294,6 +294,13 @@ export class ViewerService {
 				params.model,
 				params.id ? [params.id] : params.ids
 			);
+		}
+	}
+
+	public getNavMode() {
+		if (this.viewer) {
+			// this.$timeout();
+			return this.viewer.currentNavMode;
 		}
 	}
 
@@ -594,6 +601,24 @@ export class ViewerService {
 	public zoomToHighlightedMeshes() {
 		if (this.viewer) {
 			this.viewer.zoomToHighlightedMeshes();
+		}
+	}
+
+	public helicopterSpeedDown() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedDown();
+		}
+	}
+
+	public helicopterSpeedUp() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedUp();
+		}
+	}
+
+	public helicopterSpeedReset() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedReset();
 		}
 	}
 
