@@ -26,11 +26,12 @@ const View = require("../models/view");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get('/views/', middlewares.issue.canView, listViews);
-router.get('/views/:uid', middlewares.issue.canView, findView);
-router.put('/views/:uid', middlewares.issue.canCreate, updateView);
-router.post('/views/', middlewares.issue.canCreate, createView);
-router.delete('/views/:id', middlewares.issue.canCreate, deleteView);
+router.get("/views/", middlewares.issue.canView, listViews);
+router.get("/views/:uid", middlewares.issue.canView, findView);
+router.put("/views/:uid", middlewares.issue.canCreate, updateView);
+router.post("/views/", middlewares.issue.canCreate, createView);
+router.delete("/views/:uid", middlewares.issue.canCreate, deleteView);
+router.get("/views/:uid/thumbnail.png", middlewares.issue.canView, getViewThumbnail);
 
 const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
@@ -91,11 +92,12 @@ function deleteView(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	View.deleteView(getDbColOptions(req), req.params.id).then(() => {
+	View.deleteView(getDbColOptions(req), req.params.uid).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
+
 }
 
 function updateView(req, res, next){
@@ -116,6 +118,19 @@ function updateView(req, res, next){
 			systemLogger.logError(err.stack);
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
+}
+
+function getViewThumbnail(req, res, next){
+
+	let place = utils.APIInfo(req);
+	let dbCol = {account: req.params.account, model: req.params.model};
+
+	View.getThumbnail(dbCol, req.params.uid).then(buffer => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
 }
 
 module.exports = router;

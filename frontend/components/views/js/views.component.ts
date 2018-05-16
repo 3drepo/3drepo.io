@@ -19,8 +19,10 @@ class ViewsController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
+		"$timeout",
 
-		"ViewsService"
+		"ViewsService",
+		"APIService"
 	];
 
 	private onShowItem: any;
@@ -38,8 +40,10 @@ class ViewsController implements ng.IController {
 
 	constructor(
 		private $scope: ng.IScope,
+		private $timeout: ng.ITimeoutService,
 
-		private ViewsService: any
+		private ViewsService: any,
+		private APIService: any
 	) {}
 
 	public $onInit() {
@@ -66,16 +70,26 @@ class ViewsController implements ng.IController {
 			return this.ViewsService.state;
 		}, (newState, oldState) => {
 			angular.extend(this, newState);
-			console.log(this.views);
 		}, true);
+
+		this.$scope.$watch("vm.views", () => {
+			this.setContentHeight();
+		});
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
 			if (newValue) {
-				// console.log("show views");
 				this.toShow = "views";
+				this.setContentHeight();
 			}
 		});
 
+	}
+
+	public getThumbnailUrl(thumbnail: string) {
+		if (thumbnail) {
+			return this.APIService.getAPIUrl(thumbnail);
+		}
+		return "";
 	}
 
 	public createView() {
@@ -93,28 +107,42 @@ class ViewsController implements ng.IController {
 		} else {
 			this.selectedView.selected = false;
 		}
-
+		//this.canAddView = true;
 		this.selectedView = view;
 		this.selectedView.selected = true;
 	}
 
 	public deleteView() {
-		this.ViewsService.deleteView(this.selectedView);
+		this.ViewsService.deleteView(this.account, this.model, this.selectedView);
 	}
 
-	public editView(view) {
+	public editView(view: any) {
 		if (this.editSelectedView === view) {
 			this.editSelectedView = null;
 		} else {
+			this.canAddView = false;
 			this.editSelectedView = view;
 		}
+		this.$timeout();
 	}
 
-	public saveDisabled() {
-		return false;
+	public saveEditedView() {
+		this.ViewsService.updateView(this.account, this.model, this.selectedView)
+			.then(() => {
+				this.canAddView = true;
+				this.editSelectedView = null;
+				this.$timeout();
+			})
+			.catch((error) => {
+				console.error(error);
+				this.canAddView = true;
+				this.editSelectedView = null;
+				this.$timeout();
+			});
 	}
 
 	public addView() {
+		this.newView = { name: "" };
 		this.showGroupPane();
 	}
 
@@ -124,25 +152,25 @@ class ViewsController implements ng.IController {
 		this.onShowItem();
 	}
 
-	// public setContentHeight() {
+	public setContentHeight() {
 
-	// 	if (this.toShow === "group") {
-	// 		return 310;
-	// 	}
+		if (this.toShow === "view") {
+			return 250;
+		}
 
-	// 	let contentHeight = 0;
-	// 	const groupHeight = 110;
-	// 	const actionBar = 52;
+		let contentHeight = 0;
+		const viewHeight = 335;
+		const actionBar = 52;
 
-	// 	if (this.views && this.views.length) {
-	// 		contentHeight = (this.views.length * groupHeight) + actionBar;
-	// 	} else {
-	// 		contentHeight = 130;
-	// 	}
+		if (this.views && this.views.length) {
+			contentHeight = (this.views.length * viewHeight) + actionBar;
+		} else {
+			contentHeight = 130;
+		}
 
-	// 	this.onContentHeightRequest({height: contentHeight });
+		this.onContentHeightRequest({height: contentHeight });
 
-	// }
+	}
 
 }
 

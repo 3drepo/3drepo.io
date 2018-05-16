@@ -23,6 +23,7 @@ const utils = require("../utils");
 const uuid = require("node-uuid");
 const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
+const db = require("../db/db");
 
 const viewSchema = Schema({
 	_id: Object,
@@ -36,13 +37,12 @@ const viewSchema = Schema({
 		right: [Number]
 	},
 	screenshot: {
-		flag: Number, 
-		content: Object,
-		resizedContent: Object
+		buffer : Object,
+		thumbnail: String,
 	}
 });
 
-viewSchema.statics.findByUID = function(dbCol, uid, branch, revId){
+viewSchema.statics.findByUID = function(dbCol, uid){
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(view => {
@@ -55,32 +55,72 @@ viewSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 		});
 };
 
-viewSchema.statics.listViews = function(dbCol, queryParams){
+viewSchema.statics.listViews = function(dbCol){
 
 	const query = {};
 
 	return this.find(dbCol, query).then(results => {
+		results.forEach((result) => {
+			result._id = utils.uuidToString(result._id);
+			if (result.screenshot.buffer) {
+				delete result.screenshot.buffer;
+			}
+		});
 		return results;
 	});
+
+};
+
+viewSchema.statics.getThumbnail = function(dbColOptions, uid){
+
+	return this.findByUID(dbColOptions, uid).then(view => {
+		if(!view.screenshot || !view.screenshot.buffer || !view.screenshot.buffer.buffer){
+			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+		} else {
+			// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
+			return view.screenshot.buffer.buffer;
+		}
+	});
+
 };
 
 viewSchema.methods.updateAttrs = function(dbCol, data){
 
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name", "clippingPlanes", "viewpoint", "screenshot"];
+	let cropped;
 
-	fieldsCanBeUpdated.forEach((key) => {
-		if (data[key]) {
-			toUpdate[key] = data[key];
+	if (data.screenshot.base64) {
+		cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 120, 120);
+	} else {
+		cropped = Promise.resolve();
+	}
+	
+	const updated = cropped.then((croppedScreenshot) => {
+
+		if (croppedScreenshot) {
+			// Remove the base64 version of the screenshot
+			delete data.screenshot.base64;
+			data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
 		}
+
+		// Set the data to be updated in Mongo
+		fieldsCanBeUpdated.forEach((key) => {
+			if (data[key]) {
+				toUpdate[key] = data[key];
+			}
+		});
+
 	});
 
-	const db = require("../db/db");
-	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-		return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
-			return {_id: utils.uuidToString(this._id)};
-		}); 
+	return updated.then(() => {
+		return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
+			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
+				return {_id: utils.uuidToString(this._id)};
+			}); 
+		});
 	});
+	
 };
 
 viewSchema.statics.createView = function(dbCol, data){
@@ -90,14 +130,28 @@ viewSchema.statics.createView = function(dbCol, data){
 	});
 
 	view._id = utils.stringToUUID(uuid.v1());
-	return view.save().then((savedView) => {
-		return savedView.updateAttrs(dbCol, data).catch((err) => {
-			// remove the recently saved new view as update attributes failed
-			return View.deleteView(dbCol, view._id).then(() => {
-				return Promise.reject(err);
+
+	const cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 120, 120);
+
+	return cropped.then((croppedScreenshot) => {
+
+		const thumbnailUrl = `${dbCol.account}/${dbCol.model}/views/${utils.uuidToString(view._id)}/thumbnail.png`;
+
+		// Remove the base64 version of the screenshot
+		delete data.screenshot.base64; 
+		data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
+		data.screenshot.thumbnail = thumbnailUrl;
+
+		return view.save().then((savedView) => {
+			return savedView.updateAttrs(dbCol, data).catch((err) => {
+				// remove the recently saved new view as update attributes failed
+				return View.deleteView(dbCol, view._id).then(() => {
+					return Promise.reject(err);
+				});
 			});
 		});
 	});
+
 };
 
 viewSchema.methods.clean = function(){

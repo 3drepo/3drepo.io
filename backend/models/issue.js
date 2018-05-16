@@ -29,7 +29,6 @@ let GenericObject = require("./base/repo").GenericObject;
 let uuid = require("node-uuid");
 let responseCodes = require("../response_codes.js");
 let middlewares = require("../middlewares/middlewares");
-const sharp = require("sharp");
 const _ = require("lodash");
 
 let ChatEvent = require("./chatEvent");
@@ -623,7 +622,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		if(data.viewpoint && data.viewpoint.screenshot){
 
-			return this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
+			return utils.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated",{
 					account: dbColOptions.account, 
 					model: dbColOptions.model, 
@@ -739,7 +738,7 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			
-			return this.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365).then(resized => {
+			return utils.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365).then(resized => {
 				this.findOneAndUpdate(dbColOptions, 
 					{ _id: stringToUUID(uid), "viewpoints.guid": stringToUUID(vid)},
 					{ "$set": { "viewpoints.$.screenshot.resizedContent": resized } }
@@ -767,37 +766,6 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 			return issue.thumbnail.content.buffer;
 		}
 	});
-};
-
-schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
-
-	const image = sharp(pngBuffer);
-
-	return image.metadata().then(imageData => {
-
-		destHeight = destHeight || Math.floor(destWidth / imageData.width * imageData.height);
-
-		if(imageData.width <= destWidth){
-			
-			return pngBuffer;
-
-		} else if (!crop) {
-			
-			return image
-				.resize(destWidth, destHeight)
-				.png()
-				.toBuffer();
-
-		}
-
-		return image
-			.crop(sharp.gravity.centre)
-			.resize(destWidth, destHeight)
-			.png()
-			.toBuffer();
-
-	});
-
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -2193,7 +2161,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					//take the first screenshot as thumbnail
 					if(vpGuids.length > 0){
 						
-						return self.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
+						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
 
 							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
 								account, 
