@@ -166,6 +166,18 @@ export class PanelService {
 		});
 
 		this.panelCards.left.push({
+			type: "views",
+			title: "Views",
+			showLiteMode: true,
+			show: false,
+			help: "List current groups",
+			icon: "camera_alt",
+			minHeight: 80,
+			fixedHeight: false,
+			options: []
+		});
+
+		this.panelCards.left.push({
 			type: "tree",
 			title: "Tree",
 			showLiteMode: true,
