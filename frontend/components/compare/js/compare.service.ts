@@ -15,6 +15,27 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+interface ICompareState {
+	loadingComparison: boolean;
+	compareTypes: ICompareTypes;
+	baseModels: any[];
+	targetModels: any[];
+	mode: string;
+	modelType: string;
+	compareEnabled: boolean;
+	ready: Promise<any>;
+	isFed?: boolean;
+	compareState?: string;
+	canChangeCompareState?: boolean;
+}
+
+interface ICompareTypes {
+	[key: string]: {
+		label: string;
+		type: string;
+	};
+}
+
 export class CompareService {
 
 	public static $inject: string[] = [
@@ -26,7 +47,7 @@ export class CompareService {
 		"ViewerService"
 	];
 
-	public state: any;
+	public state: ICompareState;
 	private readyDefer: any;
 	private settingsPromises: any[];
 
@@ -46,6 +67,7 @@ export class CompareService {
 		this.readyDefer = this.$q.defer();
 
 		this.state = {
+			compareEnabled: false,
 			loadingComparison : false,
 			compareTypes : {
 				diff : {
@@ -61,7 +83,8 @@ export class CompareService {
 			targetModels: [],
 			mode : "diff",
 			modelType : "base",
-			ready : this.readyDefer.promise
+			ready : this.readyDefer.promise,
+			isFed: false
 		};
 
 	}
@@ -276,17 +299,23 @@ export class CompareService {
 
 		this.state.targetModels.forEach((model) => {
 
-			const sharedRevision = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
-			const canReuseModel = sharedRevision && sharedRevision.visible === "invisible";
+			const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
+			const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
 			let loadModel;
 
 			if (canReuseModel) {
+
+				this.setBaseModelVisibility(sharedRevisionModel);
 
 				this.ViewerService.diffToolSetAsComparator(
 					model.account,
 					model.model,
 					model.targetRevision
 				);
+
+				// TODO: This is a bit a hack as it doesn't sync with the tree
+				// We set the compare panel model back invisible
+				sharedRevisionModel.visible = "invisible";
 
 			} else if (model && model.visible === "visible") {
 
