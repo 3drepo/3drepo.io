@@ -15,6 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+interface IPanelCards {
+	left: IPanelCard[];
+	right: IPanelCard[];
+}
+
+interface IPanelCard {
+	type: string;
+	title: string;
+	showLiteMode: boolean;
+	show: boolean;
+	help: string;
+	icon: string;
+	fixedHeight: boolean;
+	options: any[];
+	add?: boolean;
+	menu?: IMenuItem[];
+	minHeight?: number;
+}
+
+interface IMenuItem {
+	hidden: boolean;
+	label: string;
+	value?: string;
+	role?: string;
+	selected?: boolean;
+	firstSelectedIcon?: string;
+	secondSelectedIcon?: string;
+	toggle?: boolean;
+	firstSelected?: boolean;
+	secondSelected?: boolean;
+	keepCheckSpace?: boolean;
+	noToggle?: boolean;
+	icon?: string;
+	divider?: boolean;
+	upperDivider?: boolean;
+}
+
 export class PanelService {
 
 	public static $inject: string[] = [
@@ -22,18 +59,23 @@ export class PanelService {
 		"TreeService"
 	];
 
-	private issuesPanelCard: any;
+	private panelCards: IPanelCards;
+	private templatepanelCards: IPanelCards;
 
 	constructor(
 		private EventService: any,
 		private TreeService: any
 	) {
-		this.issuesPanelCard = {
+		this.reset();
+	}
+
+	public reset() {
+		this.panelCards = {
 			left: [],
 			right: []
 		};
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "issues",
 			title: "Issues",
 			showLiteMode: true,
@@ -73,18 +115,20 @@ export class PanelService {
 					firstSelectedIcon: "fa-sort-amount-desc",
 					secondSelectedIcon: "fa-sort-amount-asc",
 					toggle: false,
-					selected: true,
+					selected: false,
 					firstSelected: true,
-					secondSelected: false
+					secondSelected: false,
+					keepCheckSpace: false
 				},
 				{
 					hidden: false,
 					value: "showClosed",
-					label: "Show resolved issues",
+					label: "Show closed issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
+					keepCheckSpace: true
 				},
 				{
 					hidden: false,
@@ -109,7 +153,7 @@ export class PanelService {
 			add: true
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "groups",
 			title: "Groups",
 			showLiteMode: true,
@@ -121,7 +165,7 @@ export class PanelService {
 			options: []
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "tree",
 			title: "Tree",
 			showLiteMode: true,
@@ -163,7 +207,7 @@ export class PanelService {
 			]
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "clip",
 			title: "Clip",
 			showLiteMode: false,
@@ -176,7 +220,7 @@ export class PanelService {
 			]
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "compare",
 			title: "Compare",
 			showLiteMode: false,
@@ -188,7 +232,7 @@ export class PanelService {
 			options: []
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "gis",
 			title: "GIS",
 			showLiteMode: false,
@@ -200,10 +244,11 @@ export class PanelService {
 			options: []
 		});
 
-		this.issuesPanelCard.right.push({
+		this.panelCards.right.push({
 			type: "docs",
 			title: "Meta Data",
 			show: false,
+			showLiteMode: false,
 			help: "Documents",
 			icon: "content_copy",
 			minHeight: 80,
@@ -215,9 +260,47 @@ export class PanelService {
 
 	}
 
-	public hideSubModels(issuesCardIndex, hide) {
+	public setPanelMenu(side: string, panelType: string, newMenu: any[]) {
 
-		this.issuesPanelCard.left[issuesCardIndex].menu
+		// Check if the card exists
+		const item = this.panelCards[side].find((content) => {
+			return content.type === panelType;
+		});
+
+		// Append all the menu items to it
+		if (item && item.menu) {
+			newMenu.forEach((newItem) => {
+				const exists = item.menu.find( (oldItem) => oldItem.role === newItem.role);
+				if (!exists) {
+					item.menu.push(newItem);
+				}
+			});
+		}
+
+	}
+
+	public setIssuesMenu(jobsData: any) {
+		const menu: IMenuItem[] = [];
+		jobsData.forEach((role) => {
+			menu.push({
+				value: "filterRole",
+				hidden: false,
+				role: role._id,
+				label: role._id,
+				keepCheckSpace: true,
+				toggle: true,
+				selected: true,
+				firstSelected: false,
+				secondSelected: false
+			});
+		});
+
+		this.setPanelMenu("left", "issues", menu);
+	}
+
+	public hideSubModels(issuesCardIndex: number, hide: boolean) {
+
+		this.panelCards.left[issuesCardIndex].menu
 			.forEach((item) => {
 				if (item.value === "showSubModels") {
 					item.hidden = hide;
@@ -226,9 +309,9 @@ export class PanelService {
 
 	}
 
-	public getCardIndex(type) {
+	public getCardIndex(type: string): number {
 		let index = -1;
-		const obj = this.issuesPanelCard.left.forEach((panel, i) => {
+		const obj = this.panelCards.left.forEach((panel, i) => {
 			if (panel.type === type) {
 				index = i;
 			}
@@ -241,7 +324,7 @@ export class PanelService {
 		const issuesCardIndex = this.getCardIndex("issues"); // index of tree panel
 		const menuItemIndex = this.getCardIndex("issues"); // index of hideIfc
 
-		const hideIfcMenuItem = this.issuesPanelCard.left[issuesCardIndex]
+		const hideIfcMenuItem = this.panelCards.left[issuesCardIndex]
 			.menu[menuItemIndex];
 
 		// Change state if different
