@@ -90,6 +90,7 @@
 		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Import failed: Unsupported navisworks plugin version", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Import failed: Unsupported FBX version (Supported: 2011, 2012, 2013)", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
+		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 
 
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
