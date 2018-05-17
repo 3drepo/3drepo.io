@@ -32,12 +32,13 @@ export class IssuesService {
 		"AuthService",
 		"MultiSelectService",
 		"ClipService",
-		"ViewerService"
+		"ViewerService",
+		"PanelService",
+		"DialogService"
 	];
 
 	private state: any;
 	private groupsCache: any;
-	private initDefer: any;
 	private jobsDeferred: any;
 	private availableJobs: any;
 
@@ -54,15 +55,15 @@ export class IssuesService {
 		private AuthService,
 		private MultiSelectService,
 		private ClipService,
-		private ViewerService
+		private ViewerService,
+		private PanelService,
+		private DialogService
 	) {
-		this.groupsCache = {};
-		this.initDefer = $q.defer();
-		this.jobsDeferred = this.$q.defer();
-		this.resetIssues();
+		this.reset();
 	}
 
-	public resetIssues() {
+	public reset() {
+		this.groupsCache = {};
 		this.jobsDeferred = this.$q.defer();
 		this.state = {
 			heights : {
@@ -78,8 +79,54 @@ export class IssuesService {
 				showClosed: false,
 				sortOldestFirst : false,
 				excludeRoles: []
-			}
+			},
+			availableJobs : [],
+			modelUserJob: null
 		};
+	}
+
+	public getIssuesAndJobs(account: string, model: string, revision: string) {
+		return Promise.all([
+			this.getUserJobForModel(account, model),
+			this.getIssuesData(account, model, revision),
+			this.getTeamspaceJobs(account, model)
+		]);
+	}
+
+	public getIssuesData(account: string, model: string, revision: string) {
+		return this.getIssues(account, model, revision)
+			.then((newIssues) => {
+				if (newIssues) {
+					newIssues.forEach(this.populateIssue.bind(this));
+					this.state.allIssues = newIssues;
+				} else {
+					throw new Error("Error");
+				}
+
+			});
+
+	}
+
+	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
+		const url = account + "/jobs";
+
+		return this.APIService.get(url)
+			.then((response) => {
+				this.state.availableJobs = response.data;
+				this.PanelService.setIssuesMenu(response.data);
+				return this.state.availableJobs;
+			});
+
+	}
+
+	public getUserJobForModel(account: string, model: string): Promise<any> {
+		const url = account + "/myJob";
+
+		return this.APIService.get(url)
+			.then((response) => {
+				this.state.modelUserJob = response.data;
+				return this.state.modelUserJob;
+			});
 	}
 
 	public createBlankIssue(creatorRole) {
@@ -288,11 +335,6 @@ export class IssuesService {
 
 	}
 
-	public populateNewIssues(newIssues) {
-		newIssues.forEach(this.populateIssue.bind(this));
-		this.state.allIssues = newIssues;
-	}
-
 	public addIssue(issue) {
 		this.populateIssue(issue);
 		this.state.allIssues.unshift(issue);
@@ -322,10 +364,6 @@ export class IssuesService {
 
 			}
 		});
-	}
-
-	public init() {
-		return this.initDefer.promise;
 	}
 
 	public populateIssue(issue) {
@@ -788,11 +826,6 @@ export class IssuesService {
 
 	public getIssues(account, model, revision) {
 
-		// TODO: This is a bit hacky. We are
-		// basically saying when getIssues is called
-		// we know the issues component is loaded...
-		this.initDefer.resolve();
-
 		let endpoint;
 		if (revision) {
 			endpoint = account + "/" + model + "/revision/" + revision + "/issues.json";
@@ -917,39 +950,6 @@ export class IssuesService {
 			sealed: true,
 			commentIndex
 		});
-	}
-
-	public getJobs(account, model) {
-
-		const url = account + "/jobs";
-
-		this.APIService.get(url).then(
-			(jobsData) => {
-				// this.availableJobs = jobsData.data;
-				this.jobsDeferred.resolve(jobsData.data);
-			},
-			() => {
-				this.jobsDeferred.resolve([]);
-			}
-		);
-
-		return this.jobsDeferred.promise;
-	}
-
-	public getUserJobForModel(account, model) {
-		const deferred = this.$q.defer();
-		const url = account + "/myJob";
-
-		this.APIService.get(url).then(
-			(userJob) => {
-				deferred.resolve(userJob.data);
-			},
-			() => {
-				deferred.resolve();
-			}
-		);
-
-		return deferred.promise;
 	}
 
 	public hexToRgb(hex) {

@@ -496,12 +496,12 @@ class HomeController implements ng.IController {
 	}
 
 	public logout() {
+		this.StateManager.resetServiceStates();
 		this.AuthService.logout();
-		this.ViewerService.reset();
 	}
 
 	public home() {
-		this.ViewerService.reset();
+		this.StateManager.resetServiceStates();
 		this.StateManager.goHome();
 	}
 
