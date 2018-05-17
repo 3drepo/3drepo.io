@@ -18,12 +18,9 @@
 class AccountMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$location",
 		"$scope",
+
 		"AuthService",
-		"ViewerService",
-		"IssuesService",
-		"CompareService",
 		"StateManager"
 	];
 
@@ -33,13 +30,10 @@ class AccountMenuController implements ng.IController {
 	private isLiteMode;
 
 	constructor(
-		private $location: any,
-		private $scope: any,
+		private $scope: ng.IScope,
 
 		private AuthService: any,
-		private ViewerService: any,
-		private IssuesService: any,
-		private CompareService: any
+		private StateManager: any
 	) {}
 
 	public $onInit() {
@@ -66,22 +60,16 @@ class AccountMenuController implements ng.IController {
 	 * Show user models
 	 */
 	public showTeamspaces() {
-		this.resetServices();
-		this.$location.path(this.AuthService.getUsername());
+		this.StateManager.resetServiceStates();
+		this.StateManager.goHome();
 	}
 
 	/**
 	 * Logout
 	 */
 	public logout() {
+		this.StateManager.resetServiceStates();
 		this.AuthService.logout();
-		this.resetServices();
-	}
-
-	public resetServices() {
-		this.ViewerService.reset();
-		this.IssuesService.resetIssues();
-		this.CompareService.reset();
 	}
 
 	public openUserManual() {

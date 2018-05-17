@@ -610,6 +610,24 @@ export class ViewerService {
 		}
 	}
 
+	public helicopterSpeedDown() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedDown();
+		}
+	}
+
+	public helicopterSpeedUp() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedUp();
+		}
+	}
+
+	public helicopterSpeedReset() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedReset();
+		}
+	}
+
 }
 
 export const ViewerServiceModule = angular

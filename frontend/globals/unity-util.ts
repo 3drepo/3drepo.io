@@ -559,6 +559,27 @@ export class UnityUtil {
 		UnityUtil.toUnity("GetPointInfo", false, 0);
 	}
 
+	/**
+	 * Decrease the speed of Helicopter navigation (by x0.75)
+	 */
+	public static helicopterSpeedDown() {
+		UnityUtil.toUnity("HelicopterSpeedDown", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Increase the speed of Helicopter navigation (by x1.25)
+	 */
+	public static helicopterSpeedUp() {
+		UnityUtil.toUnity("HelicopterSpeedUp", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the speed of Helicopter navigation
+	 */
+	public static helicopterSpeedReset() {
+		UnityUtil.toUnity("HelicopterSpeedReset", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
 	public static hideHiddenByDefaultObjects() {
 		UnityUtil.toUnity("HideHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}

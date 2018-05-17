@@ -60,10 +60,10 @@ export class AuthInterceptor {
 
 		const DialogService = this.$injector.get("DialogService");
 		const AuthService = this.$injector.get("AuthService");
-		const ViewerService = this.$injector.get("ViewerService");
+		const StateManager = this.$injector.get("StateManager");
 
 		DialogService.sessionExpired().then(() => {
-			ViewerService.reset();
+			StateManager.resetServiceStates();
 			AuthService.logoutSuccess();
 		});
 

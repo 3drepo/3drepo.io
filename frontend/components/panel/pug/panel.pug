@@ -1,6 +1,6 @@
 div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
-		div(ng-repeat="contentItem in vm.contentItems")
+		div(ng-repeat="contentItem in vm.contentItems track by contentItem.type")
 			panel-card(
 				id="{{contentItem.type + 'Panel'}}"
 				account="vm.account"

@@ -28,9 +28,12 @@ export class StateManagerService {
 
 		"AuthService",
 		"ClientConfigService",
-		"ViewerService",
-		"IssuesService",
-		"CompareService"
+		"ClipService",
+		"CompareService",
+		"GroupsService",
+		"PanelService",
+		"TreeService",
+		"ViewerService"
 	];
 
 	private state: any;
@@ -51,11 +54,14 @@ export class StateManagerService {
 		private $timeout,
 		private $window,
 
-		private AuthService,
-		private ClientConfigService,
-		private ViewerService,
-		private IssuesService,
-		private CompareService
+		private AuthService: any,
+		private ClientConfigService: any,
+		private ClipService: any,
+		private CompareService: any,
+		private GroupsService: any,
+		private PanelService: any,
+		private TreeService: any,
+		private ViewerService: any
 	) {
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
@@ -77,6 +83,17 @@ export class StateManagerService {
 		this.clearChanged();
 		this.stateChangeQueue = [];
 
+	}
+
+	public resetServiceStates() {
+		// We reset the state of all our services so that
+		// they're back to intial states
+		this.ClipService.reset();
+		this.CompareService.reset();
+		this.GroupsService.reset();
+		this.PanelService.reset();
+		this.TreeService.reset();
+		this.ViewerService.reset();
 	}
 
 	public setupStateStack() {
@@ -374,9 +391,7 @@ export class StateManagerService {
 			).then(
 				() => {
 					this.$location.path(account);
-					this.ViewerService.reset();
-					this.CompareService.reset();
-					this.IssuesService.resetIssues();
+					this.resetServiceStates();
 				}, () => {
 					// Pass
 				}
