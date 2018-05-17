@@ -158,7 +158,6 @@ class ModelController implements ng.IController {
 
 	public setupModelInfo() {
 
-		this.IssuesService.init();
 		this.RevisionsService.listAll(this.account, this.model);
 
 		if (!this.ViewerService.currentModel.model) {

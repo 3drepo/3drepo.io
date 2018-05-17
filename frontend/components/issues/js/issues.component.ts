@@ -103,25 +103,14 @@ class IssuesController implements ng.IController {
 		this.revisionsStatus = this.RevisionsService.status;
 
 		// Get the user roles for the model
-		this.IssuesService.getUserJobForModel(this.account, this.model)
-			.then((data) => {
-				this.modelUserJob = data;
+		this.issuesReady = this.IssuesService.getIssuesAndJobs(this.account, this.model, this.revision)
+			.then(() => {
+				this.$timeout(() => {
+					this.toShow = "showIssues";
+					this.showAddButton = true;
+					this.showProgress = false;
+				}, 1000);
 			})
-			.catch((error) => {
-				const content = "We tried to get the user job for this model but it failed. " +
-				"If this continues please message support@3drepo.io.";
-				const escapable = true;
-				this.DialogService.text("Error Getting User Job", content, escapable);
-				console.error(error);
-			});
-
-		// Get all the Issues
-		this.issuesPromise = this.getIssuesData();
-
-		// Get all the available roles for the model
-		this.jobsPromise = this.getJobsData();
-
-		this.issuesReady = this.$q.all([this.issuesPromise, this.jobsPromise])
 			.catch((error) => {
 				const content = "We had an issue getting all the issues and jobs for this model. " +
 					"If this continues please message support@3drepo.io.";
@@ -131,54 +120,6 @@ class IssuesController implements ng.IController {
 			});
 
 		this.watchers();
-
-	}
-
-	public getIssuesData() {
-
-		return this.IssuesService.getIssues(this.account, this.model, this.revision)
-			.then((data) => {
-
-				if (data) {
-					this.IssuesService.populateNewIssues(data);
-
-					setTimeout(() => {
-						requestAnimationFrame(() => {
-							this.toShow = "showIssues";
-							this.showAddButton = true;
-							this.showProgress = false;
-						});
-					}, 1000);
-
-				} else {
-					throw new Error("Error");
-				}
-
-			})
-			.catch((error) => {
-				const content = "We tried to get the issues for this model but it failed. " +
-				"If this continues please message support@3drepo.io.";
-				const escapable = true;
-				this.DialogService.text("Error Getting Issues", content, escapable);
-				console.error(error);
-			});
-
-	}
-
-	public getJobsData() {
-
-		return this.IssuesService.getJobs(this.account, this.model)
-			.then((data) => {
-				this.availableJobs = data;
-				this.PanelService.setIssuesMenu(data);
-			})
-			.catch((error) => {
-				const content = "We tried to get the jobs for this model but it failed. " +
-				"If this continues please message support@3drepo.io.";
-				const escapable = true;
-				this.DialogService.text("Error Getting Jobs", content, escapable);
-				console.error(error);
-			});
 
 	}
 
@@ -232,16 +173,10 @@ class IssuesController implements ng.IController {
 
 		this.$scope.$watch(() => {
 			return this.IssuesService.state;
-		}, () => {
+		}, (state) => {
 
-			if (this.allIssues !== this.IssuesService.state.allIssues) {
-				this.allIssues = this.IssuesService.state.allIssues;
-			}
-			if (this.selectedIssue !== this.IssuesService.state.selectedIssue) {
-				this.selectedIssue = this.IssuesService.state.selectedIssue;
-			}
-			if (this.issuesToShow !== this.IssuesService.state.issuesToShow) {
-				this.issuesToShow = this.IssuesService.state.issuesToShow;
+			if (state) {
+				angular.extend(this, state);
 			}
 
 		}, true);

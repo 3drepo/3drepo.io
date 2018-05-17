@@ -66,7 +66,10 @@ export class PanelService {
 		private EventService: any,
 		private TreeService: any
 	) {
+		this.reset();
+	}
 
+	public reset() {
 		this.panelCards = {
 			left: [],
 			right: []
@@ -255,16 +258,6 @@ export class PanelService {
 			]
 		});
 
-		this.memoizepanelCards();
-
-	}
-
-	public memoizepanelCards() {
-		this.templatepanelCards = angular.copy(this.panelCards);
-	}
-
-	public reset() {
-		this.panelCards = angular.copy(this.templatepanelCards);
 	}
 
 	public setPanelMenu(side: string, panelType: string, newMenu: any[]) {
