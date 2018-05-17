@@ -584,12 +584,10 @@ export class TreeService {
 				node.toggleState = this.VISIBILITY_STATES.visible;
 			} else if (0 === visibleChildCount) {
 				this.setNodeSelection(node, false);
-				requestAnimationFrame(() => {
-					this.ViewerService.unhighlightObjects({
-						account: node.account,
-						model: node.model,
-						ids: node.meshes
-					});
+				this.ViewerService.unhighlightObjects({
+					account: node.account,
+					model: node.model,
+					ids: node.meshes
 				});
 				node.toggleState = this.VISIBILITY_STATES.invisible;
 			} else {
@@ -986,14 +984,12 @@ export class TreeService {
 
 				if (this.ViewerService.viewer) {
 
-					requestAnimationFrame(() => {
-						this.ViewerService.switchObjectVisibility(
-							account,
-							model,
-							objectIds[key],
-							visible
-						);
-					});
+					this.ViewerService.switchObjectVisibility(
+						account,
+						model,
+						objectIds[key],
+						visible
+					);
 
 				}
 
@@ -1312,13 +1308,13 @@ export class TreeService {
 				const vals = key.split("@");
 				const account = vals[0];
 				const model = vals[1];
-				requestAnimationFrame(() => {
-					this.ViewerService.unhighlightObjects({
-						account,
-						model,
-						ids: highlightMap[key].meshes
-					});
+
+				this.ViewerService.unhighlightObjects({
+					account,
+					model,
+					ids: highlightMap[key].meshes
 				});
+
 			}
 
 			return highlightMap;
@@ -1339,9 +1335,7 @@ export class TreeService {
 
 			// Update viewer highlights
 			if (!multi) {
-				requestAnimationFrame(() => {
-					this.ViewerService.clearHighlights();
-				});
+				this.ViewerService.clearHighlights();
 			}
 
 			for (const key in highlightMap) {
@@ -1367,16 +1361,15 @@ export class TreeService {
 					const model = vals[1];
 					// Separately highlight the children
 					// but only for multipart meshes
-					requestAnimationFrame(() => {
-						this.ViewerService.highlightObjects({
-							account,
-							ids: meshes,
-							colour: highlightMap[key].colour,
-							model,
-							multi: true,
-							source: "tree",
-							forceReHighlight
-						});
+
+					this.ViewerService.highlightObjects({
+						account,
+						ids: meshes,
+						colour: highlightMap[key].colour,
+						model,
+						multi: true,
+						source: "tree",
+						forceReHighlight
 					});
 
 				}

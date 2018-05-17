@@ -750,4 +750,18 @@ export class Viewer {
 		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 
+	// Navigation
+
+	public helicopterSpeedDown() {
+		UnityUtil.helicopterSpeedDown();
+	}
+
+	public helicopterSpeedUp() {
+		UnityUtil.helicopterSpeedUp();
+	}
+
+	public helicopterSpeedReset() {
+		UnityUtil.helicopterSpeedReset();
+	}
+
 }
