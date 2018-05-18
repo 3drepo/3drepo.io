@@ -21,6 +21,7 @@ class ViewsController implements ng.IController {
 		"$scope",
 		"$timeout",
 
+		"DialogService",
 		"ViewsService",
 		"APIService"
 	];
@@ -42,6 +43,7 @@ class ViewsController implements ng.IController {
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
 
+		private DialogService,
 		private ViewsService: any,
 		private APIService: any
 	) {}
@@ -92,28 +94,33 @@ class ViewsController implements ng.IController {
 		return "";
 	}
 
+	public selectView(view) {
+
+		if (view) {
+			if (this.selectedView === undefined) {
+				this.selectedView = view;
+			} else {
+				this.selectedView.selected = false;
+			}
+			this.selectedView = view;
+			this.selectedView.selected = true;
+		}
+
+	}
+
 	public createView() {
 		this.ViewsService.createView(this.account, this.model, this.newView.name)
 			.catch((error) => {
-				console.error(error);
+				this.handleGroupError("create", error);
 			});
 		this.toShow = "views";
 	}
 
-	public selectView(view) {
-
-		if (this.selectedView === undefined) {
-			this.selectedView = view;
-		} else {
-			this.selectedView.selected = false;
-		}
-		//this.canAddView = true;
-		this.selectedView = view;
-		this.selectedView.selected = true;
-	}
-
 	public deleteView() {
-		this.ViewsService.deleteView(this.account, this.model, this.selectedView);
+		this.ViewsService.deleteView(this.account, this.model, this.selectedView)
+			.catch((error) => {
+				this.handleGroupError("delete", error);
+			});
 	}
 
 	public editView(view: any) {
@@ -129,16 +136,18 @@ class ViewsController implements ng.IController {
 	public saveEditedView() {
 		this.ViewsService.updateView(this.account, this.model, this.selectedView)
 			.then(() => {
-				this.canAddView = true;
-				this.editSelectedView = null;
-				this.$timeout();
+				this.resetEditState();
 			})
 			.catch((error) => {
-				console.error(error);
-				this.canAddView = true;
-				this.editSelectedView = null;
-				this.$timeout();
+				this.handleGroupError("update", error);
+				this.resetEditState();
 			});
+	}
+
+	public resetEditState() {
+		this.canAddView = true;
+		this.editSelectedView = null;
+		this.$timeout();
 	}
 
 	public addView() {
@@ -150,6 +159,14 @@ class ViewsController implements ng.IController {
 		this.toShow = "view";
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
+	}
+
+	public handleGroupError(method: string, error: Error) {
+		console.error(error);
+		const content = `We tried to ${method} your view but it failed.
+			If this continues please message support@3drepo.org.`;
+		const escapable = true;
+		this.DialogService.text(`View Error`, content, escapable);
 	}
 
 	public setContentHeight() {
