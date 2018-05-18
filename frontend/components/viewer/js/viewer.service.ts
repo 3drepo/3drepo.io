@@ -521,6 +521,10 @@ export class ViewerService {
 
 	// DIFF
 
+	public diffToolSetAsComparator(account: string, model: string) {
+		this.viewer.diffToolSetAsComparator(account, model);
+	}
+
 	public diffToolLoadComparator(account: string, model: string, revision: string) {
 		return this.viewer.diffToolLoadComparator(account, model, revision);
 	}
