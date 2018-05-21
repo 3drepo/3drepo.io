@@ -433,7 +433,7 @@ export class UnityUtil {
 	 * @param {string} account - name of teamspace
 	 * @param {string} model - model ID
 	 */
-	public static diffToolSetAsComparator(account, model) {
+	public static diffToolSetAsComparator(account: string, model: string) {
 		const params: any = {
 			database : account,
 			model

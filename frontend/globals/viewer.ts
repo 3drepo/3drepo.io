@@ -341,6 +341,10 @@ export class Viewer {
 		UnityUtil.requestScreenShot(promise);
 	}
 
+	public diffToolSetAsComparator(account: string, model: string) {
+		UnityUtil.diffToolSetAsComparator(account, model);
+	}
+
 	public diffToolLoadComparator(account: string, model: string, revision: string) {
 		return UnityUtil.diffToolLoadComparator(account, model, revision);
 	}

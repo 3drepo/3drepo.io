@@ -45,13 +45,13 @@ div(
 
 				md-content.modelListHolder(flex, ng-if="!vm.isModelClash(compareType.type)")
 
-						div(ng-if="vm.loadingComparision")
+						div(ng-if="vm.loadingComparison")
 							tdr-progress(
 								info="vm.loadingInfo"
 								flex
 								layout-fill)
 
-						div(ng-if="!vm.loadingComparision && model"
+						div(ng-if="!vm.loadingComparison && model"
 							ng-repeat="model in vm[vm.modelType + 'Models'] track by $index") 
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")

@@ -58,7 +58,6 @@ compare .selfDiffWarning {
 compare .modelTypeSelection {
 }
 
-/** TODO: Delete this when we bring back clash **/
 compare md-pagination-wrapper md-tab-item {
     width: 100% !important;
     max-width: initial !important;
