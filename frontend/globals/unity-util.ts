@@ -665,11 +665,26 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Set map source.
-	 * @param {string} mapSource - This can be either "OSM" or "HERE"
+	 * Reset map sources.
 	 */
-	public static setMapSource(mapSource) {
-		UnityUtil.toUnity("SetMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static resetMapSources() {
+		UnityUtil.toUnity("ResetMapSources", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Add map source.
+	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 */
+	public static addMapSource(mapSource) {
+		UnityUtil.toUnity("AddMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	}
+
+	/**
+	 * Remove map source.
+	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 */
+	public static removeMapSource(mapSource) {
+		UnityUtil.toUnity("RemoveMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
 	}
 
 	/**

@@ -31,7 +31,8 @@ export class Viewer {
 		OSM: "OSM",
 		HERE: "HERE",
 		HERE_AERIAL: "HERE_AERIAL",
-		HERE_TRAFFIC: "HERE_TRAFFIC"
+		HERE_TRAFFIC: "HERE_TRAFFIC",
+		HERE_TRAFFIC_FLOW: "HERE_TRAFFIC_FLOW"
 	};
 
 	public static EVENT = {
@@ -113,7 +114,6 @@ export class Viewer {
 	public downloadsLeft = 1;
 
 	public defaultNavMode = Viewer.NAV_MODES.TURNTABLE;
-	public defaultMapSource = Viewer.MAP_SOURCES.HERE;
 	public lastMultipart = null;
 
 	public selectionDisabled = false;
@@ -147,7 +147,6 @@ export class Viewer {
 	public options;
 	public Module;
 	public currentNavMode;
-	public currentMapSource;
 	public plugins;
 	public broadcastClippingPlane;
 	public settings;
@@ -279,7 +278,6 @@ export class Viewer {
 			Module.errorhandler = UnityUtil.onUnityError;
 
 			this.currentNavMode = null;
-			this.currentMapSource = null;
 
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
@@ -292,7 +290,6 @@ export class Viewer {
 
 			UnityUtil.setAPIHost(options.getAPI);
 			this.setNavMode(this.defaultNavMode, false);
-			this.setMapSource(this.defaultMapSource, false);
 
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
@@ -732,16 +729,26 @@ export class Viewer {
 	}
 
 	/**
-	 * Change map source
-	 * @param source Map source (OSM, HERE)
-	 * @param force Set to force source change
+	 * Resets map sources
 	 */
-	public setMapSource(source, force) {
-		if (this.currentMapSource !== source || force) {
-			// If the map source has changed
-			this.currentMapSource = source;
-			UnityUtil.setMapSource(source);
-		}
+	public resetMapSources() {
+		UnityUtil.resetMapSources();
+	}
+
+	/**
+	 * Add map source
+	 * @param source Map source
+	 */
+	public addMapSource(source) {
+		UnityUtil.addMapSource(source);
+	}
+
+	/**
+	 * Remove map source
+	 * @param source Map source
+	 */
+	public removeMapSource(source) {
+		UnityUtil.removeMapSource(source);
 	}
 
 	/**

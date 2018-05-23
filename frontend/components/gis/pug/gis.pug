@@ -23,7 +23,7 @@ div(
                 md-option.gisOption(
                     layout-align="center center"
                     ng-repeat="provider in vm.providers"
-                    ng-click="vm.setMapSource(provider.source);"
+                    ng-click="vm.setMapProvider(provider);"
                     ng-value="provider") {{provider.name}}
 
             md-container(layout-fill layout="column")

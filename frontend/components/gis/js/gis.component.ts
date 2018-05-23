@@ -47,7 +47,7 @@ class GISController implements ng.IController {
 			.then((providers) => {
 				this.providers = providers;
 				this.selectedProvider = this.providers[0];
-				this.GISService.setMapSource(this.selectedProvider.source);
+				this.GISService.resetMapSources();
 			});
 	}
 
@@ -89,19 +89,33 @@ class GISController implements ng.IController {
 		);
 	}
 
-	public setMapSource(source: string) {
-		if (this.selectedProvider.source !== source) {
+	public setMapProvider(provider: any) {
+		if (this.selectedProvider.name !== provider.name) {
 			for (let i = 0; this.selectedProvider.layers && i < this.selectedProvider.layers.length; i++) {
 				if (this.selectedProvider.layers[i].visibility === "visible") {
 					this.GISService.toggleLayerVisibility(this.selectedProvider.layers[i]);
 				}
 			}
-			this.GISService.setMapSource(source);
+			this.selectedProvider = provider;
+			this.GISService.resetMapSources();
+			this.setContentHeight();
 		}
 	}
 
 	public toggleLayerVisibility(layer: any) {
 		this.GISService.toggleLayerVisibility(layer);
+	}
+
+	public setContentHeight() {
+
+		let contentHeight = 130;
+		const layerHeight = 60;
+
+		if (this.selectedProvider && this.selectedProvider.layers && this.selectedProvider.layers.length) {
+			contentHeight += ((this.selectedProvider.layers.length - 1) * layerHeight);
+		}
+
+		this.onContentHeightRequest({height: contentHeight });
 	}
 
 }

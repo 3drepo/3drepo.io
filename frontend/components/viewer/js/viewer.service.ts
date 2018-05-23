@@ -566,9 +566,21 @@ export class ViewerService {
 		}
 	}
 
-	public setMapSource(source) {
+	public resetMapSources(source) {
 		if (this.viewer) {
-			this.viewer.setMapSource(source);
+			this.viewer.resetMapSources(source);
+		}
+	}
+
+	public addMapSource(source) {
+		if (this.viewer) {
+			this.viewer.addMapSource(source);
+		}
+	}
+
+	public removeMapSource(source) {
+		if (this.viewer) {
+			this.viewer.removeMapSource(source);
 		}
 	}
 

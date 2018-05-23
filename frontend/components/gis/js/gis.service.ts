@@ -23,12 +23,14 @@ export class GISService {
 	];
 
 	private initialised: boolean;
+	private visibleSources: Set<string>;
 
 	constructor(
 		private APIService: any,
 		private ViewerService: any
 	) {
 		this.initialised = false;
+		this.visibleSources = new Set();
 	}
 
 	public getProviders(account: string, model: string) {
@@ -49,8 +51,29 @@ export class GISService {
 			});
 	}
 
-	public setMapSource(source) {
-		this.ViewerService.setMapSource(source);
+	public resetMapSources() {
+		this.visibleSources.clear();
+		this.ViewerService.resetMapSources();
+		this.ViewerService.mapStop();
+	}
+
+	public addMapSource(source) {
+		if (!this.visibleSources.has(source)) {
+			this.ViewerService.addMapSource(source);
+			if (this.visibleSources.size === 0) {
+				this.mapStart();
+			}
+			this.visibleSources.add(source);
+		}
+	}
+
+	public removeMapSource(source) {
+		if (this.visibleSources.delete(source)) {
+			this.ViewerService.removeMapSource(source);
+			if (this.visibleSources.size === 0) {
+				this.mapStop();
+			}
+		}
 	}
 
 	public mapInitialise(params) {
@@ -78,9 +101,9 @@ export class GISService {
 		layer.visibility = (layer.visibility === "visible") ? "invisible" : "visible";
 
 		if (layer.visibility === "visible") {
-			this.mapStart();
+			this.addMapSource(layer.source);
 		} else {
-			this.mapStop();
+			this.removeMapSource(layer.source);
 		}
 
 	}

@@ -33,10 +33,10 @@ router.get("/:model/maps/herebuildings/:lat/:long/tile.json", getHereBuildingsFr
 
 function listMaps(req, res, next) {
 	const maps = [
-		{ source: "OSM", name: "Open Street Map", layers: [ { name: "Map Tiles", endpoint: "osm" } ] },
-		{ source: "HERE", name: "Here", layers: [ { name: "Base Tiles", endpoint: "here" }/*, { name: "Traffic Flow", endpoint: "heretrafficflow" }*/ ] },
-		{ source: "HERE_AERIAL", name: "Here (Satellite)", layers: [ { name: "Map Tiles", endpoint: "hereaerial" } ] },
-		{ source: "HERE_TRAFFIC", name: "Here (Traffic)", layers: [ { name: "Map Tiles", endpoint: "heretraffic" } ] }
+		{ name: "Open Street Map", layers: [ { name: "Map Tiles", source: "OSM" } ] },
+		{ name: "Here", layers: [ { name: "Base Tiles", source: "HERE" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
+		{ name: "Here (Satellite)", layers: [ { name: "Map Tiles", source: "HERE_AERIAL" } ] },
+		{ name: "Here (Traffic)", layers: [ { name: "Map Tiles", source: "HERE_TRAFFIC" } ] }
 	];
 	if (maps.length > 0) {
 		res.status(200).json({ maps });
