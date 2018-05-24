@@ -41,13 +41,13 @@ class GISController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.onContentHeightRequest({height: 130});
 		this.watchers();
 		this.GISService.getProviders(this.account, this.model)
 			.then((providers) => {
 				this.providers = providers;
 				this.selectedProvider = this.providers[0];
 				this.GISService.resetMapSources();
+				this.setContentHeight();
 			});
 	}
 
