@@ -124,6 +124,7 @@
 
 		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
+		HERE_MAPS_NOT_AVAILABLE: { message: "Your account does not have a licence for Here Maps", status: 400 },
 
 		FILE_FORMAT_NOT_SUPPORTED: { message: "Format not supported", status: 400 },
 

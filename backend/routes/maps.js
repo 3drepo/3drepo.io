@@ -22,27 +22,35 @@ const middlewares = require("../middlewares/middlewares");
 const systemLogger = require("../logger.js").systemLogger;
 const httpsGet = require('../libs/httpsReq');
 const config = require("../config");
+const User = require('../models/user');
 
 router.get("/:model/maps/", listMaps);
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
-router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", getHereMapsTile);
-router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", getHereAerialMapsTile);
-router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", getHereTrafficTile);
-router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", getHereTrafficFlowTile);
-router.get("/:model/maps/herebuildings/:lat/:long/tile.json", getHereBuildingsFromLongLat);
+router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereMapsTile);
+router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAerialMapsTile);
+router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficTile);
+router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficFlowTile);
+router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res, next) {
-	const maps = [
-		{ name: "Open Street Map", layers: [ { name: "Map Tiles", source: "OSM" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
-		{ name: "Here", layers: [ { name: "Base Tiles", source: "HERE" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
-		{ name: "Here (Satellite)", layers: [ { name: "Map Tiles", source: "HERE_AERIAL" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
-		{ name: "Here (Traffic)", layers: [ { name: "Map Tiles", source: "HERE_TRAFFIC" } ] }
+	let maps = [
+		{ name: "Open Street Map", layers: [ { name: "Map Tiles", source: "OSM" } ] }
 	];
-	if (maps.length > 0) {
-		res.status(200).json({ maps });
-	} else {
-		res.status(500).json({ message: "No Maps Available" });
-	}
+
+	User.isHereEnabled(req.session.user.username).then((hereEnabled) => {
+		if (hereEnabled) {
+			maps = maps.concat([
+				{ name: "Here", layers: [ { name: "Base Tiles", source: "HERE" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
+				{ name: "Here (Satellite)", layers: [ { name: "Map Tiles", source: "HERE_AERIAL" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] }
+			]);
+		}
+
+		if (maps.length > 0) {
+			res.status(200).json({ maps });
+		} else {
+			res.status(500).json({ message: "No Maps Available" });
+		}
+	});
 }
 
 function requestMapTile(req, res, domain, uri) {
@@ -79,7 +87,7 @@ function getHereMapsTile(req, res, next){
 }
 
 function getHereAerialMapsTile(req, res, next){
-	const size = 512; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
+	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".aerial.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here map tile: " + uri);

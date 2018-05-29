@@ -83,6 +83,7 @@ let schema = mongoose.Schema({
 				return accountPermission.methods.init(this, permissions);
 			}
 		},
+		hereEnabled : Boolean,
 		vrEnabled : Boolean
 	},
 	roles: [{}]
@@ -1088,6 +1089,20 @@ schema.statics.teamspaceMemberCheck = function(teamspace, user) {
 		if(!userEntry.isMemberOfTeamspace(teamspace)) {
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 		}
+	});
+};
+
+schema.statics.isHereEnabled = function(username) {
+	return _isHereEnabled(username);
+}
+
+function _isHereEnabled(username) {
+	const db = require("../db/db");
+	return db.getCollection("admin", "system.users").then(dbCol => {
+		return dbCol.findOne({user: username}, {_id: 0, "customData.hereEnabled": 1})
+			.then((isHereEnabledResult) => {
+				return isHereEnabledResult.customData.hereEnabled;
+			});
 	});
 };
 
