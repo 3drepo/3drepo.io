@@ -182,7 +182,7 @@
 	}
 
 	function isHereEnabled(req, res, next) {
-		const user = req.session.user.username;
+		const user = (req.session.user) ? req.session.user.username : "";
 		return User.isHereEnabled(user).then((hereEnabled) => {
 			if (hereEnabled) {
 				next();
