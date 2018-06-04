@@ -33,11 +33,13 @@ router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewa
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res, next) {
+	const user = (req.session.user) ? req.session.user.username : "";
+
 	let maps = [
 		{ name: "Open Street Map", layers: [ { name: "Map Tiles", source: "OSM" } ] }
 	];
 
-	User.isHereEnabled(req.session.user.username).then((hereEnabled) => {
+	User.isHereEnabled(user).then((hereEnabled) => {
 		if (hereEnabled) {
 			maps = maps.concat([
 				{ name: "Here", layers: [ { name: "Map Tiles", source: "HERE" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
