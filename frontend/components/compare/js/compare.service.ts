@@ -300,32 +300,34 @@ export class CompareService {
 
 		this.state.targetModels.forEach((model) => {
 
-			const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
-			const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
-			let loadModel;
+			if (model &&  model.visible === "visible") {
+				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
+				const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
+				let loadModel;
 
-			if (canReuseModel) {
+				if (canReuseModel) {
 
-				this.changeModelVisibility(sharedRevisionModel.account + ":" + sharedRevisionModel.name, true);
-				this.ViewerService.diffToolSetAsComparator(
-					model.account,
-					model.model,
-					model.targetRevision
-				);
+					this.changeModelVisibility(sharedRevisionModel.account + ":" + sharedRevisionModel.name, true);
+					this.ViewerService.diffToolSetAsComparator(
+						model.account,
+						model.model,
+						model.targetRevision
+					);
 
-			} else if (model && model.visible === "visible") {
+				} else {
+					loadModel = this.ViewerService.diffToolLoadComparator(
+						model.account,
+						model.model,
+						model.targetRevision
+					)
+						.catch((error) => {
+							console.error(error);
+						});
 
-				loadModel = this.ViewerService.diffToolLoadComparator(
-					model.account,
-					model.model,
-					model.targetRevision
-				)
-					.catch((error) => {
-						console.error(error);
-					});
-
+				}
+				allModels.push(loadModel);
 			}
-			allModels.push(loadModel);
+
 		});
 
 		return Promise.all(allModels);
