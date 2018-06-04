@@ -296,6 +296,7 @@ export class CompareService {
 		const allModels = [];
 
 		this.state.loadingComparison = true;
+		this.setBaseModelVisibility();
 
 		this.state.targetModels.forEach((model) => {
 
@@ -305,17 +306,12 @@ export class CompareService {
 
 			if (canReuseModel) {
 
-				this.setBaseModelVisibility(sharedRevisionModel);
-
+				this.changeModelVisibility(sharedRevisionModel.account + ":" + sharedRevisionModel.name, true);
 				this.ViewerService.diffToolSetAsComparator(
 					model.account,
 					model.model,
 					model.targetRevision
 				);
-
-				// TODO: This is a bit a hack as it doesn't sync with the tree
-				// We set the compare panel model back invisible
-				sharedRevisionModel.visible = "invisible";
 
 			} else if (model && model.visible === "visible") {
 
@@ -397,11 +393,11 @@ export class CompareService {
 		this.state.compareState = "compare";
 
 		if (this.state.mode === "clash") {
-			if (this.state.isFed === true) {
+			if (this.state.isFed) {
 				this.clashFed();
 			}
 		} else if (this.state.mode === "diff") {
-			if (this.state.isFed === false) {
+			if (!this.state.isFed) {
 				this.diffModel(account, model);
 			} else {
 				this.diffFed();
@@ -463,35 +459,33 @@ export class CompareService {
 	}
 
 	public toggleModelVisibility(model) {
-		if (this.state.modelType === "target") {
-			this.setTargetModelVisibility(model);
-		} else if (this.state.modelType === "base") {
-			this.setBaseModelVisibility(model);
-
+		if (model.visible === "visible") {
+			model.visible = "invisible";
+		} else {
+			model.visible = "visible";
 		}
 		this.disableComparison();
 	}
 
-	private setBaseModelVisibility(model) {
+	private setBaseModelVisibility() {
+		this.state.baseModels.forEach((model) => {
+			this.changeModelVisibility(model.account + ":" + model.name, model.visible === "visible");
+		});
+	}
+
+	private changeModelVisibility(nodeName: string, visible: boolean) {
 		const nodes = this.TreeService.getAllNodes();
 		if (nodes.length && nodes[0].children) {
-			const childNodes = nodes[0].children;
-			childNodes.forEach((node) => {
-				if (node.name === model.account + ":" + model.name) {
-					// TODO: Fix this
-					if (model.visible === "invisible") {
+			nodes[0].children.forEach((node) => {
+				if (node.name === nodeName) {
+					if (visible) {
 						this.TreeService.showTreeNodes([node]);
 					} else {
 						this.TreeService.hideTreeNodes([node]);
 					}
-
-					// Keep the compare componetn and TreeService
-					// in sync with regards to visibility
-					model.visible = node.toggleState;
 				}
 			});
 		}
-
 	}
 
 	private setTargetModelVisibility(model) {
