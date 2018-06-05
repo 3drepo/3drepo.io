@@ -182,10 +182,10 @@
 	}
 
 	function isHereEnabled(req, res, next) {
-		const user = (req.params) ? req.params.account : "";
+		const teamspace = req.params.account;
 
 		if (config.here && config.here.appID && config.here.appCode) {
-			return User.isHereEnabled(user).then((hereEnabled) => {
+			return User.isHereEnabled(teamspace).then((hereEnabled) => {
 				if (hereEnabled) {
 					next();
 				} else {
