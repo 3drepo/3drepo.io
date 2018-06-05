@@ -33,7 +33,7 @@ router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewa
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res, next) {
-	const user = (req.session.user) ? req.session.user.username : "";
+	const user = (req.params) ? req.params.account : "";
 
 	let maps = [
 		{ name: "Open Street Map", layers: [ { name: "Map Tiles", source: "OSM" } ] }

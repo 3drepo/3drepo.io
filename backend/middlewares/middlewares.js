@@ -182,7 +182,8 @@
 	}
 
 	function isHereEnabled(req, res, next) {
-		const user = (req.session.user) ? req.session.user.username : "";
+		const user = (req.params) ? req.params.account : "";
+
 		if (config.here && config.here.appID && config.here.appCode) {
 			return User.isHereEnabled(user).then((hereEnabled) => {
 				if (hereEnabled) {
