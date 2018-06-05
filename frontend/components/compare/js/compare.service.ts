@@ -292,7 +292,7 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
-	public loadModels(compareType: string) {
+	public loadModels() {
 		const allModels = [];
 
 		this.state.loadingComparison = true;
@@ -394,16 +394,10 @@ export class CompareService {
 		this.state.canChangeCompareState = false;
 		this.state.compareState = "compare";
 
-		if (this.state.mode === "clash") {
-			if (this.state.isFed) {
-				this.clashFed();
-			}
-		} else if (this.state.mode === "diff") {
-			if (!this.state.isFed) {
-				this.diffModel(account, model);
-			} else {
-				this.diffFed();
-			}
+		if (this.state.isFed) {
+			this.startComparisonFed(this.state.mode === "diff");
+		} else {
+			this.diffModel(account, model);
 		}
 
 	}
@@ -429,34 +423,20 @@ export class CompareService {
 			});
 	}
 
-	public diffFed() {
+	public startComparisonFed(isDiffMode: boolean) {
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels("diff")
-			.then(() => {
+		this.loadModels().then(() => {
+			if (isDiffMode) {
 				this.ViewerService.diffToolEnableWithDiffMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
-
-	}
-
-	public clashFed() {
-
-		this.ViewerService.diffToolDisableAndClear();
-
-		this.loadModels("clash")
-			.then(() => {
+			} else {
 				this.ViewerService.diffToolEnableWithClashMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
+			}
+			this.modelsLoaded();
+		}).catch((error) => {
+			this.modelsLoaded();
+			console.error(error);
+		});
 
 	}
 
@@ -487,16 +467,6 @@ export class CompareService {
 					}
 				}
 			});
-		}
-	}
-
-	private setTargetModelVisibility(model) {
-		if (model.visible === "invisible") {
-			model.visible = "visible";
-		} else if (model.visible === "parentOfInvisible") {
-			model.visible = "visible";
-		} else {
-			model.visible = "invisible";
 		}
 	}
 
