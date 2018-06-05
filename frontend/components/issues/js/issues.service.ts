@@ -39,8 +39,6 @@ export class IssuesService {
 
 	private state: any;
 	private groupsCache: any;
-	private jobsDeferred: any;
-	private availableJobs: any;
 
 	constructor(
 		private $q,
@@ -64,7 +62,6 @@ export class IssuesService {
 
 	public reset() {
 		this.groupsCache = {};
-		this.jobsDeferred = this.$q.defer();
 		this.state = {
 			heights : {
 				infoHeight : 135,
@@ -370,36 +367,28 @@ export class IssuesService {
 
 		if (issue) {
 			issue.title = this.generateTitle(issue);
-		}
-
-		if (issue.created) {
-			issue.timeStamp = this.getPrettyTime(issue.created);
-		}
-
-		if (issue.thumbnail) {
-			issue.thumbnailPath = this.getThumbnailPath(issue.thumbnail);
-		}
-
-		if (issue.due_date) {
-			issue.due_date = new Date(issue.due_date);
-		}
-
-		if (issue) {
 			issue.statusIcon = this.getStatusIcon(issue);
-		}
+			if (issue.created) {
+				issue.timeStamp = this.getPrettyTime(issue.created);
+			}
 
-		if (issue.assigned_roles[0]) {
-			this.getJobColor(issue.assigned_roles[0]).then((color) => {
-				issue.issueRoleColor = color;
-			});
-		}
+			if (issue.thumbnail) {
+				issue.thumbnailPath = this.getThumbnailPath(issue.thumbnail);
+			}
 
-		if (!issue.descriptionThumbnail) {
-			if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
-				issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+			if (issue.due_date) {
+				issue.due_date = new Date(issue.due_date);
+			}
+			if (issue.assigned_roles[0]) {
+				issue.issueRoleColor = this.getJobColor(issue.assigned_roles[0]);
+			}
+
+			if (!issue.descriptionThumbnail) {
+				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
+					issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+				}
 			}
 		}
-
 	}
 
 	public userJobMatchesCreator(userJob, issueData) {
@@ -984,32 +973,22 @@ export class IssuesService {
 	}
 
 	public getJobColor(id) {
-		return this.jobsDeferred.promise
-			.then((jobs) => {
-				let roleColor = "#ffffff";
-				let found = false;
-
-				if (id && jobs) {
-					for (let i = 0; i < jobs.length; i ++) {
-						const job = jobs[i];
-						if (job._id === id && job.color) {
-							roleColor = job.color;
-							found = true;
-							break;
-						}
-					}
+		let roleColor = "#ffffff";
+		let found = false;
+		if (id && this.state.availableJobs) {
+			for (let i = 0; i <  this.state.availableJobs.length; i ++) {
+				const job =  this.state.availableJobs[i];
+				if (job._id === id && job.color) {
+					roleColor = job.color;
+					found = true;
+					break;
 				}
-
-				if (!found) {
-					console.debug("Job color not found for", id);
-				}
-
-				return roleColor;
-			})
-			.catch((error) => {
-				console.error("Error getting Job Color as available jobs did not resolve");
-				return "#ffffff";
-			});
+			}
+		}
+		if (!found) {
+			console.debug("Job color not found for", id);
+		}
+		return roleColor;
 	}
 
 	/**
