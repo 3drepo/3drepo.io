@@ -183,15 +183,19 @@
 
 	function isHereEnabled(req, res, next) {
 		const user = (req.session.user) ? req.session.user.username : "";
-		return User.isHereEnabled(user).then((hereEnabled) => {
-			if (hereEnabled) {
-				next();
-			} else {
-				responseCodes.respond("Check Here enabled middleware", req, res, next, responseCodes.HERE_MAPS_NOT_AVAILABLE , null, {});
-			}
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
+		if (config.here && config.here.appID && config.here.appCode) {
+			return User.isHereEnabled(user).then((hereEnabled) => {
+				if (hereEnabled) {
+					next();
+				} else {
+					responseCodes.respond("Check Here enabled middleware", req, res, next, responseCodes.HERE_MAPS_NOT_AVAILABLE , null, {});
+				}
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		} else {
+			responseCodes.respond("Check Here enabled middleware", req, res, next, responseCodes.MISSING_HERE_CONFIG , null, {});
+		}
 	}
 
 	var middlewares = {

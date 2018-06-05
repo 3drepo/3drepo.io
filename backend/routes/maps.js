@@ -40,7 +40,7 @@ function listMaps(req, res, next) {
 	];
 
 	User.isHereEnabled(user).then((hereEnabled) => {
-		if (hereEnabled) {
+		if (hereEnabled && (config.here && config.here.appID && config.here.appCode)) {
 			maps = maps.concat([
 				{ name: "Here", layers: [ { name: "Map Tiles", source: "HERE" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
 				{ name: "Here (Satellite)", layers: [ { name: "Aerial Imagery", source: "HERE_AERIAL" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] }
