@@ -406,13 +406,13 @@ export class CompareService {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-		const modelToDiff = this.state.baseModels.find((m) => {
-			return m.model === model;
-		});
-		const revision = modelToDiff.selectedRevision;
-
 		this.state.loadingComparison = true;
-		this.ViewerService.diffToolLoadComparator(account, model, revision)
+		//This is only ever called in non fed models, so 
+		// it's safe to assume targetModels.length === 1
+		this.ViewerService.diffToolLoadComparator(
+			this.state.targetModels[0].account,
+			this.state.targetModels[0].model,
+			this.state.targetModels[0].targetRevision)
 			.then(() => {
 				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
