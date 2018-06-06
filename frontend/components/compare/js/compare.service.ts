@@ -292,44 +292,42 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
-	public loadModels(compareType: string) {
+	public loadModels() {
 		const allModels = [];
 
 		this.state.loadingComparison = true;
+		this.setBaseModelVisibility();
 
 		this.state.targetModels.forEach((model) => {
 
-			const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
-			const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
-			let loadModel;
+			if (model &&  model.visible === "visible") {
+				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
+				const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
+				let loadModel;
 
-			if (canReuseModel) {
+				if (canReuseModel) {
 
-				this.setBaseModelVisibility(sharedRevisionModel);
+					this.changeModelVisibility(sharedRevisionModel.account + ":" + sharedRevisionModel.name, true);
+					this.ViewerService.diffToolSetAsComparator(
+						model.account,
+						model.model,
+						model.targetRevision
+					);
 
-				this.ViewerService.diffToolSetAsComparator(
-					model.account,
-					model.model,
-					model.targetRevision
-				);
+				} else {
+					loadModel = this.ViewerService.diffToolLoadComparator(
+						model.account,
+						model.model,
+						model.targetRevision
+					)
+						.catch((error) => {
+							console.error(error);
+						});
 
-				// TODO: This is a bit a hack as it doesn't sync with the tree
-				// We set the compare panel model back invisible
-				sharedRevisionModel.visible = "invisible";
-
-			} else if (model && model.visible === "visible") {
-
-				loadModel = this.ViewerService.diffToolLoadComparator(
-					model.account,
-					model.model,
-					model.targetRevision
-				)
-					.catch((error) => {
-						console.error(error);
-					});
-
+				}
+				allModels.push(loadModel);
 			}
-			allModels.push(loadModel);
+
 		});
 
 		return Promise.all(allModels);
@@ -396,16 +394,10 @@ export class CompareService {
 		this.state.canChangeCompareState = false;
 		this.state.compareState = "compare";
 
-		if (this.state.mode === "clash") {
-			if (this.state.isFed === true) {
-				this.clashFed();
-			}
-		} else if (this.state.mode === "diff") {
-			if (this.state.isFed === false) {
-				this.diffModel(account, model);
-			} else {
-				this.diffFed();
-			}
+		if (this.state.isFed) {
+			this.startComparisonFed(this.state.mode === "diff");
+		} else {
+			this.diffModel(account, model);
 		}
 
 	}
@@ -431,76 +423,50 @@ export class CompareService {
 			});
 	}
 
-	public diffFed() {
+	public startComparisonFed(isDiffMode: boolean) {
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels("diff")
-			.then(() => {
+		this.loadModels().then(() => {
+			if (isDiffMode) {
 				this.ViewerService.diffToolEnableWithDiffMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
-
-	}
-
-	public clashFed() {
-
-		this.ViewerService.diffToolDisableAndClear();
-
-		this.loadModels("clash")
-			.then(() => {
+			} else {
 				this.ViewerService.diffToolEnableWithClashMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
+			}
+			this.modelsLoaded();
+		}).catch((error) => {
+			this.modelsLoaded();
+			console.error(error);
+		});
 
 	}
 
 	public toggleModelVisibility(model) {
-		if (this.state.modelType === "target") {
-			this.setTargetModelVisibility(model);
-		} else if (this.state.modelType === "base") {
-			this.setBaseModelVisibility(model);
-
+		if (model.visible === "visible") {
+			model.visible = "invisible";
+		} else {
+			model.visible = "visible";
 		}
 		this.disableComparison();
 	}
 
-	private setBaseModelVisibility(model) {
+	private setBaseModelVisibility() {
+		this.state.baseModels.forEach((model) => {
+			this.changeModelVisibility(model.account + ":" + model.name, model.visible === "visible");
+		});
+	}
+
+	private changeModelVisibility(nodeName: string, visible: boolean) {
 		const nodes = this.TreeService.getAllNodes();
 		if (nodes.length && nodes[0].children) {
-			const childNodes = nodes[0].children;
-			childNodes.forEach((node) => {
-				if (node.name === model.account + ":" + model.name) {
-					// TODO: Fix this
-					if (model.visible === "invisible") {
+			nodes[0].children.forEach((node) => {
+				if (node.name === nodeName) {
+					if (visible) {
 						this.TreeService.showTreeNodes([node]);
 					} else {
 						this.TreeService.hideTreeNodes([node]);
 					}
-
-					// Keep the compare componetn and TreeService
-					// in sync with regards to visibility
-					model.visible = node.toggleState;
 				}
 			});
-		}
-
-	}
-
-	private setTargetModelVisibility(model) {
-		if (model.visible === "invisible") {
-			model.visible = "visible";
-		} else if (model.visible === "parentOfInvisible") {
-			model.visible = "visible";
-		} else {
-			model.visible = "invisible";
 		}
 	}
 
