@@ -203,7 +203,7 @@ class CompareController implements ng.IController {
 	}
 
 	public compare() {
-		this.CompareService.compare(this.account, this.model);
+		this.CompareService.compare();
 	}
 
 }

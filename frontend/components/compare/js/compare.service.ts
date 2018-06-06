@@ -341,12 +341,12 @@ export class CompareService {
 		}
 	}
 
-	public compare(account, model) {
+	public compare() {
 
 		if (this.state.compareEnabled) {
 			this.disableComparison();
 		} else {
-			this.enableComparison(account, model);
+			this.enableComparison();
 		}
 
 	}
@@ -389,7 +389,7 @@ export class CompareService {
 
 	}
 
-	public enableComparison(account: string, model: string) {
+	public enableComparison() {
 
 		this.state.canChangeCompareState = false;
 		this.state.compareState = "compare";
@@ -397,22 +397,22 @@ export class CompareService {
 		if (this.state.isFed) {
 			this.startComparisonFed(this.state.mode === "diff");
 		} else {
-			this.diffModel(account, model);
+			this.diffModel();
 		}
 
 	}
 
-	public diffModel(account: string, model: string) {
+	public diffModel() {
 
 		this.ViewerService.diffToolDisableAndClear();
 
-		const modelToDiff = this.state.baseModels.find((m) => {
-			return m.model === model;
-		});
-		const revision = modelToDiff.selectedRevision;
-
 		this.state.loadingComparison = true;
-		this.ViewerService.diffToolLoadComparator(account, model, revision)
+		// This is only ever called in non fed models, so
+		// it's safe to assume targetModels.length === 1
+		this.ViewerService.diffToolLoadComparator(
+			this.state.targetModels[0].account,
+			this.state.targetModels[0].model,
+			this.state.targetModels[0].targetRevision)
 			.then(() => {
 				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
