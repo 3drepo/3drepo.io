@@ -25,7 +25,7 @@ export class MultiSelectService {
 	private keys = {
 		cmdKey : 91,
 		ctrlKey : 17,
-		escKey : 27
+		escKey : 27,
 		shiftKey : 16
 	};
 
