@@ -93,23 +93,6 @@ class CompareController implements ng.IController {
 			}
 		});
 
-		this.watchTreeVisibility();
-
-	}
-
-	public watchTreeVisibility() {
-		let lastViewerUpdateTime = Date.now();
-		setInterval(() => {
-
-			if (this.TreeService.visibilityUpdateTime) {
-				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
-					this.updateModels();
-				}
-			}
-
-			lastViewerUpdateTime = Date.now();
-
-		}, 250);
 	}
 
 	public updateModels() {
