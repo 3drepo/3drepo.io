@@ -614,6 +614,14 @@ export class Viewer {
 		}
 	}
 
+	public startAreaSelect() {
+		UnityUtil.startAreaSelection();
+	}
+
+	public stopAreaSelect() {
+		UnityUtil.stopAreaSelection();
+	}
+
 	public zoomToHighlightedMeshes() {
 		UnityUtil.zoomToHighlightedMeshes();
 	}
