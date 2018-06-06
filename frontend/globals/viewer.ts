@@ -52,6 +52,7 @@ export class Viewer {
 		MOVE_PIN: "VIEWER_MOVE_PIN",
 		MOVE_POINT: "VIEWER_MOVE_POINT",
 		OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
+		MULTI_OBJECTS_SELECTED: "VIEWER_MULTI_OBJECTS_SELECTED",
 		PICK_POINT: "VIEWER_PICK_POINT",
 		REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
 		REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
@@ -410,6 +411,17 @@ export class Viewer {
 			}
 		}
 
+	}
+
+	public objectsSelected(nodes) {
+		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {
+			if (nodes) {
+				this.callback(Viewer.EVENT.MULTI_OBJECTS_SELECTED, {selectedNodes: nodes});
+			} else {
+				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+			}
+
+		}
 	}
 
 	public clearHighlights() {

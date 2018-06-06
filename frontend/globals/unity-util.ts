@@ -289,7 +289,7 @@ export class UnityUtil {
 	}
 
 	public static objectsSelectedAlert(nodeInfo) {
-		console.log("Object select alert triggered", nodeInfo);
+		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
