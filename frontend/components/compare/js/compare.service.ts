@@ -300,6 +300,23 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
+	public useSetModeComparison() {
+		if (this.state.compareEnabled) {
+			if (this.state.mode === "diff") {
+				this.ViewerService.diffToolEnableWithDiffMode();
+				this.changeCompareState("compare");
+			} else if (this.state.mode === "clash") {
+				if (this.state.isFed) {
+					this.ViewerService.diffToolEnabledWithClashMode();
+				} else {
+					this.ViewerService.diffToolShowBaseModel();
+				}
+
+				this.changeCompareState("compare");
+			}
+		}
+	}
+
 	public loadModels(isDiffMode: boolean) {
 		const allModels = [];
 
