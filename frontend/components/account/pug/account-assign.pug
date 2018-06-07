@@ -46,7 +46,7 @@
 											md-tooltip {{value.tooltip}}
 
 								tr
-									th.adminColumn Admin
+									th.firstRoleColumn Admin
 
 							tbody(layout="column")
 								tr(
@@ -131,7 +131,7 @@
 										layout-align="center center") {{value.title}}
 										md-tooltip {{value.tooltip}}
 
-									th.adminColumn Admin
+									th.firstRoleColumn Admin
 
 							tbody(layout="column")
 								tr(
@@ -234,7 +234,7 @@
 								//tr: th.fixedWidth.userColumn Role
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
 									th.fixedWidth.sentenceCase(
-										ng-class="{'adminColumn' : value == 'admin'}") {{value}}
+										ng-class="{'firstRoleColumn' : value == 'unassigned'}") {{value}}
 
 							tbody(layout="column", ng-if="vm.selectedModel && vm.modelReady")
 								tr(
