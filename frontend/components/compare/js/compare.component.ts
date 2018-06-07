@@ -98,34 +98,7 @@ class CompareController implements ng.IController {
 	public updateModels() {
 		this.modelsReady.promise.then(() => {
 			const models = this.TreeService.getNodesToShow();
-			if (this.isFederation()) {
-				models.forEach(this.compareToTreeState.bind(this));
-			}
 		});
-	}
-
-	public compareToTreeState(shownModel: any) {
-
-		if (shownModel.level !== 1) {
-			return;
-		}
-
-		for (const type in this.compareTypes) {
-
-			if (!type) {
-				continue;
-			}
-
-			for (let j = 0; j < this.baseModels.length; j++) {
-				const model = this.baseModels[j];
-				if (model && shownModel.name === model.account + ":" + model.name) {
-					model.visible = shownModel.toggleState || "visible";
-					break;
-				}
-			}
-
-		}
-
 	}
 
 	public revisionTimestamp(timestamp) {

@@ -190,7 +190,7 @@ export class CompareService {
 					tag: baseRevision.tag || baseTimestamp || baseRevision.name
 				}
 			},
-			visible: "visible"
+			visible: true
 		};
 	}
 
@@ -309,9 +309,9 @@ export class CompareService {
 		const mode = isDiffMode ? "diff" : "clash";
 		this.state.targetModels.forEach((model) => {
 
-			if (model &&  model.visible === "visible") {
+			if (model &&  model.visible) {
 				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision[mode].name );
-				const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
+				const canReuseModel = sharedRevisionModel && !sharedRevisionModel.visible;
 				let loadModel;
 
 				if (canReuseModel) {
@@ -450,17 +450,13 @@ export class CompareService {
 	}
 
 	public toggleModelVisibility(model) {
-		if (model.visible === "visible") {
-			model.visible = "invisible";
-		} else {
-			model.visible = "visible";
-		}
+		model.visible = !model.visible;
 		this.disableComparison();
 	}
 
 	private setBaseModelVisibility() {
 		this.state.baseModels.forEach((model) => {
-			this.changeModelVisibility(model.account + ":" + model.name, model.visible === "visible");
+			this.changeModelVisibility(model.account + ":" + model.name, model.visible);
 		});
 	}
 

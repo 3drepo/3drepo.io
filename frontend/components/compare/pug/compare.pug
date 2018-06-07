@@ -60,8 +60,8 @@ div(
 									ng-if="vm.isFederation()"
 									ng-click="vm.toggleModelVisibility(model)")
 
-									md-icon.angular-material-icons.visible(ng-if="model.visible === 'visible'") check_box
-									md-icon.angular-material-icons.invisible(ng-if="model.visible === 'invisible'") check_box_outline_blank
+									md-icon.angular-material-icons.visible(ng-if="model.visible") check_box
+									md-icon.angular-material-icons.invisible(ng-if="!model.visible") check_box_outline_blank
 								
 								md-button.modelSides.compareVisibility(
 									ng-if="!vm.isFederation()")
