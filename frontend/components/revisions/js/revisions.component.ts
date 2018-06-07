@@ -7,7 +7,7 @@ class RevisionsController implements ng.IController {
 
 		"DialogService",
 		"RevisionsService",
-		"APIService",
+		"APIService"
 	];
 
 	private revisionsLoading;
@@ -24,7 +24,7 @@ class RevisionsController implements ng.IController {
 
 		private DialogService,
 		private RevisionsService,
-		private APIService,
+		private APIService
 	) {}
 
 	public $onInit() {
@@ -41,7 +41,7 @@ class RevisionsController implements ng.IController {
 
 			if (this.RevisionsService.status.ready === true) {
 
-				this.revisions = this.RevisionsService.status.data;
+				this.revisions = this.RevisionsService.status.data[this.account + ":" + this.model];
 				this.revisionsLoading = false;
 
 				if (!this.revisions || !this.revisions[0]) {
@@ -91,7 +91,6 @@ class RevisionsController implements ng.IController {
 	}
 
 	public revisionTimestamp(timestamp: string) {
-		console.log("REVISION TIMESTAMP", timestamp, this.RevisionsService.revisionDateFilter(timestamp));
 		return this.RevisionsService.revisionDateFilter(timestamp);
 	}
 
@@ -114,11 +113,11 @@ export const RevisionsComponent: ng.IComponentOptions = {
 		account: "=",
 		model: "=",
 		modelName: "=",
-		revision: "=",
+		revision: "="
 	},
 	controller: RevisionsController,
 	controllerAs: "vm",
-	templateUrl: "templates/revisions.html",
+	templateUrl: "templates/revisions.html"
 };
 
 export const RevisionsComponentModule = angular

@@ -16,33 +16,43 @@
  */
 
 "use strict";
-var express = require('express');
-var router = express.Router({mergeParams: true});
-var middlewares = require('../middlewares/middlewares');
-// var config = require('../config');
-var C = require("../constants");
-var responseCodes = require('../response_codes.js');
-var Group = require('../models/group');
-var utils = require('../utils');
+
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
+const Group = require("../models/group");
+const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get('/', middlewares.issue.canView, listGroups);
-router.get('/:uid', middlewares.issue.canView, findGroup);
-router.put('/:uid', middlewares.issue.canCreate, updateGroup);
-router.post('/', middlewares.issue.canCreate, createGroup);
-router.delete('/:id', middlewares.issue.canCreate, deleteGroup);
+router.get('/groups/revision/master/head/', middlewares.issue.canView, listGroups);
+router.get('/groups/revision/:rid/', middlewares.issue.canView, listGroups);
+router.get('/groups/revision/master/head/:uid', middlewares.issue.canView, findGroup);
+router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
 
+router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
+router.post('/groups/', middlewares.issue.canCreate, createGroup);
+router.delete('/groups/:id', middlewares.issue.canCreate, deleteGroup);
 
-var getDbColOptions = function(req){
+const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
 function listGroups(req, res, next){
-	'use strict';
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	Group.listGroups(getDbColOptions(req)).then(groups => {
+	let groupList;
+	if (req.params.rid) {
+		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid);
+	} else {
+		groupList = Group.listGroups(dbCol, req.query, "master", null);
+	}
+
+	groupList.then(groups => {
+
 		groups.forEach((group, i) => {
 			groups[i] = group.clean();
 		});
@@ -59,17 +69,24 @@ function listGroups(req, res, next){
 
 function findGroup(req, res, next){
 
-	'use strict';
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null);
+	}
+
+	groupItem.then( group => {
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
 			return Promise.resolve(group);
 		}
 	}).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -77,7 +94,6 @@ function findGroup(req, res, next){
 }
 
 function createGroup(req, res, next){
-	'use strict';
 
 	let place = utils.APIInfo(req);
 
@@ -85,7 +101,7 @@ function createGroup(req, res, next){
 
 	create.then(group => {
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -93,13 +109,12 @@ function createGroup(req, res, next){
 }
 
 function deleteGroup(req, res, next){
-	'use strict';
 
 	let place = utils.APIInfo(req);
 
 	Group.deleteGroup(getDbColOptions(req), req.params.id).then(() => {
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, { 'status': 'success'});
+		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 		//next();	
 
 	}).catch(err => {
@@ -109,20 +124,27 @@ function deleteGroup(req, res, next){
 }
 
 function updateGroup(req, res, next){
-	'use strict';
 
+	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	Group.findByUID(getDbColOptions(req), req.params.uid).then( group => {
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
+	}
+
+	groupItem.then( group => {
 
 		if(!group){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			return group.updateAttrs(req.body);
+			return group.updateAttrs(dbCol, req.body);
 		}
 
 	}).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

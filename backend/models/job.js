@@ -19,75 +19,153 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const ModelFactory = require('./factory/modelFactory');
+const responseCodes = require('../response_codes.js');
+const C = require('../constants.js');
 const schema = mongoose.Schema({
 	_id: String,
-	color: String
+	color: String,
+	users: [String]
 });
-const responseCodes = require('../response_codes.js');
 
-const methods = {
 
-	init: function(user, jobs) {
+schema.statics.addDefaultJobs = function(teamspace) {
+	const promises = [];
+	C.DEFAULT_JOBS.forEach(job => {
+		promises.push(this.addJob(teamspace, job));
+	});
 
-		this.user = user;
-		this.jobs = jobs;
-		return this;
-	},
+	return Promise.all(promises);
 
-	findById: function(id){
-		return this.jobs.id(id);
-	},
+}
 
-	add: function(job) {
-		if(!job._id){
-			return Promise.reject(responseCodes.JOB_ID_VALID);
-		} else if (this.findById(job._id)){
-			return Promise.reject(responseCodes.DUP_JOB);
-		} else {
-			this.jobs.push(job);
-			return this.user.save();
-		}
+schema.statics.usersWithJob = function(teamspace) {
+	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
+		let userToJob  = {};
+		
+		jobs.forEach( job => {
+			job.users.forEach( user => {
+				userToJob[user] = job._id;
+			});
+		});
 
-	},
-
-	update: function(job) {
+		return userToJob;
 	
-		const jobToUpdate = this.findById(job._id);
+	});
+	
+}
 
-		if(!job._id){
-			return Promise.reject(responseCodes.JOB_ID_VALID);
+schema.statics.removeUserFromAnyJob = function(teamspace, user) {
+	return Job.findByUser(teamspace, user).then( job => {
+		if(job) {
+			return job.removeUserFromJob(user);
 		}
-		else if (!jobToUpdate) {
-			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		} else {
-			jobToUpdate.color = job.color;
-			return this.user.save();
-		}
+	});
 
-	},
+}
 
-	remove: function(name){
+schema.methods.removeUserFromJob = function(user) {
+	this.users.splice(this.users.indexOf(user), 1);
+	return this.save();
+}
 
-		let job = this.findById(name);
-		
-		if(this.user.customData.billing.subscriptions.findByJob(name).length > 0){
-			return Promise.reject(responseCodes.JOB_ASSIGNED);
-		} else if (!job) {
-			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		} else {
-			job.remove();
-			return this.user.save();
-		}
-		
-	},
 
-	get: function(){
-		return this.jobs;
+schema.statics.findByJob = function(teamspace, job) {
+	return this.findOne({account: teamspace}, {_id: job});
+	
+}
+
+schema.statics.findByUser = function(teamspace, user) {
+	return this.findOne({account: teamspace}, {users: user});
+}
+
+schema.statics.removeUserFromJobs = function(teamspace, user) {
+	const User = require('./user');
+	return User.teamspaceMemberCheck(teamspace, user).then( () => {
+		return Job.removeUserFromAnyJob(teamspace, user);		
+	});
+
+}
+
+schema.statics.addUserToJob = function(teamspace, user, jobName) {
+	//Check if user is member of teamspace
+	const User = require('./user');
+	return User.teamspaceMemberCheck(teamspace, user).then( () => {
+		return Job.findByJob(teamspace, jobName).then( (job) => {
+			if(!job) {
+				return Promise.reject(responseCodes.JOB_NOT_FOUND);
+			}
+
+			return Job.removeUserFromAnyJob(teamspace, user).then(() => {
+				job.users.push(user);
+				return job.save();
+			});
+
+		});
+	});
+}
+
+schema.statics.addJob = function(teamspace, jobData) {
+	if(!jobData._id) {
+		return Promise.reject(responseCodes.JOB_ID_INVALID);
 	}
-};
+	return this.findByJob(teamspace, jobData._id).then(jobFound => {
+		if(jobFound) {
+			return Promise.reject(responseCodes.DUP_JOB);
+		}
+		
+		const newJobEntry = this.model('Job').createInstance({account: teamspace});
+		newJobEntry._id = jobData._id;
+		if(jobData.color) {
+			newJobEntry.color = jobData.color;
+		}
+		return newJobEntry.save();
 
-// Mongoose doesn't support subschema static method
-module.exports = {
-	schema, methods
-};
+
+	});
+}
+
+schema.methods.updateJob = function(updatedData) {
+	if(updatedData.color)
+		this.color = updatedData.color;
+
+	return this.save();
+}
+
+schema.statics.removeJob = function(teamspace, jobName) {
+
+	return this.findByJob(teamspace, jobName).then(jobFound => {
+		if(!jobFound) {
+			return Promise.reject(responseCodes.JOB_NOT_FOUND);
+		}
+	
+		if(jobFound.users.length > 0) {
+			return Promise.reject(responseCodes.JOB_ASSIGNED);	
+		}
+
+		return Job.remove({account: teamspace}, {_id: jobName});
+
+	});
+
+
+}
+
+schema.statics.getAllJobs = function(teamspace) {
+	return this.find({account: teamspace}).then(jobs => {
+		const jobList = [];
+		jobs.forEach(job => {
+			jobList.push({_id: job._id, color: job.color});
+		});
+		return jobList;
+	});
+
+}
+
+var Job = ModelFactory.createClass(
+	'Job',
+	schema,
+	() => {
+		return "jobs";
+	});
+module.exports = Job;
 

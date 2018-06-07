@@ -26,7 +26,7 @@ class PanelCardController implements ng.IController {
 		"$compile",
 
 		"PanelService",
-		"EventService",
+		"EventService"
 	];
 
 	public vm = this;
@@ -54,7 +54,7 @@ class PanelCardController implements ng.IController {
 		private $compile: ng.ICompileService,
 
 		private PanelService: any,
-		private EventService: any,
+		private EventService: any
 	) {}
 
 	public $onInit() {
@@ -100,24 +100,10 @@ class PanelCardController implements ng.IController {
 		});
 
 		/*
-		* Change toolbar options when toggling add functionality
-		*/
-		this.$scope.$watch("vm.showAdd", (newValue)  => {
-			if (this.isDefined(newValue)) {
-				this.toggleAdd(newValue);
-			}
-		});
-
-		/*
 		* Watch for card in edit mode
 		*/
 		this.$scope.$watch("vm.showEdit", (newValue) => {
 			if (this.isDefined(newValue)) {
-				this.PanelService.handlePanelEvent(
-					this.contentData.type,
-					this.EventService.EVENT.PANEL_CARD_EDIT_MODE,
-					{on: true},
-				);
 				this.hideItem();
 			}
 		});
@@ -133,9 +119,8 @@ class PanelCardController implements ng.IController {
 	}
 
 	/*
-		* Watch type on contentData to create content and tool bar options
-		*/
-
+	* Watch type on contentData to create content and tool bar options
+	*/
 	public hasFilter() {
 		const filter = this.contentData.options.find((item) => {
 			return item.type === "filter";
@@ -151,7 +136,7 @@ class PanelCardController implements ng.IController {
 		this.contentHeight = height;
 		this.onHeightRequest({
 			contentItem: this.contentData,
-			height: this.contentHeight,
+			height: this.contentHeight
 		});
 	}
 
@@ -192,7 +177,7 @@ class PanelCardController implements ng.IController {
 				option = angular.element(optionElement);
 
 				// Create the element
-				if (option !== null) {
+				if (option !== null && this.options) {
 					this.options.prepend(option);
 					this.$compile(option)(this.$scope);
 				}
@@ -228,7 +213,7 @@ class PanelCardController implements ng.IController {
 
 		switch (optionType) {
 		case "filter":
-			return " show-filter='vm.showFilter'";
+			return "show-filter='vm.showFilter'";
 
 		case "visible":
 			return " visible='vm.visible'";
@@ -252,18 +237,6 @@ class PanelCardController implements ng.IController {
 
 	}
 
-	public toggleAdd(on) {
-		if (this.contentData.type === "issues") {
-			this.showToolbarOptions(["filter", "menu"], !on);
-		}
-		this.hideItem();
-		this.PanelService.handlePanelEvent(
-			this.contentData.type,
-			this.EventService.EVENT.PANEL_CARD_ADD_MODE,
-			{on},
-		);
-	}
-
 }
 
 export const PanelCardComponent: ng.IComponentOptions = {
@@ -271,19 +244,17 @@ export const PanelCardComponent: ng.IComponentOptions = {
 		account: "=",
 		branch: "=",
 		contentData: "=",
-		keysDown: "=",
 		model: "=",
 		modelSettings: "=",
 		onHeightRequest: "&",
-		onShowFilter: "&",
 		position: "=",
 		revision: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&",
+		setInitialSelectedObjects: "&"
 	},
 	controller: PanelCardController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel-card.html",
+	templateUrl: "templates/panel-card.html"
 };
 
 export const PanelCardComponentModule = angular

@@ -39,6 +39,7 @@ class PasswordChangeController implements ng.IController {
 
 		"APIService",
 		"StateManager",
+		"PasswordService"
 	];
 
 	private promise;
@@ -54,12 +55,14 @@ class PasswordChangeController implements ng.IController {
 	private token;
 	private messageColor;
 	private username;
+	private passwordStrength;
 
 	constructor(
 		private $scope: ng.IScope,
 
 		private APIService: any,
 		private StateManager: any,
+		private PasswordService: any
 	) {}
 
 	public $onInit() {
@@ -69,6 +72,7 @@ class PasswordChangeController implements ng.IController {
 		this.messageColour = "rgba(0, 0, 0, 0.7)";
 		this.messageErrorColour = "#F44336";
 		this.buttonDisabled = true;
+		this.PasswordService.addPasswordStrengthLib();
 		this.watchers();
 	}
 
@@ -76,8 +80,10 @@ class PasswordChangeController implements ng.IController {
 
 		this.$scope.$watch("vm.newPassword", () => {
 			this.message = "";
-			if (this.newPassword && this.newPassword !== "") {
-				this.buttonDisabled = false;
+			if (this.newPassword !== undefined) {
+				const result = this.PasswordService.evaluatePassword(this.newPassword);
+				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
+				this.checkInvalidPassword(result);
 			}
 		});
 
@@ -97,6 +103,40 @@ class PasswordChangeController implements ng.IController {
 			}
 		});
 
+	}
+
+	public checkInvalidPassword(result) {
+		switch (result.score) {
+		case 0:
+			this.invalidatePassword(result);
+			break;
+		case 1:
+			this.invalidatePassword(result);
+			break;
+		case 2:
+			this.validatePassword();
+			break;
+		case 3:
+			this.validatePassword();
+			break;
+		case 4:
+			this.validatePassword();
+			break;
+		}
+	}
+
+	public invalidatePassword(result) {
+		// this.$scope.password.new.$setValidity("required", false);
+		this.buttonDisabled = true;
+		this.message = "Password is too weak; " + result.feedback.suggestions.join(" ");
+		this.messageColor = this.messageErrorColour;
+	}
+
+	public validatePassword() {
+		// this.$scope.password.new.$setValidity("required", true);
+		this.buttonDisabled = false;
+		this.message = "";
+		this.messageColor = this.messageColour;
 	}
 
 	public passwordChange(event) {
@@ -125,7 +165,7 @@ class PasswordChangeController implements ng.IController {
 
 				this.APIService.put(url, {
 					newPassword: this.newPassword,
-					token: this.token,
+					token: this.token
 				})
 					.then((response) => {
 
@@ -167,11 +207,11 @@ class PasswordChangeController implements ng.IController {
 export const PasswordChangeComponent: ng.IComponentOptions = {
 	bindings: {
 		token: "=",
-		username: "=",
+		username: "="
 	},
 	controller: PasswordChangeController,
 	controllerAs: "vm",
-	templateUrl: "templates/password-change.html",
+	templateUrl: "templates/password-change.html"
 };
 
 export const PasswordChangeComponentModule = angular

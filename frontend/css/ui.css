@@ -58,6 +58,26 @@ html, body {
 	background: #cfcdcc;
 }
 
+.close-icon {
+	margin-left: 13px;
+    margin-top: 13px;
+    color: white;
+}
+
+.focus-button {
+	height: 50px;
+	width: 50px;
+	margin: 15px !important;
+	position: absolute;
+	z-index: 1000000000000;
+	border-radius: 30px;
+	background: rgb(6,86,60);
+	top: 0;
+	right: 0px;
+	cursor: pointer;
+	display: none;
+}
+
 .connection {
 	position: absolute;
     left: 0px;

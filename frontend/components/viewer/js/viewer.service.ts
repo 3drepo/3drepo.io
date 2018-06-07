@@ -1,6 +1,3 @@
-import { IQService } from "angular";
-import { UnityUtil } from "../../../_built/amd/globals/unity-util";
-
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -24,12 +21,12 @@ export class ViewerService {
 
 	public static $inject: string[] = [
 		"$q",
+		"$timeout",
 
 		"ClientConfigService",
 		"APIService",
 		"DialogService",
-		"EventService",
-		"DocsService",
+		"EventService"
 	];
 
 	private newPinId: string;
@@ -41,26 +38,26 @@ export class ViewerService {
 	private Viewer: any;
 
 	constructor(
-		public $q: IQService,
+		public $q: ng.IQService,
+		public $timeout: ng.ITimeoutService,
 
 		public ClientConfigService: any,
 		public APIService: any,
 		public DialogService: any,
-		public EventService: any,
-		public DocsService: any,
-
+		public EventService: any
 	) {
+
 		this.newPinId = "newPinId";
 		this.pinData = null;
 		this.viewer = undefined;
 
 		this.currentModel = {
 			model : null,
-			promise : null,
+			promise : null
 		};
 
 		this.pin = {
-			pinDropMode : false,
+			pinDropMode : false
 		};
 
 		this.initialised = $q.defer();
@@ -74,6 +71,23 @@ export class ViewerService {
 		this.pinData = newPinData.data;
 	}
 
+	public updateViewerSettings(settings) {
+		if (this.viewer) {
+			this.viewer.updateSettings(settings);
+		}
+	}
+
+	public updateClippingPlanes(params) {
+		if (this.viewer) {
+			this.viewer.updateClippingPlanes(
+				params.clippingPlanes,
+				params.fromClipPanel,
+				params.account,
+				params.model
+			);
+		}
+	}
+
 	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
@@ -83,41 +97,33 @@ export class ViewerService {
 
 			switch (event.type) {
 
-			case this.EventService.EVENT.MODEL_SETTINGS_READY:
-				if (event.value.account === account && event.value.model === model) {
-					this.viewer.updateSettings(event.value);
-					// mapTile && mapTile.updateSettings(event.value.settings);
-				}
-				break;
+			// case this.EventService.EVENT.MODEL_SETTINGS_READY:
+			// 	if (event.value.account === account && event.value.model === model) {
+			// 		this.viewer.updateSettings(event.value);
+			// 		// mapTile && mapTile.updateSettings(event.value.settings);
+			// 	}
+			// 	break;
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
+				if (this.newPinId === "newPinId") {
+					this.removeUnsavedPin();
+					return;
+				}
 				this.viewer.clickPin(event.value.id);
 				break;
 
 			case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
 				this.viewer.changePinColours(
 					event.value.id,
-					event.value.colours,
-				);
-				break;
-
-			case this.EventService.EVENT.VIEWER.UPDATE_CLIPPING_PLANES:
-				this.viewer.updateClippingPlanes(
-					event.value.clippingPlanes, event.value.fromClipPanel,
-					event.value.account, event.value.model,
+					event.value.colours
 				);
 				break;
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.DocsService.state.show = false;
 				this.viewer.clearHighlights();
 				break;
 
 			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				const valid = this.DocsService.state.active && !this.pin.pinDropMode;
-				if (valid) {
-					this.DocsService.handleObjectSelected(event);
-				}
 				break;
 
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
@@ -129,7 +135,7 @@ export class ViewerService {
 					event.value.animate !== undefined ? event.value.animate : true,
 					event.value.rollerCoasterMode,
 					event.value.account,
-					event.value.model,
+					event.value.model
 				);
 				break;
 
@@ -157,7 +163,7 @@ export class ViewerService {
 						model,
 						pickedNorm: normal,
 						pickedPos: position,
-						selectedObjectId: event.value.id,
+						selectedObjectId: event.value.id
 					};
 
 					this.addPin(data);
@@ -171,16 +177,31 @@ export class ViewerService {
 				}
 				break;
 
-			case this.EventService.EVENT.VIEWER.CLICK_PIN:
-				if (this.newPinId === "newPinId") {
-					this.removeUnsavedPin();
-				}
-				break;
-
 			}
 
 		});
 
+	}
+
+	public centreToPoint(params: any) {
+		if (this.viewer) {
+			this.viewer.centreToPoint(params);
+		}
+	}
+
+	public setCamera(params) {
+		if (this.viewer) {
+			this.viewer.setCamera(
+				params.position,
+				params.view_dir,
+				params.up,
+				params.look_at,
+				params.animate !== undefined ? params.animate : true,
+				params.rollerCoasterMode,
+				params.account,
+				params.model
+			);
+		}
 	}
 
 	public removeUnsavedPin() {
@@ -189,23 +210,29 @@ export class ViewerService {
 	}
 
 	public changePinColours(params) {
-		this.viewer.changePinColours(
-			params.id,
-			params.colours,
-		);
+		if (this.viewer) {
+			this.viewer.changePinColours(
+				params.id,
+				params.colours
+			);
+		}
 	}
 
 	public clearHighlights() {
-		this.viewer.clearHighlights();
+		if (this.viewer) {
+			this.viewer.clearHighlights();
+		}
 	}
 
 	public getCurrentViewpoint(params) {
-		// Note the Info suffix
-		this.viewer.getCurrentViewpointInfo(
-			params.account,
-			params.model,
-			params.promise,
-		);
+		if (this.viewer) {
+			// Note the Info suffix
+			this.viewer.getCurrentViewpointInfo(
+				params.account,
+				params.model,
+				params.promise
+			);
+		}
 	}
 
 	public addPin(params) {
@@ -217,7 +244,7 @@ export class ViewerService {
 				params.pickedPos,
 				params.pickedNorm,
 				params.colours,
-				params.viewpoint,
+				params.viewpoint
 			);
 		});
 	}
@@ -225,60 +252,104 @@ export class ViewerService {
 	public removePin(params) {
 		this.initialised.promise.then(() => {
 			this.viewer.removePin(
-				params.id,
+				params.id
 			);
 		});
 	}
 
 	public clearClippingPlanes() {
-		this.viewer.clearClippingPlanes();
+		if (this.viewer) {
+			this.viewer.clearClippingPlanes();
+		}
 	}
 
 	public getObjectsStatus(params) {
-		this.viewer.getObjectsStatus(
-			params.account,
-			params.model,
-			params.promise,
-		);
+		if (this.viewer) {
+			this.viewer.getObjectsStatus(
+				params.account,
+				params.model,
+				params.promise
+			);
+		}
 	}
 
 	public highlightObjects(params)  {
+		if (this.viewer) {
+			this.viewer.highlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids,
+				params.zoom,
+				params.colour,
+				params.multi,
+				params.forceReHighlight
+			);
+		}
+	}
 
-		this.viewer.highlightObjects(
-			params.account,
-			params.model,
-			params.id ? [params.id] : params.ids,
-			params.zoom,
-			params.colour,
-			params.multi,
-		);
+	public unhighlightObjects(params)  {
+		if (this.viewer) {
+			this.viewer.unhighlightObjects(
+				params.account,
+				params.model,
+				params.id ? [params.id] : params.ids
+			);
+		}
+	}
+
+	public getNavMode() {
+		if (this.viewer) {
+			// this.$timeout();
+			return this.viewer.currentNavMode;
+		}
+	}
+
+	public getMultiSelectMode() {
+		if (this.viewer) {
+			return this.viewer.multiSelectMode;
+		}
+		return false;
 	}
 
 	public setMultiSelectMode(value)  {
-		this.viewer.setMultiSelectMode(value);
+		if (this.viewer) {
+			this.viewer.setMultiSelectMode(value);
+		}
 	}
 
 	public switchObjectVisibility(account, model, ids, visibility)  {
-		this.viewer.switchObjectVisibility(account, model, ids, visibility);
+		if (this.viewer) {
+			this.viewer.switchObjectVisibility(account, model, ids, visibility);
+		}
 	}
 
 	public hideHiddenByDefaultObjects() {
-		this.viewer.hideHiddenByDefaultObjects();
+		if (this.viewer) {
+			this.viewer.hideHiddenByDefaultObjects();
+		}
 	}
 
 	public showHiddenByDefaultObjects() {
-		this.viewer.showHiddenByDefaultObjects();
+		if (this.viewer) {
+			this.viewer.showHiddenByDefaultObjects();
+		}
 	}
 
-	public handleUnityError(message: string, reload: boolean)  {
+	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
 
-		this.DialogService.html("Unity Error", message, true)
+		let errorType = "3D Repo Error";
+
+		if (isUnity) {
+			errorType = "Unity Error";
+		}
+
+		this.DialogService.html(errorType, message, true)
 			.then(() => {
 				if (reload) {
 					location.reload();
 				}
 			}, () => {
-				console.error("Unity errorered and user canceled reload", message);
+				console.error("Unity errored and user canceled reload", message);
 			});
 
 	}
@@ -302,11 +373,15 @@ export class ViewerService {
 	}
 
 	public goToExtent() {
-		this.viewer.showAll();
+		if (this.viewer) {
+			this.viewer.showAll();
+		}
 	}
 
 	public setNavMode(mode) {
-		this.viewer.setNavMode(mode);
+		if (this.viewer) {
+			this.viewer.setNavMode(mode);
+		}
 	}
 
 	public unityInserted(): boolean {
@@ -326,7 +401,7 @@ export class ViewerService {
 				"viewer",
 				document.getElementById("viewer"),
 				this.EventService.send,
-				this.handleUnityError.bind(this),
+				this.handleUnityError.bind(this)
 			);
 
 			this.viewer.setUnity();
@@ -337,25 +412,31 @@ export class ViewerService {
 	}
 
 	public initViewer() {
-
+		console.debug("Initiating Viewer");
 		if (this.unityInserted() === true) {
 			return this.callInit();
-		} else {
+		} else if (this.viewer) {
+
 			return this.viewer.insertUnityLoader()
 				.then(() => { this.callInit(); })
 				.catch((error) => {
 					console.error("Error inserting Unity script: ", error);
 				});
+
 		}
 
 	}
 
 	public activateMeasure() {
-		this.viewer.setMeasureMode(true);
+		if (this.viewer) {
+			this.viewer.setMeasureMode(true);
+		}
 	}
 
 	public disableMeasure() {
-		this.viewer.setMeasureMode(false);
+		if (this.viewer) {
+			this.viewer.setMeasureMode(false);
+		}
 	}
 
 	public callInit() {
@@ -363,9 +444,9 @@ export class ViewerService {
 		return this.getViewer()
 			.init({
 				getAPI: {
-					hostNames: this.ClientConfigService.apiUrls.all,
+					hostNames: this.ClientConfigService.apiUrls.all
 				},
-				showAll : true,
+				showAll : true
 			})
 			.catch((error) => {
 				console.error("Error creating Viewer Directive: ", error);
@@ -377,12 +458,13 @@ export class ViewerService {
 
 		if (!account || !model) {
 			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
+			return Promise.reject("Account, model, branch or revision was not defined!");
 		} else {
 			this.currentModel.promise = this.viewer.loadModel(
 				account,
 				model,
 				branch,
-				revision,
+				revision
 			)
 				.then(() => {
 					// Set the current model in the viewer
@@ -392,6 +474,7 @@ export class ViewerService {
 				.catch((error) => {
 					console.error("Error loading model: ", error);
 				});
+			return this.currentModel.promise;
 		}
 
 	}
@@ -438,32 +521,109 @@ export class ViewerService {
 
 	// DIFF
 
+	public diffToolSetAsComparator(account: string, model: string) {
+		this.viewer.diffToolSetAsComparator(account, model);
+	}
+
 	public diffToolLoadComparator(account: string, model: string, revision: string) {
 		return this.viewer.diffToolLoadComparator(account, model, revision);
 	}
 
 	public diffToolEnableWithClashMode() {
-		this.viewer.diffToolEnableWithClashMode();
+		if (this.viewer) {
+			this.viewer.diffToolEnableWithClashMode();
+		}
 	}
 
 	public diffToolEnableWithDiffMode() {
-		this.viewer.diffToolEnableWithDiffMode();
+		if (this.viewer) {
+			this.viewer.diffToolEnableWithDiffMode();
+		}
 	}
 
 	public diffToolDisableAndClear() {
-		this.viewer.diffToolDisableAndClear();
+		if (this.viewer) {
+			this.viewer.diffToolDisableAndClear();
+		}
+
 	}
 
 	public diffToolShowBaseModel() {
-		this.viewer.diffToolShowBaseModel();
+		if (this.viewer) {
+			this.viewer.diffToolShowBaseModel();
+		}
 	}
 
 	public diffToolShowComparatorModel() {
-		this.viewer.diffToolShowComparatorModel();
+		if (this.viewer) {
+			this.viewer.diffToolShowComparatorModel();
+		}
 	}
 
 	public diffToolDiffView() {
-		this.viewer.diffToolDiffView();
+		if (this.viewer) {
+			this.viewer.diffToolDiffView();
+		}
+	}
+
+	public mapInitialise(surveyPoints) {
+		if (this.viewer) {
+			this.viewer.mapInitialise(surveyPoints);
+		}
+	}
+
+	public  mapStart() {
+		if (this.viewer) {
+			this.viewer.mapStart();
+		}
+	}
+
+	public mapStop() {
+		if (this.viewer) {
+			this.viewer.mapStop();
+		}
+	}
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		if (this.viewer) {
+			this.viewer.overrideMeshColor(account, model, meshIDs, color);
+		}
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		if (this.viewer) {
+			this.viewer.resetMeshColor(account, model, meshIDs);
+		}
+	}
+
+	public getDefaultHighlightColor() {
+		if (this.viewer) {
+			return this.viewer.getDefaultHighlightColor();
+		}
+	}
+
+	public zoomToHighlightedMeshes() {
+		if (this.viewer) {
+			this.viewer.zoomToHighlightedMeshes();
+		}
+	}
+
+	public helicopterSpeedDown() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedDown();
+		}
+	}
+
+	public helicopterSpeedUp() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedUp();
+		}
+	}
+
+	public helicopterSpeedReset() {
+		if (this.viewer) {
+			this.viewer.helicopterSpeedReset();
+		}
 	}
 
 }

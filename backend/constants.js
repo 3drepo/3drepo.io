@@ -165,21 +165,6 @@
 	define("REPO_NODE_LABEL_MERGE_MAP_OFFSET", "offset");
 
 	//-----------------------------------------------------------------------------
-	//
-	// X3DOM defines
-	//
-	//-----------------------------------------------------------------------------
-	
-	define("X3DOM_SRC_BYTE", 5120);
-	define("X3DOM_SRC_UBYTE", 5121);
-	define("X3DOM_SRC_SHORT", 5122);
-	define("X3DOM_SRC_USHORT", 5123);
-	define("X3DOM_SRC_INT", 5124);
-	define("X3DOM_SRC_UINT", 5125);
-	define("X3DOM_SRC_FLOAT", 5126);
-	define("X3DOM_SRC_TRIANGLE", 4);
-
-	//-----------------------------------------------------------------------------
 	// Following fields are not stored in the repository,
 	// they are only implied!
 	// TODO: refactor name such as UNUSED_LABEL to distinguishe from DB fields!
@@ -567,15 +552,15 @@
 	});
 
 	define('DEFAULT_JOBS',[
-		{ _id: 'Client' },
-		{ _id: 'Architect'},
-		{ _id: 'Structural Engineer'},
-		{ _id: 'MEP Engineer'},
-		{ _id: 'Project Manager'},
-		{ _id: 'Quantity Surveyor'},
-		{ _id: 'Asset Manager'},
-		{ _id: 'Main Contractor'},
-		{ _id: 'Supplier'}
+		{ _id: 'Client', "color": "#a6cee3" },
+		{ _id: 'Architect', "color": "#213f99"},
+		{ _id: 'Structural Engineer', "color" : "#33a02c"},
+		{ _id: 'MEP Engineer', "color": "#fb9a99"},
+		{ _id: 'Project Manager', "color": "#e31a1c"},
+		{ _id: 'Quantity Surveyor', "color": "#ff7f00"},
+		{ _id: 'Asset Manager', "color" : "#ffff99"},
+		{ _id: 'Main Contractor', "color": "#b15928"},
+		{ _id: 'Supplier', "color": "#6a3d9a"}
 	]);
 	
 })();

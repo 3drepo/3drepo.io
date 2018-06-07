@@ -5,9 +5,9 @@ git:
   depth: 1
 
 node_js:
-    - "6.11.3"
+    - "8.9.3"
 
-sudo: false
+sudo: true
 dist: trusty
 
 addons:
@@ -19,52 +19,44 @@ addons:
     - test.127.0.0.1
 
 before_install:
-    - mongo --version
+    - until nc -z localhost 27017; do echo "waiting for mongo"; sleep 1; done
     - mkdir -p submodules
+    - test_ver=`cat backend/test/testDBVersion`
     - cd submodules
     - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
-    - cd ..
-    - sudo apt-get install -y graphicsmagick 
-    - mongod --version
-    - until nc -z localhost 27017; do sleep 1; done
-    - test_ver=`cat backend/test/testDBVersion`
-    - cd submodules/tests
+    - cd tests
     - git checkout $test_ver
     - git status
     - cd backend && mongorestore
-    - cd ./../../../
+    - cd ../../../
     - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
-    - echo $PWD
-    - cd ./frontend 
-    - yarn install
-    - yarn run gulp build
-    - cd ./../backend 
-    - yarn install
-    - cd ..
 
+install:
+    - cd ./backend 
+    - yarn install
+    - cd ./../frontend 
+    - yarn install
+    - yarn run lint
+    - yarn run build
 
 cache:
   yarn: true
   directories:
-    - ./frontend/node_modules
-    - ./backend/node_modules
+    - node_modules
 
 services:
   - rabbitmq
   - mongodb
-
-matrix:
-    include:
-        - env: TEST_SUITE=backend
-        - env: TEST_SUITE=frontend
-
-script: 
-    - echo $PWD
-    - ls -lah
-    - ls -lah ./../
-    - chmod +X ./test.sh
-    - node --version
-    - bash ./test.sh $TEST_SUITE
+  
+script:
+    - yarn run wdm:update
+    - yarn run wdm:start > /dev/null 2>&1 &
+    - cd ./../backend 
+    - yarn run test
+    - cd ./../ 
+    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
+    - cd ./frontend
+    - yarn run e2e
 
 notifications:
     email: 

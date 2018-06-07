@@ -22,8 +22,8 @@ const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-const log_iface = require("../../logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const async = require('async');
 const _ = require('lodash');
@@ -191,8 +191,8 @@ describe('Permission templates', function () {
 
 		agent.post(`/${username}/${model}/permissions`)
 		.send([{ user: 'nonses', permission: 'customB'}])
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 			done(err);
 		});
 

@@ -22,7 +22,7 @@ class RightPanelController implements ng.IController {
 		"$timeout",
 		"EventService",
 		"DocsService",
-		"MeasureService",
+		"MeasureService"
 	];
 
 	private highlightBackground;
@@ -38,7 +38,7 @@ class RightPanelController implements ng.IController {
 		private $timeout,
 		private EventService,
 		private DocsService,
-		private MeasureService,
+		private MeasureService
 	) {}
 
 	public $onInit() {
@@ -89,12 +89,6 @@ class RightPanelController implements ng.IController {
 			}
 
 		}, true);
-
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			if (event.type === this.EventService.EVENT.TOGGLE_ELEMENTS) {
-				this.showPanel = !this.showPanel;
-			}
-		});
 
 	}
 
@@ -148,7 +142,7 @@ export const RightPanelComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: RightPanelController,
 	controllerAs: "vm",
-	templateUrl: "templates/right-panel.html",
+	templateUrl: "templates/right-panel.html"
 };
 
 export const RightPanelComponentModule = angular

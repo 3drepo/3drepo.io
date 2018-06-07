@@ -25,7 +25,7 @@ class CompareController implements ng.IController {
 		"ViewerService",
 		"RevisionsService",
 		"CompareService",
-		"TreeService",
+		"TreeService"
 	];
 
 	private revision: any;
@@ -36,13 +36,14 @@ class CompareController implements ng.IController {
 	private account: any;
 	private model: any;
 	private modelSettings: any;
-	private loadingComparision: boolean;
+	private loadingComparison: boolean;
 	private loadingInfo: string;
 	private isFed: boolean;
 	private compareState: string;
 	private canChangeCompareState: boolean;
 	private models: any[];
 	private modelsReady;
+	private baseModels: any[];
 
 	constructor(
 		private $scope: any,
@@ -52,12 +53,13 @@ class CompareController implements ng.IController {
 		private ViewerService: any,
 		private RevisionsService: any,
 		private CompareService: any,
-		private TreeService: any,
+		private TreeService: any
 	) {}
 
 	public $onInit() {
-		this.CompareService.disableComparision();
-		this.loadingInfo = "Loading comparision...";
+
+		this.CompareService.disableComparison();
+		this.loadingInfo = "Loading comparison...";
 		this.compareTypes = this.CompareService.state.compareTypes;
 		this.mode = this.CompareService.mode;
 		this.modelType = this.CompareService.modelType;
@@ -65,10 +67,12 @@ class CompareController implements ng.IController {
 		this.models = [];
 
 		this.watchers();
+
 	}
 
 	public $onDestroy() {
-		this.CompareService.disableComparision();
+		this.CompareService.disableComparison();
+		this.CompareService.reset();
 	}
 
 	public watchers() {
@@ -89,16 +93,6 @@ class CompareController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() => {
-			return this.TreeService.visibilityUpdateTime;
-		}, () => {
-			this.updateModels();
-		});
-
-	}
-
-	public revisionTimestamp(timestamp) {
-		return this.RevisionsService.revisionDateFilter(timestamp);
 	}
 
 	public updateModels() {
@@ -111,6 +105,7 @@ class CompareController implements ng.IController {
 	}
 
 	public compareToTreeState(shownModel: any) {
+
 		if (shownModel.level !== 1) {
 			return;
 		}
@@ -121,17 +116,20 @@ class CompareController implements ng.IController {
 				continue;
 			}
 
-			const baseModels = this.compareTypes[type].baseModels;
-			for (let j = 0; j < baseModels.length; j++) {
-				const model = baseModels[j];
-				if (shownModel.name === model.account + ":" + model.name) {
-					model.visible = (shownModel.toggleState === "visible");
+			for (let j = 0; j < this.baseModels.length; j++) {
+				const model = this.baseModels[j];
+				if (model && shownModel.name === model.account + ":" + model.name) {
+					model.visible = shownModel.toggleState || "visible";
 					break;
 				}
 			}
 
 		}
 
+	}
+
+	public revisionTimestamp(timestamp) {
+		return this.RevisionsService.revisionDateFilter(timestamp);
 	}
 
 	public modelSettingsReady() {
@@ -144,7 +142,7 @@ class CompareController implements ng.IController {
 
 			modelsReady.push(this.CompareService.addModelsForFederationCompare(
 				this.modelSettings,
-				this.revision,
+				this.revision
 			));
 
 		} else {
@@ -153,7 +151,7 @@ class CompareController implements ng.IController {
 				this.account,
 				this.model,
 				this.modelSettings,
-				this.revision,
+				this.revision
 			));
 
 		}
@@ -178,6 +176,10 @@ class CompareController implements ng.IController {
 
 	public setModelType(type: string) {
 		this.CompareService.setModelType(type);
+	}
+
+	public setBaseRevision(model: any, revision: any) {
+		this.CompareService.setBaseRevision(model, revision);
 	}
 
 	public setTargetRevision(model: any, revision: any) {
@@ -211,11 +213,11 @@ export const CompareComponent: ng.IComponentOptions = {
 		account: "<",
 		model: "<",
 		revision: "<",
-		modelSettings: "<",
+		modelSettings: "<"
 	},
 	controller: CompareController,
 	controllerAs: "vm",
-	templateUrl: "templates/compare.html",
+	templateUrl: "templates/compare.html"
 };
 
 export const CompareComponentModule = angular

@@ -26,6 +26,7 @@ class ModelController implements ng.IController {
 		"$compile",
 		"$mdDialog",
 
+		"ClipService",
 		"EventService",
 		"TreeService",
 		"RevisionsService",
@@ -34,7 +35,7 @@ class ModelController implements ng.IController {
 		"MultiSelectService",
 		"StateManager",
 		"PanelService",
-		"ViewerService",
+		"ViewerService"
 	];
 
 	private issuesCardIndex;
@@ -47,7 +48,6 @@ class ModelController implements ng.IController {
 	private revision;
 	private settings;
 	private issueId;
-	private keysDown;
 	private treeMap;
 	private selectedObjects;
 	private initialSelectedObjects;
@@ -61,6 +61,7 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
+		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -69,12 +70,12 @@ class ModelController implements ng.IController {
 		private MultiSelectService,
 		private StateManager,
 		private PanelService,
-		private ViewerService,
+		private ViewerService
 	) {}
 
 	public $onInit() {
 
-		this.issuesCardIndex = 0;
+		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
 		this.pointerEvents = "inherit";
 
 		history.pushState(null, null, document.URL);
@@ -98,7 +99,7 @@ class ModelController implements ng.IController {
 		this.$timeout(() => {
 			// Get the model element
 			this.modelUI = angular.element(
-				this.$element[0].querySelector("#modelUI"),
+				this.$element[0].querySelector("#modelUI")
 			);
 		});
 
@@ -113,10 +114,6 @@ class ModelController implements ng.IController {
 					this.setupModelInfo();
 				});
 			}
-		});
-
-		this.$scope.$watch("vm.keysDown", () => {
-			this.MultiSelectService.handleKeysDown(this.keysDown);
 		});
 
 		this.$scope.$watch("vm.issueId", () => {
@@ -152,7 +149,7 @@ class ModelController implements ng.IController {
 				.title("Model Error")
 				.textContent(message)
 				.ariaLabel("Model Error")
-				.ok("OK"),
+				.ok("OK")
 		);
 
 		this.$location.path(this.AuthService.getUsername());
@@ -161,65 +158,22 @@ class ModelController implements ng.IController {
 
 	public setupModelInfo() {
 
-		this.IssuesService.init();
 		this.RevisionsService.listAll(this.account, this.model);
 
 		if (!this.ViewerService.currentModel.model) {
-			console.debug("Initiating Viewer");
-
-			this.ViewerService.initViewer()
-				.then(() => {
-					this.ViewerService.loadViewerModel(
-						this.account,
-						this.model,
-						this.branch,
-						this.revision,
-					);
+			if (this.ViewerService.viewer) {
+				this.ViewerService.initViewer().then(() => {
+					this.loadModel();
+				}).catch((err) => {
+					console.error("Failed to load model: ", err);
 				});
-
+			} else {
+				this.loadModelSettings();
+				console.error("Failed to locate viewer");
+			}
 		} else {
-			// Load the model
-			this.ViewerService.loadViewerModel(
-				this.account,
-				this.model,
-				this.branch,
-				this.revision,
-			);
+			this.loadModel();
 		}
-
-		this.ViewerService.getModelInfo(this.account, this.model)
-			.then((response) => {
-				const data = response.data;
-				this.settings = data;
-
-				const isFederation = data.federate;
-				if (isFederation) {
-					this.PanelService.hideSubModels(this.issuesCardIndex, false);
-				} else {
-					this.PanelService.hideSubModels(this.issuesCardIndex, true);
-				}
-
-				this.EventService.send(
-					this.EventService.EVENT.MODEL_SETTINGS_READY,
-					data,
-				);
-
-				this.TreeService.init(this.account, this.model, this.branch, this.revision, data)
-					.then((tree) => {
-						this.EventService.send(this.EventService.EVENT.TREE_READY, tree);
-						// FIXME: I don't know if treeMap is still used. Doc component now uses Tree Service directly.
-						this.treeMap = this.TreeService.getMap(tree.nodes);
-					});
-			})
-			.catch((error) => {
-				console.error(error);
-				// If we are not logged in the
-				// session expired popup takes prescedence
-				if (error.data.message !== "You are not logged in") {
-					this.handleModelError();
-				}
-			});
-
 	}
 
 	public setSelectedObjects(selectedObjects) {
@@ -234,6 +188,44 @@ class ModelController implements ng.IController {
 		});
 	}
 
+	private loadModel() {
+		this.ViewerService.loadViewerModel(
+			this.account,
+			this.model,
+			this.branch,
+			this.revision
+		).then( () => {
+			// IMPORTANT: only load model settings after it has started loading the model
+			// loadViewerModel can cancel previous model loads which will kill off old unity promises
+			this.loadModelSettings();
+		});
+	}
+
+	private setupViewer() {
+		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
+		this.ViewerService.updateViewerSettings(this.settings);
+		this.ClipService.initClip(this.settings.properties.unit);
+		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
+			.catch((error) => {
+				console.error("Error initialising tree: ", error);
+			});
+	}
+
+	private loadModelSettings() {
+		this.ViewerService.getModelInfo(this.account, this.model)
+			.then((response) => {
+				this.settings = response.data;
+				this.setupViewer();
+			})
+			.catch((error) => {
+				console.error(error);
+				// If we are not logged in the
+				// session expired popup takes prescedence
+				if (error.data.message !== "You are not logged in") {
+					this.handleModelError();
+				}
+			});
+	}
 }
 
 export const ModelComponent: ng.IComponentOptions = {
@@ -241,14 +233,14 @@ export const ModelComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		issueId: "=",
-		keysDown: "<",
 		model:  "=",
 		revision: "=",
 		state:    "=",
+		isLiteMode: "="
 	},
 	controller: ModelController,
 	controllerAs: "vm",
-	templateUrl: "templates/model.html",
+	templateUrl: "templates/model.html"
 };
 
 export const ModelComponentModule = angular

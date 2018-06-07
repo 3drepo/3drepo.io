@@ -1,6 +1,6 @@
 div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
-		div(ng-repeat="contentItem in vm.contentItems")
+		div(ng-repeat="contentItem in vm.contentItems track by contentItem.type")
 			panel-card(
 				id="{{contentItem.type + 'Panel'}}"
 				account="vm.account"
@@ -12,19 +12,21 @@ div(ng-show="vm.showPanel")
 				content-data='contentItem'
 				ng-show='contentItem.show'
 				on-height-request="vm.heightRequest(contentItem, height)"
-				keys-down="vm.keysDown"
 				selected-objects="vm.selectedObjects"
 				set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
 			div(ng-if="contentItem.showGap", style="display:block; height:20px;")
 
 	div#buttons.leftButtons(
-		hide-xs
-		hide-sm
 		ng-class="{ active : vm.activate }"
 		ng-if="vm.position === 'left'")
 
-		.panelButtonGroup(ng-repeat="contentItem in vm.contentItems", layout="column", layout-align="start center")
+		.panelButtonGroup(
+			ng-repeat="contentItem in vm.contentItems"
+			ng-if="!vm.isLiteMode || contentItem.showLiteMode"
+			layout="column"
+			layout-align="start center")
+			
 			md-button.md-fab.md-primary.md-mini(
 				id="{{contentItem.type + 'LeftButton'}}"
 				ng-click="vm.togglePanel(contentItem.type)"

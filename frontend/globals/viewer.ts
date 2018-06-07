@@ -15,20 +15,16 @@
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
 
-import { Pin } from "./pin";
-import { UnityUtil } from "./unity-util";
-
+declare const Pin;
+declare const UnityUtil;
 declare const ClientConfig;
 declare const Module;
 
 export class Viewer {
 
 	public static NAV_MODES = {
-		FLY: "FLY",
 		HELICOPTER: "HELICOPTER",
-		TURNTABLE: "TURNTABLE",
-		WALK: "WALK",
-		WAYFINDER: "WAYFINDER",
+		TURNTABLE: "TURNTABLE"
 	};
 
 	public static EVENT = {
@@ -71,10 +67,11 @@ export class Viewer {
 		UNITY_READY: "VIEWER_EVENT_UNITY_READY",
 		UPDATE_CLIPPING_PLANES: "VIEWER_UPDATE_CLIPPING_PLANE",
 		VR_READY: "VIEWER_EVENT_VR_READY",
+		NAV_MODE_CHANGED: "NAV_MODE_CHANGED"
 	};
 
 	public ERROR = {
-		PIN_ID_TAKEN : "VIEWER_PIN_ID_TAKEN",
+		PIN_ID_TAKEN : "VIEWER_PIN_ID_TAKEN"
 	};
 
 	public pins = {};
@@ -128,8 +125,9 @@ export class Viewer {
 	public units = "m";
 	public convertToM = 1.0;
 	public logos = [];
+	public divId = "unityViewer";
 
-	public unityLoaderPath = "unity/Release/UnityLoader.js";
+	public unityLoaderPath = "unity/Build/UnityLoader.js";
 	public unityScriptInserted = false;
 	public viewer: HTMLElement;
 
@@ -159,7 +157,7 @@ export class Viewer {
 		name: string,
 		element: HTMLElement,
 		callback: any,
-		errCallback: any,
+		errCallback: any
 	) {
 
 		// If not given the tag by the manager create here
@@ -191,20 +189,23 @@ export class Viewer {
 
 		this.loadingDiv.appendChild(this.loadingDivText);
 
-		const canvas = document.createElement("canvas");
-		canvas.className = "emscripten";
-		canvas.setAttribute("id", "canvas");
-		canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-		canvas.setAttribute("oncontextmenu", "event.preventDefault()");
+		const unityHolder = document.createElement("div");
+		unityHolder.className = "emscripten";
+		unityHolder.setAttribute("id", this.divId);
+		unityHolder.removeAttribute("style");
+		unityHolder.setAttribute("width", "100%");
+		unityHolder.setAttribute("height", "100%");
+		unityHolder.setAttribute("tabindex", "1"); // You need this for unityHolder to register keyboard events
+		unityHolder.setAttribute("oncontextmenu", "event.preventDefault()");
 
-		canvas.onmousedown = () => {
+		unityHolder.onmousedown = () => {
 			return false;
 		};
 
-		canvas.style["pointer-events"] = "all";
+		unityHolder.style["pointer-events"] = "all";
 
 		this.element.appendChild(this.viewer);
-		this.viewer.appendChild(canvas);
+		this.viewer.appendChild(unityHolder);
 		this.viewer.appendChild(this.loadingDiv);
 
 		this.unityLoaderScript = document.createElement("script");
@@ -232,10 +233,9 @@ export class Viewer {
 
 	public insertUnityLoader() {
 		return new Promise((resolve, reject) => {
-			this.unityLoaderScript.setAttribute("defer", "");
-			this.unityLoaderScript.setAttribute("async", "");
 			this.unityLoaderScript.addEventListener ("load", () => {
 				console.debug("Loaded UnityLoader.js succesfully");
+				UnityUtil.loadUnity(this.divId);
 				resolve();
 			}, false);
 			this.unityLoaderScript.addEventListener ("error", (error) => {
@@ -288,7 +288,7 @@ export class Viewer {
 				this.loadingDivText.style.display = "none";
 				this.callback(Viewer.EVENT.UNITY_READY, {
 					model: this.modelString,
-					name: this.name,
+					name: this.name
 				});
 				resolve();
 			}).catch((error) => {
@@ -300,6 +300,10 @@ export class Viewer {
 
 		});
 
+	}
+
+	public getDefaultHighlightColor() {
+		return UnityUtil.defaultHighlightColor;
 	}
 
 	public handleError(message) {
@@ -314,12 +318,20 @@ export class Viewer {
 		UnityUtil.resetCamera();
 	}
 
+	public centreToPoint(params) {
+		UnityUtil.centreToPoint(params);
+	}
+
 	public setUnity() {
 		UnityUtil.viewer = this;
 	}
 
 	public getScreenshot(promise) {
 		UnityUtil.requestScreenShot(promise);
+	}
+
+	public diffToolSetAsComparator(account: string, model: string) {
+		UnityUtil.diffToolSetAsComparator(account, model);
 	}
 
 	public diffToolLoadComparator(account: string, model: string, revision: string) {
@@ -358,7 +370,7 @@ export class Viewer {
 			normal : pointInfo.normal,
 			position: pointInfo.position,
 			screenPos : pointInfo.mousePos,
-			selectColour : Pin.pinColours.yellow,
+			selectColour : Pin.pinColours.yellow
 		});
 
 	}
@@ -378,7 +390,7 @@ export class Viewer {
 				if (pointInfo.pin) {
 					// User clicked a pin
 					this.callback(Viewer.EVENT.CLICK_PIN, {
-						id: pointInfo.id,
+						id: pointInfo.id
 					});
 
 				} else {
@@ -386,7 +398,7 @@ export class Viewer {
 						account: pointInfo.database,
 						id: pointInfo.id,
 						model: pointInfo.model,
-						source: "viewer",
+						source: "viewer"
 					});
 				}
 			} else {
@@ -404,23 +416,34 @@ export class Viewer {
 		UnityUtil.clearHighlights();
 	}
 
-	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride) {
+	public unhighlightObjects(account, model, idsIn) {
 
-		const canHighlight = !this.pinDropMode && !this.measureMode;
+		if (idsIn) {
+			const uniqueIds = Array.from(new Set(idsIn));
+			if (uniqueIds.length) {
+				UnityUtil.unhighlightObjects(account, model, uniqueIds);
+				return;
+			}
+		}
+
+	}
+
+	public highlightObjects(account, model, idsIn, zoom, colour, multiOverride, forceReHighlight) {
+
+		const canHighlight = this.initialized && !this.pinDropMode && !this.measureMode;
 
 		if (canHighlight) {
 
-			idsIn = idsIn || [];
-			const uniqueIds = idsIn.filter((value, index) => {
-				return idsIn.indexOf(value) === index;
-			});
-
-			if (uniqueIds.length) {
-				const multi = multiOverride || this.multiSelectMode;
-				UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi);
-			} else {
-				UnityUtil.clearHighlights();
+			if (idsIn) {
+				const uniqueIds = Array.from(new Set(idsIn));
+				if (uniqueIds.length) {
+					const multi = multiOverride || this.multiSelectMode;
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
+					return;
+				}
 			}
+
+			UnityUtil.clearHighlights();
 
 		}
 
@@ -437,12 +460,6 @@ export class Viewer {
 	public updateSettings(settings) {
 		if (settings) {
 			this.settings = settings;
-			this.applySettings();
-		}
-	}
-
-	public applySettings() {
-		if (this.settings) {
 			if (this.settings.properties && this.settings.properties.unit) {
 				this.setUnits(this.settings.properties.unit);
 			}
@@ -457,7 +474,7 @@ export class Viewer {
 					account,
 					model,
 					properties.hiddenNodes,
-					false,
+					false
 				);
 			}
 
@@ -480,6 +497,10 @@ export class Viewer {
 		}
 	}
 
+	public navMethodChanged(newNavMode) {
+		this.currentNavMode = newNavMode;
+	}
+
 	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
 		this.updateCamera(pos, upDir, viewDir, lookAt, animate, rollerCoasterMode, account, model);
 	}
@@ -493,6 +514,7 @@ export class Viewer {
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = "none";
+		this.initialized = false;
 		UnityUtil.reset();
 	}
 
@@ -504,6 +526,7 @@ export class Viewer {
 	public loadModel(account, model, branch, revision) {
 
 		return UnityUtil.onReady().then(() => {
+			this.initialized = true;
 			this.account = account;
 			this.model = model;
 			this.branch = branch;
@@ -579,6 +602,10 @@ export class Viewer {
 		}
 	}
 
+	public zoomToHighlightedMeshes() {
+		UnityUtil.zoomToHighlightedMeshes();
+	}
+
 	/****************************************************************************
 	 * Clipping planes
 	 ****************************************************************************/
@@ -587,7 +614,7 @@ export class Viewer {
 		* NOTE= Clipping planes are now all managed by unity use broadcast events to retrieve its info
 	*/
 
-	public tbroadcastClippingPlane(clip) {
+	public clipBroadcast(clip) {
 		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
@@ -602,6 +629,7 @@ export class Viewer {
 
 		if (clipPlanes && clipPlanes.length > 1) {
 			console.error("More than 1 clipping planes requested!");
+			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
 		}
 	}
 
@@ -633,7 +661,7 @@ export class Viewer {
 			// Replace with
 			this.callback(Viewer.EVENT.CHANGE_PIN_COLOUR, {
 				colours: Pin.pinColours.yellow,
-				id,
+				id
 			});
 
 			this.callback(Viewer.EVENT.SET_CAMERA, {
@@ -641,14 +669,14 @@ export class Viewer {
 				model: pin.model,
 				position : pin.viewpoint.position,
 				up: pin.viewpoint.up,
-				view_dir : pin.viewpoint.view_dir,
+				view_dir : pin.viewpoint.view_dir
 			});
 
 			this.callback(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
 				account: pin.account,
 				clippingPlanes: pin.viewpoint.clippingPlanes,
 				fromClipPanel: false,
-				model: pin.model,
+				model: pin.model
 			});
 		}
 
@@ -690,6 +718,50 @@ export class Viewer {
 		if (this.pins.hasOwnProperty(id)) {
 			this.pins[id].changeColour(colours);
 		}
+	}
+
+	/**
+	 * Initialise map creator within unity
+	 * @param {Object[]} surveyPoints - array of survey points and it's respective latitude and longitude value
+	 */
+	public mapInitialise(surveyPoints) {
+		UnityUtil.mapInitialise(surveyPoints);
+	}
+
+	/**
+	 * Start map generation
+	 */
+	public  mapStart() {
+		UnityUtil.mapStart();
+	}
+
+	/**
+	 * Stop map generation
+	 */
+	public mapStop() {
+		UnityUtil.mapStop();
+	}
+
+	public overrideMeshColor(account, model, meshIDs, color) {
+		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
+	}
+
+	public resetMeshColor(account, model, meshIDs) {
+		UnityUtil.resetMeshColor(account, model, meshIDs);
+	}
+
+	// Navigation
+
+	public helicopterSpeedDown() {
+		UnityUtil.helicopterSpeedDown();
+	}
+
+	public helicopterSpeedUp() {
+		UnityUtil.helicopterSpeedUp();
+	}
+
+	public helicopterSpeedReset() {
+		UnityUtil.helicopterSpeedReset();
 	}
 
 }

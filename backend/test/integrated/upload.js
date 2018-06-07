@@ -22,8 +22,8 @@ let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let moment = require("moment");
@@ -127,7 +127,14 @@ describe('Uploading a model', function () {
 		before(function(){
 			//give some money to this guy
 			return User.findByUserName(username).then( user => {
-				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment().utc().add(1, 'month'))
+				user.customData.billing.subscriptions  = { 
+					"discretionary" : {
+		                 		"collaborators" : 2,
+			                 	"data" : 1024,
+        	            			"expiryDate" : moment().utc().add(1, 'month')
+		                	}
+				};
+				return user.save();
 			})
 		});
 

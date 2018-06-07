@@ -1,5 +1,11 @@
 /** Issues ************************************************************************************************************/
 
+issues {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
 issues #issuesAddContainer {
   position: relative;
   margin: 15px;
@@ -73,16 +79,25 @@ issues #issuesAddButton {
   bottom: 0;
   right: 0;
   margin-right: 12px;
+  width: 100%;
+  background: white;
+  margin: 0;
+  padding: 0;
 }
+
+/* issues #issuesAddButton button {
+  float: right;
+} */
 
 issues #issueDescriptionContainer {
   margin-top: 0px;
 }
 
-issues #issuesContent {
-  height: calc(100% - 70px);
-  overflow-y: auto;
-  overflow-x: hidden;
+issues #issueInformation {
+  display: block;
+  overflow-y: scroll;
+  position: relative;
+  height: calc(100% - 75px);
 }
 
 issues .importBCFLoading {
@@ -99,6 +114,8 @@ issues #issueRoleIndicator {
 issue {
   display: block;
   height: 100%;
+  position: absolute;
+  overflow: hidden;
 }
 
 issue md-list-item .md-button,
@@ -163,7 +180,30 @@ issue .issueOpenContainer {
   margin-top: 10px;
 }
 
+issue #issueDueDate .md-datepicker-button {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+issue #issueDueDate .md-datepicker-button md-icon {
+  margin-left: 0px;
+}
+
+issue #issueDueDate .md-datepicker-input-container {
+  margin: 0px;
+  width: 167.5px;
+}
+
 /** Issues List *******************************************************************************************************/
+issues-list {
+  display: block;
+  height: calc(100% - 50px);
+  position: relative;
+  overflow-y: scroll;
+}
+
 issues-list .issueListItem {
   position: relative;
   outline: none;
@@ -277,20 +317,28 @@ issues-list-item #issueListItemStatus {
 }
 
 /** Issue Comp ********************************************************************************************************/
+issue {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
 issue #issueAll {
   outline: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 issue #issueFooterButtons {
-  position: absolute;
-  bottom: 0;
   background: white;
   width: 100%;
   z-index: 10;
+  height: auto;
+  bottom: 0px;
+  position: absolute;
 }
 
 issue .issueItemContainer {
+  z-index: 10;
   padding: 10px;
   margin-top: 8px; 
   padding-top: 10px;
@@ -347,7 +395,7 @@ issue .issueThumbnail {
   padding-bottom: 0px;
   padding-top: 0px;
   background-position-y: 50%;
-  height: 200px;
+  height: 180px;
   background-repeat: no-repeat;
   background-size: contain;
 }
@@ -384,6 +432,19 @@ issue .issueCommentOwner label {
 issue .issueCommentOwner .issueNotification {
   color: rgb(6, 86, 60);
 }
+
+issue .issueOrthogonalView {
+  color: #949494;
+}
+
+
+issue .issueOrthogonalViewIssue {
+  color: #949494;
+  font-size: 14px;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
 
 issue .issueAutoComment label {
   color: rgba(0, 0, 0, 0.5);
@@ -536,21 +597,39 @@ issues-screen-shot #issueScreenShotFAIcon {
 
 issues-screen-shot #issueScreenShotContent {
   overflow: hidden;
-  height: 100%;
+  height: calc(100% - 40px);
+  background: #cecccb;
 }
 
 issues-screen-shot #scribbleCanvas {
   position: absolute;
   top: 0;
   left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+issues-screen-shot #screenShotCanvas {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  height: calc(100% - 40px);
+  width: 100%;
+  z-index: -1;
+}
+
+issues-screen-shot #issueScreenShotContainer {
+  max-height: 100%;
+  height: 100%;
+  width: 100%;
 }
 
 issues-screen-shot #issueScreenShotImage {
-  max-width: 100%;
-  max-height: 100%;
-  margin: 0px;
+  text-align: center;
+  margin: auto;
   padding: 0px;
   position: absolute;
+  bottom: 0;
   top: 0;
 }
 

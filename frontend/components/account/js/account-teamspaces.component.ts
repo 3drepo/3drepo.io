@@ -21,12 +21,10 @@ class AccountTeamspacesController implements ng.IController {
 	];
 
 	private loading;
-	private isMobileDevice;
+	private isLiteMode;
 	private account;
 	private accounts;
 	private onShowPage;
-	private quota;
-	private subscriptions;
 
 	constructor(
 	) {}
@@ -44,16 +42,14 @@ export const AccountTeamspacesComponent: ng.IComponentOptions = {
 		account: "=",
 		accounts: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
 		loading: "=",
 		selectedIndex: "=",
 		itemToShow: "=",
-		isMobileDevice: "<",
+		isLiteMode: "<"
 	},
 	controller: AccountTeamspacesController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-teamspaces.html",
+	templateUrl: "templates/account-teamspaces.html"
 };
 
 export const AccountTeamspacesComponentModule = angular

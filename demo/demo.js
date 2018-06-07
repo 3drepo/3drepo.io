@@ -6,14 +6,6 @@ var API_PREFIX = "https://api1.www.3drepo.io";
 // variable called Module
 var Module = {
     TOTAL_MEMORY: 2130706432,
-    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
-    compatibilitycheck: null,
-    backgroundColor: "#222C36",
-    splashStyle: "Light",
-    dataUrl: PREFIX + "/unity/Release/unity.data",
-    codeUrl: PREFIX + "/unity/Release/unity.js",
-    asmUrl: PREFIX + "/unity/Release/unity.asm.js",
-    memUrl: PREFIX + "/unity/Release/unity.mem",
 };
 
 init();
@@ -47,14 +39,13 @@ function init() {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json'
             },
+            credentials: 'include', // include, same-origin, *omit
             mode: "cors",
             body: JSON.stringify(credentials)
         };
 
         var LOGIN_URL = API + "login";
 
-        console.log(LOGIN_URL);
-        
         // Use the Fetch API
         fetch(LOGIN_URL, post)
             .then(function(response) {
@@ -64,10 +55,17 @@ function init() {
                 response.json()
                     .then(function(json){
                         if (validResponse) {
-                            confirm(json.message)
+                           
+                            if (json.code === "ALREADY_LOGGED_IN") {
+                                console.log("Already logged in!")
+                                initialiseViewer()
+                            } else {
+                                confirm(json.message)
+                            }
+                            
                         } else {
                             // If we log in succesfully than initialise the viewer
-                            initialiseViewer(json)
+                            initialiseViewer()
                         }
                     })
                     .catch(function(error){
@@ -76,7 +74,11 @@ function init() {
             
             })
             .catch(function(error) {
-                confirm("Error logging in: ", error)
+                if (error.code === "ALREADY_LOGGED_IN") {
+                    initialiseViewer()
+                } else {
+                    confirm("Error logging in: ", error)
+                }
             })
 
     }
@@ -87,7 +89,7 @@ function init() {
         });
     }
 
-    function initialiseViewer(json) {
+    function initialiseViewer() {
 
         console.log("Initialising 3D Repo Viewer...");
         changeStatus("Loading Viewer...")
@@ -123,24 +125,7 @@ function init() {
 
     function prepareViewer() {
 
-        var unityLoaderPath = PREFIX + "/unity/Release/UnityLoader.js";
-        var viewer = document.createElement("div");
-        viewer.className = "viewer";
-
-        var canvas = document.createElement("canvas");
-        canvas.className = "emscripten";
-        canvas.setAttribute("id", "canvas");
-        canvas.setAttribute("tabindex", "1"); // You need this for canvas to register keyboard events
-        canvas.setAttribute("oncontextmenu", "event.preventDefault()");
-
-        canvas.onmousedown = function(){
-            return false;
-        };
-
-        canvas.style["pointer-events"] = "all";
-        
-        document.body.appendChild(viewer);
-        viewer.appendChild(canvas);
+        var unityLoaderPath = PREFIX + "/unity/Build/UnityLoader.js";
 
         var unityLoaderScript = document.createElement("script");
         return new Promise(function(resolve, reject) {
@@ -172,6 +157,11 @@ function init() {
 
             Module.errorhandler = UnityUtil.onError;
 
+            UnityUtil.init(function(error) {
+                console.error(error);
+            });
+            UnityUtil.loadUnity("unity", PREFIX + "/unity/Build/unity.json");
+            
             UnityUtil.onReady().then(function() {
                 changeStatus("")
                 resolve();

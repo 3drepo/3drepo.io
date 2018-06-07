@@ -15,6 +15,16 @@ md-menu#accountMenu(md-position-mode="target-right target")
 				md-icon.angular-material-icons(md-menu-align-target) description
 				| User Manual
 		md-menu-item
+			md-container.md-button.md-ink-ripple
+				md-switch(style="top: -7px; position: relative;" ng-model="vm.isLiteMode" ng-change="vm.handleLiteModeChange()" aria-label="Lite Mode")
+					p Lite Mode
+
+		md-menu-item(ng-if="vm.hasMemorySettings()")
+			md-button(ng-click="vm.resetMemorySettings()")
+				md-icon.angular-material-icons restore
+				| Reset Settings
+
+		md-menu-item
 			md-button(ng-click="vm.logout()")
 				md-icon.angular-material-icons exit_to_app
 				| Logout

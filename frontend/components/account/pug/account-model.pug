@@ -12,25 +12,25 @@ div(layout="row", layout-align="start center", flex)
 
 	.modelRight(layout="row", layout-align="start center")
 		.modelUploadInfo(layout="row", layout-align="start center")
-			p.modelUploadFilename(ng-if="!vm.isMobileDevice") {{vm.uploadFileName}}
-			p.modelUploadInfo(ng-if="!vm.isMobileDevice") {{vm.fileUploadInfo}}
+			p.modelUploadFilename(ng-if="!vm.isLiteMode") {{vm.uploadFileName}}
+			p.modelUploadInfo(ng-if="!vm.isLiteMode") {{vm.fileUploadInfo}}
 			md-progress-circular.modelUploadIcon(
 				md-mode="indeterminate"
 				md-diameter="15"
 				ng-if="vm.isProcessing()")
 
-		p.modelTimestamp(ng-if="!vm.isMobileDevice") {{vm.model.timestampPretty}}
+		p.modelTimestamp(ng-if="!vm.isLiteMode") {{vm.model.timestampPretty}}
 
 		md-menu(md-position-mode="target-right target", id="{{vm.dialogCloseTo}}")
-			md-button.md-icon-button(
+			md-button.md-icon-button.modelSettingsButton(
 				aria-label="More"
 				ng-click="$mdOpenMenu($event)"
 				ng-disabled="vm.isProcessing()")
 
 				md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
-			md-menu-content(width="3")
+			md-menu-content.modelOptionsMenu(width="3")
 				md-menu-item(ng-repeat="(key, value) in vm.modelOptions", ng-if="!value.hidden")
 					md-button(ng-click="vm.doModelOption($event, key)")
 						div(layout="row", flex)
-							span(flex, style="color:{{value.color}}") {{value.label}}
 							md-icon.angular-material-icons(md-menu-align-target, style="color:{{value.color}}") {{value.icon}}
+							span(flex, style="color:{{value.color}}") {{value.label}}

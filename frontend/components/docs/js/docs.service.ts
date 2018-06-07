@@ -22,19 +22,21 @@ export class DocsService {
 
 		"ClientConfigService",
 		"APIService",
-		"TreeService",
+		"ViewerService"
 	];
 
 	private state: any;
 	private docTypeHeight: number;
+	private noMetadata: boolean;
 
 	constructor(
 		private $q: any,
 
 		private ClientConfigService: any,
 		private APIService: any,
-		private TreeService: any,
+		private ViewerService: any
 	) {
+		this.noMetadata = false;
 		this.docTypeHeight = 50;
 		this.state = {
 			disabled: false,
@@ -42,7 +44,7 @@ export class DocsService {
 			show: false,
 			updated: false,
 			docs: false,
-			allDocTypesHeight: 0,
+			allDocTypesHeight: 0
 		};
 	}
 
@@ -57,8 +59,6 @@ export class DocsService {
 	public updateDocs(account, model, id) {
 		this.getDocs(account, model, id)
 			.then((data) => {
-
-				console.log("DOCS - ", data)
 
 				if (!data) {
 					return;
@@ -84,26 +84,32 @@ export class DocsService {
 			});
 	}
 
-	public handleObjectSelected(event) {
+	public closeDocs() {
+		if (this.state.show) {
+			this.state.show = false;
+		}
+	}
 
-		// Get any documents associated with an object
-		const object = event.value;
+	public displayDocs(account, model, metadataIds) {
 
-		this.TreeService.getMap()
-			.then((treeMap) => {
-				const metadataIds = treeMap.oIdToMetaId[object.id];
-				if (metadataIds && metadataIds.length) {
+		const canOpenDocs = this.state.active && !this.ViewerService.pin.pinDropMode;
 
-					this.updateDocs(
-						object.account,
-						object.model,
-						metadataIds[0],
-					);
+		if (canOpenDocs) {
 
-				} else {
-					this.state.show = false;
-				}
-		});
+			if (metadataIds && metadataIds.length) {
+				this.state.noMetadata = false;
+				this.updateDocs(
+					account,
+					model,
+					metadataIds[0]
+				);
+
+			} else {
+				this.state.noMetadata = true;
+				this.state.show = true;
+			}
+
+		}
 
 	}
 
@@ -136,7 +142,7 @@ export class DocsService {
 			const endpoint = account + "/" + model + "/" + meta._id + ".pdf";
 			meta.url = this.ClientConfigService.apiUrl(
 				this.ClientConfigService.GET_API,
-				endpoint,
+				endpoint
 			);
 		}
 

@@ -24,10 +24,12 @@ class PanelController implements ng.IController {
 
 		"PanelService",
 		"EventService",
+		"TreeService"
 	];
 
 	public maxHeightAvailable;
 	public panelTopBottomGap;
+	public bottomButtonGap;
 	public contentItems;
 	public showPanel;
 	public activate;
@@ -43,24 +45,28 @@ class PanelController implements ng.IController {
 
 		private PanelService: any,
 		private EventService: any,
+		private TreeService: any
 	) {}
 
 	public $onInit() {
 
-		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap;
 		this.contentItems = [];
 		this.showPanel = true;
 		this.activate = true;
 
 		this.panelTopBottomGap = 55,
-		this.itemGap = 20,
+		this.bottomButtonGap = 64;
+		this.itemGap = 30,
 		this.panelToolbarHeight = 40,
 		this.contentItemsShown = [];
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
 		this.resize(); // We need to set the correct height for the issues
 		this.bindEvents();
 
-		this.contentItems = this.PanelService.issuesPanelCard[this.position];
+		this.PanelService.reset();
+		this.contentItems = this.PanelService.panelCards[this.position];
+
 		this.setupShownCards();
 		this.hideLastItemGap();
 
@@ -69,43 +75,32 @@ class PanelController implements ng.IController {
 
 	}
 
+	public $onDestroy() {
+		this.PanelService.reset();
+		this.contentItems = [];
+	}
+
 	public watchers() {
 
 		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
-			if (oldValue.length && newValue.length) {
-				for (let i = 0; i < newValue.length; i ++) {
-
-					if (newValue[i].show !== oldValue[i].show) {
-						this.setupShownCards();
-						// this.getContentItemShownFromType();
-						break;
-					}
-
-				}
+			if (newValue && newValue.length) {
+				this.setupShownCards();
 			}
+
 		}, true);
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
-
-			if (event.type === this.EventService.EVENT.TOGGLE_ELEMENTS) {
-				this.showPanel = !this.showPanel;
-			} else if (event.type === this.EventService.EVENT.PANEL_CONTENT_ADD_MENU_ITEMS) {
-
-				const item = this.contentItems.find((content) => {
-					return content.type === event.value.type;
-				});
-
-				// TODO: This is ugly, why are we doing this?
-				if (item && item.menu && event.value) {
-					event.value.menu.forEach((newItem) => {
-						if (item.menu.indexOf(newItem) === -1) {
-							item.menu.push(newItem);
-						}
-					});
+		// Watcher to setup new menus as they come in
+		this.$scope.$watch(() =>  this.PanelService.panelCards[this.position],
+			(newPanels) => {
+				if (newPanels && newPanels.length) {
+					this.contentItems = newPanels;
 				}
+			}, true);
 
-			}
-		});
+		this.$scope.$watch(() => this.TreeService.getHideIfc(),
+			(hideIfc) => {
+				this.PanelService.setHideIfc(hideIfc);
+			});
 
 	}
 
@@ -118,7 +113,6 @@ class PanelController implements ng.IController {
 			// If we have clicked on a canvas, we are probably moving the model around
 			if (event.target.tagName === "CANVAS") {
 				this.activate = false;
-				this.$scope.$apply();
 			}
 		});
 
@@ -127,22 +121,34 @@ class PanelController implements ng.IController {
 		*/
 		angular.element(document).bind("mouseup", () => {
 			this.activate = true;
-			this.$scope.$apply();
 		});
 
 		/*
 		* Watch for screen resize
 		*/
-		angular.element(this.$window).bind("resize", () => {
+		angular.element(window as any).bind("resize", () => {
 			this.resize();
 		});
 
 	}
 
 	public resize() {
-		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap;
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		this.calculateContentHeights();
 	}
+
+	/**
+	 * Check new panels data to see if menus have changed
+	 */
+	// public updatePanelMenus(newPanels: any) {
+	// 	this.contentItems.forEach((panel) => {
+	// 		const matching = newPanels.find((m) => m.type === panel.type);
+	// 		const exist = matching && panel.menu;
+	// 		if (exist && panel.menu.length !== matching.menu.length) {
+	// 			panel.menu = matching.menu;
+	// 		}
+	// 	});
+	// }
 
 	/**
 	 * The last card should not have a gap so that scrolling in resized window works correctly
@@ -174,7 +180,6 @@ class PanelController implements ng.IController {
 				// Resize any shown panel contents
 				if (this.contentItems[i].show) {
 					this.contentItemsShown.push(this.contentItems[i]);
-					this.calculateContentHeights();
 				} else {
 					for (let j = (this.contentItemsShown.length - 1); j >= 0; j -= 1) {
 						if (this.contentItemsShown[j].type === contentType) {
@@ -182,8 +187,8 @@ class PanelController implements ng.IController {
 						}
 					}
 					this.contentItems[i].showGap = false;
-					this.calculateContentHeights();
 				}
+				this.calculateContentHeights();
 				break;
 			}
 		}
@@ -192,8 +197,14 @@ class PanelController implements ng.IController {
 	}
 
 	public heightRequest(contentItem: any, height: number) {
+
 		contentItem.requestedHeight = height; // Keep a note of the requested height
-		contentItem.height = height; // Initially set the height to the requested height
+		if (height > this.maxHeightAvailable) {
+			contentItem.height = this.maxHeightAvailable; // Prevent excessive requests
+		} else {
+			contentItem.height = height; // Initially set the height to the requested height
+		}
+
 		this.calculateContentHeights();
 	}
 
@@ -201,11 +212,9 @@ class PanelController implements ng.IController {
 	 * Start the recursive calculation of the content heghts
 	 */
 	public calculateContentHeights() {
+		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		const tempContentItemsShown = angular.copy(this.contentItemsShown);
 		this.assignHeights(this.maxHeightAvailable, tempContentItemsShown, null);
-		this.$timeout(() => {
-			this.$scope.$apply();
-		});
 	}
 
 	public assignHeights(heightAvailable: number, contentItems: any[], previousContentItems: any[]) {
@@ -215,40 +224,51 @@ class PanelController implements ng.IController {
 		const g = (this.itemGap * (contentItems.length - 1));
 		const maxContentItemHeight = (availableHeight - h - g) / contentItems.length;
 		let prev = null;
-		let contentItem;
 
-		if (Array.isArray(previousContentItems) && (previousContentItems.length === contentItems.length)) {
+		const hasPreviousContent = Array.isArray(previousContentItems) &&
+									(previousContentItems.length === contentItems.length);
+
+		if (hasPreviousContent) {
 			// End the recurse by dividing out the remaining space to remaining content
 			for (let i = (contentItems.length - 1); i >= 0; i -= 1) {
-				if (contentItems[i] && contentItems[i].type) {
-					contentItem = this.getContentItemShownFromType(contentItems[i].type);
-					// Flexible content shouldn't have a size smaller than its minHeight
-					// or a requested height that is less than the minHeight
-					if (maxContentItemHeight < contentItem.minHeight) {
-						if (contentItem.requestedHeight < contentItem.minHeight) {
-							contentItem.height = contentItem.requestedHeight;
-						} else {
-							contentItem.height = contentItem.minHeight;
-							availableHeight -= contentItem.height + this.panelToolbarHeight + this.itemGap;
-							contentItems.splice(i, 1);
-							this.assignHeights(availableHeight, contentItems, prev);
-						}
-					} else {
-						contentItem.height = maxContentItemHeight;
-					}
+				if (!contentItems[i] || !contentItems[i].type) {
+					continue;
 				}
+
+				const contentItem = this.getContentItemShownFromType(contentItems[i].type);
+				// Flexible content shouldn't have a size smaller than its minHeight
+				// or a requested height that is less than the minHeight
+				if (maxContentItemHeight < contentItem.minHeight) {
+					if (contentItem.requestedHeight < contentItem.minHeight) {
+						contentItem.height = contentItem.requestedHeight;
+					} else {
+						contentItem.height = contentItem.minHeight;
+						availableHeight -= contentItem.height + this.panelToolbarHeight + this.itemGap;
+						contentItems.splice(i, 1);
+						this.assignHeights(availableHeight, contentItems, prev);
+					}
+				} else {
+					contentItem.height = maxContentItemHeight;
+				}
+
 			}
 		} else {
+
 			// Let content have requested height if less than max available for each
 			prev = angular.copy(contentItems);
 			for (let i = (contentItems.length - 1); i >= 0; i -= 1) {
-				if ((contentItems[i].requestedHeight < maxContentItemHeight) ||
-					(contentItems[i].fixedHeight)) {
-					contentItem = this.getContentItemShownFromType(contentItems[i].type);
+
+				const lessThanMax = (contentItems[i].requestedHeight < maxContentItemHeight);
+				const hasFixed = contentItems[i].fixedHeight;
+				const canAssign = lessThanMax || hasFixed;
+
+				if (canAssign) {
+					const contentItem = this.getContentItemShownFromType(contentItems[i].type);
 					contentItem.height = contentItems[i].requestedHeight;
 					availableHeight -= contentItem.height + this.panelToolbarHeight + this.itemGap;
 					contentItems.splice(i, 1);
 				}
+
 			}
 
 			if (contentItems.length > 0) {
@@ -278,6 +298,9 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
+		this.$timeout().then(() => {
+			angular.element(window as any).triggerHandler("resize");
+		});
 	}
 
 }
@@ -286,17 +309,17 @@ export const PanelComponent: ng.IComponentOptions = {
 	bindings: {
 		account:  "=",
 		branch:   "=",
-		keysDown: "=",
 		model:  "=",
 		modelSettings: "=",
+		isLiteMode: "=",
 		position: "@",
 		revision: "=",
 		selectedObjects: "=",
-		setInitialSelectedObjects: "&",
+		setInitialSelectedObjects: "&"
 	},
 	controller: PanelController,
 	controllerAs: "vm",
-	templateUrl: "templates/panel.html",
+	templateUrl: "templates/panel.html"
 };
 
 export const PanelComponentModule = angular

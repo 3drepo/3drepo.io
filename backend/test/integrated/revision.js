@@ -22,8 +22,8 @@ let expect = require('chai').expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-let log_iface = require("../../logger.js");
-let systemLogger = log_iface.systemLogger;
+let logger = require("../../logger.js");
+let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
@@ -82,15 +82,6 @@ describe('Revision', function () {
 		});
 	});
 
-	// TODO: X3DOM isn't used any more
-
-	it('get x3d mp by revision id should succeed', function(done){
-		agent.get(`/${username}/${model}/revision/${revisions[0]._id}.x3d.mp`)
-		.expect(200, function(err, res){
-			done(err);
-		});
-	});
-
 	it('get asset bundle list by revision id should succeed', function(done){
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/unityAssets.json`)
 		.expect(200, function(err, res){
@@ -98,28 +89,11 @@ describe('Revision', function () {
 		});
 	});
 
-	it('get x3d mp by revision tag should succeed', function(done){
-
-		let revWithTag = revisions.find(rev => rev.tag);
-		agent.get(`/${username}/${model}/revision/${revWithTag.tag}.x3d.mp`)
-		.expect(200, function(err, res){
-			done(err);
-		});
-	});
-
-
 	it('get asset bundle list by revision tag should succeed', function(done){
 
 		let revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/unityAssets.json`)
 		.expect(200, function(err, res){
-			done(err);
-		});
-	});
-
-	it('get non existing rev should fail', function(done){
-		agent.get(`/${username}/${model}/revision/invalidtag.x3d.mp`)
-		.expect(404, function(err, res){
 			done(err);
 		});
 	});

@@ -22,9 +22,10 @@
 				div(layout="row", flex)
 					md-input-container(flex="50")
 						label Email
-						input(ng-model="vm.emailNew", type="email")
+						input(required, ng-model="vm.emailNew", type="email")
 				.updateContainer(layout="row", layout-align="start center")
 					md-button.md-raised.md-accent(
+						ng-disabled="!vm.canUpdate()"
 						ng-click="vm.updateInfo()" 
 						flex-gt-md="20"
 						flex-gt-lg="15"
@@ -36,16 +37,18 @@
 
 			div(layout="column")
 				//h1.md-title Password
-				div(layout="row", flex)
+				form(name="password" layout="row", flex)
 					md-input-container(flex="50")
 						label Old password
-						input(ng-model="vm.oldPassword", type="password")
+						input(ng-model="vm.oldPassword", type="password", required)
 					md-input-container(flex="50")
-						label New password
-						input(ng-model="vm.newPassword", type="password")
+						label(ng-if="vm.passwordStrength") New password ({{vm.passwordStrength}})
+						label(ng-if="!vm.passwordStrength") New password 
+						label(ng-if="vm.passwordStrength === undefined") New password
+						input(name="new" ng-model="vm.newPassword", type="password", required)
 				.updateContainer(layout="row", layout-align="start center")
 					md-button.md-raised.md-accent(
-						ng-disabled="(!vm.oldPassword || !vm.newPassword) || (vm.oldPassword === vm.newPassword)"
+						ng-disabled="vm.passwordUpdateDisabled()"
 						ng-click="vm.updatePassword()"
 						flex-gt-md="20"
 						flex-gt-lg="15"

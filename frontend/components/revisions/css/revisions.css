@@ -14,6 +14,13 @@ revisions {
     text-align: center;
 }
 
+@media (max-width: 767px) { 
+    revisions {
+        top: 10px;
+        left: 45%;
+    } 
+}
+
 .revisions-dropdown .angular-material-icons {
   color: white;
 }
@@ -48,4 +55,8 @@ revisions {
 .revisionsDialog .revisionsDialogInfo {
     color: rgba(0, 0, 0, 0.5);
     margin: -35px 0 0;
+}
+
+.revisionsDialog .revisionDate {
+    color: rgba(0, 0, 0, 0.5);
 }

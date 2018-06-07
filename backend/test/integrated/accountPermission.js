@@ -22,8 +22,8 @@ const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-const log_iface = require("../../logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const async = require('async');
 
@@ -62,8 +62,8 @@ describe('Account permission::', function () {
 	it('should fail to assign permissions to a user that doesnt exist', function(done){
 		agent.post(`/${username}/permissions`)
 		.send({ user: 'nonsense', permissions: ['create_project']})
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 			done(err);
 		});
 	});

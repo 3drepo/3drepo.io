@@ -8,7 +8,7 @@ md-toolbar
 			md-icon.angular-material-icons(aria-label="Close dialog") close
 md-content#issueScreenShotContent(layout="row", layout-align="center center")
 	img#issueScreenShotImage(ng-src="{{vm.screenShotUse}}")
-	div(ng-if="!vm.screenShot")
+	#issueScreenShotContainer(ng-if="!vm.screenShot")
 		canvas#scribbleCanvas
 		#issueScreenShotActions(
 			layout-align="center center"

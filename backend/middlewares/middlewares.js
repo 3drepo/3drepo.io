@@ -61,11 +61,9 @@
 	function freeSpace(account){
 
 		let limits;
-
-		//console.log('checking free space');
 		return User.findByUserName(account).then( dbUser => {
 
-			limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
+			limits = dbUser.customData.billing.getSubscriptionLimits();
 			return User.historyChunksStats(account);
 
 		}).then(stats => {
@@ -75,13 +73,20 @@
 			stats.forEach(stat => {
 				totalSize += stat.size;
 			});
-
-			// console.log(limits.spaceLimit);
-			// console.log(totalSize);
-
+			totalSize /= 1024*1024;
 			return Promise.resolve(limits.spaceLimit - totalSize);
 		});
 
+	}
+
+	function isTeamspaceMember(req, res, next) {
+		const teamspace = req.params.account;
+		const user = req.session.user.username;
+		return User.teamspaceMemberCheck(teamspace, user).then(() => {
+			next();
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	function hasCollaboratorQuota(req, res, next){
@@ -93,7 +98,7 @@
 
 		return User.findByUserName(account).then( dbUser => {
 
-			limits = dbUser.customData.billing.subscriptions.getSubscriptionLimits();
+			limits = dbUser.customData.billing.getSubscriptionLimits();
 
 			return ModelSetting.findById({account}, model);
 
@@ -113,8 +118,8 @@
 	function createQueueInstance(){
 
 		// init ampq and import queue object
-		let log_iface = require("../logger.js");
-		let systemLogger = log_iface.systemLogger;
+		let logger = require("../logger.js");
+		let systemLogger = logger.systemLogger;
 
 		return importQueue.connect(config.cn_queue.host, {
 
@@ -195,6 +200,7 @@
 
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
+		isTeamspaceMember,
 		connectQueue,
 		loggedIn,
 

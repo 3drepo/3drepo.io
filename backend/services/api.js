@@ -25,7 +25,7 @@
 module.exports.createApp = function (serverConfig) {
 
 	const sharedSession = serverConfig.session;
-	const log_iface = require("../logger.js");
+	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
 	const responseCodes = require("../response_codes");
@@ -37,16 +37,10 @@ module.exports.createApp = function (serverConfig) {
 	// Express app
 	const app = express();
 
-	// Attach the encoders to the router
-	// require("../encoders/x3dom_encoder.js")
-	// 	.route(routes);
-	// require("../encoders/json_encoder.js")
-	// 	.route(routes);
-
 	app.disable("etag");
 
 	// put logger in req object
-	app.use(log_iface.startRequest);
+	app.use(logger.startRequest);
 
 	// Configure various middleware
 	app.use((req, res, next) => {
@@ -94,8 +88,7 @@ module.exports.createApp = function (serverConfig) {
 	app.set("views", "./pug");
 	app.set("view_engine", "pug");
 
-	app.use(bodyParser.json({ limit: "2mb" }));
-
+	app.use(bodyParser.json({ limit: "50mb" }));
 	app.use(compress());
 
 	app.use(function (req, res, next) {
@@ -107,6 +100,7 @@ module.exports.createApp = function (serverConfig) {
 		}
 	});
 
+	app.use("/:account", require("../routes/job"));
 	app.use("/", require("../routes/plan"));
 	//auth handler
 	app.use("/", require("../routes/auth"));
@@ -114,12 +108,12 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/:account", require("../routes/subscriptions"));
 	// invoices handler
 	app.use("/:account", require("../routes/invoice"));
-	// os api handler
-	app.use("/os", require("../routes/osBuilding"));
+	// maps handler
+	app.use("/:account", require("../routes/maps"));
 	// payment api header
 	app.use("/payment", require("../routes/payment"));
 
-	app.use("/:account", require("../routes/job"));
+	app.use("/:account", require("../routes/teamspace"));
 	app.use("/:account", require("../routes/permissionTemplate"));
 	app.use("/:account", require("../routes/accountPermission"));
 	
@@ -133,21 +127,14 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/:account/:model", require("../routes/meta"));
 
 	//groups handler
-	app.use("/:account/:model/groups", require("../routes/group"));
+	app.use("/:account/:model", require("../routes/group"));
 	
 	//issues handler
 	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
-	//mesh handler
-	app.use("/:account/:model", require("../routes/mesh"));
-	//texture handler
-	app.use("/:account/:model", require("../routes/texture"));
-
 	//history handler
 	app.use("/:account/:model", require("../routes/history"));
-
-	//app.use("/", routes.router);
 
 	app.use(function(err, req, res, next) {
 		if(err){

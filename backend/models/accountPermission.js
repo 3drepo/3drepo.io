@@ -42,19 +42,27 @@
 		},
 
 		_check(user, permission){
+			const User = require('./user');
+			return User.findByUserName(user).then( userToCheck => {
+				if(!userToCheck) {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
 
-			if(!this.user.customData.billing.subscriptions.findByAssignedUser(user)){
-				return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
-			}
+				if(!userToCheck.isMemberOfTeamspace(this.user.user)){
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+				}
 
-			const isPermissionInvalid = permission.permissions && 
-				_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
+				const isPermissionInvalid = permission.permissions && 
+					_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
 
-			if (isPermissionInvalid) {
-				return Promise.reject(responseCodes.INVALID_PERM);
-			}
+				if (isPermissionInvalid) {
+					return Promise.reject(responseCodes.INVALID_PERM);
+				}
 
-			return Promise.resolve();
+				return Promise.resolve();
+			});
+
+			
 
 		},
 

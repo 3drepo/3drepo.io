@@ -22,8 +22,8 @@ const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-const log_iface = require("../../logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const async = require('async');
 
@@ -279,8 +279,6 @@ describe('Project Permissions::', function () {
 
 			
 			callback => {
-				console.log('permissions', permissions);
-
 				agentTeamspaceAdmin
 				.put(`/${teamspace}/projects/${project}`)
 				.send({ permissions })
@@ -364,15 +362,16 @@ describe('Project Permissions::', function () {
 
 		agentProjectAdmin
 		.get(`/${teamspace}/${modelId}/permissions`)
-		.expect(200, done);
+		.expect(200, function(err, res) {
+			done(err);});
 	});
 
-	it('Users with admin_project permission on a project can access a model in it', function(done){
+	it('Users with admin_project permission on a project can access jobs', function(done){
 
 		const modelId = '4b130bee-caba-46c1-a64d-32b7d1a41d6f';
 
 		agentProjectAdmin
-		.get(`/${teamspace}/${modelId}/jobs.json`)
+		.get(`/${teamspace}/jobs`)
 		.expect(200, done);
 	});
 

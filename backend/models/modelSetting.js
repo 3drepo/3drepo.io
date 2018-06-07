@@ -25,8 +25,6 @@ const _ = require("lodash");
 const schema = mongoose.Schema({
 	_id : String,
 	name: String, // model name
-	owner: String,
-	users: [String],
 	desc: String,
 	type: String,
 	corID: String,
@@ -39,18 +37,7 @@ const schema = mongoose.Schema({
 		permission: String
 	}],
 	properties: {
-		"pinSize" : Number,
-		"avatarHeight" : Number,
-		"visibilityLimit" : Number,
-		"speed" : Number,
-		"zNear" : Number,
-		"zFar" : Number,
-		"unit": String, //cm, m, ft, mm
-		"mapTile": {
-			lat: Number,
-			lon: Number,
-			y: Number
-		},
+		unit: String, //cm, m, ft, mm
 		code: String,
 		topicTypes: [{
 			_id: false,
@@ -59,6 +46,15 @@ const schema = mongoose.Schema({
 		}]
 
 	},
+	surveyPoints: [
+		{
+			_id: false,
+			latLong: [Number],
+			position: [Number]
+		}
+	],
+	angleFromNorth : Number,
+	elevation: Number,
 	fourDSequenceTag: String,
 	timestamp: Date,
 	subModels: [{
@@ -70,6 +66,14 @@ const schema = mongoose.Schema({
 
 
 schema.statics.defaultTopicTypes = [
+	{value: "clash", label: "Clash"},
+	{value: "diff", label: "Diff"},
+	{value: "rfi", label: "RFI"},
+	{value: "risk", label: "Risk"},
+	{value: "hs", label: "H&S"},
+	{value: "design", label: "Design"},
+	{value: "constructibility", label: "Constructibility"},
+	{value: "gis", label: "GIS"},
 	{value: "for_information", label: "For information"},
 	{value: "vr", label: "VR"}
 ];
@@ -88,47 +92,43 @@ schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 
 schema.methods.updateProperties = function(updateObj){
-
 	Object.keys(updateObj).forEach(key => {
+		if(!updateObj[key]) return;
+		switch (key) {
+			case "topicTypes":
+				let topicTypes = {};
+				updateObj[key].forEach(type => {
 
-		if (key === "name") {
-			this.name = updateObj[key];
-		}
+					if(!type || !type.trim()){
+						return;
+					}
 
-		if(key === "code" && updateObj[key] && !schema.statics.modelCodeRegExp.test(updateObj[key])){
-			throw responseCodes.INVALID_MODEL_CODE;
-		}
+					//generate value from label
+					let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");;
 
-		if(key === "topicTypes"){
-			
-			let topicTypes = {};
-			updateObj[key].forEach(type => {
+					if(topicTypes[value]){
+						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+					} else {	
+						topicTypes[value] = {
+							value,
+							label: type.trim()
+						};
+					}
+				});
 
-				if(!type || !type.trim()){
-					return;
+				this.properties[key] = _.values(topicTypes);
+				break;
+			case "code":
+				if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
+					throw responseCodes.INVALID_MODEL_CODE;
 				}
-				
-				//generate value from label
-				let value = type.trim().toLowerCase().replace(/ /g, "_");
-				
-				if(topicTypes[value]){
-					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-				} else {
-					topicTypes[value] = {
-						value,
-						label: type.trim()
-					};
-				}
-			});
-
-			this.properties[key] = _.values(topicTypes);
-		} else {
-			this.properties[key] = updateObj[key];
+			case "unit":
+				this.properties[key] = updateObj[key];
+				break;
+			default:
+				this[key] = updateObj[key];
 		}
-		if(key === "fourDSequenceTag"){
-			this[key] = updateObj[key];
 
-		}	
 	});
 
 };
@@ -146,47 +146,37 @@ schema.methods.changePermissions = function(permissions){
 		let promises = [];
 
 		permissions.forEach(permission => {
-
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
+			promises.push(User.findByUserName(permission.user).then( assignedUser => {
+				if(!assignedUser) {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
 
-			if(!dbUser.customData.billing.subscriptions.findByAssignedUser(permission.user)){
-				return promises.push(Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE));
-			}
+				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
+				if(!isMember) {
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+				}
+				let perm = this.permissions.find(perm => perm.user === permission.user);
 
-			let perm = this.permissions.find(perm => perm.user === permission.user);
+				if(perm) {
+	
+					perm.permission = permission.permission;
 
-			if(perm) {
+				}
+			}));
 
-				perm.permission = permission.permission;
 
-			} else {
-
-				promises.push(
-					User.findByUserName(permission.user).then(user => {
-						if(!user){
-							return Promise.reject(responseCodes.USER_NOT_FOUND);
-						} else {
-							return;
-						}
-					})
-				);
-			}
-
+			
 		});
 
-		return Promise.all(promises);
+		return Promise.all(promises).then( () => {
+			this.permissions = permissions;
+			return this.save();
+		});
 
-	}).then(() => {
-		
-		this.permissions = permissions;
-
-		return this.save();		
-	}).then(
-		() => this.permissions
-	);
-
+	});
 };
 
 schema.methods.isPermissionAssigned = function(permission){
@@ -200,22 +190,20 @@ schema.methods.findPermissionByUser = function(username){
 schema.statics.populateUsers = function(account, permissions){
 
 	const User = require("./user");
+	
+	return User.getAllUsersInTeamspace(account).then(users => {
 
-	return User.findByUserName(account).then(user => {
+		users.forEach(user => {
+			const permissionFound = permissions && permissions.find(p => p.user ===  user);
 
-		const subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true});
-
-		subscriptions.forEach(sub => {
-			const permissionFound = permissions && permissions.find(p => p.user === sub.assignedUser);
-
-			if(!permissionFound && sub.assignedUser){
-				permissions.push({ user: sub.assignedUser });
+			if(!permissionFound){
+				permissions.push({ user });
 			}
 		});
 
 		return permissions;
 
-	});
+	}); 
 
 };
 

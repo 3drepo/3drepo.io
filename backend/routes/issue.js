@@ -28,6 +28,7 @@ let multer = require("multer");
 let config = require("../config.js");
 
 let User = require("../models/user");
+const Job = require("../models/job");
 let ModelHelper = require("../models/helper/model");
 
 let stringToUUID = utils.stringToUUID;
@@ -129,32 +130,34 @@ function updateIssue(req, res, next){
 			
 			action = User.findByUserName(req.params.account).then(dbUser => {
 
-				const sub = dbUser.customData.billing.subscriptions.findByAssignedUser(req.session.user.username);
-				const job = sub && sub.job;
-				const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
-				const userIsAdmin = ModelHelper.isUserAdmin(
-					req.params.account, 
-					req.params.model, 
-					req.session.user.username
-				);
+				return Job.findByUser(dbUser.user, req.session.user.username).then(_job => {
+					const job = _job ?  _job._id : null;
+					const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
+					const userIsAdmin = ModelHelper.isUserAdmin(
+						req.params.account, 
+						req.params.model, 
+						req.session.user.username
+					);
 				
-				return userIsAdmin.then( projAdmin => {
+					return userIsAdmin.then( projAdmin => {
+	
+						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+						const isAdmin = projAdmin || tsAdmin;
+						const hasOwnerJob = issue.creator_role === job && issue.creator_role && job; 
+						const hasAssignedJob = job === issue.assigned_roles[0];
 
-					const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-					const isAdmin = projAdmin || tsAdmin;
-					const hasOwnerJob = issue.creator_role === job && issue.creator_role && job; 
-					const hasAssignedJob = job === issue.assigned_roles[0];
-
-					return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
+						return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
 					
 
-				}).catch(err =>{
+					}).catch(err =>{
 						if(err){
 							return Promise.reject(err);
 						}
 						else{
 							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
 						}
+					});
+
 				});
 
 
@@ -202,9 +205,9 @@ function listIssues(req, res, next) {
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
 	}
 
 	findIssue.then(issues => {
@@ -221,13 +224,18 @@ function getIssuesBCF(req, res, next) {
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let model = req.params.model;
-	
+
+	let ids;
+	if (req.query.ids) {
+		ids = req.query.ids.split(",");
+	}
+
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid);
+		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
 	} else {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null);
+		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
 	}
 
 	getBCFZipRS.then(zipRS => {
@@ -262,7 +270,6 @@ function getIssuesBCF(req, res, next) {
 
 function findIssueById(req, res, next) {
 	
-
 	let params = req.params;
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, model: req.params.model};
@@ -301,9 +308,9 @@ function renderIssuesHTML(req, res, next){
 	}
 
 	if (req.params.rid) {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
 	} else {
-		findIssue = Issue.findByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
 	findIssue.then(issues => {
@@ -351,7 +358,7 @@ function importBCF(req, res, next){
 	function fileFilter(req, file, cb){
 
 		let acceptedFormat = [
-			"bcfzip", "zip"
+			"bcf", "bcfzip", "zip"
 		];
 
 		let format = file.originalname.split(".");
@@ -381,14 +388,14 @@ function importBCF(req, res, next){
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
-			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		
 		} else if(!req.file.size){
-			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
 
-			Issue.importBCF(req.headers[C.HEADER_SOCKET_ID], req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
 			}).catch(err => {
 				responseCodes.respond(place, req, res, next, err, err);

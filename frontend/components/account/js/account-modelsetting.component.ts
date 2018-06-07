@@ -23,7 +23,7 @@ class AccountModelSettingController implements ng.IController {
 
 		"APIService",
 		"ClientConfigService",
-		"AccountService",
+		"AccountService"
 	];
 
 	private accounts;
@@ -37,13 +37,18 @@ class AccountModelSettingController implements ng.IController {
 	private targetProj;
 
 	private modelType;
+	/* tslint:disable */
 	private topicTypes;
+	/* tslint:enable */
 	private code;
 	private unit;
 	private oldUnit;
 	private fourDSequenceTag;
 	private message;
 	private data;
+	private loaded: boolean;
+
+	private referencePoints: any;
 
 	constructor(
 		private $scope: any,
@@ -51,11 +56,12 @@ class AccountModelSettingController implements ng.IController {
 
 		private APIService: any,
 		private ClientConfigService: any,
-		private AccountService: any,
+		private AccountService: any
 	) {}
 
 	public $onInit() {
 
+		this.loaded = false;
 		this.units = this.ClientConfigService.units;
 		this.mapTile = {};
 
@@ -66,6 +72,31 @@ class AccountModelSettingController implements ng.IController {
 		this.targetAcct = this.urlData.targetAcct;
 		this.targetProj = this.urlData.targetProj;
 
+		this.referencePoints = {
+			latLong : {
+				latitude: 0.0,
+				longitude: 0.0
+			},
+			angleFromNorth: 0.0,
+			elevation: 0.0,
+			position: {
+				x : 0.0,
+				y: 0.0,
+				z: 0.0
+			}
+		};
+
+		this.fetchModelSettings();
+
+	}
+
+	public createTopicType(chip) {
+		return {
+			label: chip
+		};
+	}
+
+	public fetchModelSettings() {
 		this.APIService.get(this.targetAcct + "/" + this.modelId + ".json")
 			.then((response) => {
 
@@ -73,17 +104,39 @@ class AccountModelSettingController implements ng.IController {
 
 					const props = response.data.properties;
 
-					if (props.mapTile) {
-						props.mapTile.lat && (this.mapTile.lat = props.mapTile.lat);
-						props.mapTile.lon && (this.mapTile.lon = props.mapTile.lon);
-						props.mapTile.y && (this.mapTile.y = props.mapTile.y);
+					if (response.data.surveyPoints && response.data.surveyPoints.length) {
+						const reference = response.data.surveyPoints[0];
+						if (reference.latLong) {
+							this.referencePoints.latLong.latitude = reference.latLong[0];
+							this.referencePoints.latLong.longitude = reference.latLong[1];
+						}
+						if (response.data.elevation) {
+							this.referencePoints.elevation = response.data.elevation;
+						}
+						if (response.data.angleFromNorth) {
+							this.referencePoints.angleFromNorth = response.data.angleFromNorth;
+						}
+						if (reference.position) {
+
+							// Positions coming from the API
+							this.referencePoints.position.x = reference.position[0];
+							this.referencePoints.position.z = -1 * reference.position[1];
+							this.referencePoints.position.y = -1 * reference.position[2];
+						}
 					}
+
+					if (response.data.model) {
+						this.modelId = response.data.model;
+					}
+
 					if (response.data.type) {
 						this.modelType = response.data.type;
 					}
+
 					if (props.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(props.topicTypes);
+						this.topicTypes = props.topicTypes;
 					}
+
 					if (props.code) {
 						this.code = props.code;
 					}
@@ -100,11 +153,11 @@ class AccountModelSettingController implements ng.IController {
 					this.message = response.data.message;
 				}
 
+				this.loaded = true;
 			})
 			.catch((error) => {
 				console.error(error);
 			});
-
 	}
 
 	/**
@@ -122,20 +175,6 @@ class AccountModelSettingController implements ng.IController {
 	}
 
 	/**
-	 * Convert a list of topic types to a string
-	 */
-	public convertTopicTypesToString(topicTypes) {
-
-		const result = [];
-
-		topicTypes.forEach((type) => {
-			result.push(type.label);
-		});
-
-		return result.join("\n");
-	}
-
-	/**
 	 * Update the view model name
 	 */
 	public updateModel() {
@@ -144,10 +183,30 @@ class AccountModelSettingController implements ng.IController {
 			this.accounts,
 			this.targetAcct,
 			this.targetProj,
-			this.modelId,
+			this.modelId
 		);
 
 		model.name = this.modelName;
+
+	}
+
+	public getLatLong() {
+		return [
+			parseFloat(this.referencePoints.latLong.latitude) || 0.0,
+			parseFloat(this.referencePoints.latLong.longitude) || 0.0
+		];
+	}
+
+	public getPosition() {
+
+		// 3drepo.io expects coordinates to come in the format
+		// (x, -z, -y) so we need to do some massaging to our data
+
+		return [
+			parseFloat(this.referencePoints.position.x) || 0.0,
+			-parseFloat(this.referencePoints.position.z) || 0.0,
+			-parseFloat(this.referencePoints.position.y) || 0.0
+		];
 
 	}
 
@@ -156,14 +215,43 @@ class AccountModelSettingController implements ng.IController {
 	 */
 	public save() {
 
-		const data = {
+		const newTopicTypes = this.topicTypes.map((t) => t.label );
+
+		const data: any = {
 			name: this.modelName,
-			mapTile: this.mapTile,
 			unit: this.unit,
 			code: this.code,
-			topicTypes: this.topicTypes.replace(/\r/g, "").split("\n"),
-			fourDSequenceTag: this.fourDSequenceTag,
+			topicTypes: newTopicTypes,
+			fourDSequenceTag: this.fourDSequenceTag
 		};
+
+		if (this.referencePoints.position) {
+			if (!data.surveyPoints) {
+				data.surveyPoints = [{
+					position: this.getPosition()
+				}];
+			} else {
+				data.surveyPoints[0].position = this.getPosition();
+			}
+		}
+
+		if (!data.elevation) {
+			data.elevation = this.referencePoints.elevation || 0.0;
+		}
+
+		if (!data.angleFromNorth) {
+			data.angleFromNorth = this.referencePoints.angleFromNorth || 0.0;
+		}
+
+		if (this.referencePoints.latLong) {
+			if (!data.surveyPoints) {
+				data.surveyPoints = [{
+					latLong: this.getLatLong()
+				}];
+			} else {
+				data.surveyPoints[0].latLong = this.getLatLong();
+			}
+		}
 
 		const saveUrl = this.targetAcct + "/" + this.modelId +  "/settings";
 
@@ -173,12 +261,16 @@ class AccountModelSettingController implements ng.IController {
 					this.updateModel();
 					this.message = "Saved";
 					if (response.data && response.data.properties && response.data.properties.topicTypes) {
-						this.topicTypes = this.convertTopicTypesToString(response.data.properties.topicTypes);
+						this.topicTypes = response.data.properties.topicTypes;
 					}
 					this.oldUnit = this.unit;
 				} else {
 					this.message = response.data.message;
 				}
+			})
+			.catch((error) => {
+				this.message = "There was an error saving model settings";
+				console.error("Error saving model settings", error);
 			});
 
 	}
@@ -191,12 +283,11 @@ export const AccountModelSettingComponent: ng.IComponentOptions = {
 		accounts: "=",
 		model: "=",
 		showPage: "&",
-		subscriptions: "=",
-		data: "=",
+		data: "="
 	},
 	controller: AccountModelSettingController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-modelsetting.html",
+	templateUrl: "templates/account-modelsetting.html"
 };
 
 export const AccountModelSettingComponentModule = angular

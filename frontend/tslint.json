@@ -1,10 +1,15 @@
-{
+{   
+    "configPath": "./",
     "extends": "tslint:recommended",
     "rules": {
         "indent": [true, "tabs"],
         "jsdoc-format": false,
         "prefer-for-of": false,
         "no-console": [true, "log", "warning"],
-        "object-literal-sort-keys": false
+        "object-literal-sort-keys": false,
+        "no-empty": false,
+        "ordered-imports": false,
+        "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
+        "forin": false
     }
 }

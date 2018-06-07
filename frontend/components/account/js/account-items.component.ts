@@ -34,7 +34,7 @@ class AccountItemsController implements ng.IController {
 		"AccountService",
 		"ViewerService",
 		"APIService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private account;
@@ -104,7 +104,7 @@ class AccountItemsController implements ng.IController {
 		private AccountService,
 		private ViewerService,
 		private APIService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	/*
@@ -160,7 +160,7 @@ class AccountItemsController implements ng.IController {
 
 		this.viewableCache = {
 			teamspace : {},
-			projects : {},
+			projects : {}
 		};
 
 		this.projectData = {
@@ -189,7 +189,7 @@ class AccountItemsController implements ng.IController {
 							return true;
 						}
 						return false;
-					},
+					}
 				},
 				delete: {
 					label: "Delete",
@@ -199,9 +199,9 @@ class AccountItemsController implements ng.IController {
 							return true;
 						}
 						return false;
-					},
-				},
-			},
+					}
+				}
+			}
 		};
 
 		this.watchers();
@@ -320,7 +320,7 @@ class AccountItemsController implements ng.IController {
 	public resetViewableCache() {
 		this.viewableCache = {
 			teamspace : {},
-			projects : {},
+			projects : {}
 		};
 	}
 
@@ -515,11 +515,14 @@ class AccountItemsController implements ng.IController {
 		const empty = this.federationData.subModels === undefined ||
 					this.federationData.subModels.length === 0;
 
-		if (empty) {
-			this.federationErrorMessage = "Federation can't be empty";
+		if (this.federationData.name.length > 120) {
+			this.federationErrorMessage = "Federationame can't be over 120 characters";
 			this.federationSaveDisabled = true;
 		} else if (this.isDuplicateName()) {
 			this.federationErrorMessage = "Federation name taken";
+			this.federationSaveDisabled = true;
+		} else if (empty) {
+			this.federationErrorMessage = "Federation can't be empty";
 			this.federationSaveDisabled = true;
 		} else {
 			this.federationErrorMessage = "";
@@ -546,7 +549,7 @@ class AccountItemsController implements ng.IController {
 			this.accounts,
 			teamspaceName,
 			projectName,
-			fedName,
+			fedName
 		);
 
 		if (duplicate) {
@@ -592,7 +595,7 @@ class AccountItemsController implements ng.IController {
 							.title("Federation Save Error")
 							.textContent(this.errorMessage)
 							.ariaLabel("Federation Save Error")
-							.ok("OK"),
+							.ok("OK")
 					);
 
 				} else {
@@ -620,7 +623,7 @@ class AccountItemsController implements ng.IController {
 					this.AnalyticService.sendEvent({
 						eventCategory: "Model",
 						eventAction: (this.federationData._isEdit) ? "edit" : "create",
-						eventLabel: "federation",
+						eventLabel: "federation"
 					});
 				}
 
@@ -661,18 +664,18 @@ class AccountItemsController implements ng.IController {
 			models = this.AccountService.getIndividualModelsByProjectName(
 				this.accounts,
 				this.federationData.teamspace,
-				this.federationData.project,
+				this.federationData.project
 			);
 		} else {
 			models = this.AccountService.getIndividualTeamspaceModels(
 				this.accounts,
-				this.federationData.teamspace,
+				this.federationData.teamspace
 			);
 		}
 
 		const noneFederated = this.AccountService.getNoneFederatedModels(
 			this.federationData,
-			models,
+			models
 		);
 		return noneFederated;
 
@@ -699,7 +702,7 @@ class AccountItemsController implements ng.IController {
 			database: teamspaceName,
 			modelIndex,
 			model: models[modelIndex].model,
-			name: models[modelIndex].name,
+			name: models[modelIndex].name
 		});
 
 		models[modelIndex].federate = true;
@@ -723,6 +726,7 @@ class AccountItemsController implements ng.IController {
 			desc: "",
 			type: "",
 			subModels: [],
+			unit: "mm"
 		};
 
 		this.federationErrorMessage = "";
@@ -733,7 +737,7 @@ class AccountItemsController implements ng.IController {
 			true,
 			null,
 			false,
-			this.dialogCloseToId,
+			this.dialogCloseToId
 		);
 
 	}
@@ -796,13 +800,13 @@ class AccountItemsController implements ng.IController {
 									this.accounts,
 									account.name,
 									projectToDeleteFrom,
-									response.data.model,
+									response.data.model
 								);
 								this.AccountService.removeFromFederationByProjectName(
 									this.accounts,
 									account.name,
 									projectToDeleteFrom,
-									response.data.model,
+									response.data.model
 								);
 								break;
 
@@ -823,7 +827,7 @@ class AccountItemsController implements ng.IController {
 					this.addButtonType = "add";
 					this.AnalyticService.sendEvent({
 						eventCategory: "Model",
-						eventAction: "delete",
+						eventAction: "delete"
 					});
 				} else {
 					this.deleteError = "Error deleting model";
@@ -843,7 +847,9 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public showAllModelDialogInputs(): boolean {
-		return this.teamspaceAndProjectSelected() && this.newModelData.name.length > 0;
+		return this.teamspaceAndProjectSelected() &&
+			this.newModelData.name &&
+			this.newModelData.name.length;
 	}
 
 	public teamspaceAndProjectSelected(): boolean {
@@ -863,7 +869,7 @@ class AccountItemsController implements ng.IController {
 		this.newModelData = {
 			name: "",
 			account: accountForModel,
-			type: this.modelTypes[0],
+			type: this.modelTypes[0]
 		};
 		this.newModelFileToUpload = null;
 		this.DialogService.showDialog("model-dialog.html", this.$scope, event, true);
@@ -916,20 +922,20 @@ class AccountItemsController implements ng.IController {
 							project : this.newModelData.project,
 							permissions: response.data.permissions,
 							canUpload: true,
-							timestamp: null,
+							timestamp: null
 						};
 
 						this.updateAccountModels(
 							response.data.account,
 							model,
-							this.newModelData.project,
+							this.newModelData.project
 						);
 						this.addButtons = false;
 						this.addButtonType = "add";
 
 						this.AnalyticService.sendEvent({
 							eventCategory: "model",
-							eventAction: "create",
+							eventAction: "create"
 						});
 					}
 					this.uploading = false;
@@ -947,7 +953,8 @@ class AccountItemsController implements ng.IController {
 	}
 
 	public errorDialog(title, action, error) {
-		const message = (error.data.message) ? error.data.message : "Unknown Error";
+		console.error(error);
+		const message = (error && error.data && error.data.message) ? error.data.message : "Unknown Error";
 		const content = "Something went wrong " +  action + ": <br><br>" +
 			"<strong> " + message + "</strong>" +
 			"<br><br> If this is unexpected please message support@3drepo.io.";
@@ -1024,7 +1031,7 @@ class AccountItemsController implements ng.IController {
 
 			accountToUpdate = {
 				name: account,
-				models: [model],
+				models: [model]
 			};
 			accountToUpdate.canUpload = (account === this.account);
 			this.accounts.push(accountToUpdate);
@@ -1039,13 +1046,13 @@ class AccountItemsController implements ng.IController {
 				file: this.newModelFileToUpload,
 				tag: this.tag,
 				desc: this.desc,
-				newModel: true,
+				newModel: true
 			})
 				.then(() => {
 
 					this.AnalyticService.sendEvent({
 						eventCategory: "Model",
-						eventAction: "upload",
+						eventAction: "upload"
 					});
 
 				})
@@ -1132,7 +1139,7 @@ class AccountItemsController implements ng.IController {
 		this.handleProjectPromise(promise, teamspaceName, {
 			edit  : true,
 			newProjectName,
-			oldProjectName,
+			oldProjectName
 		});
 	}
 
@@ -1146,7 +1153,7 @@ class AccountItemsController implements ng.IController {
 		const promise = this.APIService.delete(url, {});
 		this.handleProjectPromise(promise, teamspaceName, {
 			projectName,
-			delete: true,
+			delete: true
 		});
 	}
 
@@ -1171,7 +1178,7 @@ class AccountItemsController implements ng.IController {
 					const permissions = [
 						"create_federation", "create_model",
 						"admin_project", "delete_project",
-						"edit_project",
+						"edit_project"
 					];
 					project.permissions = project.permissions.concat(permissions);
 
@@ -1180,19 +1187,19 @@ class AccountItemsController implements ng.IController {
 							this.accounts,
 							teamspaceName,
 							update.newProjectName,
-							update.oldProjectName,
+							update.oldProjectName
 						);
 					} else if (update.delete) {
 						this.AccountService.removeProjectInTeamspace(
 							this.accounts,
 							teamspaceName,
-							update.projectName,
+							update.projectName
 						);
 					} else {
 						this.AccountService.addProjectToTeamspace(
 							this.accounts,
 							teamspaceName,
-							project,
+							project
 						);
 					}
 
@@ -1220,13 +1227,11 @@ export const AccountItemsComponent: ng.IComponentOptions = {
 		account: "=",
 		accounts: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
-		isMobileDevice: "<",
+		isLiteMode: "<"
 	},
 	controller: AccountItemsController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-items.html",
+	templateUrl: "templates/account-items.html"
 };
 
 export const AccountItemsComponentModule = angular

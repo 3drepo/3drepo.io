@@ -97,7 +97,14 @@ let fillInServerDetails = function (serverObject, name, using_ssl, host, default
 
 };
 
+if (config === undefined) {
+	console.error("Config is undefined. Is it in a subfolder of the config directory, " +
+	"well formed and named config.js?");
+	process.exit(1);
+}
+
 config.consoleLogging = coalesce(config.consoleLogging, true);
+config.maintenanceMode = coalesce(config.maintenanceMode, false);
 
 // Check for hostname and ip here
 config.host = coalesce(config.host, "127.0.0.1");
@@ -185,7 +192,7 @@ for (let i = 0; i < config.servers.length; i++) {
 		fillInServerDetails(server, "chat", config.using_ssl, config.host, server.http_port, server.https_port);
 		server.chat_host = server.base_url_no_port + ":" + server.port;
 		config.chat_server = server;
-		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== 'undefined' ? server.reconnection_attempts : config.chat_reconnection_attempts);
+		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== "undefined" ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
 	} else if (server.service === "frontend"){
 
@@ -199,8 +206,6 @@ for (let i = 0; i < config.servers.length; i++) {
 
 // Change the algorithm for choosing an API server
 config.apiAlgorithm = createRoundRobinAlgorithm(config);
-
-config.disableCache = coalesce(config.disableCache, false);
 
 // Database configuration
 config.db = coalesce(config.db, {});
@@ -223,6 +228,13 @@ if (config.db.host.length > 1 && !config.db.replicaSet)
 
 config.db.username = coalesce(config.db.username, "username");
 config.db.password = coalesce(config.db.password, "password");
+
+//Subscription info
+config.subscriptions = coalesce(config.subscriptions, {});
+config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
+
+// Terms & Conditions update date
+config.termsUpdatedAt = coalesce(config.termsUpdatedAt, 0);
 
 // Other options
 config.js_debug_level = coalesce(config.js_debug_level, "debug"); // Loading prod or debug scripts
@@ -269,13 +281,6 @@ config.userNotice = coalesce(config.userNotice, "");
 // Settings for Unity
 config.unitySettings = coalesce(config.unitySettings, {
 	TOTAL_MEMORY: 2130706432,
-	compatibilitycheck: null,
-	backgroundColor: "#222C36",
-	splashStyle: "Light",
-	dataUrl: "unity/Release/unity.data",
-	codeUrl: "unity/Release/unity.js",
-	asmUrl: "unity/Release/unity.asm.js",
-	memUrl: "unity/Release/unity.mem"
 });
 
 //default vat validation url
@@ -285,7 +290,7 @@ config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxatio
 //get frontend base url
 config.getBaseURL = function (useNonPublicPort) {
 
-	let frontEndServerConfig = config.servers.find(server => server.service === 'frontend');
+	let frontEndServerConfig = config.servers.find(server => server.service === "frontend");
 
 	let port = "";
 

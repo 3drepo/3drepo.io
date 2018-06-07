@@ -20,7 +20,7 @@ export class RevisionsService {
 	public static $inject: string[] = [
 		"$filter",
 		"APIService",
-		"ClientConfigService",
+		"ClientConfigService"
 	];
 
 	public status: any;
@@ -29,12 +29,12 @@ export class RevisionsService {
 	constructor(
 		private $filter,
 		private APIService,
-		private ClientConfigService,
+		private ClientConfigService
 	) {
 		this.revisionDateFilter = this.$filter("revisionDate");
 		this.status = {
-			data: null,
-			ready: false,
+			data: {},
+			ready: false
 		};
 	}
 
@@ -45,11 +45,11 @@ export class RevisionsService {
 
 				if (response.status === 200) {
 					this.status.ready = true;
-					this.status.data = response.data;
+					this.status.data[account + ":" + model] = response.data;
 					return response.data;
 				} else {
 					this.status.ready = false;
-					this.status.data = response.data;
+					this.status.data[account + ":" + model] = null;
 					return response.data;
 				}
 

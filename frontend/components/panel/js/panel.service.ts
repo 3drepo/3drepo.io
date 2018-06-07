@@ -15,27 +15,70 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+interface IPanelCards {
+	left: IPanelCard[];
+	right: IPanelCard[];
+}
+
+interface IPanelCard {
+	type: string;
+	title: string;
+	showLiteMode: boolean;
+	show: boolean;
+	help: string;
+	icon: string;
+	fixedHeight: boolean;
+	options: any[];
+	add?: boolean;
+	menu?: IMenuItem[];
+	minHeight?: number;
+}
+
+interface IMenuItem {
+	hidden: boolean;
+	label: string;
+	value?: string;
+	role?: string;
+	selected?: boolean;
+	firstSelectedIcon?: string;
+	secondSelectedIcon?: string;
+	toggle?: boolean;
+	firstSelected?: boolean;
+	secondSelected?: boolean;
+	keepCheckSpace?: boolean;
+	noToggle?: boolean;
+	icon?: string;
+	divider?: boolean;
+	upperDivider?: boolean;
+}
+
 export class PanelService {
 
 	public static $inject: string[] = [
 		"EventService",
-		"TreeService",
+		"TreeService"
 	];
 
-	private issuesPanelCard: any;
+	private panelCards: IPanelCards;
+	private templatepanelCards: IPanelCards;
 
 	constructor(
 		private EventService: any,
-		private TreeService: any,
+		private TreeService: any
 	) {
-		this.issuesPanelCard = {
+		this.reset();
+	}
+
+	public reset() {
+		this.panelCards = {
 			left: [],
-			right: [],
+			right: []
 		};
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "issues",
 			title: "Issues",
+			showLiteMode: true,
 			show: true,
 			help: "List current issues",
 			icon: "place",
@@ -46,7 +89,15 @@ export class PanelService {
 					label: "Print",
 					selected: false,
 					noToggle: true,
-					icon: "fa-print",
+					icon: "fa-print"
+				},
+				{
+					hidden: false,
+					value: "importBCF",
+					label: "Import BCF",
+					selected: false,
+					noToggle: true,
+					icon: "fa-upload"
 				},
 				{
 					hidden: false,
@@ -55,7 +106,7 @@ export class PanelService {
 					selected: false,
 					noToggle: true,
 					icon: "fa-cloud-download",
-					divider: true,
+					divider: true
 				},
 				{
 					hidden: false,
@@ -64,18 +115,20 @@ export class PanelService {
 					firstSelectedIcon: "fa-sort-amount-desc",
 					secondSelectedIcon: "fa-sort-amount-asc",
 					toggle: false,
-					selected: true,
+					selected: false,
 					firstSelected: true,
 					secondSelected: false,
+					keepCheckSpace: false
 				},
 				{
 					hidden: false,
 					value: "showClosed",
-					label: "Show resolved issues",
+					label: "Show closed issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
 					secondSelected: false,
+					keepCheckSpace: true
 				},
 				{
 					hidden: false,
@@ -84,25 +137,38 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false,
+					secondSelected: false
 				}, {
 					hidden: false,
 					upperDivider: true,
-					label: "Created by: ",
-				},
+					label: "Created by: "
+				}
 			],
 			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
-				{type: "filter", visible: true},
+				{type: "filter", visible: true}
 			],
-			add: true,
+			add: true
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
+			type: "groups",
+			title: "Groups",
+			showLiteMode: true,
+			show: false,
+			help: "List current groups",
+			icon: "group_work",
+			minHeight: 80,
+			fixedHeight: false,
+			options: []
+		});
+
+		this.panelCards.left.push({
 			type: "tree",
 			title: "Tree",
+			showLiteMode: true,
 			show: false,
 			help: "Model elements shown in a tree structure",
 			icon: "device_hub",
@@ -115,7 +181,7 @@ export class PanelService {
 					label: "Show All",
 					selected: false,
 					noToggle: true,
-					icon: "fa-eye",
+					icon: "fa-eye"
 				},
 				{
 					hidden: false,
@@ -123,7 +189,7 @@ export class PanelService {
 					label: "Isolate Selected",
 					selected: false,
 					noToggle: true,
-					icon: "fa-scissors",
+					icon: "fa-scissors"
 				},
 				{
 					hidden: false,
@@ -132,66 +198,109 @@ export class PanelService {
 					selected: true,
 					toggle: true,
 					keepCheckSpace: true,
-					icon: "fa-home",
-				},
+					icon: "fa-home"
+				}
 			],
 			options: [
 				{type: "menu", visible: true},
-				{type: "filter", visible: true},
-			],
+				{type: "filter", visible: true}
+			]
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "clip",
 			title: "Clip",
+			showLiteMode: false,
 			show: false,
 			help: "Clipping plane",
 			icon: "crop_original",
 			fixedHeight: true,
 			options: [
-				{type: "visible", visible: true},
-			],
+				{type: "visible", visible: true}
+			]
 		});
 
-		this.issuesPanelCard.left.push({
+		this.panelCards.left.push({
 			type: "compare",
 			title: "Compare",
+			showLiteMode: false,
 			show: false,
 			help: "Show clashes and differences between models",
 			icon: "compare",
 			minHeight: 80,
 			fixedHeight: false,
-			options: [],
+			options: []
 		});
 
-		this.issuesPanelCard.right.push({
+		this.panelCards.left.push({
+			type: "gis",
+			title: "GIS",
+			showLiteMode: false,
+			show: false,
+			help: "Add various GIS data to the view",
+			icon: "landscape",
+			minHeight: 80,
+			fixedHeight: false,
+			options: []
+		});
+
+		this.panelCards.right.push({
 			type: "docs",
 			title: "Meta Data",
 			show: false,
+			showLiteMode: false,
 			help: "Documents",
 			icon: "content_copy",
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "close", visible: true},
-			],
+				{type: "close", visible: true}
+			]
 		});
 
-		this.issuesPanelCard.right.push({
-			type: "building",
-			title: "Building",
-			show: false,
-			help: "Building",
-			icon: "fa-cubes",
-			fixedHeight: true,
-			options: [
-			],
-		});
 	}
 
-	public hideSubModels(issuesCardIndex, hide) {
+	public setPanelMenu(side: string, panelType: string, newMenu: any[]) {
 
-		this.issuesPanelCard.left[issuesCardIndex].menu
+		// Check if the card exists
+		const item = this.panelCards[side].find((content) => {
+			return content.type === panelType;
+		});
+
+		// Append all the menu items to it
+		if (item && item.menu) {
+			newMenu.forEach((newItem) => {
+				const exists = item.menu.find( (oldItem) => oldItem.role === newItem.role);
+				if (!exists) {
+					item.menu.push(newItem);
+				}
+			});
+		}
+
+	}
+
+	public setIssuesMenu(jobsData: any) {
+		const menu: IMenuItem[] = [];
+		jobsData.forEach((role) => {
+			menu.push({
+				value: "filterRole",
+				hidden: false,
+				role: role._id,
+				label: role._id,
+				keepCheckSpace: true,
+				toggle: true,
+				selected: true,
+				firstSelected: false,
+				secondSelected: false
+			});
+		});
+
+		this.setPanelMenu("left", "issues", menu);
+	}
+
+	public hideSubModels(issuesCardIndex: number, hide: boolean) {
+
+		this.panelCards.left[issuesCardIndex].menu
 			.forEach((item) => {
 				if (item.value === "showSubModels") {
 					item.hidden = hide;
@@ -200,17 +309,28 @@ export class PanelService {
 
 	}
 
-	public handlePanelEvent(panelType, event, eventData) {
-
-		if  (event === this.EventService.EVENT.PANEL_CARD_ADD_MODE ||
-			event === this.EventService.EVENT.PANEL_CARD_EDIT_MODE
-		) {
-			if (panelType === "tree") {
-				// If another card is in modify mode don't show a node if an object is clicked in the viewer
-				this.TreeService.setHighlightSelected(!eventData.on);
+	public getCardIndex(type: string): number {
+		let index = -1;
+		const obj = this.panelCards.left.forEach((panel, i) => {
+			if (panel.type === type) {
+				index = i;
 			}
-		}
+		});
+		return index;
+	}
 
+	public setHideIfc(value: boolean) {
+
+		const issuesCardIndex = this.getCardIndex("issues"); // index of tree panel
+		const menuItemIndex = this.getCardIndex("issues"); // index of hideIfc
+
+		const hideIfcMenuItem = this.panelCards.left[issuesCardIndex]
+			.menu[menuItemIndex];
+
+		// Change state if different
+		if (hideIfcMenuItem.selected !== value) {
+			hideIfcMenuItem.selected = value;
+		}
 	}
 
 }

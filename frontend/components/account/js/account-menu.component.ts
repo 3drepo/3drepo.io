@@ -18,24 +18,33 @@
 class AccountMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$location",
+		"$scope",
 
 		"AuthService",
-		"ViewerService",
+		"StateManager"
 	];
 
 	private $mdOpenMenu;
 	private userAccount;
+	private showLiteModeButton;
+	private isLiteMode;
 
 	constructor(
-		private $location: any,
+		private $scope: ng.IScope,
 
 		private AuthService: any,
-		private ViewerService: any,
+		private StateManager: any
 	) {}
 
 	public $onInit() {
 		this.userAccount = this.AuthService.getUsername();
+	}
+
+	public handleLiteModeChange() {
+		if (this.isLiteMode !== undefined && this.isLiteMode !== null) {
+			localStorage.setItem("liteMode", this.isLiteMode);
+			location.reload();
+		}
 	}
 
 	/**
@@ -51,29 +60,41 @@ class AccountMenuController implements ng.IController {
 	 * Show user models
 	 */
 	public showTeamspaces() {
-		this.ViewerService.reset();
-		this.$location.path(this.AuthService.getUsername());
+		this.StateManager.resetServiceStates();
+		this.StateManager.goHome();
 	}
 
 	/**
 	 * Logout
 	 */
 	public logout() {
+		this.StateManager.resetServiceStates();
 		this.AuthService.logout();
-		this.ViewerService.reset();
 	}
 
 	public openUserManual() {
 		window.open("http://3drepo.org/models/3drepo-io-user-manual/", "_blank");
 	}
 
+	public hasMemorySettings() {
+		const mem = localStorage.getItem("deviceMemory");
+		return !!mem;
+	}
+
+	public resetMemorySettings() {
+		localStorage.removeItem("deviceMemory");
+	}
+
 }
 
 export const AccountMenuComponent: ng.IComponentOptions = {
-	bindings: {},
+	bindings: {
+		showLiteModeButton: "=",
+		isLiteMode: "="
+	},
 	controller: AccountMenuController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-menu.html",
+	templateUrl: "templates/account-menu.html"
 };
 
 export const AccountMenuComponentModule = angular

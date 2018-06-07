@@ -22,8 +22,8 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing"}) }
 );
-const log_iface = require("../../logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const helpers = require("./helpers");
 const async = require("async");
@@ -51,6 +51,8 @@ describe("Enrolling to a subscription", function () {
 	let username3 = "payment_user3";
 	let password3 = "payment_user3";
 	let email3 = "test3drepo_payment3@mailinator.com";
+
+	let username4 = "metaTest";
 
 	let email = "test3drepo_payment@mailinator.com";
 	let billingId = "I-000000000000";
@@ -120,7 +122,7 @@ describe("Enrolling to a subscription", function () {
 	let plans = {
 		"plans": [
 			{
-			"plan": "THE-100-QUID-PLAN",
+			"plan": "hundredQuidPlan",
 			"quantity": 3
 			}
 		],
@@ -137,18 +139,6 @@ describe("Enrolling to a subscription", function () {
 			"vat": "123456"
 		}
 	};
-
-
-	// it("should fail if VAT is invalid", function(done){
-	// 	this.timeout(timeout);
-
-	// 	agent.post(`/${username}/subscriptions`)
-	// 	.send(plans)
-	// 	.expect(400, function(err, res){
-	// 		expect(res.body.value).to.equal(responseCodes.INVALID_VAT.value);
-	// 		done(err);
-	// 	});
-	// });
 
 
 	it("should succeed no VAT is supplied", function(done){
@@ -197,7 +187,7 @@ describe("Enrolling to a subscription", function () {
 		let _plans = {
 			"plans": [
 				{
-				"plan": "THE-100-QUID-PLAN",
+				"plan": "hundredQuidPlan",
 				"quantity": 3
 				}
 			],
@@ -256,7 +246,7 @@ describe("Enrolling to a subscription", function () {
 		let _plans = {
 			"plans": [
 				{
-				"plan": "THE-100-QUID-PLAN",
+				"plan": "hundredQuidPlan",
 				"quantity": 3
 				}
 			],
@@ -519,13 +509,10 @@ describe("Enrolling to a subscription", function () {
 			
 			let twoDayLater = moment().utc().add(48, "hour").toDate();
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true });
-				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
-				subscriptions.forEach(sub => {
-					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
-					expect(Math.abs(sub.expiredAt - twoDayLater) / 1000).to.below(60);
-				});
-
+				let subscriptions = user.customData.billing.getActiveSubscriptions();
+				expect(subscriptions.paypal.length).to.equal(1);
+				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
+				expect(Math.abs(subscriptions.paypal[0].expiryDate - twoDayLater) / 1000).to.below(60);
 				done();
 			}).catch(err => {
 				done(err);
@@ -606,7 +593,6 @@ describe("Enrolling to a subscription", function () {
 
 			agent.get(`/${username}/invoices`)
 			.expect(200, function(err, res){
-				//console.log("billings", res.body);
 				expect(res.body).to.be.an("array").and.to.have.length(1);
 				expect(res.body[0].invoiceNo).to.equal("SO-1");
 				expect(res.body[0].pending).to.be.false;
@@ -620,19 +606,15 @@ describe("Enrolling to a subscription", function () {
 			//let twoDayLater = moment().utc().add(48, "hour").toDate();
 
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
-				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
-				subscriptions.forEach(sub => {
-					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
+				let subscriptions = user.customData.billing.getActiveSubscriptions()
+				expect(subscriptions.paypal.length).to.equal(1);
+				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
 
-					let expiredAt = moment(new Date(nextPayDateString)).utc()
-						.add(3, "day")
-						.hours(0).minutes(0).seconds(0).milliseconds(0)
-						.toDate();
-
-					expect(sub.expiredAt.valueOf()).to.equal(expiredAt.valueOf());
-				});
-
+				let expiredAt = moment(new Date(nextPayDateString)).utc()
+					.add(3, "day")
+					.hours(0).minutes(0).seconds(0).milliseconds(0)
+					.toDate();
+				expect(subscriptions.paypal[0].expiryDate.valueOf()).to.equal(expiredAt.valueOf());
 				done();
 			}).catch(err => {
 				done(err);
@@ -661,48 +643,19 @@ describe("Enrolling to a subscription", function () {
 			agent.get(`/${username}/subscriptions`)
 			.expect(200, function(err, res){
 
-				expect(res.body).to.be.an("array").and.to.have.length(3);
-
-				subscriptions = res.body;
-
-				subscriptions.forEach(sub => {
-
-					expect(sub).to.have.property("limits");
-					expect(sub.limits).to.have.property("spaceLimit");
-					expect(sub.limits.spaceLimit).to.be.above(0);
-
-					expect(sub.limits).to.have.property("collaboratorLimit");
-					expect(sub.limits.collaboratorLimit).to.be.above(0);
-
-					expect(sub).to.have.property("active");
-					expect(sub.active).to.equal(true);
-					expect(sub).to.have.property("plan");
-					expect(sub.plan).to.equal(plans.plans[0].plan);
-
-				});
+				expect(res.body.paypal).to.be.an("array").and.to.have.length(1);
+				expect(res.body.paypal[0].plan).to.equal(plans.plans[0].plan);
+				expect(res.body.paypal[0].quantity).to.equal(3);
+				expect(res.body.paypal[0]).to.have.property("expiryDate");
 
 				done(err);
 			});
 		});
 
-		it("and the first subscription should assigned to user itself", function(){
-			expect(subscriptions[0].assignedUser).to.equal(username);
-		});
-
 		describe("and then assigning it", function(){
 
-			it("should fail if subscription id does not exist", function(done){
-				agent.post(`/${username}/subscriptions/000000000000000000000000/assign`)
-				.send({ user: username2})
-				.expect(404, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_NOT_FOUND.value);
-					done(err);
-				});
-			});
-
 			it("to a non existing user should fail", function(done){
-				agent.post(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
-				.send({ user: "payment_non_existing"})
+				agent.post(`/${username}/members/payment_non_existing`)
 				.expect(404, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 					done(err);
@@ -710,45 +663,48 @@ describe("Enrolling to a subscription", function () {
 			});
 
 			it("to a existing user should succeed", function(done){
-				agent.post(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
-				.send({ user: username2 })
+				agent.post(`/${username}/members/${username2}`)
 				.expect(200, function(err, res){
 					done(err);
 				});
 			});
 
-			it("to a user assgined to another license should fail", function(done){
-				agent.post(`/${username}/subscriptions/${subscriptions[2]._id}/assign`)
-				.send({ user: username2 })
+			it("to a user assigned to another license should fail", function(done){
+				agent.post(`/${username}/members/${username2}`)
 				.expect(400, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.USER_ALREADY_ASSIGNED.value);
 					done(err);
 				});
 			});
 
-			it("to an other existing user again should fail", function(done){
-				agent.post(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
-				.send({ user: username3 })
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED.value);
+			it("to another (3rd) user should succeed", function(done){
+				agent.post(`/${username}/members/${username3}`)
+				.expect(200, function(err, res){
 					done(err);
 				});
 			});
 
+			it("to another (4th) user should fail", function(done){
+				agent.post(`/${username}/members/${username4}`)
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
+					done(err);
+				});
+			});
+
+
 			describe("and then deleting it", function(){
 
-
-				it("should fail if subscription ID does not exist", function(done){
-					agent.delete(`/${username}/subscriptions/000000000000000000000000/assign`)
+				it("should succeed", function(done){
+					agent.delete(`/${username}/members/${username3}`)
 					.send({})
-					.expect(404, function(err, res){
-						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_NOT_FOUND.value);
+					.expect(200, function(err, res){
 						done(err);
 					});
 				});
 
-				it("should succeed", function(done){
-					agent.delete(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
+				it("should succeed anyway if the user is not a member", function(done){
+					agent.delete(`/${username}/members/${username4}`)
 					.send({})
 					.expect(200, function(err, res){
 						done(err);
@@ -756,20 +712,10 @@ describe("Enrolling to a subscription", function () {
 				});
 
 				it("should fail if try to remove itself", function(done){
-					agent.delete(`/${username}/subscriptions/${subscriptions[0]._id}/assign`)
+					agent.delete(`/${username}/members/${username}`)
 					.send({})
 					.expect(400, function(err, res){
 						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
-						done(err);
-					});
-				});
-
-
-				it("should fail if license havent been assigned to anyone", function(done){
-					agent.delete(`/${username}/subscriptions/${subscriptions[2]._id}/assign`)
-					.send({})
-					.expect(400, function(err, res){
-						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_NOT_ASSIGNED.value);
 						done(err);
 					});
 				});
@@ -952,18 +898,15 @@ describe("Enrolling to a subscription", function () {
 			//let twoDayLater = moment().utc().add(48, "hour").toDate();
 
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.subscriptions.getActiveSubscriptions({ skipBasic: true, excludeNotInAgreement: true })
-				expect(subscriptions.length).to.equal(plans.plans[0].quantity);
-				subscriptions.forEach(sub => {
-					//the different between two datetime should be within a reasonable limit, i.e. 60 seconds
-
-					let expiredAt = moment(new Date(nextPayDateString)).utc()
-						.add(3, "day")
-						.hours(0).minutes(0).seconds(0).milliseconds(0)
-						.toDate();
-
-					expect(sub.expiredAt.valueOf()).to.equal(expiredAt.valueOf());
-				});
+				let subscriptions = user.customData.billing.getActiveSubscriptions();
+				let expiredAt = moment(new Date(nextPayDateString)).utc()
+					.add(3, "day")
+					.hours(0).minutes(0).seconds(0).milliseconds(0)
+					.toDate();
+				
+				expect(subscriptions.paypal.length).to.equal(1);
+				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
+				expect(subscriptions.paypal[0].expiryDate.valueOf()).to.equal(expiredAt.valueOf());
 
 				done();
 			}).catch(err => {
@@ -1093,7 +1036,6 @@ describe("Enrolling to a subscription", function () {
 			agent.post(`/${username3}/subscriptions`)
 			.send(plans)
 			.expect(200, function(err, res){
-				//console.log(res.body);
 				expect(res.body).to.have.property("url");
 				let parsed = url.parse(res.body.url, true);
 				expect(parsed.query).to.have.property("token");
@@ -1182,7 +1124,6 @@ describe("Enrolling to a subscription", function () {
 				return new Promise((resolve, reject) => {
 					agent.get(`/${username3}/invoices`)
 					.expect(200, function(err, res){
-						//console.log("billings", res.body);
 						expect(res.body).to.be.an("array").and.to.have.length(1);
 						expect(res.body[0].invoiceNo).to.equal("SO-3");
 						expect(res.body[0].pending).to.equal(true);

@@ -27,7 +27,7 @@ class AccountFederationsController implements ng.IController {
 		"AuthService",
 		"AnalyticService",
 		"AccountService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private onShowPage;
@@ -36,6 +36,8 @@ class AccountFederationsController implements ng.IController {
 	private account;
 	private originalFederationData;
 	private federationData;
+
+	private errorDialog;
 
 	private isSaving;
 	private modelRegExp;
@@ -64,7 +66,7 @@ class AccountFederationsController implements ng.IController {
 		private AuthService,
 		private AnalyticService,
 		private AccountService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -151,8 +153,21 @@ class AccountFederationsController implements ng.IController {
 				icon: "edit",
 				hidden: !this.AuthService.hasPermission(
 					this.ClientConfigService.permissions.PERM_EDIT_FEDERATION,
-					model.permissions,
-				),
+					model.permissions
+				)
+			},
+			permissions: {
+				label: "Permissions",
+				icon: "group",
+				hidden: !this.account === this.userAccount
+			},
+			modelsetting: {
+				label: "Settings",
+				icon: "settings",
+				hidden: !this.AuthService.hasPermission(
+					this.ClientConfigService.permissions.PERM_CHANGE_MODEL_SETTINGS,
+					model.permissions
+				)
 			},
 			delete: {
 				label: "Delete",
@@ -160,22 +175,9 @@ class AccountFederationsController implements ng.IController {
 				color: "#F44336",
 				hidden: !this.AuthService.hasPermission(
 					this.ClientConfigService.permissions.PERM_DELETE_MODEL,
-					model.permissions,
-				),
-			},
-			permissions: {
-				label: "Permissions",
-				icon: "group",
-				hidden: !this.account === this.userAccount,
-			},
-			modelsetting: {
-				label: "Settings",
-				icon: "settings",
-				hidden: !this.AuthService.hasPermission(
-					this.ClientConfigService.permissions.PERM_CHANGE_MODEL_SETTINGS,
-					model.permissions,
-				),
-			},
+					model.permissions
+				)
+			}
 		};
 
 	}
@@ -209,7 +211,7 @@ class AccountFederationsController implements ng.IController {
 			this.AnalyticService.sendEvent({
 				eventCategory: "Model",
 				eventAction: "view",
-				eventLabel: "federation",
+				eventLabel: "federation"
 			});
 
 		}
@@ -255,7 +257,7 @@ class AccountFederationsController implements ng.IController {
 							this.accounts,
 							account.name,
 							this.projectToDeleteFrom.name,
-							response.data.model,
+							response.data.model
 						);
 					}
 
@@ -267,7 +269,7 @@ class AccountFederationsController implements ng.IController {
 					this.AnalyticService.sendEvent({
 						eventCategory: "Model",
 						eventAction: "delete",
-						eventLabel: "federation",
+						eventLabel: "federation"
 					});
 
 				} else {
@@ -292,6 +294,10 @@ class AccountFederationsController implements ng.IController {
 	 */
 	public setupEditFederation(event: any, teamspace: any, project: any, model: any) {
 		this.federationData = model;
+
+		// TODO: Why isn't this in the fed data model?
+		this.federationData.unit = this.federationData.unit || "mm";
+
 		this.federationData.teamspace = teamspace.name;
 
 		// Default projects wont have a name
@@ -360,22 +366,23 @@ export const AccountFederationsComponent: ng.IComponentOptions = {
 		originalFederationData: "=",
 		federationIndex: "=",
 		onShowPage: "&",
-		quota: "=",
-		subscriptions: "=",
 		isDefaultFederation: "@",
 		getPotentialFederationModels: "=",
 		federationsSaving: "=",
 		saveFederation: "=",
 		addToFederation: "=",
+		errorDialog: "=",
+		cancelFederationChanges: "=",
 		isDuplicateName: "=",
+		resetViewableCache: "=",
 		checkFederationSaveDisabled: "=",
 		federationSaveDisabled: "=",
 		isSaving: "=",
-		federationErrorMessage: "=",
+		federationErrorMessage: "="
 	},
 	controller: AccountFederationsController,
 	controllerAs: "vm",
-	templateUrl: "templates/account-federations.html",
+	templateUrl: "templates/account-federations.html"
 };
 
 export const AccountFederationsComponentModule = angular

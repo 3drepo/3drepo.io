@@ -56,6 +56,7 @@ router.get("/:model/revision/:rev/meshes.json", middlewares.hasReadAccessToModel
 //Unity information
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
+router.get('/:model/:uid.json.mpc',  middlewares.hasReadAccessToModel, getJsonMpc);
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
 //update federated model
@@ -67,8 +68,6 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
 //model permission
 router.get("/:model/permissions",  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
-router.get("/:model/jobs.json", middlewares.hasReadAccessToModel, getJobs);
-router.get("/:model/userJobForModel.json", middlewares.hasReadAccessToModel, getUserJobForModel);
 
 //master tree
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
@@ -159,26 +158,7 @@ function getModelSetting(req, res, next){
 
 	_getModel(req).then(setting => {
 
-		//setting = setting.toObject();
-		
-		let whitelist = [
-			"name", 
-			"owner", 
-			"desc", 
-			"type", 
-			"permissions", 
-			"properties", 
-			"status", 
-			"errorReason", 
-			"federate", 
-			"subModels",
-			"fourDSequenceTag"
-		];
-
-
-		whitelist.forEach(key => {
-			resObj[key] = setting[key];
-		});
+		resObj = setting;
 		resObj.model = setting._id;
 		resObj.account = req.params.account;
 
@@ -187,12 +167,6 @@ function getModelSetting(req, res, next){
 		let account = req.params.account;
 		let model = req.params.model;
 
-		// Calculate revision heads
-		return History.getHeadRevisions({account, model});
-
-	}).then(headRevisions => {
-		
-		resObj.headRevisions = headRevisions;
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
 
 	}).catch(err => {
@@ -218,6 +192,7 @@ function createModel(req, res, next){
 		code: req.body.code,
 		project: req.body.project
 	};
+
 
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 	data.userPermissions = req.session.user.permissions;
@@ -546,57 +521,12 @@ function getPermissions(req, res, next){
 	});
 }
 
-function getJobs(req, res, next){
-	
-
-	const account = req.params.account;
-
-	User.findByUserName(account).then(dbUser => {
-		if(!dbUser){
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
-
-		return dbUser.customData.jobs.get();
-
-	}).then(jobs => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
-	}).catch(err => {
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-
-}
-
-function getUserJobForModel(req, res, next){
-	
-
-	const account = req.params.account;
-	const username = req.session.user.username;
-
-	User.findByUserName(account).then(dbUser => {
-		if(!dbUser){
-			return Promise.reject(responseCodes.USER_NOT_FOUND);
-		}
-
-		const job = dbUser.customData.billing.subscriptions.findByAssignedUser(username);
-		
-		if(job){
-			return dbUser.customData.jobs.findById(job.job);
-		}
-
-	}).then(job => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, job || {});
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
 function getUnityAssets(req, res, next){
 	
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const model = req.params.model;
+	const account = req.params.account;
+	const username = req.session.user.username;
 	let branch;
 
 	if(!req.params.rev){
@@ -610,12 +540,27 @@ function getUnityAssets(req, res, next){
 	});
 }
 
+function getJsonMpc(req, res, next){
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
+
+
+	ModelHelpers.getJsonMpc(account, model, id).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
+	});
+}
+
+
+
 function getUnityBundle(req, res, next){
 	
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let id = req.params.uid;
+	const model = req.params.model;
+	const account = req.params.account;
+	const id = req.params.uid;
 
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {

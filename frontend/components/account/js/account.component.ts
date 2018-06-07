@@ -15,7 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 class AccountController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -26,7 +25,7 @@ class AccountController implements ng.IController {
 		"AccountService",
 		"AuthService",
 		"APIService",
-		"DialogService",
+		"DialogService"
 	];
 
 	private accountInitialised;
@@ -34,9 +33,6 @@ class AccountController implements ng.IController {
 	private loadingAccount;
 	private username;
 	private account;
-	private billings;
-	private plans;
-	private subscriptions;
 	private query;
 	private itemToShow;
 	private firstName;
@@ -51,7 +47,7 @@ class AccountController implements ng.IController {
 	private accounts;
 	private billingAddress;
 	private hasAvatar;
-	private quota;
+	private showLiteModeButton;
 
 	constructor(
 		private $scope,
@@ -61,7 +57,7 @@ class AccountController implements ng.IController {
 		private AccountService,
 		private AuthService,
 		private APIService,
-		private DialogService,
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -101,62 +97,9 @@ class AccountController implements ng.IController {
 
 		if (!this.accountInitialised) {
 			// TODO: This is also a mess
-			this.getUserInfo().then(() => {
-				this.AuthService.authPromise.then(() => {
-					this.AccountService.accountDefer.promise.then(() => {
-						this.handleDirectiveInit(directive);
-					});
-				});
-			});
-
-		} else {
-			this.handleDirectiveInit(directive);
-		}
-
-	}
-
-	public handleDirectiveInit(directive) {
-		// If you go to a different URL teamspace you need to check 
-		// that you are actually the user in question!
-
-		// TODO: This shouldn't be necessary
-
-		if (this.username === this.AuthService.getUsername()) {
-
-			if (directive === "billing") {
-				this.initSubscriptions();
-				this.initBillings();
-				this.initPlans();
-			}
-
-			if (directive === "licenses") {
-				this.initSubscriptions();
-			}
+			this.getUserInfo();
 
 		}
-	}
-
-	public initBillings() {
-		return this.APIService.get(this.account + "/invoices")
-			.then((response) => {
-				this.billings = response.data;
-			});
-	}
-
-	public initPlans() {
-		return this.APIService.get("plans")
-			.then((response) => {
-				if (response.status === 200) {
-					this.plans = response.data;
-				}
-			});
-	}
-
-	public initSubscriptions() {
-		return this.APIService.get(this.account + "/subscriptions")
-			.then((response) => {
-				this.subscriptions = response.data;
-			});
 	}
 
 	public capitalizeFirstLetter(str: string) {
@@ -295,16 +238,6 @@ class AccountController implements ng.IController {
 							}
 						}
 
-						// Get quota
-						if (angular.isDefined(this.accounts)) {
-							for (let i = 0; i < this.accounts.length; i++) {
-								if (this.accounts[i].account === this.account) {
-									this.quota = this.accounts[i].quota;
-									break;
-								}
-							}
-						}
-
 						this.loadingAccount = false;
 					} else {
 						console.debug("Reponse doesn't have data", response);
@@ -328,12 +261,13 @@ export const AccountComponent: ng.IComponentOptions = {
 		state: "=",
 		query: "=",
 		account: "=",
-		keysDown: "=",
-		isMobileDevice: "<",
+		isLiteMode: "=",
+		showLiteModeButton: "<"
+
 	},
 	controller: AccountController,
 	controllerAs: "vm",
-	templateUrl: "templates/account.html",
+	templateUrl: "templates/account.html"
 };
 
 export const AccountComponentModule = angular

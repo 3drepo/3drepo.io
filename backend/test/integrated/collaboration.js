@@ -22,8 +22,8 @@ const expect = require('chai').expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
 );
-const log_iface = require("../../logger.js");
-const systemLogger = log_iface.systemLogger;
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const helpers = require("./helpers");
 const async = require('async');
@@ -159,8 +159,7 @@ describe('Sharing/Unsharing a model', function () {
 					});
 				},
 				function ableToViewModel(done){
-
-					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
@@ -207,12 +206,6 @@ describe('Sharing/Unsharing a model', function () {
 
 		it('and the viewer should NOT be able to update model settings', function(done){
 			let body = {
-
-					mapTile: {
-						lat: 123,
-						lon: 234,
-						y: 5
-					},
 					unit: 'cm'
 
 			};
@@ -291,7 +284,7 @@ describe('Sharing/Unsharing a model', function () {
 					},
 					function notAbleToViewModel(done){
 
-						agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 						.expect(401, function(err ,res){
 							done(err);
 						});
@@ -379,7 +372,7 @@ describe('Sharing/Unsharing a model', function () {
 				},
 				function ableToViewModel(done){
 
-					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
@@ -450,11 +443,6 @@ describe('Sharing/Unsharing a model', function () {
 		it('and the commenter should NOT be able to update model settings', function(done){
 			let body = {
 
-					mapTile: {
-						lat: 123,
-						lon: 234,
-						y: 5
-					},
 					unit: 'cm'
 
 			};
@@ -532,7 +520,7 @@ describe('Sharing/Unsharing a model', function () {
 					},
 					function notAbleToViewModel(done){
 
-						agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 						.expect(401, function(err ,res){
 							done(err);
 						});
@@ -619,7 +607,7 @@ describe('Sharing/Unsharing a model', function () {
 				},
 				function ableToViewModel(done){
 
-					agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 					.expect(200, function(err ,res){
 						done(err);
 					});
@@ -692,11 +680,6 @@ describe('Sharing/Unsharing a model', function () {
 		it('and the collaborator should NOT be able to update model settings', function(done){
 			let body = {
 
-					mapTile: {
-						lat: 123,
-						lon: 234,
-						y: 5
-					},
 					unit: 'cm'
 
 			};
@@ -774,7 +757,7 @@ describe('Sharing/Unsharing a model', function () {
 					},
 					function notAbleToViewModel(done){
 
-						agent.get(`/${username}/${model}/revision/master/head.x3d.mp`)
+						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
 						.expect(401, function(err ,res){
 							done(err);
 						});
@@ -843,8 +826,8 @@ describe('Sharing/Unsharing a model', function () {
 
 			agent.post(`/${username}/${model}/permissions`)
 			.send(permissions)
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+			.expect(404, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
 			});
 		});

@@ -20,99 +20,224 @@ declare var Viewer;
 class BottomButtonsController implements ng.IController {
 
 	public static $inject: string[] = [
+		"$scope",
+		"$interval",
+		"$timeout",
+		"$element",
+
 		"ViewerService",
 		"TreeService",
+		"IconsConstant"
 	];
 
 	private showButtons: boolean;
-	private showViewingOptionButtons: boolean;
-	private viewingOptions: any;
+	private navigationState: any;
 	private selectedViewingOptionIndex: number;
-	private leftButtons: any[];
+	private bottomButtons: any[];
 	private selectedMode: string;
+	private showNavigationState: boolean;
+	private customIcons: any;
+	private isFocusMode: boolean;
+	private escapeFocusModeButton: HTMLElement;
 
 	constructor(
+		private $scope: ng.IScope,
+		private $interval: ng.IIntervalService,
+		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
+
 		private ViewerService: any,
 		private TreeService: any,
-	) {}
+		private IconsConstant: any
+	) {
+
+		this.customIcons = this.IconsConstant;
+
+	}
 
 	public $onInit() {
 
 		this.showButtons = true;
-		this.showViewingOptionButtons = false;
 
-		this.viewingOptions = {
-			Helicopter : {
-				mode: Viewer.NAV_MODES.HELICOPTER,
+		this.navigationState = {
+
+			VALUE : 1,
+
+			MODES : {
+				HELICOPTER : {
+					mode: Viewer.NAV_MODES.HELICOPTER,
+					label: "Helicopter"
+				},
+				TURNTABLE : {
+					mode: Viewer.NAV_MODES.TURNTABLE,
+					label: "Turntable"
+				}
 			},
-			Turntable : {
-				mode: Viewer.NAV_MODES.TURNTABLE,
-			},
+			SPEED : {
+				RESET : {
+					mode: "RESET",
+					label: "Reset",
+					fn: () => {
+						this.ViewerService.helicopterSpeedReset();
+						this.navigationState.VALUE = 1;
+						this.$timeout(); // Force digest
+					}
+				},
+				INCREASE : {
+					mode: "INCREASE",
+					label: "Increase",
+					fn: () => {
+						if (this.navigationState.VALUE < 99) {
+							this.ViewerService.helicopterSpeedUp();
+							this.navigationState.VALUE++;
+							this.$timeout();  // Force digest
+						}
+					}
+				},
+				DECREASE : {
+					mode: "DECREASE",
+					label: "Decrease",
+					fn: () => {
+						if (this.navigationState.VALUE > -99) {
+							this.ViewerService.helicopterSpeedDown();
+							this.navigationState.VALUE--;
+							this.$timeout();  // Force digest
+						}
+					}
+				}
+			}
+
 		};
 
 		document.addEventListener("click", (event: any) => {
 			// If the click is on the scene somewhere, hide the buttons
 			const valid = event && event.target && event.target.classList;
 			if (valid && event.target.classList.contains("emscripten")) {
-				this.showViewingOptionButtons = false;
+				this.showNavigationState = false;
 			}
 		}, false);
 
 		this.selectedViewingOptionIndex = 1;
 
-		this.leftButtons = [];
-		this.leftButtons.push({
+		this.addButtons();
+
+		this.selectedMode = this.navigationState.MODES.TURNTABLE.mode;
+		this.setNavigationMode(this.selectedMode);
+
+		this.isFocusMode = false;
+
+		this.escapeFocusModeButton = document.createElement("md-button");
+		this.escapeFocusModeButton.className = "focus-button";
+		const icon = document.createElement("md-icon");
+		icon.innerHTML = "clear";
+		icon.className = "angular-material-icons material-icons close-icon";
+
+		this.escapeFocusModeButton.appendChild(icon);
+		document.getElementsByTagName("home")[0].appendChild(this.escapeFocusModeButton);
+
+		// Bind a click handler to exit focus mode
+		this.escapeFocusModeButton.addEventListener("click", this.focusMode.bind(this));
+
+		this.watchers();
+	}
+
+	public watchers() {
+
+		// We have to use interval as watcher seems to
+		// break the e2e tests due to Angular timeouts
+		this.$interval(() => {
+			const newMode = this.ViewerService.getNavMode();
+			if (newMode !== this.selectedMode) {
+				this.selectedMode = newMode;
+			}
+		}, 1000);
+
+	}
+
+	public addButtons() {
+		this.bottomButtons = [];
+		this.bottomButtons.push({
 			label: "Extent",
 			icon: "fa fa-home",
 			month: (new Date()).getMonth(),
-			click: () => { this.extent(); },
+			click: () => { this.extent(); }
 		});
 
-		this.leftButtons.push({
+		this.bottomButtons.push({
 			isViewingOptionButton: true,
-			click: () => { this.setViewingOption(undefined); },
+			click: () => {
+				this.showNavigationState = !this.showNavigationState;
+			}
 		});
 
-		this.leftButtons.push({
+		this.bottomButtons.push({
 			label: "Show All",
-			icon: "fa fa-eye",
-			click: () => { this.showAll(); },
+			click: () => { this.showAll(); }
 		});
 
-		this.leftButtons.push({
+		this.bottomButtons.push({
+			label: "Hide",
+			click: () => { this.hide(); }
+		});
+
+		this.bottomButtons.push({
 			label: "Isolate",
-			icon: "fa fa-scissors",
-			click: () => { this.isolate(); },
+			click: () => { this.isolate(); }
 		});
 
-		this.selectedMode = "Turntable";
-		this.setViewingOption(this.selectedMode);
-
+		this.bottomButtons.push({
+			label: "Focus",
+			click: () => { this.focusMode(); }
+		});
 	}
 
 	public extent() {
 		this.ViewerService.goToExtent();
 	}
 
-	public setViewingOption(type) {
+	public setNavigationMode(mode) {
 
-		if (type !== undefined) {
+		if (mode !== undefined) {
 			// Set the viewing mode
-			this.selectedMode = type;
-			this.ViewerService.setNavMode(this.viewingOptions[type].mode);
-			this.showViewingOptionButtons = false;
-		} else {
-			this.showViewingOptionButtons = !this.showViewingOptionButtons;
+			this.selectedMode = mode;
+			this.navigationState.SPEED.RESET.fn();
+			this.ViewerService.setNavMode(this.navigationState.MODES[mode].mode);
+			this.showNavigationState = false;
 		}
 
 	}
 
 	public showAll() {
-		this.TreeService.showAllTreeNodesAndIFCs();
+		this.TreeService.showAllTreeNodes(true);
+	}
+
+	public hide() {
+		this.TreeService.hideSelected();
 	}
 
 	public isolate() {
 		this.TreeService.isolateSelected();
+	}
+
+	public focusMode() {
+
+		this.isFocusMode = !this.isFocusMode;
+		this.setFocusModeButtonVisibility();
+
+	}
+
+	public getAllElementHolder(): any {
+		return document.getElementsByClassName("homeHolder")[0];
+	}
+
+	public setFocusModeButtonVisibility() {
+		if (this.isFocusMode) {
+			this.escapeFocusModeButton.style.display = "initial";
+		} else {
+			this.escapeFocusModeButton.style.display = "none";
+		}
+		const allElementsHolder = this.getAllElementHolder();
+		allElementsHolder.style.visibility = (this.isFocusMode) ? "hidden" : "visible";
 	}
 
 }
@@ -121,7 +246,7 @@ export const BottomButtonsComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: BottomButtonsController,
 	controllerAs: "vm",
-	templateUrl: "templates/bottom-buttons.html",
+	templateUrl: "templates/bottom-buttons.html"
 };
 
 export const BottomButtonsComponentModule = angular
