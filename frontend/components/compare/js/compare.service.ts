@@ -315,7 +315,6 @@ export class CompareService {
 				let loadModel;
 
 				if (canReuseModel) {
-
 					this.changeModelVisibility(sharedRevisionModel.account + ":" + sharedRevisionModel.name, true);
 					this.ViewerService.diffToolSetAsComparator(
 						model.account,
@@ -362,31 +361,7 @@ export class CompareService {
 
 	public compareInNewMode(mode) {
 		this.setMode(mode);
-		this.useSetModeComparison();
-	}
-
-	public useSetModeComparison() {
-
-		if (!this.state.compareEnabled) {
-			return;
-		}
-
-		if (this.state.mode === "diff") {
-
-			this.ViewerService.diffToolEnableWithDiffMode();
-			this.changeCompareState("compare");
-
-		} else if (this.state.mode === "clash") {
-
-			if (this.state.isFed) {
-				this.ViewerService.diffToolEnableWithClashMode();
-			} else {
-				this.ViewerService.diffToolShowBaseModel();
-			}
-
-			this.changeCompareState("compare");
-
-		}
+		this.disableComparison();
 	}
 
 	public disableComparison() {
