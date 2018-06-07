@@ -16,7 +16,6 @@
 				div.assignTabHolder(layout="column" ng-if="!vm.loadingTeamspaces", flex="100")
 					
 					md-card(md-padding layout="row" layout-align="center center") 
-						p Teamspaces are the top level container for all your content. Teamspaces hold Projects which in turn hold models and federations.
 
 					md-card.assignDropDowns(flex="100")
 						md-label Select Teamspace
@@ -48,7 +47,6 @@
 
 								tr
 									th.adminColumn Admin
-										md-tooltip {{vm.teamspacePermissions.teamspace_admin.tooltip}}
 
 							tbody(layout="column")
 								tr(
@@ -75,6 +73,7 @@
 											ng-disabled="vm.selectedTeamspace.account == user.user || vm.account == user.user"
 											ng-click="vm.teamspaceStateChange(user, 'teamspace_admin')"
 											ng-checked="vm.userHasPermissions(user, 'teamspace_admin')")
+										md-tooltip {{vm.teamspacePermissions.teamspace_admin.tooltip}}
 
 
 						//h3.noUsers(ng-if="vm.teamspacesToAssign()") No available users to assign permissions
@@ -87,9 +86,6 @@
 					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.projectsLoading", flex="100")
-
-					md-card(layout="row" layout-align="center center") 
-						p Projects are a way of organising and grouping your models and federations. They sit below Teamspaces.
 
 					md-card.assignDropDowns(layout="row")
 						div(flex="50", layout="column")
@@ -136,7 +132,6 @@
 										md-tooltip {{value.tooltip}}
 
 									th.adminColumn Admin
-										md-tooltip {{vm.projectPermissions.admin_project.tooltip}}
 
 							tbody(layout="column")
 								tr(
@@ -165,6 +160,7 @@
 											ng-click="vm.projectStateChange(user, 'admin_project')"
 											ng-disabled="vm.isTeamspaceAdmin(user)"
 											ng-checked="vm.userHasProjectPermissions(user, 'admin_project') || vm.isTeamspaceAdmin(user)")
+										md-tooltip {{vm.projectPermissions.admin_project.tooltip}}
 
 							
 						
@@ -179,9 +175,6 @@
 					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column", ng-if="vm.modelDataReady()", flex="100")
-
-					md-card(layout="row" layout-align="center center") 
-						p Models and Federations sit below Projects. Federations are made of individual Models.
 
 					md-card.assignDropDowns(layout="row")
 						div(flex="33", layout="column")
@@ -273,6 +266,7 @@
 												ng-click="vm.modelStateChange(user, value)"
 												layout-align="center center"
 												ng-value="value")
+											md-tooltip {{vm.modelRolesToolTip[value]}}
 
 							//tbody(layout="column", ng-if="vm.modelSelected || !vm.modelReady")
 								h3.noUsers Preparing users...

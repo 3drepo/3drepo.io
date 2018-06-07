@@ -50,6 +50,14 @@ class AccountAssignController implements ng.IController {
 	private teamspacePermissions;
 	private projectPermissions;
 
+	private modelRolesToolTip = {
+		unassigned : "No access",
+		viewer : "Can only view",
+		commenter : "View and create issues",
+		collaborator: "Full access and ability to upload/download revisions",
+		admin: "Collaborator access and edit permissions"
+	};
+
 	constructor(
 		private $scope: ng.IScope,
 		private $window: ng.IWindowService,
@@ -59,7 +67,6 @@ class AccountAssignController implements ng.IController {
 
 		private APIService
 	) {}
-
 	public $onInit() {
 
 		this.teamspaceAdmin = "teamspace_admin";
@@ -80,20 +87,14 @@ class AccountAssignController implements ng.IController {
 		this.teamspacePermissions = {
 			teamspace_admin : {
 				title: "Admin",
-				tooltip: `
-					Give the user full administration privileges for
-					Teamspace and all sub projects, federations and models.
-				`
+				tooltip: "Manage licenses, create new projects, full access to all projects"
 			}
 		};
 
 		this.projectPermissions = {
 			admin_project :  {
 				title: "Admin Project",
-				tooltip: `
-					Give the user full administration privileges for the Project
-					and all federations and models held within it.
-				`
+				tooltip: "Manage permissions, create models/federations, full access to all models"
 			}
 		};
 
