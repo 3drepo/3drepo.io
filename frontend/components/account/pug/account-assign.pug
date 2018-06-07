@@ -35,7 +35,7 @@
 							thead(layout="row")
 
 								tr
-									th.userColumn User
+									th.userTitleColumn User
 										md-tooltip The user to assign permissions to
 
 								tr(
@@ -46,7 +46,7 @@
 											md-tooltip {{value.tooltip}}
 
 								tr
-									th.firstRoleColumn Admin
+									th.first Admin
 
 							tbody(layout="column")
 								tr(
@@ -123,7 +123,7 @@
 							flex)
 							thead(layout="column")
 								tr
-									th.userColumn User
+									th.userTitleColumn User
 										md-tooltip The user to assign permissions to
 
 									th(ng-if="permission !== 'admin_project'"
@@ -131,7 +131,7 @@
 										layout-align="center center") {{value.title}}
 										md-tooltip {{value.tooltip}}
 
-									th.firstRoleColumn Admin
+									th.first Admin
 
 							tbody(layout="column")
 								tr(
@@ -228,13 +228,12 @@
 
 							thead(layout="row")
 								tr
-									th.fixedWidth.userColumn User
+									th.fixedWidth.userTitleColumn User
 										md-tooltip The user to assign permissions to
 
 								//tr: th.fixedWidth.userColumn Role
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
-									th.fixedWidth.sentenceCase(
-										ng-class="{'firstRoleColumn' : value == 'unassigned'}") {{value}}
+									th.fixedWidth.sentenceCase() {{value}}
 
 							tbody(layout="column", ng-if="vm.selectedModel && vm.modelReady")
 								tr(

@@ -960,8 +960,15 @@ account-assign md-checkbox span {
   font-size: 12px;
 }
 
-account-assign .firstRoleColumn {
-  border-left: black solid 1px;
+account-assign .userTitleColumn {
+  border-right: black solid 1px;
+  max-width: 250px;
+  width: 250px;
+}
+
+account-assign .userColumn {
+  max-width: 250px;
+  width: 250px;
 }
 
 account-assign .rowSelects {
