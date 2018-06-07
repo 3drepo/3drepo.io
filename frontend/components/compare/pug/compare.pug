@@ -88,7 +88,7 @@ div(
 									div(flex ng-click="$mdOpenMenu($event)" layout="row")
 										div(flex layout="column")
 											h5.modelText {{model.name}}
-											span.revisionText(ng-if="vm.modelType === 'target'") {{model.targetRevisionTag}}
+											span.revisionText(ng-if="vm.modelType === 'target'") {{model.targetRevision[vm.mode].tag}}
 											span.revisionText(ng-if="vm.modelType === 'base'")  {{model.baseRevisionTag}}
 										md-icon.angular-material-icons expand_more
 										md-tooltip(md-direction="right") Change Revision
@@ -98,8 +98,8 @@ div(
 
 											md-button(
 												ng-click="vm.setTargetRevision(model, revision)")
-												span(ng-if="revision.name !== model.targetRevision") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
-												span.selectedRev(ng-if="revision.name === model.targetRevision") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
+												span(ng-if="revision.name !== model.targetRevision[vm.mode].name") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
+												span.selectedRev(ng-if="revision.name === model.targetRevision[vm.mode].name") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
 												span
 												span.authorDate ({{revision.author}})
 							md-divider

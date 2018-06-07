@@ -126,8 +126,8 @@ export class CompareService {
 
 		const timestamp = this.RevisionsService.revisionDateFilter(revision.timestamp);
 
-		model.targetRevision = revision._id;
-		model.targetRevisionTag = revision.tag || timestamp || revision.name;
+		model.targetRevision[this.state.mode].name = revision._id;
+		model.targetRevision[this.state.mode].tag = revision.tag || timestamp || revision.name;
 
 		if (this.state.compareEnabled) {
 			this.state.compareEnabled = false;
@@ -180,8 +180,16 @@ export class CompareService {
 			revisions,
 			baseRevision: baseRevision.name,
 			baseRevisionTag: baseRevision.tag || baseTimestamp || baseRevision.name,
-			targetRevision: targetRevision.name,
-			targetRevisionTag: targetRevision.tag || targetTimestamp || targetRevision.name,
+			targetRevision: {
+				diff: {
+					name: targetRevision.name,
+					tag: targetRevision.tag || targetTimestamp || targetRevision.name
+				},
+				clash: {
+					name: baseRevision.name,
+					tag: baseRevision.tag || baseTimestamp || baseRevision.name
+				}
+			},
 			visible: "visible"
 		};
 	}
@@ -292,16 +300,17 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
-	public loadModels() {
+	public loadModels(isDiffMode: boolean) {
 		const allModels = [];
 
 		this.state.loadingComparison = true;
 		this.setBaseModelVisibility();
 
+		const mode = isDiffMode ? "diff" : "clash";
 		this.state.targetModels.forEach((model) => {
 
 			if (model &&  model.visible === "visible") {
-				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
+				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision[mode].name );
 				const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
 				let loadModel;
 
@@ -311,14 +320,14 @@ export class CompareService {
 					this.ViewerService.diffToolSetAsComparator(
 						model.account,
 						model.model,
-						model.targetRevision
+						model.targetRevision[mode].name
 					);
 
 				} else {
 					loadModel = this.ViewerService.diffToolLoadComparator(
 						model.account,
 						model.model,
-						model.targetRevision
+						model.targetRevision[mode].name
 					)
 						.catch((error) => {
 							console.error(error);
@@ -412,7 +421,7 @@ export class CompareService {
 		this.ViewerService.diffToolLoadComparator(
 			this.state.targetModels[0].account,
 			this.state.targetModels[0].model,
-			this.state.targetModels[0].targetRevision)
+			this.state.targetModels[0].targetRevision.diff.name)
 			.then(() => {
 				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
@@ -426,7 +435,7 @@ export class CompareService {
 	public startComparisonFed(isDiffMode: boolean) {
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels().then(() => {
+		this.loadModels(isDiffMode).then(() => {
 			if (isDiffMode) {
 				this.ViewerService.diffToolEnableWithDiffMode();
 			} else {
