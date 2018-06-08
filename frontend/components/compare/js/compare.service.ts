@@ -126,8 +126,8 @@ export class CompareService {
 
 		const timestamp = this.RevisionsService.revisionDateFilter(revision.timestamp);
 
-		model.targetRevision = revision._id;
-		model.targetRevisionTag = revision.tag || timestamp || revision.name;
+		model.targetRevision[this.state.mode].name = revision._id;
+		model.targetRevision[this.state.mode].tag = revision.tag || timestamp || revision.name;
 
 		if (this.state.compareEnabled) {
 			this.state.compareEnabled = false;
@@ -180,9 +180,17 @@ export class CompareService {
 			revisions,
 			baseRevision: baseRevision.name,
 			baseRevisionTag: baseRevision.tag || baseTimestamp || baseRevision.name,
-			targetRevision: targetRevision.name,
-			targetRevisionTag: targetRevision.tag || targetTimestamp || targetRevision.name,
-			visible: "visible"
+			targetRevision: {
+				diff: {
+					name: targetRevision.name,
+					tag: targetRevision.tag || targetTimestamp || targetRevision.name
+				},
+				clash: {
+					name: baseRevision.name,
+					tag: baseRevision.tag || baseTimestamp || baseRevision.name
+				}
+			},
+			visible: true
 		};
 	}
 
@@ -292,44 +300,59 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
-	public loadModels(compareType: string) {
+	public useSetModeComparison() {
+		if (this.state.compareEnabled) {
+			if (this.state.mode === "diff") {
+				this.ViewerService.diffToolEnableWithDiffMode();
+				this.changeCompareState("compare");
+			} else if (this.state.mode === "clash") {
+				if (this.state.isFed) {
+					this.ViewerService.diffToolEnabledWithClashMode();
+				} else {
+					this.ViewerService.diffToolShowBaseModel();
+				}
+
+				this.changeCompareState("compare");
+			}
+		}
+	}
+
+	public loadModels(isDiffMode: boolean) {
 		const allModels = [];
 
 		this.state.loadingComparison = true;
+		this.setBaseModelVisibility();
 
+		const mode = isDiffMode ? "diff" : "clash";
 		this.state.targetModels.forEach((model) => {
 
-			const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision );
-			const canReuseModel = sharedRevisionModel && sharedRevisionModel.visible === "invisible";
-			let loadModel;
+			if (model &&  model.visible) {
+				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision[mode].name );
+				const canReuseModel = sharedRevisionModel && !sharedRevisionModel.visible;
+				let loadModel;
 
-			if (canReuseModel) {
+				if (canReuseModel) {
+					this.changeModelVisibility(sharedRevisionModel.account + ":" + sharedRevisionModel.name, true);
+					this.ViewerService.diffToolSetAsComparator(
+						model.account,
+						model.model,
+						model.targetRevision[mode].name
+					);
 
-				this.setBaseModelVisibility(sharedRevisionModel);
+				} else {
+					loadModel = this.ViewerService.diffToolLoadComparator(
+						model.account,
+						model.model,
+						model.targetRevision[mode].name
+					)
+						.catch((error) => {
+							console.error(error);
+						});
 
-				this.ViewerService.diffToolSetAsComparator(
-					model.account,
-					model.model,
-					model.targetRevision
-				);
-
-				// TODO: This is a bit a hack as it doesn't sync with the tree
-				// We set the compare panel model back invisible
-				sharedRevisionModel.visible = "invisible";
-
-			} else if (model && model.visible === "visible") {
-
-				loadModel = this.ViewerService.diffToolLoadComparator(
-					model.account,
-					model.model,
-					model.targetRevision
-				)
-					.catch((error) => {
-						console.error(error);
-					});
-
+				}
+				allModels.push(loadModel);
 			}
-			allModels.push(loadModel);
+
 		});
 
 		return Promise.all(allModels);
@@ -343,43 +366,19 @@ export class CompareService {
 		}
 	}
 
-	public compare(account, model) {
+	public compare() {
 
 		if (this.state.compareEnabled) {
 			this.disableComparison();
 		} else {
-			this.enableComparison(account, model);
+			this.enableComparison();
 		}
 
 	}
 
 	public compareInNewMode(mode) {
 		this.setMode(mode);
-		this.useSetModeComparison();
-	}
-
-	public useSetModeComparison() {
-
-		if (!this.state.compareEnabled) {
-			return;
-		}
-
-		if (this.state.mode === "diff") {
-
-			this.ViewerService.diffToolEnableWithDiffMode();
-			this.changeCompareState("compare");
-
-		} else if (this.state.mode === "clash") {
-
-			if (this.state.isFed) {
-				this.ViewerService.diffToolEnableWithClashMode();
-			} else {
-				this.ViewerService.diffToolShowBaseModel();
-			}
-
-			this.changeCompareState("compare");
-
-		}
+		this.disableComparison();
 	}
 
 	public disableComparison() {
@@ -391,36 +390,30 @@ export class CompareService {
 
 	}
 
-	public enableComparison(account: string, model: string) {
+	public enableComparison() {
 
 		this.state.canChangeCompareState = false;
 		this.state.compareState = "compare";
 
-		if (this.state.mode === "clash") {
-			if (this.state.isFed === true) {
-				this.clashFed();
-			}
-		} else if (this.state.mode === "diff") {
-			if (this.state.isFed === false) {
-				this.diffModel(account, model);
-			} else {
-				this.diffFed();
-			}
+		if (this.state.isFed) {
+			this.startComparisonFed(this.state.mode === "diff");
+		} else {
+			this.diffModel();
 		}
 
 	}
 
-	public diffModel(account: string, model: string) {
+	public diffModel() {
 
 		this.ViewerService.diffToolDisableAndClear();
-
-		const modelToDiff = this.state.baseModels.find((m) => {
-			return m.model === model;
-		});
-		const revision = modelToDiff.selectedRevision;
 
 		this.state.loadingComparison = true;
-		this.ViewerService.diffToolLoadComparator(account, model, revision)
+		// This is only ever called in non fed models, so
+		// it's safe to assume targetModels.length === 1
+		this.ViewerService.diffToolLoadComparator(
+			this.state.targetModels[0].account,
+			this.state.targetModels[0].model,
+			this.state.targetModels[0].targetRevision.diff.name)
 			.then(() => {
 				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
@@ -431,76 +424,46 @@ export class CompareService {
 			});
 	}
 
-	public diffFed() {
+	public startComparisonFed(isDiffMode: boolean) {
 		this.ViewerService.diffToolDisableAndClear();
 
-		this.loadModels("diff")
-			.then(() => {
+		this.loadModels(isDiffMode).then(() => {
+			if (isDiffMode) {
 				this.ViewerService.diffToolEnableWithDiffMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
-
-	}
-
-	public clashFed() {
-
-		this.ViewerService.diffToolDisableAndClear();
-
-		this.loadModels("clash")
-			.then(() => {
+			} else {
 				this.ViewerService.diffToolEnableWithClashMode();
-				this.modelsLoaded();
-			})
-			.catch((error) => {
-				this.modelsLoaded();
-				console.error(error);
-			});
+			}
+			this.modelsLoaded();
+		}).catch((error) => {
+			this.modelsLoaded();
+			console.error(error);
+		});
 
 	}
 
 	public toggleModelVisibility(model) {
-		if (this.state.modelType === "target") {
-			this.setTargetModelVisibility(model);
-		} else if (this.state.modelType === "base") {
-			this.setBaseModelVisibility(model);
-
-		}
+		model.visible = !model.visible;
 		this.disableComparison();
 	}
 
-	private setBaseModelVisibility(model) {
+	private setBaseModelVisibility() {
+		this.state.baseModels.forEach((model) => {
+			this.changeModelVisibility(model.account + ":" + model.name, model.visible);
+		});
+	}
+
+	private changeModelVisibility(nodeName: string, visible: boolean) {
 		const nodes = this.TreeService.getAllNodes();
 		if (nodes.length && nodes[0].children) {
-			const childNodes = nodes[0].children;
-			childNodes.forEach((node) => {
-				if (node.name === model.account + ":" + model.name) {
-					// TODO: Fix this
-					if (model.visible === "invisible") {
+			nodes[0].children.forEach((node) => {
+				if (node.name === nodeName) {
+					if (visible) {
 						this.TreeService.showTreeNodes([node]);
 					} else {
 						this.TreeService.hideTreeNodes([node]);
 					}
-
-					// Keep the compare componetn and TreeService
-					// in sync with regards to visibility
-					model.visible = node.toggleState;
 				}
 			});
-		}
-
-	}
-
-	private setTargetModelVisibility(model) {
-		if (model.visible === "invisible") {
-			model.visible = "visible";
-		} else if (model.visible === "parentOfInvisible") {
-			model.visible = "visible";
-		} else {
-			model.visible = "invisible";
 		}
 	}
 
