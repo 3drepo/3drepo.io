@@ -16,13 +16,13 @@
  */
 
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var Schema = mongoose.Schema;
-var utils = require("../utils");
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let Schema = mongoose.Schema;
+let utils = require("../utils");
 
 
-var schema = Schema({
+let schema = Schema({
 	_id: Object,
 	parents: []
 });
@@ -47,8 +47,8 @@ schema.options.toJSON.transform = function (doc, ret) {
 };
 
 
-var Scene = ModelFactory.createClass(
-	'Scene', 
+let Scene = ModelFactory.createClass(
+	"Scene", 
 	schema, 
 	arg => { 
 		return `${arg.model}.scene`;

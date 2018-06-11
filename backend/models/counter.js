@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var DB = require('../db/db');
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let DB = require("../db/db");
 	
-var schema = mongoose.Schema({
+let schema = mongoose.Schema({
 	type: String,
 	count: Number
 });
@@ -27,17 +27,17 @@ var schema = mongoose.Schema({
 schema.statics.findAndIncInvoiceNumber = function(){
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
-	return DB.getDB('admin')
+	return DB.getDB("admin")
 	.then(db => {
-		return db.db('admin')
-			.collection('counters')
+		return db.db("admin")
+			.collection("counters")
 			.findOneAndUpdate(
-				{ type: 'invoice' },
-				{ '$inc': {'count': 1 }},
+				{ type: "invoice" },
+				{ "$inc": {"count": 1 }},
 				{ upsert : true, returnOriginal: false }
 			);
 	})
-	.then(doc => 'SO-' + doc.value.count);
+	.then(doc => "SO-" + doc.value.count);
 
 };
 
@@ -48,25 +48,25 @@ schema.statics.findAndIncRefundNumber = function(){
 
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
-	return DB.getDB('admin')
+	return DB.getDB("admin")
 	.then(db => {
-		return db.db('admin')
-			.collection('counters')
+		return db.db("admin")
+			.collection("counters")
 			.findOneAndUpdate(
-				{ type: 'refund' },
-				{ '$inc': {'count': 1 }},
+				{ type: "refund" },
+				{ "$inc": {"count": 1 }},
 				{ upsert : true, returnOriginal: false }
 			);
 	})
-	.then(doc => 'CN-' + doc.value.count);
+	.then(doc => "CN-" + doc.value.count);
 
 };
 
-var Counter = ModelFactory.createClass(
-	'Counter',
+let Counter = ModelFactory.createClass(
+	"Counter",
 	schema,
 	() => {
-		return 'counters';
+		return "counters";
 	}
 );
 

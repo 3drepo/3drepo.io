@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,43 +17,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let expect = require('chai').expect;
+let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 
 
-let request = require('supertest');
+let request = require("supertest");
 let responseCodes = require("../../response_codes.js");
 
-describe('Sign up', function(){
+describe("Sign up", function(){
 
 	let server;
 
 	before(function(done){
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 			done();
 		});
 	});
 
 	after(function(done){
 		server.close(function(){
-			console.log('API test server is closed');
+			console.log("API test server is closed");
 			done();
-		})
+		});
 	});
 
 
 
-	it('send contact email should return 400 with error message with config.contact.email is not set', function(done){
+	it("send contact email should return 400 with error message with config.contact.email is not set", function(done){
 
 		request(server)
-		.post(`/contact`)
+		.post("/contact")
 		.send({
 
-			"email": 'email',
-			"name": 'name',
+			"email": "email",
+			"name": "name",
 			"information": "information"
 
 		}).expect(400, function(err, res){

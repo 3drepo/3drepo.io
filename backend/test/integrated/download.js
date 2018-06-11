@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,10 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
+let request = require("supertest");
+let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 let logger = require("../../logger.js");
 let systemLogger = logger.systemLogger;
@@ -29,21 +29,21 @@ let responseCodes = require("../../response_codes.js");
 
 
 
-describe('Download', function () {
+describe("Download", function () {
 
 	let server;
 	let agent;
-	let username = 'testing';
-	let password = 'testing';
-	let model = 'testproject';
+	let username = "testing";
+	let password = "testing";
+	let model = "testproject";
 
 
 	before(function(done){
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			agent = request.agent(server);
-			agent.post('/login')
+			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
@@ -56,12 +56,12 @@ describe('Download', function () {
 
 	after(function(done){
 		server.close(function(){
-			console.log('API test server is closed');
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	it('should succee', function(done){
+	it("should succee", function(done){
 
 		agent.get(`/${username}/${model}/download/latest`)
 		.expect(200, function(err, res){

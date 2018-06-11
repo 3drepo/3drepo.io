@@ -18,19 +18,19 @@
 // Corresponds to repoNodeMaterial in C++ definition of 3D Repo
 
 // var mongodb = require('mongodb');
-var assert = require('assert');
-var UUID = require('node-uuid');
-var C = require('../constants');
+let assert = require("assert");
+let UUID = require("node-uuid");
+let C = require("../constants");
 
 exports.decode = function(bson, textures) {
 	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_MATERIAL, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to material");
 
 	// Supported only a single diffuse texture per material at the moment.
 	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-		for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
-			var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-			var childID = UUID.unparse(childIDbytes);
-			var texture = textures[childID];
+		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+			let childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+			let childID = UUID.unparse(childIDbytes);
+			let texture = textures[childID];
 			if (texture) {
 				bson.diffuseTexture = childID;
 				break;

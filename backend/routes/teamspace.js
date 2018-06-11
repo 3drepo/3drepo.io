@@ -18,10 +18,10 @@
 (function() {
 	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
@@ -89,9 +89,9 @@
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
 				if(req.params.user)
-					return dbUser.addTeamMember(req.params.user);
+					{return dbUser.addTeamMember(req.params.user);}
 				else
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
+					{return Promise.reject(responseCodes.USER_NOT_FOUND);}
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});

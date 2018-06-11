@@ -16,17 +16,17 @@
  */
 
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var utils = require("../utils");
-var C = require("../constants");
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let utils = require("../utils");
+let C = require("../constants");
 
-var stringToUUID = utils.stringToUUID;
-var uuidToString = utils.uuidToString;
+let stringToUUID = utils.stringToUUID;
+let uuidToString = utils.uuidToString;
 
-var Schema = mongoose.Schema;
+let Schema = mongoose.Schema;
 
-var historySchema = Schema({
+let historySchema = Schema({
 		_id: Object,
 		shared_id: Object,
 		paths: [],
@@ -62,7 +62,7 @@ historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 	
-	var query = {'incomplete': {'$exists': false}};
+	let query = {"incomplete": {"$exists": false}};
 
 	if(branch === C.MASTER_BRANCH_NAME){
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
@@ -81,7 +81,7 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 // get the head of a branch
 historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	
-	var query = { 'incomplete': {'$exists': false}};
+	let query = { "incomplete": {"$exists": false}};
 
 	projection = projection || {};
 
@@ -128,7 +128,7 @@ historySchema.methods.removeFromCurrent = function(id) {
 };
 
 historySchema.statics.clean = function(histories){
-	'use strict';
+	"use strict";
 
 	let cleaned = [];
 
@@ -140,7 +140,7 @@ historySchema.statics.clean = function(histories){
 };
 
 historySchema.methods.clean = function(){
-	'use strict';
+	"use strict";
 
 	let clean = this.toObject();
 	clean._id = uuidToString(clean._id);
@@ -149,7 +149,7 @@ historySchema.methods.clean = function(){
 };
 
 var History = ModelFactory.createClass(
-	'History', 
+	"History", 
 	historySchema, 
 	arg => { 
 		return `${arg.model}.history`;

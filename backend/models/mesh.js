@@ -94,7 +94,7 @@
 
 	meshSchema.statics.getMeshes = function (account, model, history) {
 		//find all meshes within this revision.
-		var query = { "_id" : {"$in": history.current}, "type": "mesh"};
+		let query = { "_id" : {"$in": history.current}, "type": "mesh"};
 		return this.find({account, model}, query, {_id : 1, shared_id: 1})
 			.then( meshes => {
 				meshes.forEach(mesh => {

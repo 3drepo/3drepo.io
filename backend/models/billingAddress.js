@@ -46,7 +46,7 @@ billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
 	
 	Object.keys(billingAddress).forEach(key => {
 
-		if(key === '_id') {
+		if(key === "_id") {
 			return;
 		} 
 
@@ -65,7 +65,7 @@ billingAddressSchema.methods.changeVATNumber = function(vatCode){
 
 	this.vat = vatCode;
 
-	let cleanedVATNumber = this.vat.replace(/ /g,'');
+	let cleanedVATNumber = this.vat.replace(/ /g,"");
 	if (cleanedVATNumber.toUpperCase().startsWith(this.countryCode)) {
 		cleanedVATNumber = cleanedVATNumber.substr(2); 
 	}

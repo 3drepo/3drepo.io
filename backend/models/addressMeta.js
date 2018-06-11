@@ -1,4 +1,4 @@
-var countries = [ 
+let countries = [ 
 	{"name": "Afghanistan", "code": "AF"}, 
 	{"name": "Åland Islands", "code": "AX"}, 
 	{"name": "Albania", "code": "AL"}, 
@@ -244,7 +244,7 @@ var countries = [
 	{"name": "Zimbabwe", "code": "ZW"} 
 ];
 
-var usStates = module.exports = [
+let usStates = module.exports = [
     {
         "name": "Alabama",
         "code": "AL"
@@ -483,7 +483,7 @@ var usStates = module.exports = [
     }
 ];
 
-var euCountriesCode = [
+let euCountriesCode = [
 	"GB",
 	"BE", "BG", "CZ", "DK", "DE", "EE", "IE", "GR", "ES", "FR", "HR", "IT", "CY", "LV", "LT",
 	"LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"

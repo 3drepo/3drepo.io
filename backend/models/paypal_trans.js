@@ -20,7 +20,7 @@
 
 	const C = require("../constants");
 	const config = require("../config");
-	const moment = require('moment');
+	const moment = require("moment");
 	const paypalPaymentTypes = {};
 	
 	paypalPaymentTypes[C.PRO_RATA_PAYMENT] = { "name" : "First month pro-rata price",

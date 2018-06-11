@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+let html = data => `
 	Hi there,<br>
 	<br>
 	Let's confirm your email address.<br>
@@ -30,5 +30,5 @@ var html = data => `
 
 module.exports =  {
 	html: html,
-	subject: 'Welcome to 3D Repo! Verify Your Email‏'
+	subject: "Welcome to 3D Repo! Verify Your Email‏"
 };

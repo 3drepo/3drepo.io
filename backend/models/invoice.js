@@ -34,7 +34,7 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 	const responseCodes = require("../response_codes.js");
-	const path  =require('path');
+	const path  =require("path");
 
 
 	const SchemaTypes = mongoose.Schema.Types;
@@ -55,11 +55,11 @@
 		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP }
 	});
 
-	itemSchema.virtual('description').get(function(){
+	itemSchema.virtual("description").get(function(){
 		return config.subscriptions.plans[this.name]?  config.subscriptions.plans[this.name].label : "Unknown license";
 	});
 
-	itemSchema.set('toJSON', { virtuals: true, getters:true });
+	itemSchema.set("toJSON", { virtuals: true, getters:true });
 	
 	let schema = mongoose.Schema({
 		invoiceNo: String,
@@ -94,33 +94,33 @@
 		return roundTo2DP(this.taxAmount / this.netAmount) * 100;
 	});
 
-	schema.virtual('info.countryName').get(function(){
+	schema.virtual("info.countryName").get(function(){
 		let country = addressMeta.countries.find(c => c.code === this.info.countryCode);
 		return country && country.name;
 	});
 
-	schema.virtual('B2B_EU').get(function(){
+	schema.virtual("B2B_EU").get(function(){
 		return (addressMeta.euCountriesCode.indexOf(this.info.countryCode) !== -1) && this.info.vat ? true : false;
 	});
 
 	//TO-DO: the current design of the invoice (invoice.pug) assume user only buy one type of products which is always true for now but not for the future
 	// remove unit price and change the layout of invoice and use price in the items array
-	schema.virtual('unitPrice').get(function(){
+	schema.virtual("unitPrice").get(function(){
 
 		let unitPrice = roundTo3DP(this.netAmount / this.items.length).toFixed(3);
 		
-		if(unitPrice.substr(-1) === '0'){
+		if(unitPrice.substr(-1) === "0"){
 			unitPrice = unitPrice.slice(0, -1);
 		}
 
 		return unitPrice;
 	});
 
-	schema.virtual('pending').get(function(){
+	schema.virtual("pending").get(function(){
 		return this.state === C.INV_PENDING;
 	});
 
-	schema.virtual('proRata').get(function(){
+	schema.virtual("proRata").get(function(){
 		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === config.subscriptions.plans[this.items[0].name].price.toFixed(2)){
 			return false;
 		}
@@ -129,9 +129,9 @@
 	});
 
 	//schema.set('toObject', { virtuals: true, getter:true });
-	schema.set('toJSON', { virtuals: true, getters:true });
+	schema.set("toJSON", { virtuals: true, getters:true });
 
-	schema.pre('save', function(next){
+	schema.pre("save", function(next){
 		
 		if(!this.invoiceNo && this.state !== C.INV_INIT){
 			//generate invoice number if doesn't have one and passed the init state
@@ -185,8 +185,8 @@
 		this.periodStart = data.startDate;
 		this.periodEnd = moment(this.nextPaymentDate)
 			.utc()
-			.subtract(1, 'day')
-			.endOf('date')
+			.subtract(1, "day")
+			.endOf("date")
 			.toDate();
 
 		let plans = [];
@@ -248,7 +248,7 @@
 	};
 	
 	schema.statics.findByAccount = function (account) {
-		return this.find({ account }, {state: {'$in': [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
+		return this.find({ account }, {state: {"$in": [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
 	};
 	
 	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
@@ -296,7 +296,7 @@
 
 	schema.statics.createRefund = function (user, data) {
 
-		const User = require('./user');
+		const User = require("./user");
 
 		let invoice;
 

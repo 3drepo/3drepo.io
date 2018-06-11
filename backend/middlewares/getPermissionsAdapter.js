@@ -19,9 +19,9 @@
 (() => {
 	"use strict";
 
-	const ModelSetting = require('../models/modelSetting');
-	const Project = require('../models/project');
-	const User = require('../models/user');
+	const ModelSetting = require("../models/modelSetting");
+	const Project = require("../models/project");
+	const User = require("../models/user");
 
 	// get permissions adapter
 	function getPermissionsAdapter(account) {
@@ -81,9 +81,9 @@
 				let user;
 				let projectPerms = [];
 
-				const projectQuery = { models: model, 'permissions.user': username };
+				const projectQuery = { models: model, "permissions.user": username };
 				// project admin have access to models underneath it.
-				return Project.findOne({account}, projectQuery, { 'permissions.$' : 1 } ).then(project => {
+				return Project.findOne({account}, projectQuery, { "permissions.$" : 1 } ).then(project => {
 
 					if(project && project.permissions){
 						projectPerms = project.permissions[0].permissions;

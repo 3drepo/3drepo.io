@@ -17,28 +17,28 @@
 
 "use strict";
 
-const ModelFactory = require('../factory/modelFactory');
-const ModelSetting = require('../modelSetting');
-const User = require('../user');
-const responseCodes = require('../../response_codes');
-const importQueue = require('../../services/queue');
-const C = require('../../constants');
-const Mailer = require('../../mailer/mailer');
+const ModelFactory = require("../factory/modelFactory");
+const ModelSetting = require("../modelSetting");
+const User = require("../user");
+const responseCodes = require("../../response_codes");
+const importQueue = require("../../services/queue");
+const C = require("../../constants");
+const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
-const config = require('../../config');
-const History = require('../history');
-const Mesh = require('../mesh');
-const Scene = require('../scene');
-const Ref = require('../ref');
+const config = require("../../config");
+const History = require("../history");
+const Mesh = require("../mesh");
+const Scene = require("../scene");
+const Ref = require("../ref");
 const utils = require("../../utils");
-const stash = require('./stash');
-const middlewares = require('../../middlewares/middlewares');
+const stash = require("./stash");
+const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
-const fs = require('fs');
-const ChatEvent = require('../chatEvent');
-const Project = require('../project');
-const stream = require('stream');
-const _ = require('lodash');
+const fs = require("fs");
+const ChatEvent = require("../chatEvent");
+const Project = require("../project");
+const stream = require("stream");
+const _ = require("lodash");
 const uuid = require("node-uuid");
 
 /*******************************************************************************
@@ -88,14 +88,14 @@ function convertToErrorCode(bouncerErrorCode){
 }
 
 function importSuccess(account, model, sharedSpacePath) {
-	setStatus(account, model, 'ok').then(setting => {
+	setStatus(account, model, "ok").then(setting => {
 		if (setting) {
 			if (sharedSpacePath) {
 				let files = function(filePath, fileDir, jsonFile){
 					return [
-						{desc: 'tmp model file', type: 'file', path: filePath},
-						{desc: 'json file', type: 'file', path: jsonFile},
-						{desc: 'tmp dir', type: 'dir', path: fileDir}
+						{desc: "tmp model file", type: "file", path: filePath},
+						{desc: "json file", type: "file", path: jsonFile},
+						{desc: "tmp dir", type: "dir", path: fileDir}
 					];
 				};
 
@@ -116,15 +116,15 @@ function importSuccess(account, model, sharedSpacePath) {
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
 			setting.errorReason = undefined;
-			if(setting.type === 'toy' || setting.type === 'sample'){
+			if(setting.type === "toy" || setting.type === "sample"){
 				setting.timestamp = new Date();
 			}
-			setting.markModified('errorReason');
+			setting.markModified("errorReason");
 			ChatEvent.modelStatusChanged(null, account, model, setting);
 			setting.save();
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importSuccess:` +  err);
+		systemLogger.logError("Failed to invoke importSuccess:" +  err);
 	});
 }
 
@@ -139,15 +139,15 @@ function importSuccess(account, model, sharedSpacePath) {
 function importFail(account, model, errCode, errMsg, sendMail) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		//mark model failed
-		setting.status = 'failed';
-		if(setting.type === 'toy' || setting.type === 'sample'){
+		setting.status = "failed";
+		if(setting.type === "toy" || setting.type === "sample"){
 			setting.timestamp = undefined;
 		}
 		setting.errorReason = convertToErrorCode(errCode);
-		setting.markModified('errorReason');
+		setting.markModified("errorReason");
 		setting.save().then( () => {				
 			ChatEvent.modelStatusChanged(null, account, model, setting);						
-		})
+		});
 
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
@@ -164,7 +164,7 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 			});
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importFail:` +  err);
+		systemLogger.logError("Failed to invoke importFail:" +  err);
 	});
 }
 
@@ -180,7 +180,7 @@ function setStatus(account, model, status) {
 		systemLogger.logInfo(`Model status changed to ${status}`);
 		return setting.save();
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke setStatus:`, err);
+		systemLogger.logError("Failed to invoke setStatus:", err);
 	});
 }
 
@@ -204,9 +204,9 @@ function createCorrelationId(account, model) {
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
 		return setting.save().then(() => {
 			return correlationId;
-		});;
+		});
 	}).catch(err => {
-		systemLogger.logError(`Failed to createCorrelationId:`, err);
+		systemLogger.logError("Failed to createCorrelationId:", err);
 	});
 }
 
@@ -218,10 +218,10 @@ function createCorrelationId(account, model) {
 function resetCorrelationId(account, model) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		setting.corID = undefined;
-		systemLogger.logInfo(`Correlation ID reset`);
+		systemLogger.logInfo("Correlation ID reset");
 		setting.save();
 	}).catch(err => {
-		systemLogger.logError(`Failed to resetCorrelationId:`, err);
+		systemLogger.logError("Failed to resetCorrelationId:", err);
 	});
 }
 
@@ -266,7 +266,7 @@ function createAndAssignRole(modelName, account, username, data) {
 		const query =  {name: modelName};
 
 		if(data.project){
-			query._id = { '$in' : project.models};
+			query._id = { "$in" : project.models};
 		}
 
 		return ModelSetting.count({account, model}, query);
@@ -375,13 +375,13 @@ function createAndAssignRole(modelName, account, username, data) {
 function importToyProject(account, username){
 
 	// create a project named Sample_Project
-	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+	return Project.createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
 		return Promise.all([
 
-			importToyModel(account, username, 'Lego_House_Architecture', 'ae234e5d-3b75-4b8c-b461-7529d5bec583', project.name),
-			importToyModel(account, username, 'Lego_House_Landscape', '39b51fe5-0fcb-4734-8e10-d8088bec9d45', project.name),
-			importToyModel(account, username, 'Lego_House_Structure', '3749c3cc-375d-406a-9f0d-2d059e8e782f', project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "ae234e5d-3b75-4b8c-b461-7529d5bec583", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "39b51fe5-0fcb-4734-8e10-d8088bec9d45", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "3749c3cc-375d-406a-9f0d-2d059e8e782f", project.name)
 
 		]).then(models => {
 
@@ -400,7 +400,7 @@ function importToyProject(account, username){
 				};
 			});
 
-			return importToyModel(account, username, 'Lego_House_Federation', 'b50fd608-46b4-4ba6-a97f-7bbc18c51932', project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "b50fd608-46b4-4ba6-a97f-7bbc18c51932", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -419,14 +419,14 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	
 
 	let model;
-	let desc = '';
-	let type = 'sample';
+	let desc = "";
+	let type = "sample";
 
 	let data = {
 		desc, 
 		type, 
 		project, 
-		unit: 'mm', 
+		unit: "mm", 
 		subModels,
 		surveyPoints: [
 			{
@@ -441,7 +441,7 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		return Promise.resolve(data.setting);
 	}).then(setting => {
 		model = setting._id;
-		return importModel(account, model, username, setting, {type: 'toy', modelDirName, skip });
+		return importModel(account, model, username, setting, {type: "toy", modelDirName, skip });
 	}).catch(err => {
 
 		Mailer.sendImportError({
@@ -515,7 +515,7 @@ function createFederatedModel(account, model, subModels){
 }
 
 function getAllMeshes(account, model, branch, rev, username){
-	'use strict'
+	"use strict";
 
 	let subModelMeshes;
 	let revId;
@@ -527,10 +527,10 @@ function getAllMeshes(account, model, branch, rev, username){
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
-			status = 'NOT_FOUND';
+			status = "NOT_FOUND";
 			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
@@ -561,7 +561,7 @@ function getAllMeshes(account, model, branch, rev, username){
 						meshes: obj.results.meshes,
 						owner: ref.owner,
 						model: ref.project
-					})
+					});
 				}).catch(err => {
 					return Promise.resolve();
 				})
@@ -602,7 +602,7 @@ function getAllMeshes(account, model, branch, rev, username){
 }
 
 function getIdMap(account, model, branch, rev, username){
-	'use strict'	
+	"use strict";	
 	let subIdMaps;
 	let revId, idMapsFileName;
 	let history;
@@ -613,10 +613,10 @@ function getIdMap(account, model, branch, rev, username){
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
-			status = 'NOT_FOUND';
+			status = "NOT_FOUND";
 			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
@@ -649,7 +649,7 @@ function getIdMap(account, model, branch, rev, username){
 						idMap: obj.idMaps.idMap,
 						owner: ref.owner,
 						model: ref.project
-					})
+					});
 				}).catch(err => {
 					return Promise.resolve();
 				})
@@ -661,7 +661,7 @@ function getIdMap(account, model, branch, rev, username){
 	}).then(_subIdMaps => {
 
 		subIdMaps = _subIdMaps;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', idMapsFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", idMapsFileName);
 
 	}).then(buf => {
 		let idMaps = {};
@@ -695,7 +695,7 @@ function getIdMap(account, model, branch, rev, username){
 }
 
 function getIdToMeshes(account, model, branch, rev, username){
-	'use strict'	
+	"use strict";	
 	let subIdToMeshes;
 		let revId, idToMeshesFileName;
 	let history;
@@ -706,10 +706,10 @@ function getIdToMeshes(account, model, branch, rev, username){
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
-			status = 'NOT_FOUND';
+			status = "NOT_FOUND";
 			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
@@ -741,7 +741,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 					return Promise.resolve({
 						idToMeshes: obj.idToMeshes,
 						key: ref.owner + "@" + ref.project
-					})
+					});
 				}).catch(err => {
 					return Promise.resolve();
 				})
@@ -753,7 +753,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 	}).then(_subIdToMeshes => {
 
 		subIdToMeshes = _subIdToMeshes;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', idToMeshesFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", idToMeshesFileName);
 
 	}).then(buf => {
 		let idToMeshes = {};
@@ -791,10 +791,10 @@ function getModelProperties(account, model, branch, rev, username){
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
-			status = 'NOT_FOUND';
+			status = "NOT_FOUND";
 			return Promise.resolve([]);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve([]);
 		} else {
 			revId = utils.uuidToString(history._id);
@@ -840,7 +840,7 @@ function getModelProperties(account, model, branch, rev, username){
 	}).then(_subProperties => {
 
 		subProperties = _subProperties;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', modelPropertiesFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", modelPropertiesFileName);
 
 	}).then(buf => {
 		let properties = { hiddenNodes : null };
@@ -875,7 +875,7 @@ function getModelProperties(account, model, branch, rev, username){
 }
 
 function getTreePath(account, model, branch, rev, username){
-	'use strict'	
+	"use strict";	
 	let subTreePaths;
 	let revId, treePathsFileName;
 	let history;
@@ -886,10 +886,10 @@ function getTreePath(account, model, branch, rev, username){
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
-			status = 'NOT_FOUND';
+			status = "NOT_FOUND";
 			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
@@ -922,7 +922,7 @@ function getTreePath(account, model, branch, rev, username){
 						idToPath: obj.treePaths.idToPath,
 						owner: ref.owner,
 						model: ref.project
-					})
+					});
 				}).catch(err => {
 					return Promise.resolve();
 				})
@@ -934,7 +934,7 @@ function getTreePath(account, model, branch, rev, username){
 	}).then(_subTreePaths => {
 
 		subTreePaths = _subTreePaths;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', treePathsFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", treePathsFileName);
 
 	}).then(buf => {
 		let treePaths = {};
@@ -981,10 +981,10 @@ function getUnityAssets(account, model, branch, rev, username){
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
 		if(!history){
-			status = 'NOT_FOUND';
+			status = "NOT_FOUND";
 			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
@@ -1017,7 +1017,7 @@ function getUnityAssets(account, model, branch, rev, username){
 						models: obj.models,
 						owner: ref.owner,
 						model: ref.project
-					})
+					});
 				}).catch(err => {
 					return Promise.resolve();
 				})
@@ -1029,7 +1029,7 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(_subAssets => {
 
 		subAssets = _subAssets;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', assetsFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", assetsFileName);
 
 	}).then(buf => {
 		let models = [];
@@ -1059,7 +1059,7 @@ function getJsonMpc(account, model, uid){
 	
 	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
 
-	return stash.findStashByFilename({ account, model }, 'json_mpc', bundleFileName).then(buf => {
+	return stash.findStashByFilename({ account, model }, "json_mpc", bundleFileName).then(buf => {
 		if(!buf)
 		{
 			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
@@ -1075,7 +1075,7 @@ function getUnityBundle(account, model, uid){
 	
 	const bundleFileName = `/${account}/${model}/${uid}.unity3d`;
 
-	return stash.findStashByFilename({ account, model }, 'unity3d', bundleFileName).then(buf => {
+	return stash.findStashByFilename({ account, model }, "unity3d", bundleFileName).then(buf => {
 		if(!buf)
 		{
 			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
@@ -1106,7 +1106,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
 
 		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
+		return stash.findStashByFilename({ account, model }, "json_mpc", treeFileName, true);
 
 	}).then(rs => {
 
@@ -1130,11 +1130,11 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 		return new Promise(function(resolve, reject){
 
-			pass.write('{"mainTree": ');
+			pass.write("{\"mainTree\": ");
 
-			stashRs.on('data', d => pass.write(d));
-			stashRs.on('end', ()=> resolve());
-			stashRs.on('error', err => reject(err));
+			stashRs.on("data", d => pass.write(d));
+			stashRs.on("end", ()=> resolve());
+			stashRs.on("error", err => reject(err));
 
 		});
 
@@ -1149,7 +1149,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	}).then(refs => {
 
-		pass.write(', "subTrees":[');
+		pass.write(", \"subTrees\":[");
 
 		return new Promise((resolve) => {
 
@@ -1186,7 +1186,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	}).then(() => {
 
-		pass.write(']');
+		pass.write("]");
 		pass.write("}");
 		pass.end();
 
@@ -1207,9 +1207,9 @@ function searchTree(account, model, branch, rev, searchString, username){
 		let items = [];
 
 		let filter = {
-			_id: {'$in': history.current },
-			type: {'$in': ["transformation", "mesh"]},
-			name: new RegExp(searchString, 'i')
+			_id: {"$in": history.current },
+			type: {"$in": ["transformation", "mesh"]},
+			name: new RegExp(searchString, "i")
 		};
 
 		return Scene.find({account, model}, filter, { name: 1 }).then(objs => {
@@ -1224,8 +1224,8 @@ function searchTree(account, model, branch, rev, searchString, username){
 			});
 
 			let filter = {
-				_id: {'$in': history.current },
-				type: 'ref'
+				_id: {"$in": history.current },
+				type: "ref"
 			};
 
 			return Ref.find({account, model}, filter);
@@ -1332,14 +1332,14 @@ function downloadLatest(account, model){
 			}
 
 			// change file name
-			let filename = file.filename.split('_');
-			let ext = '';
+			let filename = file.filename.split("_");
+			let ext = "";
 	
 			if (filename.length > 1){
-				ext = '.' + filename.pop();
+				ext = "." + filename.pop();
 			}
 
-			file.filename = filename.join('_').substr(36) + ext;
+			file.filename = filename.join("_").substr(36) + ext;
 	
 			return Promise.resolve({
 				readStream: bucket.openDownloadStream(file._id),
@@ -1360,7 +1360,7 @@ function uploadFile(req){
 	let account = req.params.account;
 	let model = req.params.model;
 
-	ChatEvent.modelStatusChanged(null, account, model, { status: 'uploading' });
+	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading" });
 	//upload model with tag
 	let checkTag = tag => {
 		if(!tag){
@@ -1385,7 +1385,7 @@ function uploadFile(req){
 			dest: config.cn_queue.upload_dir,
 			fileFilter: function(req, file, cb){
 
-				let format = file.originalname.split('.');
+				let format = file.originalname.split(".");
 
 				if(format.length <= 1){
 					return cb({resCode: responseCodes.FILE_NO_EXT});
@@ -1393,7 +1393,7 @@ function uploadFile(req){
 
 				format = format[format.length - 1];
 
-				let size = parseInt(req.headers['content-length']);
+				let size = parseInt(req.headers["content-length"]);
 
 				if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -1424,7 +1424,7 @@ function uploadFile(req){
 				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 
 			} else {
-				ChatEvent.modelStatusChanged(null, account, model, { status: 'uploaded' });
+				ChatEvent.modelStatusChanged(null, account, model, { status: "uploaded" });
 				return resolve(req.file);
 			}
 		});
@@ -1439,7 +1439,7 @@ function _deleteFiles(files){
 	
 	files.forEach(file => {
 
-		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
+		let deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
 
 		deleteFile(file.path, function(err){
 			if(err){
@@ -1481,7 +1481,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		});
 
 	}).catch(err => {
-		systemLogger.logError(`Failed to import model:`, err);
+		systemLogger.logError("Failed to import model:", err);
 	});
 
 }
@@ -1494,14 +1494,14 @@ function importModel(account, model, username, modelSetting, source, data){
 
 	return modelSetting.save().then(() => {
 		return createCorrelationId(account, model).then(correlationId => {
-			return setStatus(account, model, 'queued').then(setting => {
+			return setStatus(account, model, "queued").then(setting => {
 
 				modelSetting = setting;
 
-				if (source.type === 'upload'){
+				if (source.type === "upload"){
 					return _handleUpload(correlationId, account, model, username, source.file, data);
 
-				} else if (source.type === 'toy'){
+				} else if (source.type === "toy"){
 
 					return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
 						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
@@ -1512,7 +1512,7 @@ function importModel(account, model, username, modelSetting, source, data){
 			});
 		});
 	}).catch(err => {
-		systemLogger.logError(`Failed to importModel:`, err);
+		systemLogger.logError("Failed to importModel:", err);
 	});
 
 }
@@ -1555,7 +1555,7 @@ function removeModel(account, model, forceRemove){
 		let promises = [];
 
 		collections.forEach(collection => {
-			if(collection.name.startsWith(model + '.')){
+			if(collection.name.startsWith(model + ".")){
 				promises.push(ModelFactory.dbManager.dropCollection(account, collection));
 			}
 		});
@@ -1598,9 +1598,9 @@ function getModelPermission(username, setting, account){
 			permissions = _.compact(_.flatten(accountPerm.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)));
 		}
 
-		const projectQuery = { models: setting._id, 'permissions.user': username };
+		const projectQuery = { models: setting._id, "permissions.user": username };
 		// project admin have access to models underneath it.
-		return Project.findOne({account}, projectQuery, { 'permissions.$' : 1 });
+		return Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
 	}).then(project => {
 
@@ -1625,7 +1625,7 @@ function getModelPermission(username, setting, account){
 
 		return _.uniq(permissions);
 	}).catch(err => {
-		systemLogger.logError(`Failed to getModelPermission:`, err);
+		systemLogger.logError("Failed to getModelPermission:", err);
 	});
 }
 
@@ -1707,7 +1707,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 		let match = {
 			_id: {"$in": history.current},
-		}
+		};
 		match[fullFieldName] =  {"$exists" : true};
 
 		let projection = {
@@ -1721,7 +1721,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 				let parsedObj = {data: obj};
 				if(obj.length > 0 && fieldName && fieldName.length > 0) {
 					const objStr = JSON.stringify(obj);
-					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
+					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
 				}
 				if(_subMeta.length > 0) {
 					parsedObj.subModels = _subMeta;
@@ -1761,7 +1761,7 @@ function getMetadata(account, model, id){
 
 function isUserAdmin(account, model, user)
 {
-	const projection = { 'permissions': { '$elemMatch': { user: user } }};
+	const projection = { "permissions": { "$elemMatch": { user: user } }};
 	//find the project this model belongs to
 	return Project.findOne({account}, {models: model}, projection).then(project => {
 		//It either has no permissions, or it has one entry (the user) due to the project in the query
@@ -1776,13 +1776,13 @@ function isUserAdmin(account, model, user)
 const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
-	'x','obj','3ds','md3','md2','ply',
-	'mdl','ase','hmp','smd','mdc','md5',
-	'stl','lxo','nff','raw','off','ac',
-	'bvh','irrmesh','irr','q3d','q3s','b3d',
-	'dae','ter','csm','3d','lws','xml','ogex',
-	'ms3d','cob','scn','blend','pk3','ndo',
-	'ifc','xgl','zgl','fbx','assbin', 'bim'
+	"x","obj","3ds","md3","md2","ply",
+	"mdl","ase","hmp","smd","mdc","md5",
+	"stl","lxo","nff","raw","off","ac",
+	"bvh","irrmesh","irr","q3d","q3s","b3d",
+	"dae","ter","csm","3d","lws","xml","ogex",
+	"ms3d","cob","scn","blend","pk3","ndo",
+	"ifc","xgl","zgl","fbx","assbin", "bim"
 ];
 
 

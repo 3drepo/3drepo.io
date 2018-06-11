@@ -19,7 +19,7 @@
 	"use strict";
 
 	module.exports = {
-		'$ifNull': ['$$CURRENT.viewCount', 0]
+		"$ifNull": ["$$CURRENT.viewCount", 0]
 	};
 
 })();

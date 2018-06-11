@@ -230,8 +230,8 @@
 	// Payment types
 	//
 	//-----------------------------------------------------------------------------
-	define("PRO_RATA_PAYMENT", 'pro-rata');
-	define("REGULAR_PAYMENT", 'regular');
+	define("PRO_RATA_PAYMENT", "pro-rata");
+	define("REGULAR_PAYMENT", "regular");
 
 	//-----------------------------------------------------------------------------
 	//
@@ -352,55 +352,55 @@
 
 	define("IMPLIED_PERM", {
 		[module.exports.PERM_TEAMSPACE_ADMIN]:{
-			'account': module.exports.ACCOUNT_PERM_LIST,
-			'project': module.exports.PROJECT_PERM_LIST,
-			'model': module.exports.MODEL_PERM_LIST
+			"account": module.exports.ACCOUNT_PERM_LIST,
+			"project": module.exports.PROJECT_PERM_LIST,
+			"model": module.exports.MODEL_PERM_LIST
 		},
 
 		[module.exports.PERM_VIEW_PROJECTS]:{
-			'project': [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
-			'model': [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
+			"project": [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
+			"model": [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
 		},
 
 		[module.exports.PERM_PROJECT_ADMIN]: {
-			'project': module.exports.PROJECT_PERM_LIST,
-			'model': module.exports.MODEL_PERM_LIST
+			"project": module.exports.PROJECT_PERM_LIST,
+			"model": module.exports.MODEL_PERM_LIST
 		},
 
 		[module.exports.PERM_UPLOAD_FILES_ALL_MODELS]: {
-			'model': [module.exports.PERM_UPLOAD_FILES]
+			"model": [module.exports.PERM_UPLOAD_FILES]
 		},
 
 		[module.exports.PERM_EDIT_FEDERATION_ALL_MODELS]: {
-			'model': [module.exports.PERM_EDIT_FEDERATION]
+			"model": [module.exports.PERM_EDIT_FEDERATION]
 		},
 
 		[module.exports.PERM_CREATE_ISSUE_ALL_MODELS]: {
-			'model': [module.exports.PERM_CREATE_ISSUE]
+			"model": [module.exports.PERM_CREATE_ISSUE]
 		},
 
 		[module.exports.PERM_COMMENT_ISSUE_ALL_MODELS]: {
-			'model': [module.exports.PERM_COMMENT_ISSUE]
+			"model": [module.exports.PERM_COMMENT_ISSUE]
 		},
 
 		[module.exports.PERM_VIEW_ISSUE_ALL_MODELS]: {
-			'model': [module.exports.PERM_VIEW_ISSUE]
+			"model": [module.exports.PERM_VIEW_ISSUE]
 		},
 
 		[module.exports.PERM_VIEW_MODEL_ALL_MODELS]: {
-			'model': [module.exports.PERM_VIEW_MODEL]
+			"model": [module.exports.PERM_VIEW_MODEL]
 		},
 
 		[module.exports.PERM_DOWNLOAD_MODEL_ALL_MODELS]: {
-			'model': [module.exports.PERM_DOWNLOAD_MODEL]
+			"model": [module.exports.PERM_DOWNLOAD_MODEL]
 		},
 
 		[module.exports.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS]: {
-			'model': [module.exports.PERM_CHANGE_MODEL_SETTINGS]
+			"model": [module.exports.PERM_CHANGE_MODEL_SETTINGS]
 		},
 
 		[module.exports.PERM_MANAGE_MODEL_PERMISSION]: {
-			'model': module.exports.MODEL_PERM_LIST
+			"model": module.exports.MODEL_PERM_LIST
 		}
 
 	});
@@ -540,27 +540,27 @@
 
 	//issues
 
-	define('ISSUE_STATUS_OPEN', 'open'); 
-	define('ISSUE_STATUS_IN_PROGRESS', 'in progress'); 
-	define('ISSUE_STATUS_FOR_APPROVAL', 'for approval'); 
-	define('ISSUE_STATUS_CLOSED', 'closed'); 
+	define("ISSUE_STATUS_OPEN", "open"); 
+	define("ISSUE_STATUS_IN_PROGRESS", "in progress"); 
+	define("ISSUE_STATUS_FOR_APPROVAL", "for approval"); 
+	define("ISSUE_STATUS_CLOSED", "closed"); 
 
-	define('MAIL_URLS',{
-		'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
-		'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
-		'model': data => `/${data.account}/${data.model}`
+	define("MAIL_URLS",{
+		"forgotPassword": data => `/passwordChange?username=${data.username}&token=${data.token}`,
+		"verify": data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
+		"model": data => `/${data.account}/${data.model}`
 	});
 
-	define('DEFAULT_JOBS',[
-		{ _id: 'Client', "color": "#a6cee3" },
-		{ _id: 'Architect', "color": "#213f99"},
-		{ _id: 'Structural Engineer', "color" : "#33a02c"},
-		{ _id: 'MEP Engineer', "color": "#fb9a99"},
-		{ _id: 'Project Manager', "color": "#e31a1c"},
-		{ _id: 'Quantity Surveyor', "color": "#ff7f00"},
-		{ _id: 'Asset Manager', "color" : "#ffff99"},
-		{ _id: 'Main Contractor', "color": "#b15928"},
-		{ _id: 'Supplier', "color": "#6a3d9a"}
+	define("DEFAULT_JOBS",[
+		{ _id: "Client", "color": "#a6cee3" },
+		{ _id: "Architect", "color": "#213f99"},
+		{ _id: "Structural Engineer", "color" : "#33a02c"},
+		{ _id: "MEP Engineer", "color": "#fb9a99"},
+		{ _id: "Project Manager", "color": "#e31a1c"},
+		{ _id: "Quantity Surveyor", "color": "#ff7f00"},
+		{ _id: "Asset Manager", "color" : "#ffff99"},
+		{ _id: "Main Contractor", "color": "#b15928"},
+		{ _id: "Supplier", "color": "#6a3d9a"}
 	]);
 	
 })();

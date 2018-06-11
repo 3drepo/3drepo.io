@@ -1,4 +1,4 @@
-var html = data => `
+let html = data => `
 	Name: ${data.name}
 	<br><br>
 	Email: ${data.email}

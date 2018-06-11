@@ -17,9 +17,9 @@
 (() => {
 	"use strict";
 
-	const mongoose = require('mongoose');
-	const ModelFactory = require('./factory/modelFactory');
-	const C = require('../constants');
+	const mongoose = require("mongoose");
+	const ModelFactory = require("./factory/modelFactory");
+	const C = require("../constants");
 
 	const schema = mongoose.Schema({
 		_id : String,
@@ -38,15 +38,15 @@
 			} else {
 				let roleName = C.DEFAULT_MEMBER_ROLE;
 				let createRoleCmd = {
-					'createRole': roleName,
-			   		'privileges':[{
+					"createRole": roleName,
+			   		"privileges":[{
 							"resource":{
 								"db": account,
 			   					"collection": "settings"
 							},
 			   				"actions": ["find"]}
 						],
-			   		'roles': []
+			   		"roles": []
 				};
 
 				return ModelFactory.dbManager.runCommand(account, createRoleCmd).then(()=> {
@@ -59,7 +59,7 @@
 
 	schema.statics.dropTeamSpaceRole = function (account) {
 		let dropRoleCmd = {
-			'dropRole' : C.DEFAULT_MEMBER_ROLE
+			"dropRole" : C.DEFAULT_MEMBER_ROLE
 		};
 
 		return this.findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`).then(role => {
@@ -84,7 +84,7 @@
 
 
 	schema.statics.findByRoleID = function(id){
-		return this.findOne({ account: 'admin'}, { _id: id});
+		return this.findOne({ account: "admin"}, { _id: id});
 	};
 
 	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account){
@@ -98,10 +98,10 @@
 	};
 
 	var Role = ModelFactory.createClass(
-		'Role', 
+		"Role", 
 		schema, 
 		() => {
-			return 'system.roles';
+			return "system.roles";
 		}
 	);
 

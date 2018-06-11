@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-let config = require('../../config');
-let q = require('../../services/queue');
+let config = require("../../config");
+let q = require("../../services/queue");
 let logger = require("../../logger.js");
 let systemLogger = logger.systemLogger;
 
@@ -32,7 +32,7 @@ if(config.cn_queue){
 
 	}).then(() => {
 
-		systemLogger.logInfo('Queue purged.')
+		systemLogger.logInfo("Queue purged.");
 		process.exit(0);
 		
 	}).catch(err => {
@@ -41,7 +41,7 @@ if(config.cn_queue){
 	});
 
 } else {
-	systemLogger.logError('No queue config found');
+	systemLogger.logError("No queue config found");
 	process.exit(0);
 }
 

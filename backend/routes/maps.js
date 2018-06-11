@@ -16,11 +16,11 @@
  */
 "use strict";
 
-const express = require('express');
+const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 const systemLogger = require("../logger.js").systemLogger;
-const httpsGet = require('../libs/httpsReq');
+const httpsGet = require("../libs/httpsReq");
 
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
 
@@ -28,10 +28,10 @@ function getOSMTile(req, res, next){
 	//TODO: we may want to ensure the model has access to tiles
 //	const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
 	const domain = "a.tile.openstreetmap.org";
-	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png"
+	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
 	systemLogger.logInfo("Fetching osm map tile: " + uri);
 	httpsGet.get(domain, uri).then(image =>{
-		res.writeHead(200, {'Content-Type': 'image/png' });
+		res.writeHead(200, {"Content-Type": "image/png" });
 		res.write(image);
 		res.end();
 	}).catch(err => {

@@ -166,7 +166,7 @@ function getCleanedUpPayPalSubscriptions(currentSubs) {
 	}
 
 	return subs;
-};
+}
 
 billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 	if(!this.subscriptions) {
@@ -191,7 +191,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 		let planEntry = null;
 		
 		if(entryInCurrent < 0) {
-			planEntry = {plan: newSubs.plan, quantity: 0} 
+			planEntry = {plan: newSubs.plan, quantity: 0}; 
 			planEntry.pendingQuantity = newSubs.quantity;
 		}
 		else {
@@ -217,7 +217,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 		return Promise.resolve(false);
 	}
 
-}
+};
 
 billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, billingAddress) {
 	// User want to buy new subscriptions.
@@ -225,7 +225,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 	this.billingUser = billingUser;
 
 	return this.billingInfo.changeBillingAddress(billingAddress).then(() => {
-		this.markModified('billingInfo');
+		this.markModified("billingInfo");
 		return this.writeSubscriptionChanges(plans);
 
 	}).then(changes => {
@@ -343,7 +343,7 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				// pre activate
 				// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 				// IPN message should come quickly after executing an agreement, usually less then a minute
-				let twoDayLater = moment().utc().add(48, 'hour').toDate();
+				let twoDayLater = moment().utc().add(48, "hour").toDate();
 				this.subscriptions.paypal = renewAndCleanSubscriptions(
 								this.subscriptions.paypal,
 								twoDayLater);
@@ -351,7 +351,7 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				// change invoice state
 				invoice.changeState(C.INV_PENDING, {
 					billingAgreementId: this.billingAgreementId,
-					gateway: 'PAYPAL'
+					gateway: "PAYPAL"
 				});
 
 				return invoice.save();
@@ -383,7 +383,7 @@ billingSchema.methods.getActiveSubscriptions = function() {
 
 	}
 	return res;
-}
+};
 
 billingSchema.methods.getSubscriptionLimits = function() {
 
@@ -433,32 +433,32 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	}
 
 	return sumLimits;
-}
+};
 
 billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
-	const User = require('./user');
+	const User = require("./user");
 
 	let invoice;
 	if(this.nextPaymentDate > paymentInfo.nextPaymentDate){
-		return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
+		return Promise.reject({ message: "Received ipn message older than the one in database. Activation halt." });
 	}
 
 	const promise = Invoice.findByTransactionId(user, paymentInfo.transactionId).then(invoice => {
 		if(invoice){
-			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
+			return Promise.reject({ message: "Duplicated ipn message. Activation halt."});
 		}
 
 	}).then(() => {
 		if(this.nextPaymentDate && 
-			moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(this.nextPaymentDate).utc().startOf('date').toISOString()){
+			moment(paymentInfo.nextPaymentDate).utc().startOf("date").toISOString() !== moment(this.nextPaymentDate).utc().startOf("date").toISOString()){
 			this.lastAnniversaryDate = new Date(this.nextPaymentDate);
 		}
 
-		this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
+		this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf("date").toDate();
 
 		// set to to next 3rd of next month, give 3 days cushion
 		let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
-			.add(3, 'day')
+			.add(3, "day")
 			.hours(0).minutes(0).seconds(0).milliseconds(0)
 			.toDate();
 
@@ -545,7 +545,7 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 			});
 
 			return;
-		})
+		});
 	});
 	return promise;
 

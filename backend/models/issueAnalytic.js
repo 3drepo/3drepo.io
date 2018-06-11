@@ -18,9 +18,9 @@
 (() => {
 	"use strict";
 
-	const ModelFactory = require('./factory/modelFactory');
-	const responseCodes = require('../response_codes.js');
-	const json2csv = require('json2csv');
+	const ModelFactory = require("./factory/modelFactory");
+	const responseCodes = require("../response_codes.js");
+	const json2csv = require("json2csv");
 
 	function getField(field){
 		try {
@@ -45,8 +45,8 @@
 				const field = `_id.${groups[0]}`;
 
 				const pipeline = [
-					{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
-					{ '$sort': {'count': sort, [field]: sort}}
+					{ "$group" : { _id: fields, "count": { "$sum": 1 } }},
+					{ "$sort": {"count": sort, [field]: sort}}
 				];
 
 				if(!pipeline){
@@ -55,7 +55,7 @@
 
 				const promise = collection.aggregate(pipeline).toArray();
 
-				if(format === 'csv'){
+				if(format === "csv"){
 
 					let csvFields = [];
 					let csvFieldNames = [];
@@ -65,8 +65,8 @@
 						csvFieldNames.push(group);
 					});
 
-					csvFieldNames.push('count');
-					csvFields.push('count');
+					csvFieldNames.push("count");
+					csvFields.push("count");
 
 					return promise.then(data => {
 						return json2csv({ data, fields: csvFields, fieldNames: csvFieldNames });

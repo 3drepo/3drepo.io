@@ -26,12 +26,12 @@
    */
 
 
-  var widget_uuid = 0,
+  let widget_uuid = 0,
       widget_slice = Array.prototype.slice;
 
   $.cleanData = (function( orig ) {
     return function( elems ) {
-      var events, elem, i;
+      let events, elem, i;
       for ( i = 0; (elem = elems[i]) != null; i++ ) {
         try {
 
@@ -49,7 +49,7 @@
   })( $.cleanData );
 
   $.widget = function( name, base, prototype ) {
-    var fullName, existingConstructor, constructor, basePrototype,
+    let fullName, existingConstructor, constructor, basePrototype,
     // proxiedPrototype allows the provided prototype to remain unmodified
     // so that it can be used as a mixin for multiple widgets (#8876)
         proxiedPrototype = {},
@@ -104,14 +104,14 @@
         return;
       }
       proxiedPrototype[ prop ] = (function() {
-        var _super = function() {
+        let _super = function() {
               return base.prototype[ prop ].apply( this, arguments );
             },
             _superApply = function( args ) {
               return base.prototype[ prop ].apply( this, args );
             };
         return function() {
-          var __super = this._super,
+          let __super = this._super,
               __superApply = this._superApply,
               returnValue;
 
@@ -145,7 +145,7 @@
     // level in the prototype chain.
     if ( existingConstructor ) {
       $.each( existingConstructor._childConstructors, function( i, child ) {
-        var childPrototype = child.prototype;
+        let childPrototype = child.prototype;
 
         // redefine the child widget using the same prototype that was
         // originally used, but inherit from the new version of the base
@@ -164,7 +164,7 @@
   };
 
   $.widget.extend = function( target ) {
-    var input = widget_slice.call( arguments, 1 ),
+    let input = widget_slice.call( arguments, 1 ),
         inputIndex = 0,
         inputLength = input.length,
         key,
@@ -190,15 +190,15 @@
   };
 
   $.widget.bridge = function( name, object ) {
-    var fullName = object.prototype.widgetFullName || name;
+    let fullName = object.prototype.widgetFullName || name;
     $.fn[ name ] = function( options ) {
-      var isMethodCall = typeof options === "string",
+      let isMethodCall = typeof options === "string",
           args = widget_slice.call( arguments, 1 ),
           returnValue = this;
 
       if ( isMethodCall ) {
         this.each(function() {
-          var methodValue,
+          let methodValue,
               instance = $.data( this, fullName );
           if ( options === "instance" ) {
             returnValue = instance;
@@ -227,7 +227,7 @@
         }
 
         this.each(function() {
-          var instance = $.data( this, fullName );
+          let instance = $.data( this, fullName );
           if ( instance ) {
             instance.option( options || {} );
             if ( instance._init ) {
@@ -326,7 +326,7 @@
     },
 
     option: function( key, value ) {
-      var options = key,
+      let options = key,
           parts,
           curOption,
           i;
@@ -365,7 +365,7 @@
       return this;
     },
     _setOptions: function( options ) {
-      var key;
+      let key;
 
       for ( key in options ) {
         this._setOption( key, options[ key ] );
@@ -398,7 +398,7 @@
     },
 
     _on: function( suppressDisabledCheck, element, handlers ) {
-      var delegateElement,
+      let delegateElement,
           instance = this;
 
       // no suppressDisabledCheck flag, shuffle arguments
@@ -438,7 +438,7 @@
               handler.guid || handlerProxy.guid || $.guid++;
         }
 
-        var match = event.match( /^([\w:-]*)\s*(.*)$/ ),
+        let match = event.match( /^([\w:-]*)\s*(.*)$/ ),
             eventName = match[1] + instance.eventNamespace,
             selector = match[2];
         if ( selector ) {
@@ -494,7 +494,7 @@
     },
 
     _trigger: function( type, event, data ) {
-      var prop, orig,
+      let prop, orig,
           callback = this.options[ type ];
 
       data = data || {};
@@ -528,7 +528,7 @@
       if ( typeof options === "string" ) {
         options = { effect: options };
       }
-      var hasOptions,
+      let hasOptions,
           effectName = !options ?
               method :
               options === true || typeof options === "number" ?
@@ -559,7 +559,7 @@
     };
   });
 
-  var widget = $.widget;
+  let widget = $.widget;
 
 
 

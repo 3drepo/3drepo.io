@@ -19,7 +19,7 @@
 	"use strict";
 
 	module.exports = {
-		'$size': '$$CURRENT.comments'
+		"$size": "$$CURRENT.comments"
 	};
 
 })();

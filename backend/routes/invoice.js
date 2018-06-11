@@ -26,7 +26,7 @@
 	const config = require("../config");
 	const utils = require("../utils");
 	const Invoice = require("../models/invoice");
-	const moment = require('moment');
+	const moment = require("moment");
 
 	router.get("/invoices", middlewares.isAccountAdmin, listInvoices);
 	router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
@@ -86,9 +86,9 @@
 
 
 			res.writeHead(200, {
-				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="${moment(invoice.createdAtDate).utc().format('YYYY-MM-DD')}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
-				'Content-Length': pdf.length
+				"Content-Type": "application/pdf",
+				"Content-disposition": `inline; filename="${moment(invoice.createdAtDate).utc().format("YYYY-MM-DD")}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
+				"Content-Length": pdf.length
 			});
 
 			res.end(pdf);

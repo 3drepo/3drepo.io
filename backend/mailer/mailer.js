@@ -16,29 +16,29 @@
  */
 
 
-var nodemailer = require('nodemailer');
-var config = require('../config');
-var C = require('../constants');
-var responseCodes = require('../response_codes');
-var getBaseURL = config.getBaseURL;
-var transporter;
+let nodemailer = require("nodemailer");
+let config = require("../config");
+let C = require("../constants");
+let responseCodes = require("../response_codes");
+let getBaseURL = config.getBaseURL;
+let transporter;
 
 function sendEmail(template, to, data, attachments){
-	'use strict';
+	"use strict";
 
 
 	if(!config.mail || !config.mail.smtpConfig){
-		return Promise.reject({ message: 'config.mail.smtpConfig is not set'});
+		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
 	}
 
 	if(!config.mail || !config.mail.smtpConfig){
-		return Promise.reject({ message: 'config.mail.sender is not set'});
+		return Promise.reject({ message: "config.mail.sender is not set"});
 	}
 
 	let mailOptions = {
 		from: config.mail.sender,
 		to: to,
-		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
+		subject: typeof template.subject === "function" ? template.subject(data) : template.subject,
 		html: template.html(data)
 	};
 
@@ -60,12 +60,12 @@ function sendEmail(template, to, data, attachments){
 }
 
 function rejectNoUrl(name){
-	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`})
+	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`});
 }
 
 
 function getURL(urlName, params){
-	'use strict';
+	"use strict";
 
 	if(!C.MAIL_URLS || !C.MAIL_URLS[urlName]){
 		return null;
@@ -76,57 +76,57 @@ function getURL(urlName, params){
 
 function sendNoConsumerAlert(){
 	if(config.contact){
-		const template = require('./templates/noConsumers');
+		const template = require("./templates/noConsumers");
 		return sendEmail(template, config.contact.email, {domain: config.host});
 	}
 	else{
-		return Promise.reject({ message: 'config.contact is not set'});
+		return Promise.reject({ message: "config.contact is not set"});
 	}
 }
 
 function sendVerifyUserEmail(to, data){
-	'use strict';
+	"use strict";
 
-	data.url = getURL('verify', {token: data.token, username: data.username, pay: data.pay});
+	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
 
 	if(!data.url){
-		return rejectNoUrl('verify');
+		return rejectNoUrl("verify");
 	}
 
-	let template = require('./templates/verifyUser');
+	let template = require("./templates/verifyUser");
 	return sendEmail(template, to, data);
 }
 
 
 function sendResetPasswordEmail(to, data){
-	'use strict';
+	"use strict";
 
-	data.url = getURL('forgotPassword', {token: data.token, username: data.username});
+	data.url = getURL("forgotPassword", {token: data.token, username: data.username});
 
 	if(!data.url){
-		return rejectNoUrl('forgotPassword');
+		return rejectNoUrl("forgotPassword");
 	}
 
-	let template = require('./templates/forgotPassword');
+	let template = require("./templates/forgotPassword");
 	return sendEmail(template, to, data);
 }
 
 function sendPaymentReceivedEmail(to, data, attachments){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/paymentReceived');
+	let template = require("./templates/paymentReceived");
 
 
 	return sendEmail(template, to, data, attachments);
 }
 
 function sendPaymentReceivedEmailToSales(data, attachments){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/paymentReceived');
+	let template = require("./templates/paymentReceived");
 	
-	if(data.type === 'refund'){
-		template = require('./templates/paymentRefunded');
+	if(data.type === "refund"){
+		template = require("./templates/paymentRefunded");
 	}
 
 	let salesTemplate = {
@@ -147,9 +147,9 @@ function sendPaymentReceivedEmailToSales(data, attachments){
 }
 
 function sendNewUser(data){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/newUser');
+	let template = require("./templates/newUser");
 
 	data.url = getBaseURL();
 	
@@ -162,9 +162,9 @@ function sendNewUser(data){
 }
 
 function sendContactEmail(data){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/contact');
+	let template = require("./templates/contact");
 	
 	if(!config.contact || !config.contact.email){
 		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
@@ -176,25 +176,25 @@ function sendContactEmail(data){
 
 
 function sendPaymentFailedEmail(to, data){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/paymentFailed');
+	let template = require("./templates/paymentFailed");
 	return sendEmail(template, to, data);
 
 }
 
 function sendPaymentRefundedEmail(to, data, attachments){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/paymentRefunded');
+	let template = require("./templates/paymentRefunded");
 	return sendEmail(template, to, data, attachments);
 
 }
 
 function sendSubscriptionSuspendedEmail(to, data){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/paymentSuspended');
+	let template = require("./templates/paymentSuspended");
 	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
 
 	return sendEmail(template, to, data);
@@ -202,36 +202,36 @@ function sendSubscriptionSuspendedEmail(to, data){
 }
 
 function sendPaymentErrorEmail(data){
-	'use strict';
+	"use strict";
 
-	let template = require('./templates/paymentError');
+	let template = require("./templates/paymentError");
 	return sendEmail(template, config.contact.email, data);
 }
 
 function sendModelInvitation(to, data){
-	'use strict';
+	"use strict";
 
-	data.url = getURL('model', { account: data.account, model: data.model });
+	data.url = getURL("model", { account: data.account, model: data.model });
 
 	if(!data.url){
-		return rejectNoUrl('model');
+		return rejectNoUrl("model");
 	}
 
-	let template = require('./templates/invitedToModel');
+	let template = require("./templates/invitedToModel");
 	return sendEmail(template, to, data);
 }
 
 function sendImportError(data){
-	'use strict';
+	"use strict";
 
 	if(config.contact){
-		let template = require('./templates/importError');
+		let template = require("./templates/importError");
 		data.domain = config.host;
 		return sendEmail(template, config.contact.email, data);
 	}
 	else
 	{
-		return Promise.reject({ message: 'config.mail.sender is not set'});
+		return Promise.reject({ message: "config.mail.sender is not set"});
 	}
 }
 
@@ -249,4 +249,4 @@ module.exports = {
 	sendImportError,
 	sendNewUser,
 	sendNoConsumerAlert
-}
+};

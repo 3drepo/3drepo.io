@@ -17,18 +17,18 @@
 
 "use strict";
 
-var repoGraphScene = require("../../repo/repoGraphScene.js");
-var ModelFactory = require("../factory/modelFactory");
-var History = require("../history");
-var utils = require("../../utils");
-var responseCodes = require("../../response_codes.js");
-var mongoose = require("mongoose");
-var _ = require("lodash");
+let repoGraphScene = require("../../repo/repoGraphScene.js");
+let ModelFactory = require("../factory/modelFactory");
+let History = require("../history");
+let utils = require("../../utils");
+let responseCodes = require("../../response_codes.js");
+let mongoose = require("mongoose");
+let _ = require("lodash");
 
-var stringToUUID = utils.stringToUUID;
-var uuidToString = utils.uuidToString;
+let stringToUUID = utils.stringToUUID;
+let uuidToString = utils.uuidToString;
 
-var attrs = {
+let attrs = {
 	_id: Object,
 	shared_id: Object,
 	paths: [],
@@ -38,8 +38,8 @@ var attrs = {
 	name: String
 };
 
-var statics = {};
-var methods = {};
+let statics = {};
+let methods = {};
 //var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
@@ -68,9 +68,9 @@ statics.findStashByFilename = function(dbCol, format, filename){
 			}
 		});
 	}).catch(err =>{
-		ModelFactory.dbManager.disconnect()
+		ModelFactory.dbManager.disconnect();
 		return Promise.reject(err);
-	});;
+	});
 
 };
 

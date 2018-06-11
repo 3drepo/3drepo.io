@@ -1,9 +1,9 @@
-var express = require("express");
-var router = express.Router({mergeParams: true});
-var responseCodes = require("../response_codes.js");
-var utils = require("../utils");
-var User = require('../models/user');
-var Paypal = require("../models/paypal.js");
+let express = require("express");
+let router = express.Router({mergeParams: true});
+let responseCodes = require("../response_codes.js");
+let utils = require("../utils");
+let User = require("../models/user");
+let Paypal = require("../models/paypal.js");
 
 // endpoints for paypal IPN message
 router.post("/paypal/ipn", handleIPN);
@@ -12,7 +12,7 @@ router.post("/paypal/ipn", handleIPN);
 router.post("/paypal/execute", executeAgreement);
 
 function executeAgreement(req, res, next){
-	'use strict';
+	"use strict";
 	let responsePlace = utils.APIInfo(req);
 
 	// execute payment, update billingAgreementId
@@ -35,13 +35,13 @@ function executeAgreement(req, res, next){
 
 
 function handleIPN(req, res, next){
-	'use strict';
+	"use strict";
 
 	let responsePlace = utils.APIInfo(req);
 	Paypal.handleIPN(req.body);
 
 	//always respond 200 with OK to paypal 
-	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, 'OK');
+	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, "OK");
 }
 
 

@@ -23,8 +23,8 @@
 	const responseCodes = require("../response_codes.js");
 	const ModelFactory = require("./factory/modelFactory");
 	const utils = require("../utils");
-	const _ = require('lodash');
-	const ModelSetting = require('./modelSetting');
+	const _ = require("lodash");
+	const ModelSetting = require("./modelSetting");
 	const systemLogger = require("../logger.js").systemLogger;
 
 	const schema = mongoose.Schema({
@@ -37,7 +37,7 @@
 		}]
 	});
 
-	schema.pre('save', function checkInvalidName(next){
+	schema.pre("save", function checkInvalidName(next){
 
 		if(C.PROJECT_DEFAULT_ID === this.name){
 			return next(utils.makeError(responseCodes.INVALID_PROJECT_NAME));
@@ -46,7 +46,7 @@
 		return next();
 	});
 
-	schema.pre('save', function checkDupName(next){
+	schema.pre("save", function checkDupName(next){
 
 		Project.findOne(this._dbcolOptions, {name: this.name}).then(project => {
 			if(project && project.id !== this.id){
@@ -57,7 +57,7 @@
 		});
 	});
 
-	schema.pre('save', function checkPermissionName(next){
+	schema.pre("save", function checkPermissionName(next){
 
 		for (let i=0; i < this.permissions.length; i++){
 			let permission = this.permissions[i];
@@ -71,7 +71,7 @@
 	});
 
 	schema.statics.createProject = function(account, name, username, userPermissions){
-		const User = require('./user');
+		const User = require("./user");
 
 		let project = Project.createInstance({account});
 		project.name = name;
@@ -89,8 +89,8 @@
 
 	schema.statics.delete = function(account, name){
 
-		const User = require('./user');
-		const ModelHelper = require('./helper/model');
+		const User = require("./user");
+		const ModelHelper = require("./helper/model");
 
 		let project;
 
@@ -111,14 +111,14 @@
 	};
 
 	schema.statics.removeModel = function(account, model){
-		return Project.update({account}, { models: model }, { '$pull' : { 'models': model}}, {'multi': true});
+		return Project.update({account}, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
 	schema.methods.updateAttrs = function(data){
 
 		const account = this._dbcolOptions.account;
-		const whitelist = ['name', 'permissions'];
-		const User = require('./user');
+		const whitelist = ["name", "permissions"];
+		const User = require("./user");
 
 		let usersToRemove = [];
 		let usersToAdd = [];
@@ -167,7 +167,7 @@
 			usersToRemove.forEach(user => {
 				// remove all model permissions in this project as well, if any
 				userPromises.push(
-					ModelSetting.find(this._dbcolOptions, { 'permissions.user': user}).then(settings => 
+					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings => 
 						Promise.all(
 							settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
 						)
@@ -185,7 +185,7 @@
 
 	schema.statics.findAndPopulateUsers = function(account, query){
 
-		const User = require('./user');
+		const User = require("./user");
 
 
 		return User.getAllUsersInTeamspace(account.account).then(users => {
@@ -202,12 +202,12 @@
 			return projects;
 
 		});
-	}
+	};
 
 
 	schema.statics.findOneAndPopulateUsers = function(account, query){
 
-		const User = require('./user');
+		const User = require("./user");
 
 		let userList;
 
@@ -225,7 +225,7 @@
 			}
 
 		});
-	}
+	};
 
 	schema.statics.populateUsers = function(userList, project){
 

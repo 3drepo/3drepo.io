@@ -18,10 +18,10 @@
 // Corresponds to RepoNodeCamera in C++ definition of 3D Repo
 
 // var mongodb = require('mongodb');
-var assert = require('assert');
+let assert = require("assert");
 // var UUID = require('node-uuid');
-var C = require('../constants');
-var Utils = require('../utils.js');
+let C = require("../constants");
+let Utils = require("../utils.js");
 
 //-----------------------------------------------------------------------------
 exports.decode = function(bson) {
@@ -45,7 +45,7 @@ exports.encode = function(camera, root_shared_id) {
     assert(camera, "repoNodeCamera: Camera object is empty");
     assert(root_shared_id, "repoNodeCamera: Root node is empty");
 
-    var repo_camera = [];
+    let repo_camera = [];
 
     //-------------------------------------------------------------------------
     // ID field has to come first

@@ -18,13 +18,13 @@
 (() => {
 	"use strict";
 
-	const checkPermissions = require('./checkPermissions').checkPermissions;
+	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const C	= require("../constants");
 	
 	module.exports ={
 		canCreate: checkPermissions([C.PERM_CREATE_JOB]),
 		canView: checkPermissions([C.PERM_ASSIGN_JOB]),
 		canDelete: checkPermissions([C.PERM_DELETE_JOB])
-	}
+	};
 
 })();

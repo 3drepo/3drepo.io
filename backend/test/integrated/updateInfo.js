@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,31 +17,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
+let request = require("supertest");
+let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 let logger = require("../../logger.js");
 let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
-let async = require('async');
+let async = require("async");
 
-describe('Updating user info', function () {
-	let User = require('../../models/user');
+describe("Updating user info", function () {
+	let User = require("../../models/user");
 	let server;
 	let agent;
-	let username = 'updateinfo_username';
-	let password = 'password';
-	let email = 'test3drepo_updateinfo@mailinator.com';
-	let newEmail = 'test3drepo_updateinfo_1@mailinator.com';
-	let takenEmail = 'test3drepo@mailinator.com';
+	let username = "updateinfo_username";
+	let password = "password";
+	let email = "test3drepo_updateinfo@mailinator.com";
+	let newEmail = "test3drepo_updateinfo_1@mailinator.com";
+	let takenEmail = "test3drepo@mailinator.com";
 
 	before(function(done){
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			helpers.signUpAndLogin({
 				server, request, agent, expect, User, systemLogger,
@@ -58,15 +58,15 @@ describe('Updating user info', function () {
 
 	after(function(done){
 		server.close(function(){
-			console.log('API test server is closed');
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	it('should succee if provide new info and same email address', function(done){
+	it("should succee if provide new info and same email address", function(done){
 
-		let firstName = 'abc';
-		let lastName = 'def';
+		let firstName = "abc";
+		let lastName = "def";
 		async.series([
 			function update(done){
 				agent.put(`/${username}`)
@@ -87,10 +87,10 @@ describe('Updating user info', function () {
 	});
 
 
-	it('should succee if provide new info and new email address', function(done){
+	it("should succee if provide new info and new email address", function(done){
 
-		let firstName = 'abc';
-		let lastName = 'def';
+		let firstName = "abc";
+		let lastName = "def";
 		async.series([
 			function update(done){
 				agent.put(`/${username}`)
@@ -111,10 +111,10 @@ describe('Updating user info', function () {
 
 	});
 
-	it('should fail if email provided is taken', function(done){
+	it("should fail if email provided is taken", function(done){
 
-		let firstName = 'abc';
-		let lastName = 'def';
+		let firstName = "abc";
+		let lastName = "def";
 
 
 		agent.put(`/${username}`)

@@ -75,7 +75,7 @@
 	}
 
 	function getAuthDB() {
-		return MongoClient.connect(getURL('admin'), connConfig).then(_db => {
+		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
 			return _db;
 		});
 	}

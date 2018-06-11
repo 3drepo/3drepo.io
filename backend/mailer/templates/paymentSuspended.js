@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+let html = data => `
 	Hi there,<br>
 	<br>
 	Your subscription is now suspended. 
@@ -27,7 +27,7 @@ var html = data => `
 	3D Repo
 `;
 
-var subject = 'Your 3D Repo subscription is suspended';
+let subject = "Your 3D Repo subscription is suspended";
 
 module.exports =  {
 	html: html,

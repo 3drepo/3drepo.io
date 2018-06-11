@@ -16,7 +16,7 @@
  */
 
  // mongoose model factory for different db and collection name for each instance
-var mongoose = require('mongoose');
+let mongoose = require("mongoose");
 mongoose.Promise = Promise;
 
 module.exports = {
@@ -33,13 +33,13 @@ module.exports = {
 		this.dbManager.getAuthDB().then(db =>
 			{
 				if (!db){
-					throw new Error('db connection is null');
+					throw new Error("db connection is null");
 				}
 			});
 	},
 
 	get: function (modelName, options){
-		'use strict';
+		"use strict";
 		this.__checkDb();
 
 		let Model = mongoose.model(modelName);
@@ -57,13 +57,13 @@ module.exports = {
 	},
 
 	__collectionName: function(modelName, options){
-		'use strict';
+		"use strict";
 		
 		let collectionName;
 
 
 		//collectionName can be a function or a static string
-		if (typeof this.models[modelName].collectionName === 'function'){
+		if (typeof this.models[modelName].collectionName === "function"){
 
 			collectionName = this.models[modelName].collectionName(options);
 		} else {
@@ -74,7 +74,7 @@ module.exports = {
 	},
 
 	createClass: function(modelName, schema, collectionName) {
-		'use strict';
+		"use strict";
 
 		if (this.models[modelName] && this.models[modelName].mongooseModel){
 
@@ -109,12 +109,12 @@ module.exports = {
 
 			return function(options){
 
-				var args = Array.prototype.slice.call(arguments);
+				let args = Array.prototype.slice.call(arguments);
 				args.shift();
 
 				// resetting the static collection
 				if (!options || !options.account){
-					throw new Error('account name (db) is missing');
+					throw new Error("account name (db) is missing");
 				}
 
 				return self.dbManager.getCollection(options.account, self.__collectionName(modelName, options)).then(collection => {
@@ -128,7 +128,7 @@ module.exports = {
 								array[index] = item;
 							});
 						
-						} else if (typeof items === 'number') {
+						} else if (typeof items === "number") {
 
 
 						} else if (items){
@@ -150,14 +150,14 @@ module.exports = {
 			};
 		}
 
-		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove', 'remove'].forEach(staticFuncName => {
+		["find", "findOne", "count", "distinct", "where", "findOneAndUpdate", "findOneAndRemove", "remove"].forEach(staticFuncName => {
 			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
 		});
 
 
 		mongooseModel.findById = function(options, id){
 
-			var args = Array.prototype.slice.call(arguments);
+			let args = Array.prototype.slice.call(arguments);
 			args.splice(0, 2);
 
 			args.unshift(options, { _id: id});
@@ -173,7 +173,7 @@ module.exports = {
 			let collection = self.dbManager._getCollection(options.account,self.__collectionName(modelName, options));
 			mongooseModel.collection = collection;
 
-			var args = Array.prototype.slice.call(arguments);
+			let args = Array.prototype.slice.call(arguments);
 			args.shift();
 
 			return update.apply(mongooseModel, args);

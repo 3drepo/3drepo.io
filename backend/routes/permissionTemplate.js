@@ -18,16 +18,16 @@
 (function() {
 	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
-	router.get('/:model/permission-templates', middlewares.hasEditPermissionsAccessToModel, listTemplates);
+	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
 	function listTemplates(req, res, next){

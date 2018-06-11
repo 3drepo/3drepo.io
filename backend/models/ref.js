@@ -16,18 +16,18 @@
  */
 
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
+let _ = require("lodash");
+let repoBase = require("./base/repo");
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
 
-var Schema = mongoose.Schema;
+let Schema = mongoose.Schema;
 
-var refSchema = Schema(
+let refSchema = Schema(
 	_.extend({}, repoBase.attrs, {
 		// no extra attributes
 		_id: Object,
-		type: { type: String, default: 'ref'},
+		type: { type: String, default: "ref"},
 		unique: Object,
 		project: String,
 		owner: String,
@@ -41,8 +41,8 @@ refSchema.statics = {};
 refSchema.methods = {};
 
 
-var Ref = ModelFactory.createClass(
-	'Ref', 
+let Ref = ModelFactory.createClass(
+	"Ref", 
 	refSchema, 
 	arg => { 
 		return `${arg.model}.scene`;

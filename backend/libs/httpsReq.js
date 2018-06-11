@@ -16,43 +16,43 @@
  */
 
 
-var https = require('https');
+let https = require("https");
 
 const httpsAgent = new https.Agent({keepAlive:true});
 
 function parseUrl(url){
-	'use strict';
+	"use strict";
 
 	let urlPart = {};
 
-	let parsedUrl = url.split('://');
+	let parsedUrl = url.split("://");
 
 	if(parsedUrl.length === 1){
-		throw new Error('Malformed URL');
+		throw new Error("Malformed URL");
 	}
 
 
 	urlPart.protocol = parsedUrl.shift();
 	
-	parsedUrl = parsedUrl[0].split('/');
-	let host =  parsedUrl.shift().split(':');
+	parsedUrl = parsedUrl[0].split("/");
+	let host =  parsedUrl.shift().split(":");
 	urlPart.host = host[0];
 	
-	urlPart.port = host[1] || urlPart.protocol === 'https' ? 443 : 80;
-	urlPart.path = '/' + parsedUrl.join('/');
+	urlPart.port = host[1] || urlPart.protocol === "https" ? 443 : 80;
+	urlPart.path = "/" + parsedUrl.join("/");
 	
 	return urlPart;
 }
 
 
 function get(hostname, path){
-	'use strict';
+	"use strict";
 	
 	const options = {
 		hostname,
 		path,
 		agent: httpsAgent
-	}
+	};
 	return new Promise((resolve, reject) => {
 		https.get(options, result => {
 			//console.log(url + qs);
@@ -60,14 +60,14 @@ function get(hostname, path){
 
 			//console.log(result.headers);
 
-			var bodyChunks = [];
-			result.on('data', function(chunk) {
+			let bodyChunks = [];
+			result.on("data", function(chunk) {
 				bodyChunks.push(chunk);
-			}).on('end', function() {
-				var body = Buffer.concat(bodyChunks);
+			}).on("end", function() {
+				let body = Buffer.concat(bodyChunks);
 
 				// console.log(result.headers['content-type']);
-				if(result.headers['content-type'].startsWith('application/json')){
+				if(result.headers["content-type"].startsWith("application/json")){
 					body = JSON.parse(body);
 				}
 
@@ -79,7 +79,7 @@ function get(hostname, path){
 				
 			});
 
-		}).on('error', function(e) {
+		}).on("error", function(e) {
 			reject(e);
 		});
 	});
@@ -88,31 +88,31 @@ function get(hostname, path){
 
 function makePostData(obj){
 	
-	var params = [];
+	let params = [];
 	
 	Object.keys(obj).forEach( key => {
 		params.push(`${key}=${encodeURIComponent(obj[key])}`);
 	});
 
-	return params.join('&');
+	return params.join("&");
 }
 
 function post(url, obj, type){
-	'use strict';
+	"use strict";
 
 	if(!type){
-		type = 'application/x-www-form-urlencoded';
+		type = "application/x-www-form-urlencoded";
 	}
 
 	let stringify = makePostData;
 
-	if(type === 'application/json'){
+	if(type === "application/json"){
 		stringify = JSON.stringify;
 	}
 
 	let stringifiedData;
 
-	if(typeof obj === 'string'){
+	if(typeof obj === "string"){
 		stringifiedData = obj;
 	} else {
 		stringifiedData = stringify(obj);
@@ -125,10 +125,10 @@ function post(url, obj, type){
 		hostname: parsedUrl.host,
 		port: parsedUrl.port,
 		path: parsedUrl.path,
-		method: 'POST',
+		method: "POST",
 		headers: {
-			'Content-Type': type,
-			'Content-Length': stringifiedData.length
+			"Content-Type": type,
+			"Content-Length": stringifiedData.length
 		}
 	};
 
@@ -138,13 +138,13 @@ function post(url, obj, type){
 			
 			let bodyChunks = [];
 
-			res.on('data', (chunk) => {
+			res.on("data", (chunk) => {
 				bodyChunks.push(chunk);
-			}).on('end', () => {
+			}).on("end", () => {
 
 				let body = Buffer.concat(bodyChunks);
 
-				if(res.headers['content-type'].startsWith('application/json')){
+				if(res.headers["content-type"].startsWith("application/json")){
 					body = JSON.parse(body);
 				} else {
 					body = body.toString();
@@ -158,7 +158,7 @@ function post(url, obj, type){
 				}
 
 			});
-		}).on('error', err => {
+		}).on("error", err => {
 			reject(err);
 		});
 
