@@ -30,9 +30,10 @@ div(ng-show="vm.showPanel")
 			md-button.md-fab.md-primary.md-mini(
 				id="{{contentItem.type + 'LeftButton'}}"
 				ng-click="vm.togglePanel(contentItem.type)"
-				aria-label="{{contentItem.title}}")
+				aria-label="{{contentItem.title}}"
+				style="background-color:{{contentItem.bgColour}}")
 
-				md-tooltip(ng-if="contentItem.show" md-direction="right") Close
-				md-tooltip(ng-if="!contentItem.show" md-direction="right") Show
+				//md-tooltip(ng-if="contentItem.show" md-direction="right") Close
+				//md-tooltip(ng-if="!contentItem.show" md-direction="right") Show
 				md-icon.angular-material-icons {{contentItem.icon}}
 			label {{contentItem.title}}
