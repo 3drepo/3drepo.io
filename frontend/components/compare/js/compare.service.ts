@@ -393,7 +393,7 @@ export class CompareService {
 	public enableComparison() {
 
 		this.state.canChangeCompareState = false;
-		this.state.compareState = "compare";
+		this.changeCompareState("compare");
 
 		if (this.state.isFed) {
 			this.startComparisonFed(this.state.mode === "diff");
