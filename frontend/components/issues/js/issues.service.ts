@@ -32,14 +32,13 @@ export class IssuesService {
 		"AuthService",
 		"MultiSelectService",
 		"ClipService",
-		"ViewerService"
+		"ViewerService",
+		"PanelService",
+		"DialogService"
 	];
 
 	private state: any;
 	private groupsCache: any;
-	private initDefer: any;
-	private jobsDeferred: any;
-	private availableJobs: any;
 
 	constructor(
 		private $q,
@@ -54,16 +53,15 @@ export class IssuesService {
 		private AuthService,
 		private MultiSelectService,
 		private ClipService,
-		private ViewerService
+		private ViewerService,
+		private PanelService,
+		private DialogService
 	) {
-		this.groupsCache = {};
-		this.initDefer = $q.defer();
-		this.jobsDeferred = this.$q.defer();
-		this.resetIssues();
+		this.reset();
 	}
 
-	public resetIssues() {
-		this.jobsDeferred = this.$q.defer();
+	public reset() {
+		this.groupsCache = {};
 		this.state = {
 			heights : {
 				infoHeight : 135,
@@ -78,8 +76,54 @@ export class IssuesService {
 				showClosed: false,
 				sortOldestFirst : false,
 				excludeRoles: []
-			}
+			},
+			availableJobs : [],
+			modelUserJob: null
 		};
+	}
+
+	public getIssuesAndJobs(account: string, model: string, revision: string) {
+		return Promise.all([
+			this.getUserJobForModel(account, model),
+			this.getIssuesData(account, model, revision),
+			this.getTeamspaceJobs(account, model)
+		]);
+	}
+
+	public getIssuesData(account: string, model: string, revision: string) {
+		return this.getIssues(account, model, revision)
+			.then((newIssues) => {
+				if (newIssues) {
+					newIssues.forEach(this.populateIssue.bind(this));
+					this.state.allIssues = newIssues;
+				} else {
+					throw new Error("Error");
+				}
+
+			});
+
+	}
+
+	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
+		const url = account + "/jobs";
+
+		return this.APIService.get(url)
+			.then((response) => {
+				this.state.availableJobs = response.data;
+				this.PanelService.setIssuesMenu(response.data);
+				return this.state.availableJobs;
+			});
+
+	}
+
+	public getUserJobForModel(account: string, model: string): Promise<any> {
+		const url = account + "/myJob";
+
+		return this.APIService.get(url)
+			.then((response) => {
+				this.state.modelUserJob = response.data;
+				return this.state.modelUserJob;
+			});
 	}
 
 	public createBlankIssue(creatorRole) {
@@ -288,11 +332,6 @@ export class IssuesService {
 
 	}
 
-	public populateNewIssues(newIssues) {
-		newIssues.forEach(this.populateIssue.bind(this));
-		this.state.allIssues = newIssues;
-	}
-
 	public addIssue(issue) {
 		this.populateIssue(issue);
 		this.state.allIssues.unshift(issue);
@@ -324,44 +363,32 @@ export class IssuesService {
 		});
 	}
 
-	public init() {
-		return this.initDefer.promise;
-	}
-
 	public populateIssue(issue) {
 
 		if (issue) {
 			issue.title = this.generateTitle(issue);
-		}
-
-		if (issue.created) {
-			issue.timeStamp = this.getPrettyTime(issue.created);
-		}
-
-		if (issue.thumbnail) {
-			issue.thumbnailPath = this.getThumbnailPath(issue.thumbnail);
-		}
-
-		if (issue.due_date) {
-			issue.due_date = new Date(issue.due_date);
-		}
-
-		if (issue) {
 			issue.statusIcon = this.getStatusIcon(issue);
-		}
+			if (issue.created) {
+				issue.timeStamp = this.getPrettyTime(issue.created);
+			}
 
-		if (issue.assigned_roles[0]) {
-			this.getJobColor(issue.assigned_roles[0]).then((color) => {
-				issue.issueRoleColor = color;
-			});
-		}
+			if (issue.thumbnail) {
+				issue.thumbnailPath = this.getThumbnailPath(issue.thumbnail);
+			}
 
-		if (!issue.descriptionThumbnail) {
-			if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
-				issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+			if (issue.due_date) {
+				issue.due_date = new Date(issue.due_date);
+			}
+			if (issue.assigned_roles[0]) {
+				issue.issueRoleColor = this.getJobColor(issue.assigned_roles[0]);
+			}
+
+			if (!issue.descriptionThumbnail) {
+				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
+					issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+				}
 			}
 		}
-
 	}
 
 	public userJobMatchesCreator(userJob, issueData) {
@@ -788,11 +815,6 @@ export class IssuesService {
 
 	public getIssues(account, model, revision) {
 
-		// TODO: This is a bit hacky. We are
-		// basically saying when getIssues is called
-		// we know the issues component is loaded...
-		this.initDefer.resolve();
-
 		let endpoint;
 		if (revision) {
 			endpoint = account + "/" + model + "/revision/" + revision + "/issues.json";
@@ -919,39 +941,6 @@ export class IssuesService {
 		});
 	}
 
-	public getJobs(account, model) {
-
-		const url = account + "/jobs";
-
-		this.APIService.get(url).then(
-			(jobsData) => {
-				// this.availableJobs = jobsData.data;
-				this.jobsDeferred.resolve(jobsData.data);
-			},
-			() => {
-				this.jobsDeferred.resolve([]);
-			}
-		);
-
-		return this.jobsDeferred.promise;
-	}
-
-	public getUserJobForModel(account, model) {
-		const deferred = this.$q.defer();
-		const url = account + "/myJob";
-
-		this.APIService.get(url).then(
-			(userJob) => {
-				deferred.resolve(userJob.data);
-			},
-			() => {
-				deferred.resolve();
-			}
-		);
-
-		return deferred.promise;
-	}
-
 	public hexToRgb(hex) {
 		// If nothing comes end, then send nothing out.
 		if (!hex) {
@@ -984,32 +973,22 @@ export class IssuesService {
 	}
 
 	public getJobColor(id) {
-		return this.jobsDeferred.promise
-			.then((jobs) => {
-				let roleColor = "#ffffff";
-				let found = false;
-
-				if (id && jobs) {
-					for (let i = 0; i < jobs.length; i ++) {
-						const job = jobs[i];
-						if (job._id === id && job.color) {
-							roleColor = job.color;
-							found = true;
-							break;
-						}
-					}
+		let roleColor = "#ffffff";
+		let found = false;
+		if (id && this.state.availableJobs) {
+			for (let i = 0; i <  this.state.availableJobs.length; i ++) {
+				const job =  this.state.availableJobs[i];
+				if (job._id === id && job.color) {
+					roleColor = job.color;
+					found = true;
+					break;
 				}
-
-				if (!found) {
-					console.debug("Job color not found for", id);
-				}
-
-				return roleColor;
-			})
-			.catch((error) => {
-				console.error("Error getting Job Color as available jobs did not resolve");
-				return "#ffffff";
-			});
+			}
+		}
+		if (!found) {
+			console.debug("Job color not found for", id);
+		}
+		return roleColor;
 	}
 
 	/**

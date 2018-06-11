@@ -90,12 +90,6 @@ class RightPanelController implements ng.IController {
 
 		}, true);
 
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			if (event.type === this.EventService.EVENT.TOGGLE_ELEMENTS) {
-				this.showPanel = !this.showPanel;
-			}
-		});
-
 	}
 
 	public disableOtherModes(setMode) {

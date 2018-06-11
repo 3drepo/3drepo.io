@@ -141,7 +141,7 @@ class GroupsController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() => {
+		this.$scope.$watchCollection(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
 
@@ -149,7 +149,7 @@ class GroupsController implements ng.IController {
 				this.changed = true;
 			});
 
-		}, true);
+		});
 
 	}
 
@@ -283,6 +283,10 @@ class GroupsController implements ng.IController {
 
 	public getGroupRGBAColor(group: any) {
 		return this.GroupsService.getGroupRGBAColor(group);
+	}
+
+	public getFormattedDate(timestamp: number) {
+		return (new Date(timestamp)).toLocaleDateString();
 	}
 
 	public updateGroup() {

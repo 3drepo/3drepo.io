@@ -36,7 +36,7 @@ class CompareController implements ng.IController {
 	private account: any;
 	private model: any;
 	private modelSettings: any;
-	private loadingComparision: boolean;
+	private loadingComparison: boolean;
 	private loadingInfo: string;
 	private isFed: boolean;
 	private compareState: string;
@@ -58,7 +58,7 @@ class CompareController implements ng.IController {
 
 	public $onInit() {
 
-		this.CompareService.disableComparision();
+		this.CompareService.disableComparison();
 		this.loadingInfo = "Loading comparison...";
 		this.compareTypes = this.CompareService.state.compareTypes;
 		this.mode = this.CompareService.mode;
@@ -71,7 +71,7 @@ class CompareController implements ng.IController {
 	}
 
 	public $onDestroy() {
-		this.CompareService.disableComparision();
+		this.CompareService.disableComparison();
 		this.CompareService.reset();
 	}
 
@@ -93,56 +93,12 @@ class CompareController implements ng.IController {
 			}
 		});
 
-		this.watchTreeVisibility();
-
-	}
-
-	public watchTreeVisibility() {
-		let lastViewerUpdateTime = Date.now();
-		setInterval(() => {
-
-			if (this.TreeService.visibilityUpdateTime) {
-				if (lastViewerUpdateTime < this.TreeService.visibilityUpdateTime) {
-					this.updateModels();
-				}
-			}
-
-			lastViewerUpdateTime = Date.now();
-
-		}, 250);
 	}
 
 	public updateModels() {
 		this.modelsReady.promise.then(() => {
 			const models = this.TreeService.getNodesToShow();
-			if (this.isFederation()) {
-				models.forEach(this.compareToTreeState.bind(this));
-			}
 		});
-	}
-
-	public compareToTreeState(shownModel: any) {
-
-		if (shownModel.level !== 1) {
-			return;
-		}
-
-		for (const type in this.compareTypes) {
-
-			if (!type) {
-				continue;
-			}
-
-			for (let j = 0; j < this.baseModels.length; j++) {
-				const model = this.baseModels[j];
-				if (model && shownModel.name === model.account + ":" + model.name) {
-					model.visible = shownModel.toggleState || "visible";
-					break;
-				}
-			}
-
-		}
-
 	}
 
 	public revisionTimestamp(timestamp) {
@@ -220,7 +176,7 @@ class CompareController implements ng.IController {
 	}
 
 	public compare() {
-		this.CompareService.compare(this.account, this.model);
+		this.CompareService.compare();
 	}
 
 }

@@ -283,8 +283,9 @@ export class UnityUtil {
 	}
 
 	public static navMethodChanged(newNavMode) {
-		// TODO: do some front end magic to update the navigation button
-		// newNavMode can currently be "Turntable" or "Helicopter"
+		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
+			UnityUtil.viewer.navMethodChanged(newNavMode);
+		}
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
@@ -432,7 +433,7 @@ export class UnityUtil {
 	 * @param {string} account - name of teamspace
 	 * @param {string} model - model ID
 	 */
-	public static diffToolSetAsComparator(account, model) {
+	public static diffToolSetAsComparator(account: string, model: string) {
 		const params: any = {
 			database : account,
 			model
@@ -556,6 +557,27 @@ export class UnityUtil {
 
 	public static getPointInfo() {
 		UnityUtil.toUnity("GetPointInfo", false, 0);
+	}
+
+	/**
+	 * Decrease the speed of Helicopter navigation (by x0.75)
+	 */
+	public static helicopterSpeedDown() {
+		UnityUtil.toUnity("HelicopterSpeedDown", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Increase the speed of Helicopter navigation (by x1.25)
+	 */
+	public static helicopterSpeedUp() {
+		UnityUtil.toUnity("HelicopterSpeedUp", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Reset the speed of Helicopter navigation
+	 */
+	public static helicopterSpeedReset() {
+		UnityUtil.toUnity("HelicopterSpeedReset", UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	public static hideHiddenByDefaultObjects() {
@@ -763,7 +785,7 @@ export class UnityUtil {
 		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
-	/**
+	/**r
 	 * Set navigation mode.
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */
@@ -858,6 +880,13 @@ export class UnityUtil {
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+	}
+
+	/**
+	 * Zoom to highlighted meshes
+	 */
+	public static zoomToHighlightedMeshes() {
+		UnityUtil.toUnity("ZoomToHighlightedMeshes", UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 }

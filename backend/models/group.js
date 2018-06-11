@@ -24,7 +24,7 @@ const uuid = require("node-uuid");
 const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
-const History = require('./history');
+const History = require("./history");
 
 
 const groupSchema = Schema({
@@ -208,7 +208,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 /**
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToString, branch, revId) {
+groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, convertSharedIDsToString) {
 
 	const sharedIdPromises = [];
 
@@ -219,6 +219,9 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 		const sharedIdObject = {};
 		sharedIdObject.account = this.objects[i].account;
 		sharedIdObject.model = this.objects[i].model;
+
+		const _branch = (model === sharedIdObject.model) ? branch : "master";
+		const _revId = (model === sharedIdObject.model) ? revId : null;
 
 		let ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
 
@@ -234,8 +237,8 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(convertSharedIDsToStri
 					sharedIdObject.account,
 					sharedIdObject.model,
 					ifcGuids,
-					branch,
-					revId
+					_branch,
+					_revId
 					).then(sharedIdResults => {
 			for (let j = 0; j < sharedIdResults.length; j++) {
 				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
@@ -272,7 +275,7 @@ groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsSharedIDs(false, branch, revId).then((sharedIdObjects) => {
+			return group.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, false).then((sharedIdObjects) => {
 				group.objects = sharedIdObjects;
 				return group;
 			});
@@ -289,7 +292,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsSharedIDs(true, branch, revId).then((sharedIdObjects) => {
+			return group.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, true).then((sharedIdObjects) => {
 
 				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
 				returnGroup.objects = sharedIdObjects;
@@ -311,7 +314,7 @@ groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				result.getObjectsArrayAsSharedIDs(true, branch, revId).then(sharedIdObjects => {
+				result.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, true).then(sharedIdObjects => {
 					result.objects = sharedIdObjects;
 					return result;
 				})
@@ -354,8 +357,9 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 			if (data[key]) {
 				if (key === "objects" && data.objects) {
 					toUpdate.objects = convertedObjects;
-				}
-				else {
+				} else if (key === "color") {
+					toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+				} else {
 					toUpdate[key] = data[key];
 				}
 			}
