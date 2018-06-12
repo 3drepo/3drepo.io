@@ -20,7 +20,6 @@ describe("Home page", function() {
 		
 		expect(element(by.id("notSupportedChrome")).isDisplayed()).to.eventually.equal(true);
 		expect(element(by.id("notSupportedFirefox")).isDisplayed()).to.eventually.equal(true);
-		expect(element(by.id("notSupportedEdge")).isDisplayed()).to.eventually.equal(true);
 
 	});	
 

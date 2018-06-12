@@ -38,6 +38,8 @@ class PanelController implements ng.IController {
 	public contentItemsShown;
 	public position;
 
+	private highlightBackground;
+
 	constructor(
 		private $window: ng.IWindowService,
 		private $scope: ng.IScope,
@@ -50,6 +52,7 @@ class PanelController implements ng.IController {
 
 	public $onInit() {
 
+		this.highlightBackground = "#3171B6";
 		this.contentItems = [];
 		this.showPanel = true;
 		this.activate = true;
@@ -171,7 +174,7 @@ class PanelController implements ng.IController {
 	public togglePanel(contentType: string) {
 
 		// Get the content item
-		for (let i = 0; i < this.contentItems.length; i += 1) {
+		for (let i = 0; i < this.contentItems.length; i++) {
 			if (contentType === this.contentItems[i].type) {
 
 				// Toggle panel show and update number of panels showing count
@@ -194,6 +197,13 @@ class PanelController implements ng.IController {
 		}
 
 		this.hideLastItemGap();
+		this.updatePanelButtons();
+	}
+
+	public updatePanelButtons() {
+		for (let i = 0; i < this.contentItems.length; i++) {
+			this.contentItems[i].bgColour = (this.contentItems[i].show) ? this.highlightBackground : "";
+		}
 	}
 
 	public heightRequest(contentItem: any, height: number) {
@@ -298,6 +308,7 @@ class PanelController implements ng.IController {
 				this.contentItemsShown.push(this.contentItems[i]);
 			}
 		}
+		this.updatePanelButtons();
 		this.$timeout().then(() => {
 			angular.element(window as any).triggerHandler("resize");
 		});
