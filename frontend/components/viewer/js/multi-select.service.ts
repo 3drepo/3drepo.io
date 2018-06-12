@@ -25,12 +25,13 @@ export class MultiSelectService {
 	private keys = {
 		cmdKey : 91,
 		ctrlKey : 17,
-		escKey : 27
+		escKey : 27,
+		shiftKey : 16
 	};
 
 	private isMac = (navigator.platform.indexOf("Mac") !== -1);
 	private multiMode = false;
-	private keysDown: number[] = [];
+	private areaSelectMode = false;
 
 	constructor(
 		public ViewerService: any,
@@ -44,100 +45,63 @@ export class MultiSelectService {
 	public initKeyWatchers() {
 
 		this.$document.bind("keydown", (event) => {
-			if (this.keysDown.indexOf(event.which) === -1) {
-
-				this.keysDown.push(event.which);
-
-				// Recreate list so that it changes are registered in components
-				this.keysDown = this.keysDown.slice();
-
-			}
-
-			this.handleKeysDown(this.keysDown);
-
+			this.handleKey(event.which, true);
 		});
 
 		this.$document.bind("keyup", (event) => {
-			// Remove all instances of the key (multiple instances can happen if key up wasn't registered)
-			for (let i = (this.keysDown.length - 1); i >= 0; i -= 1) {
-				if (this.keysDown[i] === event.which) {
-					this.keysDown.splice(i, 1);
-				}
-			}
-
-			// Recreate list so that it changes are registered in components
-			this.keysDown = this.keysDown.slice();
-
-			this.handleKeysDown(this.keysDown);
-
+			this.handleKey(event.which, false);
 		});
 
 	}
 
-	public handleKeysDown(keysDown: any[]) {
-
+	public handleKey(key: number, keyDown: boolean) {
 		if (this.ViewerService.pin.pinDropMode) {
 			return;
 		}
 
-		if (this.isMultiSelectDown(keysDown)) {
-
-			this.multiSelectEnabled();
-
-		} else if (this.multiMode === true && this.isOtherKey(keysDown)) {
-
-			this.multiSelectDisabled();
-
-		} else if (this.isEscapeKey(keysDown)) {
-
-			this.unhighlightAll();
-
+		if (this.isMultiSelectDown(key)) {
+			this.toggleMultiSelect(keyDown);
+		} else if (this.isShiftKey(key)) {
+			this.toggleAreaSelect(keyDown);
 		}
-
 	}
 
 	public isMultiMode() {
 		return this.multiMode;
 	}
 
-	public multiSelectEnabled() {
-		this.multiMode = true;
-		this.ViewerService.setMultiSelectMode(true);
+	public toggleMultiSelect(on: boolean) {
+		if (this.multiMode !== on) {
+			this.multiMode = on;
+			this.ViewerService.setMultiSelectMode(on);
+		}
 	}
 
-	public multiSelectDisabled() {
-		this.multiMode = false;
-		this.ViewerService.setMultiSelectMode(false);
+	public toggleAreaSelect(on: boolean) {
+		if (this.areaSelectMode !== on) {
+			this.areaSelectMode = on;
+			if (on) {
+				this.ViewerService.startAreaSelect();
+			} else {
+				this.ViewerService.stopAreaSelect();
+			}
+		}
 	}
 
-	public unhighlightAll() {
-		this.ViewerService.highlightObjects([]);
+	public isCmd(key: number) {
+		return this.isMac && this.keys.cmdKey === key;
 	}
 
-	public disableMultiSelect() {
-		this.ViewerService.setMultiSelectMode(false);
+	public isCtrlKey(key: number) {
+		return !this.isMac && this.keys.ctrlKey === key;
 	}
 
-	public isCmd(keysDown: any[]) {
-		return this.isMac && keysDown.indexOf(this.keys.cmdKey) !== -1;
+	public isMultiSelectDown(key: number) {
+		return this.isCmd(key) || this.isCtrlKey(key);
 	}
 
-	public isCtrlKey(keysDown: any[]) {
-		return !this.isMac && keysDown.indexOf(this.keys.ctrlKey) !== -1;
-	}
-
-	public isMultiSelectDown(keysDown: any[]) {
-		return this.isCmd(keysDown) || this.isCtrlKey(keysDown);
-	}
-
-	public isOtherKey(keysDown: any[]) {
-		const macOtherKey = this.isMac && keysDown.indexOf(this.keys.cmdKey) === -1;
-		const otherKey = !this.isMac && keysDown.indexOf(this.keys.ctrlKey) === -1;
-		return macOtherKey || otherKey;
-	}
-
-	public isEscapeKey(keysDown: any[]) {
-		return keysDown.indexOf(this.keys.escKey) !== -1;
+	public isShiftKey(key: number) {
+		return this.keys.shiftKey === key;
 	}
 
 }

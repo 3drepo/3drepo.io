@@ -18,29 +18,62 @@
 export class GISService {
 
 	public static $inject: string[] = [
+		"APIService",
 		"ViewerService"
 	];
 
 	private initialised: boolean;
+	private visibleSources: Set<string>;
 
 	constructor(
+		private APIService: any,
 		private ViewerService: any
 	) {
 		this.initialised = false;
+		this.visibleSources = new Set();
 	}
 
-	public getProviders() {
-		return [
-			{
-				name: "Open Street Map",
-				layers: [
-					{
-						name: "Map Tiles",
-						visibility: "invisible"
-					}
-				]
+	public getProviders(account: string, model: string) {
+		const listMapsUrl = `${account}/${model}/maps/`;
+		return this.APIService.get(listMapsUrl)
+			.then((response) => {
+				const mapProviders = response.data.maps;
+				if (mapProviders && mapProviders.length > 0) {
+					mapProviders.forEach((mapProvider) => {
+						if (mapProvider.layers && mapProvider.layers.length > 0) {
+							mapProvider.layers.forEach((mapLayer) => {
+								mapLayer.visibility = "invisible";
+							});
+						}
+					});
+				}
+				return mapProviders;
+			});
+	}
+
+	public resetMapSources() {
+		this.visibleSources.clear();
+		this.ViewerService.resetMapSources();
+		this.ViewerService.mapStop();
+	}
+
+	public addMapSource(source) {
+		if (!this.visibleSources.has(source)) {
+			this.ViewerService.addMapSource(source);
+			if (this.visibleSources.size === 0) {
+				this.mapStart();
 			}
-		];
+			this.visibleSources.add(source);
+		}
+	}
+
+	public removeMapSource(source) {
+		if (this.visibleSources.delete(source)) {
+			this.ViewerService.removeMapSource(source);
+			if (this.visibleSources.size === 0) {
+				this.mapStop();
+			}
+		}
 	}
 
 	public mapInitialise(params) {
@@ -68,9 +101,9 @@ export class GISService {
 		layer.visibility = (layer.visibility === "visible") ? "invisible" : "visible";
 
 		if (layer.visibility === "visible") {
-			this.mapStart();
+			this.addMapSource(layer.source);
 		} else {
-			this.mapStop();
+			this.removeMapSource(layer.source);
 		}
 
 	}
