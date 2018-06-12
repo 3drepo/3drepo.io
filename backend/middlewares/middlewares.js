@@ -181,11 +181,31 @@
 		}
 	}
 
+	function isHereEnabled(req, res, next) {
+		const teamspace = req.params.account;
+
+		if (config.here && config.here.appID && config.here.appCode) {
+			return User.isHereEnabled(teamspace).then((hereEnabled) => {
+				if (hereEnabled) {
+					next();
+				} else {
+					responseCodes.respond("Check Here enabled middleware", req, res, next, responseCodes.HERE_MAPS_NOT_AVAILABLE , null, {});
+				}
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		} else {
+			responseCodes.respond("Check Here enabled middleware", req, res, next, responseCodes.MISSING_HERE_CONFIG , null, {});
+		}
+	}
+
 	var middlewares = {
 
 		project: require('./project'),
 		job: require('./job'),
 		issue: require('./issue'),
+
+		isHereEnabled: isHereEnabled,
 
 		//models
 		canCreateModel: canCreateModel,

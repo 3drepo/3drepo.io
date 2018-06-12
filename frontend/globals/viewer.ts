@@ -27,6 +27,14 @@ export class Viewer {
 		TURNTABLE: "TURNTABLE"
 	};
 
+	public static MAP_SOURCES = {
+		OSM: "OSM",
+		HERE: "HERE",
+		HERE_AERIAL: "HERE_AERIAL",
+		HERE_TRAFFIC: "HERE_TRAFFIC",
+		HERE_TRAFFIC_FLOW: "HERE_TRAFFIC_FLOW"
+	};
+
 	public static EVENT = {
 		ADD_PIN: "VIEWER_ADD_PIN",
 		BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
@@ -738,6 +746,29 @@ export class Viewer {
 		if (this.pins.hasOwnProperty(id)) {
 			this.pins[id].changeColour(colours);
 		}
+	}
+
+	/**
+	 * Resets map sources
+	 */
+	public resetMapSources() {
+		UnityUtil.resetMapSources();
+	}
+
+	/**
+	 * Add map source
+	 * @param source Map source
+	 */
+	public addMapSource(source) {
+		UnityUtil.addMapSource(source);
+	}
+
+	/**
+	 * Remove map source
+	 * @param source Map source
+	 */
+	public removeMapSource(source) {
+		UnityUtil.removeMapSource(source);
 	}
 
 	/**

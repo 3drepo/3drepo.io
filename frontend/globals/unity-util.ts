@@ -669,6 +669,29 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Reset map sources.
+	 */
+	public static resetMapSources() {
+		UnityUtil.toUnity("ResetMapSources", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Add map source.
+	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 */
+	public static addMapSource(mapSource) {
+		UnityUtil.toUnity("AddMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	}
+
+	/**
+	 * Remove map source.
+	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 */
+	public static removeMapSource(mapSource) {
+		UnityUtil.toUnity("RemoveMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	}
+
+	/**
 	 * Initialise map creator within unity
 	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */

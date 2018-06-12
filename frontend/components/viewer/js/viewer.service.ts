@@ -559,6 +559,24 @@ export class ViewerService {
 		}
 	}
 
+	public resetMapSources(source) {
+		if (this.viewer) {
+			this.viewer.resetMapSources(source);
+		}
+	}
+
+	public addMapSource(source) {
+		if (this.viewer) {
+			this.viewer.addMapSource(source);
+		}
+	}
+
+	public removeMapSource(source) {
+		if (this.viewer) {
+			this.viewer.removeMapSource(source);
+		}
+	}
+
 	public mapInitialise(surveyPoints) {
 		if (this.viewer) {
 			this.viewer.mapInitialise(surveyPoints);
