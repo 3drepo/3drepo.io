@@ -288,6 +288,10 @@ export class UnityUtil {
 		}
 	}
 
+	public static objectsSelectedAlert(nodeInfo) {
+		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
+	}
+
 	public static objectStatusBroadcast(nodeInfo) {
 		if (UnityUtil.objectStatusPromise) {
 			UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
@@ -850,15 +854,29 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Toggle on/off rendering statistics.
-	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
+	 * Make all hidden by default objects visible
 	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity("ShowHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	 * Toggle stats for unity
+	 * Start rectangular select
+	 */
+	public static startAreaSelection() {
+		UnityUtil.toUnity("StartRectangularSelect", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Stop rectangular select
+	 */
+	public static stopAreaSelection() {
+		UnityUtil.toUnity("StopRectangularSelect", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Toggle on/off rendering statistics.
+	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
 	 */
 	public static toggleStats() {
 		UnityUtil.toUnity("ShowStats", UnityUtil.LoadingState.VIEWER_READY, undefined);
