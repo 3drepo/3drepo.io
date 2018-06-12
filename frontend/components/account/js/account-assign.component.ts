@@ -87,7 +87,7 @@ class AccountAssignController implements ng.IController {
 		this.teamspacePermissions = {
 			teamspace_admin : {
 				title: "Admin",
-				tooltip: "Manage licenses, create new projects, full access to all projects"
+				tooltip: "Manage licences, create new projects, full access to all projects"
 			}
 		};
 
