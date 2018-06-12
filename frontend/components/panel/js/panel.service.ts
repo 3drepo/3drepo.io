@@ -246,7 +246,7 @@ export class PanelService {
 
 		this.panelCards.right.push({
 			type: "docs",
-			title: "Meta Data",
+			title: "BIM Data",
 			show: false,
 			showLiteMode: false,
 			help: "Documents",

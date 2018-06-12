@@ -10,10 +10,10 @@
 			ng-disabled="vm.measureDisabled"
 			style="background-color:{{vm.metaBackground}}")
 
-			md-tooltip(ng-if="vm.metaData" md-direction="left") Disable
-			md-tooltip(ng-if="!vm.metaData" md-direction="left") Enable
+			//md-tooltip(ng-if="vm.metaData" md-direction="left") Close BIM data
+			//md-tooltip(ng-if="!vm.metaData" md-direction="left") View BIM data of selected object
 			md-icon.angular-material-icons content_copy
-		label Meta
+		label BIM
 		
 		// MEASURE TOOL
 		md-button.md-accent.md-fab.md-mini(
@@ -23,6 +23,6 @@
 			ng-disabled="vm.measureDisabled"
 			style="background-color:{{vm.measureBackground}}")
 			
-			md-tooltip(md-direction="left") Measure
+			//md-tooltip(md-direction="left") Measure
 			md-icon.angular-material-icons straighten
 		label Measure

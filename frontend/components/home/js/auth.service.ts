@@ -176,6 +176,10 @@ export class AuthService {
 		this.authDefer.resolve(this.loggedIn);
 	}
 
+	public clearCurrentEvent() {
+		this.setCurrentEvent(null, null);
+	}
+
 	public setCurrentEvent(event, data) {
 		this.state.currentEvent = event;
 		this.state.currentData = data;
@@ -264,6 +268,7 @@ export class AuthService {
 
 	public login(loginUsername, password) {
 		this.authDefer = this.$q.defer();
+		this.clearCurrentEvent();
 
 		const postData = {username: loginUsername, password};
 

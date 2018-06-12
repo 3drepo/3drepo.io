@@ -225,7 +225,7 @@ function resetCorrelationId(account, model) {
 	});
 }
 
-function createAndAssignRole(modelName, account, username, data) {
+function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 	let project;
 	//generate model id
@@ -277,7 +277,7 @@ function createAndAssignRole(modelName, account, username, data) {
 			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 		}
 
-		return (data.subModels ? createFederatedModel(account, model, data.subModels) : Promise.resolve());
+		return (data.subModels ? createFederatedModel(account, model, data.subModels, toyFed) : Promise.resolve());
 
 	}).then(() => {
 
@@ -437,11 +437,17 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		angleFromNorth: 145,
 	};
 
-	return createAndAssignRole(modelName, account, username, data).then(data => {
+	return createAndAssignRole(modelName, account, username, data, modelDirName).then(data => {
 		return Promise.resolve(data.setting);
 	}).then(setting => {
-		model = setting._id;
-		return importModel(account, model, username, setting, {type: 'toy', modelDirName, skip });
+		if(subModels) {
+			return setting;
+		}
+		else {
+			model = setting._id;
+			return importModel(account, model, username, setting, {type: 'toy', modelDirName, skip });
+		}
+
 	}).catch(err => {
 
 		Mailer.sendImportError({
@@ -457,7 +463,7 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	});
 }
 
-function createFederatedModel(account, model, subModels){
+function createFederatedModel(account, model, subModels, toyFed){
 
 	return createCorrelationId(account, model).then(correlationId => {
 
@@ -466,6 +472,9 @@ function createFederatedModel(account, model, subModels){
 			project: model,
 			subProjects: []
 		};
+		if(toyFed) {
+			federatedJSON.toyFed = toyFed;
+		}
 
 		let error;
 
@@ -474,7 +483,6 @@ function createFederatedModel(account, model, subModels){
 		subModels.forEach(subModel => {
 
 			if(subModel.database !== account){
-				//return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
 				error = responseCodes.FED_MODEL_IN_OTHER_DB;
 			}
 

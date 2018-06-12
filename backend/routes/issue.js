@@ -219,8 +219,6 @@ function listIssues(req, res, next) {
 }
 
 function getIssuesBCF(req, res, next) {
-	
-	
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let model = req.params.model;
@@ -253,20 +251,6 @@ function getIssuesBCF(req, res, next) {
 	});
 
 }
-// function listIssuesBySID(req, res, next) {
-// 	'use strict';
-
-// 	let params = req.params;
-// 	let place = utils.APIInfo(req);
-// 	let dbCol =  {account: req.params.account, model: req.params.model};
-
-// 	Issue.findBySharedId(dbCol, params.sid, req.query.number).then(issues => {
-// 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
-// 	}).catch(err => {
-// 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-// 	});
-
-// }
 
 function findIssueById(req, res, next) {
 	
