@@ -159,7 +159,6 @@ class ViewsController implements ng.IController {
 
 	public showNewViewPane() {
 		this.toShow = "view";
-		//this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 	}
 

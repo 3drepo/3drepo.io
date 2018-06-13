@@ -81,7 +81,7 @@ export class ViewsService {
 		const viewsUrl = `${teamspace}/${model}/views/${viewId}/`;
 
 		return this.generateViewObject(teamspace, model, originalView.name)
-			.then((updatedView) => {
+			.then((updatedView: any) => {
 				updatedView._id = viewId;
 				updatedView.screenshot.thumbnail = viewsUrl + "thumbnail.png";
 				return this.APIService.put(viewsUrl, updatedView)
@@ -105,10 +105,10 @@ export class ViewsService {
 	public createView(teamspace: string, model: string, viewName: string) {
 
 		return this.generateViewObject(teamspace, model, viewName)
-			.then((view) => {
+			.then((view: any) => {
 				const viewsUrl = `${teamspace}/${model}/views/`;
 				return this.APIService.post(viewsUrl, view)
-					.then((response) => {
+					.then((response: any) => {
 						view._id = response.data._id;
 						view.screenshot.thumbnail = viewsUrl + view._id + "/thumbnail.png";
 						this.state.views.push(view);
@@ -169,8 +169,8 @@ export class ViewsService {
 
 		this.ViewerService.getScreenshot(screenshotDefer);
 		return Promise.all([viewpointDefer.promise, screenshotDefer.promise])
-			.then((results) => {
-				const viewpoint = {};
+			.then((results: any) => {
+				const viewpoint:any = {};
 				const base64Screenshot = results[1];
 				viewpoint.name = viewName;
 				viewpoint.clippingPlanes = results[0].clippingPlanes;
@@ -206,7 +206,7 @@ export class ViewsService {
 				clippingPlanes: view.clippingPlanes,
 				fromClipPanel: false,
 				account: teamspace,
-				model: model
+				model
 			};
 
 			this.ClipService.updateClippingPlane(clipData);
