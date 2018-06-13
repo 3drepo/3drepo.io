@@ -77,33 +77,43 @@ function createSession(place, req, res, next, user){
 }
 
 function login(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
-	req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
-	if(req.session.user){
-		return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
+	if (req.body && Object.prototype.toString.call(req.body.username) === "[object String]"
+		 && Object.prototype.toString.call(req.body.password) === "[object String]") {
+
+		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
+		
+		if(req.session.user){
+			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
+		}
+
+
+		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
+
+			let responseData = { username: user.user };
+
+			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
+
+			responseData.roles = user.roles;
+			responseData.flags = {};
+
+			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
+
+			user.customData.lastLoginAt = new Date();
+
+			user.save().then(() => {
+				createSession(responsePlace, req, res, next, responseData);
+			});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		});
+	}
+	else {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, {});
 	}
 
-	User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-
-		let responseData = { username: user.user };
-
-		req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
-
-		responseData.roles = user.roles;
-		responseData.flags = {};
-
-		responseData.flags.termsPrompt = !user.hasReadLatestTerms();
-
-		user.customData.lastLoginAt = new Date();
-
-		user.save().then(() => {
-			createSession(responsePlace, req, res, next, responseData);
-		});
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
-	});
 }
 
 function checkLogin(req, res, next){
@@ -131,9 +141,9 @@ function logout(req, res, next){
 function updateUser(req, res, next){
 	let responsePlace = utils.APIInfo(req);
 
-	if(req.body.oldPassword){
-
-		// Update password
+	if(req.body.oldPassword) {
+//		Object.prototype.toString.call(req.body.username) === "[object String]")
+		// Update password		
 		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
