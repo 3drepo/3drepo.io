@@ -45,6 +45,8 @@
 
 		NOT_AUTHORIZED: { message: "Not Authorized", status: 401 },
 
+		INVALID_ARGUMENTS: { message: "Missing or invalid arguments", status: 400 },
+
 		RID_SID_OR_UID_NOT_SPECIFIED: { message: "RID, SID or UID not specified", status: 422 },
 
 		GET_PUBLIC_NOT_SPECIFIED: { message: "Get public parameter not specified", status: 422 },
