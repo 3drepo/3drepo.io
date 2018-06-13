@@ -110,7 +110,7 @@ function updateView(req, res, next){
 			if(!view){
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 			} else {
-				return view.updateAttrs(dbCol, req.body);
+				return View.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
 			}
 		}).then(view => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, view);

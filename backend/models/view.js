@@ -17,35 +17,34 @@
 
 "use strict";
 
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const uuid = require("node-uuid");
-const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const db = require("../db/db");
 
-const viewSchema = Schema({
-	_id: Object,
-	name: String,
-	clippingPlanes : [Schema.Types.Mixed ],
-	viewpoint: {
-		position: [Number],
-		up: [Number],
-		look_at: [Number],
-		view_dir: [Number],
-		right: [Number]
-	},
-	screenshot: {
-		buffer : Object,
-		thumbnail: String,
-	}
-});
+const view = {};
 
-viewSchema.statics.findByUID = function(dbCol, uid){
+// viewSchema = {
+// 	_id: Object,
+// 	name: String,
+// 	clippingPlanes : [Schema.Types.Mixed ],
+// 	viewpoint: {
+// 		position: [Number],
+// 		up: [Number],
+// 		look_at: [Number],
+// 		view_dir: [Number],
+// 		right: [Number]
+// 	},
+// 	screenshot: {
+// 		buffer : Object,
+// 		thumbnail: String,
+// 	}
+// };
 
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
-		.then(view => {
+view.findByUID = function(dbCol, uid){
+
+	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
+		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }).then(view => {
 
 			if (!view) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
@@ -53,25 +52,28 @@ viewSchema.statics.findByUID = function(dbCol, uid){
 
 			return view;
 		});
+	});
 };
 
-viewSchema.statics.listViews = function(dbCol){
+view.listViews = function(dbCol){
 
 	const query = {};
 
-	return this.find(dbCol, query).then(results => {
-		results.forEach((result) => {
-			result._id = utils.uuidToString(result._id);
-			if (result.screenshot.buffer) {
-				delete result.screenshot.buffer;
-			}
+	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
+		return _dbCol.find(query).toArray().then(results => {
+			results.forEach((result) => {
+				result._id = utils.uuidToString(result._id);
+				if (result.screenshot.buffer) {
+					delete result.screenshot.buffer;
+				}
+			});
+			return results;
 		});
-		return results;
 	});
 
 };
 
-viewSchema.statics.getThumbnail = function(dbColOptions, uid){
+view.getThumbnail = function(dbColOptions, uid){
 
 	return this.findByUID(dbColOptions, uid).then(view => {
 		if(!view.screenshot || !view.screenshot.buffer || !view.screenshot.buffer.buffer){
@@ -84,7 +86,7 @@ viewSchema.statics.getThumbnail = function(dbColOptions, uid){
 
 };
 
-viewSchema.methods.updateAttrs = function(dbCol, data){
+view.updateAttrs = function(dbCol, id, data){
 
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name", "clippingPlanes", "viewpoint", "screenshot"];
@@ -115,75 +117,53 @@ viewSchema.methods.updateAttrs = function(dbCol, data){
 
 	return updated.then(() => {
 		return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
-				return {_id: utils.uuidToString(this._id)};
+			return _dbCol.update({_id: id}, {$set: toUpdate}).then(() => {
+				return {_id: utils.uuidToString(id)};
 			}); 
 		});
 	});
 	
 };
 
-viewSchema.statics.createView = function(dbCol, data){
-	const view = this.model("View").createInstance({
-		account: dbCol.account, 
-		model: dbCol.model
-	});
+view.createView = function(dbCol, data){
+	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
+		const id = utils.stringToUUID(uuid.v1());
+		return _dbCol.insert({ _id: id }).then(() => {
+			const cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 120, 120);
 
-	view._id = utils.stringToUUID(uuid.v1());
+			return cropped.then((croppedScreenshot) => {
 
-	const cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 120, 120);
+				const thumbnailUrl = `${dbCol.account}/${dbCol.model}/views/${utils.uuidToString(id)}/thumbnail.png`;
 
-	return cropped.then((croppedScreenshot) => {
+				// Remove the base64 version of the screenshot
+				delete data.screenshot.base64; 
+				data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
+				data.screenshot.thumbnail = thumbnailUrl;
 
-		const thumbnailUrl = `${dbCol.account}/${dbCol.model}/views/${utils.uuidToString(view._id)}/thumbnail.png`;
-
-		// Remove the base64 version of the screenshot
-		delete data.screenshot.base64; 
-		data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
-		data.screenshot.thumbnail = thumbnailUrl;
-
-		return view.save().then((savedView) => {
-			return savedView.updateAttrs(dbCol, data).catch((err) => {
-				// remove the recently saved new view as update attributes failed
-				return View.deleteView(dbCol, view._id).then(() => {
-					return Promise.reject(err);
+				return this.updateAttrs(dbCol, id, data).catch((err) => {
+					// remove the recently saved new view as update attributes failed
+					return this.deleteView(dbCol, id).then(() => {
+						return Promise.reject(err);
+					});
 				});
 			});
 		});
 	});
-
 };
 
-viewSchema.methods.clean = function(){
-
-	let cleaned = this.toObject();
-	cleaned._id = utils.uuidToString(cleaned._id);
-
-	return cleaned;
-};
-
-viewSchema.statics.deleteView = function(dbCol, id){
+view.deleteView = function(dbCol, id){
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
 
-	return View.findOneAndRemove(dbCol, { _id : id}).then(view => {
-
-		if(!view){
-			return Promise.reject(responseCodes.VIEW_NOT_FOUND);
-		}
-
+	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
+		return _dbCol.findOneAndDelete({ _id : id}).then((deleteResponse) => {
+			if(!deleteResponse.value) {
+				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+			}
+		});
 	});
 };
 
-const View = ModelFactory.createClass(
-	"View", 
-	viewSchema, 
-	arg => { 
-		return `${arg.model}.views`;
-	}
-);
-
-
-module.exports = View;
+module.exports = view;

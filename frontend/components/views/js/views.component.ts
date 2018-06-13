@@ -104,6 +104,8 @@ class ViewsController implements ng.IController {
 			}
 			this.selectedView = view;
 			this.selectedView.selected = true;
+
+			this.ViewsService.showViewpoint(this.account, this.model, view);
 		}
 
 	}
@@ -111,7 +113,7 @@ class ViewsController implements ng.IController {
 	public createView() {
 		this.ViewsService.createView(this.account, this.model, this.newView.name)
 			.catch((error) => {
-				this.handleGroupError("create", error);
+				this.handleViewError("create", error);
 			});
 		this.toShow = "views";
 	}
@@ -119,7 +121,7 @@ class ViewsController implements ng.IController {
 	public deleteView() {
 		this.ViewsService.deleteView(this.account, this.model, this.selectedView)
 			.catch((error) => {
-				this.handleGroupError("delete", error);
+				this.handleViewError("delete", error);
 			});
 	}
 
@@ -139,7 +141,7 @@ class ViewsController implements ng.IController {
 				this.resetEditState();
 			})
 			.catch((error) => {
-				this.handleGroupError("update", error);
+				this.handleViewError("update", error);
 				this.resetEditState();
 			});
 	}
@@ -152,16 +154,16 @@ class ViewsController implements ng.IController {
 
 	public addView() {
 		this.newView = { name: "" };
-		this.showGroupPane();
+		this.showNewViewPane();
 	}
 
-	public showGroupPane() {
+	public showNewViewPane() {
 		this.toShow = "view";
-		this.onContentHeightRequest({height: 310});
+		//this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 	}
 
-	public handleGroupError(method: string, error: Error) {
+	public handleViewError(method: string, error: Error) {
 		console.error(error);
 		const content = `We tried to ${method} your view but it failed.
 			If this continues please message support@3drepo.org.`;

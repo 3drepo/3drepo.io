@@ -26,6 +26,7 @@ export class ViewsService {
 		"$q",
 
 		"APIService",
+		"ClipService",
 		"ViewerService"
 	];
 
@@ -36,6 +37,7 @@ export class ViewsService {
 		private $q: any,
 
 		private APIService: any,
+		private ClipService: any,
 		private ViewerService: any
 	) {
 		this.reset();
@@ -168,9 +170,16 @@ export class ViewsService {
 		this.ViewerService.getScreenshot(screenshotDefer);
 		return Promise.all([viewpointDefer.promise, screenshotDefer.promise])
 			.then((results) => {
-				const viewpoint = results[0];
+				const viewpoint = {};
 				const base64Screenshot = results[1];
 				viewpoint.name = viewName;
+				viewpoint.clippingPlanes = results[0].clippingPlanes;
+				viewpoint.viewpoint = {};
+				viewpoint.viewpoint.position = results[0].position;
+				viewpoint.viewpoint.up = results[0].up;
+				viewpoint.viewpoint.look_at = results[0].look_at;
+				viewpoint.viewpoint.view_dir = results[0].view_dir;
+				viewpoint.viewpoint.right = results[0].right;
 				viewpoint.screenshot = {
 					base64 : base64Screenshot
 				};
@@ -178,6 +187,31 @@ export class ViewsService {
 			});
 	}
 
+	/**
+	 * Load viewpoint
+	 * @param teamspace Teamspace name
+	 * @param model Model id
+	 * @param view The view
+	 */
+	public showViewpoint(teamspace: string, model: string, view: any) {
+		if (view) {
+			if (view.viewpoint) {
+				view.viewpoint.account = teamspace;
+				view.viewpoint.model = model;
+
+				this.ViewerService.setCamera(view.viewpoint);
+			}
+
+			const clipData = {
+				clippingPlanes: view.clippingPlanes,
+				fromClipPanel: false,
+				account: teamspace,
+				model: model
+			};
+
+			this.ClipService.updateClippingPlane(clipData);
+		}
+	}
 }
 
 export const ViewsServiceModule = angular
