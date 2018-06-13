@@ -14,8 +14,10 @@
 					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column" ng-if="!vm.loadingTeamspaces", flex="100")
+					
+					md-card(md-padding layout="row" layout-align="center center") 
 
-					div(flex="100")
+					md-card.assignDropDowns(flex="100")
 						md-label Select Teamspace
 						md-select(aria-label="Select Teamspace" ng-model="vm.teamspaceSelected", ng-required="true")
 							md-option(
@@ -32,14 +34,19 @@
 
 							thead(layout="row")
 
-								tr: th.userColumn User
+								tr
+									th.userTitleColumn User
+										md-tooltip The user to assign permissions to
 
 								tr(
 									ng-repeat="(permission, value) in vm.teamspacePermissions"
 									ng-if="permission !== 'teamspace_admin'"
-									layout-align="center center"): th {{value}}
+									layout-align="center center")
+										th {{value.title}}
+											md-tooltip {{value.tooltip}}
 
-								tr: th.adminColumn Admin
+								tr
+									th.first Admin
 
 							tbody(layout="column")
 								tr(
@@ -54,7 +61,7 @@
 										ng-repeat="(permission, value) in vm.teamspacePermissions") 
 										md-checkbox(
 											ng-disabled="vm.teamspaceAdminDisabled(user, permission)"
-											aria-label="Checkbox {{value}}"
+											aria-label="Checkbox {{value.title}}"
 											layout-align="center center"
 											ng-click="vm.teamspaceStateChange(user, permission)"
 											ng-checked="vm.teamspaceAdminChecked(user, permission)")
@@ -66,6 +73,7 @@
 											ng-disabled="vm.selectedTeamspace.account == user.user || vm.account == user.user"
 											ng-click="vm.teamspaceStateChange(user, 'teamspace_admin')"
 											ng-checked="vm.userHasPermissions(user, 'teamspace_admin')")
+										md-tooltip {{vm.teamspacePermissions.teamspace_admin.tooltip}}
 
 
 						//h3.noUsers(ng-if="vm.teamspacesToAssign()") No available users to assign permissions
@@ -79,7 +87,7 @@
 
 				div.assignTabHolder(layout="column" ng-if="!vm.projectsLoading", flex="100")
 
-					div(layout="row")
+					md-card.assignDropDowns(layout="row")
 						div(flex="50", layout="column")
 
 							md-label Select Teamspace
@@ -115,13 +123,15 @@
 							flex)
 							thead(layout="column")
 								tr
-									th.userColumn User
+									th.userTitleColumn User
+										md-tooltip The user to assign permissions to
 
 									th(ng-if="permission !== 'admin_project'"
 										ng-repeat="(permission, value) in vm.projectPermissions"
-										layout-align="center center") {{value}}
+										layout-align="center center") {{value.title}}
+										md-tooltip {{value.tooltip}}
 
-									th.adminColumn Admin
+									th.first Admin
 
 							tbody(layout="column")
 								tr(
@@ -138,7 +148,7 @@
 
 										md-checkbox(
 											ng-disabled="vm.isTeamspaceAdmin(user)"
-											aria-label="Project Permission {{value}}"
+											aria-label="Project Permission {{value.title}}"
 											layout-align="center center"
 											ng-click="vm.projectStateChange(user, permission)"
 											ng-checked="vm.adminChecked(user, permission)")
@@ -150,6 +160,7 @@
 											ng-click="vm.projectStateChange(user, 'admin_project')"
 											ng-disabled="vm.isTeamspaceAdmin(user)"
 											ng-checked="vm.userHasProjectPermissions(user, 'admin_project') || vm.isTeamspaceAdmin(user)")
+										md-tooltip {{vm.projectPermissions.admin_project.tooltip}}
 
 							
 						
@@ -164,7 +175,8 @@
 					h3 Loading Teamspace Permissions...
 
 				div.assignTabHolder(layout="column", ng-if="vm.modelDataReady()", flex="100")
-					div(layout="row")
+
+					md-card.assignDropDowns(layout="row")
 						div(flex="33", layout="column")
 
 							md-label Select Teamspace
@@ -215,11 +227,13 @@
 							flex)
 
 							thead(layout="row")
-								tr: th.fixedWidth.userColumn User
+								tr
+									th.fixedWidth.userTitleColumn User
+										md-tooltip The user to assign permissions to
+
 								//tr: th.fixedWidth.userColumn Role
 								tr(ng-repeat="value in vm.modelRoles", layout-align="center center")
-									th.fixedWidth.sentenceCase(
-										ng-class="{'adminColumn' : value == 'admin'}") {{value}}
+									th.fixedWidth.sentenceCase() {{value}}
 
 							tbody(layout="column", ng-if="vm.selectedModel && vm.modelReady")
 								tr(
@@ -251,6 +265,7 @@
 												ng-click="vm.modelStateChange(user, value)"
 												layout-align="center center"
 												ng-value="value")
+											md-tooltip {{vm.modelRolesToolTip[value]}}
 
 							//tbody(layout="column", ng-if="vm.modelSelected || !vm.modelReady")
 								h3.noUsers Preparing users...
