@@ -159,7 +159,12 @@ describe('Sign up', function(){
 		.send({
 
 			"email": 'test3drepo3_signup@mailinator.com',
-			"password": password
+			"password": password,
+			"firstName": firstName,
+			"lastName": lastName,
+			"countryCode": countryCode,
+			"company": company,
+			"mailListAgreed": mailListAgreed
 
 		}).expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
@@ -183,7 +188,12 @@ describe('Sign up', function(){
 			.send({
 
 				"email": email,
-				"password": password
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
 				done(err);
@@ -198,7 +208,12 @@ describe('Sign up', function(){
 			.send({
 
 				"email": "abc@b",
-				"password": password
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
 
@@ -213,7 +228,12 @@ describe('Sign up', function(){
 			.send({
 
 				"email": "abc",
-				"password": password
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
 
@@ -228,7 +248,12 @@ describe('Sign up', function(){
 			.send({
 
 				"email": "",
-				"password": password
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
 
@@ -243,7 +268,12 @@ describe('Sign up', function(){
 			.send({
 
 				"email": email,
-				"password": ''
+				"password": '',
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
 
@@ -251,6 +281,173 @@ describe('Sign up', function(){
 				done(err);
 			});
 	});
+
+	it('non string password should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+
+				"email": email,
+				"password": true,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
+	it('without firstname should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+
+				"email": email,
+				"password": password,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
+	it('non string first name should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+				"email": email,
+				"password": password,
+				"firstName": true,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+	
+	it('without lastname should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
+	it('non string last name should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": true,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
+	it('without country code should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
+	it('non string countryCode should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": 44,
+				"company": company,
+				"mailListAgreed": mailListAgreed
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
+	it('without company name should pass', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName" : firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"mailListAgreed": mailListAgreed
+
+			}).expect(200, function(err, res){
+				done();
+			});
+	});
+
+	it('non string company name should fail', function(done){
+			request(server)
+			.post('/signup_somebaduser')
+			.send({
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": 123,
+				"mailListAgreed": mailListAgreed
+			}).expect(400, function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				done(err);
+			});
+	});
+
 
 
 });

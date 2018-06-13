@@ -80,7 +80,7 @@ function login(req, res, next){
 	const responsePlace = utils.APIInfo(req);
 
 
-	if (req.body && Object.prototype.toString.call(req.body.username) === "[object String]"
+	if (Object.prototype.toString.call(req.body.username) === "[object String]"
 		 && Object.prototype.toString.call(req.body.password) === "[object String]") {
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
@@ -185,74 +185,88 @@ function signUp(req, res, next){
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
 
-	//check if captcha is enabled
-	let checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
-		secret: config.captcha.secretKey,
-		response: req.body.captcha
+	
+	if (Object.prototype.toString.call(req.body.email) === "[object String]"
+		 && Object.prototype.toString.call(req.body.firstName) === "[object String]"
+		 && Object.prototype.toString.call(req.body.lastName) === "[object String]"
+		 && Object.prototype.toString.call(req.body.countryCode) === "[object String]"
+		 && (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]"
+		 && Object.prototype.toString.call(req.body.mailListOptOut) === "[object Boolean]") {
 
-	}) : Promise.resolve({
-		success: true
-	});
+			//check if captcha is enabled
+			const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
+				secret: config.captcha.secretKey,
+				response: req.body.captcha
 
-	checkCaptcha.then(resBody => {
+			}) : Promise.resolve({
+				success: true
+			});
 
-		if(resBody.success){
-			return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+			checkCaptcha.then(resBody => {
 
-				email: req.body.email,
-				firstName: req.body.firstName,
-				lastName: req.body.lastName,
-				countryCode: req.body.countryCode,
-				company: req.body.company,
-				mailListOptOut: !req.body.mailListAgreed,
+				if(resBody.success){
+					return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
 
-			}, config.tokenExpiry.emailVerify);
-		} else {
-			//console.log(resBody);
-			return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
-		}
+						email: req.body.email,
+						firstName: req.body.firstName,
+						lastName: req.body.lastName,
+						countryCode: req.body.countryCode,
+						company: req.body.company,
+						mailListOptOut: !req.body.mailListAgreed,
 
-
-	}).then( data => {
-
-		let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
-		//send to sales
-		Mailer.sendNewUser({
-			user: req.params.account,
-			email: req.body.email,
-			firstName: req.body.firstName,
-			lastName: req.body.lastName,
-			country: country && country.name,
-			company: req.body.company,
-		}).catch( err => {
-			// catch email error instead of returning to client
-			req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
-			return Promise.resolve(err);
-		});
-
-		//send verification email
-		return Mailer.sendVerifyUserEmail(req.body.email, {
-			token : data.token,
-			email: req.body.email,
-			username: req.params.account,
-			pay: req.body.pay
-
-		}).catch( err => {
-			// catch email error instead of returning to client
-			req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
-			return Promise.resolve(err);
-		});
+					}, config.tokenExpiry.emailVerify);
+				} else {
+					//console.log(resBody);
+					return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
+				}
 
 
+			}).then( data => {
+
+				let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
+				//send to sales
+				Mailer.sendNewUser({
+					user: req.params.account,
+					email: req.body.email,
+					firstName: req.body.firstName,
+					lastName: req.body.lastName,
+					country: country && country.name,
+					company: req.body.company,
+				}).catch( err => {
+					// catch email error instead of returning to client
+					req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+					return Promise.resolve(err);
+				});
+
+				//send verification email
+				return Mailer.sendVerifyUserEmail(req.body.email, {
+					token : data.token,
+					email: req.body.email,
+					username: req.params.account,
+					pay: req.body.pay
+
+				}).catch( err => {
+					// catch email error instead of returning to client
+					req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+					return Promise.resolve(err);
+				});
 
 
-	}).then(emailRes => {
 
-		req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
-	});
+
+			}).then(emailRes => {
+
+				req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
+			}).catch(err => {
+				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			});
+
+	 } else {
+		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+	 }
+
+
 }
 
 function verify(req, res, next){
