@@ -423,12 +423,18 @@ schema.methods.getAvatar = function(){
 
 schema.methods.updateInfo = function(updateObj){
 	
-	let updateableFields = [ "firstName", "lastName", "email" ];
+	const updateableFields = [ "firstName", "lastName", "email" ];
 
 	this.customData = this.customData || {};
+	let validUpdates = true;
 	updateableFields.forEach(field => {
-		if(updateObj.hasOwnProperty(field)){
-			this.customData[field] = updateObj[field];
+		if(updateObj.hasOwnProperty(field)) {
+			if(Object.prototype.toString.call(updateObj[field]) === "[object String]") {
+				this.customData[field] = updateObj[field];
+			} else {
+				return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });				
+			}
+
 		}
 	});
 

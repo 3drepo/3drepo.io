@@ -148,7 +148,7 @@ describe('Login', function () {
 	it('missing username should fail', function(done){
 		request(server)
 		.post('/login')
-		.send({ password + '123' })
+		.send({ password: password + '123' })
 		.expect(400, function(err, res){
 
 			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);

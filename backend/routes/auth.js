@@ -111,7 +111,7 @@ function login(req, res, next){
 		});
 	}
 	else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, {});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 
 }
@@ -142,16 +142,23 @@ function updateUser(req, res, next){
 	let responsePlace = utils.APIInfo(req);
 
 	if(req.body.oldPassword) {
-//		Object.prototype.toString.call(req.body.username) === "[object String]")
-		// Update password		
-		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
-		});
+		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
+			Object.prototype.toString.call(req.body.newPassword) === "[object String]")
+		{
+			// Update password		
+			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
+			}).catch(err => {
+				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			});
+		}
+		else
+		{
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+
 
 	} else {
-
 		// Update user info
 		User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
 			return user.updateInfo(req.body);
