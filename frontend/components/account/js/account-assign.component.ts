@@ -389,7 +389,7 @@ class AccountAssignController implements ng.IController {
 			.then((response) => {
 				this.modelRoles = ["unassigned"];
 
-				response.data.sort(function(a, b) {
+				response.data.sort((a, b) => {
 					return (a._id < b._id) ? 1 : -1;
 				});
 
