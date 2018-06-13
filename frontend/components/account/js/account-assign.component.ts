@@ -168,7 +168,7 @@ class AccountAssignController implements ng.IController {
 					return model.model ===  this.modelSelected;
 				});
 
-				return this.setPermissionTemplates(this.teamspaceSelected, this.modelSelected)
+				return this.setPermissionTemplates(this.selectedTeamspace, this.modelSelected)
 					.then(() => {
 						return this.handleSetPermissionTemplate();
 					});
@@ -388,6 +388,10 @@ class AccountAssignController implements ng.IController {
 		return this.APIService.get(permissionUrl)
 			.then((response) => {
 				this.modelRoles = ["unassigned"];
+
+				response.data.sort(function(a, b) {
+					return (a._id < b._id) ? 1 : -1;
+				});
 
 				response.data.forEach((template) => {
 					this.modelRoles.push(template._id);

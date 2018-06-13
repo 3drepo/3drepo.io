@@ -56,7 +56,7 @@
 
 									td.userColumn.userInput
 										p {{user.user}}
-		
+
 									td(ng-if="permission !== 'teamspace_admin'"
 										ng-repeat="(permission, value) in vm.teamspacePermissions") 
 										md-checkbox(
