@@ -188,7 +188,7 @@ function signUp(req, res, next){
 		 && Object.prototype.toString.call(req.body.firstName) === "[object String]"
 		 && Object.prototype.toString.call(req.body.lastName) === "[object String]"
 		 && Object.prototype.toString.call(req.body.countryCode) === "[object String]"
-		 && (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]"
+		 && (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
 		 && Object.prototype.toString.call(req.body.mailListOptOut) === "[object Boolean]") {
 
 			//check if captcha is enabled
