@@ -285,6 +285,10 @@ class GroupsController implements ng.IController {
 		return this.GroupsService.getGroupRGBAColor(group);
 	}
 
+	public getFormattedDate(timestamp: number) {
+		return (new Date(timestamp)).toLocaleDateString();
+	}
+
 	public updateGroup() {
 
 		this.GroupsService.updateGroup(

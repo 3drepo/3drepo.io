@@ -97,13 +97,6 @@ export class ViewerService {
 
 			switch (event.type) {
 
-			// case this.EventService.EVENT.MODEL_SETTINGS_READY:
-			// 	if (event.value.account === account && event.value.model === model) {
-			// 		this.viewer.updateSettings(event.value);
-			// 		// mapTile && mapTile.updateSettings(event.value.settings);
-			// 	}
-			// 	break;
-
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
 				if (this.newPinId === "newPinId") {
 					this.removeUnsavedPin();
@@ -521,6 +514,10 @@ export class ViewerService {
 
 	// DIFF
 
+	public diffToolSetAsComparator(account: string, model: string) {
+		this.viewer.diffToolSetAsComparator(account, model);
+	}
+
 	public diffToolLoadComparator(account: string, model: string, revision: string) {
 		return this.viewer.diffToolLoadComparator(account, model, revision);
 	}
@@ -562,6 +559,24 @@ export class ViewerService {
 		}
 	}
 
+	public resetMapSources(source) {
+		if (this.viewer) {
+			this.viewer.resetMapSources(source);
+		}
+	}
+
+	public addMapSource(source) {
+		if (this.viewer) {
+			this.viewer.addMapSource(source);
+		}
+	}
+
+	public removeMapSource(source) {
+		if (this.viewer) {
+			this.viewer.removeMapSource(source);
+		}
+	}
+
 	public mapInitialise(surveyPoints) {
 		if (this.viewer) {
 			this.viewer.mapInitialise(surveyPoints);
@@ -592,6 +607,17 @@ export class ViewerService {
 		}
 	}
 
+	public startAreaSelect() {
+		if (this.viewer) {
+			this.viewer.startAreaSelect();
+		}
+	}
+
+	public stopAreaSelect() {
+		if (this.viewer) {
+			this.viewer.stopAreaSelect();
+		}
+	}
 	public getDefaultHighlightColor() {
 		if (this.viewer) {
 			return this.viewer.getDefaultHighlightColor();

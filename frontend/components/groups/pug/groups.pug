@@ -25,7 +25,7 @@ div.groupsContainer
                         span.groupName {{group.name}}
                     div(layout="row" flex="100")
                         span.groupMeta  {{group.author}}
-                        span.groupMeta  {{ group.createdAt  | date:"MM/dd/yyyy"}}
+                        span.groupMeta  {{ vm.getFormattedDate(group.createdAt)  | date:"MM/dd/yyyy"}}
                     div(layout="row"  flex="100")
                         span.groupDescription {{group.description}}
             
@@ -109,7 +109,7 @@ div.groupsContainer
 
             div.metaMargin
                 label.groupMeta Creation Date: 
-                span.groupMeta {{ vm.selectedGroup.createdAt  | date:"MM/dd/yyyy"}}
+                span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.createdAt)  | date:"MM/dd/yyyy"}}
            
         md-container(
             layout="row"
@@ -121,7 +121,7 @@ div.groupsContainer
 
             div.metaMargin
                 label.groupMeta Updated On: 
-                span.groupMeta {{ vm.selectedGroup.updatedAt | date:"MM/dd/yyyy"}}
+                span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.updatedAt) | date:"MM/dd/yyyy"}}
 
 
     div.addHolder(layout="row" flex="100")

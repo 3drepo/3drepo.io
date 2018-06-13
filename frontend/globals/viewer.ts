@@ -27,6 +27,14 @@ export class Viewer {
 		TURNTABLE: "TURNTABLE"
 	};
 
+	public static MAP_SOURCES = {
+		OSM: "OSM",
+		HERE: "HERE",
+		HERE_AERIAL: "HERE_AERIAL",
+		HERE_TRAFFIC: "HERE_TRAFFIC",
+		HERE_TRAFFIC_FLOW: "HERE_TRAFFIC_FLOW"
+	};
+
 	public static EVENT = {
 		ADD_PIN: "VIEWER_ADD_PIN",
 		BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
@@ -52,6 +60,7 @@ export class Viewer {
 		MOVE_PIN: "VIEWER_MOVE_PIN",
 		MOVE_POINT: "VIEWER_MOVE_POINT",
 		OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
+		MULTI_OBJECTS_SELECTED: "VIEWER_MULTI_OBJECTS_SELECTED",
 		PICK_POINT: "VIEWER_PICK_POINT",
 		REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
 		REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
@@ -330,6 +339,10 @@ export class Viewer {
 		UnityUtil.requestScreenShot(promise);
 	}
 
+	public diffToolSetAsComparator(account: string, model: string) {
+		UnityUtil.diffToolSetAsComparator(account, model);
+	}
+
 	public diffToolLoadComparator(account: string, model: string, revision: string) {
 		return UnityUtil.diffToolLoadComparator(account, model, revision);
 	}
@@ -406,6 +419,17 @@ export class Viewer {
 			}
 		}
 
+	}
+
+	public objectsSelected(nodes) {
+		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {
+			if (nodes) {
+				this.callback(Viewer.EVENT.MULTI_OBJECTS_SELECTED, {selectedNodes: nodes});
+			} else {
+				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+			}
+
+		}
 	}
 
 	public clearHighlights() {
@@ -598,6 +622,14 @@ export class Viewer {
 		}
 	}
 
+	public startAreaSelect() {
+		UnityUtil.startAreaSelection();
+	}
+
+	public stopAreaSelect() {
+		UnityUtil.stopAreaSelection();
+	}
+
 	public zoomToHighlightedMeshes() {
 		UnityUtil.zoomToHighlightedMeshes();
 	}
@@ -714,6 +746,29 @@ export class Viewer {
 		if (this.pins.hasOwnProperty(id)) {
 			this.pins[id].changeColour(colours);
 		}
+	}
+
+	/**
+	 * Resets map sources
+	 */
+	public resetMapSources() {
+		UnityUtil.resetMapSources();
+	}
+
+	/**
+	 * Add map source
+	 * @param source Map source
+	 */
+	public addMapSource(source) {
+		UnityUtil.addMapSource(source);
+	}
+
+	/**
+	 * Remove map source
+	 * @param source Map source
+	 */
+	public removeMapSource(source) {
+		UnityUtil.removeMapSource(source);
 	}
 
 	/**

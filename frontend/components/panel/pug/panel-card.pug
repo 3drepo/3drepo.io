@@ -125,6 +125,8 @@ div(layout="column", class="md-whiteframe-1dp")
 				ng-if="vm.contentData.type === 'compare'")
 
 			gis(
+				account='vm.account'
+				model='vm.model'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings'
 				ng-if="vm.contentData.type === 'gis'")
