@@ -40,8 +40,6 @@ router.get("/login", checkLogin);
 
 router.get("/version", printVersion);
 
-router.post('/contact', contact);
-
 router.get("/:account.json", middlewares.loggedIn, listInfo);
 
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
@@ -273,39 +271,49 @@ function verify(req, res, next){
 
 	let responsePlace = utils.APIInfo(req);
 
-	User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
+	if (Object.prototype.toString.call(req.body.token) === "[object String]") { 
+		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
 
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
-	});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
+		});
+	} else {
+		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+	}
+
 
 }
 
 function forgotPassword(req, res, next){
 	let responsePlace = utils.APIInfo(req);
+	
+	if (Object.prototype.toString.call(req.body.email) === "[object String]") { 
 
-	User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
+		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
 
-		//send forgot password email
-		return Mailer.sendResetPasswordEmail(req.body.email, {
-			token : data.token,
-			email: req.body.email,
-			username: req.params[C.REPO_REST_API_ACCOUNT]
-		}).catch( err => {
-			// catch email error instead of returning to client
-			req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
-			return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+			//send forgot password email
+			return Mailer.sendResetPasswordEmail(req.body.email, {
+				token : data.token,
+				email: req.body.email,
+				username: req.params[C.REPO_REST_API_ACCOUNT]
+			}).catch( err => {
+				// catch email error instead of returning to client
+				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
+				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+			});
+
+		}).then(emailRes => {
+
+			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
-
-	}).then(emailRes => {
-
-		req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
-	});
+	} else {
+		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+	}
 }
 
 function getAvatar(req, res, next){
@@ -358,7 +366,7 @@ function uploadAvatar(req, res, next){
 		return cb(null, true);
 	}
 
-	var upload = multer({
+	const upload = multer({
 		storage: multer.memoryStorage(),
 		fileFilter: fileFilter
 	});
@@ -380,13 +388,18 @@ function uploadAvatar(req, res, next){
 }
 
 function resetPassword(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
-	User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
-	});
+	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
+		Object.prototype.toString.call(req.body.newPassword) === "[object String]") { 
+		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		});
+	} else {
+		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+	}
 }
 
 function listUserInfo(req, res, next){
@@ -451,22 +464,6 @@ function listInfo(req, res, next){
 	} else {
 		listUserInfo(req, res, next);
 	}
-}
-
-function contact(req, res, next){
-
-	let responsePlace = utils.APIInfo(req);
-
-	Mailer.sendContactEmail({
-		email: req.body.email,
-		name: req.body.name,
-		information: req.body.information
-	}).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'success'});
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
-	});
-
 }
 
 function printVersion(req, res, next){
