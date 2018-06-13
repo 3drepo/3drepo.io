@@ -63,7 +63,7 @@ describe('Updating user info', function () {
 		});
 	});
 
-	it('should succee if provide new info and same email address', function(done){
+	it('should succeed if provide new info and same email address', function(done){
 
 		let firstName = 'abc';
 		let lastName = 'def';
@@ -87,7 +87,7 @@ describe('Updating user info', function () {
 	});
 
 
-	it('should succee if provide new info and new email address', function(done){
+	it('should succeed if provide new info and new email address', function(done){
 
 		let firstName = 'abc';
 		let lastName = 'def';
@@ -121,6 +121,54 @@ describe('Updating user info', function () {
 		.send({ firstName, lastName, email: takenEmail })
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.EMAIL_EXISTS.value);
+			done(err);
+		});
+
+
+	});
+
+	it('should fail if firstname is not a string', function(done){
+
+		let firstName = 'abc';
+		let lastName = 'def';
+
+
+		agent.put(`/${username}`)
+		.send({ firstName : true, lastName, email })
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+			done(err);
+		});
+
+
+	});
+
+	it('should fail if last name is not a string', function(done){
+
+		let firstName = 'abc';
+		let lastName = 'def';
+
+
+		agent.put(`/${username}`)
+		.send({ firstName, lastName: true, email })
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+			done(err);
+		});
+
+
+	});
+
+	it('should fail if emailed is not a string', function(done){
+
+		let firstName = 'abc';
+		let lastName = 'def';
+
+
+		agent.put(`/${username}`)
+		.send({ firstName, lastName, email : true })
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 			done(err);
 		});
 
