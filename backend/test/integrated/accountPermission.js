@@ -148,15 +148,8 @@ describe('Account permission::', function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					callback(err);
 				});
-			},
-
-			callback => {
-				agent.get(`/${username}/permissions`)
-				.expect(200, function(err, res){
-					expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
-					callback(err);
-				});
 			}
+
 
 		], (err, res) => done(err));
 
