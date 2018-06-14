@@ -56,17 +56,24 @@
 
 	function createPermission(req, res, next){
 
-		User.findByUserName(req.params.account).then(user => {
+		if (req.body.length === 2 &&
+			Object.prototype.toString.call(req.body.user) === "[object String]" &&
+			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
+			
+			User.findByUserName(req.params.account).then(user => {
 
-			return user.customData.permissions.add(req.body);
+				return user.customData.permissions.add(req.body);
 
-		}).then(permission => {
+			}).then(permission => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		} else {
+			responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);
+		}
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-		}).catch(err => {
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
 		
 	}
 

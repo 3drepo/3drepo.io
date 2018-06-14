@@ -103,6 +103,54 @@ describe('Account permission::', function () {
 
 	});
 
+	it('should not able to assign permissions without providing a user name', function(done){
+
+		const permission = { permissions: ['create_project']};
+
+		async.series([
+			callback => {
+				agent.post(`/${username}/permissions`)
+				.send(permission)
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/permissions`)
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+
+	});
+
+	it('should not able to assign permissions without permissions', function(done){
+		const permission = { user: 'testing2'};
+
+		async.series([
+			callback => {
+				agent.post(`/${username}/permissions`)
+				.send(permission)
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/permissions`)
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+
+	});
 
 	it('should able to update users permissions', function(done){
 
