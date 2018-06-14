@@ -70,7 +70,7 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 			});
 		} else {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 
 
@@ -90,7 +90,7 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 			});
 		} else {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 
 	}

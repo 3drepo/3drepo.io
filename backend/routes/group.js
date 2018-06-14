@@ -95,16 +95,16 @@ function findGroup(req, res, next){
 
 function createGroup(req, res, next){
 
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
-	let create = Group.createGroup(getDbColOptions(req), req.body);
+	const create = Group.createGroup(getDbColOptions(req), req.body);
 
 	create.then(group => {
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 	});
 }
 
