@@ -269,21 +269,13 @@ function signUp(req, res, next){
 
 function verify(req, res, next){
 
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
-	if (Object.prototype.toString.call(req.body.token) === "[object String]") { 
-		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
-
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
-
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
-	}
-
-
+	User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+	}).catch(err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
+	});
 }
 
 function forgotPassword(req, res, next){
