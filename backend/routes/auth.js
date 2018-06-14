@@ -183,13 +183,12 @@ function signUp(req, res, next){
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
 
-	
 	if (Object.prototype.toString.call(req.body.email) === "[object String]"
 		 && Object.prototype.toString.call(req.body.firstName) === "[object String]"
 		 && Object.prototype.toString.call(req.body.lastName) === "[object String]"
 		 && Object.prototype.toString.call(req.body.countryCode) === "[object String]"
 		 && (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
-		 && Object.prototype.toString.call(req.body.mailListOptOut) === "[object Boolean]") {
+		 && Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
 
 			//check if captcha is enabled
 			const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
