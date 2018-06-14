@@ -79,7 +79,7 @@
 
 	function updatePermission(req, res, next){
 		
-		if (req.body.length === 1 &&
+		if (Object.keys(req.body).length === 1 &&
 			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
 			User.findByUserName(req.params.account).then(user => {
 				return user.customData.permissions.update(req.params.user, req.body);

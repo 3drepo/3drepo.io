@@ -104,7 +104,7 @@ describe('Account permission::', function () {
 
 	});
 
-	it('should not able to assign permissions without providing a user name', function(done){
+	it('should not be able to assign permissions without providing a user name', function(done){
 
 		const permission = { permissions: ['create_project']};
 
@@ -112,13 +112,6 @@ describe('Account permission::', function () {
 			callback => {
 				agent.post(`/${username}/permissions`)
 				.send(permission)
-				.expect(200, function(err, res){
-					callback(err);
-				});
-			},
-
-			callback => {
-				agent.get(`/${username}/permissions`)
 				.expect(400, function(err, res){
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					callback(err);
@@ -129,7 +122,7 @@ describe('Account permission::', function () {
 
 	});
 
-	it('should not able to assign permissions without permissions', function(done){
+	it('should not be able to assign permissions without permissions', function(done){
 		const permission = { user: 'testing2'};
 
 		async.series([
@@ -140,16 +133,7 @@ describe('Account permission::', function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					callback(err);
 				});
-			},
-
-			callback => {
-				agent.get(`/${username}/permissions`)
-				.expect(200, function(err, res){
-					expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
-					callback(err);
-				});
 			}
-
 		], (err, res) => done(err));
 
 	});
@@ -183,7 +167,7 @@ describe('Account permission::', function () {
 		async.series([
 			callback => {
 				agent.put(`/${username}/permissions/user2`)
-				.send({ permissions: []})
+				.send({ "permissions": []})
 				.expect(200, function(err, res){
 					callback(err);
 				});
