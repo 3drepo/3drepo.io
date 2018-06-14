@@ -297,7 +297,7 @@ describe('Sign up', function(){
 
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -316,7 +316,7 @@ describe('Sign up', function(){
 
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -334,7 +334,7 @@ describe('Sign up', function(){
 				"mailListAgreed": mailListAgreed
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -353,7 +353,7 @@ describe('Sign up', function(){
 
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -371,7 +371,7 @@ describe('Sign up', function(){
 				"mailListAgreed": mailListAgreed
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -390,7 +390,7 @@ describe('Sign up', function(){
 
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -408,7 +408,7 @@ describe('Sign up', function(){
 				"mailListAgreed": mailListAgreed
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -443,7 +443,7 @@ describe('Sign up', function(){
 				"mailListAgreed": mailListAgreed
 			}).expect(400, function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_PASSWORD_MISSING.value);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
