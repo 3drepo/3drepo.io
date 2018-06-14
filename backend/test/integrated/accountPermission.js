@@ -136,15 +136,16 @@ describe('Account permission::', function () {
 			callback => {
 				agent.post(`/${username}/permissions`)
 				.send(permission)
-				.expect(200, function(err, res){
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					callback(err);
 				});
 			},
 
 			callback => {
 				agent.get(`/${username}/permissions`)
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				.expect(200, function(err, res){
+					expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 					callback(err);
 				});
 			}
@@ -159,15 +160,16 @@ describe('Account permission::', function () {
 			callback => {
 				agent.put(`/${username}/permissions/user2`)
 				.send({ })
-				.expect(200, function(err, res){
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					callback(err);
 				});
 			},
 
 			callback => {
 				agent.get(`/${username}/permissions`)
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				.expect(200, function(err, res){
+					expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
 					callback(err);
 				});
 			}
