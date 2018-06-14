@@ -56,7 +56,7 @@
 
 	function createPermission(req, res, next){
 
-		if (req.body.length === 2 &&
+		if (Object.keys(req.body).length === 2 &&
 			Object.prototype.toString.call(req.body.user) === "[object String]" &&
 			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
 			
