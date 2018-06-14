@@ -432,11 +432,14 @@ schema.methods.updateInfo = function(updateObj){
 			if(Object.prototype.toString.call(updateObj[field]) === "[object String]") {
 				this.customData[field] = updateObj[field];
 			} else {
-				return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });				
+				validUpdates = false;
 			}
-
 		}
 	});
+
+	if(!validUpdates) {
+		return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });				
+	}
 
 	return User.isEmailTaken(this.customData.email, this.user).then(count => {
 		if(count === 0){

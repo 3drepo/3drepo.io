@@ -296,7 +296,6 @@ describe('Sign up', function(){
 				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
-				console.log("!!!!" , res.body);
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
@@ -315,7 +314,6 @@ describe('Sign up', function(){
 				"mailListAgreed": mailListAgreed
 
 			}).expect(400, function(err, res){
-
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
@@ -333,8 +331,6 @@ describe('Sign up', function(){
 				"company": company,
 				"mailListAgreed": mailListAgreed
 			}).expect(400, function(err, res){
-
-				console.log("!!!!" , res.body);
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
