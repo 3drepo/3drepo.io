@@ -63,6 +63,7 @@ describe('Account permission::', function () {
 		agent.post(`/${username}/permissions`)
 		.send({ user: 'nonsense', permissions: ['create_project']})
 		.expect(404, function(err, res){
+			console.log(res.body);
 			expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 			done(err);
 		});
