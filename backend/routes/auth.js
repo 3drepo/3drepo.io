@@ -261,7 +261,7 @@ function signUp(req, res, next){
 			});
 
 	 } else {
-		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
 	 }
 
 
@@ -280,7 +280,7 @@ function verify(req, res, next){
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
 	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
 	}
 
 
@@ -312,7 +312,7 @@ function forgotPassword(req, res, next){
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
 	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
 	}
 }
 
@@ -398,7 +398,7 @@ function resetPassword(req, res, next){
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
 	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
 	}
 }
 
