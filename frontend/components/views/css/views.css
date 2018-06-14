@@ -44,7 +44,7 @@ views .viewNameContainer {
 
 views .viewMarginBottom {
     /** Bit of a hack to battle with angular material **/
-    margin-bottom: 70px !important;
+    /*margin-bottom: 70px !important;*/
 }
 
 views .metaMargin {
@@ -105,13 +105,19 @@ views .viewMeta {
 }
 
 views .viewName {
-    font-weight: bold;
-    font-size: 20px;
-    margin-bottom: 0px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-bottom: 8px;
     height: 100%;
     display: flex;
     align-items: center;
-    width: 100%;
+    width: 230px;
+    /*FIXME: THIS NEEDS TO BE %age*/
+    /*width: calc(100% - 102px);
+    min-width: 230px;*/
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 views .viewEnterHolder {
@@ -125,8 +131,8 @@ views .viewEnterHolder md-icon {
 views .viewThumbnail {
     margin: 8px;
     margin-left: 15px;
-    width: 120px;
-    height: 120px;
+    width: 79px;
+    height: 79px;
 }
 
 views .openedGroupColorBar {
@@ -147,8 +153,8 @@ views .view:hover {
 
 views .view {
     border-bottom: solid gainsboro 1px;
-    min-height: 140px;
-    max-height: 140px;
+    min-height: 95px;
+    max-height: 95px;
     height: 100%;
 }
 

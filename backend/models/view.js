@@ -89,57 +89,53 @@ view.getThumbnail = function(dbColOptions, uid){
 view.updateAttrs = function(dbCol, id, data){
 
 	const toUpdate = {};
-	const fieldsCanBeUpdated = ["name", "clippingPlanes", "viewpoint", "screenshot"];
-	let cropped;
+	const fieldsCanBeUpdated = ["name"];
 
-	if (data.screenshot.base64) {
-		cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 120, 120);
-	} else {
-		cropped = Promise.resolve();
-	}
-	
-	const updated = cropped.then((croppedScreenshot) => {
-
-		if (croppedScreenshot) {
-			// Remove the base64 version of the screenshot
-			delete data.screenshot.base64;
-			data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
+	// Set the data to be updated in Mongo
+	fieldsCanBeUpdated.forEach((key) => {
+		if (data[key]) {
+			toUpdate[key] = data[key];
 		}
-
-		// Set the data to be updated in Mongo
-		fieldsCanBeUpdated.forEach((key) => {
-			if (data[key]) {
-				toUpdate[key] = data[key];
-			}
-		});
-
 	});
 
-	return updated.then(() => {
-		return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-			return _dbCol.update({_id: id}, {$set: toUpdate}).then(() => {
-				return {_id: utils.uuidToString(id)};
-			}); 
+	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
+		return _dbCol.update({_id: id}, {$set: toUpdate}).then(() => {
+			return {_id: utils.uuidToString(id)};
 		});
 	});
-	
 };
 
 view.createView = function(dbCol, data){
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		const id = utils.stringToUUID(uuid.v1());
-		return _dbCol.insert({ _id: id }).then(() => {
-			const cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 120, 120);
+		let cropped;
 
-			return cropped.then((croppedScreenshot) => {
+		if (data.screenshot.base64) {
+			cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 79, 79);
+		} else {
+			cropped = Promise.resolve();
+		}
 
-				const thumbnailUrl = `${dbCol.account}/${dbCol.model}/views/${utils.uuidToString(id)}/thumbnail.png`;
+		return cropped.then((croppedScreenshot) => {
 
+			const id = utils.stringToUUID(uuid.v1());
+
+			const thumbnailUrl = `${dbCol.account}/${dbCol.model}/views/${utils.uuidToString(id)}/thumbnail.png`;
+
+			if (croppedScreenshot) {
 				// Remove the base64 version of the screenshot
-				delete data.screenshot.base64; 
+				delete data.screenshot.base64;
 				data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
 				data.screenshot.thumbnail = thumbnailUrl;
+			}
 
+			const newView = {
+				_id: id,
+				clippingPlanes: data.clippingPlanes,
+				viewpoint: data.viewpoint,
+				screenshot: data.screenshot
+			};
+
+			return _dbCol.insert(newView).then(() => {
 				return this.updateAttrs(dbCol, id, data).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteView(dbCol, id).then(() => {

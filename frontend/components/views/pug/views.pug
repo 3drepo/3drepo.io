@@ -15,16 +15,17 @@ div.viewsContainer
             layout="row"
             ng-if="vm.views.length > 0"
             ng-click="vm.selectView(view)"
-            style="background-color: {{view.highlighted ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
+            style="background-color: {{view.selected ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
             ng-repeat="view in vm.views track by $index")
 
             div.viewMain(layout="row")
                 img.viewThumbnail(ng-src="{{vm.getThumbnailUrl(view.screenshot.thumbnail)}}")
-                div(layout="column" layout-align="start center")
+                div(flex, layout="column" layout-align="start center")
                     div(
                         ng-if="vm.editSelectedView !== view").viewName {{view.name || "(Unnamed View)"}}
                     input.viewName(
                         ng-model="vm.editSelectedView.name" 
+                        maxlength="{{vm.viewNameMaxlength}}"
                         ng-if="vm.editSelectedView === view")
 
             div.viewEnterHolder(
@@ -33,15 +34,26 @@ div.viewsContainer
                 layout="row"
                 layout-align="center center")
 
-                md-icon(class="angular-material-icons material-icons" role="img" aria-label="pencil") edit
+                md-icon(class="angular-material-icons material-icons" role="img" aria-label="edit") edit
 
             div.viewEnterHolder(
-                ng-click="vm.saveEditedView(view)"
                 ng-if="view.selected === true && vm.editSelectedView === view"
-                layout="row"
+                layout="column"
                 layout-align="center center")
 
-                md-icon(class="angular-material-icons material-icons" role="img" aria-label="pencil") save
+                md-icon(
+                        ng-click="vm.resetEditState()"
+                        class="angular-material-icons material-icons"
+                        role="img"
+                        aria-label="cancel"
+                ) cancel
+
+                md-icon(
+                        ng-click="vm.saveEditedView(view)"
+                        class="angular-material-icons material-icons"
+                        role="img"
+                        aria-label="save"
+                ) save
 
             div.viewEnterSpace(
                 ng-if="view.selected !== true"
@@ -70,7 +82,7 @@ div.viewsContainer
                         ng-required
                         ng-disabled="!vm.canAddView"
                         ng-model="vm.newView.name" 
-                        ng-maxlength="80")
+                        ng-maxlength="{{vm.viewNameMaxlength}}")
 
 
     div.addHolder(layout="row" flex="100")

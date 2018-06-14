@@ -38,6 +38,7 @@ class ViewsController implements ng.IController {
 	private canAddView: any;
 	private newView: any;
 	private editSelectedView: boolean;
+	private viewNameMaxlength: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -59,6 +60,7 @@ class ViewsController implements ng.IController {
 		this.canAddView = true;
 		this.views = [];
 		this.editSelectedView = false;
+		this.viewNameMaxlength = 80;
 		this.watchers();
 	}
 
@@ -74,7 +76,7 @@ class ViewsController implements ng.IController {
 			angular.extend(this, newState);
 		}, true);
 
-		this.$scope.$watch("vm.views", () => {
+		this.$scope.$watchCollection("vm.views", () => {
 			this.setContentHeight();
 		});
 
@@ -97,9 +99,7 @@ class ViewsController implements ng.IController {
 	public selectView(view) {
 
 		if (view) {
-			if (this.selectedView === undefined) {
-				this.selectedView = view;
-			} else {
+			if (this.selectedView !== undefined) {
 				this.selectedView.selected = false;
 			}
 			this.selectedView = view;
@@ -177,16 +177,15 @@ class ViewsController implements ng.IController {
 		}
 
 		let contentHeight = 0;
-		const viewHeight = 335;
+		const minContentHeight = 169;
+		const viewHeight = 95;
 		const actionBar = 52;
 
 		if (this.views && this.views.length) {
 			contentHeight = (this.views.length * viewHeight) + actionBar;
-		} else {
-			contentHeight = 130;
 		}
 
-		this.onContentHeightRequest({height: contentHeight });
+		this.onContentHeightRequest({height: Math.max(contentHeight, minContentHeight) });
 
 	}
 

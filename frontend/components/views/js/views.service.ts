@@ -48,7 +48,8 @@ export class ViewsService {
 	 */
 	public reset() {
 		this.state = {
-			views : []
+			views : [],
+			selectedGroup: {}
 		};
 	}
 
