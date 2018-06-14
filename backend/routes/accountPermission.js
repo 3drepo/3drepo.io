@@ -78,15 +78,21 @@
 	}
 
 	function updatePermission(req, res, next){
+		
+		if (req.body.length === 1 &&
+			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
+			User.findByUserName(req.params.account).then(user => {
+				return user.customData.permissions.update(req.params.user, req.body);
 
-		User.findByUserName(req.params.account).then(user => {
-			return user.customData.permissions.update(req.params.user, req.body);
+			}).then(permission => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		} else {
+			responseCodes.respond(responsePlace, req, res, next, responseCode.INVALID_ARGUMENTS, responseCode.INVALID_ARGUMENTS);
+		}
 
-		}).then(permission => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
 	}
 
 	function deletePermission(req, res, next){

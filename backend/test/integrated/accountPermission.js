@@ -152,6 +152,29 @@ describe('Account permission::', function () {
 
 	});
 
+	it('should NOT able to update users permissions without providing a set of new permissions', function(done){
+
+		async.series([
+			callback => {
+				agent.put(`/${username}/permissions/user2`)
+				.send({ })
+				.expect(200, function(err, res){
+					callback(err);
+				});
+			},
+
+			callback => {
+				agent.get(`/${username}/permissions`)
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					callback(err);
+				});
+			}
+
+		], (err, res) => done(err));
+
+	});
+
 	it('should able to update users permissions', function(done){
 
 		async.series([
