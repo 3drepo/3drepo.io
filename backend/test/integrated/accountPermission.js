@@ -162,8 +162,7 @@ describe('Account permission::', function () {
 
 	});
 
-	it('should able to update users permissions', function(done){
-
+	it('should be able to update users permissions', function(done) {
 		async.series([
 			callback => {
 				agent.put(`/${username}/permissions/user2`)
