@@ -184,6 +184,7 @@ function signUp(req, res, next){
 	}
 
 	if (Object.prototype.toString.call(req.body.email) === "[object String]"
+		 && Object.prototype.toString.call(req.body.password) === "[object String]"
 		 && Object.prototype.toString.call(req.body.firstName) === "[object String]"
 		 && Object.prototype.toString.call(req.body.lastName) === "[object String]"
 		 && Object.prototype.toString.call(req.body.countryCode) === "[object String]"
