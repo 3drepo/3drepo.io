@@ -24,23 +24,6 @@ const db = require("../db/db");
 
 const view = {};
 
-// viewSchema = {
-// 	_id: Object,
-// 	name: String,
-// 	clippingPlanes : [Schema.Types.Mixed ],
-// 	viewpoint: {
-// 		position: [Number],
-// 		up: [Number],
-// 		look_at: [Number],
-// 		view_dir: [Number],
-// 		right: [Number]
-// 	},
-// 	screenshot: {
-// 		buffer : Object,
-// 		thumbnail: String,
-// 	}
-// };
-
 view.findByUID = function(dbCol, uid){
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
