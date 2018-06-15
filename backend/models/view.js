@@ -24,10 +24,10 @@ const db = require("../db/db");
 
 const view = {};
 
-view.findByUID = function(dbCol, uid){
+view.findByUID = function(dbCol, uid, projection) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }).then(view => {
+		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(view => {
 
 			if (!view) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
@@ -44,7 +44,7 @@ view.listViews = function(dbCol){
 		return _dbCol.find().toArray().then(results => {
 			results.forEach((result) => {
 				result._id = utils.uuidToString(result._id);
-				if (result.screenshot.buffer) {
+				if (result.screenshot && result.screenshot.buffer) {
 					delete result.screenshot.buffer;
 				}
 			});
@@ -56,8 +56,8 @@ view.listViews = function(dbCol){
 
 view.getThumbnail = function(dbColOptions, uid){
 
-	return this.findByUID(dbColOptions, uid).then(view => {
-		if(!view.screenshot || !view.screenshot.buffer || !view.screenshot.buffer.buffer){
+	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(view => {
+		if (!view.screenshot) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
