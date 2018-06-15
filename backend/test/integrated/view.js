@@ -85,9 +85,7 @@ describe("Views", function () {
 					agent.post(`/${username}/${model}/views/`)
 					.send(view)
 					.expect(200 , function(err, res){
-						
 						viewId = res.body._id;
-
 						return done(err);
 					});
 				},
@@ -96,7 +94,7 @@ describe("Views", function () {
 					agent.get(`/${username}/${model}/views/${viewId}`).expect(200, function(err , res){
 
 						expect(res.body.name).to.equal(view.name);
-						expect(res.body.clippingPlanes).to.equal(view.clippingPlanes);
+						expect(res.body.clippingPlanes).to.deep.equal(view.clippingPlanes);
 						expect(res.body.viewpoint.up).to.deep.equal(view.viewpoint.up);
 						expect(res.body.viewpoint.position).to.deep.equal(view.viewpoint.position);
 						expect(res.body.viewpoint.look_at).to.deep.equal(view.viewpoint.look_at);
@@ -132,7 +130,7 @@ describe("Views", function () {
 				function(done){
 					agent.get(`/${username}/${model}/views/${viewId}/`).expect(200, function(err , res){
 
-						expect(res.body.screenshot).to.equal(`${username}/${model}/views/${viewId}/${res.body.guid}/screenshot.png`);
+						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/views/${viewId}/${res.body.guid}/screenshot.png`);
 						return done(err);
 
 					});
