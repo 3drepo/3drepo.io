@@ -92,7 +92,7 @@ view.createView = function(dbCol, data){
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
-		if (data.screenshot.base64) {
+		if (data.screenshot && data.screenshot.base64) {
 			cropped = utils.getCroppedScreenshotFromBase64(data.screenshot.base64, 79, 79);
 		} else {
 			cropped = Promise.resolve();

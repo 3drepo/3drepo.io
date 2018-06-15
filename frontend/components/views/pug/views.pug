@@ -22,22 +22,22 @@ div.viewsContainer
                 img.viewThumbnail(ng-src="{{vm.getThumbnailUrl(view.screenshot.thumbnail)}}")
                 div(flex, layout="column" layout-align="start")
                     div(
-                        ng-if="vm.editSelectedView !== view").viewName {{view.name || "(Unnamed View)"}}
+                        ng-if="vm.editSelectedView._id !== view._id").viewName {{view.name || "(Unnamed View)"}}
                     input.viewName(
                         ng-model="vm.editSelectedView.name" 
                         maxlength="{{vm.viewNameMaxlength}}"
-                        ng-if="vm.editSelectedView === view")
+                        ng-if="vm.editSelectedView._id === view._id")
 
             div.viewEnterHolder(
                 ng-click="vm.editView(view)"
-                ng-if="view.selected === true && vm.editSelectedView !== view"
+                ng-if="view.selected === true && vm.editSelectedView._id !== view._id"
                 layout="row"
                 layout-align="center center")
 
                 md-icon(class="angular-material-icons material-icons" role="img" aria-label="edit") edit
 
             div.viewEnterHolder(
-                ng-if="view.selected === true && vm.editSelectedView === view"
+                ng-if="view.selected === true && vm.editSelectedView._id === view._id"
                 layout="column"
                 layout-align="center center")
 

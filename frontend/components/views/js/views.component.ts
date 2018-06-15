@@ -130,7 +130,7 @@ class ViewsController implements ng.IController {
 			this.editSelectedView = null;
 		} else {
 			this.canAddView = false;
-			this.editSelectedView = view;
+			this.editSelectedView = Object.assign({}, view);
 		}
 		this.$timeout();
 	}
@@ -138,6 +138,7 @@ class ViewsController implements ng.IController {
 	public saveEditedView() {
 		this.ViewsService.updateView(this.account, this.model, this.selectedView)
 			.then(() => {
+				this.selectedView.name = this.editSelectedView.name;
 				this.resetEditState();
 			})
 			.catch((error) => {
