@@ -20,7 +20,7 @@ div.viewsContainer
 
             div.viewMain(layout="row")
                 img.viewThumbnail(ng-src="{{vm.getThumbnailUrl(view.screenshot.thumbnail)}}")
-                div(flex, layout="column" layout-align="start center")
+                div(flex, layout="column" layout-align="start")
                     div(
                         ng-if="vm.editSelectedView !== view").viewName {{view.name || "(Unnamed View)"}}
                     input.viewName(
