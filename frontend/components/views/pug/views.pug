@@ -23,7 +23,7 @@ div.viewsContainer
                 div(flex, layout="column" layout-align="start")
                     div(
                         ng-if="vm.editSelectedView._id !== view._id").viewName {{view.name || "(Unnamed View)"}}
-                    input.viewName(
+                    textarea.viewName(
                         ng-model="vm.editSelectedView.name" 
                         maxlength="{{vm.viewNameMaxlength}}"
                         ng-if="vm.editSelectedView._id === view._id")
