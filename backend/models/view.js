@@ -40,10 +40,8 @@ view.findByUID = function(dbCol, uid){
 
 view.listViews = function(dbCol){
 
-	const query = {};
-
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-		return _dbCol.find(query).toArray().then(results => {
+		return _dbCol.find().toArray().then(results => {
 			results.forEach((result) => {
 				result._id = utils.uuidToString(result._id);
 				if (result.screenshot.buffer) {

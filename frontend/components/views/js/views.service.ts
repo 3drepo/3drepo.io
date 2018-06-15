@@ -113,15 +113,17 @@ export class ViewsService {
 	 * @return promise
 	 */
 	public deleteView(teamspace: string, model: string, view: any) 	{
-
-		const viewsUrl = `${teamspace}/${model}/views/${view._id}`;
-		return this.APIService.delete(viewsUrl)
-			.then(() => {
-				this.state.views = this.state.views.filter((v) => {
-					return v._id !== view._id;
+		if (view && view._id) {
+			const viewsUrl = `${teamspace}/${model}/views/${view._id}`;
+			return this.APIService.delete(viewsUrl)
+				.then(() => {
+					this.state.views = this.state.views.filter((v) => {
+						return v._id !== view._id;
+					});
 				});
-			});
-
+		} else {
+			return Promise.resolve();
+		}
 	}
 
 	/**

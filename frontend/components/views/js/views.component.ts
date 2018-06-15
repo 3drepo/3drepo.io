@@ -37,7 +37,7 @@ class ViewsController implements ng.IController {
 	private savingView: any;
 	private canAddView: any;
 	private newView: any;
-	private editSelectedView: boolean;
+	private editSelectedView: any;
 	private viewNameMaxlength: number;
 
 	constructor(
@@ -96,10 +96,10 @@ class ViewsController implements ng.IController {
 		return "";
 	}
 
-	public selectView(view) {
+	public selectView(view: any) {
 
 		if (view) {
-			if (this.selectedView !== undefined) {
+			if (this.selectedView) {
 				this.selectedView.selected = false;
 			}
 			this.selectedView = view;
@@ -120,6 +120,9 @@ class ViewsController implements ng.IController {
 
 	public deleteView() {
 		this.ViewsService.deleteView(this.account, this.model, this.selectedView)
+			.then(() => {
+				this.selectedView = null;
+			})
 			.catch((error) => {
 				this.handleViewError("delete", error);
 			});
@@ -136,15 +139,17 @@ class ViewsController implements ng.IController {
 	}
 
 	public saveEditedView() {
-		this.ViewsService.updateView(this.account, this.model, this.selectedView)
-			.then(() => {
-				this.selectedView.name = this.editSelectedView.name;
-				this.resetEditState();
-			})
-			.catch((error) => {
-				this.handleViewError("update", error);
-				this.resetEditState();
-			});
+		if (this.editSelectedView.name) {
+			this.ViewsService.updateView(this.account, this.model, this.selectedView)
+				.then(() => {
+					this.selectedView.name = this.editSelectedView.name;
+					this.resetEditState();
+				})
+				.catch((error) => {
+					this.handleViewError("update", error);
+					this.resetEditState();
+				});
+		}
 	}
 
 	public resetEditState() {
