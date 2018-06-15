@@ -72,27 +72,15 @@ export class ViewsService {
 	 * Update a given view
 	 * @param teamspace teamspace name
 	 * @param model the model id
-	 * @param originalView the original view that will be updated
+	 * @param view the original view that will be updated
 	 * @return promise
 	 */
-	public updateView(teamspace: string, model: string, originalView: any) {
+	public updateView(teamspace: string, model: string, view: any) {
 
-		const viewId = originalView._id;
+		const viewId = view._id;
 		const viewsUrl = `${teamspace}/${model}/views/${viewId}/`;
 
-		return this.generateViewObject(teamspace, model, originalView.name)
-			.then((updatedView: any) => {
-				updatedView._id = viewId;
-				updatedView.screenshot.thumbnail = viewsUrl + "thumbnail.png";
-				return this.APIService.put(viewsUrl, updatedView)
-					.then((response) => {
-						// Watchers won't trigger if the URL stays the same, we force it to digest!
-						const forceRefresh = "?refresh=" + String(Date.now());
-						updatedView.screenshot.thumbnail += forceRefresh;
-						this.replaceStateView(updatedView);
-					});
-			});
-
+		return this.APIService.put(viewsUrl, { name: view.name });
 	}
 
 	/**
