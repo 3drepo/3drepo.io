@@ -48,8 +48,7 @@ export class ViewsService {
 	 */
 	public reset() {
 		this.state = {
-			views : [],
-			selectedGroup: {}
+			views : []
 		};
 	}
 
@@ -171,7 +170,7 @@ export class ViewsService {
 		this.ViewerService.getScreenshot(screenshotDefer);
 		return Promise.all([viewpointDefer.promise, screenshotDefer.promise])
 			.then((results: any) => {
-				const viewpoint:any = {};
+				const viewpoint: any = {};
 				const base64Screenshot = results[1];
 				viewpoint.name = viewName;
 				viewpoint.clippingPlanes = results[0].clippingPlanes;
