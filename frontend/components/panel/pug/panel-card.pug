@@ -54,8 +54,8 @@ div(layout="column", class="md-whiteframe-1dp")
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings')
 
-			views(
-				ng-if="vm.contentData.type === 'views'"
+			viewpoints(
+				ng-if="vm.contentData.type === 'viewpoints'"
 				account='vm.account'
 				model='vm.model'
 				revision='vm.revision'

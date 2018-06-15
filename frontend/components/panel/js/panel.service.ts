@@ -166,7 +166,7 @@ export class PanelService {
 		});
 
 		this.panelCards.left.push({
-			type: "views",
+			type: "viewpoints",
 			title: "Views",
 			showLiteMode: true,
 			show: false,

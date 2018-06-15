@@ -22,7 +22,7 @@ class ViewsController implements ng.IController {
 		"$timeout",
 
 		"DialogService",
-		"ViewsService",
+		"ViewpointsService",
 		"APIService"
 	];
 
@@ -30,7 +30,7 @@ class ViewsController implements ng.IController {
 	private account: string;
 	private model: string;
 	private onContentHeightRequest: any;
-	private views: any[];
+	private viewpoints: any[];
 	private toShow: string;
 	private loading: boolean;
 	private selectedView: any;
@@ -45,38 +45,38 @@ class ViewsController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 
 		private DialogService,
-		private ViewsService: any,
+		private ViewpointsService: any,
 		private APIService: any
 	) {}
 
 	public $onInit() {
 		this.newView = {};
-		this.ViewsService.getViews(this.account, this.model).then(() => {
+		this.ViewpointsService.getViewpoints(this.account, this.model).then(() => {
 			this.loading = false;
 		});
 		this.toShow = "views";
 		this.loading = true;
 		this.savingView = false;
 		this.canAddView = true;
-		this.views = [];
+		this.viewpoints = [];
 		this.editSelectedView = false;
 		this.viewNameMaxlength = 80;
 		this.watchers();
 	}
 
 	public $onDestroy() {
-		this.ViewsService.reset();
+		this.ViewpointsService.reset();
 	}
 
 	public watchers() {
 
 		this.$scope.$watch(() => {
-			return this.ViewsService.state;
+			return this.ViewpointsService.state;
 		}, (newState, oldState) => {
 			angular.extend(this, newState);
 		}, true);
 
-		this.$scope.$watchCollection("vm.views", () => {
+		this.$scope.$watchCollection("vm.viewpoints", () => {
 			this.setContentHeight();
 		});
 
@@ -105,21 +105,21 @@ class ViewsController implements ng.IController {
 			this.selectedView = view;
 			this.selectedView.selected = true;
 
-			this.ViewsService.showViewpoint(this.account, this.model, view);
+			this.ViewpointsService.showViewpoint(this.account, this.model, view);
 		}
 
 	}
 
-	public createView() {
-		this.ViewsService.createView(this.account, this.model, this.newView.name)
+	public createViewpoint() {
+		this.ViewpointsService.createViewpoint(this.account, this.model, this.newView.name)
 			.catch((error) => {
 				this.handleViewError("create", error);
 			});
 		this.toShow = "views";
 	}
 
-	public deleteView() {
-		this.ViewsService.deleteView(this.account, this.model, this.selectedView)
+	public deleteViewpoint() {
+		this.ViewpointsService.deleteViewpoint(this.account, this.model, this.selectedView)
 			.then(() => {
 				this.selectedView = null;
 			})
@@ -140,7 +140,7 @@ class ViewsController implements ng.IController {
 
 	public saveEditedView() {
 		if (this.editSelectedView.name) {
-			this.ViewsService.updateView(this.account, this.model, this.editSelectedView)
+			this.ViewpointsService.updateViewpoint(this.account, this.model, this.editSelectedView)
 				.then(() => {
 					this.selectedView.name = this.editSelectedView.name;
 					this.resetEditState();
@@ -159,7 +159,7 @@ class ViewsController implements ng.IController {
 	}
 
 	public addView() {
-		this.newView = { name: "View " + (this.views.length + 1) };
+		this.newView = { name: "View " + (this.viewpoints.length + 1) };
 		this.showNewViewPane();
 	}
 
@@ -187,8 +187,8 @@ class ViewsController implements ng.IController {
 		const viewHeight = 95;
 		const actionBar = 52;
 
-		if (this.views && this.views.length) {
-			contentHeight = (this.views.length * viewHeight) + actionBar;
+		if (this.viewpoints && this.viewpoints.length) {
+			contentHeight = (this.viewpoints.length * viewHeight) + actionBar;
 		}
 
 		this.onContentHeightRequest({height: Math.max(contentHeight, minContentHeight) });
@@ -197,7 +197,7 @@ class ViewsController implements ng.IController {
 
 }
 
-export const ViewsComponent: ng.IComponentOptions = {
+export const ViewpointsComponent: ng.IComponentOptions = {
 	bindings: {
 		account: "<",
 		model: "<",
@@ -209,9 +209,9 @@ export const ViewsComponent: ng.IComponentOptions = {
 	},
 	controller: ViewsController,
 	controllerAs: "vm",
-	templateUrl: "templates/views.html"
+	templateUrl: "templates/viewpoints.html"
 };
 
-export const ViewsComponentModule = angular
+export const ViewpointsComponentModule = angular
 	.module("3drepo")
-	.component("views", ViewsComponent);
+	.component("viewpoints", ViewpointsComponent);

@@ -38,7 +38,7 @@ view.findByUID = function(dbCol, uid, projection) {
 	});
 };
 
-view.listViews = function(dbCol){
+view.listViewpoints = function(dbCol){
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
@@ -86,7 +86,7 @@ view.updateAttrs = function(dbCol, id, data){
 	});
 };
 
-view.createView = function(dbCol, data){
+view.createViewpoint = function(dbCol, data){
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -100,7 +100,7 @@ view.createView = function(dbCol, data){
 
 			const id = utils.stringToUUID(uuid.v1());
 
-			const thumbnailUrl = `${dbCol.account}/${dbCol.model}/views/${utils.uuidToString(id)}/thumbnail.png`;
+			const thumbnailUrl = `${dbCol.account}/${dbCol.model}/viewpoints/${utils.uuidToString(id)}/thumbnail.png`;
 
 			if (croppedScreenshot) {
 				// Remove the base64 version of the screenshot
@@ -109,17 +109,17 @@ view.createView = function(dbCol, data){
 				data.screenshot.thumbnail = thumbnailUrl;
 			}
 
-			const newView = {
+			const newViewpoint = {
 				_id: id,
 				clippingPlanes: data.clippingPlanes,
 				viewpoint: data.viewpoint,
 				screenshot: data.screenshot
 			};
 
-			return _dbCol.insert(newView).then(() => {
+			return _dbCol.insert(newViewpoint).then(() => {
 				return this.updateAttrs(dbCol, id, data).catch((err) => {
 					// remove the recently saved new view as update attributes failed
-					return this.deleteView(dbCol, id).then(() => {
+					return this.deleteViewpoint(dbCol, id).then(() => {
 						return Promise.reject(err);
 					});
 				});
@@ -128,7 +128,7 @@ view.createView = function(dbCol, data){
 	});
 };
 
-view.deleteView = function(dbCol, id){
+view.deleteViewpoint = function(dbCol, id){
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);

@@ -16,10 +16,10 @@
  */
 
 interface IViewState {
-	views: any[];
+	viewpoints: any[];
 }
 
-export class ViewsService {
+export class ViewpointsService {
 
 	public static $inject: string[] = [
 		"$timeout",
@@ -44,26 +44,26 @@ export class ViewsService {
 	}
 
 	/**
-	 * Reset the data model for views
+	 * Reset the data model for viewpoints
 	 */
 	public reset() {
 		this.state = {
-			views : []
+			viewpoints : []
 		};
 	}
 
 	/**
-	 * get a list of views from the view API
+	 * get a list of viewpoints from the view API
 	 * @param teamspace teamspace name
 	 * @param model the model id
 	 * @return promise
 	 */
-	public getViews(teamspace: string, model: string) {
+	public getViewpoints(teamspace: string, model: string) {
 
-		const viewsUrl = `${teamspace}/${model}/views/`;
-		return this.APIService.get(viewsUrl)
+		const viewpointsUrl = `${teamspace}/${model}/viewpoints/`;
+		return this.APIService.get(viewpointsUrl)
 			.then((response) => {
-				this.state.views = response.data;
+				this.state.viewpoints = response.data;
 			});
 
 	}
@@ -75,12 +75,12 @@ export class ViewsService {
 	 * @param view the original view that will be updated
 	 * @return promise
 	 */
-	public updateView(teamspace: string, model: string, view: any) {
+	public updateViewpoint(teamspace: string, model: string, view: any) {
 
 		const viewId = view._id;
-		const viewsUrl = `${teamspace}/${model}/views/${viewId}/`;
+		const viewpointsUrl = `${teamspace}/${model}/viewpoints/${viewId}/`;
 
-		return this.APIService.put(viewsUrl, { name: view.name });
+		return this.APIService.put(viewpointsUrl, { name: view.name });
 	}
 
 	/**
@@ -90,16 +90,16 @@ export class ViewsService {
 	 * @param viewName the name of the view to create
 	 * @return promise
 	 */
-	public createView(teamspace: string, model: string, viewName: string) {
+	public createViewpoint(teamspace: string, model: string, viewName: string) {
 
-		return this.generateViewObject(teamspace, model, viewName)
+		return this.generateViewpointObject(teamspace, model, viewName)
 			.then((view: any) => {
-				const viewsUrl = `${teamspace}/${model}/views/`;
-				return this.APIService.post(viewsUrl, view)
+				const viewpointsUrl = `${teamspace}/${model}/viewpoints/`;
+				return this.APIService.post(viewpointsUrl, view)
 					.then((response: any) => {
 						view._id = response.data._id;
-						view.screenshot.thumbnail = viewsUrl + view._id + "/thumbnail.png";
-						this.state.views.push(view);
+						view.screenshot.thumbnail = viewpointsUrl + view._id + "/thumbnail.png";
+						this.state.viewpoints.push(view);
 					});
 			});
 
@@ -112,12 +112,12 @@ export class ViewsService {
 	 * @param view the name of the view to create
 	 * @return promise
 	 */
-	public deleteView(teamspace: string, model: string, view: any) 	{
+	public deleteViewpoint(teamspace: string, model: string, view: any) {
 		if (view && view._id) {
-			const viewsUrl = `${teamspace}/${model}/views/${view._id}`;
-			return this.APIService.delete(viewsUrl)
+			const viewpointsUrl = `${teamspace}/${model}/viewpoints/${view._id}`;
+			return this.APIService.delete(viewpointsUrl)
 				.then(() => {
-					this.state.views = this.state.views.filter((v) => {
+					this.state.viewpoints = this.state.viewpoints.filter((v) => {
 						return v._id !== view._id;
 					});
 				});
@@ -127,17 +127,17 @@ export class ViewsService {
 	}
 
 	/**
-	 * Replaces a view in the list of internal saved views
+	 * Replaces a view in the list of internal saved viewpoints
 	 * @param newView the view to replace the old view
 	 */
-	public replaceStateView(newView: any) {
+	public replaceStateViewpoint(newView: any) {
 		let index;
-		this.state.views.forEach((v, i) => {
+		this.state.viewpoints.forEach((v, i) => {
 			if (v._id === newView._id) {
 				index = i;
 			}
 		});
-		this.state.views[index] = newView;
+		this.state.viewpoints[index] = newView;
 	}
 
 	/**
@@ -147,7 +147,7 @@ export class ViewsService {
 	 * @param viewName the name of the new view point
 	 * @return promise
 	 */
-	public generateViewObject(teamspace: string, model: string, viewName: string) {
+	public generateViewpointObject(teamspace: string, model: string, viewName: string) {
 		const viewpointDefer = this.$q.defer();
 		const screenshotDefer = this.$q.defer();
 
@@ -204,6 +204,6 @@ export class ViewsService {
 	}
 }
 
-export const ViewsServiceModule = angular
+export const ViewpointsServiceModule = angular
 	.module("3drepo")
-	.service("ViewsService", ViewsService);
+	.service("ViewpointsService", ViewpointsService);

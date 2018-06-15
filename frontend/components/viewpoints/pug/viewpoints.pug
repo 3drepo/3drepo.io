@@ -13,10 +13,10 @@ div.viewsContainer
 
         div.view(
             layout="row"
-            ng-if="vm.views.length > 0"
+            ng-if="vm.viewpoints.length > 0"
             ng-click="vm.selectView(view)"
             style="background-color: {{view.selected ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
-            ng-repeat="view in vm.views track by $index")
+            ng-repeat="view in vm.viewpoints track by $index")
 
             div.viewMain(layout="row")
                 img.viewThumbnail(ng-src="{{vm.getThumbnailUrl(view.screenshot.thumbnail)}}")
@@ -61,11 +61,11 @@ div.viewsContainer
                 layout-align="center center")
 
         md-container.noViews(
-            ng-if="vm.views.length === 0 && !vm.loading"
+            ng-if="vm.viewpoints.length === 0 && !vm.loading"
             layout-fill
             layout="column")
 
-            h3 No views have been created yet
+            h3 No viewpoints have been created yet
 
     div.viewContainer(
         layout="column"
@@ -90,10 +90,10 @@ div.viewsContainer
         div(flex="50" layout="row" layout-align="start center")
             button(class="md-icon-button md-button md-ink-ripple" 
                 type="button"
-                ng-if="vm.views.length > 0"
+                ng-if="vm.viewpoints.length > 0"
                 aria-label="Delete"
                 ng-show="vm.toShow === 'views'"
-                ng-click="vm.deleteView()")
+                ng-click="vm.deleteViewpoint()")
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
@@ -117,7 +117,7 @@ div.viewsContainer
                 aria-label="Add" 
                 ng-disabled="!vm.newView || !vm.newView.name"
                 ng-show="vm.toShow === 'view' && !vm.savingView"
-                ng-click="vm.createView()")
+                ng-click="vm.createViewpoint()")
 
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"

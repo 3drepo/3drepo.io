@@ -129,8 +129,8 @@ module.exports.createApp = function (serverConfig) {
 	//groups handler
 	app.use("/:account/:model", require("../routes/group"));
 
-	//views handler
-	app.use("/:account/:model", require("../routes/view"));
+	//viewpoints handler
+	app.use("/:account/:model", require("../routes/viewpoint"));
 
 	//issues handler
 	app.use("/:account/:model", require("../routes/issueAnalytic"));

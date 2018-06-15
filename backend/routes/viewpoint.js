@@ -22,30 +22,30 @@ const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const View = require("../models/view");
+const Viewpoint = require("../models/viewpoint");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get("/views/", middlewares.issue.canView, listViews);
-router.get("/views/:uid", middlewares.issue.canView, findView);
-router.put("/views/:uid", middlewares.issue.canCreate, updateView);
-router.post("/views/", middlewares.issue.canCreate, createView);
-router.delete("/views/:uid", middlewares.issue.canCreate, deleteView);
-router.get("/views/:uid/thumbnail.png", middlewares.issue.canView, getViewThumbnail);
+router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
+router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
+router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
+router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
+router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
+router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getViewpointThumbnail);
 
 const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
-function listViews(req, res, next){
+function listViewpoints(req, res, next){
 
 	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	View.listViews(dbCol, req.query)
-		.then(views => {
+	Viewpoint.listViewpoints(dbCol, req.query)
+		.then(viewpoints => {
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, views);
+			responseCodes.respond(place, req, res, next, responseCodes.OK, viewpoints);
 
 		}).catch(err => {
 
@@ -55,12 +55,12 @@ function listViews(req, res, next){
 		});
 }
 
-function findView(req, res, next){
+function findViewpoint(req, res, next){
 
 	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	View.findByUID(dbCol, req.params.uid)
+	Viewpoint.findByUID(dbCol, req.params.uid)
 		.then(view => {
 			if(!view){
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
@@ -76,11 +76,11 @@ function findView(req, res, next){
 		});
 }
 
-function createView(req, res, next){
+function createViewpoint(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	View.createView(getDbColOptions(req), req.body)
+	Viewpoint.createViewpoint(getDbColOptions(req), req.body)
 		.then(view => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
 		}).catch(err => {
@@ -88,11 +88,11 @@ function createView(req, res, next){
 		});
 }
 
-function deleteView(req, res, next){
+function deleteViewpoint(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	View.deleteView(getDbColOptions(req), req.params.uid).then(() => {
+	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -100,17 +100,17 @@ function deleteView(req, res, next){
 
 }
 
-function updateView(req, res, next){
+function updateViewpoint(req, res, next){
 
 	const dbCol = getDbColOptions(req);
 	let place = utils.APIInfo(req);
 
-	View.findByUID(dbCol, req.params.uid)
+	Viewpoint.findByUID(dbCol, req.params.uid)
 		.then(view => {
 			if(!view){
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 			} else {
-				return View.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
+				return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
 			}
 		}).then(view => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
@@ -120,12 +120,12 @@ function updateView(req, res, next){
 		});
 }
 
-function getViewThumbnail(req, res, next){
+function getViewpointThumbnail(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let dbCol = {account: req.params.account, model: req.params.model};
 
-	View.getThumbnail(dbCol, req.params.uid).then(buffer => {
+	Viewpoint.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
