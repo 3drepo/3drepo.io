@@ -73,33 +73,33 @@ describe("Views", function () {
 		});
 	});
 
-	describe("Creating a view", function(){
+	describe("Creating a viewpoint", function(){
 
 		it("should succeed", function(done){
 
-			let view = Object.assign({"name":"View test"}, baseView);
-			let viewId;
+			let viewpoint = Object.assign({"name":"View test"}, baseView);
+			let viewpointId;
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${model}/views/`)
-					.send(view)
+					agent.post(`/${username}/${model}/viewpoints/`)
+					.send(viewpoint)
 					.expect(200 , function(err, res){
-						viewId = res.body._id;
+						viewpointId = res.body._id;
 						return done(err);
 					});
 				},
 
 				function(done){
-					agent.get(`/${username}/${model}/views/${viewId}`).expect(200, function(err , res){
+					agent.get(`/${username}/${model}/viewpoints/${viewpointId}`).expect(200, function(err , res){
 
-						expect(res.body.name).to.equal(view.name);
-						expect(res.body.clippingPlanes).to.deep.equal(view.clippingPlanes);
-						expect(res.body.viewpoint.up).to.deep.equal(view.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(view.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(view.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(view.viewpoint.view_dir);
-						expect(res.body.viewpoint.right).to.deep.equal(view.viewpoint.right);
+						expect(res.body.name).to.equal(viewpoint.name);
+						expect(res.body.clippingPlanes).to.deep.equal(viewpoint.clippingPlanes);
+						expect(res.body.viewpoint.up).to.deep.equal(viewpoint.viewpoint.up);
+						expect(res.body.viewpoint.position).to.deep.equal(viewpoint.viewpoint.position);
+						expect(res.body.viewpoint.look_at).to.deep.equal(viewpoint.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).to.deep.equal(viewpoint.viewpoint.view_dir);
+						expect(res.body.viewpoint.right).to.deep.equal(viewpoint.viewpoint.right);
 
 						return done(err);
 
@@ -111,26 +111,26 @@ describe("Views", function () {
 
 		it("with screenshot should succeed", function(done){
 
-			let view = Object.assign({"name":"View test"}, baseView);
-			view.screenshot = pngBase64;
+			let viewpoint = Object.assign({"name":"View test"}, baseView);
+			viewpoint.screenshot = pngBase64;
 
-			let viewId;
+			let viewpointId;
 
 			async.series([
 				function(done){
-					agent.post(`/${username}/${model}/views/`)
-					.send(view)
+					agent.post(`/${username}/${model}/viewpoints/`)
+					.send(viewpoint)
 					.expect(200 , function(err, res){
 						
-						viewId = res.body._id;
+						viewpointId = res.body._id;
 						return done(err);
 					});
 				},
 
 				function(done){
-					agent.get(`/${username}/${model}/views/${viewId}/`).expect(200, function(err , res){
+					agent.get(`/${username}/${model}/viewpoints/${viewpointId}/`).expect(200, function(err , res){
 
-						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/views/${viewId}/${res.body.guid}/screenshot.png`);
+						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/viewpoints/${viewpointId}/${res.body.guid}/screenshot.png`);
 						return done(err);
 
 					});
@@ -141,26 +141,26 @@ describe("Views", function () {
 
 		it("change name should succeed", function(done){
 
-			let view = Object.assign({"name":"View test"}, baseView, { status: "open"});
-			let viewId;
-			let newName = { name: "New view name"};
+			let viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
+			let viewpointId;
+			let newName = { name: "New viewpoint name"};
 			async.series([
 				function(done){
-					agent.post(`/${username}/${model}/views/`)
-					.send(view)
+					agent.post(`/${username}/${model}/viewpoints/`)
+					.send(viewpoint)
 					.expect(200 , function(err, res){
-						viewId = res.body._id;
+						viewpointId = res.body._id;
 						return done(err);
 						
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${model}/views/${viewId}/`)
+					agent.put(`/${username}/${model}/viewpoints/${viewpointId}/`)
 					.send(newName)
 					.expect(200, done);
 				},
 				function(done){
-					agent.get(`/${username}/${model}/views/${viewId}/`)
+					agent.get(`/${username}/${model}/viewpoints/${viewpointId}/`)
 					.expect(200, function(err, res){
 						expect(res.body.name === newName.name);
 						done(err);
@@ -171,8 +171,8 @@ describe("Views", function () {
 
 		it("change viewpoint should fail", function(done){
 
-			let view = Object.assign({"name":"View test"}, baseView, { status: "open"});
-			let viewId;
+			let viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
+			let viewpointId;
 			let newView = {
 				"up":[1,1,1],
 				"position":[12,13,35],
@@ -182,16 +182,16 @@ describe("Views", function () {
 			}
 			async.series([
 				function(done){
-					agent.post(`/${username}/${model}/views/`)
-					.send(view)
+					agent.post(`/${username}/${model}/viewpoints/`)
+					.send(viewpoint)
 					.expect(200 , function(err, res){
-						viewId = res.body._id;
+						viewpointId = res.body._id;
 						return done(err);
 						
 					});
 				},
 				function(done){
-					agent.put(`/${username}/${model}/views/${viewId}/`)
+					agent.put(`/${username}/${model}/viewpoints/${viewpointId}/`)
 					.send(newView)
 					.expect(500, done);
 				},
