@@ -132,6 +132,9 @@ describe("Views", function () {
 				function(done){
 					agent.get(`/${username}/${model}/viewpoints/${viewpointId}/`).expect(200, function(err , res){
 
+						console.log("VIEWPOINTS SCRNSHT TEST");
+						console.log(res);
+						console.log("VIEWPOINTS SCRNSHT END");
 						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/viewpoints/${viewpointId}/${res.body.guid}/screenshot.png`);
 						return done(err);
 
