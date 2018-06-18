@@ -1,43 +1,43 @@
-div.viewsContainer
+div.viewpointsContainer
 
-    div.viewsNotice(
+    div.viewpointsNotice(
         layout="column"
         layout-align="center center"
         ng-if="vm.loading")
-        h3 Loading views...
+        h3 Loading viewpoints...
 
-    md-container.viewsList(
+    md-container.viewpointsList(
         ng-show="vm.toShow === 'views'"
         flex="100"
         layout="column")
 
-        div.view(
+        div.viewpoint(
             layout="row"
             ng-if="vm.viewpoints.length > 0"
-            ng-click="vm.selectView(view)"
-            style="background-color: {{view.selected ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
-            ng-repeat="view in vm.viewpoints track by $index")
+            ng-click="vm.selectView(viewpoint)"
+            style="background-color: {{viewpoint.selected ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
+            ng-repeat="viewpoint in vm.viewpoints track by $index")
 
-            div.viewMain(layout="row")
-                img.viewThumbnail(ng-src="{{vm.getThumbnailUrl(view.screenshot.thumbnail)}}")
+            div.viewpointMain(layout="row")
+                img.viewpointThumbnail(ng-src="{{vm.getThumbnailUrl(viewpoint.screenshot.thumbnail)}}")
                 div(flex, layout="column" layout-align="start")
                     div(
-                        ng-if="vm.editSelectedView._id !== view._id").viewName {{view.name || "(Unnamed View)"}}
-                    textarea.viewName(
+                        ng-if="vm.editSelectedView._id !== viewpoint._id").viewpointName {{viewpoint.name || "(Unnamed View)"}}
+                    textarea.viewpointName(
                         ng-model="vm.editSelectedView.name" 
-                        maxlength="{{vm.viewNameMaxlength}}"
-                        ng-if="vm.editSelectedView._id === view._id")
+                        maxlength="{{vm.viewpointNameMaxlength}}"
+                        ng-if="vm.editSelectedView._id === viewpoint._id")
 
-            div.viewEnterHolder(
-                ng-click="vm.editView(view)"
-                ng-if="view.selected === true && vm.editSelectedView._id !== view._id"
+            div.viewpointEnterHolder(
+                ng-click="vm.editView(viewpoint)"
+                ng-if="viewpoint.selected === true && vm.editSelectedView._id !== viewpoint._id"
                 layout="row"
                 layout-align="center center")
 
                 md-icon(class="angular-material-icons material-icons" role="img" aria-label="edit") edit
 
-            div.viewEnterHolder(
-                ng-if="view.selected === true && vm.editSelectedView._id === view._id"
+            div.viewpointEnterHolder(
+                ng-if="viewpoint.selected === true && vm.editSelectedView._id === viewpoint._id"
                 layout="column"
                 layout-align="center center")
 
@@ -49,14 +49,14 @@ div.viewsContainer
                 ) cancel
 
                 md-icon(
-                        ng-click="vm.saveEditedView(view)"
+                        ng-click="vm.saveEditedView(viewpoint)"
                         class="angular-material-icons material-icons"
                         role="img"
                         aria-label="save"
                 ) save
 
-            div.viewEnterSpace(
-                ng-if="view.selected !== true"
+            div.viewpointEnterSpace(
+                ng-if="viewpoint.selected !== true"
                 layout="row"
                 layout-align="center center")
 
@@ -67,22 +67,22 @@ div.viewsContainer
 
             h3 No viewpoints have been created yet
 
-    div.viewContainer(
+    div.viewpointContainer(
         layout="column"
         layout-margin
         ng-show="vm.toShow === 'view'")
 
-        div(layout="row" flex).viewMarginBottom
+        div(layout="row" flex).viewpointMarginBottom
             div.openedViewColorBar(style="background-color: {{vm.getViewRGBAColor(vm.selectedView)}};")
             div(layout="column" flex)
                 md-input-container
                     label View Name
-                    input#viewName(
+                    input#viewpointName(
                         type="text"
                         ng-required
                         ng-disabled="!vm.canAddView"
                         ng-model="vm.newView.name" 
-                        maxlength="{{vm.viewNameMaxlength}}")
+                        maxlength="{{vm.viewpointNameMaxlength}}")
 
 
     div.addHolder(layout="row" flex="100")

@@ -1,22 +1,22 @@
-views {
+viewpoints {
     position: relative;
 }
 
-views .viewsContainer {
+viewpoints .viewpointsContainer {
     overflow: hidden;
     height: 100%;
 }
 
-views .viewContainer {
+viewpoints .viewpointContainer {
     height: calc(100% - 67px);
     overflow-y: auto;
 }
 
-views .noViews {
+viewpoints .noViews {
     text-align: center;
 }
 
-views .addHolder {
+viewpoints .addHolder {
     bottom: 0;
     right: 0;
     margin-right: 12px;
@@ -26,85 +26,85 @@ views .addHolder {
     padding: 0;
 }
 
-views .spinner {
+viewpoints .spinner {
     width: 25px !important;
     margin: 12.5px !important;
     height: 25px !important;
 }
 
-views .spinner svg {
+viewpoints .spinner svg {
     width: 25px !important;
     height: 25px !important;
     transform-origin: initial !important;
 }
 
-views .viewNameContainer {
+viewpoints .viewpointNameContainer {
     margin-bottom: 20px;
 }
 
-views .viewMarginBottom {
+viewpoints .viewpointMarginBottom {
     /** Bit of a hack to battle with angular material **/
     /*margin-bottom: 70px !important;*/
 }
 
-views .metaMargin {
+viewpoints .metaMargin {
     margin: 3px;
 }
 
-views .viewNameInput {
+viewpoints .viewpointNameInput {
     margin-top: 20px;
     width: 100%;
 }
 
-views .viewMain {
+viewpoints .viewpointMain {
     width: calc(100% - 45px);
 }
 
-views .viewMetaData {
+viewpoints .viewpointMetaData {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;   
     width: 100px;
 }
 
-views .viewColorBar {
+viewpoints .viewpointColorBar {
     width: 15px;
     margin: 10px;
 }
 
-views .viewColorHolder {
+viewpoints .viewpointColorHolder {
     width: 125px;
 }
 
 
-views .viewEnterHolder {
+viewpoints .viewpointEnterHolder {
     width: 45px;
     color: grey;
 }
 
-views .viewEnterSpace {
+viewpoints .viewpointEnterSpace {
     width: 45px;
 }
 
-views .viewObjectMetaContainer {
+viewpoints .viewpointObjectMetaContainer {
 
 }
 
-views .viewObjectMeta {
+viewpoints .viewpointObjectMeta {
     font-size: 14px;
     margin-right: 10px;
     margin-bottom: 10px;
     margin-left: 3px;
 }
 
-views .viewMeta {
+viewpoints .viewpointMeta {
    font-size: 12px;
    color: #8a8a8a;
    margin-right: 10px;
    height: 100%;
 }
 
-views .viewName {
+viewpoints .viewpointName {
     font-weight: 700;
     font-size: 14px;
     margin-top: 8px;
@@ -117,96 +117,96 @@ views .viewName {
     text-overflow: ellipsis;
 }
 
-views .viewEnterHolder {
+viewpoints .viewpointEnterHolder {
     cursor: pointer;
 }
 
-views .viewEnterHolder md-icon {
+viewpoints .viewpointEnterHolder md-icon {
     color: rgb(65, 65, 65);
 }
 
-views .viewThumbnail {
+viewpoints .viewpointThumbnail {
     margin: 8px;
     margin-left: 15px;
     width: 79px;
     height: 79px;
 }
 
-views .openedGroupColorBar {
+viewpoints .openedGroupColorBar {
     width: 8px;
     margin-top: 13px;
     height: 30px;
     margin-right: 10px;
 }
 
-views .viewDescription {
+viewpoints .viewpointDescription {
     color: #8a8a8a;
     font-size: 12px;
 }
 
-views .view:hover {
+viewpoints .viewpoint:hover {
     background:  rgba(186, 197, 225, 0.20);
 }
 
-views .view {
+viewpoints .viewpoint {
     border-bottom: solid gainsboro 1px;
     min-height: 95px;
     max-height: 95px;
     height: 100%;
 }
 
-views .viewsList {
+viewpoints .viewpointsList {
     height: calc(100% - 52px);
     overflow-y: scroll;
 }
 
 /** menus appear in another part of the DOM **/
 
-.viewColorGrid  {
+.viewpointColorGrid  {
     margin-top: 10px;
 }
 
-.viewColorColumn {
+.viewpointColorColumn {
     width: 40px;
     padding-left: 5px;
     padding-right: 5px;
 }
 
-.viewHexColor {
+.viewpointHexColor {
     width: 135px;
 }
 
-.viewCurrentColor {
+.viewpointCurrentColor {
     color: #9e9e9e;
 }
 
-.viewHexColorContainer {
+.viewpointHexColorContainer {
     margin-top: 16px;
     margin-bottom: 0px;
 }
 
-.viewCurrentColorBlock {
+.viewpointCurrentColorBlock {
     height: 80px;
     width: 80px;
     margin-top: 15px;
 }
 
-.viewColorMenu {
+.viewpointColorMenu {
     height: 205px;
     width: 365px;
 }
 
-.viewColorContainer {
+.viewpointColorContainer {
     width: 30px;
     height: 30px;
     margin-bottom: 10px;
 }
 
-.viewColor {
+.viewpointColor {
     width: 30px;
     height: 30px;
 }
 
-.viewCurrentColorHolder {
+.viewpointCurrentColorHolder {
     margin-top: 10px;
 }
