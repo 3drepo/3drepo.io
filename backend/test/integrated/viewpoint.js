@@ -121,7 +121,9 @@ describe("Views", function () {
 					agent.post(`/${username}/${model}/viewpoints/`)
 					.send(viewpoint)
 					.expect(200 , function(err, res){
-						
+						console.log("VIEWPOINTS TEST");
+						console.log(res);
+						console.log("VIEWPOINTS END");
 						viewpointId = res.body._id;
 						return done(err);
 					});
