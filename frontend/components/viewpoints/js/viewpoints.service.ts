@@ -53,6 +53,14 @@ export class ViewpointsService {
 	}
 
 	/**
+	 * Get full URL for given thumbnail
+	 * @param thumbnail URI for thumbnail
+	 */
+	public getThumbnailUrl(thumbnail: string) {
+		return (thumbnail) ? this.APIService.getAPIUrl(thumbnail) : "";
+	}
+
+	/**
 	 * get a list of viewpoints from the view API
 	 * @param teamspace teamspace name
 	 * @param model the model id
@@ -63,6 +71,12 @@ export class ViewpointsService {
 		const viewpointsUrl = `${teamspace}/${model}/viewpoints/`;
 		return this.APIService.get(viewpointsUrl)
 			.then((response) => {
+				response.data.forEach((viewpoint) => {
+					if (!viewpoint.screenshot) {
+						viewpoint.screenshot = {};
+					}
+					viewpoint.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpoint.screenshot.thumbnail);
+				});
 				this.state.viewpoints = response.data;
 			});
 

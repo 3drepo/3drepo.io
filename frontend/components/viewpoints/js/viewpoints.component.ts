@@ -22,8 +22,7 @@ class ViewsController implements ng.IController {
 		"$timeout",
 
 		"DialogService",
-		"ViewpointsService",
-		"APIService"
+		"ViewpointsService"
 	];
 
 	private onShowItem: any;
@@ -45,8 +44,7 @@ class ViewsController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 
 		private DialogService,
-		private ViewpointsService: any,
-		private APIService: any
+		private ViewpointsService: any
 	) {}
 
 	public $onInit() {
@@ -87,13 +85,6 @@ class ViewsController implements ng.IController {
 			}
 		});
 
-	}
-
-	public getThumbnailUrl(thumbnail: string) {
-		if (thumbnail) {
-			return this.APIService.getAPIUrl(thumbnail);
-		}
-		return "";
 	}
 
 	public selectView(view: any) {
