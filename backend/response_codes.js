@@ -110,6 +110,8 @@
 		GROUP_NOT_FOUND: { message: "Group not found", status: 404 },
 		INVALID_GROUP: { message: "Group request malformed", status: 400 },
 
+		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
+
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
 		USER_EMAIL_NOT_MATCH: { message: "Incorrect username or email", status: 400 },
