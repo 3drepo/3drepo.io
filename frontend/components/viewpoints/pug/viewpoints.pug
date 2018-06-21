@@ -19,7 +19,7 @@ div.viewpointsContainer
             ng-repeat="viewpoint in vm.viewpoints track by $index")
 
             div.viewpointMain(layout="row")
-                img.viewpointThumbnail(ng-src="{{vm.getThumbnailUrl(viewpoint.screenshot.thumbnail)}}")
+                img.viewpointThumbnail(ng-src="{{viewpoint.screenshot.thumbnailUrl}}")
                 div(flex, layout="column" layout-align="start")
                     div(
                         ng-if="vm.editSelectedView._id !== viewpoint._id").viewpointName {{viewpoint.name || "(Unnamed View)"}}
