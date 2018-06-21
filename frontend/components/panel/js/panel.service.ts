@@ -40,6 +40,7 @@ interface IMenuItem {
 	value?: string;
 	role?: string;
 	selected?: boolean;
+	stopClose?: boolean;
 	firstSelectedIcon?: string;
 	secondSelectedIcon?: string;
 	toggle?: boolean;
@@ -323,6 +324,7 @@ export class PanelService {
 				keepCheckSpace: true,
 				toggle: true,
 				selected: true,
+				stopClose: true,
 				firstSelected: false,
 				secondSelected: false
 			});
