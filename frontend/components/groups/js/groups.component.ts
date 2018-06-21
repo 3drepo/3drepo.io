@@ -151,6 +151,21 @@ class GroupsController implements ng.IController {
 
 		});
 
+		this.$scope.$watch("vm.selectedMenuOption",
+			(selectedOption: any) => {
+				if (selectedOption && selectedOption.hasOwnProperty("value")) {
+					switch (selectedOption.value) {
+						case "overrideAll":
+							this.GroupsService.colorOverrideAllGroups(selectedOption.selected);
+							break;
+						case "deleteAll":
+							this.GroupsService.deleteAllGroups(this.teamspace, this.model);
+							break;
+						default:
+							console.error("Groups option menu selection unhandled");
+					}
+				}
+			});
 	}
 
 	public resetToSavedGroup() {
@@ -396,7 +411,8 @@ export const GroupsComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
-		hideItem: "<"
+		hideItem: "<",
+		selectedMenuOption: "="
 	},
 	controller: GroupsController,
 	controllerAs: "vm",

@@ -76,11 +76,24 @@ export class GroupsService {
 	 * @param group the group to toggle
 	 */
 	public toggleColorOverride(group: any) {
-		if (this.state.colorOverride[group._id]) {
+		if (this.hasColorOverride(group)) {
 			this.removeColorOverride(group._id);
 		} else {
 			this.colorOverride(group);
 		}
+	}
+
+	/**
+	 * Override all groups
+	 */
+	public colorOverrideAllGroups(on: boolean) {
+		this.state.groups.forEach((group) => {
+			if (on) {
+				this.colorOverride(group);
+			} else {
+				this.removeColorOverride(group._id);
+			}
+		});
 	}
 
 	/**
@@ -121,48 +134,32 @@ export class GroupsService {
 	}
 
 	/**
-	 * Remove all color overrides from all groups
-	 */
-	public removeAllColorOverride() {
-		for (const groupId in this.state.colorOverride) {
-			if (!this.state.colorOverride.hasOwnProperty(groupId)) {
-				continue;
-			}
-			this.removeColorOverride(groupId);
-		}
-	}
-
-	/**
 	 * Remove all color overrides from a given group based on it's ID
 	 */
 	public removeColorOverride(groupId: string) {
 
 		const group = this.state.colorOverride[groupId];
-		if (!group) {
-			return;
-		}
 
-		for (const key in group.models) {
+		if (group) {
+			for (const key in group.models) {
 
-			if (!group.models.hasOwnProperty(key)) {
-				continue;
+				if (group.models.hasOwnProperty(key)) {
+					const meshIds = group.models[key].meshes;
+					const pair = key.split("@");
+					const account = pair[0];
+					const model = pair[1];
+
+					this.ViewerService.resetMeshColor(
+						account,
+						model,
+						meshIds,
+						group.color
+					);
+				}
 			}
 
-			const meshIds = group.models[key].meshes;
-			const pair = key.split("@");
-			const account = pair[0];
-			const model = pair[1];
-
-			this.ViewerService.resetMeshColor(
-				account,
-				model,
-				meshIds,
-				group.color
-			);
+			delete this.state.colorOverride[groupId];
 		}
-
-		delete this.state.colorOverride[groupId];
-
 	}
 
 	/**
@@ -297,14 +294,24 @@ export class GroupsService {
 		});
 	}
 
-	public deleteGroups(teamspace, model) {
+	/**
+	 * Delete selected groups
+	 */
+	public deleteGroups(teamspace: string, model: string, all?: boolean) {
 		const deleteGroupPromises = [];
 		this.state.groups.forEach((group) => {
-			if (group.highlighted) {
+			if (all || group.highlighted) {
 				deleteGroupPromises.push(this.deleteGroup(teamspace, model, group));
 			}
 		});
 		return Promise.all(deleteGroupPromises);
+	}
+
+	/**
+	 * Delete all groups
+	 */
+	public deleteAllGroups(teamspace: string, model: string) {
+		return this.deleteGroups(teamspace, model, true);
 	}
 
 	/**
