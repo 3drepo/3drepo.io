@@ -40,7 +40,7 @@ const getDbColOptions = function(req){
 function listViewpoints(req, res, next){
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.listViewpoints(dbCol, req.query)
 		.then(viewpoints => {
@@ -58,7 +58,7 @@ function listViewpoints(req, res, next){
 function findViewpoint(req, res, next){
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.findByUID(dbCol, req.params.uid)
 		.then(view => {
@@ -97,7 +97,7 @@ function createViewpoint(req, res, next){
 
 function deleteViewpoint(req, res, next){
 
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
@@ -112,7 +112,7 @@ function updateViewpoint(req, res, next){
 	if (Object.keys(req.body).length >= 1 &&
 			Object.prototype.toString.call(req.body.name) === "[object String]") {
 		const dbCol = getDbColOptions(req);
-		let place = utils.APIInfo(req);
+		const place = utils.APIInfo(req);
 
 		Viewpoint.findByUID(dbCol, req.params.uid)
 			.then(view => {
@@ -134,8 +134,8 @@ function updateViewpoint(req, res, next){
 
 function getViewpointThumbnail(req, res, next){
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const dbCol = getDbColOptions(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
