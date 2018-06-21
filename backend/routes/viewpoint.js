@@ -77,15 +77,22 @@ function findViewpoint(req, res, next){
 }
 
 function createViewpoint(req, res, next){
+	if (Object.keys(req.body).length >= 3 &&
+			Object.prototype.toString.call(req.body.name) === "[object String]" &&
+			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
+			Object.prototype.toString.call(req.body.screenshot) === "[object Object]" &&
+			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
+		let place = utils.APIInfo(req);
 
-	let place = utils.APIInfo(req);
-
-	Viewpoint.createViewpoint(getDbColOptions(req), req.body)
-		.then(view => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-		}).catch(err => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
+		Viewpoint.createViewpoint(getDbColOptions(req), req.body)
+			.then(view => {
+				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+			}).catch(err => {
+				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			});
+	} else {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
 function deleteViewpoint(req, res, next){
@@ -102,22 +109,27 @@ function deleteViewpoint(req, res, next){
 
 function updateViewpoint(req, res, next){
 
-	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	if (Object.keys(req.body).length >= 1 &&
+			Object.prototype.toString.call(req.body.name) === "[object String]") {
+		const dbCol = getDbColOptions(req);
+		let place = utils.APIInfo(req);
 
-	Viewpoint.findByUID(dbCol, req.params.uid)
-		.then(view => {
-			if(!view){
-				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
-			} else {
-				return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
-			}
-		}).then(view => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-		}).catch(err => {
-			systemLogger.logError(err.stack);
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
+		Viewpoint.findByUID(dbCol, req.params.uid)
+			.then(view => {
+				if(!view){
+					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
+				} else {
+					return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
+				}
+			}).then(view => {
+				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+			}).catch(err => {
+				systemLogger.logError(err.stack);
+				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			});
+	} else {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
 function getViewpointThumbnail(req, res, next){
