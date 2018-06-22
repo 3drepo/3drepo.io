@@ -298,13 +298,29 @@ export class GroupsService {
 	 * Delete selected groups
 	 */
 	public deleteGroups(teamspace: string, model: string, all?: boolean) {
-		const deleteGroupPromises = [];
+		const groupsToDelete = [];
 		this.state.groups.forEach((group) => {
 			if (all || group.highlighted) {
-				deleteGroupPromises.push(this.deleteGroup(teamspace, model, group));
+				groupsToDelete.push(group);
 			}
 		});
-		return Promise.all(deleteGroupPromises);
+
+		if (groupsToDelete.length > 0) {
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => { return group._id }).join(",")}`;
+			return this.APIService.delete(groupsUrl)
+				.then((response) => {
+					groupsToDelete.forEach((group) => {
+						this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
+							this.TreeService.deselectNodes(nodes);
+						});
+						this.removeColorOverride(group._id);
+						this.deleteStateGroup(group);
+					});
+					return response;
+				});
+		} else {
+			return Promise.resolve();
+		}
 	}
 
 	/**
@@ -578,16 +594,18 @@ export class GroupsService {
 	 * @param group the group object to delete
 	 */
 	public deleteGroup(teamspace: string, model: string, deleteGroup: any) {
-		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
-		return this.APIService.delete(groupUrl)
-			.then((response) => {
-				this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
-					this.TreeService.deselectNodes(nodes);
+		if (deleteGroup._id) {
+			const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
+			return this.APIService.delete(groupUrl)
+				.then((response) => {
+					this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
+						this.TreeService.deselectNodes(nodes);
+					});
+					this.removeColorOverride(deleteGroup._id);
+					this.deleteStateGroup(deleteGroup);
+					return response;
 				});
-				this.removeColorOverride(deleteGroup._id);
-				this.deleteStateGroup(deleteGroup);
-				return response;
-			});
+		}
 	}
 
 	/**

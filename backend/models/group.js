@@ -25,7 +25,7 @@ const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
-
+const db = require("../db/db");
 
 const groupSchema = Schema({
 	_id: Object,
@@ -424,5 +424,20 @@ const Group = ModelFactory.createClass(
 	}
 );
 
+Group.deleteGroups = function(dbCol, ids) {
+	for (let i = 0; i < ids.length; i++) {
+		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
+			ids[i] = utils.stringToUUID(ids[i]);
+		}
+	}
+
+	return db.getCollection(dbCol.account, dbCol.model + ".groups").then((_dbCol) => {
+		return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
+			if (!deleteResponse.result.ok) {
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			}
+		});
+	});
+};
 
 module.exports = Group;

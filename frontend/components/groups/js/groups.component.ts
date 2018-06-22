@@ -215,9 +215,11 @@ class GroupsController implements ng.IController {
 
 	public deleteGroup(group: any) {
 		const deletePromises = this.GroupsService.deleteGroups(this.teamspace, this.model);
-		deletePromises
-		.then(() => {
-			this.GroupsService.selectNextGroup();
+
+		deletePromises.then((deleteResponse) => {
+			if (deleteResponse) {
+				this.GroupsService.selectNextGroup();
+			}
 		})
 		.catch((error) => {
 			this.errorDialog(error);
