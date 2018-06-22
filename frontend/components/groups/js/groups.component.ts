@@ -259,7 +259,7 @@ class GroupsController implements ng.IController {
 		} else {
 
 			const presentConfirmation = Math.abs(this.selectedGroup.totalSavedMeshes -
-				this.selectedObjectsLen)/Math.max(this.selectedGroup.totalSavedMeshes,
+				this.selectedObjectsLen) / Math.max(this.selectedGroup.totalSavedMeshes,
 					this.selectedObjectsLen) > this.dialogThreshold;
 
 			if (presentConfirmation) {

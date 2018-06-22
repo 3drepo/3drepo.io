@@ -306,7 +306,9 @@ export class GroupsService {
 		});
 
 		if (groupsToDelete.length > 0) {
-			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => { return group._id }).join(",")}`;
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) =>
+				group._id;
+			).join(",")}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
 					groupsToDelete.forEach((group) => {
