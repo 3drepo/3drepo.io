@@ -26,6 +26,7 @@ class ViewsController implements ng.IController {
 	];
 
 	private onShowItem: any;
+	private onHideItem: any;
 	private account: string;
 	private model: string;
 	private onContentHeightRequest: any;
@@ -107,6 +108,7 @@ class ViewsController implements ng.IController {
 				this.handleViewError("create", error);
 			});
 		this.toShow = "views";
+		this.onHideItem();
 	}
 
 	public deleteViewpoint() {
@@ -196,6 +198,7 @@ export const ViewpointsComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
+		onHideItem: "&",
 		hideItem: "<"
 	},
 	controller: ViewsController,
