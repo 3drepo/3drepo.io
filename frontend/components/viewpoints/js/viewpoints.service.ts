@@ -112,7 +112,7 @@ export class ViewpointsService {
 				return this.APIService.post(viewpointsUrl, view)
 					.then((response: any) => {
 						view._id = response.data._id;
-						view.screenshot.thumbnail = viewpointsUrl + view._id + "/thumbnail.png";
+						view.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpointsUrl + view._id + "/thumbnail.png");
 						this.state.viewpoints.push(view);
 					});
 			});
