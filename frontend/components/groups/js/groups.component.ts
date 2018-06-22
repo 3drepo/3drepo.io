@@ -159,7 +159,7 @@ class GroupsController implements ng.IController {
 							this.GroupsService.colorOverrideAllGroups(selectedOption.selected);
 							break;
 						case "deleteAll":
-							this.GroupsService.deleteAllGroups(this.teamspace, this.model);
+							this.deleteAllGroups();
 							break;
 						default:
 							console.error("Groups option menu selection unhandled");
@@ -183,8 +183,8 @@ class GroupsController implements ng.IController {
 	}
 
 	public handleGroupError(method: string) {
-		const content = `We tried to ${method} your group but it failed.
-			If this continues please message support@3drepo.org.`;
+		const content = `Group ${method} failed.
+			Contact support@3drepo.org if problem persists.`;
 		const escapable = true;
 		this.DialogService.text(`Group Error`, content, escapable);
 	}
@@ -226,6 +226,22 @@ class GroupsController implements ng.IController {
 		});
 	}
 
+	public deleteAllGroups() {
+		if (this.groups && this.groups.length > 0) {
+			this.confirmDeleteAllDialog();
+		}
+	}
+
+	public confirmDeleteAllDialog() {
+		const content = `Delete all groups?`;
+		const escapable = true;
+		this.DialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
+			.then(() => {
+				this.GroupsService.deleteAllGroups(this.teamspace, this.model);
+			})
+			.catch(() => {});
+	}
+
 	public addGroup() {
 
 		this.GroupsService.generateNewGroup().then((newGroup) => {
@@ -242,8 +258,9 @@ class GroupsController implements ng.IController {
 			this.createGroup();
 		} else {
 
-			const threshold = this.selectedGroup.totalSavedMeshes * this.dialogThreshold;
-			const presentConfirmation = this.selectedObjectsLen < threshold;
+			const presentConfirmation = Math.abs(this.selectedGroup.totalSavedMeshes -
+				this.selectedObjectsLen)/Math.max(this.selectedGroup.totalSavedMeshes,
+					this.selectedObjectsLen) > this.dialogThreshold;
 
 			if (presentConfirmation) {
 				this.confirmUpdateDialog(this.selectedGroup.totalSavedMeshes, this.selectedObjectsLen);
@@ -256,16 +273,15 @@ class GroupsController implements ng.IController {
 	}
 
 	public errorDialog(error) {
-		const content = "We tried to delete your selected groups but there was an error. " +
-		"If this continues please message support@3drepo.io.";
+		const content = "Delete group failed. Contact support@3drepo.io if problem persists.";
 		const escapable = true;
 		console.error(error);
 		this.DialogService.text("Error Deleting Groups", content, escapable);
 	}
 
 	public confirmUpdateDialog(saved: number, selected: number) {
-		const content = `This looks like a significant change to the number of objects
-					in this group (${saved} to ${selected}). Do you wish to update?`;
+		const content = `A significant change is about to be applied to this group
+					(${saved} to ${selected} objects). Do you wish to proceed?`;
 		const escapable = true;
 		this.DialogService.confirm(`Confirm Group Update`, content, escapable, "Update", "Cancel")
 			.then(() => {
