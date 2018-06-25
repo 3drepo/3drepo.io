@@ -162,10 +162,10 @@ export class GroupsService {
 
 			delete this.state.colorOverride[groupId];
 
-			if (this.state.colorOverride &&
+			if (this.state.overrideAll &&
 				this.state.groups.length !==
 				Object.keys(this.state.colorOverride).length) {
-				this.state.colorOverride = false;
+				this.state.overrideAll = false;
 			}
 		}
 	}
