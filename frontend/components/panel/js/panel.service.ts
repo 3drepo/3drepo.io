@@ -40,6 +40,7 @@ interface IMenuItem {
 	value?: string;
 	role?: string;
 	selected?: boolean;
+	stopClose?: boolean;
 	firstSelectedIcon?: string;
 	secondSelectedIcon?: string;
 	toggle?: boolean;
@@ -137,7 +138,8 @@ export class PanelService {
 					toggle: true,
 					selected: false,
 					firstSelected: false,
-					secondSelected: false
+					secondSelected: false,
+					keepCheckSpace: true
 				}, {
 					hidden: false,
 					upperDivider: true,
@@ -162,7 +164,27 @@ export class PanelService {
 			icon: "group_work",
 			minHeight: 80,
 			fixedHeight: false,
-			options: []
+			menu: [
+				{
+					hidden: false,
+					value: "overrideAll",
+					label: "Override All",
+					selected: false,
+					toggle: true,
+					keepCheckSpace: true
+				},
+				{
+					hidden: false,
+					value: "deleteAll",
+					label: "Delete All",
+					selected: false,
+					noToggle: true,
+					icon: "delete"
+				}
+			],
+			options: [
+				{type: "menu", visible: true}
+			]
 		});
 
 		this.panelCards.left.push({
@@ -170,7 +192,7 @@ export class PanelService {
 			title: "Views",
 			showLiteMode: true,
 			show: false,
-			help: "List current groups",
+			help: "List current viewpoints",
 			icon: "camera_alt",
 			minHeight: 80,
 			fixedHeight: false,
@@ -302,6 +324,7 @@ export class PanelService {
 				keepCheckSpace: true,
 				toggle: true,
 				selected: true,
+				stopClose: true,
 				firstSelected: false,
 				secondSelected: false
 			});
@@ -331,20 +354,36 @@ export class PanelService {
 		return index;
 	}
 
-	public setHideIfc(value: boolean) {
+	public getMenuIndex(cardIndex: any, value: string): number {
+		let index = -1;
+		const obj = this.panelCards.left[cardIndex].menu.forEach((item, i) => {
+			if (item.value === value) {
+				index = i;
+			}
+		});
+		return index;
+	}
 
-		const issuesCardIndex = this.getCardIndex("issues"); // index of tree panel
-		const menuItemIndex = this.getCardIndex("issues"); // index of hideIfc
+	public setMenuItemToggle(panelType: string, menuItemValue: string, on: boolean) {
+		const cardIndex = this.getCardIndex(panelType);
+		const menuItemIndex = this.getMenuIndex(cardIndex, menuItemValue);
 
-		const hideIfcMenuItem = this.panelCards.left[issuesCardIndex]
+		const hideIfcMenuItem = this.panelCards.left[cardIndex]
 			.menu[menuItemIndex];
 
 		// Change state if different
-		if (hideIfcMenuItem.selected !== value) {
-			hideIfcMenuItem.selected = value;
+		if (hideIfcMenuItem.selected !== on) {
+			hideIfcMenuItem.selected = on;
 		}
 	}
 
+	public setHideIfc(value: boolean) {
+		this.setMenuItemToggle("tree", "hideIfc", value);
+	}
+
+	public setOverrideAll(value: boolean) {
+		this.setMenuItemToggle("groups", "overrideAll", value);
+	}
 }
 
 export const PanelServiceModule = angular
