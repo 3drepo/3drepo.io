@@ -570,6 +570,10 @@ export class GroupsService {
 			return this.APIService.post(groupUrl, group)
 				.then((response) => {
 					group._id = response.data._id;
+					if (this.state.groups.length ===
+						Object.keys(this.state.colorOverride).length) {
+						this.colorOverride(group);
+					}
 					this.state.groups.push(group);
 					this.state.selectedGroup = group;
 					this.state.selectedGroup.totalSavedMeshes = savedMeshesLength;
