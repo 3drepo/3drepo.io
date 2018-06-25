@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -28,12 +28,12 @@ const History = require("../models/history");
 const createAndAssignRole = ModelHelpers.createAndAssignRole;
 const User = require("../models/user");
 
-function getDbColOptions(req){
+function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
 }
 
-function convertProjectToParam(req, res, next){
-	if(req.body.project){
+function convertProjectToParam(req, res, next) {
+	if (req.body.project) {
 		req.params.project = req.body.project;
 	}
 	next();
@@ -41,9 +41,7 @@ function convertProjectToParam(req, res, next){
 
 // Get model info
 router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
-
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
-
 router.post("/model", 
 	convertProjectToParam, 
 	middlewares.connectQueue,
@@ -68,7 +66,6 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
 //model permission
 router.get("/:model/permissions",  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
-
 //master tree
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 router.get("/:model/revision/master/head/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
@@ -86,23 +83,19 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
 
 //search master tree
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
-
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
-
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
-
 router.post("/:model/upload", middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
-
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
-function updateSettings(req, res, next){
+function updateSettings(req, res, next) {
 	
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
 	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
 
-		if(!modelSetting){
+		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
@@ -116,14 +109,12 @@ function updateSettings(req, res, next){
 	});
 }
 
-
-function _getModel(req){
-	
+function _getModel(req) {
 
 	let setting;
 	return ModelSetting.findById(getDbColOptions(req), req.params.model).then(_setting => {
 
-		if(!_setting){
+		if (!_setting) {
 			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
 
@@ -149,80 +140,80 @@ function _getModel(req){
 	});
 }
 
+function getModelSetting(req, res, next) {
 
-function getModelSetting(req, res, next){
-	
-
-	let place = utils.APIInfo(req);
-	let resObj = {};
+	const place = utils.APIInfo(req);
 
 	_getModel(req).then(setting => {
 
-		resObj = setting;
-		resObj.model = setting._id;
-		resObj.account = req.params.account;
+		setting.model = setting._id;
+		setting.account = req.params.account;
 
-		resObj.headRevisions = {};
+		setting.headRevisions = {};
 
-		let account = req.params.account;
-		let model = req.params.model;
-
-		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, setting);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
-
-
-function createModel(req, res, next){
+function createModel(req, res, next) {
 	
+	const responsePlace = utils.APIInfo(req);
 
-	let responsePlace = utils.APIInfo(req);
-	let modelName = req.body.modelName;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	if (Object.keys(req.body).length >= 0 &&
+		Object.prototype.toString.call(req.body.modelName) === "[object String]" &&
+		Object.prototype.toString.call(req.body.desc) === "[object String]" &&
+		Object.prototype.toString.call(req.body.type) === "[object String]" &&
+		Object.prototype.toString.call(req.body.unit) === "[object String]" &&
+		Object.prototype.toString.call(req.body.subModels === "[object Array]" &&
+		Object.prototype.toString.call(req.body.code) === "[object String]" &&
+		Object.prototype.toString.call(req.body.project) === "[object String]") {
+		const modelName = req.body.modelName;
+		const account = req.params.account;
+		const username = req.session.user.username;
 
-	let data = {
-		desc: req.body.desc, 
-		type: req.body.type, 
-		unit: req.body.unit, 
-		subModels: req.body.subModels, 
-		code: req.body.code,
-		project: req.body.project
-	};
+		const data = {
+			desc: req.body.desc, 
+			type: req.body.type, 
+			unit: req.body.unit, 
+			subModels: req.body.subModels, 
+			code: req.body.code,
+			project: req.body.project
+		};
 
+		data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+		data.userPermissions = req.session.user.permissions;
 
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-	data.userPermissions = req.session.user.permissions;
-
-	createAndAssignRole(modelName, account, username, data).then(data => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
-	}).catch( err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+		createAndAssignRole(modelName, account, username, data).then(data => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
+		}).catch( err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	} else {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
-function updateModel(req, res, next){
-	
+function updateModel(req, res, next) {
 
-	let responsePlace = utils.APIInfo(req);
-	let model = req.params.model;
-	let account = req.params.account;
+	const responsePlace = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	let promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
 	let setting;
 
-	if(req.body.subModels && req.body.subModels.length > 0){
+	if (req.body.subModels && req.body.subModels.length > 0) {
 
 		promise = ModelSetting.findById({account}, model).then(_setting => {
 
 			setting = _setting;
 
-			if(!setting) {
+			if (!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-			} else if (!setting.federate){
+			} else if (!setting.federate) {
 				return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
 			} else {
 				return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
@@ -243,12 +234,11 @@ function updateModel(req, res, next){
 	});
 }
 
-function deleteModel(req, res, next){
-	
+function deleteModel(req, res, next) {
 
-	let responsePlace = utils.APIInfo(req);
-	let model = req.params.model;
-	let account = req.params.account;
+	const responsePlace = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	//delete
 	ModelHelpers.removeModel(account, model).then(() => {
@@ -258,13 +248,13 @@ function deleteModel(req, res, next){
 	});
 }
 
-function getAllMeshes(req, res,next){
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+function getAllMeshes(req, res,next) {
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -275,15 +265,14 @@ function getAllMeshes(req, res,next){
 	});
 }
 
-function getIdMap(req, res, next){
-	
+function getIdMap(req, res, next) {
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -294,15 +283,14 @@ function getIdMap(req, res, next){
 	});
 }
 
-function getIdToMeshes(req, res, next){
-	
+function getIdToMeshes(req, res, next) {
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -314,15 +302,14 @@ function getIdToMeshes(req, res, next){
 }
 
 
-function getModelTree(req, res, next){
-	
+function getModelTree(req, res, next) {
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -346,14 +333,13 @@ function getModelTree(req, res, next){
 }
 
 function getModelProperties(req, res, next) {
-	
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -364,15 +350,14 @@ function getModelProperties(req, res, next) {
 	});
 }
 
-function getTreePath(req, res, next){
-	
+function getTreePath(req, res, next) {
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
+	const model = req.params.model;
+	const account = req.params.account;
+	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -383,10 +368,7 @@ function getTreePath(req, res, next){
 	});
 }
 
-
-
-function searchModelTree(req, res, next){
-	
+function searchModelTree(req, res, next) {
 
 	let model = req.params.model;
 	let account = req.params.account;
@@ -395,7 +377,7 @@ function searchModelTree(req, res, next){
 
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -409,7 +391,7 @@ function searchModelTree(req, res, next){
 }
 
 
-function downloadLatest(req, res, next){
+function downloadLatest(req, res, next) {
 	
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
@@ -418,7 +400,7 @@ function downloadLatest(req, res, next){
 			"Content-Disposition": "attachment;filename=" + file.meta.filename,
 		};
 
-		if(file.meta.contentType){
+		if (file.meta.contentType) {
 			headers["Content-Type"] = "application/json";
 		}
 
@@ -429,21 +411,20 @@ function downloadLatest(req, res, next){
 	});
 }
 
-function uploadModel(req, res, next){
-	
+function uploadModel(req, res, next) {
 
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
+	const username = req.session.user.username;
 	let modelSetting;
-	let account = req.params.account;
-	let username = req.session.user.username;
-	let model = req.params.model;
 
 	//check model exists before upload
 	return ModelSetting.findById({account, model}, model).then(_modelSetting => {
 		
 		modelSetting = _modelSetting;
 
-		if(!modelSetting){
+		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		} else {
 			return ModelHelpers.uploadFile(req);
@@ -453,12 +434,12 @@ function uploadModel(req, res, next){
 		// api respond ok once the file is uploaded
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 
-		let data = {
+		const data = {
 			tag: req.body.tag,
 			desc: req.body.desc
 		};
 
-		let source = {
+		const source = {
 			type: "upload",
 			file: file
 		};
@@ -474,62 +455,54 @@ function uploadModel(req, res, next){
 	});
 }
 
-function updatePermissions(req, res, next){
-	
+function updatePermissions(req, res, next) {
 
-	let account = req.params.account;
-	let model = req.params.model;
+	const account = req.params.account;
+	const model = req.params.model;
 
 	return ModelSetting.findById({account, model}, model).then(modelSetting => {
 
-		if(!modelSetting){
+		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
 		return modelSetting.changePermissions(req.body);
 
 	}).then(permission => {
-
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
-
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
-function getPermissions(req, res, next){
-	
+function getPermissions(req, res, next) {
 
-	let account = req.params.account;
-	let model = req.params.model;
+	const account = req.params.account;
+	const model = req.params.model;
 
 	return ModelSetting.findById({account, model}, model).then(setting => {
 
-		if(!setting){
+		if (!setting) {
 			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
 			return ModelSetting.populateUsers(account, setting.permissions);
 		}
 
 	}).then(permissions => {
-		
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
-
 	}).catch(err => {
-
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
-function getUnityAssets(req, res, next){
-	
+function getUnityAssets(req, res, next) {
 
 	const model = req.params.model;
 	const account = req.params.account;
 	const username = req.session.user.username;
 	let branch;
 
-	if(!req.params.rev){
+	if (!req.params.rev) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
@@ -540,11 +513,10 @@ function getUnityAssets(req, res, next){
 	});
 }
 
-function getJsonMpc(req, res, next){
+function getJsonMpc(req, res, next) {
 	const model = req.params.model;
 	const account = req.params.account;
 	const id = req.params.uid;
-
 
 	ModelHelpers.getJsonMpc(account, model, id).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
@@ -553,15 +525,11 @@ function getJsonMpc(req, res, next){
 	});
 }
 
-
-
-function getUnityBundle(req, res, next){
-	
+function getUnityBundle(req, res, next) {
 
 	const model = req.params.model;
 	const account = req.params.account;
 	const id = req.params.uid;
-
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
 		req.params.format= "unity3d";
@@ -571,8 +539,4 @@ function getUnityBundle(req, res, next){
 	});
 }
 
-
-
 module.exports = router;
-
-

@@ -44,7 +44,6 @@ const schema = mongoose.Schema({
 			value: String,
 			label: String
 		}]
-
 	},
 	surveyPoints: [
 		{
@@ -63,7 +62,6 @@ const schema = mongoose.Schema({
 		model: String
 	}]
 });
-
 
 schema.statics.defaultTopicTypes = [
 	{value: "clash", label: "Clash"},
@@ -89,7 +87,6 @@ schema.path("properties.topicTypes").get(function(v) {
 schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
-
 
 schema.methods.updateProperties = function(updateObj){
 	Object.keys(updateObj).forEach(key => {
@@ -128,9 +125,7 @@ schema.methods.updateProperties = function(updateObj){
 			default:
 				this[key] = updateObj[key];
 		}
-
 	});
-
 };
 
 schema.methods.changePermissions = function(permissions){
@@ -150,37 +145,31 @@ schema.methods.changePermissions = function(permissions){
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
 			promises.push(User.findByUserName(permission.user).then( assignedUser => {
-				if(!assignedUser) {
+				if (!assignedUser) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 
 				const isMember = assignedUser.isMemberOfTeamspace(dbUser.user);
-				if(!isMember) {
+				if (!isMember) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}
 				let perm = this.permissions.find(perm => perm.user === permission.user);
 
 				if(perm) {
-	
 					perm.permission = permission.permission;
-
 				}
 			}));
-
-
-			
 		});
 
 		return Promise.all(promises).then( () => {
 			this.permissions = permissions;
 			return this.save();
 		});
-
 	});
 };
 
 schema.methods.isPermissionAssigned = function(permission){
-	return this.permissions.find(perm => perm.permission === permission) ?  true : false;
+	return this.permissions.find(perm => perm.permission === permission);
 };
 
 schema.methods.findPermissionByUser = function(username){
@@ -196,15 +185,13 @@ schema.statics.populateUsers = function(account, permissions){
 		users.forEach(user => {
 			const permissionFound = permissions && permissions.find(p => p.user ===  user);
 
-			if(!permissionFound){
+			if (!permissionFound) {
 				permissions.push({ user });
 			}
 		});
 
 		return permissions;
-
 	}); 
-
 };
 
 const ModelSetting = ModelFactory.createClass(
