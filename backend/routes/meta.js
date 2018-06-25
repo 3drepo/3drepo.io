@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -37,54 +37,53 @@
 	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 
-	function getMetadata(req, res, next){
+	function getMetadata(req, res, next) {
 
 		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id).then(meta => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {meta: [meta]});
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
-	function getAllMetadata(req, res, next){
+	function getAllMetadata(req, res, next) {
 		let branch;
 
-		if(!req.params.rev){
+		if(!req.params.rev) {
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		ModelHelpers.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev).then(obj =>{
+		ModelHelpers.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev).then(obj => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
-		}).catch(err =>{
+		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
-	function getAllIdsWith4DSequenceTag(req, res, next){
+	function getAllIdsWith4DSequenceTag(req, res, next) {
 		let branch;
 		
-		if(!req.params.rev){
+		if(!req.params.rev) {
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev).then(obj =>{
+		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev).then(obj => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
-		}).catch(err =>{
+		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
-	function getAllIdsWithMetadataField(req, res, next){
+	function getAllIdsWithMetadataField(req, res, next) {
 		let branch;
 		
-		if(!req.params.rev){
+		if(!req.params.rev) {
 			branch = C.MASTER_BRANCH_NAME;
 		}
 
-		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey).then(obj =>{
+		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey).then(obj => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
-		}).catch(err =>{
+		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}

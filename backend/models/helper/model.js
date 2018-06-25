@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -1749,7 +1749,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 function getMetadata(account, model, id){
 
-	let projection = {
+	const projection = {
 		shared_id: 0,
 		paths: 0,
 		type: 0,
