@@ -24,9 +24,7 @@ const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
-const History = require("../models/history");
 const createAndAssignRole = ModelHelpers.createAndAssignRole;
-const User = require("../models/user");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -169,7 +167,7 @@ function createModel(req, res, next) {
 		Object.prototype.toString.call(req.body.unit) === "[object String]" &&
 		Object.prototype.toString.call(req.body.subModels === "[object Array]" &&
 		Object.prototype.toString.call(req.body.code) === "[object String]" &&
-		Object.prototype.toString.call(req.body.project) === "[object String]") {
+		Object.prototype.toString.call(req.body.project) === "[object String]")) {
 		const modelName = req.body.modelName;
 		const account = req.params.account;
 		const username = req.session.user.username;
@@ -186,8 +184,8 @@ function createModel(req, res, next) {
 		data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 		data.userPermissions = req.session.user.permissions;
 
-		createAndAssignRole(modelName, account, username, data).then(data => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data.model);
+		createAndAssignRole(modelName, account, username, data).then(result => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result.model);
 		}).catch( err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});

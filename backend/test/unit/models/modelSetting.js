@@ -16,11 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let chai = require("chai");
 let expect = require("chai").expect;
 let mongoose = require("mongoose");
 let mockgoose = require("mockgoose");
-let _ = require("lodash");
 
 
 let proxyquire = require("proxyquire");
@@ -29,17 +27,10 @@ let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", {
 	"mongoose": mongoose, 
 });
 
-
-
-let utils = require("../mock/utils");
-
-let sinon = require("sinon");
-
 let ModelSetting = proxyquire("../../../models/modelSetting", { 
 	"mongoose": mongoose, 
 	"./factory/modelFactory":  modelFactoryMock,
 });
-
 
 let DB = require("../mock/db");
 
@@ -49,11 +40,11 @@ describe("Model Settings", function(){
 
 		modelFactoryMock.setDB(new DB());
 
-	    mockgoose(mongoose).then(function() {
-	        mongoose.connect("mongodb://example.com/TestingDB", function(err) {
-	            done(err);
-	        });
-	    });
+		mockgoose(mongoose).then(function() {
+		mongoose.connect("mongodb://example.com/TestingDB", function(err) {
+			done(err);
+		});
+	});
 
 	});
 

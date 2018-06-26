@@ -16,9 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const chai = require("chai");
 const expect = require("chai").expect;
-const _ = require("lodash");
 const proxyquire = require("proxyquire").noCallThru();
 const checkPermission  = proxyquire("../../../middlewares/checkPermissions", {
 	"./getPermissionsAdapter": {},

@@ -16,11 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let chai = require("chai");
 let expect = require("chai").expect;
 let mongoose = require("mongoose");
 let mockgoose = require("mockgoose");
-let _ = require("lodash");
 
 let proxyquire = require("proxyquire");
 
@@ -30,7 +28,6 @@ let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", {
 
 let repoGraphSceneMock = require("../mock/repoGraphScene");
 let utils = require("../mock/utils");
-let topLvStubs = [];
 let sinon = require("sinon");
 
 
@@ -58,13 +55,12 @@ describe("Mesh and Object extended from repo base", function(){
 
 	before(function(done) {
 
-		let db = new DB();
 		modelFactoryMock.setDB(DB);
-	    mockgoose(mongoose).then(function() {
-	        mongoose.connect("mongodb://example.com/TestingDB", function(err) {
-	            done(err);
-	        });
-	    });
+		mockgoose(mongoose).then(function() {
+			mongoose.connect("mongodb://example.com/TestingDB", function(err) {
+				done(err);
+			});
+		});
 
 	});
 

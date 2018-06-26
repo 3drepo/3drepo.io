@@ -16,7 +16,6 @@
  */
 
 "use strict";
-const _ = require("lodash");
 const sharp = require("sharp");
 const nodeuuid = require("node-uuid");
 const mongo = require("mongodb");
