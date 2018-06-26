@@ -107,8 +107,7 @@ function login(req, res, next){
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
-	}
-	else {
+	} else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 
@@ -141,17 +140,14 @@ function updateUser(req, res, next){
 
 	if(req.body.oldPassword) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
-			Object.prototype.toString.call(req.body.newPassword) === "[object String]")
-		{
+			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
 			// Update password		
 			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
 				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 			});
-		}
-		else
-		{
+		} else {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 
@@ -191,74 +187,74 @@ function signUp(req, res, next){
 		 && (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
 		 && Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
 
-			//check if captcha is enabled
-			const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
-				secret: config.captcha.secretKey,
-				response: req.body.captcha
+		//check if captcha is enabled
+		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
+			secret: config.captcha.secretKey,
+			response: req.body.captcha
 
-			}) : Promise.resolve({
-				success: true
-			});
+		}) : Promise.resolve({
+			success: true
+		});
 
-			checkCaptcha.then(resBody => {
+		checkCaptcha.then(resBody => {
 
-				if(resBody.success){
-					return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+			if(resBody.success){
+				return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
 
-						email: req.body.email,
-						firstName: req.body.firstName,
-						lastName: req.body.lastName,
-						countryCode: req.body.countryCode,
-						company: req.body.company,
-						mailListOptOut: !req.body.mailListAgreed,
-
-					}, config.tokenExpiry.emailVerify);
-				} else {
-					//console.log(resBody);
-					return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
-				}
-
-
-			}).then( data => {
-
-				let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
-				//send to sales
-				Mailer.sendNewUser({
-					user: req.params.account,
 					email: req.body.email,
 					firstName: req.body.firstName,
 					lastName: req.body.lastName,
-					country: country && country.name,
+					countryCode: req.body.countryCode,
 					company: req.body.company,
-				}).catch( err => {
-					// catch email error instead of returning to client
-					req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
-					return Promise.resolve(err);
-				});
+					mailListOptOut: !req.body.mailListAgreed
 
-				//send verification email
-				return Mailer.sendVerifyUserEmail(req.body.email, {
-					token : data.token,
-					email: req.body.email,
-					username: req.params.account,
-					pay: req.body.pay
-
-				}).catch( err => {
-					// catch email error instead of returning to client
-					req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
-					return Promise.resolve(err);
-				});
+				}, config.tokenExpiry.emailVerify);
+			} else {
+				//console.log(resBody);
+				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
+			}
 
 
+		}).then( data => {
 
-
-			}).then(emailRes => {
-
-				req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
+			//send to sales
+			Mailer.sendNewUser({
+				user: req.params.account,
+				email: req.body.email,
+				firstName: req.body.firstName,
+				lastName: req.body.lastName,
+				country: country && country.name,
+				company: req.body.company
+			}).catch( err => {
+				// catch email error instead of returning to client
+				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+				return Promise.resolve(err);
 			});
+
+			//send verification email
+			return Mailer.sendVerifyUserEmail(req.body.email, {
+				token : data.token,
+				email: req.body.email,
+				username: req.params.account,
+				pay: req.body.pay
+
+			}).catch( err => {
+				// catch email error instead of returning to client
+				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+				return Promise.resolve(err);
+			});
+
+
+
+
+		}).then(emailRes => {
+
+			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		});
 
 	 } else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
@@ -418,7 +414,7 @@ function listUserInfo(req, res, next){
 			lastName: customData.lastName,
 			email: customData.email,
 			billingInfo: customData.billing.billingInfo,
-			hasAvatar: customData.avatar ? true : false,
+			hasAvatar: customData.avatar ? true : false
 		});
 
 	}).catch(err => {

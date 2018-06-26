@@ -152,8 +152,7 @@ function updateIssue(req, res, next){
 					}).catch(err =>{
 						if(err){
 							return Promise.reject(err);
-						}
-						else{
+						} else{
 							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
 						}
 					});
@@ -301,18 +300,14 @@ function renderIssuesHTML(req, res, next){
 		// Split issues by type
 		let splitIssues   = {open : [], closed: []};
 
-		for (let i = 0; i < issues.length; i++)
-		{
-			if (issues[i].hasOwnProperty("comments"))
-			{
-				for (let j = 0; j < issues[i].comments.length; j++)
-				{
+		for (let i = 0; i < issues.length; i++) {
+			if (issues[i].hasOwnProperty("comments")) {
+				for (let j = 0; j < issues[i].comments.length; j++) {
 					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
 				}
 			}
 
-			if(issues[i].closed || issues[i].status === "closed")
-			{
+			if(issues[i].closed || issues[i].status === "closed") {
 				issues[i].created = new Date(issues[i].created).toString();
 				splitIssues.closed.push(issues[i]);
 			} else {
@@ -367,7 +362,7 @@ function importBCF(req, res, next){
 
 	let upload = multer({ 
 		dest: config.bcf_dir,
-		fileFilter: fileFilter,
+		fileFilter: fileFilter
 	});
 
 	upload.single("file")(req, res, function (err) {

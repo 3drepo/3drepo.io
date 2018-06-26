@@ -27,20 +27,20 @@ let uuidToString = utils.uuidToString;
 let Schema = mongoose.Schema;
 
 let historySchema = Schema({
-		_id: Object,
-		shared_id: Object,
-		paths: [],
-		type: String,
-		api: Number,
-		parents: [],
-		name: String,
-		tag: String,
-		author: String,
-		desc: String,
-		timestamp: Date,
-		incomplete: Number,
-		coordOffset: [],
-		current: []
+	_id: Object,
+	shared_id: Object,
+	paths: [],
+	type: String,
+	api: Number,
+	parents: [],
+	name: String,
+	tag: String,
+	author: String,
+	desc: String,
+	timestamp: Date,
+	incomplete: Number,
+	coordOffset: [],
+	current: []
 });
 
 historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {

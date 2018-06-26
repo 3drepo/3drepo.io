@@ -1,6 +1,9 @@
 {
   "name": "3drepo.io-backend",
   "version": "1.0.0",
+  "engines": {
+	  "node" : "8.0.0"
+  },
   "private": true,
   "scripts": {
     "start": "./../run/forever_app default",

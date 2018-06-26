@@ -82,8 +82,7 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 		//Currently next payment is determined by whether we have proRata licenses
 		//And there can be situations where one has proRata and the other has decreased
 		licensesDecreased = licence.pendingQuantity < licence.quantity;
-		if(licence.pendingQuantity > licence.quantity && licence.quantity !== 0)
-		{
+		if(licence.pendingQuantity > licence.quantity && licence.quantity !== 0) {
 			//Calculate proRata if we are adding additional licenses
 			const additionalLicences = licence.pendingQuantity - licence.quantity;
 			proRataAmount += config.subscriptions.plans[licence.plan].price * additionalLicences;
@@ -193,8 +192,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 		if(entryInCurrent < 0) {
 			planEntry = {plan: newSubs.plan, quantity: 0}; 
 			planEntry.pendingQuantity = newSubs.quantity;
-		}
-		else {
+		} else {
 			planEntry = currentSubs[entryInCurrent];
 			planEntry.pendingQuantity = newSubs.quantity;
 			currentSubs.splice(entryInCurrent, 1);
@@ -212,8 +210,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 			cancelledAllPlans : totalSubCount === 0
 		};
 		return Promise.resolve(result);
-	}
-	else {
+	} else {
 		return Promise.resolve(false);
 	}
 
@@ -231,8 +228,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 	}).then(changes => {
 		if (!changes) {
 			// If there are no changes in plans but only changes in billingInfo, then update billingInfo only
-			if (this.billingAgreementId && this.billingInfo.isModified())
-			{	
+			if (this.billingAgreementId && this.billingInfo.isModified()) {	
 				const paypalUpdate = Paypal.updateBillingAddress(this.billingAgreementId, this.billingInfo);
 				return paypalUpdate;
 			}
@@ -345,8 +341,8 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				// IPN message should come quickly after executing an agreement, usually less then a minute
 				let twoDayLater = moment().utc().add(48, "hour").toDate();
 				this.subscriptions.paypal = renewAndCleanSubscriptions(
-								this.subscriptions.paypal,
-								twoDayLater);
+					this.subscriptions.paypal,
+					twoDayLater);
 				
 				// change invoice state
 				invoice.changeState(C.INV_PENDING, {
@@ -371,8 +367,7 @@ billingSchema.methods.getActiveSubscriptions = function() {
 						res.paypal.push(ppPlan);
 					}
 				});
-			}
-			else {
+			} else {
 				if(!this.subscriptions[key].expiryDate || 
 					this.subscriptions[key].expiryDate > Date.now()) {
 					res[key] = this.subscriptions[key];
@@ -417,8 +412,7 @@ billingSchema.methods.getSubscriptionLimits = function() {
 						}
 					});
 				}
-			}
-			else {
+			} else {
 				if(!this.subscriptions[key].expiryDate || 
 					this.subscriptions[key].expiryDate > Date.now()) {
 					sumLimits.spaceLimit += this.subscriptions[key].data;							
@@ -536,7 +530,7 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 
 					Mailer.sendPaymentReceivedEmail(billingUser.customData.email, {
 						account: user,
-						amount: `${currency}${amount}`,
+						amount: `${currency}${amount}`
 					}, attachments)
 				]);
 

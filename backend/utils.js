@@ -102,8 +102,7 @@ function Utils() {
 	  * @param {Object} variable - variable to coalesce
 	  * @param {Object} value - value to return if object is null or undefined
 	  *******************************************************************************/
-	this.coalesce = function(variable, value)
-	{
+	this.coalesce = function(variable, value) {
 		if (variable === null || variable === undefined) {
 			return value;
 		} else {

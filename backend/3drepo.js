@@ -57,8 +57,7 @@ function setupSSL() {
 		}
 	
 		sslOptions = {
-			SNICallback: function(domain, callback)
-			{
+			SNICallback: function(domain, callback) {
 				let certGroup = certMap[domain];
 				callback(null, certs[certGroup]);
 			},
@@ -117,16 +116,16 @@ function runServer() {
 	handleSubdomains(mainApp);
 	
 	const server = config.using_ssl ? 
-					https.createServer(sslOptions, mainApp) : 
-					http.createServer(mainApp);
+		https.createServer(sslOptions, mainApp) : 
+		http.createServer(mainApp);
 
 	const startFunc = serverStartFunction("0.0.0.0", config.port);
 
 	server.setTimeout(config.timeout * 1000);
 	server.listen(config.port, "0.0.0.0", startFunc);
-		// .on('error', function(error) { 
-		// 	systemLogger.logInfo(error);
-		// });
+	// .on('error', function(error) { 
+	// 	systemLogger.logInfo(error);
+	// });
 
 }
 

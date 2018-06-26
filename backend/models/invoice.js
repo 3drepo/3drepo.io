@@ -40,11 +40,21 @@
 	const SchemaTypes = mongoose.Schema.Types;
 
 	// Various getter/setter helper functions
-	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); };
-	let roundTo3DP = function(x) { return utils.roundToNDP(x, 3.0); };
-	let signAndRoundTo2DP = function(x) { return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x); };
-	let dateToString = function(date) { return moment(date).utc().format(C.DATE_FORMAT); };
-	let dateToDateTimeString = function(date) { return moment(date).utc().format(C.DATE_TIME_FORMAT); };
+	let roundTo2DP = function(x) {
+		return utils.roundToNDP(x, 2.0); 
+	};
+	let roundTo3DP = function(x) {
+		return utils.roundToNDP(x, 3.0); 
+	};
+	let signAndRoundTo2DP = function(x) {
+		return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x); 
+	};
+	let dateToString = function(date) {
+		return moment(date).utc().format(C.DATE_FORMAT); 
+	};
+	let dateToDateTimeString = function(date) {
+		return moment(date).utc().format(C.DATE_TIME_FORMAT); 
+	};
 
 	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
 
@@ -312,7 +322,7 @@
 		// or we hide tax info for refund invoice in that case we don't need to bother this
 		data.amount = parseFloat(data.amount);
 		invoice.taxAmount =roundTo2DP(
-				data.amount -(data.amount / (1 + vat.getByCountryCode(invoice.info.countryCode, invoice.info.vat)))
+			data.amount -(data.amount / (1 + vat.getByCountryCode(invoice.info.countryCode, invoice.info.vat)))
 		);
 
 		invoice.billingAgreementId = data.billingAgreementId;
@@ -338,9 +348,9 @@
 				Mailer.sendPaymentRefundedEmail(billingUser.customData.email, {
 					amount: `${data.currency}${data.amount}`
 				}, attachments)
-				.catch(err => {
-					systemLogger.logError(`Email error - ${err.message}`);
-				});
+					.catch(err => {
+						systemLogger.logError(`Email error - ${err.message}`);
+					});
 
 				//make a copy to sales
 				Mailer.sendPaymentReceivedEmailToSales({
@@ -350,9 +360,9 @@
 					invoiceNo: invoice.invoiceNo,
 					type: invoice.type
 				}, attachments)
-				.catch(err => {
-					systemLogger.logError(`Email error - ${err.message}`);
-				});
+					.catch(err => {
+						systemLogger.logError(`Email error - ${err.message}`);
+					});
 			});
 
 			return invoice;
@@ -373,22 +383,22 @@
 
 		return new Promise((resolve, reject) => {
 
-				let useNonPublicPort = true;
+			let useNonPublicPort = true;
 
-				let template = path.join(__dirname, "../../pug/invoice.pug");
-				if (this.type === "refund") {
-					template = path.join(__dirname, "../../pug/refund.pug");
+			let template = path.join(__dirname, "../../pug/invoice.pug");
+			if (this.type === "refund") {
+				template = path.join(__dirname, "../../pug/refund.pug");
+			}
+
+			pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(html);
 				}
+			});
 
-				pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(html);
-					}
-				});
-
-			})
+		})
 			.then(html => {
 
 				return new Promise((resolve, reject) => {
@@ -425,7 +435,9 @@
 
 				return new Promise((resolve, reject) => {
 
-					pdfRS.on("data", function (d) { bufs.push(d); });
+					pdfRS.on("data", function (d) {
+						bufs.push(d); 
+					});
 					pdfRS.on("end", function () {
 						resolve(Buffer.concat(bufs));
 					});

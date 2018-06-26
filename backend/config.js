@@ -220,8 +220,7 @@ if (config.db.port.length !== config.db.host.length) {
 	process.exit(1);
 }
 
-if (config.db.host.length > 1 && !config.db.replicaSet)
-{
+if (config.db.host.length > 1 && !config.db.replicaSet) {
 	console.error("You must specify the replica set name");
 	process.exit(1);
 }
@@ -280,7 +279,7 @@ config.userNotice = coalesce(config.userNotice, "");
 
 // Settings for Unity
 config.unitySettings = coalesce(config.unitySettings, {
-	TOTAL_MEMORY: 2130706432,
+	TOTAL_MEMORY: 2130706432
 });
 
 //default vat validation url

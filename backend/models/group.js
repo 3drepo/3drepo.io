@@ -234,12 +234,12 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 		}
 
 		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
-					sharedIdObject.account,
-					sharedIdObject.model,
-					ifcGuids,
-					_branch,
-					_revId
-					).then(sharedIdResults => {
+			sharedIdObject.account,
+			sharedIdObject.model,
+			ifcGuids,
+			_branch,
+			_revId
+		).then(sharedIdResults => {
 			for (let j = 0; j < sharedIdResults.length; j++) {
 				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
 					sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
@@ -340,8 +340,7 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 			};
 
 			return group.updateAttrs(dbCol, issueIdData);
-		}
-		else {
+		} else {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 	});

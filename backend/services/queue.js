@@ -113,7 +113,7 @@
 					file: newPath,
 					database: databaseName,
 					project: modelName,
-					owner: userName,
+					owner: userName
 				};
 
 				if (tag) {
@@ -161,33 +161,33 @@
 				}
 			});
 		})
-		.then(() => {
-			return new Promise((resolve, reject) => {
-				fs.mkdir(newFileDir, function (err) {
-					if (err) {
-						reject(err);
-					} else {
-						resolve();
-					}
-				});
+			.then(() => {
+				return new Promise((resolve, reject) => {
+					fs.mkdir(newFileDir, function (err) {
+						if (err) {
+							reject(err);
+						} else {
+							resolve();
+						}
+					});
 
-			});
-		})
-		.then(() => {
-			return new Promise((resolve, reject) => {
-				fs.writeFile(filename, JSON.stringify(defObj), { flag: "a+" }, err => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve();
-					}
 				});
+			})
+			.then(() => {
+				return new Promise((resolve, reject) => {
+					fs.writeFile(filename, JSON.stringify(defObj), { flag: "a+" }, err => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve();
+						}
+					});
+				});
+			})
+			.then(() => {
+				let msg = `genFed ${filename} ${account}`;
+				return this._dispatchWork(corID, msg);
 			});
-		})
-		.then(() => {
-			let msg = `genFed ${filename} ${account}`;
-			return this._dispatchWork(corID, msg);
-		});
 
 	};
 
@@ -341,8 +341,7 @@
 					} else {
 						if (resErrorCode === 0) {
 							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);
-						} 
-						else {
+						} else {
 							ModelHelper.importFail(resDatabase, resProject, resErrorCode, resErrorMessage, true);
 						}
 						defer && delete self.deferedObjs[rep.properties.correlationId];
@@ -360,8 +359,8 @@
 		msg = JSON.stringify(msg);
 
 		return this.channel.assertExchange(this.eventExchange, "fanout", {
-				durable: true
-			})
+			durable: true
+		})
 			.then(() => {
 				return this.channel.publish(
 					this.eventExchange,
@@ -377,8 +376,8 @@
 		let queue;
 
 		return this.channel.assertExchange(this.eventExchange, "fanout", {
-				durable: true
-			})
+			durable: true
+		})
 			.then(() => {
 
 				return this.channel.assertQueue("", { exclusive: true });

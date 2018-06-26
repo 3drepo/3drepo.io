@@ -316,7 +316,7 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 		setting.updateProperties({
 			unit: data.unit,
-			code: data.code,
+			code: data.code
 		});
 
 		setting.properties.topicTypes = ModelSetting.defaultTopicTypes;
@@ -431,10 +431,10 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		surveyPoints: [
 			{
 				latLong: [48.92454, 2.02831],
-				position: [ 0, 0, 0],
+				position: [0, 0, 0]
 			}
 		],
-		angleFromNorth: 145,
+		angleFromNorth: 145
 	};
 
 	return createAndAssignRole(modelName, account, username, data, modelDirName).then(data => {
@@ -442,8 +442,7 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	}).then(setting => {
 		if(subModels) {
 			return setting;
-		}
-		else {
+		} else {
 			model = setting._id;
 			return importModel(account, model, username, setting, {type: "toy", modelDirName, skip });
 		}
@@ -586,19 +585,16 @@ function getAllMeshes(account, model, branch, rev, username){
 		let results = {};
 	       	if(meshes) {
 			results.meshes = meshes;
-		}
-		else {
+		} else {
 			results.meshes = [];
 		}
 
 
-		if(subModelMeshes.length > 0)
-		{
+		if(subModelMeshes.length > 0) {
 			results.subModels = [];
 		}
 		subModelMeshes.forEach(subMeshes => {
-			if (subMeshes && subMeshes.meshes)
-			{
+			if (subMeshes && subMeshes.meshes) {
 				results.subModels.push({meshes: subMeshes.meshes, account: subMeshes.owner, model: subMeshes.model});
 			}
 		});
@@ -678,21 +674,18 @@ function getIdMap(account, model, branch, rev, username){
 			idMaps = JSON.parse(buf);
 		}
 
-		if (!idMaps.idMap)
-		{
+		if (!idMaps.idMap) {
 			idMaps.idMap = [];
 		}
 
-		if(subIdMaps.length > 0)
-		{
+		if(subIdMaps.length > 0) {
 			idMaps.subModels = [];
 		}
 		subIdMaps.forEach(subIdMap => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdMap && subIdMap.idMap)
-			{
+			if (subIdMap && subIdMap.idMap) {
 				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
 			}
 		});
@@ -705,7 +698,7 @@ function getIdMap(account, model, branch, rev, username){
 function getIdToMeshes(account, model, branch, rev, username){
 	"use strict";	
 	let subIdToMeshes;
-		let revId, idToMeshesFileName;
+	let revId, idToMeshesFileName;
 	let history;
 	let status;
 
@@ -774,8 +767,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdToMeshes && subIdToMeshes.idToMeshes)
-			{
+			if (subIdToMeshes && subIdToMeshes.idToMeshes) {
 			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
 				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
 			}
@@ -837,9 +829,9 @@ function getModelProperties(account, model, branch, rev, username){
 						model: ref.project
 					});
 				})
-				.catch(err => {
-					return Promise.resolve();
-				})
+					.catch(err => {
+						return Promise.resolve();
+					})
 			);
 		});
 
@@ -857,13 +849,11 @@ function getModelProperties(account, model, branch, rev, username){
 			properties = JSON.parse(buf);
 		}
 
-		if (!properties.hiddenNodes)
-		{
+		if (!properties.hiddenNodes) {
 			properties.hiddenNodes = [];
 		}
 
-		if(subProperties.length > 0)
-		{
+		if(subProperties.length > 0) {
 			properties.subModels = [];
 		}
 		subProperties.forEach(subProperty => {
@@ -871,8 +861,7 @@ function getModelProperties(account, model, branch, rev, username){
 			// For a federation concatenate all together in a
 			// single array
 
-			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0)
-			{
+			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0) {
 				properties.subModels.push({properties: subProperty.properties, account: subProperty.owner, model: subProperty.model});
 			}
 		});
@@ -951,21 +940,18 @@ function getTreePath(account, model, branch, rev, username){
 			treePaths = JSON.parse(buf);
 		}
 
-		if (!treePaths.idToPath)
-		{
+		if (!treePaths.idToPath) {
 			treePaths.idToPath = [];
 		}
 
-		if(subTreePaths.length > 0)
-		{
+		if(subTreePaths.length > 0) {
 			treePaths.subModels = [];
 		}
 		subTreePaths.forEach(subTreePath => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subTreePath && subTreePath.idToPath)
-			{
+			if (subTreePath && subTreePath.idToPath) {
 				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
 			}
 		});
@@ -1044,16 +1030,14 @@ function getUnityAssets(account, model, branch, rev, username){
 
 		if(buf){
 			let modelAssets = JSON.parse(buf);
-			if(modelAssets !== null)
-			{
+			if(modelAssets !== null) {
 				models.push(modelAssets);
 			}
 
 		}
 
 		subAssets.forEach(subAsset => {
-			if (subAsset && subAsset.models)
-			{
+			if (subAsset && subAsset.models) {
 				models = models.concat(subAsset.models);
 			}
 		});
@@ -1068,12 +1052,9 @@ function getJsonMpc(account, model, uid){
 	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
 
 	return stash.findStashByFilename({ account, model }, "json_mpc", bundleFileName).then(buf => {
-		if(!buf)
-		{
+		if(!buf) {
 			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
-		}
-		else
-		{
+		} else {
 			return Promise.resolve(buf);
 		}
 	});
@@ -1084,12 +1065,9 @@ function getUnityBundle(account, model, uid){
 	const bundleFileName = `/${account}/${model}/${uid}.unity3d`;
 
 	return stash.findStashByFilename({ account, model }, "unity3d", bundleFileName).then(buf => {
-		if(!buf)
-		{
+		if(!buf) {
 			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
-		}
-		else
-		{
+		} else {
 			return Promise.resolve(buf);
 		}
 	});
@@ -1644,12 +1622,10 @@ function getAllMetadata(account, model, branch, rev) {
 function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 	//Get sequence tag then call the generic getAllIdsWithMetadataField
 	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
-		if(!settings)
-		{
+		if(!settings) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
-		if(!settings.fourDSequenceTag)
-		{
+		if(!settings.fourDSequenceTag) {
 			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
 		}
 		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
@@ -1695,17 +1671,17 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 			getMeta.push(
 				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
-				.then(obj => {
-					return Promise.resolve({
-						data: obj.data,
-						account: ref.owner,
-						model: ref.project
-					});
-				})
-				.catch(err => {
+					.then(obj => {
+						return Promise.resolve({
+							data: obj.data,
+							account: ref.owner,
+							model: ref.project
+						});
+					})
+					.catch(err => {
 					//Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-					return Promise.resolve();
-				})
+						return Promise.resolve();
+					})
 			);
 		});
 
@@ -1714,7 +1690,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 	}).then(_subMeta => {
 
 		let match = {
-			_id: {"$in": history.current},
+			_id: {"$in": history.current}
 		};
 		match[fullFieldName] =  {"$exists" : true};
 
@@ -1767,8 +1743,7 @@ function getMetadata(account, model, id){
 
 }
 
-function isUserAdmin(account, model, user)
-{
+function isUserAdmin(account, model, user) {
 	const projection = { "permissions": { "$elemMatch": { user: user } }};
 	//find the project this model belongs to
 	return Project.findOne({account}, {models: model}, projection).then(project => {
@@ -1777,7 +1752,7 @@ function isUserAdmin(account, model, user)
 			project  //This model belongs to a project
 			&& project.permissions.length > 0 //This user has project level permissions in the project
 			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
-			);
+		);
 	});
 }
 

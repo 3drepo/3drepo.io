@@ -42,55 +42,55 @@ exports.decode = function(bson) {
  */
 exports.encode = function(camera, root_shared_id) {
 
-    assert(camera, "repoNodeCamera: Camera object is empty");
-    assert(root_shared_id, "repoNodeCamera: Root node is empty");
+	assert(camera, "repoNodeCamera: Camera object is empty");
+	assert(root_shared_id, "repoNodeCamera: Root node is empty");
 
-    let repo_camera = [];
+	let repo_camera = [];
 
-    //-------------------------------------------------------------------------
-    // ID field has to come first
-    repo_camera[C.REPO_NODE_LABEL_ID] = Utils.generateUUID();
+	//-------------------------------------------------------------------------
+	// ID field has to come first
+	repo_camera[C.REPO_NODE_LABEL_ID] = Utils.generateUUID();
 
-    //-------------------------------------------------------------------------
-    // Name is required for shared_id hashing and has to be unique!
-    // TODO: check number of cameras in the current revision and append count+1 to the name.
-    repo_camera[C.REPO_NODE_LABEL_NAME] = camera.name ? camera.name : "camera";
+	//-------------------------------------------------------------------------
+	// Name is required for shared_id hashing and has to be unique!
+	// TODO: check number of cameras in the current revision and append count+1 to the name.
+	repo_camera[C.REPO_NODE_LABEL_NAME] = camera.name ? camera.name : "camera";
 
-    // TODO: add camera hash appendix
-    repo_camera[C.REPO_NODE_LABEL_SHARED_ID] = Utils.generateUUID();
-    repo_camera[C.REPO_NODE_LABEL_API] = 1;	
-    repo_camera[C.REPO_NODE_LABEL_TYPE] = C.REPO_NODE_TYPE_CAMERA;
+	// TODO: add camera hash appendix
+	repo_camera[C.REPO_NODE_LABEL_SHARED_ID] = Utils.generateUUID();
+	repo_camera[C.REPO_NODE_LABEL_API] = 1;	
+	repo_camera[C.REPO_NODE_LABEL_TYPE] = C.REPO_NODE_TYPE_CAMERA;
 
-    repo_camera[C.REPO_NODE_LABEL_PARENTS] = [root_shared_id];
-    repo_camera[C.REPO_NODE_LABEL_PATHS] = [[root_shared_id]];
+	repo_camera[C.REPO_NODE_LABEL_PARENTS] = [root_shared_id];
+	repo_camera[C.REPO_NODE_LABEL_PATHS] = [[root_shared_id]];
 
-    if (camera.look_at){
-        repo_camera[C.REPO_NODE_LABEL_LOOK_AT] = camera.look_at;
-    }
+	if (camera.look_at){
+		repo_camera[C.REPO_NODE_LABEL_LOOK_AT] = camera.look_at;
+	}
 
-    if (camera.position){
-        repo_camera[C.REPO_NODE_LABEL_POSITION] = camera.position;
-    }
+	if (camera.position){
+		repo_camera[C.REPO_NODE_LABEL_POSITION] = camera.position;
+	}
 
-    if (camera.up){
-        repo_camera[C.REPO_NODE_LABEL_UP] = camera.up;
-    }
+	if (camera.up){
+		repo_camera[C.REPO_NODE_LABEL_UP] = camera.up;
+	}
 
-    if (camera.fov){
-        repo_camera[C.REPO_NODE_LABEL_FOV] = camera.fov;
-    }
+	if (camera.fov){
+		repo_camera[C.REPO_NODE_LABEL_FOV] = camera.fov;
+	}
 
-    if (camera.near){
-        repo_camera[C.REPO_NODE_LABEL_NEAR] = camera.near;
-    }
+	if (camera.near){
+		repo_camera[C.REPO_NODE_LABEL_NEAR] = camera.near;
+	}
 
-    if (camera.far){
-        repo_camera[C.REPO_NODE_LABEL_FAR] = camera.far;
-    }
+	if (camera.far){
+		repo_camera[C.REPO_NODE_LABEL_FAR] = camera.far;
+	}
 
-    if (camera.aspect_ratio){
-        repo_camera[C.REPO_NODE_LABEL_ASPECT_RATIO] = camera.aspect_ratio;
-    }
+	if (camera.aspect_ratio){
+		repo_camera[C.REPO_NODE_LABEL_ASPECT_RATIO] = camera.aspect_ratio;
+	}
    
-    return repo_camera;
+	return repo_camera;
 };

@@ -43,8 +43,7 @@
 			if(user.isMemberOfTeamspace(req.params.account)) {
 				return User.getQuotaInfo(req.params.account);
 
-			}
-			else {
+			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
 		}).then(quotaInfo => {
@@ -68,8 +67,7 @@
 			if(user.isMemberOfTeamspace(req.params.account)) {
 				return User.getMembersAndJobs(req.params.account);
 
-			}
-			else {
+			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
 		}).then(memArray => {
@@ -88,10 +86,11 @@
 	
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				if(req.params.user)
-					{return dbUser.addTeamMember(req.params.user);}
-				else
-					{return Promise.reject(responseCodes.USER_NOT_FOUND);}
+				if(req.params.user) {
+					return dbUser.addTeamMember(req.params.user);
+				} else {
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});

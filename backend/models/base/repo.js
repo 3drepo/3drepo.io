@@ -60,7 +60,9 @@ statics.findStashByFilename = function(dbCol, format, filename){
 					let downloadStream = bucket.openDownloadStreamByName(filename);
 					let bufs = [];
 
-					downloadStream.on("data", function(d){ bufs.push(d); });
+					downloadStream.on("data", function(d){
+						bufs.push(d); 
+					});
 					downloadStream.on("end", function(){
 						resolve(Buffer.concat(bufs));
 					});

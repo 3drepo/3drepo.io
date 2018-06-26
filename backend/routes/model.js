@@ -388,7 +388,7 @@ function downloadLatest(req, res, next) {
 
 		let headers = {
 			"Content-Length": file.meta.length,
-			"Content-Disposition": "attachment;filename=" + file.meta.filename,
+			"Content-Disposition": "attachment;filename=" + file.meta.filename
 		};
 
 		if (file.meta.contentType) {
@@ -436,9 +436,9 @@ function uploadModel(req, res, next) {
 		};
 		//FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
 		ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
-			}).catch(() => {
+		}).catch(() => {
 
-			});
+		});
 
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;

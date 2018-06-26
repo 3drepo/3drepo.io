@@ -90,40 +90,42 @@ schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 schema.methods.updateProperties = function(updateObj){
 	Object.keys(updateObj).forEach(key => {
-		if(!updateObj[key]) {return;}
+		if(!updateObj[key]) {
+			return;
+		}
 		switch (key) {
-			case "topicTypes":
-				let topicTypes = {};
-				updateObj[key].forEach(type => {
+		case "topicTypes":
+			let topicTypes = {};
+			updateObj[key].forEach(type => {
 
-					if(!type || !type.trim()){
-						return;
-					}
-
-					//generate value from label
-					let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");
-
-					if(topicTypes[value]){
-						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-					} else {	
-						topicTypes[value] = {
-							value,
-							label: type.trim()
-						};
-					}
-				});
-
-				this.properties[key] = _.values(topicTypes);
-				break;
-			case "code":
-				if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
-					throw responseCodes.INVALID_MODEL_CODE;
+				if(!type || !type.trim()){
+					return;
 				}
-			case "unit":
-				this.properties[key] = updateObj[key];
-				break;
-			default:
-				this[key] = updateObj[key];
+
+				//generate value from label
+				let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");
+
+				if(topicTypes[value]){
+					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+				} else {	
+					topicTypes[value] = {
+						value,
+						label: type.trim()
+					};
+				}
+			});
+
+			this.properties[key] = _.values(topicTypes);
+			break;
+		case "code":
+			if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
+				throw responseCodes.INVALID_MODEL_CODE;
+			}
+		case "unit":
+			this.properties[key] = updateObj[key];
+			break;
+		default:
+			this[key] = updateObj[key];
 		}
 	});
 };

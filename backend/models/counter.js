@@ -28,16 +28,16 @@ schema.statics.findAndIncInvoiceNumber = function(){
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
 	return DB.getDB("admin")
-	.then(db => {
-		return db.db("admin")
-			.collection("counters")
-			.findOneAndUpdate(
-				{ type: "invoice" },
-				{ "$inc": {"count": 1 }},
-				{ upsert : true, returnOriginal: false }
-			);
-	})
-	.then(doc => "SO-" + doc.value.count);
+		.then(db => {
+			return db.db("admin")
+				.collection("counters")
+				.findOneAndUpdate(
+					{ type: "invoice" },
+					{ "$inc": {"count": 1 }},
+					{ upsert : true, returnOriginal: false }
+				);
+		})
+		.then(doc => "SO-" + doc.value.count);
 
 };
 
@@ -49,16 +49,16 @@ schema.statics.findAndIncRefundNumber = function(){
 	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
 	return DB.getDB("admin")
-	.then(db => {
-		return db.db("admin")
-			.collection("counters")
-			.findOneAndUpdate(
-				{ type: "refund" },
-				{ "$inc": {"count": 1 }},
-				{ upsert : true, returnOriginal: false }
-			);
-	})
-	.then(doc => "CN-" + doc.value.count);
+		.then(db => {
+			return db.db("admin")
+				.collection("counters")
+				.findOneAndUpdate(
+					{ type: "refund" },
+					{ "$inc": {"count": 1 }},
+					{ upsert : true, returnOriginal: false }
+				);
+		})
+		.then(doc => "CN-" + doc.value.count);
 
 };
 

@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- // mongoose model factory for different db and collection name for each instance
+// mongoose model factory for different db and collection name for each instance
 let mongoose = require("mongoose");
 mongoose.Promise = Promise;
 
@@ -30,12 +30,11 @@ module.exports = {
 	},
 
 	__checkDb: function(){
-		this.dbManager.getAuthDB().then(db =>
-			{
-				if (!db){
-					throw new Error("db connection is null");
-				}
-			});
+		this.dbManager.getAuthDB().then(db => {
+			if (!db){
+				throw new Error("db connection is null");
+			}
+		});
 	},
 
 	get: function (modelName, options){

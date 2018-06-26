@@ -34,13 +34,11 @@ if (!schema.options.toJSON){
 
 schema.options.toJSON.transform = function (doc, ret) {
 	ret._id = utils.uuidToString(doc._id);
-	if(doc.parents)
-	{
+	if(doc.parents) {
 		let newParents = [];
-		doc.parents.forEach(function(parentId)
-			{
-				newParents.push(utils.uuidToString(parentId));
-			});
+		doc.parents.forEach(function(parentId) {
+			newParents.push(utils.uuidToString(parentId));
+		});
 		ret.parents = newParents;
 	}
 	return ret;

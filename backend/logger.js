@@ -99,7 +99,7 @@ function createLogger() {
 	if (config.logfile.silent === undefined || config.logfile.silent === false) {
 		transports.push(new winston.transports.Console({
 			colorize: true,
-			level: config.logfile.console_level,
+			level: config.logfile.console_level
 		}));
 	}
 	
@@ -127,7 +127,7 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
 	let timeDiff = currentTime - this.startTime;
 
 	let metadata = Object.assign({}, meta, {
-		uid: this.uid,
+		uid: this.uid
 	});
 
 	this.session && this.session.user && (metadata.username = this.session.user.username);

@@ -29,8 +29,7 @@ exports.decode = function(bson, meshes, cameras) {
 	// Meshes & Cameras extraction	
 	let mMeshes = [];
 	let mCameras = [];
-	if (bson[C.REPO_NODE_LABEL_CHILDREN])
-	{
+	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
 		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {			
 			let childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
 			let childID = UUID.unparse(childIDbytes);

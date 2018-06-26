@@ -1,142 +1,142 @@
 "use strict";
 
-    const express = require("express");
-    const router = express.Router({mergeParams: true});
-    const responseCodes = require("../response_codes.js");
-    const C = require("../constants");
-    const serialize = require("serialize-javascript");
-    const _ = require("lodash");
-    const addressMeta = require("../models/addressMeta");
-    const units = require("../models/unit");
-    const History = require("../models/history");
-    const ModelHelper = require("../models/helper/model");
-    const User = require("../models/user");
-    const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
-    const path = require("path");
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const responseCodes = require("../response_codes.js");
+const C = require("../constants");
+const serialize = require("serialize-javascript");
+const _ = require("lodash");
+const addressMeta = require("../models/addressMeta");
+const units = require("../models/unit");
+const History = require("../models/history");
+const ModelHelper = require("../models/helper/model");
+const User = require("../models/user");
+const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
+const path = require("path");
     
-    const config = require("../config");
+const config = require("../config");
     
-    function createClientConfig(serverConfig, req) {
+function createClientConfig(serverConfig, req) {
     
-        // TODO: Replace with user based plugin selection
-        let pluginStructure = {};
+	// TODO: Replace with user based plugin selection
+	let pluginStructure = {};
     
-        // If the serverConfig has a plugin structure, use that
-        // else just use the default
-        if (serverConfig.pluginStructure) {
-            pluginStructure = require("../../" + serverConfig.pluginStructure);
-        } else {
-            pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
-        }
+	// If the serverConfig has a plugin structure, use that
+	// else just use the default
+	if (serverConfig.pluginStructure) {
+		pluginStructure = require("../../" + serverConfig.pluginStructure);
+	} else {
+		pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
+	}
     
-        let clientConfig = {
-            "maintenanceMode": config.maintenanceMode,
-            "ui": {},
-            "uistate": {},
-            "structure": pluginStructure,
-            "frontendPug": [],
-            "gaTrackId": config.gaTrackId,
-            "development" : config.development,
-            "googleConversionId": config.googleConversionId,
-            "userNotice" : config.userNotice,
-            "unitySettings" : config.unitySettings,
-            "customLogins" : config.customLogins
-        };
+	let clientConfig = {
+		"maintenanceMode": config.maintenanceMode,
+		"ui": {},
+		"uistate": {},
+		"structure": pluginStructure,
+		"frontendPug": [],
+		"gaTrackId": config.gaTrackId,
+		"development" : config.development,
+		"googleConversionId": config.googleConversionId,
+		"userNotice" : config.userNotice,
+		"unitySettings" : config.unitySettings,
+		"customLogins" : config.customLogins
+	};
 
-        if (config.hasOwnProperty("captcha_client_key")) {
-            clientConfig.captcha_client_key = config.captcha_client_key;
-        }
+	if (config.hasOwnProperty("captcha_client_key")) {
+		clientConfig.captcha_client_key = config.captcha_client_key;
+	}
 
-        // Set up the legal plugins
-        if (config.hasOwnProperty("legal")) {
-            for (let i = 0; i < config.legal.length; i += 1) {
-                pluginStructure.functions.push(config.legal[i].page);
-            }
-        }
+	// Set up the legal plugins
+	if (config.hasOwnProperty("legal")) {
+		for (let i = 0; i < config.legal.length; i += 1) {
+			pluginStructure.functions.push(config.legal[i].page);
+		}
+	}
         
-        if (config.hasOwnProperty("captcha_client_key")) {
-            clientConfig.captcha_client_key = config.captcha_client_key;
-        }
+	if (config.hasOwnProperty("captcha_client_key")) {
+		clientConfig.captcha_client_key = config.captcha_client_key;
+	}
     
-        if (req) {
-            clientConfig.userId = _.get(req, "session.user.username");
-        }
+	if (req) {
+		clientConfig.userId = _.get(req, "session.user.username");
+	}
     
-        // Set up the legal plugins
-        clientConfig.legalTemplates = [];
-        if (config.hasOwnProperty("legal")) {
-            clientConfig.legalTemplates = config.legal;
-        }
+	// Set up the legal plugins
+	clientConfig.legalTemplates = [];
+	if (config.hasOwnProperty("legal")) {
+		clientConfig.legalTemplates = config.legal;
+	}
     
-        clientConfig.apiUrls = config.apiUrls;
+	clientConfig.apiUrls = config.apiUrls;
     
-        clientConfig.C = {
-            GET_API : C.GET_API,
-            POST_API : C.POST_API,
-            MAP_API : C.MAP_API
-        };
+	clientConfig.C = {
+		GET_API : C.GET_API,
+		POST_API : C.POST_API,
+		MAP_API : C.MAP_API
+	};
     
-        if (config.chat_server) {
-            clientConfig.chatHost = config.chat_server.chat_host;
-            clientConfig.chatPath = "/" + config.chat_server.subdirectory;
-        }
+	if (config.chat_server) {
+		clientConfig.chatHost = config.chat_server.chat_host;
+		clientConfig.chatPath = "/" + config.chat_server.subdirectory;
+	}
     
-        clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
+	clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
     
-        clientConfig.VERSION = config.version;
+	clientConfig.VERSION = config.version;
     
-        if (serverConfig.backgroundImage) {
-            clientConfig.backgroundImage = serverConfig.backgroundImage;
-        }
+	if (serverConfig.backgroundImage) {
+		clientConfig.backgroundImage = serverConfig.backgroundImage;
+	}
     
-        clientConfig.return_path = "/";
+	clientConfig.return_path = "/";
     
-        clientConfig.auth =  config.auth;
+	clientConfig.auth =  config.auth;
     
-        if(config.captcha && config.captcha.clientKey) {
-            clientConfig.captcha_client_key = config.captcha.clientKey;
-        }
+	if(config.captcha && config.captcha.clientKey) {
+		clientConfig.captcha_client_key = config.captcha.clientKey;
+	}
     
-        clientConfig.uploadSizeLimit = config.uploadSizeLimit;
-        clientConfig.countries = addressMeta.countries;
-        clientConfig.euCountriesCode = addressMeta.euCountriesCode;
-        clientConfig.usStates = addressMeta.usStates;
-        clientConfig.units = units;
-        clientConfig.legal = config.legal;
-        clientConfig.tagRegExp = History.tagRegExp;
-        clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
-        clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp;
-        clientConfig.usernameRegExp = User.usernameRegExp;
-        clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
-        clientConfig.login_check_interval = config.login_check_interval;
+	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
+	clientConfig.countries = addressMeta.countries;
+	clientConfig.euCountriesCode = addressMeta.euCountriesCode;
+	clientConfig.usStates = addressMeta.usStates;
+	clientConfig.units = units;
+	clientConfig.legal = config.legal;
+	clientConfig.tagRegExp = History.tagRegExp;
+	clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
+	clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp;
+	clientConfig.usernameRegExp = User.usernameRegExp;
+	clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
+	clientConfig.login_check_interval = config.login_check_interval;
     
-        clientConfig.responseCodes = _.each(responseCodes.codesMap);
+	clientConfig.responseCodes = _.each(responseCodes.codesMap);
     
-        clientConfig.permissions = C.MODEL_PERM_OBJ;
+	clientConfig.permissions = C.MODEL_PERM_OBJ;
     
-        clientConfig.impliedPermission = C.IMPLIED_PERM;
+	clientConfig.impliedPermission = C.IMPLIED_PERM;
     
-        return clientConfig;
-    }
+	return clientConfig;
+}
     
-    const clientConfig = createClientConfig(config);
+const clientConfig = createClientConfig(config);
     
-    router.get("/version.json", function (req, res) {
-        return res.json({"VERSION": clientConfig.VERSION });
-    });
+router.get("/version.json", function (req, res) {
+	return res.json({"VERSION": clientConfig.VERSION });
+});
     
-    router.get("/config.js", function (req, res) {
+router.get("/config.js", function (req, res) {
     
-        // Only need to set the userId the rest is static
-        clientConfig.userId = _.get(req, "session.user.username");
+	// Only need to set the userId the rest is static
+	clientConfig.userId = _.get(req, "session.user.username");
     
-        // TODO: This used to be a long string concat, 
-        // this is marginally better but still a complete hack. 
-        // There is definitely a better way to do this
-        const serializedConfig = serialize(clientConfig); 
+	// TODO: This used to be a long string concat, 
+	// this is marginally better but still a complete hack. 
+	// There is definitely a better way to do this
+	const serializedConfig = serialize(clientConfig); 
     
-        res.header("Content-Type", "text/javascript");
-        res.render(path.resolve(__dirname, "./../../pug/config.pug"), {config: serializedConfig});
-    });
+	res.header("Content-Type", "text/javascript");
+	res.render(path.resolve(__dirname, "./../../pug/config.pug"), {config: serializedConfig});
+});
     
-    module.exports = router;
+module.exports = router;

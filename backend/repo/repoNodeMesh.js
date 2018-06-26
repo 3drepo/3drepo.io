@@ -22,60 +22,56 @@ let UUID = require("node-uuid");
 let C = require("../constants");
 
 exports.decode = function(bson, materials) {
-    "use strict";
-    // There should be always only a single material with the mesh!
-    // Takes the very first match if multiple materials attached as children.
-    // Children are appended on the fly from other repository components.
-    // If a single mesh is being decoded on it"s own, it will not have the
-    // children array attached!
-    if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-        for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
-            let childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-            let childID = UUID.unparse(childIDbytes);
-            let material = materials[childID];
-            if (material) {
-                // TODO: change mMaterialIndex to material
-                bson[C.M_MATERIAL_INDEX] = childID;
-                break;
-            }
-        }
-    }
+	"use strict";
+	// There should be always only a single material with the mesh!
+	// Takes the very first match if multiple materials attached as children.
+	// Children are appended on the fly from other repository components.
+	// If a single mesh is being decoded on it"s own, it will not have the
+	// children array attached!
+	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
+		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+			let childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+			let childID = UUID.unparse(childIDbytes);
+			let material = materials[childID];
+			if (material) {
+				// TODO: change mMaterialIndex to material
+				bson[C.M_MATERIAL_INDEX] = childID;
+				break;
+			}
+		}
+	}
 
-    let myUUID = bson.id;
+	let myUUID = bson.id;
 
-    if (bson[C.REPO_NODE_LABEL_COMBINED_MAP])
-    {
-        // TODO: Here we have multiple maps, including ones that
-        // are no originally ours, let"s hope we never have an example
-        // of this.
-        // var myMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+	if (bson[C.REPO_NODE_LABEL_COMBINED_MAP]) {
+		// TODO: Here we have multiple maps, including ones that
+		// are no originally ours, let"s hope we never have an example
+		// of this.
+		// var myMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
 
-        if (myUUID in bson[C.REPO_NODE_LABEL_COMBINED_MAP])
-        {
-            bson[C.REPO_NODE_LABEL_COMBINED_MAP] = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+		if (myUUID in bson[C.REPO_NODE_LABEL_COMBINED_MAP]) {
+			bson[C.REPO_NODE_LABEL_COMBINED_MAP] = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
 
-            for(let i = 0; i < bson[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
-            {
-                bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID] =
-                    UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID].buffer);
+			for(let i = 0; i < bson[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++) {
+				bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID] =
+																				UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID].buffer);
 
-                bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID] =
-                    UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID].buffer);
+				bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID] =
+																				UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID].buffer);
 
-                bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] =
-                    bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-            }
-        }
+				bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] =
+																				bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+			}
+		}
 
-        delete bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
-    }
+		delete bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+	}
 
-    if (bson.vertices && bson.vertices.buffer)
-    {
-        bson.vertices_count = bson.vertices.buffer.length / 12;
-    }
+	if (bson.vertices && bson.vertices.buffer) {
+		bson.vertices_count = bson.vertices.buffer.length / 12;
+	}
 
-    return bson;
+	return bson;
 };
 
 /**
@@ -84,37 +80,36 @@ exports.decode = function(bson, materials) {
  * @param {Object} mesh
  */
 exports.extractBoundingBox = function(mesh) {
-    "use strict";
+	"use strict";
 
-    let bbox = {};
+	let bbox = {};
 
-    if (mesh.bounding_box)
-    {
-        bbox.min = mesh.bounding_box[0];
-        bbox.max = mesh.bounding_box[1];
-        bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
-        bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
-    } else {
-        bbox.min    = [-1,-1,-1];
-        bbox.max    = [ 1, 1, 1];
-        bbox.center = [ 0, 0, 0];
-        bbox.size   = [ 2, 2, 2];
-    }
+	if (mesh.bounding_box) {
+		bbox.min = mesh.bounding_box[0];
+		bbox.max = mesh.bounding_box[1];
+		bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
+		bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+	} else {
+		bbox.min    = [-1,-1,-1];
+		bbox.max    = [1, 1, 1];
+		bbox.center = [0, 0, 0];
+		bbox.size   = [2, 2, 2];
+	}
 
-    return bbox;
+	return bbox;
 };
 
 
 exports.mergeMapSort = function(left, right) {
-    "use strict";
+	"use strict";
 
-    if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
-        return -1;
-    } else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] ) {
-        return 1;
-    } else {
-        return 0;
-    }
+	if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
+		return -1;
+	} else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] ) {
+		return 1;
+	} else {
+		return 0;
+	}
 };
 
 

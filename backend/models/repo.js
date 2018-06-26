@@ -41,7 +41,7 @@ let cameraSchema = Schema(
 		look_at: [Number],
 		view_dir: [Number],
 		position: [Number],
-		up: [Number],
+		up: [Number]
 
 	})
 );

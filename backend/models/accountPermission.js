@@ -74,8 +74,7 @@
 					//return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
 					return this.update(permission.user, permission);
 				}
-				if(permission.permissions.length === 0)
-				{
+				if(permission.permissions.length === 0) {
 					//Adding a user with empty permissions is not allowed
 					return Promise.reject(responseCodes.ACCOUNT_PERM_EMPTY);
 				}
@@ -88,13 +87,10 @@
 
 		update(user, permission){
 			return this._check(user, permission).then(() => {
-				if(permission && permission.permissions.length === 0)
-				{
+				if(permission && permission.permissions.length === 0) {
 					//this is actually a remove
 					return this.remove(user);
-				}
-				else
-				{
+				} else {
 					const currPermission = this.findByUser(user);
 
 					if(currPermission){

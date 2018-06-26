@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 let express = require("express");
 let responseCodes = require("../response_codes.js");
 let router = express.Router({mergeParams: true});
@@ -25,7 +26,6 @@ router.get("/plans", listPlans);
 
 
 function listPlans(req, res, next){
-	"use strict";
 	let place = utils.APIInfo(req);
 	let subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
 	responseCodes.respond(place, req, res, next, responseCodes.OK, subscriptions);

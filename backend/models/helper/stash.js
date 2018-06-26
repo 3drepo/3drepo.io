@@ -58,7 +58,9 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 
 						let bufs = [];
 
-						downloadStream.on("data", function(d){ bufs.push(d); });
+						downloadStream.on("data", function(d){
+							bufs.push(d); 
+						});
 						downloadStream.on("end", function(){
 							resolve(Buffer.concat(bufs));
 						});

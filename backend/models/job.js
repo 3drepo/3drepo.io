@@ -126,8 +126,9 @@ schema.statics.addJob = function(teamspace, jobData) {
 };
 
 schema.methods.updateJob = function(updatedData) {
-	if(updatedData.color)
-		{this.color = updatedData.color;}
+	if(updatedData.color) {
+		this.color = updatedData.color;
+	}
 
 	return this.save();
 };

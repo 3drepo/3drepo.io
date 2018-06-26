@@ -61,15 +61,15 @@ exports.decode = function(bsonArray) {
 				bson[C.REPO_NODE_LABEL_BRANCH] = UUID.unparse(idBytes);
 
 				switch(bson[C.REPO_NODE_LABEL_TYPE]) {
-					case C.REPO_NODE_TYPE_REVISION :
-						revisions[bson.id] = bson;
-						history[C.REPO_HISTORY_LABEL_REVISIONS_COUNT]++;
-						if (!bson[C.REPO_NODE_LABEL_PARENTS]){
-							rootNode = bson;
-						}
-						break;
-					default :
-						logger.log("error","Unsupported node type found: " + bson[C.REPO_NODE_LABEL_TYPE]);
+				case C.REPO_NODE_TYPE_REVISION :
+					revisions[bson.id] = bson;
+					history[C.REPO_HISTORY_LABEL_REVISIONS_COUNT]++;
+					if (!bson[C.REPO_NODE_LABEL_PARENTS]){
+						rootNode = bson;
+					}
+					break;
+				default :
+					logger.log("error","Unsupported node type found: " + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 			}
 		}

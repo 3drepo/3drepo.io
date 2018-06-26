@@ -40,18 +40,18 @@
 				let createRoleCmd = {
 					"createRole": roleName,
 			   		"privileges":[{
-							"resource":{
-								"db": account,
+						"resource":{
+							"db": account,
 			   					"collection": "settings"
-							},
+						},
 			   				"actions": ["find"]}
-						],
+					],
 			   		"roles": []
 				};
 
 				return ModelFactory.dbManager.runCommand(account, createRoleCmd).then(()=> {
-							return {role: roleName, db: account};
-						});
+					return {role: roleName, db: account};
+				});
 			}
 		});
 

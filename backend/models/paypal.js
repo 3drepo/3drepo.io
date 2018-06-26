@@ -34,7 +34,7 @@ const Invoice = require("./invoice");
 paypal.configure({
 	"mode": config.paypal.mode, //sandbox or live
 	"client_id": config.paypal.client_id,
-	"client_secret": config.paypal.client_secret,
+	"client_secret": config.paypal.client_secret
 });
 
 let updateBillingAddress = function (billingAgreementId, billingAddress) {
@@ -110,9 +110,9 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 		if (payment.type === C.PRO_RATA_PAYMENT) {
 			hasProRata = true;
 			proRataAmount += payment.gross;
-			} else if (payment.type === C.REGULAR_PAYMENT) {
+		} else if (payment.type === C.REGULAR_PAYMENT) {
 			regularAmount += payment.gross;
-			}
+		}
 
 		paymentDefs.push(paypalTrans.getPaypalPayment(payment));
 	});
@@ -135,76 +135,76 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 		});
 
 	})
-	.then(billingPlan => {
+		.then(billingPlan => {
 
 		//activate plan
-		return new Promise((resolve, reject) => {
-			let billingPlanUpdateAttributes = [{
-				"op": "replace",
-				"path": "/",
-				"value": {
-					"state": "ACTIVE"
-				}
-			}];
+			return new Promise((resolve, reject) => {
+				let billingPlanUpdateAttributes = [{
+					"op": "replace",
+					"path": "/",
+					"value": {
+						"state": "ACTIVE"
+					}
+				}];
 
-			paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
-				if (err) {
+				paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
+					if (err) {
 
-					systemLogger.logError(JSON.stringify(err));
+						systemLogger.logError(JSON.stringify(err));
 
-					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-					paypalError.message = err.response && err.response.message || err.message;
+						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+						paypalError.message = err.response && err.response.message || err.message;
 			
-					reject(paypalError);
-				} else {
-					resolve(billingPlan);
-				}
-			});
+						reject(paypalError);
+					} else {
+						resolve(billingPlan);
+					}
+				});
 
-		});
-	})
-	.then(billingPlan => {
+			});
+		})
+		.then(billingPlan => {
 
 		//create agreement
-		return new Promise((resolve, reject) => {
+			return new Promise((resolve, reject) => {
 
-			let desc = "";
-			if (hasProRata) {
-				desc += `This month's pro-rata: £${proRataAmount}. `;
-			}
-			desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format("Do MMM YYYY")}`;
-
-			let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
-				billingPlan.id,
-				startDate,
-				paypalTrans.getPaypalAddress(billing.billingInfo),
-				desc
-			);
-
-			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
-				if (err) {
-					systemLogger.logError(JSON.stringify(err));
-					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-					paypalError.message = err.response && err.response.message || err.message;
-					reject(paypalError);
-				} else {
-
-					let link = billingAgreement.links.find(link => link.rel === "approval_url");
-					let token = url.parse(link.href, true)
-						.query.token;
-
-					//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
-					resolve({
-						url: link.href,
-						paypalPaymentToken: token,
-						agreement: billingAgreement
-					});
+				let desc = "";
+				if (hasProRata) {
+					desc += `This month's pro-rata: £${proRataAmount}. `;
 				}
+				desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format("Do MMM YYYY")}`;
+
+				let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
+					billingPlan.id,
+					startDate,
+					paypalTrans.getPaypalAddress(billing.billingInfo),
+					desc
+				);
+
+				paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
+					if (err) {
+						systemLogger.logError(JSON.stringify(err));
+						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+						paypalError.message = err.response && err.response.message || err.message;
+						reject(paypalError);
+					} else {
+
+						let link = billingAgreement.links.find(link => link.rel === "approval_url");
+						let token = url.parse(link.href, true)
+							.query.token;
+
+						//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
+						resolve({
+							url: link.href,
+							paypalPaymentToken: token,
+							agreement: billingAgreement
+						});
+					}
+				});
+
 			});
 
 		});
-
-	});
 
 };
 

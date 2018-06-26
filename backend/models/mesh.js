@@ -46,7 +46,7 @@
 			uv_channels_count: Number,
 			uv_channels_byte_count: Number,
 
-			groups: [],
+			groups: []
 
 		})
 	);

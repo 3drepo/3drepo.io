@@ -22,8 +22,8 @@
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
 	const connConfig = {
-				autoReconnect: true
-			};
+		autoReconnect: true
+	};
 
 	let db;
 	

@@ -103,7 +103,7 @@ let schema = Schema({
 		aspect_ratio: Number,
 		far : Number,
 		near : Number,
-		clippingPlanes : [Schema.Types.Mixed ],
+		clippingPlanes : [Schema.Types.Mixed],
 		group_id: Object,
 		highlighted_group_id: Object,
 		hidden_group_id: Object,
@@ -136,7 +136,7 @@ let schema = Schema({
 	desc: String,
 	thumbnail: {flag: Number, content: Object},
 	priority: {
-		type: String,
+		type: String
 		//enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
@@ -354,7 +354,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 				let revIds = histories.map(h => h._id);
 
 				filter = {
-					"$or" : [ filter, {
+					"$or" : [filter, {
 						rev_id: { "$in" : revIds }
 					}]
 				};
@@ -435,7 +435,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 	let zip = archiver.create("zip");
 
 	zip.append(new Buffer.from(this.getModelBCF(model), "utf8"), {name: "model.bcf"})
-	.append(new Buffer.from(this.getBCFVersion(), "utf8"), {name: "bcf.version"});
+		.append(new Buffer.from(this.getBCFVersion(), "utf8"), {name: "bcf.version"});
 
 	let projection = {};
 	let noClean = true;
@@ -746,7 +746,7 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 					systemLogger.logError("error while saving resized screenshot",{
 						issueId: uid,
 						viewpointId: vid,
-						err: err,
+						err: err
 					});
 				});
 
@@ -1053,8 +1053,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if (data.hasOwnProperty("due_date") && this.due_date !== data.due_date) {
-		if(!(!data.due_date && !this.due_date))
-		{
+		if(!(!data.due_date && !this.due_date)) {
 			if(data.due_date === null) {
 				data.due_date = undefined;
 			}
@@ -1219,7 +1218,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 				"Description": this.desc
 			},
 			"Comment": [],
-			"Viewpoints": [],
+			"Viewpoints": []
 		}
 	};
 
@@ -1307,7 +1306,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 				"@":{
 					"Guid": utils.uuidToString(vp.guid),
 					"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-					"xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+					"xmlns:xsd": "http://www.w3.org/2001/XMLSchema"
 				}
 			}
 		};
@@ -1385,10 +1384,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 							}
 							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
 								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
-										"@": {
-											DefaultVisibility: true
-										}
-									};
+									"@": {
+										DefaultVisibility: true
+									}
+								};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
@@ -1421,10 +1420,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 							}
 							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
 								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
-										"@": {
-											DefaultVisibility: false
-										}
-									};
+									"@": {
+										DefaultVisibility: false
+									}
+								};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
 								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
 							}
@@ -1494,7 +1493,7 @@ schema.statics.getModelBCF = function(modelId){
 			},
 			"Project": {
 				"@": { "ProjectId": modelId },
-				"Name": modelId,
+				"Name": modelId
 			},
 			"ExtensionSchema": {
 
@@ -1635,7 +1634,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											if (undefined !== issue[simpleAttr] 
 											 && (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
 												matchingIssue.comments.push({
-												guid: utils.generateUUID(),
+													guid: utils.generateUUID(),
 													created: timeStamp,
 													action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
 													owner: requester.user + "(BCF Import)"
@@ -1650,7 +1649,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											const complexAttr = complexAttrs[complexAttrIndex];
 											for (let i = 0; i < issue[complexAttr].length; i++) {
 												if (-1 === matchingIssue[complexAttr].findIndex(attr =>
-														utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
+													utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
 													matchingIssue[complexAttr].push(issue[complexAttr][i]);
 												} else {
 													// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
@@ -1712,7 +1711,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					let vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
 
 					viewpoints[vp["@"].Guid] = {
-						snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`],
+						snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`]
 					};
 
 					vpFile && promises.push(parseXmlString(vpFile.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(xml => {
@@ -1846,7 +1845,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
 						issue.markModified("extras");
 
-				}
+					}
 
 					_.get(xml ,"Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 						let obj = {
@@ -1894,7 +1893,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 						let screenshotObj = viewpoints[guid].snapshot ? {
 							flag: 1,
-							content: viewpoints[guid].snapshot,
+							content: viewpoints[guid].snapshot
 						} : undefined;
 
 
@@ -2018,12 +2017,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											}
 
 											highlightedGroupObject = createGroupObject(
-													highlightedGroupObject,
-													issue.name,
-													[255, 0, 0],
-													account,
-													objectModel,
-													vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
+												highlightedGroupObject,
+												issue.name,
+												[255, 0, 0],
+												account,
+												objectModel,
+												vpComponents[i].Selection[j].Component[k]["@"].IfcGuid
 											);
 										}
 									}
@@ -2043,12 +2042,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 												}
 
 												highlightedGroupObject = createGroupObject(
-														highlightedGroupObject,
-														issue.name,
-														[255, 0, 0],
-														account,
-														objectModel,
-														vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
+													highlightedGroupObject,
+													issue.name,
+													[255, 0, 0],
+													account,
+													objectModel,
+													vpComponents[i].Coloring[j].Color[k].Component[compIdx]["@"].IfcGuid
 												);
 											}
 										}
@@ -2101,12 +2100,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											// Exclude items selected
 											if (highlightedObjectsMap && -1 === highlightedObjectsMap.indexOf(componentsToHide[k]["@"].IfcGuid)) {
 												hiddenGroupObject = createGroupObject(
-														hiddenGroupObject,
-														issue.name,
-														[255, 0, 0],
-														account,
-														objectModel,
-														componentsToHide[k]["@"].IfcGuid
+													hiddenGroupObject,
+													issue.name,
+													[255, 0, 0],
+													account,
+													objectModel,
+													componentsToHide[k]["@"].IfcGuid
 												);
 											}
 										}
@@ -2119,12 +2118,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 											}
 
 											shownGroupObject = createGroupObject(
-													shownGroupObject,
-													issue.name,
-													[255, 0, 0],
-													account,
-													objectModel,
-													componentsToShow[k]["@"].IfcGuid
+												shownGroupObject,
+												issue.name,
+												[255, 0, 0],
+												account,
+												objectModel,
+												componentsToShow[k]["@"].IfcGuid
 											);
 										}
 									}

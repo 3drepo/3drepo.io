@@ -435,7 +435,7 @@
 		module.exports.PERM_VIEW_ISSUE,
 		module.exports.PERM_VIEW_MODEL,
 		module.exports.PERM_DOWNLOAD_MODEL,
-		module.exports.PERM_EDIT_FEDERATION,
+		module.exports.PERM_EDIT_FEDERATION
 	]);
 
 	define("ADMIN_TEMPLATE_PERMISSIONS",[

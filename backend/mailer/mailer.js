@@ -78,8 +78,7 @@ function sendNoConsumerAlert(){
 	if(config.contact){
 		const template = require("./templates/noConsumers");
 		return sendEmail(template, config.contact.email, {domain: config.host});
-	}
-	else{
+	} else{
 		return Promise.reject({ message: "config.contact is not set"});
 	}
 }
@@ -228,9 +227,7 @@ function sendImportError(data){
 		let template = require("./templates/importError");
 		data.domain = config.host;
 		return sendEmail(template, config.contact.email, data);
-	}
-	else
-	{
+	} else {
 		return Promise.reject({ message: "config.mail.sender is not set"});
 	}
 }

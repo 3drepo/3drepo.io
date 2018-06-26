@@ -402,8 +402,8 @@ schema.statics.verify = function(username, token, options){
 		}
 		
 		Role.createTeamSpaceRole(username).then(role => {
-				return Role.grantTeamSpaceRoleToUser(username, username);
-			}
+			return Role.grantTeamSpaceRoleToUser(username, username);
+		}
 		).catch(err => {
 			systemLogger.logError("Failed to create role for ", username);
 		});
@@ -423,7 +423,7 @@ schema.methods.getAvatar = function(){
 
 schema.methods.updateInfo = function(updateObj){
 	
-	const updateableFields = [ "firstName", "lastName", "email" ];
+	const updateableFields = ["firstName", "lastName", "email"];
 
 	this.customData = this.customData || {};
 	let validUpdates = true;
@@ -543,13 +543,16 @@ function _getModels(accountName, ids, permissions){
 		settings.forEach(setting => {
 			promises.push(
 				_fillInModelDetails(accountName, setting, permissions).then(model => {
-					if(!(model.permissions.length == 1 && model.permissions[0] == null))
-						{setting.federate ? fedModels.push(model) : models.push(model);}
+					if(!(model.permissions.length == 1 && model.permissions[0] == null)) {
+						setting.federate ? fedModels.push(model) : models.push(model);
+					}
 				})
 			);
 		});
 
-		return Promise.all(promises).then(() => { return {models, fedModels}; });
+		return Promise.all(promises).then(() => {
+			return {models, fedModels}; 
+		});
 	});
 }
 
@@ -660,13 +663,13 @@ function _calSpace(user){
 function _sortAccountsAndModels(accounts){
 
 	function sortModel(a, b) {
-			if(a.timestamp < b.timestamp){
-				return 1;
-			} else if (a.timestamp > b.timestamp){
-				return -1;
-			} else {
-				return 0;
-			}
+		if(a.timestamp < b.timestamp){
+			return 1;
+		} else if (a.timestamp > b.timestamp){
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 
 	accounts.forEach(account => {
@@ -703,14 +706,16 @@ function _createAccounts(roles, userName) {
 
 	roles.forEach( role => {
 		promises.push(User.findByUserName(role.db).then(user => {
-			if(!user) {return;}
+			if(!user) {
+				return;
+			}
 			let tsPromises = [];
 			const permission = user.customData.permissions.findByUser(userName);
 			if(permission){
 				//Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-					let account = {
+				let account = {
 					account: user.user,
 					projects: [],
 					models: [],
@@ -785,113 +790,110 @@ function _createAccounts(roles, userName) {
 									myProj.models = models.models.concat(models.fedModels);
 									resolve();
 								});
-							}
-							else
-							{
+							} else {
 								resolve();
 							}
 						}));						
 
 					});
-					return Promise.all(projPromises).then(()=>
-							{
-								//model permissions
-								let modelPromises = [];
-								let dbUserCache = {};
-								return ModelSetting.find({account: user.user},query, projection).then(models => {
+					return Promise.all(projPromises).then(()=> {
+						//model permissions
+						let modelPromises = [];
+						let dbUserCache = {};
+						return ModelSetting.find({account: user.user},query, projection).then(models => {
 
-									models.forEach(model => {
-										if(model.permissions.length > 0){
-											if(!account){
-												account = accounts.find(account => account.account === user.user);
-												if(!account){
-													account = _makeAccountObject(user.user);
-													accounts.push(account);
-												}
-											}	
-											const existingModel = _findModel(model._id, account);
-											modelPromises.push(
-												_findModelDetails(dbUserCache, userName, { 
-													account: user.user, model: model._id
-												}).then(data => {
-														return _fillInModelDetails(account.account, data.setting, data.permissions);
+							models.forEach(model => {
+								if(model.permissions.length > 0){
+									if(!account){
+										account = accounts.find(account => account.account === user.user);
+										if(!account){
+											account = _makeAccountObject(user.user);
+											accounts.push(account);
+										}
+									}	
+									const existingModel = _findModel(model._id, account);
+									modelPromises.push(
+										_findModelDetails(dbUserCache, userName, { 
+											account: user.user, model: model._id
+										}).then(data => {
+											return _fillInModelDetails(account.account, data.setting, data.permissions);
 			
-												}).then(_model => {
+										}).then(_model => {
 			
-													if(existingModel){
+											if(existingModel){
 								
-														existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
-															return;
-													}
+												existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
+												return;
+											}
 	
-													//push result to account object
-													return Project.findOne({ account: account.account }, { models: _model.model }).then(projectObj => {
-														if (projectObj){
+											//push result to account object
+											return Project.findOne({ account: account.account }, { models: _model.model }).then(projectObj => {
+												if (projectObj){
 									
-															let project = account.projects.find(p => p.name === projectObj.name);
+													let project = account.projects.find(p => p.name === projectObj.name);
 								
-															if(!project){
-																project = {
-																	_id: projectObj._id,
-																	name: projectObj.name,
-																	permissions: [],
-																	models: []
-																};
-																account.projects.push(project);
-															}
-															project.models.push(_model);
+													if(!project){
+														project = {
+															_id: projectObj._id,
+															name: projectObj.name,
+															permissions: [],
+															models: []
+														};
+														account.projects.push(project);
+													}
+													project.models.push(_model);
 
-														} else {
-															_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
-														}
-													});
-												})
-											);
-										}
-									});
+												} else {
+													_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
+												}
+											});
+										})
+									);
+								}
+							});
 									
 
 
-									return Promise.all(modelPromises).then(() => {
+							return Promise.all(modelPromises).then(() => {
 
-										//fill in all subModels name
-										accounts.forEach(account => {
-											//all fed models
-											const allFedModels = account.fedModels.concat(
-											account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
-											);
+								//fill in all subModels name
+								accounts.forEach(account => {
+									//all fed models
+									const allFedModels = account.fedModels.concat(
+										account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
+									);
 
-											//all models	
-											const allModels = account.models.concat(
-												account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
-											);
+									//all models	
+									const allModels = account.models.concat(
+										account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
+									);
 
-											allFedModels.forEach(fed => {
-												fed.subModels.forEach(subModel => {
-													const foundModel = allModels.find(m => m.model === subModel.model);
-													subModel.name = foundModel && foundModel.name;
-												});
-											});
+									allFedModels.forEach(fed => {
+										fed.subModels.forEach(subModel => {
+											const foundModel = allModels.find(m => m.model === subModel.model);
+											subModel.name = foundModel && foundModel.name;
 										});
-
-
-										//sorting models
-										_sortAccountsAndModels(accounts);
-
-										// own acconut always ranks top of the list
-										let myAccountIndex = accounts.findIndex(account => account.account === userName);
-										if(myAccountIndex > -1){
-											let myAccount = accounts[myAccountIndex];
-											accounts.splice(myAccountIndex, 1);
-											accounts.unshift(myAccount);
-										}
-
-
-										return accounts;
-
-									});			
+									});
 								});
-							});
+
+
+								//sorting models
+								_sortAccountsAndModels(accounts);
+
+								// own acconut always ranks top of the list
+								let myAccountIndex = accounts.findIndex(account => account.account === userName);
+								if(myAccountIndex > -1){
+									let myAccount = accounts[myAccountIndex];
+									accounts.splice(myAccountIndex, 1);
+									accounts.unshift(myAccount);
+								}
+
+
+								return accounts;
+
+							});			
+						});
+					});
 				});
 				
 			});
@@ -899,7 +901,9 @@ function _createAccounts(roles, userName) {
 
 	});
 
-	return Promise.all(promises).then(() => { return accounts;});
+	return Promise.all(promises).then(() => {
+		return accounts;
+	});
 
 }
 schema.methods.listAccounts = function(){
@@ -913,13 +917,13 @@ schema.methods.updateSubscriptions = function(plans, billingUser, billingAddress
 	plans = plans || [];
 	
 	return this.customData.billing.updateSubscriptions(plans, this.user, billingUser, billingAddress)
-	.then(_billingAgreement => {
+		.then(_billingAgreement => {
 		
-		billingAgreement = _billingAgreement;
-		return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
-	}).then(() => {
-		return Promise.resolve(billingAgreement || {});
-	});
+			billingAgreement = _billingAgreement;
+			return updateUser(this.user, {$set: {"customData.billing" : this.customData.billing}});
+		}).then(() => {
+			return Promise.resolve(billingAgreement || {});
+		});
 };
 
 function updateUser(username, update) {
@@ -982,7 +986,9 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 			return Promise.reject({ 
 				resCode: responseCodes.USER_IN_COLLABORATOR_LIST, 
 				info: {
-					models: foundModels.map(m => { return { model: m.name}; }),
+					models: foundModels.map(m => {
+						return { model: m.name}; 
+					}),
 					projects: foundProjects.map(p => p.name),
 					teamspace: teamspacePerm
 				}
@@ -1018,8 +1024,7 @@ schema.methods.addTeamMember = function(user){
 		const limits = this.customData.billing.getSubscriptionLimits();
 		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
 			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
-		}
-		else {
+		} else {
 			return User.findByUserName(user).then(userEntry => {
 				if(!userEntry) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
@@ -1053,8 +1058,8 @@ schema.statics.getMembersAndJobs = function(teamspace) {
 	let promises = [];
 
 	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
-					memberArr = members;
-				});
+		memberArr = members;
+	});
 
 	const getJobInfoProm = Job.usersWithJob(teamspace).then( _memToJob => {
 		memToJob = _memToJob;

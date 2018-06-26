@@ -89,8 +89,7 @@
 		};
 	};
 
-	let getBillingAgreementAttributes = function(id, startDate, billingAddress, desc)
-	{
+	let getBillingAgreementAttributes = function(id, startDate, billingAddress, desc) {
 		return {
 			"name": "3D Repo Licences",
 			"description": desc,
