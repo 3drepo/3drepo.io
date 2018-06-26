@@ -1,3 +1,4 @@
+"use strict";
 module.exports.DEFAULT_PLUGIN_STRUCTURE = {
 	"plugin": "home",
 	"friends": [

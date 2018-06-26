@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,17 +16,15 @@
  */
 
 // Corresponds to RepoNodeCamera in C++ definition of 3D Repo
-
-// var mongodb = require('mongodb');
+"use strict";
 const assert = require("assert");
-// var UUID = require('node-uuid');
 const C = require("../constants");
 const Utils = require("../utils.js");
 
 //-----------------------------------------------------------------------------
 exports.decode = function(bson) {
 	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_CAMERA, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_CAMERA);
-		
+
 	// Nothing to process at the moment, so return unmodified
 	return bson;
 };
@@ -37,7 +35,7 @@ exports.decode = function(bson) {
  * and performs checks to fill in any missing information such as empty name,
  * _id and shared_id fields.
  *
- * WARNING: input variables are pass by reference, any changes to them are 
+ * WARNING: input variables are pass by reference, any changes to them are
  * carried over!
  */
 exports.encode = function(camera, root_shared_id) {
@@ -58,7 +56,7 @@ exports.encode = function(camera, root_shared_id) {
 
 	// TODO: add camera hash appendix
 	repo_camera[C.REPO_NODE_LABEL_SHARED_ID] = Utils.generateUUID();
-	repo_camera[C.REPO_NODE_LABEL_API] = 1;	
+	repo_camera[C.REPO_NODE_LABEL_API] = 1;
 	repo_camera[C.REPO_NODE_LABEL_TYPE] = C.REPO_NODE_TYPE_CAMERA;
 
 	repo_camera[C.REPO_NODE_LABEL_PARENTS] = [root_shared_id];
@@ -91,6 +89,6 @@ exports.encode = function(camera, root_shared_id) {
 	if (camera.aspect_ratio){
 		repo_camera[C.REPO_NODE_LABEL_ASPECT_RATIO] = camera.aspect_ratio;
 	}
-   
+
 	return repo_camera;
 };

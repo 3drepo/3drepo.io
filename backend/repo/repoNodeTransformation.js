@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 
 // Corresponds to repoNodeTransformation in C++ definition of 3D Repo
 
-// var mongodb = require('mongodb');
+"use strict";
 const assert = require("assert");
 const UUID = require("node-uuid");
 const C = require("../constants");
@@ -25,12 +25,12 @@ const C = require("../constants");
 exports.decode = function(bson, meshes, cameras) {
 	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_TRANSFORMATION, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_TRANSFORMATION);
 
-	//---------------------------------------------------------------------	
-	// Meshes & Cameras extraction	
+	//---------------------------------------------------------------------
+	// Meshes & Cameras extraction
 	const mMeshes = [];
 	const mCameras = [];
 	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {			
+		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
 			const childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
 			const childID = UUID.unparse(childIDbytes);
 
@@ -39,14 +39,14 @@ exports.decode = function(bson, meshes, cameras) {
 			if (mesh) {
 				mMeshes.push(childID);
 			}
-			
+
 			// If child is a camera
 			const camera = cameras[childID];
 			if (camera) {
 				mCameras.push(childID);
 			}
 		}
-	}	
+	}
 
 	//---------------------------------------------------------------------
 	// Meshes
@@ -60,6 +60,6 @@ exports.decode = function(bson, meshes, cameras) {
 	if (mCameras.length > 0){
 		bson[C.REPO_NODE_LABEL_CAMERAS] = mCameras;
 	}
-	
+
 	return bson;
 };

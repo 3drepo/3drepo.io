@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 
 // Corresponds to repoNodeMaterial in C++ definition of 3D Repo
 
-// var mongodb = require('mongodb');
+"use strict";
 const assert = require("assert");
 const UUID = require("node-uuid");
 const C = require("../constants");
@@ -38,4 +38,4 @@ exports.decode = function(bson, textures) {
 		}
 	}
 	return bson;
-}; 
+};

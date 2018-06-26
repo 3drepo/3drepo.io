@@ -21,6 +21,7 @@
 // var UUID = require('node-uuid');
 // var C = require('./constants');
 
+"use strict";
 exports.decode = function(bson /*, meta*/) {
 	if (bson.mime) {
 		bson.data = {};

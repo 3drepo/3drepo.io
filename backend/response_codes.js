@@ -408,10 +408,6 @@
 
 				res.status(resCode.status);
 
-				if (req && req.params && req.params.format) {
-					reqFormat = req.params.format;
-				}
-
 				const contentType = mimeTypes[format || req.params.format];
 
 				if (contentType) {

@@ -19,9 +19,6 @@
 
 "use strict";
 
-// var mongodb = require('mongodb');
-// var assert = require('assert');
-
 const UUID = require("node-uuid");
 const C = require("../constants");
 const repoNodeMesh = require("./repoNodeMesh");
@@ -39,7 +36,7 @@ const systemLogger = require("../logger.js").systemLogger;
  *
  * @param {Array} bsonArray
  */
-var repoGraphScene = function(logger) {
+const repoGraphScene = function(logger) {
 
 	const self = this instanceof repoGraphScene ? this : Object.create(repoGraphScene.prototype);
 
@@ -48,13 +45,11 @@ var repoGraphScene = function(logger) {
 	return self;
 };
 
-repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
+repoGraphScene.prototype.decode = function(bsonArray) {
 
 	let rootNode;
 
 	this.logger.logTrace("repoGraphScene start decode");
-
-	gridfsfiles = typeof(gridfsfiles) === "undefined" ? {} : gridfsfiles;
 
 	// return variable
 	const scene = {};

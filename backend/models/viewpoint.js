@@ -27,13 +27,13 @@ const view = {};
 view.findByUID = function(dbCol, uid, projection) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(view => {
+		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
 
-			if (!view) {
+			if (!vp) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
 
-			return view;
+			return vp;
 		});
 	});
 };
@@ -56,12 +56,12 @@ view.listViewpoints = function(dbCol){
 
 view.getThumbnail = function(dbColOptions, uid){
 
-	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(view => {
-		if (!view.screenshot) {
+	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {
+		if (!vp.screenshot) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
-			return view.screenshot.buffer.buffer;
+			return vp.screenshot.buffer.buffer;
 		}
 	});
 

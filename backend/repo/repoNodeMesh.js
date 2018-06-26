@@ -18,11 +18,11 @@
 // Corresponds to repoNodeMesh in C++ definition of 3D Repo
 // var mongodb = require("mongodb");
 // var assert = require("assert");
+"use strict";
 const UUID = require("node-uuid");
 const C = require("../constants");
 
 exports.decode = function(bson, materials) {
-	"use strict";
 	// There should be always only a single material with the mesh!
 	// Takes the very first match if multiple materials attached as children.
 	// Children are appended on the fly from other repository components.
@@ -80,8 +80,6 @@ exports.decode = function(bson, materials) {
  * @param {Object} mesh
  */
 exports.extractBoundingBox = function(mesh) {
-	"use strict";
-
 	const bbox = {};
 
 	if (mesh.bounding_box) {
@@ -101,8 +99,6 @@ exports.extractBoundingBox = function(mesh) {
 
 
 exports.mergeMapSort = function(left, right) {
-	"use strict";
-
 	if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
 		return -1;
 	} else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] ) {
