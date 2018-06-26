@@ -28,7 +28,7 @@
 	 * @type {Object}
 	 */
 
-	let codesMap = {
+	const codesMap = {
 		OK: { message: "OK", status: 200 },
 		USER_NOT_FOUND: { message: "User not found", status: 404 },
 		INCORRECT_USERNAME_OR_PASSWORD: { message: "Incorrect username or password", status: 400 },
@@ -248,7 +248,7 @@
 
 
 	let valueCounter = 0;
-	let valid_values = [900, 1000, 2000, 3000, 4000];
+	const valid_values = [900, 1000, 2000, 3000, 4000];
 
 	Object.keys(codesMap)
 		.forEach(key => {
@@ -258,7 +258,7 @@
 			
 		});
 
-	let responseCodes = Object.assign({
+	const responseCodes = Object.assign({
 
 		codesMap: codesMap,
 
@@ -385,7 +385,7 @@
 		let length;
 		if (resCode.value) // Prepare error response
 		{
-			let responseObject = _.extend({}, extraInfo, {
+			const responseObject = _.extend({}, extraInfo, {
 				place: place,
 				status: resCode.status,
 				message: resCode.message,

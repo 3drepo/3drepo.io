@@ -18,30 +18,30 @@
 // Corresponds to repoNodeTransformation in C++ definition of 3D Repo
 
 // var mongodb = require('mongodb');
-let assert = require("assert");
-let UUID = require("node-uuid");
-let C = require("../constants");
+const assert = require("assert");
+const UUID = require("node-uuid");
+const C = require("../constants");
 
 exports.decode = function(bson, meshes, cameras) {
 	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_TRANSFORMATION, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_TRANSFORMATION);
 
 	//---------------------------------------------------------------------	
 	// Meshes & Cameras extraction	
-	let mMeshes = [];
-	let mCameras = [];
+	const mMeshes = [];
+	const mCameras = [];
 	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
 		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {			
-			let childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-			let childID = UUID.unparse(childIDbytes);
+			const childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+			const childID = UUID.unparse(childIDbytes);
 
 			// If child is a mesh
-			let mesh = meshes[childID];
+			const mesh = meshes[childID];
 			if (mesh) {
 				mMeshes.push(childID);
 			}
 			
 			// If child is a camera
-			let camera = cameras[childID];
+			const camera = cameras[childID];
 			if (camera) {
 				mCameras.push(childID);
 			}

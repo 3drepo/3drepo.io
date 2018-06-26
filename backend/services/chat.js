@@ -21,17 +21,17 @@ module.exports.createApp = function (server, serverConfig){
 	//let app = require('express');
 	//var server = require('http').Server(app);
 
-	let config = require("../config");
-	let session = require("./session").session(config);
+	const config = require("../config");
+	const session = require("./session").session(config);
 	
-	let logger = require("../logger.js");
-	let middlewares = require("../middlewares/middlewares");
-	let systemLogger = logger.systemLogger;
+	const logger = require("../logger.js");
+	const middlewares = require("../middlewares/middlewares");
+	const systemLogger = logger.systemLogger;
 
 	//console.log(serverConfig);
-	let io = require("socket.io")(server, { path: "/" + serverConfig.subdirectory });
-	let sharedSession = require("express-socket.io-session");
-	let _ = require("lodash");
+	const io = require("socket.io")(server, { path: "/" + serverConfig.subdirectory });
+	const sharedSession = require("express-socket.io-session");
+	const _ = require("lodash");
 
 	io.use((socket, next) => {
 		if(socket.handshake.query["connect.sid"] && !socket.handshake.headers.cookie){
@@ -46,7 +46,7 @@ module.exports.createApp = function (server, serverConfig){
 
 	io.use((socket, next) => {
 		// init the singleton db connection
-		let DB = require("../db/db");
+		const DB = require("../db/db");
 		DB.getDB("admin").then( () => {
 			// set db to singleton modelFactory class
 			require("../models/factory/modelFactory").setDB(DB);
@@ -69,9 +69,9 @@ module.exports.createApp = function (server, serverConfig){
 	});
 
 
-	let userToSocket = {};
-	let credentialErrorEventName = "credentialError";
-	let joinedEventName = "joined";
+	const userToSocket = {};
+	const credentialErrorEventName = "credentialError";
+	const joinedEventName = "joined";
 
 	function initiateSocket(queue){
 
@@ -80,9 +80,9 @@ module.exports.createApp = function (server, serverConfig){
 
 			if(msg.event && msg.account){
 				//it is to avoid emitter getting its own message
-				let emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
+				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 				
-				let modelNameSpace = msg.model ?  `::${msg.model}` : ""; 
+				const modelNameSpace = msg.model ?  `::${msg.model}` : ""; 
 				let extraPrefix = "";
 
 				if(Array.isArray(msg.extraKeys) && msg.extraKeys.length > 0){
@@ -91,7 +91,7 @@ module.exports.createApp = function (server, serverConfig){
 					});
 				}
 
-				let eventName = `${msg.account}${modelNameSpace}${extraPrefix}::${msg.event}`;
+				const eventName = `${msg.account}${modelNameSpace}${extraPrefix}::${msg.event}`;
 				emitter.to(`${msg.account}${modelNameSpace}`).emit(eventName, msg.data);
 			}
 		});
@@ -113,8 +113,8 @@ module.exports.createApp = function (server, serverConfig){
 				return;
 			}
 
-			let username = socket.handshake.session.user.username;
-			let sessionId =  socket.handshake.session.id;
+			const username = socket.handshake.session.user.username;
+			const sessionId =  socket.handshake.session.id;
 			//console.log('socket id', socket.client.id);
 			userToSocket[socket.client.id] = socket;
 
@@ -122,11 +122,11 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on("join", data => {
 				//check permission if the user have permission to join room
-				let auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
+				const auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
 				
 				auth(username, data.account, data.model).then(hasAccess => {
 
-					let modelNameSpace = data.model ?  `::${data.model}` : "";
+					const modelNameSpace = data.model ?  `::${data.model}` : "";
 
 					if(hasAccess){
 
@@ -153,7 +153,7 @@ module.exports.createApp = function (server, serverConfig){
 
 			socket.on("leave", data => {
 
-				let modelNameSpace = data.model ?  `::${data.model}` : "";
+				const modelNameSpace = data.model ?  `::${data.model}` : "";
 
 				socket.leave(`${data.account}${modelNameSpace}`);
 				systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has left room ${data.account}${modelNameSpace}`, { 

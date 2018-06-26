@@ -37,7 +37,7 @@ const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
 const Project = require("./project");
 
-let schema = mongoose.Schema({
+const schema = mongoose.Schema({
 	_id : String,
 	user: String,
 	//db: String,
@@ -93,8 +93,8 @@ schema.statics.historyChunksStats = function(dbName){
 
 	return ModelFactory.dbManager.listCollections(dbName).then(collections => {
 
-		let historyChunks = _.filter(collections, collection => collection.name.endsWith(".history.chunks"));
-		let promises = [];
+		const historyChunks = _.filter(collections, collection => collection.name.endsWith(".history.chunks"));
+		const promises = [];
 
 		historyChunks.forEach(collection => {
 			promises.push(ModelFactory.dbManager.getCollectionStats(dbName, collection.name));
@@ -201,7 +201,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 			user = _user;
 
-			let tokenData = user.customData.resetPasswordToken;
+			const tokenData = user.customData.resetPasswordToken;
 			if(tokenData && tokenData.token === token && tokenData.expiredAt > new Date()){
 				return Promise.resolve();
 			} else {
@@ -212,7 +212,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 
 	return checkUser.then(() => {
 
-		let updateUserCmd = {
+		const updateUserCmd = {
 			"updateUser" : username,
 			"pwd": newPassword
 		};
@@ -241,7 +241,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	if (customData) {
 		return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
-			let cleanedCustomData = {};
+			const cleanedCustomData = {};
 			let emailRegex = /^(['a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
 			if (config.auth.allowPlusSignInEmail) {
@@ -268,7 +268,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 				}
 			});
 
-			let billingInfo = {};
+			const billingInfo = {};
 
 			["firstName", "lastName", "countryCode", "company"].forEach(key => {
 				if (customData[key]){
@@ -276,7 +276,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 				}
 			});
 
-			let expiryAt = new Date();
+			const expiryAt = new Date();
 			expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
 			cleanedCustomData.inactive = true;
@@ -357,9 +357,9 @@ schema.statics.verify = function(username, token, options){
 
 	options = options || {};
 
-	let allowRepeatedVerify = options.allowRepeatedVerify;
-	let skipImportToyModel = options.skipImportToyModel;
-	let skipCreateBasicPlan = options.skipCreateBasicPlan;
+	const allowRepeatedVerify = options.allowRepeatedVerify;
+	const skipImportToyModel = options.skipImportToyModel;
+	const skipCreateBasicPlan = options.skipCreateBasicPlan;
 
 	let user;
 
@@ -367,7 +367,7 @@ schema.statics.verify = function(username, token, options){
 		
 		user = _user;
 
-		let tokenData = user && user.customData && user.customData.emailVerifyToken;
+		const tokenData = user && user.customData && user.customData.emailVerifyToken;
 
 		if(!user){
 
@@ -394,7 +394,7 @@ schema.statics.verify = function(username, token, options){
 		if(!skipImportToyModel){
 
 			//import toy model
-			let ModelHelper = require("./helper/model");
+			const ModelHelper = require("./helper/model");
 
 			ModelHelper.importToyProject(username, username).catch(err => {
 				systemLogger.logError("Failed to import toy model", { err : err && err.stack ? err.stack : err});
@@ -452,10 +452,10 @@ schema.methods.updateInfo = function(updateObj){
 
 schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTime){
 
-	let expiryAt = new Date();
+	const expiryAt = new Date();
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
-	let resetPasswordToken = {
+	const resetPasswordToken = {
 		token: crypto.randomBytes(64).toString("hex"),
 		expiredAt: expiryAt
 	};
@@ -488,7 +488,7 @@ function _fillInModelDetails(accountName, setting, permissions){
 		permissions = C.MODEL_PERM_LIST.slice(0);
 	}
 
-	let model = {
+	const model = {
 		federate: setting.federate,
 		permissions: permissions,
 		model: setting._id,
@@ -527,8 +527,8 @@ function _fillInModelDetails(accountName, setting, permissions){
 //list all models in an account
 function _getModels(accountName, ids, permissions){
 
-	let models = [];
-	let fedModels = [];
+	const models = [];
+	const fedModels = [];
 
 	let query = {};
 
@@ -538,7 +538,7 @@ function _getModels(accountName, ids, permissions){
 
 	return ModelSetting.find({account: accountName}, query).then(settings => {
 
-		let promises = [];
+		const promises = [];
 
 		settings.forEach(setting => {
 			promises.push(
@@ -590,7 +590,7 @@ function _addProjects(account, username, models){
 
 			project.models.forEach((model, j) => {
 
-				let fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
+				const fullModel = account.models.find(findModel(model)) || account.fedModels.find(findModel(model));
 				project.models[j] = fullModel;
 
 			});
@@ -642,7 +642,7 @@ function _findModelDetails(dbUserCache, username, model){
 
 function _calSpace(user){
 
-	let quota = user.customData.billing.getSubscriptionLimits();
+	const quota = user.customData.billing.getSubscriptionLimits();
 	return User.historyChunksStats(user.user).then(stats => {
 
 		if(stats && quota.spaceLimit > 0){
@@ -701,21 +701,21 @@ function _makeAccountObject(name) {
 
 function _createAccounts(roles, userName) {
 
-	let accounts = [];
-	let promises = [];
+	const accounts = [];
+	const promises = [];
 
 	roles.forEach( role => {
 		promises.push(User.findByUserName(role.db).then(user => {
 			if(!user) {
 				return;
 			}
-			let tsPromises = [];
+			const tsPromises = [];
 			const permission = user.customData.permissions.findByUser(userName);
 			if(permission){
 				//Check for admin Privileges first
 				const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-				let account = {
+				const account = {
 					account: user.user,
 					projects: [],
 					models: [],
@@ -744,7 +744,7 @@ function _createAccounts(roles, userName) {
 
 			return Promise.all(tsPromises).then(()=>{
 				//check project scope permissions
-				let projPromises = [];
+				const projPromises = [];
 				let account = null;
 				const query = { "permissions": { "$elemMatch": { user: userName } }};
 				const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1};
@@ -798,8 +798,8 @@ function _createAccounts(roles, userName) {
 					});
 					return Promise.all(projPromises).then(()=> {
 						//model permissions
-						let modelPromises = [];
-						let dbUserCache = {};
+						const modelPromises = [];
+						const dbUserCache = {};
 						return ModelSetting.find({account: user.user},query, projection).then(models => {
 
 							models.forEach(model => {
@@ -881,9 +881,9 @@ function _createAccounts(roles, userName) {
 								_sortAccountsAndModels(accounts);
 
 								// own acconut always ranks top of the list
-								let myAccountIndex = accounts.findIndex(account => account.account === userName);
+								const myAccountIndex = accounts.findIndex(account => account.account === userName);
 								if(myAccountIndex > -1){
-									let myAccount = accounts[myAccountIndex];
+									const myAccount = accounts[myAccountIndex];
 									accounts.splice(myAccountIndex, 1);
 									accounts.unshift(myAccount);
 								}
@@ -970,7 +970,7 @@ schema.methods.removeTeamMember = function(username, cascadeRemove){
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 	}
 
-	let teamspacePerm = this.customData.permissions.findByUser(username);
+	const teamspacePerm = this.customData.permissions.findByUser(username);
 	//check if they have any permissions assigned
 	return Project.find({ account: this.user }, { "permissions.user":  username}).then(projects => {
 		
@@ -1055,7 +1055,7 @@ schema.statics.getQuotaInfo = function(teamspace) {
 schema.statics.getMembersAndJobs = function(teamspace) {
 	let memberArr = [];
 	let memToJob = {};
-	let promises = [];
+	const promises = [];
 
 	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
 		memberArr = members;
@@ -1068,9 +1068,9 @@ schema.statics.getMembersAndJobs = function(teamspace) {
 	promises.push(getJobInfoProm);
 		
 	return Promise.all(promises).then( () => {
-		let resultArr = [];
+		const resultArr = [];
 		memberArr.forEach(mem => {
-			let entry = {user: mem};
+			const entry = {user: mem};
 			if(memToJob[mem]) {
 				entry.job = memToJob[mem];			
 			}
@@ -1085,7 +1085,7 @@ schema.statics.getAllUsersInTeamspace = function(teamspace) {
 
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
 	return this.find({account: "admin"}, query , {user : 1}).then( users => {
-		let res = [];
+		const res = [];
 		users.forEach(user => {
 			res.push(user.user);
 		});

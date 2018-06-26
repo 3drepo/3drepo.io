@@ -17,20 +17,20 @@
 
 "use strict";
 
-let express = require("express");
-let router = express.Router({mergeParams: true});
-let responseCodes = require("../response_codes.js");
-let C = require("../constants");
-let middlewares = require("../middlewares/middlewares");
-let config = require("../config");
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const responseCodes = require("../response_codes.js");
+const C = require("../constants");
+const middlewares = require("../middlewares/middlewares");
+const config = require("../config");
 //var systemLogger    = require("../logger.js").systemLogger;
-let utils = require("../utils");
-let User = require("../models/user");
-let addressMeta = require("../models/addressMeta");
-let Mailer = require("../mailer/mailer");
-let httpsPost = require("../libs/httpsReq").post;
+const utils = require("../utils");
+const User = require("../models/user");
+const addressMeta = require("../models/addressMeta");
+const Mailer = require("../mailer/mailer");
+const httpsPost = require("../libs/httpsReq").post;
 
-let multer = require("multer");
+const multer = require("multer");
 
 
 router.post("/login", login);
@@ -90,7 +90,7 @@ function login(req, res, next){
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
-			let responseData = { username: user.user };
+			const responseData = { username: user.user };
 
 			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
 
@@ -126,7 +126,7 @@ function logout(req, res, next){
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
-	let username = req.session.user.username;
+	const username = req.session.user.username;
 
 	req.session.destroy(function() {
 		req[C.REQ_REPO].logger.logDebug("User has logged out.");
@@ -136,7 +136,7 @@ function logout(req, res, next){
 }
 
 function updateUser(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
 	if(req.body.oldPassword) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
@@ -168,14 +168,14 @@ function updateUser(req, res, next){
 
 function signUp(req, res, next){
 
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
 	if(!config.auth.register){
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.REGISTER_DISABLE, responseCodes.REGISTER_DISABLE);
 	}
 
 	if(!req.body.password){
-		let err = responseCodes.SIGN_UP_PASSWORD_MISSING;
+		const err = responseCodes.SIGN_UP_PASSWORD_MISSING;
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
 
@@ -217,7 +217,7 @@ function signUp(req, res, next){
 
 		}).then( data => {
 
-			let country = addressMeta.countries.find(country => country.code === req.body.countryCode);
+			const country = addressMeta.countries.find(country => country.code === req.body.countryCode);
 			//send to sales
 			Mailer.sendNewUser({
 				user: req.params.account,
@@ -275,7 +275,7 @@ function verify(req, res, next){
 }
 
 function forgotPassword(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 	
 	if (Object.prototype.toString.call(req.body.email) === "[object String]") { 
 
@@ -305,7 +305,7 @@ function forgotPassword(req, res, next){
 }
 
 function getAvatar(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
@@ -329,19 +329,19 @@ function getAvatar(req, res, next){
 }
 
 function uploadAvatar(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
 
 
 	//check space and format
 	function fileFilter(req, file, cb){
 
-		let acceptedFormat = ["png", "jpg", "gif"];
+		const acceptedFormat = ["png", "jpg", "gif"];
 
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
-		let size = parseInt(req.headers["content-length"]);
+		const size = parseInt(req.headers["content-length"]);
 
 		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -392,7 +392,7 @@ function resetPassword(req, res, next){
 
 function listUserInfo(req, res, next){
 
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 	let user;
 
 	User.findByUserName(req.params.account).then(_user => {
@@ -406,7 +406,7 @@ function listUserInfo(req, res, next){
 
 	}).then(databases => {
 
-		let customData = user.customData.toObject();
+		const customData = user.customData.toObject();
 
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 			accounts: databases,
@@ -424,7 +424,7 @@ function listUserInfo(req, res, next){
 
 function listInfo(req, res, next){
 
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
 	if(req.session.user.username !== req.params.account){
 
@@ -455,7 +455,7 @@ function listInfo(req, res, next){
 }
 
 function printVersion(req, res, next){
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 	const versionInfo = require("../VERSION");
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, versionInfo);
 }

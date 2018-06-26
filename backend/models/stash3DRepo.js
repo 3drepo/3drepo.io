@@ -16,15 +16,15 @@
  */
 
 
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
-let Schema = mongoose.Schema;
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const Schema = mongoose.Schema;
 
-let schema = Schema({
+const schema = Schema({
 	_id: Object
 });
 
-let Stash3DRepo = ModelFactory.createClass(
+const Stash3DRepo = ModelFactory.createClass(
 	"Stash3DRepo", 
 	schema, 
 	arg => { 

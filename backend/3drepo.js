@@ -31,17 +31,17 @@ const http = require("http");
 const tls  = require("tls");
 const vhost = require("vhost");
 
-let certs = {};
-let certMap = {};
+const certs = {};
+const certMap = {};
 let sslOptions = {};
 
 function setupSSL() {
 	if ("ssl" in config) {
 
-		for (let certGroup in config.ssl) {
+		for (const certGroup in config.ssl) {
 	
 			if (config.ssl.hasOwnProperty(certGroup)) {
-				let certGroupOptions = {};
+				const certGroupOptions = {};
 	
 				certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
 				certGroupOptions.cert = fs.readFileSync(config.ssl[certGroup].cert, "utf8");
@@ -58,7 +58,7 @@ function setupSSL() {
 	
 		sslOptions = {
 			SNICallback: function(domain, callback) {
-				let certGroup = certMap[domain];
+				const certGroup = certMap[domain];
 				callback(null, certs[certGroup]);
 			},
 			key: fs.readFileSync(config.ssl["default"].key, "utf8"),
@@ -83,8 +83,8 @@ function setupSSL() {
 function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
 
-		let http_app = express();
-		let redirect = express();
+		const http_app = express();
+		const redirect = express();
 
 		// If someone tries to access the site through http redirect to the encrypted site.
 		http_app.use(vhost(config.host, redirect));
@@ -131,7 +131,7 @@ function runServer() {
 
 function handleSubdomains(mainApp) {
 	if (config.hasOwnProperty("subdomains")) {
-		for (let subdomain in config.subdomains) {
+		for (const subdomain in config.subdomains) {
 			if (config.subdomains.hasOwnProperty(subdomain)) {
 				setupSubdomain(mainApp, subdomain);
 			}
@@ -140,16 +140,16 @@ function handleSubdomains(mainApp) {
 }
 
 function setupSubdomain(mainApp, subdomain) {
-	let subDomainApp = express();
+	const subDomainApp = express();
 	
-	let subdomainServers = config.subdomains[subdomain];
+	const subdomainServers = config.subdomains[subdomain];
 
 	for (let subId = 0; subId < subdomainServers.length; subId++) {
 
-		let serverConfig = subdomainServers[subId];
+		const serverConfig = subdomainServers[subId];
 
 		// Certificate group
-		let certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
+		const certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
 		certMap[serverConfig.hostname] = certGroup;
 
 		if (!serverConfig.external) {
@@ -179,7 +179,7 @@ function setupSubdomain(mainApp, subdomain) {
 	}
 
 	if (subdomain !== "undefined") {
-		let subdomainHost = subdomain + "." + config.host;
+		const subdomainHost = subdomain + "." + config.host;
 		mainApp.use(vhost(subdomainHost, subDomainApp));
 	} else {
 		mainApp.use(vhost(config.host, subDomainApp));
@@ -197,7 +197,7 @@ function logCreateService(serverConfig) {
 }
 
 function createChat(serverConfig) {
-	let server = config.using_ssl ? 
+	const server = config.using_ssl ? 
 		https.createServer(sslOptions) : 
 		http.createServer();
 
@@ -207,13 +207,13 @@ function createChat(serverConfig) {
 		serverStartFunction("0.0.0.0", serverConfig.port)
 	);
 	
-	let service = `./services/${serverConfig.service}.js`;
+	const service = `./services/${serverConfig.service}.js`;
 	require(service).createApp(server, serverConfig);
 }
 
 function createService(subDomainApp, serverConfig) {
-	let service = `./services/${serverConfig.service}.js`;
-	let app = require(service).createApp(serverConfig);
+	const service = `./services/${serverConfig.service}.js`;
+	const app = require(service).createApp(serverConfig);
 
 	subDomainApp.use(serverConfig.host_dir, app);
 }

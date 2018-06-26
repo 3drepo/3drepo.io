@@ -145,7 +145,7 @@
 		// level in the prototype chain.
 		if ( existingConstructor ) {
 			$.each( existingConstructor._childConstructors, function( i, child ) {
-				let childPrototype = child.prototype;
+				const childPrototype = child.prototype;
 
 				// redefine the child widget using the same prototype that was
 				// originally used, but inherit from the new version of the base
@@ -190,7 +190,7 @@
 	};
 
 	$.widget.bridge = function( name, object ) {
-		let fullName = object.prototype.widgetFullName || name;
+		const fullName = object.prototype.widgetFullName || name;
 		$.fn[ name ] = function( options ) {
 			let isMethodCall = typeof options === "string",
 				args = widget_slice.call( arguments, 1 ),
@@ -227,7 +227,7 @@
 				}
 
 				this.each(function() {
-					let instance = $.data( this, fullName );
+					const instance = $.data( this, fullName );
 					if ( instance ) {
 						instance.option( options || {} );
 						if ( instance._init ) {
@@ -559,7 +559,7 @@
 		};
 	});
 
-	let widget = $.widget;
+	const widget = $.widget;
 
 
 

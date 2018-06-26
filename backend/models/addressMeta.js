@@ -1,4 +1,4 @@
-let countries = [ 
+const countries = [ 
 	{"name": "Afghanistan", "code": "AF"}, 
 	{"name": "Åland Islands", "code": "AX"}, 
 	{"name": "Albania", "code": "AL"}, 
@@ -244,7 +244,7 @@ let countries = [
 	{"name": "Zimbabwe", "code": "ZW"} 
 ];
 
-let usStates = module.exports = [
+const usStates = module.exports = [
 	{
 		"name": "Alabama",
 		"code": "AL"
@@ -483,7 +483,7 @@ let usStates = module.exports = [
 	}
 ];
 
-let euCountriesCode = [
+const euCountriesCode = [
 	"GB",
 	"BE", "BG", "CZ", "DK", "DE", "EE", "IE", "GR", "ES", "FR", "HR", "IT", "CY", "LV", "LT",
 	"LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"

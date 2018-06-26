@@ -63,7 +63,7 @@ under the License.
 		}
 
 		return str.split("&").reduce(function (ret, param) {
-			let parts = param.replace(/\+/g, " ").split("=");
+			const parts = param.replace(/\+/g, " ").split("=");
 			let key = parts[0];
 			let val = parts[1];
 
@@ -86,7 +86,7 @@ under the License.
 
 	function stringifyURL(obj) {
 		return obj ? Object.keys(obj).sort().map(function (key) {
-			let val = obj[key];
+			const val = obj[key];
 
 			if (Array.isArray(val)) {
 				return val.sort().map(function (val2) {
@@ -101,7 +101,7 @@ under the License.
 	// gets the language set in the query string
 	function getLanguageFromQueryString() {
 		if (location.search.length >= 1) {
-			let language = parseURL(location.search).language;
+			const language = parseURL(location.search).language;
 			if (language) {
 				return language;
 			} else if (jQuery.inArray(location.search.substr(1), languages) != -1) {
@@ -114,7 +114,7 @@ under the License.
 
 	// returns a new query string with the new language in it
 	function generateNewQueryString(language) {
-		let url = parseURL(location.search);
+		const url = parseURL(location.search);
 		if (url.language) {
 			url.language = language;
 			return stringifyURL(url);
@@ -138,11 +138,11 @@ under the License.
 	}
 
 	function setupLanguages(l) {
-		let defaultLanguage = localStorage.getItem("language");
+		const defaultLanguage = localStorage.getItem("language");
 
 		languages = l;
 
-		let presetLanguage = getLanguageFromQueryString();
+		const presetLanguage = getLanguageFromQueryString();
 		if (presetLanguage) {
 			// the language is in the URL, so use that language!
 			activateLanguage(presetLanguage);
@@ -160,7 +160,7 @@ under the License.
 	// if we click on a language tab, activate that language
 	$(function() {
 		$(".lang-selector a").on("click", function() {
-			let language = $(this).data("language-name");
+			const language = $(this).data("language-name");
 			pushURL(language);
 			activateLanguage(language);
 			return false;

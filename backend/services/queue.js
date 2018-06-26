@@ -100,16 +100,16 @@
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
 	ImportQueue.prototype.importFile = function (correlationId, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
-		let corID = correlationId;
+		const corID = correlationId;
 
 		let newPath;
-		let jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
+		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
 		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy)
 			.then(obj => {
 				newPath = obj.filePath;
 
-				let json = {
+				const json = {
 					file: newPath,
 					database: databaseName,
 					project: modelName,
@@ -136,7 +136,7 @@
 
 			})
 			.then(() => {
-				let msg = `import -f ${jsonFilename}`;
+				const msg = `import -f ${jsonFilename}`;
 				return this._dispatchWork(corID, msg, true);
 			});
 	};
@@ -147,9 +147,9 @@
 	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
 	 *******************************************************************************/
 	ImportQueue.prototype.createFederatedModel = function (correlationId, account, defObj) {
-		let corID = correlationId;
-		let newFileDir = this.sharedSpacePath + "/" + corID;
-		let filename = `${newFileDir}/obj.json`;
+		const corID = correlationId;
+		const newFileDir = this.sharedSpacePath + "/" + corID;
+		const filename = `${newFileDir}/obj.json`;
 		//let filename = `${newFileDir}.json`; //cclw05 - is /obj necessary? kept it there for now
 
 		return new Promise((resolve, reject) => {
@@ -185,7 +185,7 @@
 				});
 			})
 			.then(() => {
-				let msg = `genFed ${filename} ${account}`;
+				const msg = `genFed ${filename} ${account}`;
 				return this._dispatchWork(corID, msg);
 			});
 
@@ -199,10 +199,10 @@
 	 * @param {string} modeDirName - the dir name of the model database dump staying in 
 	 *******************************************************************************/
 	ImportQueue.prototype.importToyModel = function (correlationId, database, model, options) {
-		let corID = correlationId;
+		const corID = correlationId;
 
 		const skip = options.skip && JSON.stringify(options.skip) || "";
-		let msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
+		const msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 		
 		return this._dispatchWork(corID, msg);
 	};
@@ -217,12 +217,12 @@
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
 	ImportQueue.prototype._moveFileToSharedSpace = function (corID, orgFilePath, newFileName, copy) {
-		let ModelHelper = require("../models/helper/model");
+		const ModelHelper = require("../models/helper/model");
 
 		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
 
-		let newFileDir = this.sharedSpacePath + "/" + corID + "/";
-		let filePath = newFileDir + newFileName;
+		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
+		const filePath = newFileDir + newFileName;
 
 		return new Promise((resolve, reject) => {
 			fs.mkdir(newFileDir, function (err) {
@@ -230,7 +230,7 @@
 					reject(err);
 				} else {
 
-					let move = copy ? fs.copy : fs.move;
+					const move = copy ? fs.copy : fs.move;
 
 					move(orgFilePath, filePath, function (moveErr) {
 						if (moveErr) {
@@ -302,7 +302,7 @@
 	 * Should be called once only, presumably in constructor
 	 *******************************************************************************/
 	ImportQueue.prototype._consumeCallbackQueue = function () {
-		let self = this;
+		const self = this;
 		let queue;
 
 		return this.channel.assertExchange(this.callbackQName, "direct", { durable: true })
@@ -323,18 +323,18 @@
 
 					self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
 					
-					let ModelHelper = require("../models/helper/model");
+					const ModelHelper = require("../models/helper/model");
 
-					let defer = self.deferedObjs[rep.properties.correlationId];
+					const defer = self.deferedObjs[rep.properties.correlationId];
 
-					let resData = JSON.parse(rep.content);
+					const resData = JSON.parse(rep.content);
 
-					let resErrorCode = resData.value;
-					let resErrorMessage = resData.message;
-					let resDatabase = resData.database;
-					let resProject = resData.project;
+					const resErrorCode = resData.value;
+					const resErrorMessage = resData.message;
+					const resDatabase = resData.database;
+					const resProject = resData.project;
 
-					let status = resData.status;
+					const status = resData.status;
 
 					if ("processing" === status) {
 						ModelHelper.setStatus(resDatabase, resProject, "processing");

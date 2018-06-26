@@ -39,8 +39,8 @@ function Utils() {
 	* @returns {Buffer} binuuid - Binary representation of a UUID
 	*******************************************************************************/
 	this.stringToUUID = function(uuid) {
-		let bytes = nodeuuid.parse(uuid);
-		let buf   = new Buffer.from(bytes);
+		const bytes = nodeuuid.parse(uuid);
+		const buf   = new Buffer.from(bytes);
 
 		return mongo.Binary(buf, 3);
 	};
@@ -121,7 +121,7 @@ function Utils() {
 	this.mongoErrorToResCode = function(err){
 
 		//let _ = require('lodash');
-		let responseCodes = require("./response_codes");
+		const responseCodes = require("./response_codes");
 		if(err.name === "ValidationError"){
 			return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
 		} else if(err.name === "MongoError") {
@@ -149,7 +149,7 @@ function Utils() {
 	 * @return {Double} value rounded to n d.p.
 	 */
 	this.roundToNDP = function(value, n){
-		let factor = Math.pow(10.0, n);
+		const factor = Math.pow(10.0, n);
 		return Math.round(value * factor) / factor;
 	};
 

@@ -16,18 +16,18 @@
  */
 
 "use strict";
-let express = require("express");
-let responseCodes = require("../response_codes.js");
-let router = express.Router({mergeParams: true});
-let utils = require("../utils");
-let config = require("../config");
+const express = require("express");
+const responseCodes = require("../response_codes.js");
+const router = express.Router({mergeParams: true});
+const utils = require("../utils");
+const config = require("../config");
 
 router.get("/plans", listPlans);
 
 
 function listPlans(req, res, next){
-	let place = utils.APIInfo(req);
-	let subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
+	const place = utils.APIInfo(req);
+	const subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
 	responseCodes.respond(place, req, res, next, responseCodes.OK, subscriptions);
 }
 

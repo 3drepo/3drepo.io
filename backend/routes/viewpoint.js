@@ -82,7 +82,7 @@ function createViewpoint(req, res, next){
 			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
 			Object.prototype.toString.call(req.body.screenshot) === "[object Object]" &&
 			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
-		let place = utils.APIInfo(req);
+		const place = utils.APIInfo(req);
 
 		Viewpoint.createViewpoint(getDbColOptions(req), req.body)
 			.then(view => {

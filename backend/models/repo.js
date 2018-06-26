@@ -16,12 +16,12 @@
  */
 
 
-let _ = require("lodash");
-let mongoose = require("mongoose");
-let Schema = mongoose.Schema;
+const _ = require("lodash");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
 // Base Repo Attributes
-let repoBase = {
+const repoBase = {
 	_id: Buffer,
 	shared_id: Buffer,
 	paths: [Buffer],
@@ -31,7 +31,7 @@ let repoBase = {
 	name: String
 };
 
-let cameraSchema = Schema(
+const cameraSchema = Schema(
 	_.extend({}, repoBase, {
 		// camera attrs
 		aspect_ratio: Number,
@@ -46,7 +46,7 @@ let cameraSchema = Schema(
 	})
 );
 
-let materialSchema = Schema(
+const materialSchema = Schema(
 	_.extend({}, repoBase, {
 		//material attrs
 		ambient: [Number],
@@ -62,13 +62,13 @@ let materialSchema = Schema(
 	})
 );
 
-let metaDataSchema = Schema(
+const metaDataSchema = Schema(
 	_.extend({}, repoBase, {
 		metadata: Buffer
 	})
 );
 
-let referenceSchema = Schema(
+const referenceSchema = Schema(
 	_.extend({}, repoBase, {
 		owner: String,
 		project: String,
@@ -77,7 +77,7 @@ let referenceSchema = Schema(
 	})
 );
 
-let textureSchema = Schema(
+const textureSchema = Schema(
 	_.extend({}, repoBase, {
 		width: Number,
 		height: Number,
@@ -88,14 +88,14 @@ let textureSchema = Schema(
 );
 
 
-let transformationSchema = Schema(
+const transformationSchema = Schema(
 	_.extend({}, repoBase, {
 		matrix: [[Number]]
 	})
 );
 
 
-let Camera = ModelFactory.createClass(
+const Camera = ModelFactory.createClass(
 	"Camera", 
 	cameraSchema, 
 	arg => { 
@@ -103,7 +103,7 @@ let Camera = ModelFactory.createClass(
 	}
 );
 
-let Material = ModelFactory.createClass(
+const Material = ModelFactory.createClass(
 	"Material", 
 	materialSchema, 
 	arg => { 
@@ -112,7 +112,7 @@ let Material = ModelFactory.createClass(
 );
 
 
-let Metadata = ModelFactory.createClass(
+const Metadata = ModelFactory.createClass(
 	"Metadata", 
 	metaDataSchema, 
 	arg => { 
@@ -120,7 +120,7 @@ let Metadata = ModelFactory.createClass(
 	}
 );
 
-let Reference = ModelFactory.createClass(
+const Reference = ModelFactory.createClass(
 	"Reference", 
 	referenceSchema, 
 	arg => { 
@@ -128,7 +128,7 @@ let Reference = ModelFactory.createClass(
 	}
 );
 
-let Texture = ModelFactory.createClass(
+const Texture = ModelFactory.createClass(
 	"Texture", 
 	textureSchema, 
 	arg => { 
@@ -137,7 +137,7 @@ let Texture = ModelFactory.createClass(
 );
 
 
-let Transformation = ModelFactory.createClass(
+const Transformation = ModelFactory.createClass(
 	"Transformation", 
 	transformationSchema, 
 	arg => { 

@@ -32,7 +32,7 @@
 		"cycles": 0
 	};
 
-	let getPaypalAddress = function (billingAddress) {
+	const getPaypalAddress = function (billingAddress) {
 		return {
 			"line1": billingAddress.line1,
 			"line2": billingAddress.line2,
@@ -43,8 +43,8 @@
 		};
 	};
 
-	let getPaypalPayment = function (payment) {
-		let paymentType = paypalPaymentTypes[payment.type];
+	const getPaypalPayment = function (payment) {
+		const paymentType = paypalPaymentTypes[payment.type];
 
 		return {
 			"amount": {
@@ -66,13 +66,13 @@
 		};
 	};
 
-	let getBillingPlanAttributes = function (billingUser, paymentDefs) {
+	const getBillingPlanAttributes = function (billingUser, paymentDefs) {
 		//this is for generating and api url, but we only need a frontend url.
 		//let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
 		//let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
 
-		let cancelUrl = config.getBaseURL() + `/${billingUser}?page=billing&cancel=1`;
-		let returnUrl =config.getBaseURL() + `/${billingUser}?page=billing`;
+		const cancelUrl = config.getBaseURL() + `/${billingUser}?page=billing&cancel=1`;
+		const returnUrl =config.getBaseURL() + `/${billingUser}?page=billing`;
 
 		return {
 			"description": "3D Repo Licence",
@@ -89,7 +89,7 @@
 		};
 	};
 
-	let getBillingAgreementAttributes = function(id, startDate, billingAddress, desc) {
+	const getBillingAgreementAttributes = function(id, startDate, billingAddress, desc) {
 		return {
 			"name": "3D Repo Licences",
 			"description": desc,

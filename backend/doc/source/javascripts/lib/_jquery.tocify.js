@@ -144,7 +144,7 @@
 		//      Constructs the plugin.  Only called once.
 		_create: function() {
 
-			let self = this;
+			const self = this;
 
 			self.tocifyWrapper = $(".tocify-wrapper");
 			self.extendPageScroll = true;
@@ -164,7 +164,7 @@
 
 			self.webkit = (function() {
 
-				for(let prop in window) {
+				for(const prop in window) {
 
 					if(prop) {
 
@@ -553,7 +553,7 @@
 				// If the showAndHide option is true
 				if(self.options.showAndHide) {
 
-					let elem = $("li[data-unique=\"" + $(this).attr("data-unique") + "\"]");
+					const elem = $("li[data-unique=\"" + $(this).attr("data-unique") + "\"]");
 
 					self._triggerShow(elem);
 
@@ -680,7 +680,7 @@
 							self.calculateHeights();
 						}
 
-						let scrollTop = $(window).scrollTop();
+						const scrollTop = $(window).scrollTop();
 
 						// Determines the index of the closest anchor
 						self.cachedAnchors.each(function(idx) {
@@ -706,15 +706,15 @@
 							elem.addClass(self.focusClass);
 
 							// Scroll to highlighted element's header
-							let tocifyWrapper = self.tocifyWrapper;
-							let scrollToElem = $(elem).closest(".tocify-header");
+							const tocifyWrapper = self.tocifyWrapper;
+							const scrollToElem = $(elem).closest(".tocify-header");
 
 							let elementOffset = scrollToElem.offset().top,
 								wrapperOffset = tocifyWrapper.offset().top;
-							let offset = elementOffset - wrapperOffset;
+							const offset = elementOffset - wrapperOffset;
 
 							if (offset >= $(window).height()) {
-								let scrollPosition = offset + tocifyWrapper.scrollTop();
+								const scrollPosition = offset + tocifyWrapper.scrollTop();
 								tocifyWrapper.scrollTop(scrollPosition);
 							} else if (offset < 0) {
 								tocifyWrapper.scrollTop(0);
@@ -761,12 +761,12 @@
 		// ----
 		//      ADDED BY ROBERT
 		calculateHeights: function() {
-			let self = this;
+			const self = this;
 			self.cachedHeights = [];
 			self.cachedAnchors = [];
-			let anchors = $(self.options.context).find("div[data-unique]");
+			const anchors = $(self.options.context).find("div[data-unique]");
 			anchors.each(function(idx) {
-				let distance = (($(this).next().length ? $(this).next() : $(this)).offset().top - self.options.highlightOffset);
+				const distance = (($(this).next().length ? $(this).next() : $(this)).offset().top - self.options.highlightOffset);
 				self.cachedHeights[idx] = distance;
 			});
 			self.cachedAnchors = anchors;
@@ -869,7 +869,7 @@
 		hide: function(elem) {
 
 			// Stores the plugin context in the `self` variable
-			let self = this;
+			const self = this;
 
 			//Determines what jQuery effect to use
 			switch (self.options.hideEffect) {
@@ -920,7 +920,7 @@
 		//      Determines what elements get shown on scroll and click
 		_triggerShow: function(elem, scroll) {
 
-			let self = this;
+			const self = this;
 
 			// If the current element's parent is a header element or the next element is a nested subheader element
 			if(elem.parent().is(headerClass) || elem.next().is(subheaderClass)) {

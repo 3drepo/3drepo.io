@@ -82,7 +82,7 @@
 	
 	function addTeamMember(req, res, next) {
 	
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 	
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
@@ -104,7 +104,7 @@
 	
 	function removeTeamMember(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
 				return dbUser.removeTeamMember(req.params.user, req.query.cascadeRemove);

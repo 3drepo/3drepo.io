@@ -28,7 +28,7 @@ const sessionFactory = require("./services/session.js");
  * @param {Object} variable - variable to coalesce
  * @param {Object} value - value to return if object is null or undefined
  *******************************************************************************/
-let coalesce = function (variable, value) {
+const coalesce = function (variable, value) {
 	if (variable === null || variable === undefined) {
 		return value;
 	} else {
@@ -57,7 +57,7 @@ function createRoundRobinAlgorithm(algoConfig) {
 		}
 	};
 
-	for (let k in algoConfig.apiUrls) {
+	for (const k in algoConfig.apiUrls) {
 		if(algoConfig.apiUrls.hasOwnProperty(k)){
 			roundRobin.apiUrlCounter[k] = 0;
 		}
@@ -76,7 +76,7 @@ function createRoundRobinAlgorithm(algoConfig) {
  * @param {number} default_http_port - Default HTTP port for the server is none is configured
  * @param {number} default_https_port - Default HTTPS port for the server is none in configured
  *******************************************************************************/
-let fillInServerDetails = function (serverObject, name, using_ssl, host, default_http_port, default_https_port) {
+const fillInServerDetails = function (serverObject, name, using_ssl, host, default_http_port, default_https_port) {
 	serverObject = coalesce(serverObject, {});
 	serverObject.name = coalesce(serverObject.name, name);
 	serverObject.http_port = coalesce(serverObject.http_port, default_http_port);
@@ -112,8 +112,8 @@ config.numThreads = coalesce(config.numThreads, 1);
 config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 
 // Global config variable used in the function above
-let default_http_port = coalesce(config.http_port, 80); // Default http port
-let default_https_port = coalesce(config.https_port, 443); // Default https port
+const default_http_port = coalesce(config.http_port, 80); // Default http port
+const default_https_port = coalesce(config.https_port, 443); // Default https port
 
 // Check for hostname and ip here
 config.host = coalesce(config.host, "127.0.0.1");
@@ -149,7 +149,7 @@ config.apiUrls = {};
 let multipleAPIServer = false;
 
 for (let i = 0; i < config.servers.length; i++) {
-	let server = config.servers[i];
+	const server = config.servers[i];
 
 	if (!config.subdomains.hasOwnProperty(server.subdomain)) {
 		config.subdomains[server.subdomain] = [];
@@ -173,7 +173,7 @@ for (let i = 0; i < config.servers.length; i++) {
 			server.external = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
 		}
 
-		let hasSubdomainArr = config.subdomains.hasOwnProperty(server.subdomain);
+		const hasSubdomainArr = config.subdomains.hasOwnProperty(server.subdomain);
 		if (!hasSubdomainArr) {
 			// Create empty array for the subdomain to hold servers
 			config.subdomains[server.subdomain] = [];
@@ -289,7 +289,7 @@ config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxatio
 //get frontend base url
 config.getBaseURL = function (useNonPublicPort) {
 
-	let frontEndServerConfig = config.servers.find(server => server.service === "frontend");
+	const frontEndServerConfig = config.servers.find(server => server.service === "frontend");
 
 	let port = "";
 
@@ -302,7 +302,7 @@ config.getBaseURL = function (useNonPublicPort) {
 		port = ":" + frontEndServerConfig.public_port;
 	}
 
-	let baseUrl = (config.using_ssl ? "https://" : "http://") + config.host + port;
+	const baseUrl = (config.using_ssl ? "https://" : "http://") + config.host + port;
 
 	return baseUrl;
 };

@@ -22,7 +22,7 @@ const vat = require("./vat");
 const responseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 
-let billingAddressSchema = new mongoose.Schema({
+const billingAddressSchema = new mongoose.Schema({
 	//vat setter was async. setter cannot be async at the momnent. 
 	// could happen in the future versions of mongoose
 	// https://github.com/Automattic/mongoose/issues/4227 

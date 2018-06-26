@@ -43,7 +43,7 @@
    *
    */
 	var lunr = function (config) {
-		let idx = new lunr.Index;
+		const idx = new lunr.Index;
 
 		idx.pipeline.add(
 			lunr.trimmer,
@@ -135,7 +135,7 @@
 			return;
 		}
 
-		let fnIndex = this.events[name].indexOf(fn);
+		const fnIndex = this.events[name].indexOf(fn);
 		this.events[name].splice(fnIndex, 1);
 
 		if (!this.events[name].length) {
@@ -157,7 +157,7 @@
 			return;
 		}
 
-		let args = Array.prototype.slice.call(arguments, 1);
+		const args = Array.prototype.slice.call(arguments, 1);
 
 		this.events[name].forEach(function (fn) {
 			fn.apply(undefined, args);
@@ -286,7 +286,7 @@
    * @memberOf Pipeline
    */
 	lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
-		let isRegistered = fn.label && (fn.label in this.registeredFunctions);
+		const isRegistered = fn.label && (fn.label in this.registeredFunctions);
 
 		if (!isRegistered) {
 			lunr.utils.warn("Function is not registered with pipeline. This may cause problems when serialising the index.\n", fn);
@@ -305,10 +305,10 @@
    * @memberOf Pipeline
    */
 	lunr.Pipeline.load = function (serialised) {
-		let pipeline = new lunr.Pipeline;
+		const pipeline = new lunr.Pipeline;
 
 		serialised.forEach(function (fnName) {
-			let fn = lunr.Pipeline.registeredFunctions[fnName];
+			const fn = lunr.Pipeline.registeredFunctions[fnName];
 
 			if (fn) {
 				pipeline.add(fn);
@@ -329,7 +329,7 @@
    * @memberOf Pipeline
    */
 	lunr.Pipeline.prototype.add = function () {
-		let fns = Array.prototype.slice.call(arguments);
+		const fns = Array.prototype.slice.call(arguments);
 
 		fns.forEach(function (fn) {
 			lunr.Pipeline.warnIfFunctionNotRegistered(fn);
@@ -350,7 +350,7 @@
 	lunr.Pipeline.prototype.after = function (existingFn, newFn) {
 		lunr.Pipeline.warnIfFunctionNotRegistered(newFn);
 
-		let pos = this._stack.indexOf(existingFn) + 1;
+		const pos = this._stack.indexOf(existingFn) + 1;
 		this._stack.splice(pos, 0, newFn);
 	};
 
@@ -367,7 +367,7 @@
 	lunr.Pipeline.prototype.before = function (existingFn, newFn) {
 		lunr.Pipeline.warnIfFunctionNotRegistered(newFn);
 
-		let pos = this._stack.indexOf(existingFn);
+		const pos = this._stack.indexOf(existingFn);
 		this._stack.splice(pos, 0, newFn);
 	};
 
@@ -378,7 +378,7 @@
    * @memberOf Pipeline
    */
 	lunr.Pipeline.prototype.remove = function (fn) {
-		let pos = this._stack.indexOf(fn);
+		const pos = this._stack.indexOf(fn);
 		this._stack.splice(pos, 1);
 	};
 
@@ -479,7 +479,7 @@
    * @memberOf Vector.
    */
 	lunr.Vector.prototype.insert = function (idx, val) {
-		let list = this.list;
+		const list = this.list;
 
 		if (!list) {
 			this.list = new lunr.Vector.Node (idx, val, list);
@@ -588,7 +588,7 @@
    * @memberOf SortedSet
    */
 	lunr.SortedSet.load = function (serialisedData) {
-		let set = new this;
+		const set = new this;
 
 		set.elements = serialisedData;
 		set.length = serialisedData.length;
@@ -779,7 +779,7 @@
    * @memberOf SortedSet
    */
 	lunr.SortedSet.prototype.clone = function () {
-		let clone = new lunr.SortedSet;
+		const clone = new lunr.SortedSet;
 
 		clone.elements = this.toArray();
 		clone.length = clone.elements.length;
@@ -858,7 +858,7 @@
    * @memberOf Index
    */
 	lunr.Index.prototype.on = function () {
-		let args = Array.prototype.slice.call(arguments);
+		const args = Array.prototype.slice.call(arguments);
 		return this.eventEmitter.addListener.apply(this.eventEmitter, args);
 	};
 
@@ -888,7 +888,7 @@
 			lunr.utils.warn("version mismatch: current " + lunr.version + " importing " + serialisedData.version);
 		}
 
-		let idx = new this;
+		const idx = new this;
 
 		idx._fields = serialisedData.fields;
 		idx._ref = serialisedData.ref;
@@ -967,7 +967,7 @@
 			emitEvent = emitEvent === undefined ? true : emitEvent;
 
 		this._fields.forEach(function (field) {
-			let fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]));
+			const fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]));
 
 			docTokens[field.name] = fieldTokens;
 			lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens);
@@ -978,14 +978,14 @@
 
 		for (let i = 0; i < allDocumentTokens.length; i++) {
 			var token = allDocumentTokens.elements[i];
-			let tf = this._fields.reduce(function (memo, field) {
-				let fieldLength = docTokens[field.name].length;
+			const tf = this._fields.reduce(function (memo, field) {
+				const fieldLength = docTokens[field.name].length;
 
 				if (!fieldLength) {
 					return memo;
 				}
 
-				let tokenCount = docTokens[field.name].filter(function (t) {
+				const tokenCount = docTokens[field.name].filter(function (t) {
 					return t === token; 
 				}).length;
 
@@ -1026,7 +1026,7 @@
 			return;
 		}
 
-		let docTokens = this.documentStore.get(docRef);
+		const docTokens = this.documentStore.get(docRef);
 
 		this.documentStore.remove(docRef);
 
@@ -1079,7 +1079,7 @@
    * @memberOf Index
    */
 	lunr.Index.prototype.idf = function (term) {
-		let cacheKey = "@" + term;
+		const cacheKey = "@" + term;
 		if (Object.prototype.hasOwnProperty.call(this._idfCache, cacheKey)) {
 			return this._idfCache[cacheKey];
 		}
@@ -1126,7 +1126,7 @@
 				return memo + f.boost; 
 			}, 0);
 
-		let hasSomeToken = queryTokens.some(function (token) {
+		const hasSomeToken = queryTokens.some(function (token) {
 			return this.tokenStore.has(token);
 		}, this);
 
@@ -1139,7 +1139,7 @@
 				let tf = 1 / tokens.length * this._fields.length * fieldBoosts,
 					self = this;
 
-				let set = this.tokenStore.expand(token).reduce(function (memo, key) {
+				const set = this.tokenStore.expand(token).reduce(function (memo, key) {
 					let pos = self.corpusTokens.indexOf(key),
 						idf = self.idf(key),
 						similarityBoost = 1,
@@ -1149,7 +1149,7 @@
 					// penalise the score for this key by how different the key is
 					// to the token.
 					if (key !== token) {
-						let diff = Math.max(3, key.length - token.length);
+						const diff = Math.max(3, key.length - token.length);
 						similarityBoost = 1 / Math.log(diff);
 					}
 
@@ -1171,7 +1171,7 @@
 				documentSets.push(set);
 			}, this);
 
-		let documentSet = documentSets.reduce(function (memo, set) {
+		const documentSet = documentSets.reduce(function (memo, set) {
 			return memo.intersect(set);
 		});
 
@@ -1259,7 +1259,7 @@
    * @memberOf Index
    */
 	lunr.Index.prototype.use = function (plugin) {
-		let args = Array.prototype.slice.call(arguments, 1);
+		const args = Array.prototype.slice.call(arguments, 1);
 		args.unshift(this);
 		plugin.apply(this, args);
 	};
@@ -1288,7 +1288,7 @@
    * @memberOf Store
    */
 	lunr.Store.load = function (serialisedData) {
-		let store = new this;
+		const store = new this;
 
 		store.length = serialisedData.length;
 		store.store = Object.keys(serialisedData.store).reduce(function (memo, key) {
@@ -1423,33 +1423,33 @@
 			mgr1 = "^(" + C + ")?" + V + C + V + C,       // [C]VCVC... is m>1
 			s_v = "^(" + C + ")?" + v;                   // vowel in stem
 
-		let re_mgr0 = new RegExp(mgr0);
-		let re_mgr1 = new RegExp(mgr1);
-		let re_meq1 = new RegExp(meq1);
-		let re_s_v = new RegExp(s_v);
+		const re_mgr0 = new RegExp(mgr0);
+		const re_mgr1 = new RegExp(mgr1);
+		const re_meq1 = new RegExp(meq1);
+		const re_s_v = new RegExp(s_v);
 
-		let re_1a = /^(.+?)(ss|i)es$/;
-		let re2_1a = /^(.+?)([^s])s$/;
-		let re_1b = /^(.+?)eed$/;
-		let re2_1b = /^(.+?)(ed|ing)$/;
-		let re_1b_2 = /.$/;
-		let re2_1b_2 = /(at|bl|iz)$/;
-		let re3_1b_2 = new RegExp("([^aeiouylsz])\\1$");
-		let re4_1b_2 = new RegExp("^" + C + v + "[^aeiouwxy]$");
+		const re_1a = /^(.+?)(ss|i)es$/;
+		const re2_1a = /^(.+?)([^s])s$/;
+		const re_1b = /^(.+?)eed$/;
+		const re2_1b = /^(.+?)(ed|ing)$/;
+		const re_1b_2 = /.$/;
+		const re2_1b_2 = /(at|bl|iz)$/;
+		const re3_1b_2 = new RegExp("([^aeiouylsz])\\1$");
+		const re4_1b_2 = new RegExp("^" + C + v + "[^aeiouwxy]$");
 
-		let re_1c = /^(.+?[^aeiou])y$/;
-		let re_2 = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
+		const re_1c = /^(.+?[^aeiou])y$/;
+		const re_2 = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
 
-		let re_3 = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
+		const re_3 = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
 
-		let re_4 = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
-		let re2_4 = /^(.+?)(s|t)(ion)$/;
+		const re_4 = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
+		const re2_4 = /^(.+?)(s|t)(ion)$/;
 
-		let re_5 = /^(.+?)e$/;
-		let re_5_1 = /ll$/;
-		let re3_5 = new RegExp("^" + C + v + "[^aeiouwxy]$");
+		const re_5 = /^(.+?)e$/;
+		const re_5_1 = /ll$/;
+		const re3_5 = new RegExp("^" + C + v + "[^aeiouwxy]$");
 
-		let porterStemmer = function porterStemmer(w) {
+		const porterStemmer = function porterStemmer(w) {
 			let   stem,
 				suffix,
 				firstch,
@@ -1790,7 +1790,7 @@
    * @memberOf TokenStore
    */
 	lunr.TokenStore.load = function (serialisedData) {
-		let store = new this;
+		const store = new this;
 
 		store.root = serialisedData.root;
 		store.length = serialisedData.length;

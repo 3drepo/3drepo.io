@@ -17,18 +17,18 @@
 
 "use strict";
 
-let repoGraphScene = require("../../repo/repoGraphScene.js");
-let ModelFactory = require("../factory/modelFactory");
-let History = require("../history");
-let utils = require("../../utils");
-let responseCodes = require("../../response_codes.js");
-let mongoose = require("mongoose");
-let _ = require("lodash");
+const repoGraphScene = require("../../repo/repoGraphScene.js");
+const ModelFactory = require("../factory/modelFactory");
+const History = require("../history");
+const utils = require("../../utils");
+const responseCodes = require("../../response_codes.js");
+const mongoose = require("mongoose");
+const _ = require("lodash");
 
-let stringToUUID = utils.stringToUUID;
-let uuidToString = utils.uuidToString;
+const stringToUUID = utils.stringToUUID;
+const uuidToString = utils.uuidToString;
 
-let attrs = {
+const attrs = {
 	_id: Object,
 	shared_id: Object,
 	paths: [],
@@ -38,8 +38,8 @@ let attrs = {
 	name: String
 };
 
-let statics = {};
-let methods = {};
+const statics = {};
+const methods = {};
 //var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
@@ -57,8 +57,8 @@ statics.findStashByFilename = function(dbCol, format, filename){
 			} else {
 				return new Promise((resolve) => {
 	
-					let downloadStream = bucket.openDownloadStreamByName(filename);
-					let bufs = [];
+					const downloadStream = bucket.openDownloadStreamByName(filename);
+					const bufs = [];
 
 					downloadStream.on("data", function(d){
 						bufs.push(d); 
@@ -78,7 +78,7 @@ statics.findStashByFilename = function(dbCol, format, filename){
 
 statics.getSharedId = function(dbCol, uid){
 
-	let projection = { shared_id: 1 };
+	const projection = { shared_id: 1 };
 
 	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).then(colRef => {
 		return colRef.find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
@@ -104,7 +104,7 @@ statics.findByUID = function(dbCol, uid, options){
 
 	//let from3DRepoStash = false;
 
-	let projection = options && options.projection || {};
+	const projection = options && options.projection || {};
 
 	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).then(colRef => {
 		return colRef.find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
@@ -125,12 +125,12 @@ statics.findByUID = function(dbCol, uid, options){
 			// load extRef if _.extRef is defined
 			if(obj.type === "mesh" && obj._extRef){
 
-				let promises = [];
+				const promises = [];
 	
 				obj = obj.toObject();
 	
 				Object.keys(obj._extRef).forEach(type => {
-					let filename = obj._extRef[type];
+					const filename = obj._extRef[type];
 					promises.push(
 						this.findStashByFilename(dbCol, "3drepo", filename).then(data => {
 							obj[type] = { buffer: data };
@@ -152,7 +152,7 @@ statics.findByUID = function(dbCol, uid, options){
 
 methods.clean = function(){
 
-	let cleaned = this.toObject();
+	const cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.shared_id = uuidToString(cleaned.shared_id);
 	cleaned.parents.forEach((parent, i) => {
@@ -164,9 +164,9 @@ methods.clean = function(){
 
 statics.findByRevision = function(dbCol, rid, sid, options){
 
-	let projection = options && options.projection || {};
+	const projection = options && options.projection || {};
 
-	let _find = () => History.findByUID(dbCol, rid).then( rev => {
+	const _find = () => History.findByUID(dbCol, rid).then( rev => {
 		rev = rev.toObject();
 
 		return this.findOne(dbCol, { _id: { "$in": rev.current }, shared_id: stringToUUID(sid) }, projection).then(obj => {
@@ -178,12 +178,12 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 			// load extRef if _.extRef is defined
 			if(obj.type === "mesh" && obj._extRef){
 
-				let promises = [];
+				const promises = [];
 
 				obj = obj.toObject();
 
 				Object.keys(obj._extRef).forEach(type => {
-					let filename = obj._extRef[type];
+					const filename = obj._extRef[type];
 					promises.push(
 						this.findStashByFilename(dbCol, "3drepo", filename).then(data => {
 							obj[type] = { buffer: data };

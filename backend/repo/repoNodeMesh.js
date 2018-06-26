@@ -18,8 +18,8 @@
 // Corresponds to repoNodeMesh in C++ definition of 3D Repo
 // var mongodb = require("mongodb");
 // var assert = require("assert");
-let UUID = require("node-uuid");
-let C = require("../constants");
+const UUID = require("node-uuid");
+const C = require("../constants");
 
 exports.decode = function(bson, materials) {
 	"use strict";
@@ -30,9 +30,9 @@ exports.decode = function(bson, materials) {
 	// children array attached!
 	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
 		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
-			let childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-			let childID = UUID.unparse(childIDbytes);
-			let material = materials[childID];
+			const childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+			const childID = UUID.unparse(childIDbytes);
+			const material = materials[childID];
 			if (material) {
 				// TODO: change mMaterialIndex to material
 				bson[C.M_MATERIAL_INDEX] = childID;
@@ -41,7 +41,7 @@ exports.decode = function(bson, materials) {
 		}
 	}
 
-	let myUUID = bson.id;
+	const myUUID = bson.id;
 
 	if (bson[C.REPO_NODE_LABEL_COMBINED_MAP]) {
 		// TODO: Here we have multiple maps, including ones that
@@ -82,7 +82,7 @@ exports.decode = function(bson, materials) {
 exports.extractBoundingBox = function(mesh) {
 	"use strict";
 
-	let bbox = {};
+	const bbox = {};
 
 	if (mesh.bounding_box) {
 		bbox.min = mesh.bounding_box[0];

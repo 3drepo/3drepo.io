@@ -37,12 +37,12 @@ paypal.configure({
 	"client_secret": config.paypal.client_secret
 });
 
-let updateBillingAddress = function (billingAgreementId, billingAddress) {
+const updateBillingAddress = function (billingAgreementId, billingAddress) {
 
 
 	const paypalAddress = paypalTrans.getPaypalAddress(billingAddress);
 
-	let updateOps = [{
+	const updateOps = [{
 		"op": "replace",
 		"path": "/",
 		"value": {
@@ -58,7 +58,7 @@ let updateBillingAddress = function (billingAgreementId, billingAddress) {
 					billingAgreementId: billingAgreementId
 				});
 
-				let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+				const paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 				paypalError.message = err.response && err.response.message || err.message;
 				reject(paypalError);
 			} else {
@@ -71,9 +71,9 @@ let updateBillingAddress = function (billingAgreementId, billingAddress) {
 	});
 };
 
-let cancelOldAgreement = function(billingAgreementId) {
+const cancelOldAgreement = function(billingAgreementId) {
 
-	let cancel_note = {
+	const cancel_note = {
 		"note": "You have updated the licence subscriptions."
 	};
 
@@ -95,15 +95,15 @@ let cancelOldAgreement = function(billingAgreementId) {
 	});
 };
 
-let createBillingAgreement = function(billing, payments, paymentDate) {
+const createBillingAgreement = function(billing, payments, paymentDate) {
 
 	//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement start");
 	
-	let paymentDefs = [];
+	const paymentDefs = [];
 	let hasProRata = false;
 	let proRataAmount = 0.0;
 	let regularAmount = 0.0;
-	let startDate = paymentDate;
+	const startDate = paymentDate;
 
 	// Translate payments to paypal specific
 	payments.forEach(function(payment) {
@@ -117,7 +117,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 		paymentDefs.push(paypalTrans.getPaypalPayment(payment));
 	});
 
-	let billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billing.billingUser, paymentDefs);
+	const billingPlanAttributes = paypalTrans.getBillingPlanAttributes(billing.billingUser, paymentDefs);
 
 	return new Promise((resolve, reject) => {
 
@@ -126,7 +126,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 
 			if (err) {
 				systemLogger.logError(JSON.stringify(err));
-				let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+				const paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 				paypalError.message = err.response && err.response.message || err.message;
 				reject(paypalError);
 			} else {
@@ -139,7 +139,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 
 		//activate plan
 			return new Promise((resolve, reject) => {
-				let billingPlanUpdateAttributes = [{
+				const billingPlanUpdateAttributes = [{
 					"op": "replace",
 					"path": "/",
 					"value": {
@@ -152,7 +152,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 
 						systemLogger.logError(JSON.stringify(err));
 
-						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+						const paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 						paypalError.message = err.response && err.response.message || err.message;
 			
 						reject(paypalError);
@@ -174,7 +174,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 				}
 				desc += `Regular monthly recurring payment £${regularAmount}. This agreement starts on ${moment(startDate).utc().format("Do MMM YYYY")}`;
 
-				let billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
+				const billingAgreementAttributes = paypalTrans.getBillingAgreementAttributes(
 					billingPlan.id,
 					startDate,
 					paypalTrans.getPaypalAddress(billing.billingInfo),
@@ -184,13 +184,13 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 				paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 					if (err) {
 						systemLogger.logError(JSON.stringify(err));
-						let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+						const paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 						paypalError.message = err.response && err.response.message || err.message;
 						reject(paypalError);
 					} else {
 
-						let link = billingAgreement.links.find(link => link.rel === "approval_url");
-						let token = url.parse(link.href, true)
+						const link = billingAgreement.links.find(link => link.rel === "approval_url");
+						const token = url.parse(link.href, true)
 							.query.token;
 
 						//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
@@ -208,7 +208,7 @@ let createBillingAgreement = function(billing, payments, paymentDate) {
 
 };
 
-let processPayments = function(billing, payments, paymentDate) {
+const processPayments = function(billing, payments, paymentDate) {
 	// Cancel old agreements and then create new ones
 
 	// don't cancel agreement here. only cancel after executing billing agreement
@@ -220,7 +220,7 @@ let processPayments = function(billing, payments, paymentDate) {
 	//});
 };
 
-let executeAgreement = function(token){
+const executeAgreement = function(token){
 
 	return new Promise((resolve, reject) => {
 		paypal.billingAgreement.execute(token, {}, (err, billingAgreement) => {
@@ -239,7 +239,7 @@ let executeAgreement = function(token){
 	});
 };
 
-let verifyGenuine = function(url, qs) {
+const verifyGenuine = function(url, qs) {
 
 	return httpsPost(url, qs).then(resData => {
 		if(resData === "VERIFIED") {
@@ -251,14 +251,14 @@ let verifyGenuine = function(url, qs) {
 
 };
 
-let validateIPN = function(data){
+const validateIPN = function(data){
 
 	// skip ipn validation
 	if(!config.paypal.validateIPN){
 		return Promise.resolve();
 	}
 
-	let url = config.paypal.ipnValidateUrl;
+	const url = config.paypal.ipnValidateUrl;
 	let qs = querystring(data);
 	qs = "cmd=_notify-validate&" + qs;
 
@@ -266,9 +266,9 @@ let validateIPN = function(data){
 	return verifyGenuine(url, qs);
 };
 
-let determineIPNType = function(paymentInfo){
+const determineIPNType = function(paymentInfo){
 
-	let type = paymentInfo.txn_type;
+	const type = paymentInfo.txn_type;
 
 	if(type === "recurring_payment_profile_created"){
 		return C.IPN_PAYMENT_INIT;
@@ -287,11 +287,11 @@ let determineIPNType = function(paymentInfo){
 	return C.IPN_UNKONWN;
 };
 
-let handleIPN = function(paymentInfo){
+const handleIPN = function(paymentInfo){
 	const User = require("./user");
 
-	let billingAgreementId = paymentInfo.recurring_payment_id;
-	let ipnType = determineIPNType(paymentInfo);
+	const billingAgreementId = paymentInfo.recurring_payment_id;
+	const ipnType = determineIPNType(paymentInfo);
 
 	//save IPN
 	IPN.save(paymentInfo).catch(err => {

@@ -30,7 +30,7 @@ const responseCodes = require("../response_codes.js");
 const Mailer = require("../mailer/mailer");
 const systemLogger = require("../logger.js").systemLogger;
 
-let billingSchema = mongoose.Schema({
+const billingSchema = mongoose.Schema({
 	subscriptions: Object,
 	billingInfo: { type: billingAddressInfo, default: {}  },
 	//global billing info
@@ -42,11 +42,11 @@ let billingSchema = mongoose.Schema({
 });
 
 // Wrapper for VAT calculation and payment information
-let calTax = function(gross, countryCode, isBusiness){
+const calTax = function(gross, countryCode, isBusiness){
 	return gross * vat.getByCountryCode(countryCode, isBusiness);
 };
 
-let Payment = function (type, netAmount, countryCode, isBusiness, length) {
+const Payment = function (type, netAmount, countryCode, isBusiness, length) {
 	this.type = type;
 	this.net = netAmount;
 	this.tax = calTax(this.net, countryCode, isBusiness);
@@ -61,19 +61,19 @@ let Payment = function (type, netAmount, countryCode, isBusiness, length) {
 
 billingSchema.methods.calculateAmounts = function(paymentDate) {
 
-	let country = this.billingInfo.countryCode;
-	let isBusiness = this.billingInfo.vat;
+	const country = this.billingInfo.countryCode;
+	const isBusiness = this.billingInfo.vat;
 
-	let proRataLength = { value: -1, unit: "DAY" };
-	let regularCycleLength = { value: 1, unit: "MONTH" };
+	const proRataLength = { value: -1, unit: "DAY" };
+	const regularCycleLength = { value: 1, unit: "MONTH" };
 
-	let payments = [];
+	const payments = [];
 
 	let regularAmount = 0;
 	let proRataAmount = 0;
 
-	let regularItems = [];
-	let proRataItems = [];
+	const regularItems = [];
+	const proRataItems = [];
 	
 	let licensesDecreased = false;
 
@@ -94,13 +94,13 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 	});
 
 
-	let nextPaymentDate = moment(this.nextPaymentDate);
+	const nextPaymentDate = moment(this.nextPaymentDate);
 	if (proRataAmount) {
 		// The length of the pro-rata period is difference between now and next payment date
 		proRataLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf("date"))).asDays());
 
 		// Calculate percentage of payment period * cost of the period.
-		let proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays());
+		const proRataFactor = proRataLength.value / Math.round(moment.duration(nextPaymentDate.diff(this.lastAnniversaryDate)).asDays());
 	
 		proRataAmount = proRataFactor * proRataAmount;
 
@@ -132,8 +132,8 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 
 // used to predict next payment date when ipn from paypal is delayed, where ipn contains the actual next payment date info.
 billingSchema.statics.getNextPaymentDate = function (date) {
-	let start = moment(date).utc().startOf("date");
-	let next = moment(date).utc().startOf("date").add(1, "month");
+	const start = moment(date).utc().startOf("date");
+	const next = moment(date).utc().startOf("date").add(1, "month");
 
 	if (next.date() !== start.date()) {
 		next.add(1, "day");
@@ -149,12 +149,12 @@ billingSchema.methods.cancelAgreement = function(){
 
 };
 
-let getImmediatePaymentStartDate = function(){
+const getImmediatePaymentStartDate = function(){
 	return moment().utc().add(60, "second");
 };
 
 function getCleanedUpPayPalSubscriptions(currentSubs) {
-	let subs = [];
+	const subs = [];
 	if(currentSubs) {
 		currentSubs.forEach( payPalEntry => {
 			if(payPalEntry.quantity > 0) {
@@ -172,9 +172,9 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 		this.subscriptions = {};
 	}
 
-	let currentSubs = this.billingAgreementId ? getCleanedUpPayPalSubscriptions(this.subscriptions.paypal) : [];
+	const currentSubs = this.billingAgreementId ? getCleanedUpPayPalSubscriptions(this.subscriptions.paypal) : [];
 	let hasChanges = false;
-	let updatedSubs = [];
+	const updatedSubs = [];
 	let totalSubCount = 0;
 
 	for(let i = 0; i < newPlans.length; ++i) {
@@ -184,7 +184,7 @@ billingSchema.methods.writeSubscriptionChanges = function(newPlans) {
 			return Promise.reject(responseCodes.PLAN_NOT_FOUND);
 		}
 
-		let entryInCurrent = currentSubs.findIndex( element => newSubs.plan === element.plan);
+		const entryInCurrent = currentSubs.findIndex( element => newSubs.plan === element.plan);
 		hasChanges = hasChanges || (entryInCurrent < 0 || currentSubs[entryInCurrent].quantity !== newSubs.quantity);
 
 		let planEntry = null;
@@ -246,9 +246,9 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 				}).length === 0;
 			
 			//changes in plans
-			let startDate = getImmediatePaymentStartDate();
+			const startDate = getImmediatePaymentStartDate();
 
-			let data = this.calculateAmounts(startDate);
+			const data = this.calculateAmounts(startDate);
 
 			const invoiceLineItems = data.listItems;
 
@@ -266,7 +266,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 				// create invoice with init state for payment happens right after executing agreement
 				if(data.paymentDate <= startDate.toDate()){
 
-					let invoice = Invoice.createInstance({ account: user });
+					const invoice = Invoice.createInstance({ account: user });
 					invoice.initInvoice({ 
 						changes: invoiceLineItems, 
 						payments: data.payments,
@@ -286,7 +286,7 @@ billingSchema.methods.updateSubscriptions = function (plans, user, billingUser, 
 };
 
 function renewAndCleanSubscriptions(subs, newExpiryDate) {
-	let updatedSubs = [];
+	const updatedSubs = [];
 	if(subs) {
 		subs.forEach( sub => {
 			if(sub.pendingQuantity) {
@@ -339,7 +339,7 @@ billingSchema.methods.executeBillingAgreement = function(user){
 				// pre activate
 				// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 				// IPN message should come quickly after executing an agreement, usually less then a minute
-				let twoDayLater = moment().utc().add(48, "hour").toDate();
+				const twoDayLater = moment().utc().add(48, "hour").toDate();
 				this.subscriptions.paypal = renewAndCleanSubscriptions(
 					this.subscriptions.paypal,
 					twoDayLater);
@@ -357,7 +357,7 @@ billingSchema.methods.executeBillingAgreement = function(user){
 };
 
 billingSchema.methods.getActiveSubscriptions = function() {
-	let res = { basic: config.subscriptions.basic};
+	const res = { basic: config.subscriptions.basic};
 	if(this.subscriptions) {
 		Object.keys(this.subscriptions).forEach(key => {
 			if(key === "paypal") {
@@ -382,7 +382,7 @@ billingSchema.methods.getActiveSubscriptions = function() {
 
 billingSchema.methods.getSubscriptionLimits = function() {
 
-	let sumLimits = {};
+	const sumLimits = {};
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
 		sumLimits.collaboratorLimit = config.subscriptions.basic.collaborators;
@@ -451,7 +451,7 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 		this.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf("date").toDate();
 
 		// set to to next 3rd of next month, give 3 days cushion
-		let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+		const expiredAt = moment(paymentInfo.nextPaymentDate).utc()
 			.add(3, "day")
 			.hours(0).minutes(0).seconds(0).milliseconds(0)
 			.toDate();
@@ -513,8 +513,8 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw){
 		
 
 			//send invoice
-			let amount = invoice.amount;
-			let currency = invoice.currency;
+			const amount = invoice.amount;
+			const currency = invoice.currency;
 
 			return User.findByUserName(this.billingUser).then(billingUser => {
 			

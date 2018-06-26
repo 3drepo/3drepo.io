@@ -27,7 +27,7 @@ const responseCodes = require("../response_codes");
 //logic to check permissions
 function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions){
 
-	let getPermPromises = [];
+	const getPermPromises = [];
 
 	getPermPromises.push(getPermissions(account).accountLevel(username));
 

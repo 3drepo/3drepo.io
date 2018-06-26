@@ -92,8 +92,8 @@
 
 		let limits;
 
-		let account = req.params.account;
-		let model = req.params.model;
+		const account = req.params.account;
+		const model = req.params.model;
 
 		return User.findByUserName(account).then( dbUser => {
 
@@ -117,8 +117,8 @@
 	function createQueueInstance(){
 
 		// init ampq and import queue object
-		let logger = require("../logger.js");
-		let systemLogger = logger.systemLogger;
+		const logger = require("../logger.js");
+		const systemLogger = logger.systemLogger;
 
 		return importQueue.connect(config.cn_queue.host, {
 
@@ -198,7 +198,7 @@
 		}
 	}
 
-	let middlewares = {
+	const middlewares = {
 
 		project: require("./project"),
 		job: require("./job"),

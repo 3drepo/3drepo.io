@@ -20,7 +20,7 @@
 	const mongoose = require("mongoose");
 	const ModelFactory = require("./factory/modelFactory");
 		
-	let schema = mongoose.Schema({
+	const schema = mongoose.Schema({
 		createdAt: Date,
 		message: {}
 	});
@@ -37,7 +37,7 @@
 
 	schema.statics.save = function(ipnMessage){
 		
-		let ipn = IPN.createInstance({ account: "admin" });
+		const ipn = IPN.createInstance({ account: "admin" });
 		ipn.message = ipnMessage;
 		ipn.markModified("message");
 
@@ -45,7 +45,7 @@
 	};
 
 
-	let IPN = ModelFactory.createClass(
+	const IPN = ModelFactory.createClass(
 		"IPN",
 		schema,
 		() => {

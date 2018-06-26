@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
-let DB = require("../db/db");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const DB = require("../db/db");
 	
-let schema = mongoose.Schema({
+const schema = mongoose.Schema({
 	type: String,
 	count: Number
 });
@@ -62,7 +62,7 @@ schema.statics.findAndIncRefundNumber = function(){
 
 };
 
-let Counter = ModelFactory.createClass(
+const Counter = ModelFactory.createClass(
 	"Counter",
 	schema,
 	() => {

@@ -43,7 +43,7 @@ const getDbColOptions = function(req){
 function listGroups(req, res, next){
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	let groupList;
 	if (req.params.rid) {
@@ -71,7 +71,7 @@ function listGroups(req, res, next){
 function findGroup(req, res, next){
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	let groupItem;
 	if (req.params.rid) {
@@ -140,7 +140,7 @@ function deleteGroups(req, res, next) {
 function updateGroup(req, res, next){
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	let groupItem;
 	if (req.params.rid) {

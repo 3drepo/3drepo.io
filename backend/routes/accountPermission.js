@@ -35,7 +35,7 @@
 	function listPermissions(req, res, next){
 
 		User.findByUserName(req.params.account).then(user => {
-			let permissions = user.toObject().customData.permissions;
+			const permissions = user.toObject().customData.permissions;
 			return User.getAllUsersInTeamspace(req.params.account).then(users => {
 		
 				users.forEach( user => {

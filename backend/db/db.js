@@ -48,10 +48,10 @@
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
 		let connectString = "mongodb://" + config.db.username + ":" + config.db.password + "@";
-		let hostPorts = [];
+		const hostPorts = [];
 
 		/* jshint ignore:start */
-		for(let host in config.db.host)
+		for(const host in config.db.host)
 		/* jshint ignore:end */
 		{
 			hostPorts.push(config.db.host[host] + ":" + config.db.port[host]);

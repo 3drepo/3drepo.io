@@ -71,6 +71,9 @@
 	"indent": [
 	    "error",
 	    "tab"
+	],
+	"prefer-const": [
+		"error"
 	]
   }
 }

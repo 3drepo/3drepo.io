@@ -46,7 +46,7 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
-			let permission = {
+			const permission = {
 				_id: req.body._id,
 				permissions: req.body.permissions
 			};

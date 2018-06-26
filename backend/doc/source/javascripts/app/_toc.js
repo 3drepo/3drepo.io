@@ -5,12 +5,12 @@
 (function (global) {
 	"use strict";
 
-	let closeToc = function() {
+	const closeToc = function() {
 		$(".tocify-wrapper").removeClass("open");
 		$("#nav-button").removeClass("open");
 	};
 
-	let makeToc = function() {
+	const makeToc = function() {
 		global.toc = $("#toc").tocify({
 			selectors: "h1, h2",
 			extendPage: false,

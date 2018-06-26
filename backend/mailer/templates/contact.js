@@ -1,4 +1,4 @@
-let html = data => `
+const html = data => `
 	Name: ${data.name}
 	<br><br>
 	Email: ${data.email}

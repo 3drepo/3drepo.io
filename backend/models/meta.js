@@ -16,13 +16,13 @@
  */
 
 
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
-let Schema = mongoose.Schema;
-let utils = require("../utils");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const Schema = mongoose.Schema;
+const utils = require("../utils");
 
 
-let schema = Schema({
+const schema = Schema({
 	_id: Object,
 	parents: [],
 	metadata: Object
@@ -36,7 +36,7 @@ if (!schema.options.toJSON){
 schema.options.toJSON.transform = function (doc, ret) {
 	ret._id = utils.uuidToString(doc._id);
 	if(doc.parents) {
-		let newParents = [];
+		const newParents = [];
 		doc.parents.forEach(function(parentId) {
 			newParents.push(utils.uuidToString(parentId));
 		});
@@ -46,7 +46,7 @@ schema.options.toJSON.transform = function (doc, ret) {
 };
 
 
-let Meta = ModelFactory.createClass(
+const Meta = ModelFactory.createClass(
 	"Meta", 
 	schema, 
 	arg => { 

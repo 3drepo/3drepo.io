@@ -36,7 +36,7 @@
 
 			return ModelFactory.dbManager.getCollection(account, `${model}.issues`).then(collection => {
 
-				let fields = {};
+				const fields = {};
 
 				groups.forEach(group => {
 					fields[group] = getField(group);
@@ -57,8 +57,8 @@
 
 				if(format === "csv"){
 
-					let csvFields = [];
-					let csvFieldNames = [];
+					const csvFields = [];
+					const csvFieldNames = [];
 
 					groups.forEach(group => {
 						csvFields.push(`_id.${group}`);

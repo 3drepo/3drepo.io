@@ -60,7 +60,7 @@
 	schema.pre("save", function checkPermissionName(next){
 
 		for (let i=0; i < this.permissions.length; i++){
-			let permission = this.permissions[i];
+			const permission = this.permissions[i];
 
 			if (_.intersection(C.PROJECT_PERM_LIST, permission.permissions).length < permission.permissions.length){
 				return next(utils.makeError(responseCodes.INVALID_PERM));
@@ -73,7 +73,7 @@
 	schema.statics.createProject = function(account, name, username, userPermissions){
 		const User = require("./user");
 
-		let project = Project.createInstance({account});
+		const project = Project.createInstance({account});
 		project.name = name;
 
 		if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
@@ -162,7 +162,7 @@
 				}
 			});
 	
-			let userPromises = [];
+			const userPromises = [];
 
 			usersToRemove.forEach(user => {
 				// remove all model permissions in this project as well, if any

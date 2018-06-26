@@ -32,7 +32,7 @@ let log;
  */
 const repoLogger = function (req, res, id) {
 
-	let self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
+	const self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
 
 	self.uid = id;
 
@@ -122,11 +122,11 @@ function createLogger() {
  * @param {Object} meta - Extra data to put into the log file
  */
 repoLogger.prototype.logMessage = function (type, msg, meta) {
-	let currentTime = (new Date())
+	const currentTime = (new Date())
 		.getTime();
-	let timeDiff = currentTime - this.startTime;
+	const timeDiff = currentTime - this.startTime;
 
-	let metadata = Object.assign({}, meta, {
+	const metadata = Object.assign({}, meta, {
 		uid: this.uid
 	});
 

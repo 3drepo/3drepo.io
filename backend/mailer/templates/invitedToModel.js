@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let html = data => `
+const html = data => `
 	Hi there,<br>
 	<br>
 	You've been invited to collaborate on the model - ${data.model}
@@ -26,7 +26,7 @@ let html = data => `
 	3D Repo
 `;
 
-let subject = data => `${data.model} - Invitation to collaborate`;
+const subject = data => `${data.model} - Invitation to collaborate`;
 
 module.exports =  {
 	html: html,

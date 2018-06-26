@@ -35,12 +35,12 @@ function updateSubscription(req, res, next) {
 
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
-			let billingUser = req.session.user.username;
+			const billingUser = req.session.user.username;
 			return dbUser.updateSubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 		})
 		.then(agreement => {
 
-			let resData = {
+			const resData = {
 				url: agreement.url
 			};
 
@@ -58,10 +58,10 @@ function updateSubscription(req, res, next) {
 
 function listSubscriptions(req, res, next) {
 
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
 		.then(user => {
-			let subscriptions = user.customData.billing.getActiveSubscriptions();
+			const subscriptions = user.customData.billing.getActiveSubscriptions();
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		})

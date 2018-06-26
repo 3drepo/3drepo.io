@@ -79,7 +79,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 
 	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
-			let ifcGuids = [];
+			const ifcGuids = [];
 			results.forEach(res => {
 				if (this.isIfcGuid(res.metadata["IFC GUID"])) {
 					ifcGuids.push(res.metadata["IFC GUID"]);
@@ -129,7 +129,7 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 		const sharedIdsSet = new Set();
 		const ifcGuidsSet = new Set();
 
-		let sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+		const sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
 
 		for (let j = 0; j < sharedIds.length; j++) {
 			if ("[object String]" === Object.prototype.toString.call(sharedIds[j])) {
@@ -189,7 +189,7 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
 
 	// Extract a unique list of IDs only
-	let groupObjectsMap = [];
+	const groupObjectsMap = [];
 
 	return this.findOne(dbCol, { _id: uid })
 		.then(group => {
@@ -223,7 +223,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 		const _branch = (model === sharedIdObject.model) ? branch : "master";
 		const _revId = (model === sharedIdObject.model) ? revId : null;
 
-		let ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
+		const ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
 
 		for (let j = 0; this.objects[i].shared_ids && j < this.objects[i].shared_ids.length; j++) {
 			let sharedId = this.objects[i].shared_ids[j];
@@ -392,7 +392,7 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 groupSchema.methods.clean = function(){
 
-	let cleaned = this.toObject();
+	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 

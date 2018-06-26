@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let express = require("express");
-let router = express.Router({mergeParams: true});
-let middlewares = require("../middlewares/middlewares");
-let C = require("../constants");
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
+const C = require("../constants");
 
-let responseCodes = require("../response_codes.js");
-let History = require("../models/history");
-let utils = require("../utils");
+const responseCodes = require("../response_codes.js");
+const History = require("../models/history");
+const utils = require("../utils");
 
 router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
@@ -31,9 +31,9 @@ router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisio
 function listRevisions(req, res, next){
 	"use strict";
 
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 
 	History.listByBranch({account, model}, null, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
@@ -54,9 +54,9 @@ function listRevisions(req, res, next){
 function listRevisionsByBranch(req, res, next){
 	"use strict";
 
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 
 	History.listByBranch({account, model}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
@@ -77,9 +77,9 @@ function listRevisionsByBranch(req, res, next){
 function updateRevisionTag(req, res, next){
 	"use strict";
 
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	History.findByUID({account, model}, req.params.id, {_id : 1, tag: 1}).then(history => {
 		if (!history){

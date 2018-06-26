@@ -1,9 +1,10 @@
-let express = require("express");
-let router = express.Router({mergeParams: true});
-let responseCodes = require("../response_codes.js");
-let utils = require("../utils");
-let User = require("../models/user");
-let Paypal = require("../models/paypal.js");
+"use strict";
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const responseCodes = require("../response_codes.js");
+const utils = require("../utils");
+const User = require("../models/user");
+const Paypal = require("../models/paypal.js");
 
 // endpoints for paypal IPN message
 router.post("/paypal/ipn", handleIPN);
@@ -12,11 +13,10 @@ router.post("/paypal/ipn", handleIPN);
 router.post("/paypal/execute", executeAgreement);
 
 function executeAgreement(req, res, next){
-	"use strict";
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 
 	// execute payment, update billingAgreementId
-	let token = req.body.token;
+	const token = req.body.token;
 
 	User.findByPaypalPaymentToken(token).then(dbUser => {
 		// important to check there is a user/ghost with this token before executing the agreement
@@ -35,9 +35,7 @@ function executeAgreement(req, res, next){
 
 
 function handleIPN(req, res, next){
-	"use strict";
-
-	let responsePlace = utils.APIInfo(req);
+	const responsePlace = utils.APIInfo(req);
 	Paypal.handleIPN(req.body);
 
 	//always respond 200 with OK to paypal 

@@ -40,25 +40,25 @@
 	const SchemaTypes = mongoose.Schema.Types;
 
 	// Various getter/setter helper functions
-	let roundTo2DP = function(x) {
+	const roundTo2DP = function(x) {
 		return utils.roundToNDP(x, 2.0); 
 	};
-	let roundTo3DP = function(x) {
+	const roundTo3DP = function(x) {
 		return utils.roundToNDP(x, 3.0); 
 	};
-	let signAndRoundTo2DP = function(x) {
+	const signAndRoundTo2DP = function(x) {
 		return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x); 
 	};
-	let dateToString = function(date) {
+	const dateToString = function(date) {
 		return moment(date).utc().format(C.DATE_FORMAT); 
 	};
-	let dateToDateTimeString = function(date) {
+	const dateToDateTimeString = function(date) {
 		return moment(date).utc().format(C.DATE_TIME_FORMAT); 
 	};
 
 	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
 
-	let itemSchema = mongoose.Schema({
+	const itemSchema = mongoose.Schema({
 		name: String,
 		currency: String,
 		amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
@@ -71,7 +71,7 @@
 
 	itemSchema.set("toJSON", { virtuals: true, getters:true });
 	
-	let schema = mongoose.Schema({
+	const schema = mongoose.Schema({
 		invoiceNo: String,
 		billingAgreementId: String,
 		gateway: String,
@@ -105,7 +105,7 @@
 	});
 
 	schema.virtual("info.countryName").get(function(){
-		let country = addressMeta.countries.find(c => c.code === this.info.countryCode);
+		const country = addressMeta.countries.find(c => c.code === this.info.countryCode);
 		return country && country.name;
 	});
 
@@ -175,8 +175,8 @@
 
 		if(data.payments){
 
-			let proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
-			let regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
+			const proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
+			const regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
 
 			if(proRataPayments.length > 0){
 				this.currency = proRataPayments[0].currency;
@@ -339,7 +339,7 @@
 
 		}).then(invoice => {
 
-			let attachments = [{
+			const attachments = [{
 				filename: `${moment(invoice.createdAtDate).utc().format(C.DATE_FORMAT)}_invoice-${invoice.invoiceNo}.pdf`,
 				content: invoice.pdf
 			}];
@@ -374,8 +374,8 @@
 
 		let ph;
 		let page;
-		let htmlPath = `${config.invoice_dir}/${this.id}.html`;
-		let pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
+		const htmlPath = `${config.invoice_dir}/${this.id}.html`;
+		const pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
 
 		if (!config.invoice_dir) {
 			return Promise.reject({ message: "invoice dir is not set in config file" });
@@ -383,7 +383,7 @@
 
 		return new Promise((resolve, reject) => {
 
-			let useNonPublicPort = true;
+			const useNonPublicPort = true;
 
 			let template = path.join(__dirname, "../../pug/invoice.pug");
 			if (this.type === "refund") {
@@ -430,8 +430,8 @@
 			.then(() => {
 				ph && ph.exit();
 
-				let pdfRS = fs.createReadStream(pdfPath);
-				let bufs = [];
+				const pdfRS = fs.createReadStream(pdfPath);
+				const bufs = [];
 
 				return new Promise((resolve, reject) => {
 

@@ -46,13 +46,13 @@
 jQuery.extend({
 	highlight: function (node, re, nodeName, className) {
 		if (node.nodeType === 3) {
-			let match = node.data.match(re);
+			const match = node.data.match(re);
 			if (match) {
-				let highlight = document.createElement(nodeName || "span");
+				const highlight = document.createElement(nodeName || "span");
 				highlight.className = className || "highlight";
-				let wordNode = node.splitText(match.index);
+				const wordNode = node.splitText(match.index);
 				wordNode.splitText(match[0].length);
-				let wordClone = wordNode.cloneNode(true);
+				const wordClone = wordNode.cloneNode(true);
 				highlight.appendChild(wordClone);
 				wordNode.parentNode.replaceChild(highlight, wordNode);
 				return 1; //skip added node in parent
@@ -69,18 +69,18 @@ jQuery.extend({
 });
 
 jQuery.fn.unhighlight = function (options) {
-	let settings = { className: "highlight", element: "span" };
+	const settings = { className: "highlight", element: "span" };
 	jQuery.extend(settings, options);
 
 	return this.find(settings.element + "." + settings.className).each(function () {
-		let parent = this.parentNode;
+		const parent = this.parentNode;
 		parent.replaceChild(this.firstChild, this);
 		parent.normalize();
 	}).end();
 };
 
 jQuery.fn.highlight = function (words, options) {
-	let settings = { className: "highlight", element: "span", caseSensitive: false, wordsOnly: false };
+	const settings = { className: "highlight", element: "span", caseSensitive: false, wordsOnly: false };
 	jQuery.extend(settings, options);
     
 	if (words.constructor === String) {
@@ -96,12 +96,12 @@ jQuery.fn.highlight = function (words, options) {
 		return this; 
 	}
 
-	let flag = settings.caseSensitive ? "" : "i";
+	const flag = settings.caseSensitive ? "" : "i";
 	let pattern = "(" + words.join("|") + ")";
 	if (settings.wordsOnly) {
 		pattern = "\\b" + pattern + "\\b";
 	}
-	let re = new RegExp(pattern, flag);
+	const re = new RegExp(pattern, flag);
     
 	return this.each(function () {
 		jQuery.highlight(this, re, settings.element, settings.className);

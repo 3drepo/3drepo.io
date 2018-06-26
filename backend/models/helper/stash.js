@@ -17,10 +17,10 @@
 
 
 // generic stash function
-let ModelFactory = require("../factory/modelFactory");
-let stream = require("stream");
-let GridFSBucket = require("mongodb").GridFSBucket;
-let systemLogger = require("../../logger.js").systemLogger;
+const ModelFactory = require("../factory/modelFactory");
+const stream = require("stream");
+const GridFSBucket = require("mongodb").GridFSBucket;
+const systemLogger = require("../../logger.js").systemLogger;
 
 
 function getGridFSBucket (account, bucketName){
@@ -48,7 +48,7 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 
 				return new Promise((resolve) => {
 
-					let downloadStream = bucket.openDownloadStreamByName(filename);
+					const downloadStream = bucket.openDownloadStreamByName(filename);
 
 					if(getStreamOnly){
 							
@@ -56,7 +56,7 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 
 					} else { 
 
-						let bufs = [];
+						const bufs = [];
 
 						downloadStream.on("data", function(d){
 							bufs.push(d); 
@@ -82,9 +82,9 @@ function saveStashByFilename(dbCol, format, filename, buffer){
 	"use strict";
 
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
-		let uploadStream = bucket.openUploadStream(filename);
+		const uploadStream = bucket.openUploadStream(filename);
 
-		let bufferStream = new stream.PassThrough();
+		const bufferStream = new stream.PassThrough();
 		bufferStream.end(buffer);
 
 		bufferStream.pipe(uploadStream);

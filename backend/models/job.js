@@ -41,7 +41,7 @@ schema.statics.addDefaultJobs = function(teamspace) {
 
 schema.statics.usersWithJob = function(teamspace) {
 	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
-		let userToJob  = {};
+		const userToJob  = {};
 		
 		jobs.forEach( job => {
 			job.users.forEach( user => {

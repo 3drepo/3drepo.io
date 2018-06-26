@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let html = data => `
+const html = data => `
 	Billing User: ${data.billingUser}
 	<br><br>
 	Email: ${data.email}
@@ -27,7 +27,7 @@ let html = data => `
 	Raw ipn message: ${data.ipn}
 `;
 
-let subject = "[System] Unexpected PayPal Payment IPN";
+const subject = "[System] Unexpected PayPal Payment IPN";
 
 module.exports =  {
 	html: html,

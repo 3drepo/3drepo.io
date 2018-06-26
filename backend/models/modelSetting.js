@@ -95,7 +95,7 @@ schema.methods.updateProperties = function(updateObj){
 		}
 		switch (key) {
 		case "topicTypes":
-			let topicTypes = {};
+			const topicTypes = {};
 			updateObj[key].forEach(type => {
 
 				if(!type || !type.trim()){
@@ -103,7 +103,7 @@ schema.methods.updateProperties = function(updateObj){
 				}
 
 				//generate value from label
-				let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");
+				const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");
 
 				if(topicTypes[value]){
 					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
@@ -140,7 +140,7 @@ schema.methods.changePermissions = function(permissions){
 	
 	return User.findByUserName(account).then(dbUser => {
 
-		let promises = [];
+		const promises = [];
 
 		permissions.forEach(permission => {
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
@@ -155,7 +155,7 @@ schema.methods.changePermissions = function(permissions){
 				if (!isMember) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}
-				let perm = this.permissions.find(perm => perm.user === permission.user);
+				const perm = this.permissions.find(perm => perm.user === permission.user);
 
 				if(perm) {
 					perm.permission = permission.permission;

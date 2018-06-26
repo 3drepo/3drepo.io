@@ -16,11 +16,11 @@
  */
 
 
-let nodemailer = require("nodemailer");
-let config = require("../config");
-let C = require("../constants");
-let responseCodes = require("../response_codes");
-let getBaseURL = config.getBaseURL;
+const nodemailer = require("nodemailer");
+const config = require("../config");
+const C = require("../constants");
+const responseCodes = require("../response_codes");
+const getBaseURL = config.getBaseURL;
 let transporter;
 
 function sendEmail(template, to, data, attachments){
@@ -35,7 +35,7 @@ function sendEmail(template, to, data, attachments){
 		return Promise.reject({ message: "config.mail.sender is not set"});
 	}
 
-	let mailOptions = {
+	const mailOptions = {
 		from: config.mail.sender,
 		to: to,
 		subject: typeof template.subject === "function" ? template.subject(data) : template.subject,
@@ -92,7 +92,7 @@ function sendVerifyUserEmail(to, data){
 		return rejectNoUrl("verify");
 	}
 
-	let template = require("./templates/verifyUser");
+	const template = require("./templates/verifyUser");
 	return sendEmail(template, to, data);
 }
 
@@ -106,14 +106,14 @@ function sendResetPasswordEmail(to, data){
 		return rejectNoUrl("forgotPassword");
 	}
 
-	let template = require("./templates/forgotPassword");
+	const template = require("./templates/forgotPassword");
 	return sendEmail(template, to, data);
 }
 
 function sendPaymentReceivedEmail(to, data, attachments){
 	"use strict";
 
-	let template = require("./templates/paymentReceived");
+	const template = require("./templates/paymentReceived");
 
 
 	return sendEmail(template, to, data, attachments);
@@ -128,7 +128,7 @@ function sendPaymentReceivedEmailToSales(data, attachments){
 		template = require("./templates/paymentRefunded");
 	}
 
-	let salesTemplate = {
+	const salesTemplate = {
 		html: template.html,
 		subject: function(data){
 			return `[${data.type}] [${data.invoiceNo}] ${data.email}`;
@@ -148,7 +148,7 @@ function sendPaymentReceivedEmailToSales(data, attachments){
 function sendNewUser(data){
 	"use strict";
 
-	let template = require("./templates/newUser");
+	const template = require("./templates/newUser");
 
 	data.url = getBaseURL();
 	
@@ -163,7 +163,7 @@ function sendNewUser(data){
 function sendContactEmail(data){
 	"use strict";
 
-	let template = require("./templates/contact");
+	const template = require("./templates/contact");
 	
 	if(!config.contact || !config.contact.email){
 		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
@@ -177,7 +177,7 @@ function sendContactEmail(data){
 function sendPaymentFailedEmail(to, data){
 	"use strict";
 
-	let template = require("./templates/paymentFailed");
+	const template = require("./templates/paymentFailed");
 	return sendEmail(template, to, data);
 
 }
@@ -185,7 +185,7 @@ function sendPaymentFailedEmail(to, data){
 function sendPaymentRefundedEmail(to, data, attachments){
 	"use strict";
 
-	let template = require("./templates/paymentRefunded");
+	const template = require("./templates/paymentRefunded");
 	return sendEmail(template, to, data, attachments);
 
 }
@@ -193,7 +193,7 @@ function sendPaymentRefundedEmail(to, data, attachments){
 function sendSubscriptionSuspendedEmail(to, data){
 	"use strict";
 
-	let template = require("./templates/paymentSuspended");
+	const template = require("./templates/paymentSuspended");
 	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
 
 	return sendEmail(template, to, data);
@@ -203,7 +203,7 @@ function sendSubscriptionSuspendedEmail(to, data){
 function sendPaymentErrorEmail(data){
 	"use strict";
 
-	let template = require("./templates/paymentError");
+	const template = require("./templates/paymentError");
 	return sendEmail(template, config.contact.email, data);
 }
 
@@ -216,7 +216,7 @@ function sendModelInvitation(to, data){
 		return rejectNoUrl("model");
 	}
 
-	let template = require("./templates/invitedToModel");
+	const template = require("./templates/invitedToModel");
 	return sendEmail(template, to, data);
 }
 
@@ -224,7 +224,7 @@ function sendImportError(data){
 	"use strict";
 
 	if(config.contact){
-		let template = require("./templates/importError");
+		const template = require("./templates/importError");
 		data.domain = config.host;
 		return sendEmail(template, config.contact.email, data);
 	} else {

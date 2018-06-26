@@ -16,14 +16,14 @@
  */
 
 
-let _ = require("lodash");
-let repoBase = require("./base/repo");
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
+const _ = require("lodash");
+const repoBase = require("./base/repo");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
 
-let Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-let refSchema = Schema(
+const refSchema = Schema(
 	_.extend({}, repoBase.attrs, {
 		// no extra attributes
 		_id: Object,
@@ -41,7 +41,7 @@ refSchema.statics = {};
 refSchema.methods = {};
 
 
-let Ref = ModelFactory.createClass(
+const Ref = ModelFactory.createClass(
 	"Ref", 
 	refSchema, 
 	arg => { 

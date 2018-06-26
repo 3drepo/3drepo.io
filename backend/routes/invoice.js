@@ -35,7 +35,7 @@
 
 	function listInvoices(req, res, next){
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		Invoice.findByAccount(req.params.account).then(invoices => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, invoices);
@@ -46,7 +46,7 @@
 
 	function renderInvoice(req, res, next){
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(invoice => {
 
 			if(!invoice){
@@ -70,7 +70,7 @@
 
 	function renderInvoicePDF(req, res, next){
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		let invoice;
 
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_invoice => {

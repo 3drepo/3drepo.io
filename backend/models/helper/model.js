@@ -91,7 +91,7 @@ function importSuccess(account, model, sharedSpacePath) {
 	setStatus(account, model, "ok").then(setting => {
 		if (setting) {
 			if (sharedSpacePath) {
-				let files = function(filePath, fileDir, jsonFile){
+				const files = function(filePath, fileDir, jsonFile){
 					return [
 						{desc: "tmp model file", type: "file", path: filePath},
 						{desc: "json file", type: "file", path: jsonFile},
@@ -99,14 +99,14 @@ function importSuccess(account, model, sharedSpacePath) {
 					];
 				};
 
-				let tmpDir = `${sharedSpacePath}/${setting.corID}`;
-				let tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
+				const tmpDir = `${sharedSpacePath}/${setting.corID}`;
+				const tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
 				fs.stat(tmpModelFile, function(err, stat) {
 					let tmpJsonFile;
 					if (err) {
 						tmpJsonFile = `${tmpDir}/obj.json`;
 					} else {
-						let tmpModelFileData = require(tmpModelFile);
+						const tmpModelFileData = require(tmpModelFile);
 						tmpJsonFile = tmpModelFileData.file;
 					}
 
@@ -190,7 +190,7 @@ function setStatus(account, model, status) {
  * @param {model} model - Model
  */
 function createCorrelationId(account, model) {
-	let correlationId = uuid.v1();
+	const correlationId = uuid.v1();
 
 	// store corID
 	return ModelSetting.findById({account, model}, model).then(setting => {
@@ -352,7 +352,7 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 	}).then(setting => {
 
-		let modelData = {
+		const modelData = {
 			account,
 			model:  model.toString(),
 			name: modelName,
@@ -419,10 +419,10 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	
 
 	let model;
-	let desc = "";
-	let type = "sample";
+	const desc = "";
+	const type = "sample";
 
-	let data = {
+	const data = {
 		desc, 
 		type, 
 		project, 
@@ -466,7 +466,7 @@ function createFederatedModel(account, model, subModels, toyFed){
 
 	return createCorrelationId(account, model).then(correlationId => {
 
-		let federatedJSON = {
+		const federatedJSON = {
 			database: account,
 			project: model,
 			subProjects: []
@@ -477,7 +477,7 @@ function createFederatedModel(account, model, subModels, toyFed){
 
 		let error;
 
-		let addSubModels = [];
+		const addSubModels = [];
 
 		subModels.forEach(subModel => {
 
@@ -541,7 +541,7 @@ function getAllMeshes(account, model, branch, rev, username){
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -550,7 +550,7 @@ function getAllMeshes(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let refMeshesPromises = [];
+		const refMeshesPromises = [];
 
 		refs.forEach(ref => {
 
@@ -582,7 +582,7 @@ function getAllMeshes(account, model, branch, rev, username){
 		subModelMeshes = refMeshes;
 		return Mesh.getMeshes(account, model, history);
 	}).then(meshes => {
-		let results = {};
+		const results = {};
 	       	if(meshes) {
 			results.meshes = meshes;
 		} else {
@@ -626,7 +626,7 @@ function getIdMap(account, model, branch, rev, username){
 			revId = utils.uuidToString(history._id);
 			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -635,7 +635,7 @@ function getIdMap(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getIdMaps = [];
+		const getIdMaps = [];
 
 		refs.forEach(ref => {
 
@@ -716,7 +716,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 			revId = utils.uuidToString(history._id);
 			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -725,7 +725,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let refPromises = [];
+		const refPromises = [];
 
 		refs.forEach(ref => {
 
@@ -800,7 +800,7 @@ function getModelProperties(account, model, branch, rev, username){
 			revId = utils.uuidToString(history._id);
 			modelPropertiesFileName = `/${account}/${model}/revision/${revId}/modelProperties.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -809,7 +809,7 @@ function getModelProperties(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getModelProps = [];
+		const getModelProps = [];
 
 		refs.forEach(ref => {
 
@@ -892,7 +892,7 @@ function getTreePath(account, model, branch, rev, username){
 			revId = utils.uuidToString(history._id);
 			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -901,7 +901,7 @@ function getTreePath(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getTreePaths = [];
+		const getTreePaths = [];
 
 		refs.forEach(ref => {
 
@@ -984,7 +984,7 @@ function getUnityAssets(account, model, branch, rev, username){
 			revId = utils.uuidToString(history._id);
 			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -993,7 +993,7 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(refs => {
 
 		//for all refs get their tree
-		let getUnityProps = [];
+		const getUnityProps = [];
 
 		refs.forEach(ref => {
 
@@ -1029,7 +1029,7 @@ function getUnityAssets(account, model, branch, rev, username){
 		let models = [];
 
 		if(buf){
-			let modelAssets = JSON.parse(buf);
+			const modelAssets = JSON.parse(buf);
 			if(modelAssets !== null) {
 				models.push(modelAssets);
 			}
@@ -1088,8 +1088,8 @@ function getFullTree_noSubTree(account, model, branch, rev){
 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
 		}
 
-		let revId = utils.uuidToString(history._id);
-		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
+		const revId = utils.uuidToString(history._id);
+		const treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
 
 		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
 		return stash.findStashByFilename({ account, model }, "json_mpc", treeFileName, true);
@@ -1126,7 +1126,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	}).then(() => {
 
-		let filter = {
+		const filter = {
 			type: "ref",
 			_id: { $in: history.current }
 		};
@@ -1188,11 +1188,11 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 function searchTree(account, model, branch, rev, searchString, username){
 
-	let search = (history) => {
+	const search = (history) => {
 
 		let items = [];
 
-		let filter = {
+		const filter = {
 			_id: {"$in": history.current },
 			type: {"$in": ["transformation", "mesh"]},
 			name: new RegExp(searchString, "i")
@@ -1209,7 +1209,7 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 			});
 
-			let filter = {
+			const filter = {
 				_id: {"$in": history.current },
 				type: "ref"
 			};
@@ -1218,7 +1218,7 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 		}).then(refs => {
 
-			let promises = [];
+			const promises = [];
 
 			refs.forEach(ref => {
 
@@ -1268,12 +1268,12 @@ function searchTree(account, model, branch, rev, searchString, username){
 function listSubModels(account, model, branch){
 	
 
-	let subModels = [];
+	const subModels = [];
 
 	return History.findByBranch({ account, model }, branch).then(history => {
 
 		if(history){
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -1318,7 +1318,7 @@ function downloadLatest(account, model){
 			}
 
 			// change file name
-			let filename = file.filename.split("_");
+			const filename = file.filename.split("_");
 			let ext = "";
 	
 			if (filename.length > 1){
@@ -1343,12 +1343,12 @@ function uploadFile(req){
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
-	let account = req.params.account;
-	let model = req.params.model;
+	const account = req.params.account;
+	const model = req.params.model;
 
 	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading" });
 	//upload model with tag
-	let checkTag = tag => {
+	const checkTag = tag => {
 		if(!tag){
 			return Promise.resolve();
 		} else {
@@ -1367,7 +1367,7 @@ function uploadFile(req){
 
 	return new Promise((resolve, reject) => {
 
-		let upload = multer({
+		const upload = multer({
 			dest: config.cn_queue.upload_dir,
 			fileFilter: function(req, file, cb){
 
@@ -1379,7 +1379,7 @@ function uploadFile(req){
 
 				format = format[format.length - 1];
 
-				let size = parseInt(req.headers["content-length"]);
+				const size = parseInt(req.headers["content-length"]);
 
 				if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -1425,7 +1425,7 @@ function _deleteFiles(files){
 	
 	files.forEach(file => {
 
-		let deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
+		const deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
 
 		deleteFile(file.path, function(err){
 			if(err){
@@ -1519,7 +1519,7 @@ function removeModel(account, model, forceRemove){
 
 	}).then(settings => {
 
-		let promises = [];
+		const promises = [];
 
 		settings.forEach(modelSetting => {
 			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
@@ -1538,7 +1538,7 @@ function removeModel(account, model, forceRemove){
 	}).then(collections => {
 		//remove model collections
 
-		let promises = [];
+		const promises = [];
 
 		collections.forEach(collection => {
 			if(collection.name.startsWith(model + ".")){
@@ -1648,8 +1648,8 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
 		//Check for submodel references
-		let revId = utils.uuidToString(history._id);
-		let filter = {
+		const revId = utils.uuidToString(history._id);
+		const filter = {
 			type: "ref",
 			_id: { $in: history.current }
 		};
@@ -1657,7 +1657,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 	}).then(refs =>{
 
 		//for all refs get their tree
-		let getMeta = [];
+		const getMeta = [];
 
 		refs.forEach(ref => {
 
@@ -1689,12 +1689,12 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 	}).then(_subMeta => {
 
-		let match = {
+		const match = {
 			_id: {"$in": history.current}
 		};
 		match[fullFieldName] =  {"$exists" : true};
 
-		let projection = {
+		const projection = {
 			parents: 1
 		};
 		projection[fullFieldName] = 1;
@@ -1702,7 +1702,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 		return Scene.find({account, model}, match, projection).then(obj => {
 			if(obj){
 				//rename fieldName to "value"
-				let parsedObj = {data: obj};
+				const parsedObj = {data: obj};
 				if(obj.length > 0 && fieldName && fieldName.length > 0) {
 					const objStr = JSON.stringify(obj);
 					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));

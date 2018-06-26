@@ -15,12 +15,12 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let Queue = require("../services/queue");
+const Queue = require("../services/queue");
 
 function insertEventQueue(event, emitter, account, model, extraKeys, data){
 	"use strict";
 
-	let msg = {
+	const msg = {
 		event,
 		emitter,
 		account,

@@ -27,7 +27,7 @@
 
 	const Schema = mongoose.Schema;
 
-	let meshSchema = Schema(
+	const meshSchema = Schema(
 		_.extend({}, repoBase.attrs, {
 			vertices: Object,
 			vertices_count: Number,
@@ -94,7 +94,7 @@
 
 	meshSchema.statics.getMeshes = function (account, model, history) {
 		//find all meshes within this revision.
-		let query = { "_id" : {"$in": history.current}, "type": "mesh"};
+		const query = { "_id" : {"$in": history.current}, "type": "mesh"};
 		return this.find({account, model}, query, {_id : 1, shared_id: 1})
 			.then( meshes => {
 				meshes.forEach(mesh => {
@@ -108,7 +108,7 @@
 	};
 	
 
-	let Mesh = ModelFactory.createClass(
+	const Mesh = ModelFactory.createClass(
 		"Mesh",
 		meshSchema,
 		

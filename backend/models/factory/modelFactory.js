@@ -16,7 +16,7 @@
  */
 
 // mongoose model factory for different db and collection name for each instance
-let mongoose = require("mongoose");
+const mongoose = require("mongoose");
 mongoose.Promise = Promise;
 
 module.exports = {
@@ -41,11 +41,11 @@ module.exports = {
 		"use strict";
 		this.__checkDb();
 
-		let Model = mongoose.model(modelName);
+		const Model = mongoose.model(modelName);
 		
-		let data  = options && options.data || {};
+		const data  = options && options.data || {};
 
-		let item = new Model(data);
+		const item = new Model(data);
 		
 		//FIXME: this needs to use the normal getCollection(), which returns a promise.
 		item.collection = this.dbManager._getCollection(options.account, this.__collectionName(modelName, options));
@@ -100,15 +100,15 @@ module.exports = {
 			return this.get(modelName, options);
 		};
 
-		let self = this;
+		const self = this;
 
 		function staticFunctionProxy(staticFuncName){
 
-			let staticFunc = mongooseModel[staticFuncName];
+			const staticFunc = mongooseModel[staticFuncName];
 
 			return function(options){
 
-				let args = Array.prototype.slice.call(arguments);
+				const args = Array.prototype.slice.call(arguments);
 				args.shift();
 
 				// resetting the static collection
@@ -156,7 +156,7 @@ module.exports = {
 
 		mongooseModel.findById = function(options, id){
 
-			let args = Array.prototype.slice.call(arguments);
+			const args = Array.prototype.slice.call(arguments);
 			args.splice(0, 2);
 
 			args.unshift(options, { _id: id});
@@ -165,21 +165,21 @@ module.exports = {
 		};
 
 
-		let update = mongooseModel.update;
+		const update = mongooseModel.update;
 
 		mongooseModel.update = function(options){
 			//FIXME: another one that breaks when I turn it into a promise.
-			let collection = self.dbManager._getCollection(options.account,self.__collectionName(modelName, options));
+			const collection = self.dbManager._getCollection(options.account,self.__collectionName(modelName, options));
 			mongooseModel.collection = collection;
 
-			let args = Array.prototype.slice.call(arguments);
+			const args = Array.prototype.slice.call(arguments);
 			args.shift();
 
 			return update.apply(mongooseModel, args);
 		};
 
 		mongooseModel.prototype.model = modelName => {
-			let model = this.models[modelName].mongooseModel;
+			const model = this.models[modelName].mongooseModel;
 			return model;
 		};
 

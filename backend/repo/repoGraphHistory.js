@@ -19,8 +19,8 @@
 
 // var mongodb = require('mongodb');
 // var assert = require('assert');
-let UUID = require("node-uuid");
-let C = require("./constants");
+const UUID = require("node-uuid");
+const C = require("./constants");
 //var repoNodeRevision = require('./repoNodeRevision');
 
 // Documentation
@@ -35,13 +35,13 @@ exports.decode = function(bsonArray) {
 	let rootNode;
 
 	// return variable
-	let history = {};
+	const history = {};
 	history[C.REPO_HISTORY_LABEL_REVISIONS_COUNT] = 0;
 
 	// Sort documents into categories (dictionaries of {id : bson} pairs)
 	// UUID is a binary object of subtype 3 (old) or 4 (new)
 	// see http://mongodb.github.com/node-mongodb-native/api-bson-generated/binary.html
-	let revisions = {};
+	const revisions = {};
 
 	if (bsonArray) {
 		// Separate out all the revisions and

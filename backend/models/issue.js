@@ -16,34 +16,34 @@
  */
 "use strict";
 
-let mongoose = require("mongoose");
-let ModelFactory = require("./factory/modelFactory");
-let Schema = mongoose.Schema;
-let ModelSetting = require("./modelSetting");
-let utils = require("../utils");
-let stringToUUID = utils.stringToUUID;
-let uuidToString = utils.uuidToString;
-let History = require("./history");
-let Ref = require("./ref");
-let GenericObject = require("./base/repo").GenericObject;
-let uuid = require("node-uuid");
-let responseCodes = require("../response_codes.js");
-let middlewares = require("../middlewares/middlewares");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const Schema = mongoose.Schema;
+const ModelSetting = require("./modelSetting");
+const utils = require("../utils");
+const stringToUUID = utils.stringToUUID;
+const uuidToString = utils.uuidToString;
+const History = require("./history");
+const Ref = require("./ref");
+const GenericObject = require("./base/repo").GenericObject;
+const uuid = require("node-uuid");
+const responseCodes = require("../response_codes.js");
+const middlewares = require("../middlewares/middlewares");
 const _ = require("lodash");
 
-let ChatEvent = require("./chatEvent");
+const ChatEvent = require("./chatEvent");
 
 // var xmlBuilder = require('xmlbuilder');
-let moment = require("moment");
-let archiver = require("archiver");
-let yauzl = require("yauzl");
-let xml2js = require("xml2js");
-let systemLogger = require("../logger.js").systemLogger;
-let Group = require("./group");
-let Meta = require("./meta");
-let C = require("../constants");
+const moment = require("moment");
+const archiver = require("archiver");
+const yauzl = require("yauzl");
+const xml2js = require("xml2js");
+const systemLogger = require("../logger.js").systemLogger;
+const Group = require("./group");
+const Meta = require("./meta");
+const C = require("../constants");
 
-let xmlBuilder = new xml2js.Builder({
+const xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
 	xmldec: {
 		version: "1.0",
@@ -55,7 +55,7 @@ let xmlBuilder = new xml2js.Builder({
 });
 
 
-let actionSchema = Schema({
+const actionSchema = Schema({
 	_id : false,
 	id: false,
 	property: String,
@@ -65,7 +65,7 @@ let actionSchema = Schema({
 
 function propertyTextMapping(property){
 
-	let mapping = {
+	const mapping = {
 		"priority": "Priority",
 		"status": "Status",
 		"assigned_roles": "Assigned",
@@ -82,7 +82,7 @@ actionSchema.virtual("propertyText").get(function(){
 
 actionSchema.set("toObject", { virtuals: true, getters:true });
 
-let schema = Schema({
+const schema = Schema({
 	_id: Object,
 	object_id: Object,
 	rev_id: Object,
@@ -188,14 +188,14 @@ function parseXmlString(xml, options){
 // Model statics method
 //internal helper _find
 
-let statusEnum = {
+const statusEnum = {
 	"OPEN": C.ISSUE_STATUS_OPEN, 
 	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS, 
 	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL, 
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
-let priorityEnum = {
+const priorityEnum = {
 	"NONE": "none", 
 	"LOW": "low", 
 	"MEDIUM": "medium", 
@@ -234,7 +234,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 				return Promise.resolve([]);
 			}
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -244,13 +244,13 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 
 		}).then(refs => {
 
-			let promises = [];
+			const promises = [];
 
 			refs.forEach(ref => {
-				let childDbName  = ref.owner ? ref.owner : dbColOptions.account;
-				let childModel = ref.project;
+				const childDbName  = ref.owner ? ref.owner : dbColOptions.account;
+				const childModel = ref.project;
 
-				let unique = ref.unique;
+				const unique = ref.unique;
 
 				let childRevision, childBranch;
 				if (ref._rid){
@@ -263,7 +263,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 					childBranch   = "master";
 				}
 
-				let dbCol = {
+				const dbCol = {
 					account: childDbName,
 					model: childModel
 				};
@@ -288,7 +288,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
 
 	let issues;
-	let self = this;
+	const self = this;
 	let filter = {};
 
 	let addRevFilter = Promise.resolve();
@@ -334,7 +334,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 			if(histories.length > 0){
 
-				let history = histories[0];
+				const history = histories[0];
 				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
 				filter = {
 					"created" : { "$lt": history.timestamp.valueOf() },
@@ -351,7 +351,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 			if(histories.length > 0){
 				// for issues with rev_id, get all issues if rev_id in revIds
-				let revIds = histories.map(h => h._id);
+				const revIds = histories.map(h => h._id);
 
 				filter = {
 					"$or" : [filter, {
@@ -387,16 +387,16 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 			return Promise.resolve(issues);
 		} else {
 
-			let promises = [];
+			const promises = [];
 			refs.forEach(ref => {
-				let childDbName = ref.owner || dbColOptions.account;
-				let childModel = ref.project;
+				const childDbName = ref.owner || dbColOptions.account;
+				const childModel = ref.project;
 
 				promises.push(
 					middlewares.hasReadAccessToModelHelper(username, childDbName, childModel).then(granted => {
 						if(granted){
 
-							let filter = {};
+							const filter = {};
 
 							if(ids){
 								filter._id = {
@@ -432,13 +432,13 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId, ids){
 
-	let zip = archiver.create("zip");
+	const zip = archiver.create("zip");
 
 	zip.append(new Buffer.from(this.getModelBCF(model), "utf8"), {name: "model.bcf"})
 		.append(new Buffer.from(this.getBCFVersion(), "utf8"), {name: "bcf.version"});
 
-	let projection = {};
-	let noClean = true;
+	const projection = {};
+	const noClean = true;
 	let settings;
 
 	return ModelSetting.findById({account, model}, model).then(_settings => {
@@ -448,7 +448,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 	}).then(issues => {
 
-		let bcfPromises = [];
+		const bcfPromises = [];
 
 		issues.forEach(issue => {
 
@@ -481,7 +481,7 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 
 schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 
-	let filter = { parent: stringToUUID(sid) };
+	const filter = { parent: stringToUUID(sid) };
 
 	if(number){
 		filter.number = number;
@@ -526,11 +526,11 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 
 schema.statics.createIssue = function(dbColOptions, data){
 
-	let objectId = data.object_id;
+	const objectId = data.object_id;
 
-	let promises = [];
+	const promises = [];
 
-	let issue = Issue.createInstance(dbColOptions);
+	const issue = Issue.createInstance(dbColOptions);
 	issue._id = stringToUUID(uuid.v1());
 
 	if(!data.name){
@@ -654,7 +654,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 			return ModelSetting.findById(dbColOptions, dbColOptions.model);
 		}).then(settings => {
 
-			let cleaned = issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
+			const cleaned = issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
 			
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.model, [cleaned]);
 
@@ -665,7 +665,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
-	let updateGroup = function(group_id){
+	const updateGroup = function(group_id){
 		return Group.updateIssueId(dbColOptions, group_id, issueId).then(group => {
 			if(!group){
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
@@ -675,7 +675,7 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 		});
 	};
 
-	let groupUpdatePromises = [];
+	const groupUpdatePromises = [];
 
 	if (data.group_id){
 		groupUpdatePromises.push(updateGroup(data.group_id));
@@ -770,7 +770,7 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 
 schema.methods.updateComment = function(commentIndex, data){
 
-	let timeStamp = (new Date()).getTime();
+	const timeStamp = (new Date()).getTime();
 
 	if((this.comments[commentIndex] && this.comments[commentIndex].sealed)){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
@@ -778,7 +778,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	if(commentIndex === null || typeof commentIndex === "undefined"){
 
-		let commentGuid = utils.generateUUID();
+		const commentGuid = utils.generateUUID();
 		let branch;
 
 		if (!data.revId){
@@ -840,8 +840,8 @@ schema.methods.updateComment = function(commentIndex, data){
 			schema.statics.setGroupIssueId(this._dbcolOptions, data, issue._id);
 
 			issue = issue.clean();
-			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
-			let eventData = comment;
+			const comment = issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
+			const eventData = comment;
 
 			ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, eventData);
 			return comment;
@@ -849,7 +849,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	} else {
 
-		let commentObj = this.comments[commentIndex];
+		const commentObj = this.comments[commentIndex];
 		
 		if(!commentObj){
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
@@ -874,8 +874,8 @@ schema.methods.updateComment = function(commentIndex, data){
 		return this.save().then(issue => {
 			issue = issue.clean();
 
-			let comment = issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
-			let eventData = comment;
+			const comment = issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
+			const eventData = comment;
 
 			ChatEvent.commentChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, eventData);
 			return comment;
@@ -890,7 +890,7 @@ function isSystemComment(comment){
 
 schema.methods.removeComment = function(commentIndex, data){
 
-	let commentObj = this.comments[commentIndex];
+	const commentObj = this.comments[commentIndex];
 
 	if(!commentObj){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
@@ -908,12 +908,12 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
 	}
 	
-	let comment = this.clean().comments[commentIndex];
+	const comment = this.clean().comments[commentIndex];
 	this.comments[commentIndex].remove();
 
 	return this.save().then(() => {
 
-		let issue = this.clean();
+		const issue = this.clean();
 		ChatEvent.commentDeleted(
 			data.sessionId, 
 			this._dbcolOptions.account, 
@@ -931,8 +931,8 @@ schema.methods.isClosed = function(){
 
 schema.methods.addSystemComment = function(owner, property, from , to){
 
-	let timeStamp = (new Date()).getTime();
-	let comment = {
+	const timeStamp = (new Date()).getTime();
+	const comment = {
 		guid: utils.generateUUID(),
 		created: timeStamp,
 		action:{
@@ -945,7 +945,7 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 	this.commentCount++;
 
 	//seal the last comment if it is a human commnet after adding system comments
-	let commentLen = this.comments.length;
+	const commentLen = this.comments.length;
 
 	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])){
 		this.comments[commentLen - 2].sealed = true;
@@ -1077,7 +1077,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	}).then(() => {
 
-		let issue = this.clean(settings.type, settings.properties.code);
+		const issue = this.clean(settings.type, settings.properties.code);
 		ChatEvent.issueChanged(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, issue);
 		ChatEvent.newComment(data.sessionId, this._dbcolOptions.account, this._dbcolOptions.model, issue._id, systemComment);
 
@@ -1087,7 +1087,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 schema.methods.clean = function(typePrefix, modelCode){
 
-	let cleaned = this.toObject();
+	const cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.typePrefix = typePrefix;
 	cleaned.modelCode = modelCode;
@@ -1184,8 +1184,8 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 	this.generateCommentsGUID();
 	this.save();
 
-	let viewpointEntries = [];
-	let snapshotEntries = [];
+	const viewpointEntries = [];
+	const snapshotEntries = [];
 
 	let scale = 1;
 
@@ -1199,7 +1199,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		scale = 0.3048;
 	}
 
-	let markup = {
+	const markup = {
 		Markup:{
 			"@" : {
 				"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
@@ -1248,7 +1248,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			return;
 		}
 
-		let commentXmlObj = {
+		const commentXmlObj = {
 			"@":{
 				Guid: utils.uuidToString(comment.guid)
 			},
@@ -1269,18 +1269,18 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		markup.Markup.Comment.push(commentXmlObj);
 	});
 
-	let viewpointsPromises = [];
+	const viewpointsPromises = [];
 
 	// generate viewpoints
 	let snapshotNo = 0;
 
 	this.viewpoints.forEach((vp, index) => {
 
-		let number = index === 0 ? "" : index;
-		let viewpointFileName = `viewpoint${number}.bcfv`;
-		let snapshotFileName = `snapshot${(snapshotNo === 0 ? "" : snapshotNo)}.png`;
+		const number = index === 0 ? "" : index;
+		const viewpointFileName = `viewpoint${number}.bcfv`;
+		const snapshotFileName = `snapshot${(snapshotNo === 0 ? "" : snapshotNo)}.png`;
 
-		let vpObj = {
+		const vpObj = {
 			"@": {
 				"Guid": utils.uuidToString(vp.guid)
 			},
@@ -1301,7 +1301,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 
 		markup.Markup.Viewpoints.push(vpObj);
 		
-		let viewpointXmlObj = {
+		const viewpointXmlObj = {
 			VisualizationInfo:{
 				"@":{
 					"Guid": utils.uuidToString(vp.guid),
@@ -1339,7 +1339,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
 		}
 
-		let componentsPromises = [];
+		const componentsPromises = [];
 
 		if (_.get(vp, "highlighted_group_id")) {
 			const highlightedGroupId = _.get(vp, "highlighted_group_id");
@@ -1485,7 +1485,7 @@ schema.statics.getBCFVersion = function(){
 
 schema.statics.getModelBCF = function(modelId){
 
-	let model = {
+	const model = {
 		ProjectExtension:{
 			"@" : {
 				"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
@@ -1513,7 +1513,7 @@ schema.statics.getIfcGuids = function(account, model) {
 
 schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
-	let self = this;
+	const self = this;
 	let settings;
 	let branch;
 
@@ -1536,8 +1536,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 		settings = _settings;
 
 	}).then(() => {
-		let ifcToModelMapPromises = [];
-		let ifcToModelMap = [];
+		const ifcToModelMapPromises = [];
+		const ifcToModelMap = [];
 
 		if (settings.federate) {
 			for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
@@ -1560,8 +1560,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 		return new Promise((resolve, reject) => {
 
-			let files = {};
-			let promises = [];
+			const files = {};
+			const promises = [];
 
 			function handleZip(err, zipfile) {
 				if(err){
@@ -1588,7 +1588,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					}).then(() => {
 
-						let createIssueProms = [];
+						const createIssueProms = [];
 						
 						Object.keys(files).forEach(guid => {
 							createIssueProms.push(createIssue(guid));
@@ -1598,7 +1598,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					}).then(issues => {
 							
-						let saveIssueProms = [];
+						const saveIssueProms = [];
 
 						// sort issues by date and add number
 						issues = issues.sort((a, b) => {
@@ -1629,7 +1629,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 										// Replace following attributes if they do not exist
 										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
-										for (let simpleAttrIndex in simpleAttrs) {
+										for (const simpleAttrIndex in simpleAttrs) {
 											const simpleAttr = simpleAttrs[simpleAttrIndex];
 											if (undefined !== issue[simpleAttr] 
 											 && (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
@@ -1645,7 +1645,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 										// Attempt to merge following attributes and sort by created desc
 										const complexAttrs = ["comments", "viewpoints"];
-										for (let complexAttrIndex in complexAttrs) {
+										for (const complexAttrIndex in complexAttrs) {
 											const complexAttr = complexAttrs[complexAttrIndex];
 											for (let i = 0; i < issue[complexAttr].length; i++) {
 												if (-1 === matchingIssue[complexAttr].findIndex(attr =>
@@ -1674,7 +1674,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					}).then(savedIssues => {
 
-						let notifications = [];
+						const notifications = [];
 
 						savedIssues.forEach(issue => {
 							schema.statics.setGroupIssueId({account, model}, issue, issue._id);
@@ -1699,8 +1699,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 			function parseViewpoints(issueGuid, issueFiles, vps){
 
-				let viewpoints = {};
-				let promises = [];
+				const viewpoints = {};
+				const promises = [];
 
 				vps && vps.forEach(vp => {
 
@@ -1708,7 +1708,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						return;
 					}
 					
-					let vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
+					const vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
 
 					viewpoints[vp["@"].Guid] = {
 						snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`]
@@ -1741,13 +1741,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 			function createGroupData(groupObject) {
 
-				let groupData = {};
+				const groupData = {};
 
 				groupData.name = groupObject.name;
 				groupData.color = groupObject.color;
 
-				for (let account in groupObject.objects) {
-					for (let model in groupObject.objects[account]) {
+				for (const account in groupObject.objects) {
+					for (const model in groupObject.objects[account]) {
 						if (!groupData.objects) {
 							groupData.objects = [];
 						}
@@ -1798,8 +1798,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 			function createIssue(guid){
 
-				let issueFiles = files[guid];
-				let markupBuf = issueFiles[`${guid}/markup.bcf`];
+				const issueFiles = files[guid];
+				const markupBuf = issueFiles[`${guid}/markup.bcf`];
 				let xml;
 				let issue;
 
@@ -1848,7 +1848,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					}
 
 					_.get(xml ,"Markup.Comment") && xml.Markup.Comment.forEach(comment => {
-						let obj = {
+						const obj = {
 							guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
 							created: moment(_.get(comment, "Date[0]._")).format("x"),
 							owner: _.get(comment, "Author[0]._"),
@@ -1868,18 +1868,18 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 				}).then(viewpoints => {
 
-					let vpGuids = Object.keys(viewpoints);
+					const vpGuids = Object.keys(viewpoints);
 
 					vpGuids.forEach(guid => {
 
-						let groupPromises = [];
+						const groupPromises = [];
 
 						if(!viewpoints[guid].viewpointXml){
 							return;
 						}
 
-						let extras = {};
-						let vpXML = viewpoints[guid].viewpointXml;
+						const extras = {};
+						const vpXML = viewpoints[guid].viewpointXml;
 
 						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
 						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
@@ -1891,13 +1891,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						extras.Snapshot = viewpoints[guid].Snapshot;
 						!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
 
-						let screenshotObj = viewpoints[guid].snapshot ? {
+						const screenshotObj = viewpoints[guid].snapshot ? {
 							flag: 1,
 							content: viewpoints[guid].snapshot
 						} : undefined;
 
 
-						let vp = {
+						const vp = {
 							guid: utils.stringToUUID(guid),
 							extras: extras,
 							screenshot: screenshotObj
@@ -1905,7 +1905,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						};
 
 						let scale = 1;
-						let unit = _.get(settings, "properties.unit");
+						const unit = _.get(settings, "properties.unit");
 						if (unit === "dm") {
 							scale = 10;
 						} else if (unit === "cm") {
@@ -1922,7 +1922,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							if(clippingPlanes[0].ClippingPlane) {
 								for(let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
 									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
-									let clip = {};									
+									const clip = {};									
 									clip.normal = [
 										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
 										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
@@ -1999,7 +1999,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								model: model
 							};
 
-							let vpComponents = _.get(vpXML, "VisualizationInfo.Components");
+							const vpComponents = _.get(vpXML, "VisualizationInfo.Components");
 
 							for (let i = 0; i < vpComponents.length; i++) {
 
@@ -2131,7 +2131,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 									// TODO: May need a better way to combine hidden/shown
 									// as it is not ideal to save both hidden and shown objects
 									if (shownGroupObject) {
-										let shownGroupData = createGroupData(shownGroupObject);
+										const shownGroupData = createGroupData(shownGroupObject);
 
 										if (highlightedGroupData) {
 											shownGroupData.objects = shownGroupData.objects.concat(highlightedGroupData.objects);
@@ -2212,7 +2212,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					paths = entry.fileName.split("/");
 				}
 
-				let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
+				const guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
 
 				if(guid && !files[guid]){
 					files[guid] = {};
@@ -2227,12 +2227,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								return reject(err);
 							} else {
 
-								let bufs = [];
+								const bufs = [];
 
 								rs.on("data", d => bufs.push(d) );
 
 								rs.on("end", () => {
-									let buf = Buffer.concat(bufs);
+									const buf = Buffer.concat(bufs);
 									files[guid][paths.join("/")] = buf;
 									resolve();
 								});
@@ -2254,7 +2254,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 	});
 };
 
-let Issue = ModelFactory.createClass(
+const Issue = ModelFactory.createClass(
 	"Issue",
 	schema,
 	arg => {

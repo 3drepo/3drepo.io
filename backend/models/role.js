@@ -36,8 +36,8 @@
 				roleFound = roleFound.toObject();
 				return { role: roleFound.role, db: roleFound.db};
 			} else {
-				let roleName = C.DEFAULT_MEMBER_ROLE;
-				let createRoleCmd = {
+				const roleName = C.DEFAULT_MEMBER_ROLE;
+				const createRoleCmd = {
 					"createRole": roleName,
 			   		"privileges":[{
 						"resource":{
@@ -58,7 +58,7 @@
 	};
 
 	schema.statics.dropTeamSpaceRole = function (account) {
-		let dropRoleCmd = {
+		const dropRoleCmd = {
 			"dropRole" : C.DEFAULT_MEMBER_ROLE
 		};
 
@@ -74,7 +74,7 @@
 
 	schema.statics.grantTeamSpaceRoleToUser = function (username, account) {
 		
-		let grantRoleCmd = {
+		const grantRoleCmd = {
 			grantRolesToUser: username,
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
@@ -89,7 +89,7 @@
 
 	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account){
 
-		let cmd = {
+		const cmd = {
 			revokeRolesFromUser: username,
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};

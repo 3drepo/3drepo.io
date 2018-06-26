@@ -307,7 +307,7 @@ function getModelTree(req, res, next) {
 	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
 
 	data.readStreamPromise.then(readStream => {
-		let headers = {
+		const headers = {
 			"Content-Type" : "application/json"
 		};
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
@@ -361,10 +361,10 @@ function getTreePath(req, res, next) {
 
 function searchModelTree(req, res, next) {
 
-	let model = req.params.model;
-	let account = req.params.account;
-	let username = req.session.user.username;
-	let searchString = req.query.searchString;
+	const model = req.params.model;
+	const account = req.params.account;
+	const username = req.session.user.username;
+	const searchString = req.query.searchString;
 
 	let branch;
 
@@ -386,7 +386,7 @@ function downloadLatest(req, res, next) {
 	
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
-		let headers = {
+		const headers = {
 			"Content-Length": file.meta.length,
 			"Content-Disposition": "attachment;filename=" + file.meta.filename
 		};

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let html = data => `
+const html = data => `
 	Hi there,<br>
 	<br>
 	Your model ${data.model} has been processed successfully without errors and is now ready.<br><br>
@@ -25,7 +25,7 @@ let html = data => `
 	3D Repo
 `;
 
-let subject = data => `Your model ${data.model} is now ready`;
+const subject = data => `Your model ${data.model} is now ready`;
 
 module.exports =  {
 	html: html,

@@ -29,7 +29,7 @@ function createClientConfig(serverConfig, req) {
 		pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
 	}
     
-	let clientConfig = {
+	const clientConfig = {
 		"maintenanceMode": config.maintenanceMode,
 		"ui": {},
 		"uistate": {},

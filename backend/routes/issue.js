@@ -16,22 +16,22 @@
  */
 "use strict";
 
-let express = require("express");
-let router = express.Router({mergeParams: true});
-let middlewares = require("../middlewares/middlewares");
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
 
-let C = require("../constants");
-let responseCodes = require("../response_codes.js");
-let Issue = require("../models/issue");
-let utils = require("../utils");
-let multer = require("multer");
-let config = require("../config.js");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
+const Issue = require("../models/issue");
+const utils = require("../utils");
+const multer = require("multer");
+const config = require("../config.js");
 
-let User = require("../models/user");
+const User = require("../models/user");
 const Job = require("../models/job");
-let ModelHelper = require("../models/helper/model");
+const ModelHelper = require("../models/helper/model");
 
-let stringToUUID = utils.stringToUUID;
+const stringToUUID = utils.stringToUUID;
 
 router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -60,9 +60,9 @@ router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, midd
 function storeIssue(req, res, next){
 	
 
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 	//let data = JSON.parse(req.body.data);
-	let data = req.body;
+	const data = req.body;
 	data.owner = req.session.user.username;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 	
@@ -90,16 +90,16 @@ function storeIssue(req, res, next){
 
 function updateIssue(req, res, next){
 	
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 	//let data = JSON.parse(req.body.data);
-	let data = req.body;
+	const data = req.body;
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	let dbCol = {account: req.params.account, model: req.params.model};
-	let issueId = req.params.issueId;
+	const dbCol = {account: req.params.account, model: req.params.model};
+	const issueId = req.params.issueId;
 	let action;
 
 	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
@@ -166,7 +166,7 @@ function updateIssue(req, res, next){
 		return action;
 
 	}).then(issue => {
-		let resData = {
+		const resData = {
 			_id: issueId,
 			account: req.params.account,
 			model: req.params.model,
@@ -188,9 +188,9 @@ function updateIssue(req, res, next){
 function listIssues(req, res, next) {
 	
 	//let params = req.params;
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-	let projection = {
+	const place = utils.APIInfo(req);
+	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+	const projection = {
 		extras: 0,
 		"comments": 0,
 		"viewpoints.extras": 0,
@@ -218,9 +218,9 @@ function listIssues(req, res, next) {
 }
 
 function getIssuesBCF(req, res, next) {
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	let ids;
 	if (req.query.ids) {
@@ -237,7 +237,7 @@ function getIssuesBCF(req, res, next) {
 
 	getBCFZipRS.then(zipRS => {
 
-		let headers = {
+		const headers = {
 			"Content-Disposition": "attachment;filename=issues.bcfzip",
 			"Content-Type": "application/zip"
 		};
@@ -253,9 +253,9 @@ function getIssuesBCF(req, res, next) {
 
 function findIssueById(req, res, next) {
 	
-	let params = req.params;
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model};
+	const params = req.params;
+	const place = utils.APIInfo(req);
+	const dbCol =  {account: req.params.account, model: req.params.model};
 
 	Issue.findByUID(dbCol, params.uid).then(issue => {
 
@@ -271,12 +271,12 @@ function findIssueById(req, res, next) {
 function renderIssuesHTML(req, res, next){
 	
 
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+	const place = utils.APIInfo(req);
+	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let findIssue;
-	let noClean = false;
+	const noClean = false;
 
-	let projection = {
+	const projection = {
 		extras: 0,
 		"viewpoints.extras": 0,
 		"viewpoints.scribble": 0,
@@ -298,7 +298,7 @@ function renderIssuesHTML(req, res, next){
 
 	findIssue.then(issues => {
 		// Split issues by type
-		let splitIssues   = {open : [], closed: []};
+		const splitIssues   = {open : [], closed: []};
 
 		for (let i = 0; i < issues.length; i++) {
 			if (issues[i].hasOwnProperty("comments")) {
@@ -331,19 +331,19 @@ function renderIssuesHTML(req, res, next){
 function importBCF(req, res, next){
 	
 
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	//check space
 	function fileFilter(req, file, cb){
 
-		let acceptedFormat = [
+		const acceptedFormat = [
 			"bcf", "bcfzip", "zip"
 		];
 
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
-		let size = parseInt(req.headers["content-length"]);
+		const size = parseInt(req.headers["content-length"]);
 
 		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -360,7 +360,7 @@ function importBCF(req, res, next){
 		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined"});
 	}
 
-	let upload = multer({ 
+	const upload = multer({ 
 		dest: config.bcf_dir,
 		fileFilter: fileFilter
 	});
@@ -386,8 +386,8 @@ function importBCF(req, res, next){
 function getScreenshot(req, res, next){
 	
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
@@ -400,8 +400,8 @@ function getScreenshot(req, res, next){
 function getScreenshotSmall(req, res, next){
 	
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
@@ -414,8 +414,8 @@ function getScreenshotSmall(req, res, next){
 function getThumbnail(req, res, next){
 	
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");

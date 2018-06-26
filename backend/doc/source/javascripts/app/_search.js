@@ -5,9 +5,9 @@
 	"use strict";
 
 	let content, searchResults;
-	let highlightOpts = { element: "span", className: "search-highlight" };
+	const highlightOpts = { element: "span", className: "search-highlight" };
 
-	let index = new lunr.Index();
+	const index = new lunr.Index();
 
 	index.ref("id");
 	index.field("title", { boost: 10 });
@@ -19,8 +19,8 @@
 
 	function populate() {
 		$("h1, h2").each(function() {
-			let title = $(this);
-			let body = title.nextUntil("h1, h2");
+			const title = $(this);
+			const body = title.nextUntil("h1, h2");
 			index.add({
 				id: title.prop("id"),
 				title: title.text(),
@@ -46,14 +46,14 @@
 		}
 
 		if (this.value) {
-			let results = index.search(this.value).filter(function(r) {
+			const results = index.search(this.value).filter(function(r) {
 				return r.score > 0.0001;
 			});
 
 			if (results.length) {
 				searchResults.empty();
 				$.each(results, function (index, result) {
-					let elem = document.getElementById(result.ref);
+					const elem = document.getElementById(result.ref);
 					searchResults.append("<li><a href='#" + result.ref + "'>" + $(elem).text() + "</a></li>");
 				});
 				highlight.call(this);

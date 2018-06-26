@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let html = data => `
+const html = data => `
 	Hi there,<br>
 	<br>
 	Let's confirm your email address.<br>

@@ -16,14 +16,14 @@
  */
 
 
-let https = require("https");
+const https = require("https");
 
 const httpsAgent = new https.Agent({keepAlive:true});
 
 function parseUrl(url){
 	"use strict";
 
-	let urlPart = {};
+	const urlPart = {};
 
 	let parsedUrl = url.split("://");
 
@@ -35,7 +35,7 @@ function parseUrl(url){
 	urlPart.protocol = parsedUrl.shift();
 	
 	parsedUrl = parsedUrl[0].split("/");
-	let host =  parsedUrl.shift().split(":");
+	const host =  parsedUrl.shift().split(":");
 	urlPart.host = host[0];
 	
 	urlPart.port = host[1] || urlPart.protocol === "https" ? 443 : 80;
@@ -60,7 +60,7 @@ function get(hostname, path){
 
 			//console.log(result.headers);
 
-			let bodyChunks = [];
+			const bodyChunks = [];
 			result.on("data", function(chunk) {
 				bodyChunks.push(chunk);
 			}).on("end", function() {
@@ -88,7 +88,7 @@ function get(hostname, path){
 
 function makePostData(obj){
 	
-	let params = [];
+	const params = [];
 	
 	Object.keys(obj).forEach( key => {
 		params.push(`${key}=${encodeURIComponent(obj[key])}`);
@@ -119,9 +119,9 @@ function post(url, obj, type){
 	}
 
 
-	let parsedUrl = parseUrl(url);
+	const parsedUrl = parseUrl(url);
 
-	let options = {
+	const options = {
 		hostname: parsedUrl.host,
 		port: parsedUrl.port,
 		path: parsedUrl.path,
@@ -134,9 +134,9 @@ function post(url, obj, type){
 
 	return new Promise((resolve, reject) => {
 
-		let req = https.request(options, (res) => {
+		const req = https.request(options, (res) => {
 			
-			let bodyChunks = [];
+			const bodyChunks = [];
 
 			res.on("data", (chunk) => {
 				bodyChunks.push(chunk);
