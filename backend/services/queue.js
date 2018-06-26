@@ -20,8 +20,8 @@
  *       queue via amqp protocol. A compute node with a worker must be running
  *       to fulfil the tasks in order for the work to be done.
  ****************************************************************************/
+"use strict";
 (() => {
-	"use strict";
 
 	const amqp = require("amqplib");
 	const fs = require("fs.extra");
@@ -103,13 +103,11 @@
 		let corID = correlationId;
 
 		let newPath;
-		let newFileDir;
 		let jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
 		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy)
 			.then(obj => {
 				newPath = obj.filePath;
-				newFileDir = obj.newFileDir;
 
 				let json = {
 					file: newPath,
@@ -234,9 +232,9 @@
 
 					let move = copy ? fs.copy : fs.move;
 
-					move(orgFilePath, filePath, function (err) {
-						if (err) {
-							reject(err);
+					move(orgFilePath, filePath, function (moveErr) {
+						if (moveErr) {
+							reject(moveErr);
 						} else {
 							resolve({ filePath, newFileDir });
 						}

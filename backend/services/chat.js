@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 module.exports.createApp = function (server, serverConfig){
-	"use strict";
 
 	//let app = require('express');
 	//var server = require('http').Server(app);
@@ -47,7 +47,7 @@ module.exports.createApp = function (server, serverConfig){
 	io.use((socket, next) => {
 		// init the singleton db connection
 		let DB = require("../db/db");
-		DB.getDB("admin").then( db => {
+		DB.getDB("admin").then( () => {
 			// set db to singleton modelFactory class
 			require("../models/factory/modelFactory").setDB(DB);
 			next();
@@ -62,7 +62,7 @@ module.exports.createApp = function (server, serverConfig){
 
 	middlewares.createQueueInstance().then(queue => {
 
-		socket(queue);
+		initiateSocket(queue);
 
 	}).catch(err => {
 		systemLogger.logError("Chat server - Queue init error - " + err.message);
@@ -73,12 +73,10 @@ module.exports.createApp = function (server, serverConfig){
 	let credentialErrorEventName = "credentialError";
 	let joinedEventName = "joined";
 
-	function socket(queue){
+	function initiateSocket(queue){
 
 		//consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
-
-			//console.log("consumeEventMessage --- ", msg);
 
 			if(msg.event && msg.account){
 				//it is to avoid emitter getting its own message
