@@ -18,10 +18,10 @@
 (function() {
 	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
 	

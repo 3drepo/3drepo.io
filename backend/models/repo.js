@@ -16,12 +16,12 @@
  */
 
 
-var _ = require('lodash');
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+let _ = require("lodash");
+let mongoose = require("mongoose");
+let Schema = mongoose.Schema;
 
 // Base Repo Attributes
-var repoBase = {
+let repoBase = {
 	_id: Buffer,
 	shared_id: Buffer,
 	paths: [Buffer],
@@ -31,7 +31,7 @@ var repoBase = {
 	name: String
 };
 
-var cameraSchema = Schema(
+let cameraSchema = Schema(
 	_.extend({}, repoBase, {
 		// camera attrs
 		aspect_ratio: Number,
@@ -46,7 +46,7 @@ var cameraSchema = Schema(
 	})
 );
 
-var materialSchema = Schema(
+let materialSchema = Schema(
 	_.extend({}, repoBase, {
 		//material attrs
 		ambient: [Number],
@@ -62,13 +62,13 @@ var materialSchema = Schema(
 	})
 );
 
-var metaDataSchema = Schema(
+let metaDataSchema = Schema(
 	_.extend({}, repoBase, {
 		metadata: Buffer
 	})
 );
 
-var referenceSchema = Schema(
+let referenceSchema = Schema(
 	_.extend({}, repoBase, {
 		owner: String,
 		project: String,
@@ -77,7 +77,7 @@ var referenceSchema = Schema(
 	})
 );
 
-var textureSchema = Schema(
+let textureSchema = Schema(
 	_.extend({}, repoBase, {
 		width: Number,
 		height: Number,
@@ -88,23 +88,23 @@ var textureSchema = Schema(
 );
 
 
-var transformationSchema = Schema(
+let transformationSchema = Schema(
 	_.extend({}, repoBase, {
 		matrix: [[Number]]
 	})
 );
 
 
-var Camera = ModelFactory.createClass(
-	'Camera', 
+let Camera = ModelFactory.createClass(
+	"Camera", 
 	cameraSchema, 
 	arg => { 
 		return `${arg.model}.scene`;
 	}
 );
 
-var Material = ModelFactory.createClass(
-	'Material', 
+let Material = ModelFactory.createClass(
+	"Material", 
 	materialSchema, 
 	arg => { 
 		return `${arg.model}.scene`;
@@ -112,24 +112,24 @@ var Material = ModelFactory.createClass(
 );
 
 
-var Metadata = ModelFactory.createClass(
-	'Metadata', 
+let Metadata = ModelFactory.createClass(
+	"Metadata", 
 	metaDataSchema, 
 	arg => { 
 		return `${arg.model}.scene`;
 	}
 );
 
-var Reference = ModelFactory.createClass(
-	'Reference', 
+let Reference = ModelFactory.createClass(
+	"Reference", 
 	referenceSchema, 
 	arg => { 
 		return `${arg.model}.scene`;
 	}
 );
 
-var Texture = ModelFactory.createClass(
-	'Texture', 
+let Texture = ModelFactory.createClass(
+	"Texture", 
 	textureSchema, 
 	arg => { 
 		return `${arg.model}.scene`;
@@ -137,8 +137,8 @@ var Texture = ModelFactory.createClass(
 );
 
 
-var Transformation = ModelFactory.createClass(
-	'Transformation', 
+let Transformation = ModelFactory.createClass(
+	"Transformation", 
 	transformationSchema, 
 	arg => { 
 		return `${arg.model}.scene`;

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2016 3D Repo Ltd
@@ -17,42 +17,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
+let request = require("supertest");
+let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 let logger = require("../../logger.js");
 let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
-let C = require('../../constants');
-let async = require('async');
-let ModelSetting = require('../../models/modelSetting');
-let User = require('../../models/user');
-let config = require('../../config');
-let fs = require('fs');
-let unit = 'm';
+let C = require("../../constants");
+let async = require("async");
+let ModelSetting = require("../../models/modelSetting");
+let User = require("../../models/user");
+let config = require("../../config");
+let fs = require("fs");
+let unit = "m";
 
-describe('Federated Model', function () {
+describe("Federated Model", function () {
 
 	let server;
 	let agent;
-	let username = 'fed';
-	let password = '123456';
-	let subModels = ['proj1', 'proj2'];
-	let desc = 'desc';
-	let type = 'type';
-	let fedModelName = 'fedproj';
+	let username = "fed";
+	let password = "123456";
+	let subModels = ["proj1", "proj2"];
+	let desc = "desc";
+	let type = "type";
+	let fedModelName = "fedproj";
 	let fedModelId;
 
 	before(function(done){
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			agent = request.agent(server);
-			agent.post('/login')
+			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
@@ -64,7 +64,7 @@ describe('Federated Model', function () {
 	});
 
 	after(function(done){
-		let q = require('../../services/queue');
+		let q = require("../../services/queue");
 
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
@@ -73,17 +73,17 @@ describe('Federated Model', function () {
 				return q.channel.purgeQueue(q.modelQName);
 			}).then(() => {
 				server.close(function(){
-					console.log('API test server is closed');
+					console.log("API test server is closed");
 					done();
 				});
 			});
 		});
 	});
 
-	it('should be created successfully', function(done){
+	it("should be created successfully", function(done){
 		this.timeout(5000);
 
-		let q = require('../../services/queue');
+		let q = require("../../services/queue");
 		let corId, appId;
 
 		agent.post(`/${username}/model`)
@@ -113,7 +113,7 @@ describe('Federated Model', function () {
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
 						done(err);
-					})
+					});
 				},
 				done => {
 					agent.get(`/${username}.json`)
@@ -122,19 +122,19 @@ describe('Federated Model', function () {
 						let fed = account.fedModels.find(m => m.model === fedModelId);
 						expect(fed.federate).to.equal(true);
 						done(err);
-					})
+					});
 				}
 			], err => {
 				done(err);
-			})
+			});
 
 		});
 
 	});
 
 
-	it('should be created successfully even if no sub models are specified', function(done){
-		let emptyFed = 'emptyFed';
+	it("should be created successfully even if no sub models are specified", function(done){
+		let emptyFed = "emptyFed";
 		let emptyFedId;
 
 		agent.post(`/${username}/model`)
@@ -162,7 +162,7 @@ describe('Federated Model', function () {
 						expect(res.body.desc).to.equal(desc);
 						expect(res.body.type).to.equal(type);
 						done(err);
-					})
+					});
 				},
 				done => {
 					agent.get(`/${username}.json`)
@@ -171,17 +171,17 @@ describe('Federated Model', function () {
 						let fed = account.fedModels.find(p => p.model === emptyFedId);
 						expect(fed.federate).to.equal(true);
 						done(err);
-					})
+					});
 				}
 			], err => {
 				done(err);
-			})
+			});
 
 			
 		});
 	});
 
-	it('should fail if create federation using existing model name (fed or model)', function(done){
+	it("should fail if create federation using existing model name (fed or model)", function(done){
 
 		agent.post(`/${username}/model`)
 		.send({ 
@@ -202,7 +202,7 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('should fail if create federation using invalid model name', function(done){
+	it("should fail if create federation using invalid model name", function(done){
 
 		agent.post(`/${username}/model`)
 		.send({ 
@@ -210,8 +210,8 @@ describe('Federated Model', function () {
 			desc, 
 			type, 
 			subModels:[{
-				"database": 'testing',
-				"model": 'testproject'
+				"database": "testing",
+				"model": "testproject"
 			}] 
 		})
 		.expect(400, function(err ,res) {
@@ -224,7 +224,7 @@ describe('Federated Model', function () {
 
 
 
-	it('should fail if create federation from models in a different database', function(done){
+	it("should fail if create federation from models in a different database", function(done){
 
 		agent.post(`/${username}/model`)
 		.send({ 
@@ -233,8 +233,8 @@ describe('Federated Model', function () {
 			type, 
 			unit,
 			subModels:[{
-				"database": 'testing',
-				"model": 'testproject'
+				"database": "testing",
+				"model": "testproject"
 			}] 
 		})
 		.expect(400, function(err ,res) {
@@ -245,11 +245,11 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('should accept only one model if models are duplicated', function(done){
+	it("should accept only one model if models are duplicated", function(done){
 
 		this.timeout(5000);
 
-		let q = require('../../services/queue');
+		let q = require("../../services/queue");
 		let corId, appId;
 
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
@@ -270,7 +270,7 @@ describe('Federated Model', function () {
 				}] 
 			})
 			.expect(200, function(err ,res) {
-				console
+				console;
 				done(err);
 			});
 		});
@@ -278,7 +278,7 @@ describe('Federated Model', function () {
 	});
 
 
-	it('should fail if create fed of fed', function(done){
+	it("should fail if create fed of fed", function(done){
 		agent.post(`/${username}/model`)
 		.send({ 
 			modelName: "fedfed",
@@ -298,7 +298,7 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('update should fail if model is not a fed', function(done){
+	it("update should fail if model is not a fed", function(done){
 
 		agent.put(`/${username}/${subModels[0]}`)
 		.send({ 
@@ -318,7 +318,7 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('update should fail if model does not exist', function(done){
+	it("update should fail if model does not exist", function(done){
 		agent.put(`/${username}/nonexistmodel`)
 		.send({
 			desc, 
@@ -337,10 +337,10 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('update should succeed if model is a federation', function(done){
+	it("update should succeed if model is a federation", function(done){
 		this.timeout(5000);
 
-		let q = require('../../services/queue');
+		let q = require("../../services/queue");
 		let corId, appId;
 
 		agent.put(`/${username}/${fedModelId}`)
@@ -358,8 +358,8 @@ describe('Federated Model', function () {
 		});
 	});
 
-	it('should fail to delete a model that is a sub model of another federation', function(done){
-		const model = 'f4ec3efb-3de8-4eeb-81a1-1c62cb2fed40';
+	it("should fail to delete a model that is a sub model of another federation", function(done){
+		const model = "f4ec3efb-3de8-4eeb-81a1-1c62cb2fed40";
 		agent.delete(`/${username}/${model}`)
 		.send({})
 		.expect(400, function(err, res){
@@ -368,5 +368,5 @@ describe('Federated Model', function () {
 			expect(res.body.value).to.equal(responseCodes.MODEL_IS_A_SUBMODEL.value);
 			done();
 		});
-	})
+	});
 });

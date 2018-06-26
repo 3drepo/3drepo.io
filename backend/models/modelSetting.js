@@ -90,7 +90,7 @@ schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
 schema.methods.updateProperties = function(updateObj){
 	Object.keys(updateObj).forEach(key => {
-		if(!updateObj[key]) return;
+		if(!updateObj[key]) {return;}
 		switch (key) {
 			case "topicTypes":
 				let topicTypes = {};
@@ -101,7 +101,7 @@ schema.methods.updateProperties = function(updateObj){
 					}
 
 					//generate value from label
-					let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");;
+					let value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");
 
 					if(topicTypes[value]){
 						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;

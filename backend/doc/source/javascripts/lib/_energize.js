@@ -9,9 +9,9 @@
   /**
    * Don't add to non-touch devices, which don't need to be sped up
    */
-  if(!('ontouchstart' in window)) return;
+  if(!("ontouchstart" in window)) {return;}
 
-  var lastClick = {},
+  let lastClick = {},
       isThresholdReached, touchstart, touchmove, touchend,
       click, closest;
   
@@ -45,7 +45,7 @@
    */
   touchmove = function(e) {
     // NOOP if the threshold has already been reached
-    if(this.threshold) return false;
+    if(this.threshold) {return false;}
 
     this.threshold = isThresholdReached(this.startXY, [e.touches[0].clientX, e.touches[0].clientY]);
   };
@@ -68,9 +68,9 @@
      * Create and fire a click event on the target element
      * https://developer.mozilla.org/en/DOM/event.initMouseEvent
      */
-    var touch = e.changedTouches[0],
-        evt = document.createEvent('MouseEvents');
-    evt.initMouseEvent('click', true, true, window, 0, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
+    let touch = e.changedTouches[0],
+        evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 0, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
     evt.simulated = true;   // distinguish from a normal (nonsimulated) click
     e.target.dispatchEvent(evt);
   };
@@ -87,14 +87,14 @@
      * Prevent ghost clicks by only allowing clicks we created
      * in the click event we fired (look for e.simulated)
      */
-    var time = Date.now(),
+    let time = Date.now(),
         timeDiff = time - lastClick.time,
         x = e.clientX,
         y = e.clientY,
         xyDiff = [Math.abs(lastClick.x - x), Math.abs(lastClick.y - y)],
-        target = closest(e.target, 'A') || e.target,  // needed for standalone apps
+        target = closest(e.target, "A") || e.target,  // needed for standalone apps
         nodeName = target.nodeName,
-        isLink = nodeName === 'A',
+        isLink = nodeName === "A",
         standAlone = window.navigator.standalone && isLink && e.target.getAttribute("href");
     
     lastClick.time = time;
@@ -110,7 +110,7 @@
     if((!e.simulated && (timeDiff < 500 || (timeDiff < 1500 && xyDiff[0] < 50 && xyDiff[1] < 50))) || standAlone) {
       e.preventDefault();
       e.stopPropagation();
-      if(!standAlone) return false;
+      if(!standAlone) {return false;}
     }
 
     /** 
@@ -125,7 +125,7 @@
      * Add an energize-focus class to the targeted link (mimics :focus behavior)
      * TODO: test and/or remove?  Does this work?
      */
-    if(!target || !target.classList) return;
+    if(!target || !target.classList) {return;}
     target.classList.add("energize-focus");
     window.setTimeout(function(){
       target.classList.remove("energize-focus");
@@ -143,7 +143,7 @@
    * matching nodeName, continuing until hitting document.body
    */
   closest = function(node, tagName){
-    var curNode = node;
+    let curNode = node;
 
     while(curNode !== document.body) {  // go up the dom until we find the tag we're after
       if(!curNode || curNode.nodeName === tagName) { return curNode; } // found
@@ -161,9 +161,9 @@
    *
    * Note: no need to wait for DOMContentLoaded here
    */
-  document.addEventListener('touchstart', touchstart, false);
-  document.addEventListener('touchmove', touchmove, false);
-  document.addEventListener('touchend', touchend, false);
-  document.addEventListener('click', click, true);  // TODO: why does this use capture?
+  document.addEventListener("touchstart", touchstart, false);
+  document.addEventListener("touchmove", touchmove, false);
+  document.addEventListener("touchend", touchend, false);
+  document.addEventListener("click", click, true);  // TODO: why does this use capture?
   
 })();

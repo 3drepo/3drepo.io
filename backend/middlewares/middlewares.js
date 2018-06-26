@@ -19,19 +19,19 @@
 	"use strict";
 
 
-	const responseCodes = require('../response_codes');
+	const responseCodes = require("../response_codes");
 	const C				= require("../constants");
-	const ModelSetting = require('../models/modelSetting');
+	const ModelSetting = require("../models/modelSetting");
 	// var History = require('../models/history');
-	const User = require('../models/user');
+	const User = require("../models/user");
 	const utils = require("../utils");
-	const config = require('../config');
+	const config = require("../config");
 
 	// init ampq and import queue object
-	const importQueue = require('../services/queue');
-	const getPermissionsAdapter = require('./getPermissionsAdapter');
-	const checkPermissionsHelper = require('./checkPermissions').checkPermissionsHelper;
-	const checkPermissions = require('./checkPermissions').checkPermissions;
+	const importQueue = require("../services/queue");
+	const getPermissionsAdapter = require("./getPermissionsAdapter");
+	const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
+	const checkPermissions = require("./checkPermissions").checkPermissions;
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -155,7 +155,7 @@
 		return checkPermissionsHelper(
 			username, 
 			account, 
-			'',
+			"",
 			model, 
 			readAccessToModel,
 			getPermissionsAdapter
@@ -166,7 +166,7 @@
 		return checkPermissionsHelper(
 			username, 
 			account, 
-			'',
+			"",
 			model, 
 			[C.PERM_TEAMSPACE_ADMIN],
 			getPermissionsAdapter
@@ -199,11 +199,11 @@
 		}
 	}
 
-	var middlewares = {
+	let middlewares = {
 
-		project: require('./project'),
-		job: require('./job'),
-		issue: require('./issue'),
+		project: require("./project"),
+		job: require("./job"),
+		issue: require("./issue"),
 
 		isHereEnabled: isHereEnabled,
 

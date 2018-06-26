@@ -16,13 +16,13 @@
  */
 
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var Schema = mongoose.Schema;
-var utils = require("../utils");
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let Schema = mongoose.Schema;
+let utils = require("../utils");
 
 
-var schema = Schema({
+let schema = Schema({
 	_id: Object,
 	parents: [],
 	metadata: Object
@@ -48,8 +48,8 @@ schema.options.toJSON.transform = function (doc, ret) {
 };
 
 
-var Meta = ModelFactory.createClass(
-	'Meta', 
+let Meta = ModelFactory.createClass(
+	"Meta", 
 	schema, 
 	arg => { 
 		return `${arg.model}.scene`;

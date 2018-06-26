@@ -18,10 +18,10 @@
 (function() {
 	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const Job = require("../models/job");
 	const utils = require("../utils");
 
@@ -60,7 +60,7 @@
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		})
+		});
 	}
 
 	

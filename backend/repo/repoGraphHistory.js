@@ -19,8 +19,8 @@
 
 // var mongodb = require('mongodb');
 // var assert = require('assert');
-var UUID = require('node-uuid');
-var C = require('./constants');
+let UUID = require("node-uuid");
+let C = require("./constants");
 //var repoNodeRevision = require('./repoNodeRevision');
 
 // Documentation
@@ -32,28 +32,28 @@ var C = require('./constants');
  * @param {Array} bsonArray
  */
 exports.decode = function(bsonArray) {
-	var rootNode;
+	let rootNode;
 
 	// return variable
-	var history = {};
+	let history = {};
 	history[C.REPO_HISTORY_LABEL_REVISIONS_COUNT] = 0;
 
 	// Sort documents into categories (dictionaries of {id : bson} pairs)
 	// UUID is a binary object of subtype 3 (old) or 4 (new)
 	// see http://mongodb.github.com/node-mongodb-native/api-bson-generated/binary.html
-	var revisions = {};
+	let revisions = {};
 
 	if (bsonArray) {
 		// Separate out all the revisions and
 		// find the single root node
-		for (var i = 0; i < bsonArray.length; ++i) {
+		for (let i = 0; i < bsonArray.length; ++i) {
 			bson = bsonArray[i];
 			if (!bson[C.REPO_NODE_LABEL_SHARED_ID]) {
-				logger.log('error', 'Shared UUID not found!');
+				logger.log("error", "Shared UUID not found!");
 			} else {
 
 				// Unique ID (UID) of a revision
-				var idBytes                = bson[C.REPO_NODE_LABEL_UNIQUE_ID].buffer;
+				let idBytes                = bson[C.REPO_NODE_LABEL_UNIQUE_ID].buffer;
 				bson[C.REPO_NODE_LABEL_ID] = UUID.unparse(idBytes);
 
 				// Shared ID (SID) of a revision (its branch ID)
@@ -69,7 +69,7 @@ exports.decode = function(bsonArray) {
 						}
 						break;
 					default :
-						logger.log('error','Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
+						logger.log("error","Unsupported node type found: " + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 			}
 		}

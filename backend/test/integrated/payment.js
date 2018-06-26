@@ -606,7 +606,7 @@ describe("Enrolling to a subscription", function () {
 			//let twoDayLater = moment().utc().add(48, "hour").toDate();
 
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.getActiveSubscriptions()
+				let subscriptions = user.customData.billing.getActiveSubscriptions();
 				expect(subscriptions.paypal.length).to.equal(1);
 				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
 
@@ -812,7 +812,7 @@ describe("Enrolling to a subscription", function () {
 
 		let paymentDate = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
 		let paymentDateAfterNext = getNextPaymentDate(getNextPaymentDate(new Date()));
-		let nextPayDateString = moment(paymentDateAfterNext).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z")
+		let nextPayDateString = moment(paymentDateAfterNext).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
 		let lastPaymentDate;
 
 		before(function(done){

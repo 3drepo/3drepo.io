@@ -18,13 +18,13 @@
 (function() {
 	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
-	const _ = require('lodash');
+	const _ = require("lodash");
 
 	router.get("/permissions", middlewares.isAccountAdmin, listPermissions);
 	router.post("/permissions", middlewares.isAccountAdmin, createPermission);
@@ -35,11 +35,11 @@
 	function listPermissions(req, res, next){
 
 		User.findByUserName(req.params.account).then(user => {
-			var permissions = user.toObject().customData.permissions;
+			let permissions = user.toObject().customData.permissions;
 			return User.getAllUsersInTeamspace(req.params.account).then(users => {
 		
 				users.forEach( user => {
-					if(!_.find(permissions, {'user' : user})) {
+					if(!_.find(permissions, {"user" : user})) {
 						permissions.push({user, permissions: []});
 					}
 				});

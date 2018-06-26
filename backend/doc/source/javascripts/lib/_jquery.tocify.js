@@ -24,7 +24,7 @@
     // ECMAScript 5 Strict Mode: [John Resig Blog Post](http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/)
     "use strict";
 
-    var tocClassName = "tocify",
+    let tocClassName = "tocify",
         tocClass = "." + tocClassName,
         tocFocusClassName = "tocify-focus",
         tocHoverClassName = "tocify-hover",
@@ -144,9 +144,9 @@
         //      Constructs the plugin.  Only called once.
         _create: function() {
 
-            var self = this;
+            let self = this;
 
-            self.tocifyWrapper = $('.tocify-wrapper');
+            self.tocifyWrapper = $(".tocify-wrapper");
             self.extendPageScroll = true;
 
             // Internal array that keeps track of all TOC items (Helps to recognize if there are duplicate TOC item strings)
@@ -164,7 +164,7 @@
 
             self.webkit = (function() {
 
-                for(var prop in window) {
+                for(let prop in window) {
 
                     if(prop) {
 
@@ -214,7 +214,7 @@
             // _Local variables_
 
             // Stores the plugin context in the self variable
-            var self = this,
+            let self = this,
 
                 // All of the HTML tags found within the context provided (i.e. body) that match the top level jQuery selector above
                 firstElem,
@@ -314,7 +314,7 @@
 
         _setActiveElement: function(pageload) {
 
-            var self = this,
+            let self = this,
 
                 hash = window.location.hash.substring(1),
 
@@ -361,7 +361,7 @@
         //      Helps create the table of contents list by appending nested list items
         _nestElements: function(self, index) {
 
-            var arr, item, hashValue;
+            let arr, item, hashValue;
 
             arr = $.grep(this.items, function (item) {
 
@@ -424,7 +424,7 @@
         //      Generates the hash value that will be used to refer to each item.
         _generateHashValue: function(arr, self, index) {
 
-            var hashValue = "",
+            let hashValue = "",
                 hashGeneratorOption = this.options.hashGenerator;
 
             if (hashGeneratorOption === "pretty") {
@@ -475,7 +475,7 @@
         _appendSubheaders: function(self, ul) {
 
             // The current element index
-            var index = $(this).index(self.options.selectors),
+            let index = $(this).index(self.options.selectors),
 
                 // Finds the previous header DOM element
                 previousHeader = $(self.options.selectors).eq(index - 1),
@@ -529,7 +529,7 @@
             // _Local variables_
 
             // Stores the plugin context in the self variable
-            var self = this,
+            let self = this,
 
                 // Instantiates a new variable that will be used to hold a specific element's context
                 $self,
@@ -555,7 +555,7 @@
                 // If the showAndHide option is true
                 if(self.options.showAndHide) {
 
-                    var elem = $('li[data-unique="' + $(this).attr("data-unique") + '"]');
+                    let elem = $("li[data-unique=\"" + $(this).attr("data-unique") + "\"]");
 
                     self._triggerShow(elem);
 
@@ -594,7 +594,7 @@
 
             // Reset height cache on scroll
 
-            $(window).on('resize', function() {
+            $(window).on("resize", function() {
                 self.calculateHeights();
             });
 
@@ -607,7 +607,7 @@
                     // Local variables
 
                     // Stores how far the user has scrolled
-                    var winScrollTop = $(window).scrollTop(),
+                    let winScrollTop = $(window).scrollTop(),
 
                         // Stores the height of the window
                         winHeight = $(window).height(),
@@ -633,9 +633,9 @@
 
                             if(!$(extendPageClass).length) {
 
-                                lastElem = $('div[data-unique="' + $(itemClass).last().attr("data-unique") + '"]');
+                                lastElem = $("div[data-unique=\"" + $(itemClass).last().attr("data-unique") + "\"]");
 
-                                if(!lastElem.length) return;
+                                if(!lastElem.length) {return;}
 
                                 // Gets the top offset of the page header that is linked to the last toc item
                                 lastElemOffset = lastElem.offset().top;
@@ -653,7 +653,7 @@
 
                                 if(self.extendPageScroll) {
 
-                                    currentElem = self.element.find('li.active');
+                                    currentElem = self.element.find("li.active");
 
                                     self._scrollTo($("div[data-unique=" + currentElem.attr("data-unique") + "]"));
 
@@ -671,7 +671,7 @@
                         // _Local variables_
 
                         // Stores the distance to the closest anchor
-                        var // Stores the index of the closest anchor
+                        let // Stores the index of the closest anchor
                             closestAnchorIdx = null,
                             anchorText;
 
@@ -680,7 +680,7 @@
                             self.calculateHeights();
                         }
 
-                        var scrollTop = $(window).scrollTop();
+                        let scrollTop = $(window).scrollTop();
 
                         // Determines the index of the closest anchor
                         self.cachedAnchors.each(function(idx) {
@@ -694,7 +694,7 @@
                         anchorText = $(self.cachedAnchors[closestAnchorIdx]).attr("data-unique");
 
                         // Stores the list item HTML element that corresponds to the currently traversed anchor tag
-                        elem = $('li[data-unique="' + anchorText + '"]');
+                        elem = $("li[data-unique=\"" + anchorText + "\"]");
 
                         // If the `highlightOnScroll` option is true and a next element is found
                         if(self.options.highlightOnScroll && elem.length && !elem.hasClass(self.focusClass)) {
@@ -706,15 +706,15 @@
                             elem.addClass(self.focusClass);
 
                             // Scroll to highlighted element's header
-                            var tocifyWrapper = self.tocifyWrapper;
-                            var scrollToElem = $(elem).closest('.tocify-header');
+                            let tocifyWrapper = self.tocifyWrapper;
+                            let scrollToElem = $(elem).closest(".tocify-header");
 
-                            var elementOffset = scrollToElem.offset().top,
+                            let elementOffset = scrollToElem.offset().top,
                                 wrapperOffset = tocifyWrapper.offset().top;
-                            var offset = elementOffset - wrapperOffset;
+                            let offset = elementOffset - wrapperOffset;
 
                             if (offset >= $(window).height()) {
-                              var scrollPosition = offset + tocifyWrapper.scrollTop();
+                              let scrollPosition = offset + tocifyWrapper.scrollTop();
                               tocifyWrapper.scrollTop(scrollPosition);
                             } else if (offset < 0) {
                               tocifyWrapper.scrollTop(0);
@@ -761,12 +761,12 @@
         // ----
         //      ADDED BY ROBERT
         calculateHeights: function() {
-            var self = this;
+            let self = this;
             self.cachedHeights = [];
             self.cachedAnchors = [];
-            var anchors = $(self.options.context).find("div[data-unique]");
+            let anchors = $(self.options.context).find("div[data-unique]");
             anchors.each(function(idx) {
-                var distance = (($(this).next().length ? $(this).next() : $(this)).offset().top - self.options.highlightOffset);
+                let distance = (($(this).next().length ? $(this).next() : $(this)).offset().top - self.options.highlightOffset);
                 self.cachedHeights[idx] = distance;
             });
             self.cachedAnchors = anchors;
@@ -778,7 +778,7 @@
         show: function(elem, scroll) {
 
             // Stores the plugin context in the `self` variable
-            var self = this,
+            let self = this,
                 element = elem;
 
             // If the sub-header is not already visible
@@ -869,7 +869,7 @@
         hide: function(elem) {
 
             // Stores the plugin context in the `self` variable
-            var self = this;
+            let self = this;
 
             //Determines what jQuery effect to use
             switch (self.options.hideEffect) {
@@ -920,7 +920,7 @@
         //      Determines what elements get shown on scroll and click
         _triggerShow: function(elem, scroll) {
 
-            var self = this;
+            let self = this;
 
             // If the current element's parent is a header element or the next element is a nested subheader element
             if(elem.parent().is(headerClass) || elem.next().is(subheaderClass)) {
@@ -1010,7 +1010,7 @@
         //      Scrolls to a specific element
         _scrollTo: function(elem) {
 
-            var self = this,
+            let self = this,
                 duration = self.options.smoothScroll || 0,
                 scrollTo = self.options.scrollTo;
 
@@ -1021,7 +1021,7 @@
                 $("html, body").animate({
 
                     // Sets the jQuery `scrollTop` to the top offset of the HTML div tag that matches the current list item's `data-unique` tag
-                    "scrollTop": $('div[data-unique="' + elem.attr("data-unique") + '"]').next().offset().top - ($.isFunction(scrollTo) ? scrollTo.call() : scrollTo) + "px"
+                    "scrollTop": $("div[data-unique=\"" + elem.attr("data-unique") + "\"]").next().offset().top - ($.isFunction(scrollTo) ? scrollTo.call() : scrollTo) + "px"
 
                 }, {
 

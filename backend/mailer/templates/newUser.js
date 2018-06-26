@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+let html = data => `
 	We have one more new user signed up on ${data.url}!
 	<br><br>
 	Username: ${data.user}
@@ -29,7 +29,7 @@ var html = data => `
 	Country: ${data.country}
 `;
 
-var subject = data => `[New User][${data.company}] New user from ${data.company} signed up`;
+let subject = data => `[New User][${data.company}] New user from ${data.company} signed up`;
 
 module.exports =  {
 	html: html,

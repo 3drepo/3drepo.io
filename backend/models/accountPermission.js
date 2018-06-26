@@ -24,10 +24,10 @@
 		user: String,
 		permissions: [String]
 	});
-	const responseCodes = require('../response_codes.js');
-	const C = require('../constants');
-	const _ = require('lodash');
-	const Project = require('./project');
+	const responseCodes = require("../response_codes.js");
+	const C = require("../constants");
+	const _ = require("lodash");
+	const Project = require("./project");
 
 	const methods = {
 		init(user, permissions) {
@@ -42,7 +42,7 @@
 		},
 
 		_check(user, permission){
-			const User = require('./user');
+			const User = require("./user");
 			return User.findByUserName(user).then( userToCheck => {
 				if(!userToCheck) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
@@ -72,7 +72,7 @@
 				
 				if(this.findByUser(permission.user)){
 					//return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
-					return this.update(permission.user, permission)
+					return this.update(permission.user, permission);
 				}
 				if(permission.permissions.length === 0)
 				{
@@ -124,7 +124,7 @@
 				this.permissions.splice(index, 1);
 				return this.user.save().then(() => {
 					// remove all project permissions in this project as well, if any
-					return Project.find({ account: this.user.user },{ 'permissions.user': user} );
+					return Project.find({ account: this.user.user },{ "permissions.user": user} );
 				}).then(projects => {
 					return Promise.all(
 						projects.map(proj => proj.updateAttrs({ 

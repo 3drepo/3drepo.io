@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+let html = data => `
 	Hi there,<br>
 	<br>
 	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
@@ -26,7 +26,7 @@ var html = data => `
 	3D Repo
 `;
 
-var subject = 'Your payment to 3D Repo is failed';
+let subject = "Your payment to 3D Repo is failed";
 
 module.exports =  {
 	html: html,

@@ -16,16 +16,16 @@
  */
 
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var Schema = mongoose.Schema;
+let mongoose = require("mongoose");
+let ModelFactory = require("./factory/modelFactory");
+let Schema = mongoose.Schema;
 
-var schema = Schema({
+let schema = Schema({
 	_id: Object
 });
 
-var Stash3DRepo = ModelFactory.createClass(
-	'Stash3DRepo', 
+let Stash3DRepo = ModelFactory.createClass(
+	"Stash3DRepo", 
 	schema, 
 	arg => { 
 		return `${arg.model}.stash.3drepo`;

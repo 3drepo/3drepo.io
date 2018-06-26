@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2017 3D Repo Ltd
@@ -17,30 +17,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const request = require('supertest');
-const expect = require('chai').expect;
+const request = require("supertest");
+const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
-const async = require('async');
+const async = require("async");
 
 
-describe('Projects', function () {
+describe("Projects", function () {
 
 	let server;
 	let agent;
-	let username = 'projectuser';
-	let password = 'projectuser';
+	let username = "projectuser";
+	let password = "projectuser";
 
 	before(function(done){
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			agent = request.agent(server);
-			agent.post('/login')
+			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
@@ -52,16 +52,16 @@ describe('Projects', function () {
 
 	after(function(done){
 		server.close(function(){
-			console.log('API test server is closed');
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
 
-	it('should able to create project', function(done){
+	it("should able to create project", function(done){
 
 		const project = {
-			name: 'project1'
+			name: "project1"
 		};
 
 		async.series([
@@ -91,9 +91,9 @@ describe('Projects', function () {
 	});
 
 
-	it('should fail to create project with name default', function(done){
+	it("should fail to create project with name default", function(done){
 		agent.post(`/${username}/projects`)
-		.send({name: 'default'})
+		.send({name: "default"})
 		.expect(400, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
 			done(err);
@@ -101,10 +101,10 @@ describe('Projects', function () {
 	});
 
 
-	it('should fail to create project with dup name', function(done){
+	it("should fail to create project with dup name", function(done){
 
 		const project = {
-			name: 'project_exists'
+			name: "project_exists"
 		};
 
 		agent.post(`/${username}/projects`)
@@ -116,14 +116,14 @@ describe('Projects', function () {
 	});
 
 
-	it('should be able to update project', function(done){
+	it("should be able to update project", function(done){
 
 
 		const project = {
-			name: 'project2',
+			name: "project2",
 			permissions: [{
-				user: 'testing',
-				permissions: ['create_model', 'edit_project']
+				user: "testing",
+				permissions: ["create_model", "edit_project"]
 			}]
 		};
 
@@ -140,7 +140,7 @@ describe('Projects', function () {
 			callback => {
 				agent.get(`/${username}/projects/${project.name}`)
 				.expect(200, function(err, res){
-					var entriesFiltered = res.body.permissions.filter((entry => {
+					let entriesFiltered = res.body.permissions.filter((entry => {
 						return entry.permissions.length > 0;
 					}));
 					expect(entriesFiltered).to.deep.equal(project.permissions);
@@ -152,11 +152,11 @@ describe('Projects', function () {
 	});
 
 
-	it('should be able to update project name', function(done){
+	it("should be able to update project name", function(done){
 
 
 		const project = {
-			name: 'project2_new'
+			name: "project2_new"
 		};
 
 		async.series([
@@ -187,13 +187,13 @@ describe('Projects', function () {
 		], (err, res) => done(err));
 	});
 
-	it('should fail to update project for invalid permissions', function(done){
+	it("should fail to update project for invalid permissions", function(done){
 
 		const project = {
-			name: 'project3',
+			name: "project3",
 			permissions: [{
-				user: 'testing',
-				permissions: ['create_issue']
+				user: "testing",
+				permissions: ["create_issue"]
 			}]
 		};
 
@@ -205,12 +205,12 @@ describe('Projects', function () {
 		});
 	});
 
-	it('should fail to assign permission to unlicensed user', function(done){
+	it("should fail to assign permission to unlicensed user", function(done){
 		const project = {
-			name: 'project3',
+			name: "project3",
 			permissions: [{
 				user: "metaTest",
-				permissions: ['edit_project']
+				permissions: ["edit_project"]
 			}]
 		};
 
@@ -224,10 +224,10 @@ describe('Projects', function () {
 
 
 
-	it('should able to delete project', function(done){
+	it("should able to delete project", function(done){
 
 		const project = {
-			name: 'project4'
+			name: "project4"
 		};
 
 		async.series([
@@ -258,7 +258,7 @@ describe('Projects', function () {
 
 	});
 
-	it('should fail to update a project that doesnt exist', function(done){
+	it("should fail to update a project that doesnt exist", function(done){
 		agent.put(`/${username}/projects/notexist`)
 		.send({})
 		.expect(404, function(err, res){
@@ -267,7 +267,7 @@ describe('Projects', function () {
 		});
 	});
 
-	it('should fail to delete a project that doesnt exist', function(done){
+	it("should fail to delete a project that doesnt exist", function(done){
 		agent.delete(`/${username}/projects/notexist`)
 		.expect(404, function(err, res){
 			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);

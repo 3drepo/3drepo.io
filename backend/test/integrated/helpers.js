@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-'use strict';
+"use strict";
 
 function signUpAndLogin(params){
 
@@ -32,7 +32,7 @@ function signUpAndLogin(params){
 	let noBasicPlan = params.noBasicPlan;
 
 	//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-	request(server).get('/info').end(() => {
+	request(server).get("/info").end(() => {
 
 		agent = request.agent(server);
 
@@ -44,11 +44,11 @@ function signUpAndLogin(params){
 		}).then(user => {
 			
 			//login
-			agent.post('/login')
+			agent.post("/login")
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
-				console.log(typeof done)
+				console.log(typeof done);
 				done(err, agent);
 
 			});
@@ -104,4 +104,4 @@ function signUpAndLoginAndCreateModel(params){
 module.exports = {
 	signUpAndLogin,
 	signUpAndLoginAndCreateModel
-}
+};

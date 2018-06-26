@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var router = express.Router({mergeParams: true});
-var middlewares = require('../middlewares/middlewares');
-var C = require('../constants');
+let express = require("express");
+let router = express.Router({mergeParams: true});
+let middlewares = require("../middlewares/middlewares");
+let C = require("../constants");
 
-var responseCodes = require('../response_codes.js');
-var History = require('../models/history');
-var utils = require('../utils');
+let responseCodes = require("../response_codes.js");
+let History = require("../models/history");
+let utils = require("../utils");
 
-router.get('/revisions.json', middlewares.hasReadAccessToModel, listRevisions);
-router.get('/revisions/:branch.json', middlewares.hasReadAccessToModel, listRevisionsByBranch);
-router.put('/revisions/:id/tag', middlewares.hasReadAccessToModel, updateRevisionTag);
+router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
+router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
+router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
 
 function listRevisions(req, res, next){
-	'use strict';
+	"use strict";
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
@@ -52,7 +52,7 @@ function listRevisions(req, res, next){
 }
 
 function listRevisionsByBranch(req, res, next){
-	'use strict';
+	"use strict";
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
@@ -75,7 +75,7 @@ function listRevisionsByBranch(req, res, next){
 }
 
 function updateRevisionTag(req, res, next){
-	'use strict';
+	"use strict";
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;

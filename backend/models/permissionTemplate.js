@@ -23,9 +23,9 @@
 		_id: String,
 		permissions: [String]
 	});
-	const responseCodes = require('../response_codes.js');
-	const C = require('../constants');
-	const _ = require('lodash');
+	const responseCodes = require("../response_codes.js");
+	const C = require("../constants");
+	const _ = require("lodash");
 
 	const methods = {
 		get: function(){

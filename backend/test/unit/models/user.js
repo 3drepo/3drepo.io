@@ -1,37 +1,36 @@
-'use strict';
+"use strict";
 
-let chai = require("chai");
-let expect = require('chai').expect;
-let mongoose = require('mongoose');
-let mockgoose = require('mockgoose');
-let _ = require('lodash');
+let expect = require("chai").expect;
+let mongoose = require("mongoose");
+let mockgoose = require("mockgoose");
+let _ = require("lodash");
 
 
-let proxyquire = require('proxyquire').noCallThru();;
-let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
-	'mongoose': mongoose, 
+let proxyquire = require("proxyquire").noCallThru();
+let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", { 
+	"mongoose": mongoose, 
 });
 
-let sinon = require('sinon');
-let DB = require('../mock/db');
-const C = require('../../../constants');
+let sinon = require("sinon");
+let DB = require("../mock/db");
+const C = require("../../../constants");
 
-let User = proxyquire('../../../models/user', {
-	'../db/db': { 
+let User = proxyquire("../../../models/user", {
+	"../db/db": { 
 		getAuthDB : function(){ 
-			return  Promise.resolve({ authenticate: function(u, p){ return Promise.resolve()}  });
+			return  Promise.resolve({ authenticate: function(u, p){ return Promise.resolve();}  });
 		} 
 	}, 
-	'mongoose': mongoose, 
-	'./factory/modelFactory':  modelFactoryMock,
-	'../mailer/mailer': {},
-	'../logger.js': {},
-	'./userBilling': {},
-	'./project': {}
+	"mongoose": mongoose, 
+	"./factory/modelFactory":  modelFactoryMock,
+	"../mailer/mailer": {},
+	"../logger.js": {},
+	"./userBilling": {},
+	"./project": {}
 });
 
 
-describe('User', function(){
+describe("User", function(){
 
 	// before(function(done) {
 

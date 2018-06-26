@@ -18,7 +18,7 @@
 (() => {
 	"use strict";
 
-	const checkPermissions = require('./checkPermissions').checkPermissions;
+	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const C	= require("../constants");
 	
 	function canUpdate(req, res, next){
@@ -35,7 +35,7 @@
 		canView: checkPermissions([C.PERM_PROJECT_ADMIN]),
 		canList: checkPermissions([C.PERM_VIEW_PROJECTS]),
 		canDelete: checkPermissions([C.PERM_DELETE_PROJECT])
-	}
+	};
 
 })();
 

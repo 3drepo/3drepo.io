@@ -27,7 +27,7 @@
 	const fs = require("fs.extra");
 	const shortid = require("shortid");
 	const systemLogger = require("../logger.js").systemLogger;
-	const Mailer = require('../mailer/mailer');
+	const Mailer = require("../mailer/mailer");
 
 	function ImportQueue() {}
 
@@ -203,7 +203,7 @@
 	ImportQueue.prototype.importToyModel = function (correlationId, database, model, options) {
 		let corID = correlationId;
 
-		const skip = options.skip && JSON.stringify(options.skip) || '';
+		const skip = options.skip && JSON.stringify(options.skip) || "";
 		let msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 		
 		return this._dispatchWork(corID, msg);
@@ -280,7 +280,7 @@
 
 				if (info.consumerCount <= 0) {
 					this.logger.logError(
-						`No consumer found in the queue`, {
+						"No consumer found in the queue", {
 							corID: corID.toString()
 						}
 					);
@@ -339,7 +339,7 @@
 					let status = resData.status;
 
 					if ("processing" === status) {
-						ModelHelper.setStatus(resDatabase, resProject, 'processing');
+						ModelHelper.setStatus(resDatabase, resProject, "processing");
 					} else {
 						if (resErrorCode === 0) {
 							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);

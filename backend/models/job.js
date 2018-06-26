@@ -19,9 +19,9 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const ModelFactory = require('./factory/modelFactory');
-const responseCodes = require('../response_codes.js');
-const C = require('../constants.js');
+const ModelFactory = require("./factory/modelFactory");
+const responseCodes = require("../response_codes.js");
+const C = require("../constants.js");
 const schema = mongoose.Schema({
 	_id: String,
 	color: String,
@@ -37,7 +37,7 @@ schema.statics.addDefaultJobs = function(teamspace) {
 
 	return Promise.all(promises);
 
-}
+};
 
 schema.statics.usersWithJob = function(teamspace) {
 	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
@@ -53,7 +53,7 @@ schema.statics.usersWithJob = function(teamspace) {
 	
 	});
 	
-}
+};
 
 schema.statics.removeUserFromAnyJob = function(teamspace, user) {
 	return Job.findByUser(teamspace, user).then( job => {
@@ -62,34 +62,34 @@ schema.statics.removeUserFromAnyJob = function(teamspace, user) {
 		}
 	});
 
-}
+};
 
 schema.methods.removeUserFromJob = function(user) {
 	this.users.splice(this.users.indexOf(user), 1);
 	return this.save();
-}
+};
 
 
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
 	
-}
+};
 
 schema.statics.findByUser = function(teamspace, user) {
 	return this.findOne({account: teamspace}, {users: user});
-}
+};
 
 schema.statics.removeUserFromJobs = function(teamspace, user) {
-	const User = require('./user');
+	const User = require("./user");
 	return User.teamspaceMemberCheck(teamspace, user).then( () => {
 		return Job.removeUserFromAnyJob(teamspace, user);		
 	});
 
-}
+};
 
 schema.statics.addUserToJob = function(teamspace, user, jobName) {
 	//Check if user is member of teamspace
-	const User = require('./user');
+	const User = require("./user");
 	return User.teamspaceMemberCheck(teamspace, user).then( () => {
 		return Job.findByJob(teamspace, jobName).then( (job) => {
 			if(!job) {
@@ -103,7 +103,7 @@ schema.statics.addUserToJob = function(teamspace, user, jobName) {
 
 		});
 	});
-}
+};
 
 schema.statics.addJob = function(teamspace, jobData) {
 	if(!jobData._id) {
@@ -114,7 +114,7 @@ schema.statics.addJob = function(teamspace, jobData) {
 			return Promise.reject(responseCodes.DUP_JOB);
 		}
 		
-		const newJobEntry = this.model('Job').createInstance({account: teamspace});
+		const newJobEntry = this.model("Job").createInstance({account: teamspace});
 		newJobEntry._id = jobData._id;
 		if(jobData.color) {
 			newJobEntry.color = jobData.color;
@@ -123,14 +123,14 @@ schema.statics.addJob = function(teamspace, jobData) {
 
 
 	});
-}
+};
 
 schema.methods.updateJob = function(updatedData) {
 	if(updatedData.color)
-		this.color = updatedData.color;
+		{this.color = updatedData.color;}
 
 	return this.save();
-}
+};
 
 schema.statics.removeJob = function(teamspace, jobName) {
 
@@ -148,7 +148,7 @@ schema.statics.removeJob = function(teamspace, jobName) {
 	});
 
 
-}
+};
 
 schema.statics.getAllJobs = function(teamspace) {
 	return this.find({account: teamspace}).then(jobs => {
@@ -159,10 +159,10 @@ schema.statics.getAllJobs = function(teamspace) {
 		return jobList;
 	});
 
-}
+};
 
 var Job = ModelFactory.createClass(
-	'Job',
+	"Job",
 	schema,
 	() => {
 		return "jobs";

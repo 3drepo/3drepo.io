@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+let html = data => `
 	No consumers found in ${data.domain}. Please look into it!
 `;
 
-var subject = '[System] No consumers found in queue';
+let subject = "[System] No consumers found in queue";
 
 module.exports =  {
 	html: html,

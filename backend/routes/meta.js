@@ -18,23 +18,23 @@
 (function() {
 	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const ModelHelpers = require('../models/helper/model');
-	const middlewares = require('../middlewares/middlewares');
-	const utils = require('../utils');
+	const responseCodes = require("../response_codes");
+	const ModelHelpers = require("../models/helper/model");
+	const middlewares = require("../middlewares/middlewares");
+	const utils = require("../utils");
 	const C = require("../constants");
 
 	//Get meta data
-	router.get('/revision/master/head/meta/4DTaskSequence.json', middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
-	router.get('/revision/:rev/meta/4DTaskSequence.json', middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
-	router.get('/revision/master/head/meta/all.json', middlewares.hasReadAccessToModel, getAllMetadata);
-	router.get('/revision/:rev/meta/all.json', middlewares.hasReadAccessToModel, getAllMetadata);
-	router.get('/meta/:id.json', middlewares.hasReadAccessToModel, getMetadata);
-	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
-	router.get('/revision/:rev/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
-	router.get('/revision/master/head/meta/findObjsWith/:metaKey.json', middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+	router.get("/revision/master/head/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
+	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
+	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
+	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
+	router.get("/meta/:id.json", middlewares.hasReadAccessToModel, getMetadata);
+	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 
 	function getMetadata(req, res, next) {

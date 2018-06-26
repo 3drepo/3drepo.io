@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  *  Copyright (C) 2016 3D Repo Ltd
  *
@@ -16,29 +16,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let session =  require('express-session')({ secret: 'testing'});
-let config = require('../../config');
+let request = require("supertest");
+let expect = require("chai").expect;
+let session =  require("express-session")({ secret: "testing"});
+let config = require("../../config");
 let app = require("../../services/api.js").createApp(
 	{ session: config.api_server.session }
 );
 let logger = require("../../logger.js");
 let systemLogger = logger.systemLogger;
 let responseCodes = require("../../response_codes.js");
-let async = require('async');
-let http = require('http');
+let async = require("async");
+let http = require("http");
 //let newXhr = require('socket.io-client-cookie'); 
-let io = require('socket.io-client');
+let io = require("socket.io-client");
 
-describe('Notification', function () {
+describe("Notification", function () {
 
 	let server;
 	let agent;
 	let agent2;
-	let username = 'testing';
-	let password = 'testing';
-	let model = 'testproject';
+	let username = "testing";
+	let password = "testing";
+	let model = "testproject";
 
 	let cookies;
 	let socket;
@@ -68,12 +68,12 @@ describe('Notification', function () {
 
 	before(function(done){
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 
 			let chatServer = http.createServer();
 
-			let chat = require('../../services/chat.js').createApp(
+			let chat = require("../../services/chat.js").createApp(
 				chatServer, config.chat_server
 			);
 
@@ -82,15 +82,15 @@ describe('Notification', function () {
 				async.series([
 					function(done){
 						agent = request.agent(server);
-						agent.post('/login')
+						agent.post("/login")
 						.send({ username, password })
 						.expect(200, function(err, res){
-							cookies = res.header['set-cookie'][0];
+							cookies = res.header["set-cookie"][0];
 
-							cookies.split(';').forEach(keyval => {
+							cookies.split(";").forEach(keyval => {
 								if(keyval){
-									keyval = keyval.split('=');
-									if(keyval[0] === 'connect.sid'){
+									keyval = keyval.split("=");
+									if(keyval[0] === "connect.sid"){
 										connectSid = keyval[1];
 									}
 								}
@@ -100,7 +100,7 @@ describe('Notification', function () {
 					},
 					function(done){
 						agent2 = request.agent(server);
-						agent2.post('/login')
+						agent2.post("/login")
 						.send({ username: username, password: password })
 						.expect(200, done);
 					}
@@ -113,32 +113,32 @@ describe('Notification', function () {
 
 	after(function(done){
 		server.close(function(){
-			console.log('API test server is closed');
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	it('connect to chat server and join room should succee', function(done){
+	it("connect to chat server and join room should succee", function(done){
 		this.timeout(2000);
 
 		//https://gist.github.com/jfromaniello/4087861
 		//socket-io.client send the cookies!
 
 		//newXhr.setCookies(`connect.sid=${connectSid}; `);
-		socket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory, extraHeaders:{
+		socket = io(config.chat_server.chat_host, {path: "/" + config.chat_server.subdirectory, extraHeaders:{
 			Cookie: `connect.sid=${connectSid}; `
 		}});
-		socket.on('connect', function(data){
+		socket.on("connect", function(data){
 
-			socket.emit('join', {account: username, model: model});
+			socket.emit("join", {account: username, model: model});
 			
-			socket.on('joined', function(data){
+			socket.on("joined", function(data){
 				if(data.account === username && data.model === model){
 					done();
 				}
 			});
 
-			socket.on('credentialError', function(err){
+			socket.on("credentialError", function(err){
 				done(err);
 			});
 		});
@@ -147,29 +147,29 @@ describe('Notification', function () {
 	});
 
 
-	it('join a room that user has no access to should fail', function(done){
+	it("join a room that user has no access to should fail", function(done){
 
 		//newXhr.setCookies(`connect.sid=${connectSid}; `);
 		
 		//https://github.com/socketio/socket.io-client/issues/318 force new connection
-		let mySocket = io(config.chat_server.chat_host, {path: '/' + config.chat_server.subdirectory, 'force new connection': true, extraHeaders:{
+		let mySocket = io(config.chat_server.chat_host, {path: "/" + config.chat_server.subdirectory, "force new connection": true, extraHeaders:{
 			Cookie: `connect.sid=${connectSid}; `
 		}});
 
-		mySocket.on('connect', function(data){
-			console.log('on connect')
-			mySocket.emit('join', {account: 'someaccount', model: 'someproject'});
+		mySocket.on("connect", function(data){
+			console.log("on connect");
+			mySocket.emit("join", {account: "someaccount", model: "someproject"});
 
-			mySocket.on('credentialError', function(err){
-				expect(err).to.exist
+			mySocket.on("credentialError", function(err){
+				expect(err).to.exist;
 				done();
 			});
 		});
-	})
+	});
 
 	let issueId;
 
-	it('subscribe new issue notification should succeed', function(done){
+	it("subscribe new issue notification should succeed", function(done){
 
 		//other users post an issue
 		let issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -207,12 +207,12 @@ describe('Notification', function () {
 			expect(err).to.not.exist;
 		});
 
-		socket.on('credentialError', function(err){
+		socket.on("credentialError", function(err){
 			done(err);
 		});
 	});
 
-	it('subscribe new comment notification should succeed', function(done){
+	it("subscribe new comment notification should succeed", function(done){
 		let comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 		
 		socket.on(`${username}::${model}::${issueId}::newComment`, function(resComment){
@@ -242,7 +242,7 @@ describe('Notification', function () {
 	});
 
 
-	it('subscribe comment changed notification should succeed', function(done){
+	it("subscribe comment changed notification should succeed", function(done){
 		let comment ={"comment":"abc123456","edit":true,"commentIndex":0};
 
 		socket.on(`${username}::${model}::${issueId}::commentChanged`, function(resComment){
@@ -259,9 +259,9 @@ describe('Notification', function () {
 	});
 
 
-	it('subscribe comment deleted notification should succeed', function(done){
+	it("subscribe comment deleted notification should succeed", function(done){
 
-		let comment = {"comment":"","delete":true,"commentIndex":0}
+		let comment = {"comment":"","delete":true,"commentIndex":0};
 
 		socket.on(`${username}::${model}::${issueId}::commentDeleted`, function(resComment){
 			expect(resComment).to.exist;
@@ -275,7 +275,7 @@ describe('Notification', function () {
 		});
 	});
 
-	it('subscribe issue change should succeed', function(done){
+	it("subscribe issue change should succeed", function(done){
 
 		let status = {"priority":"high","status":"open","topic_type":"for info","assigned_roles":["testproject.collaborator"]};
 
@@ -292,11 +292,11 @@ describe('Notification', function () {
 			function(done){
 				socket.on(`${username}::${model}::${issueId}::issueChanged`, function(issue){
 					expect(issue).to.exist;
-					expect(issue.priority).to.equal('high');
+					expect(issue.priority).to.equal("high");
 					done();
 				});
 			}
-		], done)
+		], done);
 
 
 

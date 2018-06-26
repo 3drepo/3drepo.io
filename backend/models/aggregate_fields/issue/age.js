@@ -24,9 +24,9 @@
 	// ...
 
 	module.exports = {
-		'$ceil': {
-			'$divide': [
-				{'$subtract': [new Date().valueOf(), '$$CURRENT.created']},
+		"$ceil": {
+			"$divide": [
+				{"$subtract": [new Date().valueOf(), "$$CURRENT.created"]},
 				// one week in milliseconds
 				604800000
 			]

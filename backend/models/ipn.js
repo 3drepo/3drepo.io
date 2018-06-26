@@ -17,8 +17,8 @@
 (() => {
 	"use strict";
 
-	const mongoose = require('mongoose');
-	const ModelFactory = require('./factory/modelFactory');
+	const mongoose = require("mongoose");
+	const ModelFactory = require("./factory/modelFactory");
 		
 	let schema = mongoose.Schema({
 		createdAt: Date,
@@ -26,7 +26,7 @@
 	});
 
 
-	schema.pre('save', function(next){
+	schema.pre("save", function(next){
 
 		if(!this.createdAt){
 			this.createdAt = new Date();
@@ -37,19 +37,19 @@
 
 	schema.statics.save = function(ipnMessage){
 		
-		let ipn = IPN.createInstance({ account: 'admin' });
+		let ipn = IPN.createInstance({ account: "admin" });
 		ipn.message = ipnMessage;
-		ipn.markModified('message');
+		ipn.markModified("message");
 
 		return ipn.save();
 	};
 
 
 	let IPN = ModelFactory.createClass(
-		'IPN',
+		"IPN",
 		schema,
 		() => {
-			return 'ipns';
+			return "ipns";
 		}
 	);
 

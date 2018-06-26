@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -18,17 +18,17 @@
  */
 
 
-let DB = function(){}
+let DB = function(){};
 
 DB.prototype.admin = function() { return this; };
 
 DB.prototype.authenticate = (username, password) => {
 	return Promise.resolve({username, password});
-}
+};
 
 DB.prototype.addUser = (username, password, options) => {
 	return Promise.resolve(username, password, options);
-}
+};
 
 DB.prototype.db = function() { return this; };
 

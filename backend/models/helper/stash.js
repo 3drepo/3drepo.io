@@ -17,26 +17,26 @@
 
 
 // generic stash function
-var ModelFactory = require('../factory/modelFactory');
-var stream = require('stream');
-var GridFSBucket = require('mongodb').GridFSBucket;
-var systemLogger = require("../../logger.js").systemLogger;
+let ModelFactory = require("../factory/modelFactory");
+let stream = require("stream");
+let GridFSBucket = require("mongodb").GridFSBucket;
+let systemLogger = require("../../logger.js").systemLogger;
 
 
 function getGridFSBucket (account, bucketName){
-	'use strict';
+	"use strict";
 	return ModelFactory.dbManager.getGridFSBucket(account, { bucketName:  bucketName});
 }
 
 
 function _getGridFSBucket (dbCol, format){
-	'use strict';
+	"use strict";
 
 	return getGridFSBucket(dbCol.account, `${dbCol.model}.stash.${format}`);
 }
 
 function findStashByFilename(dbCol, format, filename, getStreamOnly){
-	'use strict';
+	"use strict";
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
 		return bucket.find({ filename }).toArray().then(files => {
 			if(!files.length){
@@ -58,8 +58,8 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 
 						let bufs = [];
 
-						downloadStream.on('data', function(d){ bufs.push(d); });
-						downloadStream.on('end', function(){
+						downloadStream.on("data", function(d){ bufs.push(d); });
+						downloadStream.on("end", function(){
 							resolve(Buffer.concat(bufs));
 						});
 
@@ -77,7 +77,7 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 }
 
 function saveStashByFilename(dbCol, format, filename, buffer){
-	'use strict';
+	"use strict";
 
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
 		let uploadStream = bucket.openUploadStream(filename);
@@ -88,11 +88,11 @@ function saveStashByFilename(dbCol, format, filename, buffer){
 		bufferStream.pipe(uploadStream);
 
 		return new Promise((resolve, reject) => {
-			uploadStream.once('finish', function(fileMeta) {
+			uploadStream.once("finish", function(fileMeta) {
 				resolve(fileMeta);
 			});
 
-			uploadStream.once('error', function(err) {
+			uploadStream.once("error", function(err) {
 				reject(err);
 			});
 		});

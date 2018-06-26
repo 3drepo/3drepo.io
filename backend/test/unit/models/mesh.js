@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -17,51 +17,51 @@
  */
 
 let chai = require("chai");
-let expect = require('chai').expect;
-let mongoose = require('mongoose');
-let mockgoose = require('mockgoose');
-let _ = require('lodash');
+let expect = require("chai").expect;
+let mongoose = require("mongoose");
+let mockgoose = require("mockgoose");
+let _ = require("lodash");
 
-let proxyquire = require('proxyquire');
+let proxyquire = require("proxyquire");
 
-let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
-	'mongoose': mongoose, 
+let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", { 
+	"mongoose": mongoose, 
 });
 
-let repoGraphSceneMock = require('../mock/repoGraphScene');
+let repoGraphSceneMock = require("../mock/repoGraphScene");
 let utils = require("../mock/utils");
 let topLvStubs = [];
-let sinon = require('sinon');
+let sinon = require("sinon");
 
 
-let repoBaseMock = proxyquire('../../../models/base/repo', { 
-	'../../repo/repoGraphScene.js': repoGraphSceneMock, 
-	'../../utils': utils,
-	'../factory/modelFactory': modelFactoryMock
+let repoBaseMock = proxyquire("../../../models/base/repo", { 
+	"../../repo/repoGraphScene.js": repoGraphSceneMock, 
+	"../../utils": utils,
+	"../factory/modelFactory": modelFactoryMock
 });
 
-let History = require('../../../models/history');
+let History = require("../../../models/history");
 
 
-let DB = require('../mock/db');
+let DB = require("../mock/db");
 
-let Mesh = proxyquire('../../../models/mesh', { 
-	'mongoose': mongoose, 
-	'./factory/modelFactory':  modelFactoryMock,
-	'../history': History,
-	'./base/repo': repoBaseMock
+let Mesh = proxyquire("../../../models/mesh", { 
+	"mongoose": mongoose, 
+	"./factory/modelFactory":  modelFactoryMock,
+	"../history": History,
+	"./base/repo": repoBaseMock
 
 });
 
 
-describe('Mesh and Object extended from repo base', function(){
+describe("Mesh and Object extended from repo base", function(){
 
 	before(function(done) {
 
 		let db = new DB();
 		modelFactoryMock.setDB(DB);
 	    mockgoose(mongoose).then(function() {
-	        mongoose.connect('mongodb://example.com/TestingDB', function(err) {
+	        mongoose.connect("mongodb://example.com/TestingDB", function(err) {
 	            done(err);
 	        });
 	    });
@@ -106,9 +106,9 @@ describe('Mesh and Object extended from repo base', function(){
 		});
 	});
 */
-	describe('#findByRevision', function(){
-		it('as a repo item it should have findByRevision static function', function(){
-			expect(Mesh).to.have.property('findByRevision');
+	describe("#findByRevision", function(){
+		it("as a repo item it should have findByRevision static function", function(){
+			expect(Mesh).to.have.property("findByRevision");
 		});
 
 		// it('should return from stash if found', function(){
@@ -123,7 +123,7 @@ describe('Mesh and Object extended from repo base', function(){
 		// 	});
 		// });
 
-		it('should return from collection and decode if not found from stash', function(){
+		it("should return from collection and decode if not found from stash", function(){
 
 			let dbData = {a: 1};
 			dbData.toObject = () => dbData;
@@ -131,14 +131,14 @@ describe('Mesh and Object extended from repo base', function(){
 			let revisionObj = {current: [1,2,3,4,5]};
 			revisionObj.toObject = () => revisionObj;
 
-			let HistoryStub = sinon.stub(History, 'findByUID').returns(Promise.resolve(revisionObj));
+			let HistoryStub = sinon.stub(History, "findByUID").returns(Promise.resolve(revisionObj));
 			// mock no stash found
 			//let stashStub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(false));
-			let meshStub = sinon.stub(Mesh, 'findOne').returns(Promise.resolve(dbData));
+			let meshStub = sinon.stub(Mesh, "findOne").returns(Promise.resolve(dbData));
 
 			let dbCol = {};
-			let rid = 'rid';
-			let sid = 'sid';
+			let rid = "rid";
+			let sid = "sid";
 
 			return Mesh.findByRevision(dbCol, rid, sid, { stash: {} }).then(data => {
 

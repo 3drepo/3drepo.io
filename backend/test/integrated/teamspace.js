@@ -33,49 +33,49 @@ describe("Checking Quota Info  ", function() {
 		user: "sub_noSub",
 		password: "password",
 		quota: {spaceLimit: 1, collaboratorLimit: 0, spaceUsed: 0}
-	}
+	};
 
 	const paypalUser = {
 		user: "sub_paypal",
 		password: "password",
 		quota: {spaceLimit: 20481, collaboratorLimit: 2, spaceUsed: 0}
-	}
+	};
 
 	const enterpriseUser = {
 		user: "sub_enterprise",
 		password: "password",
 		quota: {spaceLimit: 2049, collaboratorLimit: 5, spaceUsed: 0}
-	}
+	};
 
 	const discretionaryUser = {
 		user: "sub_discretionary",
 		password: "password",
 		quota: {spaceLimit: 1025, collaboratorLimit: 10, spaceUsed: 0}
-	}
+	};
 
 	const mixedUser1 = {
 		user: "sub_all",
 		password: "password",
 		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0}
-	}
+	};
 
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
 		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0}
-	}
+	};
 
 	const mixedUser3 = {
 		user: "sub_all3",
 		password: "password",
 		quota: {spaceLimit: 21505, collaboratorLimit: 4, spaceUsed: 0}
-	}
+	};
 
 	const mixedUser4 = {
 		user: "sub_all4",
 		password: "password",
 		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0}
-	}
+	};
 
 
 	before(function(done){

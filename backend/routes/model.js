@@ -54,7 +54,7 @@ router.get("/:model/revision/:rev/meshes.json", middlewares.hasReadAccessToModel
 //Unity information
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
-router.get('/:model/:uid.json.mpc',  middlewares.hasReadAccessToModel, getJsonMpc);
+router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMpc);
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
 //update federated model
