@@ -107,16 +107,9 @@ class PanelController implements ng.IController {
 				this.PanelService.setHideIfc(hideIfc);
 			});
 
-		this.$scope.$watch(() => Object.keys(this.GroupsService.state.colorOverride).length,
-			(colorOverrideCount) => {
-				this.PanelService.setOverrideAll(colorOverrideCount ===
-					this.GroupsService.state.groups.length);
-			});
-
-		this.$scope.$watch(() => this.GroupsService.state.groups.length,
-			(groupsCount) => {
-				this.PanelService.setOverrideAll(groupsCount ===
-					Object.keys(this.GroupsService.state.colorOverride).length);
+		this.$scope.$watch(() => this.GroupsService.state.overrideAll,
+			(overrideAll) => {
+				this.PanelService.setOverrideAll(overrideAll);
 			});
 	}
 
