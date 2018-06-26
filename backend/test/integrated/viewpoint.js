@@ -22,7 +22,6 @@ let expect = require("chai").expect;
 let app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let responseCodes = require("../../response_codes.js");
 let async = require("async");
 
 describe("Views", function () {
@@ -31,11 +30,8 @@ describe("Views", function () {
 	let agent;
 
 	const username = "issue_username";
-	const username2 = "issue_username2";
 	const password = "password";
 	
-	const projectAdminUser = "imProjectAdmin";
-
 	const model = "project1";
 
 	let pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
@@ -53,8 +49,6 @@ describe("Views", function () {
 	before(function(done){
 
 		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-
 			agent = request.agent(server);
 			agent.post("/login")
 			.send({ username, password })
@@ -68,7 +62,6 @@ describe("Views", function () {
 
 	after(function(done){
 		server.close(function(){
-			console.log("API test server is closed");
 			done();
 		});
 	});

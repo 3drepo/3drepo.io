@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 module.exports  = function(){
 	return {
 		decode: o => o[0]
