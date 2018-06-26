@@ -48,7 +48,8 @@ export class GroupsService {
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes : 0,
-			multiSelectedGroups: []
+			multiSelectedGroups: [],
+			overrideAll: false
 		};
 	}
 
@@ -87,6 +88,7 @@ export class GroupsService {
 	 * Override all groups
 	 */
 	public colorOverrideAllGroups(on: boolean) {
+		this.state.overrideAll = on;
 		this.state.groups.forEach((group) => {
 			if (on) {
 				this.colorOverride(group);
@@ -159,6 +161,12 @@ export class GroupsService {
 			}
 
 			delete this.state.colorOverride[groupId];
+
+			if (this.state.overrideAll &&
+				this.state.groups.length !==
+				Object.keys(this.state.colorOverride).length) {
+				this.state.overrideAll = false;
+			}
 		}
 	}
 
@@ -575,6 +583,9 @@ export class GroupsService {
 					this.state.selectedGroup.totalSavedMeshes = savedMeshesLength;
 					this.updateSelectedGroupColor();
 					this.selectGroup(group);
+					if (this.state.overrideAll) {
+						this.colorOverride(group);
+					}
 					return group;
 				});
 		});
