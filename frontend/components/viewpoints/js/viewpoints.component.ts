@@ -22,11 +22,11 @@ class ViewsController implements ng.IController {
 		"$timeout",
 
 		"DialogService",
-		"ViewpointsService",
-		"APIService"
+		"ViewpointsService"
 	];
 
 	private onShowItem: any;
+	private onHideItem: any;
 	private account: string;
 	private model: string;
 	private onContentHeightRequest: any;
@@ -45,8 +45,7 @@ class ViewsController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 
 		private DialogService,
-		private ViewpointsService: any,
-		private APIService: any
+		private ViewpointsService: any
 	) {}
 
 	public $onInit() {
@@ -89,13 +88,6 @@ class ViewsController implements ng.IController {
 
 	}
 
-	public getThumbnailUrl(thumbnail: string) {
-		if (thumbnail) {
-			return this.APIService.getAPIUrl(thumbnail);
-		}
-		return "";
-	}
-
 	public selectView(view: any) {
 
 		if (view) {
@@ -116,6 +108,7 @@ class ViewsController implements ng.IController {
 				this.handleViewError("create", error);
 			});
 		this.toShow = "views";
+		this.onHideItem();
 	}
 
 	public deleteViewpoint() {
@@ -205,6 +198,7 @@ export const ViewpointsComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
+		onHideItem: "&",
 		hideItem: "<"
 	},
 	controller: ViewsController,
