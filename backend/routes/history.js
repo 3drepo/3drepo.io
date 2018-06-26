@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
@@ -29,7 +30,6 @@ router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevi
 router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
 
 function listRevisions(req, res, next){
-	"use strict";
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
@@ -52,7 +52,6 @@ function listRevisions(req, res, next){
 }
 
 function listRevisionsByBranch(req, res, next){
-	"use strict";
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
@@ -75,7 +74,6 @@ function listRevisionsByBranch(req, res, next){
 }
 
 function updateRevisionTag(req, res, next){
-	"use strict";
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;

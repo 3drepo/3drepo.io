@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
 	const express = require("express");
 	const router = express.Router({mergeParams: true});

@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.	If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -23,7 +23,7 @@ const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
-//var systemLogger    = require("../logger.js").systemLogger;
+//var systemLogger		= require("../logger.js").systemLogger;
 const utils = require("../utils");
 const User = require("../models/user");
 const addressMeta = require("../models/addressMeta");
@@ -63,7 +63,7 @@ function createSession(place, req, res, next, user){
 			req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
 			req.session[C.REPO_SESSION_USER] = user;
-			req.session.cookie.domain        = config.cookie_domain;
+			req.session.cookie.domain				 = config.cookie_domain;
 
 			if (config.cookie.maxAge) {
 				req.session.cookie.maxAge = config.cookie.maxAge;
@@ -79,10 +79,10 @@ function login(req, res, next){
 
 
 	if (Object.prototype.toString.call(req.body.username) === "[object String]"
-		 && Object.prototype.toString.call(req.body.password) === "[object String]") {
+		&& Object.prototype.toString.call(req.body.password) === "[object String]") {
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
-		
+
 		if(req.session.user){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
@@ -141,7 +141,7 @@ function updateUser(req, res, next){
 	if(req.body.oldPassword) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
 			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-			// Update password		
+			// Update password
 			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
@@ -180,12 +180,12 @@ function signUp(req, res, next){
 	}
 
 	if (Object.prototype.toString.call(req.body.email) === "[object String]"
-		 && Object.prototype.toString.call(req.body.password) === "[object String]"
-		 && Object.prototype.toString.call(req.body.firstName) === "[object String]"
-		 && Object.prototype.toString.call(req.body.lastName) === "[object String]"
-		 && Object.prototype.toString.call(req.body.countryCode) === "[object String]"
-		 && (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
-		 && Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
+		&& Object.prototype.toString.call(req.body.password) === "[object String]"
+		&& Object.prototype.toString.call(req.body.firstName) === "[object String]"
+		&& Object.prototype.toString.call(req.body.lastName) === "[object String]"
+		&& Object.prototype.toString.call(req.body.countryCode) === "[object String]"
+		&& (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
+		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
 
 		//check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
@@ -217,7 +217,7 @@ function signUp(req, res, next){
 
 		}).then( data => {
 
-			const country = addressMeta.countries.find(country => country.code === req.body.countryCode);
+			const country = addressMeta.countries.find(_country => _country.code === req.body.countryCode);
 			//send to sales
 			Mailer.sendNewUser({
 				user: req.params.account,
@@ -256,9 +256,9 @@ function signUp(req, res, next){
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
 
-	 } else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
-	 }
+	} else {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 
 
 }
@@ -276,8 +276,8 @@ function verify(req, res, next){
 
 function forgotPassword(req, res, next){
 	const responsePlace = utils.APIInfo(req);
-	
-	if (Object.prototype.toString.call(req.body.email) === "[object String]") { 
+
+	if (Object.prototype.toString.call(req.body.email) === "[object String]") {
 
 		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
 
@@ -300,7 +300,7 @@ function forgotPassword(req, res, next){
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
 	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 }
 
@@ -322,7 +322,7 @@ function getAvatar(req, res, next){
 		res.write(avatar.data.buffer);
 		res.end();
 
-	}).catch(() => {
+	}).catch((err) => {
 
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -334,14 +334,14 @@ function uploadAvatar(req, res, next){
 
 
 	//check space and format
-	function fileFilter(req, file, cb){
+	function fileFilter(fileReq, file, cb){
 
 		const acceptedFormat = ["png", "jpg", "gif"];
 
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
-		const size = parseInt(req.headers["content-length"]);
+		const size = parseInt(fileReq.headers["content-length"]);
 
 		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -368,8 +368,8 @@ function uploadAvatar(req, res, next){
 				return user.save();
 			}).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
-			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			}).catch(error => {
+				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode: error, error.resCode ? error.resCode: error);
 			});
 		}
 	});
@@ -379,14 +379,14 @@ function resetPassword(req, res, next){
 	const responsePlace = utils.APIInfo(req);
 
 	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
-		Object.prototype.toString.call(req.body.newPassword) === "[object String]") { 
+		Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
 		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
 	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 }
 

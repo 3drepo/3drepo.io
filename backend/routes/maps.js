@@ -32,7 +32,7 @@ router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.
 router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficFlowTile);
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
-function listMaps(req, res, next) {
+function listMaps(req, res) {
 	const teamspace = req.params.account;
 
 	let maps = [
@@ -70,7 +70,7 @@ function requestMapTile(req, res, domain, uri) {
 	});
 }
 
-function getOSMTile(req, res, next){
+function getOSMTile(req, res){
 	//TODO: we may want to ensure the model has access to tiles
 	//const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
 	const domain = "a.tile.openstreetmap.org";
@@ -79,7 +79,7 @@ function getOSMTile(req, res, next){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereMapsTile(req, res, next){
+function getHereMapsTile(req, res){
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".base.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -88,7 +88,7 @@ function getHereMapsTile(req, res, next){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereAerialMapsTile(req, res, next){
+function getHereAerialMapsTile(req, res){
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".aerial.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -97,7 +97,7 @@ function getHereAerialMapsTile(req, res, next){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereTrafficTile(req, res, next){
+function getHereTrafficTile(req, res){
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".traffic.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/traffictile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -106,7 +106,7 @@ function getHereTrafficTile(req, res, next){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereTrafficFlowTile(req, res, next){
+function getHereTrafficFlowTile(req, res){
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".traffic.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -115,7 +115,7 @@ function getHereTrafficFlowTile(req, res, next){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereBuildingsFromLongLat(req, res, next) {
+function getHereBuildingsFromLongLat(req, res) {
 	const zoomLevel = 13;
 	const tileSize = 180 / Math.pow(2, zoomLevel);
 	const tileX = Math.floor((parseFloat(req.params.long) + 180) / tileSize);

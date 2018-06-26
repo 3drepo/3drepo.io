@@ -334,7 +334,7 @@ function importBCF(req, res, next){
 	const place = utils.APIInfo(req);
 
 	//check space
-	function fileFilter(req, file, cb){
+	function fileFilter(fileReq, file, cb){
 
 		const acceptedFormat = [
 			"bcf", "bcfzip", "zip"
@@ -343,7 +343,7 @@ function importBCF(req, res, next){
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
-		const size = parseInt(req.headers["content-length"]);
+		const size = parseInt(fileReq.headers["content-length"]);
 
 		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -376,8 +376,8 @@ function importBCF(req, res, next){
 
 			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
-			}).catch(err => {
-				responseCodes.respond(place, req, res, next, err, err);
+			}).catch(error => {
+				responseCodes.respond(place, req, res, next, error, error);
 			});
 		}
 	});

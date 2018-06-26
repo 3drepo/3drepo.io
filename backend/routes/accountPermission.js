@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
@@ -37,14 +37,14 @@
 		User.findByUserName(req.params.account).then(user => {
 			const permissions = user.toObject().customData.permissions;
 			return User.getAllUsersInTeamspace(req.params.account).then(users => {
-		
-				users.forEach( user => {
-					if(!_.find(permissions, {"user" : user})) {
+
+				users.forEach( _user => {
+					if(!_.find(permissions, {"user" : _user})) {
 						permissions.push({user, permissions: []});
 					}
 				});
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
-			
+
 			});
 
 		}).catch(err => {
@@ -59,7 +59,7 @@
 		if (Object.keys(req.body).length === 2 &&
 			Object.prototype.toString.call(req.body.user) === "[object String]" &&
 			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
-			
+
 			User.findByUserName(req.params.account).then(user => {
 
 				return user.customData.permissions.add(req.body);
@@ -74,11 +74,11 @@
 		}
 
 
-		
+
 	}
 
 	function updatePermission(req, res, next){
-		
+
 		if (Object.keys(req.body).length === 1 &&
 			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
 			User.findByUserName(req.params.account).then(user => {

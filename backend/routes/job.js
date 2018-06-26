@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
@@ -50,7 +50,7 @@
 
 		//middleware checks if user is in teamspace, so this member check should not be necessary here.
 		Job.findByUser(teamspace, user).then( (job) => {
-		 	const result = {};
+			const result = {};
 			if(job) {
 				result._id = job._id;
 				result.color = job.color;

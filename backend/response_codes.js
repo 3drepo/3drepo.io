@@ -14,8 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 (() => {
-	"use strict";
 
 	const C = require("./constants");
 	const _ = require("lodash");
@@ -77,7 +77,7 @@
 		ROOT_NODE_NOT_FOUND: { message: "No root node found for revision", status: 500 },
 
 		ISSUE_NOT_FOUND: { message: "Issue not found", status: 404 },
-		
+
 
 		HEAD_REVISION_NOT_FOUND: { message: "Head revision not found", status: 404 },
 
@@ -243,7 +243,7 @@
 		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
 
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500}
-		
+
 	};
 
 
@@ -255,7 +255,7 @@
 			codesMap[key].code = key;
 			codesMap[key].value = valueCounter++;
 			valid_values.push(codesMap[key].value);
-			
+
 		});
 
 	const responseCodes = Object.assign({
@@ -264,7 +264,7 @@
 
 		/**
 		 * Wrapper for mongoose errors
-		 * 
+		 *
 		 * @param {Object} err
 		 * @returns
 		 */
@@ -278,14 +278,14 @@
 
 		/**
 		 * Wrapper for Mongo errors
-		 * 
+		 *
 		 * @param {Object} mongoErr
 		 * @returns
 		 */
 		DB_ERROR: function (mongoErr) {
 
 			let errorCode = mongoErr.code;
-			
+
 			//replica error format
 			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err){
 				errorCode = mongoErr.errors[0].err.code;
@@ -308,7 +308,7 @@
 
 		/**
 		 * Wrapper for other external library errors
-		 * 
+		 *
 		 * @param {Object} message
 		 * @returns
 		 */
@@ -323,7 +323,7 @@
 
 		/**
 		 * Wrapper for processes that run
-		 * 
+		 *
 		 * @param {Object} message
 		 * @returns
 		 */
@@ -353,8 +353,8 @@
 	};
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param {any} place
 	 * @param {any} req
 	 * @param {any} res
@@ -364,7 +364,7 @@
 	 * @param {any} format
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
-		
+
 		resCode = utils.mongoErrorToResCode(resCode);
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
@@ -383,8 +383,8 @@
 		}
 
 		let length;
-		if (resCode.value) // Prepare error response
-		{
+		// Prepare error response
+		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
 				place: place,
 				status: resCode.status,
@@ -395,7 +395,7 @@
 			length = JSON.stringify(responseObject)
 				.length;
 			req[C.REQ_REPO].logger.logError(
-				JSON.stringify(responseObject), 
+				JSON.stringify(responseObject),
 				{ httpCode: resCode.status, contentLength: length }
 			);
 
@@ -408,21 +408,19 @@
 
 				res.status(resCode.status);
 
-				let reqFormat;
-				
 				if (req && req.params && req.params.format) {
 					reqFormat = req.params.format;
 				}
-		
+
 				const contentType = mimeTypes[format || req.params.format];
-				
+
 				if (contentType) {
 					res.setHeader("Content-Type", contentType);
 				} else {
 					// Force compression on everything else
 					res.setHeader("Content-Type", "application/json");
 				}
-		
+
 				//res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
 
@@ -448,16 +446,16 @@
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
 
 		let length = 0;
-		
+
 		if (customHeaders) {
 			res.writeHead(responseCodes.OK.status, customHeaders);
 		}
 
 		readStream.on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, { 
-				httpCode: responseCodes.OK.status, 
-				contentLength: length 
+			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, {
+				httpCode: responseCodes.OK.status,
+				contentLength: length
 			});
 		});
 
@@ -470,8 +468,8 @@
 	// On error respond with error code and errInfo (containing helpful information)
 	// On OK, response with OK status and extraInfo
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param {any} place
 	 * @param {any} req
 	 * @param {any} res
