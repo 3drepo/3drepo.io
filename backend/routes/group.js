@@ -26,15 +26,15 @@ const Group = require("../models/group");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get('/groups/revision/master/head/', middlewares.issue.canView, listGroups);
-router.get('/groups/revision/:rid/', middlewares.issue.canView, listGroups);
-router.get('/groups/revision/master/head/:uid', middlewares.issue.canView, findGroup);
-router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
+router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
+router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
+router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
+router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
-router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
-router.post('/groups/', middlewares.issue.canCreate, createGroup);
-router.delete('/groups/:id', middlewares.issue.canCreate, deleteGroup);
-router.delete('/groups/', middlewares.issue.canCreate, deleteGroups);
+router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
+router.post("/groups/", middlewares.issue.canCreate, createGroup);
+router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
+router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
 const getDbColOptions = function(req){
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};

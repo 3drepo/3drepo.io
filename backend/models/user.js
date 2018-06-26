@@ -1103,7 +1103,7 @@ schema.statics.teamspaceMemberCheck = function(teamspace, user) {
 
 schema.statics.isHereEnabled = function(username) {
 	return _isHereEnabled(username);
-}
+};
 
 function _isHereEnabled(username) {
 	const db = require("../db/db");
@@ -1113,7 +1113,7 @@ function _isHereEnabled(username) {
 				return isHereEnabledResult.customData.hereEnabled;
 			});
 	});
-};
+}
 
 const User = ModelFactory.createClass(
 	"User",

@@ -179,7 +179,7 @@ describe("Views", function () {
 				"look_at":[0,0,1],
 				"view_dir":[-1,0,1],
 				"right":[0,1,0]
-			}
+			};
 			async.series([
 				function(done){
 					agent.post(`/${username}/${model}/viewpoints/`)

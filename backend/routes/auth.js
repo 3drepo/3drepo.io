@@ -17,20 +17,20 @@
 
 "use strict";
 
-var express = require("express");
-var router = express.Router({mergeParams: true});
-var responseCodes = require("../response_codes.js");
-var C = require("../constants");
-var middlewares = require("../middlewares/middlewares");
-var config = require('../config');
+let express = require("express");
+let router = express.Router({mergeParams: true});
+let responseCodes = require("../response_codes.js");
+let C = require("../constants");
+let middlewares = require("../middlewares/middlewares");
+let config = require("../config");
 //var systemLogger    = require("../logger.js").systemLogger;
-var utils = require("../utils");
-var User = require("../models/user");
-var addressMeta = require("../models/addressMeta");
-var Mailer = require("../mailer/mailer");
-var httpsPost = require("../libs/httpsReq").post;
+let utils = require("../utils");
+let User = require("../models/user");
+let addressMeta = require("../models/addressMeta");
+let Mailer = require("../mailer/mailer");
+let httpsPost = require("../libs/httpsReq").post;
 
-var multer = require("multer");
+let multer = require("multer");
 
 
 router.post("/login", login);
@@ -46,10 +46,10 @@ router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 
-router.post('/:account', signUp);
+router.post("/:account", signUp);
 
-router.post('/:account/verify', verify);
-router.post('/:account/forgot-password', forgotPassword);
+router.post("/:account/verify", verify);
+router.post("/:account/forgot-password", forgotPassword);
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
@@ -127,7 +127,7 @@ function logout(req, res, next){
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
-	var username = req.session.user.username;
+	let username = req.session.user.username;
 
 	req.session.destroy(function() {
 		req[C.REQ_REPO].logger.logDebug("User has logged out.");
@@ -254,7 +254,7 @@ function signUp(req, res, next){
 
 			}).then(emailRes => {
 
-				req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
+				req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
 				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
@@ -293,12 +293,12 @@ function forgotPassword(req, res, next){
 			}).catch( err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
-				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+				return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
 			});
 
 		}).then(emailRes => {
 
-			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
+			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
@@ -340,12 +340,12 @@ function uploadAvatar(req, res, next){
 	//check space and format
 	function fileFilter(req, file, cb){
 
-		let acceptedFormat = ['png', 'jpg', 'gif'];
+		let acceptedFormat = ["png", "jpg", "gif"];
 
-		let format = file.originalname.split('.');
-		format = format.length <= 1 ? '' : format.splice(-1)[0];
+		let format = file.originalname.split(".");
+		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
-		let size = parseInt(req.headers['content-length']);
+		let size = parseInt(req.headers["content-length"]);
 
 		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -371,7 +371,7 @@ function uploadAvatar(req, res, next){
 				user.customData.avatar = { data: req.file.buffer};
 				return user.save();
 			}).then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'success' });
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
 			}).catch(err => {
 				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 			});
@@ -435,15 +435,15 @@ function listInfo(req, res, next){
 		let getType;
 
 		if(C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1){
-			getType = Promise.resolve('blacklisted');
+			getType = Promise.resolve("blacklisted");
 		} else {
 			getType = User.findByUserName(req.params.account).then(_user => {
 				if(!_user){
-					return '';
+					return "";
 				} else if(!_user.customData.email){
-					return 'database';
+					return "database";
 				} else {
-					return 'user';
+					return "user";
 				}
 			});
 		}

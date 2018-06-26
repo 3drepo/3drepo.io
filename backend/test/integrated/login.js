@@ -145,10 +145,10 @@ describe("Login", function () {
 		});
 	});
 
-	it('missing username should fail', function(done){
+	it("missing username should fail", function(done){
 		request(server)
-		.post('/login')
-		.send({ password: password + '123' })
+		.post("/login")
+		.send({ password: password + "123" })
 		.expect(400, function(err, res){
 
 			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -157,9 +157,9 @@ describe("Login", function () {
 		});
 	});
 
-	it('missing password should fail', function(done){
+	it("missing password should fail", function(done){
 		request(server)
-		.post('/login')
+		.post("/login")
 		.send({ username: username })
 		.expect(400, function(err, res){
 
@@ -169,9 +169,9 @@ describe("Login", function () {
 		});
 	});
 
-	it('non string type username should fail', function(done){
+	it("non string type username should fail", function(done){
 		request(server)
-		.post('/login')
+		.post("/login")
 		.send({ username: true , password})
 		.expect(400, function(err, res){
 
@@ -182,9 +182,9 @@ describe("Login", function () {
 	});
 
 	
-	it('non string type password should fail', function(done){
+	it("non string type password should fail", function(done){
 		request(server)
-		.post('/login')
+		.post("/login")
 		.send({ username, password: true})
 		.expect(400, function(err, res){
 
