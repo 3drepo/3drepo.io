@@ -359,13 +359,10 @@ schema.statics.verify = function(username, token, options){
 
 	const allowRepeatedVerify = options.allowRepeatedVerify;
 	const skipImportToyModel = options.skipImportToyModel;
-	const skipCreateBasicPlan = options.skipCreateBasicPlan;
-
-	let user;
 
 	return this.findByUserName(username).then(_user => {
 
-		user = _user;
+		const user = _user;
 
 		const tokenData = user && user.customData && user.customData.emailVerifyToken;
 
@@ -389,7 +386,7 @@ schema.statics.verify = function(username, token, options){
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
 
-	}).then(user => {
+	}).then(() => {
 
 		if(!skipImportToyModel){
 
@@ -401,10 +398,10 @@ schema.statics.verify = function(username, token, options){
 			});
 		}
 
-		Role.createTeamSpaceRole(username).then(role => {
+		Role.createTeamSpaceRole(username).then(() => {
 			return Role.grantTeamSpaceRoleToUser(username, username);
 		}
-		).catch(err => {
+		).catch(() => {
 			systemLogger.logError("Failed to create role for ", username);
 		});
 
@@ -543,7 +540,7 @@ function _getModels(accountName, ids, permissions){
 		settings.forEach(setting => {
 			promises.push(
 				_fillInModelDetails(accountName, setting, permissions).then(model => {
-					if(!(model.permissions.length == 1 && model.permissions[0] == null)) {
+					if(!(model.permissions.length === 1 && model.permissions[0] === null)) {
 						setting.federate ? fedModels.push(model) : models.push(model);
 					}
 				})
@@ -751,7 +748,7 @@ function _createAccounts(roles, userName) {
 				return Project.find({account: user.user}, query, projection).then(projects => {
 
 					projects.forEach( _proj =>{
-						projPromises.push(new Promise(function(resolve, reject){
+						projPromises.push(new Promise(function(resolve){
 							let myProj;
 							if(!_proj || _proj.permissions.length === 0){
 								resolve();
@@ -759,7 +756,7 @@ function _createAccounts(roles, userName) {
 							}
 							if(!account){
 
-								account = accounts.find(account => account.account === user.user);
+								account = accounts.find(_account => _account.account === user.user);
 								if(!account) {
 									account = _makeAccountObject(user.user);
 									accounts.push(account);
@@ -805,7 +802,7 @@ function _createAccounts(roles, userName) {
 							models.forEach(model => {
 								if(model.permissions.length > 0){
 									if(!account){
-										account = accounts.find(account => account.account === user.user);
+										account = accounts.find(_account => _account.account === user.user);
 										if(!account){
 											account = _makeAccountObject(user.user);
 											accounts.push(account);
@@ -857,10 +854,10 @@ function _createAccounts(roles, userName) {
 							return Promise.all(modelPromises).then(() => {
 
 								//fill in all subModels name
-								accounts.forEach(account => {
+								accounts.forEach(_account => {
 									//all fed models
-									const allFedModels = account.fedModels.concat(
-										account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
+									const allFedModels = _account.fedModels.concat(
+										_account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
 									);
 
 									//all models
@@ -881,7 +878,7 @@ function _createAccounts(roles, userName) {
 								_sortAccountsAndModels(accounts);
 
 								// own acconut always ranks top of the list
-								const myAccountIndex = accounts.findIndex(account => account.account === userName);
+								const myAccountIndex = accounts.findIndex(_account => _account.account === userName);
 								if(myAccountIndex > -1){
 									const myAccount = accounts[myAccountIndex];
 									accounts.splice(myAccountIndex, 1);
