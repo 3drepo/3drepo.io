@@ -36,6 +36,7 @@ describe("Views", function () {
 
 	let pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
 	let baseView = {
+		"screenshot":{"base64":pngBase64},
 		"clippingPlanes":[],
 		"viewpoint":{
 			"up":[0,1,0],
@@ -104,7 +105,7 @@ describe("Views", function () {
 
 		it("with screenshot should succeed", function(done){
 
-			let viewpoint = Object.assign({"name":"View test"}, baseView);
+			let viewpoint = Object.assign({"name":"View test", "viewpoint": {}}, baseView);
 			viewpoint.screenshot = {};
 			viewpoint.screenshot.base64 = pngBase64;
 
