@@ -36,10 +36,9 @@
 		User.findByUserName(req.params.account).then(user => {
 			const permissions = user.toObject().customData.permissions;
 			return User.getAllUsersInTeamspace(req.params.account).then(users => {
-
 				users.forEach(_user => {
 					if(!_.find(permissions, {"user" : _user})) {
-						permissions.push({user, permissions: []});
+						permissions.push({_user, permissions: []});
 					}
 				});
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);

@@ -1073,7 +1073,6 @@ schema.statics.getAllUsersInTeamspace = function(teamspace) {
 		users.forEach(user => {
 			res.push(user.user);
 		});
-
 		return Promise.resolve(res);
 	});
 };
