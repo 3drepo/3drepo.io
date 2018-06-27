@@ -850,8 +850,8 @@ function _createAccounts(roles, userName) {
 									);
 
 									// all models
-									const allModels = account.models.concat(
-										account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
+									const allModels = _account.models.concat(
+										_account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
 									);
 
 									allFedModels.forEach(fed => {
