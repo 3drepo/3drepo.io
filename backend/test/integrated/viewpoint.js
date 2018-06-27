@@ -17,12 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require("supertest");
-let expect = require("chai").expect;
-let app = require("../../services/api.js").createApp(
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let async = require("async");
+const async = require("async");
 
 describe("Views", function () {
 
@@ -31,11 +31,11 @@ describe("Views", function () {
 
 	const username = "issue_username";
 	const password = "password";
-	
+
 	const model = "project1";
 
-	let pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
-	let baseView = {
+	const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
+	const baseView = {
 		"screenshot":{"base64":pngBase64},
 		"clippingPlanes":[],
 		"viewpoint":{
@@ -43,49 +43,49 @@ describe("Views", function () {
 			"position":[38,38 ,125.08011914810137],
 			"look_at":[0,0,-163.08011914810137],
 			"view_dir":[0,0,-1],
-			"right":[1,0,0],
-		},
+			"right":[1,0,0]
+		}
 	};
 
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
 			agent = request.agent(server);
 			agent.post("/login")
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
 		});
 
 	});
 
-	after(function(done){
-		server.close(function(){
+	after(function(done) {
+		server.close(function() {
 			done();
 		});
 	});
 
-	describe("Creating a viewpoint", function(){
+	describe("Creating a viewpoint", function() {
 
-		it("should succeed", function(done){
+		it("should succeed", function(done) {
 
-			let viewpoint = Object.assign({"name":"View test"}, baseView);
+			const viewpoint = Object.assign({"name":"View test"}, baseView);
 			let viewpointId;
 
 			async.series([
-				function(done){
+				function(done) {
 					agent.post(`/${username}/${model}/viewpoints/`)
-					.send(viewpoint)
-					.expect(200 , function(err, res){
-						viewpointId = res.body._id;
-						return done(err);
-					});
+						.send(viewpoint)
+						.expect(200 , function(err, res) {
+							viewpointId = res.body._id;
+							return done(err);
+						});
 				},
 
-				function(done){
-					agent.get(`/${username}/${model}/viewpoints/${viewpointId}`).expect(200, function(err , res){
+				function(done) {
+					agent.get(`/${username}/${model}/viewpoints/${viewpointId}`).expect(200, function(err , res) {
 
 						expect(res.body.name).to.equal(viewpoint.name);
 						expect(res.body.clippingPlanes).to.deep.equal(viewpoint.clippingPlanes);
@@ -103,26 +103,26 @@ describe("Views", function () {
 
 		});
 
-		it("with screenshot should succeed", function(done){
+		it("with screenshot should succeed", function(done) {
 
-			let viewpoint = Object.assign({"name":"View test", "viewpoint": {}}, baseView);
+			const viewpoint = Object.assign({"name":"View test", "viewpoint": {}}, baseView);
 			viewpoint.screenshot = {};
 			viewpoint.screenshot.base64 = pngBase64;
 
 			let viewpointId;
 
 			async.series([
-				function(done){
+				function(done) {
 					agent.post(`/${username}/${model}/viewpoints/`)
-					.send(viewpoint)
-					.expect(200 , function(err, res){
-						viewpointId = res.body._id;
-						return done(err);
-					});
+						.send(viewpoint)
+						.expect(200 , function(err, res) {
+							viewpointId = res.body._id;
+							return done(err);
+						});
 				},
 
-				function(done){
-					agent.get(`/${username}/${model}/viewpoints/${viewpointId}/`).expect(200, function(err , res){
+				function(done) {
+					agent.get(`/${username}/${model}/viewpoints/${viewpointId}/`).expect(200, function(err , res) {
 
 						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/viewpoints/${viewpointId}/thumbnail.png`);
 						return done(err);
@@ -133,41 +133,41 @@ describe("Views", function () {
 
 		});
 
-		it("change name should succeed", function(done){
+		it("change name should succeed", function(done) {
 
-			let viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
+			const viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
 			let viewpointId;
-			let newName = { name: "New viewpoint name"};
+			const newName = { name: "New viewpoint name"};
 			async.series([
-				function(done){
+				function(done) {
 					agent.post(`/${username}/${model}/viewpoints/`)
-					.send(viewpoint)
-					.expect(200 , function(err, res){
-						viewpointId = res.body._id;
-						return done(err);
-						
-					});
+						.send(viewpoint)
+						.expect(200 , function(err, res) {
+							viewpointId = res.body._id;
+							return done(err);
+
+						});
 				},
-				function(done){
+				function(done) {
 					agent.put(`/${username}/${model}/viewpoints/${viewpointId}/`)
-					.send(newName)
-					.expect(200, done);
+						.send(newName)
+						.expect(200, done);
 				},
-				function(done){
+				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewpointId}/`)
-					.expect(200, function(err, res){
-						expect(res.body.name === newName.name);
-						done(err);
-					});
-				},
+						.expect(200, function(err, res) {
+							expect(res.body.name === newName.name);
+							done(err);
+						});
+				}
 			], done);
 		});
 
-		it("change viewpoint should fail", function(done){
+		it("change viewpoint should fail", function(done) {
 
-			let viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
+			const viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
 			let viewpointId;
-			let newView = {
+			const newView = {
 				"viewpoint":{
 					"up":[1,1,1],
 					"position":[12,13,35],
@@ -177,20 +177,20 @@ describe("Views", function () {
 				}
 			};
 			async.series([
-				function(done){
+				function(done) {
 					agent.post(`/${username}/${model}/viewpoints/`)
-					.send(viewpoint)
-					.expect(200 , function(err, res){
-						viewpointId = res.body._id;
-						return done(err);
-						
-					});
+						.send(viewpoint)
+						.expect(200 , function(err, res) {
+							viewpointId = res.body._id;
+							return done(err);
+
+						});
 				},
-				function(done){
+				function(done) {
 					agent.put(`/${username}/${model}/viewpoints/${viewpointId}/`)
-					.send(newView)
-					.expect(400, done);
-				},
+						.send(newView)
+						.expect(400, done);
+				}
 			], done);
 		});
 

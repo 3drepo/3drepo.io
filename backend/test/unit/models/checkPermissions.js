@@ -23,14 +23,13 @@ const checkPermission  = proxyquire("../../../middlewares/checkPermissions", {
 	"../response_codes": {}
 }).checkPermissionsHelper;
 
+describe("Check permission function", function() {
 
-describe("Check permission function", function(){
+	describe("should return true if user has enough permissions", function () {
 
-	describe("should return true if user has enough permissions", function (){
+		it("case #1 - requests nothing", function() {
 
-		it("case #1 - requests nothing", function(){
-
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project"]),
 					projectLevel: () => Promise.resolve([]),
@@ -43,9 +42,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #2 - account level permissions", function(){
+		it("case #2 - account level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project"]),
 					projectLevel: () => Promise.resolve([]),
@@ -58,9 +57,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #3 - account level permissions", function(){
+		it("case #3 - account level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve([]),
@@ -73,9 +72,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #3.1 - account level permissions with OR relationship", function(){
+		it("case #3.1 - account level permissions with OR relationship", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project"]),
 					projectLevel: () => Promise.resolve([]),
@@ -89,9 +88,9 @@ describe("Check permission function", function(){
 
 		});
 
-		it("case #4 - project level permissions", function(){
+		it("case #4 - project level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -104,9 +103,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #5 - project level permissions", function(){
+		it("case #5 - project level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -119,9 +118,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #5.1 - project level permissions with OR relationship", function(){
+		it("case #5.1 - project level permissions with OR relationship", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_federation", "delete_project"]),
@@ -129,15 +128,15 @@ describe("Check permission function", function(){
 				};
 			}
 
-			return checkPermission("", "", "", "", {"$or": [["create_model"], ["create_federation", "delete_project"] ]}, getPermissionsAdpater).then(res => {
+			return checkPermission("", "", "", "", {"$or": [["create_model"], ["create_federation", "delete_project"]]}, getPermissionsAdpater).then(res => {
 				expect(res.granted).to.be.true;
 			});
 
 		});
 
-		it("case #6 - model level permissions", function(){
+		it("case #6 - model level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -150,9 +149,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #7 - model level permissions", function(){
+		it("case #7 - model level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -165,9 +164,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #7.1 - model level permissions with OR relationship", function(){
+		it("case #7.1 - model level permissions with OR relationship", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -180,9 +179,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #8 - mixed level permissions", function(){
+		it("case #8 - mixed level permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -195,10 +194,9 @@ describe("Check permission function", function(){
 			});
 		});
 
+		it("case #8.1 - mixed level permissions with OR relationship", function() {
 
-		it("case #8.1 - mixed level permissions with OR relationship", function(){
-
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -206,18 +204,18 @@ describe("Check permission function", function(){
 				};
 			}
 
-			return checkPermission("", "", "", "", { "$or": [ ["revoke_licence"], ["create_project", "create_model", "view_issue"]] }, getPermissionsAdpater).then(res => {
+			return checkPermission("", "", "", "", { "$or": [["revoke_licence"], ["create_project", "create_model", "view_issue"]] }, getPermissionsAdpater).then(res => {
 				expect(res.granted).to.be.true;
 			});
 		});
 
 	});
 
-	describe("should return false if user doesn't have enough permissions", function(){
+	describe("should return false if user doesn't have enough permissions", function() {
 
-		it("case #1 - no permissions assiged to user", function(){
+		it("case #1 - no permissions assiged to user", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve([]),
 					projectLevel: () => Promise.resolve([]),
@@ -230,9 +228,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #2 - insufficient account permissions", function(){
+		it("case #2 - insufficient account permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["assign_licence"]),
 					projectLevel: () => Promise.resolve([]),
@@ -245,9 +243,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #3 - insufficient project permissions", function(){
+		it("case #3 - insufficient project permissions", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["assign_licence"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation"]),
@@ -260,9 +258,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #4  - insufficient permissions on just one level", function(){
+		it("case #4  - insufficient permissions on just one level", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_model", "create_federation", "delete_project"]),
@@ -275,9 +273,9 @@ describe("Check permission function", function(){
 			});
 		});
 
-		it("case #4  - insufficient permissions with OR relationship", function(){
+		it("case #4  - insufficient permissions with OR relationship", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["create_project", "assign_licence", "create_job"]),
 					projectLevel: () => Promise.resolve(["create_federation", "delete_project"]),
@@ -285,16 +283,16 @@ describe("Check permission function", function(){
 				};
 			}
 
-			return checkPermission("", "", "", "", [ ["create_project", "create_model"], ["view_issue", "comment_issue"]], getPermissionsAdpater).then(res => {
+			return checkPermission("", "", "", "", [["create_project", "create_model"], ["view_issue", "comment_issue"]], getPermissionsAdpater).then(res => {
 				expect(res.granted).to.be.false;
 			});
 		});
 	});
 
-	describe("should return true if user has teamspace admin permission", function(){
-		it("teamspace admin", function(){
+	describe("should return true if user has teamspace admin permission", function() {
+		it("teamspace admin", function() {
 
-			function getPermissionsAdpater(){
+			function getPermissionsAdpater() {
 				return {
 					accountLevel: () => Promise.resolve(["teamspace_admin"]),
 					projectLevel: () => Promise.resolve([]),

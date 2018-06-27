@@ -30,34 +30,33 @@ const async = require("async");
 const C = require("../../constants");
 
 describe("Sharing/Unsharing a model", function () {
-	let User = require("../../models/user");
+	const User = require("../../models/user");
 	let server;
 	let agent;
-	let username = "projectowner";
-	let password = "password";
-	let model = "testproject";
-	let email = suf => `test3drepo_collaboration_${suf}@mailinator.com`;
+	const username = "projectowner";
+	const password = "password";
+	const model = "testproject";
+	const email = suf => `test3drepo_collaboration_${suf}@mailinator.com`;
 
+	const username_viewer = "collaborator_viewer";
+	const password_viewer = "collaborator_viewer";
 
-	let username_viewer = "collaborator_viewer";
-	let password_viewer = "collaborator_viewer";
+	const username_editor = "collaborator_editor";
+	const password_editor = "collaborator_editor";
 
-	let username_editor = "collaborator_editor";
-	let password_editor = "collaborator_editor";
+	const username_commenter = "collaborator_comm";
+	const password_commenter = "collaborator_comm";
 
-	let username_commenter = "collaborator_comm";
-	let password_commenter = "collaborator_comm";
-
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 
-			let actions = [];
+			const actions = [];
 
 			[1,2,3,4,5].forEach(n => {
 
-				actions.push(function (done){
+				actions.push(function (done) {
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
 						username: username_viewer + n, password: password_viewer, email: email("viewer" + n),
@@ -71,9 +70,9 @@ describe("Sharing/Unsharing a model", function () {
 
 	});
 
-	after(function(done){
+	after(function(done) {
 
-		let q = require("../../services/queue");
+		const q = require("../../services/queue");
 
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
@@ -81,7 +80,7 @@ describe("Sharing/Unsharing a model", function () {
 			q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
 				return q.channel.purgeQueue(q.modelQName);
 			}).then(() => {
-				server.close(function(){
+				server.close(function() {
 					console.log("API test server is closed");
 					done();
 				});
@@ -89,319 +88,315 @@ describe("Sharing/Unsharing a model", function () {
 		});
 	});
 
+	describe("for view only", function() {
 
-	describe("for view only", function(){
-
-		before(function(done){
+		before(function(done) {
 
 			agent = request.agent(server);
 			agent.post("/login")
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
-			
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+
 		});
 
-		after(function(done){
+		after(function(done) {
 
 			agent.post("/logout")
-			.send({})
-			.expect(200, done);
+				.send({})
+				.expect(200, done);
 		});
 
-		it("should succee and the viewer is able to see the model", function(done){
+		it("should succee and the viewer is able to see the model", function(done) {
 
 			const permissions = [
 				{ user: username_viewer, permission: "viewer"}
 			];
 
 			async.series([
-				function share(done){
+				function share(done) {
 
 					agent.post(`/${username}/${model}/permissions`)
-					.send(permissions)
-					.expect(200, function(err, res){
-						done(err);
-					});
+						.send(permissions)
+						.expect(200, function(err, res) {
+							done(err);
+						});
 				},
-				function logout(done){
+				function logout(done) {
 
 					agent.post("/logout")
-					.send({})
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
 				},
-				function loginAsViewer(done){
+				function loginAsViewer(done) {
 
 					agent.post("/login")
-					.send({ username: username_viewer, password: password_viewer })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username_viewer);
-						done(err);
-					});
+						.send({ username: username_viewer, password: password_viewer })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_viewer);
+							done(err);
+						});
 				},
-				function checkSharedModelInList(done){
+				function checkSharedModelInList(done) {
 
 					agent.get(`/${username_viewer}.json`)
-					.expect(200, function(err, res){
-						expect(res.body).to.have.property("accounts").that.is.an("array");
-						const account = res.body.accounts.find( a => a.account === username);
-						expect(account).to.have.property("models").that.is.an("array");
-						const modelObj = account.models.find( _model => _model.model === model);
-						expect(modelObj).to.have.property("model", model);
-						expect(modelObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
+						.expect(200, function(err, res) {
+							expect(res.body).to.have.property("accounts").that.is.an("array");
+							const account = res.body.accounts.find(a => a.account === username);
+							expect(account).to.have.property("models").that.is.an("array");
+							const modelObj = account.models.find(_model => _model.model === model);
+							expect(modelObj).to.have.property("model", model);
+							expect(modelObj.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
 
-						done(err);
-					});
+							done(err);
+						});
 				},
-				function ableToViewModel(done){
+				function ableToViewModel(done) {
 					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-					.expect(200, function(err ,res){
-						done(err);
-					});
+						.expect(200, function(err ,res) {
+							done(err);
+						});
 				}
 			], done);
 
-
 		});
 
-		it("model info api shows correct permissions", function(done){
+		it("model info api shows correct permissions", function(done) {
 			agent.get(`/${username}/${model}.json`).
-			expect(200, function(err, res){
-				expect(res.body.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
-				done(err);
-			});
+				expect(200, function(err, res) {
+					expect(res.body.permissions).to.deep.equal(C.VIEWER_TEMPLATE_PERMISSIONS);
+					done(err);
+				});
 		});
 
-		it("and the viewer should be able to see list of issues", function(done){
+		it("and the viewer should be able to see list of issues", function(done) {
 			agent.get(`/${username}/${model}/issues.json`)
-			.expect(200, done);
+				.expect(200, done);
 		});
 
-		it("and the viewer should not be able to download the model", function(done){
+		it("and the viewer should not be able to download the model", function(done) {
 			agent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
-		it("and the viewer should NOT be able to upload model", function(done){
+		it("and the viewer should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-			.expect(401, done);
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(401, done);
 		});
 
-		it("and the viewer should NOT be able to see raise issue", function(done){
+		it("and the viewer should NOT be able to see raise issue", function(done) {
 			agent.post(`/${username}/${model}/issues.json`)
-			.send({})
-			.expect(401 , done);
-		});
-
-		it("and the viewer should NOT be able to delete the model", function(done){
-			agent.delete(`/${username}/${model}`)
-			.send({})
-			.expect(401 , done);
-		});
-
-		it("and the viewer should NOT be able to update model settings", function(done){
-			let body = {
-					unit: "cm"
-
-			};
-			
-			agent.put(`/${username}/${model}/settings`)
-			.send(body).expect(401 , done);
-		});
-
-
-		describe("and then revoking the permission", function(){
-			before(function(done){
-				async.waterfall([
-					function logout(done){
-
-						agent.post("/logout")
-						.send({})
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_viewer);
-							done(err);
-						});
-					},
-					function loginAsModelOwner(done){
-
-						agent.post("/login")
-						.send({ username, password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
-					}
-				], done);
-			});
-
-			it("should succee and the viewer is NOT able to see the model", function(done){
-
-				const permissions = [];
-					
-				async.waterfall([
-					function remove(done){
-
-						agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res){
-							done(err);
-						});
-					},
-					function logout(done){
-
-						agent.post("/logout")
-						.send({})
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
-					},
-					function loginAsViewer(done){
-
-						agent.post("/login")
-						.send({ username: username_viewer, password: password_viewer })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_viewer);
-							done(err);
-						});
-					},
-					function checkSharedModelInList(done){
-
-						agent.get(`/${username_viewer}.json`)
-						.expect(200, function(err, res){
-
-							expect(res.body).to.have.property("accounts").that.is.an("array");
-							let account = res.body.accounts.find( a => a.account === username);
-							expect(account).to.be.undefined;
-
-							done(err);
-						});
-					},
-					function notAbleToViewModel(done){
-
-						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-						.expect(401, function(err ,res){
-							done(err);
-						});
-					}
-				], done);
-
-			});
-
-			it("and the viewer should NOT be able to see raise issue", function(done){
-				agent.post(`/${username}/${model}/issues.json`)
 				.send({})
 				.expect(401 , done);
+		});
+
+		it("and the viewer should NOT be able to delete the model", function(done) {
+			agent.delete(`/${username}/${model}`)
+				.send({})
+				.expect(401 , done);
+		});
+
+		it("and the viewer should NOT be able to update model settings", function(done) {
+			const body = {
+				unit: "cm"
+
+			};
+
+			agent.put(`/${username}/${model}/settings`)
+				.send(body).expect(401 , done);
+		});
+
+		describe("and then revoking the permission", function() {
+			before(function(done) {
+				async.waterfall([
+					function logout(done) {
+
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_viewer);
+								done(err);
+							});
+					},
+					function loginAsModelOwner(done) {
+
+						agent.post("/login")
+							.send({ username, password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					}
+				], done);
+			});
+
+			it("should succee and the viewer is NOT able to see the model", function(done) {
+
+				const permissions = [];
+
+				async.waterfall([
+					function remove(done) {
+
+						agent.post(`/${username}/${model}/permissions`)
+							.send(permissions)
+							.expect(200, function(err, res) {
+								done(err);
+							});
+					},
+					function logout(done) {
+
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					},
+					function loginAsViewer(done) {
+
+						agent.post("/login")
+							.send({ username: username_viewer, password: password_viewer })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_viewer);
+								done(err);
+							});
+					},
+					function checkSharedModelInList(done) {
+
+						agent.get(`/${username_viewer}.json`)
+							.expect(200, function(err, res) {
+
+								expect(res.body).to.have.property("accounts").that.is.an("array");
+								const account = res.body.accounts.find(a => a.account === username);
+								expect(account).to.be.undefined;
+
+								done(err);
+							});
+					},
+					function notAbleToViewModel(done) {
+
+						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+							.expect(401, function(err ,res) {
+								done(err);
+							});
+					}
+				], done);
+
+			});
+
+			it("and the viewer should NOT be able to see raise issue", function(done) {
+				agent.post(`/${username}/${model}/issues.json`)
+					.send({})
+					.expect(401 , done);
 			});
 		});
 	});
 
-	describe("for comment only", function(){
+	describe("for comment only", function() {
 
-		before(function(done){
+		before(function(done) {
 
 			agent = request.agent(server);
 			agent.post("/login")
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
-			
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+
 		});
 
-		after(function(done){
+		after(function(done) {
 
 			agent.post("/logout")
-			.send({})
-			.expect(200, done);
+				.send({})
+				.expect(200, done);
 		});
 
-		it("should succee and the commenter is able to see the model", function(done){
+		it("should succee and the commenter is able to see the model", function(done) {
 
 			const permissions = [
 				{ user: username_commenter, permission: "commenter"}
 			];
 
 			async.series([
-				function share(done){
+				function share(done) {
 
 					agent.post(`/${username}/${model}/permissions`)
-					.send(permissions)
-					.expect(200, function(err, res){
-						done(err);
-					});
+						.send(permissions)
+						.expect(200, function(err, res) {
+							done(err);
+						});
 				},
-				function logout(done){
+				function logout(done) {
 
 					agent.post("/logout")
-					.send({})
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
 				},
-				function loginAsCommenter(done){
+				function loginAsCommenter(done) {
 
 					agent.post("/login")
-					.send({ username: username_commenter, password: password_commenter })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username_commenter);
-						done(err);
-					});
+						.send({ username: username_commenter, password: password_commenter })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_commenter);
+							done(err);
+						});
 				},
-				function checkSharedModelInList(done){
+				function checkSharedModelInList(done) {
 
 					agent.get(`/${username_commenter}.json`)
-					.expect(200, function(err, res){
+						.expect(200, function(err, res) {
 
-						expect(res.body).to.have.property("accounts").that.is.an("array");
-						let account = res.body.accounts.find( a => a.account === username);
-						expect(account).to.have.property("models").that.is.an("array");
-						let modelObj = account.models.find( _model => _model.model === model);
-						expect(modelObj).to.have.property("model", model);
-						expect(modelObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
+							expect(res.body).to.have.property("accounts").that.is.an("array");
+							const account = res.body.accounts.find(a => a.account === username);
+							expect(account).to.have.property("models").that.is.an("array");
+							const modelObj = account.models.find(_model => _model.model === model);
+							expect(modelObj).to.have.property("model", model);
+							expect(modelObj.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
 
-						done(err);
-					});
+							done(err);
+						});
 				},
-				function ableToViewModel(done){
+				function ableToViewModel(done) {
 
 					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-					.expect(200, function(err ,res){
-						done(err);
-					});
+						.expect(200, function(err ,res) {
+							done(err);
+						});
 				}
 			], done);
 
-
 		});
 
-		it("model info api shows correct permissions", function(done){
+		it("model info api shows correct permissions", function(done) {
 			agent.get(`/${username}/${model}.json`).
-			expect(200, function(err, res){
-				expect(res.body.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
-				done(err);
-			});
+				expect(200, function(err, res) {
+					expect(res.body.permissions).to.deep.equal(C.COMMENTER_TEMPLATE_PERMISSIONS);
+					done(err);
+				});
 		});
 
-		it("and the commenter should be able to see list of issues", function(done){
+		it("and the commenter should be able to see list of issues", function(done) {
 			agent.get(`/${username}/${model}/issues.json`)
-			.expect(200, done);
+				.expect(200, done);
 		});
 
-		it("and the commenter should not be able to download the model", function(done){
+		it("and the commenter should not be able to download the model", function(done) {
 			agent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
-		it("and the commenter should be able to see raise issue", function(done){
+		it("and the commenter should be able to see raise issue", function(done) {
 
-			let issue = { 
+			const issue = {
 				"name": "issue",
 				"status": "open",
 				"priority": "medium",
@@ -420,220 +415,218 @@ describe("Sharing/Unsharing a model", function () {
 				},
 				"scale":1,
 				"creator_role":"testproject.collaborator",
-				"assigned_roles":["testproject.collaborator"],
+				"assigned_roles":["testproject.collaborator"]
 			};
 
 			agent.post(`/${username}/${model}/issues.json`)
-			.send(issue)
-			.expect(200 , done);
+				.send(issue)
+				.expect(200 , done);
 		});
 
-		it("and the commenter should NOT be able to upload model", function(done){
+		it("and the commenter should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-			.expect(401, done);
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(401, done);
 		});
 
-		it("and the commenter should NOT be able to delete the model", function(done){
+		it("and the commenter should NOT be able to delete the model", function(done) {
 			agent.delete(`/${username}/${model}`)
-			.send({})
-			.expect(401 , done);
+				.send({})
+				.expect(401 , done);
 		});
 
-		it("and the commenter should NOT be able to update model settings", function(done){
-			let body = {
+		it("and the commenter should NOT be able to update model settings", function(done) {
+			const body = {
 
-					unit: "cm"
+				unit: "cm"
 
 			};
-			
+
 			agent.put(`/${username}/${model}/settings`)
-			.send(body).expect(401 , done);
+				.send(body).expect(401 , done);
 		});
 
-		describe("and then revoking the permissions", function(done){
-			before(function(done){
+		describe("and then revoking the permissions", function(done) {
+			before(function(done) {
 				async.waterfall([
-					function logout(done){
+					function logout(done) {
 
 						agent.post("/logout")
-						.send({})
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_commenter);
-							done(err);
-						});
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_commenter);
+								done(err);
+							});
 					},
-					function loginAsModelOwner(done){
+					function loginAsModelOwner(done) {
 
 						agent.post("/login")
-						.send({ username, password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
+							.send({ username, password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
 					}
 				], done);
 			});
 
-			it("should succee and the commenter is NOT able to see the model", function(done){
+			it("should succee and the commenter is NOT able to see the model", function(done) {
 
 				const permissions = [];
-					
+
 				async.waterfall([
-					function remove(done){
+					function remove(done) {
 
 						agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res){
-							done(err);
-						});
+							.send(permissions)
+							.expect(200, function(err, res) {
+								done(err);
+							});
 					},
-					function logout(done){
+					function logout(done) {
 
 						agent.post("/logout")
-						.send({})
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
 					},
-					function loginAsCommenter(done){
+					function loginAsCommenter(done) {
 
 						agent.post("/login")
-						.send({ username: username_commenter, password: password_commenter })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_commenter);
-							done(err);
-						});
+							.send({ username: username_commenter, password: password_commenter })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_commenter);
+								done(err);
+							});
 					},
-					function checkSharedModelInList(done){
+					function checkSharedModelInList(done) {
 
 						agent.get(`/${username_commenter}.json`)
-						.expect(200, function(err, res){
+							.expect(200, function(err, res) {
 
-							expect(res.body).to.have.property("accounts").that.is.an("array");
-							let account = res.body.accounts.find( a => a.account === username);
-							expect(account).to.be.undefined;
+								expect(res.body).to.have.property("accounts").that.is.an("array");
+								const account = res.body.accounts.find(a => a.account === username);
+								expect(account).to.be.undefined;
 
-							done(err);
-						});
+								done(err);
+							});
 					},
-					function notAbleToViewModel(done){
+					function notAbleToViewModel(done) {
 
 						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-						.expect(401, function(err ,res){
-							done(err);
-						});
+							.expect(401, function(err ,res) {
+								done(err);
+							});
 					}
 				], done);
 
 			});
 
-			it("and the commenter should NOT be able to see raise issue", function(done){
+			it("and the commenter should NOT be able to see raise issue", function(done) {
 				agent.post(`/${username}/${model}/issues.json`)
-				.send({ })
-				.expect(401 , done);
+					.send({ })
+					.expect(401 , done);
 			});
 		});
 	});
 
-	describe("for collaborator", function(){
-		before(function(done){
+	describe("for collaborator", function() {
+		before(function(done) {
 
 			agent = request.agent(server);
 			agent.post("/login")
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
-			
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+
 		});
 
-		after(function(done){
+		after(function(done) {
 
 			agent.post("/logout")
-			.send({})
-			.expect(200, done);
+				.send({})
+				.expect(200, done);
 		});
 
-		it("should succee and the editor is able to see the model", function(done){
+		it("should succee and the editor is able to see the model", function(done) {
 
 			const permissions = [
 				{ user: username_editor, permission: "collaborator"}
 			];
 
 			async.series([
-				function share(done){
+				function share(done) {
 
 					agent.post(`/${username}/${model}/permissions`)
-					.send(permissions)
-					.expect(200, function(err, res){
-						done(err);
-					});
+						.send(permissions)
+						.expect(200, function(err, res) {
+							done(err);
+						});
 				},
-				function logout(done){
+				function logout(done) {
 
 					agent.post("/logout")
-					.send({})
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
 				},
-				function loginAsEditor(done){
+				function loginAsEditor(done) {
 
 					agent.post("/login")
-					.send({ username: username_editor, password: password_editor })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username_editor);
-						done(err);
-					});
+						.send({ username: username_editor, password: password_editor })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username_editor);
+							done(err);
+						});
 				},
-				function checkSharedModelInList(done){
+				function checkSharedModelInList(done) {
 
 					agent.get(`/${username_editor}.json`)
-					.expect(200, function(err, res){
+						.expect(200, function(err, res) {
 
-						expect(res.body).to.have.property("accounts").that.is.an("array");
-						let account = res.body.accounts.find( a => a.account === username);
-						expect(account).to.have.property("models").that.is.an("array");
-						let modelObj = account.models.find( _model => _model.model === model);
-						expect(modelObj).to.have.property("model", model);
-						expect(modelObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
+							expect(res.body).to.have.property("accounts").that.is.an("array");
+							const account = res.body.accounts.find(a => a.account === username);
+							expect(account).to.have.property("models").that.is.an("array");
+							const modelObj = account.models.find(_model => _model.model === model);
+							expect(modelObj).to.have.property("model", model);
+							expect(modelObj.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
 
-						done(err);
-					});
+							done(err);
+						});
 				},
-				function ableToViewModel(done){
+				function ableToViewModel(done) {
 
 					agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-					.expect(200, function(err ,res){
-						done(err);
-					});
+						.expect(200, function(err ,res) {
+							done(err);
+						});
 				}
 			], done);
 
-
 		});
 
-		it("model info api shows correct permissions", function(done){
+		it("model info api shows correct permissions", function(done) {
 			agent.get(`/${username}/${model}.json`).
-			expect(200, function(err, res){
-				expect(res.body.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
-				done(err);
-			});
+				expect(200, function(err, res) {
+					expect(res.body.permissions).to.deep.equal(C.COLLABORATOR_TEMPLATE_PERMISSIONS);
+					done(err);
+				});
 		});
-		
 
-		it("and the editor should be able to see list of issues", function(done){
+		it("and the editor should be able to see list of issues", function(done) {
 			agent.get(`/${username}/${model}/issues.json`)
-			.expect(200, done);
+				.expect(200, done);
 		});
 
-		it("and the editor should be able to raise issue", function(done){
+		it("and the editor should be able to raise issue", function(done) {
 
-			let issue = { 
+			const issue = {
 				"name": "issue",
 				"status": "open",
 				"priority": "medium",
@@ -652,124 +645,123 @@ describe("Sharing/Unsharing a model", function () {
 				},
 				"scale":1,
 				"creator_role":"testproject.collaborator",
-				"assigned_roles":["testproject.collaborator"],
+				"assigned_roles":["testproject.collaborator"]
 			};
 
 			agent.post(`/${username}/${model}/issues.json`)
-			.send(issue)
-			.expect(200 , done);
+				.send(issue)
+				.expect(200 , done);
 		});
 
-		it("and the collaborator should be able to upload model", function(done){
+		it("and the collaborator should be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-			.expect(200, done);
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(200, done);
 		});
 
-
-		it("and the collaborator should be able to download the model", function(done){
+		it("and the collaborator should be able to download the model", function(done) {
 			agent.get(`/${username}/${model}/download/latest`).expect(200, done);
 		});
 
-		it("and the collaborator should NOT be able to delete the model", function(done){
+		it("and the collaborator should NOT be able to delete the model", function(done) {
 			agent.delete(`/${username}/${model}`)
-			.send({})
-			.expect(401 , done);
-		});
-
-		it("and the collaborator should NOT be able to update model settings", function(done){
-			let body = {
-
-					unit: "cm"
-
-			};
-			
-			agent.put(`/${username}/${model}/settings`)
-			.send(body).expect(401 , done);
-		});
-
-		describe("and then revoking the permissions", function(done){
-			before(function(done){
-				async.waterfall([
-					function logout(done){
-
-						agent.post("/logout")
-						.send({})
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_editor);
-							done(err);
-						});
-					},
-					function loginAsModelOwner(done){
-
-						agent.post("/login")
-						.send({ username, password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
-					}
-				], done);
-			});
-
-			it("should succee and the editor is NOT able to see the model", function(done){
-
-				const permissions = [];
-					
-				async.waterfall([
-					function remove(done){
-
-						agent.post(`/${username}/${model}/permissions`)
-						.send(permissions)
-						.expect(200, function(err, res){
-							done(err);
-						});
-					},
-					function logout(done){
-
-						agent.post("/logout")
-						.send({})
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
-					},
-					function loginAsEditor(done){
-
-						agent.post("/login")
-						.send({ username: username_editor, password: password_editor })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username_editor);
-							done(err);
-						});
-					},
-					function checkSharedModelInList(done){
-
-						agent.get(`/${username_editor}.json`)
-						.expect(200, function(err, res){
-
-							expect(res.body).to.have.property("accounts").that.is.an("array");
-							let account = res.body.accounts.find( a => a.account === username);
-							expect(account).to.be.undefined;
-
-							done(err);
-						});
-					},
-					function notAbleToViewModel(done){
-
-						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
-						.expect(401, function(err ,res){
-							done(err);
-						});
-					}
-				], done);
-
-			});
-
-			it("and the editor should NOT be able to raise issue", function(done){
-				agent.post(`/${username}/${model}/issues.json`)
 				.send({})
 				.expect(401 , done);
+		});
+
+		it("and the collaborator should NOT be able to update model settings", function(done) {
+			const body = {
+
+				unit: "cm"
+
+			};
+
+			agent.put(`/${username}/${model}/settings`)
+				.send(body).expect(401 , done);
+		});
+
+		describe("and then revoking the permissions", function(done) {
+			before(function(done) {
+				async.waterfall([
+					function logout(done) {
+
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_editor);
+								done(err);
+							});
+					},
+					function loginAsModelOwner(done) {
+
+						agent.post("/login")
+							.send({ username, password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					}
+				], done);
+			});
+
+			it("should succee and the editor is NOT able to see the model", function(done) {
+
+				const permissions = [];
+
+				async.waterfall([
+					function remove(done) {
+
+						agent.post(`/${username}/${model}/permissions`)
+							.send(permissions)
+							.expect(200, function(err, res) {
+								done(err);
+							});
+					},
+					function logout(done) {
+
+						agent.post("/logout")
+							.send({})
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+					},
+					function loginAsEditor(done) {
+
+						agent.post("/login")
+							.send({ username: username_editor, password: password_editor })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username_editor);
+								done(err);
+							});
+					},
+					function checkSharedModelInList(done) {
+
+						agent.get(`/${username_editor}.json`)
+							.expect(200, function(err, res) {
+
+								expect(res.body).to.have.property("accounts").that.is.an("array");
+								const account = res.body.accounts.find(a => a.account === username);
+								expect(account).to.be.undefined;
+
+								done(err);
+							});
+					},
+					function notAbleToViewModel(done) {
+
+						agent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+							.expect(401, function(err ,res) {
+								done(err);
+							});
+					}
+				], done);
+
+			});
+
+			it("and the editor should NOT be able to raise issue", function(done) {
+				agent.post(`/${username}/${model}/issues.json`)
+					.send({})
+					.expect(401 , done);
 			});
 		});
 	});
@@ -786,7 +778,7 @@ describe("Sharing/Unsharing a model", function () {
 	// 			expect(res.body.username).to.equal(username);
 	// 			done(err);
 	// 		});
-			
+
 	// 	});
 
 	// 	it('should fail', function(done){
@@ -804,32 +796,32 @@ describe("Sharing/Unsharing a model", function () {
 	// 	});
 	// });
 
-	describe("for non-existing user", function(){
+	describe("for non-existing user", function() {
 
 		let agent;
 
-		before(function(done){
+		before(function(done) {
 
 			agent = request.agent(server);
 			agent.post("/login")
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
-			
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+
 		});
 
-		it("should fail", function(done){
+		it("should fail", function(done) {
 
 			const permissions = [{ user: username_viewer + "99", permission: "collaborator"}];
 
 			agent.post(`/${username}/${model}/permissions`)
-			.send(permissions)
-			.expect(404, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
-				done(err);
-			});
+				.send(permissions)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+					done(err);
+				});
 		});
 
 		// it('should fail (unshare)', function(done){
@@ -846,9 +838,7 @@ describe("Sharing/Unsharing a model", function () {
 		// 	});
 		// });
 
-
 	});
-
 
 	// describe('for a user dont have access', function(){
 
@@ -884,7 +874,6 @@ describe("Sharing/Unsharing a model", function () {
 	// 		});
 	// 	});
 
-
 	// 	it('should fail (unshare)', function(done){
 	// 		let role = {
 	// 			user: username,
@@ -901,21 +890,20 @@ describe("Sharing/Unsharing a model", function () {
 
 	// });
 
-
-	describe("to the same user twice", function(){
+	describe("to the same user twice", function() {
 
 		let agent;
 
-		before(function(done){
+		before(function(done) {
 
 			agent = request.agent(server);
 			agent.post("/login")
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
-			
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+
 		});
 
 		const permissions = [
@@ -923,29 +911,29 @@ describe("Sharing/Unsharing a model", function () {
 			{ user: username_viewer, permission: "viewer"}
 		];
 
-		it("should be ok and reduced to one by the backend and response body should show all subscription users", function(done){
+		it("should be ok and reduced to one by the backend and response body should show all subscription users", function(done) {
 
 			async.series([
 				done => {
 					agent.post(`/${username}/${model}/permissions`)
-					.send(permissions)
-					.expect(200, function(err, res){
-						done(err);
-					});
+						.send(permissions)
+						.expect(200, function(err, res) {
+							done(err);
+						});
 				},
 				done => {
 					agent.get(`/${username}/${model}/permissions`)
-					.expect(200, function(err, res){
-						expect(res.body.find(p => p.user === username_viewer)).to.deep.equal({ user: username_viewer, permission: "viewer"});
-						expect(res.body.find(p => p.user === username_editor)).to.deep.equal({ user: username_editor});
-						expect(res.body.find(p => p.user === username_commenter)).to.deep.equal({ user: username_commenter});
-						done(err);
-					});
+						.expect(200, function(err, res) {
+							expect(res.body.find(p => p.user === username_viewer)).to.deep.equal({ user: username_viewer, permission: "viewer"});
+							expect(res.body.find(p => p.user === username_editor)).to.deep.equal({ user: username_editor});
+							expect(res.body.find(p => p.user === username_commenter)).to.deep.equal({ user: username_commenter});
+							done(err);
+						});
 				}
 			], done);
 
 		});
-				
+
 	});
 
 });

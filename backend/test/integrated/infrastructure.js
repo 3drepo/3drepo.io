@@ -17,25 +17,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require("supertest");
-let expect = require("chai").expect;
-let app = require("../../services/api.js").createApp(
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
-let responseCodes = require("../../response_codes.js");
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
+const responseCodes = require("../../response_codes.js");
 
-
-function stopQueue(done){
-	let exec = require("child_process").exec;
+function stopQueue(done) {
+	const exec = require("child_process").exec;
 	exec("sudo service rabbitmq-server stop", (err, stdout, stderr) => {
 		done(err);
 	});
 }
 
-function startQueue(done){
-	let exec = require("child_process").exec;
+function startQueue(done) {
+	const exec = require("child_process").exec;
 	exec("sudo service rabbitmq-server start", (err, stdout, stderr) => {
 		done(err);
 	});
@@ -43,22 +42,20 @@ function startQueue(done){
 
 describe("Infrastructure", function () {
 
-	let User = require("../../models/user");
+	const User = require("../../models/user");
 	let server;
 	let agent;
-	let username = "testing";
-	let password = "testing";
-	let model = "testproject";
+	const username = "testing";
+	const password = "testing";
+	const model = "testproject";
 
-
-
-	describe("Queue", function(){
+	describe("Queue", function() {
 		this.timeout(15000);
 
-		describe("died before app start", function(){
-			before(function(done){
+		describe("died before app start", function() {
+			before(function(done) {
 				stopQueue(err => {
-					if(err){
+					if(err) {
 						return done(err);
 					}
 
@@ -67,109 +64,109 @@ describe("Infrastructure", function () {
 
 						agent = request.agent(server);
 						agent.post("/login")
-						.send({ username, password })
-						.expect(200, function(err, res){
-							expect(res.body.username).to.equal(username);
-							done(err);
-						});
+							.send({ username, password })
+							.expect(200, function(err, res) {
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
 
 					});
 				});
 			});
 
-			after(function(done){
+			after(function(done) {
 				startQueue(err => {
-					if(err){
+					if(err) {
 						return done(err);
 					}
 
-					server.close(function(){
+					server.close(function() {
 						console.log("API test server is closed");
 						done();
 					});
 				});
 			});
-		
-			it("should behaves normal for non-queue based API", function(done){
+
+			it("should behaves normal for non-queue based API", function(done) {
 				agent.get("/{{username}}.json")
-				.expect(200, function(err, res){
-					done(err);
-				});
+					.expect(200, function(err, res) {
+						done(err);
+					});
 			});
 
-			it("should report error for queue based api if queue service is not running", function(done){
+			it("should report error for queue based api if queue service is not running", function(done) {
 
 				agent.post(`/testing/${model}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-				.expect(500, function(err, res){
-					done(err);
-				});
-			
+					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+					.expect(500, function(err, res) {
+						done(err);
+					});
+
 			});
 		});
 
-		describe("died on midway", function(done){
+		describe("died on midway", function(done) {
 
-			before(function(done){
+			before(function(done) {
 				server = app.listen(8080, function () {
 					console.log("API test server is listening on port 8080!");
 
 					agent = request.agent(server);
 					agent.post("/login")
-					.send({ username, password })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						
-						if(err){
-							return done(err);
-						}
+						.send({ username, password })
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
 
-						stopQueue(done);
+							if(err) {
+								return done(err);
+							}
 
-					});
+							stopQueue(done);
+
+						});
 
 				});
 			});
 
-			it("should report error for queue based api if queue service is not running", function(done){
+			it("should report error for queue based api if queue service is not running", function(done) {
 
 				agent.post(`/testing/${model}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-				.expect(500, function(err, res){
-					done(err);
-				});
-			
+					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+					.expect(500, function(err, res) {
+						done(err);
+					});
+
 			});
 
-			it("should behaves normal for non-queue based API", function(done){
+			it("should behaves normal for non-queue based API", function(done) {
 				agent.get("/{{username}}.json")
-				.expect(200, function(err, res){
-					done(err);
-				});
+					.expect(200, function(err, res) {
+						done(err);
+					});
 			});
-			
-			it("should reconnect if queue service starts again", function(done){
-				startQueue(function(err){
-					if(err){
+
+			it("should reconnect if queue service starts again", function(done) {
+				startQueue(function(err) {
+					if(err) {
 						return done(err);
 					}
 
 					agent.post(`/testing/${model}/upload`)
-					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-					.end(function(err, res){
-						expect(res.statusCode).to.not.equal(500);
-						done(err);
-					});
+						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.end(function(err, res) {
+							expect(res.statusCode).to.not.equal(500);
+							done(err);
+						});
 				});
 			});
 
-			after(function(done){
+			after(function(done) {
 				startQueue(err => {
-					if(err){
+					if(err) {
 						done(err);
 					}
 
-					server.close(function(){
+					server.close(function() {
 						console.log("API test server is closed");
 						done();
 					});
@@ -177,8 +174,6 @@ describe("Infrastructure", function () {
 			});
 		});
 
-
 	});
-
 
 });

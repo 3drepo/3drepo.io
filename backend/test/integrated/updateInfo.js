@@ -17,28 +17,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require("supertest");
-let expect = require("chai").expect;
-let app = require("../../services/api.js").createApp(
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
-let responseCodes = require("../../response_codes.js");
-let helpers = require("./helpers");
-let async = require("async");
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
+const responseCodes = require("../../response_codes.js");
+const helpers = require("./helpers");
+const async = require("async");
 
 describe("Updating user info", function () {
-	let User = require("../../models/user");
+	const User = require("../../models/user");
 	let server;
 	let agent;
-	let username = "updateinfo_username";
-	let password = "password";
-	let email = "test3drepo_updateinfo@mailinator.com";
-	let newEmail = "test3drepo_updateinfo_1@mailinator.com";
-	let takenEmail = "test3drepo@mailinator.com";
+	const username = "updateinfo_username";
+	const password = "password";
+	const email = "test3drepo_updateinfo@mailinator.com";
+	const newEmail = "test3drepo_updateinfo_1@mailinator.com";
+	const takenEmail = "test3drepo@mailinator.com";
 
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
@@ -46,132 +46,123 @@ describe("Updating user info", function () {
 			helpers.signUpAndLogin({
 				server, request, agent, expect, User, systemLogger,
 				username, password, email,
-				done: function(err, _agent){
+				done: function(err, _agent) {
 					agent = _agent;
 					done(err);
 				}
 			});
-			
+
 		});
 
 	});
 
-	after(function(done){
-		server.close(function(){
+	after(function(done) {
+		server.close(function() {
 			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	it("should succeed if provide new info and same email address", function(done){
+	it("should succeed if provide new info and same email address", function(done) {
 
-		let firstName = "abc";
-		let lastName = "def";
+		const firstName = "abc";
+		const lastName = "def";
 		async.series([
-			function update(done){
+			function update(done) {
 				agent.put(`/${username}`)
-				.send({ firstName, lastName, email })
-				.expect(200, done);
+					.send({ firstName, lastName, email })
+					.expect(200, done);
 			},
 
-			function check(done){
+			function check(done) {
 				agent.get(`/${username}.json`)
-				.expect(200, function(err, res){
-					expect(res.body.firstName).to.equal(firstName);
-					expect(res.body.lastName).to.equal(lastName);
-					done(err);
-				});
+					.expect(200, function(err, res) {
+						expect(res.body.firstName).to.equal(firstName);
+						expect(res.body.lastName).to.equal(lastName);
+						done(err);
+					});
 			}
 		], done);
 
 	});
 
+	it("should succeed if provide new info and new email address", function(done) {
 
-	it("should succeed if provide new info and new email address", function(done){
-
-		let firstName = "abc";
-		let lastName = "def";
+		const firstName = "abc";
+		const lastName = "def";
 		async.series([
-			function update(done){
+			function update(done) {
 				agent.put(`/${username}`)
-				.send({ firstName, lastName, email: newEmail})
-				.expect(200, done);
+					.send({ firstName, lastName, email: newEmail})
+					.expect(200, done);
 			},
 
-			function check(done){
+			function check(done) {
 				agent.get(`/${username}.json`)
-				.expect(200, function(err, res){
-					expect(res.body.firstName).to.equal(firstName);
-					expect(res.body.lastName).to.equal(lastName);
-					expect(res.body.email).to.equal(newEmail);
-					done(err);
-				});
+					.expect(200, function(err, res) {
+						expect(res.body.firstName).to.equal(firstName);
+						expect(res.body.lastName).to.equal(lastName);
+						expect(res.body.email).to.equal(newEmail);
+						done(err);
+					});
 			}
 		], done);
 
 	});
 
-	it("should fail if email provided is taken", function(done){
+	it("should fail if email provided is taken", function(done) {
 
-		let firstName = "abc";
-		let lastName = "def";
-
+		const firstName = "abc";
+		const lastName = "def";
 
 		agent.put(`/${username}`)
-		.send({ firstName, lastName, email: takenEmail })
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.EMAIL_EXISTS.value);
-			done(err);
-		});
-
+			.send({ firstName, lastName, email: takenEmail })
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.EMAIL_EXISTS.value);
+				done(err);
+			});
 
 	});
 
-	it("should fail if firstname is not a string", function(done){
+	it("should fail if firstname is not a string", function(done) {
 
-		let firstName = "abc";
-		let lastName = "def";
-
+		const firstName = "abc";
+		const lastName = "def";
 
 		agent.put(`/${username}`)
-		.send({ firstName : true, lastName, email })
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
-		});
-
+			.send({ firstName : true, lastName, email })
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
 
 	});
 
-	it("should fail if last name is not a string", function(done){
+	it("should fail if last name is not a string", function(done) {
 
-		let firstName = "abc";
-		let lastName = "def";
-
+		const firstName = "abc";
+		const lastName = "def";
 
 		agent.put(`/${username}`)
-		.send({ firstName, lastName: true, email })
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
-		});
-
+			.send({ firstName, lastName: true, email })
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
 
 	});
 
-	it("should fail if emailed is not a string", function(done){
+	it("should fail if emailed is not a string", function(done) {
 
-		let firstName = "abc";
-		let lastName = "def";
-
+		const firstName = "abc";
+		const lastName = "def";
 
 		agent.put(`/${username}`)
-		.send({ firstName, lastName, email : true })
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
-		});
-
+			.send({ firstName, lastName, email : true })
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
 
 	});
 });

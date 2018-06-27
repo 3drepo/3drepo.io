@@ -16,56 +16,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let expect = require("chai").expect;
-let mongoose = require("mongoose");
-let mockgoose = require("mockgoose");
+const expect = require("chai").expect;
+const mongoose = require("mongoose");
+const mockgoose = require("mockgoose");
 
+const proxyquire = require("proxyquire");
 
-let proxyquire = require("proxyquire");
-
-let modelFactoryMock = proxyquire("../../../models/factory/modelFactory", { 
-	"mongoose": mongoose, 
+const modelFactoryMock = proxyquire("../../../models/factory/modelFactory", {
+	"mongoose": mongoose
 });
 
-let ModelSetting = proxyquire("../../../models/modelSetting", { 
-	"mongoose": mongoose, 
-	"./factory/modelFactory":  modelFactoryMock,
+const ModelSetting = proxyquire("../../../models/modelSetting", {
+	"mongoose": mongoose,
+	"./factory/modelFactory":  modelFactoryMock
 });
 
-let DB = require("../mock/db");
+const DB = require("../mock/db");
 
-describe("Model Settings", function(){
+describe("Model Settings", function() {
 
 	before(function(done) {
 
 		modelFactoryMock.setDB(new DB());
 
 		mockgoose(mongoose).then(function() {
-		mongoose.connect("mongodb://example.com/TestingDB", function(err) {
-			done(err);
+			mongoose.connect("mongodb://example.com/TestingDB", function(err) {
+				done(err);
+			});
 		});
-	});
 
 	});
 
+	describe("#updateProperties", function() {
 
-	describe("#updateProperties", function(){
-
-		it("should have updateProperties function", function(){
-			let modelSetting = new ModelSetting();
+		it("should have updateProperties function", function() {
+			const modelSetting = new ModelSetting();
 			expect(modelSetting).to.have.property("updateProperties");
 		});
 
-		it("should update properties", function(){
+		it("should update properties", function() {
 
-			let props = {
+			const props = {
 				unit: "metre",
 				topicTypes: ["For info", "VR"],
 				code: "09ABC"
 
 			};
 
-			let expectedReturn = {
+			const expectedReturn = {
 				unit: "metre",
 				topicTypes: [{
 					label: "For info",
@@ -77,22 +75,20 @@ describe("Model Settings", function(){
 				code: "09ABC"
 			};
 
-			let modelSetting = new ModelSetting();
-			
+			const modelSetting = new ModelSetting();
+
 			modelSetting.updateProperties(props);
 			expect(modelSetting.toObject().properties).to.deep.equal(expectedReturn);
-		
 
 		});
 	});
 
-	after(function(done){
+	after(function(done) {
 		mockgoose.reset(function() {
-			mongoose.unmock(function(){
+			mongoose.unmock(function() {
 				done();
 			});
 		});
 	});
-
 
 });

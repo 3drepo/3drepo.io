@@ -16,7 +16,7 @@
  */
 
 "use strict";
-module.exports  = function(){
+module.exports  = function() {
 	return {
 		decode: o => o[0]
 	};

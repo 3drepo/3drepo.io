@@ -98,15 +98,19 @@ function createGroup(req, res, next) {
 
 	const place = utils.APIInfo(req);
 
-	const create = Group.createGroup(getDbColOptions(req), req.body);
+	if(req.body.objects) {
+		const create = Group.createGroup(getDbColOptions(req), req.body);
 
-	create.then(group => {
+		create.then(group => {
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
+			responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-	});
+		}).catch(err => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
+		});
+	} else {
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
 function deleteGroup(req, res, next) {
@@ -129,11 +133,10 @@ function deleteGroups(req, res, next) {
 		Group.deleteGroups(getDbColOptions(req), ids).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 		}).catch(err => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 		});
 	} else {
-		// responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-		responseCodes.respond(place, req, res, next, { message: "Missing or invalid arguments", status: 400 }, { message: "Missing or invalid arguments", status: 400 });
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 }
 
@@ -161,7 +164,7 @@ function updateGroup(req, res, next) {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 	});
 }
 

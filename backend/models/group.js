@@ -120,7 +120,7 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data) {
 		const account = data.objects[i].account;
 		const model = data.objects[i].model;
 
-		if (!(account && model) || data.objects[i].ifc_guid || data.objects[i].shared_id) {
+		if (!(account && model) || (!data.objects[i].ifc_guids && !data.objects[i].shared_ids)) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
@@ -347,24 +347,46 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
+		const fieldTypes = {
+			"description" : "[object String]" ,
+			"name" : "[object String]",
+			"author" : "[object String]",
+			"createdAt" : "[object Number]",
+			"updatedBy" : "[object Number]",
+			"updatedAt" : "[object Number]",
+			"objects" :  "[object Array]",
+			"color" : "[object Array]",
+			"issue_id": "[object String]"
+		};
 
+		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
-				if (key === "objects" && data.objects) {
-					toUpdate.objects = convertedObjects;
-				} else if (key === "color") {
-					toUpdate[key] = data[key].map((c) => parseInt(c, 10));
-				} else {
-					toUpdate[key] = data[key];
+				if(Object.prototype.toString.call(data[key] === fieldTypes[key])) {
+					if (key === "objects" && data.objects) {
+						toUpdate.objects = convertedObjects;
+					} else if (key === "color") {
+						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+					} else {
+						toUpdate[key] = data[key];
+					}
 				}
+			} else {
+				typeCorrect = false;
 			}
+
 		});
 
-		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
-				return {_id: utils.uuidToString(this._id)};
+		if (typeCorrect) {
+			return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
+				return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
+					return {_id: utils.uuidToString(this._id)};
+				});
 			});
-		});
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+
 	});
 };
 

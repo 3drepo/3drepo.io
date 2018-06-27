@@ -37,36 +37,35 @@ const url = require("url");
 const sinon = require("sinon");
 
 describe("Enrolling to a subscription", function () {
-	let User = require("../../models/user");
+	const User = require("../../models/user");
 	let server;
 	let agent;
-	let username = "payment_testing";
-	let password = "payment_testing";
+	const username = "payment_testing";
+	const password = "payment_testing";
 
-	let username2 = "payment_user2";
-	let password2 = "payment_user2";
-	let email2 = "test3drepo_payment2@mailinator.com";
+	const username2 = "payment_user2";
+	const password2 = "payment_user2";
+	const email2 = "test3drepo_payment2@mailinator.com";
 
+	const username3 = "payment_user3";
+	const password3 = "payment_user3";
+	const email3 = "test3drepo_payment3@mailinator.com";
 
-	let username3 = "payment_user3";
-	let password3 = "payment_user3";
-	let email3 = "test3drepo_payment3@mailinator.com";
+	const username4 = "metaTest";
 
-	let username4 = "metaTest";
-
-	let email = "test3drepo_payment@mailinator.com";
-	let billingId = "I-000000000000";
+	const email = "test3drepo_payment@mailinator.com";
+	const billingId = "I-000000000000";
 
 	const timeout = 30000;
-	
-	before(function(done){
+
+	before(function(done) {
 
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 
 			async.series([
 
-				function(done){
+				function(done) {
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
 						username: username2, password: password2, email: email2,
@@ -74,7 +73,7 @@ describe("Enrolling to a subscription", function () {
 					});
 				},
 
-				function(done){
+				function(done) {
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
 						username: username3, password: password3, email: email3,
@@ -82,11 +81,11 @@ describe("Enrolling to a subscription", function () {
 					});
 				},
 
-				function(done){
+				function(done) {
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
 						username, password, email,
-						done: function(err, _agent){
+						done: function(err, _agent) {
 							agent = _agent;
 							if (err) {
 								return done(err);
@@ -94,36 +93,35 @@ describe("Enrolling to a subscription", function () {
 
 							agent = request.agent(server);
 							agent.post("/login")
-							.send({ username, password })
-							.expect(200, function(err, res){
-								expect(res.body.username).to.equal(username);
-								done(err);
-							});
+								.send({ username, password })
+								.expect(200, function(err, res) {
+									expect(res.body.username).to.equal(username);
+									done(err);
+								});
 						}
 					});
-				},
+				}
 
 			], done);
 
-
 		});
 
 	});
 
-	after(function(done){
-		
-		server.close(function(){
+	after(function(done) {
+
+		server.close(function() {
 			console.log("API test server is closed");
 			done();
 		});
-		
+
 	});
 
-	let plans = {
+	const plans = {
 		"plans": [
 			{
-			"plan": "hundredQuidPlan",
-			"quantity": 3
+				"plan": "hundredQuidPlan",
+				"quantity": 3
 			}
 		],
 		"billingAddress":{
@@ -140,13 +138,12 @@ describe("Enrolling to a subscription", function () {
 		}
 	};
 
-
-	it("should succeed no VAT is supplied", function(done){
+	it("should succeed no VAT is supplied", function(done) {
 		this.timeout(timeout);
 
 		delete plans.billingAddress.vat;
 
-		const stub = sinon.stub(Paypal, "processPayments").callsFake(function(){
+		const stub = sinon.stub(Paypal, "processPayments").callsFake(function() {
 			return Promise.resolve({
 				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-09X091704Y2940153",
 				"paypalPaymentToken": "EC-09X091704Y2940153",
@@ -173,22 +170,21 @@ describe("Enrolling to a subscription", function () {
 		});
 
 		agent.post(`/${username}/subscriptions`)
-		.send(plans)
-		.expect(200, function(err, res){
-			stub.restore();
-			done(err);
-		});
+			.send(plans)
+			.expect(200, function(err, res) {
+				stub.restore();
+				done(err);
+			});
 	});
 
-
-	it("should succeed if VAT is supplied and country is non EU", function(done){
+	it("should succeed if VAT is supplied and country is non EU", function(done) {
 		this.timeout(timeout);
 
-		let _plans = {
+		const _plans = {
 			"plans": [
 				{
-				"plan": "hundredQuidPlan",
-				"quantity": 3
+					"plan": "hundredQuidPlan",
+					"quantity": 3
 				}
 			],
 			"billingAddress":{
@@ -232,22 +228,21 @@ describe("Enrolling to a subscription", function () {
 		});
 
 		agent.post(`/${username}/subscriptions`)
-		.send(_plans)
-		.expect(200, function(err, res){
-			stub.restore();
-			done(err);
-		});
+			.send(_plans)
+			.expect(200, function(err, res) {
+				stub.restore();
+				done(err);
+			});
 	});
 
-
-	it("should succeed VAT is not supplied and country is non EU", function(done){
+	it("should succeed VAT is not supplied and country is non EU", function(done) {
 		this.timeout(timeout);
 
-		let _plans = {
+		const _plans = {
 			"plans": [
 				{
-				"plan": "hundredQuidPlan",
-				"quantity": 3
+					"plan": "hundredQuidPlan",
+					"quantity": 3
 				}
 			],
 			"billingAddress":{
@@ -262,7 +257,7 @@ describe("Enrolling to a subscription", function () {
 				"countryCode": "HK"
 			}
 		};
-		
+
 		const stub = sinon.stub(Paypal, "processPayments").callsFake(function() {
 			return Promise.resolve({
 				"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-3M948685LE836592J",
@@ -290,48 +285,48 @@ describe("Enrolling to a subscription", function () {
 		});
 
 		agent.post(`/${username}/subscriptions`)
-		.send(_plans)
-		.expect(200, function(err, res){
-			stub.restore();
-			done(err);
-		});
+			.send(_plans)
+			.expect(200, function(err, res) {
+				stub.restore();
+				done(err);
+			});
 	});
 
-	it("should succeed (GB business)", function(done){
+	it("should succeed (GB business)", function(done) {
 
 		plans.billingAddress.vat = "206909015";
 
 		this.timeout(timeout);
 
-		const stub = sinon.stub(Paypal, "processPayments").callsFake(function(){
-			return Promise.resolve({  
+		const stub = sinon.stub(Paypal, "processPayments").callsFake(function() {
+			return Promise.resolve({
 				"url":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-2AX25360HG2794932",
 				"paypalPaymentToken":"EC-2AX25360HG2794932",
-				"agreement":{  
+				"agreement":{
 					"name":"3D Repo Licences",
 					"description":"Regular monthly recurring payment £360. This agreement starts on 15th Sep 2017",
-					"plan":{  
+					"plan":{
 						"id":"P-07M85527XP798190YQWWKIPQ",
 						"state":"ACTIVE",
 						"name":"3D Repo Licences",
 						"description":"3D Repo Licence",
 						"type":"INFINITE",
-						"payment_definitions":[  
-							{  
+						"payment_definitions":[
+							{
 								"id":"PD-83H636509P8266139QWWKIPQ",
 								"name":"Regular monthly price",
 								"type":"REGULAR",
 								"frequency":"Month",
-								"amount":{  
+								"amount":{
 									"currency":"GBP",
 									"value":"300"
 								},
 								"cycles":"0",
-								"charge_models":[  
-									{  
+								"charge_models":[
+									{
 										"id":"CHM-22S96885W5688111LQWWKIPQ",
 										"type":"TAX",
-										"amount":{  
+										"amount":{
 											"currency":"GBP",
 											"value":"60"
 										}
@@ -340,8 +335,8 @@ describe("Enrolling to a subscription", function () {
 								"frequency_interval":"1"
 							}
 						],
-						"merchant_preferences":{  
-							"setup_fee":{  
+						"merchant_preferences":{
+							"setup_fee":{
 								"currency":"GBP",
 								"value":"0"
 							},
@@ -352,13 +347,13 @@ describe("Enrolling to a subscription", function () {
 							"initial_fail_amount_action":"CONTINUE"
 						}
 					},
-					"links":[  
-						{  
+					"links":[
+						{
 							"href":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-2AX25360HG2794932",
 							"rel":"approval_url",
 							"method":"REDIRECT"
 						},
-						{  
+						{
 							"href":"https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-2AX25360HG2794932/agreement-execute",
 							"rel":"execute",
 							"method":"POST"
@@ -371,59 +366,58 @@ describe("Enrolling to a subscription", function () {
 		});
 
 		agent.post(`/${username}/subscriptions`)
-		.send(plans)
-		.expect(200, function(err, res){
+			.send(plans)
+			.expect(200, function(err, res) {
 
-			expect(res.body).to.have.property("url");
-			let parsed = url.parse(res.body.url, true);
-			expect(parsed.query).to.have.property("token");
+				expect(res.body).to.have.property("url");
+				const parsed = url.parse(res.body.url, true);
+				expect(parsed.query).to.have.property("token");
 
-			let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === "REGULAR");
-			expect(paymentDef).to.be.not.null;
-			stub.restore();
+				const paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === "REGULAR");
+				expect(paymentDef).to.be.not.null;
+				stub.restore();
 
-			done(err);
-		});
+				done(err);
+			});
 	});
 
-
-	describe("and then pay", function(){
+	describe("and then pay", function() {
 		let stub;
-		before(function(done){
+		before(function(done) {
 
-			//fake payment
+			// fake payment
 			this.timeout(timeout);
-			let start_date = (new Date()).toISOString();
-			
+			const start_date = (new Date()).toISOString();
+
 			// set fake billing id
-			stub = sinon.stub(Paypal, "executeAgreement").callsFake(function(){
+			stub = sinon.stub(Paypal, "executeAgreement").callsFake(function() {
 
 				return Promise.resolve({
 					"id":billingId,
 					"name":"3D Repo Licenses",
 					"description":"Regualr monthly recurring payment £360, starts on 1st Aug 2016",
-					"plan":{  
+					"plan":{
 						"id":"P-0E4438980T7694020I2RECCQ",
 						"state":"ACTIVE",
 						"name":"3D Repo Licences",
 						"description":"3D Repo Licence",
 						"type":"INFINITE",
-						"payment_definitions":[  
-							{  
+						"payment_definitions":[
+							{
 								"id":"PD-4N463346D9639034UI2RECCQ",
 								"name":"Regular monthly price",
 								"type":"REGULAR",
 								"frequency":"Month",
-								"amount":{  
+								"amount":{
 									"currency":"GBP",
 									"value":"300"
 								},
 								"cycles":"0",
-								"charge_models":[  
-									{  
+								"charge_models":[
+									{
 										"id":"CHM-3R965001UL5436050I2RECCQ",
 										"type":"TAX",
-										"amount":{  
+										"amount":{
 											"currency":"GBP",
 											"value":"60"
 										}
@@ -432,8 +426,8 @@ describe("Enrolling to a subscription", function () {
 								"frequency_interval":"1"
 							}
 						],
-						"merchant_preferences":{  
-							"setup_fee":{  
+						"merchant_preferences":{
+							"setup_fee":{
 								"currency":"GBP",
 								"value":"0"
 							},
@@ -444,13 +438,13 @@ describe("Enrolling to a subscription", function () {
 							"initial_fail_amount_action":"CONTINUE"
 						}
 					},
-					"links":[  
-						{  
+					"links":[
+						{
 							"href":"https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-5EL17555M32938829",
 							"rel":"approval_url",
 							"method":"REDIRECT"
 						},
-						{  
+						{
 							"href":"https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-5EL17555M32938829/agreement-execute",
 							"rel":"execute",
 							"method":"POST"
@@ -468,48 +462,46 @@ describe("Enrolling to a subscription", function () {
 
 			}).then(() => {
 
-
 				// it should have a pending billing with SO-1 as invoice number.
 				return new Promise((resolve, reject) => {
 					agent.get(`/${username}/invoices`)
-					.expect(200, function(err, res){
-						
-						expect(res.body).to.be.an("array").and.to.have.length(1);
-						expect(res.body[0].invoiceNo).to.equal("SO-1");
-						expect(res.body[0].pending).to.equal(true);
-				
-						if(err){
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
+						.expect(200, function(err, res) {
+
+							expect(res.body).to.be.an("array").and.to.have.length(1);
+							expect(res.body[0].invoiceNo).to.equal("SO-1");
+							expect(res.body[0].pending).to.equal(true);
+
+							if(err) {
+								reject(err);
+							} else {
+								resolve();
+							}
+						});
 				});
 
-			}).then(() => {		
+			}).then(() => {
 				done();
 
 			}).catch(err => {
 				done(err);
 			});
 
-
 		});
 
-		after(function(done){
-			stub.restore();		
+		after(function(done) {
+			stub.restore();
 			agent.post("/logout")
-			.send({})
-			.expect(200, function(err, res){
-				done(err);
-			});
+				.send({})
+				.expect(200, function(err, res) {
+					done(err);
+				});
 		});
 
-		it("before 1st IPN the subscriptions should be activated temporary for 48 hours", function(done){
-			
-			let twoDayLater = moment().utc().add(48, "hour").toDate();
+		it("before 1st IPN the subscriptions should be activated temporary for 48 hours", function(done) {
+
+			const twoDayLater = moment().utc().add(48, "hour").toDate();
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.getActiveSubscriptions();
+				const subscriptions = user.customData.billing.getActiveSubscriptions();
 				expect(subscriptions.paypal.length).to.equal(1);
 				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
 				expect(Math.abs(subscriptions.paypal[0].expiryDate - twoDayLater) / 1000).to.below(60);
@@ -519,11 +511,11 @@ describe("Enrolling to a subscription", function () {
 			});
 		});
 
-		it("before 1st IPN the last anniversary date and next payment date are set already", function(done){
+		it("before 1st IPN the last anniversary date and next payment date are set already", function(done) {
 
 			User.findByUserName(username).then(user => {
 
-				let startDate = moment().utc();
+				const startDate = moment().utc();
 				expect(user.customData.billing.lastAnniversaryDate.valueOf()).to.equal(
 					startDate.clone().startOf("day").toDate().valueOf()
 				);
@@ -538,14 +530,14 @@ describe("Enrolling to a subscription", function () {
 
 		});
 
-		let nextPayDateString = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
+		const nextPayDateString = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
 
-		it("and then 1st IPN arrive", function(done){
+		it("and then 1st IPN arrive", function(done) {
 
 			this.timeout(timeout);
 
-			let paymentDate = moment().tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
-			let fakePaymentMsg =
+			const paymentDate = moment().tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
+			const fakePaymentMsg =
 				"mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=" + nextPayDateString
 				+ "&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA"
 				+ "&address_street=na&payment_date=" + paymentDate + "&payment_status=Completed"
@@ -560,23 +552,23 @@ describe("Enrolling to a subscription", function () {
 				+ "&transaction_subject=abc"
 				+ "&payment_gross=&shipping=0.00&product_type=1&time_created=" + paymentDate + "&ipn_track_id=78a335fad3b16";
 
-			const verifyStub = sinon.stub(Paypal, "verifyGenuine").callsFake(function(){
+			const verifyStub = sinon.stub(Paypal, "verifyGenuine").callsFake(function() {
 				return Promise.resolve();
 			});
 
 			new Promise((resolve, reject) => {
 				agent.post("/payment/paypal/ipn")
-				.send(fakePaymentMsg)
-				.expect(200, function(err, res){
-					setTimeout(function(){
-						
-						if(err){
-							reject(err);
-						} else {
-							resolve(res);
-						}
-					}, 3000);
-				});
+					.send(fakePaymentMsg)
+					.expect(200, function(err, res) {
+						setTimeout(function() {
+
+							if(err) {
+								reject(err);
+							} else {
+								resolve(res);
+							}
+						}, 3000);
+					});
 			}).then(() => {
 				verifyStub.restore();
 				done();
@@ -588,29 +580,29 @@ describe("Enrolling to a subscription", function () {
 
 		});
 
-		it("after 1st IPN it should have a confirmed invoice SO-1 generated", function(done){
+		it("after 1st IPN it should have a confirmed invoice SO-1 generated", function(done) {
 			// it should have a confirmed billing with SO-1 as invoice number.
 
 			agent.get(`/${username}/invoices`)
-			.expect(200, function(err, res){
-				expect(res.body).to.be.an("array").and.to.have.length(1);
-				expect(res.body[0].invoiceNo).to.equal("SO-1");
-				expect(res.body[0].pending).to.be.false;
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.be.an("array").and.to.have.length(1);
+					expect(res.body[0].invoiceNo).to.equal("SO-1");
+					expect(res.body[0].pending).to.be.false;
+					done(err);
+				});
 
 		});
 
-		it("after 1st IPN the subscriptions should be activated until 3 days after next payment date", function(done){
+		it("after 1st IPN the subscriptions should be activated until 3 days after next payment date", function(done) {
 
-			//let twoDayLater = moment().utc().add(48, "hour").toDate();
+			// let twoDayLater = moment().utc().add(48, "hour").toDate();
 
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.getActiveSubscriptions();
+				const subscriptions = user.customData.billing.getActiveSubscriptions();
 				expect(subscriptions.paypal.length).to.equal(1);
 				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
 
-				let expiredAt = moment(new Date(nextPayDateString)).utc()
+				const expiredAt = moment(new Date(nextPayDateString)).utc()
 					.add(3, "day")
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
@@ -621,11 +613,11 @@ describe("Enrolling to a subscription", function () {
 			});
 		});
 
-		it("after 1st IPN the next payment date are set", function(done){
-			
+		it("after 1st IPN the next payment date are set", function(done) {
+
 			User.findByUserName(username).then(user => {
 
-				//let startDate = moment().utc();
+				// let startDate = moment().utc();
 
 				expect(user.customData.billing.nextPaymentDate.valueOf()).to.equal(moment(new Date(nextPayDateString)).utc().startOf("date").toDate().valueOf());
 
@@ -638,109 +630,106 @@ describe("Enrolling to a subscription", function () {
 		});
 
 		let subscriptions;
-		it("and the subscription should be active and filled with quota", function(done){
+		it("and the subscription should be active and filled with quota", function(done) {
 
 			agent.get(`/${username}/subscriptions`)
-			.expect(200, function(err, res){
+				.expect(200, function(err, res) {
 
-				expect(res.body.paypal).to.be.an("array").and.to.have.length(1);
-				expect(res.body.paypal[0].plan).to.equal(plans.plans[0].plan);
-				expect(res.body.paypal[0].quantity).to.equal(3);
-				expect(res.body.paypal[0]).to.have.property("expiryDate");
+					expect(res.body.paypal).to.be.an("array").and.to.have.length(1);
+					expect(res.body.paypal[0].plan).to.equal(plans.plans[0].plan);
+					expect(res.body.paypal[0].quantity).to.equal(3);
+					expect(res.body.paypal[0]).to.have.property("expiryDate");
 
-				done(err);
-			});
+					done(err);
+				});
 		});
 
-		describe("and then assigning it", function(){
+		describe("and then assigning it", function() {
 
-			it("to a non existing user should fail", function(done){
+			it("to a non existing user should fail", function(done) {
 				agent.post(`/${username}/members/payment_non_existing`)
-				.expect(404, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
-					done(err);
-				});
+					.expect(404, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+						done(err);
+					});
 			});
 
-			it("to a existing user should succeed", function(done){
+			it("to a existing user should succeed", function(done) {
 				agent.post(`/${username}/members/${username2}`)
-				.expect(200, function(err, res){
-					done(err);
-				});
+					.expect(200, function(err, res) {
+						done(err);
+					});
 			});
 
-			it("to a user assigned to another license should fail", function(done){
+			it("to a user assigned to another license should fail", function(done) {
 				agent.post(`/${username}/members/${username2}`)
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.USER_ALREADY_ASSIGNED.value);
-					done(err);
-				});
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.USER_ALREADY_ASSIGNED.value);
+						done(err);
+					});
 			});
 
-			it("to another (3rd) user should succeed", function(done){
+			it("to another (3rd) user should succeed", function(done) {
 				agent.post(`/${username}/members/${username3}`)
-				.expect(200, function(err, res){
-					done(err);
-				});
+					.expect(200, function(err, res) {
+						done(err);
+					});
 			});
 
-			it("to another (4th) user should fail", function(done){
+			it("to another (4th) user should fail", function(done) {
 				agent.post(`/${username}/members/${username4}`)
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
-					done(err);
-				});
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
+						done(err);
+					});
 			});
 
+			describe("and then deleting it", function() {
 
-			describe("and then deleting it", function(){
-
-				it("should succeed", function(done){
+				it("should succeed", function(done) {
 					agent.delete(`/${username}/members/${username3}`)
-					.send({})
-					.expect(200, function(err, res){
-						done(err);
-					});
+						.send({})
+						.expect(200, function(err, res) {
+							done(err);
+						});
 				});
 
-				it("should succeed anyway if the user is not a member", function(done){
+				it("should succeed anyway if the user is not a member", function(done) {
 					agent.delete(`/${username}/members/${username4}`)
-					.send({})
-					.expect(200, function(err, res){
-						done(err);
-					});
+						.send({})
+						.expect(200, function(err, res) {
+							done(err);
+						});
 				});
 
-				it("should fail if try to remove itself", function(done){
+				it("should fail if try to remove itself", function(done) {
 					agent.delete(`/${username}/members/${username}`)
-					.send({})
-					.expect(400, function(err, res){
-						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
-						done(err);
-					});
+						.send({})
+						.expect(400, function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
+							done(err);
+						});
 				});
 
-				it("should fail if the user is a collaborator of a model", function(){
-					//to-do
+				it("should fail if the user is a collaborator of a model", function() {
+					// to-do
 				});
 
 			});
 
 		});
-
 
 	});
 
-
-	describe("and then refund", function(){
+	describe("and then refund", function() {
 		this.timeout(6000);
 
-		before(function(done){
+		before(function(done) {
 
-			let paymentDate = moment().tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
-			let nextPayDateString = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
+			const paymentDate = moment().tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
+			const nextPayDateString = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
 
-			let fakePaymentMsg = "mc_gross=-120.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=" + nextPayDateString
+			const fakePaymentMsg = "mc_gross=-120.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=" + nextPayDateString
 			+ "&protection_eligibility=Eligible&payment_cycle=Monthly&payer_id=6TCR69539GDR8&address_street=123 123&payment_date=" + paymentDate
 			+ "&payment_status=Refunded&product_name=This month\"s pro-rata: £120. Regualr monthly recurring payment £360, starts on 4th Aug 2016&"
 			+ "charset=UTF-8&recurring_payment_id=" + billingId + "&address_zip=123&first_name=PAy&mc_fee=-8.67&address_country_code=GB&address_name="
@@ -751,75 +740,74 @@ describe("Enrolling to a subscription", function () {
 			+ "&test_ipn=1&transaction_subject=This month\"s pro-rata: £120. Regualr monthly recurring payment £360, starts on 4th Aug 2016&payment_gross="
 			+ "&shipping=0.00&product_type=1&time_created=" + paymentDate + "&ipn_track_id=5d3ce7c954739";
 
-
 			async.series([
 
-				function(done){
+				function(done) {
 					agent.post("/payment/paypal/ipn")
-					.send(fakePaymentMsg)
-					.expect(200, function(err, res){
-						setTimeout(function(){
-							if(err){
-								done(err);
-							} else {
-								done();
-							}
-						}, 3000);
-					});
+						.send(fakePaymentMsg)
+						.expect(200, function(err, res) {
+							setTimeout(function() {
+								if(err) {
+									done(err);
+								} else {
+									done();
+								}
+							}, 3000);
+						});
 				},
 
-				function(done){
+				function(done) {
 
 					agent.post("/login")
-					.send({ username, password})
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
+						.send({ username, password})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
 
 				}
 			], done);
 
 		});
 
-		after(function(done){
+		after(function(done) {
 
 			agent.post("/logout")
-			.send({})
-			.expect(200, function(err, res){
-				done(err);
-			});
+				.send({})
+				.expect(200, function(err, res) {
+					done(err);
+				});
 
 		});
 
-		it("should have credit note created with number CN-1", function(done){
+		it("should have credit note created with number CN-1", function(done) {
 			agent.get(`/${username}/invoices`)
-			.expect(200, function(err, res){
+				.expect(200, function(err, res) {
 
-				expect(res.body).to.be.an("array");
-				let cn = res.body.find( bill => bill.invoiceNo === "CN-1");
-				expect(cn).to.exist;
+					expect(res.body).to.be.an("array");
+					const cn = res.body.find(bill => bill.invoiceNo === "CN-1");
+					expect(cn).to.exist;
 
-				done(err);
-			});
+					done(err);
+				});
 		});
 
 	});
 
-	describe("and then simulate recurring payment message from the 2nd month", function(){
+	describe("and then simulate recurring payment message from the 2nd month", function() {
 
 		this.timeout(6000);
 
-		let paymentDate = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
-		let paymentDateAfterNext = getNextPaymentDate(getNextPaymentDate(new Date()));
-		let nextPayDateString = moment(paymentDateAfterNext).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
+		const paymentDate = moment(getNextPaymentDate(new Date())).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
+		const paymentDateAfterNext = getNextPaymentDate(getNextPaymentDate(new Date()));
+		const nextPayDateString = moment(paymentDateAfterNext).tz("America/Los_Angeles").format("HH:mm:ss MMM DD, YYYY z");
 		let lastPaymentDate;
 
-		before(function(done){
+		before(function(done) {
 
-			let transactionId = "99999999AA000000A";
+			const transactionId = "99999999AA000000A";
 
-			let fakePaymentMsg =
+			const fakePaymentMsg =
 				"mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=" + nextPayDateString
 				+ "&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA"
 				+ "&address_street=na&payment_date=" + paymentDate + "&payment_status=Completed"
@@ -834,76 +822,75 @@ describe("Enrolling to a subscription", function () {
 				+ "&transaction_subject=abc"
 				+ "&payment_gross=&shipping=0.00&product_type=1&time_created=" + paymentDate + "&ipn_track_id=78a335fad3b16";
 
-
 			async.series([
 
-				function(done){
+				function(done) {
 					return User.findByUserName(username).then(user => {
 						lastPaymentDate = user.customData.billing.nextPaymentDate;
 						done();
 					});
 				},
-				function(done){
+				function(done) {
 					agent.post("/payment/paypal/ipn")
-					.send(fakePaymentMsg)
-					.expect(200, function(err, res){
-						setTimeout(function(){
-							if(err){
-								done(err);
-							} else {
-								done();
-							}
-						}, 3000);
-					});
+						.send(fakePaymentMsg)
+						.expect(200, function(err, res) {
+							setTimeout(function() {
+								if(err) {
+									done(err);
+								} else {
+									done();
+								}
+							}, 3000);
+						});
 				},
 
-				function(done){
+				function(done) {
 
 					agent.post("/login")
-					.send({ username, password})
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
+						.send({ username, password})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
 
 				}
 			], done);
 
 		});
 
-		after(function(done){
+		after(function(done) {
 
 			agent.post("/logout")
-			.send({})
-			.expect(200, function(err, res){
-				done(err);
-			});
+				.send({})
+				.expect(200, function(err, res) {
+					done(err);
+				});
 
 		});
 
-		it("should have invoice created with number SO-2", function(done){
+		it("should have invoice created with number SO-2", function(done) {
 			agent.get(`/${username}/invoices`)
-			.expect(200, function(err, res){
+				.expect(200, function(err, res) {
 
-				expect(res.body).to.be.an("array");
-				let cn = res.body.find( bill => bill.invoiceNo === "SO-2");
-				expect(cn).to.exist;
+					expect(res.body).to.be.an("array");
+					const cn = res.body.find(bill => bill.invoiceNo === "SO-2");
+					expect(cn).to.exist;
 
-				done(err);
-			});
+					done(err);
+				});
 		});
 
-		it("after 2nd IPN the subscriptions should be activated until 3 days after next payment date", function(done){
+		it("after 2nd IPN the subscriptions should be activated until 3 days after next payment date", function(done) {
 
-			//let twoDayLater = moment().utc().add(48, "hour").toDate();
+			// let twoDayLater = moment().utc().add(48, "hour").toDate();
 
 			User.findByUserName(username).then(user => {
-				let subscriptions = user.customData.billing.getActiveSubscriptions();
-				let expiredAt = moment(new Date(nextPayDateString)).utc()
+				const subscriptions = user.customData.billing.getActiveSubscriptions();
+				const expiredAt = moment(new Date(nextPayDateString)).utc()
 					.add(3, "day")
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
-				
+
 				expect(subscriptions.paypal.length).to.equal(1);
 				expect(subscriptions.paypal[0].quantity).to.equal(plans.plans[0].quantity);
 				expect(subscriptions.paypal[0].expiryDate.valueOf()).to.equal(expiredAt.valueOf());
@@ -915,7 +902,7 @@ describe("Enrolling to a subscription", function () {
 
 		});
 
-		it("after 2nd IPN the last anniversary date and next payment date are set", function(done){
+		it("after 2nd IPN the last anniversary date and next payment date are set", function(done) {
 
 			User.findByUserName(username).then(user => {
 
@@ -927,43 +914,42 @@ describe("Enrolling to a subscription", function () {
 			}).catch(err => {
 				done(err);
 			});
-			
+
 		});
 
 	});
 
-	describe("second user pays", function(){
+	describe("second user pays", function() {
 
-
-		before(function(done){
+		before(function(done) {
 
 			agent.post("/login")
-			.send({ username: username3, password: password3 })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username3);
-				done(err);
-			});
+				.send({ username: username3, password: password3 })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username3);
+					done(err);
+				});
 
 		});
 
-		after(function(done){
+		after(function(done) {
 
 			agent.post("/logout")
-			.send({})
-			.expect(200, function(err, res){
-				done(err);
-			});
+				.send({})
+				.expect(200, function(err, res) {
+					done(err);
+				});
 
 		});
 
-		it("should succeed (GB business)", function(done){
+		it("should succeed (GB business)", function(done) {
 
 			plans.billingAddress.vat = "206909015";
 			plans.billingAddress.line1 = "2nduser line1";
 			plans.billingAddress.line2 = "2nduser line2";
 			plans.billingAddress.line3 = "2nduser line3";
 
-			const stub = sinon.stub(Paypal, "processPayments").callsFake( function() {
+			const stub = sinon.stub(Paypal, "processPayments").callsFake(function() {
 				return Promise.resolve({
 					"url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-7CF55778SV0933845",
 					"paypalPaymentToken": "EC-7CF55778SV0933845",
@@ -1034,21 +1020,21 @@ describe("Enrolling to a subscription", function () {
 			this.timeout(timeout);
 
 			agent.post(`/${username3}/subscriptions`)
-			.send(plans)
-			.expect(200, function(err, res){
-				expect(res.body).to.have.property("url");
-				let parsed = url.parse(res.body.url, true);
-				expect(parsed.query).to.have.property("token");
+				.send(plans)
+				.expect(200, function(err, res) {
+					expect(res.body).to.have.property("url");
+					const parsed = url.parse(res.body.url, true);
+					expect(parsed.query).to.have.property("token");
 
-				let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === "REGULAR");
-				expect(paymentDef).to.be.not.null;
-				stub.restore();
+					const paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === "REGULAR");
+					expect(paymentDef).to.be.not.null;
+					stub.restore();
 
-				done(err);
-			});
+					done(err);
+				});
 		});
 
-		it("should have an invoice with invoice number SO-3", function(){
+		it("should have an invoice with invoice number SO-3", function() {
 
 			const start_date = (new Date()).toISOString();
 			const stub = sinon.stub(Paypal, "executeAgreement").callsFake(function() {
@@ -1069,8 +1055,8 @@ describe("Enrolling to a subscription", function () {
 								"type": "REGULAR",
 								"frequency": "Month",
 								"amount": {
-								"currency": "GBP",
-								"value": "300"
+									"currency": "GBP",
+									"value": "300"
 								},
 								"cycles": "0",
 								"charge_models": [{
@@ -1086,8 +1072,8 @@ describe("Enrolling to a subscription", function () {
 						],
 						"merchant_preferences": {
 							"setup_fee": {
-							"currency": "GBP",
-							"value": "0"
+								"currency": "GBP",
+								"value": "0"
 							},
 							"max_fail_attempts": "0",
 							"return_url": "http://127.0.0.1:8080//payment_testing?page=billing",
@@ -1119,24 +1105,22 @@ describe("Enrolling to a subscription", function () {
 
 			}).then(() => {
 
-
 				// it should have a pending billing with SO-3 as invoice number.
 				return new Promise((resolve, reject) => {
 					agent.get(`/${username3}/invoices`)
-					.expect(200, function(err, res){
-						expect(res.body).to.be.an("array").and.to.have.length(1);
-						expect(res.body[0].invoiceNo).to.equal("SO-3");
-						expect(res.body[0].pending).to.equal(true);
-						
-						stub.restore();
-						if(err){
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-				});
+						.expect(200, function(err, res) {
+							expect(res.body).to.be.an("array").and.to.have.length(1);
+							expect(res.body[0].invoiceNo).to.equal("SO-3");
+							expect(res.body[0].pending).to.equal(true);
 
+							stub.restore();
+							if(err) {
+								reject(err);
+							} else {
+								resolve();
+							}
+						});
+				});
 
 			});
 		});

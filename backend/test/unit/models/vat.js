@@ -1,23 +1,23 @@
 "use strict";
 
-let vat = require("../../../models/vat");
-let expect = require("chai").expect;
+const vat = require("../../../models/vat");
+const expect = require("chai").expect;
 
-describe("VAT", function(){
+describe("VAT", function() {
 
-	describe("for business user", function(){
+	describe("for business user", function() {
 
-		let isBusiness = true;
+		const isBusiness = true;
 
-		it("in UK should be 0.2", function(){
+		it("in UK should be 0.2", function() {
 			expect(vat.getByCountryCode("GB", isBusiness)).to.closeTo(0.2, Number.EPSILON);
 		});
 
-		it("in other countries should be 0", function(){
+		it("in other countries should be 0", function() {
 
-			let otherEU = ["AT","BE","BG","CY","CZ","DE","DK","EE","GR","ES","FI","FR",
-			"HR","HU","IE","IT","LT","LU","LV","MT","NL","PL","PT","RO",
-			"SE","SI","SK"];
+			const otherEU = ["AT","BE","BG","CY","CZ","DE","DK","EE","GR","ES","FI","FR",
+				"HR","HU","IE","IT","LT","LU","LV","MT","NL","PL","PT","RO",
+				"SE","SI","SK"];
 
 			otherEU.forEach(code => {
 				expect(vat.getByCountryCode(code, isBusiness)).to.equal(0);
@@ -30,21 +30,19 @@ describe("VAT", function(){
 			expect(vat.getByCountryCode("CN", isBusiness)).to.equal(0);
 			expect(vat.getByCountryCode("JP", isBusiness)).to.equal(0);
 
-
 		});
-
 
 	});
 
-	describe("for personal user", function(){
+	describe("for personal user", function() {
 
-		let isBusiness = false;
+		const isBusiness = false;
 
-		it("in UK should be 0.2", function(){
+		it("in UK should be 0.2", function() {
 			expect(vat.getByCountryCode("GB", isBusiness)).to.closeTo(0.2, Number.EPSILON);
 		});
 
-		it("in other EU countries should be country-specific VAT", function(){
+		it("in other EU countries should be country-specific VAT", function() {
 
 			expect(vat.getByCountryCode("AT", isBusiness)).to.closeTo(0.2, Number.EPSILON);
 			expect(vat.getByCountryCode("BE", isBusiness)).to.closeTo(0.21, Number.EPSILON);
@@ -74,10 +72,10 @@ describe("VAT", function(){
 			expect(vat.getByCountryCode("SI", isBusiness)).to.closeTo(0.22, Number.EPSILON);
 			expect(vat.getByCountryCode("SK", isBusiness)).to.closeTo(0.2, Number.EPSILON);
 			expect(vat.getByCountryCode("GB", isBusiness)).to.closeTo(0.2, Number.EPSILON);
-			
+
 		});
 
-		it("in other places should be 0", function(){
+		it("in other places should be 0", function() {
 			expect(vat.getByCountryCode("HK", isBusiness)).to.equal(0);
 			expect(vat.getByCountryCode("US", isBusiness)).to.equal(0);
 			expect(vat.getByCountryCode("AU", isBusiness)).to.equal(0);

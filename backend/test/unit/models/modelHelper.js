@@ -39,24 +39,24 @@ const ModelHelper = proxyquire("../../../models/helper/model", {
 	"../project": {}
 });
 
-describe("Model Helpers", function(){
+describe("Model Helpers", function() {
 
-	describe("#modelNameRegExp", function(){
-		it("should have modelNameRegExp exposed", function(){
+	describe("#modelNameRegExp", function() {
+		it("should have modelNameRegExp exposed", function() {
 			expect(ModelHelper.modelNameRegExp).to.have.exist;
 		});
 
-		it("blank test model name format should fail", function(){
+		it("blank test model name format should fail", function() {
 			expect(ModelHelper.modelNameRegExp.test("")).to.be.false;
 		});
 
-		it("plain test model name format should succeed", function(){
+		it("plain test model name format should succeed", function() {
 			expect(ModelHelper.modelNameRegExp.test("a")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("ab")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("abc")).to.be.true;
 		});
 
-		it("hyphens dashes and underscores in test model name format should succeed", function(){
+		it("hyphens dashes and underscores in test model name format should succeed", function() {
 			expect(ModelHelper.modelNameRegExp.test("123-4a")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("123_4a")).to.be.true;
 			expect(ModelHelper.modelNameRegExp.test("123-_4A")).to.be.true;
@@ -65,25 +65,25 @@ describe("Model Helpers", function(){
 			expect(ModelHelper.modelNameRegExp.test("aasa%")).to.be.true;
 		});
 
-		it("non-ASCII characters should fail", function(){
+		it("non-ASCII characters should fail", function() {
 			expect(ModelHelper.modelNameRegExp.test("失败")).to.be.false;
 			expect(ModelHelper.modelNameRegExp.test("😕")).to.be.false;
 		});
 
-		it("long strings less than 120 characters in test model name format should succeed", function(){
+		it("long strings less than 120 characters in test model name format should succeed", function() {
 			expect(ModelHelper.modelNameRegExp.test("aaaaaaaaaaaaaaaaaaaaa")).to.be.true;
 		});
 
-		it("long strings more than 120 characters in test model name format should fail", function(){
+		it("long strings more than 120 characters in test model name format should fail", function() {
 			expect(ModelHelper.modelNameRegExp.test(
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" + 
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" + 
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaa"
 			)).to.be.false;
 		});
-	
+
 	});
 
 });

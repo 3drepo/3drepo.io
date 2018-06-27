@@ -23,56 +23,54 @@ const app = require("../../services/frontend.js").createApp(
 	{ session: require("express-session")({ secret: "testing", resave: false, saveUninitialized: false }) }
 );
 
-
 describe("Config", function () {
 	let server;
 
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
-            done();
+			done();
 		});
 
 	});
 
-	after(function(done){
-        server.close(function(){
-            console.log("API test server is closed");
-            done();
-        });
+	after(function(done) {
+		server.close(function() {
+			console.log("API test server is closed");
+			done();
+		});
 	});
 
+	describe("version endpoint", function() {
 
-	describe("version endpoint", function(){
+		it("should return { VERSION : $version }", function(done) {
 
-		it("should return { VERSION : $version }", function(done){
+			const agent = request.agent(server);
+			agent.get("/config/version.json")
+				.expect(200, function(err, res) {
+					expect(typeof res).to.equal("object");
+					expect(typeof res.body.VERSION).to.equal("string");
+					expect(res.body.VERSION.split(".").length - 1).to.equal(2);
+					done(err);
+				});
 
-            const agent = request.agent(server);
-            agent.get("/config/version.json")
-            .expect(200, function(err, res){
-                expect(typeof res).to.equal("object");
-                expect(typeof res.body.VERSION).to.equal("string");
-                expect(res.body.VERSION.split(".").length-1).to.equal(2);
-                done(err);
-            });
-				
 		});
 
-    });
-    
-    describe("config endpoint", function(){
-        
-        it("should JavaScript file", function(done){
+	});
 
-            const agent = request.agent(server);
-            agent.get("/config/config.js")
-            .expect(200, function(err, res){
-                expect(typeof res).to.equal("object");
-                done(err);
-            });
-                
-        });
+	describe("config endpoint", function() {
 
-    });
+		it("should JavaScript file", function(done) {
+
+			const agent = request.agent(server);
+			agent.get("/config/config.js")
+				.expect(200, function(err, res) {
+					expect(typeof res).to.equal("object");
+					done(err);
+				});
+
+		});
+
+	});
 
 });

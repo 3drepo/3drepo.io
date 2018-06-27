@@ -17,47 +17,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require("supertest");
-let expect = require("chai").expect;
-let app = require("../../services/api.js").createApp(
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
-let responseCodes = require("../../response_codes.js");
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
+const responseCodes = require("../../response_codes.js");
 
 describe("Login", function () {
-	let User = require("../../models/user");
+	const User = require("../../models/user");
 	let server;
-	let username = "login_username";
-	let username_not_verified = "login_nonverified";
-	let password = "password";
-	let email = suf => `test3drepo_login_${suf}@mailinator.com`;
+	const username = "login_username";
+	const username_not_verified = "login_nonverified";
+	const password = "password";
+	const email = suf => `test3drepo_login_${suf}@mailinator.com`;
 
-	before(function(done){
-
+	before(function(done) {
 
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 
-			//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
+			// hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
 			request(server).get("/info").end(() => {
 				done();
 			});
-			
+
 		});
 
 	});
 
-	after(function(done){
-		server.close(function(){
+	after(function(done) {
+		server.close(function() {
 			console.log("API test server is closed");
 			done();
 		});
 	});
-
-
-
 
 	it("with correct password and username and verified should login successfully", function () {
 
@@ -70,12 +66,12 @@ describe("Login", function () {
 
 			return new Promise((resolve, reject) => {
 				request(server)
-				.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res){
-					expect(res.body.username).to.equal(username);
-					err ? reject(err) : resolve();
-				});
+					.post("/login")
+					.send({ username, password })
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username);
+						err ? reject(err) : resolve();
+					});
 			});
 
 		});
@@ -91,107 +87,106 @@ describe("Login", function () {
 
 			return new Promise((resolve, reject) => {
 				request(server)
-				.post("/login")
-				.send({ username: username_not_verified, password })
-				.expect(400, function(err, res){
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_VERIFIED.value);
-					console.log(err);
-					err ? reject(err) : resolve();
-				});
+					.post("/login")
+					.send({ username: username_not_verified, password })
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.USER_NOT_VERIFIED.value);
+						console.log(err);
+						err ? reject(err) : resolve();
+					});
 			});
 
 		});
 
 	});
 
-	it("with incorrect password should fail", function(done){
+	it("with incorrect password should fail", function(done) {
 		request(server)
-		.post("/login")
-		.send({ username, password: password + "123" })
-		.expect(400, function(err, res){
+			.post("/login")
+			.send({ username, password: password + "123" })
+			.expect(400, function(err, res) {
 
-			expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
-			done(err);
-
-		});
-	});
-
-	it("with incorrect username and password should fail", function(done){
-		request(server)
-		.post("/login")
-		.send({ username: username  + "123", password: password + "123" })
-		.expect(400, function(err, res){
-
-			expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
-			done(err);
-
-		});
-	});
-
-	it("when you are logged in should fail", function(done){
-		//preserver cookies
-		let agent = request.agent(server);
-		agent.post("/login")
-		.send({ username: username , password: password })
-		.end(function(err, res){
-
-			//double login
-			agent.post("/login").send({ username: username , password: password })
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.ALREADY_LOGGED_IN.value);
+				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
 				done(err);
+
 			});
-
-		});
 	});
 
-	it("missing username should fail", function(done){
+	it("with incorrect username and password should fail", function(done) {
 		request(server)
-		.post("/login")
-		.send({ password: password + "123" })
-		.expect(400, function(err, res){
+			.post("/login")
+			.send({ username: username  + "123", password: password + "123" })
+			.expect(400, function(err, res) {
 
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
+				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+				done(err);
 
-		});
+			});
 	});
 
-	it("missing password should fail", function(done){
-		request(server)
-		.post("/login")
-		.send({ username: username })
-		.expect(400, function(err, res){
+	it("when you are logged in should fail", function(done) {
+		// preserver cookies
+		const agent = request.agent(server);
+		agent.post("/login")
+			.send({ username: username , password: password })
+			.end(function(err, res) {
 
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
+			// double login
+				agent.post("/login").send({ username: username , password: password })
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.ALREADY_LOGGED_IN.value);
+						done(err);
+					});
 
-		});
+			});
 	});
 
-	it("non string type username should fail", function(done){
+	it("missing username should fail", function(done) {
 		request(server)
-		.post("/login")
-		.send({ username: true , password})
-		.expect(400, function(err, res){
+			.post("/login")
+			.send({ password: password + "123" })
+			.expect(400, function(err, res) {
 
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
 
-		});
+			});
 	});
 
-	
-	it("non string type password should fail", function(done){
+	it("missing password should fail", function(done) {
 		request(server)
-		.post("/login")
-		.send({ username, password: true})
-		.expect(400, function(err, res){
+			.post("/login")
+			.send({ username: username })
+			.expect(400, function(err, res) {
 
-			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-			done(err);
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
 
-		});
+			});
+	});
+
+	it("non string type username should fail", function(done) {
+		request(server)
+			.post("/login")
+			.send({ username: true , password})
+			.expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+
+			});
+	});
+
+	it("non string type password should fail", function(done) {
+		request(server)
+			.post("/login")
+			.send({ username, password: true})
+			.expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+
+			});
 	});
 
 });
