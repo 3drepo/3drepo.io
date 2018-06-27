@@ -15,8 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const config	  = require("../config.js");
@@ -49,10 +49,7 @@
 		let connectString = "mongodb://" + config.db.username + ":" + config.db.password + "@";
 		const hostPorts = [];
 
-		/* jshint ignore:start */
-		for(const host in config.db.host)
-		/* jshint ignore:end */
-		{
+		for(const host in config.db.host) {
 			hostPorts.push(config.db.host[host] + ":" + config.db.port[host]);
 		}
 

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const utils = require("./utils.js");
 
@@ -484,7 +484,7 @@
 	// -----------------------------------------------------------------------------
 
 	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
-	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/);
+	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/);
 
 	// -----------------------------------------------------------------------------
 	//
