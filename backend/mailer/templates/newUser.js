@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
 const html = data => `
 	We have one more new user signed up on ${data.url}!
@@ -24,7 +25,7 @@ const html = data => `
 	<br>
 	Name: ${data.firstName} ${data.lastName}
 	<br>
-	Company: ${data.company} 
+	Company: ${data.company}
 	<br>
 	Country: ${data.country}
 `;

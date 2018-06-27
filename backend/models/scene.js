@@ -28,7 +28,7 @@ const schema = Schema({
 });
 
 
-if (!schema.options.toJSON){
+if (!schema.options.toJSON) {
 	schema.options.toJSON = {};
 }
 

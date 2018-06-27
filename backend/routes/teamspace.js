@@ -26,17 +26,17 @@
 	const utils = require("../utils");
 
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
-	
-	router.get("/members", middlewares.loggedIn, getMemberList);	
+
+	router.get("/members", middlewares.loggedIn, getMemberList);
 	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 
 
-	function getQuotaInfo(req, res, next){
+	function getQuotaInfo(req, res, next) {
 
 		User.findByUserName(req.session.user.username).then(user => {
 
-			if(!user){
+			if(!user) {
 				return Promise.reject(responseCodes.USER_NOT_FOUND);
 			}
 
@@ -52,11 +52,11 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
 
 
-	function getMemberList(req, res, next){
+	function getMemberList(req, res, next) {
 
 		User.findByUserName(req.session.user.username).then(user => {
 
@@ -76,14 +76,14 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
-	
-	
+
+
 	function addTeamMember(req, res, next) {
-	
+
 		const responsePlace = utils.APIInfo(req);
-	
+
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
 				if(req.params.user) {
@@ -96,12 +96,12 @@
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
 			})
 			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, 
+				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 			});
 	}
 
-	
+
 	function removeTeamMember(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
@@ -113,7 +113,7 @@
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
 			})
 			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, 
+				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 			});
 	}

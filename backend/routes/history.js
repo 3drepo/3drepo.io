@@ -29,7 +29,7 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
 
-function listRevisions(req, res, next){
+function listRevisions(req, res, next) {
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
@@ -37,7 +37,7 @@ function listRevisions(req, res, next){
 
 
 	History.listByBranch({account, model}, null, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
-		
+
 		histories = History.clean(histories);
 
 		histories.forEach(function(history) {
@@ -47,11 +47,11 @@ function listRevisions(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
 
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 	});
 }
 
-function listRevisionsByBranch(req, res, next){
+function listRevisionsByBranch(req, res, next) {
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
@@ -59,7 +59,7 @@ function listRevisionsByBranch(req, res, next){
 
 
 	History.listByBranch({account, model}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
-		
+
 		histories = History.clean(histories);
 
 		histories.forEach(function(history) {
@@ -69,18 +69,18 @@ function listRevisionsByBranch(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
 
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 	});
 }
 
-function updateRevisionTag(req, res, next){
+function updateRevisionTag(req, res, next) {
 
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
 
 	History.findByUID({account, model}, req.params.id, {_id : 1, tag: 1}).then(history => {
-		if (!history){
+		if (!history) {
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else {
 			history.tag = req.body.tag;

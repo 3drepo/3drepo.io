@@ -23,19 +23,19 @@ const stream = require("stream");
 const systemLogger = require("../../logger.js").systemLogger;
 
 
-function getGridFSBucket (account, bucketName){
+function getGridFSBucket (account, bucketName) {
 	return ModelFactory.dbManager.getGridFSBucket(account, { bucketName:  bucketName});
 }
 
 
-function _getGridFSBucket (dbCol, format){
+function _getGridFSBucket (dbCol, format) {
 	return getGridFSBucket(dbCol.account, `${dbCol.model}.stash.${format}`);
 }
 
-function findStashByFilename(dbCol, format, filename, getStreamOnly){
+function findStashByFilename(dbCol, format, filename, getStreamOnly) {
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
 		return bucket.find({ filename }).toArray().then(files => {
-			if(!files.length){
+			if(!files.length) {
 				systemLogger.logInfo(filename + " - Attempt to retrieved from stash but not found");
 				return Promise.resolve(false);
 
@@ -46,7 +46,7 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 
 					const downloadStream = bucket.openDownloadStreamByName(filename);
 
-					if(getStreamOnly){
+					if(getStreamOnly) {
 
 						resolve(downloadStream);
 
@@ -54,10 +54,10 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 
 						const bufs = [];
 
-						downloadStream.on("data", function(d){
+						downloadStream.on("data", function(d) {
 							bufs.push(d);
 						});
-						downloadStream.on("end", function(){
+						downloadStream.on("end", function() {
 							resolve(Buffer.concat(bufs));
 						});
 
@@ -74,7 +74,7 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	});
 }
 
-function saveStashByFilename(dbCol, format, filename, buffer){
+function saveStashByFilename(dbCol, format, filename, buffer) {
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
 		const uploadStream = bucket.openUploadStream(filename);
 

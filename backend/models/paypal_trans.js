@@ -67,12 +67,12 @@
 	};
 
 	const getBillingPlanAttributes = function (billingUser, paymentDefs) {
-		//this is for generating and api url, but we only need a frontend url.
-		//let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
-		//let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
+		// this is for generating and api url, but we only need a frontend url.
+		// let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
+		// let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
 
 		const cancelUrl = config.getBaseURL() + `/${billingUser}?page=billing&cancel=1`;
-		const returnUrl =config.getBaseURL() + `/${billingUser}?page=billing`;
+		const returnUrl = config.getBaseURL() + `/${billingUser}?page=billing`;
 
 		return {
 			"description": "3D Repo Licence",

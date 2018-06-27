@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
@@ -23,15 +23,14 @@ const responseCodes = require("../response_codes");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
-function sendEmail(template, to, data, attachments){
-	"use strict";
+function sendEmail(template, to, data, attachments) {
 
 
-	if(!config.mail || !config.mail.smtpConfig){
+	if(!config.mail || !config.mail.smtpConfig) {
 		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
 	}
 
-	if(!config.mail || !config.mail.smtpConfig){
+	if(!config.mail || !config.mail.smtpConfig) {
 		return Promise.reject({ message: "config.mail.sender is not set"});
 	}
 
@@ -42,15 +41,15 @@ function sendEmail(template, to, data, attachments){
 		html: template.html(data)
 	};
 
-	if(attachments){
+	if(attachments) {
 		mailOptions.attachments = attachments;
 	}
 
 	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
 	return new Promise((resolve, reject) => {
-		transporter.sendMail(mailOptions, function(err, info){
-			if(err){
+		transporter.sendMail(mailOptions, function(err, info) {
+			if(err) {
 				reject(err);
 			} else {
 				resolve(info);
@@ -59,23 +58,23 @@ function sendEmail(template, to, data, attachments){
 	});
 }
 
-function rejectNoUrl(name){
+function rejectNoUrl(name) {
 	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`});
 }
 
 
-function getURL(urlName, params){
-	"use strict";
+function getURL(urlName, params) {
 
-	if(!C.MAIL_URLS || !C.MAIL_URLS[urlName]){
+
+	if(!C.MAIL_URLS || !C.MAIL_URLS[urlName]) {
 		return null;
 	}
 
 	return getBaseURL() + C.MAIL_URLS[urlName](params);
 }
 
-function sendNoConsumerAlert(){
-	if(config.contact){
+function sendNoConsumerAlert() {
+	if(config.contact) {
 		const template = require("./templates/noConsumers");
 		return sendEmail(template, config.contact.email, {domain: config.host});
 	} else{
@@ -83,12 +82,12 @@ function sendNoConsumerAlert(){
 	}
 }
 
-function sendVerifyUserEmail(to, data){
-	"use strict";
+function sendVerifyUserEmail(to, data) {
+
 
 	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
 
-	if(!data.url){
+	if(!data.url) {
 		return rejectNoUrl("verify");
 	}
 
@@ -97,12 +96,12 @@ function sendVerifyUserEmail(to, data){
 }
 
 
-function sendResetPasswordEmail(to, data){
-	"use strict";
+function sendResetPasswordEmail(to, data) {
+
 
 	data.url = getURL("forgotPassword", {token: data.token, username: data.username});
 
-	if(!data.url){
+	if(!data.url) {
 		return rejectNoUrl("forgotPassword");
 	}
 
@@ -110,8 +109,8 @@ function sendResetPasswordEmail(to, data){
 	return sendEmail(template, to, data);
 }
 
-function sendPaymentReceivedEmail(to, data, attachments){
-	"use strict";
+function sendPaymentReceivedEmail(to, data, attachments) {
+
 
 	const template = require("./templates/paymentReceived");
 
@@ -119,53 +118,53 @@ function sendPaymentReceivedEmail(to, data, attachments){
 	return sendEmail(template, to, data, attachments);
 }
 
-function sendPaymentReceivedEmailToSales(data, attachments){
-	"use strict";
+function sendPaymentReceivedEmailToSales(data, attachments) {
+
 
 	let template = require("./templates/paymentReceived");
-	
-	if(data.type === "refund"){
+
+	if(data.type === "refund") {
 		template = require("./templates/paymentRefunded");
 	}
 
 	const salesTemplate = {
 		html: template.html,
-		subject: function(data){
+		subject: function(data) {
 			return `[${data.type}] [${data.invoiceNo}] ${data.email}`;
 		}
 	};
 
-	if(config.contact && config.contact.sales){
-		//console.log(config.contact.sales);
+	if(config.contact && config.contact.sales) {
+		// console.log(config.contact.sales);
 		return sendEmail(salesTemplate, config.contact.sales, data, attachments);
 	} else {
 		return Promise.resolve();
 	}
 
-	
+
 }
 
-function sendNewUser(data){
-	"use strict";
+function sendNewUser(data) {
+
 
 	const template = require("./templates/newUser");
 
 	data.url = getBaseURL();
-	
-	if(config.contact && config.contact.sales){
-		//console.log(config.contact.sales);
+
+	if(config.contact && config.contact.sales) {
+		// console.log(config.contact.sales);
 		return sendEmail(template, config.contact.sales, data);
 	} else {
 		return Promise.resolve();
 	}
 }
 
-function sendContactEmail(data){
-	"use strict";
+function sendContactEmail(data) {
+
 
 	const template = require("./templates/contact");
-	
-	if(!config.contact || !config.contact.email){
+
+	if(!config.contact || !config.contact.email) {
 		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
 	}
 
@@ -173,25 +172,24 @@ function sendContactEmail(data){
 }
 
 
+function sendPaymentFailedEmail(to, data) {
 
-function sendPaymentFailedEmail(to, data){
-	"use strict";
 
 	const template = require("./templates/paymentFailed");
 	return sendEmail(template, to, data);
 
 }
 
-function sendPaymentRefundedEmail(to, data, attachments){
-	"use strict";
+function sendPaymentRefundedEmail(to, data, attachments) {
+
 
 	const template = require("./templates/paymentRefunded");
 	return sendEmail(template, to, data, attachments);
 
 }
 
-function sendSubscriptionSuspendedEmail(to, data){
-	"use strict";
+function sendSubscriptionSuspendedEmail(to, data) {
+
 
 	const template = require("./templates/paymentSuspended");
 	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
@@ -200,19 +198,19 @@ function sendSubscriptionSuspendedEmail(to, data){
 
 }
 
-function sendPaymentErrorEmail(data){
-	"use strict";
+function sendPaymentErrorEmail(data) {
+
 
 	const template = require("./templates/paymentError");
 	return sendEmail(template, config.contact.email, data);
 }
 
-function sendModelInvitation(to, data){
-	"use strict";
+function sendModelInvitation(to, data) {
+
 
 	data.url = getURL("model", { account: data.account, model: data.model });
 
-	if(!data.url){
+	if(!data.url) {
 		return rejectNoUrl("model");
 	}
 
@@ -220,10 +218,10 @@ function sendModelInvitation(to, data){
 	return sendEmail(template, to, data);
 }
 
-function sendImportError(data){
-	"use strict";
+function sendImportError(data) {
 
-	if(config.contact){
+
+	if(config.contact) {
 		const template = require("./templates/importError");
 		data.domain = config.host;
 		return sendEmail(template, config.contact.email, data);

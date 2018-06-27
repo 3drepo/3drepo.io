@@ -37,19 +37,19 @@
 		}]
 	});
 
-	schema.pre("save", function checkInvalidName(next){
+	schema.pre("save", function checkInvalidName(next) {
 
-		if(C.PROJECT_DEFAULT_ID === this.name){
+		if(C.PROJECT_DEFAULT_ID === this.name) {
 			return next(utils.makeError(responseCodes.INVALID_PROJECT_NAME));
 		}
 
 		return next();
 	});
 
-	schema.pre("save", function checkDupName(next){
+	schema.pre("save", function checkDupName(next) {
 
 		Project.findOne(this._dbcolOptions, {name: this.name}).then(project => {
-			if(project && project.id !== this.id){
+			if(project && project.id !== this.id) {
 				return next(utils.makeError(responseCodes.PROJECT_EXIST));
 			} else {
 				return next();
@@ -57,12 +57,12 @@
 		});
 	});
 
-	schema.pre("save", function checkPermissionName(next){
+	schema.pre("save", function checkPermissionName(next) {
 
-		for (let i=0; i < this.permissions.length; i++){
+		for (let i = 0; i < this.permissions.length; i++) {
 			const permission = this.permissions[i];
 
-			if (_.intersection(C.PROJECT_PERM_LIST, permission.permissions).length < permission.permissions.length){
+			if (_.intersection(C.PROJECT_PERM_LIST, permission.permissions).length < permission.permissions.length) {
 				return next(utils.makeError(responseCodes.INVALID_PERM));
 			}
 		}
@@ -70,11 +70,11 @@
 		return next();
 	});
 
-	schema.statics.createProject = function(account, name, username, userPermissions){
+	schema.statics.createProject = function(account, name, username, userPermissions) {
 		const project = Project.createInstance({account});
 		project.name = name;
 
-		if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1){
+		if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
 			project.permissions = [{
 				user: username,
 				permissions: [C.PERM_PROJECT_ADMIN]
@@ -85,7 +85,7 @@
 
 	};
 
-	schema.statics.delete = function(account, name){
+	schema.statics.delete = function(account, name) {
 		const ModelHelper = require("./helper/model");
 
 		let project;
@@ -94,9 +94,9 @@
 
 			project = _project;
 
-			//remove all models as well
+			// remove all models as well
 
-			if(!project){
+			if(!project) {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
 				return Promise.resolve();
@@ -106,21 +106,21 @@
 		}).then(() => project);
 	};
 
-	schema.statics.removeModel = function(account, model){
+	schema.statics.removeModel = function(account, model) {
 		return Project.update({account}, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
 	};
 
-	schema.methods.updateAttrs = function(data){
+	schema.methods.updateAttrs = function(data) {
 		const whitelist = ["name", "permissions"];
 		const User = require("./user");
 
 		let usersToRemove = [];
 
 		let check = Promise.resolve();
-		if(data.permissions){
+		if(data.permissions) {
 			// user to delete
-			for(let i = data.permissions.length -1; i >=0; i--){
-				if(!Array.isArray(data.permissions[i].permissions) || data.permissions[i].permissions.length === 0){
+			for(let i = data.permissions.length - 1; i >= 0; i--) {
+				if(!Array.isArray(data.permissions[i].permissions) || data.permissions[i].permissions.length === 0) {
 					data.permissions.splice(i ,1);
 				}
 			}
@@ -129,13 +129,13 @@
 
 			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
 
-				return User.getAllUsersInTeamspace(teamspace.user).then( members => {
+				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
 					const someUserNotAssignedWithLicence = data.permissions.some(
 						perm => {
 							return !members.includes(perm.user);
 						}
 					);
-					if(someUserNotAssignedWithLicence){
+					if(someUserNotAssignedWithLicence) {
 						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 					}
 				});
@@ -148,7 +148,7 @@
 		return check.then(() => {
 
 			Object.keys(data).forEach(key => {
-				if(whitelist.indexOf(key) !== -1){
+				if(whitelist.indexOf(key) !== -1) {
 
 					this[key] = data[key];
 				}
@@ -175,7 +175,7 @@
 
 	};
 
-	schema.statics.findAndPopulateUsers = function(account, query){
+	schema.statics.findAndPopulateUsers = function(account, query) {
 
 		const User = require("./user");
 
@@ -187,7 +187,7 @@
 
 		}).then(projects => {
 
-			if(projects){
+			if(projects) {
 				projects.forEach(p => Project.populateUsers(userList, p));
 			}
 
@@ -197,7 +197,7 @@
 	};
 
 
-	schema.statics.findOneAndPopulateUsers = function(account, query){
+	schema.statics.findOneAndPopulateUsers = function(account, query) {
 
 		const User = require("./user");
 
@@ -210,7 +210,7 @@
 
 		}).then(project => {
 
-			if(project){
+			if(project) {
 				return Project.populateUsers(userList, project);
 			} else {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
@@ -219,13 +219,13 @@
 		});
 	};
 
-	schema.statics.populateUsers = function(userList, project){
+	schema.statics.populateUsers = function(userList, project) {
 
 		userList.forEach(user => {
 
 			const userFound = project.permissions.find(perm => perm.user === user);
 
-			if(!userFound){
+			if(!userFound) {
 				project.permissions.push({
 					user
 				});
@@ -236,7 +236,7 @@
 	};
 
 
-	schema.methods.findPermsByUser = function(username){
+	schema.methods.findPermsByUser = function(username) {
 		return this.permissions.find(perm => perm.user === username);
 	};
 

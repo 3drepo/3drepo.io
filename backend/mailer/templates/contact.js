@@ -1,3 +1,5 @@
+
+"use strict";
 const html = data => `
 	Name: ${data.name}
 	<br><br>

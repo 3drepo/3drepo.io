@@ -20,34 +20,34 @@ const https = require("https");
 
 const httpsAgent = new https.Agent({keepAlive:true});
 
-function parseUrl(url){
+function parseUrl(url) {
 	"use strict";
 
 	const urlPart = {};
 
 	let parsedUrl = url.split("://");
 
-	if(parsedUrl.length === 1){
+	if(parsedUrl.length === 1) {
 		throw new Error("Malformed URL");
 	}
 
 
 	urlPart.protocol = parsedUrl.shift();
-	
+
 	parsedUrl = parsedUrl[0].split("/");
 	const host =  parsedUrl.shift().split(":");
 	urlPart.host = host[0];
-	
+
 	urlPart.port = host[1] || urlPart.protocol === "https" ? 443 : 80;
 	urlPart.path = "/" + parsedUrl.join("/");
-	
+
 	return urlPart;
 }
 
 
-function get(hostname, path){
+function get(hostname, path) {
 	"use strict";
-	
+
 	const options = {
 		hostname,
 		path,
@@ -55,10 +55,10 @@ function get(hostname, path){
 	};
 	return new Promise((resolve, reject) => {
 		https.get(options, result => {
-			//console.log(url + qs);
+			// console.log(url + qs);
 			// Buffer the body entirely for processing as a whole.
 
-			//console.log(result.headers);
+			// console.log(result.headers);
 
 			const bodyChunks = [];
 			result.on("data", function(chunk) {
@@ -67,16 +67,16 @@ function get(hostname, path){
 				let body = Buffer.concat(bodyChunks);
 
 				// console.log(result.headers['content-type']);
-				if(result.headers["content-type"].startsWith("application/json")){
+				if(result.headers["content-type"].startsWith("application/json")) {
 					body = JSON.parse(body);
 				}
 
-				if([200, 201].indexOf(result.statusCode) === -1){
+				if([200, 201].indexOf(result.statusCode) === -1) {
 					reject({resCode : result.statusCode, message: result.statusMessage});
 				} else {
 					resolve(body);
 				}
-				
+
 			});
 
 		}).on("error", function(e) {
@@ -86,33 +86,33 @@ function get(hostname, path){
 
 }
 
-function makePostData(obj){
-	
+function makePostData(obj) {
+
 	const params = [];
-	
-	Object.keys(obj).forEach( key => {
+
+	Object.keys(obj).forEach(key => {
 		params.push(`${key}=${encodeURIComponent(obj[key])}`);
 	});
 
 	return params.join("&");
 }
 
-function post(url, obj, type){
+function post(url, obj, type) {
 	"use strict";
 
-	if(!type){
+	if(!type) {
 		type = "application/x-www-form-urlencoded";
 	}
 
 	let stringify = makePostData;
 
-	if(type === "application/json"){
+	if(type === "application/json") {
 		stringify = JSON.stringify;
 	}
 
 	let stringifiedData;
 
-	if(typeof obj === "string"){
+	if(typeof obj === "string") {
 		stringifiedData = obj;
 	} else {
 		stringifiedData = stringify(obj);
@@ -135,7 +135,7 @@ function post(url, obj, type){
 	return new Promise((resolve, reject) => {
 
 		const req = https.request(options, (res) => {
-			
+
 			const bodyChunks = [];
 
 			res.on("data", (chunk) => {
@@ -144,14 +144,14 @@ function post(url, obj, type){
 
 				let body = Buffer.concat(bodyChunks);
 
-				if(res.headers["content-type"].startsWith("application/json")){
+				if(res.headers["content-type"].startsWith("application/json")) {
 					body = JSON.parse(body);
 				} else {
 					body = body.toString();
 				}
 
 
-				if([200, 201].indexOf(res.statusCode) === -1){
+				if([200, 201].indexOf(res.statusCode) === -1) {
 					reject(body);
 				} else {
 					resolve(body);
@@ -170,7 +170,7 @@ function post(url, obj, type){
 }
 
 module.exports = {
-	get: get, 
+	get: get,
 	post: post,
 	querystring: makePostData
 };

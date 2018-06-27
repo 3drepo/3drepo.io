@@ -15,9 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
-
 
 	const responseCodes = require("../response_codes");
 	const C				= require("../constants");
@@ -39,15 +38,15 @@
 	function skipLoggedIn(req) {
 
 		const loginIgnores = [
-			"/config.js", 
+			"/config.js",
 			"/version.json"
-		];		
+		];
 
 		return loginIgnores.indexOf(req.url) !== -1;
 
 	}
 
-	function loggedIn(req, res, next){
+	function loggedIn(req, res, next) {
 		if (skipLoggedIn(req)) {
 			next();
 		} else if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
@@ -57,10 +56,10 @@
 		}
 	}
 
-	function freeSpace(account){
+	function freeSpace(account) {
 
 		let limits;
-		return User.findByUserName(account).then( dbUser => {
+		return User.findByUserName(account).then(dbUser => {
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
 			return User.historyChunksStats(account);
@@ -72,7 +71,7 @@
 			stats.forEach(stat => {
 				totalSize += stat.size;
 			});
-			totalSize /= 1024*1024;
+			totalSize /= 1024 * 1024;
 			return Promise.resolve(limits.spaceLimit - totalSize);
 		});
 
@@ -88,14 +87,14 @@
 		});
 	}
 
-	function hasCollaboratorQuota(req, res, next){
+	function hasCollaboratorQuota(req, res, next) {
 
 		let limits;
 
 		const account = req.params.account;
 		const model = req.params.model;
 
-		return User.findByUserName(account).then( dbUser => {
+		return User.findByUserName(account).then(dbUser => {
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
 
@@ -103,18 +102,18 @@
 
 		}).then(modelSetting => {
 
-			if(limits.collaboratorLimit - modelSetting.collaborators.length > 0){
+			if(limits.collaboratorLimit - modelSetting.collaborators.length > 0) {
 				next();
 			} else {
 				responseCodes.respond("", req, res, next, responseCodes.COLLABORATOR_LIMIT_EXCEEDED , null, {});
 			}
 
 		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		});
 	}
 
-	function createQueueInstance(){
+	function createQueueInstance() {
 
 		// init ampq and import queue object
 		const logger = require("../logger.js");
@@ -133,10 +132,10 @@
 
 	}
 
-	function connectQueue(req, res, next){
+	function connectQueue(req, res, next) {
 
 		// init ampq and import queue object
-		if(config.cn_queue){
+		if(config.cn_queue) {
 
 			createQueueInstance().then(() => {
 				next();
@@ -150,30 +149,30 @@
 
 	}
 
-	function hasReadAccessToModelHelper(username, account, model){
+	function hasReadAccessToModelHelper(username, account, model) {
 		return checkPermissionsHelper(
-			username, 
-			account, 
+			username,
+			account,
 			"",
-			model, 
+			model,
 			readAccessToModel,
 			getPermissionsAdapter
 		).then(data => data.granted);
 	}
 
-	function isAccountAdminHelper(username, account, model){
+	function isAccountAdminHelper(username, account, model) {
 		return checkPermissionsHelper(
-			username, 
-			account, 
+			username,
+			account,
 			"",
-			model, 
+			model,
 			[C.PERM_TEAMSPACE_ADMIN],
 			getPermissionsAdapter
 		).then(data => data.granted);
 	}
 
-	function canCreateModel(req, res, next){
-		if(req.body.subModels){
+	function canCreateModel(req, res, next) {
+		if(req.body.subModels) {
 			checkPermissions([C.PERM_CREATE_FEDERATION])(req, res, next);
 		} else {
 			checkPermissions([C.PERM_CREATE_MODEL])(req, res, next);
@@ -206,7 +205,7 @@
 
 		isHereEnabled: isHereEnabled,
 
-		//models
+		// models
 		canCreateModel: canCreateModel,
 		hasReadAccessToModel: checkPermissions(readAccessToModel),
 		hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),

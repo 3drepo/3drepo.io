@@ -49,7 +49,7 @@ const cameraSchema = Schema(
 
 const materialSchema = Schema(
 	_.extend({}, repoBase, {
-		//material attrs
+		// material attrs
 		ambient: [Number],
 		diffuse: [Number],
 		specular: [Number],

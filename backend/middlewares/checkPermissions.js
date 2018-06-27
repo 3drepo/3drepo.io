@@ -16,7 +16,6 @@
  */
 
 
-
 "use strict";
 
 const _ = require("lodash");
@@ -24,8 +23,8 @@ const C	= require("../constants");
 const getPermissionsAdapter = require("./getPermissionsAdapter");
 const responseCodes = require("../response_codes");
 
-//logic to check permissions
-function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions){
+// logic to check permissions
+function checkPermissionsHelper(username, account, project, model, requiredPerms, getPermissions) {
 
 	const getPermPromises = [];
 
@@ -35,21 +34,21 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 
 	const flattenRequiredPerms = requiredPerms["$or"] ? _.flatten(requiredPerms["$or"]) : _.flatten(requiredPerms);
 
-	if(_.intersection(C.PROJECT_PERM_LIST, flattenRequiredPerms).length > 0){
+	if(_.intersection(C.PROJECT_PERM_LIST, flattenRequiredPerms).length > 0) {
 		getPermPromises.push(getPermissions(account).projectLevel(username, project));
 	}
 
-	if(_.intersection(C.MODEL_PERM_LIST, flattenRequiredPerms).length > 0){
+	if(_.intersection(C.MODEL_PERM_LIST, flattenRequiredPerms).length > 0) {
 
 		getPermPromises.push(getPermissions(account).modelLevel(username, model));
 
 	}
 
 	return Promise.all(getPermPromises).then(userPermissions => {
-		
+
 		userPermissions = _.flatten(userPermissions);
 
-		//add implied and inherited permissions
+		// add implied and inherited permissions
 		let impliedPerms = [];
 
 		["account", "project", "model"].forEach(
@@ -64,20 +63,20 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 			return _.difference(perms, userPermissions).length === 0;
 		}
 
-		//if it contains or relationship
-		if(Array.isArray(requiredPerms["$or"])){
+		// if it contains or relationship
+		if(Array.isArray(requiredPerms["$or"])) {
 			return { granted: requiredPerms["$or"].some(hasRequiredPermissions), userPermissions };
 		}
 
-		//return true if user has the requested permissions
+		// return true if user has the requested permissions
 		return { granted: hasRequiredPermissions(requiredPerms), userPermissions };
 	});
 }
 
-//function that returns a middleware function for checking permissions
-function checkPermissions(permsRequest){
+// function that returns a middleware function for checking permissions
+function checkPermissions(permsRequest) {
 
-	return function(req, res, next){
+	return function(req, res, next) {
 		let checkLogin = Promise.resolve();
 
 		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
@@ -99,7 +98,7 @@ function checkPermissions(permsRequest){
 				req.session.user.permissions = data.userPermissions;
 			}
 
-			if(data.granted){
+			if(data.granted) {
 				next();
 			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);

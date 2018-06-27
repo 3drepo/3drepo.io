@@ -27,29 +27,28 @@
 
 	router.get("/issues/analytics.:format", middlewares.issue.canView, getIssueAnalytics);
 
-	function getIssueAnalytics(req, res, next){
-		
+	function getIssueAnalytics(req, res, next) {
+
 		const place = utils.APIInfo(req);
 		const sort = parseInt(req.query.sort) || -1;
 		const groups = req.query.groupBy.split(",");
 
 		IssueAnalytic.groupBy(
-			req.params.account, 
-			req.params.model,  
+			req.params.account,
+			req.params.model,
 			groups,
-			sort, 
+			sort,
 			req.params.format
 		).then(docs => {
 
-			if(req.params.format === "csv"){
+			if(req.params.format === "csv") {
 
 				res.set("Content-Disposition", "attachment;filename=data.csv");
 				res.send(docs);
-				
+
 			} else {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, docs);
 			}
-			
 
 
 		}).catch(err => {

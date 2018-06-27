@@ -22,7 +22,7 @@
 // var C = require('./constants');
 
 "use strict";
-exports.decode = function(bson /*, meta*/) {
+exports.decode = function(bson /* , meta*/) {
 	if (bson.mime) {
 		bson.data = {};
 		bson.data.buffer = new Buffer.alloc(bson.metadata.data.buffer.length);

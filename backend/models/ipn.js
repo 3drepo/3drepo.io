@@ -27,16 +27,16 @@
 	});
 
 
-	schema.pre("save", function(next){
+	schema.pre("save", function(next) {
 
-		if(!this.createdAt){
+		if(!this.createdAt) {
 			this.createdAt = new Date();
 		}
 
 		next();
 	});
 
-	schema.statics.save = function(ipnMessage){
+	schema.statics.save = function(ipnMessage) {
 
 		const ipn = IPN.createInstance({ account: "admin" });
 		ipn.message = ipnMessage;

@@ -18,7 +18,7 @@
 
 /**
  * Create API Express app
- * 
+ *
  * @param {Object} serverConfig - Configuration for server
  * @returns
  */
@@ -46,21 +46,21 @@ module.exports.createApp = function (serverConfig) {
 	app.use((req, res, next) => {
 
 		sharedSession(req, res, function(err) {
-			if(err){
+			if(err) {
 				// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
-				//res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-				
+				// res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+
 				req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
 				req[C.REQ_REPO].logger.logError(`express-session internal error: ${JSON.stringify(err)}`);
 				req[C.REQ_REPO].logger.logError(`express-session internal error: ${err.stack}`);
 
-				//responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
+				// responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
 
 			} else {
 				next();
 			}
 		});
-		
+
 	});
 
 	app.use(cors({ origin: true, credentials: true }));
@@ -102,7 +102,7 @@ module.exports.createApp = function (serverConfig) {
 
 	app.use("/:account", require("../routes/job"));
 	app.use("/", require("../routes/plan"));
-	//auth handler
+	// auth handler
 	app.use("/", require("../routes/auth"));
 	// subscriptions handler
 	app.use("/:account", require("../routes/subscriptions"));
@@ -116,36 +116,36 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/:account", require("../routes/teamspace"));
 	app.use("/:account", require("../routes/permissionTemplate"));
 	app.use("/:account", require("../routes/accountPermission"));
-	
+
 	// projects handlers
 	app.use("/:account", require("../routes/project"));
 
-	//models handlers
+	// models handlers
 	app.use("/:account", require("../routes/model"));
 
-	//metadata handler
+	// metadata handler
 	app.use("/:account/:model", require("../routes/meta"));
 
-	//groups handler
+	// groups handler
 	app.use("/:account/:model", require("../routes/group"));
 
-	//viewpoints handler
+	// viewpoints handler
 	app.use("/:account/:model", require("../routes/viewpoint"));
 
-	//issues handler
+	// issues handler
 	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
-	//history handler
+	// history handler
 	app.use("/:account/:model", require("../routes/history"));
 
 	app.use(function(err, req, res, next) {
-		if(err){
+		if(err) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		}
 
 		err.stack && req[C.REQ_REPO].logger.logError(err.stack);
-		//next(err);
+		// next(err);
 	});
 
 	return app;

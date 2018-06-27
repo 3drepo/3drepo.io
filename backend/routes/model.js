@@ -40,31 +40,31 @@ function convertProjectToParam(req, res, next) {
 // Get model info
 router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
-router.post("/model", 
-	convertProjectToParam, 
+router.post("/model",
+	convertProjectToParam,
 	middlewares.connectQueue,
-	middlewares.canCreateModel, 
+	middlewares.canCreateModel,
 	createModel
 );
 router.get("/:model/revision/master/head/meshes.json", middlewares.hasReadAccessToModel, getAllMeshes);
 router.get("/:model/revision/:rev/meshes.json", middlewares.hasReadAccessToModel, getAllMeshes);
 
-//Unity information
+// Unity information
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMpc);
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
-//update federated model
+// update federated model
 router.put("/:model", middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
-//model permission
+// model permission
 router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
-//model permission
+// model permission
 router.get("/:model/permissions",  middlewares.hasEditPermissionsAccessToModel, getPermissions);
 
-//master tree
+// master tree
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 router.get("/:model/revision/master/head/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 router.get("/:model/revision/master/head/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
@@ -79,7 +79,7 @@ router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToM
 
 router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
-//search master tree
+// search master tree
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
@@ -87,7 +87,7 @@ router.post("/:model/upload", middlewares.hasUploadAccessToModel, middlewares.co
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
 function updateSettings(req, res, next) {
-	
+
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
@@ -118,11 +118,11 @@ function _getModel(req) {
 
 			setting = _setting;
 			setting = setting.toObject();
-			//compute permissions by user role
+			// compute permissions by user role
 
 			return ModelHelpers.getModelPermission(
 				req.session.user.username,
-				_setting, 
+				_setting,
 				req.params.account
 			).then(permissions => {
 
@@ -157,7 +157,7 @@ function getModelSetting(req, res, next) {
 }
 
 function createModel(req, res, next) {
-	
+
 	const responsePlace = utils.APIInfo(req);
 
 	if (Object.keys(req.body).length >= 0) {
@@ -166,10 +166,10 @@ function createModel(req, res, next) {
 		const username = req.session.user.username;
 
 		const data = {
-			desc: req.body.desc, 
-			type: req.body.type, 
-			unit: req.body.unit, 
-			subModels: req.body.subModels, 
+			desc: req.body.desc,
+			type: req.body.type,
+			unit: req.body.unit,
+			subModels: req.body.subModels,
 			code: req.body.code,
 			project: req.body.project
 		};
@@ -179,7 +179,7 @@ function createModel(req, res, next) {
 
 		createAndAssignRole(modelName, account, username, data).then(result => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result.model);
-		}).catch( err => {
+		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	} else {
@@ -220,7 +220,7 @@ function updateModel(req, res, next) {
 
 	promise.then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
-	}).catch( err => {
+	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -231,10 +231,10 @@ function deleteModel(req, res, next) {
 	const account = req.params.account;
 	const model = req.params.model;
 
-	//delete
+	// delete
 	ModelHelpers.removeModel(account, model).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
-	}).catch( err => {
+	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
 }
@@ -383,7 +383,7 @@ function searchModelTree(req, res, next) {
 
 
 function downloadLatest(req, res, next) {
-	
+
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
 		const headers = {
@@ -410,9 +410,9 @@ function uploadModel(req, res, next) {
 	const username = req.session.user.username;
 	let modelSetting;
 
-	//check model exists before upload
+	// check model exists before upload
 	return ModelSetting.findById({account, model}, model).then(_modelSetting => {
-		
+
 		modelSetting = _modelSetting;
 
 		if (!modelSetting) {
@@ -434,7 +434,7 @@ function uploadModel(req, res, next) {
 			type: "upload",
 			file: file
 		};
-		//FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
+		// FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
 		ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
 		}).catch(() => {
 
@@ -512,7 +512,7 @@ function getJsonMpc(req, res, next) {
 	ModelHelpers.getJsonMpc(account, model, id).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
@@ -523,10 +523,10 @@ function getUnityBundle(req, res, next) {
 	const id = req.params.uid;
 
 	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
-		req.params.format= "unity3d";
+		req.params.format = "unity3d";
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode? {} : err);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 

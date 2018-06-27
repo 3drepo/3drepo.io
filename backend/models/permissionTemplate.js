@@ -28,7 +28,7 @@
 	const _ = require("lodash");
 
 	const methods = {
-		get: function(){
+		get: function() {
 			return this.permissions;
 		},
 
@@ -39,16 +39,16 @@
 			return this;
 		},
 
-		findById: function(id){
+		findById: function(id) {
 			return this.permissions.id(id);
 		},
 
-		add: function(permission){
+		add: function(permission) {
 
 			const isPermissionInvalid = !Array.isArray(permission.permissions) ||
 				_.intersection(permission.permissions, C.MODEL_PERM_LIST).length !== permission.permissions.length;
 
-			if (this.findById(permission._id)){
+			if (this.findById(permission._id)) {
 				return Promise.reject(responseCodes.DUP_PERM_TEMPLATE);
 			} else if (isPermissionInvalid) {
 				return Promise.reject(responseCodes.INVALID_PERM);
@@ -58,9 +58,9 @@
 			}
 		},
 
-		remove: function(id){
+		remove: function(id) {
 
-			if(id === C.ADMIN_TEMPLATE){
+			if(id === C.ADMIN_TEMPLATE) {
 				return Promise.reject(responseCodes.ADMIN_TEMPLATE_CANNOT_CHANGE);
 			}
 

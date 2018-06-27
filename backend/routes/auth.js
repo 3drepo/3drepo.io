@@ -23,7 +23,7 @@ const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
-//var systemLogger		= require("../logger.js").systemLogger;
+// var systemLogger		= require("../logger.js").systemLogger;
 const utils = require("../utils");
 const User = require("../models/user");
 const addressMeta = require("../models/addressMeta");
@@ -53,7 +53,7 @@ router.post("/:account/forgot-password", forgotPassword);
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
-function createSession(place, req, res, next, user){
+function createSession(place, req, res, next, user) {
 
 	req.session.regenerate(function(err) {
 		req[C.REQ_REPO].logger.logInfo("Creating session for " + " " + user.username);
@@ -74,7 +74,7 @@ function createSession(place, req, res, next, user){
 	});
 }
 
-function login(req, res, next){
+function login(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 
@@ -83,7 +83,7 @@ function login(req, res, next){
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
-		if(req.session.user){
+		if(req.session.user) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
 
@@ -105,7 +105,7 @@ function login(req, res, next){
 				createSession(responsePlace, req, res, next, responseData);
 			});
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		});
 	} else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
@@ -113,7 +113,7 @@ function login(req, res, next){
 
 }
 
-function checkLogin(req, res, next){
+function checkLogin(req, res, next) {
 	if (!req.session || !req.session.user) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	} else {
@@ -121,8 +121,8 @@ function checkLogin(req, res, next){
 	}
 }
 
-function logout(req, res, next){
-	if(!req.session || !req.session.user){
+function logout(req, res, next) {
+	if(!req.session || !req.session.user) {
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
@@ -135,7 +135,7 @@ function logout(req, res, next){
 	});
 }
 
-function updateUser(req, res, next){
+function updateUser(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	if(req.body.oldPassword) {
@@ -145,7 +145,7 @@ function updateUser(req, res, next){
 			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 			});
 		} else {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
@@ -166,15 +166,15 @@ function updateUser(req, res, next){
 
 }
 
-function signUp(req, res, next){
+function signUp(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
-	if(!config.auth.register){
+	if(!config.auth.register) {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.REGISTER_DISABLE, responseCodes.REGISTER_DISABLE);
 	}
 
-	if(!req.body.password){
+	if(!req.body.password) {
 		const err = responseCodes.SIGN_UP_PASSWORD_MISSING;
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
@@ -187,7 +187,7 @@ function signUp(req, res, next){
 		&& (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
 		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
 
-		//check if captcha is enabled
+		// check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
 			secret: config.captcha.secretKey,
 			response: req.body.captcha
@@ -198,7 +198,7 @@ function signUp(req, res, next){
 
 		checkCaptcha.then(resBody => {
 
-			if(resBody.success){
+			if(resBody.success) {
 				return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
 
 					email: req.body.email,
@@ -210,15 +210,15 @@ function signUp(req, res, next){
 
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				//console.log(resBody);
+				// console.log(resBody);
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 
 
-		}).then( data => {
+		}).then(data => {
 
 			const country = addressMeta.countries.find(_country => _country.code === req.body.countryCode);
-			//send to sales
+			// send to sales
 			Mailer.sendNewUser({
 				user: req.params.account,
 				email: req.body.email,
@@ -226,26 +226,24 @@ function signUp(req, res, next){
 				lastName: req.body.lastName,
 				country: country && country.name,
 				company: req.body.company
-			}).catch( err => {
+			}).catch(err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
 
-			//send verification email
+			// send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
 				email: req.body.email,
 				username: req.params.account,
 				pay: req.body.pay
 
-			}).catch( err => {
+			}).catch(err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
-
-
 
 
 		}).then(emailRes => {
@@ -253,7 +251,7 @@ function signUp(req, res, next){
 			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		});
 
 	} else {
@@ -263,7 +261,7 @@ function signUp(req, res, next){
 
 }
 
-function verify(req, res, next){
+function verify(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
@@ -274,19 +272,19 @@ function verify(req, res, next){
 	});
 }
 
-function forgotPassword(req, res, next){
+function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	if (Object.prototype.toString.call(req.body.email) === "[object String]") {
 
 		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
 
-			//send forgot password email
+			// send forgot password email
 			return Mailer.sendResetPasswordEmail(req.body.email, {
 				token : data.token,
 				email: req.body.email,
 				username: req.params[C.REPO_REST_API_ACCOUNT]
-			}).catch( err => {
+			}).catch(err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
 				return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
@@ -304,14 +302,14 @@ function forgotPassword(req, res, next){
 	}
 }
 
-function getAvatar(req, res, next){
+function getAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
 
 
-		if(!user.getAvatar()){
+		if(!user.getAvatar()) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 
@@ -328,13 +326,12 @@ function getAvatar(req, res, next){
 	});
 }
 
-function uploadAvatar(req, res, next){
+function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 
-
-	//check space and format
-	function fileFilter(fileReq, file, cb){
+	// check space and format
+	function fileFilter(fileReq, file, cb) {
 
 		const acceptedFormat = ["png", "jpg", "gif"];
 
@@ -343,11 +340,11 @@ function uploadAvatar(req, res, next){
 
 		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+		if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
-		if(size > config.avatarSizeLimit){
+		if(size > config.avatarSizeLimit) {
 			return cb({ resCode: responseCodes.AVATAR_SIZE_LIMIT });
 		}
 
@@ -369,13 +366,13 @@ function uploadAvatar(req, res, next){
 			}).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
 			}).catch(error => {
-				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode: error, error.resCode ? error.resCode: error);
+				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode : error, error.resCode ? error.resCode : error);
 			});
 		}
 	});
 }
 
-function resetPassword(req, res, next){
+function resetPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
 	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
@@ -383,21 +380,21 @@ function resetPassword(req, res, next){
 		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		});
 	} else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 }
 
-function listUserInfo(req, res, next){
+function listUserInfo(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 	let user;
 
 	User.findByUserName(req.params.account).then(_user => {
 
-		if(!_user){
+		if(!_user) {
 			return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
 		}
 
@@ -422,21 +419,21 @@ function listUserInfo(req, res, next){
 	});
 }
 
-function listInfo(req, res, next){
+function listInfo(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
-	if(req.session.user.username !== req.params.account){
+	if(req.session.user.username !== req.params.account) {
 
 		let getType;
 
-		if(C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1){
+		if(C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1) {
 			getType = Promise.resolve("blacklisted");
 		} else {
 			getType = User.findByUserName(req.params.account).then(_user => {
-				if(!_user){
+				if(!_user) {
 					return "";
-				} else if(!_user.customData.email){
+				} else if(!_user.customData.email) {
 					return "database";
 				} else {
 					return "user";
@@ -454,7 +451,7 @@ function listInfo(req, res, next){
 	}
 }
 
-function printVersion(req, res, next){
+function printVersion(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const versionInfo = require("../VERSION");
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, versionInfo);

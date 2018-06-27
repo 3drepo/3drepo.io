@@ -32,7 +32,7 @@ const IPN = require("./ipn");
 const Invoice = require("./invoice");
 
 paypal.configure({
-	"mode": config.paypal.mode, //sandbox or live
+	"mode": config.paypal.mode, // sandbox or live
 	"client_id": config.paypal.client_id,
 	"client_secret": config.paypal.client_secret
 });
@@ -51,7 +51,7 @@ const updateBillingAddress = function (billingAgreementId, billingAddress) {
 	}];
 
 	return new Promise((resolve, reject) => {
-		paypal.billingAgreement.update(billingAgreementId, updateOps, function (err/*, billingAgreement*/) {
+		paypal.billingAgreement.update(billingAgreementId, updateOps, function (err/* , billingAgreement*/) {
 			if (err) {
 
 				systemLogger.logError(JSON.stringify(err),{
@@ -97,7 +97,7 @@ const cancelOldAgreement = function(billingAgreementId) {
 
 const createBillingAgreement = function(billing, payments, paymentDate) {
 
-	//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement start");
+	// console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement start");
 
 	const paymentDefs = [];
 	let hasProRata = false;
@@ -137,7 +137,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 	})
 		.then(billingPlan => {
 
-		//activate plan
+		// activate plan
 			return new Promise((resolve, reject) => {
 				const billingPlanUpdateAttributes = [{
 					"op": "replace",
@@ -165,7 +165,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 		})
 		.then(billingPlan => {
 
-		//create agreement
+		// create agreement
 			return new Promise((resolve, reject) => {
 
 				let desc = "";
@@ -193,7 +193,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 						const token = url.parse(link.href, true)
 							.query.token;
 
-						//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
+						// console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
 						resolve({
 							url: link.href,
 							paypalPaymentToken: token,
@@ -214,13 +214,13 @@ const processPayments = function(billing, payments, paymentDate) {
 	// don't cancel agreement here. only cancel after executing billing agreement
 	// otherwise if user decide not to complete the payment in paypal page it will
 	// leave users with no agreements at all in their account
-	//cancelOldAgreement(this).then(function() {
-	//(new Date().getSeconds(), "buySubscription - paypal.processPayments calling createBillingAgreement");
+	// cancelOldAgreement(this).then(function() {
+	// (new Date().getSeconds(), "buySubscription - paypal.processPayments calling createBillingAgreement");
 	return createBillingAgreement(billing, payments, paymentDate);
-	//});
+	// });
 };
 
-const executeAgreement = function(token){
+const executeAgreement = function(token) {
 
 	return new Promise((resolve, reject) => {
 		paypal.billingAgreement.execute(token, {}, (err, billingAgreement) => {
@@ -229,7 +229,7 @@ const executeAgreement = function(token){
 			} else if(
 				(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError) ||
 				["Expired", "Suspended", "Cancelled"].indexOf(billingAgreement.state) !== -1
-			){
+			) {
 				reject(responseCodes.EXECUTE_AGREEMENT_ERROR);
 
 			} else {
@@ -251,10 +251,10 @@ const verifyGenuine = function(payUrl, qs) {
 
 };
 
-const validateIPN = function(data){
+const validateIPN = function(data) {
 
 	// skip ipn validation
-	if(!config.paypal.validateIPN){
+	if(!config.paypal.validateIPN) {
 		return Promise.resolve();
 	}
 
@@ -262,49 +262,49 @@ const validateIPN = function(data){
 	let qs = querystring(data);
 	qs = "cmd=_notify-validate&" + qs;
 
-	//first verify this message is genuinely coming from paypal
+	// first verify this message is genuinely coming from paypal
 	return verifyGenuine(payUrl, qs);
 };
 
-const determineIPNType = function(paymentInfo){
+const determineIPNType = function(paymentInfo) {
 
 	const type = paymentInfo.txn_type;
 
-	if(type === "recurring_payment_profile_created"){
+	if(type === "recurring_payment_profile_created") {
 		return C.IPN_PAYMENT_INIT;
-	} else if (type === "recurring_payment" && paymentInfo.payment_status === "Completed"){
+	} else if (type === "recurring_payment" && paymentInfo.payment_status === "Completed") {
 		return C.IPN_PAYMENT_SUCCESS;
-	} else if (type === "recurring_payment_profile_cancel"){
+	} else if (type === "recurring_payment_profile_cancel") {
 		return C.IPN_PAYMENT_CANCEL;
-	} else if (type === "recurring_payment_suspended" || type === "recurring_payment_suspended_due_to_max_failed_payment"){
+	} else if (type === "recurring_payment_suspended" || type === "recurring_payment_suspended_due_to_max_failed_payment") {
 		return C.IPN_PAYMENT_SUSPENDED;
-	} else if (type === "recurring_payment_failed" || type === "recurring_payment_skipped"){
+	} else if (type === "recurring_payment_failed" || type === "recurring_payment_skipped") {
 		return C.IPN_PAYMENT_FAILED;
-	} else if (paymentInfo.payment_status === "Refunded"){
+	} else if (paymentInfo.payment_status === "Refunded") {
 		return C.IPN_PAYMENT_REFUNDED;
 	}
 
 	return C.IPN_UNKONWN;
 };
 
-const handleIPN = function(paymentInfo){
+const handleIPN = function(paymentInfo) {
 	const User = require("./user");
 
 	const billingAgreementId = paymentInfo.recurring_payment_id;
 	const ipnType = determineIPNType(paymentInfo);
 
-	//save IPN
+	// save IPN
 	IPN.save(paymentInfo).catch(err => {
-		systemLogger.logError("Failed to save IPN", {err: err, billingAgreementId: billingAgreementId} );
+		systemLogger.logError("Failed to save IPN", {err: err, billingAgreementId: billingAgreementId});
 	});
 
 	validateIPN(paymentInfo).then(() => {
 
-		if(ipnType === C.IPN_PAYMENT_INIT){
-			//ignore
-			systemLogger.logInfo("Payment init IPN", {billingAgreementId: billingAgreementId} );
+		if(ipnType === C.IPN_PAYMENT_INIT) {
+			// ignore
+			systemLogger.logInfo("Payment init IPN", {billingAgreementId: billingAgreementId});
 
-		} else if(ipnType === C.IPN_PAYMENT_SUCCESS){
+		} else if(ipnType === C.IPN_PAYMENT_SUCCESS) {
 
 			return User.activateSubscription(billingAgreementId, {
 
@@ -326,12 +326,12 @@ const handleIPN = function(paymentInfo){
 			// ignore
 			systemLogger.logInfo("IPN said subscription canceled", { billingAgreementId });
 
-		} else if (ipnType === C.IPN_PAYMENT_FAILED){
+		} else if (ipnType === C.IPN_PAYMENT_FAILED) {
 
 
 			return User.findUserByBillingId(billingAgreementId).then(user => {
 
-				if(!user){
+				if(!user) {
 					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`});
 				}
 
@@ -349,7 +349,7 @@ const handleIPN = function(paymentInfo){
 
 			return User.findUserByBillingId(billingAgreementId).then(user => {
 
-				if(!user){
+				if(!user) {
 					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`, ipn: paymentInfo});
 				}
 
@@ -361,11 +361,11 @@ const handleIPN = function(paymentInfo){
 
 			});
 
-		} else if (ipnType === C.IPN_PAYMENT_REFUNDED){
+		} else if (ipnType === C.IPN_PAYMENT_REFUNDED) {
 
 			return User.findUserByBillingId(billingAgreementId).then(user => {
 
-				if(!user){
+				if(!user) {
 					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`, ipn: paymentInfo});
 				}
 
@@ -381,25 +381,25 @@ const handleIPN = function(paymentInfo){
 				}).then(() => {
 					systemLogger.logInfo("Created and sent refund invoice to user", { billingAgreementId, user: user.user });
 				}).catch(err => {
-					systemLogger.logError("Error while creating refund notice", {err: err, user: user.user, ipn: paymentInfo} );
+					systemLogger.logError("Error while creating refund notice", {err: err, user: user.user, ipn: paymentInfo});
 				});
 
 			});
 
 		} else if(ipnType === C.IPN_UNKONWN) {
 
-			//other payment status we don't know how to deal with
+			// other payment status we don't know how to deal with
 			return Promise.reject({ message: "unexpected ipn message type"});
 		}
 
-	}).catch( err => {
+	}).catch(err => {
 
 		// log error and send email to support
-		if(err){
+		if(err) {
 
-			systemLogger.logError("Error while activating subscription", {err: err, billingAgreementId: billingAgreementId} );
+			systemLogger.logError("Error while activating subscription", {err: err, billingAgreementId: billingAgreementId});
 
-			if(err.stack){
+			if(err.stack) {
 				systemLogger.logError(err.stack);
 			}
 

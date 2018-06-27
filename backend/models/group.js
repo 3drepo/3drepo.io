@@ -50,8 +50,7 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch,
 	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
 	const project = { parents: 1, _id: 0 };
 
-	const db = require("../db/db");
-	return db.getCollection(account, model+ ".scene").then(dbCol => {
+	return db.getCollection(account, model + ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
 			return History.getHistory({ account, model }, branch, revId).then(history => {
 				if (!history) {
@@ -74,7 +73,7 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch,
 groupSchema.statics.uuidToIfcGuids = function(obj) {
 	const account = obj.account;
 	const model = obj.model;
-	const uid =("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
+	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
 	const parent = utils.stringToUUID(uid);
 
 	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
@@ -92,8 +91,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: {$in: ids}, "metadata.IFC GUID": {$exists: true} };
 	const project =  { "metadata.IFC GUID": 1 , parents: 1};
-	const db = require("../db/db");
-	return db.getCollection(account, model+ ".scene").then(dbCol => {
+	return db.getCollection(account, model + ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
 			return results;
 		});
@@ -110,7 +108,7 @@ groupSchema.statics.isIfcGuid = function(value) {
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsToString) {
+groupSchema.methods.getObjectsArrayAsIfcGuids = function(data) {
 
 	const ifcGuidPromises = [];
 
@@ -186,11 +184,9 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 	});
 };
 
-groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
+groupSchema.statics.findIfcGroupByUID = function(dbCol, uid) {
 
 	// Extract a unique list of IDs only
-	const groupObjectsMap = [];
-
 	return this.findOne(dbCol, { _id: uid })
 		.then(group => {
 
@@ -266,7 +262,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 	});
 };
 
-groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
+groupSchema.statics.findByUID = function(dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -283,7 +279,7 @@ groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 
 };
 
-groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
+groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -301,7 +297,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
+groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId) {
 
 	const query = {};
 
@@ -346,12 +342,12 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 	});
 };
 
-groupSchema.methods.updateAttrs = function(dbCol, data){
+groupSchema.methods.updateAttrs = function(dbCol, data) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
-		
+
 		fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
 				if (key === "objects" && data.objects) {
@@ -364,25 +360,24 @@ groupSchema.methods.updateAttrs = function(dbCol, data){
 			}
 		});
 
-		const db = require("../db/db");
 		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
 				return {_id: utils.uuidToString(this._id)};
-			}); 
+			});
 		});
 	});
 };
 
-groupSchema.statics.createGroup = function(dbCol, data){
+groupSchema.statics.createGroup = function(dbCol, data) {
 	const group = this.model("Group").createInstance({
-		account: dbCol.account, 
+		account: dbCol.account,
 		model: dbCol.model
 	});
 
 	group._id = utils.stringToUUID(uuid.v1());
-	return group.save().then( (savedGroup)=>{
+	return group.save().then((savedGroup)=>{
 		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
-			//remove the recently saved new group as update attributes failed
+			// remove the recently saved new group as update attributes failed
 			return Group.deleteGroup(dbCol, group._id).then(() => {
 				return Promise.reject(err);
 			});
@@ -390,7 +385,7 @@ groupSchema.statics.createGroup = function(dbCol, data){
 	});
 };
 
-groupSchema.methods.clean = function(){
+groupSchema.methods.clean = function() {
 
 	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
@@ -400,7 +395,7 @@ groupSchema.methods.clean = function(){
 };
 
 
-groupSchema.statics.deleteGroup = function(dbCol, id){
+groupSchema.statics.deleteGroup = function(dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
@@ -408,7 +403,7 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 
 	return Group.findOneAndRemove(dbCol, { _id : id}).then(group => {
 
-		if(!group){
+		if(!group) {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 
@@ -416,9 +411,9 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 };
 
 const Group = ModelFactory.createClass(
-	"Group", 
-	groupSchema, 
-	arg => { 
+	"Group",
+	groupSchema,
+	arg => {
 		return `${arg.model}.groups`;
 	}
 );

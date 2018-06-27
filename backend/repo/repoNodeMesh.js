@@ -101,13 +101,12 @@ exports.extractBoundingBox = function(mesh) {
 exports.mergeMapSort = function(left, right) {
 	if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
 		return -1;
-	} else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] ) {
+	} else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
 		return 1;
 	} else {
 		return 0;
 	}
 };
-
 
 
 /**

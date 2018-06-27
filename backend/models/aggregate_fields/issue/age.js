@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
-
 	// calulate how many weeks an issue has been created.
 	// 0 - <=1 = week 0
-	// >1 - <=2 = week 1 
+	// >1 - <=2 = week 1
 	// ...
 
 	module.exports = {

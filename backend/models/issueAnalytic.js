@@ -22,7 +22,7 @@
 	const responseCodes = require("../response_codes.js");
 	const json2csv = require("json2csv");
 
-	function getField(field){
+	function getField(field) {
 		try {
 			return require(`./aggregate_fields/issue/${field}`);
 		} catch (e) {
@@ -49,13 +49,13 @@
 					{ "$sort": {"count": sort, [field]: sort}}
 				];
 
-				if(!pipeline){
+				if(!pipeline) {
 					return Promise.reject(responseCodes.GROUP_BY_FIELD_NOT_SUPPORTED);
 				}
 
 				const promise = collection.aggregate(pipeline).toArray();
 
-				if(format === "csv"){
+				if(format === "csv") {
 
 					const csvFields = [];
 					const csvFieldNames = [];

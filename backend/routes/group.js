@@ -36,11 +36,11 @@ router.post("/groups/", middlewares.issue.canCreate, createGroup);
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
 router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
-const getDbColOptions = function(req){
+const getDbColOptions = function(req) {
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
-function listGroups(req, res, next){
+function listGroups(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
@@ -68,7 +68,7 @@ function listGroups(req, res, next){
 	});
 }
 
-function findGroup(req, res, next){
+function findGroup(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
@@ -80,8 +80,8 @@ function findGroup(req, res, next){
 		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null);
 	}
 
-	groupItem.then( group => {
-		if(!group){
+	groupItem.then(group => {
+		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
 			return Promise.resolve(group);
@@ -94,7 +94,7 @@ function findGroup(req, res, next){
 	});
 }
 
-function createGroup(req, res, next){
+function createGroup(req, res, next) {
 
 	const place = utils.APIInfo(req);
 
@@ -109,7 +109,7 @@ function createGroup(req, res, next){
 	});
 }
 
-function deleteGroup(req, res, next){
+function deleteGroup(req, res, next) {
 
 	if (!req.query.ids || "[object Array]" !== Object.prototype.toString.call(req.query.ids)) {
 		req.query.ids = [];
@@ -132,12 +132,12 @@ function deleteGroups(req, res, next) {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	} else {
-		//responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		// responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		responseCodes.respond(place, req, res, next, { message: "Missing or invalid arguments", status: 400 }, { message: "Missing or invalid arguments", status: 400 });
 	}
 }
 
-function updateGroup(req, res, next){
+function updateGroup(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
@@ -149,9 +149,9 @@ function updateGroup(req, res, next){
 		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
 	}
 
-	groupItem.then( group => {
+	groupItem.then(group => {
 
-		if(!group){
+		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
 			return group.updateAttrs(dbCol, req.body);

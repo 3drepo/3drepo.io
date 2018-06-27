@@ -40,11 +40,11 @@ schema.statics.addDefaultJobs = function(teamspace) {
 };
 
 schema.statics.usersWithJob = function(teamspace) {
-	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
+	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then((jobs) => {
 		const userToJob  = {};
 
-		jobs.forEach( job => {
-			job.users.forEach( user => {
+		jobs.forEach(job => {
+			job.users.forEach(user => {
 				userToJob[user] = job._id;
 			});
 		});
@@ -56,7 +56,7 @@ schema.statics.usersWithJob = function(teamspace) {
 };
 
 schema.statics.removeUserFromAnyJob = function(teamspace, user) {
-	return Job.findByUser(teamspace, user).then( job => {
+	return Job.findByUser(teamspace, user).then(job => {
 		if(job) {
 			return job.removeUserFromJob(user);
 		}
@@ -81,17 +81,17 @@ schema.statics.findByUser = function(teamspace, user) {
 
 schema.statics.removeUserFromJobs = function(teamspace, user) {
 	const User = require("./user");
-	return User.teamspaceMemberCheck(teamspace, user).then( () => {
+	return User.teamspaceMemberCheck(teamspace, user).then(() => {
 		return Job.removeUserFromAnyJob(teamspace, user);
 	});
 
 };
 
 schema.statics.addUserToJob = function(teamspace, user, jobName) {
-	//Check if user is member of teamspace
+	// Check if user is member of teamspace
 	const User = require("./user");
-	return User.teamspaceMemberCheck(teamspace, user).then( () => {
-		return Job.findByJob(teamspace, jobName).then( (job) => {
+	return User.teamspaceMemberCheck(teamspace, user).then(() => {
+		return Job.findByJob(teamspace, jobName).then((job) => {
 			if(!job) {
 				return Promise.reject(responseCodes.JOB_NOT_FOUND);
 			}

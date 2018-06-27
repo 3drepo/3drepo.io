@@ -30,19 +30,19 @@
 	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
-	function listTemplates(req, res, next){
+	function listTemplates(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.permissionTemplates.get());
-			
+
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
-	function createTemplate(req, res, next){
+	function createTemplate(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 
@@ -60,10 +60,10 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
 
-	function deleteTemplate(req, res, next){
+	function deleteTemplate(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 

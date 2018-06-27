@@ -23,7 +23,7 @@ const config = require("app-config").config;
 
 const sessionFactory = require("./services/session.js");
 
-/*******************************************************************************
+/** *****************************************************************************
  * Coalesce function
  * @param {Object} variable - variable to coalesce
  * @param {Object} value - value to return if object is null or undefined
@@ -36,7 +36,7 @@ const coalesce = function (variable, value) {
 	}
 };
 
-/*******************************************************************************
+/** *****************************************************************************
  * Round robin API ClientConfiguration
  * @param {Object} variable - variable to coalesce
  * @param {Object} value - value to return if object is null or undefined
@@ -50,24 +50,24 @@ function createRoundRobinAlgorithm(algoConfig) {
 		apiUrl : function(type, path) {
 			const typeFunctions = this.apiUrls[type];
 			const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-	
+
 			this.apiUrlCounter[type] += 1;
-	
+
 			return this.apiUrls[type][functionIndex] + "/" + path;
 		}
 	};
 
 	for (const k in algoConfig.apiUrls) {
-		if(algoConfig.apiUrls.hasOwnProperty(k)){
+		if(algoConfig.apiUrls.hasOwnProperty(k)) {
 			roundRobin.apiUrlCounter[k] = 0;
 		}
 	}
-	
+
 	return roundRobin;
 
 }
 
-/*******************************************************************************
+/** *****************************************************************************
  * Fill in the details of a server
  * @param {Object} serverObject - The object to populate
  * @param {string} name - The name of the server (also populates sub-domain/sub-directory)
@@ -90,7 +90,7 @@ const fillInServerDetails = function (serverObject, name, using_ssl, host, defau
 
 	serverObject.base_url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
 	serverObject.base_url_no_port = serverObject.public_protocol + "://" + serverObject.hostname;
-	//serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
+	// serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
 	serverObject.url = serverObject.base_url + serverObject.host_dir;
 
 	serverObject.location_url = serverObject.url;
@@ -194,7 +194,7 @@ for (let i = 0; i < config.servers.length; i++) {
 		config.chat_server = server;
 		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== "undefined" ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
-	} else if (server.service === "frontend"){
+	} else if (server.service === "frontend") {
 
 		server.session = sessionFactory.session(config);
 		fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
@@ -228,7 +228,7 @@ if (config.db.host.length > 1 && !config.db.replicaSet) {
 config.db.username = coalesce(config.db.username, "username");
 config.db.password = coalesce(config.db.password, "password");
 
-//Subscription info
+// Subscription info
 config.subscriptions = coalesce(config.subscriptions, {});
 config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
 
@@ -241,7 +241,7 @@ config.js_debug_level = coalesce(config.js_debug_level, "debug"); // Loading pro
 config.backgroundImage = coalesce(config.backgroundImage, "public/images/dummies/login-background.jpg");
 
 config.default_format = coalesce(config.default_format, "html");
-//config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
+// config.external = (config.js_debug_level === "debug") ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
 // Log file options
 config.logfile = coalesce(config.logfile, {});
@@ -260,19 +260,19 @@ config.tokenExpiry = coalesce(config.tokenExpiry, {});
 config.tokenExpiry.emailVerify = coalesce(config.tokenExpiry.emailVerify, 14 * 24); // 2 weeks
 config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
 
-//captcha
+// captcha
 config.captcha = coalesce(config.captcha, null);
 
-//default auth settings
+// default auth settings
 config.auth = coalesce(config.auth, {});
 config.auth.captcha = coalesce(config.auth.captcha, false);
 config.auth.register = coalesce(config.auth.register,true);
 
-//paypal
+// paypal
 config.paypal = coalesce(config.paypal, {});
 config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
 
-//upload size limit
+// upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
@@ -282,11 +282,11 @@ config.unitySettings = coalesce(config.unitySettings, {
 	TOTAL_MEMORY: 2130706432
 });
 
-//default vat validation url
+// default vat validation url
 config.vat = coalesce(config.vat, {});
 config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl");
 
-//get frontend base url
+// get frontend base url
 config.getBaseURL = function (useNonPublicPort) {
 
 	const frontEndServerConfig = config.servers.find(server => server.service === "frontend");
@@ -294,11 +294,11 @@ config.getBaseURL = function (useNonPublicPort) {
 	let port = "";
 
 	if (useNonPublicPort) {
-		//use non public port, for html templates generated for phamtom to generate pdf
+		// use non public port, for html templates generated for phamtom to generate pdf
 		port = ":" + (config.using_ssl ? default_https_port : default_http_port);
 
 	} else if (config.using_ssl && frontEndServerConfig.public_port !== 443 || !config.using_ssl && frontEndServerConfig.public_port !== 80) {
-		//do not show :port in url if port is 80 for http or 443 for https to make the url in email looks pretty
+		// do not show :port in url if port is 80 for http or 443 for https to make the url in email looks pretty
 		port = ":" + frontEndServerConfig.public_port;
 	}
 
@@ -307,7 +307,7 @@ config.getBaseURL = function (useNonPublicPort) {
 	return baseUrl;
 };
 
-//avatar size limit
+// avatar size limit
 config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
 
 module.exports = config;

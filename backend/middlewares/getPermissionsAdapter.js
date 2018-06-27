@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 (() => {
-	"use strict";
-
 	const ModelSetting = require("../models/modelSetting");
 	const Project = require("../models/project");
 	const User = require("../models/user");
@@ -27,8 +25,8 @@
 	function getPermissionsAdapter(account) {
 
 		return {
-			getUser: function(){
-				if(this.dbUser){
+			getUser: function() {
+				if(this.dbUser) {
 					return Promise.resolve(this.dbUser);
 				} else {
 					return User.findByUserName(account).then(user => {
@@ -38,54 +36,54 @@
 				}
 			},
 
-			accountLevel: function(username){
+			accountLevel: function(username) {
 
 				return this.getUser().then(user => {
 
-					if(!user){
+					if(!user) {
 						return [];
 					}
 
 					const permission = user.customData.permissions.findByUser(username);
 
-					if(!permission){
+					if(!permission) {
 						return [];
 					}
-					
+
 					return permission.permissions;
 				});
 			},
 
-			projectLevel: function(username, project){
+			projectLevel: function(username, modelName) {
 
-				return Project.findOne({account}, { name: project}).then(project => {
+				return Project.findOne({account}, { name: modelName}).then(project => {
 
-					if(!project){
+					if(!project) {
 						return [];
 					}
 
 					const permission = project.findPermsByUser(username);
-					
-					if(!permission){
+
+					if(!permission) {
 						return [];
 					}
-					
+
 					return permission.permissions;
 
-					
+
 				});
 			},
 
-			modelLevel: function(username, model){
+			modelLevel: function(username, model) {
 
 				let user;
 				let projectPerms = [];
 
 				const projectQuery = { models: model, "permissions.user": username };
 				// project admin have access to models underneath it.
-				return Project.findOne({account}, projectQuery, { "permissions.$" : 1 } ).then(project => {
+				return Project.findOne({account}, projectQuery, { "permissions.$" : 1 }).then(project => {
 
-					if(project && project.permissions){
+					if(project && project.permissions) {
 						projectPerms = project.permissions[0].permissions;
 					}
 
@@ -98,13 +96,13 @@
 
 				}).then(setting => {
 
-					if(!setting){
+					if(!setting) {
 						return projectPerms;
 					}
 
 					const perm = setting.findPermissionByUser(username);
 
-					if(!perm){
+					if(!perm) {
 						return projectPerms;
 					}
 

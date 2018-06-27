@@ -1,3 +1,4 @@
+"use strict";
 const html = data => `
 	Hi there,<br>
 	<br>

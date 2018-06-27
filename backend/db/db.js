@@ -17,7 +17,7 @@
 
 (function() {
 	"use strict";
-	
+
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
@@ -26,9 +26,9 @@
 	};
 
 	let db;
-	
+
 	function disconnect() {
-		if(db){
+		if(db) {
 			db.close();
 			db = null;
 		}
@@ -38,7 +38,7 @@
 		getDB(database).then(dbConn => {
 			dbConn.dropCollection(collection.name);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
@@ -64,7 +64,7 @@
 	}
 
 	function getDB(database) {
-		if(db){
+		if(db) {
 			return Promise.resolve(db.db(database));
 		} else {
 			return MongoClient.connect(getURL(database), connConfig).then(_db => {
@@ -84,7 +84,7 @@
 		return getDB(database).then(dbConn => {
 			return new GridFSBucket(dbConn, collection);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
@@ -93,7 +93,7 @@
 		return getDB(database).then(dbConn => {
 			return dbConn.collection(colName);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
@@ -102,12 +102,12 @@
 		return getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
 
-	//FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
+	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
 	function _getCollection(database, colName)	{
 		return db.db(database).collection(colName);
 	}
@@ -116,17 +116,17 @@
 		return getDB(database).then(dbConn => {
 			return dbConn.listCollections().toArray();
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
-		
+
 	}
-	
+
 	function runCommand(database, cmd) {
 		return getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}

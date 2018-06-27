@@ -14,18 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const DB = require("../db/db");
-	
+
 const schema = mongoose.Schema({
 	type: String,
 	count: Number
 });
 
-//inc counter and return the number atomically
-schema.statics.findAndIncInvoiceNumber = function(){
-	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
+// inc counter and return the number atomically
+schema.statics.findAndIncInvoiceNumber = function() {
+	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
 	return DB.getDB("admin")
 		.then(db => {
@@ -42,11 +43,11 @@ schema.statics.findAndIncInvoiceNumber = function(){
 };
 
 
-//inc counter and return the number atomically
-schema.statics.findAndIncRefundNumber = function(){
+// inc counter and return the number atomically
+schema.statics.findAndIncRefundNumber = function() {
 
 
-	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
+	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
 	return DB.getDB("admin")
 		.then(db => {
@@ -69,7 +70,6 @@ const Counter = ModelFactory.createClass(
 		return "counters";
 	}
 );
-
 
 
 module.exports = Counter;

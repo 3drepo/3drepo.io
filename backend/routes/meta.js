@@ -26,7 +26,7 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 
-	//Get meta data
+	// Get meta data
 	router.get("/revision/master/head/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
@@ -62,7 +62,7 @@
 
 	function getAllIdsWith4DSequenceTag(req, res, next) {
 		let branch;
-		
+
 		if(!req.params.rev) {
 			branch = C.MASTER_BRANCH_NAME;
 		}
@@ -76,7 +76,7 @@
 
 	function getAllIdsWithMetadataField(req, res, next) {
 		let branch;
-		
+
 		if(!req.params.rev) {
 			branch = C.MASTER_BRANCH_NAME;
 		}

@@ -38,7 +38,7 @@ view.findByUID = function(dbCol, uid, projection) {
 	});
 };
 
-view.listViewpoints = function(dbCol){
+view.listViewpoints = function(dbCol) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
@@ -54,7 +54,7 @@ view.listViewpoints = function(dbCol){
 
 };
 
-view.getThumbnail = function(dbColOptions, uid){
+view.getThumbnail = function(dbColOptions, uid) {
 
 	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {
 		if (!vp.screenshot) {
@@ -67,7 +67,7 @@ view.getThumbnail = function(dbColOptions, uid){
 
 };
 
-view.updateAttrs = function(dbCol, id, data){
+view.updateAttrs = function(dbCol, id, data) {
 
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
@@ -86,7 +86,7 @@ view.updateAttrs = function(dbCol, id, data){
 	});
 };
 
-view.createViewpoint = function(dbCol, data){
+view.createViewpoint = function(dbCol, data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -128,7 +128,7 @@ view.createViewpoint = function(dbCol, data){
 	});
 };
 
-view.deleteViewpoint = function(dbCol, id){
+view.deleteViewpoint = function(dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);

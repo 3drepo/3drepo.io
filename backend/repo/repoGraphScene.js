@@ -92,7 +92,7 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 				switch(bson[C.REPO_NODE_LABEL_TYPE]) {
 				case C.REPO_NODE_TYPE_TRANSFORMATION :
 					transformations[bson.id] = bson;
-					if (!bson[C.REPO_NODE_LABEL_PARENTS]){
+					if (!bson[C.REPO_NODE_LABEL_PARENTS]) {
 						rootNode = bson;
 					}
 					break;
@@ -135,7 +135,7 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 		}
 	}
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Propagate information about children from parental links
 	// CAREFUL: under normal circumstances JavaScript is pass-by-value
 	// unless you update the fields in place (using dot notation) or pass objects.
@@ -149,7 +149,7 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 				const parent = all[UUID.unparse(parentSidBytes)];
 
 				if (parent) {
-					if (!parent[C.REPO_NODE_LABEL_CHILDREN]){
+					if (!parent[C.REPO_NODE_LABEL_CHILDREN]) {
 						parent[C.REPO_NODE_LABEL_CHILDREN] = [];
 					}
 					parent[C.REPO_NODE_LABEL_CHILDREN].push(all[sid]);
@@ -158,11 +158,11 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 		}
 	});
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Textures
 	scene.textures = textures;
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Materials
 	Object.keys(materials).forEach(id => {
 		materials[id] = repoNodeMaterial.decode(materials[id], scene.textures);
@@ -170,7 +170,7 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 
 	scene.materials = materials;
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Meshes
 
 	Object.keys(meshes).forEach(id => {
@@ -179,7 +179,7 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 
 	scene.meshes = meshes;
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Cameras
 	Object.keys(cameras).forEach(id => {
 		cameras[id] = repoNodeCamera.decode(cameras[id]);
@@ -187,19 +187,19 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 
 	scene.cameras = cameras;
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Attach ID of meshes to transformation which points to them (ID, not SID!)
-	//var mTransformations = new Object();
+	// var mTransformations = new Object();
 
 	Object.keys(transformations).forEach(id => {
 		transformations[id] = repoNodeTransformation.decode(transformations[id], meshes, cameras);
 	});
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Federation references
 	scene.refs = refs;
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Metadata
 	Object.keys(metas).forEach(id => {
 		metas[id] = repoNodeMeta.decode(metas[id]);
@@ -207,9 +207,9 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 
 	scene.metas = metas;
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Register root node
-	if (rootNode){
+	if (rootNode) {
 		scene.mRootNode = rootNode;
 	}
 

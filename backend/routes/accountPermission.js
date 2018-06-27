@@ -32,13 +32,13 @@
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
 
-	function listPermissions(req, res, next){
+	function listPermissions(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 			const permissions = user.toObject().customData.permissions;
 			return User.getAllUsersInTeamspace(req.params.account).then(users => {
 
-				users.forEach( _user => {
+				users.forEach(_user => {
 					if(!_.find(permissions, {"user" : _user})) {
 						permissions.push({user, permissions: []});
 					}
@@ -54,7 +54,7 @@
 
 	}
 
-	function createPermission(req, res, next){
+	function createPermission(req, res, next) {
 
 		if (Object.keys(req.body).length === 2 &&
 			Object.prototype.toString.call(req.body.user) === "[object String]" &&
@@ -74,10 +74,9 @@
 		}
 
 
-
 	}
 
-	function updatePermission(req, res, next){
+	function updatePermission(req, res, next) {
 
 		if (Object.keys(req.body).length === 1 &&
 			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
@@ -95,7 +94,7 @@
 
 	}
 
-	function deletePermission(req, res, next){
+	function deletePermission(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 

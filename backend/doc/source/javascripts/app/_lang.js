@@ -1,4 +1,4 @@
-//= require ../lib/_jquery
+// = require ../lib/_jquery
 
 /*
 Copyright 2008-2013 Concur Technologies, Inc.
@@ -33,7 +33,7 @@ under the License.
 
 		$(".lang-selector a").removeClass("active");
 		$(".lang-selector a[data-language-name='" + language + "']").addClass("active");
-		for (let i=0; i < languages.length; i++) {
+		for (let i = 0; i < languages.length; i++) {
 			$(".highlight.tab-" + languages[i]).hide();
 			$(".lang-specific." + languages[i]).hide();
 		}
@@ -125,7 +125,7 @@ under the License.
 	// if a button is clicked, add the state to the history
 	function pushURL(language) {
 		if (!history) {
-			return; 
+			return;
 		}
 		let hash = window.location.hash;
 		if (hash) {

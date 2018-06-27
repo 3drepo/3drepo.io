@@ -23,9 +23,9 @@ const responseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 
 const billingAddressSchema = new mongoose.Schema({
-	//vat setter was async. setter cannot be async at the momnent. 
+	// vat setter was async. setter cannot be async at the momnent.
 	// could happen in the future versions of mongoose
-	// https://github.com/Automattic/mongoose/issues/4227 
+	// https://github.com/Automattic/mongoose/issues/4227
 	vat: { type: String },
 	line1: { type: String },
 	line2: { type: String },
@@ -43,31 +43,31 @@ const billingAddressSchema = new mongoose.Schema({
 
 
 billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
-	
+
 	Object.keys(billingAddress).forEach(key => {
 
 		if(key === "_id") {
 			return;
-		} 
+		}
 
 		this.set(key, billingAddress[key]);
-		
+
 	});
 
-	if(billingAddress.vat){
+	if(billingAddress.vat) {
 		return this.changeVATNumber(billingAddress.vat);
 	} else {
 		return Promise.resolve();
 	}
 };
 
-billingAddressSchema.methods.changeVATNumber = function(vatCode){
+billingAddressSchema.methods.changeVATNumber = function(vatCode) {
 
 	this.vat = vatCode;
 
 	let cleanedVATNumber = this.vat.replace(/ /g,"");
 	if (cleanedVATNumber.toUpperCase().startsWith(this.countryCode)) {
-		cleanedVATNumber = cleanedVATNumber.substr(2); 
+		cleanedVATNumber = cleanedVATNumber.substr(2);
 	}
 
 	return vat.checkVAT(this.countryCode, cleanedVATNumber)

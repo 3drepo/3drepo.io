@@ -286,8 +286,8 @@
 
 			let errorCode = mongoErr.code;
 
-			//replica error format
-			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err){
+			// replica error format
+			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err) {
 				errorCode = mongoErr.errors[0].err.code;
 			}
 
@@ -296,7 +296,7 @@
 			} else if (errorCode === 18) {
 				return this.INCORRECT_USERNAME_OR_PASSWORD;
 			}
-			//other error
+			// other error
 			systemLogger.logError(mongoErr);
 			return {
 				value: 1000,
@@ -376,7 +376,7 @@
 				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
 			}
 
-			if(!resCode.value){
+			if(!resCode.value) {
 				resCode = responseCodes.PROCESS_ERROR(resCode);
 			}
 
@@ -417,7 +417,7 @@
 					res.setHeader("Content-Type", "application/json");
 				}
 
-				//res.setHeader("Content-Length", extraInfo.length);
+				// res.setHeader("Content-Length", extraInfo.length);
 				length = extraInfo.length;
 
 				res.write(extraInfo, "binary");
@@ -436,7 +436,7 @@
 			req[C.REQ_REPO].logger.logInfo("Responded with " + resCode.status, { httpCode: resCode.status, contentLength: length });
 		}
 
-		//next();
+		// next();
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {

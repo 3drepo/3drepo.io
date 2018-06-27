@@ -15,14 +15,14 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const C	= require("../constants");
-	
-	function canUpdate(req, res, next){
-		if(req.body.permissions){
+
+	function canUpdate(req, res, next) {
+		if(req.body.permissions) {
 			checkPermissions([C.PERM_PROJECT_ADMIN])(req, res, next);
 		} else {
 			checkPermissions([C.PERM_EDIT_PROJECT])(req, res, next);

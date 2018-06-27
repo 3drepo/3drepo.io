@@ -62,24 +62,24 @@ function requestMapTile(req, res, domain, uri) {
 		res.end();
 	}).catch(err => {
 		systemLogger.logError(JSON.stringify(err));
-		if(err.message){
+		if(err.message) {
 			res.status(500).json({ message: err.message});
-		} else if (err.resCode){
+		} else if (err.resCode) {
 			res.status(err.resCode).json({message: err.message});
 		}
 	});
 }
 
-function getOSMTile(req, res){
-	//TODO: we may want to ensure the model has access to tiles
-	//const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
+function getOSMTile(req, res) {
+	// TODO: we may want to ensure the model has access to tiles
+	// const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
 	const domain = "a.tile.openstreetmap.org";
 	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
 	systemLogger.logInfo("Fetching osm map tile: " + uri);
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereMapsTile(req, res){
+function getHereMapsTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".base.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -88,7 +88,7 @@ function getHereMapsTile(req, res){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereAerialMapsTile(req, res){
+function getHereAerialMapsTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".aerial.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -97,7 +97,7 @@ function getHereAerialMapsTile(req, res){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereTrafficTile(req, res){
+function getHereTrafficTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".traffic.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/traffictile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -106,7 +106,7 @@ function getHereTrafficTile(req, res){
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereTrafficFlowTile(req, res){
+function getHereTrafficFlowTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".traffic.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
@@ -130,9 +130,9 @@ function getHereBuildingsFromLongLat(req, res) {
 		res.status(200).json(buildings);
 	}).catch(err => {
 		systemLogger.logError(JSON.stringify(err));
-		if(err.message){
+		if(err.message) {
 			res.status(500).json({ message: err.message});
-		} else if (err.resCode){
+		} else if (err.resCode) {
 			res.status(err.resCode).json({message: err.message});
 		}
 	});

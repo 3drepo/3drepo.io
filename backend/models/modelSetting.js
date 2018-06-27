@@ -37,7 +37,7 @@ const schema = mongoose.Schema({
 		permission: String
 	}],
 	properties: {
-		unit: String, //cm, m, ft, mm
+		unit: String, // cm, m, ft, mm
 		code: String,
 		topicTypes: [{
 			_id: false,
@@ -88,7 +88,7 @@ schema.set("toObject", { getters: true });
 
 schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
 
-schema.methods.updateProperties = function(updateObj){
+schema.methods.updateProperties = function(updateObj) {
 	Object.keys(updateObj).forEach(key => {
 		if(!updateObj[key]) {
 			return;
@@ -99,14 +99,14 @@ schema.methods.updateProperties = function(updateObj){
 				const topicTypes = {};
 				updateObj[key].forEach(type => {
 
-					if(!type || !type.trim()){
+					if(!type || !type.trim()) {
 						return;
 					}
 
-					//generate value from label
+					// generate value from label
 					const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
 
-					if(topicTypes[value]){
+					if(topicTypes[value]) {
 						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
 					} else {
 						topicTypes[value] = {
@@ -132,12 +132,12 @@ schema.methods.updateProperties = function(updateObj){
 	});
 };
 
-schema.methods.changePermissions = function(permissions){
+schema.methods.changePermissions = function(permissions) {
 
 	const User = require("./user");
 	const account = this._dbcolOptions.account;
 
-	//get list of valid permission name
+	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
 
 	return User.findByUserName(account).then(dbUser => {
@@ -145,10 +145,10 @@ schema.methods.changePermissions = function(permissions){
 		const promises = [];
 
 		permissions.forEach(permission => {
-			if (!dbUser.customData.permissionTemplates.findById(permission.permission)){
+			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
-			promises.push(User.findByUserName(permission.user).then( assignedUser => {
+			promises.push(User.findByUserName(permission.user).then(assignedUser => {
 				if (!assignedUser) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
@@ -165,22 +165,22 @@ schema.methods.changePermissions = function(permissions){
 			}));
 		});
 
-		return Promise.all(promises).then( () => {
+		return Promise.all(promises).then(() => {
 			this.permissions = permissions;
 			return this.save();
 		});
 	});
 };
 
-schema.methods.isPermissionAssigned = function(permission){
+schema.methods.isPermissionAssigned = function(permission) {
 	return this.permissions.find(perm => perm.permission === permission);
 };
 
-schema.methods.findPermissionByUser = function(username){
+schema.methods.findPermissionByUser = function(username) {
 	return this.permissions.find(perm => perm.user === username);
 };
 
-schema.statics.populateUsers = function(account, permissions){
+schema.statics.populateUsers = function(account, permissions) {
 
 	const User = require("./user");
 

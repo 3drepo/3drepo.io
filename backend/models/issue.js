@@ -63,7 +63,7 @@ const actionSchema = Schema({
 	to: String
 });
 
-function propertyTextMapping(property){
+function propertyTextMapping(property) {
 
 	const mapping = {
 		"priority": "Priority",
@@ -76,7 +76,7 @@ function propertyTextMapping(property){
 	return mapping[property] || property;
 }
 
-actionSchema.virtual("propertyText").get(function(){
+actionSchema.virtual("propertyText").get(function() {
 	return propertyTextMapping(this.property);
 });
 
@@ -137,7 +137,7 @@ const schema = Schema({
 	thumbnail: {flag: Number, content: Object},
 	priority: {
 		type: String
-		//enum: ['low', 'medium', 'high', 'critical']
+		// enum: ['low', 'medium', 'high', 'critical']
 	},
 	comments: [{
 		action: actionSchema,
@@ -147,8 +147,8 @@ const schema = Schema({
 		sealed: Boolean,
 		rev_id: Object,
 		guid: Object,
-		viewpoint: Object, //guid backref to viewpoints
-		//bcf extra fields we don't care
+		viewpoint: Object, // guid backref to viewpoints
+		// bcf extra fields we don't care
 		extras: {}
 	}],
 	commentCount: { type: Number, default: 0},
@@ -164,19 +164,19 @@ const schema = Schema({
 	origin_account: String,
 	origin_model: String,
 
-	//to be remove
+	// to be remove
 	scribble: Object,
 
-	//bcf extra fields we don't care
+	// bcf extra fields we don't care
 	extras: {}
 });
 
 
-function parseXmlString(xmlString, options){
+function parseXmlString(xmlString, options) {
 
 	return new Promise((resolve, reject) => {
 		xml2js.parseString(xmlString, options, function (err, xml) {
-			if(err){
+			if(err) {
 				reject(err);
 			} else {
 				resolve(xml);
@@ -186,7 +186,7 @@ function parseXmlString(xmlString, options){
 
 }
 // Model statics method
-//internal helper _find
+// internal helper _find
 
 const statusEnum = {
 	"OPEN": C.ISSUE_STATUS_OPEN,
@@ -202,9 +202,9 @@ const priorityEnum = {
 	"HIGH": "high"
 };
 
-schema.statics._find = function(dbColOptions, filter, projection, sort, noClean){
+schema.statics._find = function(dbColOptions, filter, projection, sort, noClean) {
 
-	//get model type
+	// get model type
 	let settings;
 	let issues;
 
@@ -215,22 +215,22 @@ schema.statics._find = function(dbColOptions, filter, projection, sort, noClean)
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = noClean ? issue: issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
+			issues[index] = noClean ? issue : issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
 		});
 
 		return Promise.resolve(issues);
 	});
 };
 
-schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch, _revision){
+schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch, _revision) {
 
 	let allRefs = [];
-	//FIXME: why do we need an embedded function?!
-	function _get(dbColOptions, branch, revision){
+	// FIXME: why do we need an embedded function?!
+	function _get(dbColOptions, branch, revision) {
 
 		return History.getHistory(dbColOptions, branch, revision).then(history => {
 
-			if(!history){
+			if(!history) {
 				return Promise.resolve([]);
 			}
 
@@ -253,8 +253,8 @@ schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch
 				const unique = ref.unique;
 
 				let childRevision, childBranch;
-				if (ref._rid){
-					if (unique){
+				if (ref._rid) {
+					if (unique) {
 						childRevision = uuidToString(ref._rid);
 					} else {
 						childBranch   = uuidToString(ref._rid);
@@ -285,7 +285,7 @@ schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch
 };
 
 
-schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy){
+schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy) {
 
 	let issues;
 	const self = this;
@@ -301,7 +301,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 	let sort;
 
-	if(sortBy === "activity"){
+	if(sortBy === "activity") {
 		sort = {sort: {"commentCount": -1}};
 	} else if (sortBy === "view") {
 		sort = {sort: {"viewCount": -1}};
@@ -315,7 +315,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 		let currHistory;
 		addRevFilter = History.getHistory(dbColOptions, branch, revId).then(history => {
 
-			if(!history){
+			if(!history) {
 				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 			} else {
 
@@ -332,10 +332,10 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 		}).then(histories => {
 
-			if(histories.length > 0){
+			if(histories.length > 0) {
 
 				const history = histories[0];
-				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision
+				// backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision
 				filter = {
 					"created" : { "$lt": history.timestamp.valueOf() },
 					rev_id: null
@@ -349,7 +349,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 			);
 		}).then(histories => {
 
-			if(histories.length > 0){
+			if(histories.length > 0) {
 				// for issues with rev_id, get all issues if rev_id in revIds
 				const revIds = histories.map(h => h._id);
 
@@ -364,7 +364,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 	return addRevFilter.then(() => {
 
-		if(ids){
+		if(ids) {
 			filter._id = {
 				"$in": ids
 			};
@@ -383,7 +383,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 	}).then(refs => {
 
-		if(!refs.length || (ids && ids.length === issues.length)){
+		if(!refs.length || (ids && ids.length === issues.length)) {
 			return Promise.resolve(issues);
 		} else {
 
@@ -394,11 +394,11 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 				promises.push(
 					middlewares.hasReadAccessToModelHelper(username, childDbName, childModel).then(granted => {
-						if(granted){
+						if(granted) {
 
 							const queryFilter = {};
 
-							if(ids){
+							if(ids) {
 								queryFilter._id = {
 									"$in": ids
 								};
@@ -430,7 +430,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 	});
 };
 
-schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId, ids){
+schema.statics.getBCFZipReadStream = function(account, model, username, branch, revId, ids) {
 
 	const zip = archiver.create("zip");
 
@@ -483,13 +483,13 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 
 	const filter = { parent: stringToUUID(sid) };
 
-	if(number){
+	if(number) {
 		filter.number = number;
 	}
 
 	return this._find(dbColOptions, filter).then(issues => {
 		issues.forEach((issue, i) => {
-			if(issue.scribble){
+			if(issue.scribble) {
 				issues[i] = issue.scribble.toString("base64");
 			}
 		});
@@ -498,7 +498,7 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 	});
 };
 
-schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
+schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean) {
 	let settings;
 
 	return ModelSetting.findById(dbColOptions, dbColOptions.model).then(_settings => {
@@ -511,7 +511,7 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 	});
 };
 
-schema.statics.createIssue = function(dbColOptions, data){
+schema.statics.createIssue = function(dbColOptions, data) {
 
 	const objectId = data.object_id;
 
@@ -520,11 +520,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 	const issue = Issue.createInstance(dbColOptions);
 	issue._id = stringToUUID(uuid.v1());
 
-	if(!data.name){
+	if(!data.name) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
 	}
 
-	if(objectId){
+	if(objectId) {
 		promises.push(
 			GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
 				issue.parent = stringToUUID(sid);
@@ -534,15 +534,15 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 	let branch;
 
-	if (!data.revId){
+	if (!data.revId) {
 		branch = "master";
 	}
 
-	//assign rev_id for issue
+	// assign rev_id for issue
 	promises.push(History.getHistory(dbColOptions, branch, data.revId, {_id: 1}).then(history => {
-		if(!history && data.revId){
+		if(!history && data.revId) {
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history){
+		} else if (history) {
 			issue.rev_id = history._id;
 		}
 	}));
@@ -571,7 +571,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 			issue.due_date = data.due_date;
 		}
 
-		if(data.viewpoint){
+		if(data.viewpoint) {
 			data.viewpoint.guid = utils.generateUUID();
 			if (data.group_id || data.viewpoint.group_id) {
 				data.viewpoint.group_id = stringToUUID(data.group_id);
@@ -591,7 +591,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 				flag: 1
 			});
 
-			if(data.viewpoint.screenshot){
+			if(data.viewpoint.screenshot) {
 				data.viewpoint.screenshot = {
 					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
 					flag: 1
@@ -607,7 +607,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.creator_role = data.creator_role || issue.creator_role;
 		issue.assigned_roles = data.assigned_roles || issue.assigned_roles;
 
-		if(data.viewpoint && data.viewpoint.screenshot){
+		if(data.viewpoint && data.viewpoint.screenshot) {
 
 			return utils.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated",{
@@ -626,7 +626,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 	}).then(image => {
 
-		if(image){
+		if(image) {
 			issue.thumbnail = {
 				flag: 1,
 				content: image
@@ -652,9 +652,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
-	const updateGroup = function(group_id){
+	const updateGroup = function(group_id) {
 		return Group.updateIssueId(dbColOptions, group_id, issueId).then(group => {
-			if(!group){
+			if(!group) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			} else {
 				return Promise.resolve(group);
@@ -664,7 +664,7 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
 	const groupUpdatePromises = [];
 
-	if (data.group_id){
+	if (data.group_id) {
 		groupUpdatePromises.push(updateGroup(data.group_id));
 	}
 
@@ -697,14 +697,14 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 	return Promise.all(groupUpdatePromises);
 };
 
-schema.statics.getScreenshot = function(dbColOptions, uid, vid){
+schema.statics.getScreenshot = function(dbColOptions, uid, vid) {
 
 	return this.findById(dbColOptions, stringToUUID(uid), {
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } },
 		"viewpoints.screenshot.resizedContent": 0
 	}).then(issue => {
 
-		if(!_.get(issue, "viewpoints[0].screenshot.content.buffer")){
+		if(!_.get(issue, "viewpoints[0].screenshot.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			return issue.viewpoints[0].screenshot.content.buffer;
@@ -712,16 +712,16 @@ schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 	});
 };
 
-schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
+schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid) {
 
 	return this.findById(dbColOptions, stringToUUID(uid), {
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } }
 	}).then(issue => {
 
-		if (_.get(issue, "viewpoints[0].screenshot.resizedContent.buffer")){
+		if (_.get(issue, "viewpoints[0].screenshot.resizedContent.buffer")) {
 
 			return issue.viewpoints[0].screenshot.resizedContent.buffer;
-		} else if(!_.get(issue, "viewpoints[0].screenshot.content.buffer")){
+		} else if(!_.get(issue, "viewpoints[0].screenshot.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 
@@ -729,7 +729,7 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 				this.findOneAndUpdate(dbColOptions,
 					{ _id: stringToUUID(uid), "viewpoints.guid": stringToUUID(vid)},
 					{ "$set": { "viewpoints.$.screenshot.resizedContent": resized } }
-				).catch( err => {
+				).catch(err => {
 					systemLogger.logError("error while saving resized screenshot",{
 						issueId: uid,
 						viewpointId: vid,
@@ -743,11 +743,11 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 	});
 };
 
-schema.statics.getThumbnail = function(dbColOptions, uid){
+schema.statics.getThumbnail = function(dbColOptions, uid) {
 
 	return this.findById(dbColOptions, stringToUUID(uid), { thumbnail: 1 }).then(issue => {
 
-		if(!_.get(issue, "thumbnail.content.buffer")){
+		if(!_.get(issue, "thumbnail.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			return issue.thumbnail.content.buffer;
@@ -755,26 +755,26 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 	});
 };
 
-schema.methods.updateComment = function(commentIndex, data){
+schema.methods.updateComment = function(commentIndex, data) {
 
 	const timeStamp = (new Date()).getTime();
 
-	if((this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+	if((this.comments[commentIndex] && this.comments[commentIndex].sealed)) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
-	if(commentIndex === null || typeof commentIndex === "undefined"){
+	if(commentIndex === null || typeof commentIndex === "undefined") {
 
 		const commentGuid = utils.generateUUID();
 		let branch;
 
-		if (!data.revId){
+		if (!data.revId) {
 			branch = "master";
 		}
 
-		//assign rev_id for issue
+		// assign rev_id for issue
 		return History.getHistory(this._dbcolOptions, branch, data.revId, {_id: 1}).then(history => {
-			if(!history && data.revId){
+			if(!history && data.revId) {
 				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 			} else {
 
@@ -803,7 +803,7 @@ schema.methods.updateComment = function(commentIndex, data){
 				this.viewpoints.push(data.viewpoint);
 
 				this.comments.forEach(comment => {
-					if(!comment.sealed){
+					if(!comment.sealed) {
 						comment.sealed = true;
 					}
 				});
@@ -838,20 +838,20 @@ schema.methods.updateComment = function(commentIndex, data){
 
 		const commentObj = this.comments[commentIndex];
 
-		if(!commentObj){
+		if(!commentObj) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
 		}
 
-		if(commentObj.owner !== data.owner && data.comment){
+		if(commentObj.owner !== data.owner && data.comment) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 		}
 
-		if(isSystemComment(commentObj)){
+		if(isSystemComment(commentObj)) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
 
 		}
 
-		if(data.comment){
+		if(data.comment) {
 			commentObj.comment = data.comment;
 			commentObj.created = timeStamp;
 		}
@@ -870,28 +870,28 @@ schema.methods.updateComment = function(commentIndex, data){
 	}
 };
 
-function isSystemComment(comment){
+function isSystemComment(comment) {
 
 	return !_.isEmpty(comment.toObject().action);
 }
 
-schema.methods.removeComment = function(commentIndex, data){
+schema.methods.removeComment = function(commentIndex, data) {
 
 	const commentObj = this.comments[commentIndex];
 
-	if(!commentObj){
+	if(!commentObj) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
 	}
 
-	if(commentObj.owner !== data.owner){
+	if(commentObj.owner !== data.owner) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 	}
 
-	if(this.comments[commentIndex].sealed){
+	if(this.comments[commentIndex].sealed) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
-	if(isSystemComment(this.comments[commentIndex])){
+	if(isSystemComment(this.comments[commentIndex])) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
 	}
 
@@ -911,12 +911,12 @@ schema.methods.removeComment = function(commentIndex, data){
 	});
 };
 
-schema.methods.isClosed = function(){
+schema.methods.isClosed = function() {
 	return this.status === "closed" || this.closed;
 };
 
 
-schema.methods.addSystemComment = function(owner, property, from , to){
+schema.methods.addSystemComment = function(owner, property, from , to) {
 
 	const timeStamp = (new Date()).getTime();
 	const comment = {
@@ -931,10 +931,10 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 	this.comments.push(comment);
 	this.commentCount++;
 
-	//seal the last comment if it is a human commnet after adding system comments
+	// seal the last comment if it is a human commnet after adding system comments
 	const commentLen = this.comments.length;
 
-	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])){
+	if(commentLen > 1 && !isSystemComment(this.comments[commentLen - 2])) {
 		this.comments[commentLen - 2].sealed = true;
 	}
 
@@ -949,7 +949,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 					!_.isEqual(this.assigned_roles, data.assigned_roles);
 
 	if (assignedHasChanged) {
-		//force status change to in progress if assigned roles during status=for approval
+		// force status change to in progress if assigned roles during status=for approval
 
 		systemComment = this.addSystemComment(
 			data.owner,
@@ -987,7 +987,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 			if (canChangeStatus) {
 
-				//change status to for_approval if assigned roles is changed.
+				// change status to for_approval if assigned roles is changed.
 				if (data.status === statusEnum.FOR_APPROVAL) {
 					this.assigned_roles = this.creator_role ? [this.creator_role] : [];
 				}
@@ -1000,10 +1000,10 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 			}
 		}
 
-		//}
+		// }
 	}
 
-	if(data.hasOwnProperty("priority")){
+	if(data.hasOwnProperty("priority")) {
 		// if (_.map(priorityEnum).indexOf(data.priority) === -1){
 		//
 		//	throw responseCodes.ISSUE_INVALID_PRIORITY;
@@ -1024,7 +1024,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		}
 	}
 
-	if(data.hasOwnProperty("topic_type") && this.topic_type !== data.topic_type){
+	if(data.hasOwnProperty("topic_type") && this.topic_type !== data.topic_type) {
 		systemComment = this.addSystemComment(data.owner, "topic_type", this.topic_type, data.topic_type);
 		this.topic_type = data.topic_type;
 	}
@@ -1072,7 +1072,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	});
 };
 
-schema.methods.clean = function(typePrefix, modelCode){
+schema.methods.clean = function(typePrefix, modelCode) {
 
 	const cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
@@ -1098,55 +1098,55 @@ schema.methods.clean = function(typePrefix, modelCode){
 			"[object String]" !== Object.prototype.toString.call(cleaned.viewpoints[i].shown_group_id) ?
 			uuidToString(cleaned.viewpoints[i].shown_group_id) : undefined;
 
-		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
-			cleaned.viewpoints[i].screenshot = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshot.png";
-			cleaned.viewpoints[i].screenshotSmall = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshotSmall.png";
+		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)) {
+			cleaned.viewpoints[i].screenshot = cleaned.account + "/" + cleaned.model + "/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshot.png";
+			cleaned.viewpoints[i].screenshotSmall = cleaned.account + "/" + cleaned.model + "/issues/" + cleaned._id + "/viewpoints/" + cleaned.viewpoints[i].guid + "/screenshotSmall.png";
 		}
 	});
 
-	if(_.get(cleaned, "thumbnail.flag")){
-		cleaned.thumbnail = cleaned.account + "/" + cleaned.model +"/issues/" + cleaned._id + "/thumbnail.png";
+	if(_.get(cleaned, "thumbnail.flag")) {
+		cleaned.thumbnail = cleaned.account + "/" + cleaned.model + "/issues/" + cleaned._id + "/thumbnail.png";
 	}
 
-	cleaned.comments && cleaned.comments.forEach( (comment, i) => {
+	cleaned.comments && cleaned.comments.forEach((comment, i) => {
 
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
 
-		if(cleaned.comments[i].viewpoint){
+		if(cleaned.comments[i].viewpoint) {
 
 			const commentViewpoint = JSON.stringify(cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint)));
 			if (commentViewpoint) {
 				cleaned.comments[i].viewpoint = JSON.parse(commentViewpoint);
 			}
 
-			if(i > 0 && cleaned.comments[i-1].viewpoint && cleaned.comments[i].viewpoint.guid === cleaned.comments[i-1].viewpoint.guid){
-				//hide repeated screenshot if consecutive comments relate to the same viewpoint
+			if(i > 0 && cleaned.comments[i - 1].viewpoint && cleaned.comments[i].viewpoint.guid === cleaned.comments[i - 1].viewpoint.guid) {
+				// hide repeated screenshot if consecutive comments relate to the same viewpoint
 				cleaned.comments[i].viewpoint.screenshot = null;
 				cleaned.comments[i].viewpoint.screenshotSmall = null;
 			}
 
-		} else if (!isSystemComment(this.comments[i])){
+		} else if (!isSystemComment(this.comments[i])) {
 			// for all other non system comments
 			cleaned.comments[i].viewpoint = cleaned.viewpoint;
 		}
 	});
 
-	if( cleaned.comments &&
+	if(cleaned.comments &&
 		cleaned.comments.length > 0 &&
 		cleaned.viewpoints[0] &&
 		cleaned.comments[0].viewpoint &&
-		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
-		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
+		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid) {
+		// hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
 		cleaned.comments[0].viewpoint.screenshotSmall = null;
 	}
 
-	if(cleaned.scribble){
+	if(cleaned.scribble) {
 		cleaned.scribble = cleaned.scribble.toString("base64");
 	}
 
-	if(cleaned.viewpoints.length > 0){
+	if(cleaned.viewpoints.length > 0) {
 		cleaned.viewpoint = cleaned.viewpoints[0];
 	}
 
@@ -1155,19 +1155,19 @@ schema.methods.clean = function(typePrefix, modelCode){
 	return cleaned;
 };
 
-schema.methods.generateCommentsGUID = function(){
+schema.methods.generateCommentsGUID = function() {
 
 	this.comments.forEach(comment => {
-		if(!comment.guid && !isSystemComment(comment)){
+		if(!comment.guid && !isSystemComment(comment)) {
 			comment.guid = utils.generateUUID();
 		}
-		if(!comment.viewpoint && !isSystemComment(comment) && this.viewpoints.length > 0){
+		if(!comment.viewpoint && !isSystemComment(comment) && this.viewpoints.length > 0) {
 			comment.viewpoint = this.viewpoints[0].guid;
 		}
 	});
 };
 
-schema.methods.getBCFMarkup = function(account, model, unit){
+schema.methods.getBCFMarkup = function(account, model, unit) {
 	this.generateCommentsGUID();
 	this.save();
 
@@ -1176,7 +1176,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 
 	let scale = 1;
 
-	if(unit === "dm"){
+	if(unit === "dm") {
 		scale = 0.1;
 	} else if (unit === "cm") {
 		scale = 0.01;
@@ -1228,10 +1228,10 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 	_.get(this, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(this, "extras.DocumentReference"));
 	_.get(this, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(this, "extras.RelatedTopic"));
 
-	//add comments
+	// add comments
 	this.comments.forEach(comment => {
 
-		if(isSystemComment(comment)){
+		if(isSystemComment(comment)) {
 			return;
 		}
 
@@ -1275,7 +1275,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			"Snapshot":  null
 		};
 
-		if(vp.screenshot.flag){
+		if(vp.screenshot.flag) {
 			vpObj.Snapshot = snapshotFileName;
 			snapshotEntries.push({
 				filename: snapshotFileName,
@@ -1298,7 +1298,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			}
 		};
 
-		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >=3){
+		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
 
 			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
 				CameraViewPoint:{
@@ -1353,7 +1353,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 						}
 					}
 				}).catch(()=> {
-					//catching this error and ignoring - if we can't find the group, we should still export the issue.
+					// catching this error and ignoring - if we can't find the group, we should still export the issue.
 					systemLogger.logInfo("Failed to find group - " + highlightedGroupId);
 				})
 			);
@@ -1389,7 +1389,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 						}
 					}
 				}).catch(()=> {
-					//catching this error and ignoring - if we can't find the group, we should still export the issue.
+					// catching this error and ignoring - if we can't find the group, we should still export the issue.
 					systemLogger.logInfo("Failed to find group - " + hiddenGroupId);
 				})
 			);
@@ -1425,7 +1425,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 						}
 					}
 				}).catch(()=> {
-					//catching this error and ignoring - if we can't find the group, we should still export the issue.
+					// catching this error and ignoring - if we can't find the group, we should still export the issue.
 					systemLogger.logInfo("Failed to find group - " + shownGroupId);
 				})
 			);
@@ -1459,7 +1459,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 	});
 };
 
-schema.statics.getBCFVersion = function(){
+schema.statics.getBCFVersion = function() {
 
 	return `
 		<?xml version="1.0" encoding="UTF-8"?>
@@ -1470,7 +1470,7 @@ schema.statics.getBCFVersion = function(){
 
 };
 
-schema.statics.getModelBCF = function(modelId){
+schema.statics.getModelBCF = function(modelId) {
 
 	const model = {
 		ProjectExtension:{
@@ -1498,19 +1498,19 @@ schema.statics.getIfcGuids = function(account, model) {
 		});
 };
 
-schema.statics.importBCF = function(requester, account, model, revId, zipPath){
+schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 	let settings;
 	let branch;
 
-	if (!revId){
+	if (!revId) {
 		branch = "master";
 	}
 
-	//assign revId for issue
+	// assign revId for issue
 	return History.getHistory({ account, model }, branch, revId, {_id: 1}).then(history => {
-		if(!history){
+		if(!history) {
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else if (history){
+		} else if (history) {
 			revId = history._id;
 		}
 	}).then(() => {
@@ -1549,7 +1549,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 			const promises = [];
 
 			function handleZip(err, zipfile) {
-				if(err){
+				if(err) {
 					return reject(err);
 				}
 
@@ -1669,7 +1669,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							}
 						});
 
-						if(notifications.length){
+						if(notifications.length) {
 							ChatEvent.newIssues(requester.socketId, account, model, notifications);
 						}
 
@@ -1682,14 +1682,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 			}
 
-			function parseViewpoints(issueGuid, issueFiles, vps){
+			function parseViewpoints(issueGuid, issueFiles, vps) {
 
 				const viewpoints = {};
 				const vpPromises = [];
 
 				vps && vps.forEach(vp => {
 
-					if(!_.get(vp, "@.Guid")){
+					if(!_.get(vp, "@.Guid")) {
 						return;
 					}
 
@@ -1781,14 +1781,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				return group;
 			}
 
-			function createIssue(guid){
+			function createIssue(guid) {
 
 				const issueFiles = files[guid];
 				const markupBuf = issueFiles[`${guid}/markup.bcf`];
 				let xml;
 				let issue;
 
-				if(!markupBuf){
+				if(!markupBuf) {
 					return Promise.resolve();
 				}
 
@@ -1801,12 +1801,12 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					issue.extras = {};
 					issue.rev_id = revId;
 
-					if(xml.Markup){
+					if(xml.Markup) {
 
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
-						if( !issue.status || issue.status === "") {
+						if(!issue.status || issue.status === "") {
 							issue.status = "open";
 						}
 						issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
@@ -1859,7 +1859,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 						const groupPromises = [];
 
-						if(!viewpoints[vpGuid].viewpointXml){
+						if(!viewpoints[vpGuid].viewpointXml) {
 							return;
 						}
 
@@ -1932,7 +1932,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 						}
 
-						if(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")){
+						if(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
 							vp.up = [
 								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._")),
 								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._")),
@@ -1953,7 +1953,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 							vp.type = "perspective";
 
-						} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")){
+						} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
 
 							vp.up = [
 								parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].CameraUpVector[0].X[0]._")),
@@ -2015,11 +2015,11 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 								}
 								if (vpComponents[i].Coloring) {
-									//FIXME: this is essentially copy of selection with slight modification. Should merge common code.
+									// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
 									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
 										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
 											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
-											//const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
+											// const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
 												let objectModel = model;
 
 												if (settings.federate) {
@@ -2151,8 +2151,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						});
 					});
 
-					//take the first screenshot as thumbnail
-					if(vpGuids.length > 0){
+					// take the first screenshot as thumbnail
+					if(vpGuids.length > 0) {
 
 						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
 
@@ -2173,7 +2173,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 				}).then(image => {
 
-					if(image){
+					if(image) {
 						issue.thumbnail = {
 							flag: 1,
 							content: image
@@ -2190,8 +2190,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 				let paths;
 
-				if(entry.fileName.indexOf("\\") !== -1){
-					//give tolerance to file path using \ instead of /
+				if(entry.fileName.indexOf("\\") !== -1) {
+					// give tolerance to file path using \ instead of /
 					paths = entry.fileName.split("\\");
 				} else {
 					paths = entry.fileName.split("/");
@@ -2199,22 +2199,22 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 				const guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
 
-				if(guid && !files[guid]){
+				if(guid && !files[guid]) {
 					files[guid] = {};
 				}
 
 				// if entry is a file and start with guid
-				if(!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid){
+				if(!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
 
-					promises.push(new Promise( (_resolve, _reject) => {
+					promises.push(new Promise((_resolve, _reject) => {
 						zipfile.openReadStream(entry, (err, rs) => {
-							if(err){
+							if(err) {
 								return _reject(err);
 							} else {
 
 								const bufs = [];
 
-								rs.on("data", d => bufs.push(d) );
+								rs.on("data", d => bufs.push(d));
 
 								rs.on("end", () => {
 									const buf = Buffer.concat(bufs);

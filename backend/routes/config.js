@@ -13,14 +13,14 @@ const ModelHelper = require("../models/helper/model");
 const User = require("../models/user");
 const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
 const path = require("path");
-    
+
 const config = require("../config");
-    
+
 function createClientConfig(serverConfig, req) {
-    
+
 	// TODO: Replace with user based plugin selection
 	let pluginStructure = {};
-    
+
 	// If the serverConfig has a plugin structure, use that
 	// else just use the default
 	if (serverConfig.pluginStructure) {
@@ -28,7 +28,7 @@ function createClientConfig(serverConfig, req) {
 	} else {
 		pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
 	}
-    
+
 	const clientConfig = {
 		"maintenanceMode": config.maintenanceMode,
 		"ui": {},
@@ -53,50 +53,50 @@ function createClientConfig(serverConfig, req) {
 			pluginStructure.functions.push(config.legal[i].page);
 		}
 	}
-        
+
 	if (config.hasOwnProperty("captcha_client_key")) {
 		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
-    
+
 	if (req) {
 		clientConfig.userId = _.get(req, "session.user.username");
 	}
-    
+
 	// Set up the legal plugins
 	clientConfig.legalTemplates = [];
 	if (config.hasOwnProperty("legal")) {
 		clientConfig.legalTemplates = config.legal;
 	}
-    
+
 	clientConfig.apiUrls = config.apiUrls;
-    
+
 	clientConfig.C = {
 		GET_API : C.GET_API,
 		POST_API : C.POST_API,
 		MAP_API : C.MAP_API
 	};
-    
+
 	if (config.chat_server) {
 		clientConfig.chatHost = config.chat_server.chat_host;
 		clientConfig.chatPath = "/" + config.chat_server.subdirectory;
 	}
-    
+
 	clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
-    
+
 	clientConfig.VERSION = config.version;
-    
+
 	if (serverConfig.backgroundImage) {
 		clientConfig.backgroundImage = serverConfig.backgroundImage;
 	}
-    
+
 	clientConfig.return_path = "/";
-    
+
 	clientConfig.auth =  config.auth;
-    
+
 	if(config.captcha && config.captcha.clientKey) {
 		clientConfig.captcha_client_key = config.captcha.clientKey;
 	}
-    
+
 	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
 	clientConfig.countries = addressMeta.countries;
 	clientConfig.euCountriesCode = addressMeta.euCountriesCode;
@@ -109,34 +109,34 @@ function createClientConfig(serverConfig, req) {
 	clientConfig.usernameRegExp = User.usernameRegExp;
 	clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
 	clientConfig.login_check_interval = config.login_check_interval;
-    
+
 	clientConfig.responseCodes = _.each(responseCodes.codesMap);
-    
+
 	clientConfig.permissions = C.MODEL_PERM_OBJ;
-    
+
 	clientConfig.impliedPermission = C.IMPLIED_PERM;
-    
+
 	return clientConfig;
 }
-    
+
 const clientConfig = createClientConfig(config);
-    
+
 router.get("/version.json", function (req, res) {
 	return res.json({"VERSION": clientConfig.VERSION });
 });
-    
+
 router.get("/config.js", function (req, res) {
-    
+
 	// Only need to set the userId the rest is static
 	clientConfig.userId = _.get(req, "session.user.username");
-    
-	// TODO: This used to be a long string concat, 
-	// this is marginally better but still a complete hack. 
+
+	// TODO: This used to be a long string concat,
+	// this is marginally better but still a complete hack.
 	// There is definitely a better way to do this
-	const serializedConfig = serialize(clientConfig); 
-    
+	const serializedConfig = serialize(clientConfig);
+
 	res.header("Content-Type", "text/javascript");
 	res.render(path.resolve(__dirname, "./../../pug/config.pug"), {config: serializedConfig});
 });
-    
+
 module.exports = router;

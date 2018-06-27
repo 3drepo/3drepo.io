@@ -16,7 +16,7 @@
 	let lastClick = {},
 		isThresholdReached, touchstart, touchmove, touchend,
 		click, closest;
-  
+
 	/**
    * isThresholdReached
    *
@@ -67,7 +67,7 @@
 		if(this.threshold || isThresholdReached(this.startXY, [e.changedTouches[0].clientX, e.changedTouches[0].clientY])) {
 			return;
 		}
-    
+
 		/**
      * Create and fire a click event on the target element
      * https://developer.mozilla.org/en/DOM/event.initMouseEvent
@@ -78,14 +78,14 @@
 		evt.simulated = true;   // distinguish from a normal (nonsimulated) click
 		e.target.dispatchEvent(evt);
 	};
-  
+
 	/**
    * click
    *
    * Because we've already fired a click event in touchend,
    * we need to listed for all native click events here
    * and suppress them as necessary.
-   */  
+   */
 	click = function(e) {
 		/**
      * Prevent ghost clicks by only allowing clicks we created
@@ -100,7 +100,7 @@
 			nodeName = target.nodeName,
 			isLink = nodeName === "A",
 			standAlone = window.navigator.standalone && isLink && e.target.getAttribute("href");
-    
+
 		lastClick.time = time;
 		lastClick.x = x;
 		lastClick.y = y;
@@ -119,7 +119,7 @@
 			}
 		}
 
-		/** 
+		/**
      * Special logic for standalone web apps
      * See http://stackoverflow.com/questions/2898740/iphone-safari-web-app-opens-links-in-new-window
      */
@@ -135,7 +135,7 @@
 			return;
 		}
 		target.classList.add("energize-focus");
-		window.setTimeout(function(){
+		window.setTimeout(function() {
 			target.classList.remove("energize-focus");
 		}, 150);
 	};
@@ -150,22 +150,22 @@
    * Starts at node and goes up the DOM tree looking for a
    * matching nodeName, continuing until hitting document.body
    */
-	closest = function(node, tagName){
+	closest = function(node, tagName) {
 		let curNode = node;
 
 		while(curNode !== document.body) {  // go up the dom until we find the tag we're after
 			if(!curNode || curNode.nodeName === tagName) {
-				return curNode; 
+				return curNode;
 			} // found
 			curNode = curNode.parentNode;     // not found, so keep going up
 		}
-    
+
 		return null;  // not found
 	};
 
 	/**
    * Add all delegated event listeners
-   * 
+   *
    * All the events we care about bubble up to document,
    * so we can take advantage of event delegation.
    *
@@ -175,5 +175,5 @@
 	document.addEventListener("touchmove", touchmove, false);
 	document.addEventListener("touchend", touchend, false);
 	document.addEventListener("click", click, true);  // TODO: why does this use capture?
-  
+
 })();

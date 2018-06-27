@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 const html = data => `
 	Model failed to import. Please help this user out.
 	<br>

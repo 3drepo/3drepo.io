@@ -60,11 +60,11 @@ historySchema.statics.getHistory = function(dbColOptions, branch, revId, project
 
 historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
-historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
+historySchema.statics.listByBranch = function(dbColOptions, branch, projection) {
 
 	const query = {"incomplete": {"$exists": false}};
 
-	if(branch === C.MASTER_BRANCH_NAME){
+	if(branch === C.MASTER_BRANCH_NAME) {
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
 	} else if(branch) {
 		query.shared_id = stringToUUID(branch);
@@ -79,13 +79,13 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 };
 
 // get the head of a branch
-historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
+historySchema.statics.findByBranch = function(dbColOptions, branch, projection) {
 
 	const query = { "incomplete": {"$exists": false}};
 
 	projection = projection || {};
 
-	if(!branch || branch === C.MASTER_BRANCH_NAME){
+	if(!branch || branch === C.MASTER_BRANCH_NAME) {
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
 	} else {
 		query.shared_id = stringToUUID(branch);
@@ -98,19 +98,19 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	);
 };
 
-//get the head of default branch (master)
-historySchema.statics.findLatest = function(dbColOptions, projection){
+// get the head of default branch (master)
+historySchema.statics.findLatest = function(dbColOptions, projection) {
 	return this.findByBranch(dbColOptions, null, projection);
 };
 
-historySchema.statics.findByUID = function(dbColOptions, revId, projection){
+historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
 
 	projection = projection || {};
 	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
 
 };
 
-historySchema.statics.findByTag = function(dbColOptions, tag, projection){
+historySchema.statics.findByTag = function(dbColOptions, tag, projection) {
 
 	projection = projection || {};
 	return History.findOne(dbColOptions, { tag }, projection);
@@ -127,7 +127,7 @@ historySchema.methods.removeFromCurrent = function(id) {
 	this.current.remove(id);
 };
 
-historySchema.statics.clean = function(histories){
+historySchema.statics.clean = function(histories) {
 	const cleaned = [];
 
 	histories.forEach(history => {
@@ -137,7 +137,7 @@ historySchema.statics.clean = function(histories){
 	return cleaned;
 };
 
-historySchema.methods.clean = function(){
+historySchema.methods.clean = function() {
 
 	const clean = this.toObject();
 	clean._id = uuidToString(clean._id);

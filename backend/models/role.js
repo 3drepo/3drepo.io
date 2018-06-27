@@ -33,7 +33,7 @@
 		const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
 
 		return Role.findByRoleID(roleId).then(roleFound => {
-			if(roleFound){
+			if(roleFound) {
 				roleFound = roleFound.toObject();
 				return { role: roleFound.role, db: roleFound.db};
 			} else {
@@ -64,7 +64,7 @@
 		};
 
 		return this.findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`).then(role => {
-			if(!role){
+			if(!role) {
 				return Promise.resolve();
 			} else {
 				return ModelFactory.dbManager.runCommand(account, dropRoleCmd);
@@ -84,11 +84,11 @@
 	};
 
 
-	schema.statics.findByRoleID = function(id){
+	schema.statics.findByRoleID = function(id) {
 		return this.findOne({ account: "admin"}, { _id: id});
 	};
 
-	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account){
+	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account) {
 
 		const cmd = {
 			revokeRolesFromUser: username,

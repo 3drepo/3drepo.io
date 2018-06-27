@@ -55,7 +55,7 @@ jQuery.extend({
 				const wordClone = wordNode.cloneNode(true);
 				highlight.appendChild(wordClone);
 				wordNode.parentNode.replaceChild(highlight, wordNode);
-				return 1; //skip added node in parent
+				return 1; // skip added node in parent
 			}
 		} else if ((node.nodeType === 1 && node.childNodes) && // only element nodes that have children
 																!/(script|style)/i.test(node.tagName) && // ignore script and style nodes
@@ -82,18 +82,18 @@ jQuery.fn.unhighlight = function (options) {
 jQuery.fn.highlight = function (words, options) {
 	const settings = { className: "highlight", element: "span", caseSensitive: false, wordsOnly: false };
 	jQuery.extend(settings, options);
-    
+
 	if (words.constructor === String) {
 		words = [words];
 	}
-	words = jQuery.grep(words, function(word, i){
+	words = jQuery.grep(words, function(word, i) {
 		return word != "";
 	});
 	words = jQuery.map(words, function(word, i) {
 		return word.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 	});
 	if (words.length == 0) {
-		return this; 
+		return this;
 	}
 
 	const flag = settings.caseSensitive ? "" : "i";
@@ -102,7 +102,7 @@ jQuery.fn.highlight = function (words, options) {
 		pattern = "\\b" + pattern + "\\b";
 	}
 	const re = new RegExp(pattern, flag);
-    
+
 	return this.each(function () {
 		jQuery.highlight(this, re, settings.element, settings.className);
 	});

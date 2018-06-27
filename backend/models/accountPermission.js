@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const mongoose = require("mongoose");
 	const schema = mongoose.Schema({
@@ -37,22 +37,22 @@
 			return this;
 		},
 
-		findByUser(user){
+		findByUser(user) {
 			return this.permissions.find(perm => perm.user === user);
 		},
 
-		_check(user, permission){
+		_check(user, permission) {
 			const User = require("./user");
-			return User.findByUserName(user).then( userToCheck => {
+			return User.findByUserName(user).then(userToCheck => {
 				if(!userToCheck) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 
-				if(!userToCheck.isMemberOfTeamspace(this.user.user)){
+				if(!userToCheck.isMemberOfTeamspace(this.user.user)) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}
 
-				const isPermissionInvalid = permission.permissions && 
+				const isPermissionInvalid = permission.permissions &&
 					_.intersection(permission.permissions, C.ACCOUNT_PERM_LIST).length !== permission.permissions.length;
 
 				if (isPermissionInvalid) {
@@ -62,20 +62,19 @@
 				return Promise.resolve();
 			});
 
-			
 
 		},
 
-		add(permission){
+		add(permission) {
 
 			return this._check(permission.user, permission).then(() => {
-				
-				if(this.findByUser(permission.user)){
-					//return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
+
+				if(this.findByUser(permission.user)) {
+					// return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
 					return this.update(permission.user, permission);
 				}
 				if(permission.permissions.length === 0) {
-					//Adding a user with empty permissions is not allowed
+					// Adding a user with empty permissions is not allowed
 					return Promise.reject(responseCodes.ACCOUNT_PERM_EMPTY);
 				}
 
@@ -85,15 +84,15 @@
 			});
 		},
 
-		update(user, permission){
+		update(user, permission) {
 			return this._check(user, permission).then(() => {
 				if(permission && permission.permissions.length === 0) {
-					//this is actually a remove
+					// this is actually a remove
 					return this.remove(user);
 				} else {
 					const currPermission = this.findByUser(user);
 
-					if(currPermission){
+					if(currPermission) {
 						currPermission.permissions = permission.permissions;
 						return this.user.save().then(() => permission);
 					} else {
@@ -104,11 +103,11 @@
 			});
 		},
 
-		remove(user){
+		remove(user) {
 			let index = -1;
-			
+
 			this.permissions.find((perm, i) => {
-				if(perm.user === user){
+				if(perm.user === user) {
 					index = i;
 					return true;
 				}
@@ -120,11 +119,11 @@
 				this.permissions.splice(index, 1);
 				return this.user.save().then(() => {
 					// remove all project permissions in this project as well, if any
-					return Project.find({ account: this.user.user },{ "permissions.user": user} );
+					return Project.find({ account: this.user.user },{ "permissions.user": user});
 				}).then(projects => {
 					return Promise.all(
-						projects.map(proj => proj.updateAttrs({ 
-							permissions: proj.permissions.filter(perm => perm.user !== user) 
+						projects.map(proj => proj.updateAttrs({
+							permissions: proj.permissions.filter(perm => perm.user !== user)
 						}))
 					);
 				}).then(() => this.user);

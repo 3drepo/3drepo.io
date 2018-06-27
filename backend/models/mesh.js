@@ -93,10 +93,10 @@
 	};
 
 	meshSchema.statics.getMeshes = function (account, model, history) {
-		//find all meshes within this revision.
+		// find all meshes within this revision.
 		const query = { "_id" : {"$in": history.current}, "type": "mesh"};
 		return this.find({account, model}, query, {_id : 1, shared_id: 1})
-			.then( meshes => {
+			.then(meshes => {
 				meshes.forEach(mesh => {
 					mesh._id = utils.uuidToString(mesh._id);
 					mesh.shared_id = mesh.shared_id && utils.uuidToString(mesh.shared_id);

@@ -5,7 +5,7 @@
  * @license
  */
 
-(function(){
+(function() {
 
 	/**
    * Convenience function for instantiating a new lunr index and configuring it
@@ -59,7 +59,7 @@
 	};
 
 	lunr.version = "0.5.7";
-	/*!
+	/* !
    * lunr.utils
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -83,7 +83,7 @@
 		};
 	})(this);
 
-	/*!
+	/* !
    * lunr.EventEmitter
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -175,7 +175,7 @@
 		return name in this.events;
 	};
 
-	/*!
+	/* !
    * lunr.tokenizer
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -194,7 +194,7 @@
 		}
 		if (Array.isArray(obj)) {
 			return obj.map(function (t) {
-				return t.toLowerCase(); 
+				return t.toLowerCase();
 			});
 		}
 
@@ -216,7 +216,7 @@
 				return token.toLowerCase();
 			});
 	};
-	/*!
+	/* !
    * lunr.Pipeline
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -437,7 +437,7 @@
 			return fn.label;
 		});
 	};
-	/*!
+	/* !
    * lunr.Vector
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -564,7 +564,7 @@
 	lunr.Vector.prototype.similarity = function (otherVector) {
 		return this.dot(otherVector) / (this.magnitude() * otherVector.magnitude());
 	};
-	/*!
+	/* !
    * lunr.SortedSet
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -820,7 +820,7 @@
 	lunr.SortedSet.prototype.toJSON = function () {
 		return this.toArray();
 	};
-	/*!
+	/* !
    * lunr.Index
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -986,7 +986,7 @@
 				}
 
 				const tokenCount = docTokens[field.name].filter(function (t) {
-					return t === token; 
+					return t === token;
 				}).length;
 
 				return memo + (tokenCount / fieldLength * field.boost);
@@ -1123,7 +1123,7 @@
 			queryVector = new lunr.Vector,
 			documentSets = [],
 			fieldBoosts = this._fields.reduce(function (memo, f) {
-				return memo + f.boost; 
+				return memo + f.boost;
 			}, 0);
 
 		const hasSomeToken = queryTokens.some(function (token) {
@@ -1162,7 +1162,7 @@
 
 					// add all the documents that have this key into a set
 					Object.keys(self.tokenStore.get(key)).forEach(function (ref) {
-						set.add(ref); 
+						set.add(ref);
 					});
 
 					return memo.union(set);
@@ -1263,7 +1263,7 @@
 		args.unshift(this);
 		plugin.apply(this, args);
 	};
-	/*!
+	/* !
    * lunr.Store
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -1363,7 +1363,7 @@
 		};
 	};
 
-	/*!
+	/* !
    * lunr.stemmer
    * Copyright (C) 2014 Oliver Nightingale
    * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
@@ -1378,7 +1378,7 @@
    * @returns {String}
    * @see lunr.Pipeline
    */
-	lunr.stemmer = (function(){
+	lunr.stemmer = (function() {
 		let step2list = {
 				"ational" : "ate",
 				"tional" : "tion",
@@ -1459,7 +1459,7 @@
 				re4;
 
 			if (w.length < 3) {
-				return w; 
+				return w;
 			}
 
 			firstch = w.substr(0,1);
@@ -1472,9 +1472,9 @@
 			re2 = re2_1a;
 
 			if (re.test(w)) {
-				w = w.replace(re,"$1$2"); 
+				w = w.replace(re,"$1$2");
 			} else if (re2.test(w)) {
-				w = w.replace(re2,"$1$2"); 
+				w = w.replace(re2,"$1$2");
 			}
 
 			// Step 1b
@@ -1497,11 +1497,11 @@
 					re3 = re3_1b_2;
 					re4 = re4_1b_2;
 					if (re2.test(w)) {
-						w = w + "e"; 
+						w = w + "e";
 					} else if (re3.test(w)) {
-						re = re_1b_2; w = w.replace(re,""); 
+						re = re_1b_2; w = w.replace(re,"");
 					} else if (re4.test(w)) {
-						w = w + "e"; 
+						w = w + "e";
 					}
 				}
 			}
@@ -1590,7 +1590,7 @@
 	})();
 
 	lunr.Pipeline.registerFunction(lunr.stemmer, "stemmer");
-	/*!
+	/* !
    * lunr.stopWordFilter
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -1739,7 +1739,7 @@
 	];
 
 	lunr.Pipeline.registerFunction(lunr.stopWordFilter, "stopWordFilter");
-	/*!
+	/* !
    * lunr.trimmer
    * Copyright (C) 2014 Oliver Nightingale
    */
@@ -1765,7 +1765,7 @@
 	};
 
 	lunr.Pipeline.registerFunction(lunr.trimmer, "trimmer");
-	/*!
+	/* !
    * lunr.stemmer
    * Copyright (C) 2014 Oliver Nightingale
    * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt

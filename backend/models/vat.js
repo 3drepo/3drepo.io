@@ -6,7 +6,7 @@ const vatValidationUrl = config.vat.checkUrl;
 const addressMeta = require("./addressMeta");
 
 // Country Code : Standard Rate
-const vat = { 
+const vat = {
 	AT: 20,
 	BE: 21,
 	BG: 20,
@@ -34,17 +34,17 @@ const vat = {
 	SE: 25,
 	SI: 22,
 	SK: 20,
-	GB: 20 
+	GB: 20
 };
-  
 
-function getByCountryCode(code, isBusiness){
+
+function getByCountryCode(code, isBusiness) {
 
 	let rate;
 
 	if(isBusiness) {
 
-		if(code === "GB"){
+		if(code === "GB") {
 			rate = { standardRate : vat["GB"] };
 		} else {
 			rate = { standardRate : 0 };
@@ -54,7 +54,7 @@ function getByCountryCode(code, isBusiness){
 
 		rate = { standardRate : vat[code] };
 
-		if(!rate){
+		if(!rate) {
 			rate = {standardRate : 0 };
 		}
 	}
@@ -69,24 +69,24 @@ function getByCountryCode(code, isBusiness){
 
 const soapClient = soap.createClientAsync(vatValidationUrl);
 
-function checkVAT(code, vatNum){
+function checkVAT(code, vatNum) {
 
 	const isDebug = config.vat && config.vat.debug && config.vat.debug.skipChecking;
 	const isOutsideEU = addressMeta.euCountriesCode.indexOf(code) === -1;
-	
+
 	return new Promise((resolve, reject) => {
 
 		// TODO: Should we try to validate the country code at least?
 		if(isDebug || isOutsideEU) {
 			return resolve({ valid: true });
-		} 
+		}
 
-		if(!vatValidationUrl){
+		if(!vatValidationUrl) {
 			const vatMsg = "vat.checkUrl is not defined in config file";
 			return reject({message: vatMsg});
 		}
 
-		//console.log("checkVAT Slow Path hit")
+		// console.log("checkVAT Slow Path hit")
 
 		soapClient.then((client) => {
 			return client.checkVatAsync({

@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/***************************************************************************
+/** *************************************************************************
  *  @file Contains functionality to dispatch work to the
  *       queue via amqp protocol. A compute node with a worker must be running
  *       to fulfil the tasks in order for the work to be done.
@@ -31,7 +31,7 @@
 
 	function ImportQueue() {}
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Create a connection and a channel in ampq and init variables
 	 * @param {url} url - ampq connection string
 	 * @param {options} options - defines sharedSpacePath, logger, callbackQName and workerQName
@@ -78,7 +78,7 @@
 				this.callbackQName = options.callback_queue;
 				this.workerQName = options.worker_queue;
 				this.modelQName = options.model_queue;
-				this.deferedObjs = {}; //cclw05 - should be deferred?
+				this.deferedObjs = {}; // cclw05 - should be deferred?
 				this.eventExchange = options.event_exchange;
 
 				return this._consumeCallbackQueue();
@@ -88,7 +88,7 @@
 			});
 	};
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Dispatch work to queue to import a model via a file uploaded by User
 	 * @param {filePath} filePath - Path to uploaded file
 	 * @param {orgFileName} orgFileName - Original file name of the file
@@ -141,7 +141,7 @@
 			});
 	};
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Dispatch work to queue to create a federated model
 	 * @param {account} account - username
 	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
@@ -150,7 +150,7 @@
 		const corID = correlationId;
 		const newFileDir = this.sharedSpacePath + "/" + corID;
 		const filename = `${newFileDir}/obj.json`;
-		//let filename = `${newFileDir}.json`; //cclw05 - is /obj necessary? kept it there for now
+		// let filename = `${newFileDir}.json`; //cclw05 - is /obj necessary? kept it there for now
 
 		return new Promise((resolve, reject) => {
 			fs.mkdir(this.sharedSpacePath, function (err) {
@@ -192,22 +192,22 @@
 	};
 
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Dispatch work to import toy model
 	 * @param {string} database - database name
 	 * @param {string} model - model id
-	 * @param {string} modeDirName - the dir name of the model database dump staying in 
+	 * @param {string} modeDirName - the dir name of the model database dump staying in
 	 *******************************************************************************/
 	ImportQueue.prototype.importToyModel = function (correlationId, database, model, options) {
 		const corID = correlationId;
 
 		const skip = options.skip && JSON.stringify(options.skip) || "";
 		const msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
-		
+
 		return this._dispatchWork(corID, msg);
 	};
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Move a specified file to shared storage (area shared by queue workers)
 	 * move the file to shared storage space, put it in a corID/newFileName
 	 * note: using move(in fs.extra) instead of rename(in fs) as rename doesn"t allow cross device
@@ -246,7 +246,7 @@
 
 	};
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Insert a job item in worker queue
 	 *
 	 * @param {corID} corID - Correlation ID
@@ -255,7 +255,7 @@
 	 *******************************************************************************/
 	ImportQueue.prototype._dispatchWork = function (corID, msg, isModelImport) {
 		let info;
-		const queueName = isModelImport? this.modelQName : this.workerQName;
+		const queueName = isModelImport ? this.modelQName : this.workerQName;
 		return this.channel.assertQueue(queueName, { durable: true })
 			.then(_info => {
 				info = _info;
@@ -297,7 +297,7 @@
 
 	};
 
-	/*******************************************************************************
+	/** *****************************************************************************
 	 * Listen to callback queue, resolve promise when job done
 	 * Should be called once only, presumably in constructor
 	 *******************************************************************************/
@@ -322,7 +322,7 @@
 				return this.channel.consume(queue, function (rep) {
 
 					self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
-					
+
 					const ModelHelper = require("../models/helper/model");
 
 					const defer = self.deferedObjs[rep.properties.correlationId];
@@ -351,8 +351,8 @@
 	};
 
 	ImportQueue.prototype.insertEventMessage = function (msg) {
-		
-		if(!this.channel){
+
+		if(!this.channel) {
 			return;
 		}
 

@@ -24,7 +24,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
-	
+
 	router.post("/projects", middlewares.project.canCreate, createProject);
 	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
 	router.get("/projects", middlewares.project.canList, listProjects);
@@ -32,7 +32,7 @@
 	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
 
 
-	function createProject(req, res, next){
+	function createProject(req, res, next) {
 		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
@@ -41,10 +41,10 @@
 	}
 
 
-	function updateProject(req, res, next){
+	function updateProject(req, res, next) {
 
 		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
-			if(!project){
+			if(!project) {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
 				return project.updateAttrs(req.body);
@@ -56,8 +56,8 @@
 		});
 	}
 
-	function deleteProject(req, res, next){
-		
+	function deleteProject(req, res, next) {
+
 		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
@@ -65,7 +65,7 @@
 		});
 	}
 
-	function listProjects(req, res, next){
+	function listProjects(req, res, next) {
 		Project.findAndPopulateUsers({ account: req.params.account }, {}).then(projects => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
 		}).catch(err => {
@@ -73,10 +73,10 @@
 		});
 	}
 
-	function listProject(req, res, next){
+	function listProject(req, res, next) {
 
 		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
-			
+
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 
 		}).catch(err => {

@@ -25,7 +25,7 @@ const C = require("../constants");
 exports.decode = function(bson, meshes, cameras) {
 	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_TRANSFORMATION, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_TRANSFORMATION);
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Meshes & Cameras extraction
 	const mMeshes = [];
 	const mCameras = [];
@@ -48,16 +48,16 @@ exports.decode = function(bson, meshes, cameras) {
 		}
 	}
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Meshes
 	// TODO: rename to meshes
 	if (mMeshes.length > 0) {
 		bson[C.M_MESHES] = mMeshes;
 	}
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Cameras
-	if (mCameras.length > 0){
+	if (mCameras.length > 0) {
 		bson[C.REPO_NODE_LABEL_CAMERAS] = mCameras;
 	}
 

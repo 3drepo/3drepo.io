@@ -33,7 +33,7 @@
 	router.get("/invoices/:invoiceNo.pdf", middlewares.isAccountAdmin, renderInvoicePDF);
 
 
-	function listInvoices(req, res, next){
+	function listInvoices(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
 		Invoice.findByAccount(req.params.account).then(invoices => {
@@ -44,23 +44,23 @@
 		});
 	}
 
-	function renderInvoice(req, res, next){
+	function renderInvoice(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(invoice => {
 
-			if(!invoice){
+			if(!invoice) {
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
 			let template = "invoice.pug";
 
-			if(invoice.type === "refund"){
+			if(invoice.type === "refund") {
 				template = "refund.pug";
 			}
 
-			//console.log( invoice.toJSON());
-			
+			// console.log( invoice.toJSON());
+
 			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
 
 		}).catch(err => {
@@ -68,7 +68,7 @@
 		});
 	}
 
-	function renderInvoicePDF(req, res, next){
+	function renderInvoicePDF(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
 		let invoice;
@@ -76,7 +76,7 @@
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_invoice => {
 
 			invoice = _invoice;
-			if(!invoice){
+			if(!invoice) {
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
