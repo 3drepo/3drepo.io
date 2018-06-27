@@ -59,7 +59,6 @@ router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, midd
 
 function storeIssue(req, res, next) {
 
-
 	const place = utils.APIInfo(req);
 	// let data = JSON.parse(req.body.data);
 	const data = req.body;
@@ -148,7 +147,6 @@ function updateIssue(req, res, next) {
 
 						return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
 
-
 					}).catch(err =>{
 						if(err) {
 							return Promise.reject(err);
@@ -158,7 +156,6 @@ function updateIssue(req, res, next) {
 					});
 
 				});
-
 
 			});
 		}
@@ -270,7 +267,6 @@ function findIssueById(req, res, next) {
 
 function renderIssuesHTML(req, res, next) {
 
-
 	const place = utils.APIInfo(req);
 	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let findIssue;
@@ -330,7 +326,6 @@ function renderIssuesHTML(req, res, next) {
 
 function importBCF(req, res, next) {
 
-
 	const place = utils.APIInfo(req);
 
 	// check space
@@ -373,7 +368,6 @@ function importBCF(req, res, next) {
 			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
-
 			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
 			}).catch(error => {
@@ -384,7 +378,6 @@ function importBCF(req, res, next) {
 }
 
 function getScreenshot(req, res, next) {
-
 
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
@@ -399,7 +392,6 @@ function getScreenshot(req, res, next) {
 
 function getScreenshotSmall(req, res, next) {
 
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
@@ -412,7 +404,6 @@ function getScreenshotSmall(req, res, next) {
 }
 
 function getThumbnail(req, res, next) {
-
 
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};

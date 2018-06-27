@@ -80,7 +80,6 @@ function convertToErrorCode(bouncerErrorCode) {
 
 	];
 
-
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
 		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
 
@@ -325,14 +324,12 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 	}).then(setting => {
 
-
 		if(project) {
 			project.models.push(model);
 			return project.save().then(() => setting);
 		}
 
 		return setting;
-
 
 	}).then(setting => {
 
@@ -416,7 +413,6 @@ function importToyProject(account, username) {
 }
 
 function importToyModel(account, username, modelName, modelDirName, project, subModels, skip) {
-
 
 	let model;
 	const desc = "";
@@ -770,7 +766,6 @@ function getIdToMeshes(account, model, branch, rev, username) {
 	});
 }
 
-
 function getModelProperties(account, model, branch, rev, username) {
 
 	let subProperties;
@@ -952,9 +947,7 @@ function getTreePath(account, model, branch, rev, username) {
 	});
 }
 
-
 function getUnityAssets(account, model, branch, rev, username) {
-
 
 	let subAssets;
 	let revId, assetsFileName;
@@ -1097,7 +1090,6 @@ function getFullTree_noSubTree(account, model, branch, rev) {
 		return stream.PassThrough();
 
 	});
-
 
 	let pass;
 
@@ -1256,7 +1248,6 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 function listSubModels(account, model, branch) {
 
-
 	const subModels = [];
 
 	return History.findByBranch({ account, model }, branch).then(history => {
@@ -1295,7 +1286,6 @@ function listSubModels(account, model, branch) {
 	});
 }
 
-
 function downloadLatest(account, model) {
 
 	return stash.getGridFSBucket(account, `${model}.history`).then(bucket => {
@@ -1324,7 +1314,6 @@ function downloadLatest(account, model) {
 		});
 	});
 }
-
 
 function uploadFile(req) {
 
@@ -1494,7 +1483,6 @@ function importModel(account, model, username, modelSetting, source, data) {
 
 function removeModel(account, model, forceRemove) {
 
-
 	let setting;
 	return ModelSetting.findById({account, model}, model).then(_setting => {
 
@@ -1550,7 +1538,6 @@ function removeModel(account, model, forceRemove) {
 }
 
 function getModelPermission(username, setting, account) {
-
 
 	if(!setting) {
 		return Promise.resolve([]);
@@ -1706,7 +1693,6 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 	});
 
-
 }
 
 function getMetadata(account, model, id) {
@@ -1753,7 +1739,6 @@ const acceptedFormat = [
 	"ms3d","cob","scn","blend","pk3","ndo",
 	"ifc","xgl","zgl","fbx","assbin", "bim"
 ];
-
 
 module.exports = {
 	createAndAssignRole,

@@ -24,12 +24,10 @@ const config = require("../config");
 
 router.get("/plans", listPlans);
 
-
 function listPlans(req, res, next) {
 	const place = utils.APIInfo(req);
 	const subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
 	responseCodes.respond(place, req, res, next, responseCodes.OK, subscriptions);
 }
-
 
 module.exports = router;

@@ -36,10 +36,8 @@ const refSchema = Schema(
 	})
 );
 
-
 refSchema.statics = {};
 refSchema.methods = {};
-
 
 const Ref = ModelFactory.createClass(
 	"Ref",

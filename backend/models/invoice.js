@@ -36,7 +36,6 @@
 	const responseCodes = require("../response_codes.js");
 	const path  = require("path");
 
-
 	const SchemaTypes = mongoose.Schema.Types;
 
 	// Various getter/setter helper functions
@@ -188,7 +187,6 @@
 				this.taxAmount = regularPayments.reduce((sum, payment) => sum + payment.tax, 0);
 			}
 
-
 			this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.gross, 0);
 		}
 
@@ -237,7 +235,6 @@
 				this.items = lastGoodInvoice.items;
 			}).then(() => this);
 		}
-
 
 	};
 

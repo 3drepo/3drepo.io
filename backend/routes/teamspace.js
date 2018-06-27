@@ -31,7 +31,6 @@
 	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 
-
 	function getQuotaInfo(req, res, next) {
 
 		User.findByUserName(req.session.user.username).then(user => {
@@ -54,7 +53,6 @@
 		});
 
 	}
-
 
 	function getMemberList(req, res, next) {
 
@@ -79,7 +77,6 @@
 
 	}
 
-
 	function addTeamMember(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
@@ -101,7 +98,6 @@
 			});
 	}
 
-
 	function removeTeamMember(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
@@ -117,7 +113,6 @@
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 			});
 	}
-
 
 	module.exports = router;
 }());

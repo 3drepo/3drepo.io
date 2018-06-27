@@ -68,7 +68,6 @@ module.exports.createApp = function (server, serverConfig) {
 		systemLogger.logError("Chat server - Queue init error - " + err.message);
 	});
 
-
 	const userToSocket = {};
 	const credentialErrorEventName = "credentialError";
 	const joinedEventName = "joined";
@@ -164,7 +163,6 @@ module.exports.createApp = function (server, serverConfig) {
 			});
 
 		});
-
 
 	}
 

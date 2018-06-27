@@ -21,13 +21,11 @@ const ModelFactory = require("./factory/modelFactory");
 const Schema = mongoose.Schema;
 const utils = require("../utils");
 
-
 const schema = Schema({
 	_id: Object,
 	parents: [],
 	metadata: Object
 });
-
 
 if (!schema.options.toJSON) {
 	schema.options.toJSON = {};
@@ -44,7 +42,6 @@ schema.options.toJSON.transform = function (doc, ret) {
 	}
 	return ret;
 };
-
 
 const Meta = ModelFactory.createClass(
 	"Meta",

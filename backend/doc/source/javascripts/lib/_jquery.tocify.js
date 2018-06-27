@@ -428,7 +428,6 @@
 			if (hashGeneratorOption === "pretty") {
 				// remove weird characters
 
-
 				// prettify the text
 				hashValue = self.text().toLowerCase().replace(/\s/g, "-");
 

@@ -28,7 +28,10 @@
 	"no-extend-native": 2,
 	"no-var": 2,
 	"no-undef": 2,
-	"no-multiple-empty-lines" : 2,
+	"no-multiple-empty-lines" : [
+			"error",
+			{"max" : 1}
+	],
 	"no-trailing-spaces" : 2,
 	"no-whitespace-before-property": 2,
 	"space-before-blocks" : 2,

@@ -58,7 +58,6 @@ module.exports = {
 	__collectionName: function(modelName, options) {
 		let collectionName;
 
-
 		// collectionName can be a function or a static string
 		if (typeof this.models[modelName].collectionName === "function") {
 
@@ -82,7 +81,6 @@ module.exports = {
 		} else {
 			mongooseModel = mongoose.model(modelName, schema);
 		}
-
 
 		// let mongooseModel =  mongoose.model(modelName, schema);
 
@@ -145,7 +143,6 @@ module.exports = {
 			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
 		});
 
-
 		mongooseModel.findById = function(options, id) {
 
 			const args = Array.prototype.slice.call(arguments);
@@ -155,7 +152,6 @@ module.exports = {
 
 			return mongooseModel.findOne.apply(mongooseModel, args);
 		};
-
 
 		const update = mongooseModel.update;
 

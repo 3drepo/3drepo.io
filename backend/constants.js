@@ -290,7 +290,6 @@
 	define("PERM_DELETE_MODEL", "delete_model");
 	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
 
-
 	// team space
 	define("ACCOUNT_PERM_LIST", [
 		module.exports.PERM_ASSIGN_LICENCE,
@@ -478,7 +477,6 @@
 		"system"
 	]);
 
-
 	// -----------------------------------------------------------------------------
 	//
 	// Regular expressions
@@ -495,7 +493,6 @@
 	// -----------------------------------------------------------------------------
 	define("BASIC_PLAN", "BASIC");
 	define("PAID_PLAN", "THE-100-QUID-PLAN");
-
 
 	// -----------------------------------------------------------------------------
 	//
@@ -535,7 +532,6 @@
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
 	define("PROJECT_DEFAULT_ID", "default");
-
 
 	// issues
 

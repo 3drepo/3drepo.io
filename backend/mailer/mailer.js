@@ -25,7 +25,6 @@ let transporter;
 
 function sendEmail(template, to, data, attachments) {
 
-
 	if(!config.mail || !config.mail.smtpConfig) {
 		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
 	}
@@ -62,9 +61,7 @@ function rejectNoUrl(name) {
 	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`});
 }
 
-
 function getURL(urlName, params) {
-
 
 	if(!C.MAIL_URLS || !C.MAIL_URLS[urlName]) {
 		return null;
@@ -84,7 +81,6 @@ function sendNoConsumerAlert() {
 
 function sendVerifyUserEmail(to, data) {
 
-
 	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
 
 	if(!data.url) {
@@ -95,9 +91,7 @@ function sendVerifyUserEmail(to, data) {
 	return sendEmail(template, to, data);
 }
 
-
 function sendResetPasswordEmail(to, data) {
-
 
 	data.url = getURL("forgotPassword", {token: data.token, username: data.username});
 
@@ -111,15 +105,12 @@ function sendResetPasswordEmail(to, data) {
 
 function sendPaymentReceivedEmail(to, data, attachments) {
 
-
 	const template = require("./templates/paymentReceived");
-
 
 	return sendEmail(template, to, data, attachments);
 }
 
 function sendPaymentReceivedEmailToSales(data, attachments) {
-
 
 	let template = require("./templates/paymentReceived");
 
@@ -129,8 +120,8 @@ function sendPaymentReceivedEmailToSales(data, attachments) {
 
 	const salesTemplate = {
 		html: template.html,
-		subject: function(data) {
-			return `[${data.type}] [${data.invoiceNo}] ${data.email}`;
+		subject: function(_data) {
+			return `[${_data.type}] [${_data.invoiceNo}] ${_data.email}`;
 		}
 	};
 
@@ -141,11 +132,9 @@ function sendPaymentReceivedEmailToSales(data, attachments) {
 		return Promise.resolve();
 	}
 
-
 }
 
 function sendNewUser(data) {
-
 
 	const template = require("./templates/newUser");
 
@@ -161,7 +150,6 @@ function sendNewUser(data) {
 
 function sendContactEmail(data) {
 
-
 	const template = require("./templates/contact");
 
 	if(!config.contact || !config.contact.email) {
@@ -171,9 +159,7 @@ function sendContactEmail(data) {
 	return sendEmail(template, config.contact.email, data);
 }
 
-
 function sendPaymentFailedEmail(to, data) {
-
 
 	const template = require("./templates/paymentFailed");
 	return sendEmail(template, to, data);
@@ -182,14 +168,12 @@ function sendPaymentFailedEmail(to, data) {
 
 function sendPaymentRefundedEmail(to, data, attachments) {
 
-
 	const template = require("./templates/paymentRefunded");
 	return sendEmail(template, to, data, attachments);
 
 }
 
 function sendSubscriptionSuspendedEmail(to, data) {
-
 
 	const template = require("./templates/paymentSuspended");
 	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
@@ -200,13 +184,11 @@ function sendSubscriptionSuspendedEmail(to, data) {
 
 function sendPaymentErrorEmail(data) {
 
-
 	const template = require("./templates/paymentError");
 	return sendEmail(template, config.contact.email, data);
 }
 
 function sendModelInvitation(to, data) {
-
 
 	data.url = getURL("model", { account: data.account, model: data.model });
 
@@ -219,7 +201,6 @@ function sendModelInvitation(to, data) {
 }
 
 function sendImportError(data) {
-
 
 	if(config.contact) {
 		const template = require("./templates/importError");

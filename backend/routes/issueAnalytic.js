@@ -50,7 +50,6 @@
 				responseCodes.respond(place, req, res, next, responseCodes.OK, docs);
 			}
 
-
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});

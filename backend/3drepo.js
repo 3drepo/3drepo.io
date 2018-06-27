@@ -79,7 +79,6 @@ function setupSSL() {
 	}
 }
 
-
 function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
 
@@ -168,7 +167,6 @@ function setupSubdomain(mainApp, subdomain) {
 				createService(subDomainApp, serverConfig);
 
 			}
-
 
 		}
 		// If the configuration specifies a redirect then apply

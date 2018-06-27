@@ -62,7 +62,6 @@
 
 	const support = {};
 
-
 	var
 		version = "2.2.0",
 
@@ -2674,7 +2673,6 @@
 
 })(window);
 
-
 	jQuery.find = Sizzle;
 	jQuery.expr = Sizzle.selectors;
 	jQuery.expr[ ":" ] = jQuery.expr.pseudos;
@@ -2682,7 +2680,6 @@
 	jQuery.text = Sizzle.getText;
 	jQuery.isXMLDoc = Sizzle.isXML;
 	jQuery.contains = Sizzle.contains;
-
 
 	const dir = function(elem, dir, until) {
 		let matched = [],
@@ -2699,7 +2696,6 @@
 		return matched;
 	};
 
-
 	const siblings = function(n, elem) {
 		const matched = [];
 
@@ -2712,11 +2708,9 @@
 		return matched;
 	};
 
-
 	const rneedsContext = jQuery.expr.match.needsContext;
 
 	const rsingleTag = (/^<([\w-]+)\s*\/?>(?:<\/\1>|)$/);
-
 
 	const risSimple = /^.[^:#\[\.,]*$/;
 
@@ -2810,9 +2804,7 @@
 		}
 	});
 
-
 	// Initialize a jQuery object
-
 
 	// A central reference to the root jQuery(document)
 	let rootjQuery,
@@ -2936,7 +2928,6 @@
 
 	// Initialize central reference
 	rootjQuery = jQuery(document);
-
 
 	let rparentsprev = /^(?:parents|prev(?:Until|All))/,
 
@@ -3100,7 +3091,6 @@
 		};
 	});
 	const rnotwhite = (/\S+/g);
-
 
 	// Convert String-formatted options into Object-formatted ones
 	function createOptions(options) {
@@ -3327,7 +3317,6 @@
 		return self;
 	};
 
-
 	jQuery.extend({
 
 		Deferred: function(func) {
@@ -3478,7 +3467,6 @@
 		}
 	});
 
-
 	// The deferred used on DOM ready
 	let readyList;
 
@@ -3574,7 +3562,6 @@
 	// Kick off the DOM ready check even if the user does not
 	jQuery.ready.promise();
 
-
 	// Multifunctional method to get and set values of a collection
 	// The value/s can optionally be executed if it's a function
 	var access = function(elems, fn, key, value, chainable, emptyGet, raw) {
@@ -3643,7 +3630,6 @@
 		/* jshint -W018 */
 		return owner.nodeType === 1 || owner.nodeType === 9 || !(+owner.nodeType);
 	};
-
 
 	function Data() {
 		this.expando = jQuery.expando + Data.uid++;
@@ -3840,7 +3826,6 @@
 
 	const dataUser = new Data();
 
-
 	//  Implementation Summary
 	//
 	//  1. Enforce API surface and semantic compatibility with 1.9.x branch
@@ -4019,7 +4004,6 @@
 		}
 	});
 
-
 	jQuery.extend({
 		queue: function(elem, type, data) {
 			let queue;
@@ -4157,7 +4141,6 @@
 
 	const rcssNum = new RegExp("^(?:([+-])=|)(" + pnum + ")([a-z%]*)$", "i");
 
-
 	const cssExpand = ["Top", "Right", "Bottom", "Left"];
 
 	const isHidden = function(elem, el) {
@@ -4168,7 +4151,6 @@
 		return jQuery.css(elem, "display") === "none" ||
 						!jQuery.contains(elem.ownerDocument, elem);
 	};
-
 
 	function adjustCSS(elem, prop, valueParts, tween) {
 		let adjusted,
@@ -4237,7 +4219,6 @@
 
 	const rscriptType = (/^$|\/(?:java|ecma)script/i);
 
-
 	// We have to close these tags to support XHTML (#13200)
 	const wrapMap = {
 
@@ -4261,7 +4242,6 @@
 	wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 	wrapMap.th = wrapMap.td;
 
-
 	function getAll(context, tag) {
 
 		// Support: IE9-11+
@@ -4277,7 +4257,6 @@
 			ret;
 	}
 
-
 	// Mark scripts as having already been evaluated
 	function setGlobalEval(elems, refElements) {
 		let i = 0,
@@ -4291,7 +4270,6 @@
 			);
 		}
 	}
-
 
 	const rhtml = /<|&#?\w+;/;
 
@@ -4384,7 +4362,6 @@
 		return fragment;
 	}
 
-
 	(function() {
 		let fragment = document.createDocumentFragment(),
 			div = fragment.appendChild(document.createElement("div")),
@@ -4409,7 +4386,6 @@
 		div.innerHTML = "<textarea>x</textarea>";
 		support.noCloneChecked = !!div.cloneNode(true).lastChild.defaultValue;
 	})();
-
 
 	let
 		rkeyEvent = /^key/,
@@ -5108,7 +5084,6 @@
 		}
 	});
 
-
 	let
 		rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:-]+)[^>]*)\/>/gi,
 
@@ -5561,7 +5536,6 @@
 		};
 	});
 
-
 	let iframe,
 		elemdisplay = {
 
@@ -5663,9 +5637,7 @@
 		return ret;
 	};
 
-
 	const documentElement = document.documentElement;
-
 
 	(function() {
 		let pixelPositionVal, boxSizingReliableVal, pixelMarginRightVal, reliableMarginLeftVal,
@@ -5778,7 +5750,6 @@
 		});
 	})();
 
-
 	function curCSS(elem, name, computed) {
 		let width, minWidth, maxWidth, ret,
 			style = elem.style;
@@ -5825,7 +5796,6 @@
 			ret;
 	}
 
-
 	function addGetHookIf(conditionFn, hookFn) {
 
 		// Define the hook, we'll check on the first run if it's really needed.
@@ -5844,7 +5814,6 @@
 			}
 		};
 	}
-
 
 	let
 
@@ -6334,7 +6303,6 @@
 		}
 	});
 
-
 	function Tween(elem, options, prop, end, easing) {
 		return new Tween.prototype.init(elem, options, prop, end, easing);
 	}
@@ -6449,7 +6417,6 @@
 
 	// Back Compat <1.8 extension point
 	jQuery.fx.step = {};
-
 
 	let
 		fxNow, timerId,
@@ -7058,7 +7025,6 @@
 		_default: 400
 	};
 
-
 	// Based off of the plugin by Clint Helfers, with permission.
 	// http://web.archive.org/web/20100324014747/http://blindsignals.com/index.php/2009/07/jquery-delay/
 	jQuery.fn.delay = function(time, type) {
@@ -7072,7 +7038,6 @@
 			};
 		});
 	};
-
 
 	(function() {
 		let input = document.createElement("input"),
@@ -7101,7 +7066,6 @@
 		input.type = "radio";
 		support.radioValue = input.value === "t";
 	})();
-
 
 	let boolHook,
 		attrHandle = jQuery.expr.attrHandle;
@@ -7236,7 +7200,6 @@
 		};
 	});
 
-
 	let rfocusable = /^(?:input|select|textarea|button)$/i,
 		rclickable = /^(?:a|area)$/i;
 
@@ -7337,7 +7300,6 @@
 	], function() {
 		jQuery.propFix[ this.toLowerCase() ] = this;
 	});
-
 
 	const rclass = /[\t\r\n\f]/g;
 
@@ -7508,7 +7470,6 @@
 		}
 	});
 
-
 	const rreturn = /\r/g;
 
 	jQuery.fn.extend({
@@ -7672,9 +7633,7 @@
 		}
 	});
 
-
 	// Return jQuery for attributes-only inclusion
-
 
 	const rfocusMorph = /^(?:focusinfocus|focusoutblur)$/;
 
@@ -7863,7 +7822,6 @@
 		}
 	});
 
-
 	jQuery.each(("blur focus focusin focusout load resize scroll unload click dblclick " +
 		"mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
 		"change select submit keydown keypress keyup error contextmenu").split(" "),
@@ -7883,9 +7841,7 @@
 		}
 	});
 
-
 	support.focusin = "onfocusin" in window;
-
 
 	// Support: Firefox
 	// Firefox doesn't have focus(in | out) events
@@ -7934,13 +7890,11 @@
 
 	const rquery = (/\?/);
 
-
 	// Support: Android 2.3
 	// Workaround failure to string-cast null input
 	jQuery.parseJSON = function(data) {
 		return JSON.parse(data + "");
 	};
-
 
 	// Cross-browser xml parsing
 	jQuery.parseXML = function(data) {
@@ -7961,7 +7915,6 @@
 		}
 		return xml;
 	};
-
 
 	let
 		rhash = /#.*$/,
@@ -8791,7 +8744,6 @@
 		};
 	});
 
-
 	jQuery._evalUrl = function(url) {
 		return jQuery.ajax({
 			url: url,
@@ -8804,7 +8756,6 @@
 			"throws": true
 		});
 	};
-
 
 	jQuery.fn.extend({
 		wrapAll: function(html) {
@@ -8876,7 +8827,6 @@
 		}
 	});
 
-
 	jQuery.expr.filters.hidden = function(elem) {
 		return !jQuery.expr.filters.visible(elem);
 	};
@@ -8888,7 +8838,6 @@
 		// See tickets #10406 and #13132
 		return elem.offsetWidth > 0 || elem.offsetHeight > 0 || elem.getClientRects().length > 0;
 	};
-
 
 	let r20 = /%20/g,
 		rbracket = /\[\]$/,
@@ -9004,7 +8953,6 @@
 				}).get();
 		}
 	});
-
 
 	jQuery.ajaxSettings.xhr = function() {
 		try {
@@ -9166,7 +9114,6 @@
 		}
 	});
 
-
 	// Install script dataType
 	jQuery.ajaxSetup({
 		accepts: {
@@ -9227,7 +9174,6 @@
 			};
 		}
 	});
-
 
 	let oldCallbacks = [],
 		rjsonp = /(=)\?(?=&|$)|\?\?/;
@@ -9321,7 +9267,6 @@
 		}
 	});
 
-
 	// Support: Safari 8+
 	// In Safari 8 documents created via document.implementation.createHTMLDocument
 	// collapse sibling forms: the second one becomes a child of the first one.
@@ -9332,7 +9277,6 @@
 		body.innerHTML = "<form></form><form></form>";
 		return body.childNodes.length === 2;
 	})();
-
 
 	// Argument "data" should be string of html
 	// context (optional): If specified, the fragment will be created in this context,
@@ -9369,7 +9313,6 @@
 
 		return jQuery.merge([], parsed.childNodes);
 	};
-
 
 	// Keep a copy of the old load method
 	const _load = jQuery.fn.load;
@@ -9441,7 +9384,6 @@
 		return this;
 	};
 
-
 	// Attach a bunch of functions for handling common AJAX events
 	jQuery.each([
 		"ajaxStart",
@@ -9456,13 +9398,11 @@
 		};
 	});
 
-
 	jQuery.expr.filters.animated = function(elem) {
 		return jQuery.grep(jQuery.timers, function(fn) {
 			return elem === fn.elem;
 		}).length;
 	};
-
 
 	/**
  * Gets a window from an element
@@ -9668,7 +9608,6 @@
 		);
 	});
 
-
 	// Create innerHeight, innerWidth, height, width, outerHeight and outerWidth methods
 	jQuery.each({ Height: "height", Width: "width" }, function(name, type) {
 		jQuery.each({ padding: "inner" + name, content: type, "": "outer" + name },
@@ -9715,7 +9654,6 @@
 			});
 	});
 
-
 	jQuery.fn.extend({
 
 		bind: function(types, data, fn) {
@@ -9742,7 +9680,6 @@
 
 	jQuery.fn.andSelf = jQuery.fn.addBack;
 
-
 	// Register as a named AMD module, since jQuery can be concatenated with other
 	// files that may use define, but not via a proper concatenation script that
 	// understands anonymous AMD modules. A named AMD is safest and most robust
@@ -9761,7 +9698,6 @@
 			return jQuery;
 		});
 	}
-
 
 	let
 

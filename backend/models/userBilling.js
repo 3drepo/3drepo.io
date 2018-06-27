@@ -93,7 +93,6 @@ billingSchema.methods.calculateAmounts = function(paymentDate) {
 		regularItems.push({plan: licence.plan, quantity: licence.pendingQuantity});
 	});
 
-
 	const nextPaymentDate = moment(this.nextPaymentDate);
 	if (proRataAmount) {
 		// The length of the pro-rata period is difference between now and next payment date
@@ -304,7 +303,6 @@ billingSchema.methods.executeBillingAgreement = function(user) {
 
 	let billingAgreement;
 
-
 	return Invoice.findByPaypalPaymentToken(user, this.paypalPaymentToken).then(invoice => {
 		if(invoice && invoice.state === C.INV_PENDING && invoice.billingAgreementId) {
 
@@ -500,7 +498,6 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
 				return invoice.save();
 			});
 
-
 		}).then(invoice => {
 
 			// email
@@ -508,7 +505,6 @@ billingSchema.methods.activateSubscriptions = function(user, paymentInfo, raw) {
 				filename: `${invoice.createdAtDate}_invoice-${invoice.invoiceNo}.pdf`,
 				content: invoice.pdf
 			}];
-
 
 			// send invoice
 			const amount = invoice.amount;

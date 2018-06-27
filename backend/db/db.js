@@ -43,7 +43,6 @@
 		});
 	}
 
-
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.

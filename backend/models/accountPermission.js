@@ -62,7 +62,6 @@
 				return Promise.resolve();
 			});
 
-
 		},
 
 		add(permission) {

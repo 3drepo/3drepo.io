@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 "use strict";
 
 const mongoose = require("mongoose");
@@ -27,7 +26,6 @@ const schema = mongoose.Schema({
 	color: String,
 	users: [String]
 });
-
 
 schema.statics.addDefaultJobs = function(teamspace) {
 	const promises = [];
@@ -68,7 +66,6 @@ schema.methods.removeUserFromJob = function(user) {
 	this.users.splice(this.users.indexOf(user), 1);
 	return this.save();
 };
-
 
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
@@ -121,7 +118,6 @@ schema.statics.addJob = function(teamspace, jobData) {
 		}
 		return newJobEntry.save();
 
-
 	});
 };
 
@@ -147,7 +143,6 @@ schema.statics.removeJob = function(teamspace, jobName) {
 		return Job.remove({account: teamspace}, {_id: jobName});
 
 	});
-
 
 };
 

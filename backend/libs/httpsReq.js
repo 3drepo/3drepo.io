@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 const https = require("https");
 
 const httpsAgent = new https.Agent({keepAlive:true});
 
 function parseUrl(url) {
-	"use strict";
 
 	const urlPart = {};
 
@@ -30,7 +29,6 @@ function parseUrl(url) {
 	if(parsedUrl.length === 1) {
 		throw new Error("Malformed URL");
 	}
-
 
 	urlPart.protocol = parsedUrl.shift();
 
@@ -44,9 +42,7 @@ function parseUrl(url) {
 	return urlPart;
 }
 
-
 function get(hostname, path) {
-	"use strict";
 
 	const options = {
 		hostname,
@@ -98,7 +94,6 @@ function makePostData(obj) {
 }
 
 function post(url, obj, type) {
-	"use strict";
 
 	if(!type) {
 		type = "application/x-www-form-urlencoded";
@@ -117,7 +112,6 @@ function post(url, obj, type) {
 	} else {
 		stringifiedData = stringify(obj);
 	}
-
 
 	const parsedUrl = parseUrl(url);
 
@@ -150,7 +144,6 @@ function post(url, obj, type) {
 					body = body.toString();
 				}
 
-
 				if([200, 201].indexOf(res.statusCode) === -1) {
 					reject(body);
 				} else {
@@ -161,7 +154,6 @@ function post(url, obj, type) {
 		}).on("error", err => {
 			reject(err);
 		});
-
 
 		req.write(stringifiedData);
 		req.end();
@@ -174,5 +166,4 @@ module.exports = {
 	post: post,
 	querystring: makePostData
 };
-
 

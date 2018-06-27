@@ -140,10 +140,8 @@
 					}
 				});
 
-
 			});
 		}
-
 
 		return check.then(() => {
 
@@ -179,7 +177,6 @@
 
 		const User = require("./user");
 
-
 		let userList;
 		return User.getAllUsersInTeamspace(account.account).then(users => {
 			userList = users;
@@ -195,7 +192,6 @@
 
 		});
 	};
-
 
 	schema.statics.findOneAndPopulateUsers = function(account, query) {
 
@@ -234,7 +230,6 @@
 
 		return project;
 	};
-
 
 	schema.methods.findPermsByUser = function(username) {
 		return this.permissions.find(perm => perm.user === username);

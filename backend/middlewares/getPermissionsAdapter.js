@@ -70,7 +70,6 @@
 
 					return permission.permissions;
 
-
 				});
 			},
 

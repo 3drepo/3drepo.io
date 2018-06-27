@@ -42,10 +42,8 @@ schema.statics.findAndIncInvoiceNumber = function() {
 
 };
 
-
 // inc counter and return the number atomically
 schema.statics.findAndIncRefundNumber = function() {
-
 
 	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
@@ -70,6 +68,5 @@ const Counter = ModelFactory.createClass(
 		return "counters";
 	}
 );
-
 
 module.exports = Counter;

@@ -78,7 +78,6 @@
 
 		ISSUE_NOT_FOUND: { message: "Issue not found", status: 404 },
 
-
 		HEAD_REVISION_NOT_FOUND: { message: "Head revision not found", status: 404 },
 
 		FILE_IMPORT_PROCESS_ERR: { message: "Import failed: Failed to process file", status: 400 },
@@ -93,7 +92,6 @@
 		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Import failed: Unsupported FBX version (Supported: 2011, 2012, 2013)", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
-
 
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
 		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
@@ -245,7 +243,6 @@
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500}
 
 	};
-
 
 	let valueCounter = 0;
 	const valid_values = [900, 1000, 2000, 3000, 4000];

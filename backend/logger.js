@@ -198,7 +198,6 @@ repoLogger.prototype.logFatal = function (msg, meta) {
 	this.logMessage("fatal", msg, meta);
 };
 
-
 const systemLogger = new repoLogger(null, null, "system");
 
 /**

@@ -394,7 +394,6 @@ groupSchema.methods.clean = function() {
 	return cleaned;
 };
 
-
 groupSchema.statics.deleteGroup = function(dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {

@@ -63,7 +63,6 @@
 		});
 	}
 
-
 	function removeUserFromJobs(req, res, next) {
 
 		Job.removeUserFromJobs(req.params.account, req.params.user).then(() => {

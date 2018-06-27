@@ -37,7 +37,6 @@ const vat = {
 	GB: 20
 };
 
-
 function getByCountryCode(code, isBusiness) {
 
 	let rate;

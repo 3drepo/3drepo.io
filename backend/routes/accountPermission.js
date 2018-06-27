@@ -31,7 +31,6 @@
 	router.put("/permissions/:user", middlewares.isAccountAdmin, updatePermission);
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
-
 	function listPermissions(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
@@ -72,7 +71,6 @@
 		} else {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
-
 
 	}
 

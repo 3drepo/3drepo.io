@@ -88,13 +88,11 @@ const textureSchema = Schema(
 	})
 );
 
-
 const transformationSchema = Schema(
 	_.extend({}, repoBase, {
 		matrix: [[Number]]
 	})
 );
-
 
 const Camera = ModelFactory.createClass(
 	"Camera",
@@ -111,7 +109,6 @@ const Material = ModelFactory.createClass(
 		return `${arg.model}.scene`;
 	}
 );
-
 
 const Metadata = ModelFactory.createClass(
 	"Metadata",
@@ -137,7 +134,6 @@ const Texture = ModelFactory.createClass(
 	}
 );
 
-
 const Transformation = ModelFactory.createClass(
 	"Transformation",
 	transformationSchema,
@@ -145,6 +141,5 @@ const Transformation = ModelFactory.createClass(
 		return `${arg.model}.scene`;
 	}
 );
-
 
 module.exports = {Camera, Material, Metadata, Reference, Texture, Transformation};

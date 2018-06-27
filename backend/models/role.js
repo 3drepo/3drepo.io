@@ -83,7 +83,6 @@
 		return ModelFactory.dbManager.runCommand("admin", grantRoleCmd);
 	};
 
-
 	schema.statics.findByRoleID = function(id) {
 		return this.findOne({ account: "admin"}, { _id: id});
 	};

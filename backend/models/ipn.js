@@ -26,7 +26,6 @@
 		message: {}
 	});
 
-
 	schema.pre("save", function(next) {
 
 		if(!this.createdAt) {
@@ -44,7 +43,6 @@
 
 		return ipn.save();
 	};
-
 
 	const IPN = ModelFactory.createClass(
 		"IPN",

@@ -41,7 +41,6 @@ const billingAddressSchema = new mongoose.Schema({
 	phoneNo: {type: String }
 });
 
-
 billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
 
 	Object.keys(billingAddress).forEach(key => {

@@ -97,7 +97,6 @@ exports.extractBoundingBox = function(mesh) {
 	return bbox;
 };
 
-
 exports.mergeMapSort = function(left, right) {
 	if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
 		return -1;
@@ -107,7 +106,6 @@ exports.mergeMapSort = function(left, right) {
 		return 0;
 	}
 };
-
 
 /**
  * Expects a byte array where each offset bytes are integers.
@@ -158,7 +156,6 @@ exports.mergeMapSort = function(left, right) {
 //     }
 //     return result;
 // }
-
 
 /**
  * Returns an array of arrays of uv channels, where each channel

@@ -17,7 +17,6 @@
 
 "use strict";
 
-
 /**
  * Creates frontend API Express app
  *

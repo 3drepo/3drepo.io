@@ -138,7 +138,6 @@ schema.statics.authenticate = function(logger, username, password) {
 	});
 };
 
-
 // schema.statics.filterRoles = function(roles, database){
 // 	return  database ? _.filter(users, { 'db': database }) : roles;
 // };
@@ -173,11 +172,9 @@ schema.statics.isEmailTaken = function(email, exceptUser) {
 	return this.count({account: "admin"}, query);
 };
 
-
 schema.statics.findUserByBillingId = function(billingAgreementId) {
 	return this.findOne({account: "admin"}, { "customData.billing.billingAgreementId": billingAgreementId });
 };
-
 
 schema.statics.updatePassword = function(logger, username, oldPassword, token, newPassword) {
 
@@ -376,11 +373,9 @@ schema.statics.verify = function(username, token, options) {
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()) {
 
-
 			user.customData.inactive = undefined;
 			user.customData.emailVerifyToken = undefined;
 			return user.save();
-
 
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
@@ -475,9 +470,7 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 		return Promise.resolve(resetPasswordToken);
 	});
 
-
 };
-
 
 function _fillInModelDetails(accountName, setting, permissions) {
 
@@ -599,7 +592,6 @@ function _addProjects(account, username, models) {
 		account.projects = account.projects.concat(projects);
 	});
 }
-
 
 function _findModelDetails(dbUserCache, username, model) {
 
@@ -773,7 +765,6 @@ function _createAccounts(roles, userName) {
 								myProj.permissions = _.uniq(myProj.permissions.concat(_proj.toObject().permissions[0].permissions));
 							}
 
-
 							// show implied and inherited permissions
 							myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
 							myProj.permissions = _.uniq(_.flatten(myProj.permissions));
@@ -849,7 +840,6 @@ function _createAccounts(roles, userName) {
 								}
 							});
 
-
 							return Promise.all(modelPromises).then(() => {
 
 								// fill in all subModels name
@@ -872,7 +862,6 @@ function _createAccounts(roles, userName) {
 									});
 								});
 
-
 								// sorting models
 								_sortAccountsAndModels(accounts);
 
@@ -883,7 +872,6 @@ function _createAccounts(roles, userName) {
 									accounts.splice(myAccountIndex, 1);
 									accounts.unshift(myAccount);
 								}
-
 
 								return accounts;
 
@@ -1123,6 +1111,5 @@ const User = ModelFactory.createClass(
 		return "system.users";
 	}
 );
-
 
 module.exports = User;

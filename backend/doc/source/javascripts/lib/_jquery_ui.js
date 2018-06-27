@@ -25,7 +25,6 @@
    * http://api.jqueryui.com/jQuery.widget/
    */
 
-
 	let widget_uuid = 0,
 		widget_slice = Array.prototype.slice;
 
@@ -560,6 +559,5 @@
 	});
 
 	const widget = $.widget;
-
 
 }));

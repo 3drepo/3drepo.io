@@ -39,7 +39,6 @@ paypal.configure({
 
 const updateBillingAddress = function (billingAgreementId, billingAddress) {
 
-
 	const paypalAddress = paypalTrans.getPaypalAddress(billingAddress);
 
 	const updateOps = [{
@@ -327,7 +326,6 @@ const handleIPN = function(paymentInfo) {
 			systemLogger.logInfo("IPN said subscription canceled", { billingAgreementId });
 
 		} else if (ipnType === C.IPN_PAYMENT_FAILED) {
-
 
 			return User.findUserByBillingId(billingAgreementId).then(user => {
 

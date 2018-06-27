@@ -36,7 +36,6 @@
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
-
 	function getMetadata(req, res, next) {
 
 		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id).then(meta => {

@@ -54,7 +54,6 @@ const xmlBuilder = new xml2js.Builder({
 	attrkey: "@"
 });
 
-
 const actionSchema = Schema({
 	_id : false,
 	id: false,
@@ -171,7 +170,6 @@ const schema = Schema({
 	extras: {}
 });
 
-
 function parseXmlString(xmlString, options) {
 
 	return new Promise((resolve, reject) => {
@@ -239,7 +237,6 @@ schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch
 				_id: { $in: history.current }
 			};
 
-
 			return Ref.find(dbColOptions, filter);
 
 		}).then(refs => {
@@ -283,7 +280,6 @@ schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch
 		return Promise.resolve(allRefs);
 	});
 };
-
 
 schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy) {
 
@@ -914,7 +910,6 @@ schema.methods.removeComment = function(commentIndex, data) {
 schema.methods.isClosed = function() {
 	return this.status === "closed" || this.closed;
 };
-
 
 schema.methods.addSystemComment = function(owner, property, from , to) {
 
@@ -1590,7 +1585,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 							return a.created > b.created;
 						});
 
-
 						issues.forEach(issue => {
 							saveIssueProms.push(
 								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
@@ -1655,7 +1649,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 						});
 
 						return Promise.all(saveIssueProms);
-
 
 					}).then(savedIssues => {
 
@@ -1881,7 +1874,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 							content: viewpoints[vpGuid].snapshot
 						} : undefined;
 
-
 						const vp = {
 							guid: utils.stringToUUID(vpGuid),
 							extras: extras,
@@ -2012,7 +2004,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 										}
 									}
 
-
 								}
 								if (vpComponents[i].Coloring) {
 									// FIXME: this is essentially copy of selection with slight modification. Should merge common code.
@@ -2135,7 +2126,6 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 										);
 									}
 								}
-
 
 								if (vpComponents[i].ViewSetupHints) {
 									// TODO: Full ViewSetupHints support -

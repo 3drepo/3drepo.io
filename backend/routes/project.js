@@ -31,7 +31,6 @@
 	router.get("/projects/:project",  middlewares.project.canView, listProject);
 	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
 
-
 	function createProject(req, res, next) {
 		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
@@ -39,7 +38,6 @@
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
-
 
 	function updateProject(req, res, next) {
 

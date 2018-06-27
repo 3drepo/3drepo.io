@@ -33,7 +33,6 @@ function executeAgreement(req, res, next) {
 	});
 }
 
-
 function handleIPN(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	Paypal.handleIPN(req.body);
@@ -41,6 +40,5 @@ function handleIPN(req, res, next) {
 	// always respond 200 with OK to paypal
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, "OK");
 }
-
 
 module.exports = router;

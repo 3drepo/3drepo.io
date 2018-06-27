@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 "use strict";
 // generic stash function
 const ModelFactory = require("../factory/modelFactory");
 const stream = require("stream");
 const systemLogger = require("../../logger.js").systemLogger;
 
-
 function getGridFSBucket (account, bucketName) {
 	return ModelFactory.dbManager.getGridFSBucket(account, { bucketName:  bucketName});
 }
-
 
 function _getGridFSBucket (dbCol, format) {
 	return getGridFSBucket(dbCol.account, `${dbCol.model}.stash.${format}`);

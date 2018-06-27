@@ -35,7 +35,6 @@ function listRevisions(req, res, next) {
 	const account = req.params.account;
 	const model = req.params.model;
 
-
 	History.listByBranch({account, model}, null, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
 
 		histories = History.clean(histories);
@@ -56,7 +55,6 @@ function listRevisionsByBranch(req, res, next) {
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
-
 
 	History.listByBranch({account, model}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
 

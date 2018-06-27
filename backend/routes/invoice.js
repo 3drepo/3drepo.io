@@ -32,7 +32,6 @@
 	router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
 	router.get("/invoices/:invoiceNo.pdf", middlewares.isAccountAdmin, renderInvoicePDF);
 
-
 	function listInvoices(req, res, next) {
 
 		const responsePlace = utils.APIInfo(req);
@@ -84,7 +83,6 @@
 
 		}).then(pdf => {
 
-
 			res.writeHead(200, {
 				"Content-Type": "application/pdf",
 				"Content-disposition": `inline; filename="${moment(invoice.createdAtDate).utc().format("YYYY-MM-DD")}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
@@ -97,7 +95,6 @@
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
-
 
 	module.exports = router;
 

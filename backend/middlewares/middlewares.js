@@ -34,7 +34,6 @@
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
-
 	function skipLoggedIn(req) {
 
 		const loginIgnores = [
@@ -233,6 +232,5 @@
 	};
 
 	module.exports = middlewares;
-
 
 })();

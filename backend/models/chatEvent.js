@@ -49,7 +49,6 @@ function commentDeleted(emitter, account, model, issueId, data) {
 	return insertEventQueue("commentDeleted", emitter, account, model, [issueId], data);
 }
 
-
 function modelStatusChanged(emitter, account, model, data) {
 	return insertEventQueue("modelStatusChanged", emitter, account, model, null, data);
 }

@@ -32,7 +32,6 @@ const httpsPost = require("../libs/httpsReq").post;
 
 const multer = require("multer");
 
-
 router.post("/login", login);
 router.post("/logout", logout);
 
@@ -77,7 +76,6 @@ function createSession(place, req, res, next, user) {
 function login(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-
 	if (Object.prototype.toString.call(req.body.username) === "[object String]"
 		&& Object.prototype.toString.call(req.body.password) === "[object String]") {
 
@@ -86,7 +84,6 @@ function login(req, res, next) {
 		if(req.session.user) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
-
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
@@ -151,7 +148,6 @@ function updateUser(req, res, next) {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 
-
 	} else {
 		// Update user info
 		User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
@@ -162,7 +158,6 @@ function updateUser(req, res, next) {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 		});
 	}
-
 
 }
 
@@ -214,7 +209,6 @@ function signUp(req, res, next) {
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 
-
 		}).then(data => {
 
 			const country = addressMeta.countries.find(_country => _country.code === req.body.countryCode);
@@ -245,7 +239,6 @@ function signUp(req, res, next) {
 				return Promise.resolve(err);
 			});
 
-
 		}).then(emailRes => {
 
 			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
@@ -257,7 +250,6 @@ function signUp(req, res, next) {
 	} else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
-
 
 }
 
@@ -308,7 +300,6 @@ function getAvatar(req, res, next) {
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
 
-
 		if(!user.getAvatar()) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
@@ -328,7 +319,6 @@ function getAvatar(req, res, next) {
 
 function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-
 
 	// check space and format
 	function fileFilter(fileReq, file, cb) {
@@ -440,7 +430,6 @@ function listInfo(req, res, next) {
 				}
 			});
 		}
-
 
 		getType.then(type => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {type});

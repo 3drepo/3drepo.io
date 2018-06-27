@@ -104,9 +104,7 @@
 				return meshes;
 			});
 
-
 	};
-
 
 	const Mesh = ModelFactory.createClass(
 		"Mesh",

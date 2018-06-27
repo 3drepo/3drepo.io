@@ -292,7 +292,6 @@ function getIdToMeshes(req, res, next) {
 	});
 }
 
-
 function getModelTree(req, res, next) {
 
 	const account = req.params.account;
@@ -380,7 +379,6 @@ function searchModelTree(req, res, next) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
-
 
 function downloadLatest(req, res, next) {
 
