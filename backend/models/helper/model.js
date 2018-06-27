@@ -51,10 +51,10 @@ function convertToErrorCode(bouncerErrorCode){
 	// These error codes correspond to the error messages to 3drepobouncer
 	// refer to bouncer/repo/error_codes.h for what they are.
 	const bouncerErrToWebErr = [
-		responseCodes.OK, 
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
-		responseCodes.NOT_AUTHORIZED, 
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.OK,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.NOT_AUTHORIZED,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
@@ -81,9 +81,9 @@ function convertToErrorCode(bouncerErrorCode){
 	];
 
 
-	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ? 
+	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
 		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-	
+
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
@@ -101,7 +101,7 @@ function importSuccess(account, model, sharedSpacePath) {
 
 				const tmpDir = `${sharedSpacePath}/${setting.corID}`;
 				const tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
-				fs.stat(tmpModelFile, function(err, stat) {
+				fs.stat(tmpModelFile, function(err) {
 					let tmpJsonFile;
 					if (err) {
 						tmpJsonFile = `${tmpDir}/obj.json`;
@@ -145,8 +145,8 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 		}
 		setting.errorReason = convertToErrorCode(errCode);
 		setting.markModified("errorReason");
-		setting.save().then( () => {				
-			ChatEvent.modelStatusChanged(null, account, model, setting);						
+		setting.save().then( () => {
+			ChatEvent.modelStatusChanged(null, account, model, setting);
 		});
 
 		if (!errMsg) {
@@ -259,10 +259,10 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 			}
 
 		});
-	} 
+	}
 
 	return promise.then(() => {
-		
+
 		const query =  {name: modelName};
 
 		if(data.project){
@@ -332,12 +332,12 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 		}
 
 		return setting;
-		
+
 
 	}).then(setting => {
 
-		if(data.userPermissions && 
-			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 && 
+		if(data.userPermissions &&
+			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 &&
 			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
 		){
 
@@ -389,9 +389,9 @@ function importToyProject(account, username){
 			const skip = { tree: 1 };
 
 			const subModels = models.map(m => {
-				
+
 				m = m.toObject();
-				
+
 				importSuccess(account, m._id);
 
 				return {
@@ -416,17 +416,17 @@ function importToyProject(account, username){
 }
 
 function importToyModel(account, username, modelName, modelDirName, project, subModels, skip){
-	
+
 
 	let model;
 	const desc = "";
 	const type = "sample";
 
 	const data = {
-		desc, 
-		type, 
-		project, 
-		unit: "mm", 
+		desc,
+		type,
+		project,
+		unit: "mm",
 		subModels,
 		surveyPoints: [
 			{
@@ -437,8 +437,8 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		angleFromNorth: 145
 	};
 
-	return createAndAssignRole(modelName, account, username, data, modelDirName).then(data => {
-		return Promise.resolve(data.setting);
+	return createAndAssignRole(modelName, account, username, data, modelDirName).then(_data => {
+		return Promise.resolve(_data.setting);
 	}).then(setting => {
 		if(subModels) {
 			return setting;
@@ -522,10 +522,7 @@ function createFederatedModel(account, model, subModels, toyFed){
 }
 
 function getAllMeshes(account, model, branch, rev, username){
-	"use strict";
-
 	let subModelMeshes;
-	let revId;
 	let history;
 	let status;
 
@@ -535,12 +532,11 @@ function getAllMeshes(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
 			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
-			revId = utils.uuidToString(history._id);
 			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
@@ -569,7 +565,7 @@ function getAllMeshes(account, model, branch, rev, username){
 						owner: ref.owner,
 						model: ref.project
 					});
-				}).catch(err => {
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -583,12 +579,11 @@ function getAllMeshes(account, model, branch, rev, username){
 		return Mesh.getMeshes(account, model, history);
 	}).then(meshes => {
 		const results = {};
-	       	if(meshes) {
+		if(meshes) {
 			results.meshes = meshes;
 		} else {
 			results.meshes = [];
 		}
-
 
 		if(subModelMeshes.length > 0) {
 			results.subModels = [];
@@ -602,11 +597,10 @@ function getAllMeshes(account, model, branch, rev, username){
 		return Promise.resolve({results, status});
 
 	});
-	
+
 }
 
 function getIdMap(account, model, branch, rev, username){
-	"use strict";	
 	let subIdMaps;
 	let revId, idMapsFileName;
 	let history;
@@ -618,7 +612,7 @@ function getIdMap(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
 			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
@@ -654,7 +648,7 @@ function getIdMap(account, model, branch, rev, username){
 						owner: ref.owner,
 						model: ref.project
 					});
-				}).catch(err => {
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -696,7 +690,6 @@ function getIdMap(account, model, branch, rev, username){
 }
 
 function getIdToMeshes(account, model, branch, rev, username){
-	"use strict";	
 	let subIdToMeshes;
 	let revId, idToMeshesFileName;
 	let history;
@@ -708,7 +701,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
 			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
@@ -743,7 +736,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 						idToMeshes: obj.idToMeshes,
 						key: ref.owner + "@" + ref.project
 					});
-				}).catch(err => {
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -763,13 +756,12 @@ function getIdToMeshes(account, model, branch, rev, username){
 			idToMeshes = JSON.parse(buf);
 		}
 
-		subIdToMeshes.forEach(subIdToMeshes => {
+		subIdToMeshes.forEach(_subIdToMeshes => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdToMeshes && subIdToMeshes.idToMeshes) {
-			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
-				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
+			if (_subIdToMeshes && _subIdToMeshes.idToMeshes) {
+				idToMeshes[_subIdToMeshes.key] = _subIdToMeshes.idToMeshes;
 			}
 		});
 
@@ -780,7 +772,7 @@ function getIdToMeshes(account, model, branch, rev, username){
 
 
 function getModelProperties(account, model, branch, rev, username){
-	
+
 	let subProperties;
 	let revId, modelPropertiesFileName;
 	let history;
@@ -829,7 +821,7 @@ function getModelProperties(account, model, branch, rev, username){
 						model: ref.project
 					});
 				})
-					.catch(err => {
+					.catch(() => {
 						return Promise.resolve();
 					})
 			);
@@ -872,7 +864,6 @@ function getModelProperties(account, model, branch, rev, username){
 }
 
 function getTreePath(account, model, branch, rev, username){
-	"use strict";	
 	let subTreePaths;
 	let revId, treePathsFileName;
 	let history;
@@ -884,7 +875,7 @@ function getTreePath(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
 			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
@@ -920,7 +911,7 @@ function getTreePath(account, model, branch, rev, username){
 						owner: ref.owner,
 						model: ref.project
 					});
-				}).catch(err => {
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -963,7 +954,7 @@ function getTreePath(account, model, branch, rev, username){
 
 
 function getUnityAssets(account, model, branch, rev, username){
-	
+
 
 	let subAssets;
 	let revId, assetsFileName;
@@ -976,7 +967,7 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(granted => {
 		if(!history){
 			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
 			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
@@ -1012,7 +1003,7 @@ function getUnityAssets(account, model, branch, rev, username){
 						owner: ref.owner,
 						model: ref.project
 					});
-				}).catch(err => {
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -1048,12 +1039,12 @@ function getUnityAssets(account, model, branch, rev, username){
 }
 
 function getJsonMpc(account, model, uid){
-	
+
 	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
 
 	return stash.findStashByFilename({ account, model }, "json_mpc", bundleFileName).then(buf => {
 		if(!buf) {
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
 		} else {
 			return Promise.resolve(buf);
 		}
@@ -1061,12 +1052,12 @@ function getJsonMpc(account, model, uid){
 }
 
 function getUnityBundle(account, model, uid){
-	
+
 	const bundleFileName = `/${account}/${model}/${uid}.unity3d`;
 
 	return stash.findStashByFilename({ account, model }, "unity3d", bundleFileName).then(buf => {
 		if(!buf) {
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
 		} else {
 			return Promise.resolve(buf);
 		}
@@ -1146,8 +1137,8 @@ function getFullTree_noSubTree(account, model, branch, rev){
 				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
 
 				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
-					url = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-				} 
+					url = `/${ref.owner}/${ref.project}/revision/${ref._rid}/fulltree.json`;
+				}
 
 				if(refIndex > 0){
 					pass.write(",");
@@ -1209,12 +1200,10 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 			});
 
-			const filter = {
+			return Ref.find({account, model}, {
 				_id: {"$in": history.current },
 				type: "ref"
-			};
-
-			return Ref.find({account, model}, filter);
+			});
 
 		}).then(refs => {
 
@@ -1266,7 +1255,7 @@ function searchTree(account, model, branch, rev, searchString, username){
 }
 
 function listSubModels(account, model, branch){
-	
+
 
 	const subModels = [];
 
@@ -1285,7 +1274,7 @@ function listSubModels(account, model, branch){
 
 	}).then(refs => {
 
-		const proms = refs.map(ref => 
+		const proms = refs.map(ref =>
 
 			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
@@ -1296,7 +1285,7 @@ function listSubModels(account, model, branch){
 						name: subModel.name
 					});
 				}
-				
+
 			})
 
 		);
@@ -1308,7 +1297,7 @@ function listSubModels(account, model, branch){
 
 
 function downloadLatest(account, model){
-	
+
 	return stash.getGridFSBucket(account, `${model}.history`).then(bucket => {
 
 		return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
@@ -1320,13 +1309,13 @@ function downloadLatest(account, model){
 			// change file name
 			const filename = file.filename.split("_");
 			let ext = "";
-	
+
 			if (filename.length > 1){
 				ext = "." + filename.pop();
 			}
 
 			file.filename = filename.join("_").substr(36) + ext;
-	
+
 			return Promise.resolve({
 				readStream: bucket.openDownloadStream(file._id),
 				meta: file
@@ -1338,7 +1327,7 @@ function downloadLatest(account, model){
 
 
 function uploadFile(req){
-	
+
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -1354,8 +1343,8 @@ function uploadFile(req){
 		} else {
 			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
 				return History.findByTag({account, model}, tag, {_id: 1});
-			}).then(tag => {
-				if (!tag){
+			}).then(_tag => {
+				if (!_tag){
 					return Promise.resolve();
 				} else {
 					return Promise.reject(responseCodes.DUPLICATE_TAG);
@@ -1369,7 +1358,7 @@ function uploadFile(req){
 
 		const upload = multer({
 			dest: config.cn_queue.upload_dir,
-			fileFilter: function(req, file, cb){
+			fileFilter: function(fileReq, file, cb){
 
 				let format = file.originalname.split(".");
 
@@ -1379,7 +1368,7 @@ function uploadFile(req){
 
 				format = format[format.length - 1];
 
-				const size = parseInt(req.headers["content-length"]);
+				const size = parseInt(fileReq.headers["content-length"]);
 
 				if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -1422,7 +1411,7 @@ function uploadFile(req){
 }
 
 function _deleteFiles(files){
-	
+
 	files.forEach(file => {
 
 		const deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
@@ -1447,7 +1436,7 @@ function _deleteFiles(files){
  * Called by importModel to perform model upload
  */
 function _handleUpload(correlationId, account, model, username, file, data){
-	
+
 	importQueue.importFile(
 		correlationId,
 		file.path,
@@ -1458,7 +1447,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		null,
 		data.tag,
 		data.desc
-	).then(obj => {
+	).then(() => {
 
 		systemLogger.logInfo(`Job ${correlationId} imported without error`,{
 			account,
@@ -1489,7 +1478,7 @@ function importModel(account, model, username, modelSetting, source, data){
 
 				} else if (source.type === "toy"){
 
-					return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
+					return importQueue.importToyModel(correlationId, account, model, source).then(() => {
 						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
 						return modelSetting;
 					});
@@ -1504,7 +1493,7 @@ function importModel(account, model, username, modelSetting, source, data){
 }
 
 function removeModel(account, model, forceRemove){
-	
+
 
 	let setting;
 	return ModelSetting.findById({account, model}, model).then(_setting => {
@@ -1532,7 +1521,7 @@ function removeModel(account, model, forceRemove){
 		return Promise.all(promises);
 
 	}).then(() => {
-		
+
 		return ModelFactory.dbManager.listCollections(account);
 
 	}).then(collections => {
@@ -1561,7 +1550,7 @@ function removeModel(account, model, forceRemove){
 }
 
 function getModelPermission(username, setting, account){
-	
+
 
 	if(!setting){
 		return Promise.resolve([]);
@@ -1648,7 +1637,6 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
 		//Check for submodel references
-		const revId = utils.uuidToString(history._id);
 		const filter = {
 			type: "ref",
 			_id: { $in: history.current }
@@ -1678,7 +1666,7 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 							model: ref.project
 						});
 					})
-					.catch(err => {
+					.catch(() => {
 					//Just because a sub model fails doesn't mean everything failed. Resolve the promise.
 						return Promise.resolve();
 					})
@@ -1756,7 +1744,7 @@ function isUserAdmin(account, model, user) {
 	});
 }
 
-const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
+const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
 const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
 	"x","obj","3ds","md3","md2","ply",
@@ -1797,7 +1785,7 @@ module.exports = {
 	getFullTree_noSubTree,
 	resetCorrelationId,
 	getAllMetadata,
-   	getAllIdsWith4DSequenceTag,
+	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
 	setStatus,
 	importSuccess,

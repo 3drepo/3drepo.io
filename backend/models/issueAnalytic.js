@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const ModelFactory = require("./factory/modelFactory");
 	const responseCodes = require("../response_codes.js");
@@ -31,8 +31,8 @@
 	}
 
 	module.exports = {
-		
-		groupBy: (account, project, groups, sort, format) => {
+
+		groupBy: (account, model, groups, sort, format) => {
 
 			return ModelFactory.dbManager.getCollection(account, `${model}.issues`).then(collection => {
 

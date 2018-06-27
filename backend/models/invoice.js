@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 (() => {
-	"use strict";
 
 	const mongoose = require("mongoose");
 	require("mongoose-double")(mongoose);
@@ -41,19 +41,19 @@
 
 	// Various getter/setter helper functions
 	const roundTo2DP = function(x) {
-		return utils.roundToNDP(x, 2.0); 
+		return utils.roundToNDP(x, 2.0);
 	};
 	const roundTo3DP = function(x) {
-		return utils.roundToNDP(x, 3.0); 
+		return utils.roundToNDP(x, 3.0);
 	};
 	const signAndRoundTo2DP = function(x) {
-		return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x); 
+		return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x);
 	};
 	const dateToString = function(date) {
-		return moment(date).utc().format(C.DATE_FORMAT); 
+		return moment(date).utc().format(C.DATE_FORMAT);
 	};
 	const dateToDateTimeString = function(date) {
-		return moment(date).utc().format(C.DATE_TIME_FORMAT); 
+		return moment(date).utc().format(C.DATE_TIME_FORMAT);
 	};
 
 	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
@@ -70,7 +70,7 @@
 	});
 
 	itemSchema.set("toJSON", { virtuals: true, getters:true });
-	
+
 	const schema = mongoose.Schema({
 		invoiceNo: String,
 		billingAgreementId: String,
@@ -118,7 +118,7 @@
 	schema.virtual("unitPrice").get(function(){
 
 		let unitPrice = roundTo3DP(this.netAmount / this.items.length).toFixed(3);
-		
+
 		if(unitPrice.substr(-1) === "0"){
 			unitPrice = unitPrice.slice(0, -1);
 		}
@@ -142,7 +142,7 @@
 	schema.set("toJSON", { virtuals: true, getters:true });
 
 	schema.pre("save", function(next){
-		
+
 		if(!this.invoiceNo && this.state !== C.INV_INIT){
 			//generate invoice number if doesn't have one and passed the init state
 			let genNo;
@@ -163,7 +163,7 @@
 		} else {
 			next();
 		}
-		
+
 	});
 
 	schema.methods.initInvoice = function(data){
@@ -206,7 +206,7 @@
 			// if there is any pro rata priced plans then there will be no regular priced plans in this invoice and vice versa.
 
 			if(data.changes.proRataPeriodPlans.length > 0){
-				plans = data.changes.proRataPeriodPlans;	
+				plans = data.changes.proRataPeriodPlans;
 			} else if (data.changes.regularPeriodPlans){
 				plans = data.changes.regularPeriodPlans;
 			}
@@ -238,7 +238,7 @@
 			}).then(() => this);
 		}
 
-		
+
 	};
 
 	schema.methods.changeState = function(state, data){
@@ -256,11 +256,11 @@
 		data.nextPaymentDate && (this.nextPaymentDate = data.nextPaymentDate);
 
 	};
-	
+
 	schema.statics.findByAccount = function (account) {
 		return this.find({ account }, {state: {"$in": [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
 	};
-	
+
 	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
 		return this.findOne({ account }, { paypalPaymentToken }, { raw: 0, pdf: 0});
 	};
@@ -308,33 +308,31 @@
 
 		const User = require("./user");
 
-		let invoice;
+		const newInvoice = Invoice.createInstance({ account: user.user });
 
-		invoice = Invoice.createInstance({ account: user.user });
-
-		invoice.info = user.customData.billing.billingInfo;
-		invoice.raw = data.raw;
-		invoice.gateway = data.gateway;
-		invoice.createdAt = new Date();
-		invoice.currency = data.currency;
-		invoice.amount = data.amount;
+		newInvoice.info = user.customData.billing.billingInfo;
+		newInvoice.raw = data.raw;
+		newInvoice.gateway = data.gateway;
+		newInvoice.createdAt = new Date();
+		newInvoice.currency = data.currency;
+		newInvoice.amount = data.amount;
 		// full/parital refund IPNs don't have any tax infomation, need to recalulate the tax for refund case
-		// or we hide tax info for refund invoice in that case we don't need to bother this
+		// or we hide tax info for refund newInvoice in that case we don't need to bother this
 		data.amount = parseFloat(data.amount);
-		invoice.taxAmount =roundTo2DP(
-			data.amount -(data.amount / (1 + vat.getByCountryCode(invoice.info.countryCode, invoice.info.vat)))
+		newInvoice.taxAmount =roundTo2DP(
+			data.amount -(data.amount / (1 + vat.getByCountryCode(newInvoice.info.countryCode, newInvoice.info.vat)))
 		);
 
-		invoice.billingAgreementId = data.billingAgreementId;
-		invoice.type = C.INV_TYPE_REFUND;
-		invoice.transactionId = data.transactionId;
-		invoice.state = C.INV_COMPLETE;
+		newInvoice.billingAgreementId = data.billingAgreementId;
+		newInvoice.type = C.INV_TYPE_REFUND;
+		newInvoice.transactionId = data.transactionId;
+		newInvoice.state = C.INV_COMPLETE;
 
-		//save first to generate invoice no before generating pdf
-		return invoice.save().then(invoice => {
+		//save first to generate newInvoice no before generating pdf
+		return newInvoice.save().then(savedInvoice => {
 
-			return invoice.generatePDF().then(pdf => {
-				return invoice;
+			return savedInvoice.generatePDF().then(() => {
+				return savedInvoice;
 			});
 
 		}).then(invoice => {
@@ -436,7 +434,7 @@
 				return new Promise((resolve, reject) => {
 
 					pdfRS.on("data", function (d) {
-						bufs.push(d); 
+						bufs.push(d);
 					});
 					pdfRS.on("end", function () {
 						resolve(Buffer.concat(bufs));
@@ -487,7 +485,7 @@
 
 	};
 
-	var Invoice = ModelFactory.createClass(
+	const Invoice = ModelFactory.createClass(
 		"Invoice",
 		schema,
 		() => {

@@ -14,8 +14,9 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+"use strict";
 (() => {
-	"use strict";
 
 	const mongoose = require("mongoose");
 	const ModelFactory = require("./factory/modelFactory");
@@ -39,14 +40,14 @@
 				const roleName = C.DEFAULT_MEMBER_ROLE;
 				const createRoleCmd = {
 					"createRole": roleName,
-			   		"privileges":[{
+					"privileges":[{
 						"resource":{
 							"db": account,
-			   					"collection": "settings"
+							"collection": "settings"
 						},
-			   				"actions": ["find"]}
+						"actions": ["find"]}
 					],
-			   		"roles": []
+					"roles": []
 				};
 
 				return ModelFactory.dbManager.runCommand(account, createRoleCmd).then(()=> {
@@ -69,16 +70,16 @@
 				return ModelFactory.dbManager.runCommand(account, dropRoleCmd);
 			}
 		});
-		
+
 	};
 
 	schema.statics.grantTeamSpaceRoleToUser = function (username, account) {
-		
+
 		const grantRoleCmd = {
 			grantRolesToUser: username,
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
-		
+
 		return ModelFactory.dbManager.runCommand("admin", grantRoleCmd);
 	};
 
@@ -97,9 +98,9 @@
 		return ModelFactory.dbManager.runCommand("admin", cmd);
 	};
 
-	var Role = ModelFactory.createClass(
-		"Role", 
-		schema, 
+	const Role = ModelFactory.createClass(
+		"Role",
+		schema,
 		() => {
 			return "system.roles";
 		}

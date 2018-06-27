@@ -98,7 +98,7 @@ const cancelOldAgreement = function(billingAgreementId) {
 const createBillingAgreement = function(billing, payments, paymentDate) {
 
 	//console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement start");
-	
+
 	const paymentDefs = [];
 	let hasProRata = false;
 	let proRataAmount = 0.0;
@@ -154,7 +154,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 
 						const paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
 						paypalError.message = err.response && err.response.message || err.message;
-			
+
 						reject(paypalError);
 					} else {
 						resolve(billingPlan);
@@ -189,7 +189,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 						reject(paypalError);
 					} else {
 
-						const link = billingAgreement.links.find(link => link.rel === "approval_url");
+						const link = billingAgreement.links.find(_link => _link.rel === "approval_url");
 						const token = url.parse(link.href, true)
 							.query.token;
 
@@ -239,9 +239,9 @@ const executeAgreement = function(token){
 	});
 };
 
-const verifyGenuine = function(url, qs) {
+const verifyGenuine = function(payUrl, qs) {
 
-	return httpsPost(url, qs).then(resData => {
+	return httpsPost(payUrl, qs).then(resData => {
 		if(resData === "VERIFIED") {
 			return Promise.resolve();
 		} else {
@@ -258,12 +258,12 @@ const validateIPN = function(data){
 		return Promise.resolve();
 	}
 
-	const url = config.paypal.ipnValidateUrl;
+	const payUrl = config.paypal.ipnValidateUrl;
 	let qs = querystring(data);
 	qs = "cmd=_notify-validate&" + qs;
 
 	//first verify this message is genuinely coming from paypal
-	return verifyGenuine(url, qs);
+	return verifyGenuine(payUrl, qs);
 };
 
 const determineIPNType = function(paymentInfo){

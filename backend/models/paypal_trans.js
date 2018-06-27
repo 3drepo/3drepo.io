@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const C = require("../constants");
 	const config = require("../config");
 	const moment = require("moment");
 	const paypalPaymentTypes = {};
-	
+
 	paypalPaymentTypes[C.PRO_RATA_PAYMENT] = { "name" : "First month pro-rata price",
 		"type" : "TRIAL",
 		"cycles" : 1 };
@@ -103,7 +103,7 @@
 				"payment_method": "paypal"
 			},
 			"shipping_address": billingAddress
-		};							
+		};
 	};
 
 	module.exports = {

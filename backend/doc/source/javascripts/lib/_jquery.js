@@ -111,7 +111,7 @@
 			return num != null ?
 
 				// Return just the one element from the set
-	( num < 0 ? this[ num + this.length ] : this[ num ] ) :
+				( num < 0 ? this[ num + this.length ] : this[ num ] ) :
 
 				// Return all the elements in a clean array
 				slice.call( this );
@@ -622,19 +622,19 @@
 
 		// Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
 		attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
-			// Operator (capture 2)
+		// Operator (capture 2)
 				"*([*^$|!~]?=)" + whitespace +
-			// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
+		// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
 				"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace +
 				"*\\]",
 
 		pseudos = ":(" + identifier + ")(?:\\((" +
-			// To reduce the number of selectors needing tokenize in the preFilter, prefer arguments:
-			// 1. quoted (capture 3; capture 4 or capture 5)
+		// To reduce the number of selectors needing tokenize in the preFilter, prefer arguments:
+		// 1. quoted (capture 3; capture 4 or capture 5)
 				"('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|" +
-			// 2. simple (capture 6)
+		// 2. simple (capture 6)
 				"((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
-			// 3. anything else (capture 2)
+		// 3. anything else (capture 2)
 				".*" +
 				")\\)|)",
 
@@ -688,7 +688,7 @@
 				escaped :
 				high < 0 ?
 					// BMP codepoint
-	String.fromCharCode( high + 0x10000 ) :
+					String.fromCharCode( high + 0x10000 ) :
 					// Supplemental Plane codepoint (surrogate pair)
 					String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
 		},
@@ -714,9 +714,9 @@
 		push = { apply: arr.length ?
 
 			// Leverage slice if possible
-	function( target, els ) {
-		push_native.apply( target, slice.call(els) );
-	} :
+			function( target, els ) {
+				push_native.apply( target, slice.call(els) );
+			} :
 
 			// Support: IE<9
 			// Otherwise append directly
@@ -1385,7 +1385,7 @@
 
 				return i ?
 					// Do a sibling check if the nodes have a common ancestor
-	siblingCheck( ap[i], bp[i] ) :
+					siblingCheck( ap[i], bp[i] ) :
 
 					// Otherwise nodes in our document sort first
 					ap[i] === preferredDoc ? -1 :
@@ -1681,9 +1681,9 @@
 				return first === 1 && last === 0 ?
 
 					// Shortcut for :nth-*(n)
-	function( elem ) {
-		return !!elem.parentNode;
-	} :
+					function( elem ) {
+						return !!elem.parentNode;
+					} :
 
 					function( elem, context, xml ) {
 						let cache, uniqueCache, outerCache, node, nodeIndex, start,
@@ -1736,7 +1736,7 @@
 
 								while ( (node = ++nodeIndex && node && node[ dir ] ||
 
-									// Fallback to seeking `elem` from the start
+								// Fallback to seeking `elem` from the start
 																(diff = nodeIndex = 0) || start.pop()) ) {
 
 									// When found, cache indexes on `parent` and break
@@ -2141,13 +2141,13 @@
 
 		return combinator.first ?
 			// Check against closest ancestor/preceding element
-	function( elem, context, xml ) {
-		while ( (elem = elem[ dir ]) ) {
-			if ( elem.nodeType === 1 || checkNonElements ) {
-				return matcher( elem, context, xml );
-			}
-		}
-	} :
+			function( elem, context, xml ) {
+				while ( (elem = elem[ dir ]) ) {
+					if ( elem.nodeType === 1 || checkNonElements ) {
+						return matcher( elem, context, xml );
+					}
+				}
+			} :
 
 			// Check against all ancestor/preceding elements
 			function( elem, context, xml ) {
@@ -2259,13 +2259,13 @@
 
 				matcherOut = matcher ?
 					// If we have a postFinder, or filtered seed, or non-seed postFilter or preexisting results,
-	postFinder || ( seed ? preFilter : preexisting || postFilter ) ?
+					postFinder || ( seed ? preFilter : preexisting || postFilter ) ?
 
-		// ...intermediate processing is necessary
-	[] :
+					// ...intermediate processing is necessary
+						[] :
 
-		// ...otherwise use results directly
-		results :
+					// ...otherwise use results directly
+						results :
 					matcherIn;
 
 			// Find primary matches
@@ -3971,8 +3971,8 @@
 					// with the key as-is
 					data = dataUser.get( elem, key ) ||
 
-						// Try to find dashed key if it exists (gh-2779)
-						// This is for 2.2.x only
+					// Try to find dashed key if it exists (gh-2779)
+					// This is for 2.2.x only
 										dataUser.get( elem, key.replace( rmultiDash, "-$&" ).toLowerCase() );
 
 					if ( data !== undefined ) {
@@ -4978,7 +4978,7 @@
 			this.isDefaultPrevented = src.defaultPrevented ||
 								src.defaultPrevented === undefined &&
 
-									// Support: Android<4.0
+								// Support: Android<4.0
 								src.returnValue === false ?
 				returnTrue :
 				returnFalse;
@@ -5834,7 +5834,7 @@
 
 			// Support: IE9-11+
 			// IE returns zIndex value as an integer.
-	ret + "" :
+			ret + "" :
 			ret;
 	}
 
@@ -5903,7 +5903,7 @@
 		return matches ?
 
 			// Guard against undefined "subtract", e.g., when used as in cssHooks
-	Math.max( 0, matches[ 2 ] - ( subtract || 0 ) ) + ( matches[ 3 ] || "px" ) :
+			Math.max( 0, matches[ 2 ] - ( subtract || 0 ) ) + ( matches[ 3 ] || "px" ) :
 			value;
 	}
 
@@ -5911,7 +5911,7 @@
 		let i = extra === ( isBorderBox ? "border" : "content" ) ?
 
 				// If we already have the right measurement, avoid augmentation
-	4 :
+				4 :
 
 				// Otherwise initialize for horizontal or vertical properties
 				name === "width" ? 1 : 0,
@@ -7554,7 +7554,7 @@
 					return typeof ret === "string" ?
 
 						// Handle most common string cases
-	ret.replace( rreturn, "" ) :
+						ret.replace( rreturn, "" ) :
 
 						// Handle cases where value is null/undef or number
 						ret == null ? "" : ret;
@@ -8345,7 +8345,7 @@
 			return settings ?
 
 				// Building a settings object
-	ajaxExtend( ajaxExtend( target, jQuery.ajaxSettings ), settings ) :
+				ajaxExtend( ajaxExtend( target, jQuery.ajaxSettings ), settings ) :
 
 				// Extending ajaxSettings
 				ajaxExtend( jQuery.ajaxSettings, target );
@@ -8576,7 +8576,7 @@
 					s.url = rts.test( cacheURL ) ?
 
 						// If there is already a '_' parameter, set its value
-	cacheURL.replace( rts, "$1_=" + nonce++ ) :
+						cacheURL.replace( rts, "$1_=" + nonce++ ) :
 
 						// Otherwise add one to the end
 						cacheURL + ( rquery.test( cacheURL ) ? "&" : "?" ) + "_=" + nonce++;
@@ -9457,7 +9457,7 @@
 
 					// If a selector was specified, locate the right elements in a dummy div
 					// Exclude scripts to avoid IE 'Permission Denied' errors
-	jQuery( "<div>" ).append( jQuery.parseHTML( responseText ) ).find( selector ) :
+					jQuery( "<div>" ).append( jQuery.parseHTML( responseText ) ).find( selector ) :
 
 					// Otherwise use the full result
 					responseText );
@@ -9746,7 +9746,7 @@
 						return value === undefined ?
 
 							// Get width or height on the element, requesting but not forcing parseFloat
-	jQuery.css( elem, type, extra ) :
+							jQuery.css( elem, type, extra ) :
 
 							// Set width or height on the element
 							jQuery.style( elem, type, value, extra );

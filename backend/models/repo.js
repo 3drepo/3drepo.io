@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
+const ModelFactory = require("./factory/modelFactory");
 const _ = require("lodash");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
@@ -96,51 +97,51 @@ const transformationSchema = Schema(
 
 
 const Camera = ModelFactory.createClass(
-	"Camera", 
-	cameraSchema, 
-	arg => { 
+	"Camera",
+	cameraSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
 const Material = ModelFactory.createClass(
-	"Material", 
-	materialSchema, 
-	arg => { 
+	"Material",
+	materialSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
 
 const Metadata = ModelFactory.createClass(
-	"Metadata", 
-	metaDataSchema, 
-	arg => { 
+	"Metadata",
+	metaDataSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
 const Reference = ModelFactory.createClass(
-	"Reference", 
-	referenceSchema, 
-	arg => { 
+	"Reference",
+	referenceSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
 const Texture = ModelFactory.createClass(
-	"Texture", 
-	textureSchema, 
-	arg => { 
+	"Texture",
+	textureSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
 
 const Transformation = ModelFactory.createClass(
-	"Transformation", 
-	transformationSchema, 
-	arg => { 
+	"Transformation",
+	transformationSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );

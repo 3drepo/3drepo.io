@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const mongoose = require("mongoose");
 	const C = require("../constants");
@@ -25,7 +25,7 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const ModelSetting = require("./modelSetting");
-	const systemLogger = require("../logger.js").systemLogger;
+	// const systemLogger = require("../logger.js").systemLogger;
 
 	const schema = mongoose.Schema({
 		name: { type: String, unique: true},
@@ -71,8 +71,6 @@
 	});
 
 	schema.statics.createProject = function(account, name, username, userPermissions){
-		const User = require("./user");
-
 		const project = Project.createInstance({account});
 		project.name = name;
 
@@ -88,8 +86,6 @@
 	};
 
 	schema.statics.delete = function(account, name){
-
-		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
 		let project;
@@ -115,13 +111,10 @@
 	};
 
 	schema.methods.updateAttrs = function(data){
-
-		const account = this._dbcolOptions.account;
 		const whitelist = ["name", "permissions"];
 		const User = require("./user");
 
 		let usersToRemove = [];
-		let usersToAdd = [];
 
 		let check = Promise.resolve();
 		if(data.permissions){
@@ -133,7 +126,6 @@
 			}
 
 			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
-			usersToAdd = _.difference(data.permissions.map(p => p.user), this.permissions.map(p => p.user));
 
 			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
 
@@ -147,12 +139,12 @@
 						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 					}
 				});
-				
+
 
 			});
 		}
 
-		
+
 		return check.then(() => {
 
 			Object.keys(data).forEach(key => {
@@ -161,13 +153,13 @@
 					this[key] = data[key];
 				}
 			});
-	
+
 			const userPromises = [];
 
 			usersToRemove.forEach(user => {
 				// remove all model permissions in this project as well, if any
 				userPromises.push(
-					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings => 
+					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings =>
 						Promise.all(
 							settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
 						)
@@ -188,13 +180,13 @@
 		const User = require("./user");
 
 
+		let userList;
 		return User.getAllUsersInTeamspace(account.account).then(users => {
-			
-			const userList = users;
+			userList = users;
 			return Project.find(account, query);
-		
+
 		}).then(projects => {
-			
+
 			if(projects){
 				projects.forEach(p => Project.populateUsers(userList, p));
 			}
@@ -212,12 +204,12 @@
 		let userList;
 
 		return User.getAllUsersInTeamspace(account.account).then(users => {
-			
+
 			userList = users;
 			return Project.findOne(account, query);
-		
+
 		}).then(project => {
-			
+
 			if(project){
 				return Project.populateUsers(userList, project);
 			} else {

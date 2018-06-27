@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const _ = require("lodash");
 	const repoBase = require("./base/repo");
@@ -106,12 +106,12 @@
 
 
 	};
-	
+
 
 	const Mesh = ModelFactory.createClass(
 		"Mesh",
 		meshSchema,
-		
+
 		arg => {
 			return `${arg.model}.scene`;
 		}

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
@@ -61,7 +61,7 @@ historySchema.statics.getHistory = function(dbColOptions, branch, revId, project
 historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
-	
+
 	const query = {"incomplete": {"$exists": false}};
 
 	if(branch === C.MASTER_BRANCH_NAME){
@@ -71,16 +71,16 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 	}
 
 	return History.find(
-		dbColOptions, 
-		query, 
-		projection, 
+		dbColOptions,
+		query,
+		projection,
 		{sort: {timestamp: -1}}
 	);
 };
 
 // get the head of a branch
 historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
-	
+
 	const query = { "incomplete": {"$exists": false}};
 
 	projection = projection || {};
@@ -91,9 +91,9 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 		query.shared_id = stringToUUID(branch);
 	}
 	return History.findOne(
-		dbColOptions, 
-		query, 
-		projection, 
+		dbColOptions,
+		query,
+		projection,
 		{sort: {timestamp: -1}}
 	);
 };
@@ -128,8 +128,6 @@ historySchema.methods.removeFromCurrent = function(id) {
 };
 
 historySchema.statics.clean = function(histories){
-	"use strict";
-
 	const cleaned = [];
 
 	histories.forEach(history => {
@@ -140,7 +138,6 @@ historySchema.statics.clean = function(histories){
 };
 
 historySchema.methods.clean = function(){
-	"use strict";
 
 	const clean = this.toObject();
 	clean._id = uuidToString(clean._id);
@@ -148,12 +145,13 @@ historySchema.methods.clean = function(){
 	return clean;
 };
 
-var History = ModelFactory.createClass(
-	"History", 
-	historySchema, 
-	arg => { 
+const History = ModelFactory.createClass(
+	"History",
+	historySchema,
+	arg => {
 		return `${arg.model}.history`;
 	}
 );
 
 module.exports = History;
+

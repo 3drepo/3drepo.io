@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -95,27 +95,29 @@ schema.methods.updateProperties = function(updateObj){
 		}
 		switch (key) {
 		case "topicTypes":
-			const topicTypes = {};
-			updateObj[key].forEach(type => {
+			{
+				const topicTypes = {};
+				updateObj[key].forEach(type => {
 
-				if(!type || !type.trim()){
-					return;
-				}
+					if(!type || !type.trim()){
+						return;
+					}
 
-				//generate value from label
-				const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/\&/g, "");
+					//generate value from label
+					const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
 
-				if(topicTypes[value]){
-					throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
-				} else {	
-					topicTypes[value] = {
-						value,
-						label: type.trim()
-					};
-				}
-			});
+					if(topicTypes[value]){
+						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+					} else {
+						topicTypes[value] = {
+							value,
+							label: type.trim()
+						};
+					}
+				});
 
-			this.properties[key] = _.values(topicTypes);
+				this.properties[key] = _.values(topicTypes);
+			}
 			break;
 		case "code":
 			if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
@@ -137,7 +139,7 @@ schema.methods.changePermissions = function(permissions){
 
 	//get list of valid permission name
 	permissions = _.uniq(permissions, "user");
-	
+
 	return User.findByUserName(account).then(dbUser => {
 
 		const promises = [];
@@ -155,7 +157,7 @@ schema.methods.changePermissions = function(permissions){
 				if (!isMember) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}
-				const perm = this.permissions.find(perm => perm.user === permission.user);
+				const perm = this.permissions.find(_perm => _perm.user === permission.user);
 
 				if(perm) {
 					perm.permission = permission.permission;
@@ -181,7 +183,7 @@ schema.methods.findPermissionByUser = function(username){
 schema.statics.populateUsers = function(account, permissions){
 
 	const User = require("./user");
-	
+
 	return User.getAllUsersInTeamspace(account).then(users => {
 
 		users.forEach(user => {
@@ -193,7 +195,7 @@ schema.statics.populateUsers = function(account, permissions){
 		});
 
 		return permissions;
-	}); 
+	});
 };
 
 const ModelSetting = ModelFactory.createClass(

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const Schema = mongoose.Schema;
@@ -47,9 +47,9 @@ schema.options.toJSON.transform = function (doc, ret) {
 
 
 const Meta = ModelFactory.createClass(
-	"Meta", 
-	schema, 
-	arg => { 
+	"Meta",
+	schema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );

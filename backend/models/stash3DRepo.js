@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const Schema = mongoose.Schema;
@@ -25,9 +25,9 @@ const schema = Schema({
 });
 
 const Stash3DRepo = ModelFactory.createClass(
-	"Stash3DRepo", 
-	schema, 
-	arg => { 
+	"Stash3DRepo",
+	schema,
+	arg => {
 		return `${arg.model}.stash.3drepo`;
 	}
 );

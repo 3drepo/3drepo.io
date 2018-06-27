@@ -42,7 +42,7 @@ schema.statics.addDefaultJobs = function(teamspace) {
 schema.statics.usersWithJob = function(teamspace) {
 	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then( (jobs) => {
 		const userToJob  = {};
-		
+
 		jobs.forEach( job => {
 			job.users.forEach( user => {
 				userToJob[user] = job._id;
@@ -50,9 +50,9 @@ schema.statics.usersWithJob = function(teamspace) {
 		});
 
 		return userToJob;
-	
+
 	});
-	
+
 };
 
 schema.statics.removeUserFromAnyJob = function(teamspace, user) {
@@ -72,7 +72,7 @@ schema.methods.removeUserFromJob = function(user) {
 
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
-	
+
 };
 
 schema.statics.findByUser = function(teamspace, user) {
@@ -82,7 +82,7 @@ schema.statics.findByUser = function(teamspace, user) {
 schema.statics.removeUserFromJobs = function(teamspace, user) {
 	const User = require("./user");
 	return User.teamspaceMemberCheck(teamspace, user).then( () => {
-		return Job.removeUserFromAnyJob(teamspace, user);		
+		return Job.removeUserFromAnyJob(teamspace, user);
 	});
 
 };
@@ -113,7 +113,7 @@ schema.statics.addJob = function(teamspace, jobData) {
 		if(jobFound) {
 			return Promise.reject(responseCodes.DUP_JOB);
 		}
-		
+
 		const newJobEntry = this.model("Job").createInstance({account: teamspace});
 		newJobEntry._id = jobData._id;
 		if(jobData.color) {
@@ -139,9 +139,9 @@ schema.statics.removeJob = function(teamspace, jobName) {
 		if(!jobFound) {
 			return Promise.reject(responseCodes.JOB_NOT_FOUND);
 		}
-	
+
 		if(jobFound.users.length > 0) {
-			return Promise.reject(responseCodes.JOB_ASSIGNED);	
+			return Promise.reject(responseCodes.JOB_ASSIGNED);
 		}
 
 		return Job.remove({account: teamspace}, {_id: jobName});
@@ -162,7 +162,7 @@ schema.statics.getAllJobs = function(teamspace) {
 
 };
 
-var Job = ModelFactory.createClass(
+const Job = ModelFactory.createClass(
 	"Job",
 	schema,
 	() => {

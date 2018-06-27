@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 
@@ -89,7 +89,7 @@ const schema = Schema({
 	name: { type: String, required: true },
 	topic_type: String,
 	status: {
-        	type: String
+		type: String
 	},
 
 	viewpoints: [{
@@ -110,7 +110,7 @@ const schema = Schema({
 		shown_group_id: Object,
 		hideIfc: Boolean,
 		screenshot: {
-			flag: Number, 
+			flag: Number,
 			content: Object,
 			resizedContent: Object
 		},
@@ -118,8 +118,8 @@ const schema = Schema({
 		extras: {},
 		scribble: {flag: Number, content: Object},
 		type: {
-			type: String, 
-			default: "perspective", 
+			type: String,
+			default: "perspective",
 			enum: ["perspective", "orthogonal"]
 		}
 	}],
@@ -172,10 +172,10 @@ const schema = Schema({
 });
 
 
-function parseXmlString(xml, options){
-	
+function parseXmlString(xmlString, options){
+
 	return new Promise((resolve, reject) => {
-		xml2js.parseString(xml, options, function (err, xml) {
+		xml2js.parseString(xmlString, options, function (err, xml) {
 			if(err){
 				reject(err);
 			} else {
@@ -189,21 +189,21 @@ function parseXmlString(xml, options){
 //internal helper _find
 
 const statusEnum = {
-	"OPEN": C.ISSUE_STATUS_OPEN, 
-	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS, 
-	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL, 
+	"OPEN": C.ISSUE_STATUS_OPEN,
+	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
+	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
 const priorityEnum = {
-	"NONE": "none", 
-	"LOW": "low", 
-	"MEDIUM": "medium", 
+	"NONE": "none",
+	"LOW": "low",
+	"MEDIUM": "medium",
 	"HIGH": "high"
 };
 
 schema.statics._find = function(dbColOptions, filter, projection, sort, noClean){
-	
+
 	//get model type
 	let settings;
 	let issues;
@@ -222,10 +222,10 @@ schema.statics._find = function(dbColOptions, filter, projection, sort, noClean)
 	});
 };
 
-schema.statics.getFederatedModelList = function(dbColOptions, username, branch, revision){
+schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch, _revision){
 
 	let allRefs = [];
-
+	//FIXME: why do we need an embedded function?!
 	function _get(dbColOptions, branch, revision){
 
 		return History.getHistory(dbColOptions, branch, revision).then(history => {
@@ -279,7 +279,7 @@ schema.statics.getFederatedModelList = function(dbColOptions, username, branch, 
 		});
 	}
 
-	return _get(dbColOptions, branch, revision).then(() => {
+	return _get(_dbColOptions, _branch, _revision).then(() => {
 		return Promise.resolve(allRefs);
 	});
 };
@@ -322,9 +322,9 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 				currHistory = history;
 
 				return History.find(
-					dbColOptions, 
-					{ timestamp: {"$gt": currHistory.timestamp }}, 
-					{_id : 1, timestamp: 1}, 
+					dbColOptions,
+					{ timestamp: {"$gt": currHistory.timestamp }},
+					{_id : 1, timestamp: 1},
 					{sort: {timestamp: 1}}
 				);
 
@@ -335,16 +335,16 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 			if(histories.length > 0){
 
 				const history = histories[0];
-				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
+				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision
 				filter = {
 					"created" : { "$lt": history.timestamp.valueOf() },
-					rev_id: null 
+					rev_id: null
 				};
 			}
 
 			return History.find(
-				dbColOptions, 
-				{ timestamp: {"$lte": currHistory.timestamp }}, 
+				dbColOptions,
+				{ timestamp: {"$lte": currHistory.timestamp }},
 				{_id : 1}
 			);
 		}).then(histories => {
@@ -363,7 +363,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 	}
 
 	return addRevFilter.then(() => {
-		
+
 		if(ids){
 			filter._id = {
 				"$in": ids
@@ -396,15 +396,15 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 					middlewares.hasReadAccessToModelHelper(username, childDbName, childModel).then(granted => {
 						if(granted){
 
-							const filter = {};
+							const queryFilter = {};
 
 							if(ids){
-								filter._id = {
+								queryFilter._id = {
 									"$in": ids
 								};
 							}
 
-							return self._find({account: childDbName, model: childModel}, filter, projection, sort, noClean)
+							return self._find({account: childDbName, model: childModel}, queryFilter, projection, sort, noClean)
 								.then(subModelIssues => {
 									return subModelIssues.map(issue => {
 										issue.origin_account = childDbName;
@@ -499,26 +499,13 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 };
 
 schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
-
-	let projection = {};
-
-	if (onlyStubs){
-		projection = {
-			_id : 1,
-			name : 1,
-			deadline : 1,
-			position: 1,
-			parent: 1
-		};
-	}
-
 	let settings;
 
 	return ModelSetting.findById(dbColOptions, dbColOptions.model).then(_settings => {
 
 		settings = _settings;
 		return this.findById(dbColOptions, stringToUUID(uid));
-	
+
 	}).then(issue => {
 		return Promise.resolve(noClean ? issue : issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", "")));
 	});
@@ -563,7 +550,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 	return Promise.all(promises).then(() => {
 
 		return Issue.count(dbColOptions);
-		
+
 	}).then(count => {
 
 		issue.number  = count + 1;
@@ -613,7 +600,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			issue.viewpoints.push(data.viewpoint);
 		}
-		
+
 		issue.scale = data.scale || issue.scale;
 		issue.position =  data.position || issue.position;
 		issue.norm = data.norm || issue.norm;
@@ -624,14 +611,14 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 			return utils.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true).catch(err => {
 				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated",{
-					account: dbColOptions.account, 
-					model: dbColOptions.model, 
-					issueId: utils.uuidToString(issue._id), 
+					account: dbColOptions.account,
+					model: dbColOptions.model,
+					issueId: utils.uuidToString(issue._id),
 					viewpointId: utils.uuidToString(data.viewpoint.guid),
 					err: err
 				});
 			});
-		
+
 		} else {
 
 			return Promise.resolve();
@@ -646,16 +633,16 @@ schema.statics.createIssue = function(dbColOptions, data){
 			};
 		}
 
-		return issue.save().then(issue => {
+		return issue.save().then(savedIssue => {
 
-			return this.setGroupIssueId(dbColOptions, data, issue._id);
+			return this.setGroupIssueId(dbColOptions, data, savedIssue._id);
 
 		}).then(() => {
 			return ModelSetting.findById(dbColOptions, dbColOptions.model);
 		}).then(settings => {
 
 			const cleaned = issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
-			
+
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.model, [cleaned]);
 
 			return Promise.resolve(cleaned);
@@ -712,7 +699,7 @@ schema.statics.setGroupIssueId = function(dbColOptions, data, issueId) {
 
 schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 
-	return this.findById(dbColOptions, stringToUUID(uid), { 
+	return this.findById(dbColOptions, stringToUUID(uid), {
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } },
 		"viewpoints.screenshot.resizedContent": 0
 	}).then(issue => {
@@ -727,7 +714,7 @@ schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 
 schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 
-	return this.findById(dbColOptions, stringToUUID(uid), { 
+	return this.findById(dbColOptions, stringToUUID(uid), {
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } }
 	}).then(issue => {
 
@@ -737,9 +724,9 @@ schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
 		} else if(!_.get(issue, "viewpoints[0].screenshot.content.buffer")){
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			
+
 			return utils.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365).then(resized => {
-				this.findOneAndUpdate(dbColOptions, 
+				this.findOneAndUpdate(dbColOptions,
 					{ _id: stringToUUID(uid), "viewpoints.guid": stringToUUID(vid)},
 					{ "$set": { "viewpoints.$.screenshot.resizedContent": resized } }
 				).catch( err => {
@@ -821,9 +808,9 @@ schema.methods.updateComment = function(commentIndex, data){
 					}
 				});
 
-				this.comments.push({ 
+				this.comments.push({
 					owner: data.owner,
-					comment: data.comment, 
+					comment: data.comment,
 					created: timeStamp,
 					rev_id: history ? history._id : undefined,
 					guid: commentGuid,
@@ -850,7 +837,7 @@ schema.methods.updateComment = function(commentIndex, data){
 	} else {
 
 		const commentObj = this.comments[commentIndex];
-		
+
 		if(!commentObj){
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
 		}
@@ -868,7 +855,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			commentObj.comment = data.comment;
 			commentObj.created = timeStamp;
 		}
-		
+
 		commentObj.sealed = data.sealed || commentObj.sealed;
 
 		return this.save().then(issue => {
@@ -907,7 +894,7 @@ schema.methods.removeComment = function(commentIndex, data){
 	if(isSystemComment(this.comments[commentIndex])){
 		return Promise.reject({ resCode: responseCodes.ISSUE_SYSTEM_COMMENT });
 	}
-	
+
 	const comment = this.clean().comments[commentIndex];
 	this.comments[commentIndex].remove();
 
@@ -915,9 +902,9 @@ schema.methods.removeComment = function(commentIndex, data){
 
 		const issue = this.clean();
 		ChatEvent.commentDeleted(
-			data.sessionId, 
-			this._dbcolOptions.account, 
-			this._dbcolOptions.model, 
+			data.sessionId,
+			this._dbcolOptions.account,
+			this._dbcolOptions.model,
 			issue._id, comment);
 
 		return issue;
@@ -957,16 +944,16 @@ schema.methods.addSystemComment = function(owner, property, from , to){
 schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob) {
 
 	let forceStatusChanged;
-	let systemComment; 
-	const assignedHasChanged = data.hasOwnProperty("assigned_roles") && 
+	let systemComment;
+	const assignedHasChanged = data.hasOwnProperty("assigned_roles") &&
 					!_.isEqual(this.assigned_roles, data.assigned_roles);
 
 	if (assignedHasChanged) {
 		//force status change to in progress if assigned roles during status=for approval
 
 		systemComment = this.addSystemComment(
-			data.owner, 
-			"assigned_roles", 
+			data.owner,
+			"assigned_roles",
 			this.assigned_roles,
 			data.assigned_roles
 		);
@@ -986,7 +973,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 		// const invalidStatus = _.map(statusEnum).indexOf(data.status) === -1;
 		// if (invalidStatus) {
 
-		// 	throw responseCodes.ISSUE_INVALID_STATUS;
+		//	throw responseCodes.ISSUE_INVALID_STATUS;
 
 		// } else {
 
@@ -994,7 +981,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 		if(statusHasChanged) {
 
-			const canChangeStatus = isAdmin || 
+			const canChangeStatus = isAdmin ||
 				hasOwnerJob ||
 				(hasAssignedJob && data.status !== statusEnum.CLOSED);
 
@@ -1007,7 +994,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 				systemComment = this.addSystemComment(data.owner, "status", this.status, data.status);
 				this.status_last_changed = (new Date()).getTime();
-				this.status = data.status;			
+				this.status = data.status;
 			} else {
 				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 			}
@@ -1018,10 +1005,10 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 
 	if(data.hasOwnProperty("priority")){
 		// if (_.map(priorityEnum).indexOf(data.priority) === -1){
-		// 
-		// 	throw responseCodes.ISSUE_INVALID_PRIORITY;
-		// 
-		// } else 
+		//
+		//	throw responseCodes.ISSUE_INVALID_PRIORITY;
+		//
+		// } else
 		if (data.priority !== this.priority) {
 
 			const canChangeStatus = isAdmin || hasOwnerJob;
@@ -1043,7 +1030,7 @@ schema.methods.updateAttrs = function(data, isAdmin, hasOwnerJob, hasAssignedJob
 	}
 
 	if(data.hasOwnProperty("desc") && this.desc !== data.desc) {
-		const canChangeStatus = isAdmin || hasOwnerJob; 
+		const canChangeStatus = isAdmin || hasOwnerJob;
 		if (canChangeStatus) {
 			systemComment = this.addSystemComment(data.owner, "desc", this.desc, data.desc);
 			this.desc = data.desc;
@@ -1146,9 +1133,9 @@ schema.methods.clean = function(typePrefix, modelCode){
 	});
 
 	if( cleaned.comments &&
-		cleaned.comments.length > 0 && 
-		cleaned.viewpoints[0] && 
-		cleaned.comments[0].viewpoint && 
+		cleaned.comments.length > 0 &&
+		cleaned.viewpoints[0] &&
+		cleaned.comments[0].viewpoint &&
 		cleaned.comments[0].viewpoint.guid === cleaned.viewpoints[0].guid){
 		//hide repeated screenshot if issue viewpoint is the same as first comment's viewpoint
 		cleaned.comments[0].viewpoint.screenshot = null;
@@ -1256,7 +1243,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
-				"@": {Guid: utils.uuidToString(comment.viewpoint ? comment.viewpoint :  utils.generateUUID())}
+				"@": {Guid: utils.uuidToString(comment.viewpoint ? comment.viewpoint :	utils.generateUUID())}
 			},
 			// bcf 1.0 for back comp
 			"Status": this.topic_type ? utils.ucFirst(this.topic_type.replace(/_/g, " ")) : "",
@@ -1300,7 +1287,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 		_.get(vp, "extras.Index") && (vpObj.Index = vp.extras.Index);
 
 		markup.Markup.Viewpoints.push(vpObj);
-		
+
 		const viewpointXmlObj = {
 			VisualizationInfo:{
 				"@":{
@@ -1366,7 +1353,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 						}
 					}
 				}).catch(()=> {
-					//catching this error and ignoring - if we can't find the group, we should still export the issue. 
+					//catching this error and ignoring - if we can't find the group, we should still export the issue.
 					systemLogger.logInfo("Failed to find group - " + highlightedGroupId);
 				})
 			);
@@ -1402,7 +1389,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 						}
 					}
 				}).catch(()=> {
-					//catching this error and ignoring - if we can't find the group, we should still export the issue. 
+					//catching this error and ignoring - if we can't find the group, we should still export the issue.
 					systemLogger.logInfo("Failed to find group - " + hiddenGroupId);
 				})
 			);
@@ -1438,7 +1425,7 @@ schema.methods.getBCFMarkup = function(account, model, unit){
 						}
 					}
 				}).catch(()=> {
-					//catching this error and ignoring - if we can't find the group, we should still export the issue. 
+					//catching this error and ignoring - if we can't find the group, we should still export the issue.
 					systemLogger.logInfo("Failed to find group - " + shownGroupId);
 				})
 			);
@@ -1512,8 +1499,6 @@ schema.statics.getIfcGuids = function(account, model) {
 };
 
 schema.statics.importBCF = function(requester, account, model, revId, zipPath){
-
-	const self = this;
 	let settings;
 	let branch;
 
@@ -1572,7 +1557,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 				zipfile.on("entry", entry => handleEntry(zipfile, entry));
 
-				zipfile.on("error", err => reject(err));
+				zipfile.on("error", error => reject(error));
 
 				zipfile.on("end", () => {
 
@@ -1589,7 +1574,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					}).then(() => {
 
 						const createIssueProms = [];
-						
+
 						Object.keys(files).forEach(guid => {
 							createIssueProms.push(createIssue(guid));
 						});
@@ -1597,7 +1582,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						return Promise.all(createIssueProms);
 
 					}).then(issues => {
-							
+
 						const saveIssueProms = [];
 
 						// sort issues by date and add number
@@ -1605,7 +1590,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							return a.created > b.created;
 						});
 
-	
+
 						issues.forEach(issue => {
 							saveIssueProms.push(
 								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
@@ -1631,8 +1616,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
 										for (const simpleAttrIndex in simpleAttrs) {
 											const simpleAttr = simpleAttrs[simpleAttrIndex];
-											if (undefined !== issue[simpleAttr] 
-											 && (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
+											if (undefined !== issue[simpleAttr]
+												&& (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
 												matchingIssue.comments.push({
 													guid: utils.generateUUID(),
 													created: timeStamp,
@@ -1670,7 +1655,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						});
 
 						return Promise.all(saveIssueProms);
-				
+
 
 					}).then(savedIssues => {
 
@@ -1687,11 +1672,11 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						if(notifications.length){
 							ChatEvent.newIssues(requester.socketId, account, model, notifications);
 						}
-						
+
 						resolve();
 
-					}).catch(err => {
-						reject(err);
+					}).catch(error => {
+						reject(error);
 					});
 				});
 
@@ -1700,21 +1685,21 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 			function parseViewpoints(issueGuid, issueFiles, vps){
 
 				const viewpoints = {};
-				const promises = [];
+				const vpPromises = [];
 
 				vps && vps.forEach(vp => {
 
 					if(!_.get(vp, "@.Guid")){
 						return;
 					}
-					
+
 					const vpFile = issueFiles[`${issueGuid}/${_.get(vp, "Viewpoint[0]._")}`];
 
 					viewpoints[vp["@"].Guid] = {
 						snapshot: issueFiles[`${issueGuid}/${_.get(vp, "Snapshot[0]._")}`]
 					};
 
-					vpFile && promises.push(parseXmlString(vpFile.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(xml => {
+					vpFile && vpPromises.push(parseXmlString(vpFile.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(xml => {
 						viewpoints[vp["@"].Guid].viewpointXml = xml;
 						viewpoints[vp["@"].Guid].Index = _.get(vp, "Index");
 						viewpoints[vp["@"].Guid].Viewpoint = _.get(vp, "Viewpoint");
@@ -1722,8 +1707,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					}));
 
 				});
-				
-				return Promise.all(promises).then(() => viewpoints);
+
+				return Promise.all(vpPromises).then(() => viewpoints);
 			}
 
 			function sanitise(data, list) {
@@ -1736,7 +1721,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					return data;
 				}
 				return dataSanitised;
-				
+
 			}
 
 			function createGroupData(groupObject) {
@@ -1746,16 +1731,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				groupData.name = groupObject.name;
 				groupData.color = groupObject.color;
 
-				for (const account in groupObject.objects) {
-					for (const model in groupObject.objects[account]) {
+				for (const groupAccount in groupObject.objects) {
+					for (const groupModel in groupObject.objects[groupAccount]) {
 						if (!groupData.objects) {
 							groupData.objects = [];
 						}
 
 						groupData.objects.push({
-							account,
-							model,
-							ifc_guids: groupObject.objects[account][model].ifc_guids
+							groupAccount,
+							groupModel,
+							ifc_guids: groupObject.objects[groupAccount][groupModel].ifc_guids
 						});
 					}
 				}
@@ -1763,9 +1748,9 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				return groupData;
 			}
 
-			function createGroupObject(group, name, color, account, model, ifc_guid) {
+			function createGroupObject(group, name, color, groupAccount, groupModel, ifc_guid) {
 
-				if (account && model && ifc_guid) {
+				if (groupAccount && groupModel && ifc_guid) {
 					if (!group) {
 						group = {};
 					}
@@ -1782,15 +1767,15 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						group.objects = {};
 					}
 
-					if (!group.objects[account]) {
-						group.objects[account] = {};
+					if (!group.objects[groupAccount]) {
+						group.objects[groupAccount] = {};
 					}
 
-					if (!group.objects[account][model]) {
-						group.objects[account][model] = { ifc_guids: [] };
+					if (!group.objects[groupAccount][groupModel]) {
+						group.objects[groupAccount][groupModel] = { ifc_guids: [] };
 					}
 
-					group.objects[account][model].ifc_guids.push(ifc_guid);
+					group.objects[groupAccount][groupModel].ifc_guids.push(ifc_guid);
 				}
 
 				return group;
@@ -1817,7 +1802,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 					issue.rev_id = revId;
 
 					if(xml.Markup){
-						
+
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
@@ -1870,16 +1855,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					const vpGuids = Object.keys(viewpoints);
 
-					vpGuids.forEach(guid => {
+					vpGuids.forEach(vpGuid => {
 
 						const groupPromises = [];
 
-						if(!viewpoints[guid].viewpointXml){
+						if(!viewpoints[vpGuid].viewpointXml){
 							return;
 						}
 
 						const extras = {};
-						const vpXML = viewpoints[guid].viewpointXml;
+						const vpXML = viewpoints[vpGuid].viewpointXml;
 
 						extras.Spaces = _.get(vpXML, "VisualizationInfo.Spaces");
 						extras.SpaceBoundaries = _.get(vpXML, "VisualizationInfo.SpaceBoundaries");
@@ -1887,18 +1872,18 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 						extras.OrthogonalCamera = _.get(vpXML, "VisualizationInfo.OrthogonalCamera");
 						extras.Lines = _.get(vpXML, "VisualizationInfo.Lines");
 						extras.Bitmap = _.get(vpXML, "VisualizationInfo.Bitmap");
-						extras.Index = viewpoints[guid].Viewpoint;
-						extras.Snapshot = viewpoints[guid].Snapshot;
+						extras.Index = viewpoints[vpGuid].Viewpoint;
+						extras.Snapshot = viewpoints[vpGuid].Snapshot;
 						!_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]") && (extras._noPerspective = true);
 
-						const screenshotObj = viewpoints[guid].snapshot ? {
+						const screenshotObj = viewpoints[vpGuid].snapshot ? {
 							flag: 1,
-							content: viewpoints[guid].snapshot
+							content: viewpoints[vpGuid].snapshot
 						} : undefined;
 
 
 						const vp = {
-							guid: utils.stringToUUID(guid),
+							guid: utils.stringToUUID(vpGuid),
 							extras: extras,
 							screenshot: screenshotObj
 
@@ -1914,15 +1899,15 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							scale = 1000;
 						} else if (unit === "ft") {
 							scale = 3.28084;
-						}	
+						}
 
 						if(_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
-							const clippingPlanes = 	_.get(vpXML, "VisualizationInfo.ClippingPlanes");
+							const clippingPlanes =	_.get(vpXML, "VisualizationInfo.ClippingPlanes");
 							const planes = [];
 							if(clippingPlanes[0].ClippingPlane) {
 								for(let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
 									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
-									const clip = {};									
+									const clip = {};
 									clip.normal = [
 										parseFloat(_.get(vpXML, fieldName + ".Direction[0].X[0]._")),
 										parseFloat(_.get(vpXML, fieldName + ".Direction[0].Z[0]._")),
@@ -1934,11 +1919,11 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										-parseFloat(_.get(vpXML, fieldName + ".Location[0].Y[0]._")) * scale
 									];
 
-									clip.distance = - (position[0] * clip.normal[0] 
-										+ position[1] * clip.normal[1] 
+									clip.distance = - (position[0] * clip.normal[0]
+										+ position[1] * clip.normal[1]
 										+ position[2] * clip.normal[2]);
 
-									clip.clipDirection = 1; 
+									clip.clipDirection = 1;
 									planes.push(clip);
 								}
 							}
@@ -1967,7 +1952,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 							vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
 
 							vp.type = "perspective";
-							
+
 						} else if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")){
 
 							vp.up = [
@@ -2027,14 +2012,14 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 										}
 									}
 
-								
+
 								}
 								if (vpComponents[i].Coloring) {
 									//FIXME: this is essentially copy of selection with slight modification. Should merge common code.
 									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
 										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
-											const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
 											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
+											//const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
 												let objectModel = model;
 
 												if (settings.federate) {
@@ -2168,13 +2153,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 
 					//take the first screenshot as thumbnail
 					if(vpGuids.length > 0){
-						
+
 						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
 
 							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-								account, 
-								model, 
-								issueId: utils.uuidToString(issue._id), 
+								account,
+								model,
+								issueId: utils.uuidToString(issue._id),
 								viewpointId: vpGuids[0],
 								err: err
 							});
@@ -2221,10 +2206,10 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 				// if entry is a file and start with guid
 				if(!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid){
 
-					promises.push(new Promise( (resolve, reject) => {
+					promises.push(new Promise( (_resolve, _reject) => {
 						zipfile.openReadStream(entry, (err, rs) => {
 							if(err){
-								return reject(err);
+								return _reject(err);
 							} else {
 
 								const bufs = [];
@@ -2234,16 +2219,16 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath){
 								rs.on("end", () => {
 									const buf = Buffer.concat(bufs);
 									files[guid][paths.join("/")] = buf;
-									resolve();
+									_resolve();
 								});
 
-								rs.on("error", err =>{
-									reject(err);
+								rs.on("error", error =>{
+									_reject(error);
 								});
 							}
 						});
 					}));
-				} 
+				}
 
 				zipfile.readEntry();
 

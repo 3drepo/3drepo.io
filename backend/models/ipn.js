@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+"use strict";
 (() => {
-	"use strict";
 
 	const mongoose = require("mongoose");
 	const ModelFactory = require("./factory/modelFactory");
-		
+
 	const schema = mongoose.Schema({
 		createdAt: Date,
 		message: {}
@@ -36,7 +37,7 @@
 	});
 
 	schema.statics.save = function(ipnMessage){
-		
+
 		const ipn = IPN.createInstance({ account: "admin" });
 		ipn.message = ipnMessage;
 		ipn.markModified("message");
@@ -54,5 +55,5 @@
 	);
 
 	module.exports = IPN;
-	
+
 })();

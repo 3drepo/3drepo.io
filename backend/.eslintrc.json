@@ -20,6 +20,8 @@
   "extends": ["eslint:recommended", "plugin:node/recommended"],
   "rules": {
 	"node/no-unpublished-require": 0,
+	"no-fallthrough" : 0,
+	"no-control-regex": 0,
 	"strict": ["error", "global"],
 	"no-bitwise": 2,
 	"eqeqeq": 2,
@@ -56,16 +58,16 @@
 	    	{ "allow": ["warn", "error"] }
 	],
 	"brace-style" : [
-	    "error", 
+	    "error",
 	    "1tbs"
 	],
 	"array-bracket-spacing": [
-	    "error", 
+	    "error",
 	    "never"
 	],
 	"comma-style": ["error", "last"],
 	"comma-dangle": [
-	    "error", 
+	    "error",
 	    "never"
 	],
 	"indent": [

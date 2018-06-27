@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 const _ = require("lodash");
 const repoBase = require("./base/repo");
 const mongoose = require("mongoose");
@@ -42,9 +42,9 @@ refSchema.methods = {};
 
 
 const Ref = ModelFactory.createClass(
-	"Ref", 
-	refSchema, 
-	arg => { 
+	"Ref",
+	refSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
