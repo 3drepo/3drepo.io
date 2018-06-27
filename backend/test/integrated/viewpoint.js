@@ -168,11 +168,13 @@ describe("Views", function () {
 			let viewpoint = Object.assign({"name":"View test"}, baseView, { status: "open"});
 			let viewpointId;
 			let newView = {
-				"up":[1,1,1],
-				"position":[12,13,35],
-				"look_at":[0,0,1],
-				"view_dir":[-1,0,1],
-				"right":[0,1,0]
+				"viewpoint":{
+					"up":[1,1,1],
+					"position":[12,13,35],
+					"look_at":[0,0,1],
+					"view_dir":[-1,0,1],
+					"right":[0,1,0]
+				}
 			};
 			async.series([
 				function(done){
@@ -187,7 +189,7 @@ describe("Views", function () {
 				function(done){
 					agent.put(`/${username}/${model}/viewpoints/${viewpointId}/`)
 					.send(newView)
-					.expect(500, done);
+					.expect(400, done);
 				},
 			], done);
 		});
