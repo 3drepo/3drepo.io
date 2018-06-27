@@ -32,9 +32,10 @@ before_install:
     - cp -r ./submodules/tests/frontend/pug/legal/ ./pug/legal
 
 install:
-    - cd ./backend 
+    - cd ./backend
     - yarn install
-    - cd ./../frontend 
+    - yarn run lint
+    - cd ./../frontend
     - yarn install
     - yarn run lint
     - yarn run build
@@ -47,18 +48,18 @@ cache:
 services:
   - rabbitmq
   - mongodb
-  
+
 script:
     - yarn run wdm:update
     - yarn run wdm:start > /dev/null 2>&1 &
-    - cd ./../backend 
+    - cd ./../backend
     - yarn run test
-      #    - cd ./../ 
-      #    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5 
+      #    - cd ./../
+      #    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5
       #    - cd ./frontend
       #    - yarn run e2e
 
 notifications:
-    email: 
+    email:
         recipients:
             - devOps@3drepo.org
