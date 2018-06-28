@@ -203,26 +203,33 @@ function updateModel(req, res, next) {
 	let promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
 	let setting;
 
-	if (req.body.subModels && req.body.subModels.length > 0) {
+	if (Object.keys(req.body).length >= 1 && req.body.subModels) {
+		if (Object.prototype.toString.call(req.body.subModels) === "[object Array]") {
+			if (req.body.subModels.length > 0) {
 
-		promise = ModelSetting.findById({account}, model).then(_setting => {
+				promise = ModelSetting.findById({account}, model).then(_setting => {
 
-			setting = _setting;
+					setting = _setting;
 
-			if (!setting) {
-				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-			} else if (!setting.federate) {
-				return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
-			} else {
-				return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
+					/*if (!setting) {
+						return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+					} else if (!setting.federate) {
+						return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
+					} else {
+						return ModelHelpers.createFederatedModel(account, model, req.body.subModels).then(() => {
+							setting.subModels = req.body.subModels;
+							setting.timestamp = new Date();
+							return setting.save();
+						});
+					}*/
+					return setting;
+
+				});
+
 			}
-
-		}).then(() => {
-			setting.subModels = req.body.subModels;
-			setting.timestamp = new Date();
-			return setting.save();
-		});
-
+		} else {
+			promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
 	}
 
 	promise.then(() => {
