@@ -160,7 +160,14 @@ function createModel(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
 
-	if (Object.keys(req.body).length >= 0) {
+	if (Object.keys(req.body).length >= 1 &&
+			Object.prototype.toString.call(req.body.modelName) === "[object String]" &&
+			(!req.body.desc || Object.prototype.toString.call(req.body.desc) === "[object String]") &&
+			(!req.body.type || Object.prototype.toString.call(req.body.type) === "[object String]") &&
+			(!req.body.unit || Object.prototype.toString.call(req.body.unit) === "[object String]") &&
+			(!req.body.subModels || Object.prototype.toString.call(req.body.subModels) === "[object Array]") &&
+			(!req.body.code || Object.prototype.toString.call(req.body.code) === "[object String]") &&
+			(!req.body.project || Object.prototype.toString.call(req.body.project) === "[object String]")) {
 		const modelName = req.body.modelName;
 		const account = req.params.account;
 		const username = req.session.user.username;
