@@ -62,18 +62,16 @@ describe("Groups", function () {
 	describe("List all groups", function() {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/groups/revision/master/head/`)
-				.send(groups)
 				.expect(200 , function(err, res) {
-					expect(groups.length).to.equal(4);
+					expect(res.length).to.equal(4);
 					done(err);
 				});
 		});
 
 		it("using revision ID should succeed", function(){
 			agent.get(`/${username}/${model}/groups/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/`)
-				.send(groups)
 				.expect(200 , function(err, res) {
-					expect(groups.length).to.equal(4);
+					expect(res.length).to.equal(4);
 					done(err);
 				});
 		});
