@@ -211,19 +211,18 @@ function updateModel(req, res, next) {
 
 					setting = _setting;
 
-					/*if (!setting) {
+					if (!setting) {
 						return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 					} else if (!setting.federate) {
 						return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
 					} else {
-						return ModelHelpers.createFederatedModel(account, model, req.body.subModels).then(() => {
-							setting.subModels = req.body.subModels;
-							setting.timestamp = new Date();
-							return setting.save();
-						});
-					}*/
-					return setting;
+						return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
+					}
 
+				}).then(() => {
+					setting.subModels = req.body.subModels;
+					setting.timestamp = new Date();
+					return setting.save();
 				});
 
 			}
