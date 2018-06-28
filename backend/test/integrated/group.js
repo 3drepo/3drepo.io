@@ -31,7 +31,8 @@ describe("Groups", function () {
 	let agent;
 
 	const username = "groupUser";
-	const username2 = "issue_username2";
+	const viewerUser = "issue_username2";
+	const noAccessUser = "issue_username";
 	const password = "password";
 
 	const model = "4ec71fdd-0450-4b6f-8478-c46633bb66e3";
@@ -95,6 +96,54 @@ describe("Groups", function () {
 				});
 		});
 	});
+
+	describe("Finding a group by ID ", function() {
+		const groupID = "0e2f7fa0-7ac5-11e8-9567-6b401a084a90";
+		const goldenData = {
+			"_id":"0e2f7fa0-7ac5-11e8-9567-6b401a084a90",
+			"color":[98,126,184],
+			"objects":[
+				{
+					"account":"groupUser",
+					"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}
+			]
+		};
+		it("using master head revision should succeed", function(done){
+			agent.get(`/${username}/${model}/groups/revision/master/head/${groupID}`)
+				.expect(200 , function(err, res) {
+					expect(res.body).to.deep.equal(goldenData);
+					done(err);
+				});
+		});
+
+		it("with invalid ID should fail", function(done){
+			agent.get(`/${username}/${model}/groups/revision/master/head/invalidSomething`)
+				.expect(404 , function(err, res) {
+					expect(res.body.code).to.deep.equal(responseCodes.GROUP_NOT_FOUND);
+					done(err);
+				});
+		});
+
+		it("with invalid revision ID should fail", function(done){
+			agent.get(`/${username}/${model}/groups/revision/f640aa3dec2/${groupID}`)
+				.expect(400 , function(err, res) {
+					expect(res.body.code).to.deep.equal(responseCodes.INVALID_TAG_NAME);
+					done(err);
+				});
+		});
+
+		it("using revision ID should succeed", function(done){
+			agent.get(`/${username}/${model}/groups/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/${groupID}`)
+				.expect(200 , function(err, res) {
+					expect(res.body).to.deep.equal(goldenData);
+					done(err);
+				});
+		});
+	});
+
+
 
 });
 
