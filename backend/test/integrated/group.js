@@ -63,7 +63,7 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/groups/revision/master/head/`)
 				.expect(200 , function(err, res) {
-					expect(res.length).to.equal(4);
+					expect(res.body.length).to.equal(4);
 					done(err);
 				});
 		});
@@ -71,7 +71,7 @@ describe("Groups", function () {
 		it("using revision ID should succeed", function(){
 			agent.get(`/${username}/${model}/groups/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/`)
 				.expect(200 , function(err, res) {
-					expect(res.length).to.equal(4);
+					expect(res.body.length).to.equal(4);
 					done(err);
 				});
 		});
