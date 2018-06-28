@@ -370,9 +370,9 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 					} else {
 						toUpdate[key] = data[key];
 					}
+				} else {
+					typeCorrect = false;
 				}
-			} else {
-				typeCorrect = false;
 			}
 
 		});
