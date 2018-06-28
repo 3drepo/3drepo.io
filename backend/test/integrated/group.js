@@ -63,7 +63,8 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/groups/revision/master/head/`)
 				.expect(200 , function(err, res) {
-					console.log(res);
+					console.log(res.body.length);
+					console.log(res.body);
 					expect(res.body.length).to.equal(4);
 					done(err);
 				});
