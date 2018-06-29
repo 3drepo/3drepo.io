@@ -121,7 +121,7 @@ describe("Groups", function () {
 		it("with invalid ID should fail", function(done){
 			agent.get(`/${username}/${model}/groups/revision/master/head/invalidSomething`)
 				.expect(404 , function(err, res) {
-					expect(res.body.code).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -129,7 +129,7 @@ describe("Groups", function () {
 		it("with invalid revision ID should fail", function(done){
 			agent.get(`/${username}/${model}/groups/revision/f640aa3dec2/${groupID}`)
 				.expect(400 , function(err, res) {
-					expect(res.body.code).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
 				});
 		});
@@ -137,7 +137,7 @@ describe("Groups", function () {
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/groups/revision/f640aa3dec2/${groupID}`)
 				.expect(401 , function(err, res) {
-					expect(res.body.code).to.equal(responseCodes.NOT_AUTHORIZED.value);
+					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
 					done(err);
 				});
 		});
