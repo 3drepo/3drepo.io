@@ -206,6 +206,18 @@ describe("Groups", function () {
 
 		});
 
+		it("color with wrong type should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.color = true;
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
+		});
+
+
 		it("without objects field should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
@@ -215,6 +227,40 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
+		});
+
+		it("objects with wrong type should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.objects = true;
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("object with empty array should succeed", function(done) {
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					newGroup.object = [];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(5);
+							done(err);
+						});
+				}
+
+			], done);
+
 		});
 
 
