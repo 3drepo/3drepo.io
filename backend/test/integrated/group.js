@@ -181,7 +181,7 @@ describe("Groups", function () {
 						});
 				}
 
-			]);
+			], done);
 
 		});
 
