@@ -152,23 +152,21 @@ describe("Groups", function () {
 	});
 
 	describe("Creating a group ", function() {
+		const data = {
+			"color":[98,126,184],
+			"objects":[
+				{
+					"account":"groupUser",
+					"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
+					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+				}]
+		};
 		it("with valid parameters should succeed", function(done) {
-			const goldenData = {
-				"_id":"0e2f7fa0-7ac5-11e8-9567-6b401a084a90",
-				"color":[98,126,184],
-				"objects":[
-					{
-						"account":"groupUser",
-						"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
-						"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
-					}]
-			};
+
 			async.series([
 				function(done) {
-					const newGroup = Object.assign({}, goldenData);
-					delete newGroup._id;
 					agent.post(`/${username}/${model}/groups/`)
-						.send(newGroup)
+						.send(data)
 						.expect(200 , function(err, res) {
 							done(err);
 					});
@@ -184,6 +182,53 @@ describe("Groups", function () {
 			], done);
 
 		});
+
+		it("without color should succeed", function(done) {
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.color;
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(4);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("without objects should succeed", function(done) {
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(5);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
 
 	});
 
