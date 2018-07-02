@@ -212,6 +212,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
+					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});

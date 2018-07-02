@@ -362,7 +362,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
-				if(Object.prototype.toString.call(data[key] === fieldTypes[key])) {
+				if(Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
 						toUpdate.objects = convertedObjects;
 					} else if (key === "color") {
