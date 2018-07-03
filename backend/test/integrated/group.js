@@ -358,6 +358,15 @@ describe("Groups", function () {
 
 
 		});
+
+		it("updating invalid group ID should fail", function(done) {
+			agent.put(`/${username}/${model}/groups/invalidID`)
+				.send({objects: []})
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+					done(err);
+				});
+		});
 	});
 
 
