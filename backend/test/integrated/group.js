@@ -37,6 +37,19 @@ describe("Groups", function () {
 
 	const model = "4ec71fdd-0450-4b6f-8478-c46633bb66e3";
 
+	const goldenData = {
+		"_id":"0e2f7fa0-7ac5-11e8-9567-6b401a084a90",
+		"color":[98,126,184],
+		"objects":[
+			{
+				"account":"groupUser",
+				"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
+				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+			}
+		]
+	};
+
+
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -99,17 +112,7 @@ describe("Groups", function () {
 
 	describe("Finding a group by ID ", function() {
 		const groupID = "0e2f7fa0-7ac5-11e8-9567-6b401a084a90";
-		const goldenData = {
-			"_id":"0e2f7fa0-7ac5-11e8-9567-6b401a084a90",
-			"color":[98,126,184],
-			"objects":[
-				{
-					"account":"groupUser",
-					"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
-					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
-				}
-			]
-		};
+
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/groups/revision/master/head/${groupID}`)
 				.expect(200 , function(err, res) {
@@ -329,15 +332,31 @@ describe("Groups", function () {
 					done(err);
 				});
 		});
-
-
-
-
-
-
-
 	});
 
+	describe("Updating a group ", function() {
+		it("updating only the objects should succeed", function(done) {
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+						.send({objects: []})
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							expect(res.body).to.deep.equal(Object.assign({objects:[]}, goldenData));
+							done(err);
+						});
+				}
+
+			], done);
+
+
+		});
+	});
 
 
 });
