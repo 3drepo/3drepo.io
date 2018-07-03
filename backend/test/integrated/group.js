@@ -347,8 +347,9 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/groups/revision/master/head/${goldenData._id}`)
 						.expect(200 , function(err, res) {
-							console.log(res.body, Object.assign({objects:[]}, goldenData));
-							expect(res.body).to.deep.equal(Object.assign({objects:[]}, goldenData));
+							const expectedData = Object.assign({}, goldenData);
+							expectedData.objects = [];
+							expect(res.body).to.deep.equal(expectedData);
 							done(err);
 						});
 				}
