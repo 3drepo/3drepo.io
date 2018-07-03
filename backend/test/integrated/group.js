@@ -369,6 +369,37 @@ describe("Groups", function () {
 		});
 	});
 
+	describe("Delete group ", function() {
+		it("delete group with valid group ID should succeed", function(done) {
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/${goldenData._id}`)
+						.expect(404 , function(err, res) {
+							expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+							done(err);
+						});
+				}
+
+			], done);
+		});
+
+		it("delete invalid group ID should fail", function(done) {
+			agent.put(`/${username}/${model}/groups/invalidID`)
+				.send({objects: []})
+				.expect(404 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+	});
+
 
 });
 
