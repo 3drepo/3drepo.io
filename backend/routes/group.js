@@ -126,7 +126,7 @@ function deleteGroup(req, res, next) {
 
 function deleteGroups(req, res, next) {
 	const place = utils.APIInfo(req);
-	systemLogger.logError(req.query);
+	systemLogger.logError(JSON.stringify(req.query));
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
