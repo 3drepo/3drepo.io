@@ -33,6 +33,7 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
+// @deprecated -  use deleteGroups with single id instead.
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
 router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
@@ -113,13 +114,12 @@ function createGroup(req, res, next) {
 	}
 }
 
+/**
+ * @deprecated -  use deleteGroups with single id instead.
+ */
 function deleteGroup(req, res, next) {
 
-	if (!req.query.ids || "[object Array]" !== Object.prototype.toString.call(req.query.ids)) {
-		req.query.ids = [];
-	}
-
-	req.query.ids.push(req.params.id);
+	req.query.ids = req.params.id;
 
 	return deleteGroups(req, res, next);
 }
