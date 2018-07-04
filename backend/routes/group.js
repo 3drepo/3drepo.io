@@ -121,9 +121,9 @@ function deleteGroup(req, res, next) {
 
 	req.query.ids.push(req.params.id);
 
-	console.log(req.query);
+	systemLogger.logError(req.query);
 
-	return deleteGroup(req, res, next);
+	return deleteGroups(req, res, next);
 }
 
 function deleteGroups(req, res, next) {
