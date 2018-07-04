@@ -23,6 +23,8 @@ class ViewsController implements ng.IController {
 		"$element",
 
 		"DialogService",
+		"AuthService",
+		"ClientConfigService",
 		"ViewpointsService"
 	];
 
@@ -37,6 +39,8 @@ class ViewsController implements ng.IController {
 	private selectedView: any;
 	private savingView: any;
 	private canAddView: any;
+	private editMode: boolean;
+	private modelSettings: any;
 	private newView: any;
 	private editSelectedView: any;
 	private viewpointNameMaxlength: number;
@@ -47,6 +51,8 @@ class ViewsController implements ng.IController {
 		private $element: ng.IRootElementService,
 
 		private DialogService,
+		private AuthService,
+		private ClientConfigService: any,
 		private ViewpointsService: any
 	) {}
 
@@ -58,7 +64,8 @@ class ViewsController implements ng.IController {
 		this.toShow = "views";
 		this.loading = true;
 		this.savingView = false;
-		this.canAddView = true;
+		this.canAddView = false;
+		this.editMode = false;
 		this.viewpoints = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
@@ -85,6 +92,15 @@ class ViewsController implements ng.IController {
 			if (newValue) {
 				this.toShow = "views";
 				this.setContentHeight();
+			}
+		});
+
+		this.$scope.$watch("vm.modelSettings", () => {
+			if (this.modelSettings) {
+				this.canAddView = this.AuthService.hasPermission(
+					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+					this.modelSettings.permissions
+				);
 			}
 		});
 
@@ -127,7 +143,7 @@ class ViewsController implements ng.IController {
 		if (this.editSelectedView === view) {
 			this.editSelectedView = null;
 		} else {
-			this.canAddView = false;
+			this.editMode = true;
 			this.editSelectedView = Object.assign({}, view);
 		}
 		this.$timeout();
@@ -148,7 +164,7 @@ class ViewsController implements ng.IController {
 	}
 
 	public resetEditState() {
-		this.canAddView = true;
+		this.editMode = false;
 		this.editSelectedView = null;
 		this.$timeout();
 	}
@@ -156,6 +172,10 @@ class ViewsController implements ng.IController {
 	public addView() {
 		this.newView = { name: "View " + (this.viewpoints.length + 1) };
 		this.showNewViewPane();
+	}
+
+	public addViewDisabled() {
+		return !this.canAddView || this.editMode;
 	}
 
 	public showNewViewPane() {

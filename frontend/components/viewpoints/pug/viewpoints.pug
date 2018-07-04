@@ -30,7 +30,7 @@ div.viewpointsContainer
 
             div.viewpointEnterHolder(
                 ng-click="vm.editView(viewpoint)"
-                ng-if="viewpoint.selected === true && vm.editSelectedView._id !== viewpoint._id"
+                ng-if="viewpoint.selected === true && vm.editSelectedView._id !== viewpoint._id && vm.canAddView"
                 layout="row"
                 layout-align="center center")
 
@@ -104,7 +104,7 @@ div.viewpointsContainer
                 type="button" 
                 aria-label="Add"
                 ng-show="vm.toShow === 'views'"
-                ng-disabled="!vm.canAddView"
+                ng-disabled="vm.addViewDisabled()"
                 ng-click="vm.addView()")
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
