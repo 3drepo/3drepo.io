@@ -389,10 +389,9 @@ describe("Groups", function () {
 			], done);
 		});
 
-		it("delete invalid group ID should fail", function(done) {
+		it("delete invalid group ID should succeed", function(done) {
 			agent.delete(`/${username}/${model}/groups/invalidID`)
-				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+				.expect(200 , function(err, res) {
 					done(err);
 				});
 		});
@@ -400,19 +399,17 @@ describe("Groups", function () {
 	});
 
 	describe("Delete groups ", function() {
-		it("delete group no query string should fail", function(done) {
+		it("delete group no query string should succeed", function(done) {
 				agent.delete(`/${username}/${model}/groups/${goldenData._id}/`)
-					.expect(400 , function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					.expect(200 , function(err, res) {
 						done(err);
 					});
 		});
 
-		it("delete group invalid group ID should fail", function(done) {
+		it("delete group invalid group ID should succeed", function(done) {
 			agent.delete(`/${username}/${model}/groups/invalidID?ids=a,b,c,d,e`)
 				.send({objects: []})
-				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+				.expect(200 , function(err, res) {
 					done(err);
 				});
 		});
