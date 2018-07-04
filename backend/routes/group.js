@@ -121,13 +121,12 @@ function deleteGroup(req, res, next) {
 
 	req.query.ids.push(req.params.id);
 
-	systemLogger.logError(req.query);
-
 	return deleteGroups(req, res, next);
 }
 
 function deleteGroups(req, res, next) {
 	const place = utils.APIInfo(req);
+	systemLogger.logError(req.query);
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
