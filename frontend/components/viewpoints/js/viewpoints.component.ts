@@ -38,7 +38,7 @@ class ViewsController implements ng.IController {
 	private canAddView: any;
 	private newView: any;
 	private editSelectedView: any;
-	private viewNameMaxlength: number;
+	private viewpointNameMaxlength: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -59,7 +59,7 @@ class ViewsController implements ng.IController {
 		this.canAddView = true;
 		this.viewpoints = [];
 		this.editSelectedView = false;
-		this.viewNameMaxlength = 80;
+		this.viewpointNameMaxlength = 80;
 		this.watchers();
 	}
 
