@@ -20,6 +20,7 @@ class ViewsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"DialogService",
 		"ViewpointsService"
@@ -43,6 +44,7 @@ class ViewsController implements ng.IController {
 	constructor(
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private DialogService,
 		private ViewpointsService: any
@@ -159,6 +161,14 @@ class ViewsController implements ng.IController {
 	public showNewViewPane() {
 		this.toShow = "view";
 		this.onShowItem();
+		this.focusViewpointName();
+	}
+
+	public focusViewpointName() {
+		this.$timeout(() => {
+			const input: HTMLElement = this.$element[0].querySelector("#viewpointName");
+			input.focus();
+		});
 	}
 
 	public handleViewError(method: string, error: Error) {
