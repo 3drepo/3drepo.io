@@ -143,6 +143,7 @@ export class PanelService {
 				}, {
 					hidden: false,
 					upperDivider: true,
+					disabled: true,
 					label: "Created by: "
 				}
 			],
