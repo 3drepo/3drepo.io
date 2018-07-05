@@ -134,6 +134,7 @@ class ViewsController implements ng.IController {
 	public deleteViewpoint() {
 		this.ViewpointsService.deleteViewpoint(this.account, this.model, this.selectedView)
 			.then(() => {
+				this.resetEditState();
 				this.selectedView = null;
 			})
 			.catch((error) => {
