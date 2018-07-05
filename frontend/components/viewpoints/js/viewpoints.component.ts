@@ -39,7 +39,6 @@ class ViewsController implements ng.IController {
 	private selectedView: any;
 	private savingView: any;
 	private canAddView: any;
-	private editMode: boolean;
 	private modelSettings: any;
 	private newView: any;
 	private editSelectedView: any;
@@ -65,7 +64,6 @@ class ViewsController implements ng.IController {
 		this.loading = true;
 		this.savingView = false;
 		this.canAddView = false;
-		this.editMode = false;
 		this.viewpoints = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
@@ -109,6 +107,10 @@ class ViewsController implements ng.IController {
 	public selectView(view: any) {
 
 		if (view) {
+			if (this.editSelectedView && this.selectedView !== view) {
+				this.resetEditState();
+			}
+
 			if (this.selectedView) {
 				this.selectedView.selected = false;
 			}
@@ -143,7 +145,6 @@ class ViewsController implements ng.IController {
 		if (this.editSelectedView === view) {
 			this.editSelectedView = null;
 		} else {
-			this.editMode = true;
 			this.editSelectedView = Object.assign({}, view);
 		}
 		this.$timeout();
@@ -164,7 +165,6 @@ class ViewsController implements ng.IController {
 	}
 
 	public resetEditState() {
-		this.editMode = false;
 		this.editSelectedView = null;
 		this.$timeout();
 	}
@@ -175,7 +175,7 @@ class ViewsController implements ng.IController {
 	}
 
 	public addViewDisabled() {
-		return !this.canAddView || this.editMode;
+		return !this.canAddView || this.editSelectedView;
 	}
 
 	public showNewViewPane() {
