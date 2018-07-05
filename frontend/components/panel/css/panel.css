@@ -153,6 +153,9 @@ panel-card md-toolbar .md-toolbar-tools {
 panel-card md-toolbar #options .md-button {
   margin: 0 4px;
 }
+panel-card md-toolbar .panel-icon {
+  margin: -2px 14px 0 0px;
+}
 
 panel-card .md-menu {
   padding: 0;
