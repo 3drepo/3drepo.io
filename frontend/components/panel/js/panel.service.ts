@@ -32,6 +32,7 @@ interface IPanelCard {
 	add?: boolean;
 	menu?: IMenuItem[];
 	minHeight?: number;
+	disabled?: boolean;
 }
 
 interface IMenuItem {
