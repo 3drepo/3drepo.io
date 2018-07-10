@@ -237,7 +237,7 @@ class IssueController implements ng.IController {
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
 				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
-				this.checkCanComment();
+				this.canComment();
 				this.convertCommentTopicType();
 			}
 		});
@@ -403,7 +403,7 @@ class IssueController implements ng.IController {
 		this.handleBCFAssign(this.issueData.assigned_roles);
 		this.handleBCFType(this.issueData.topic_type);
 
-		this.checkCanComment();
+		this.canComment();
 		this.convertCommentTopicType();
 
 		// Can edit description if no comments
@@ -453,16 +453,6 @@ class IssueController implements ng.IController {
 		if (!this.submitDisabled) {
 			this.disabledReason = this.reasonCommentText;
 		}
-	}
-
-	public checkCanComment() {
-
-		return this.IssuesService.canComment(
-			this.issueData,
-			this.userJob,
-			this.modelSettings.permissions
-		);
-
 	}
 
 	public canChangePriority() {
@@ -550,15 +540,14 @@ class IssueController implements ng.IController {
 
 	public canComment() {
 
-		if (!this.IssuesService.isOpen(this.issueData)) {
-			return false;
-		}
-
-		return this.IssuesService.canComment(
-			this.issueData,
-			this.userJob,
-			this.modelSettings.permissions
-		);
+		return this.issueData &&
+			this.userJob &&
+			this.modelSettings.permissions &&
+			this.IssuesService.canComment(
+				this.issueData,
+				this.userJob,
+				this.modelSettings.permissions
+			);
 
 	}
 
@@ -615,7 +604,7 @@ class IssueController implements ng.IController {
 				})
 				.catch(this.handleUpdateError.bind(this));
 
-			this.checkCanComment();
+			this.canComment();
 
 			this.AnalyticService.sendEvent({
 				eventCategory: "Issue",

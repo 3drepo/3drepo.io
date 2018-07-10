@@ -392,7 +392,6 @@ export class IssuesService {
 	}
 
 	public userJobMatchesCreator(userJob, issueData) {
-
 		return (userJob._id &&
 			issueData.creator_role &&
 			userJob._id === issueData.creator_role);
@@ -420,49 +419,38 @@ export class IssuesService {
 	}
 
 	public canChangePriority(issueData, userJob, permissions) {
-
-		const notViewer = !this.isViewer(permissions);
-		const matches = this.userJobMatchesCreator(userJob, issueData);
-
-		return this.isAdmin(permissions) || (matches && notViewer);
+		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
 	}
 
 	public canChangeStatusToClosed(issueData, userJob, permissions) {
-
 		const jobOwner = (this.userJobMatchesCreator(userJob, issueData) &&
 						!this.isViewer(permissions));
 
 		return this.isAdmin(permissions) || jobOwner;
-
 	}
 
 	public canChangeStatus(issueData, userJob, permissions) {
-
-		const assigned = this.isAssignedJob(userJob, issueData, permissions);
-		const jobMatches = (
-			this.userJobMatchesCreator(userJob, issueData) &&
-			!this.isViewer(permissions)
-		);
-		return this.isAdmin(permissions) || jobMatches || assigned;
-
+		return this.isAdmin(permissions) || this.isAssignedJob(userJob, issueData, permissions);
 	}
 
 	public canChangeType(issueData, userJob, permissions) {
-
-		return this.canComment(issueData, userJob, permissions);
-
+		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
 	}
 
 	public canChangeDueDate(issueData, userJob, permissions) {
-
-		return this.canChangeStatusToClosed(issueData, userJob, permissions);
-
+		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
 	}
 
 	public canChangeAssigned(issueData, userJob, permissions) {
+		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
+	}
 
-		return this.canComment(issueData, userJob, permissions);
+	public canCommentAndIsAssignee(issueData, userJob, permissions) {
+		const jobOwner = !this.isViewer(permissions) &&
+			this.userJobMatchesCreator(userJob, issueData);
 
+		return jobOwner || (this.canComment(issueData, userJob, permissions) &&
+			this.isAssignedJob(userJob, issueData, permissions));
 	}
 
 	public isOpen(issueData) {
@@ -472,16 +460,26 @@ export class IssuesService {
 		return false;
 	}
 
+	/**
+	 * user can comment if they are a commenter/collaborator,
+	 * or if they have the same job as the issue owner (but not a viewer)
+	 * or if they are the issue owner (but not a viewer),
+	 * and the issue is not closed
+	 */
 	public canComment(issueData, userJob, permissions) {
+
+		const jobOwner = !this.isViewer(permissions) &&
+			this.userJobMatchesCreator(userJob, issueData);
 
 		const isNotClosed = issueData &&
 			issueData.status &&
 			this.isOpen(issueData);
 
-		const ableToComment = this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-			permissions
-		);
+		const ableToComment = jobOwner ||
+			this.AuthService.hasPermission(
+				this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
+				permissions
+			);
 
 		return ableToComment && isNotClosed;
 
