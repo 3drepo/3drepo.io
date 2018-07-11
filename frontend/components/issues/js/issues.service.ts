@@ -446,7 +446,8 @@ export class IssuesService {
 	}
 
 	public canCommentAndIsAssignee(issueData, userJob, permissions) {
-		const jobOwner = !this.isViewer(permissions) &&
+		const jobOwner = this.isAdmin(permissions) ||
+			!this.isViewer(permissions) &&
 			this.userJobMatchesCreator(userJob, issueData);
 
 		return jobOwner || (this.canComment(issueData, userJob, permissions) &&
@@ -468,7 +469,8 @@ export class IssuesService {
 	 */
 	public canComment(issueData, userJob, permissions) {
 
-		const jobOwner = !this.isViewer(permissions) &&
+		const jobOwner = this.isAdmin(permissions) ||
+			!this.isViewer(permissions) &&
 			this.userJobMatchesCreator(userJob, issueData);
 
 		const isNotClosed = issueData &&

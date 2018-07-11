@@ -291,7 +291,7 @@ md-divider
 				ng-change="vm.commentChange()"
 				ng-focus="vm.textInputHasFocus(true)"
 				ng-blur="vm.textInputHasFocus(false)"
-				ng-disabled="!vm.checkCanComment() || vm.issueFailedToLoad"
+				ng-disabled="!vm.canComment() || vm.issueFailedToLoad"
 				ng-required="true")
 				
 		div(layout="row" layout-align="start center")
