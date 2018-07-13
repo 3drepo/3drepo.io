@@ -30,6 +30,7 @@ router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereE
 router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAerialMapsTile);
 router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficTile);
 router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficFlowTile);
+router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTerrainTile);
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res, next) {
@@ -111,6 +112,15 @@ function getHereTrafficFlowTile(req, res, next){
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".traffic.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
+	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	requestMapTile(req, res, domain, uri);
+}
+
+function getHereTerrainTile(req, res) {
+	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
+	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".aerial.maps.cit.api.here.com";
+	let uri = "/maptile/2.1/maptile/newest/terrain.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	systemLogger.logInfo("Fetching Here terrain map tile: " + uri);
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
 	requestMapTile(req, res, domain, uri);
 }
