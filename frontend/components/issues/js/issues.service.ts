@@ -398,34 +398,37 @@ export class IssuesService {
 	}
 
 	public isViewer(permissions) {
-		return !this.AuthService.hasPermission(
+		return permissions && !this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
 			permissions
 		);
 	}
 
-	public isAssignedJob(userJob, issueData, permissions) {
-		return (userJob._id &&
+	public isAssignedJob(issueData, userJob, permissions) {
+		return issueData && userJob &&
+			(userJob._id &&
 				issueData.assigned_roles[0] &&
 				userJob._id === issueData.assigned_roles[0]) &&
 				!this.isViewer(permissions);
 	}
 
 	public isAdmin(permissions) {
-		return this.AuthService.hasPermission(
+		return permissions && this.AuthService.hasPermission(
 			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
 			permissions
 		);
 	}
 
 	public isJobOwner(issueData, userJob, permissions) {
-		return (issueData.owner === this.AuthService.getUsername() ||
+		return issueData && userJob &&
+			(issueData.owner === this.AuthService.getUsername() ||
 			this.userJobMatchesCreator(userJob, issueData)) &&
 			!this.isViewer(permissions);
 	}
 
 	public canChangePriority(issueData, userJob, permissions) {
-		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
+		return (this.isAdmin(permissions) || this.isJobOwner(issueData, userJob, permissions)) &&
+			this.canComment(issueData, userJob, permissions);
 	}
 
 	public canChangeStatusToClosed(issueData, userJob, permissions) {
@@ -434,26 +437,29 @@ export class IssuesService {
 
 	public canChangeStatus(issueData, userJob, permissions) {
 		return this.canChangeStatusToClosed(issueData, userJob, permissions) ||
-			this.isAssignedJob(userJob, issueData, permissions);
+			this.isAssignedJob(issueData, userJob, permissions);
 	}
 
 	public canChangeType(issueData, userJob, permissions) {
-		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
+		return (this.isAdmin(permissions) || this.isJobOwner(issueData, userJob, permissions)) &&
+			this.canComment(issueData, userJob, permissions);
+	}
+
+	public canChangeDescription(issueData, userJob, permissions) {
+		return (this.isAdmin(permissions) || this.isJobOwner(issueData, userJob, permissions)) &&
+			this.canComment(issueData, userJob, permissions);
 	}
 
 	public canChangeDueDate(issueData, userJob, permissions) {
-		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
+		return (this.isAdmin(permissions) || this.isJobOwner(issueData, userJob, permissions)) &&
+			this.canComment(issueData, userJob, permissions);
 	}
 
 	public canChangeAssigned(issueData, userJob, permissions) {
-		return this.canCommentAndIsAssignee(issueData, userJob, permissions);
-	}
-
-	public canCommentAndIsAssignee(issueData, userJob, permissions) {
-		return this.isAdmin(permissions) ||
+		return (this.isAdmin(permissions) ||
 			this.isJobOwner(issueData, userJob, permissions) ||
-			(this.canComment(issueData, userJob, permissions) &&
-			this.isAssignedJob(userJob, issueData, permissions));
+			this.isAssignedJob(issueData, userJob, permissions)) &&
+			this.canComment(issueData, userJob, permissions);
 	}
 
 	public isOpen(issueData) {

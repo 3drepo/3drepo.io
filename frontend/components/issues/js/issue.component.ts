@@ -39,7 +39,6 @@ class IssueController implements ng.IController {
 		"DialogService"
 	];
 
-	private canEditDescription: boolean;
 	private issueFailedToLoad: boolean;
 	private savedScreenShot: any;
 	private editingCommentIndex: any;
@@ -107,7 +106,6 @@ class IssueController implements ng.IController {
 
 	public $onInit() {
 
-		this.canEditDescription = false;
 		this.issueFailedToLoad = false;
 
 		this.savedScreenShot = null;
@@ -406,43 +404,24 @@ class IssueController implements ng.IController {
 		this.canComment();
 		this.convertCommentTopicType();
 
-		// Can edit description if no comments
-		this.canEditDescription = this.checkCanEditDesc();
-
 		this.IssuesService.populateIssue(this.issueData);
 		this.setContentHeight();
 
 	}
 
-	public checkCanEditDesc() {
-		// Comments that aren't notifciations
-		const canEditDesc = this.IssuesService.canChangeStatusToClosed(
+	public canChangeDescription() {
+		return this.IssuesService.canChangeDescription(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
-
-		if (!canEditDesc) {
-			return false;
-		}
-
-		if (!this.issueData || !this.issueData.comments) {
-			return false;
-		}
-
-		const comments = this.issueData.comments.filter((comment) => {
-			return comment.action === undefined;
-		});
-		return comments.length === 0;
 	}
 
 	public nameChange() {
-
 		this.submitDisabled = !this.issueData.name;
 		if (!this.submitDisabled) {
 			this.disabledReason = this.reasonTitleText;
 		}
-
 	}
 
 	/**
@@ -456,99 +435,60 @@ class IssueController implements ng.IController {
 	}
 
 	public canChangePriority() {
-
-		if (!this.IssuesService.isOpen(this.issueData)) {
-			return false;
-		}
-
 		return this.IssuesService.canChangePriority(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
-
 	}
 
 	public disableStatusOption(status) {
-
-		if (status.value === "closed" || status.value === "open") {
-			return !this.IssuesService.canChangeStatusToClosed(
+		return (status.value === "closed" || status.value === "open") &&
+			!this.IssuesService.canChangeStatusToClosed(
 				this.issueData,
 				this.userJob,
 				this.modelSettings.permissions
 			);
-		}
-
-		return false;
-
 	}
 
 	public canChangeStatus() {
-
-		// We don't check is open because we need to be
-		// able to open the issue!
-
 		return this.IssuesService.canChangeStatus(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
-
 	}
 
 	public canChangeType() {
-
-		if (!this.IssuesService.isOpen(this.issueData)) {
-			return false;
-		}
-
 		return this.IssuesService.canChangeType(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
-
 	}
 
 	public canChangeDueDate() {
-
-		if (!this.IssuesService.isOpen(this.issueData)) {
-			return false;
-		}
-
 		return this.IssuesService.canChangeDueDate(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
-
 	}
 
 	public canChangeAssigned() {
-
-		if (!this.IssuesService.isOpen(this.issueData)) {
-			return false;
-		}
-
 		return this.IssuesService.canChangeAssigned(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
-
 	}
 
 	public canComment() {
-
-		return this.issueData &&
-			this.userJob &&
-			this.modelSettings.permissions &&
-			this.IssuesService.canComment(
-				this.issueData,
-				this.userJob,
-				this.modelSettings.permissions
-			);
-
+		return this.IssuesService.canComment(
+			this.issueData,
+			this.userJob,
+			this.modelSettings.permissions
+		);
 	}
 
 	/**
@@ -1058,7 +998,6 @@ class IssueController implements ng.IController {
 				this.IssuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
 						this.saving = false;
-						this.canEditDescription = this.checkCanEditDesc();
 						this.afterNewComment(response.data.issue, false);
 					})
 					.catch((error) => {
@@ -1231,7 +1170,7 @@ class IssueController implements ng.IController {
 		if (this.data) {
 
 			// Description text
-			if (this.canEditDescription || (this.issueData && this.issueData.hasOwnProperty("desc")) ) {
+			if (this.canChangeDescription() || (this.issueData && this.issueData.hasOwnProperty("desc")) ) {
 				height += descriptionTextHeight;
 			}
 			// Description thumbnail
@@ -1374,7 +1313,7 @@ class IssueController implements ng.IController {
 			);
 
 		}
-}
+	}
 
 }
 

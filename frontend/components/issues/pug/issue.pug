@@ -149,7 +149,7 @@ md-content#issueInformation(
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
 					
-					.issueTextActions(layout="row", ng-if="vm.canEditDescription")
+					.issueTextActions(layout="row", ng-if="vm.canChangeDescription()")
 						md-button.md-icon-button.md-accent(
 							aria-label="Edit Description Toggle"
 							ng-click="vm.toggleEditDescription($event)")
