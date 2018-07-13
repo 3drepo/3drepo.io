@@ -61,7 +61,7 @@ Configuration
 The configuration files are contained in the subdirectory config under the main project directory. 
 Each directory in config represents a different configuration you can run under. This allows you to quickly switch between, for example, a development environment and a production environment. These both contain a file call config_sample.js that needs to be copied or renamed to config.js for it to work.
 
-In general, to configure a new configuration enviroment called <config_name>:
+In general, to configure a new configuration environment called <config_name>:
  
 1. Change to the configuration directory: `cd config`
 2. First create a new directory under config: `mkdir <config_name>`
