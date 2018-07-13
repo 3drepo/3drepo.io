@@ -34,6 +34,7 @@ router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", middlewares.
 router.get("/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereHybridTile);
 router.get("/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTile);
 router.get("/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTransitTile);
+router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTruckRestrictionsTile);
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res, next) {
@@ -151,6 +152,15 @@ function getHereGreyTransitTile(req, res) {
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".base.maps.cit.api.here.com";
 	let uri = "/maptile/2.1/maptile/newest/normal.day.transit/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here colour-reduced transit map tile: " + uri);
+	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	requestMapTile(req, res, domain, uri);
+}
+
+function getHereTruckRestrictionsTile(req, res) {
+	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
+	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + ".base.maps.cit.api.here.com";
+	let uri = "/maptile/2.1/trucktile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	systemLogger.logInfo("Fetching Here truck restrictions map tile: " + uri);
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
 	requestMapTile(req, res, domain, uri);
 }
