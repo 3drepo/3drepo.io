@@ -3,7 +3,7 @@ div(layout="column", class="md-whiteframe-1dp")
 	// Tool bar
 	md-toolbar(class="md-primary" flex)
 		.md-toolbar-tools
-			md-button.md-icon-button(aria-label="Status", ng-click="vm.hideItem()")
+			span.panel-icon(aria-label="Status", ng-click="vm.hideItem()")
 				md-icon.angular-material-icons( flex="none") {{vm.statusIcon}}
 			span(ng-if="!vm.showFilter" flex="50")
 				h2

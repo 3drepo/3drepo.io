@@ -20,8 +20,11 @@ class ViewsController implements ng.IController {
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
+		"$element",
 
 		"DialogService",
+		"AuthService",
+		"ClientConfigService",
 		"ViewpointsService"
 	];
 
@@ -36,15 +39,19 @@ class ViewsController implements ng.IController {
 	private selectedView: any;
 	private savingView: any;
 	private canAddView: any;
+	private modelSettings: any;
 	private newView: any;
 	private editSelectedView: any;
-	private viewNameMaxlength: number;
+	private viewpointNameMaxlength: number;
 
 	constructor(
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
+		private $element: ng.IRootElementService,
 
 		private DialogService,
+		private AuthService,
+		private ClientConfigService: any,
 		private ViewpointsService: any
 	) {}
 
@@ -56,10 +63,10 @@ class ViewsController implements ng.IController {
 		this.toShow = "views";
 		this.loading = true;
 		this.savingView = false;
-		this.canAddView = true;
+		this.canAddView = false;
 		this.viewpoints = [];
 		this.editSelectedView = false;
-		this.viewNameMaxlength = 80;
+		this.viewpointNameMaxlength = 80;
 		this.watchers();
 	}
 
@@ -86,11 +93,24 @@ class ViewsController implements ng.IController {
 			}
 		});
 
+		this.$scope.$watch("vm.modelSettings", () => {
+			if (this.modelSettings) {
+				this.canAddView = this.AuthService.hasPermission(
+					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+					this.modelSettings.permissions
+				);
+			}
+		});
+
 	}
 
 	public selectView(view: any) {
 
 		if (view) {
+			if (this.editSelectedView && this.selectedView !== view) {
+				this.resetEditState();
+			}
+
 			if (this.selectedView) {
 				this.selectedView.selected = false;
 			}
@@ -114,6 +134,7 @@ class ViewsController implements ng.IController {
 	public deleteViewpoint() {
 		this.ViewpointsService.deleteViewpoint(this.account, this.model, this.selectedView)
 			.then(() => {
+				this.resetEditState();
 				this.selectedView = null;
 			})
 			.catch((error) => {
@@ -125,7 +146,6 @@ class ViewsController implements ng.IController {
 		if (this.editSelectedView === view) {
 			this.editSelectedView = null;
 		} else {
-			this.canAddView = false;
 			this.editSelectedView = Object.assign({}, view);
 		}
 		this.$timeout();
@@ -146,7 +166,6 @@ class ViewsController implements ng.IController {
 	}
 
 	public resetEditState() {
-		this.canAddView = true;
 		this.editSelectedView = null;
 		this.$timeout();
 	}
@@ -156,9 +175,21 @@ class ViewsController implements ng.IController {
 		this.showNewViewPane();
 	}
 
+	public addViewDisabled() {
+		return !this.canAddView || this.editSelectedView;
+	}
+
 	public showNewViewPane() {
 		this.toShow = "view";
 		this.onShowItem();
+		this.focusViewpointName();
+	}
+
+	public focusViewpointName() {
+		this.$timeout(() => {
+			const input: HTMLElement = this.$element[0].querySelector("#viewpointName");
+			input.focus();
+		});
 	}
 
 	public handleViewError(method: string, error: Error) {

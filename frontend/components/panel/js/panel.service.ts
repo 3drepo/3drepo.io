@@ -51,6 +51,7 @@ interface IMenuItem {
 	icon?: string;
 	divider?: boolean;
 	upperDivider?: boolean;
+	disabled?: boolean;
 }
 
 export class PanelService {
@@ -143,6 +144,7 @@ export class PanelService {
 				}, {
 					hidden: false,
 					upperDivider: true,
+					disabled: true,
 					label: "Created by: "
 				}
 			],
