@@ -7,11 +7,12 @@ md-menu(md-position-mode="target-right target", md-offset="2 14")
 		md-menu-item.menuHighlight(
 			ng-repeat="menuItem in vm.menu track by menuItem.label"
 			ng-if="!menuItem.hidden")
-			md-button(ng-click="vm.menuItemSelected($index)" md-prevent-menu-close )
+			md-button(ng-click="vm.menuItemSelected($index)" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
 				div(layout="column" flex)
 					md-divider(ng-if="menuItem.upperDivider" flex)
 					div(layout="row" flex)
-						md-icon(md-font-icon="{{menuItem.icon}}", class="fa", ng-if="menuItem.noToggle && menuItem.icon !== 'fa-eye' && menuItem.icon !== 'fa-scissors'")
+						md-icon(md-font-icon="{{menuItem.icon}}", class="fa angular-material-icons ng-scope material-icons", ng-if="menuItem.noToggle && menuItem.icon !== 'fa-eye' && menuItem.icon !== 'fa-scissors' && menuItem.icon !== 'delete'")
+						md-icon(class="angular-material-icons ng-scope material-icons" role="img" aria-hidden="true", ng-if="menuItem.noToggle && menuItem.icon === 'delete'") {{menuItem.icon}}
 						md-icon(md-font-icon="{{menuItem.firstSelectedIcon}}", class="fa", ng-if="menuItem.firstSelected")
 						md-icon(md-font-icon="{{menuItem.secondSelectedIcon}}", class="fa", ng-if="menuItem.secondSelected")
 						md-icon(class="fa", ng-if="menuItem.icon === 'fa-eye' || menuItem.icon === 'fa-scissors'")

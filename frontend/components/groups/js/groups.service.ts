@@ -48,7 +48,8 @@ export class GroupsService {
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes : 0,
-			multiSelectedGroups: []
+			multiSelectedGroups: [],
+			overrideAll: false
 		};
 	}
 
@@ -76,11 +77,25 @@ export class GroupsService {
 	 * @param group the group to toggle
 	 */
 	public toggleColorOverride(group: any) {
-		if (this.state.colorOverride[group._id]) {
+		if (this.hasColorOverride(group)) {
 			this.removeColorOverride(group._id);
 		} else {
 			this.colorOverride(group);
 		}
+	}
+
+	/**
+	 * Override all groups
+	 */
+	public colorOverrideAllGroups(on: boolean) {
+		this.state.overrideAll = on;
+		this.state.groups.forEach((group) => {
+			if (on) {
+				this.colorOverride(group);
+			} else {
+				this.removeColorOverride(group._id);
+			}
+		});
 	}
 
 	/**
@@ -121,48 +136,38 @@ export class GroupsService {
 	}
 
 	/**
-	 * Remove all color overrides from all groups
-	 */
-	public removeAllColorOverride() {
-		for (const groupId in this.state.colorOverride) {
-			if (!this.state.colorOverride.hasOwnProperty(groupId)) {
-				continue;
-			}
-			this.removeColorOverride(groupId);
-		}
-	}
-
-	/**
 	 * Remove all color overrides from a given group based on it's ID
 	 */
 	public removeColorOverride(groupId: string) {
 
 		const group = this.state.colorOverride[groupId];
-		if (!group) {
-			return;
-		}
 
-		for (const key in group.models) {
+		if (group) {
+			for (const key in group.models) {
 
-			if (!group.models.hasOwnProperty(key)) {
-				continue;
+				if (group.models.hasOwnProperty(key)) {
+					const meshIds = group.models[key].meshes;
+					const pair = key.split("@");
+					const account = pair[0];
+					const model = pair[1];
+
+					this.ViewerService.resetMeshColor(
+						account,
+						model,
+						meshIds,
+						group.color
+					);
+				}
 			}
 
-			const meshIds = group.models[key].meshes;
-			const pair = key.split("@");
-			const account = pair[0];
-			const model = pair[1];
+			delete this.state.colorOverride[groupId];
 
-			this.ViewerService.resetMeshColor(
-				account,
-				model,
-				meshIds,
-				group.color
-			);
+			if (this.state.overrideAll &&
+				this.state.groups.length !==
+				Object.keys(this.state.colorOverride).length) {
+				this.state.overrideAll = false;
+			}
 		}
-
-		delete this.state.colorOverride[groupId];
-
 	}
 
 	/**
@@ -297,14 +302,40 @@ export class GroupsService {
 		});
 	}
 
-	public deleteGroups(teamspace, model) {
-		const deleteGroupPromises = [];
+	/**
+	 * Delete selected groups
+	 */
+	public deleteGroups(teamspace: string, model: string, all?: boolean) {
+		const groupsToDelete = [];
 		this.state.groups.forEach((group) => {
-			if (group.highlighted) {
-				deleteGroupPromises.push(this.deleteGroup(teamspace, model, group));
+			if (all || group.highlighted) {
+				groupsToDelete.push(group);
 			}
 		});
-		return Promise.all(deleteGroupPromises);
+
+		if (groupsToDelete.length > 0) {
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => group._id).join(",")}`;
+			return this.APIService.delete(groupsUrl)
+				.then((response) => {
+					groupsToDelete.forEach((group) => {
+						this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
+							this.TreeService.deselectNodes(nodes);
+						});
+						this.removeColorOverride(group._id);
+						this.deleteStateGroup(group);
+					});
+					return response;
+				});
+		} else {
+			return Promise.resolve();
+		}
+	}
+
+	/**
+	 * Delete all groups
+	 */
+	public deleteAllGroups(teamspace: string, model: string) {
+		return this.deleteGroups(teamspace, model, true);
 	}
 
 	/**
@@ -552,6 +583,9 @@ export class GroupsService {
 					this.state.selectedGroup.totalSavedMeshes = savedMeshesLength;
 					this.updateSelectedGroupColor();
 					this.selectGroup(group);
+					if (this.state.overrideAll) {
+						this.colorOverride(group);
+					}
 					return group;
 				});
 		});
@@ -571,16 +605,18 @@ export class GroupsService {
 	 * @param group the group object to delete
 	 */
 	public deleteGroup(teamspace: string, model: string, deleteGroup: any) {
-		const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
-		return this.APIService.delete(groupUrl)
-			.then((response) => {
-				this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
-					this.TreeService.deselectNodes(nodes);
+		if (deleteGroup._id) {
+			const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
+			return this.APIService.delete(groupUrl)
+				.then((response) => {
+					this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
+						this.TreeService.deselectNodes(nodes);
+					});
+					this.removeColorOverride(deleteGroup._id);
+					this.deleteStateGroup(deleteGroup);
+					return response;
 				});
-				this.removeColorOverride(deleteGroup._id);
-				this.deleteStateGroup(deleteGroup);
-				return response;
-			});
+		}
 	}
 
 	/**

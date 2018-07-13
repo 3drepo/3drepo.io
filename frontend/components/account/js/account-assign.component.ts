@@ -50,6 +50,14 @@ class AccountAssignController implements ng.IController {
 	private teamspacePermissions;
 	private projectPermissions;
 
+	private modelRolesToolTip = {
+		unassigned : "No access",
+		viewer : "Can only view",
+		commenter : "View and create issues",
+		collaborator: "Full access and ability to upload/download revisions",
+		admin: "Collaborator access and edit permissions"
+	};
+
 	constructor(
 		private $scope: ng.IScope,
 		private $window: ng.IWindowService,
@@ -59,7 +67,6 @@ class AccountAssignController implements ng.IController {
 
 		private APIService
 	) {}
-
 	public $onInit() {
 
 		this.teamspaceAdmin = "teamspace_admin";
@@ -78,23 +85,17 @@ class AccountAssignController implements ng.IController {
 		this.getTeamspaces();
 
 		this.teamspacePermissions = {
-
-			teamspace_admin : "Admin"
-			// assign_licence	: "Assign Licence",
-			// revoke_licence	: "Revoke Licence",
-			// create_project	: "Create Project",
-			// create_job	: "Create Job",
-			// delete_job	: "Delete Job",
-			// assign_job : "Assign Job"
-
+			teamspace_admin : {
+				title: "Admin",
+				tooltip: "Manage licences, create new projects, full access to all projects"
+			}
 		};
 
 		this.projectPermissions = {
-			// create_model : "Create Model",
-			// create_federation : "Create Federation",
-			// delete_project : "Delete Project",
-			// edit_project :  "Edit Project",
-			admin_project : "Admin Project"
+			admin_project :  {
+				title: "Admin Project",
+				tooltip: "Manage permissions, create models/federations, full access to all models"
+			}
 		};
 
 		this.modelRoles = ["unassigned"];
@@ -167,7 +168,7 @@ class AccountAssignController implements ng.IController {
 					return model.model ===  this.modelSelected;
 				});
 
-				return this.setPermissionTemplates(this.teamspaceSelected, this.modelSelected)
+				return this.setPermissionTemplates(this.selectedTeamspace, this.modelSelected)
 					.then(() => {
 						return this.handleSetPermissionTemplate();
 					});
@@ -387,6 +388,10 @@ class AccountAssignController implements ng.IController {
 		return this.APIService.get(permissionUrl)
 			.then((response) => {
 				this.modelRoles = ["unassigned"];
+
+				response.data.sort((a, b) => {
+					return (a._id < b._id) ? 1 : -1;
+				});
 
 				response.data.forEach((template) => {
 					this.modelRoles.push(template._id);

@@ -29,6 +29,8 @@ class GISController implements ng.IController {
 	private providers: any[];
 	private modelSettings: any;
 	private onContentHeightRequest: any;
+	private account: string;
+	private model: string;
 
 	constructor(
 		private $scope: any,
@@ -39,10 +41,14 @@ class GISController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.onContentHeightRequest({height: 130});
 		this.watchers();
-		this.providers = this.GISService.getProviders();
-		this.selectedProvider = this.providers[0];
+		this.GISService.getProviders(this.account, this.model)
+			.then((providers) => {
+				this.providers = providers;
+				this.selectedProvider = this.providers[0];
+				this.GISService.resetMapSources();
+				this.setContentHeight();
+			});
 	}
 
 	public $onDestroy() {
@@ -83,8 +89,33 @@ class GISController implements ng.IController {
 		);
 	}
 
+	public setMapProvider(provider: any) {
+		if (this.selectedProvider.name !== provider.name) {
+			for (let i = 0; this.selectedProvider.layers && i < this.selectedProvider.layers.length; i++) {
+				if (this.selectedProvider.layers[i].visibility === "visible") {
+					this.GISService.toggleLayerVisibility(this.selectedProvider.layers[i]);
+				}
+			}
+			this.selectedProvider = provider;
+			this.GISService.resetMapSources();
+			this.setContentHeight();
+		}
+	}
+
 	public toggleLayerVisibility(layer: any) {
 		this.GISService.toggleLayerVisibility(layer);
+	}
+
+	public setContentHeight() {
+
+		let contentHeight = 130;
+		const layerHeight = 60;
+
+		if (this.selectedProvider && this.selectedProvider.layers && this.selectedProvider.layers.length) {
+			contentHeight += ((this.selectedProvider.layers.length - 1) * layerHeight);
+		}
+
+		this.onContentHeightRequest({height: contentHeight });
 	}
 
 }

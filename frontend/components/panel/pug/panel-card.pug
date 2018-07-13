@@ -3,7 +3,7 @@ div(layout="column", class="md-whiteframe-1dp")
 	// Tool bar
 	md-toolbar(class="md-primary" flex)
 		.md-toolbar-tools
-			md-button.md-icon-button(aria-label="Status", ng-click="vm.hideItem()")
+			span.panel-icon(aria-label="Status", ng-click="vm.hideItem()")
 				md-icon.angular-material-icons( flex="none") {{vm.statusIcon}}
 			span(ng-if="!vm.showFilter" flex="50")
 				h2
@@ -50,6 +50,18 @@ div(layout="column", class="md-whiteframe-1dp")
 				model='vm.model'
 				revision='vm.revision'
 				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				model-settings='vm.modelSettings'
+				selected-menu-option='vm.selectedMenuOption')
+
+			viewpoints(
+				ng-if="vm.contentData.type === 'viewpoints'"
+				account='vm.account'
+				model='vm.model'
+				revision='vm.revision'
+				on-show-item='vm.showItem()'
+				on-hide-item='vm.hideItem()'
 				hide-item='vm.hideSelectedItem'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings')
@@ -115,6 +127,8 @@ div(layout="column", class="md-whiteframe-1dp")
 				ng-if="vm.contentData.type === 'compare'")
 
 			gis(
+				account='vm.account'
+				model='vm.model'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings'
 				ng-if="vm.contentData.type === 'gis'")

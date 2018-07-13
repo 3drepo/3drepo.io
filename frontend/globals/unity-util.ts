@@ -288,6 +288,10 @@ export class UnityUtil {
 		}
 	}
 
+	public static objectsSelectedAlert(nodeInfo) {
+		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
+	}
+
 	public static objectStatusBroadcast(nodeInfo) {
 		if (UnityUtil.objectStatusPromise) {
 			UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
@@ -665,6 +669,29 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Reset map sources.
+	 */
+	public static resetMapSources() {
+		UnityUtil.toUnity("ResetMapSources", UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Add map source.
+	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 */
+	public static addMapSource(mapSource) {
+		UnityUtil.toUnity("AddMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	}
+
+	/**
+	 * Remove map source.
+	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 */
+	public static removeMapSource(mapSource) {
+		UnityUtil.toUnity("RemoveMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	}
+
+	/**
 	 * Initialise map creator within unity
 	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
@@ -827,15 +854,29 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Toggle on/off rendering statistics.
-	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
+	 * Make all hidden by default objects visible
 	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity("ShowHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	 * Toggle stats for unity
+	 * Start rectangular select
+	 */
+	public static startAreaSelection() {
+		UnityUtil.toUnity("StartRectangularSelect", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Stop rectangular select
+	 */
+	public static stopAreaSelection() {
+		UnityUtil.toUnity("StopRectangularSelect", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Toggle on/off rendering statistics.
+	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
 	 */
 	public static toggleStats() {
 		UnityUtil.toUnity("ShowStats", UnityUtil.LoadingState.VIEWER_READY, undefined);
