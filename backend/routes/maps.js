@@ -50,8 +50,46 @@ function listMaps(req, res, next) {
 	User.isHereEnabled(teamspace).then((hereEnabled) => {
 		if (hereEnabled && (config.here && config.here.appID && config.here.appCode)) {
 			maps = maps.concat([
-				{ name: "Here", layers: [ { name: "Map Tiles", source: "HERE" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] },
-				{ name: "Here (Satellite)", layers: [ { name: "Aerial Imagery", source: "HERE_AERIAL" }, { name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" } ] }
+				{ name: "Here", layers: [
+					{ name: "Map Tiles", source: "HERE" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (Terrain)", layers: [
+					{ name: "Map Tiles", source: "HERE_TERRAIN" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (Satellite)", layers: [
+					{ name: "Aerial Imagery", source: "HERE_AERIAL" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (Hybrid)", layers: [
+					{ name: "Map Tiles", source: "HERE_HYBRID" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (Street)", layers: [
+					{ name: "Map Tiles", source: "HERE_STREET" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (Transit)", layers: [
+					{ name: "Map Tiles", source: "HERE_TRANSIT" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (Toll Zone)", layers: [
+					{ name: "Map Tiles", source: "HERE_TOLL_ZONE" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] },
+				{ name: "Here (POI)", layers: [
+					{ name: "Map Tiles", source: "HERE_POI" },
+					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
+					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
+				] }
 			]);
 		}
 
