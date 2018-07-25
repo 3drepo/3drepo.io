@@ -22,16 +22,17 @@ export class MultiSelectService {
 		"$document"
 	];
 
-	private keys = {
-		cmdKey : 91,
-		ctrlKey : 17,
-		escKey : 27,
-		shiftKey : 16
-	};
-
 	private isMac = (navigator.platform.indexOf("Mac") !== -1);
-	private multiMode = false;
+	private accumMode = false;
+	private decumMode = false;
 	private areaSelectMode = false;
+
+	private cursorIcons = {
+		accumMode : "copy",
+		decumMode : "alias",
+		areaMode  : "crosshair",
+		none      : "default"
+	};
 
 	constructor(
 		public ViewerService: any,
@@ -59,25 +60,68 @@ export class MultiSelectService {
 			return;
 		}
 
-		if (this.isMultiSelectDown(key)) {
-			this.toggleMultiSelect(keyDown);
-		} else if (this.isShiftKey(key)) {
-			this.toggleAreaSelect(keyDown);
+		switch (key) {
+			case 16:
+				// Shift
+				this.toggleAreaSelect(keyDown);
+				break;
+			case 17:
+				// Ctrl
+				if (!this.isMac) {
+					this.setAccumMode(keyDown);
+				}
+				break;
+			case 18:
+				// Alt
+				this.setDecumMode(keyDown);
+				break;
+			case 91:
+				// Command key(Mac)
+				if (this.isMac) {
+					this.setAccumMode(keyDown);
+				}
+				break;
 		}
+		this.determineCursorIcon();
 	}
 
 	public isMultiMode() {
-		return this.multiMode;
+		return this.isAccumMode();
 	}
 
-	public toggleMultiSelect(on: boolean) {
-		if (this.multiMode !== on) {
-			this.multiMode = on;
-			this.ViewerService.setMultiSelectMode(on);
+	public isAccumMode() {
+		// isMultiMode() {
+		return this.accumMode;
+	}
+
+	public isDecumMode() {
+		return this.decumMode;
+	}
+
+	private determineCursorIcon() {
+		let icon = this.cursorIcons.none;
+		if (this.areaSelectMode) {
+			icon = this.cursorIcons.areaMode;
+		} else if (this.accumMode) {
+			icon = this.cursorIcons.accumMode;
+		} else if (this.decumMode) {
+			icon = this.cursorIcons.decumMode;
 		}
+
+		document.getElementById("#canvas").style.cursor = icon;
 	}
 
-	public toggleAreaSelect(on: boolean) {
+	private setAccumMode(on: boolean) {
+		this.accumMode = on;
+		this.decumMode = on ? false : this.decumMode;
+	}
+
+	private setDecumMode(on: boolean) {
+		this.decumMode = on;
+		this.accumMode = on ? false : this.accumMode;
+	}
+
+	private toggleAreaSelect(on: boolean) {
 		if (this.areaSelectMode !== on) {
 			this.areaSelectMode = on;
 			if (on) {
@@ -87,23 +131,6 @@ export class MultiSelectService {
 			}
 		}
 	}
-
-	public isCmd(key: number) {
-		return this.isMac && this.keys.cmdKey === key;
-	}
-
-	public isCtrlKey(key: number) {
-		return !this.isMac && this.keys.ctrlKey === key;
-	}
-
-	public isMultiSelectDown(key: number) {
-		return this.isCmd(key) || this.isCtrlKey(key);
-	}
-
-	public isShiftKey(key: number) {
-		return this.keys.shiftKey === key;
-	}
-
 }
 
 export const MultiSelectServiceModule = angular
