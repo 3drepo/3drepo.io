@@ -95,36 +95,45 @@ schema.methods.updateProperties = function(updateObj) {
 		}
 		switch (key) {
 		case "topicTypes":
-			{
+			if (Object.prototype.toString.call(updateObj[key]) === "[object Array]") {
 				const topicTypes = {};
 				updateObj[key].forEach(type => {
 
-					if(!type || !type.trim()) {
-						return;
-					}
+					if (type &&
+							Object.prototype.toString.call(type) === "[object String]" &&
+							type.trim()) {
+						// generate value from label
+						const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
 
-					// generate value from label
-					const value = type.trim().toLowerCase().replace(/ /g, "_").replace(/&/g, "");
-
-					if(topicTypes[value]) {
-						throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+						if(topicTypes[value]) {
+							throw responseCodes.ISSUE_DUPLICATE_TOPIC_TYPE;
+						} else {
+							topicTypes[value] = {
+								value,
+								label: type.trim()
+							};
+						}
 					} else {
-						topicTypes[value] = {
-							value,
-							label: type.trim()
-						};
+						throw responseCodes.INVALID_ARGUMENTS;
 					}
+
 				});
 
 				this.properties[key] = _.values(topicTypes);
+			} else {
+				throw responseCodes.INVALID_ARGUMENTS;
 			}
 			break;
 		case "code":
-			if(!schema.statics.modelCodeRegExp.test(updateObj[key])) {
+			if (!schema.statics.modelCodeRegExp.test(updateObj[key])) {
 				throw responseCodes.INVALID_MODEL_CODE;
 			}
 		case "unit":
-			this.properties[key] = updateObj[key];
+			if (Object.prototype.toString.call(updateObj[key]) === "[object String]") {
+				this.properties[key] = updateObj[key];
+			} else {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
 			break;
 		default:
 			this[key] = updateObj[key];
@@ -137,6 +146,10 @@ schema.methods.changePermissions = function(permissions) {
 	const User = require("./user");
 	const account = this._dbcolOptions.account;
 
+	if (Object.prototype.toString.call(permissions) !== "[object Array]") {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
 
@@ -145,6 +158,11 @@ schema.methods.changePermissions = function(permissions) {
 		const promises = [];
 
 		permissions.forEach(permission => {
+			if (Object.prototype.toString.call(permission.user) !== "[object String]" ||
+					Object.prototype.toString.call(permission.permission) !== "[object String]") {
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
