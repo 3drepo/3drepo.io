@@ -176,9 +176,9 @@ function getHereBaseInfo(req, res) {
 		res.end();
 	}).catch(err => {
 		systemLogger.logError(JSON.stringify(err));
-		if(err.message){
+		if (err.message) {
 			res.status(500).json({ message: err.message});
-		} else if (err.resCode){
+		} else if (err.resCode) {
 			res.status(err.resCode).json({message: err.message});
 		}
 	});
