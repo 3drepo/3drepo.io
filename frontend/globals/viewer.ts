@@ -528,7 +528,6 @@ export class Viewer {
 	}
 
 	public reset() {
-		this.setMultiSelectMode(false);
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = "none";
