@@ -159,16 +159,15 @@ function requestHereMapTile(req, res, domain, uri) {
 	requestMapTile(req, res, domain, uri);
 }
 
-function getOSMTile(req, res, next){
-	//TODO: we may want to ensure the model has access to tiles
-	//const url = "https://a.tile.openstreetmap.org/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
+function getOSMTile(req, res) {
+	// TODO: we may want to ensure the model has access to tiles
 	const domain = "a.tile.openstreetmap.org";
 	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
 	systemLogger.logInfo("Fetching osm map tile: " + uri);
 	requestMapTile(req, res, domain, uri);
 }
 
-function getHereBaseInfo(req, res, next){
+function getHereBaseInfo(req, res) {
 	const domain = "1" + hereBaseDomain;
 	let uri = "/maptile/2.1/info";
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
@@ -185,10 +184,10 @@ function getHereBaseInfo(req, res, next){
 	});
 }
 
-function getHereMapsTile(req, res, next){
+function getHereMapsTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -196,7 +195,7 @@ function getHereMapsTile(req, res, next){
 function getHereAerialMapsTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereAerialDomain;
-	let uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -204,7 +203,7 @@ function getHereAerialMapsTile(req, res) {
 function getHereTrafficTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereTrafficDomain;
-	let uri = "/maptile/2.1/traffictile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/traffictile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -212,97 +211,97 @@ function getHereTrafficTile(req, res) {
 function getHereTrafficFlowTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereTrafficDomain;
-	let uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereTerrainTile(req, res, next) {
+function getHereTerrainTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereAerialDomain;
-	let uri = "/maptile/2.1/maptile/newest/terrain.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/maptile/newest/terrain.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here terrain map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereHybridTile(req, res, next) {
+function getHereHybridTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereAerialDomain;
-	let uri = "/maptile/2.1/maptile/newest/hybrid.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/maptile/newest/hybrid.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here hybrid map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereGreyTile(req, res, next) {
+function getHereGreyTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/maptile/newest/normal.day.grey/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/maptile/newest/normal.day.grey/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here colour-reduced street map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereGreyTransitTile(req, res, next) {
+function getHereGreyTransitTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/maptile/newest/normal.day.transit/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/maptile/newest/normal.day.transit/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here colour-reduced transit map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereTruckRestrictionsTile(req, res, next) {
+function getHereTruckRestrictionsTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/trucktile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/trucktile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here truck restrictions map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereTruckRestrictionsOverlayTile(req, res, next) {
+function getHereTruckRestrictionsOverlayTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/truckonlytile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/truckonlytile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here truck restrictions overlay map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereAdminLabelOverlayTile(req, res, next) {
+function getHereAdminLabelOverlayTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/alabeltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/alabeltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here administrative label overlay map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereLabelOverlayTile(req, res, next) {
+function getHereLabelOverlayTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/labeltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/labeltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here label overlay map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereLineLabelOverlayTile(req, res, next) {
+function getHereLineLabelOverlayTile(req, res) {
 	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
 	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	let uri = "/maptile/2.1/lltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
+	const uri = "/maptile/2.1/lltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
 	systemLogger.logInfo("Fetching Here line label overlay map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
 
-function getHereTollZoneTile(req, res, next) {
+function getHereTollZoneTile(req, res) {
 	if (!req.query) {
 		req.query = {};
 	}
 	req.query.congestion = true;
-	getHereMapsTile(req, res, next);
+	getHereMapsTile(req, res);
 }
 
-function getHerePOITile(req, res, next) {
+function getHerePOITile(req, res) {
 	if (!req.query) {
 		req.query = {};
 	}
 	req.query.pois = true;
-	getHereMapsTile(req, res, next);
+	getHereMapsTile(req, res);
 }
 
 function getHereBuildingsFromLongLat(req, res) {
