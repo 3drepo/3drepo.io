@@ -82,7 +82,6 @@ export class MultiSelectService {
 				}
 				break;
 		}
-		this.determineCursorIcon();
 	}
 
 	public isMultiMode() {
@@ -112,13 +111,19 @@ export class MultiSelectService {
 	}
 
 	private setAccumMode(on: boolean) {
-		this.accumMode = on;
-		this.decumMode = on ? false : this.decumMode;
+		if (this.accumMode !== on) {
+			this.accumMode = on;
+			this.decumMode = on ? false : this.decumMode;
+			this.determineCursorIcon();
+		}
 	}
 
 	private setDecumMode(on: boolean) {
-		this.decumMode = on;
-		this.accumMode = on ? false : this.accumMode;
+		if (this.decumMode !== on) {
+			this.decumMode = on;
+			this.accumMode = on ? false : this.accumMode;
+			this.determineCursorIcon();
+		}
 	}
 
 	private toggleAreaSelect(on: boolean) {
@@ -129,6 +134,7 @@ export class MultiSelectService {
 			} else {
 				this.ViewerService.stopAreaSelect();
 			}
+			this.determineCursorIcon();
 		}
 	}
 }
