@@ -339,74 +339,80 @@ export class GroupsService {
 	}
 
 	/**
+	 * Highlight the group. This updates the internal states and also
+	 * make calls to highlight the meshes
+	 * @param group the group to select
+	 */
+	public highlightGroup(group: any) {
+		group.highlighted = true;
+
+		let color = this.ViewerService.getDefaultHighlightColor(); // TODO: check if needed
+		if (!this.state.selectedGroup.new) {
+			color = this.state.selectedGroup.color.map((c) => c / 255);
+		}
+
+		if (!this.state.multiSelectedGroups.includes(group)) {
+			this.state.multiSelectedGroups.push(group);
+		}
+
+		return this.TreeService.showTreeNodesBySharedIds(this.state.selectedGroup.objects).then(() => {
+			return this.TreeService.selectNodesBySharedIds(
+				this.state.selectedGroup.objects,
+				this.MultiSelectService.isAccumMode(),
+				color,
+				true
+			).then((meshes) => {
+				this.setTotalSavedMeshes();
+			});
+		});
+	}
+
+	/**
+	 * Highlight the group. This updates the internal states and also
+	 * make calls to highlight the meshes
+	 * @param group the group to select
+	 */
+	public unhighlightGroup(group: any) {
+		const index = this.state.multiSelectedGroups.indexOf(group);
+		this.state.multiSelectedGroups.splice(index, 1);
+		group.highlighted = false;
+
+		return this.TreeService.getNodesFromSharedIds(this.state.selectedGroup.objects)
+			.then((nodes) => {
+				this.TreeService.deselectNodes(nodes).then((meshes) => {
+					this.setTotalSavedMeshes();
+				});
+			});
+	}
+
+	/**
 	 * Select a group
 	 * @param group the group to select
 	 */
 	public selectGroup(group: any) {
-
-		const sameGroup = this.state.selectedGroup === group;
-		const multi = this.MultiSelectService.isMultiMode();
+		const addGroup = this.MultiSelectService.isAccumMode();
+		const removeGroup = this.MultiSelectService.isDecumMode();
+		const multiSelect = addGroup || removeGroup;
 
 		// Deselect previous group (perhaps can be moved to new func?)
 		if (this.state.selectedGroup) {
 			this.state.selectedGroup.selected = false;
 		}
+
 		this.state.selectedGroup = group;
 		this.state.selectedGroup.selected = true;
-		this.state.selectedGroup.highlighted = !this.state.selectedGroup.highlighted; // Toggle
 
-		// If it has no set totalSavedMeshes
+		if (!multiSelect) {
+			this.state.multiSelectedGroups = [];
+			this.clearSelectionHighlights();
+		}
+
+		// If it has no set totalSavedMeshes TODO: is this needed? very random to be placed here.
 		if (this.state.selectedGroup.totalSavedMeshes === undefined) {
 			this.state.selectedGroup.totalSavedMeshes = 0;
 		}
 
-		let color = this.ViewerService.getDefaultHighlightColor();
-		if (!this.state.selectedGroup.new) {
-			color = this.state.selectedGroup.color.map((c) => c / 255);
-		}
-
-		const isGroupSelected = this.state.multiSelectedGroups.includes(group);
-
-		if (!multi) {
-			this.state.multiSelectedGroups = [group];
-			this.clearSelectionHighlights();
-			this.state.selectedGroup.highlighted = true;
-		} else if (!isGroupSelected) {
-			// selecting group that's not selected
-			this.state.multiSelectedGroups.push(group);
-		}
-
-		if (!multi || !isGroupSelected) {
-
-			return this.TreeService.showTreeNodesBySharedIds(this.state.selectedGroup.objects).then(() => {
-				return this.TreeService.selectNodesBySharedIds(
-					this.state.selectedGroup.objects,
-					multi, // multi
-					color,
-					true
-				).then((meshes) => {
-					this.setTotalSavedMeshes();
-
-				});
-			});
-
-		} else {
-
-			// Remove the group from selected groups
-			const index = this.state.multiSelectedGroups.indexOf(group);
-			this.state.multiSelectedGroups.splice(index, 1);
-
-			// selecting a group that's already selected
-			return this.TreeService.getNodesFromSharedIds(this.state.selectedGroup.objects)
-				.then((nodes) => {
-
-					this.TreeService.deselectNodes(nodes).then((meshes) => {
-						this.setTotalSavedMeshes();
-					});
-
-				});
-		}
-
+		return removeGroup ? this.unhighlightGroup(group) : this.highlightGroup(group);
 	}
 
 	public getObjectsStatus() {
@@ -497,7 +503,7 @@ export class GroupsService {
 
 			this.TreeService.highlightNodesBySharedId(
 				intersection,
-				true, // multi
+				true,
 				color,
 				true
 			);
