@@ -345,8 +345,8 @@ export class GroupsService {
 		group.highlighted = true;
 
 		let color = this.ViewerService.getDefaultHighlightColor(); // TODO: check if needed
-		if (!this.state.selectedGroup.new) {
-			color = this.state.selectedGroup.color.map((c) => c / 255);
+		if (!group.new) {
+			color = group.color.map((c) => c / 255);
 		}
 
 		if (!this.state.multiSelectedGroups.includes(group)) {
@@ -374,6 +374,7 @@ export class GroupsService {
 		const index = this.state.multiSelectedGroups.indexOf(group);
 		this.state.multiSelectedGroups.splice(index, 1);
 		group.highlighted = false;
+		group.focus = false;
 
 		return this.TreeService.getNodesFromSharedIds(group.objects)
 			.then((nodes) => {
@@ -392,20 +393,17 @@ export class GroupsService {
 		const removeGroup = this.MultiSelectService.isDecumMode();
 		const multiSelect = addGroup || removeGroup;
 
-		// Deselect previous group (perhaps can be moved to new func?)
-		if (this.state.selectedGroup) {
-			this.state.selectedGroup.selected = false;
-		}
-
-		this.state.selectedGroup = group;
-		this.state.selectedGroup.selected = true;
-
 		if (!multiSelect) {
 			this.state.multiSelectedGroups = [];
 			this.clearSelectionHighlights();
 		}
 
-		return removeGroup ? this.unhighlightGroup(group) : this.highlightGroup(group);
+		if (removeGroup) {
+			this.unhighlightGroup(group);
+		} else {
+			this.focus(group);
+			this.highlightGroup(group);
+		}
 	}
 
 	public getObjectsStatus() {
@@ -606,6 +604,20 @@ export class GroupsService {
 		if (newGroup._id === this.state.selectedGroup._id) {
 			this.state.selectedGroup = newGroup;
 		}
+	}
+
+	/**
+	 * Focus on the group given
+	 * @param group the group
+	 */
+	private focus(group: any) {
+		// Deselect previous group (perhaps can be moved to new func?)
+		if (this.state.selectedGroup) {
+			this.state.selectedGroup.focus = false;
+		}
+
+		this.state.selectedGroup = group;
+		this.state.selectedGroup.focus = true;
 	}
 
 }

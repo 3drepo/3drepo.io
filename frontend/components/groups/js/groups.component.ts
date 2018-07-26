@@ -173,7 +173,7 @@ class GroupsController implements ng.IController {
 			this.selectedGroup.name = this.savedGroupData.name;
 			this.selectedGroup.description = this.savedGroupData.description;
 			this.selectedGroup.color = this.savedGroupData.color;
-			this.GroupsService.updateSelectedGroupColor();
+			this.GroupsService.selectGroup(this.selectedGroup);
 		}
 	}
 
