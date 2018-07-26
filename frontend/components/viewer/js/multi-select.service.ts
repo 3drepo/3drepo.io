@@ -28,9 +28,11 @@ export class MultiSelectService {
 	private areaSelectMode = false;
 
 	private cursorIcons = {
-		accumMode : "copy",
-		decumMode : "alias",
-		areaMode  : "crosshair",
+		accumMode : "url(./icons/cursor_add.png), auto",
+		decumMode : "url(./icons/cursor_del.png), auto",
+		areaMode  : "url(./icons/cursor_rect.png), auto",
+		areaAccumMode: "url(./icons/cursor_rect_add.png), auto",
+		areaDecumMode: "url(./icons/cursor_rect_del.png), auto",
 		none      : "default"
 	};
 
@@ -100,7 +102,13 @@ export class MultiSelectService {
 	private determineCursorIcon() {
 		let icon = this.cursorIcons.none;
 		if (this.areaSelectMode) {
-			icon = this.cursorIcons.areaMode;
+			if (this.accumMode) {
+				icon = this.cursorIcons.areaAccumMode;
+			} else if (this.decumMode) {
+				icon = this.cursorIcons.areaDecumMode;
+			} else {
+				icon = this.cursorIcons.areaMode;
+			}
 		} else if (this.accumMode) {
 			icon = this.cursorIcons.accumMode;
 		} else if (this.decumMode) {
