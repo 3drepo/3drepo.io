@@ -337,54 +337,6 @@ export class GroupsService {
 	}
 
 	/**
-	 * Highlight the group. This updates the internal states and also
-	 * make calls to highlight the meshes
-	 * @param group the group to select
-	 */
-	public highlightGroup(group: any) {
-		group.highlighted = true;
-
-		let color = this.ViewerService.getDefaultHighlightColor(); // TODO: check if needed
-		if (!group.new) {
-			color = group.color.map((c) => c / 255);
-		}
-
-		if (!this.state.multiSelectedGroups.includes(group)) {
-			this.state.multiSelectedGroups.push(group);
-		}
-
-		return this.TreeService.showTreeNodesBySharedIds(group.objects).then(() => {
-			return this.TreeService.selectNodesBySharedIds(
-				group.objects,
-				this.MultiSelectService.isAccumMode(),
-				color,
-				true
-			).then((meshes) => {
-				this.setTotalSavedMeshes(group);
-			});
-		});
-	}
-
-	/**
-	 * Highlight the group. This updates the internal states and also
-	 * make calls to highlight the meshes
-	 * @param group the group to select
-	 */
-	public unhighlightGroup(group: any) {
-		const index = this.state.multiSelectedGroups.indexOf(group);
-		this.state.multiSelectedGroups.splice(index, 1);
-		group.highlighted = false;
-		group.focus = false;
-
-		return this.TreeService.getNodesFromSharedIds(group.objects)
-			.then((nodes) => {
-				this.TreeService.deselectNodes(nodes).then((meshes) => {
-					this.setTotalSavedMeshes(group);
-				});
-			});
-	}
-
-	/**
 	 * Select a group
 	 * @param group the group to select
 	 */
@@ -618,6 +570,54 @@ export class GroupsService {
 
 		this.state.selectedGroup = group;
 		this.state.selectedGroup.focus = true;
+	}
+
+	/**
+	 * Highlight the group. This updates the internal states and also
+	 * make calls to highlight the meshes
+	 * @param group the group to select
+	 */
+	private highlightGroup(group: any) {
+		group.highlighted = true;
+
+		let color = this.ViewerService.getDefaultHighlightColor(); // TODO: check if needed
+		if (!group.new) {
+			color = group.color.map((c) => c / 255);
+		}
+
+		if (!this.state.multiSelectedGroups.includes(group)) {
+			this.state.multiSelectedGroups.push(group);
+		}
+
+		return this.TreeService.showTreeNodesBySharedIds(group.objects).then(() => {
+			return this.TreeService.selectNodesBySharedIds(
+				group.objects,
+				this.MultiSelectService.isAccumMode(),
+				color,
+				true
+			).then((meshes) => {
+				this.setTotalSavedMeshes(group);
+			});
+		});
+	}
+
+	/**
+	 * Highlight the group. This updates the internal states and also
+	 * make calls to highlight the meshes
+	 * @param group the group to select
+	 */
+	private unhighlightGroup(group: any) {
+		const index = this.state.multiSelectedGroups.indexOf(group);
+		this.state.multiSelectedGroups.splice(index, 1);
+		group.highlighted = false;
+		group.focus = false;
+
+		return this.TreeService.getNodesFromSharedIds(group.objects)
+			.then((nodes) => {
+				this.TreeService.deselectNodes(nodes).then((meshes) => {
+					this.setTotalSavedMeshes(group);
+				});
+			});
 	}
 
 }
