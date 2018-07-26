@@ -297,6 +297,7 @@ export class GroupsService {
 	public clearSelectionHighlights() {
 		this.state.groups.forEach((group) => {
 			group.highlighted = false;
+			group.focus = false;
 		});
 	}
 
@@ -305,11 +306,15 @@ export class GroupsService {
 	 */
 	public deleteGroups(teamspace: string, model: string, all?: boolean) {
 		const groupsToDelete = [];
-		this.state.groups.forEach((group) => {
+		let nextGroup;
+		for (let i = 0; i < this.state.groups.length; ++i) {
+			const group = this.state.groups[i];
 			if (all || group.highlighted) {
 				groupsToDelete.push(group);
+				const nextGroupIdx = i + 1 === this.state.groups.length ? 0 : i + 1;
+				nextGroup = this.state.groups[nextGroupIdx];
 			}
-		});
+		}
 
 		if (groupsToDelete.length > 0) {
 			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => group._id).join(",")}`;
@@ -321,6 +326,9 @@ export class GroupsService {
 						});
 						this.removeColorOverride(group._id);
 						this.deleteStateGroup(group);
+						if (this.state.groups.length) {
+							this.selectGroup(nextGroup);
+						}
 					});
 					return response;
 				});
@@ -398,7 +406,15 @@ export class GroupsService {
 	 */
 	public generateNewGroup(): any {
 		return this.getSelectedObjects().then((objects) => {
-			return {
+
+			this.TreeService.selectNodesBySharedIds(
+				objects,
+				false,
+				this.ViewerService.getDefaultHighlightColor(),
+				true
+			);
+
+			this.focus({
 				new: true,
 				createdAt: Date.now(),
 				updatedAt: Date.now(),
@@ -409,7 +425,7 @@ export class GroupsService {
 				color: this.getRandomColor(),
 				objects,
 				totalSavedMeshes: 0
-			};
+			});
 		});
 	}
 
@@ -484,7 +500,6 @@ export class GroupsService {
 				.then((response) => {
 					group._id = response.data._id;
 					this.state.groups.push(group);
-					this.state.selectedGroup = group;
 					group.totalSavedMeshes = this.state.selectedObjectsLen;
 					this.selectGroup(group);
 					if (this.state.overrideAll) {
@@ -494,33 +509,6 @@ export class GroupsService {
 				});
 		});
 
-	}
-
-	public selectNextGroup() {
-		if (this.state.groups.length) {
-			this.selectGroup(this.state.groups[0]);
-		}
-	}
-
-	/**
-	 * Delete a group in the backend
-	 * @param teamspace the teamspace name for the group
-	 * @param model the model id for the group
-	 * @param group the group object to delete
-	 */
-	public deleteGroup(teamspace: string, model: string, deleteGroup: any) {
-		if (deleteGroup._id) {
-			const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
-			return this.APIService.delete(groupUrl)
-				.then((response) => {
-					this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
-						this.TreeService.deselectNodes(nodes);
-					});
-					this.removeColorOverride(deleteGroup._id);
-					this.deleteStateGroup(deleteGroup);
-					return response;
-				});
-		}
 	}
 
 	/**
@@ -580,10 +568,8 @@ export class GroupsService {
 	private highlightGroup(group: any) {
 		group.highlighted = true;
 
-		let color = this.ViewerService.getDefaultHighlightColor(); // TODO: check if needed
-		if (!group.new) {
-			color = group.color.map((c) => c / 255);
-		}
+		const color = group.color ? group.color.map((c) => c / 255) :
+						this.ViewerService.getDefaultHighlightColor();
 
 		if (!this.state.multiSelectedGroups.includes(group)) {
 			this.state.multiSelectedGroups.push(group);
