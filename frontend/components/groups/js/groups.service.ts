@@ -405,11 +405,6 @@ export class GroupsService {
 			this.clearSelectionHighlights();
 		}
 
-		// If it has no set totalSavedMeshes TODO: is this needed? very random to be placed here.
-		if (group.totalSavedMeshes === undefined) {
-			group.totalSavedMeshes = 0;
-		}
-
 		return removeGroup ? this.unhighlightGroup(group) : this.highlightGroup(group);
 	}
 
@@ -462,7 +457,8 @@ export class GroupsService {
 				description: "",
 				name: this.getDefaultGroupName(this.state.groups),
 				color: this.getRandomColor(),
-				objects
+				objects,
+				totalSavedMeshes: 0
 			};
 		});
 	}
