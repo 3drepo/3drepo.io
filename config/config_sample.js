@@ -77,19 +77,6 @@ module.exports = {
             'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
             'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
         }
-    },
-	os: {
-		keys: {
-			'property': '<your key>',
-			'place': '<your key>',
-			'map': '<your key>'
-		},
-		endpoints:{
-			bbox: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/bbox',
-			radius: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/radius',
-			dimensions: params => { return `https://api2.ordnancesurvey.co.uk/insights/beta/properties/${params.uprn}/dimensions` },
-			map: params => { return `https://api2.ordnancesurvey.co.uk/mapping_api/v1/service/zxy/${params.tileMatrixSet}/${params.layer}/${params.z}/${params.x}/${params.y}.png` }
-		}
 	},
 
 	invoice_dir: '/tmp',
@@ -111,7 +98,6 @@ module.exports = {
 		event_exchange: 'eventExchange'
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
-	test_helper_api: false,
 	paypal:{
 		validateIPN: false,
 		ipnValidateUrl: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
@@ -132,14 +118,4 @@ module.exports = {
 	},
 	termsUpdatedAt: 1520592720000,
 	bcf_dir: '/tmp',
-	unitySettings: {
-        TOTAL_MEMORY: 2130706432,
-        compatibilitycheck: null,
-        backgroundColor: "#222C36",
-        splashStyle: "Light",
-        dataUrl: "unity/Release/unity.data",
-        codeUrl: "unity/Release/unity.js",
-        asmUrl: "unity/Release/unity.asm.js",
-        memUrl: "unity/Release/unity.mem"
-    }
 }
