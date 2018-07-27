@@ -33,7 +33,8 @@ export class MultiSelectService {
 		areaMode  : "url(./icons/cursor_rect.png), auto",
 		areaAccumMode: "url(./icons/cursor_rect_add.png), auto",
 		areaDecumMode: "url(./icons/cursor_rect_del.png), auto",
-		none      : "default"
+		noneCanvas     : "default",
+		nonePanel       : "pointer"
 	};
 
 	constructor(
@@ -100,22 +101,37 @@ export class MultiSelectService {
 	}
 
 	private determineCursorIcon() {
-		let icon = this.cursorIcons.none;
+		let canvasIcon = this.cursorIcons.noneCanvas;
+		let panelIcon = this.cursorIcons.nonePanel;
 		if (this.areaSelectMode) {
 			if (this.accumMode) {
-				icon = this.cursorIcons.areaAccumMode;
+				canvasIcon = this.cursorIcons.areaAccumMode;
+				panelIcon = this.cursorIcons.accumMode;
 			} else if (this.decumMode) {
-				icon = this.cursorIcons.areaDecumMode;
+				canvasIcon = this.cursorIcons.areaDecumMode;
+				panelIcon = this.cursorIcons.decumMode;
 			} else {
-				icon = this.cursorIcons.areaMode;
+				canvasIcon = this.cursorIcons.areaMode;
 			}
 		} else if (this.accumMode) {
-			icon = this.cursorIcons.accumMode;
+			canvasIcon = panelIcon = this.cursorIcons.accumMode;
 		} else if (this.decumMode) {
-			icon = this.cursorIcons.decumMode;
+			canvasIcon = panelIcon = this.cursorIcons.decumMode;
 		}
 
-		document.getElementById("#canvas").style.cursor = icon;
+		if (document.getElementById("#canvas")) {
+			document.getElementById("#canvas").style.cursor = canvasIcon;
+		}
+
+		const groupElements = document.getElementsByClassName("groupsList");
+		for (let i = 0; i < groupElements.length; ++i) {
+			groupElements[i].style.cursor = panelIcon;
+		}
+
+		const treeNodeElements = document.getElementsByClassName("treeNode");
+		for (let i = 0; i < treeNodeElements.length; ++i) {
+			treeNodeElements[i].style.cursor = panelIcon;
+		}
 	}
 
 	private setAccumMode(on: boolean) {

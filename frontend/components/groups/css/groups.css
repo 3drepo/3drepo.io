@@ -3,6 +3,7 @@ groups {
 }
 
 groups .groupsContainer {
+
     overflow: hidden;
     height: 100%;
 }
@@ -63,7 +64,7 @@ groups .groupMain {
 groups .groupMetaData {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;   
+    text-overflow: ellipsis;
     width: 100px;
 }
 
@@ -144,6 +145,7 @@ groups .group {
 }
 
 groups .groupsList {
+	cursor: pointer;
     height: calc(100% - 52px);
     overflow-y: scroll;
 }
