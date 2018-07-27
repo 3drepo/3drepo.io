@@ -16,22 +16,22 @@
  */
 "use strict";
 
-let express = require("express");
-let router = express.Router({mergeParams: true});
-let middlewares = require("../middlewares/middlewares");
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
 
-let C = require("../constants");
-let responseCodes = require("../response_codes.js");
-let Issue = require("../models/issue");
-let utils = require("../utils");
-let multer = require("multer");
-let config = require("../config.js");
+const C = require("../constants");
+const responseCodes = require("../response_codes.js");
+const Issue = require("../models/issue");
+const utils = require("../utils");
+const multer = require("multer");
+const config = require("../config.js");
 
-let User = require("../models/user");
+const User = require("../models/user");
 const Job = require("../models/job");
-let ModelHelper = require("../models/helper/model");
+const ModelHelper = require("../models/helper/model");
 
-let stringToUUID = utils.stringToUUID;
+const stringToUUID = utils.stringToUUID;
 
 router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -46,7 +46,7 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
-//router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
+// router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
 router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
@@ -57,26 +57,25 @@ router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.
 router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue);
 router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue);
 
-function storeIssue(req, res, next){
-	
+function storeIssue(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	//let data = JSON.parse(req.body.data);
-	let data = req.body;
+	const place = utils.APIInfo(req);
+	// let data = JSON.parse(req.body.data);
+	const data = req.body;
 	data.owner = req.session.user.username;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-	
+
 	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, model: req.params.model}, data).then(issue => {
 
 		// let resData = {
 		// 	_id: issue._id,
-		// 	account: req.params.account, 
-		// 	model: req.params.model, 
-		// 	issue_id : issue._id, 
-		// 	number : issue.number, 
-		// 	created : issue.created, 
+		// 	account: req.params.account,
+		// 	model: req.params.model,
+		// 	issue_id : issue._id,
+		// 	number : issue.number,
+		// 	created : issue.created,
 		// 	scribble: data.scribble,
 		// 	issue: issue
 		// };
@@ -88,27 +87,27 @@ function storeIssue(req, res, next){
 	});
 }
 
-function updateIssue(req, res, next){
-	
-	let place = utils.APIInfo(req);
-	//let data = JSON.parse(req.body.data);
-	let data = req.body;
+function updateIssue(req, res, next) {
+
+	const place = utils.APIInfo(req);
+	// let data = JSON.parse(req.body.data);
+	const data = req.body;
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	let dbCol = {account: req.params.account, model: req.params.model};
-	let issueId = req.params.issueId;
+	const dbCol = {account: req.params.account, model: req.params.model};
+	const issueId = req.params.issueId;
 	let action;
 
 	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
 
-		if(!issue){
+		if(!issue) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
 		}
 
-		if (data.hasOwnProperty("comment") && data.edit){
+		if (data.hasOwnProperty("comment") && data.edit) {
 			action = issue.updateComment(data.commentIndex, data);
 
 		} else if(data.sealed) {
@@ -117,49 +116,46 @@ function updateIssue(req, res, next){
 		} else if(data.commentIndex >= 0 && data.delete) {
 			action = issue.removeComment(data.commentIndex, data);
 
-		} else if (data.hasOwnProperty("comment")){
+		} else if (data.hasOwnProperty("comment")) {
 			action = issue.updateComment(null, data);
-		
-		} else if (data.hasOwnProperty("closed") && data.closed){
+
+		} else if (data.hasOwnProperty("closed") && data.closed) {
 			action = Promise.reject("This action is deprecated, use PUT issues/id.json {\"status\": \"closed\"}");
 
-		} else if (data.hasOwnProperty("closed") && !data.closed){
+		} else if (data.hasOwnProperty("closed") && !data.closed) {
 			action = Promise.reject("This action is deprecated, use PUT issues/id.json {\"status\": \"closed\"}");
 
 		} else {
-			
+
 			action = User.findByUserName(req.params.account).then(dbUser => {
 
 				return Job.findByUser(dbUser.user, req.session.user.username).then(_job => {
 					const job = _job ?  _job._id : null;
 					const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
 					const userIsAdmin = ModelHelper.isUserAdmin(
-						req.params.account, 
-						req.params.model, 
+						req.params.account,
+						req.params.model,
 						req.session.user.username
 					);
-				
-					return userIsAdmin.then( projAdmin => {
-	
+
+					return userIsAdmin.then(projAdmin => {
+
 						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = issue.creator_role === job && issue.creator_role && job; 
+						const hasOwnerJob = issue.creator_role === job && issue.creator_role && job;
 						const hasAssignedJob = job === issue.assigned_roles[0];
 
 						return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
-					
 
 					}).catch(err =>{
-						if(err){
+						if(err) {
 							return Promise.reject(err);
-						}
-						else{
-							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);					
+						} else{
+							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);
 						}
 					});
 
 				});
-
 
 			});
 		}
@@ -167,7 +163,7 @@ function updateIssue(req, res, next){
 		return action;
 
 	}).then(issue => {
-		let resData = {
+		const resData = {
 			_id: issueId,
 			account: req.params.account,
 			model: req.params.model,
@@ -187,11 +183,11 @@ function updateIssue(req, res, next){
 }
 
 function listIssues(req, res, next) {
-	
-	//let params = req.params;
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-	let projection = {
+
+	// let params = req.params;
+	const place = utils.APIInfo(req);
+	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+	const projection = {
 		extras: 0,
 		"comments": 0,
 		"viewpoints.extras": 0,
@@ -202,7 +198,7 @@ function listIssues(req, res, next) {
 	};
 
 	let findIssue;
-	if(req.query.shared_id){
+	if(req.query.shared_id) {
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
 		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
@@ -219,9 +215,9 @@ function listIssues(req, res, next) {
 }
 
 function getIssuesBCF(req, res, next) {
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	let ids;
 	if (req.query.ids) {
@@ -238,7 +234,7 @@ function getIssuesBCF(req, res, next) {
 
 	getBCFZipRS.then(zipRS => {
 
-		let headers = {
+		const headers = {
 			"Content-Disposition": "attachment;filename=issues.bcfzip",
 			"Content-Type": "application/zip"
 		};
@@ -253,10 +249,10 @@ function getIssuesBCF(req, res, next) {
 }
 
 function findIssueById(req, res, next) {
-	
-	let params = req.params;
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model};
+
+	const params = req.params;
+	const place = utils.APIInfo(req);
+	const dbCol =  {account: req.params.account, model: req.params.model};
 
 	Issue.findByUID(dbCol, params.uid).then(issue => {
 
@@ -269,15 +265,14 @@ function findIssueById(req, res, next) {
 
 }
 
-function renderIssuesHTML(req, res, next){
-	
+function renderIssuesHTML(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+	const place = utils.APIInfo(req);
+	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let findIssue;
-	let noClean = false;
+	const noClean = false;
 
-	let projection = {
+	const projection = {
 		extras: 0,
 		"viewpoints.extras": 0,
 		"viewpoints.scribble": 0,
@@ -287,7 +282,7 @@ function renderIssuesHTML(req, res, next){
 	};
 
 	let ids;
-	if(req.query.ids){
+	if(req.query.ids) {
 		ids = req.query.ids.split(",");
 	}
 
@@ -299,20 +294,16 @@ function renderIssuesHTML(req, res, next){
 
 	findIssue.then(issues => {
 		// Split issues by type
-		let splitIssues   = {open : [], closed: []};
+		const splitIssues   = {open : [], closed: []};
 
-		for (let i = 0; i < issues.length; i++)
-		{
-			if (issues[i].hasOwnProperty("comments"))
-			{
-				for (let j = 0; j < issues[i].comments.length; j++)
-				{
+		for (let i = 0; i < issues.length; i++) {
+			if (issues[i].hasOwnProperty("comments")) {
+				for (let j = 0; j < issues[i].comments.length; j++) {
 					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
 				}
 			}
 
-			if(issues[i].closed || issues[i].status === "closed")
-			{
+			if(issues[i].closed || issues[i].status === "closed") {
 				issues[i].created = new Date(issues[i].created).toString();
 				splitIssues.closed.push(issues[i]);
 			} else {
@@ -322,8 +313,8 @@ function renderIssuesHTML(req, res, next){
 		}
 
 		res.render("issues.pug", {
-			issues : splitIssues, 
-			url: function (path){
+			issues : splitIssues,
+			url: function (path) {
 				return config.apiAlgorithm.apiUrl(C.GET_API, path);
 			}
 		});
@@ -333,66 +324,63 @@ function renderIssuesHTML(req, res, next){
 	});
 }
 
-function importBCF(req, res, next){
-	
+function importBCF(req, res, next) {
 
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
-	//check space
-	function fileFilter(req, file, cb){
+	// check space
+	function fileFilter(fileReq, file, cb) {
 
-		let acceptedFormat = [
+		const acceptedFormat = [
 			"bcf", "bcfzip", "zip"
 		];
 
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
-		let size = parseInt(req.headers["content-length"]);
+		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+		if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
-		if(size > config.uploadSizeLimit){
+		if(size > config.uploadSizeLimit) {
 			return cb({ resCode: responseCodes.SIZE_LIMIT });
 		}
 
 		cb(null, true);
 	}
 
-	if(!config.bcf_dir){
+	if(!config.bcf_dir) {
 		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined"});
 	}
 
-	let upload = multer({ 
+	const upload = multer({
 		dest: config.bcf_dir,
-		fileFilter: fileFilter,
+		fileFilter: fileFilter
 	});
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
 			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
-		
-		} else if(!req.file.size){
+
+		} else if(!req.file.size) {
 			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 
-
 			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
-			}).catch(err => {
-				responseCodes.respond(place, req, res, next, err, err);
+			}).catch(error => {
+				responseCodes.respond(place, req, res, next, error, error);
 			});
 		}
 	});
 }
 
-function getScreenshot(req, res, next){
-	
+function getScreenshot(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
@@ -402,11 +390,10 @@ function getScreenshot(req, res, next){
 
 }
 
-function getScreenshotSmall(req, res, next){
-	
+function getScreenshotSmall(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
@@ -416,11 +403,10 @@ function getScreenshotSmall(req, res, next){
 
 }
 
-function getThumbnail(req, res, next){
-	
+function getThumbnail(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");

@@ -15,43 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const Schema = mongoose.Schema;
+const utils = require("../utils");
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var Schema = mongoose.Schema;
-var utils = require("../utils");
-
-
-var schema = Schema({
+const schema = Schema({
 	_id: Object,
 	parents: [],
 	metadata: Object
 });
 
-
-if (!schema.options.toJSON){
+if (!schema.options.toJSON) {
 	schema.options.toJSON = {};
 }
 
 schema.options.toJSON.transform = function (doc, ret) {
 	ret._id = utils.uuidToString(doc._id);
-	if(doc.parents)
-	{
-		let newParents = [];
-		doc.parents.forEach(function(parentId)
-			{
-				newParents.push(utils.uuidToString(parentId));
-			});
+	if(doc.parents) {
+		const newParents = [];
+		doc.parents.forEach(function(parentId) {
+			newParents.push(utils.uuidToString(parentId));
+		});
 		ret.parents = newParents;
 	}
 	return ret;
 };
 
-
-var Meta = ModelFactory.createClass(
-	'Meta', 
-	schema, 
-	arg => { 
+const Meta = ModelFactory.createClass(
+	"Meta",
+	schema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );

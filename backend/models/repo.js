@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-var _ = require('lodash');
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+"use strict";
+const ModelFactory = require("./factory/modelFactory");
+const _ = require("lodash");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
 // Base Repo Attributes
-var repoBase = {
+const repoBase = {
 	_id: Buffer,
 	shared_id: Buffer,
 	paths: [Buffer],
@@ -31,7 +32,7 @@ var repoBase = {
 	name: String
 };
 
-var cameraSchema = Schema(
+const cameraSchema = Schema(
 	_.extend({}, repoBase, {
 		// camera attrs
 		aspect_ratio: Number,
@@ -41,14 +42,14 @@ var cameraSchema = Schema(
 		look_at: [Number],
 		view_dir: [Number],
 		position: [Number],
-		up: [Number],
+		up: [Number]
 
 	})
 );
 
-var materialSchema = Schema(
+const materialSchema = Schema(
 	_.extend({}, repoBase, {
-		//material attrs
+		// material attrs
 		ambient: [Number],
 		diffuse: [Number],
 		specular: [Number],
@@ -62,13 +63,13 @@ var materialSchema = Schema(
 	})
 );
 
-var metaDataSchema = Schema(
+const metaDataSchema = Schema(
 	_.extend({}, repoBase, {
 		metadata: Buffer
 	})
 );
 
-var referenceSchema = Schema(
+const referenceSchema = Schema(
 	_.extend({}, repoBase, {
 		owner: String,
 		project: String,
@@ -77,7 +78,7 @@ var referenceSchema = Schema(
 	})
 );
 
-var textureSchema = Schema(
+const textureSchema = Schema(
 	_.extend({}, repoBase, {
 		width: Number,
 		height: Number,
@@ -87,63 +88,58 @@ var textureSchema = Schema(
 	})
 );
 
-
-var transformationSchema = Schema(
+const transformationSchema = Schema(
 	_.extend({}, repoBase, {
 		matrix: [[Number]]
 	})
 );
 
-
-var Camera = ModelFactory.createClass(
-	'Camera', 
-	cameraSchema, 
-	arg => { 
+const Camera = ModelFactory.createClass(
+	"Camera",
+	cameraSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
-var Material = ModelFactory.createClass(
-	'Material', 
-	materialSchema, 
-	arg => { 
+const Material = ModelFactory.createClass(
+	"Material",
+	materialSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
-
-var Metadata = ModelFactory.createClass(
-	'Metadata', 
-	metaDataSchema, 
-	arg => { 
+const Metadata = ModelFactory.createClass(
+	"Metadata",
+	metaDataSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
-var Reference = ModelFactory.createClass(
-	'Reference', 
-	referenceSchema, 
-	arg => { 
+const Reference = ModelFactory.createClass(
+	"Reference",
+	referenceSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
-var Texture = ModelFactory.createClass(
-	'Texture', 
-	textureSchema, 
-	arg => { 
+const Texture = ModelFactory.createClass(
+	"Texture",
+	textureSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
 
-
-var Transformation = ModelFactory.createClass(
-	'Transformation', 
-	transformationSchema, 
-	arg => { 
+const Transformation = ModelFactory.createClass(
+	"Transformation",
+	transformationSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );
-
 
 module.exports = {Camera, Material, Metadata, Reference, Texture, Transformation};

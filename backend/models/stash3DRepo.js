@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const Schema = mongoose.Schema;
 
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var Schema = mongoose.Schema;
-
-var schema = Schema({
+const schema = Schema({
 	_id: Object
 });
 
-var Stash3DRepo = ModelFactory.createClass(
-	'Stash3DRepo', 
-	schema, 
-	arg => { 
+const Stash3DRepo = ModelFactory.createClass(
+	"Stash3DRepo",
+	schema,
+	arg => {
 		return `${arg.model}.stash.3drepo`;
 	}
 );

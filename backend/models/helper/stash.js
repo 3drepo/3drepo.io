@@ -15,51 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+"use strict";
 // generic stash function
-var ModelFactory = require('../factory/modelFactory');
-var stream = require('stream');
-var GridFSBucket = require('mongodb').GridFSBucket;
-var systemLogger = require("../../logger.js").systemLogger;
+const ModelFactory = require("../factory/modelFactory");
+const stream = require("stream");
+const systemLogger = require("../../logger.js").systemLogger;
 
-
-function getGridFSBucket (account, bucketName){
-	'use strict';
+function getGridFSBucket (account, bucketName) {
 	return ModelFactory.dbManager.getGridFSBucket(account, { bucketName:  bucketName});
 }
 
-
-function _getGridFSBucket (dbCol, format){
-	'use strict';
-
+function _getGridFSBucket (dbCol, format) {
 	return getGridFSBucket(dbCol.account, `${dbCol.model}.stash.${format}`);
 }
 
-function findStashByFilename(dbCol, format, filename, getStreamOnly){
-	'use strict';
+function findStashByFilename(dbCol, format, filename, getStreamOnly) {
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
 		return bucket.find({ filename }).toArray().then(files => {
-			if(!files.length){
+			if(!files.length) {
 				systemLogger.logInfo(filename + " - Attempt to retrieved from stash but not found");
 				return Promise.resolve(false);
-			
+
 			} else {
 				systemLogger.logInfo(filename + " - Retrieved from stash");
 
 				return new Promise((resolve) => {
 
-					let downloadStream = bucket.openDownloadStreamByName(filename);
+					const downloadStream = bucket.openDownloadStreamByName(filename);
 
-					if(getStreamOnly){
-							
+					if(getStreamOnly) {
+
 						resolve(downloadStream);
 
-					} else { 
+					} else {
 
-						let bufs = [];
+						const bufs = [];
 
-						downloadStream.on('data', function(d){ bufs.push(d); });
-						downloadStream.on('end', function(){
+						downloadStream.on("data", function(d) {
+							bufs.push(d);
+						});
+						downloadStream.on("end", function() {
 							resolve(Buffer.concat(bufs));
 						});
 
@@ -76,23 +71,21 @@ function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	});
 }
 
-function saveStashByFilename(dbCol, format, filename, buffer){
-	'use strict';
-
+function saveStashByFilename(dbCol, format, filename, buffer) {
 	return  _getGridFSBucket(dbCol, format).then(bucket => {
-		let uploadStream = bucket.openUploadStream(filename);
+		const uploadStream = bucket.openUploadStream(filename);
 
-		let bufferStream = new stream.PassThrough();
+		const bufferStream = new stream.PassThrough();
 		bufferStream.end(buffer);
 
 		bufferStream.pipe(uploadStream);
 
 		return new Promise((resolve, reject) => {
-			uploadStream.once('finish', function(fileMeta) {
+			uploadStream.once("finish", function(fileMeta) {
 				resolve(fileMeta);
 			});
 
-			uploadStream.once('error', function(err) {
+			uploadStream.once("error", function(err) {
 				reject(err);
 			});
 		});

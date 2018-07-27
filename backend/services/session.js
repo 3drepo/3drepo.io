@@ -41,4 +41,3 @@ module.exports.session = function(config) {
 	});
 };
 
-

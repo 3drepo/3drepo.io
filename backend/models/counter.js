@@ -14,62 +14,59 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
-var DB = require('../db/db');
-	
-var schema = mongoose.Schema({
+"use strict";
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
+const DB = require("../db/db");
+
+const schema = mongoose.Schema({
 	type: String,
 	count: Number
 });
 
-//inc counter and return the number atomically
-schema.statics.findAndIncInvoiceNumber = function(){
-	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
+// inc counter and return the number atomically
+schema.statics.findAndIncInvoiceNumber = function() {
+	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
-	return DB.getDB('admin')
-	.then(db => {
-		return db.db('admin')
-			.collection('counters')
-			.findOneAndUpdate(
-				{ type: 'invoice' },
-				{ '$inc': {'count': 1 }},
-				{ upsert : true, returnOriginal: false }
-			);
-	})
-	.then(doc => 'SO-' + doc.value.count);
-
-};
-
-
-//inc counter and return the number atomically
-schema.statics.findAndIncRefundNumber = function(){
-
-
-	//mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
-
-	return DB.getDB('admin')
-	.then(db => {
-		return db.db('admin')
-			.collection('counters')
-			.findOneAndUpdate(
-				{ type: 'refund' },
-				{ '$inc': {'count': 1 }},
-				{ upsert : true, returnOriginal: false }
-			);
-	})
-	.then(doc => 'CN-' + doc.value.count);
+	return DB.getDB("admin")
+		.then(db => {
+			return db.db("admin")
+				.collection("counters")
+				.findOneAndUpdate(
+					{ type: "invoice" },
+					{ "$inc": {"count": 1 }},
+					{ upsert : true, returnOriginal: false }
+				);
+		})
+		.then(doc => "SO-" + doc.value.count);
 
 };
 
-var Counter = ModelFactory.createClass(
-	'Counter',
+// inc counter and return the number atomically
+schema.statics.findAndIncRefundNumber = function() {
+
+	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
+
+	return DB.getDB("admin")
+		.then(db => {
+			return db.db("admin")
+				.collection("counters")
+				.findOneAndUpdate(
+					{ type: "refund" },
+					{ "$inc": {"count": 1 }},
+					{ upsert : true, returnOriginal: false }
+				);
+		})
+		.then(doc => "CN-" + doc.value.count);
+
+};
+
+const Counter = ModelFactory.createClass(
+	"Counter",
 	schema,
 	() => {
-		return 'counters';
+		return "counters";
 	}
 );
-
-
 
 module.exports = Counter;

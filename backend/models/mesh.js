@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const _ = require("lodash");
 	const repoBase = require("./base/repo");
@@ -27,7 +27,7 @@
 
 	const Schema = mongoose.Schema;
 
-	let meshSchema = Schema(
+	const meshSchema = Schema(
 		_.extend({}, repoBase.attrs, {
 			vertices: Object,
 			vertices_count: Number,
@@ -46,7 +46,7 @@
 			uv_channels_count: Number,
 			uv_channels_byte_count: Number,
 
-			groups: [],
+			groups: []
 
 		})
 	);
@@ -93,10 +93,10 @@
 	};
 
 	meshSchema.statics.getMeshes = function (account, model, history) {
-		//find all meshes within this revision.
-		var query = { "_id" : {"$in": history.current}, "type": "mesh"};
+		// find all meshes within this revision.
+		const query = { "_id" : {"$in": history.current}, "type": "mesh"};
 		return this.find({account, model}, query, {_id : 1, shared_id: 1})
-			.then( meshes => {
+			.then(meshes => {
 				meshes.forEach(mesh => {
 					mesh._id = utils.uuidToString(mesh._id);
 					mesh.shared_id = mesh.shared_id && utils.uuidToString(mesh.shared_id);
@@ -104,14 +104,12 @@
 				return meshes;
 			});
 
-
 	};
-	
 
-	let Mesh = ModelFactory.createClass(
+	const Mesh = ModelFactory.createClass(
 		"Mesh",
 		meshSchema,
-		
+
 		arg => {
 			return `${arg.model}.scene`;
 		}

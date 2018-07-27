@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+"use strict";
+const html = data => `
 	Hi there,<br>
 	<br>
-	Your subscription is now suspended. 
+	Your subscription is now suspended.
 	<br>
 	Please click on the following link if you would like to subscribe again.
 	<br><a href="${data.url}">${data.url}</a>
@@ -27,7 +28,7 @@ var html = data => `
 	3D Repo
 `;
 
-var subject = 'Your 3D Repo subscription is suspended';
+const subject = "Your 3D Repo subscription is suspended";
 
 module.exports =  {
 	html: html,

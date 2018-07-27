@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-'use strict';
+"use strict";
 
-function signUpAndLogin(params){
+function signUpAndLogin(params) {
 
-	let server = params.server;
-	let request = params.request;
-	let User = params.User;
-	let systemLogger = params.systemLogger;
-	let username = params.username;
-	let password = params.password;
-	let email = params.email;
-	let done = params.done;
+	const server = params.server;
+	const request = params.request;
+	const User = params.User;
+	const systemLogger = params.systemLogger;
+	const username = params.username;
+	const password = params.password;
+	const email = params.email;
+	const done = params.done;
 	let agent = params.agent;
-	let expect = params.expect;
-	let noBasicPlan = params.noBasicPlan;
+	const expect = params.expect;
+	const noBasicPlan = params.noBasicPlan;
 
-	//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-	request(server).get('/info').end(() => {
+	// hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
+	request(server).get("/info").end(() => {
 
 		agent = request.agent(server);
 
@@ -42,16 +42,16 @@ function signUpAndLogin(params){
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, {skipImportToyModel : true, skipCreateBasicPlan: noBasicPlan});
 		}).then(user => {
-			
-			//login
-			agent.post('/login')
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				console.log(typeof done)
-				done(err, agent);
 
-			});
+			// login
+			agent.post("/login")
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					console.log(typeof done);
+					done(err, agent);
+
+				});
 
 		}).catch(err => {
 			done(err, agent);
@@ -61,41 +61,41 @@ function signUpAndLogin(params){
 
 }
 
-function signUpAndLoginAndCreateModel(params){
+function signUpAndLoginAndCreateModel(params) {
 
-	let server = params.server;
-	let request = params.request;
-	let User = params.User;
-	let systemLogger = params.systemLogger;
-	let username = params.username;
-	let password = params.password;
-	let email = params.email;
-	let done = params.done;
+	const server = params.server;
+	const request = params.request;
+	const User = params.User;
+	const systemLogger = params.systemLogger;
+	const username = params.username;
+	const password = params.password;
+	const email = params.email;
+	const done = params.done;
 	let agent = params.agent;
-	let type = params.type;
-	let desc = params.desc;
-	let expect = params.expect;
-	let model = params.model;
-	let noBasicPlan = params.noBasicPlan;
-	let unit = params.unit;
+	const type = params.type;
+	const desc = params.desc;
+	const expect = params.expect;
+	const model = params.model;
+	const noBasicPlan = params.noBasicPlan;
+	const unit = params.unit;
 
 	signUpAndLogin({
 		server, request, agent, expect, User, systemLogger,
-		username, password, email, noBasicPlan, 
-		done: function(err, _agent){
+		username, password, email, noBasicPlan,
+		done: function(err, _agent) {
 
 			agent = _agent;
 
-			if(err){
+			if(err) {
 				return done(err, agent);
 			}
 
-			//create a model
+			// create a model
 			agent.post(`/${username}/${model}`)
-			.send({ type, desc, unit })
-			.expect(200, function(err, res){
-				done(err, agent);
-			});
+				.send({ type, desc, unit })
+				.expect(200, function(err, res) {
+					done(err, agent);
+				});
 		}
 	});
 
@@ -104,4 +104,4 @@ function signUpAndLoginAndCreateModel(params){
 module.exports = {
 	signUpAndLogin,
 	signUpAndLoginAndCreateModel
-}
+};

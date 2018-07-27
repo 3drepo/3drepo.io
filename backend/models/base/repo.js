@@ -17,18 +17,18 @@
 
 "use strict";
 
-var repoGraphScene = require("../../repo/repoGraphScene.js");
-var ModelFactory = require("../factory/modelFactory");
-var History = require("../history");
-var utils = require("../../utils");
-var responseCodes = require("../../response_codes.js");
-var mongoose = require("mongoose");
-var _ = require("lodash");
+const repoGraphScene = require("../../repo/repoGraphScene.js");
+const ModelFactory = require("../factory/modelFactory");
+const History = require("../history");
+const utils = require("../../utils");
+const responseCodes = require("../../response_codes.js");
+const mongoose = require("mongoose");
+const _ = require("lodash");
 
-var stringToUUID = utils.stringToUUID;
-var uuidToString = utils.uuidToString;
+const stringToUUID = utils.stringToUUID;
+const uuidToString = utils.uuidToString;
 
-var attrs = {
+const attrs = {
 	_id: Object,
 	shared_id: Object,
 	paths: [],
@@ -38,45 +38,47 @@ var attrs = {
 	name: String
 };
 
-var statics = {};
-var methods = {};
-//var methods = {};
+const statics = {};
+const methods = {};
+// var methods = {};
 
-statics._getGridFSBucket = function(dbCol, format){
+statics._getGridFSBucket = function(dbCol, format) {
 
 	return ModelFactory.dbManager.getGridFSBucket(dbCol.account,
 		{ bucketName:  `${dbCol.model}.stash.${format}`});
 };
 
-statics.findStashByFilename = function(dbCol, format, filename){
+statics.findStashByFilename = function(dbCol, format, filename) {
 	return this._getGridFSBucket(dbCol, format).then(bucket => {
 
 		return bucket.find({ filename }).toArray().then(files => {
-			if(!files.length){
+			if(!files.length) {
 				return Promise.resolve(false);
 			} else {
 				return new Promise((resolve) => {
-	
-					let downloadStream = bucket.openDownloadStreamByName(filename);
-					let bufs = [];
 
-					downloadStream.on("data", function(d){ bufs.push(d); });
-					downloadStream.on("end", function(){
+					const downloadStream = bucket.openDownloadStreamByName(filename);
+					const bufs = [];
+
+					downloadStream.on("data", function(d) {
+						bufs.push(d);
+					});
+					downloadStream.on("end", function() {
 						resolve(Buffer.concat(bufs));
 					});
-				});	
+				});
 			}
 		});
 	}).catch(err =>{
-		ModelFactory.dbManager.disconnect()
+		ModelFactory.dbManager.disconnect();
 		return Promise.reject(err);
-	});;
+	});
 
 };
 
-statics.getSharedId = function(dbCol, uid){
+statics.getSharedId = function(dbCol, uid) {
 
-	let projection = { shared_id: 1 };
+	const projection = { shared_id: 1 };
 
 	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).then(colRef => {
 		return colRef.find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
@@ -84,7 +86,7 @@ statics.getSharedId = function(dbCol, uid){
 				return this.findById(dbCol, stringToUUID(uid), projection);
 			}
 
-			//from3DRepoStash = true;
+			// from3DRepoStash = true;
 			obj.toObject = () => obj;
 			return Promise.resolve(obj);
 
@@ -98,11 +100,11 @@ statics.getSharedId = function(dbCol, uid){
 
 };
 
-statics.findByUID = function(dbCol, uid, options){
+statics.findByUID = function(dbCol, uid, options) {
 
-	//let from3DRepoStash = false;
+	// let from3DRepoStash = false;
 
-	let projection = options && options.projection || {};
+	const projection = options && options.projection || {};
 
 	return ModelFactory.dbManager.getCollection(dbCol.account, `${dbCol.model}.stash.3drepo`).then(colRef => {
 		return colRef.find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
@@ -110,25 +112,25 @@ statics.findByUID = function(dbCol, uid, options){
 				return this.findById(dbCol, stringToUUID(uid), projection);
 			}
 
-			//from3DRepoStash = true;
+			// from3DRepoStash = true;
 			obj.toObject = () => obj;
 
 			return Promise.resolve(obj);
 
 		}).then(obj =>{
 
-			if(!obj){
+			if(!obj) {
 				return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 			}
 			// load extRef if _.extRef is defined
-			if(obj.type === "mesh" && obj._extRef){
+			if(obj.type === "mesh" && obj._extRef) {
 
-				let promises = [];
-	
+				const promises = [];
+
 				obj = obj.toObject();
-	
+
 				Object.keys(obj._extRef).forEach(type => {
-					let filename = obj._extRef[type];
+					const filename = obj._extRef[type];
 					promises.push(
 						this.findStashByFilename(dbCol, "3drepo", filename).then(data => {
 							obj[type] = { buffer: data };
@@ -136,21 +138,21 @@ statics.findByUID = function(dbCol, uid, options){
 					);
 				});
 
-				return Promise.all(promises).then( () => {
+				return Promise.all(promises).then(() => {
 					return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
 				});
 
 			} else {
 				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
-			}	
+			}
 		});
 	});
 
 };
 
-methods.clean = function(){
+methods.clean = function() {
 
-	let cleaned = this.toObject();
+	const cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
 	cleaned.shared_id = uuidToString(cleaned.shared_id);
 	cleaned.parents.forEach((parent, i) => {
@@ -160,28 +162,28 @@ methods.clean = function(){
 	return cleaned;
 };
 
-statics.findByRevision = function(dbCol, rid, sid, options){
+statics.findByRevision = function(dbCol, rid, sid, options) {
 
-	let projection = options && options.projection || {};
+	const projection = options && options.projection || {};
 
-	let _find = () => History.findByUID(dbCol, rid).then( rev => {
+	const _find = () => History.findByUID(dbCol, rid).then(rev => {
 		rev = rev.toObject();
 
 		return this.findOne(dbCol, { _id: { "$in": rev.current }, shared_id: stringToUUID(sid) }, projection).then(obj => {
 
-			if(!obj){
+			if(!obj) {
 				return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 			}
 
 			// load extRef if _.extRef is defined
-			if(obj.type === "mesh" && obj._extRef){
+			if(obj.type === "mesh" && obj._extRef) {
 
-				let promises = [];
+				const promises = [];
 
 				obj = obj.toObject();
 
 				Object.keys(obj._extRef).forEach(type => {
-					let filename = obj._extRef[type];
+					const filename = obj._extRef[type];
 					promises.push(
 						this.findStashByFilename(dbCol, "3drepo", filename).then(data => {
 							obj[type] = { buffer: data };
@@ -189,7 +191,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 					);
 				});
 
-				return Promise.all(promises).then( () => {
+				return Promise.all(promises).then(() => {
 					return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
 				});
 
@@ -227,9 +229,9 @@ _.extend(genericObjectSchema.statics, statics);
 _.extend(genericObjectSchema.methods, methods);
 
 const GenericObject = ModelFactory.createClass(
-	"GenericObject", 
-	genericObjectSchema, 
-	arg => { 
+	"GenericObject",
+	genericObjectSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );

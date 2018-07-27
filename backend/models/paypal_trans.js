@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const C = require("../constants");
 	const config = require("../config");
-	const moment = require('moment');
+	const moment = require("moment");
 	const paypalPaymentTypes = {};
-	
+
 	paypalPaymentTypes[C.PRO_RATA_PAYMENT] = { "name" : "First month pro-rata price",
 		"type" : "TRIAL",
 		"cycles" : 1 };
@@ -32,7 +32,7 @@
 		"cycles": 0
 	};
 
-	let getPaypalAddress = function (billingAddress) {
+	const getPaypalAddress = function (billingAddress) {
 		return {
 			"line1": billingAddress.line1,
 			"line2": billingAddress.line2,
@@ -43,8 +43,8 @@
 		};
 	};
 
-	let getPaypalPayment = function (payment) {
-		let paymentType = paypalPaymentTypes[payment.type];
+	const getPaypalPayment = function (payment) {
+		const paymentType = paypalPaymentTypes[payment.type];
 
 		return {
 			"amount": {
@@ -66,13 +66,13 @@
 		};
 	};
 
-	let getBillingPlanAttributes = function (billingUser, paymentDefs) {
-		//this is for generating and api url, but we only need a frontend url.
-		//let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
-		//let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
+	const getBillingPlanAttributes = function (billingUser, paymentDefs) {
+		// this is for generating and api url, but we only need a frontend url.
+		// let cancelUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing&cancel=1`);
+		// let returnUrl = config.apiAlgorithm.apiUrl(C.GET_API, `${billingUser}?page=billing`);
 
-		let cancelUrl = config.getBaseURL() + `/${billingUser}?page=billing&cancel=1`;
-		let returnUrl =config.getBaseURL() + `/${billingUser}?page=billing`;
+		const cancelUrl = config.getBaseURL() + `/${billingUser}?page=billing&cancel=1`;
+		const returnUrl = config.getBaseURL() + `/${billingUser}?page=billing`;
 
 		return {
 			"description": "3D Repo Licence",
@@ -89,8 +89,7 @@
 		};
 	};
 
-	let getBillingAgreementAttributes = function(id, startDate, billingAddress, desc)
-	{
+	const getBillingAgreementAttributes = function(id, startDate, billingAddress, desc) {
 		return {
 			"name": "3D Repo Licences",
 			"description": desc,
@@ -104,7 +103,7 @@
 				"payment_method": "paypal"
 			},
 			"shipping_address": billingAddress
-		};							
+		};
 	};
 
 	module.exports = {

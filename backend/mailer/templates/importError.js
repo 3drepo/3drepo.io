@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+"use strict";
+const html = data => `
 	Model failed to import. Please help this user out.
 	<br>
 	account: ${data.account}
@@ -33,7 +34,7 @@ var html = data => `
 	domain: ${data.domain}
 `;
 
-var subject = '[System] Model import error';
+const subject = "[System] Model import error";
 
 module.exports =  {
 	html: html,

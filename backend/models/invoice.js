@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 (() => {
-	"use strict";
 
 	const mongoose = require("mongoose");
 	require("mongoose-double")(mongoose);
@@ -34,47 +34,56 @@
 	const utils = require("../utils");
 	const C = require("../constants");
 	const responseCodes = require("../response_codes.js");
-	const path  =require('path');
-
+	const path  = require("path");
 
 	const SchemaTypes = mongoose.Schema.Types;
 
 	// Various getter/setter helper functions
-	let roundTo2DP = function(x) { return utils.roundToNDP(x, 2.0); };
-	let roundTo3DP = function(x) { return utils.roundToNDP(x, 3.0); };
-	let signAndRoundTo2DP = function(x) { return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x); };
-	let dateToString = function(date) { return moment(date).utc().format(C.DATE_FORMAT); };
-	let dateToDateTimeString = function(date) { return moment(date).utc().format(C.DATE_TIME_FORMAT); };
+	const roundTo2DP = function(x) {
+		return utils.roundToNDP(x, 2.0);
+	};
+	const roundTo3DP = function(x) {
+		return utils.roundToNDP(x, 3.0);
+	};
+	const signAndRoundTo2DP = function(x) {
+		return this.type === C.INV_TYPE_REFUND ? roundTo2DP(-x) : roundTo2DP(x);
+	};
+	const dateToString = function(date) {
+		return moment(date).utc().format(C.DATE_FORMAT);
+	};
+	const dateToDateTimeString = function(date) {
+		return moment(date).utc().format(C.DATE_TIME_FORMAT);
+	};
 
-	//let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
+	// let dateTimeToString = function(date) { return  moment(date).utc().format(C.DATE_TIME_FORMAT); }
 
-	let itemSchema = mongoose.Schema({
+	const itemSchema = mongoose.Schema({
 		name: String,
 		currency: String,
-		amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
+		amount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  // gross+tax
 		taxAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP }
 	});
 
-	itemSchema.virtual('description').get(function(){
-		return config.subscriptions.plans[this.name]?  config.subscriptions.plans[this.name].label : "Unknown license";
+	itemSchema.virtual("description").get(function() {
+		return config.subscriptions.plans[this.name] ?  config.subscriptions.plans[this.name].label : "Unknown license";
 	});
 
-	itemSchema.set('toJSON', { virtuals: true, getters:true });
-	
-	let schema = mongoose.Schema({
+	itemSchema.set("toJSON", { virtuals: true, getters:true });
+
+	const schema = mongoose.Schema({
 		invoiceNo: String,
 		billingAgreementId: String,
 		gateway: String,
 		raw: {},
 		createdAt: { type: Date, get: dateToDateTimeString } ,
 		currency: String,
-		amount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },//gross+tax
+		amount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },// gross+tax
 		type: { type: String, default: C.INV_TYPE_INVOICE, enum: [C.INV_TYPE_INVOICE, C.INV_TYPE_REFUND] },
 		items: [itemSchema],
 		periodStart: { type: Date, get: dateToString },
 		periodEnd: { type: Date, get: dateToString },
 		nextPaymentDate:  { type: Date, get: dateToString },
-		nextPaymentAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  //gross+tax
+		nextPaymentAmount: { type: SchemaTypes.Double, get: roundTo2DP, set: roundTo2DP },  // gross+tax
 		transactionId: String,
 		taxAmount: { type: SchemaTypes.Double, get: signAndRoundTo2DP, set: roundTo2DP },
 		info: billingAddressInfo,
@@ -94,47 +103,47 @@
 		return roundTo2DP(this.taxAmount / this.netAmount) * 100;
 	});
 
-	schema.virtual('info.countryName').get(function(){
-		let country = addressMeta.countries.find(c => c.code === this.info.countryCode);
+	schema.virtual("info.countryName").get(function() {
+		const country = addressMeta.countries.find(c => c.code === this.info.countryCode);
 		return country && country.name;
 	});
 
-	schema.virtual('B2B_EU').get(function(){
+	schema.virtual("B2B_EU").get(function() {
 		return (addressMeta.euCountriesCode.indexOf(this.info.countryCode) !== -1) && this.info.vat ? true : false;
 	});
 
-	//TO-DO: the current design of the invoice (invoice.pug) assume user only buy one type of products which is always true for now but not for the future
+	// TO-DO: the current design of the invoice (invoice.pug) assume user only buy one type of products which is always true for now but not for the future
 	// remove unit price and change the layout of invoice and use price in the items array
-	schema.virtual('unitPrice').get(function(){
+	schema.virtual("unitPrice").get(function() {
 
 		let unitPrice = roundTo3DP(this.netAmount / this.items.length).toFixed(3);
-		
-		if(unitPrice.substr(-1) === '0'){
+
+		if(unitPrice.substr(-1) === "0") {
 			unitPrice = unitPrice.slice(0, -1);
 		}
 
 		return unitPrice;
 	});
 
-	schema.virtual('pending').get(function(){
+	schema.virtual("pending").get(function() {
 		return this.state === C.INV_PENDING;
 	});
 
-	schema.virtual('proRata').get(function(){
-		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === config.subscriptions.plans[this.items[0].name].price.toFixed(2)){
+	schema.virtual("proRata").get(function() {
+		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === config.subscriptions.plans[this.items[0].name].price.toFixed(2)) {
 			return false;
 		}
 
 		return true;
 	});
 
-	//schema.set('toObject', { virtuals: true, getter:true });
-	schema.set('toJSON', { virtuals: true, getters:true });
+	// schema.set('toObject', { virtuals: true, getter:true });
+	schema.set("toJSON", { virtuals: true, getters:true });
 
-	schema.pre('save', function(next){
-		
-		if(!this.invoiceNo && this.state !== C.INV_INIT){
-			//generate invoice number if doesn't have one and passed the init state
+	schema.pre("save", function(next) {
+
+		if(!this.invoiceNo && this.state !== C.INV_INIT) {
+			// generate invoice number if doesn't have one and passed the init state
 			let genNo;
 
 			if(this.type === C.INV_TYPE_INVOICE) {
@@ -153,22 +162,22 @@
 		} else {
 			next();
 		}
-		
+
 	});
 
-	schema.methods.initInvoice = function(data){
+	schema.methods.initInvoice = function(data) {
 
 		this.createdAt = new Date();
 		this.nextPaymentDate = data.nextPaymentDate;
 		this.info = data.billingInfo;
 		this.paypalPaymentToken = data.paypalPaymentToken;
 
-		if(data.payments){
+		if(data.payments) {
 
-			let proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
-			let regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
+			const proRataPayments = data.payments.filter(p => p.type === C.PRO_RATA_PAYMENT);
+			const regularPayments = data.payments.filter(p => p.type === C.REGULAR_PAYMENT);
 
-			if(proRataPayments.length > 0){
+			if(proRataPayments.length > 0) {
 				this.currency = proRataPayments[0].currency;
 				this.amount = proRataPayments.reduce((sum, payment) => sum + payment.gross, 0);
 				this.taxAmount = proRataPayments.reduce((sum, payment) => sum + payment.tax, 0);
@@ -178,36 +187,35 @@
 				this.taxAmount = regularPayments.reduce((sum, payment) => sum + payment.tax, 0);
 			}
 
-
 			this.nextPaymentAmount = regularPayments.reduce((sum, payment) => sum + payment.gross, 0);
 		}
 
 		this.periodStart = data.startDate;
 		this.periodEnd = moment(this.nextPaymentDate)
 			.utc()
-			.subtract(1, 'day')
-			.endOf('date')
+			.subtract(1, "day")
+			.endOf("date")
 			.toDate();
 
 		let plans = [];
 
-		if(data.changes){
-			//init invoice items using data.changes
+		if(data.changes) {
+			// init invoice items using data.changes
 			// if there is any pro rata priced plans then there will be no regular priced plans in this invoice and vice versa.
 
-			if(data.changes.proRataPeriodPlans.length > 0){
-				plans = data.changes.proRataPeriodPlans;	
-			} else if (data.changes.regularPeriodPlans){
+			if(data.changes.proRataPeriodPlans.length > 0) {
+				plans = data.changes.proRataPeriodPlans;
+			} else if (data.changes.regularPeriodPlans) {
 				plans = data.changes.regularPeriodPlans;
 			}
 
 			// add items bought in the invoice
 			plans.forEach(plan => {
-				for(let i=0 ; i< plan.quantity; i++){
+				for(let i = 0 ; i < plan.quantity; i++) {
 					this.items.push({
 						name: plan.plan,
 						currency: "GBP",
-						amount: plan.amount,  //gross+tax
+						amount: plan.amount,  // gross+tax
 						taxAmount: plan.taxAmount
 					});
 				}
@@ -216,22 +224,21 @@
 			return this;
 
 		} else if (data.billingAgreementId) {
-			//init items using last invoice with same billing id
+			// init items using last invoice with same billing id
 
 			this.billingAgreementId = data.billingAgreementId;
-			//copy items from last completed invoice with same agreement id
+			// copy items from last completed invoice with same agreement id
 			return Invoice.findLatestCompleteByAgreementId(data.account, data.billingAgreementId).then(lastGoodInvoice => {
-				if(!lastGoodInvoice){
+				if(!lastGoodInvoice) {
 					return Promise.reject(responseCodes.MISSING_LAST_INVOICE);
 				}
 				this.items = lastGoodInvoice.items;
 			}).then(() => this);
 		}
 
-		
 	};
 
-	schema.methods.changeState = function(state, data){
+	schema.methods.changeState = function(state, data) {
 
 		this.state = state;
 		data.invoiceNo && (this.invoiceNo = data.invoiceNo);
@@ -246,11 +253,11 @@
 		data.nextPaymentDate && (this.nextPaymentDate = data.nextPaymentDate);
 
 	};
-	
+
 	schema.statics.findByAccount = function (account) {
-		return this.find({ account }, {state: {'$in': [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
+		return this.find({ account }, {state: {"$in": [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
 	};
-	
+
 	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
 		return this.findOne({ account }, { paypalPaymentToken }, { raw: 0, pdf: 0});
 	};
@@ -278,7 +285,7 @@
 			});
 	};
 
-	schema.statics.findPendingInvoice = function(account, billingAgreementId){
+	schema.statics.findPendingInvoice = function(account, billingAgreementId) {
 		return this.findOne({ account }, { billingAgreementId, state: C.INV_PENDING });
 	};
 
@@ -296,40 +303,38 @@
 
 	schema.statics.createRefund = function (user, data) {
 
-		const User = require('./user');
+		const User = require("./user");
 
-		let invoice;
+		const newInvoice = Invoice.createInstance({ account: user.user });
 
-		invoice = Invoice.createInstance({ account: user.user });
-
-		invoice.info = user.customData.billing.billingInfo;
-		invoice.raw = data.raw;
-		invoice.gateway = data.gateway;
-		invoice.createdAt = new Date();
-		invoice.currency = data.currency;
-		invoice.amount = data.amount;
+		newInvoice.info = user.customData.billing.billingInfo;
+		newInvoice.raw = data.raw;
+		newInvoice.gateway = data.gateway;
+		newInvoice.createdAt = new Date();
+		newInvoice.currency = data.currency;
+		newInvoice.amount = data.amount;
 		// full/parital refund IPNs don't have any tax infomation, need to recalulate the tax for refund case
-		// or we hide tax info for refund invoice in that case we don't need to bother this
+		// or we hide tax info for refund newInvoice in that case we don't need to bother this
 		data.amount = parseFloat(data.amount);
-		invoice.taxAmount =roundTo2DP(
-				data.amount -(data.amount / (1 + vat.getByCountryCode(invoice.info.countryCode, invoice.info.vat)))
+		newInvoice.taxAmount = roundTo2DP(
+			data.amount - (data.amount / (1 + vat.getByCountryCode(newInvoice.info.countryCode, newInvoice.info.vat)))
 		);
 
-		invoice.billingAgreementId = data.billingAgreementId;
-		invoice.type = C.INV_TYPE_REFUND;
-		invoice.transactionId = data.transactionId;
-		invoice.state = C.INV_COMPLETE;
+		newInvoice.billingAgreementId = data.billingAgreementId;
+		newInvoice.type = C.INV_TYPE_REFUND;
+		newInvoice.transactionId = data.transactionId;
+		newInvoice.state = C.INV_COMPLETE;
 
-		//save first to generate invoice no before generating pdf
-		return invoice.save().then(invoice => {
+		// save first to generate newInvoice no before generating pdf
+		return newInvoice.save().then(savedInvoice => {
 
-			return invoice.generatePDF().then(pdf => {
-				return invoice;
+			return savedInvoice.generatePDF().then(() => {
+				return savedInvoice;
 			});
 
 		}).then(invoice => {
 
-			let attachments = [{
+			const attachments = [{
 				filename: `${moment(invoice.createdAtDate).utc().format(C.DATE_FORMAT)}_invoice-${invoice.invoiceNo}.pdf`,
 				content: invoice.pdf
 			}];
@@ -338,11 +343,11 @@
 				Mailer.sendPaymentRefundedEmail(billingUser.customData.email, {
 					amount: `${data.currency}${data.amount}`
 				}, attachments)
-				.catch(err => {
-					systemLogger.logError(`Email error - ${err.message}`);
-				});
+					.catch(err => {
+						systemLogger.logError(`Email error - ${err.message}`);
+					});
 
-				//make a copy to sales
+				// make a copy to sales
 				Mailer.sendPaymentReceivedEmailToSales({
 					account: user.user,
 					amount: `${data.currency}${data.amount}`,
@@ -350,9 +355,9 @@
 					invoiceNo: invoice.invoiceNo,
 					type: invoice.type
 				}, attachments)
-				.catch(err => {
-					systemLogger.logError(`Email error - ${err.message}`);
-				});
+					.catch(err => {
+						systemLogger.logError(`Email error - ${err.message}`);
+					});
 			});
 
 			return invoice;
@@ -360,12 +365,12 @@
 	};
 
 	schema.methods.generatePDF = function () {
-		//let cleaned = this.clean();
+		// let cleaned = this.clean();
 
 		let ph;
 		let page;
-		let htmlPath = `${config.invoice_dir}/${this.id}.html`;
-		let pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
+		const htmlPath = `${config.invoice_dir}/${this.id}.html`;
+		const pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
 
 		if (!config.invoice_dir) {
 			return Promise.reject({ message: "invoice dir is not set in config file" });
@@ -373,22 +378,22 @@
 
 		return new Promise((resolve, reject) => {
 
-				let useNonPublicPort = true;
+			const useNonPublicPort = true;
 
-				let template = path.join(__dirname, "../../pug/invoice.pug");
-				if (this.type === "refund") {
-					template = path.join(__dirname, "../../pug/refund.pug");
+			let template = path.join(__dirname, "../../pug/invoice.pug");
+			if (this.type === "refund") {
+				template = path.join(__dirname, "../../pug/refund.pug");
+			}
+
+			pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(html);
 				}
+			});
 
-				pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(html);
-					}
-				});
-
-			})
+		})
 			.then(html => {
 
 				return new Promise((resolve, reject) => {
@@ -420,12 +425,14 @@
 			.then(() => {
 				ph && ph.exit();
 
-				let pdfRS = fs.createReadStream(pdfPath);
-				let bufs = [];
+				const pdfRS = fs.createReadStream(pdfPath);
+				const bufs = [];
 
 				return new Promise((resolve, reject) => {
 
-					pdfRS.on("data", function (d) { bufs.push(d); });
+					pdfRS.on("data", function (d) {
+						bufs.push(d);
+					});
 					pdfRS.on("end", function () {
 						resolve(Buffer.concat(bufs));
 					});
@@ -475,7 +482,7 @@
 
 	};
 
-	var Invoice = ModelFactory.createClass(
+	const Invoice = ModelFactory.createClass(
 		"Invoice",
 		schema,
 		() => {

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,50 +17,49 @@
 
 // Corresponds to repoNodeTransformation in C++ definition of 3D Repo
 
-// var mongodb = require('mongodb');
-var assert = require('assert');
-var UUID = require('node-uuid');
-var C = require('../constants');
+"use strict";
+const assert = require("assert");
+const UUID = require("node-uuid");
+const C = require("../constants");
 
 exports.decode = function(bson, meshes, cameras) {
 	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_TRANSFORMATION, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_TRANSFORMATION);
 
-	//---------------------------------------------------------------------	
-	// Meshes & Cameras extraction	
-	var mMeshes = [];
-	var mCameras = [];
-	if (bson[C.REPO_NODE_LABEL_CHILDREN])
-	{
-		for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {			
-			var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-			var childID = UUID.unparse(childIDbytes);
+	// ---------------------------------------------------------------------
+	// Meshes & Cameras extraction
+	const mMeshes = [];
+	const mCameras = [];
+	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
+		for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+			const childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+			const childID = UUID.unparse(childIDbytes);
 
 			// If child is a mesh
-			var mesh = meshes[childID];
+			const mesh = meshes[childID];
 			if (mesh) {
 				mMeshes.push(childID);
 			}
-			
+
 			// If child is a camera
-			var camera = cameras[childID];
+			const camera = cameras[childID];
 			if (camera) {
 				mCameras.push(childID);
 			}
 		}
-	}	
+	}
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Meshes
 	// TODO: rename to meshes
 	if (mMeshes.length > 0) {
 		bson[C.M_MESHES] = mMeshes;
 	}
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Cameras
-	if (mCameras.length > 0){
+	if (mCameras.length > 0) {
 		bson[C.REPO_NODE_LABEL_CAMERAS] = mCameras;
 	}
-	
+
 	return bson;
 };

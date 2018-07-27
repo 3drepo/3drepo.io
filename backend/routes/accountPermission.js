@@ -15,36 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
-	const _ = require('lodash');
+	const _ = require("lodash");
 
 	router.get("/permissions", middlewares.isAccountAdmin, listPermissions);
 	router.post("/permissions", middlewares.isAccountAdmin, createPermission);
 	router.put("/permissions/:user", middlewares.isAccountAdmin, updatePermission);
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
-
-	function listPermissions(req, res, next){
+	function listPermissions(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
-			var permissions = user.toObject().customData.permissions;
+			const permissions = user.toObject().customData.permissions;
 			return User.getAllUsersInTeamspace(req.params.account).then(users => {
-		
-				users.forEach( user => {
-					if(!_.find(permissions, {'user' : user})) {
-						permissions.push({user, permissions: []});
+				users.forEach(_user => {
+					if(!_.find(permissions, {"user" : _user})) {
+						permissions.push({user: _user, permissions: []});
 					}
 				});
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
-			
+
 			});
 
 		}).catch(err => {
@@ -54,35 +52,46 @@
 
 	}
 
-	function createPermission(req, res, next){
+	function createPermission(req, res, next) {
 
-		User.findByUserName(req.params.account).then(user => {
+		if (Object.keys(req.body).length === 2 &&
+			Object.prototype.toString.call(req.body.user) === "[object String]" &&
+			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
 
-			return user.customData.permissions.add(req.body);
+			User.findByUserName(req.params.account).then(user => {
 
-		}).then(permission => {
+				return user.customData.permissions.add(req.body);
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-		}).catch(err => {
+			}).then(permission => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		} else {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-		
 	}
 
-	function updatePermission(req, res, next){
+	function updatePermission(req, res, next) {
 
-		User.findByUserName(req.params.account).then(user => {
-			return user.customData.permissions.update(req.params.user, req.body);
+		if (Object.keys(req.body).length === 1 &&
+			Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
+			User.findByUserName(req.params.account).then(user => {
+				return user.customData.permissions.update(req.params.user, req.body);
 
-		}).then(permission => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
+			}).then(permission => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		} else {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+
 	}
 
-	function deletePermission(req, res, next){
+	function deletePermission(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 
@@ -93,7 +102,6 @@
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}

@@ -15,42 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const middlewares = require('../middlewares/middlewares');
-	const responseCodes = require('../response_codes.js');
-	const IssueAnalytic = require('../models/issueAnalytic');
+	const middlewares = require("../middlewares/middlewares");
+	const responseCodes = require("../response_codes.js");
+	const IssueAnalytic = require("../models/issueAnalytic");
 	const utils = require("../utils");
 
-	router.get('/issues/analytics.:format', middlewares.issue.canView, getIssueAnalytics);
+	router.get("/issues/analytics.:format", middlewares.issue.canView, getIssueAnalytics);
 
-	function getIssueAnalytics(req, res, next){
-		
+	function getIssueAnalytics(req, res, next) {
+
 		const place = utils.APIInfo(req);
 		const sort = parseInt(req.query.sort) || -1;
-		const groups = req.query.groupBy.split(',');
+		const groups = req.query.groupBy.split(",");
 
 		IssueAnalytic.groupBy(
-			req.params.account, 
-			req.params.model,  
+			req.params.account,
+			req.params.model,
 			groups,
-			sort, 
+			sort,
 			req.params.format
 		).then(docs => {
 
-			if(req.params.format === 'csv'){
+			if(req.params.format === "csv") {
 
-				res.set('Content-Disposition', 'attachment;filename=data.csv');
+				res.set("Content-Disposition", "attachment;filename=data.csv");
 				res.send(docs);
-				
+
 			} else {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, docs);
 			}
-			
-
 
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

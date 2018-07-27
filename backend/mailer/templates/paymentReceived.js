@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
+"use strict";
+const html = data => `
 	Hi there,<br>
 	<br>
-	Your payment of ${data.amount} is confirmed and you can start uploading models in your 
+	Your payment of ${data.amount} is confirmed and you can start uploading models in your
 	${data.account} repository.
 	<br><br>
 	Best,<br>
 	3D Repo
 `;
 
-var subject = 'Your payment to 3D Repo is confirmed';
+const subject = "Your payment to 3D Repo is confirmed";
 
 module.exports =  {
 	html: html,

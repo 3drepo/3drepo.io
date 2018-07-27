@@ -15,38 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
-	router.get('/:model/permission-templates', middlewares.hasEditPermissionsAccessToModel, listTemplates);
+	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
-	function listTemplates(req, res, next){
+	function listTemplates(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.permissionTemplates.get());
-			
+
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}
 
-	function createTemplate(req, res, next){
+	function createTemplate(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 
-			let permission = {
+			const permission = {
 				_id: req.body._id,
 				permissions: req.body.permissions
 			};
@@ -60,10 +60,10 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
 
-	function deleteTemplate(req, res, next){
+	function deleteTemplate(req, res, next) {
 
 		User.findByUserName(req.params.account).then(user => {
 

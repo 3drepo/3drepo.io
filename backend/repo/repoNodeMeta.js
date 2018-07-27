@@ -21,9 +21,9 @@
 // var UUID = require('node-uuid');
 // var C = require('./constants');
 
-exports.decode = function(bson /*, meta*/) {
-	if (bson.mime)
-	{
+"use strict";
+exports.decode = function(bson /* , meta*/) {
+	if (bson.mime) {
 		bson.data = {};
 		bson.data.buffer = new Buffer.alloc(bson.metadata.data.buffer.length);
 		bson.metadata.data.buffer.copy(bson.data.buffer);

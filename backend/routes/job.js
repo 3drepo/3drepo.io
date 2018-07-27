@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const Job = require("../models/job");
 	const utils = require("../utils");
 
@@ -33,7 +33,7 @@
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
-	function addUserToJob(req, res, next){
+	function addUserToJob(req, res, next) {
 
 		Job.addUserToJob(req.params.account, req.params.user, req.params.jobId).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
@@ -48,9 +48,9 @@
 		const teamspace = req.params.account;
 		const user = req.session.user.username;
 
-		//middleware checks if user is in teamspace, so this member check should not be necessary here.
-		Job.findByUser(teamspace, user).then( (job) => {
-		 	const result = {};
+		// middleware checks if user is in teamspace, so this member check should not be necessary here.
+		Job.findByUser(teamspace, user).then((job) => {
+			const result = {};
 			if(job) {
 				result._id = job._id;
 				result.color = job.color;
@@ -60,11 +60,10 @@
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		})
+		});
 	}
 
-	
-	function removeUserFromJobs(req, res, next){
+	function removeUserFromJobs(req, res, next) {
 
 		Job.removeUserFromJobs(req.params.account, req.params.user).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
@@ -75,7 +74,7 @@
 
 	}
 
-	function createJob(req, res, next){
+	function createJob(req, res, next) {
 
 		const newJob = {
 			_id: req.body._id,
@@ -91,12 +90,12 @@
 
 	}
 
-	function updateJob(req, res, next){
-	
+	function updateJob(req, res, next) {
+
 		if(!req.body._id) {
 			return Promise.reject(responseCodes.JOB_ID_INVALID);
 		}
-		Job.findByJob(req.params.account, req.body._id).then( job => {
+		Job.findByJob(req.params.account, req.body._id).then(job => {
 			return job.updateJob(req.body).then(() => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
 			});
@@ -104,10 +103,10 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
 
-	function deleteJob(req, res, next){
+	function deleteJob(req, res, next) {
 
 		Job.removeJob(req.params.account, req.params.jobId).then(() => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
@@ -118,7 +117,7 @@
 		});
 	}
 
-	function listJobs(req, res, next){
+	function listJobs(req, res, next) {
 		Job.getAllJobs(req.params.account).then(jobs => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
 		}).catch(err => {

@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
 
-var html = data => `
+const html = data => `
 	We have one more new user signed up on ${data.url}!
 	<br><br>
 	Username: ${data.user}
@@ -24,12 +25,12 @@ var html = data => `
 	<br>
 	Name: ${data.firstName} ${data.lastName}
 	<br>
-	Company: ${data.company} 
+	Company: ${data.company}
 	<br>
 	Country: ${data.country}
 `;
 
-var subject = data => `[New User][${data.company}] New user from ${data.company} signed up`;
+const subject = data => `[New User][${data.company}] New user from ${data.company} signed up`;
 
 module.exports =  {
 	html: html,

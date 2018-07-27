@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
-let config = require('../../config');
-let q = require('../../services/queue');
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
+const config = require("../../config");
+const q = require("../../services/queue");
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
 
-if(config.cn_queue){
+if(config.cn_queue) {
 
 	q.connect(config.cn_queue.host, {
 
@@ -14,7 +14,7 @@ if(config.cn_queue){
 		callback_queue: config.cn_queue.callback_queue,
 		worker_queue: config.cn_queue.worker_queue,
 		event_exchange: config.cn_queue.event_exchange
-		
+
 	}).then(() => {
 
 		return q.channel.assertQueue(q.workerQName, { durable: true });
@@ -32,18 +32,16 @@ if(config.cn_queue){
 
 	}).then(() => {
 
-		systemLogger.logInfo('Queue purged.')
+		systemLogger.logInfo("Queue purged.");
 		process.exit(0);
-		
+
 	}).catch(err => {
 		systemLogger.logError(err);
 		process.exit(-1);
 	});
 
 } else {
-	systemLogger.logError('No queue config found');
+	systemLogger.logError("No queue config found");
 	process.exit(0);
 }
-
-
 

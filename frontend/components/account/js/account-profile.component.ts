@@ -77,6 +77,9 @@ class AccountProfileController implements ng.IController {
 	}
 
 	public checkInvalidPassword(result) {
+		if (!this.newPassword) {
+			return;
+		}
 
 		if (this.newPassword.length  < 8) {
 			this.invalidatePassword();

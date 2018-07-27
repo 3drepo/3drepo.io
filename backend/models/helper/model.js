@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,44 +17,44 @@
 
 "use strict";
 
-const ModelFactory = require('../factory/modelFactory');
-const ModelSetting = require('../modelSetting');
-const User = require('../user');
-const responseCodes = require('../../response_codes');
-const importQueue = require('../../services/queue');
-const C = require('../../constants');
-const Mailer = require('../../mailer/mailer');
+const ModelFactory = require("../factory/modelFactory");
+const ModelSetting = require("../modelSetting");
+const User = require("../user");
+const responseCodes = require("../../response_codes");
+const importQueue = require("../../services/queue");
+const C = require("../../constants");
+const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
-const config = require('../../config');
-const History = require('../history');
-const Mesh = require('../mesh');
-const Scene = require('../scene');
-const Ref = require('../ref');
+const config = require("../../config");
+const History = require("../history");
+const Mesh = require("../mesh");
+const Scene = require("../scene");
+const Ref = require("../ref");
 const utils = require("../../utils");
-const stash = require('./stash');
-const middlewares = require('../../middlewares/middlewares');
+const stash = require("./stash");
+const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
-const fs = require('fs');
-const ChatEvent = require('../chatEvent');
-const Project = require('../project');
-const stream = require('stream');
-const _ = require('lodash');
+const fs = require("fs");
+const ChatEvent = require("../chatEvent");
+const Project = require("../project");
+const stream = require("stream");
+const _ = require("lodash");
 const uuid = require("node-uuid");
 
-/*******************************************************************************
+/** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
  * Uncaught error codes that are valid responseCodes will be returned,
  * otherwise FILE_IMPORT_UNKNOWN_ERR is returned.
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
-function convertToErrorCode(bouncerErrorCode){
+function convertToErrorCode(bouncerErrorCode) {
 	// These error codes correspond to the error messages to 3drepobouncer
 	// refer to bouncer/repo/error_codes.h for what they are.
 	const bouncerErrToWebErr = [
-		responseCodes.OK, 
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
-		responseCodes.NOT_AUTHORIZED, 
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR, 
+		responseCodes.OK,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.NOT_AUTHORIZED,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
 		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
@@ -80,33 +80,32 @@ function convertToErrorCode(bouncerErrorCode){
 
 	];
 
-
-	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ? 
+	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
 		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-	
+
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
 function importSuccess(account, model, sharedSpacePath) {
-	setStatus(account, model, 'ok').then(setting => {
+	setStatus(account, model, "ok").then(setting => {
 		if (setting) {
 			if (sharedSpacePath) {
-				let files = function(filePath, fileDir, jsonFile){
+				const files = function(filePath, fileDir, jsonFile) {
 					return [
-						{desc: 'tmp model file', type: 'file', path: filePath},
-						{desc: 'json file', type: 'file', path: jsonFile},
-						{desc: 'tmp dir', type: 'dir', path: fileDir}
+						{desc: "tmp model file", type: "file", path: filePath},
+						{desc: "json file", type: "file", path: jsonFile},
+						{desc: "tmp dir", type: "dir", path: fileDir}
 					];
 				};
 
-				let tmpDir = `${sharedSpacePath}/${setting.corID}`;
-				let tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
-				fs.stat(tmpModelFile, function(err, stat) {
+				const tmpDir = `${sharedSpacePath}/${setting.corID}`;
+				const tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
+				fs.stat(tmpModelFile, function(err) {
 					let tmpJsonFile;
 					if (err) {
 						tmpJsonFile = `${tmpDir}/obj.json`;
 					} else {
-						let tmpModelFileData = require(tmpModelFile);
+						const tmpModelFileData = require(tmpModelFile);
 						tmpJsonFile = tmpModelFileData.file;
 					}
 
@@ -116,15 +115,15 @@ function importSuccess(account, model, sharedSpacePath) {
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
 			setting.errorReason = undefined;
-			if(setting.type === 'toy' || setting.type === 'sample'){
+			if(setting.type === "toy" || setting.type === "sample") {
 				setting.timestamp = new Date();
 			}
-			setting.markModified('errorReason');
+			setting.markModified("errorReason");
 			ChatEvent.modelStatusChanged(null, account, model, setting);
 			setting.save();
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importSuccess:` +  err);
+		systemLogger.logError("Failed to invoke importSuccess:" +  err);
 	});
 }
 
@@ -138,16 +137,16 @@ function importSuccess(account, model, sharedSpacePath) {
  */
 function importFail(account, model, errCode, errMsg, sendMail) {
 	ModelSetting.findById({account, model}, model).then(setting => {
-		//mark model failed
-		setting.status = 'failed';
-		if(setting.type === 'toy' || setting.type === 'sample'){
+		// mark model failed
+		setting.status = "failed";
+		if(setting.type === "toy" || setting.type === "sample") {
 			setting.timestamp = undefined;
 		}
 		setting.errorReason = convertToErrorCode(errCode);
-		setting.markModified('errorReason');
-		setting.save().then( () => {				
-			ChatEvent.modelStatusChanged(null, account, model, setting);						
-		})
+		setting.markModified("errorReason");
+		setting.save().then(() => {
+			ChatEvent.modelStatusChanged(null, account, model, setting);
+		});
 
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
@@ -164,7 +163,7 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 			});
 		}
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke importFail:` +  err);
+		systemLogger.logError("Failed to invoke importFail:" +  err);
 	});
 }
 
@@ -180,7 +179,7 @@ function setStatus(account, model, status) {
 		systemLogger.logInfo(`Model status changed to ${status}`);
 		return setting.save();
 	}).catch(err => {
-		systemLogger.logError(`Failed to invoke setStatus:`, err);
+		systemLogger.logError("Failed to invoke setStatus:", err);
 	});
 }
 
@@ -190,7 +189,7 @@ function setStatus(account, model, status) {
  * @param {model} model - Model
  */
 function createCorrelationId(account, model) {
-	let correlationId = uuid.v1();
+	const correlationId = uuid.v1();
 
 	// store corID
 	return ModelSetting.findById({account, model}, model).then(setting => {
@@ -204,9 +203,9 @@ function createCorrelationId(account, model) {
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
 		return setting.save().then(() => {
 			return correlationId;
-		});;
+		});
 	}).catch(err => {
-		systemLogger.logError(`Failed to createCorrelationId:`, err);
+		systemLogger.logError("Failed to createCorrelationId:", err);
 	});
 }
 
@@ -218,62 +217,62 @@ function createCorrelationId(account, model) {
 function resetCorrelationId(account, model) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		setting.corID = undefined;
-		systemLogger.logInfo(`Correlation ID reset`);
+		systemLogger.logInfo("Correlation ID reset");
 		setting.save();
 	}).catch(err => {
-		systemLogger.logError(`Failed to resetCorrelationId:`, err);
+		systemLogger.logError("Failed to resetCorrelationId:", err);
 	});
 }
 
 function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 	let project;
-	//generate model id
+	// generate model id
 	const model = utils.generateUUID({string: true});
 
-	if(!modelName.match(modelNameRegExp)){
+	if(!modelName.match(modelNameRegExp)) {
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
 	}
 
-	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)){
+	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)) {
 		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
 	}
 
-	if(!data.unit){
+	if(!data.unit) {
 		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
 	}
 
-	if(C.REPO_BLACKLIST_MODEL.indexOf(modelName) !== -1){
+	if(C.REPO_BLACKLIST_MODEL.indexOf(modelName) !== -1) {
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_MODEL_NAME });
 	}
 
 	let promise = Promise.resolve();
 
-	if(data.project){
+	if(data.project) {
 		promise = Project.findOne({account}, {name: data.project}).then(_project => {
 
-			if(!_project){
+			if(!_project) {
 				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 			} else {
 				project = _project;
 			}
 
 		});
-	} 
+	}
 
 	return promise.then(() => {
-		
+
 		const query =  {name: modelName};
 
-		if(data.project){
-			query._id = { '$in' : project.models};
+		if(data.project) {
+			query._id = { "$in" : project.models};
 		}
 
 		return ModelSetting.count({account, model}, query);
 
 	}).then(count => {
 
-		if(count){
+		if(count) {
 			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 		}
 
@@ -296,7 +295,7 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 		setting.desc = data.desc;
 		setting.type = data.type;
 
-		if(data.subModels){
+		if(data.subModels) {
 			setting.federate = true;
 			setting.subModels = data.subModels;
 			setting.timestamp = new Date();
@@ -316,7 +315,7 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 		setting.updateProperties({
 			unit: data.unit,
-			code: data.code,
+			code: data.code
 		});
 
 		setting.properties.topicTypes = ModelSetting.defaultTopicTypes;
@@ -325,21 +324,19 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 	}).then(setting => {
 
-
-		if(project){
+		if(project) {
 			project.models.push(model);
 			return project.save().then(() => setting);
 		}
 
 		return setting;
-		
 
 	}).then(setting => {
 
-		if(data.userPermissions && 
-			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 && 
+		if(data.userPermissions &&
+			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 &&
 			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
-		){
+		) {
 
 			return setting.changePermissions([{
 				user: username,
@@ -352,7 +349,7 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 
 	}).then(setting => {
 
-		let modelData = {
+		const modelData = {
 			account,
 			model:  model.toString(),
 			name: modelName,
@@ -372,26 +369,26 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 	});
 }
 
-function importToyProject(account, username){
+function importToyProject(account, username) {
 
 	// create a project named Sample_Project
-	return Project.createProject(username, 'Sample_Project', username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+	return Project.createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
 		return Promise.all([
 
-			importToyModel(account, username, 'Lego_House_Architecture', 'ae234e5d-3b75-4b8c-b461-7529d5bec583', project.name),
-			importToyModel(account, username, 'Lego_House_Landscape', '39b51fe5-0fcb-4734-8e10-d8088bec9d45', project.name),
-			importToyModel(account, username, 'Lego_House_Structure', '3749c3cc-375d-406a-9f0d-2d059e8e782f', project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "ae234e5d-3b75-4b8c-b461-7529d5bec583", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "39b51fe5-0fcb-4734-8e10-d8088bec9d45", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "3749c3cc-375d-406a-9f0d-2d059e8e782f", project.name)
 
 		]).then(models => {
 
-			//skip some steps when importing fed models
+			// skip some steps when importing fed models
 			const skip = { tree: 1 };
 
 			const subModels = models.map(m => {
-				
+
 				m = m.toObject();
-				
+
 				importSuccess(account, m._id);
 
 				return {
@@ -400,7 +397,7 @@ function importToyProject(account, username){
 				};
 			});
 
-			return importToyModel(account, username, 'Lego_House_Federation', 'b50fd608-46b4-4ba6-a97f-7bbc18c51932', project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "b50fd608-46b4-4ba6-a97f-7bbc18c51932", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -415,37 +412,35 @@ function importToyProject(account, username){
 	});
 }
 
-function importToyModel(account, username, modelName, modelDirName, project, subModels, skip){
-	
+function importToyModel(account, username, modelName, modelDirName, project, subModels, skip) {
 
 	let model;
-	let desc = '';
-	let type = 'sample';
+	const desc = "";
+	const type = "sample";
 
-	let data = {
-		desc, 
-		type, 
-		project, 
-		unit: 'mm', 
+	const data = {
+		desc,
+		type,
+		project,
+		unit: "mm",
 		subModels,
 		surveyPoints: [
 			{
 				latLong: [48.92454, 2.02831],
-				position: [ 0, 0, 0],
+				position: [0, 0, 0]
 			}
 		],
-		angleFromNorth: 145,
+		angleFromNorth: 145
 	};
 
-	return createAndAssignRole(modelName, account, username, data, modelDirName).then(data => {
-		return Promise.resolve(data.setting);
+	return createAndAssignRole(modelName, account, username, data, modelDirName).then(_data => {
+		return Promise.resolve(_data.setting);
 	}).then(setting => {
 		if(subModels) {
 			return setting;
-		}
-		else {
+		} else {
 			model = setting._id;
-			return importModel(account, model, username, setting, {type: 'toy', modelDirName, skip });
+			return importModel(account, model, username, setting, {type: "toy", modelDirName, skip });
 		}
 
 	}).catch(err => {
@@ -463,11 +458,11 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	});
 }
 
-function createFederatedModel(account, model, subModels, toyFed){
+function createFederatedModel(account, model, subModels, toyFed) {
 
 	return createCorrelationId(account, model).then(correlationId => {
 
-		let federatedJSON = {
+		const federatedJSON = {
 			database: account,
 			project: model,
 			subProjects: []
@@ -478,16 +473,16 @@ function createFederatedModel(account, model, subModels, toyFed){
 
 		let error;
 
-		let addSubModels = [];
+		const addSubModels = [];
 
 		subModels.forEach(subModel => {
 
-			if(subModel.database !== account){
+			if(subModel.database !== account) {
 				error = responseCodes.FED_MODEL_IN_OTHER_DB;
 			}
 
 			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-				if(setting && setting.federate){
+				if(setting && setting.federate) {
 					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
 				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
@@ -511,8 +506,8 @@ function createFederatedModel(account, model, subModels, toyFed){
 		return Promise.all(addSubModels).then(() => {
 			importQueue.createFederatedModel(correlationId, account, federatedJSON);
 		}).catch(err => {
-			//catch here to provide custom error message
-			if(err.errCode){
+			// catch here to provide custom error message
+			if(err.errCode) {
 				return Promise.reject(convertToErrorCode(err.errCode));
 			}
 			return Promise.reject(err);
@@ -522,11 +517,8 @@ function createFederatedModel(account, model, subModels, toyFed){
 	});
 }
 
-function getAllMeshes(account, model, branch, rev, username){
-	'use strict'
-
+function getAllMeshes(account, model, branch, rev, username) {
 	let subModelMeshes;
-	let revId;
 	let history;
 	let status;
 
@@ -534,15 +526,14 @@ function getAllMeshes(account, model, branch, rev, username){
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
-		if(!history){
-			status = 'NOT_FOUND';
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		if(!history) {
+			status = "NOT_FOUND";
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
-			revId = utils.uuidToString(history._id);
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -550,14 +541,14 @@ function getAllMeshes(account, model, branch, rev, username){
 		}
 	}).then(refs => {
 
-		//for all refs get their tree
-		let refMeshesPromises = [];
+		// for all refs get their tree
+		const refMeshesPromises = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -569,8 +560,8 @@ function getAllMeshes(account, model, branch, rev, username){
 						meshes: obj.results.meshes,
 						owner: ref.owner,
 						model: ref.project
-					})
-				}).catch(err => {
+					});
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -583,22 +574,18 @@ function getAllMeshes(account, model, branch, rev, username){
 		subModelMeshes = refMeshes;
 		return Mesh.getMeshes(account, model, history);
 	}).then(meshes => {
-		let results = {};
-	       	if(meshes) {
+		const results = {};
+		if(meshes) {
 			results.meshes = meshes;
-		}
-		else {
+		} else {
 			results.meshes = [];
 		}
 
-
-		if(subModelMeshes.length > 0)
-		{
+		if(subModelMeshes.length > 0) {
 			results.subModels = [];
 		}
 		subModelMeshes.forEach(subMeshes => {
-			if (subMeshes && subMeshes.meshes)
-			{
+			if (subMeshes && subMeshes.meshes) {
 				results.subModels.push({meshes: subMeshes.meshes, account: subMeshes.owner, model: subMeshes.model});
 			}
 		});
@@ -606,11 +593,10 @@ function getAllMeshes(account, model, branch, rev, username){
 		return Promise.resolve({results, status});
 
 	});
-	
+
 }
 
-function getIdMap(account, model, branch, rev, username){
-	'use strict'	
+function getIdMap(account, model, branch, rev, username) {
 	let subIdMaps;
 	let revId, idMapsFileName;
 	let history;
@@ -620,17 +606,17 @@ function getIdMap(account, model, branch, rev, username){
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
-		if(!history){
-			status = 'NOT_FOUND';
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		if(!history) {
+			status = "NOT_FOUND";
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -638,14 +624,14 @@ function getIdMap(account, model, branch, rev, username){
 		}
 	}).then(refs => {
 
-		//for all refs get their tree
-		let getIdMaps = [];
+		// for all refs get their tree
+		const getIdMaps = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -657,8 +643,8 @@ function getIdMap(account, model, branch, rev, username){
 						idMap: obj.idMaps.idMap,
 						owner: ref.owner,
 						model: ref.project
-					})
-				}).catch(err => {
+					});
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -669,30 +655,27 @@ function getIdMap(account, model, branch, rev, username){
 	}).then(_subIdMaps => {
 
 		subIdMaps = _subIdMaps;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', idMapsFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", idMapsFileName);
 
 	}).then(buf => {
 		let idMaps = {};
 
-		if(buf){
+		if(buf) {
 			idMaps = JSON.parse(buf);
 		}
 
-		if (!idMaps.idMap)
-		{
+		if (!idMaps.idMap) {
 			idMaps.idMap = [];
 		}
 
-		if(subIdMaps.length > 0)
-		{
+		if(subIdMaps.length > 0) {
 			idMaps.subModels = [];
 		}
 		subIdMaps.forEach(subIdMap => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdMap && subIdMap.idMap)
-			{
+			if (subIdMap && subIdMap.idMap) {
 				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
 			}
 		});
@@ -702,10 +685,9 @@ function getIdMap(account, model, branch, rev, username){
 	});
 }
 
-function getIdToMeshes(account, model, branch, rev, username){
-	'use strict'	
+function getIdToMeshes(account, model, branch, rev, username) {
 	let subIdToMeshes;
-		let revId, idToMeshesFileName;
+	let revId, idToMeshesFileName;
 	let history;
 	let status;
 
@@ -713,17 +695,17 @@ function getIdToMeshes(account, model, branch, rev, username){
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
-		if(!history){
-			status = 'NOT_FOUND';
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		if(!history) {
+			status = "NOT_FOUND";
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -731,14 +713,14 @@ function getIdToMeshes(account, model, branch, rev, username){
 		}
 	}).then(refs => {
 
-		//for all refs get their tree
-		let refPromises = [];
+		// for all refs get their tree
+		const refPromises = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -749,8 +731,8 @@ function getIdToMeshes(account, model, branch, rev, username){
 					return Promise.resolve({
 						idToMeshes: obj.idToMeshes,
 						key: ref.owner + "@" + ref.project
-					})
-				}).catch(err => {
+					});
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -761,23 +743,21 @@ function getIdToMeshes(account, model, branch, rev, username){
 	}).then(_subIdToMeshes => {
 
 		subIdToMeshes = _subIdToMeshes;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', idToMeshesFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", idToMeshesFileName);
 
 	}).then(buf => {
 		let idToMeshes = {};
 
-		if(buf){
+		if(buf) {
 			idToMeshes = JSON.parse(buf);
 		}
 
-		subIdToMeshes.forEach(subIdToMeshes => {
+		subIdToMeshes.forEach(_subIdToMeshes => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subIdToMeshes && subIdToMeshes.idToMeshes)
-			{
-			//	idToMeshes.subModels.push({idToMeshes: subIdToMeshes.idToMeshes, account: subIdToMeshes.owner, model: subIdToMeshes.model});
-				idToMeshes[subIdToMeshes.key] = subIdToMeshes.idToMeshes;
+			if (_subIdToMeshes && _subIdToMeshes.idToMeshes) {
+				idToMeshes[_subIdToMeshes.key] = _subIdToMeshes.idToMeshes;
 			}
 		});
 
@@ -786,9 +766,8 @@ function getIdToMeshes(account, model, branch, rev, username){
 	});
 }
 
+function getModelProperties(account, model, branch, rev, username) {
 
-function getModelProperties(account, model, branch, rev, username){
-	
 	let subProperties;
 	let revId, modelPropertiesFileName;
 	let history;
@@ -798,17 +777,17 @@ function getModelProperties(account, model, branch, rev, username){
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
-		if(!history){
-			status = 'NOT_FOUND';
+		if(!history) {
+			status = "NOT_FOUND";
 			return Promise.resolve([]);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve([]);
 		} else {
 			revId = utils.uuidToString(history._id);
 			modelPropertiesFileName = `/${account}/${model}/revision/${revId}/modelProperties.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -816,14 +795,14 @@ function getModelProperties(account, model, branch, rev, username){
 		}
 	}).then(refs => {
 
-		//for all refs get their tree
-		let getModelProps = [];
+		// for all refs get their tree
+		const getModelProps = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -837,9 +816,9 @@ function getModelProperties(account, model, branch, rev, username){
 						model: ref.project
 					});
 				})
-				.catch(err => {
-					return Promise.resolve();
-				})
+					.catch(() => {
+						return Promise.resolve();
+					})
 			);
 		});
 
@@ -848,22 +827,20 @@ function getModelProperties(account, model, branch, rev, username){
 	}).then(_subProperties => {
 
 		subProperties = _subProperties;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', modelPropertiesFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", modelPropertiesFileName);
 
 	}).then(buf => {
 		let properties = { hiddenNodes : null };
 
-		if(buf){
+		if(buf) {
 			properties = JSON.parse(buf);
 		}
 
-		if (!properties.hiddenNodes)
-		{
+		if (!properties.hiddenNodes) {
 			properties.hiddenNodes = [];
 		}
 
-		if(subProperties.length > 0)
-		{
+		if(subProperties.length > 0) {
 			properties.subModels = [];
 		}
 		subProperties.forEach(subProperty => {
@@ -871,8 +848,7 @@ function getModelProperties(account, model, branch, rev, username){
 			// For a federation concatenate all together in a
 			// single array
 
-			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0)
-			{
+			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0) {
 				properties.subModels.push({properties: subProperty.properties, account: subProperty.owner, model: subProperty.model});
 			}
 		});
@@ -882,8 +858,7 @@ function getModelProperties(account, model, branch, rev, username){
 	});
 }
 
-function getTreePath(account, model, branch, rev, username){
-	'use strict'	
+function getTreePath(account, model, branch, rev, username) {
 	let subTreePaths;
 	let revId, treePathsFileName;
 	let history;
@@ -893,17 +868,17 @@ function getTreePath(account, model, branch, rev, username){
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
-		if(!history){
-			status = 'NOT_FOUND';
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		if(!history) {
+			status = "NOT_FOUND";
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -911,14 +886,14 @@ function getTreePath(account, model, branch, rev, username){
 		}
 	}).then(refs => {
 
-		//for all refs get their tree
-		let getTreePaths = [];
+		// for all refs get their tree
+		const getTreePaths = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -930,8 +905,8 @@ function getTreePath(account, model, branch, rev, username){
 						idToPath: obj.treePaths.idToPath,
 						owner: ref.owner,
 						model: ref.project
-					})
-				}).catch(err => {
+					});
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -942,30 +917,27 @@ function getTreePath(account, model, branch, rev, username){
 	}).then(_subTreePaths => {
 
 		subTreePaths = _subTreePaths;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', treePathsFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", treePathsFileName);
 
 	}).then(buf => {
 		let treePaths = {};
 
-		if(buf){
+		if(buf) {
 			treePaths = JSON.parse(buf);
 		}
 
-		if (!treePaths.idToPath)
-		{
+		if (!treePaths.idToPath) {
 			treePaths.idToPath = [];
 		}
 
-		if(subTreePaths.length > 0)
-		{
+		if(subTreePaths.length > 0) {
 			treePaths.subModels = [];
 		}
 		subTreePaths.forEach(subTreePath => {
 			// Model properties hidden nodes
 			// For a federation concatenate all together in a
 			// single array
-			if (subTreePath && subTreePath.idToPath)
-			{
+			if (subTreePath && subTreePath.idToPath) {
 				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
 			}
 		});
@@ -975,9 +947,7 @@ function getTreePath(account, model, branch, rev, username){
 	});
 }
 
-
-function getUnityAssets(account, model, branch, rev, username){
-	
+function getUnityAssets(account, model, branch, rev, username) {
 
 	let subAssets;
 	let revId, assetsFileName;
@@ -988,17 +958,17 @@ function getUnityAssets(account, model, branch, rev, username){
 		history = _history;
 		return middlewares.hasReadAccessToModelHelper(username, account, model);
 	}).then(granted => {
-		if(!history){
-			status = 'NOT_FOUND';
-			return Promise.reject(responseCodes.INVALID_TAG_NAME); 
+		if(!history) {
+			status = "NOT_FOUND";
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		} else if (!granted) {
-			status = 'NO_ACCESS';
+			status = "NO_ACCESS";
 			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
 		} else {
 			revId = utils.uuidToString(history._id);
 			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
 
-			let filter = {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -1006,14 +976,14 @@ function getUnityAssets(account, model, branch, rev, username){
 		}
 	}).then(refs => {
 
-		//for all refs get their tree
-		let getUnityProps = [];
+		// for all refs get their tree
+		const getUnityProps = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -1025,8 +995,8 @@ function getUnityAssets(account, model, branch, rev, username){
 						models: obj.models,
 						owner: ref.owner,
 						model: ref.project
-					})
-				}).catch(err => {
+					});
+				}).catch(() => {
 					return Promise.resolve();
 				})
 			);
@@ -1037,23 +1007,21 @@ function getUnityAssets(account, model, branch, rev, username){
 	}).then(_subAssets => {
 
 		subAssets = _subAssets;
-		return stash.findStashByFilename({ account, model }, 'json_mpc', assetsFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", assetsFileName);
 
 	}).then(buf => {
 		let models = [];
 
-		if(buf){
-			let modelAssets = JSON.parse(buf);
-			if(modelAssets !== null)
-			{
+		if(buf) {
+			const modelAssets = JSON.parse(buf);
+			if(modelAssets !== null) {
 				models.push(modelAssets);
 			}
 
 		}
 
 		subAssets.forEach(subAsset => {
-			if (subAsset && subAsset.models)
-			{
+			if (subAsset && subAsset.models) {
 				models = models.concat(subAsset.models);
 			}
 		});
@@ -1063,33 +1031,27 @@ function getUnityAssets(account, model, branch, rev, username){
 	});
 }
 
-function getJsonMpc(account, model, uid){
-	
+function getJsonMpc(account, model, uid) {
+
 	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
 
-	return stash.findStashByFilename({ account, model }, 'json_mpc', bundleFileName).then(buf => {
-		if(!buf)
-		{
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
-		}
-		else
-		{
+	return stash.findStashByFilename({ account, model }, "json_mpc", bundleFileName).then(buf => {
+		if(!buf) {
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
+		} else {
 			return Promise.resolve(buf);
 		}
 	});
 }
 
-function getUnityBundle(account, model, uid){
-	
+function getUnityBundle(account, model, uid) {
+
 	const bundleFileName = `/${account}/${model}/${uid}.unity3d`;
 
-	return stash.findStashByFilename({ account, model }, 'unity3d', bundleFileName).then(buf => {
-		if(!buf)
-		{
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND); 
-		}
-		else
-		{
+	return stash.findStashByFilename({ account, model }, "unity3d", bundleFileName).then(buf => {
+		if(!buf) {
+			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
+		} else {
 			return Promise.resolve(buf);
 		}
 	});
@@ -1097,7 +1059,7 @@ function getUnityBundle(account, model, uid){
 
 // return main tree and urls of sub trees only and let frontend to do the remaining work :)
 // returning a readstream for piping and a promise for error catching while streaming
-function getFullTree_noSubTree(account, model, branch, rev){
+function getFullTree_noSubTree(account, model, branch, rev) {
 
 	let history;
 	let stashRs;
@@ -1106,19 +1068,19 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 		history = _history;
 
-		if(!history){
+		if(!history) {
 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
 		}
 
-		let revId = utils.uuidToString(history._id);
-		let treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
+		const revId = utils.uuidToString(history._id);
+		const treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
 
-		//return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-		return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName, true);
+		// return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
+		return stash.findStashByFilename({ account, model }, "json_mpc", treeFileName, true);
 
 	}).then(rs => {
 
-		//trees.mainTree = buf.toString();
+		// trees.mainTree = buf.toString();
 		if(!rs) {
 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
 		}
@@ -1129,26 +1091,25 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	});
 
-
 	let pass;
 
 	const outputingPromise = readStreamPromise.then(_pass => {
 
 		pass = _pass;
 
-		return new Promise(function(resolve, reject){
+		return new Promise(function(resolve, reject) {
 
-			pass.write('{"mainTree": ');
+			pass.write("{\"mainTree\": ");
 
-			stashRs.on('data', d => pass.write(d));
-			stashRs.on('end', ()=> resolve());
-			stashRs.on('error', err => reject(err));
+			stashRs.on("data", d => pass.write(d));
+			stashRs.on("end", ()=> resolve());
+			stashRs.on("error", err => reject(err));
 
 		});
 
 	}).then(() => {
 
-		let filter = {
+		const filter = {
 			type: "ref",
 			_id: { $in: history.current }
 		};
@@ -1157,35 +1118,35 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	}).then(refs => {
 
-		pass.write(', "subTrees":[');
+		pass.write(", \"subTrees\":[");
 
 		return new Promise((resolve) => {
 
-			function eachRef(refIndex){
+			function eachRef(refIndex) {
 
 				const ref = refs[refIndex];
 
 				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
 
-				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
-					url = `/${ref.owner}/${ref.project}/revision/${revId}/fulltree.json`;
-				} 
+				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH) {
+					url = `/${ref.owner}/${ref.project}/revision/${ref._rid}/fulltree.json`;
+				}
 
-				if(refIndex > 0){
+				if(refIndex > 0) {
 					pass.write(",");
 				}
 
 				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
 
-				if(refIndex+1 < refs.length){
-					eachRef(refIndex+1);
+				if(refIndex + 1 < refs.length) {
+					eachRef(refIndex + 1);
 				} else {
 					resolve();
 				}
 
 			}
 
-			if(refs.length){
+			if(refs.length) {
 				eachRef(0);
 			} else {
 				resolve();
@@ -1194,7 +1155,7 @@ function getFullTree_noSubTree(account, model, branch, rev){
 
 	}).then(() => {
 
-		pass.write(']');
+		pass.write("]");
 		pass.write("}");
 		pass.end();
 
@@ -1208,16 +1169,16 @@ function getFullTree_noSubTree(account, model, branch, rev){
 	return {readStreamPromise, outputingPromise};
 }
 
-function searchTree(account, model, branch, rev, searchString, username){
+function searchTree(account, model, branch, rev, searchString, username) {
 
-	let search = (history) => {
+	const search = (history) => {
 
 		let items = [];
 
-		let filter = {
-			_id: {'$in': history.current },
-			type: {'$in': ["transformation", "mesh"]},
-			name: new RegExp(searchString, 'i')
+		const filter = {
+			_id: {"$in": history.current },
+			type: {"$in": ["transformation", "mesh"]},
+			name: new RegExp(searchString, "i")
 		};
 
 		return Scene.find({account, model}, filter, { name: 1 }).then(objs => {
@@ -1231,22 +1192,20 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 			});
 
-			let filter = {
-				_id: {'$in': history.current },
-				type: 'ref'
-			};
-
-			return Ref.find({account, model}, filter);
+			return Ref.find({account, model}, {
+				_id: {"$in": history.current },
+				type: "ref"
+			});
 
 		}).then(refs => {
 
-			let promises = [];
+			const promises = [];
 
 			refs.forEach(ref => {
 
 				let refRev, refBranch;
 
-				if(utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				if(utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 					refBranch = C.MASTER_BRANCH_NAME;
 				} else {
 					refRev = utils.uuidToString(ref._rid);
@@ -1270,10 +1229,10 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 	return middlewares.hasReadAccessToModelHelper(username, account, model).then(granted => {
 
-		if(granted){
+		if(granted) {
 
 			return History.getHistory({ account, model }, branch, rev).then(history => {
-				if(history){
+				if(history) {
 					return search(history);
 				} else {
 					return Promise.resolve([]);
@@ -1287,15 +1246,14 @@ function searchTree(account, model, branch, rev, searchString, username){
 
 }
 
-function listSubModels(account, model, branch){
-	
+function listSubModels(account, model, branch) {
 
-	let subModels = [];
+	const subModels = [];
 
 	return History.findByBranch({ account, model }, branch).then(history => {
 
-		if(history){
-			let filter = {
+		if(history) {
+			const filter = {
 				type: "ref",
 				_id: { $in: history.current }
 			};
@@ -1307,7 +1265,7 @@ function listSubModels(account, model, branch){
 
 	}).then(refs => {
 
-		const proms = refs.map(ref => 
+		const proms = refs.map(ref =>
 
 			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
@@ -1318,7 +1276,7 @@ function listSubModels(account, model, branch){
 						name: subModel.name
 					});
 				}
-				
+
 			})
 
 		);
@@ -1328,27 +1286,26 @@ function listSubModels(account, model, branch){
 	});
 }
 
+function downloadLatest(account, model) {
 
-function downloadLatest(account, model){
-	
 	return stash.getGridFSBucket(account, `${model}.history`).then(bucket => {
 
 		return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
 
-			if(!file){
+			if(!file) {
 				return Promise.reject(responseCodes.NO_FILE_FOUND);
 			}
 
 			// change file name
-			let filename = file.filename.split('_');
-			let ext = '';
-	
-			if (filename.length > 1){
-				ext = '.' + filename.pop();
+			const filename = file.filename.split("_");
+			let ext = "";
+
+			if (filename.length > 1) {
+				ext = "." + filename.pop();
 			}
 
-			file.filename = filename.join('_').substr(36) + ext;
-	
+			file.filename = filename.join("_").substr(36) + ext;
+
 			return Promise.resolve({
 				readStream: bucket.openDownloadStream(file._id),
 				meta: file
@@ -1358,26 +1315,25 @@ function downloadLatest(account, model){
 	});
 }
 
+function uploadFile(req) {
 
-function uploadFile(req){
-	
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
 
-	let account = req.params.account;
-	let model = req.params.model;
+	const account = req.params.account;
+	const model = req.params.model;
 
-	ChatEvent.modelStatusChanged(null, account, model, { status: 'uploading' });
-	//upload model with tag
-	let checkTag = tag => {
-		if(!tag){
+	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading" });
+	// upload model with tag
+	const checkTag = tag => {
+		if(!tag) {
 			return Promise.resolve();
 		} else {
 			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
 				return History.findByTag({account, model}, tag, {_id: 1});
-			}).then(tag => {
-				if (!tag){
+			}).then(_tag => {
+				if (!_tag) {
 					return Promise.resolve();
 				} else {
 					return Promise.reject(responseCodes.DUPLICATE_TAG);
@@ -1389,32 +1345,32 @@ function uploadFile(req){
 
 	return new Promise((resolve, reject) => {
 
-		let upload = multer({
+		const upload = multer({
 			dest: config.cn_queue.upload_dir,
-			fileFilter: function(req, file, cb){
+			fileFilter: function(fileReq, file, cb) {
 
-				let format = file.originalname.split('.');
+				let format = file.originalname.split(".");
 
-				if(format.length <= 1){
+				if(format.length <= 1) {
 					return cb({resCode: responseCodes.FILE_NO_EXT});
 				}
 
 				format = format[format.length - 1];
 
-				let size = parseInt(req.headers['content-length']);
+				const size = parseInt(fileReq.headers["content-length"]);
 
-				if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+				if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 				}
 
-				if(size > config.uploadSizeLimit){
+				if(size > config.uploadSizeLimit) {
 					return cb({ resCode: responseCodes.SIZE_LIMIT });
 				}
 
-				const sizeInMB = size / (1024*1024);
+				const sizeInMB = size / (1024 * 1024);
 				middlewares.freeSpace(account).then(space => {
 
-					if(sizeInMB > space){
+					if(sizeInMB > space) {
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
 						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
 					} else {
@@ -1428,11 +1384,11 @@ function uploadFile(req){
 			if (err) {
 				return reject(err);
 
-			} else if(!req.file.size){
+			} else if(!req.file.size) {
 				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 
 			} else {
-				ChatEvent.modelStatusChanged(null, account, model, { status: 'uploaded' });
+				ChatEvent.modelStatusChanged(null, account, model, { status: "uploaded" });
 				return resolve(req.file);
 			}
 		});
@@ -1443,14 +1399,14 @@ function uploadFile(req){
 
 }
 
-function _deleteFiles(files){
-	
+function _deleteFiles(files) {
+
 	files.forEach(file => {
 
-		let deleteFile = (file.type === 'file' ? fs.unlink : fs.rmdir);
+		const deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
 
-		deleteFile(file.path, function(err){
-			if(err){
+		deleteFile(file.path, function(err) {
+			if(err) {
 				systemLogger.logError(`error while deleting ${file.desc}`,{
 					message: err.message,
 					err: err,
@@ -1468,8 +1424,8 @@ function _deleteFiles(files){
 /**
  * Called by importModel to perform model upload
  */
-function _handleUpload(correlationId, account, model, username, file, data){
-	
+function _handleUpload(correlationId, account, model, username, file, data) {
+
 	importQueue.importFile(
 		correlationId,
 		file.path,
@@ -1480,7 +1436,7 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		null,
 		data.tag,
 		data.desc
-	).then(obj => {
+	).then(() => {
 
 		systemLogger.logInfo(`Job ${correlationId} imported without error`,{
 			account,
@@ -1489,29 +1445,29 @@ function _handleUpload(correlationId, account, model, username, file, data){
 		});
 
 	}).catch(err => {
-		systemLogger.logError(`Failed to import model:`, err);
+		systemLogger.logError("Failed to import model:", err);
 	});
 
 }
 
-function importModel(account, model, username, modelSetting, source, data){
+function importModel(account, model, username, modelSetting, source, data) {
 
-	if(!modelSetting){
+	if(!modelSetting) {
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
 	return modelSetting.save().then(() => {
 		return createCorrelationId(account, model).then(correlationId => {
-			return setStatus(account, model, 'queued').then(setting => {
+			return setStatus(account, model, "queued").then(setting => {
 
 				modelSetting = setting;
 
-				if (source.type === 'upload'){
+				if (source.type === "upload") {
 					return _handleUpload(correlationId, account, model, username, source.file, data);
 
-				} else if (source.type === 'toy'){
+				} else if (source.type === "toy") {
 
-					return importQueue.importToyModel(correlationId, account, model, source).then(obj => {
+					return importQueue.importToyModel(correlationId, account, model, source).then(() => {
 						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
 						return modelSetting;
 					});
@@ -1520,20 +1476,19 @@ function importModel(account, model, username, modelSetting, source, data){
 			});
 		});
 	}).catch(err => {
-		systemLogger.logError(`Failed to importModel:`, err);
+		systemLogger.logError("Failed to importModel:", err);
 	});
 
 }
 
-function removeModel(account, model, forceRemove){
-	
+function removeModel(account, model, forceRemove) {
 
 	let setting;
 	return ModelSetting.findById({account, model}, model).then(_setting => {
 
 		setting = _setting;
 
-		if(!setting){
+		if(!setting) {
 			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
 		}
 
@@ -1541,7 +1496,7 @@ function removeModel(account, model, forceRemove){
 
 	}).then(settings => {
 
-		let promises = [];
+		const promises = [];
 
 		settings.forEach(modelSetting => {
 			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
@@ -1554,16 +1509,16 @@ function removeModel(account, model, forceRemove){
 		return Promise.all(promises);
 
 	}).then(() => {
-		
+
 		return ModelFactory.dbManager.listCollections(account);
 
 	}).then(collections => {
-		//remove model collections
+		// remove model collections
 
-		let promises = [];
+		const promises = [];
 
 		collections.forEach(collection => {
-			if(collection.name.startsWith(model + '.')){
+			if(collection.name.startsWith(model + ".")) {
 				promises.push(ModelFactory.dbManager.dropCollection(account, collection));
 			}
 		});
@@ -1571,21 +1526,20 @@ function removeModel(account, model, forceRemove){
 		return Promise.all(promises);
 
 	}).then(() => {
-		//remove model settings
+		// remove model settings
 		return setting.remove();
 
 	}).then(() => {
 
-		//remove model from all project
+		// remove model from all project
 		return Project.removeModel(account, model);
 	});
 
 }
 
-function getModelPermission(username, setting, account){
-	
+function getModelPermission(username, setting, account) {
 
-	if(!setting){
+	if(!setting) {
 		return Promise.resolve([]);
 	}
 
@@ -1596,23 +1550,23 @@ function getModelPermission(username, setting, account){
 
 		dbUser = _dbUser;
 
-		if(!dbUser){
+		if(!dbUser) {
 			return [];
 		}
 
 		const accountPerm = dbUser.customData.permissions.findByUser(username);
 
-		if(accountPerm && accountPerm.permissions){
+		if(accountPerm && accountPerm.permissions) {
 			permissions = _.compact(_.flatten(accountPerm.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)));
 		}
 
-		const projectQuery = { models: setting._id, 'permissions.user': username };
+		const projectQuery = { models: setting._id, "permissions.user": username };
 		// project admin have access to models underneath it.
-		return Project.findOne({account}, projectQuery, { 'permissions.$' : 1 });
+		return Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
 	}).then(project => {
 
-		if(project && project.permissions){
+		if(project && project.permissions) {
 			permissions = permissions.concat(
 				_.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
 			);
@@ -1620,11 +1574,11 @@ function getModelPermission(username, setting, account){
 
 		const template = setting.findPermissionByUser(username);
 
-		if(template){
+		if(template) {
 
 			const permission = dbUser.customData.permissionTemplates.findById(template.permission);
 
-			if(permission && permission.permissions){
+			if(permission && permission.permissions) {
 				permissions = permissions.concat(
 					_.flatten(permission.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || p))
 				);
@@ -1633,7 +1587,7 @@ function getModelPermission(username, setting, account){
 
 		return _.uniq(permissions);
 	}).catch(err => {
-		systemLogger.logError(`Failed to getModelPermission:`, err);
+		systemLogger.logError("Failed to getModelPermission:", err);
 	});
 }
 
@@ -1641,15 +1595,13 @@ function getAllMetadata(account, model, branch, rev) {
 	return getAllIdsWithMetadataField(account, model, branch, rev, "");
 }
 
-function getAllIdsWith4DSequenceTag(account, model, branch, rev){
-	//Get sequence tag then call the generic getAllIdsWithMetadataField
+function getAllIdsWith4DSequenceTag(account, model, branch, rev) {
+	// Get sequence tag then call the generic getAllIdsWithMetadataField
 	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
-		if(!settings)
-		{
+		if(!settings) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
-		if(!settings.fourDSequenceTag)
-		{
+		if(!settings.fourDSequenceTag) {
 			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
 		}
 		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
@@ -1657,8 +1609,8 @@ function getAllIdsWith4DSequenceTag(account, model, branch, rev){
 	});
 }
 
-function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username){
-	//Get the revision object to find all relevant IDs
+function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username) {
+	// Get the revision object to find all relevant IDs
 	let history;
 	let fullFieldName = "metadata";
 
@@ -1668,26 +1620,25 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 	return History.getHistory({ account, model }, branch, rev).then(_history => {
 		history = _history;
-		if(!history){
+		if(!history) {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
 		}
-		//Check for submodel references
-		let revId = utils.uuidToString(history._id);
-		let filter = {
+		// Check for submodel references
+		const filter = {
 			type: "ref",
 			_id: { $in: history.current }
 		};
 		return Ref.find({ account, model }, filter);
 	}).then(refs =>{
 
-		//for all refs get their tree
-		let getMeta = [];
+		// for all refs get their tree
+		const getMeta = [];
 
 		refs.forEach(ref => {
 
 			let refBranch, refRev;
 
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
 				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
 				refRev = utils.uuidToString(ref._rid);
@@ -1695,17 +1646,17 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 			getMeta.push(
 				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
-				.then(obj => {
-					return Promise.resolve({
-						data: obj.data,
-						account: ref.owner,
-						model: ref.project
-					});
-				})
-				.catch(err => {
-					//Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-					return Promise.resolve();
-				})
+					.then(obj => {
+						return Promise.resolve({
+							data: obj.data,
+							account: ref.owner,
+							model: ref.project
+						});
+					})
+					.catch(() => {
+					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
+						return Promise.resolve();
+					})
 			);
 		});
 
@@ -1713,23 +1664,23 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 	}).then(_subMeta => {
 
-		let match = {
-			_id: {"$in": history.current},
-		}
+		const match = {
+			_id: {"$in": history.current}
+		};
 		match[fullFieldName] =  {"$exists" : true};
 
-		let projection = {
+		const projection = {
 			parents: 1
 		};
 		projection[fullFieldName] = 1;
 
 		return Scene.find({account, model}, match, projection).then(obj => {
-			if(obj){
-				//rename fieldName to "value"
-				let parsedObj = {data: obj};
+			if(obj) {
+				// rename fieldName to "value"
+				const parsedObj = {data: obj};
 				if(obj.length > 0 && fieldName && fieldName.length > 0) {
 					const objStr = JSON.stringify(obj);
-					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, 'g'), "value"))
+					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
 				}
 				if(_subMeta.length > 0) {
 					parsedObj.subModels = _subMeta;
@@ -1742,14 +1693,11 @@ function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, user
 
 	});
 
-
-
-
 }
 
-function getMetadata(account, model, id){
+function getMetadata(account, model, id) {
 
-	let projection = {
+	const projection = {
 		shared_id: 0,
 		paths: 0,
 		type: 0,
@@ -1758,7 +1706,7 @@ function getMetadata(account, model, id){
 	};
 
 	return Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
-		if(obj){
+		if(obj) {
 			return obj;
 		} else {
 			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
@@ -1767,32 +1715,30 @@ function getMetadata(account, model, id){
 
 }
 
-function isUserAdmin(account, model, user)
-{
-	const projection = { 'permissions': { '$elemMatch': { user: user } }};
-	//find the project this model belongs to
+function isUserAdmin(account, model, user) {
+	const projection = { "permissions": { "$elemMatch": { user: user } }};
+	// find the project this model belongs to
 	return Project.findOne({account}, {models: model}, projection).then(project => {
-		//It either has no permissions, or it has one entry (the user) due to the project in the query
+		// It either has no permissions, or it has one entry (the user) due to the project in the query
 		return Promise.resolve(
-			project  //This model belongs to a project
-			&& project.permissions.length > 0 //This user has project level permissions in the project
-			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 //This user is an admin of the project
-			);
+			project  // This model belongs to a project
+			&& project.permissions.length > 0 // This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 // This user is an admin of the project
+		);
 	});
 }
 
-const fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
+const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
 const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
-	'x','obj','3ds','md3','md2','ply',
-	'mdl','ase','hmp','smd','mdc','md5',
-	'stl','lxo','nff','raw','off','ac',
-	'bvh','irrmesh','irr','q3d','q3s','b3d',
-	'dae','ter','csm','3d','lws','xml','ogex',
-	'ms3d','cob','scn','blend','pk3','ndo',
-	'ifc','xgl','zgl','fbx','assbin', 'bim'
+	"x","obj","3ds","md3","md2","ply",
+	"mdl","ase","hmp","smd","mdc","md5",
+	"stl","lxo","nff","raw","off","ac",
+	"bvh","irrmesh","irr","q3d","q3s","b3d",
+	"dae","ter","csm","3d","lws","xml","ogex",
+	"ms3d","cob","scn","blend","pk3","ndo",
+	"ifc","xgl","zgl","fbx","assbin", "bim"
 ];
-
 
 module.exports = {
 	createAndAssignRole,
@@ -1822,7 +1768,7 @@ module.exports = {
 	getFullTree_noSubTree,
 	resetCorrelationId,
 	getAllMetadata,
-   	getAllIdsWith4DSequenceTag,
+	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
 	setStatus,
 	importSuccess,

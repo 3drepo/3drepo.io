@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,32 +17,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
-let responseCodes = require("../../response_codes.js");
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
+const responseCodes = require("../../response_codes.js");
 
-describe('Logout', function () {
-	let User = require('../../models/user');
+describe("Logout", function () {
+	const User = require("../../models/user");
 	let server;
-	let username = 'logout_username';
-	let username_not_verified = 'logout_username_not_verified';
-	let password = 'password';
-	let email = 'test3drepo_logout@mailinator.com';
+	const username = "logout_username";
+	const username_not_verified = "logout_username_not_verified";
+	const password = "password";
+	const email = "test3drepo_logout@mailinator.com";
 
-	before(function(done){
-
+	before(function(done) {
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
-			//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-			request(server).get('/info').end(() => {
-
+			// hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
+			request(server).get("/info").end(() => {
 
 				// create a user
 				return User.createUser(systemLogger, username, password, {
@@ -56,72 +54,71 @@ describe('Logout', function () {
 				});
 
 			});
-			
+
 		});
 
 	});
 
-	after(function(done){
-		server.close(function(){
-			console.log('API test server is closed');
+	after(function(done) {
+		server.close(function() {
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
+	it("should be successful if logged in", function(done) {
+		const agent = request.agent(server);
 
-	it('should be successful if logged in', function(done){
-		let agent = request.agent(server);
-
-		agent.post('/login')
-		.send({ username, password })
-		.expect(200, function(err, res){
-			if(err){
-				done(err)
-			} else {
-				agent.post('/logout')
-				.send({})
-				.expect(200, function(err, res){
-					expect(res.body.username).to.equal(username);
+		agent.post("/login")
+			.send({ username, password })
+			.expect(200, function(err, res) {
+				if(err) {
 					done(err);
-				})
-			}
-		});
-	});
-
-	it('and view user profile should fail', function(done){
-		let agent = request.agent(server);
-
-		agent.post('/login')
-		.send({ username, password })
-		.expect(200, function(err, res){
-			if(err){
-				done(err)
-			} else {
-				agent.post('/logout')
-				.send({})
-				.expect(200, function(err, res){
-					expect(res.body.username).to.equal(username);
-					if(err){
-						done(err);
-					} else {
-						agent.get(`/${username}.json`)
-						.expect(401, function(err, res){
+				} else {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
 							done(err);
-						})
-					}
-				})
-			}
-		});
+						});
+				}
+			});
 	});
 
-	it('should fail if not logged in', function(done){
-		let agent = request.agent(server);
-		agent.post('/logout')
-		.send({})
-		.expect(401, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.NOT_LOGGED_IN.value);
-			done(err);
-		});
+	it("and view user profile should fail", function(done) {
+		const agent = request.agent(server);
+
+		agent.post("/login")
+			.send({ username, password })
+			.expect(200, function(err, res) {
+				if(err) {
+					done(err);
+				} else {
+					agent.post("/logout")
+						.send({})
+						.expect(200, function(err, res) {
+							expect(res.body.username).to.equal(username);
+							if(err) {
+								done(err);
+							} else {
+								agent.get(`/${username}.json`)
+									.expect(401, function(err, res) {
+										done(err);
+									});
+							}
+						});
+				}
+			});
+	});
+
+	it("should fail if not logged in", function(done) {
+		const agent = request.agent(server);
+		agent.post("/logout")
+			.send({})
+			.expect(401, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.NOT_LOGGED_IN.value);
+				done(err);
+			});
 	});
 
 });

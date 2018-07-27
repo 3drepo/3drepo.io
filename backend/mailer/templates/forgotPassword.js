@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-var html = data => `
+"use strict";
+const html = data => `
 	Hi there,<br>
 	<br>
 	You've requested to reset your password, please click on the following link to reset your password.<br>
@@ -29,5 +29,5 @@ var html = data => `
 
 module.exports =  {
 	html: html,
-	subject: 'Reset your password'
+	subject: "Reset your password"
 };

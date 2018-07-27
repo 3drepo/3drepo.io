@@ -33,14 +33,14 @@ router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
 router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
 router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getViewpointThumbnail);
 
-const getDbColOptions = function(req){
+const getDbColOptions = function(req) {
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
-function listViewpoints(req, res, next){
+function listViewpoints(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.listViewpoints(dbCol, req.query)
 		.then(viewpoints => {
@@ -55,14 +55,14 @@ function listViewpoints(req, res, next){
 		});
 }
 
-function findViewpoint(req, res, next){
+function findViewpoint(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.findByUID(dbCol, req.params.uid)
 		.then(view => {
-			if(!view){
+			if(!view) {
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 			} else {
 				view._id = utils.uuidToString(view._id);
@@ -76,21 +76,28 @@ function findViewpoint(req, res, next){
 		});
 }
 
-function createViewpoint(req, res, next){
+function createViewpoint(req, res, next) {
+	if (Object.keys(req.body).length >= 3 &&
+			Object.prototype.toString.call(req.body.name) === "[object String]" &&
+			Object.prototype.toString.call(req.body.viewpoint) === "[object Object]" &&
+			Object.prototype.toString.call(req.body.screenshot) === "[object Object]" &&
+			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
+		const place = utils.APIInfo(req);
 
-	let place = utils.APIInfo(req);
-
-	Viewpoint.createViewpoint(getDbColOptions(req), req.body)
-		.then(view => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-		}).catch(err => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
+		Viewpoint.createViewpoint(getDbColOptions(req), req.body)
+			.then(view => {
+				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+			}).catch(err => {
+				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			});
+	} else {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
-function deleteViewpoint(req, res, next){
+function deleteViewpoint(req, res, next) {
 
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
@@ -100,30 +107,35 @@ function deleteViewpoint(req, res, next){
 
 }
 
-function updateViewpoint(req, res, next){
+function updateViewpoint(req, res, next) {
 
-	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	if (Object.keys(req.body).length >= 1 &&
+			Object.prototype.toString.call(req.body.name) === "[object String]") {
+		const dbCol = getDbColOptions(req);
+		const place = utils.APIInfo(req);
 
-	Viewpoint.findByUID(dbCol, req.params.uid)
-		.then(view => {
-			if(!view){
-				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
-			} else {
-				return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
-			}
-		}).then(view => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, view);
-		}).catch(err => {
-			systemLogger.logError(err.stack);
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
+		Viewpoint.findByUID(dbCol, req.params.uid)
+			.then(view => {
+				if(!view) {
+					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
+				} else {
+					return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
+				}
+			}).then(view => {
+				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
+			}).catch(err => {
+				systemLogger.logError(err.stack);
+				responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			});
+	} else {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
-function getViewpointThumbnail(req, res, next){
+function getViewpointThumbnail(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let dbCol = {account: req.params.account, model: req.params.model};
+	const dbCol = getDbColOptions(req);
+	const place = utils.APIInfo(req);
 
 	Viewpoint.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
