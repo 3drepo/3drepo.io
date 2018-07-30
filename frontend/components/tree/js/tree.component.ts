@@ -101,33 +101,11 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-
-				if ((event.value.source !== "tree") && this.TreeService.highlightSelectedViewerObject) {
-					const objectID = event.value.id;
-
-					if (objectID && this.TreeService.getCachedIdToPath()) {
-
-						const path = this.TreeService.getPath(objectID);
-						if (!path) {
-							console.error("Couldn't find the object path");
-						} else if (this.showTree) {
-
-							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode())
-								.then((selectedIndex) => {
-									this.updateTopIndex(selectedIndex);
-								});
-							this.TreeService.updateModelVisibility(this.allNodes[0]);
-
-						} else {
-							const nodes = [this.TreeService.getNodeById(objectID)];
-							this.TreeService.selectNodes(nodes, this.MultiSelectService.isMultiMode(), undefined, true);
-						}
-
-					}
-				}
+				const nodes = [this.TreeService.getNodeById(event.value.id)];
+				this.TreeService.nodesClicked(nodes);
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.MULTI_OBJECTS_SELECTED) {
-				this.TreeService.selectNodesBySharedIds(event.value.selectedNodes, this.MultiSelectService.isMultiMode());
+				this.TreeService.nodesClickedBySharedIds(event.value.selectedNode);
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
 				this.GroupsService.clearSelectionHighlights();
@@ -358,12 +336,7 @@ class TreeController implements ng.IController {
 		if (this.ignoreSelection($event, node)) {
 			return;
 		}
-		this.lastSelection = this.TreeService.selectNodes(
-			[node],
-			this.MultiSelectService.isMultiMode(),
-			undefined,
-			false
-		);
+		this.lastSelection = this.TreeService.nodesClicked([node]);
 
 		return this.lastSelection;
 	}
@@ -409,11 +382,11 @@ class TreeController implements ng.IController {
 												this.TreeService.SELECTION_STATES.unselected;
 		}
 
+		// FIXME: revisit
 		const selectedComponentNode = this.nodes[node.index];
-
 		if (selectedComponentNode) {
 			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
+			this.TreeService.nodesClicked([serviceNode]);
 		}
 
 	}

@@ -408,10 +408,7 @@ export class GroupsService {
 		return this.getSelectedObjects().then((objects) => {
 
 			this.TreeService.selectNodesBySharedIds(
-				objects,
-				false,
-				this.ViewerService.getDefaultHighlightColor(),
-				true
+				objects
 			);
 
 			this.focus({
@@ -575,12 +572,10 @@ export class GroupsService {
 			this.state.multiSelectedGroups.push(group);
 		}
 
-		return this.TreeService.showTreeNodesBySharedIds(group.objects).then(() => {
+		return this.TreeService.showNodesBySharedIds(group.objects).then(() => {
 			return this.TreeService.selectNodesBySharedIds(
 				group.objects,
-				this.MultiSelectService.isAccumMode(),
-				color,
-				true
+				color
 			).then((meshes) => {
 				this.setTotalSavedMeshes(group);
 			});

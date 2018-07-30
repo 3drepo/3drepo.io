@@ -123,12 +123,12 @@ export class MultiSelectService {
 			document.getElementById("#canvas").style.cursor = canvasIcon;
 		}
 
-		const groupElements = document.getElementsByClassName("groupsList");
+		const groupElements: any = document.getElementsByClassName("groupsList");
 		for (let i = 0; i < groupElements.length; ++i) {
 			groupElements[i].style.cursor = panelIcon;
 		}
 
-		const treeNodeElements = document.getElementsByClassName("treeNode");
+		const treeNodeElements: any = document.getElementsByClassName("treeNode");
 		for (let i = 0; i < treeNodeElements.length; ++i) {
 			treeNodeElements[i].style.cursor = panelIcon;
 		}
