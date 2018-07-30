@@ -105,7 +105,7 @@ class TreeController implements ng.IController {
 				this.TreeService.nodesClicked(nodes);
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.MULTI_OBJECTS_SELECTED) {
-				this.TreeService.nodesClickedBySharedIds(event.value.selectedNode);
+				this.TreeService.nodesClickedBySharedIds(event.value.selectedNodes);
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
 				this.GroupsService.clearSelectionHighlights();
