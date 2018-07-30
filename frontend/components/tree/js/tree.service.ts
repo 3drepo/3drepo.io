@@ -59,7 +59,7 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
-		private DocsService
+		private DocsService,
 		private MultiSelectService
 	) {
 		this.reset();
