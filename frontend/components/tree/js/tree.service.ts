@@ -20,9 +20,9 @@ export class TreeService {
 	public static $inject: string[] = [
 		"$q",
 		"APIService",
-		"MultiSelectService",
 		"ViewerService",
-		"DocsService"
+		"DocsService",
+		"MultiSelectService"
 	];
 
 	public highlightMap;
@@ -59,8 +59,8 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
-		private MultiSelectService,
 		private DocsService
+		private MultiSelectService
 	) {
 		this.reset();
 
@@ -1047,7 +1047,6 @@ export class TreeService {
 	 */
 	public clearCurrentlySelected() {
 
-		console.log(this.ViewerService);
 		this.ViewerService.clearHighlights();
 		this.DocsService.closeDocs();
 
