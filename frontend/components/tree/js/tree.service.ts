@@ -652,71 +652,6 @@ export class TreeService {
 	}
 
 	/**
-	* Collapse a given tree node in the UI
-	* @param nodeToCollapse the node to collapse
-	*/
-	public collapseTreeNode(nodeToCollapse: any) {
-
-		let subNodes = [];
-		if (nodeToCollapse.children) {
-			subNodes = subNodes.concat(nodeToCollapse.children);
-		}
-
-		nodeToCollapse.expanded = false;
-
-		while (subNodes.length > 0) {
-
-			const subNodeToCollapse = subNodes.pop();
-
-			// Collapse the node
-			if (subNodeToCollapse.expanded) {
-				// If it has children lets collapse those too
-				if (subNodeToCollapse.children) {
-					subNodes = subNodes.concat(subNodeToCollapse.children);
-				}
-				subNodeToCollapse.expanded = false;
-			}
-
-			// Remove the node from the visible tree
-			const subNodeToCollapseIndex = this.nodesToShow.indexOf(subNodeToCollapse);
-
-			if (subNodeToCollapseIndex !== -1) {
-				this.nodesToShow.splice(subNodeToCollapseIndex, 1);
-			}
-		}
-	}
-
-	/**
-	 * Expand a given tree node in the UI
-	 * @param nodeToExpand the path array to traverse down
-	 */
-	public expandTreeNode(nodeToExpand: any) {
-
-		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
-
-			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
-			const numChildren = nodeToExpand.children.length;
-
-			let position = 0; // We don't want to use i as some childNodes aren't displayed (no name)
-			for (let i = 0; i < numChildren; i++) {
-
-				const childNode = nodeToExpand.children[i];
-				childNode.level = nodeToExpand.level + 1;
-
-				if (childNode && childNode.hasOwnProperty("name")) {
-					if (this.nodesToShow.indexOf(childNode) === -1) {
-						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
-						position++;
-					}
-				}
-
-			}
-			nodeToExpand.expanded = true;
-		}
-
-	}
-
-	/**
 	 * Return a normalised path fo ra given object ID
 	 * This will fix paths for federations.
 	 * @param objectID the id of the node to get a path for
@@ -1522,6 +1457,72 @@ export class TreeService {
 		}
 
 	}
+
+		/**
+	* Collapse a given tree node in the UI
+	* @param nodeToCollapse the node to collapse
+	*/
+	private collapseTreeNode(nodeToCollapse: any) {
+
+		let subNodes = [];
+		if (nodeToCollapse.children) {
+			subNodes = subNodes.concat(nodeToCollapse.children);
+		}
+
+		nodeToCollapse.expanded = false;
+
+		while (subNodes.length > 0) {
+
+			const subNodeToCollapse = subNodes.pop();
+
+			// Collapse the node
+			if (subNodeToCollapse.expanded) {
+				// If it has children lets collapse those too
+				if (subNodeToCollapse.children) {
+					subNodes = subNodes.concat(subNodeToCollapse.children);
+				}
+				subNodeToCollapse.expanded = false;
+			}
+
+			// Remove the node from the visible tree
+			const subNodeToCollapseIndex = this.nodesToShow.indexOf(subNodeToCollapse);
+
+			if (subNodeToCollapseIndex !== -1) {
+				this.nodesToShow.splice(subNodeToCollapseIndex, 1);
+			}
+		}
+	}
+
+	/**
+	 * Expand a given tree node in the UI
+	 * @param nodeToExpand the path array to traverse down
+	 */
+	private expandTreeNode(nodeToExpand: any) {
+
+		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
+
+			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
+			const numChildren = nodeToExpand.children.length;
+
+			let position = 0; // We don't want to use i as some childNodes aren't displayed (no name)
+			for (let i = 0; i < numChildren; i++) {
+
+				const childNode = nodeToExpand.children[i];
+				childNode.level = nodeToExpand.level + 1;
+
+				if (childNode && childNode.hasOwnProperty("name")) {
+					if (this.nodesToShow.indexOf(childNode) === -1) {
+						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
+						position++;
+					}
+				}
+
+			}
+			nodeToExpand.expanded = true;
+		}
+
+	}
+
 }
 
 export const TreeServiceModule = angular
