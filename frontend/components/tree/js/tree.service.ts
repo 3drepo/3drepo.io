@@ -472,20 +472,11 @@ export class TreeService {
 	 * @param nodes	Array of root node to show.
 	 */
 	public initNodesToShow(nodes) {
-		// TODO: Is it a good idea to save tree state within each node?
 		this.nodesToShow = nodes;
 		this.nodesToShow[0].level = 0;
 		this.nodesToShow[0].expanded = false;
 		this.nodesToShow[0].selected = this.SELECTION_STATES.unselected;
-	}
-
-	/**
-	 * Show the first set of children using the expand function but deselect the child used for this.
-	 */
-	public expandFirstNode() {
-		if (this.nodesToShow.length > 0) {
-			this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
-		}
+		this.expandTreeNode(this.nodesToShow[0]);
 	}
 
 	/**
@@ -1071,7 +1062,7 @@ export class TreeService {
 		return this.getMeshHighlights(this.getCurrentSelectedNodesAsArray());
 	}
 
-	public nodesClicked(nodes: any[]) {
+	public nodesClicked(nodes: any[], skipExpand?: boolean) {
 		const addGroup = this.MultiSelectService.isAccumMode();
 		const removeGroup = this.MultiSelectService.isDecumMode();
 		const multi = addGroup || removeGroup;
@@ -1084,7 +1075,7 @@ export class TreeService {
 		if (removeGroup) {
 			this.deselectNodes(nodes);
 		} else {
-			this.selectNodes(nodes);
+			this.selectNodes(nodes, skipExpand);
 		}
 	}
 
@@ -1130,7 +1121,7 @@ export class TreeService {
 	 * @param nodes	Nodes to select.
 	 * @param colour the colour array for selection in the viewer
 	 */
-	public selectNodes(nodes: any[], colour?: number[]): any {
+	public selectNodes(nodes: any[], skipExpand?: boolean, colour?: number[]): any {
 
 		if (!nodes) {
 			return Promise.resolve("No nodes specified");
@@ -1143,7 +1134,9 @@ export class TreeService {
 			this.setNodeSelection(node, true);
 		}
 
-		this.expandToNode(lastNode);
+		if (!skipExpand) {
+			this.expandToNode(lastNode);
+		}
 
 		return this.onReady().then(() => {
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
@@ -1254,7 +1247,7 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				return this.selectNodes(nodes, colour);
+				return this.selectNodes(nodes, false, colour);
 			})
 			.catch((error) => {
 				console.error(error);
