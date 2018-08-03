@@ -1,3 +1,4 @@
+
 /**
  *	Copyright (C) 2018 3D Repo Ltd
  *
@@ -27,7 +28,8 @@ class GroupsController implements ng.IController {
 		"TreeService",
 		"AuthService",
 		"ClientConfigService",
-		"IconsConstant"
+		"IconsConstant",
+		"NotificationService"
 	];
 
 	private onContentHeightRequest: any;
@@ -56,13 +58,13 @@ class GroupsController implements ng.IController {
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
 		private $element: ng.IRootElementService,
-
 		private GroupsService: any,
 		private DialogService: any,
 		private TreeService: any,
 		private AuthService: any,
 		private ClientConfigService: any,
-		private IconsConstant: any
+		private IconsConstant: any,
+		private NotificationService: any
 	) {}
 
 	public $onInit() {
@@ -107,7 +109,7 @@ class GroupsController implements ng.IController {
 
 		}, true);
 
-		this.$scope.$watch("vm.groups", () => {
+		this.$scope.$watchCollection("vm.groups", () => {
 			this.setContentHeight();
 		});
 
@@ -138,7 +140,10 @@ class GroupsController implements ng.IController {
 					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
 					this.modelSettings.permissions
 				);
+
+				this.watchNotification();
 			}
+
 		});
 
 		this.$scope.$watchCollection(() => {
@@ -419,6 +424,22 @@ class GroupsController implements ng.IController {
 
 	}
 
+	/*** Realtime sync  */
+	public watchNotification() {
+
+		// Watch for new groups
+		this.NotificationService.subscribe.newGroup(
+			this.account,
+			this.model,
+			this.newGroupListener.bind(this)
+		);
+
+	}
+
+	public newGroupListener(group, submodel) {
+		this.GroupsService.state.groups.push(group);
+	}
+	/***/
 }
 
 export const GroupsComponent: ng.IComponentOptions = {

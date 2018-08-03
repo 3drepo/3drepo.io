@@ -77,7 +77,7 @@ class IssuesController implements ng.IController {
 		private EventService,
 		private AuthService,
 		private APIService,
-		private NotificationService,
+		private NotificationService: any,
 		private RevisionsService,
 		private ClientConfigService,
 		private AnalyticService,
@@ -128,6 +128,7 @@ class IssuesController implements ng.IController {
 		this.allIssues = [];
 		this.issuesToShow = [];
 		this.removeUnsavedPin();
+
 		this.NotificationService.unsubscribe.newIssues(this.account, this.model);
 		this.NotificationService.unsubscribe.issueChanged(this.account, this.model);
 

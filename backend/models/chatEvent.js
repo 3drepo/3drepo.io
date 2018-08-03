@@ -66,12 +66,33 @@ function newModel(emitter, account, data) {
 	return insertEventQueue("newModel", emitter, account, null, null, data);
 }
 
+
+function newGroups(emitter, account, model, data){
+	'use strict';
+	return insertEventQueue('newGroups', emitter, account, model, null, data);
+}
+
+
+function groupChanged(emitter, account, model, issueId, data){
+	'use strict';
+
+	//send event to single issue changed listener and any issues changed listener
+	return Promise.all([
+		insertEventQueue('groupChanged', emitter, account, model, [issueId], data),
+		insertEventQueue('groupChanged', emitter, account, model, null, data)
+	]);
+}
+
+
+
 module.exports = {
 	newIssues,
 	newComment,
+	newGroups,
 	commentChanged,
 	commentDeleted,
+	groupChanged,
 	modelStatusChanged,
 	issueChanged,
-	newModel
+	newModel,
 };

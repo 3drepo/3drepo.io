@@ -26,6 +26,8 @@ const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
 const db = require("../db/db");
+const ChatEvent = require("./chatEvent");
+
 
 const groupSchema = Schema({
 	_id: Object,
@@ -390,16 +392,23 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 	});
 };
 
-groupSchema.statics.createGroup = function(dbCol, data) {
+groupSchema.statics.createGroup = function(dbCol,sessionId , data){
 	const group = this.model("Group").createInstance({
 		account: dbCol.account,
 		model: dbCol.model
 	});
 
+	const model = dbCol.model;
+
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.save().then((savedGroup)=>{
-		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
-			// remove the recently saved new group as update attributes failed
+		return savedGroup.updateAttrs(dbCol, data).then(() => {			
+			data._id = utils.uuidToString(savedGroup._id);			
+			ChatEvent.newGroups(sessionId, dbCol.account , model, data);
+			return data;
+		}		
+		,(err) => {
+			//remove the recently saved new group as update attributes failed
 			return Group.deleteGroup(dbCol, group._id).then(() => {
 				return Promise.reject(err);
 			});

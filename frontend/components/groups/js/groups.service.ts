@@ -26,7 +26,7 @@ export class GroupsService {
 		"ViewerService"
 	];
 
-	private state;
+	public state;
 
 	constructor(
 		private $q: ng.IQService,
@@ -256,7 +256,7 @@ export class GroupsService {
 	/**
 	 * Convert a colour from hex to an RGBA value
 	 */
-	public hexToRGBA(hex: string, alpha: number) {
+	public hexToRGBA(hex: string, alpha?: number) {
 
 		alpha = (alpha !== undefined) ? alpha : 1;
 

@@ -68,7 +68,9 @@ export class NotificationService {
 			commentDeleted: this.subscribeCommentDeleted,
 			issueChanged: this.subscribeIssueChanged,
 			modelStatusChanged: this.subscribeModelStatusChanged,
-			newModel: this.subscribeNewModel
+			newModel: this.subscribeNewModel,
+			newGroup: this.subscribeNewGroup,
+			groupChanged: this.subscribeGroupChanged
 		};
 
 		this.unsubscribe = {
@@ -84,7 +86,9 @@ export class NotificationService {
 			commentDeleted: this.unsubscribeCommentDeleted,
 			issueChanged: this.unsubscribeIssueChanged,
 			modelStatusChanged: this.unsubscribeModelStatusChanged,
-			newModel: this.unsubscribeNewModel
+			newModel: this.unsubscribeNewModel,
+			newGroup: this.unsubscribeNewGroup,
+			groupChanged: this.unsubscribeGroupChanged
 		};
 
 	}
@@ -217,6 +221,36 @@ export class NotificationService {
 			this.performUnsubscribe(account, model, [issueId], "issueChanged");
 		}
 	}
+
+	/**
+	 *  Groups messaging
+	 */
+	public subscribeNewGroup(account: string, model: string, callback: any) {
+		this.performSubscribe(account, model, [], "newGroups", callback);
+	}
+
+	public unsubscribeNewGroup(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "newGroups");
+	}
+
+	public subscribeGroupChanged(account: string, model: string, groupId: string, callback: any) {
+		if (arguments.length === 3) {
+			callback = groupId;
+			this.performSubscribe(account, model, [], "groupChanged", callback);
+		} else {
+			this.performSubscribe(account, model, [groupId], "groupChanged", callback);
+		}
+	}
+
+	public unsubscribeGroupChanged(account: string, model: string, groupId: string) {
+		if (arguments.length === 2) {
+			this.performUnsubscribe(account, model, [], "groupChanged");
+		} else {
+			this.performUnsubscribe(account, model, [groupId], "groupChanged");
+		}
+	}
+
+	/** end groups messanging */
 
 	public subscribeModelStatusChanged(account: string, model: string, callback: any) {
 		this.performSubscribe(account, model, [], "modelStatusChanged", callback);
