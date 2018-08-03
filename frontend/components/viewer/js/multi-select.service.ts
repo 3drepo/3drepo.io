@@ -87,12 +87,7 @@ export class MultiSelectService {
 		}
 	}
 
-	public isMultiMode() {
-		return this.isAccumMode();
-	}
-
 	public isAccumMode() {
-		// isMultiMode() {
 		return this.accumMode;
 	}
 

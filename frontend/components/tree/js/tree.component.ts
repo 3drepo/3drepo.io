@@ -363,22 +363,23 @@ class TreeController implements ng.IController {
 			return;
 		}
 
-		const multi = this.MultiSelectService.isMultiMode();
+		const addGroup = this.MultiSelectService.isAccumMode();
+		const removeGroup = this.MultiSelectService.isDecumMode();
+		const multi = addGroup || removeGroup;
+
+		const selectedComponentNode = this.TreeService.getNodeById(this.nodes[node.index]._id);
 
 		if (!multi) {
 			this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
-			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
-		} else {
-			this.nodes[node.index].selected = (this.nodes[node.index].selected !== this.TreeService.SELECTION_STATES.selected) ?
-												this.TreeService.SELECTION_STATES.selected :
-												this.TreeService.SELECTION_STATES.unselected;
+			this.TreeService.clearCurrentlySelected();
 		}
 
-		// FIXME: revisit
-		const selectedComponentNode = this.nodes[node.index];
-		if (selectedComponentNode) {
-			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.nodesClicked([serviceNode]);
+		if (removeGroup) {
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.unselected;
+			this.TreeService.deselectNodes([selectedComponentNode]);
+		} else {
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
+			this.TreeService.selectNodes([selectedComponentNode], true);
 		}
 
 	}
