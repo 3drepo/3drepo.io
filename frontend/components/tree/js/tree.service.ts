@@ -717,66 +717,6 @@ export class TreeService {
 	}
 
 	/**
-	 * Given a node expand the UI tree to that node and select it
-	 * @param path the path array to traverse down
-	 * @param level the level to start expanding at (generally the root node)
-	 * @param noHighlight whether no highlighting should take place
-	 * @param multi wether multiple nodes are selected in the selection
-	 */
-	public expandToSelection(path: any[], level: number, noHighlight: boolean, multi: boolean) {
-
-		let selectedIndex;
-
-		// Cut it to the level provided
-		path = path.slice(level, path.length);
-
-		for (let i = 0; i < path.length; i++) {
-			const node = this.getNodeById(path[i]);
-			const nextNode = this.getNodeById(path[i + 1]);
-
-			this.expandTreeNode(node);
-
-			// Collapse all the children that aren't next
-			// down the expansion path
-			if (node.children) {
-				node.children.forEach((n) => {
-					if (n !== nextNode || nextNode === undefined) {
-						this.collapseTreeNode(n);
-					}
-				});
-			}
-
-			// If it's the last node in the path
-			// scroll to it
-			if (i === path.length - 1) {
-				selectedIndex = this.nodesToShow.indexOf(node);
-
-				if (selectedIndex === -1) {
-					// Sometimes we have an edge case where an object doesn't exist in the tree
-					// because it has no name. It is often objects like a window, so what we do
-					// is select its parent object to highlight that instead
-					const specialNodeParent = this.getNodeById(path[i - 1]);
-					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent);
-				}
-			}
-		}
-
-		if (!noHighlight) {
-
-			return this.selectNodes([this.nodesToShow[selectedIndex]])
-				.then(() => {
-					this.selectedIndex = selectedIndex;
-					return selectedIndex;
-				});
-
-		}
-
-		this.selectedIndex = selectedIndex;
-		return Promise.resolve(selectedIndex);
-
-	}
-
-	/**
 	 * Return a normalised path fo ra given object ID
 	 * This will fix paths for federations.
 	 * @param objectID the id of the node to get a path for
@@ -1261,11 +1201,14 @@ export class TreeService {
 			return Promise.resolve("No nodes specified");
 		}
 
-		this.handleMetadata(nodes[nodes.length - 1]);
+		const lastNode = nodes[nodes.length - 1];
+		this.handleMetadata(lastNode);
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 			this.setNodeSelection(node, true);
 		}
+
+		this.expandToNode(lastNode);
 
 		return this.onReady().then(() => {
 			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
@@ -1529,6 +1472,56 @@ export class TreeService {
 		return this.allNodes;
 	}
 
+	/**
+	 * Given a node expand the UI tree to that node and select it
+	 * @param path the path array to traverse down
+	 * @param level the level to start expanding at (generally the root node)
+	 */
+	private expandToNode(nodeToExpand: any) {
+
+		let selectedIndex;
+
+		const path = this.getPath(nodeToExpand._id);
+
+		if (path) {
+			for (let i = 0; i < path.length; i++) {
+				const node = this.getNodeById(path[i]);
+				const nextNode = this.getNodeById(path[i + 1]);
+
+				this.expandTreeNode(node);
+
+				// Collapse all the children that aren't next
+				// down the expansion path
+				if (node.children) {
+					node.children.forEach((n) => {
+						if (n !== nextNode || nextNode === undefined) {
+							this.collapseTreeNode(n);
+						}
+					});
+				}
+
+				// If it's the last node in the path
+				// scroll to it
+				if (i === path.length - 1) {
+					selectedIndex = this.nodesToShow.indexOf(node);
+
+					if (selectedIndex === -1) {
+						// Sometimes we have an edge case where an object doesn't exist in the tree
+						// because it has no name. It is often objects like a window, so what we do
+						// is select its parent object to highlight that instead
+						const specialNodeParent = this.getNodeById(path[i - 1]);
+						selectedIndex =  this.nodesToShow.indexOf(specialNodeParent);
+					}
+				}
+			}
+
+			this.selectedIndex = selectedIndex;
+			return Promise.resolve(selectedIndex);
+		} else {
+			return Promise.reject("Failed to find path for node");
+		}
+
+	}
 }
 
 export const TreeServiceModule = angular

@@ -299,6 +299,7 @@ export class GroupsService {
 			group.highlighted = false;
 			group.focus = false;
 		});
+		this.TreeService.clearCurrentlySelected();
 	}
 
 	/**
