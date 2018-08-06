@@ -115,7 +115,7 @@ export class GroupsService {
 
 				// Create a map of meshes
 				// for the colour overiding
-				const meshes = this.TreeService.getMeshMapFromNodes(nodes,  treeMap.idToMeshes);
+				const meshes = this.TreeService.getMeshMapFromNodes(nodes);
 
 				for (const key in meshes) {
 					if (key) {

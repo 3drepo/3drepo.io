@@ -482,12 +482,14 @@ export class TreeService {
 	/**
 	 * Get map of meshes and associated colours from an array of nodes
 	 */
-	public getMeshMapFromNodes(nodes: any, idToMeshes: any, colour?: number[]) {
+	public getMeshMapFromNodes(nodes: any, colour?: number[]) {
 
 		if (!Array.isArray(nodes)) {
 			console.error("getMeshMapFromNodes nodes is not an array: ", nodes);
 			return;
 		}
+
+		const idToMeshes = this.treeMap.idToMeshes;
 
 		if (!idToMeshes) {
 			console.error("getMeshMapFromNodes - idToMeshes is not defined: ", idToMeshes);
@@ -865,7 +867,7 @@ export class TreeService {
 
 		return this.onReady().then(() => {
 
-			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
+			const childNodes = this.getMeshMapFromNodes([node]);
 
 			for (const key in childNodes) {
 				if (!key) {
@@ -1050,7 +1052,7 @@ export class TreeService {
 
 	public getMeshHighlights(nodes) {
 		return this.onReady().then(() => {
-			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
+			return this.getMeshMapFromNodes(nodes);
 		});
 	}
 
@@ -1092,7 +1094,7 @@ export class TreeService {
 
 		return this.onReady().then(() => {
 
-			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, undefined);
+			const highlightMap = this.getMeshMapFromNodes(nodes);
 
 			for (const key in highlightMap) {
 				if (!highlightMap.hasOwnProperty(key)) {
@@ -1139,7 +1141,7 @@ export class TreeService {
 		}
 
 		return this.onReady().then(() => {
-			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
+			const highlightMap = this.getMeshMapFromNodes(nodes, colour);
 			for (const key in highlightMap) {
 
 				const meshes = highlightMap[key].meshes;
