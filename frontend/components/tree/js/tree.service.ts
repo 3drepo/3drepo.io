@@ -1050,18 +1050,13 @@ export class TreeService {
 
 	}
 
-	public getMeshHighlights(nodes) {
-		return this.onReady().then(() => {
-			return this.getMeshMapFromNodes(nodes);
-		});
-	}
-
 	/**
 	 * Return a map of currently selected meshes
 	 */
 	public getCurrentMeshHighlights() {
-		const objectsPromise = this.$q.defer();
-		return this.getMeshHighlights(this.getCurrentSelectedNodesAsArray());
+		return this.onReady().then(() => {
+			return this.getMeshMapFromNodes(this.getCurrentSelectedNodesAsArray());
+		});
 	}
 
 	public nodesClicked(nodes: any[], skipExpand?: boolean) {
