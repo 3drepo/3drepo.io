@@ -17,6 +17,7 @@
 
 "use strict";
 
+const _ = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
@@ -343,6 +344,12 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 		}
 	});
 };
+
+groupSchema.methods.updateGroup = function(dbCol, sessionId, data) {
+	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
+	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, data);
+	return update;
+}
 
 groupSchema.methods.updateAttrs = function(dbCol, data) {
 

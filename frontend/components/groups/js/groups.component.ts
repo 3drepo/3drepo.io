@@ -442,7 +442,12 @@ class GroupsController implements ng.IController {
 			this.model,
 			this.groupsDeletedListener.bind(this)
 		);
-	}
+
+		this.NotificationService.subscribe.groupChanged(
+			this.account,
+			this.model,
+			this.groupChangedListener.bind(this)
+		);	}
 
 	public newGroupListener(group, submodel) {
 		this.GroupsService.state.groups.push(group);
@@ -452,6 +457,9 @@ class GroupsController implements ng.IController {
 		this.GroupsService.deleteStateGroupsByIds(ids);
 	}
 
+	public groupChangedListener(group, submodel) {
+		this.GroupsService.replaceStateGroup(group);
+	}
 	/***/
 }
 

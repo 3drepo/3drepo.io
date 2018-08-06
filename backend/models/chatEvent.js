@@ -76,14 +76,9 @@ function groupsDeleted(emitter, account, model, ids){
 	return insertEventQueue('groupsDeleted', emitter, account, model, null, ids);
 }
 
-function groupChanged(emitter, account, model, issueId, data){
+function groupChanged(emitter, account, model, data){
 	'use strict';
-
-	//send event to single issue changed listener and any issues changed listener
-	return Promise.all([
-		insertEventQueue('groupChanged', emitter, account, model, [issueId], data),
-		insertEventQueue('groupChanged', emitter, account, model, null, data)
-	]);
+	return insertEventQueue('groupChanged', emitter, account, model, null, data)
 }
 
 

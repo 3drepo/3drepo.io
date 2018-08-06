@@ -96,10 +96,11 @@ function findGroup(req, res, next) {
 }
 
 function createGroup(req, res, next){
-	let place = utils.APIInfo(req);
-	let sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	let create = Group.createGroup(getDbColOptions(req), sessionId , req.body);
+	if (req.body.objects) {
+		const create = Group.createGroup(getDbColOptions(req), sessionId , req.body);
 
 		create.then(group => {
 
@@ -141,10 +142,10 @@ function deleteGroups(req, res, next) {
 	}
 }
 
-function updateGroup(req, res, next) {
-
+function updateGroup(req, res, next){
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	let groupItem;
 	if (req.params.rid) {
@@ -158,7 +159,7 @@ function updateGroup(req, res, next) {
 		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			return group.updateAttrs(dbCol, req.body);
+			return group.updateGroup(dbCol,sessionId , req.body);
 		}
 
 	}).then(group => {

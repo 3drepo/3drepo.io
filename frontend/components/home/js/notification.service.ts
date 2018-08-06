@@ -243,21 +243,12 @@ export class NotificationService {
 		this.performUnsubscribe(account, model, [], "groupsDeleted");
 	}
 
-	public subscribeGroupChanged(account: string, model: string, groupId: string, callback: any) {
-		if (arguments.length === 3) {
-			callback = groupId;
-			this.performSubscribe(account, model, [], "groupChanged", callback);
-		} else {
-			this.performSubscribe(account, model, [groupId], "groupChanged", callback);
-		}
+	public subscribeGroupChanged(account: string, model: string,  callback: any) {
+		this.performSubscribe(account, model, [], "groupChanged", callback);
 	}
 
-	public unsubscribeGroupChanged(account: string, model: string, groupId: string) {
-		if (arguments.length === 2) {
-			this.performUnsubscribe(account, model, [], "groupChanged");
-		} else {
-			this.performUnsubscribe(account, model, [groupId], "groupChanged");
-		}
+	public unsubscribeGroupChanged(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "groupChanged");
 	}
 
 	/** end groups messanging */
