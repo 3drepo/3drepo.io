@@ -88,8 +88,7 @@ class BottomButtonsController implements ng.IController {
 					label: "Increase",
 					fn: () => {
 						if (this.navigationState.VALUE < 99) {
-							this.ViewerService.helicopterSpeedUp();
-							this.navigationState.VALUE++;
+							this.ViewerService.helicopterSpeedUp(++this.navigationState.VALUE);
 							this.$timeout();  // Force digest
 						}
 					}
@@ -99,8 +98,7 @@ class BottomButtonsController implements ng.IController {
 					label: "Decrease",
 					fn: () => {
 						if (this.navigationState.VALUE > -99) {
-							this.ViewerService.helicopterSpeedDown();
-							this.navigationState.VALUE--;
+							this.ViewerService.helicopterSpeedDown(--this.navigationState.VALUE);
 							this.$timeout();  // Force digest
 						}
 					}

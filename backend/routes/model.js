@@ -113,7 +113,7 @@ function getHeliSpeed(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
 	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
-		const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 0;
+		const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 1;
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {heliSpeed: speed});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
