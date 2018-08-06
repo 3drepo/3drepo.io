@@ -787,11 +787,11 @@ export class TreeService {
 		const selectedNodes = this.getCurrentSelectedNodesAsArray();
 
 		// Hide all
-		this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
+		this.hideAllTreeNodes(true); // We can just reset the state without hiding in the UI
 		// Show selected
 		if (selectedNodes) {
-			this.setCurrentSelectedNodesFromArray(selectedNodes);
 			this.showTreeNodes(selectedNodes);
+			this.setCurrentSelectedNodesFromArray(selectedNodes);
 		}
 	}
 
@@ -1277,13 +1277,9 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-
-				// Hide all
-				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
-				// Show selected
-
 				this.setCurrentSelectedNodesFromArray(nodes);
-				this.showTreeNodes(nodes);
+
+				this.isolateSelected();
 
 			})
 			.catch((error) => {
