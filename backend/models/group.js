@@ -448,7 +448,10 @@ const Group = ModelFactory.createClass(
 	}
 );
 
-Group.deleteGroups = function(dbCol, ids) {
+Group.deleteGroups = function(dbCol, sessionId, ids) {
+	const groupsIds = [].concat(ids);
+
+
 	for (let i = 0; i < ids.length; i++) {
 		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
 			ids[i] = utils.stringToUUID(ids[i]);
@@ -460,6 +463,9 @@ Group.deleteGroups = function(dbCol, ids) {
 			if (!deleteResponse.result.ok) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
+
+			//Success!
+			ChatEvent.groupsDeleted(sessionId, dbCol.account ,  dbCol.model, groupsIds);
 		});
 	});
 };

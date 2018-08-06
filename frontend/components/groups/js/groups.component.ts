@@ -96,6 +96,9 @@ class GroupsController implements ng.IController {
 
 	public $onDestroy() {
 		this.groups = [];
+
+		this.NotificationService.unsubscribe.newGroup(this.account, this.model);
+		this.NotificationService.unsubscribe.groupsDeleted(this.account, this.model);
 	}
 
 	public watchers() {
@@ -219,7 +222,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public deleteGroup(group: any) {
-		const deletePromises = this.GroupsService.deleteGroups(this.teamspace, this.model);
+		const deletePromises = this.GroupsService.deleteSelectedGroups(this.teamspace, this.model);
 
 		deletePromises.then((deleteResponse) => {
 			if (deleteResponse) {
@@ -434,11 +437,21 @@ class GroupsController implements ng.IController {
 			this.newGroupListener.bind(this)
 		);
 
+		this.NotificationService.subscribe.groupsDeleted(
+			this.account,
+			this.model,
+			this.groupsDeletedListener.bind(this)
+		);
 	}
 
 	public newGroupListener(group, submodel) {
 		this.GroupsService.state.groups.push(group);
 	}
+
+	public groupsDeletedListener(ids, submodel) {
+		this.GroupsService.deleteStateGroupsByIds(ids);
+	}
+
 	/***/
 }
 

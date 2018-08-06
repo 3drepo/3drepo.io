@@ -303,27 +303,36 @@ export class GroupsService {
 	}
 
 	/**
-	 * Delete selected groups
+	 * Deletes selected groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
 	 */
-	public deleteGroups(teamspace: string, model: string, all?: boolean) {
-		const groupsToDelete = [];
-		this.state.groups.forEach((group) => {
-			if (all || group.highlighted) {
-				groupsToDelete.push(group);
-			}
-		});
+	public deleteSelectedGroups(teamspace: string, model: string) {
+		const groupsToDelete = this.state.groups.filter( (g) => g.highlighted);
+		return this.deleteGroups(teamspace, model, groupsToDelete);
+	}
 
-		if (groupsToDelete.length > 0) {
-			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => group._id).join(",")}`;
+	/**
+	 * Deletes all groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 */
+	public deleteAllGroups(teamspace: string, model: string) {
+		return this.deleteGroups(teamspace, model, [].concat(this.state.groups));
+	}
+
+	/**
+	 * Deletes an array of groups in the backend
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 * @param groups the groups array to delete
+	 */
+	public deleteGroups(teamspace: string, model: string, groups: any) {
+		if (groups.length > 0) {
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
-					groupsToDelete.forEach((group) => {
-						this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
-							this.TreeService.deselectNodes(nodes);
-						});
-						this.removeColorOverride(group._id);
-						this.deleteStateGroup(group);
-					});
+					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
 				});
 		} else {
@@ -332,10 +341,13 @@ export class GroupsService {
 	}
 
 	/**
-	 * Delete all groups
+	 * Deselects the objects from a particular group
+	 * @param group the group that contains the objects I wish to deselect
 	 */
-	public deleteAllGroups(teamspace: string, model: string) {
-		return this.deleteGroups(teamspace, model, true);
+	public deselectObjectsFromGroup(group: any) {
+		this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
+			this.TreeService.deselectNodes(nodes);
+		});
 	}
 
 	/**
@@ -443,17 +455,6 @@ export class GroupsService {
 			}
 		});
 	}
-
-	// This is how we would calculate total meshes if we didn't use the viewer:
-	// public getTotalMeshes(meshes) {
-	// 	let total = 0;
-	// 	for (const key in meshes) {
-	// 		if (key && meshes[key] && meshes[key].meshes) {
-	// 			total += meshes[key].meshes.length;
-	// 		}
-	// 	}
-	// 	return total;
-	// }
 
 	/**
 	 * Generate a placeholder object for a new group
@@ -599,40 +600,29 @@ export class GroupsService {
 	}
 
 	/**
-	 * Delete a group in the backend
-	 * @param teamspace the teamspace name for the group
-	 * @param model the model id for the group
-	 * @param group the group object to delete
+	 * Remove a group from the data model
+	 * @param group the group to delete
 	 */
-	public deleteGroup(teamspace: string, model: string, deleteGroup: any) {
-		if (deleteGroup._id) {
-			const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
-			return this.APIService.delete(groupUrl)
-				.then((response) => {
-					this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
-						this.TreeService.deselectNodes(nodes);
-					});
-					this.removeColorOverride(deleteGroup._id);
-					this.deleteStateGroup(deleteGroup);
-					return response;
-				});
+	public deleteStateGroup(group: any) {
+		this.deselectObjectsFromGroup(group);
+		this.removeColorOverride(group._id);
+
+		this.state.groups = this.state.groups.filter((g) => {
+			return group._id !== g._id;
+		});
+
+		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id) {
+			this.state.selectedGroup = null;
 		}
 	}
 
 	/**
-	 * Remove a group from the data model
-	 * @param deleteGroup the group to delete
+	 * Removes all the groups with the ids contained in the ids array from the state
+	 * @param ids the ids of the groups to be deleted
 	 */
-	public deleteStateGroup(deleteGroup: any) {
-
-		this.state.groups = this.state.groups.filter((g) => {
-			return deleteGroup._id !== g._id;
-		});
-
-		if (this.state.selectedGroup && deleteGroup._id === this.state.selectedGroup._id) {
-			this.state.selectedGroup = null;
-		}
-
+	public deleteStateGroupsByIds(ids: string[]) {
+		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		groups.forEach(this.deleteStateGroup.bind(this));
 	}
 
 	/**

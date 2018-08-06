@@ -70,7 +70,8 @@ export class NotificationService {
 			modelStatusChanged: this.subscribeModelStatusChanged,
 			newModel: this.subscribeNewModel,
 			newGroup: this.subscribeNewGroup,
-			groupChanged: this.subscribeGroupChanged
+			groupChanged: this.subscribeGroupChanged,
+			groupsDeleted: this.subscribeGroupsDeleted
 		};
 
 		this.unsubscribe = {
@@ -88,7 +89,8 @@ export class NotificationService {
 			modelStatusChanged: this.unsubscribeModelStatusChanged,
 			newModel: this.unsubscribeNewModel,
 			newGroup: this.unsubscribeNewGroup,
-			groupChanged: this.unsubscribeGroupChanged
+			groupChanged: this.unsubscribeGroupChanged,
+			groupsDeleted: this.unsubscribeGroupsDeleted
 		};
 
 	}
@@ -231,6 +233,14 @@ export class NotificationService {
 
 	public unsubscribeNewGroup(account: string, model: string) {
 		this.performUnsubscribe(account, model, [], "newGroups");
+	}
+
+	public subscribeGroupsDeleted(account: string, model: string, callback: any) {
+		this.performSubscribe(account, model, [], "groupsDeleted", callback);
+	}
+
+	public unsubscribeGroupsDeleted(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "groupsDeleted");
 	}
 
 	public subscribeGroupChanged(account: string, model: string, groupId: string, callback: any) {

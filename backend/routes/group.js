@@ -124,13 +124,14 @@ function deleteGroup(req, res, next) {
 }
 
 function deleteGroups(req, res, next) {
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
 	systemLogger.logError(JSON.stringify(req.query));
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
 
-		Group.deleteGroups(getDbColOptions(req), ids).then(() => {
+		Group.deleteGroups(getDbColOptions(req),sessionId , ids).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
