@@ -1,0 +1,25 @@
+.homeUserContent.userContentNoMargin.accountUserManagement
+	md-content.md-whiteframe-1dp(
+		aria-label="User Management",
+		layout="column",
+		flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 User Managment
+
+		.teamspaceSelectWrapper(layout="row")
+			md-input-container.teamspaceSelectContainer(md-no-float, flex)
+				md-select(ng-model="vm.selectedProject", placeholder="Select a teamspace")
+					md-option(ng-value="project", ng-repeat="project in vm.projects") {{project}}
+			
+
+		md-tabs(md-dynamic-height, md-border-bottom) 
+			md-tab(label="Users")
+				.userContent.usersList
+
+			md-tab(label="Jobs")
+				.userContent.jobsList
+
+			md-tab(label="Projects")
+				.userContent.projectsList
+						

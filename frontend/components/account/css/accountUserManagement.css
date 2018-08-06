@@ -1,0 +1,11 @@
+.accountUserManagement {
+
+}
+
+.accountUserManagement .teamspaceSelectWrapper {
+  background: rgba(255, 255, 255, 1);
+}
+
+.accountUserManagement .teamspaceSelectContainer {
+  padding: 0 24px;
+}

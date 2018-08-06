@@ -73,6 +73,9 @@ div#accountHolder(
 				data="vm.data"
 				show-page="vm.showPage(page, callingPage, data)")
 
+			account-user-management(
+				ng-if="vm.username && vm.itemToShow === 'userManagement'")
+
 div(ng-if="vm.state.model")
 	model(
 		is-lite-mode="vm.isLiteMode"
