@@ -462,7 +462,7 @@ export class TreeService {
 	/**
 	 * Get map of meshes and associated colours from an array of nodes
 	 */
-	public getMeshMapFromNodes(nodes: any, colour?: number[]) {
+	public getMeshMapFromNodes(nodes: any) {
 
 		if (!Array.isArray(nodes)) {
 			console.error("getMeshMapFromNodes nodes is not an array: ", nodes);
@@ -493,10 +493,6 @@ export class TreeService {
 
 			if (highlightMap[key] === undefined) {
 				highlightMap[key] = {};
-			}
-
-			if (highlightMap[key].colour === undefined) {
-				highlightMap[key].colour = colour;
 			}
 
 			// Check top level and then check if sub model of fed
@@ -1100,23 +1096,22 @@ export class TreeService {
 	 */
 	public selectNodes(nodes: any[], skipExpand?: boolean, colour?: number[]): any {
 
-		if (!nodes) {
+		if (!nodes || nodes.length === 0) {
 			return Promise.resolve("No nodes specified");
+		}
+
+		for (let i = 0; i < nodes.length; i++) {
+			this.setNodeSelection(nodes[i], true);
 		}
 
 		const lastNode = nodes[nodes.length - 1];
 		this.handleMetadata(lastNode);
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			this.setNodeSelection(node, true);
-		}
-
 		if (!skipExpand) {
 			this.expandToNode(lastNode);
 		}
 
 		return this.onReady().then(() => {
-			const highlightMap = this.getMeshMapFromNodes(nodes, colour);
+			const highlightMap = this.getMeshMapFromNodes(nodes);
 			for (const key in highlightMap) {
 
 				if (highlightMap[key].meshes) {
@@ -1133,7 +1128,7 @@ export class TreeService {
 						this.ViewerService.highlightObjects({
 							account,
 							ids: meshes,
-							colour: highlightMap[key].colour,
+							colour,
 							model,
 							multi: true,
 							source: "tree",
@@ -1383,11 +1378,10 @@ export class TreeService {
 	 */
 	private expandToNode(nodeToExpand: any) {
 
-		let selectedIndex;
-
-		const path = this.getPath(nodeToExpand._id);
+		const path = nodeToExpand ?  this.getPath(nodeToExpand._id) : undefined;
 
 		if (path) {
+			let selectedIndex;
 			for (let i = 0; i < path.length; i++) {
 				const node = this.getNodeById(path[i]);
 				const nextNode = this.getNodeById(path[i + 1]);
