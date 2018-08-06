@@ -39,6 +39,8 @@ function convertProjectToParam(req, res, next) {
 
 // Get model info
 router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
+router.get("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, getHeliSpeed);
+router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updateHeliSpeed);
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 router.post("/model",
 	convertProjectToParam,
@@ -97,11 +99,42 @@ function updateSettings(req, res, next) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
-		modelSetting.updateProperties(req.body);
-		return modelSetting.save();
+		return modelSetting.updateProperties(req.body);
 
 	}).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getHeliSpeed(req, res, next) {
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+
+	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
+		const speed = modelSetting.heliSpeed ? modelSetting.heliSpeed : 0;
+		responseCodes.respond(place, req, res, next, responseCodes.OK, {heliSpeed: speed});
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateHeliSpeed(req, res, next) {
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+
+	return ModelSetting.findById(dbCol, req.params.model).then(modelSetting => {
+		if (!modelSetting) {
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+		if (!req.body.heliSpeed || Object.prototype.toString.call(req.body.heliSpeed) === "[object Number]") {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+
+		return modelSetting.updateProperties({heliSpeed: req.body.heliSpeed});
+	}).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
