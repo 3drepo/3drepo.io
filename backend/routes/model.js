@@ -128,7 +128,7 @@ function updateHeliSpeed(req, res, next) {
 		if (!modelSetting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
-		if (!req.body.heliSpeed || Object.prototype.toString.call(req.body.heliSpeed) === "[object Number]") {
+		if (!req.body.heliSpeed || Object.prototype.toString.call(req.body.heliSpeed) !== "[object Number]") {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 
