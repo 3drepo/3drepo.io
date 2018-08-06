@@ -1119,9 +1119,11 @@ export class TreeService {
 			const highlightMap = this.getMeshMapFromNodes(nodes, colour);
 			for (const key in highlightMap) {
 
-				const meshes = highlightMap[key].meshes;
+				if (highlightMap[key].meshes) {
+					const meshes = highlightMap[key].meshes.filter((mesh) => {
+						return this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected;
+					});
 
-				if (meshes.length) {
 					const vals = key.split("@");
 					const account = vals[0];
 					const model = vals[1];
