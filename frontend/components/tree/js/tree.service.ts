@@ -39,8 +39,6 @@ export class TreeService {
 
 	private allNodes;
 	private currentSelectedNodes;
-	private clickedHidden;
-	private clickedShown;
 	private nodesToShow;
 	private subTreesById;
 	private subModelIdToPath;
@@ -78,8 +76,6 @@ export class TreeService {
 		this.allNodes = [];
 		this.idToPath = {};
 		this.currentSelectedNodes = {};
-		this.clickedHidden = {}; // or reset?
-		this.clickedShown = {}; // or reset?
 		this.nodesToShow = [];
 		this.subTreesById = {};
 		this.subModelIdToPath = {};
@@ -425,22 +421,6 @@ export class TreeService {
 
 	public setCurrentSelectedNodes(nodes) {
 		this.currentSelectedNodes = nodes;
-	}
-
-	public getClickedHidden() {
-		return this.clickedHidden;
-	}
-
-	public resetClickedHidden() {
-		this.clickedHidden = {};
-	}
-
-	public getClickedShown() {
-		return this.clickedShown;
-	}
-
-	public resetClickedShown() {
-		this.clickedShown = {};
 	}
 
 	public getNodesToShow() {
@@ -859,8 +839,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Update the state of clickedHidden and clickedShown, which are used by tree component
-	 * to apply changes to the viewer.
+	 * Apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
 	public updateModelVisibility(node: any) {
@@ -868,6 +847,8 @@ export class TreeService {
 		return this.onReady().then(() => {
 
 			const childNodes = this.getMeshMapFromNodes([node]);
+			const hidden = {};
+			const shown = {};
 
 			for (const key in childNodes) {
 				if (!key) {
@@ -879,7 +860,6 @@ export class TreeService {
 					continue;
 				}
 
-				// FIXME: ???!
 				for (let i = 0; i < childMeshes.length; i++) {
 
 					const id  = childMeshes[i];
@@ -888,23 +868,23 @@ export class TreeService {
 					if (childNode) {
 
 						if (childNode.toggleState === this.VISIBILITY_STATES.invisible) {
-							this.clickedHidden[childNode._id] = childNode;
+							hidden[childNode._id] = childNode;
 						} else {
-							delete this.clickedHidden[childNode._id];
+							delete hidden[childNode._id];
 						}
 
 						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
-							this.clickedShown[childNode._id] = childNode;
+							this.shown[childNode._id] = childNode;
 						} else {
-							delete this.clickedShown[childNode._id];
+							delete shown[childNode._id];
 						}
 
 					}
 				}
 			}
 
-			this.handleVisibility(this.getClickedHidden(), false);
-			this.handleVisibility(this.getClickedShown(), true);
+			this.handleVisibility(hidden, false);
+			this.handleVisibility(shown, true);
 
 		});
 

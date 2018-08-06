@@ -33,8 +33,6 @@ class TreeController implements ng.IController {
 	private revision;
 	private promise;
 	private highlightSelectedViewerObject: boolean;
-	private clickedHidden;
-	private clickedShown;
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
@@ -82,8 +80,6 @@ class TreeController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading full tree structure";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
-		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
-		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
 		this.allNodes = [];
 		this.initTreeOnReady();
