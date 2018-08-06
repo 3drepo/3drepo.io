@@ -291,7 +291,7 @@ export class GroupsService {
 	 */
 	public isolateGroup(group: any) {
 		this.clearSelectionHighlights();
-		this.TreeService.isolateNodesBySharedId(group.objects);
+		this.TreeService.isolateNodesBySharedIds(group.objects);
 	}
 
 	public clearSelectionHighlights() {

@@ -1124,21 +1124,22 @@ export class TreeService {
 						return this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected;
 					});
 
-					const vals = key.split("@");
-					const account = vals[0];
-					const model = vals[1];
-					// Separately highlight the children
-					// but only for multipart meshes
-
-					this.ViewerService.highlightObjects({
-						account,
-						ids: meshes,
-						colour: highlightMap[key].colour,
-						model,
-						multi: true,
-						source: "tree",
-						forceReHighlight : true
-					});
+					if (meshes.length > 0) {
+						const vals = key.split("@");
+						const account = vals[0];
+						const model = vals[1];
+						// Separately highlight the children
+						// but only for multipart meshes
+						this.ViewerService.highlightObjects({
+							account,
+							ids: meshes,
+							colour: highlightMap[key].colour,
+							model,
+							multi: true,
+							source: "tree",
+							forceReHighlight : true
+						});
+					}
 
 				}
 
@@ -1252,7 +1253,7 @@ export class TreeService {
 	 * Isolate selected objects by their shared IDs
 	 * @param objects an array of objects with shared_id properties
 	 */
-	public isolateNodesBySharedId(objects) {
+	public isolateNodesBySharedIds(objects) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
@@ -1271,7 +1272,7 @@ export class TreeService {
 	 * Hide series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects objects to hide
 	 */
-	public hideNodesBySharedId(objects: any[]) {
+	public hideNodesBySharedIds(objects: any[]) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
