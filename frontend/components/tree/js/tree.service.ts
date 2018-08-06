@@ -874,7 +874,7 @@ export class TreeService {
 						}
 
 						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
-							this.shown[childNode._id] = childNode;
+							shown[childNode._id] = childNode;
 						} else {
 							delete shown[childNode._id];
 						}
