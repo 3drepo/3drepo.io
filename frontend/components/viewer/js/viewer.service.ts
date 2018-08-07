@@ -619,7 +619,7 @@ export class ViewerService {
 		if (this.account && this.model) {
 			this.APIService.put(this.account + "/" + this.model + "/settings/heliSpeed", {heliSpeed: value})
 				.catch((err) => {
-				console.err("Failed to update helicopter speed", err);
+				console.error("Failed to update helicopter speed", err);
 			});
 		}
 	}
