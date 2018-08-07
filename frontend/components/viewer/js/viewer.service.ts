@@ -38,6 +38,7 @@ export class ViewerService {
 	private Viewer: any;
 	private model: string;
 	private account: string;
+	private heliSpeed: number = 1;
 
 	constructor(
 		public $q: ng.IQService,
@@ -457,6 +458,7 @@ export class ViewerService {
 		} else {
 			this.account = account;
 			this.model = model;
+			this.setHelicopterSpeed();
 			this.currentModel.promise = this.viewer.loadModel(
 				account,
 				model,
@@ -608,18 +610,37 @@ export class ViewerService {
 		}
 	}
 
-	public helicopterSpeedReset() {
+	public helicopterSpeedReset(updateDefaultSpeed: boolean) {
 		if (this.viewer) {
 			this.viewer.helicopterSpeedReset();
-			this.helicopterSpeedUpdate(1);
+			if (updateDefaultSpeed) {
+				this.helicopterSpeedUpdate(1);
+			}
 		}
 	}
 
+	public getHeliSpeed() {
+		return this.heliSpeed;
+	}
+
 	private helicopterSpeedUpdate(value: number) {
-		if (this.account && this.model) {
+		this.heliSpeed = value;
+		if (this.account && this.model && value) {
 			this.APIService.put(this.account + "/" + this.model + "/settings/heliSpeed", {heliSpeed: value})
 				.catch((err) => {
 				console.error("Failed to update helicopter speed", err);
+			});
+		}
+	}
+
+	private setHelicopterSpeed() {
+		if (this.account && this.model) {
+			this.APIService.get(this.account + "/" + this.model + "/settings/heliSpeed")
+				.then((res) => {
+					this.heliSpeed = res.data.heliSpeed ? res.data.heliSpeed : 1;
+				})
+				.catch((err) => {
+				console.error("Failed to fetch helicopter speed", err);
 			});
 		}
 	}
