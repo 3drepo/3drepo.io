@@ -74,7 +74,10 @@ div#accountHolder(
 				show-page="vm.showPage(page, callingPage, data)")
 
 			account-user-management(
-				ng-if="vm.username && vm.itemToShow === 'userManagement'")
+				ng-if="vm.username && vm.itemToShow === 'userManagement'"
+				account="vm.account"
+				accounts="vm.accounts"
+				show-page="vm.showPage(page, callingPage, data)")
 
 div(ng-if="vm.state.model")
 	model(

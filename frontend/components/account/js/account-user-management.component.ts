@@ -19,13 +19,59 @@ class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [];
 
+		private account;
+		private accounts;
+		private selectedTeamspace;
+		private teamspaces;
+
 		constructor() {}
 
-		public $onInit() {}
+		public $onInit() {
+			this.selectedTeamspace = this.account;
+		}
+
+		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}) {
+			if (accountName.currentValue && accounts.currentValue) {
+				this.teamspaces = accounts.currentValue.filter(({isAdmin}) => isAdmin);
+			}
+		}
+
+		/**
+		 * Calls when teamspace was changed
+		 */
+		public onTeamspaceChange() {
+/* 			this.setProjects();
+
+			// The property is set async so it won't be there immediately
+			return this.$q((resolve, reject) => {
+				this.appendTeamspacePermissions(this.selectedTeamspace)
+					.then(() => {
+						this.setPermissionTemplates(this.selectedTeamspace,  this.modelSelected)
+							.then(() => {
+								if (this.fromURL.projectSelected) {
+									this.projectSelected = this.fromURL.projectSelected;
+									delete this.fromURL.projectSelected;
+								}
+								resolve(this.selectedTeamspace.teamspacePermissions);
+							});
+					})
+					.catch((error) => {
+						const title = "Issue Populating Teamspace Permissions";
+						this.showError(title, error);
+						reject(error);
+					});
+
+			}); */
+
+		}
 }
 
 export const AccountUserManagementComponent: ng.IComponentOptions = {
-		bindings: {},
+		bindings: {
+			account: "<",
+			accounts: "<",
+			showPage: "&?"
+		},
 		controller: AccountUserManagementController,
 		controllerAs: "vm",
 		templateUrl: "templates/account-user-management.html"

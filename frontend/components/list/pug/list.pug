@@ -1,0 +1,8 @@
+.list(layout="column")
+	.listHeader
+
+	.listBody
+		.listItem(
+			ng-repeat="item in vm.items track by item.id",
+			layout="row"
+			layout-align="start center")

@@ -107,6 +107,7 @@ import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
 import "./viewpoints/js/viewpoints.component";
 import "./viewpoints/js/viewpoints.service";
+import "./list/js/list.component";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

@@ -9,17 +9,22 @@
 
 		.teamspaceSelectWrapper(layout="row")
 			md-input-container.teamspaceSelectContainer(md-no-float, flex)
-				md-select(ng-model="vm.selectedProject", placeholder="Select a teamspace")
-					md-option(ng-value="project", ng-repeat="project in vm.projects") {{project}}
-			
-
+				md-select(
+					ng-model="vm.selectedTeamspace"
+					placeholder="Select a teamspace"
+					ng-change="vm.onTeamspaceChange()"
+					ng-disabled="!vm.teamspaces.length")
+					md-option(
+						ng-value="teamspace.account"
+						ng-repeat="teamspace in vm.teamspaces") {{teamspace.account}}
+	
 		md-tabs(md-dynamic-height, md-border-bottom) 
 			md-tab(label="Users")
-				.userContent.usersList
+				list.usersList
 
 			md-tab(label="Jobs")
-				.userContent.jobsList
+				list.jobsList
 
 			md-tab(label="Projects")
-				.userContent.projectsList
+				list.projectsList
 						
