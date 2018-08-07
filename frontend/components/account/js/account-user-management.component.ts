@@ -21,48 +21,69 @@ class AccountUserManagementController implements ng.IController {
 
 		private account;
 		private accounts;
-		private selectedTeamspace;
 		private teamspaces;
+		private users;
+		private jobs;
+		private projects;
+
+		private selectedTeamspace;
+		private selectedTab;
 
 		constructor() {}
 
-		public $onInit() {
+		public $onInit(): void {
 			this.selectedTeamspace = this.account;
 		}
 
-		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}) {
+		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}): void {
 			if (accountName.currentValue && accounts.currentValue) {
 				this.teamspaces = accounts.currentValue.filter(({isAdmin}) => isAdmin);
 			}
 		}
 
 		/**
-		 * Calls when teamspace was changed
+		 * Get teamspace details
 		 */
-		public onTeamspaceChange() {
-/* 			this.setProjects();
+		public onTeamspaceChange(): void {
+			this.users = this.getTeamspaceUsers(this.selectedTeamspace);
+			this.jobs = this.getTeamspaceJobs(this.selectedTeamspace);
+			this.projects = this.getTeamspaceProjects(this.selectedTeamspace);
+		}
 
-			// The property is set async so it won't be there immediately
-			return this.$q((resolve, reject) => {
-				this.appendTeamspacePermissions(this.selectedTeamspace)
-					.then(() => {
-						this.setPermissionTemplates(this.selectedTeamspace,  this.modelSelected)
-							.then(() => {
-								if (this.fromURL.projectSelected) {
-									this.projectSelected = this.fromURL.projectSelected;
-									delete this.fromURL.projectSelected;
-								}
-								resolve(this.selectedTeamspace.teamspacePermissions);
-							});
-					})
-					.catch((error) => {
-						const title = "Issue Populating Teamspace Permissions";
-						this.showError(title, error);
-						reject(error);
-					});
+		/**
+		 * Get teamspace users list
+		 * @param teamspaceName
+		 */
+		public getTeamspaceUsers(teamspaceName: string): object[] {
+			if (!teamspaceName) {
+				return [];
+			}
+			// TODO: Handle request
+			return [];
+		}
 
-			}); */
+		/**
+		 * Get teamspace jobs list
+		 * @param teamspaceName
+		 */
+		public getTeamspaceJobs(teamspaceName: string): object[] {
+			if (!teamspaceName) {
+				return [];
+			}
+			// TODO: Handle request
+			return [];
+		}
 
+		/**
+		 * Get teamspace projects list
+		 * @param teamspaceName
+		 */
+		public getTeamspaceProjects(teamspaceName: string): object[] {
+			if (!teamspaceName) {
+				return [];
+			}
+			// TODO: Handle request
+			return [];
 		}
 }
 

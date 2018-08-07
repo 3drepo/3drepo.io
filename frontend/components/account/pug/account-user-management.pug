@@ -18,7 +18,10 @@
 						ng-value="teamspace.account"
 						ng-repeat="teamspace in vm.teamspaces") {{teamspace.account}}
 	
-		md-tabs(md-dynamic-height, md-border-bottom) 
+		md-tabs(
+			md-dynamic-height,
+			md-border-bottom
+			md-selected="vm.selectedTab") 
 			md-tab(label="Users")
 				list.usersList
 
