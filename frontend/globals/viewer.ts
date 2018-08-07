@@ -486,27 +486,6 @@ export class Viewer {
 		}
 	}
 
-	public applyModelProperties(account, model, properties) {
-
-		if (properties) {
-			if (properties.hiddenNodes && properties.hiddenNodes.length > 0) {
-				this.switchObjectVisibility(
-					account,
-					model,
-					properties.hiddenNodes,
-					false
-				);
-			}
-
-			if (properties.subModels) {
-				for (let i = 0; i < properties.subModels.length; i++) {
-					const entry = properties.subModels[i];
-					this.applyModelProperties(entry.account, entry.model, entry.properties);
-				}
-			}
-		}
-	}
-
 	public setNavMode(mode, force) {
 		if (this.currentNavMode !== mode || force) {
 			// If the navigation mode has changed
