@@ -33,6 +33,7 @@ class AccountUserManagementController implements ng.IController {
 
 		public $onInit(): void {
 			this.selectedTeamspace = this.account;
+			this.onTeamspaceChange();
 		}
 
 		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}): void {
