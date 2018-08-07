@@ -6,63 +6,66 @@ div.groupsContainer
         ng-if="vm.loading")
         h3 Loading groups...
 
-    md-container.groupsList(
+    div.groupsList(
         ng-show="vm.toShow === 'groups'"
-        flex="100"
-        layout="column")
+    )
 
         div.group(
-            layout="row"
+            layout="column"
             ng-if="vm.groups.length > 0"
             ng-click="vm.selectGroup(group)"
             style="background-color: {{group.highlighted ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
             ng-repeat="group in vm.groups track by $index")
 
-            div.groupMain(layout="row")
-                div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
-                div.groupMetaData(layout="column", flex="100" layout-margin)
-                    div(layout="row" layout-align="space-between center"  flex="100")
-                        span.groupName {{group.name}}
-                    div(layout="row" flex="100")
-                        span.groupMeta  {{group.author}}
-                        span.groupMeta  {{ vm.getFormattedDate(group.createdAt)  | date:"MM/dd/yyyy"}}
-                    div(layout="row"  flex="100")
-                        span.groupDescription {{group.description}}
+            div.groupDetails(layout="row")
+                div.groupMain(layout="row")
+                    div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
+                    div.groupMetaData(layout="column", flex="100" layout-margin)
+                        div(layout="row" layout-align="space-between center"  flex="100")
+                            span.groupName {{group.name}}
+                        div(layout="row" flex="100")
+                            span.groupMeta  {{group.author}}
+                            span.groupMeta  {{ vm.getFormattedDate(group.createdAt)  | date:"MM/dd/yyyy"}}
+                        div(layout="row"  flex="100")
+                            span.groupDescription {{group.description}}
+                
+                div.groupColorHolder(
+                    layout="row"
+                    layout-align="center center")
+
+                    div
+                        md-button.md-icon-button(
+                            aria-label="Invert Colors"
+                            ng-click="vm.isolateGroup($event, group)")
+                            svg(width="24px" height="24px" viewBox="0 0 24 24")
+                                path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate1}}")
+                                path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate2}}")
+                        md-tooltip Isolate
+
+                    div
+                        md-button.md-icon-button(
+                            ng-click="vm.toggleColorOverride($event, group)"
+                            aria-label="Invert Colors")
+                            md-icon.angular-material-icons(
+                                style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
+                        md-tooltip Toggle Colour Override
+                
+                div.groupEnterHolder(
+                    ng-click="vm.editGroup()"
+                    ng-if="group.selected === true"
+                    layout="row"
+                    layout-align="center center")
+
+                    md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
+
+                div.groupEnterSpace(
+                    ng-if="group.selected !== true"
+                    layout="row"
+                    layout-align="center center")
             
-            div.groupColorHolder(
-                layout="row"
-                layout-align="center center")
-
-                div
-                    md-button.md-icon-button(
-                        aria-label="Invert Colors"
-                        ng-click="vm.isolateGroup($event, group)")
-                        svg(width="24px" height="24px" viewBox="0 0 24 24")
-                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate1}}")
-                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate2}}")
-                    md-tooltip Isolate
-
-                div
-                    md-button.md-icon-button(
-                        ng-click="vm.toggleColorOverride($event, group)"
-                        aria-label="Invert Colors")
-                        md-icon.angular-material-icons(
-                            style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
-                    md-tooltip Toggle Colour Override
+            .groupJustDeleted(ng-if="group.justBeenDeleted")
+                .deletedText This group has been deleted
             
-            div.groupEnterHolder(
-                ng-click="vm.editGroup()"
-                ng-if="group.selected === true"
-                layout="row"
-                layout-align="center center")
-
-                md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
-
-            div.groupEnterSpace(
-                ng-if="group.selected !== true"
-                layout="row"
-                layout-align="center center")
-
         md-container.noGroups(
             ng-if="vm.groups.length === 0 && !vm.loading"
             layout-fill
@@ -74,7 +77,6 @@ div.groupsContainer
         layout="column"
         layout-margin
         ng-show="vm.toShow === 'group'")
-
 
         div(layout="row" flex).groupMarginBottom
             div.openedGroupColorBar(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")

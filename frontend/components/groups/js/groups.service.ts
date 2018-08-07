@@ -19,6 +19,8 @@ export class GroupsService {
 
 	public static $inject: string[] = [
 		"$q",
+		"$timeout",
+
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
@@ -30,6 +32,7 @@ export class GroupsService {
 
 	constructor(
 		private $q: ng.IQService,
+		private $timeout: any,
 		private APIService: any,
 		private TreeService: any,
 		private MultiSelectService: any,
@@ -303,11 +306,11 @@ export class GroupsService {
 	}
 
 	/**
-	 * Deletes selected groups in the current model
+	 * Deletes highlighted groups in the current model
 	 * @param teamspace the teamspace name for the group
 	 * @param model the model id for the group
 	 */
-	public deleteSelectedGroups(teamspace: string, model: string) {
+	public deleteHighlightedGroups(teamspace: string, model: string) {
 		const groupsToDelete = this.state.groups.filter( (g) => g.highlighted);
 		return this.deleteGroups(teamspace, model, groupsToDelete);
 	}
@@ -623,6 +626,17 @@ export class GroupsService {
 	public deleteStateGroupsByIds(ids: string[]) {
 		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
 		groups.forEach(this.deleteStateGroup.bind(this));
+	}
+
+	/**
+	 * Removes all the groups with the ids contained in the ids array from the state after 4 seconds
+	 * while showing a feedback that these groups has been deleted
+	 * @param ids the ids of the groups to be deleted
+	 */
+	public deleteStateGroupsByIdsDeferred(ids: string[]) {
+		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		groups.forEach((g) => g.justBeenDeleted = true);
+		this.$timeout(this.deleteStateGroupsByIds.bind(this, ids) , 4000);
 	}
 
 	/**

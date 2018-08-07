@@ -41,6 +41,7 @@ class GroupsController implements ng.IController {
 	private loading: boolean;
 	private account: string;
 	private onShowItem;
+	private onHideItem;
 	private toShow: string;
 	private savingGroup: boolean;
 	private changed: boolean;
@@ -222,7 +223,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public deleteGroup(group: any) {
-		const deletePromises = this.GroupsService.deleteSelectedGroups(this.teamspace, this.model);
+		const deletePromises = this.GroupsService.deleteHighlightedGroups(this.teamspace, this.model);
 
 		deletePromises.then((deleteResponse) => {
 			if (deleteResponse) {
@@ -378,6 +379,10 @@ class GroupsController implements ng.IController {
 
 	}
 
+	public isEditing(): boolean {
+		return this.toShow === "group";
+	}
+
 	public getColorOverrideRGBA(group: any): string {
 		const hasOverride = this.GroupsService.hasColorOverride(group);
 		if (hasOverride) {
@@ -393,7 +398,11 @@ class GroupsController implements ng.IController {
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 		this.focusGroupName();
+	}
 
+	public cancelEdition() {
+		this.hexColor = "";
+		this.onHideItem();
 	}
 
 	public focusGroupName() {
@@ -454,7 +463,11 @@ class GroupsController implements ng.IController {
 	}
 
 	public groupsDeletedListener(ids, submodel) {
-		this.GroupsService.deleteStateGroupsByIds(ids);
+		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
+			this.cancelEdition();
+		}
+
+		this.GroupsService.deleteStateGroupsByIdsDeferred(ids);
 	}
 
 	public groupChangedListener(group, submodel) {
@@ -471,6 +484,7 @@ export const GroupsComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
+		onHideItem: "&",
 		hideItem: "<",
 		selectedMenuOption: "="
 	},

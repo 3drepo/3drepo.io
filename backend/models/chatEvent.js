@@ -66,22 +66,17 @@ function newModel(emitter, account, data) {
 	return insertEventQueue("newModel", emitter, account, null, null, data);
 }
 
-function newGroups(emitter, account, model, data){
-	'use strict';
-	return insertEventQueue('newGroups', emitter, account, model, null, data);
+function newGroups(emitter, account, model, data) {
+	return insertEventQueue("newGroups", emitter, account, model, null, data);
 }
 
-function groupsDeleted(emitter, account, model, ids){
-	'use strict';
-	return insertEventQueue('groupsDeleted', emitter, account, model, null, ids);
+function groupsDeleted(emitter, account, model, ids) {
+	return insertEventQueue("groupsDeleted", emitter, account, model, null, ids);
 }
 
-function groupChanged(emitter, account, model, data){
-	'use strict';
-	return insertEventQueue('groupChanged', emitter, account, model, null, data)
+function groupChanged(emitter, account, model, data) {
+	return insertEventQueue("groupChanged", emitter, account, model, null, data);
 }
-
-
 
 module.exports = {
 	newIssues,
@@ -93,5 +88,5 @@ module.exports = {
 	groupsDeleted,
 	modelStatusChanged,
 	issueChanged,
-	newModel,
+	newModel
 };

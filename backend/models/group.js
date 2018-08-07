@@ -29,7 +29,6 @@ const History = require("./history");
 const db = require("../db/db");
 const ChatEvent = require("./chatEvent");
 
-
 const groupSchema = Schema({
 	_id: Object,
 	name: String,
@@ -347,9 +346,9 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 
 groupSchema.methods.updateGroup = function(dbCol, sessionId, data) {
 	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
-	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, data);
+	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["selected", "highlighted"]));
 	return update;
-}
+};
 
 groupSchema.methods.updateAttrs = function(dbCol, data) {
 
@@ -399,7 +398,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 	});
 };
 
-groupSchema.statics.createGroup = function(dbCol,sessionId , data){
+groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 	const group = this.model("Group").createInstance({
 		account: dbCol.account,
 		model: dbCol.model
@@ -409,13 +408,13 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data){
 
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.save().then((savedGroup)=>{
-		return savedGroup.updateAttrs(dbCol, data).then(() => {			
-			data._id = utils.uuidToString(savedGroup._id);			
-			ChatEvent.newGroups(sessionId, dbCol.account , model, data);
+		return savedGroup.updateAttrs(dbCol, data).then(() => {
+			data._id = utils.uuidToString(savedGroup._id);
+			ChatEvent.newGroups(sessionId, dbCol.account , model,  _.omit(data, ["selected", "highlighted"]));
 			return data;
-		}		
-		,(err) => {
-			//remove the recently saved new group as update attributes failed
+		}
+			,(err) => {
+			// remove the recently saved new group as update attributes failed
 			return Group.deleteGroup(dbCol, group._id).then(() => {
 				return Promise.reject(err);
 			});
@@ -458,7 +457,6 @@ const Group = ModelFactory.createClass(
 Group.deleteGroups = function(dbCol, sessionId, ids) {
 	const groupsIds = [].concat(ids);
 
-
 	for (let i = 0; i < ids.length; i++) {
 		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
 			ids[i] = utils.stringToUUID(ids[i]);
@@ -471,7 +469,7 @@ Group.deleteGroups = function(dbCol, sessionId, ids) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			//Success!
+			// Success!
 			ChatEvent.groupsDeleted(sessionId, dbCol.account ,  dbCol.model, groupsIds);
 		});
 	});

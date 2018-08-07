@@ -95,7 +95,7 @@ function findGroup(req, res, next) {
 	});
 }
 
-function createGroup(req, res, next){
+function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
@@ -142,7 +142,7 @@ function deleteGroups(req, res, next) {
 	}
 }
 
-function updateGroup(req, res, next){
+function updateGroup(req, res, next) {
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];

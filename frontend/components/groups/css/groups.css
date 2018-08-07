@@ -144,6 +144,8 @@ groups .group {
 }
 
 groups .groupsList {
+    display: block;
+    position: relative;
     height: calc(100% - 52px);
     overflow-y: scroll;
 }
@@ -197,4 +199,20 @@ groups .groupsList {
 
 .groupCurrentColorHolder {
     margin-top: 10px;
+}
+
+.group .groupJustDeleted {
+    position: absolute;
+    width: 100%;
+    height: 94px;
+    background-color: rgba(212,212,212,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.groupJustDeleted .deletedText{
+    padding: 15px 25px;
+    background-color: hsla(0,0%,100%,.9);
+    border: 1px solid #ddd;
 }
