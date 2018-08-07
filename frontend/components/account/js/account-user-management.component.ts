@@ -15,21 +15,43 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {get, uniq, map} from "lodash";
+
+const TABS_TYPES = {
+	USERS: 1,
+	JOBS: 2,
+	PROJECTS: 3
+};
+
 class AccountUserManagementController implements ng.IController {
 
-		public static $inject: string[] = [];
+		public static $inject: string[] = [
+			"AccountService",
+			"DialogService"
+		];
 
 		private account;
 		private accounts;
 		private teamspaces;
-		private users;
+		private members;
 		private jobs;
+		private jobsColors;
 		private projects;
+		private extraData = {
+			totalLicenses: 0,
+			usedLicences: 0
+		};
 
 		private selectedTeamspace;
 		private selectedTab;
+		private selectedProject;
 
-		constructor() {}
+		private shouldSelectAllUser;
+
+		constructor(
+			private AccountService: any,
+			private DialogService: any
+		) {}
 
 		public $onInit(): void {
 			this.selectedTeamspace = this.account;
@@ -46,8 +68,8 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace details
 		 */
 		public onTeamspaceChange(): void {
-			this.users = this.getTeamspaceUsers(this.selectedTeamspace);
-			this.jobs = this.getTeamspaceJobs(this.selectedTeamspace);
+			this.setTeamspaceMembers(this.selectedTeamspace);
+			this.setTeamspaceJobs(this.selectedTeamspace);
 			this.projects = this.getTeamspaceProjects(this.selectedTeamspace);
 		}
 
@@ -55,24 +77,37 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace users list
 		 * @param teamspaceName
 		 */
-		public getTeamspaceUsers(teamspaceName: string): object[] {
-			if (!teamspaceName) {
-				return [];
-			}
-			// TODO: Handle request
-			return [];
+		public setTeamspaceMembers(teamspaceName: string): void {
+			const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
+				.catch((error) => {
+					this.handleError("retrieve", "subscriptions", error);
+				});
+
+			const memberListPromise = this.AccountService.getMembers(teamspaceName)
+				.catch((error) => {
+					this.handleError("retrieve", "members", error);
+				});
+
+			Promise.all([quotaInfoPromise, memberListPromise])
+				.then(([quotaInfoResponse, membersResponse]) => {
+					this.extraData.totalLicenses = get(quotaInfoResponse, "data.collaboratorLimit", 0);
+					this.members = membersResponse.data.members;
+				});
 		}
 
 		/**
 		 * Get teamspace jobs list
 		 * @param teamspaceName
 		 */
-		public getTeamspaceJobs(teamspaceName: string): object[] {
-			if (!teamspaceName) {
-				return [];
-			}
-			// TODO: Handle request
-			return [];
+		public setTeamspaceJobs(teamspaceName: string): void {
+			this.AccountService.getJobs(teamspaceName)
+				.then((response) => {
+					this.jobs = get(response, "data", []);
+					this.jobsColors = uniq(map(this.jobs, "color"));
+				})
+				.catch((error) => {
+					this.handleError("retrieve", "jobs", error);
+				});
 		}
 
 		/**
@@ -85,6 +120,34 @@ class AccountUserManagementController implements ng.IController {
 			}
 			// TODO: Handle request
 			return [];
+		}
+
+		/**
+		 * Handle an error from a request
+		 */
+		public handleError(action: string, type: string, error: any) {
+			let message = "";
+			if (error.data && error.data.message) {
+				message = error.data.message;
+			}
+
+			const title = "Error";
+			const content = `
+				Something went wrong trying to ${action} the ${type}:
+				<br><br>
+				<strong>${message}</strong>
+				<br><br>
+				If this is unexpected please message support@3drepo.io.
+			`;
+			const escapable = true;
+			this.DialogService.html(title, content, escapable);
+			console.error(`Something went wrong trying to ${action} the ${type}:`, error);
+		}
+
+		public toggleAllUsers() {
+			this.members = this.members.map((member) => {
+				return {...member, isSelected: this.shouldSelectAllUser}
+			});
 		}
 }
 

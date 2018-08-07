@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const LIST_ITEM_TYPES:Readonly = {
+export const LIST_ITEM_TYPES = {
 	checkbox: 1,
 	dropdown: 2,
 	radio: 3
@@ -32,7 +32,7 @@ class ListController implements ng.IController {
 
 export const ListComponent: ng.IComponentOptions = {
 		bindings: {
-			items: '<'
+			items: "<"
 		},
 		controller: ListController,
 		controllerAs: "vm",

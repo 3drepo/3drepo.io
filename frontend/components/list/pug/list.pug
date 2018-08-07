@@ -1,8 +1,9 @@
 .list(layout="column")
-	.listHeader
+	.listHeader(ng-transclude-slot="listHeader")
 
 	.listBody
 		.listItem(
 			ng-repeat="item in vm.items track by item.id",
 			layout="row"
-			layout-align="start center")
+			layout-align="start center"
+			ng-transclude="vm.listItemTemplate")

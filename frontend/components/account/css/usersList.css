@@ -1,0 +1,39 @@
+.usersList {
+
+}
+
+.usersListHeader {
+
+}
+
+.usersListBody {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.usersListRow {
+  height: 62px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.userListCell {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  padding: 0 24px;
+}
+
+.userListCell md-checkbox {
+  margin-bottom: 0;
+  width: 20px;
+  margin-right: -24px;
+}
+
+.userListCell md-input-container {
+  width: 100%;
+}
+
+.userListCell .md-select-value {
+  padding-left: 0;
+}
+

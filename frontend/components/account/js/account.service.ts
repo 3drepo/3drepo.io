@@ -236,7 +236,7 @@ export class AccountService {
 	 * @returns {*|promise}
 	 */
 	public newSubscription(teamspace, data): Promise<any> {
-		return this.APIService.post(teamspace + "/subscriptions", data);
+		return this.APIService.post(`${teamspace}/subscriptions`, data);
 	}
 
 	/**
@@ -246,11 +246,40 @@ export class AccountService {
 	 * @returns {*|promise}
 	 */
 	public getUserInfo(username): Promise<any> {
-		const currentAccount = this.APIService.get(username + ".json");
+		const currentAccount = this.APIService.get(`${username}.json`);
 		this.accountDefer.resolve(currentAccount);
 		return currentAccount;
 	}
 
+	/**
+	 * Get quota info
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getQuotaInfo(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/quota`);
+	}
+
+	/**
+	 * Get quota info
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getMembers(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/members`);
+	}
+
+	/**
+	 * Get jobs list
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getJobs(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/jobs`);
+	}
 }
 
 export const AccountServiceModule = angular
