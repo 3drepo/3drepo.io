@@ -36,6 +36,8 @@ export class ViewerService {
 	private pin: any;
 	private initialised: any;
 	private Viewer: any;
+	private model: string;
+	private account: string;
 
 	constructor(
 		public $q: ng.IQService,
