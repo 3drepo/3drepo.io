@@ -400,7 +400,7 @@ class GroupsController implements ng.IController {
 		this.focusGroupName();
 	}
 
-	public cancelEdition() {
+	public cancelEdit() {
 		this.hexColor = "";
 		this.onHideItem();
 	}
@@ -464,7 +464,7 @@ class GroupsController implements ng.IController {
 
 	public groupsDeletedListener(ids, submodel) {
 		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
-			this.cancelEdition();
+			this.cancelEdit();
 		}
 
 		this.GroupsService.deleteStateGroupsByIdsDeferred(ids);

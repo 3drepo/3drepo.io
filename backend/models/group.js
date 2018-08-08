@@ -360,7 +360,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 			"name" : "[object String]",
 			"author" : "[object String]",
 			"createdAt" : "[object Number]",
-			"updatedBy" : "[object Number]",
+			"updatedBy" : "[object String]",
 			"updatedAt" : "[object Number]",
 			"objects" :  "[object Array]",
 			"color" : "[object Array]",
