@@ -23,5 +23,5 @@ md-dialog(aria-label="Remove Licence")
 				p {{vm.teamspacePerms}}
 
 		div(layout="row", layout-align="start")
-			md-button.md-raised.md-accent(ng-click="vm.removeLicenseConfirmed()") Remove
+			md-button.md-raised.md-accent(ng-click="onRemove()") Remove
 			md-button.md-accent(ng-click="utilsRemoveDialog()") Cancel

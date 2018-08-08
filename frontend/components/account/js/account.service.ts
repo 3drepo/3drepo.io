@@ -320,6 +320,26 @@ export class AccountService {
 	public getModelPermissions(teamspace, model): Promise<any> {
 		return this.APIService.get(`${teamspace}/${model}/permission`);
 	}
+
+	/**
+	 * Remove member from teamspace
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public removeMember(teamspace, member): Promise<any> {
+		return this.APIService.delete(`${teamspace}/members/${member}`, {});
+	}
+
+	/**
+	 * Remove member from teamspace
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public removeMemberCascade(teamspace, member): Promise<any> {
+		return this.APIService.delete(`${teamspace}/members/${member}?cascadeRemove=true`, {});
+	}
 }
 
 export const AccountServiceModule = angular

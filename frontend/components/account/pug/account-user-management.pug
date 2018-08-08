@@ -5,7 +5,7 @@
 		flex)
 		md-toolbar
 			.md-toolbar-tools
-				h2 User Managment
+				h2 User Management
 
 		.teamspaceSelectWrapper(layout="row")
 			md-input-container.teamspaceSelectContainer(md-no-float, flex)
@@ -74,7 +74,8 @@
 
 							//Remove action
 							md-button.md-icon-button.userListRemoveButton(
-								ng-disabled="member.isCurrentUser")
+								ng-if="!member.isCurrentUser"
+								ng-click="vm.removeMember(member)")
 								md-icon.angular-material-icons remove_circle
 
 			md-tab(label="Jobs")

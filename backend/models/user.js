@@ -1036,33 +1036,33 @@ schema.statics.getQuotaInfo = function(teamspace) {
 	});
 };
 
-schema.statics.getMembersAndJobs = function(teamspace) {
-	let memberArr = [];
-	let memToJob = {};
+schema.statics.getMembers = function(teamspace) {
 	const promises = [];
 
-	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
-		memberArr = members;
-	});
+	const getTSMemProm = this.getAllUsersInTeamspace(teamspace);
+	const getJobInfoProm = Job.usersWithJob(teamspace);
 
-	const getJobInfoProm = Job.usersWithJob(teamspace).then(_memToJob => {
-		memToJob = _memToJob;
-	});
-	promises.push(getTSMemProm);
-	promises.push(getJobInfoProm);
+	const getPermissionsProm = User.findByUserName(teamspace)
+		.then((user) => user.toObject().customData.permissions);
 
-	return Promise.all(promises).then(() => {
-		const resultArr = [];
-		memberArr.forEach(mem => {
-			const entry = {user: mem};
-			if(memToJob[mem]) {
-				entry.job = memToJob[mem];
-			}
+	promises.push(
+		getTSMemProm,
+		getJobInfoProm ,
+		getPermissionsProm
+	);
 
-			resultArr.push(entry);
+	return Promise.all(promises)
+		.then(([members = [], memToJob = {}, permissions = []]) => {
+			return members.map((mem) => {
+				const entry = {user: mem};
+				if(memToJob[mem]) {
+					entry.job = memToJob[mem];
+				}
+				entry.permissions = _.get(_.find(permissions, {"user": mem}), "permissions", []);
+
+				return entry;
+			});
 		});
-		return resultArr;
-	});
 };
 
 schema.statics.getAllUsersInTeamspace = function(teamspace) {

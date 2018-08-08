@@ -91,7 +91,7 @@ export class DialogService {
 		return variable !== null && variable !== undefined;
 	}
 
-	public cancel() {
+	public cancel = () => {
 		this.$mdDialog.cancel();
 	}
 
@@ -105,10 +105,7 @@ export class DialogService {
 		// Set up and show dialog
 		const data: any = {
 			controller: () => {},
-			templateUrl: "/templates/" + dialogTemplate,
-			onRemoving: () => {
-				this.$mdDialog.cancel();
-			}
+			templateUrl: `/templates/${dialogTemplate}`
 		};
 
 		data.parent = angular.element(this.isDefined(parent) ? parent : document.body);

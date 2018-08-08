@@ -38,9 +38,12 @@ const TEAMSPACE_PERMISSIONS = {
 class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
+			"$q",
+			"$rootScope",
+			"$mdDialog",
+			"APIService",
 			"AccountService",
-			"DialogService",
-			"$q"
+			"DialogService"
 		];
 
 		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
@@ -65,9 +68,12 @@ class AccountUserManagementController implements ng.IController {
 		private shouldSelectAllUser;
 
 		constructor(
+			private $q: any,
+			private $rootScope: any,
+			private $mdDialog: any,
+			private APIService: any,
 			private AccountService: any,
-			private DialogService: any,
-			private $q: any
+			private DialogService: any
 		) {}
 
 		public $onInit(): void {
@@ -111,7 +117,8 @@ class AccountUserManagementController implements ng.IController {
 					this.members = membersResponse.data.members.map((member) => {
 						return {
 							...member,
-							isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key)
+							isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
+							isCurrentUser: this.account === member.user
 						};
 					});
 				});
@@ -142,6 +149,55 @@ class AccountUserManagementController implements ng.IController {
 			}
 			// TODO: Handle request
 			return [];
+		}
+
+		/**
+		 * Remove license for a member
+		 */
+		public removeMember(member): void {
+			this.AccountService.removeMember(this.currentTeamspace.account, member.user)
+				.then(this.onMemberRemove.bind(null, member))
+				.catch((error) => {
+					if (error.status === 400) {
+						const responseCode = this.APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
+						if (error.data.value === responseCode) {
+							const dialogData: any = this.$rootScope.$new();
+							dialogData.models = error.data.models,
+							dialogData.projects = error.data.projects,
+							dialogData.onRemove = this.removeLicenseConfirmed.bind(null, this.currentTeamspace.account, member);
+
+							if (error.data.teamspace) {
+								dialogData.teamspacePerms = error.data.teamspace.permissions.join(", ");
+							}
+
+							this.DialogService.showDialog("remove-license-dialog.html", dialogData);
+						}
+					} else {
+						this.handleError("remove", "licence", error);
+					}
+
+				});
+		}
+
+		/**
+		* Remove license from user who is a team member of a model
+		*/
+		public removeLicenseConfirmed = (teamspace, member) => {
+			this.AccountService.removeMemberCascade(teamspace, member.user)
+				.then(this.onMemberRemove.bind(null, member))
+				.catch((error) => {
+					this.handleError("remove", "licence", error);
+				});
+		}
+
+		/**
+		 * Call on member remove
+		 */
+		public onMemberRemove = (member, response): void => {
+			if (response.status === 200) {
+				this.members = this.members.filter(({user}) => user !== member.user);
+			}
+			this.$mdDialog.cancel();
 		}
 
 		/**

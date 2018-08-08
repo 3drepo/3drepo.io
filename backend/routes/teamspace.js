@@ -63,8 +63,7 @@
 			}
 
 			if(user.isMemberOfTeamspace(req.params.account)) {
-				return User.getMembersAndJobs(req.params.account);
-
+				return User.getMembers(req.params.account);
 			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
