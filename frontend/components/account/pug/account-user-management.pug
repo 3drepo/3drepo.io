@@ -16,7 +16,7 @@
 					ng-disabled="!vm.teamspaces.length")
 					md-option(
 						ng-value="teamspace.account"
-						ng-repeat="teamspace in vm.teamspaces") {{teamspace.account}}
+						ng-repeat="teamspace in vm.teamspaces") {{::teamspace.account}}
 
 		md-button.md-accent.md-fab.md-mini.addButton(
 			aria-label="Add new member"
@@ -28,7 +28,7 @@
 			md-dynamic-height
 			md-border-bottom
 			md-selected="vm.selectedTab"
-			md-on-select="onTabSelected(tab)") 
+			md-on-select="vm.onTabChange()") 
 			md-tab(label="Users")
 				.usersList
 					.userListHeader(layout="row" layout-align="start center")
@@ -66,7 +66,10 @@
 										md-option(
 											ng-value="job._id"
 											ng-repeat="job in vm.jobs track by job._id")
-											div(layout="row" layout-align="start center") {{job._id}}
+											div(layout="row" layout-align="start center")
+												span.userListJobColor(ng-style="{'background-color': job.color}")
+												.userListJobName {{job._id}}
+												
 
 							//Permissions
 							.userListCell(layout="row" layout-align="start center" flex="25")

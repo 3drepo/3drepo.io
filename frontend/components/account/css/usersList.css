@@ -35,10 +35,10 @@
 
 .userListCell .md-select-value {
   padding-left: 0;
+  border-bottom-color: transparent !important;
 }
 
-.userListCell .md-text,
-.userListCell .md-text div {
+.userListCell .md-text {
   text-overflow: ellipsis;
   overflow: hidden;
   width: 100%;
@@ -48,4 +48,15 @@
 
 .userListRemoveButton.md-button {
   margin-right: 16px;
+}
+
+.userListJobColor {
+  min-height: 6px;
+  min-width: 6px;
+  border-radius: 100%;
+  margin-right: 12px;
+}
+
+.userListJobName {
+
 }

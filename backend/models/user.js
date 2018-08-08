@@ -1039,42 +1039,49 @@ schema.statics.getQuotaInfo = function(teamspace) {
 schema.statics.getMembers = function(teamspace) {
 	const promises = [];
 
-	const getTSMemProm = this.getAllUsersInTeamspace(teamspace);
+	const getTSMemProm = this.findUsersInTeamspace(teamspace, {
+		user: 1,
+		customData: 1
+	});
 	const getJobInfoProm = Job.usersWithJob(teamspace);
-
-	const getPermissionsProm = User.findByUserName(teamspace)
-		.then((user) => user.toObject().customData.permissions);
 
 	promises.push(
 		getTSMemProm,
-		getJobInfoProm ,
-		getPermissionsProm
+		getJobInfoProm
 	);
 
 	return Promise.all(promises)
-		.then(([members = [], memToJob = {}, permissions = []]) => {
-			return members.map((mem) => {
-				const entry = {user: mem};
-				if(memToJob[mem]) {
-					entry.job = memToJob[mem];
-				}
-				entry.permissions = _.get(_.find(permissions, {"user": mem}), "permissions", []);
-
-				return entry;
+		.then(([members = [], memToJob = {}]) => {
+			return members.map(({user, customData}) => {
+				const permissions = _.find(
+					_.get(customData.permissions, "permissions", []),
+					{user: teamspace}
+				);
+				return {
+					user,
+					firstName: customData.firstName,
+					lastName: customData.lastName,
+					email: customData.email,
+					permissions: _.get(permissions, "permissions", []),
+					job: _.get(memToJob, user)
+				};
 			});
 		});
 };
 
 schema.statics.getAllUsersInTeamspace = function(teamspace) {
-
-	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return this.find({account: "admin"}, query , {user : 1}).then(users => {
+	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
 		const res = [];
 		users.forEach(user => {
 			res.push(user.user);
 		});
 		return Promise.resolve(res);
 	});
+};
+
+schema.statics.findUsersInTeamspace = function (teamspace, fields) {
+	const query = { "roles.db": teamspace, "roles.role": C.DEFAULT_MEMBER_ROLE };
+	return this.find({ account: "admin" }, query, fields);
 };
 
 schema.statics.teamspaceMemberCheck = function(teamspace, user) {
