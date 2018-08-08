@@ -108,7 +108,12 @@ class AccountUserManagementController implements ng.IController {
 			Promise.all([quotaInfoPromise, memberListPromise, permissionsPromise])
 				.then(([quotaInfoResponse, membersResponse, permissionsResponse]) => {
 					this.extraData.totalLicenses = get(quotaInfoResponse, "data.collaboratorLimit", 0);
-					this.members = membersResponse.data.members;
+					this.members = membersResponse.data.members.map((member) => {
+						return {
+							...member,
+							isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key)
+						};
+					});
 				});
 		}
 
