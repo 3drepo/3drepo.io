@@ -39,7 +39,8 @@ class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
 			"AccountService",
-			"DialogService"
+			"DialogService",
+			"$q"
 		];
 
 		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
@@ -65,7 +66,8 @@ class AccountUserManagementController implements ng.IController {
 
 		constructor(
 			private AccountService: any,
-			private DialogService: any
+			private DialogService: any,
+			private $q: any
 		) {}
 
 		public $onInit(): void {
@@ -103,10 +105,8 @@ class AccountUserManagementController implements ng.IController {
 					this.handleError("retrieve", "members", error);
 				});
 
-			const permissionsPromise = this.AccountService.getPermissions(teamspaceName);
-
-			Promise.all([quotaInfoPromise, memberListPromise, permissionsPromise])
-				.then(([quotaInfoResponse, membersResponse, permissionsResponse]) => {
+			this.$q.all([quotaInfoPromise, memberListPromise])
+				.then(([quotaInfoResponse, membersResponse]) => {
 					this.extraData.totalLicenses = get(quotaInfoResponse, "data.collaboratorLimit", 0);
 					this.members = membersResponse.data.members.map((member) => {
 						return {
