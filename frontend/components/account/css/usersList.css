@@ -46,3 +46,6 @@
   display: block; 
 }
 
+.userListRemoveButton.md-button {
+  margin-right: 16px;
+}
