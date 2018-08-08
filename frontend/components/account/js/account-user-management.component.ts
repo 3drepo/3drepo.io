@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {get, uniq, map} from "lodash";
+import {get, uniq, map, values} from "lodash";
 
 const TABS_TYPES = {
 	USERS: 1,
@@ -42,7 +42,7 @@ class AccountUserManagementController implements ng.IController {
 			"DialogService"
 		];
 
-		private TEAMSPACE_PERMISSIONS = Object.values(TEAMSPACE_PERMISSIONS);
+		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
 
 		private account;
 		private accounts;
@@ -105,8 +105,8 @@ class AccountUserManagementController implements ng.IController {
 
 			const permissionsPromise = this.AccountService.getPermissions(teamspaceName);
 
-			Promise.all([quotaInfoPromise, memberListPromise])
-				.then(([quotaInfoResponse, membersResponse]) => {
+			Promise.all([quotaInfoPromise, memberListPromise, permissionsPromise])
+				.then(([quotaInfoResponse, membersResponse, permissionsResponse]) => {
 					this.extraData.totalLicenses = get(quotaInfoResponse, "data.collaboratorLimit", 0);
 					this.members = membersResponse.data.members;
 				});

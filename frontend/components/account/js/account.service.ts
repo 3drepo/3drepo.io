@@ -287,6 +287,15 @@ export class AccountService {
 	 * @returns {*|promise}
 	 */
 	public getPermissions(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/permissions`);
+	}
+
+	/**
+	 * Get teamspace permissions
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getPermissionTemplates(teamspace): Promise<any> {
 		return this.APIService.get(`${teamspace}/permission-templates`);
 	}
 
@@ -297,8 +306,19 @@ export class AccountService {
 	 * @param model
 	 * @returns {*|promise}
 	 */
-	public getModelPermissions(teamspace, model): Promise<any> {
+	public getModelPermissionTemplates(teamspace, model): Promise<any> {
 		return this.APIService.get(`${teamspace}/${model}/permission-templates`);
+	}
+
+	/**
+	 * Get model permissions
+	 *
+	 * @param teamspace
+	 * @param model
+	 * @returns {*|promise}
+	 */
+	public getModelPermissions(teamspace, model): Promise<any> {
+		return this.APIService.get(`${teamspace}/${model}/permission`);
 	}
 }
 
