@@ -56,8 +56,7 @@
 									md-checkbox(ng-model="member.isSelected")
 
 							//User details
-							.userListCell(layout="row" layout-align="start center" flex="25")
-								.md-text {{member.user}}
+							member-card.userListCell(data="member" flex="25")
 
 							//Job
 							.userListCell(layout="row" layout-align="start center" flex="25")
