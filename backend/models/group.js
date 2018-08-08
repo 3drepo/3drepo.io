@@ -423,10 +423,17 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 };
 
 groupSchema.methods.clean = function() {
-
 	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+
+	if (Date.prototype.isPrototypeOf(cleaned.createdAt)) {
+		cleaned.createdAt = cleaned.createdAt.getTime();
+	}
+
+	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
+		cleaned.updatedAt = cleaned.updatedAt.getTime();
+	}
 
 	return cleaned;
 };

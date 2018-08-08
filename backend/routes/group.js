@@ -159,7 +159,7 @@ function updateGroup(req, res, next) {
 		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			return group.updateGroup(dbCol,sessionId , req.body);
+			return group.updateGroup(dbCol, sessionId, req.body);
 		}
 
 	}).then(group => {
