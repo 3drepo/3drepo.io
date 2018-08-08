@@ -17,11 +17,18 @@
 					md-option(
 						ng-value="teamspace.account"
 						ng-repeat="teamspace in vm.teamspaces") {{teamspace.account}}
-	
+
+		md-button.md-accent.md-fab.md-mini.addButton(
+			aria-label="Add new member"
+			ng-if="!vm.isLoadingTeamspace"
+			ng-click="vm.openNewDataPanel()")
+			md-icon.angular-material-icons add
+
 		md-tabs(
-			md-dynamic-height,
+			md-dynamic-height
 			md-border-bottom
-			md-selected="vm.selectedTab") 
+			md-selected="vm.selectedTab"
+			md-on-select="onTabSelected(tab)") 
 			md-tab(label="Users")
 				.usersList
 					.userListHeader(layout="row" layout-align="start center")

@@ -18,9 +18,24 @@
 import {get, uniq, map, values} from "lodash";
 
 const TABS_TYPES = {
-	USERS: 1,
-	JOBS: 2,
-	PROJECTS: 3
+	USERS: 0,
+	JOBS: 1,
+	PROJECTS: 2
+};
+
+const TABS = {
+	[TABS_TYPES.USERS]: {
+		id: TABS_TYPES.USERS,
+		label: "Users"
+	},
+	[TABS_TYPES.JOBS]: {
+		id: TABS_TYPES.JOBS,
+		label: "Jobs"
+	},
+	[TABS_TYPES.PROJECTS]: {
+		id: TABS_TYPES.PROJECTS,
+		label: "Projects"
+	}
 };
 
 const TEAMSPACE_PERMISSIONS = {
@@ -56,10 +71,12 @@ class AccountUserManagementController implements ng.IController {
 		private jobsColors;
 		private projects;
 		private currentTeamspace;
+		private currentTabConfig;
 		private extraData = {
 			totalLicenses: 0,
 			usedLicences: 0
 		};
+		private isLoadingTeamspace;
 
 		private selectedTeamspace;
 		private selectedTab;
@@ -89,11 +106,23 @@ class AccountUserManagementController implements ng.IController {
 		/**
 		 * Get teamspace details
 		 */
-		public onTeamspaceChange = (): void => {
+		public async onTeamspaceChange = (): void => {
+			this.isLoadingTeamspace = true;
 			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.account);
-			this.setTeamspaceMembers(this.currentTeamspace.account);
-			this.setTeamspaceJobs(this.currentTeamspace.account);
-			this.projects = [...this.currentTeamspace.projects];
+			const membersPromise = this.setTeamspaceMembers(this.currentTeamspace.account);
+			const jobsPromise = this.setTeamspaceJobs(this.currentTeamspace.account);
+
+			this.$q.all([membersPromise, jobsPromise]).then(() => {
+				this.projects = [...this.currentTeamspace.projects];
+				this.isLoadingTeamspace = false;
+			});
+		}
+
+		/**
+		 * Get teamspace details
+		 */
+		public onTabChange = (): void => {
+			this.currentTabConfig = TABS[this.selectedTab];
 		}
 
 		/**
@@ -111,7 +140,7 @@ class AccountUserManagementController implements ng.IController {
 					this.handleError("retrieve", "members", error);
 				});
 
-			this.$q.all([quotaInfoPromise, memberListPromise])
+			return this.$q.all([quotaInfoPromise, memberListPromise])
 				.then(([quotaInfoResponse, membersResponse]) => {
 					this.extraData.totalLicenses = get(quotaInfoResponse, "data.collaboratorLimit", 0);
 					this.members = membersResponse.data.members.map((member) => {
@@ -129,7 +158,7 @@ class AccountUserManagementController implements ng.IController {
 		 * @param teamspaceName
 		 */
 		public setTeamspaceJobs(teamspaceName: string): void {
-			this.AccountService.getJobs(teamspaceName)
+			return this.AccountService.getJobs(teamspaceName)
 				.then((response) => {
 					this.jobs = get(response, "data", []);
 					this.jobsColors = uniq(map(this.jobs, "color"));

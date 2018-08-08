@@ -9,3 +9,9 @@
 .accountUserManagement .teamspaceSelectContainer {
   margin: 24px;
 }
+
+.accountUserManagement .addButton {
+  position: absolute;
+  right: 7px;
+  top: 142px;
+}
