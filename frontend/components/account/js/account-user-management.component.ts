@@ -154,6 +154,8 @@ class AccountUserManagementController implements ng.IController {
 				${subtitle}
 				<br><br>
 				<strong>${message}</strong>
+				<br>
+				${error.status ? `<code>(Status Code: ${error.status})</code>` : ""}
 				<br><br>
 				If this is unexpected please message support@3drepo.io.
 			`;
