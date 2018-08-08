@@ -23,12 +23,26 @@ const TABS_TYPES = {
 	PROJECTS: 3
 };
 
+const TEAMSPACE_PERMISSIONS = {
+	admin: {
+		isAdmin: true,
+		key: "teamspace_admin",
+		label: "Teamspace admin"
+	},
+	user: {
+		isAdmin: false,
+		label: "User"
+	}
+};
+
 class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
 			"AccountService",
 			"DialogService"
 		];
+
+		private TEAMSPACE_PERMISSIONS = Object.values(TEAMSPACE_PERMISSIONS);
 
 		private account;
 		private accounts;
@@ -55,7 +69,6 @@ class AccountUserManagementController implements ng.IController {
 		) {}
 
 		public $onInit(): void {
-			this.selectedTeamspace = this.account;
 			this.onTeamspaceChange();
 		}
 
@@ -68,10 +81,10 @@ class AccountUserManagementController implements ng.IController {
 		/**
 		 * Get teamspace details
 		 */
-		public onTeamspaceChange(): void {
-			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
-			this.setTeamspaceMembers(this.selectedTeamspace);
-			this.setTeamspaceJobs(this.selectedTeamspace);
+		public onTeamspaceChange = (): void => {
+			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.account);
+			this.setTeamspaceMembers(this.currentTeamspace.account);
+			this.setTeamspaceJobs(this.currentTeamspace.account);
 			this.projects = [...this.currentTeamspace.projects];
 		}
 
@@ -89,6 +102,8 @@ class AccountUserManagementController implements ng.IController {
 				.catch((error) => {
 					this.handleError("retrieve", "members", error);
 				});
+
+			const permissionsPromise = this.AccountService.getPermissions(teamspaceName);
 
 			Promise.all([quotaInfoPromise, memberListPromise])
 				.then(([quotaInfoResponse, membersResponse]) => {
@@ -128,27 +143,29 @@ class AccountUserManagementController implements ng.IController {
 		 * Handle an error from a request
 		 */
 		public handleError(action: string, type: string, error: any) {
-			let message = "";
-			if (error.data && error.data.message) {
-				message = error.data.message;
-			}
+			const message = get(error, "data.message", "");
 
 			const title = "Error";
+			const subtitle = action && type ?
+			`Something went wrong trying to ${action} the ${type}:`:
+			`Something went wrong:`;
+
 			const content = `
-				Something went wrong trying to ${action} the ${type}:
+				${subtitle}
 				<br><br>
 				<strong>${message}</strong>
 				<br><br>
 				If this is unexpected please message support@3drepo.io.
 			`;
 			const escapable = true;
+
 			this.DialogService.html(title, content, escapable);
-			console.error(`Something went wrong trying to ${action} the ${type}:`, error);
+			console.error(subtitle, error);
 		}
 
 		public toggleAllUsers() {
 			this.members = this.members.map((member) => {
-				return {...member, isSelected: this.shouldSelectAllUser}
+				return {...member, isSelected: this.shouldSelectAllUser};
 			});
 		}
 }
