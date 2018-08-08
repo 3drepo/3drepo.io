@@ -32,11 +32,12 @@ class AccountUserManagementController implements ng.IController {
 
 		private account;
 		private accounts;
-		private teamspaces;
+		private teamspaces = [];
 		private members;
 		private jobs;
 		private jobsColors;
 		private projects;
+		private currentTeamspace;
 		private extraData = {
 			totalLicenses: 0,
 			usedLicences: 0
@@ -68,9 +69,10 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace details
 		 */
 		public onTeamspaceChange(): void {
+			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
 			this.setTeamspaceMembers(this.selectedTeamspace);
 			this.setTeamspaceJobs(this.selectedTeamspace);
-			this.projects = this.getTeamspaceProjects(this.selectedTeamspace);
+			this.projects = [...this.currentTeamspace.projects];
 		}
 
 		/**

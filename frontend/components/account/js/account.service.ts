@@ -280,6 +280,26 @@ export class AccountService {
 	public getJobs(teamspace): Promise<any> {
 		return this.APIService.get(`${teamspace}/jobs`);
 	}
+
+	/**
+	 * Get teamspace permissions
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getPermissions(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/permission-templates`);
+	}
+
+	/**
+	 * Get model permissions
+	 *
+	 * @param teamspace
+	 * @param model
+	 * @returns {*|promise}
+	 */
+	public getModelPermissions(teamspace, model): Promise<any> {
+		return this.APIService.get(`${teamspace}/${model}/permission-templates`);
+	}
 }
 
 export const AccountServiceModule = angular
