@@ -37,3 +37,12 @@
   padding-left: 0;
 }
 
+.userListCell .md-text,
+.userListCell .md-text div {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+  white-space: nowrap;
+  display: block; 
+}
+

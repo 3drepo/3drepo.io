@@ -152,7 +152,7 @@ class AccountUserManagementController implements ng.IController {
 
 			const title = "Error";
 			const subtitle = action && type ?
-			`Something went wrong trying to ${action} the ${type}:`:
+			`Something went wrong trying to ${action} the ${type}:` :
 			`Something went wrong:`;
 
 			const content = `
