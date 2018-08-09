@@ -131,14 +131,10 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public setTeamspaceMembers(teamspaceName: string): void {
 			const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
-				.catch((error) => {
-					this.handleError("retrieve", "subscriptions", error);
-				});
+				.catch(this.handleError.bind(null, "retrieve", "subscriptions"));
 
 			const memberListPromise = this.AccountService.getMembers(teamspaceName)
-				.catch((error) => {
-					this.handleError("retrieve", "members", error);
-				});
+				.catch(this.handleError.bind(null, "retrieve", "members"));
 
 			return this.$q.all([quotaInfoPromise, memberListPromise])
 				.then(([quotaInfoResponse, membersResponse]) => {
@@ -163,9 +159,7 @@ class AccountUserManagementController implements ng.IController {
 					this.jobs = get(response, "data", []);
 					this.jobsColors = uniq(map(this.jobs, "color"));
 				})
-				.catch((error) => {
-					this.handleError("retrieve", "jobs", error);
-				});
+				.catch(this.handleError.bind(null, "retrieve", "jobs"));
 		}
 
 		/**
@@ -214,9 +208,7 @@ class AccountUserManagementController implements ng.IController {
 		public removeLicenseConfirmed = (teamspace, member) => {
 			this.AccountService.removeMemberCascade(teamspace, member.user)
 				.then(this.onMemberRemove.bind(null, member))
-				.catch((error) => {
-					this.handleError("remove", "licence", error);
-				});
+				.catch(this.handleError.bind(null, "remove", "licence"));
 		}
 
 		/**
@@ -232,7 +224,7 @@ class AccountUserManagementController implements ng.IController {
 		/**
 		 * Handle an error from a request
 		 */
-		public handleError(action: string, type: string, error: any) {
+		public handleError = (action: string, type: string, error: any) => {
 			const message = get(error, "data.message", "");
 
 			const title = "Error";
@@ -259,6 +251,30 @@ class AccountUserManagementController implements ng.IController {
 			this.members = this.members.map((member) => {
 				return {...member, isSelected: this.shouldSelectAllUser};
 			});
+		}
+
+		/**
+		 * Update member job title
+		 * @param member
+		 * @param member.job
+		 * @param member.user
+		 */
+		public onJobChange(member): void {
+			const {job, user} = member;
+			const updatePromise = this.AccountService[job ? "updateMemberJob" : "removeMemberJob"];
+			const acionType = job ? "assign" : "unassign";
+
+			member.isPending = true;
+			updatePromise(this.currentTeamspace.account, job, user)
+				.then((response) => {
+					if (response.status !== 200) {
+						throw (response);
+					}
+				})
+				.catch(this.handleError.bind(null, acionType, "job"))
+				.finally(() => {
+					member.isPending = false;
+				});
 		}
 }
 

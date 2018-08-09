@@ -340,6 +340,28 @@ export class AccountService {
 	public removeMemberCascade(teamspace, member): Promise<any> {
 		return this.APIService.delete(`${teamspace}/members/${member}?cascadeRemove=true`, {});
 	}
+
+	/**
+	 * Update member job
+	 * @param teamspace
+	 * @param job
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public updateMemberJob = (teamspace, job, member): Promise<any> => {
+		return this.APIService.post(`${teamspace}/jobs/${job}/${member}`);
+	}
+
+	/**
+	 * Remove member job
+	 * @param teamspace
+	 * @param job
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public removeMemberJob = (teamspace, job, member): Promise<any> => {
+		return this.APIService.delete(`${teamspace}/jobs/unassign/${member}`);
+	}
 }
 
 export const AccountServiceModule = angular

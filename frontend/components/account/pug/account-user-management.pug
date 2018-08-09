@@ -70,7 +70,11 @@
 									md-select(
 										ng-model="member.job"
 										placeholder="Select a job"
-										ng-change="vm.onJobChange()")
+										ng-change="vm.onJobChange(member)")
+										md-option(ng-value="" ng-if="vm.jobs.length && member.job")
+											div(layout="row" layout-align="start center")
+												span.userListJobColor(ng-style="{'background-color': job.color}")
+												.userListJobName Unassign
 										md-option(
 											ng-value="job._id"
 											ng-repeat="job in vm.jobs track by job._id")
