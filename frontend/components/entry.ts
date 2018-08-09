@@ -110,6 +110,7 @@ import "./viewpoints/js/viewpoints.service";
 import "./member-card/js/member-card.component";
 import "./list-sort-button/js/list-sort-button.component";
 import "./new-member-form/js/new-member-form.component";
+import "./users-list/js/users-list.component";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

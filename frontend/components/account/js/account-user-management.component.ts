@@ -15,6 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {get, uniq, map, values, cond, matches, orderBy} from "lodash";
 
 const TABS_TYPES = {
@@ -38,55 +39,26 @@ const TABS = {
 	}
 };
 
-const TEAMSPACE_PERMISSIONS = {
-	admin: {
-		isAdmin: true,
-		key: "teamspace_admin",
-		label: "Teamspace admin"
-	},
-	user: {
-		isAdmin: false,
-		label: "User"
-	}
-};
-
-const SORT_TYPES = {
-	USERS: 1,
-	JOBS: 2,
-	PERMISSIONS: 3
-};
-
-const SORT_ORDER_TYPES = {
-	ASCENDING: "asc",
-	DESCENDING: "desc"
-};
-
 class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
 			"$q",
-			"$rootScope",
-			"$mdDialog",
-			"APIService",
 			"AccountService",
 			"DialogService"
 		];
 
 		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
 		private TABS_TYPES = TABS_TYPES;
-		private SORT_TYPES = SORT_TYPES;
 
 		private account;
 		private accounts;
 		private teamspaces = [];
 		private members;
-		private processedMembers;
 		private jobs;
 		private jobsColors;
 		private projects;
 		private currentTeamspace;
 		private currentTabConfig;
-		private currentSort;
 		private extraData = {
 			totalLicenses: 0,
 			usedLicences: 0
@@ -96,21 +68,16 @@ class AccountUserManagementController implements ng.IController {
 		private selectedTeamspace;
 		private selectedTab;
 		private selectedProject;
-		private shouldSelectAllUser;
 		private showAddingPanel;
 
 		constructor(
 			private $q: any,
-			private $rootScope: any,
-			private $mdDialog: any,
-			private APIService: any,
 			private AccountService: any,
 			private DialogService: any
 		) {}
 
 		public $onInit(): void {
 			this.onTeamspaceChange();
-			this.setSortType(SORT_TYPES.USERS, SORT_ORDER_TYPES.ASCENDING);
 		}
 
 		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}): void {
@@ -162,8 +129,6 @@ class AccountUserManagementController implements ng.IController {
 							isCurrentUser: this.account === member.user
 						};
 					});
-
-					this.processedMembers = this.processMembers();
 				});
 		}
 
@@ -193,138 +158,12 @@ class AccountUserManagementController implements ng.IController {
 		}
 
 		/**
-		 * Remove license for a member
-		 */
-		public removeMember(member): void {
-			this.AccountService.removeMember(this.currentTeamspace.account, member.user)
-				.then(this.onMemberRemove.bind(null, member))
-				.catch((error) => {
-					if (error.status === 400) {
-						const responseCode = this.APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
-						if (error.data.value === responseCode) {
-							const dialogData: any = this.$rootScope.$new();
-							dialogData.models = error.data.models,
-							dialogData.projects = error.data.projects,
-							dialogData.onRemove = this.removeLicenseConfirmed.bind(null, this.currentTeamspace.account, member);
-
-							if (error.data.teamspace) {
-								dialogData.teamspacePerms = error.data.teamspace.permissions.join(", ");
-							}
-
-							this.DialogService.showDialog("remove-license-dialog.html", dialogData);
-						}
-					} else {
-						this.DialogService.showError("remove", "licence", error);
-					}
-
-				});
-		}
-
-		/**
-		* Remove license from user who is a team member of a model
-		*/
-		public removeLicenseConfirmed = (teamspace, member) => {
-			this.AccountService.removeMemberCascade(teamspace, member.user)
-				.then(this.onMemberRemove.bind(null, member))
-				.catch(this.DialogService.showError.bind(null, "remove", "licence"));
-		}
-
-		/**
-		 * Call on member remove
-		 */
-		public onMemberRemove = (member, response): void => {
-			if (response.status === 200) {
-				this.members = this.members.filter(({user}) => user !== member.user);
-			}
-			this.$mdDialog.cancel();
-		}
-
-		public toggleAllUsers() {
-			this.members = this.members.map((member) => {
-				return {...member, isSelected: this.shouldSelectAllUser};
-			});
-		}
-
-		/**
-		 * Update member job title
-		 * @param member
-		 */
-		public onJobChange(member): void {
-			const {job, user} = member;
-			const updatePromise = this.AccountService[job ? "updateMemberJob" : "removeMemberJob"];
-			const acionType = job ? "assign" : "unassign";
-
-			member.isPending = true;
-			updatePromise(this.currentTeamspace.account, job, user)
-				.then((response) => {
-					if (response.status !== 200) {
-						throw (response);
-					}
-				})
-				.catch(this.DialogService.showError.bind(null, acionType, "job"))
-				.finally(() => {
-					member.isPending = false;
-				});
-		}
-
-		/**
-		 * Update member permissions
-		 * @param member
-		 */
-		public onPermissionsChange(member): void {
-			const permissionData = {
-				user: member.user,
-				permissions: member.isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
-			};
-
-			member.isPending = true;
-			this.AccountService
-				.setMemberPermissions(this.currentTeamspace.account, permissionData)
-				.catch(this.DialogService.showError.bind(null, "update", "teamspace permissions"))
-				.finally(() => {
-					member.isPending = false;
-				});
-		}
-
-		/**
 		 * Change panel visibility
 		 * @param forceHide
 		 */
 		public toggleNewDataPanel(forceHide = false): void {
 			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
 		}
-
-		public setSortType(type, order): void {
-			this.currentSort = {type, order};
-			this.processedMembers = this.processMembers();
-		}
-
-	public processMembers(): object[] {
-		const filteredMembers = this.getFilteredMembers(this.members);
-		const processedMembers = this.getSortedMembers(filteredMembers);
-		console.log('processing')
-		return processedMembers;
-	}
-
-	public getFilteredMembers(members): object[] {
-		return members;
-	}
-
-	public getSortedMembers(members, options = this.currentSort): object[] {
-		const {USERS, JOBS, PERMISSIONS} = SORT_TYPES;
-		const sort = cond([
-			[matches({type: USERS}), ({order}) => {
-				return orderBy(members, ({firstName, lastName}) => `${firstName} ${lastName}`.toLowerCase().trim(), order);
-			}],
-			[matches({type: JOBS}), ({order}) => {
-				return orderBy(members, ["job"], order);
-			}],
-			[matches({type: PERMISSIONS}), ({order}) => {
-				return orderBy(members, ["isAdmin"], order);
-			}]
-		]);
-		return sort(options);
-	}
 }
 
 export const AccountUserManagementComponent: ng.IComponentOptions = {

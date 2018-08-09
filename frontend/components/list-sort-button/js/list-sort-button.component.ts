@@ -14,29 +14,24 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const SORT_BUTTON_STATES = {
-	ASCENDING: "asc",
-	DESCENDNIG: "desc"
-};
+import {SORT_ORDER_TYPES} from "../../../constants/sorting";
 
 class ListSortButtonController implements ng.IController {
 	public static $inject: string[] = [];
 
-	private SORT_BUTTON_STATES = SORT_BUTTON_STATES;
 	private currentSort;
 
 	private onChange;
 
 	public $onInit(): void {
-		this.currentSort = SORT_BUTTON_STATES.ASCENDING;
+		this.currentSort = SORT_ORDER_TYPES.ASCENDING;
 	}
 
 	public onSortChange(): void {
-		if (this.currentSort === SORT_BUTTON_STATES.ASCENDING) {
-			this.currentSort = SORT_BUTTON_STATES.DESCENDNIG;
-		} else if (this.currentSort === SORT_BUTTON_STATES.DESCENDNIG) {
-			this.currentSort = SORT_BUTTON_STATES.ASCENDING;
+		if (this.currentSort === SORT_ORDER_TYPES.ASCENDING) {
+			this.currentSort = SORT_ORDER_TYPES.DESCENDING;
+		} else if (this.currentSort === SORT_ORDER_TYPES.DESCENDING) {
+			this.currentSort = SORT_ORDER_TYPES.ASCENDING;
 		}
 
 		if (this.onChange) {
@@ -45,7 +40,7 @@ class ListSortButtonController implements ng.IController {
 	}
 
 	public isDescending(): boolean {
-		return this.currentSort === SORT_BUTTON_STATES.DESCENDNIG;
+		return this.currentSort === SORT_ORDER_TYPES.DESCENDING;
 	}
 }
 
