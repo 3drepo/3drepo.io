@@ -1039,24 +1039,26 @@ schema.statics.getQuotaInfo = function(teamspace) {
 schema.statics.getMembers = function(teamspace) {
 	const promises = [];
 
-	const getTSMemProm = this.findUsersInTeamspace(teamspace, {
+	const getTeamspaceMembers = this.findUsersInTeamspace(teamspace, {
 		user: 1,
 		customData: 1
 	});
-	const getJobInfoProm = Job.usersWithJob(teamspace);
+	const getJobInfo = Job.usersWithJob(teamspace);
+
+	const getTeamspacePermissions = User.findByUserName(teamspace)
+		.then(user => user.toObject().customData.permissions);
 
 	promises.push(
-		getTSMemProm,
-		getJobInfoProm
+		getTeamspaceMembers,
+		getTeamspacePermissions,
+		getJobInfo
 	);
 
 	return Promise.all(promises)
-		.then(([members = [], memToJob = {}]) => {
+		.then(([members = [], teamspacePermissions, memToJob = {}]) => {
 			return members.map(({user, customData}) => {
-				const permissions = _.find(
-					_.get(customData.permissions, "permissions", []),
-					{user: teamspace}
-				);
+				const permissions = _.find(teamspacePermissions, {user});
+
 				return {
 					user,
 					firstName: customData.firstName,
@@ -1071,11 +1073,8 @@ schema.statics.getMembers = function(teamspace) {
 
 schema.statics.getAllUsersInTeamspace = function(teamspace) {
 	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
-		const res = [];
-		users.forEach(user => {
-			res.push(user.user);
-		});
-		return Promise.resolve(res);
+		const results = users.map(({user}) => user);
+		return Promise.resolve(results);
 	});
 };
 

@@ -33,9 +33,17 @@
   width: 100%;
 }
 
-.userListCell .md-select-value {
+.userListCell md-select .md-select-value {
   padding-left: 0;
   border-bottom-color: transparent !important;
+}
+
+.userListCell md-select[disabled] .md-select-value {
+  background-image: none;
+}
+
+.userListCell md-select[disabled] .md-select-icon {
+  display: none;
 }
 
 .userListCell .md-text {

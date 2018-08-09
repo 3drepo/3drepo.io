@@ -256,8 +256,6 @@ class AccountUserManagementController implements ng.IController {
 		/**
 		 * Update member job title
 		 * @param member
-		 * @param member.job
-		 * @param member.user
 		 */
 		public onJobChange(member): void {
 			const {job, user} = member;
@@ -272,6 +270,25 @@ class AccountUserManagementController implements ng.IController {
 					}
 				})
 				.catch(this.handleError.bind(null, acionType, "job"))
+				.finally(() => {
+					member.isPending = false;
+				});
+		}
+
+		/**
+		 * Update member permissions
+		 * @param member
+		 */
+		public onPermissionsChange(member): void {
+			const permissionData = {
+				user: member.user,
+				permissions: member.isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
+			};
+
+			member.isPending = true;
+			this.AccountService
+				.setMemberPermissions(this.currentTeamspace.account, permissionData)
+				.catch(this.handleError.bind(null, "update", "teamspace permissions"))
 				.finally(() => {
 					member.isPending = false;
 				});

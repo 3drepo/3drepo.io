@@ -362,6 +362,10 @@ export class AccountService {
 	public removeMemberJob = (teamspace, job, member): Promise<any> => {
 		return this.APIService.delete(`${teamspace}/jobs/unassign/${member}`);
 	}
+
+	public setMemberPermissions = (teamspace, permissionsData) => {
+		return this.APIService.post(`${teamspace}/permissions/`, permissionsData);
+	}
 }
 
 export const AccountServiceModule = angular
