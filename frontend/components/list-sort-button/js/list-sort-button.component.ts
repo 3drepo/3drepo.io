@@ -15,15 +15,43 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const SORT_BUTTON_STATES = {
+	ASCENDING: 1,
+	DESCENDNIG: -1
+};
+
 class ListSortButtonController implements ng.IController {
 	public static $inject: string[] = [];
 
-	public $onInit(): void {}
+	private SORT_BUTTON_STATES = SORT_BUTTON_STATES;
+	private currentSort;
+
+	private onChange;
+
+	public $onInit(): void {
+		this.currentSort = SORT_BUTTON_STATES.ASCENDING;
+	}
+
+	public onSortChange(): void {
+		if (this.currentSort === SORT_BUTTON_STATES.ASCENDING) {
+			this.currentSort = SORT_BUTTON_STATES.DESCENDNIG;
+		} else if (this.currentSort === SORT_BUTTON_STATES.DESCENDNIG) {
+			this.currentSort = SORT_BUTTON_STATES.ASCENDING;
+		}
+
+		if (this.onChange) {
+			this.onChange(this.currentSort);
+		}
+	}
+
+	public isDescending(): boolean {
+		return this.currentSort === SORT_BUTTON_STATES.DESCENDNIG;
+	}
 }
 
 export const ListSortButtonComponent: ng.IComponentOptions = {
 	bindings: {
-		data: "<"
+		onChange: "&?"
 	},
 	controller: ListSortButtonController,
 	controllerAs: "vm",

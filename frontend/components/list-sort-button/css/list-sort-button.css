@@ -13,4 +13,9 @@
 	width: 14px;
 	min-width: 14px;
 	min-height: 14px;
+	transition: transform 200ms ease-in-out;
+}
+
+.listSortButton.listSortButtonDescending md-icon {
+	transform: rotate(180deg);
 }
