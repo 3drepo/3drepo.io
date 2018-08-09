@@ -28,7 +28,7 @@ div.groupsContainer
                             span.groupMeta  {{ vm.getFormattedDate(group.createdAt)  | date:"MM/dd/yyyy"}}
                         div(layout="row"  flex="100")
                             span.groupDescription {{group.description}}
-                
+
                 div.groupColorHolder(
                     layout="row"
                     layout-align="center center")
@@ -49,7 +49,7 @@ div.groupsContainer
                             md-icon.angular-material-icons(
                                 style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
                         md-tooltip Toggle Colour Override
-                
+
                 div.groupEnterHolder(
                     ng-click="vm.editGroup()"
                     ng-if="group.focus"
@@ -62,10 +62,10 @@ div.groupsContainer
                     ng-if="!group.focus"
                     layout="row"
                     layout-align="center center")
-            
+
             .remoteNotification.groupJustDeleted(ng-if="group.justBeenDeleted")
                 .message This group has been deleted
-            
+
         md-container.noGroups(
             ng-if="vm.groups.length === 0 && !vm.loading"
             layout-fill
@@ -112,7 +112,7 @@ div.groupsContainer
             div.metaMargin
                 label.groupMeta Creation Date:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.createdAt)  | date:"MM/dd/yyyy"}}
-           
+
         div(
             layout="row"
             layout-align="space-between center")
@@ -124,7 +124,7 @@ div.groupsContainer
             div.metaMargin
                 label.groupMeta Updated On:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.updatedAt) | date:"MM/dd/yyyy"}}
-       
+
     .remoteNotification.groupJustUpdated(ng-if="vm.justUpdated && vm.toShow === 'group'")
         .message This group has been updated by someone else
 

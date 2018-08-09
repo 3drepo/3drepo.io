@@ -60,7 +60,7 @@ import "./home/js/client-config.service";
 import "./home/js/dialog.service";
 import "./home/js/event.service";
 import "./home/js/home.component";
-import "./home/js/notification.service";
+import "./home/js/notifications/notification.service";
 import "./home/js/serviceworker.service";
 import "./home/js/state-manager.config";
 import "./home/js/state-manager.run";

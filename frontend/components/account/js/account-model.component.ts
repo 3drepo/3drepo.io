@@ -15,6 +15,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { NotificationService } from "../../home/js/notifications/notification.service";
+import { NotificationModelEvents } from "../../home/js/notifications/notification.model.events";
 
 class AccountModelController implements ng.IController {
 
@@ -61,6 +63,7 @@ class AccountModelController implements ng.IController {
 	private onSetupDeleteModel;
 	private revisions;
 	private project;
+	private modelNotifications: NotificationModelEvents;
 
 	constructor(
 		private $scope: any,
@@ -73,7 +76,7 @@ class AccountModelController implements ng.IController {
 		private APIService: any,
 		private ClientConfigService: any,
 		private RevisionsService: any,
-		private NotificationService: any,
+		private notificationService: NotificationService,
 		private AuthService: any,
 		private AnalyticService: any,
 		private AccountService: any,
@@ -146,7 +149,7 @@ class AccountModelController implements ng.IController {
 		this.modelToUploadFileWatch = undefined;
 
 		// Unsubscribe for notifications
-		this.NotificationService.unsubscribe.modelStatusChanged(this.account, this.model.model);
+		this.modelNotifications.offStatusChanged();
 	}
 
 	public watchers() {
@@ -366,12 +369,8 @@ class AccountModelController implements ng.IController {
 		this.handleModelStatus(this.model, false);
 
 		// Else if there's dynamic updates to the model listen for them
-		this.NotificationService.subscribe.modelStatusChanged(
-			this.account,
-			this.model.model,
-			this.handleModelStatus.bind(this)
-		);
-
+		this.modelNotifications = this.notificationService.getChannel(this.account, this.model.model).model;
+		this.modelNotifications.onStatusChanged(this.handleModelStatus.bind(this));
 	}
 
 	/**
