@@ -5,6 +5,7 @@ groups {
 groups .groupsContainer {
     overflow: hidden;
     height: 100%;
+    position: relative;
 }
 
 groups .groupContainer {
@@ -201,18 +202,28 @@ groups .groupsList {
     margin-top: 10px;
 }
 
-.group .groupJustDeleted {
+.remoteNotification {
     position: absolute;
     width: 100%;
-    height: 94px;
     background-color: rgba(212,212,212,0.7);
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
 
-.groupJustDeleted .deletedText{
+.remoteNotification .message{
     padding: 15px 25px;
     background-color: hsla(0,0%,100%,.9);
     border: 1px solid #ddd;
 }
+
+.remoteNotification.groupJustDeleted {
+    height: 94px;
+}
+
+.remoteNotification.groupJustUpdated {
+    top: 0;
+    height: calc(100% - 50px);
+}
+

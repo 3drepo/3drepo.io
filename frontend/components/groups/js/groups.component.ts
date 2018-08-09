@@ -50,6 +50,7 @@ class GroupsController implements ng.IController {
 	private selectedObjectsLen: number;
 	private dialogThreshold: number;
 	private canAddGroup: boolean;
+	private justUpdated: boolean;
 	private modelSettings: any;
 	private savedGroupData: any;
 	private customIcons: any;
@@ -69,7 +70,6 @@ class GroupsController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.customIcons = this.IconsConstant;
 
 		this.canAddGroup = false;
@@ -395,6 +395,7 @@ class GroupsController implements ng.IController {
 		this.savedGroupData = Object.assign({}, this.selectedGroup);
 		this.toShow = "group";
 		this.hexColor = "";
+
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 		this.focusGroupName();
@@ -471,8 +472,15 @@ class GroupsController implements ng.IController {
 	}
 
 	public groupChangedListener(group, submodel) {
+		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
 		this.GroupsService.replaceStateGroup(group);
+		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
 	}
+
+	private resetJustUpdated() {
+		this.justUpdated = false;
+	}
+
 	/***/
 }
 

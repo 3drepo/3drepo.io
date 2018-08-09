@@ -63,8 +63,8 @@ div.groupsContainer
                     layout="row"
                     layout-align="center center")
             
-            .groupJustDeleted(ng-if="group.justBeenDeleted")
-                .deletedText This group has been deleted
+            .remoteNotification.groupJustDeleted(ng-if="group.justBeenDeleted")
+                .message This group has been deleted
             
         md-container.noGroups(
             ng-if="vm.groups.length === 0 && !vm.loading"
@@ -113,7 +113,7 @@ div.groupsContainer
                 label.groupMeta Creation Date: 
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.createdAt)  | date:"MM/dd/yyyy"}}
            
-        md-container(
+        div(
             layout="row"
             layout-align="space-between center")
 
@@ -124,7 +124,9 @@ div.groupsContainer
             div.metaMargin
                 label.groupMeta Updated On: 
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.updatedAt) | date:"MM/dd/yyyy"}}
-
+       
+    .remoteNotification.groupJustUpdated(ng-if="vm.justUpdated && vm.toShow === 'group'")
+        .message This group has been updated by someone else
 
     div.addHolder(layout="row" flex="100")
 
