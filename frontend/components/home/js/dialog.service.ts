@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import {get} from "lodash";
 
 export class DialogService {
 
@@ -252,6 +253,29 @@ export class DialogService {
 				console.debug("User didn't reload");
 			});
 
+	}
+
+	public showError = (action: string, type: string, error: any) => {
+		const message = get(error, "data.message", "");
+
+		const title = "Error";
+		const subtitle = action && type ?
+			`Something went wrong trying to ${action} the ${type}:` :
+			`Something went wrong:`;
+
+		const content = `
+				${subtitle}
+				<br><br>
+				<strong>${message}</strong>
+				<br>
+				${error.status ? `<code>(Status Code: ${error.status})</code>` : ""}
+				<br><br>
+				If this is unexpected please message support@3drepo.io.
+			`;
+		const escapable = true;
+
+		this.html(title, content, escapable);
+		console.error(subtitle, error);
 	}
 
 }

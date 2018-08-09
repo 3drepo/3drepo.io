@@ -1,0 +1,36 @@
+.newMemberForm {
+  padding: 16px;
+  width: 280px;
+}
+
+.newMemberForm md-input-container {
+  margin: 0;
+  margin-bottom: 16px;
+}
+
+.newMemberFormAutocomplete .md-input-focused label,
+.newMemberFormAutocomplete .md-input-has-value label {
+  display: none !important;
+}
+
+
+.newMemberFormAutocomplete .md-errors-spacer {
+  display: none;
+}
+
+.newMemberFormPermissions {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: -6px;
+}
+
+.newMemberFormPermissions md-checkbox {
+  margin-bottom: 0;
+  margin-left: 10px;
+  margin-right: -8px;
+}
+
+.newMemberFormButton {
+  margin: 0;
+  margin-top: 16px;
+}

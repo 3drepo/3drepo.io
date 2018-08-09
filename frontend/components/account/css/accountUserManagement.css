@@ -8,6 +8,41 @@
 
 .accountUserManagement .addButton {
   position: absolute;
-  right: 7px;
+  right: 6px;
   top: 142px;
+}
+
+.accountUserManagement .addButton.active md-icon {
+  transform: rotate(45deg);
+}
+
+.accountUserManagement .addPanel {
+  z-index: 2;
+  right: 67px;
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 1);
+  border-radius: 0;
+  top: 148px;
+  transform-origin: top right;
+  position: absolute;
+}
+
+.accountUserManagement .addPanelBackdrop {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  transition: background 150ms ease-in-out;
+}
+
+.accountUserManagement .addPanelBackdropVisible {
+  background: rgba(255, 255, 255, 0.8);
+  pointer-events: all;
+}
+
+.accountUserManagement .accountUserManagementFooter {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: rgba(130, 130, 130, 0.6);
 }

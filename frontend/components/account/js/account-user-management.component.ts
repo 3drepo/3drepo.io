@@ -62,6 +62,7 @@ class AccountUserManagementController implements ng.IController {
 		];
 
 		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
+		private TABS_TYPES = TABS_TYPES;
 
 		private account;
 		private accounts;
@@ -81,8 +82,8 @@ class AccountUserManagementController implements ng.IController {
 		private selectedTeamspace;
 		private selectedTab;
 		private selectedProject;
-
 		private shouldSelectAllUser;
+		private showAddingPanel;
 
 		constructor(
 			private $q: any,
@@ -131,10 +132,10 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public setTeamspaceMembers(teamspaceName: string): void {
 			const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
-				.catch(this.handleError.bind(null, "retrieve", "subscriptions"));
+				.catch(this.DialogService.showError.bind(null, "retrieve", "subscriptions"));
 
 			const memberListPromise = this.AccountService.getMembers(teamspaceName)
-				.catch(this.handleError.bind(null, "retrieve", "members"));
+				.catch(this.DialogService.showError.bind(null, "retrieve", "members"));
 
 			return this.$q.all([quotaInfoPromise, memberListPromise])
 				.then(([quotaInfoResponse, membersResponse]) => {
@@ -159,7 +160,7 @@ class AccountUserManagementController implements ng.IController {
 					this.jobs = get(response, "data", []);
 					this.jobsColors = uniq(map(this.jobs, "color"));
 				})
-				.catch(this.handleError.bind(null, "retrieve", "jobs"));
+				.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"));
 		}
 
 		/**
@@ -196,7 +197,7 @@ class AccountUserManagementController implements ng.IController {
 							this.DialogService.showDialog("remove-license-dialog.html", dialogData);
 						}
 					} else {
-						this.handleError("remove", "licence", error);
+						this.DialogService.showError("remove", "licence", error);
 					}
 
 				});
@@ -208,7 +209,7 @@ class AccountUserManagementController implements ng.IController {
 		public removeLicenseConfirmed = (teamspace, member) => {
 			this.AccountService.removeMemberCascade(teamspace, member.user)
 				.then(this.onMemberRemove.bind(null, member))
-				.catch(this.handleError.bind(null, "remove", "licence"));
+				.catch(this.DialogService.showError.bind(null, "remove", "licence"));
 		}
 
 		/**
@@ -221,31 +222,6 @@ class AccountUserManagementController implements ng.IController {
 			this.$mdDialog.cancel();
 		}
 
-		/**
-		 * Handle an error from a request
-		 */
-		public handleError = (action: string, type: string, error: any) => {
-			const message = get(error, "data.message", "");
-
-			const title = "Error";
-			const subtitle = action && type ?
-			`Something went wrong trying to ${action} the ${type}:` :
-			`Something went wrong:`;
-
-			const content = `
-				${subtitle}
-				<br><br>
-				<strong>${message}</strong>
-				<br>
-				${error.status ? `<code>(Status Code: ${error.status})</code>` : ""}
-				<br><br>
-				If this is unexpected please message support@3drepo.io.
-			`;
-			const escapable = true;
-
-			this.DialogService.html(title, content, escapable);
-			console.error(subtitle, error);
-		}
 
 		public toggleAllUsers() {
 			this.members = this.members.map((member) => {
@@ -269,7 +245,7 @@ class AccountUserManagementController implements ng.IController {
 						throw (response);
 					}
 				})
-				.catch(this.handleError.bind(null, acionType, "job"))
+				.catch(this.DialogService.showError.bind(null, acionType, "job"))
 				.finally(() => {
 					member.isPending = false;
 				});
@@ -288,10 +264,18 @@ class AccountUserManagementController implements ng.IController {
 			member.isPending = true;
 			this.AccountService
 				.setMemberPermissions(this.currentTeamspace.account, permissionData)
-				.catch(this.handleError.bind(null, "update", "teamspace permissions"))
+				.catch(this.DialogService.showError.bind(null, "update", "teamspace permissions"))
 				.finally(() => {
 					member.isPending = false;
 				});
+		}
+
+		/**
+		 * Change panel visibility
+		 * @param forceHide
+		 */
+		public toggleNewDataPanel(forceHide = false): void {
+			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
 		}
 }
 

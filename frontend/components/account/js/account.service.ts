@@ -363,8 +363,34 @@ export class AccountService {
 		return this.APIService.delete(`${teamspace}/jobs/unassign/${member}`);
 	}
 
-	public setMemberPermissions = (teamspace, permissionsData) => {
+	/**
+	 * Set member permissions
+	 * @param teamspace
+	 * @param permissionData
+	 * @returns {*|promise}
+	 */
+	public setMemberPermissions = (teamspace, permissionsData): Promise<any> => {
 		return this.APIService.post(`${teamspace}/permissions/`, permissionsData);
+	}
+
+	/**
+	 * Add new member
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public addMember = (teamspace, member): Promise<any> => {
+		return this.APIService.post(`${teamspace}/members`, member);
+	}
+
+	/**
+	 * Find members by usernname and email
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public findMembers = (teamspace, searchText): Promise<any> => {
+		return this.APIService.get(`${teamspace}/members/search/${searchText}`);
 	}
 }
 
