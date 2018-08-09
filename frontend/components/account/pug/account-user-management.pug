@@ -38,11 +38,17 @@
 									ng-model="vm.shouldSelectAllUser"
 									ng-change="vm.toggleAllUsers()")
 
-						.userListCell(layout="row" layout-align="start center" flex="25") User
+						.userListCell(layout="row" layout-align="start center" flex="25")
+							list-sort-button
+							.userListCellLabel User
 
-						.userListCell(layout="row" layout-align="start center" flex="25") Job
+						.userListCell(layout="row" layout-align="start center" flex="25")
+							list-sort-button
+							.userListCellLabel Job
 
-						.userListCell(layout="row" layout-align="start center" flex="25") Permissions
+						.userListCell(layout="row" layout-align="start center" flex="25")
+							list-sort-button
+							.userListCellLabel Permissions
 
 					.usersListBody
 						div.usersListRow(

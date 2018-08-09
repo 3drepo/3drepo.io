@@ -15,21 +15,21 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class MemberCardController implements ng.IController {
+class ListSortButtonController implements ng.IController {
 	public static $inject: string[] = [];
 
 	public $onInit(): void {}
 }
 
-export const MemberCardComponent: ng.IComponentOptions = {
+export const ListSortButtonComponent: ng.IComponentOptions = {
 	bindings: {
 		data: "<"
 	},
-	controller: MemberCardController,
+	controller: ListSortButtonController,
 	controllerAs: "vm",
-	templateUrl: "templates/member-card.html"
+	templateUrl: "templates/list-sort-button.html"
 };
 
-export const MemberCardComponentModule = angular
+export const ListSortButtonComponentModule = angular
 	.module("3drepo")
-	.component("memberCard", MemberCardComponent);
+	.component("listSortButton", ListSortButtonComponent);

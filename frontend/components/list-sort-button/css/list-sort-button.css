@@ -1,0 +1,16 @@
+.listSortButton.md-icon-button {
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	margin-left: -2px;
+	margin-right: 6px;
+	min-height: 0;
+}
+
+.listSortButton md-icon {
+	height: 14px;
+	font-size: 14px;
+	width: 14px;
+	min-width: 14px;
+	min-height: 14px;
+}
