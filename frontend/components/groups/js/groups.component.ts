@@ -1,4 +1,3 @@
-
 /**
  *	Copyright (C) 2018 3D Repo Ltd
  *
@@ -15,6 +14,9 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { NotificationService } from "../../home/js/notifications/notification.service";
+import { NotificationEvents } from "../../home/js/notifications/notification.events";
 
 class GroupsController implements ng.IController {
 	public static $inject: string[] = [
@@ -55,6 +57,7 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
+	private groupsNotifications: NotificationEvents;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -66,7 +69,7 @@ class GroupsController implements ng.IController {
 		private AuthService: any,
 		private ClientConfigService: any,
 		private IconsConstant: any,
-		private NotificationService: any
+		private notificationService: NotificationService
 	) {}
 
 	public $onInit() {
@@ -93,13 +96,14 @@ class GroupsController implements ng.IController {
 			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]]
 		];
 
+		this.groupsNotifications =  this.notificationService.getChannel(this.account, this.model).groups;
 	}
 
 	public $onDestroy() {
 		this.groups = [];
-
-		this.NotificationService.unsubscribe.newGroup(this.account, this.model);
-		this.NotificationService.unsubscribe.groupsDeleted(this.account, this.model);
+		this.groupsNotifications.offCreated();
+		this.groupsNotifications.offUpdated();
+		this.groupsNotifications.offDeleted();
 	}
 
 	public watchers() {
@@ -433,27 +437,12 @@ class GroupsController implements ng.IController {
 
 	/*** Realtime sync  */
 	public watchNotification() {
+		this.groupsNotifications.onCreated(this.onGroupsCreated.bind(this));
+		this.groupsNotifications.onUpdated(this.onGroupsUpdated.bind(this));
+		this.groupsNotifications.onDeleted(this.onGroupsDeleted.bind(this));
+	}
 
-		// Watch for new groups
-		this.NotificationService.subscribe.newGroup(
-			this.account,
-			this.model,
-			this.newGroupListener.bind(this)
-		);
-
-		this.NotificationService.subscribe.groupsDeleted(
-			this.account,
-			this.model,
-			this.groupsDeletedListener.bind(this)
-		);
-
-		this.NotificationService.subscribe.groupChanged(
-			this.account,
-			this.model,
-			this.groupChangedListener.bind(this)
-		);	}
-
-	public newGroupListener(group, submodel) {
+	public onGroupsCreated(group, submodel) {
 		this.GroupsService.state.groups.push(group);
 
 		if (this.GroupsService.state.overrideAll) {
@@ -461,7 +450,7 @@ class GroupsController implements ng.IController {
 		}
 	}
 
-	public groupsDeletedListener(ids, submodel) {
+	public onGroupsDeleted(ids, submodel) {
 		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
 			this.cancelEdit();
 		}
@@ -469,7 +458,7 @@ class GroupsController implements ng.IController {
 		this.GroupsService.deleteStateGroupsByIdsDeferred(ids);
 	}
 
-	public groupChangedListener(group, submodel) {
+	public onGroupsUpdated(group, submodel) {
 		const shouldPaintObjects = this.GroupsService.hasColorOverride(group);
 		if (shouldPaintObjects) {
 			this.GroupsService.removeColorOverride(group._id);

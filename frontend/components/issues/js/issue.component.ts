@@ -15,6 +15,10 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NotificationService } from "../../home/js/notifications/notification.service";
+import { NotificationIssuesEvents } from "../../home/js/notifications/notification.issues.events";
+import { NotificationEvents } from "../../home/js/notifications/notification.events";
+
 class IssueController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -81,6 +85,8 @@ class IssueController implements ng.IController {
 	private issueComponent;
 	private commentThumbnail;
 	private contentHeight;
+	private issuesNotifications: NotificationIssuesEvents;
+	private commentsNotifications: NotificationEvents;
 
 	constructor(
 		private $location,
@@ -93,7 +99,7 @@ class IssueController implements ng.IController {
 
 		private IssuesService,
 		private APIService,
-		private NotificationService,
+		private notificationService: NotificationService,
 		private AuthService,
 		private ClientConfigService,
 		private AnalyticService,
@@ -215,10 +221,10 @@ class IssueController implements ng.IController {
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.NotificationService.unsubscribe.newComment(this.data.account, this.data.model, this.data._id);
-			this.NotificationService.unsubscribe.commentChanged(this.data.account, this.data.model, this.data._id);
-			this.NotificationService.unsubscribe.commentDeleted(this.data.account, this.data.model, this.data._id);
-			this.NotificationService.unsubscribe.issueChanged(this.data.account, this.data.model, this.data._id);
+			this.issuesNotifications.offUpdated();
+			this.commentsNotifications.offCreated();
+			this.commentsNotifications.offUpdated ();
+			this.commentsNotifications.offDeleted();
 		}
 
 	}
@@ -1221,6 +1227,9 @@ class IssueController implements ng.IController {
 	}
 
 	public handleIssueChange(issue) {
+		if (issue._id !== this.data._id) {
+			return;
+		}
 
 		this.IssuesService.populateIssue(issue);
 		this.issueData = issue;
@@ -1232,86 +1241,62 @@ class IssueController implements ng.IController {
 	public startNotification() {
 
 		if (this.data && !this.notificationStarted) {
-
 			this.notificationStarted = true;
+
+			this.issuesNotifications =  this.notificationService.getChannel(this.data.account, this.data.model).issues;
 
 			/*
 			* Watch for issue change
 			*/
 
-			this.NotificationService.subscribe.issueChanged(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				this.handleIssueChange.bind(this)
-			);
+			this.issuesNotifications.onUpdated( this.handleIssueChange.bind(this));
 
 			/*
 			* Watch for new comments
 			*/
-			this.NotificationService.subscribe.newComment(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				(comment) => {
-					if (comment.action) {
-						this.IssuesService.convertActionCommentToText(comment, this.topic_types);
-					}
 
-					this.afterNewComment(comment, true);
+			this.commentsNotifications =  this.issuesNotifications.getCommentsNotifications(this.data._id);
 
-					// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
-					this.$scope.$apply();
-					this.commentAreaScrollToBottom();
+			this.commentsNotifications.onCreated((comment) => {
+				if (comment.action) {
+					this.IssuesService.convertActionCommentToText(comment, this.topic_types);
 				}
-			);
+
+				this.afterNewComment(comment, true);
+
+				// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
+				this.$scope.$apply();
+				this.commentAreaScrollToBottom();
+			});
 
 			/*
 			* Watch for comment changed
 			*/
-			this.NotificationService.subscribe.commentChanged(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				(newComment) => {
-					const comment = this.issueData.comments.find((oldComment) => {
-						return oldComment.guid === newComment.guid;
-					});
+			this.commentsNotifications.onUpdated( (newComment) => {
+				const comment = this.issueData.comments.find((oldComment) => oldComment.guid === newComment.guid );
 
-					comment.comment = newComment.comment;
+				comment.comment = newComment.comment;
 
-					this.$scope.$apply();
-					this.commentAreaScrollToBottom();
-				}
-			);
+				this.$scope.$apply();
+				this.commentAreaScrollToBottom();
+			});
 
 			/*
 			* Watch for comment deleted
 			*/
-			this.NotificationService.subscribe.commentDeleted(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				(newComment) => {
+			this.commentsNotifications.onDeleted((newComment) => {
+				let deleteIndex;
+				deleteIndex = this.issueData.comments.findIndex((comment) => comment.guid === newComment.guid);
 
-					let deleteIndex;
-					this.issueData.comments.forEach((comment, i) => {
-						if (comment.guid === newComment.guid) {
-							deleteIndex = i;
-						}
-					});
+				this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
 
-					this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
+				this.$scope.$apply();
+				this.commentAreaScrollToBottom();
 
-					this.$scope.$apply();
-					this.commentAreaScrollToBottom();
-
-					this.$timeout(() => {
-						this.issueData.comments.splice(deleteIndex, 1);
-					}, 4000);
-				}
-			);
-
+				this.$timeout(() => {
+					this.issueData.comments.splice(deleteIndex, 1);
+				}, 4000);
+			});
 		}
 	}
 

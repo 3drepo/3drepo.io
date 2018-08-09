@@ -34,19 +34,19 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 }
 
 function newIssues(emitter, account, model, data) {
-	return insertEventQueue("newIssues", emitter, account, model, null, data);
+	return insertEventQueue("issuesCreated", emitter, account, model, null, data);
 }
 
 function newComment(emitter, account, model, issueId, data) {
-	return insertEventQueue("newComment", emitter, account, model, [issueId], data);
+	return insertEventQueue("commentsCreated", emitter, account, model, [issueId], data);
 }
 
 function commentChanged(emitter, account, model, issueId, data) {
-	return insertEventQueue("commentChanged", emitter, account, model, [issueId], data);
+	return insertEventQueue("commentsUpdated", emitter, account, model, [issueId], data);
 }
 
 function commentDeleted(emitter, account, model, issueId, data) {
-	return insertEventQueue("commentDeleted", emitter, account, model, [issueId], data);
+	return insertEventQueue("commentsDeleted", emitter, account, model, [issueId], data);
 }
 
 function modelStatusChanged(emitter, account, model, data) {
@@ -57,17 +57,17 @@ function issueChanged(emitter, account, model, issueId, data) {
 
 	// send event to single issue changed listener and any issues changed listener
 	return Promise.all([
-		insertEventQueue("issueChanged", emitter, account, model, [issueId], data),
-		insertEventQueue("issueChanged", emitter, account, model, null, data)
+		insertEventQueue("issuesUpdated", emitter, account, model, [issueId], data),
+		insertEventQueue("issuesUpdated", emitter, account, model, null, data)
 	]);
 }
 
 function newModel(emitter, account, data) {
-	return insertEventQueue("newModel", emitter, account, null, null, data);
+	return insertEventQueue("modelCreated", emitter, account, null, null, data);
 }
 
 function newGroups(emitter, account, model, data) {
-	return insertEventQueue("newGroups", emitter, account, model, null, data);
+	return insertEventQueue("groupsCreated", emitter, account, model, null, data);
 }
 
 function groupsDeleted(emitter, account, model, ids) {
@@ -75,7 +75,7 @@ function groupsDeleted(emitter, account, model, ids) {
 }
 
 function groupChanged(emitter, account, model, data) {
-	return insertEventQueue("groupChanged", emitter, account, model, null, data);
+	return insertEventQueue("groupsUpdated", emitter, account, model, null, data);
 }
 
 module.exports = {

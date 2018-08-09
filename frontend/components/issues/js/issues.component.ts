@@ -14,6 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { NotificationService } from "../../home/js/notifications/notification.service";
 
 class IssuesController implements ng.IController {
 
@@ -77,7 +78,7 @@ class IssuesController implements ng.IController {
 		private EventService,
 		private AuthService,
 		private APIService,
-		private NotificationService: any,
+		private notificationService: NotificationService,
 		private RevisionsService,
 		private ClientConfigService,
 		private AnalyticService,
@@ -129,16 +130,17 @@ class IssuesController implements ng.IController {
 		this.issuesToShow = [];
 		this.removeUnsavedPin();
 
-		this.NotificationService.unsubscribe.newIssues(this.account, this.model);
-		this.NotificationService.unsubscribe.issueChanged(this.account, this.model);
+		let channel = this.notificationService.getChannel(this.account, this.model);
 
-		if (this.subModels) {
-			this.subModels.forEach((subModel) => {
-				this.NotificationService.unsubscribe.newIssues(subModel.database, subModel.model);
-				this.NotificationService.unsubscribe.issueChanged(subModel.database, subModel.model);
-			});
-		}
+		channel.issues.offCreated();
+		channel.issues.offUpdated();
 
+		// Do the same for all subModels
+		([] || this.subModels).forEach((subModel) => {
+				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel.issues.offCreated();
+				channel.issues.offUpdated();
+		});
 	}
 
 	public watchers() {
@@ -261,43 +263,25 @@ class IssuesController implements ng.IController {
 	}
 
 	public watchNotification() {
-
 		// Watch for new issues
-		this.NotificationService.subscribe.newIssues(
-			this.account,
-			this.model,
-			this.newIssueListener.bind(this)
-		);
 
-		// Watch for status changes for all issues
-		this.NotificationService.subscribe.issueChanged(
-			this.account,
-			this.model,
-			this.handleIssueChanged.bind(this)
-		);
+		let channel = this.notificationService.getChannel(this.account, this.model);
+		const onIssueCreated = this.newIssueListener.bind(this);
+		const onIssueUpdated = this.handleIssueChanged.bind(this);
+
+		channel.issues.onCreated(onIssueCreated);
+		channel.issues.onUpdated(onIssueUpdated);
 
 		// Do the same for all subModels
-		if (this.subModels) {
-			this.subModels.forEach((subModel) => {
-
-				if (subModel) {
-					this.NotificationService.subscribe.newIssues(
-						subModel.database,
-						subModel.model,
-						this.newIssueListener.bind(this)
-					);
-					this.NotificationService.subscribe.issueChanged(
-						subModel.database,
-						subModel.model,
-						this.handleIssueChanged.bind(this)
-					);
-				} else {
-					console.error("Submodel was expected to be defined for issue subscription: ", subModel);
-				}
-
-			});
-		}
-
+		([] || this.subModels).forEach((subModel) => {
+			if (subModel) {
+				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel.issues.onCreated(onIssueCreated);
+				channel.issues.onUpdated(onIssueUpdated);
+			} else {
+				console.error("Submodel was expected to be defined for issue subscription: ", subModel);
+			}
+		});
 	}
 
 	public newIssueListener(issues, submodel) {
