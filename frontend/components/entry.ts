@@ -107,7 +107,6 @@ import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
 import "./viewpoints/js/viewpoints.component";
 import "./viewpoints/js/viewpoints.service";
-import "./list/js/list.component";
 import "./member-card/js/member-card.component";
 import "./list-sort-button/js/list-sort-button.component";
 
