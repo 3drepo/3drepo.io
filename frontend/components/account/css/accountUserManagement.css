@@ -46,3 +46,11 @@
   font-size: 14px;
   color: rgba(130, 130, 130, 0.6);
 }
+
+.accountUserManagement list-sort-button.active button {
+  background: rgb(6,86,60) !important;
+}
+
+.accountUserManagement list-sort-button.active md-icon {
+  color: rgba(255, 255, 255, 1) !important;
+}

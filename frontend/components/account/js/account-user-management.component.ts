@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {get, uniq, map, values} from "lodash";
+import {get, uniq, map, values, cond, matches, orderBy} from "lodash";
 
 const TABS_TYPES = {
 	USERS: 0,
@@ -50,6 +50,17 @@ const TEAMSPACE_PERMISSIONS = {
 	}
 };
 
+const SORT_TYPES = {
+	USERS: 1,
+	JOBS: 2,
+	PERMISSIONS: 3
+};
+
+const SORT_ORDER_TYPES = {
+	ASCENDING: "asc",
+	DESCENDING: "desc"
+};
+
 class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
@@ -63,16 +74,19 @@ class AccountUserManagementController implements ng.IController {
 
 		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
 		private TABS_TYPES = TABS_TYPES;
+		private SORT_TYPES = SORT_TYPES;
 
 		private account;
 		private accounts;
 		private teamspaces = [];
 		private members;
+		private processedMembers;
 		private jobs;
 		private jobsColors;
 		private projects;
 		private currentTeamspace;
 		private currentTabConfig;
+		private currentSort;
 		private extraData = {
 			totalLicenses: 0,
 			usedLicences: 0
@@ -96,6 +110,7 @@ class AccountUserManagementController implements ng.IController {
 
 		public $onInit(): void {
 			this.onTeamspaceChange();
+			this.setSortType(SORT_TYPES.USERS, SORT_ORDER_TYPES.ASCENDING);
 		}
 
 		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}): void {
@@ -147,6 +162,8 @@ class AccountUserManagementController implements ng.IController {
 							isCurrentUser: this.account === member.user
 						};
 					});
+
+					this.processedMembers = this.processMembers();
 				});
 		}
 
@@ -222,7 +239,6 @@ class AccountUserManagementController implements ng.IController {
 			this.$mdDialog.cancel();
 		}
 
-
 		public toggleAllUsers() {
 			this.members = this.members.map((member) => {
 				return {...member, isSelected: this.shouldSelectAllUser};
@@ -277,6 +293,38 @@ class AccountUserManagementController implements ng.IController {
 		public toggleNewDataPanel(forceHide = false): void {
 			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
 		}
+
+		public setSortType(type, order): void {
+			this.currentSort = {type, order};
+			this.processedMembers = this.processMembers();
+		}
+
+	public processMembers(): object[] {
+		const filteredMembers = this.getFilteredMembers(this.members);
+		const processedMembers = this.getSortedMembers(filteredMembers);
+		console.log('processing')
+		return processedMembers;
+	}
+
+	public getFilteredMembers(members): object[] {
+		return members;
+	}
+
+	public getSortedMembers(members, options = this.currentSort): object[] {
+		const {USERS, JOBS, PERMISSIONS} = SORT_TYPES;
+		const sort = cond([
+			[matches({type: USERS}), ({order}) => {
+				return orderBy(members, ({firstName, lastName}) => `${firstName} ${lastName}`.toLowerCase().trim(), order);
+			}],
+			[matches({type: JOBS}), ({order}) => {
+				return orderBy(members, ["job"], order);
+			}],
+			[matches({type: PERMISSIONS}), ({order}) => {
+				return orderBy(members, ["isAdmin"], order);
+			}]
+		]);
+		return sort(options);
+	}
 }
 
 export const AccountUserManagementComponent: ng.IComponentOptions = {

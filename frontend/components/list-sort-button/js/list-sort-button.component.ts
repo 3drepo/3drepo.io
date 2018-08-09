@@ -16,8 +16,8 @@
  */
 
 const SORT_BUTTON_STATES = {
-	ASCENDING: 1,
-	DESCENDNIG: -1
+	ASCENDING: "asc",
+	DESCENDNIG: "desc"
 };
 
 class ListSortButtonController implements ng.IController {
@@ -40,7 +40,7 @@ class ListSortButtonController implements ng.IController {
 		}
 
 		if (this.onChange) {
-			this.onChange(this.currentSort);
+			this.onChange({order: this.currentSort});
 		}
 	}
 

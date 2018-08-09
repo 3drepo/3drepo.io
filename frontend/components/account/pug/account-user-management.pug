@@ -45,20 +45,26 @@
 				.usersList
 					.usersListHeader(layout="row" layout-align="start center")
 						.usersListCell(layout="row" layout-align="start center" flex="30")
-							list-sort-button
+							list-sort-button(
+								ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+								on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
 							.usersListCellLabel User
 
 						.usersListCell(layout="row" layout-align="start center" flex="25")
-							list-sort-button
+							list-sort-button(
+								ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.JOBS}"
+								on-change="vm.setSortType(vm.SORT_TYPES.JOBS, order)")
 							.usersListCellLabel Job
 
 						.usersListCell(layout="row" layout-align="start center" flex="30")
-							list-sort-button
+							list-sort-button(
+								ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.PERMISSIONS}"
+								on-change="vm.setSortType(vm.SORT_TYPES.PERMISSIONS, order)")
 							.usersListCellLabel Permissions
 
 					.usersListBody
 						div.usersListRow(
-							ng-repeat="member in vm.members track by member.user"
+							ng-repeat="member in vm.processedMembers track by member.user"
 							layout="row"
 							layout-align="start center")
 
