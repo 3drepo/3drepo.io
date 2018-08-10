@@ -112,13 +112,8 @@ div.groupsContainer
             div.metaMargin
                 label.groupMeta Creation Date:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.createdAt)  | date:"MM/dd/yyyy"}}
-<<<<<<< HEAD
            
         div(
-=======
-
-        md-container(
->>>>>>> origin/ISSUE_1053
             layout="row"
             layout-align="space-between center")
 
@@ -141,7 +136,7 @@ div.groupsContainer
                 ng-if="vm.groups.length > 0"
                 aria-label="Delete"
                 ng-show="vm.toShow === 'groups'"
-                ng-click="vm.deleteGroup()")
+                ng-click="vm.deleteHighlightedGroups()")
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
                     role="img"

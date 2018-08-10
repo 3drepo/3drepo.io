@@ -17,7 +17,6 @@
  */
 
 class GroupsController implements ng.IController {
-
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
@@ -74,7 +73,6 @@ class GroupsController implements ng.IController {
 
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
-		this.changed = false;
 		this.teamspace = this.account; // Workaround legacy naming
 		this.onContentHeightRequest({height: 1000});
 		this.GroupsService.reset();
@@ -107,10 +105,8 @@ class GroupsController implements ng.IController {
 		this.$scope.$watch(() => {
 			return this.GroupsService.state;
 		}, (newState, oldState) => {
-
 			angular.extend(this, newState);
-			this.changed = true;
-
+			this.updateChangeStatus();
 		}, true);
 
 		this.$scope.$watchCollection("vm.groups", () => {
@@ -155,7 +151,7 @@ class GroupsController implements ng.IController {
 		}, () => {
 
 			this.GroupsService.updateSelectedObjectsLen().then(() => {
-				this.changed = true;
+				this.updateChangeStatus();
 			});
 
 		});
@@ -210,8 +206,6 @@ class GroupsController implements ng.IController {
 	}
 
 	public editGroup() {
-		this.changed = false;
-
 		// Save the color override to be re-enabled later
 		if (this.GroupsService.hasColorOverride(this.selectedGroup)) {
 			this.lastColorOverride = this.selectedGroup;
@@ -222,8 +216,8 @@ class GroupsController implements ng.IController {
 		this.showGroupPane();
 	}
 
-	public deleteGroup(group: any) {
-		this.GroupsService.deleteGroups(this.teamspace, this.model)
+	public deleteHighlightedGroups() {
+		this.GroupsService.deleteHighlightedGroups(this.teamspace, this.model)
 		.catch((error) => {
 			this.errorDialog(error);
 		});
@@ -305,7 +299,6 @@ class GroupsController implements ng.IController {
 			this.hexColor = "";
 		}
 		this.GroupsService.setSelectedGroupColor(color);
-		this.changed = true;
 	}
 
 	public reselectGroup() {
@@ -335,11 +328,6 @@ class GroupsController implements ng.IController {
 			.then(() => {
 				this.savingGroup = false;
 				this.savedGroupData = Object.assign({}, this.selectedGroup);
-				// Wrapped in timeout to avoid watcher clashing
-				this.$timeout(() => {
-					this.changed = false;
-				});
-
 			})
 			.catch((error) => {
 				this.handleGroupError("update");
@@ -358,11 +346,7 @@ class GroupsController implements ng.IController {
 			.then(() => {
 				this.savingGroup = false;
 				this.savedGroupData = Object.assign({}, this.selectedGroup);
-				// Wrapped in timeout to avoid watcher clashing
-				this.$timeout(() => {
-					this.changed = false;
-				});
-
+				this.updateChangeStatus();
 			})
 			.catch((error) => {
 				this.handleGroupError("create");
@@ -408,6 +392,10 @@ class GroupsController implements ng.IController {
 
 	public selectGroup(group: any) {
 		this.GroupsService.selectGroup(group);
+	}
+
+	public updateChangeStatus(): void {
+		this.changed = !!this.savedGroupData && angular.toJson(this.savedGroupData) !== angular.toJson(this.selectedGroup);
 	}
 
 	public setContentHeight() {
@@ -466,8 +454,10 @@ class GroupsController implements ng.IController {
 
 	public groupChangedListener(group, submodel) {
 		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
+		this.savedGroupData = Object.assign({}, group);
 		this.GroupsService.replaceStateGroup(group);
 		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
+		this.reselectGroup();
 	}
 
 	private resetJustUpdated() {

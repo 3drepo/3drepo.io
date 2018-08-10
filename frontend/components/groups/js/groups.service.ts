@@ -331,18 +331,6 @@ export class GroupsService {
 	 * @param groups the groups array to delete
 	 */
 	public deleteGroups(teamspace: string, model: string, groups: any) {
-		// public deleteGroups(teamspace: string, model: string, all?: boolean) {
-		// 	const groupsToDelete = [];
-		// 	let nextGroup;
-		// 	for (let i = 0; i < this.state.groups.length; ++i) {
-		// 		const group = this.state.groups[i];
-		// 		if (all || group.highlighted) {
-		// 			groupsToDelete.push(group);
-		// 			const nextGroupIdx = i + 1 === this.state.groups.length ? 0 : i + 1;
-		// 			nextGroup = this.state.groups[nextGroupIdx];
-		// 		}
-		// 	}
-
 		if (groups.length > 0) {
 			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
 			return this.APIService.delete(groupsUrl)
@@ -536,14 +524,17 @@ export class GroupsService {
 	public deleteStateGroup(group: any) {
 		this.deselectObjectsFromGroup(group);
 		this.removeColorOverride(group._id);
+		const groupIndex = this.state.groups.indexOf(group);
+		const groupsCount = this.state.groups.length;
+
+		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
+			const nextGroup = this.state.groups[ (groupIndex + 1) % groupsCount];
+			this.selectGroup(nextGroup);
+		}
 
 		this.state.groups = this.state.groups.filter((g) => {
 			return group._id !== g._id;
 		});
-
-		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id) {
-			this.state.selectedGroup = null;
-		}
 	}
 
 	/**
