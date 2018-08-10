@@ -37,6 +37,7 @@ class UsersListController implements ng.IController {
 	private currentSort;
 	private onChange;
 	private searchText;
+	private isLoading = true;
 
 	constructor(
 		private $rootScope: any,
@@ -45,14 +46,19 @@ class UsersListController implements ng.IController {
 		private AccountService: any,
 		private DialogService: any
 	) {
-		this.members = [];
-		this.setSortType(SORT_TYPES.USERS, SORT_ORDER_TYPES.ASCENDING);
+		this.currentSort = {
+			type: SORT_TYPES.USERS,
+			order: SORT_ORDER_TYPES.ASCENDING
+		};
 	}
 
 	public $onInit(): void {}
 
 	public $onChanges({members}: {members?: any}): void {
 		if (members && members.currentValue && this.currentSort) {
+			if (!this.processedMembers) {
+				this.isLoading = false;
+			}
 			this.processedMembers = this.processMembers();
 		}
 	}

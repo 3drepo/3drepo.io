@@ -25,7 +25,10 @@
 				on-change="vm.setSortType(vm.SORT_TYPES.PERMISSIONS, order)")
 			.usersListCellLabel Permissions
 
-	.usersListBody
+	.usersListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.usersListBody(ng-if="!vm.isLoading")
 		div.usersListRow(
 			ng-repeat="member in vm.processedMembers track by member.user"
 			layout="row"
