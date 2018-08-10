@@ -30,7 +30,8 @@
 				ng-if="vm.selectedTab === vm.TABS_TYPES.USERS"
 				current-teamspace="vm.currentTeamspace.account"
 				jobs="vm.jobs"
-				on-save="vm.onMemberSave()")
+				title="vm.licencesLabel"
+				on-save="vm.onMemberSave(newMember)")
 
 		.addPanelBackdrop(
 			ng-class="{'addPanelBackdropVisible': vm.showAddingPanel}"
@@ -48,8 +49,9 @@
 					current-teamspace="vm.currentTeamspace"
 					on-change="vm.onMembersChange(updatedMembers)")
 				.accountUserManagementFooter(
+					ng-if="vm.licencesLabel"
 					layout="row"
-					layout-align="end center") You have {{}} out of {{}} licences left
+					layout-align="end center") {{vm.licencesLabel}}
 
 			md-tab(label="Jobs")
 				.jobsList

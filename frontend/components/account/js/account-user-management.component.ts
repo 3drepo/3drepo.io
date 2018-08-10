@@ -16,7 +16,7 @@
  */
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
-import {get, uniq, map} from "lodash";
+import {get, uniq, map, isNumber} from "lodash";
 
 const TABS_TYPES = {
 	USERS: 0,
@@ -58,10 +58,8 @@ class AccountUserManagementController implements ng.IController {
 		private projects;
 		private currentTeamspace;
 		private currentTabConfig;
-		private extraData = {
-			totalLicenses: 0,
-			usedLicences: 0
-		};
+		private licencesLimit;
+		private licencesLabel;
 		private isLoadingTeamspace;
 
 		private selectedTeamspace;
@@ -120,7 +118,7 @@ class AccountUserManagementController implements ng.IController {
 
 			return this.$q.all([quotaInfoPromise, memberListPromise])
 				.then(([quotaInfoResponse, membersResponse]) => {
-					this.extraData.totalLicenses = get(quotaInfoResponse, "data.collaboratorLimit", 0);
+					this.licencesLimit = get(quotaInfoResponse, "data.collaboratorLimit", 0);
 					this.members = membersResponse.data.members.map((member) => {
 						return {
 							...member,
@@ -128,6 +126,7 @@ class AccountUserManagementController implements ng.IController {
 							isCurrentUser: this.account === member.user
 						};
 					});
+					this.licencesLabel = this.getLicencesLabel();
 				});
 		}
 
@@ -162,6 +161,25 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public toggleNewDataPanel(forceHide = false): void {
 			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
+		}
+
+		/**
+		 * Generate licences summary
+		 */
+		public getLicencesLabel(): string {
+			const limit = isNumber(this.licencesLimit) ?
+				`${this.licencesLimit} licences left` :
+				"unlimited assigned";
+			return `Assign licences (${this.members.length} of ${limit})`;
+		}
+
+		/**
+		 * Update local list of members
+		 * @param updatedMembers
+		 */
+		public onMembersChange(updatedMembers): void {
+			this.members = updatedMembers;
+			this.licencesLabel = this.getLicencesLabel();
 		}
 }
 

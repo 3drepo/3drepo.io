@@ -17,14 +17,19 @@
 
 class NewMemberFormController implements ng.IController {
 	public static $inject: string[] = [
-		"AccountService"
+		"AccountService",
+		"DialogService"
 	];
 
 	private newMember;
 	private currentTeamspace;
 	private searchText;
+	private onSave;
 
-	constructor(private AccountService: any) {}
+	constructor(
+		private AccountService: any,
+		private DialogService: any
+	) {}
 
 	public $onInit(): void {
 		this.newMember = {};
@@ -47,25 +52,22 @@ class NewMemberFormController implements ng.IController {
 	public addMember(): void {
 		return this.AccountService.addMember(this.currentTeamspace, this.newMember)
 			.then((response) => {
-				if (response.status === 200) {
-					/* this.addMessage = "User " + this.newLicenseAssignee + " assigned a license";
-					this.licenses.push({ user: response.data.user, showRemove: true });
-					this.newLicenseAssignee = ""; */
+				if (response.status === 200 && this.onSave) {
+					this.onSave({newMember: response.data});
 				} else if (response.status === 400) {
 					throw (response);
 				}
 			})
-			.catch((error) => {
-				console.error('error', error)
-				//this.handleError("assign", "licence", error);
-			});
+			.catch(this.DialogService.showError.bind(null, "assign", "licence"));
 	}
 }
 
 export const NewMemberFormComponent: ng.IComponentOptions = {
 	bindings: {
 		currentTeamspace: "<",
-		jobs: "<"
+		jobs: "<",
+		title: "<",
+		onSave: "&"
 	},
 	controller: NewMemberFormController,
 	controllerAs: "vm",
