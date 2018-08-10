@@ -52,7 +52,8 @@ export class GroupsService {
 			colorOverride: {},
 			totalSelectedMeshes : 0,
 			multiSelectedGroups: [],
-			overrideAll: false
+			overrideAll: false,
+			highlightedNodes: []
 		};
 	}
 

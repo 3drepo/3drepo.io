@@ -149,11 +149,7 @@ class GroupsController implements ng.IController {
 		this.$scope.$watchCollection(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
-
-			this.GroupsService.updateSelectedObjectsLen().then(() => {
-				this.updateChangeStatus();
-			});
-
+			this.GroupsService.updateSelectedObjectsLen().then(this.updateChangeStatus.bind(this));
 		});
 
 		this.$scope.$watch("vm.selectedMenuOption",
@@ -395,7 +391,20 @@ class GroupsController implements ng.IController {
 	}
 
 	public updateChangeStatus(): void {
-		this.changed = !!this.savedGroupData && angular.toJson(this.savedGroupData) !== angular.toJson(this.selectedGroup);
+		// angular.toJson is being used for a deep object comparison
+		this.GroupsService.getSelectedObjects().then((currentHighlights) => {
+			if (!this.savedGroupData || !this.selectedGroup) {
+				this.changed = false;
+			} else {
+				const highlightedIds =  this.getFullIdsFromNodes(currentHighlights);
+				const groupObjectsIds = this.getFullIdsFromNodes(this.selectedGroup.objects);
+				let differsSelectedObjects = highlightedIds.length !== groupObjectsIds.length;
+				differsSelectedObjects =  differsSelectedObjects || highlightedIds.some((i) => groupObjectsIds.indexOf(i) === -1);
+
+				const differsFromSavedData = angular.toJson(this.savedGroupData) !== angular.toJson(this.selectedGroup);
+				this.changed =  (differsFromSavedData || differsSelectedObjects);
+			}
+		});
 	}
 
 	public setContentHeight() {
@@ -462,6 +471,18 @@ class GroupsController implements ng.IController {
 
 	private resetJustUpdated() {
 		this.justUpdated = false;
+	}
+
+	private getFullIdsFromNodes(nodes: [any]) {
+		return nodes.reduce((obj, currentVal) => {
+			const nsp = currentVal.account + "." + currentVal.model ;
+			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));
+			if (Array.isArray(currentVal.ifc_guids)) {
+				ids = ids.concat(currentVal.ifc_guids.map( (id) => nsp + "." + id ));
+			}
+
+			return ids;
+		} , []);
 	}
 
 	/***/
