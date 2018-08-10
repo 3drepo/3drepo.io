@@ -29,7 +29,6 @@
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
 
 	router.get("/members", middlewares.loggedIn, getMemberList);
-	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 	router.get("/members/search/:query", middlewares.isAccountAdmin, findUsersWithoutMembership);
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
