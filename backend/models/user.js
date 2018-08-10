@@ -152,12 +152,12 @@ schema.statics.findAllByQuery = function (teamspace, query) {
 		return dbCol
 			.find({
 				$and: [{
-						$or: [
-							{ user: query },
-							{ "customData.email": { $regex: `.*${query}.*` } }
-						]
-					},
-					{"customData.inactive": {'$exists':false}}
+					$or: [
+						{ user: query },
+						{ "customData.email": { $regex: `.*${query}.*` }}
+					]
+				},
+				{ "customData.inactive": { "$exists": false }}
 				]
 			}).toArray();
 	}).then((users) => {
@@ -1030,21 +1030,35 @@ schema.methods.removeTeamMember = function(username, cascadeRemove) {
 
 };
 
-schema.methods.addTeamMember = function(user) {
-
+schema.methods.addTeamMember = function(user, job, permissions) {
+	console.error("test === ", user, job, permissions, this.user)
 	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
 		const limits = this.customData.billing.getSubscriptionLimits();
 		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
 			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
 		} else {
-			return User.findByUserName(user).then(userEntry => {
+			return Promise.all([
+				User.findByUserName(user),
+				User.findByUserName(this.user)
+			]).then(([userEntry, teamspaceEntry]) => {
 				if(!userEntry) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 				if(userEntry.isMemberOfTeamspace(this.user)) {
 					return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
 				}
-				return Role.grantTeamSpaceRoleToUser(user, this.user);
+
+				return Role.grantTeamSpaceRoleToUser(user, this.user).then(() => {
+					const promises = [];
+					if (job) {
+						promises.push(Job.addUserToJob(this.user, user, job));
+					}
+					if (permissions && permissions.length) {
+						promises.push(teamspaceEntry.customData.permissions.add({user, permissions}));
+					}
+					return Promise.all(promises);
+				});
+
 			});
 		}
 	});

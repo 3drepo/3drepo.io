@@ -32,6 +32,7 @@
 	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 	router.get("/members/search/:query", middlewares.isAccountAdmin, findUsersWithoutMembership);
+	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
 	function getQuotaInfo(req, res, next) {
 
@@ -91,8 +92,8 @@
 		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				if(req.params.user) {
-					return dbUser.addTeamMember(req.params.user);
+				if(req.body.user) {
+					return dbUser.addTeamMember(req.body.user, req.body.job, req.body.permissions);
 				} else {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}

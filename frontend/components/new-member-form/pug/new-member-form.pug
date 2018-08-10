@@ -32,8 +32,10 @@ form.newMemberForm(name="newMemberForm" layout="column")
 
 	.newMemberFormPermissions(layout="row" layout-align="space-between center")
 		p Add as Teamspace Admin
-		md-checkbox(ng-model="newMember")
+		md-checkbox(ng-model="vm.newMember.isAdmin")
 
-	md-button.md-accent.md-raised.newMemberFormButton(ng-disabled="!newMemberForm.$valid") + Add user
+	md-button.md-accent.md-raised.newMemberFormButton(
+		ng-disabled="!vm.newMember.user"
+		ng-click="vm.addMember()") + Add user
 
 	

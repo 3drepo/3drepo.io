@@ -14,6 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import {get, pick} from "lodash";
+import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 
 class NewMemberFormController implements ng.IController {
 	public static $inject: string[] = [
@@ -25,6 +27,7 @@ class NewMemberFormController implements ng.IController {
 	private currentTeamspace;
 	private searchText;
 	private onSave;
+	private selectedUser;
 
 	constructor(
 		private AccountService: any,
@@ -36,7 +39,11 @@ class NewMemberFormController implements ng.IController {
 	}
 
 	public selectedUserChange(): void {
-		this.newMember.user = "test";
+		this.newMember.user = get(this.selectedUser, "user", null);
+	}
+
+	public selectedJobChange(): void {
+		this.newMember.user = get(this.selectedUser, "user", null);
 	}
 
 	/**
@@ -44,16 +51,19 @@ class NewMemberFormController implements ng.IController {
 	 */
 	public querySearch(): void {
 		return this.AccountService.findMembers(this.currentTeamspace, this.searchText)
-			.then((response) => {
-				return response.data;
-			});
+			.then((response) => response.data);
 	}
 
 	/**
 	 * Prepare user data and send request
 	 */
 	public addMember(): void {
-		return this.AccountService.addMember(this.currentTeamspace, this.newMember)
+		const member = {
+			...pick(this.newMember, ["user", "job"]),
+			permissions: this.newMember.isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
+		};
+
+		this.AccountService.addMember(this.currentTeamspace, member)
 			.then((response) => {
 				if (response.status === 200 && this.onSave) {
 					this.onSave({newMember: response.data});
