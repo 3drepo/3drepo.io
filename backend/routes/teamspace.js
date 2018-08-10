@@ -98,8 +98,8 @@
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 			})
-			.then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
+			.then((user) => {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user);
 			})
 			.catch(err => {
 				responseCodes.respond(responsePlace, req, res, next,

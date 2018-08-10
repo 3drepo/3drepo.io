@@ -1031,7 +1031,6 @@ schema.methods.removeTeamMember = function(username, cascadeRemove) {
 };
 
 schema.methods.addTeamMember = function(user, job, permissions) {
-	console.error("test === ", user, job, permissions, this.user)
 	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
 		const limits = this.customData.billing.getSubscriptionLimits();
 		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
@@ -1056,12 +1055,24 @@ schema.methods.addTeamMember = function(user, job, permissions) {
 					if (permissions && permissions.length) {
 						promises.push(teamspaceEntry.customData.permissions.add({user, permissions}));
 					}
-					return Promise.all(promises);
-				});
+
+					return Promise.all(promises).then(userEntry.getBaseData.bind(userEntry));
+				})
+					.then(userData => Object.assign({job, permissions}, userData));
 
 			});
 		}
 	});
+};
+
+schema.methods.getBaseData = function() {
+	const {user, customData} = this;
+	return {
+		user,
+		firstName: customData.firstName,
+		lastName: customData.lastName,
+		email: customData.email
+	};
 };
 
 schema.methods.isMemberOfTeamspace = function(teamspace) {
