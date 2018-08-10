@@ -32,7 +32,6 @@ import "./account/js/account.component";
 import "./account/js/account-federations.component";
 import "./account/js/account-info.component";
 import "./account/js/account-items.component";
-import "./account/js/account-licenses.component";
 import "./account/js/account-menu.component";
 import "./account/js/account-model.component";
 import "./account/js/account-modelsetting.component";
