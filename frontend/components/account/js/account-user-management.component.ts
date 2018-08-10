@@ -16,7 +16,7 @@
  */
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
-import {get, uniq, map, values, cond, matches, orderBy} from "lodash";
+import {get, uniq, map} from "lodash";
 
 const TABS_TYPES = {
 	USERS: 0,
@@ -47,7 +47,6 @@ class AccountUserManagementController implements ng.IController {
 			"DialogService"
 		];
 
-		private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
 		private TABS_TYPES = TABS_TYPES;
 
 		private account;

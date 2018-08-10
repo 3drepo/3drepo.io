@@ -14,9 +14,9 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TEAMSPACE_PERMISSIONS } from "../../../constants/teamspace-permissions";
+import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
-import {get, uniq, map, values, cond, matches, orderBy} from "lodash";
+import {values, cond, matches, orderBy} from "lodash";
 
 class UsersListController implements ng.IController {
 	public static $inject: string[] = [
@@ -27,6 +27,7 @@ class UsersListController implements ng.IController {
 		"DialogService"
 	];
 
+	private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
 	private SORT_TYPES = SORT_TYPES;
 
 	private members;
@@ -35,6 +36,7 @@ class UsersListController implements ng.IController {
 	private currentTeamspace;
 	private currentSort;
 	private onChange;
+	private searchText;
 
 	constructor(
 		private $rootScope: any,
@@ -148,13 +150,25 @@ class UsersListController implements ng.IController {
 			});
 	}
 
+	/**
+	 * Set new sort type and order
+	 * @param type
+	 * @param order
+	 */
 	public setSortType(type, order): void {
 		this.currentSort = {type, order};
 		this.processedMembers = this.processMembers();
 	}
 
+	/**
+	 * Search callback
+	 */
+	public onSearch(): void {
+		this.processedMembers = this.processMembers();
+	}
+
 	public processMembers(): object[] {
-		const filteredMembers = this.getFilteredMembers(this.members);
+		const filteredMembers = this.getFilteredMembers(this.members, this.searchText);
 		const processedMembers = this.getSortedMembers(filteredMembers);
 		return processedMembers;
 	}
@@ -166,7 +180,13 @@ class UsersListController implements ng.IController {
 	 * @returns {Array}
 	 */
 	public getFilteredMembers(members = [], query = ""): object[] {
-		return members;
+		if (!query) {
+			return members;
+		}
+
+		return members.filter(({firstName, lastName, user, email}) => {
+			return `${firstName} ${lastName} ${user} ${email}`.includes(query);
+		});
 	}
 
 	/**

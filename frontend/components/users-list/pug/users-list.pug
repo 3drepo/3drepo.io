@@ -4,7 +4,14 @@
 			list-sort-button(
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
-			.usersListCellLabel User
+
+			md-input-container.usersListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="User"
+					ng-change="vm.onSearch()")
 
 		.usersListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(

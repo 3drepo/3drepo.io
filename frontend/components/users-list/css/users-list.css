@@ -65,3 +65,43 @@
   margin-right: 12px;
   background-color: rgba(0, 0, 0, 0.06);
 }
+
+.usersListCellSearch {
+  margin: 0;
+  margin-bottom: 4px;
+  padding-left: 20px !important;
+}
+
+.usersListCellSearch .md-input {
+  padding-top: 5px !important;
+}
+
+.usersListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input {
+  border-color: transparent;
+}
+
+.usersListCellSearch.md-icon-float md-icon {
+  height: 14px;
+	font-size: 14px;
+	width: 14px;
+	min-width: 14px;
+  min-height: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  top: 12px;
+}
+
+.usersListCellSearch.md-icon-float > label {
+  color: rgba(0, 0, 0, 0.6);
+  width: calc(100% - 20px - 18px) !important;
+  left: 20px !important;
+  margin-bottom: 1px;
+}
+
+.usersListCellSearch.md-input-focused > label,
+.usersListCellSearch.md-input-has-value > label {
+  transform: translate3d(0,12px,0) scale(.75) !important;
+}
+
+.usersListCellSearch .md-errors-spacer {
+  display: none;
+}
