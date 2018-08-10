@@ -146,6 +146,34 @@ schema.statics.findByUserName = function(user) {
 	return this.findOne({account: "admin"}, { user });
 };
 
+schema.statics.findAllByQuery = function (teamspace, query) {
+	const db = require("../db/db");
+	return db.getCollection("admin", "system.users").then(dbCol => {
+		return dbCol
+			.find({
+				$and: [{
+						$or: [
+							{ user: query },
+							{ "customData.email": { $regex: `.*${query}.*` } }
+						]
+					},
+					{"customData.inactive": {'$exists':false}}
+				]
+			}).toArray();
+	}).then((users) => {
+		const usersData = users.map(({user, roles, customData}) => {
+			return {
+				user,
+				roles,
+				firstName: customData.firstName,
+				lastName: customData.lastName,
+				email: customData.email
+			};
+		});
+		return Promise.resolve(usersData);
+	});
+};
+
 // case insenstive
 schema.statics.isUserNameTaken = function(username) {
 	return this.count({account: "admin"}, {

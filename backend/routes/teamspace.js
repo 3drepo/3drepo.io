@@ -24,12 +24,14 @@
 	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
+	const C = require("../constants");
 
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
 
 	router.get("/members", middlewares.loggedIn, getMemberList);
 	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
+	router.get("/members/search/:query", middlewares.isAccountAdmin, findUsersWithoutMembership);
 
 	function getQuotaInfo(req, res, next) {
 
@@ -48,10 +50,20 @@
 		}).then(quotaInfo => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, quotaInfo);
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
+	}
 
+	function findUsersWithoutMembership(req, res, next) {
+		User.findAllByQuery(req.params.account, req.params.query).then((users) => {
+			const notMembers = users.filter(({roles}) => {
+				const isMemberOfTeamspace = roles.some(({ db, role }) => db === req.params.account && role === C.DEFAULT_MEMBER_ROLE);
+				return !isMemberOfTeamspace;
+			});
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, notMembers);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	function getMemberList(req, res, next) {
@@ -73,13 +85,10 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-
 	}
 
 	function addTeamMember(req, res, next) {
-
 		const responsePlace = utils.APIInfo(req);
-
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
 				if(req.params.user) {

@@ -1,4 +1,5 @@
 form.newMemberForm(name="newMemberForm" layout="column")
+	.newMemberFormTitle {{vm.title}}
 	md-autocomplete(
 		class="newMemberFormAutocomplete"
 		md-autofocus="true"
@@ -10,9 +11,10 @@ form.newMemberForm(name="newMemberForm" layout="column")
 		md-search-text="vm.searchText"
 		md-selected-item-change="vm.selectedUserChange(item)"
 		md-items="item in vm.querySearch(vm.searchText)"
-		md-item-text="item.name"
-		md-min-length="0"
+		md-item-text="item.email"
+		md-min-length="1"
 		ng-required
+		md-menu-class="newMemberFormAutocompleteMenu"
 		md-floating-label="Username or email address")
 		md-item-template
 			member-card(data="item")

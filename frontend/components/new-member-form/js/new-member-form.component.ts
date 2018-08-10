@@ -43,7 +43,10 @@ class NewMemberFormController implements ng.IController {
 	 * Search memebers by query
 	 */
 	public querySearch(): void {
-		return this.AccountService.findMembers(this.currentTeamspace, this.searchText);
+		return this.AccountService.findMembers(this.currentTeamspace, this.searchText)
+			.then((response) => {
+				return response.data;
+			});
 	}
 
 	/**
