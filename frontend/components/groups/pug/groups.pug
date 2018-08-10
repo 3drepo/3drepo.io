@@ -52,14 +52,14 @@ div.groupsContainer
                 
                 div.groupEnterHolder(
                     ng-click="vm.editGroup()"
-                    ng-if="group.selected === true"
+                    ng-if="group.focus"
                     layout="row"
                     layout-align="center center")
 
                     md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
 
                 div.groupEnterSpace(
-                    ng-if="group.selected !== true"
+                    ng-if="!group.focus"
                     layout="row"
                     layout-align="center center")
             
@@ -86,7 +86,7 @@ div.groupsContainer
                     input#groupName(
                         type="text"
                         ng-disabled="!vm.canAddGroup"
-                        ng-model="vm.selectedGroup.name" 
+                        ng-model="vm.selectedGroup.name"
                         maxlength="80")
 
         md-input-container
@@ -98,31 +98,36 @@ div.groupsContainer
         md-container.groupObjectMetaContainer(
             layout="row"
             layout-align="space-between center")
-            div.groupObjectMeta  Saved Objects: {{ vm.selectedGroup.totalSavedMeshes }} 
+            div.groupObjectMeta  Saved Objects: {{ vm.selectedGroup.totalSavedMeshes }}
             div.groupObjectMeta  Selected Objects: {{ vm.selectedObjectsLen || 0 }}
-        
+
         md-container(
             layout="row"
             layout-align="space-between center")
 
             div.metaMargin
-                label.groupMeta Author: 
+                label.groupMeta Author:
                 span.groupMeta {{ vm.selectedGroup.author }}
 
             div.metaMargin
-                label.groupMeta Creation Date: 
+                label.groupMeta Creation Date:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.createdAt)  | date:"MM/dd/yyyy"}}
+<<<<<<< HEAD
            
         div(
+=======
+
+        md-container(
+>>>>>>> origin/ISSUE_1053
             layout="row"
             layout-align="space-between center")
 
             div.metaMargin
-                label.groupMeta Last Updated By: 
+                label.groupMeta Last Updated By:
                 span.groupMeta {{ vm.selectedGroup.updatedBy }}
 
             div.metaMargin
-                label.groupMeta Updated On: 
+                label.groupMeta Updated On:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.updatedAt) | date:"MM/dd/yyyy"}}
        
     .remoteNotification.groupJustUpdated(ng-if="vm.justUpdated && vm.toShow === 'group'")
@@ -131,7 +136,7 @@ div.groupsContainer
     div.addHolder(layout="row" flex="100")
 
         div(flex="50" layout="row" layout-align="start center")
-            button(class="md-icon-button md-button md-ink-ripple" 
+            button(class="md-icon-button md-button md-ink-ripple"
                 type="button"
                 ng-if="vm.groups.length > 0"
                 aria-label="Delete"
@@ -144,9 +149,9 @@ div.groupsContainer
 
             md-menu
                 button(
-                    class="md-icon-button md-button md-ink-ripple" 
-                    type="button" 
-                    aria-label="Color" 
+                    class="md-icon-button md-button md-ink-ripple"
+                    type="button"
+                    aria-label="Color"
                     ng-disabled="!vm.canAddGroup"
                     ng-show="vm.toShow === 'group' && !vm.savingGroup"
                     ng-click="vm.openColorMenu($mdMenu, $event)")
@@ -171,9 +176,9 @@ div.groupsContainer
                             div(layout-fill).groupCurrentColorHolder
                                 label.groupCurrentColor Current Colour
                                 div.groupCurrentColorBlock(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
-            
 
-            button(class="md-icon-button md-button md-ink-ripple" 
+
+            button(class="md-icon-button md-button md-ink-ripple"
                 type="button"
                 ng-if="vm.groups.length > 0"
                 aria-label="Reselect"
@@ -186,8 +191,8 @@ div.groupsContainer
                     aria-hidden="true") replay
 
         div(flex="50" layout="row" layout-align="end center")
-            button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
+            button(class="md-accent md-fab md-mini md-button md-ink-ripple"
+                type="button"
                 aria-label="Add"
                 ng-show="vm.toShow === 'groups'"
                 ng-disabled="!vm.canAddGroup"
@@ -196,11 +201,11 @@ div.groupsContainer
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
                     aria-hidden="true") add
-            
+
             button(
-                class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
-                aria-label="Add" 
+                class="md-accent md-fab md-mini md-button md-ink-ripple"
+                type="button"
+                aria-label="Add"
                 ng-disabled="vm.saveDisabled()"
                 ng-show="vm.toShow === 'group' && !vm.savingGroup"
                 ng-click="vm.handleGroupSave()")
@@ -209,13 +214,13 @@ div.groupsContainer
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
                     aria-hidden="true") save
-            
+
             md-progress-circular.spinner(
                 ng-if="vm.toShow === 'group' && vm.savingGroup")
 
 
 
 
-        
-        
+
+
 
