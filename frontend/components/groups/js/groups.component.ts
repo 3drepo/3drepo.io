@@ -372,6 +372,7 @@ class GroupsController implements ng.IController {
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 		this.focusGroupName();
+		this.GroupsService.updateSelectedObjectsLen();
 	}
 
 	public cancelEdit() {
