@@ -1,0 +1,301 @@
+
+md-content#issueInformation(
+	ng-if="vm.riskData && vm.modelSettings"
+	layout="column"
+	tabindex="0"
+	tdr-focus="true")
+
+	// Title
+	.issueItemContainer#issueTitleArea(
+		layout="column"
+		layout-align="start"
+		flex
+		ng-class="{issueTitleArea: vm.data}"
+		ng-click="vm.toggleShowAdditional()")
+
+			div(layout="row", flex, layout-align="space-between")
+				div(layout="row", flex)
+					#issueRoleIndicator(ng-style="{backgroundColor: vm.riskData.roleColor}")
+					
+					div(ng-if="!vm.data"
+						layout="column"
+						flex)
+						md-input-container#issueTitleInput(
+							style="width=100%;"
+							flex
+							md-no-float)
+
+							input(
+								flex
+								type="text"
+								ng-model="vm.riskData.name"
+								ng-change="vm.nameChange()"
+								ng-disabled="vm.data"
+								ng-focus="vm.textInputHasFocus(true)"
+								ng-blur="vm.textInputHasFocus(false)"
+								aria-label="Title"
+								tdr-focus="true"
+								required
+								placeholder="Title",
+								ng-click="vm.titleInputClick($event)")
+
+					label#issueTitle(ng-if="vm.data") {{vm.riskData.title}}
+
+				span(flex="5")
+				div
+					md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
+						md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
+						md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
+					md-tooltip(ng-if="!vm.showAdditional") Show additional information
+					md-tooltip(ng-if="vm.showAdditional") Hide additional information
+
+	// Info
+	.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
+		div(flex="10")
+			md-icon.angular-material-icons#issueStatusIcon(
+				style="color:{{vm.riskData.statusIcon.colour}}") {{vm.riskData.statusIcon.icon}}
+
+		.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
+			label {{vm.data.owner}}
+			label {{vm.data.timeStamp}}
+
+	// Status
+	.issueItemContainer#issueAdditional(layout="column", ng-if="vm.showAdditional")
+		div(layout="row")
+			md-input-container.issueItemStatus(flex)
+				label SafetiBase ID
+				md-select(
+					id="issuePriority"
+					ng-model="vm.riskData.priority"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangePriority()")
+			
+					md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
+			
+			md-input-container.issueItemStatus(flex)
+				label Associated Activity
+				md-select(
+					id="issueStatus"
+					ng-model="vm.riskData.status"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeStatus()")
+					
+					md-option(
+						ng-repeat="status in vm.statuses"
+						ng-disabled="vm.disableStatusOption(status)"
+						value="{{status.value}}") {{status.label}}
+
+	.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
+		div(layout="column", layout-align="start", flex)
+			div(ng-if="!vm.data", flex, layout="column")
+				md-input-container#descriptionText()
+					label Description
+					textarea(
+						ng-model="vm.riskData.desc"
+						ng-disabled="vm.data"
+						ng-focus="vm.textInputHasFocus(true)"
+						ng-blur="vm.textInputHasFocus(false)")
+
+			#issueDescription(
+				ng-if="vm.data"
+				layout="column"
+				ng-click="vm.showViewpoint($event, vm.riskData.viewpoint)")
+
+				div(layout='row', layout-align="space-between", flex)
+					label(
+						ng-if="!vm.editingDescription"
+						ng-bind-html="vm.riskData.desc | linky:'_blank'") {{vm.riskData.desc}}
+					md-input-container(flex, ng-if="vm.editingDescription")
+						textarea(
+							ng-model="vm.riskData.desc"
+							aria-label="Description"
+							tdr-focus="true"
+							ng-focus="vm.textInputHasFocus(true)"
+							ng-blur="vm.textInputHasFocus(false)")
+					
+					.issueTextActions(layout="row", ng-if="vm.canChangeDescription()")
+						md-button.md-icon-button.md-accent(
+							aria-label="Edit Description Toggle"
+							ng-click="vm.toggleEditDescription($event)")
+
+							md-tooltip(
+								ng-if="!vm.editingDescription"
+								md-direction="bottom") Edit Description
+							md-icon.angular-material-icons(
+								ng-if="!vm.editingDescription"
+								style="color:{{vm.editCommentColor}}") mode_edit
+
+							md-tooltip(
+								ng-if="vm.editingDescription"
+								md-direction="bottom") Save Description
+							md-icon.angular-material-icons(
+								ng-if="vm.editingDescription"
+								style="color:{{vm.editCommentColor}}") save
+							
+			
+			.issueThumbnail(
+				ng-if="vm.riskData.descriptionThumbnail"
+				ng-click="vm.showScreenShot($event, vm.riskData.viewpoint)")
+				img.issueThumbnailImage(ng-src="{{vm.riskData.descriptionThumbnail}}")
+
+
+	.issueItemContainer#issueAdditional(layout="column")
+
+		div(layout="row")
+			md-input-container(flex)
+				label Risk Owner
+				md-select(
+					id="issueType"
+					ng-model="vm.riskData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+			
+			md-input-container(flex)
+				label Category
+				md-select(
+					id="issueType"
+					ng-model="vm.riskData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+
+		div(layout="row")
+			md-input-container(flex)
+				label Risk Likelihood
+				md-select(
+					id="issueType"
+					ng-model="vm.riskData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+
+			md-input-container(flex)
+				label Risk Consequence
+				md-select(
+					id="issueType"
+					ng-model="vm.riskData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+
+	.issueItemContainer#issueAdditional(layout="column")
+
+		div(layout="row")
+			md-input-container(flex)
+				label Level of Risk
+				md-select(
+					id="issueType"
+					ng-model="vm.riskData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+			
+			md-input-container(flex)
+				label Mitigation Status
+				md-select(
+					id="issueType"
+					ng-model="vm.riskData.topic_type"
+					ng-change="vm.statusChange()"
+					ng-disabled="!vm.canChangeType()")
+					
+					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+
+		div(flex, layout="column")
+			md-input-container#descriptionText()
+				label Mitigation
+				textarea(
+					ng-model="vm.riskData.desc"
+					ng-disabled="vm.data"
+					ng-focus="vm.textInputHasFocus(true)"
+					ng-blur="vm.textInputHasFocus(false)")
+
+md-divider
+
+.issueItemContainer#issueFooterButtons(layout="column")
+
+	.issueThumbnail.fillHeight(
+		layout="row"
+		layout-align="center"
+		ng-if="vm.commentThumbnail"
+		ng-click="vm.showThumbnail()")
+
+		img.issueThumbnailImage(
+			id="commentThumbnail"
+			ng-src="{{vm.commentThumbnail}}")
+	
+	div(layout="row" flex="100")
+		// New comment
+		.issueItemContainer#issueNewComment(
+			layout="row"
+			layout-align="start center"
+			flex="100"
+			ng-if="vm.data")
+			
+			textarea(
+				flex="100"
+				placeholder="{{vm.getCommentPlaceholderText()}}"
+				id="newCommentInput"
+				aria-label="New Comment"
+				ng-model="vm.comment"
+				ng-change="vm.commentChange()"
+				ng-focus="vm.textInputHasFocus(true)"
+				ng-blur="vm.textInputHasFocus(false)"
+				ng-disabled="!vm.canComment() || vm.failedToLoad"
+				ng-required="true")
+				
+		div(layout="row" layout-align="start center")
+			md-button.md-icon-button(
+
+				ng-repeat="(action, actionData) in vm.actions"
+				id="{{actionData.id + 'CommentButton'}}"
+				aria-label="{{action}}"
+				ng-click="vm.doAction($event, action)"
+				ng-if="actionData.visible()"
+				ng-disabled="actionData.disabled()")
+
+				md-tooltip(md-direction="bottom") {{actionData.label}}
+				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
+		
+		div(flex="100" ng-if="!vm.data")
+
+		div(layout="row" layout-align="end center")
+			md-button.md-fab.md-mini(
+				id="submitCommentButton"
+				aria-label="Submit"
+				ng-disabled="vm.submitDisabled || vm.failedToLoad"
+				ng-click="vm.submit()"
+				ng-if="!vm.saving")
+				md-tooltip(md-direction="bottom") Submit
+				md-icon.angular-material-icons save
+			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
+		
+// Whilst issue is loading
+div.heightFix(
+	ng-if="!vm.modelSettings || !vm.riskData"
+	flex
+	layout="column"
+	layout-fill
+	tabindex="0"
+	tdr-focus="true")
+
+	tdr-progress(info="vm.issueProgressInfo")
+
+div.heightFix(
+	ng-if="vm.failedToLoad"
+	flex
+	layout="column"
+	layout-fill
+	tabindex="0"
+	tdr-focus="true")
+
+	div(
+		layout="column"
+		flex 
+		layout-align="center center")
+			h3 Issue Failed to Load

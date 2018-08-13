@@ -1,0 +1,643 @@
+/** Issues ************************************************************************************************************/
+
+risks-card {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
+risks-card #issuesAddContainer {
+  position: relative;
+  margin: 15px;
+}
+risks-card #issuesAddContainer .md-dialog-container {
+  top: 0 !important;
+  height: 200px !important;
+}
+risks-card #issuesAddContainer .md-dialog-backdrop {
+  height: 205px !important;
+}
+risks-card #issuesAddContainer md-input-container {
+  margin-bottom: 0;
+}
+risks-card #issuesAddContainer h4 {
+  margin-left: 4px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+risks-card .issueHeader {
+  position: relative;
+}
+risks-card .issueHeader:hover {
+  background-color: #EEEEEE;
+  cursor: pointer;
+}
+
+risks-card md-list {
+  padding: 0;
+}
+
+risks-card .issuesInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+risks-card .issuesInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+risks-card #addAlert {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+risks-card #addAlert #addAlertBackground {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+}
+risks-card #addAlert #addAlertBackground #addAlertInfo {
+  background: #FFFFFF;
+  border-radius: 4px;
+}
+risks-card #addAlert #addAlertBackground #addAlertInfo .md-button {
+  background: #EEEEEE;
+}
+
+risks-card span.addHint {
+  color: grey;
+  padding-right: 6px;
+  font-size: 14px;
+}
+
+risks-card #risksAddButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-right: 12px;
+  width: 100%;
+  background: white;
+  margin: 0;
+  padding: 0;
+}
+
+/* risks-card #risksAddButton button {
+  float: right;
+} */
+
+risks-card #issueDescriptionContainer {
+  margin-top: 0px;
+}
+
+risks-card #issueInformation {
+  display: block;
+  overflow-y: scroll;
+  position: relative;
+  height: calc(100% - 75px);
+}
+
+risks-card .importBCFLoading {
+  margin: 10px auto;
+}
+
+risks-card #issueRoleIndicator {
+  width: 8px;
+  border: 1px solid #DDDDDD;
+  margin-right: 10px;
+}
+
+/** Issue *************************************************************************************************************/
+risk-item {
+  display: block;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+}
+
+risk-item md-list-item .md-button,
+risk-item md-list-item .md-button .md-ripple-container {
+  border-radius: 0;
+}
+
+risk-item h3,
+risk-item h4 {
+  word-wrap: break-word;
+  white-space: normal !important;
+}
+
+risk-item #descriptionText {
+  max-height: 120px;
+  height: 100px;
+}
+
+risk-item #descriptionText textarea {
+  max-height: 120px;
+  height: 100px;
+  overflow-y: auto;
+}
+
+risk-item .issueCommentsContainer {
+  padding: 0 15px 0 25px
+}
+risk-item .issueCommentsContainer md-list-item {
+  padding: 0 !important;
+}
+
+risk-item .issueCommentsContainer md-list-item .commentModifyButton {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin: 0 0 0 20px;
+  outline: none;
+}
+risk-item .issueCommentsContainer .issueCommentInfo {
+  position: relative;
+}
+risk-item .issueCommentsContainer .issueCommentInfo p {
+  color: rgba(0,0,0,0.35) !important;
+}
+risk-item .issueCommentsContainer .issueCommentsFooter {
+  margin-top: -15px;
+  padding-bottom: 10px;
+  /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
+}
+
+md-list-item.issueRole {
+  padding: 0;
+}
+md-list-item .issueAssignColourMarker {
+  display: block;
+  width: 10px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+risk-item .issueOpenContainer {
+  margin-top: 10px;
+}
+
+risk-item #issueDueDate .md-datepicker-button {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+risk-item #issueDueDate .md-datepicker-button md-icon {
+  margin-left: 0px;
+}
+
+risk-item #issueDueDate .md-datepicker-input-container {
+  margin: 0px;
+  width: 167.5px;
+}
+
+/** Issues List *******************************************************************************************************/
+risks-list {
+  display: block;
+  height: calc(100% - 50px);
+  position: relative;
+  overflow-y: scroll;
+}
+
+risks-list .issueListItem {
+  position: relative;
+  outline: none;
+}
+risks-list .issueListItem:hover {
+  cursor: pointer;
+  background: #f3f3f3;
+
+}
+risks-list .issueListItem *:hover {
+  cursor: inherit;
+}
+
+risks-list .issueListItem div:first-child {
+  outline: none;
+}
+
+risks-list #issuesListItemContent {
+  padding: 10px;
+  padding-right: 40px;
+  overflow: hidden;  
+}
+
+risks-list #issuesListItemTitle {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+risks-list #issuesListItemInfo {
+  margin: 5px 0;
+}
+
+risks-list #issuesListItemInfo label,
+risks-list #issuesListItemDescription label {
+  color: rgba(0, 0, 0, 0.5);
+  word-wrap: break-word;
+}
+
+risks-list #issuesListItemDescription {
+  height: 60px;
+  font-size: 13px;
+}
+risks-list #issuesListItemDescription label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+risks-list #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 100%;
+  background: rgb(12, 47, 84);
+  outline: none;
+}
+risks-list #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}
+
+risks-list .issueListItemThumbnail {
+  margin-right: 10px;
+  height: 120px;
+  width: 120px;
+  background: rgba(240,240,240,1)
+}
+
+risks-list #issuesListContainer {
+  outline: none;
+}
+
+risks-list .issueJustClosed{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(212,212,212,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+risks-list .closedText{
+  padding: 15px 25px;
+  background-color: rgba(255,255,255,0.9);
+  border: 1px solid #DDDDDD;
+ }
+
+/** Issues List Item **************************************************************************************************/
+.userRoleIssueListItemTitle {
+  border: 1px solid rgba(240,240,240,1);
+  margin-left: -4px;
+  padding-left: 4px;
+}
+
+risks-list-item:hover {
+   background: #eaeaea;
+}
+
+risks-list-item .issueListItemMissingThumbnail {
+  font-size: 50px;
+  width: 50px;
+  height: 50px;
+  opacity: 0.3;
+}
+
+risks-list-item #issueListItemStatus {
+  margin-right: 5px;
+}
+
+/** Issue Comp ********************************************************************************************************/
+risk-item {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
+risk-item #issueAll {
+  outline: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+risk-item #issueFooterButtons {
+  background: white;
+  width: 100%;
+  z-index: 10;
+  height: auto;
+  bottom: 0px;
+  position: absolute;
+}
+
+risk-item .issueItemContainer {
+  z-index: 10;
+  padding: 10px;
+  margin-top: 8px; 
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+risk-item .issueItemContainer div {
+  outline: none;
+}
+
+risk-item #issueeArea {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  outline: none;
+}
+risk-item .issueTitleArea:hover {
+  background: rgba(250,250,250,1);
+  cursor: pointer;
+}
+risk-item .issueTitleArea #issueTitle {
+  cursor: inherit;
+}
+
+risk-item #issueInfoArea {
+  padding-top: 5px;
+  padding-bottom: 20px;
+}
+
+risk-item #issueTitleInput {
+  margin: 2px 0 0;
+  height: 40px;
+}
+
+risk-item #issueTitle {
+  margin: 10px 0;
+}
+
+risk-item .issueItemStatus {
+  margin-right: 5px;
+}
+
+risk-item .heightFix {
+  height: initial;
+}
+
+risk-item .fullHeight {
+  height: 100%;
+}
+
+risk-item .issueThumbnail {
+  position: relative;
+  display: inline-block;
+  padding: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  background-position-y: 50%;
+  height: 180px;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+risk-item .issueThumbnailImage {
+  width: 100%;
+  height: 100%;
+}
+
+risk-item .issueThumbnailImage:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+risk-item .issuesLabel {
+  padding-bottom: 10px;
+}
+
+risk-item .issueIssueOwner {
+  margin-top: 0;
+}
+
+risk-item .issueAutoComment,
+risk-item .issueCommentOwner {
+  margin-bottom: 10px;
+}
+
+risk-item .issueIssueOwner label,
+risk-item .issueCommentOwner label {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+risk-item .issueCommentOwner .issueNotification {
+  color: rgb(6, 86, 60);
+}
+
+risk-item .issueOrthogonalView {
+  color: #949494;
+}
+
+
+risk-item .issueOrthogonalViewIssue {
+  color: #949494;
+  font-size: 14px;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+
+risk-item .issueAutoComment label {
+  color: rgba(0, 0, 0, 0.5);
+  /*font-style: italic;*/
+  font-size: 14px;
+}
+
+risk-item .issueComment {
+  margin: 0 0 5px;
+}
+
+risk-item .issueCommentTitle {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+risk-item .issueTextActions {
+  z-index: 2;
+}
+
+risk-item #issueDescription {
+  outline: none;
+  margin-bottom: 10px;
+}
+risk-item #issueDescription label {
+  word-break: break-all;
+}
+
+risk-item .issueComment:hover,
+risk-item #issueDescription:hover {
+  background: rgba(250,250,250,1);
+  cursor: pointer;
+}
+risk-item .issueComment *:hover,
+risk-item #issueDescription *:hover {
+  cursor: pointer;
+}
+
+risk-item #additionalInfoButton {
+  margin: 0 5px 0 -8px;
+}
+
+risk-item #issueAdditional {
+  margin: -10px 0;
+  padding-top: 5px;
+}
+
+risk-item #issueNewComment {
+  padding-top:  0px;
+  padding-bottom: 0px;
+  margin: 0px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+risk-item #issueNewComment textarea {
+  background-color: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgb(230, 230, 230);
+  border-radius: 2px;
+  color: black;
+}
+
+risk-item #issueNewComment md-input-container {
+  margin: 0px;
+}
+
+risk-item #issueAdditional md-input-container {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+risk-item #descriptionAndComments {
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+
+risk-item #issueRoleIndicator {
+  margin-left: 7px;
+  margin-top: 5px;
+  height: 28px;
+}
+
+/** Issue Screen Shot  ************************************************************************************************/
+#issueScreenShotDialog {
+  width:80%;
+  height: calc(80% + 40px); /* 40px is the height of the dialog toolbar */
+  max-height: calc(80% + 40px);
+  overflow: hidden;
+}
+
+#issueScreenShotDialog #issueScreenShotPenIndicator {
+  min-height: 1px !important;
+  min-width: 1px !important;
+  height: initial;
+  width: initial;
+}
+
+issues-screen-shot .sizeContainer {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+issues-screen-shot .sizeContainer .md-errors-spacer {
+  min-height: 0px !important;
+  height: 0px;
+}
+
+issues-screen-shot .size input {
+  text-align: center;
+  color: black;
+}
+
+
+issues-screen-shot .colorContainer {
+  width: 60px;
+  display: inline-block;
+  margin-right: 30px;
+}
+
+
+issues-screen-shot .colorContainer md-select {
+  margin: 0px;
+}
+
+issues-screen-shot .colorContainer .penColor {
+  width: 83px;
+}
+
+issues-screen-shot .colorContainer md-select-value span {
+  min-height: 19px;
+}
+
+issues-screen-shot #issueScreenShotActions {
+  position: absolute;
+  padding-left: 40px;
+  bottom: 50px;
+  display: block;
+  width: 450px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+}
+
+issues-screen-shot #issueScreenShotFAIcon {
+  font-size: 24px;
+}
+
+issues-screen-shot #issueScreenShotContent {
+  overflow: hidden;
+  height: calc(100% - 40px);
+  background: #cecccb;
+}
+
+issues-screen-shot #scribbleCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+issues-screen-shot #screenShotCanvas {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  height: calc(100% - 40px);
+  width: 100%;
+  z-index: -1;
+}
+
+issues-screen-shot #issueScreenShotContainer {
+  max-height: 100%;
+  height: 100%;
+  width: 100%;
+}
+
+issues-screen-shot #issueScreenShotImage {
+  text-align: center;
+  margin: auto;
+  padding: 0px;
+  position: absolute;
+  bottom: 0;
+  top: 0;
+}
+
+issues-screen-shot #issueScreenShotPenIndicator {
+  position: absolute;
+  display: block;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+  pointer-events: none;
+}

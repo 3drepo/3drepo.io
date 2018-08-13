@@ -158,6 +158,39 @@ export class PanelService {
 		});
 
 		this.panelCards.left.push({
+			type: "risks",
+			title: "SafetiBase",
+			showLiteMode: true,
+			show: false,
+			help: "Risk register",
+			icon: "report_problem",
+			minHeight: 260,
+			fixedHeight: false,
+			menu: [
+				{
+					hidden: false,
+					value: "print",
+					label: "Print",
+					selected: false,
+					noToggle: true,
+					icon: "fa-print"
+				},
+				{
+					hidden: false,
+					value: "showPins",
+					label: "Show Pins",
+					selected: false,
+					noToggle: false,
+					keepCheckSpace: true
+				}
+			],
+			options: [
+				{type: "menu", visible: true}
+			],
+			add: true
+		});
+
+		this.panelCards.left.push({
 			type: "groups",
 			title: "Groups",
 			showLiteMode: true,
