@@ -410,7 +410,7 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 	return group.save().then((savedGroup)=>{
 		return savedGroup.updateAttrs(dbCol, data).then(() => {
 			data._id = utils.uuidToString(savedGroup._id);
-			ChatEvent.newGroups(sessionId, dbCol.account , model,  _.omit(data, ["selected", "highlighted"]));
+			ChatEvent.newGroups(sessionId, dbCol.account , model,  _.omit(data, ["focus", "highlighted"]));
 			return data;
 		}
 			,(err) => {

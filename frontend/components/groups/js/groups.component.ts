@@ -461,6 +461,11 @@ class GroupsController implements ng.IController {
 	}
 
 	public groupChangedListener(group, submodel) {
+		const shouldPaintObjects = this.GroupsService.hasColorOverride(group);
+		if (shouldPaintObjects) {
+			this.GroupsService.removeColorOverride(group._id);
+		}
+
 		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
 		this.savedGroupData = Object.assign({}, group);
 		this.GroupsService.replaceStateGroup(group);
@@ -468,6 +473,10 @@ class GroupsController implements ng.IController {
 
 		if (this.justUpdated) {
 			this.GroupsService.selectGroup(group);
+		}
+
+		if (shouldPaintObjects) {
+			this.GroupsService.colorOverride(group);
 		}
 	}
 
