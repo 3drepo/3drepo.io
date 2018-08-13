@@ -450,6 +450,10 @@ class GroupsController implements ng.IController {
 
 	public newGroupListener(group, submodel) {
 		this.GroupsService.state.groups.push(group);
+
+		if (this.GroupsService.state.overrideAll) {
+			this.GroupsService.colorOverride(group);
+		}
 	}
 
 	public groupsDeletedListener(ids, submodel) {

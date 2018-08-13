@@ -399,6 +399,8 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 };
 
 groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
+	data = _.omit(data, ["focus", "highlighted"]);
+
 	const group = this.model("Group").createInstance({
 		account: dbCol.account,
 		model: dbCol.model
@@ -406,11 +408,12 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 
 	const model = dbCol.model;
 
+
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.save().then((savedGroup)=>{
-		return savedGroup.updateAttrs(dbCol, data).then(() => {
+		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
 			data._id = utils.uuidToString(savedGroup._id);
-			ChatEvent.newGroups(sessionId, dbCol.account , model,  _.omit(data, ["focus", "highlighted"]));
+			ChatEvent.newGroups(sessionId, dbCol.account , model,  data);
 			return data;
 		}
 			,(err) => {
