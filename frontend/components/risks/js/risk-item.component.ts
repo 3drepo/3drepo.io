@@ -202,7 +202,6 @@ class RiskItemController implements ng.IController {
 		this.aboutToBeDestroyed = true;
 		if (this.comment) {
 			this.RisksService.updateRisks(this.riskData); // So that risks list is notified
-			this.saveComment();
 		}
 		if (this.editingCommentIndex !== null) {
 			this.riskData.comments[this.editingCommentIndex].editing = false;
@@ -265,7 +264,7 @@ class RiskItemController implements ng.IController {
 
 				this.RisksService.getRisk(this.data.account, this.data.model, this.data._id)
 					.then((fetchedRisk) => {
-						this.setEditRiskData(fetchedRisk;
+						this.setEditRiskData(fetchedRisk);
 						this.startNotification();
 						this.failedToLoad = false;
 						// Update the risk data on risk service so search would work better
@@ -569,11 +568,7 @@ class RiskItemController implements ng.IController {
 
 		this.saving = true;
 
-		if (this.data) {
-			this.saveComment();
-		} else {
-			this.saveRisk();
-		}
+		this.saveRisk();
 
 	}
 
@@ -1087,8 +1082,6 @@ class RiskItemController implements ng.IController {
 					if (comment.action) {
 						this.RisksService.convertActionCommentToText(comment, this.topic_types);
 					}
-
-					this.afterNewComment(comment, true);
 
 					// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
 					this.$scope.$apply();
