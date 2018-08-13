@@ -54,6 +54,7 @@ class GroupsController implements ng.IController {
 	private savedGroupData: any;
 	private customIcons: any;
 	private lastColorOverride: any;
+	private selectedNodes: [any];
 
 	constructor(
 		private $scope: ng.IScope,
@@ -149,7 +150,12 @@ class GroupsController implements ng.IController {
 		this.$scope.$watchCollection(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
-			this.GroupsService.updateSelectedObjectsLen().then(this.updateChangeStatus.bind(this));
+			this.GroupsService.updateSelectedObjectsLen().then( () => {
+				this.GroupsService.getSelectedObjects().then((currentHighlights) => {
+					this.selectedNodes = currentHighlights;
+					this.updateChangeStatus();
+				});
+			});
 		});
 
 		this.$scope.$watch("vm.selectedMenuOption",
@@ -314,7 +320,6 @@ class GroupsController implements ng.IController {
 	}
 
 	public updateGroup() {
-
 		this.GroupsService.updateGroup(
 			this.teamspace,
 			this.model,
@@ -392,16 +397,13 @@ class GroupsController implements ng.IController {
 	}
 
 	public updateChangeStatus(): void {
-		// angular.toJson is being used for a deep object comparison
-		this.GroupsService.getSelectedObjects().then((currentHighlights) => {
-			if (!this.savedGroupData || !this.selectedGroup) {
-				this.changed = false;
-			} else {
-				const differsdObjects = !this.GroupsService.areGroupObjectsEqual(currentHighlights, this.selectedGroup.objects);
-				const differsFromSavedData = !this.GroupsService.areGroupsEqual(this.savedGroupData, this.selectedGroup);
-				this.changed =  (differsFromSavedData || differsdObjects);
-			}
-		});
+		if (!this.savedGroupData || !this.selectedGroup) {
+			this.changed = false;
+		} else {
+			const differsFromSavedData = !this.GroupsService.areGroupsEqual(this.savedGroupData, this.selectedGroup);
+			const differsdObjects = !this.GroupsService.areGroupObjectsEqual(this.selectedNodes, this.selectedGroup.objects);
+			this.changed = (differsFromSavedData || differsdObjects);
+		}
 	}
 
 	public setContentHeight() {
@@ -463,7 +465,10 @@ class GroupsController implements ng.IController {
 		this.savedGroupData = Object.assign({}, group);
 		this.GroupsService.replaceStateGroup(group);
 		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
-		this.reselectGroup();
+
+		if (this.justUpdated) {
+			this.GroupsService.selectGroup(group);
+		}
 	}
 
 	private resetJustUpdated() {

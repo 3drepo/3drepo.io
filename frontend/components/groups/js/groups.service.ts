@@ -52,8 +52,7 @@ export class GroupsService {
 			colorOverride: {},
 			totalSelectedMeshes : 0,
 			multiSelectedGroups: [],
-			overrideAll: false,
-			highlightedNodes: []
+			overrideAll: false
 		};
 	}
 
@@ -477,10 +476,10 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
 		return this.getSelectedObjects().then((currentHighlights) => {
 			group.objects = currentHighlights;
+			group.totalSavedMeshes = this.state.selectedObjectsLen;
 
 			return this.APIService.put(groupUrl, group)
 				.then((response) => {
-					group.totalSavedMeshes = this.state.selectedObjectsLen;
 					this.replaceStateGroup(group);
 					this.selectGroup(group);
 					return group;
