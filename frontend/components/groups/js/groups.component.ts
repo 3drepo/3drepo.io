@@ -397,13 +397,9 @@ class GroupsController implements ng.IController {
 			if (!this.savedGroupData || !this.selectedGroup) {
 				this.changed = false;
 			} else {
-				const highlightedIds =  this.getFullIdsFromNodes(currentHighlights);
-				const groupObjectsIds = this.getFullIdsFromNodes(this.selectedGroup.objects);
-				let differsSelectedObjects = highlightedIds.length !== groupObjectsIds.length;
-				differsSelectedObjects =  differsSelectedObjects || highlightedIds.some((i) => groupObjectsIds.indexOf(i) === -1);
-
-				const differsFromSavedData = angular.toJson(this.savedGroupData) !== angular.toJson(this.selectedGroup);
-				this.changed =  (differsFromSavedData || differsSelectedObjects);
+				const differsdObjects = !this.GroupsService.areGroupObjectsEqual(currentHighlights, this.selectedGroup.objects);
+				const differsFromSavedData = !this.GroupsService.areGroupsEqual(this.savedGroupData, this.selectedGroup);
+				this.changed =  (differsFromSavedData || differsdObjects);
 			}
 		});
 	}
@@ -472,18 +468,6 @@ class GroupsController implements ng.IController {
 
 	private resetJustUpdated() {
 		this.justUpdated = false;
-	}
-
-	private getFullIdsFromNodes(nodes: [any]) {
-		return nodes.reduce((obj, currentVal) => {
-			const nsp = currentVal.account + "." + currentVal.model ;
-			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));
-			if (Array.isArray(currentVal.ifc_guids)) {
-				ids = ids.concat(currentVal.ifc_guids.map( (id) => nsp + "." + id ));
-			}
-
-			return ids;
-		} , []);
 	}
 
 	/***/

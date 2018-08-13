@@ -578,6 +578,44 @@ export class GroupsService {
 	}
 
 	/**
+	 * Compares groups without taking in consideration focus/selection or objects contained in the group
+	 * @param groupA a group to be compared
+	 * @param groupB the other group to be compared
+	 */
+	public areGroupsEqual(groupA: any, groupB: any): boolean {
+		const fields = ["_id", "__v", "name", "author", "createdAt", "updatedBy", "updatedAt", "color"];
+		const areEqual = fields.every( (f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]) );
+
+		return areEqual;
+	}
+
+
+	/**
+	 * Compare groups objects
+	 * @param objectsA a group objects to be compared
+	 * @param objectsB the other groups objects to be compared
+	 */
+	public areGroupObjectsEqual(objectsA: [any], objectsB: [any]): boolean {
+		const objAIds = this.getFullIdsForNodes(objectsA);
+		const objBIds = this.getFullIdsForNodes(objectsB);
+		let areEqual = objAIds.length === objBIds.length;
+		areEqual =  areEqual && objAIds.every((i) => objBIds.indexOf(i) >=  0);
+		return areEqual;
+	}
+
+	private getFullIdsForNodes(nodes: [any]) {
+		return nodes.reduce((obj, currentVal) => {
+			const nsp = currentVal.account + "." + currentVal.model ;
+			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));
+			if (Array.isArray(currentVal.ifc_guids)) {
+				ids = ids.concat(currentVal.ifc_guids.map( (id) => nsp + "." + id ));
+			}
+
+			return ids;
+		} , []);
+	}
+
+	/**
 	 * Focus on the group given
 	 * @param group the group
 	 */
