@@ -52,12 +52,15 @@ class SignupController implements ng.IController {
 	private countries;
 	private legalText;
 	private legalTitle;
-	private registerErrorMessage;
-	private registerPasswordMessage;
-	private registerMaxCharMessageUser;
-	private registerMaxCharMessage;
-	private registerConfirmEmailMessage;
 	private allowedPhone;
+	private registerErrorMessage: string;
+	private registerPasswordMessage: string;
+	private registerMaxCharMessageUser: string;
+	private registerMaxCharMessage: string;
+	private registerConfirmEmailMessage: string;
+	private maxLength: number;
+	private isUsed: boolean;
+	private isMax: boolean;
 
 	constructor(
 		private $scope,
@@ -87,12 +90,19 @@ class SignupController implements ng.IController {
 			console.debug("User is not logged in");
 		});
 
+		this.isUsed = false;
+		this.isUsed = false;
+
+		this.maxLength = 10;
 		this.enterKey = 13,
-		this.agreeToText = "",
-		this.haveReadText = "";
+			this.agreeToText = "",
+			this.haveReadText = "";
 
 		this.buttonLabel = "Sign Up!";
-		this.newUser = { username: "", email: "", confirmEmail: "", company: "", confirmPassword: "", password: "", mailListAgreed: true, tcAgreed: false };
+		this.newUser = {
+			username: "", email: "", confirmEmail: "",
+			company: "", confirmPassword: "", password: "", mailListAgreed: true, tcAgreed: false
+		};
 		this.version = this.ClientConfigService.VERSION;
 		this.logo = "/images/3drepo-logo-white.png";
 		this.captchaKey = this.ClientConfigService.captcha_client_key;
@@ -159,11 +169,11 @@ class SignupController implements ng.IController {
 		return variable !== undefined && variable !== null;
 	}
 
-
 	public watchers() {
-		/** 
+		/**
 		* Watch changes to register fields to clear warning message
 		*/
+
 		this.$scope.$watch("vm.newUser", (newValue) => {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
@@ -183,25 +193,58 @@ class SignupController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.newUser.username", (newValue) => {	
-			if (this.isDefined(newValue)) {
-				if(newValue.length > 9){
-					this.$scope.signup.username.invalid = true;
-					this.registerMaxCharMessageUser = "(Maxium Characters Exceeded)";
-				} else {
-					this.registerMaxCharMessageUser = "";
-				}
-			}
-		}, true);
+		this.$scope.$watch("vm.newUser.username", (newValue) => {
+			this.checkMaxLength(10, newValue);
+		});
 
-		this.$scope.$watch("vm.newUser.company", (newValue) => {	
-			if (this.isDefined(newValue)) {
-				if(newValue.length > 20){
-					this.$scope.signup.company.invalid = true;
-					this.registerMaxCharMessage = "(Maxium Characters Exceeded)";
-				}
+		this.$scope.$watch("vm.newUser.company", (newValue) => {
+			this.checkMaxLength(25, newValue);
+		});
+	}
+
+	public checkMaxLength(maxlength: number, value: string) {
+
+		this.maxLength = maxlength;
+
+		if (this.isDefined(value)) {
+			if (value.length > 9) {
+				this.$scope.signup.username.invalid = true;
+				this.registerMaxCharMessageUser = "(Maxium Characters Exceeded)";
+			} else {
+				this.registerMaxCharMessageUser = "";
 			}
-		}, true);
+		}
+
+		if (this.isDefined(value)) {
+			if (value.length > 20) {
+				this.$scope.signup.username.invalid = true;
+				this.registerMaxCharMessage = "(Maxium Characters Exceeded)";
+			} else {
+				this.registerMaxCharMessage = "";
+			}
+		}
+	}
+
+	/**
+	 * @param firstValue : first user input value
+	 * @param secondValue: confirmation value
+	 * Take two user input values and check for duplicate values
+	 */
+
+	public checkDuplicateValues(first, secondary) {
+		if (this.isUsed) {
+			this.$scope.signup.confirmPassword.$setValidity("invalid", first === secondary);
+			const passwordInvalid = this.$scope.signup.confirmPassword.$invalid;
+			(passwordInvalid ? this.registerPasswordMessage
+				= "(Password does not match)" : this.registerPasswordMessage = "");
+		}
+
+		if (!this.isUsed) {
+			this.$scope.signup.confirmEmail.$setValidity("invalid", first === secondary);
+			const confirmEmailInvalid = this.$scope.signup.confirmEmail.$invalid;
+			(confirmEmailInvalid ? this.registerConfirmEmailMessage =
+				"(Email does not match)" : this.registerConfirmEmailMessage = "");
+		}
 	}
 
 	public checkInvalidPassword(score) {
@@ -219,7 +262,7 @@ class SignupController implements ng.IController {
 				this.validatePassword();
 				break;
 			case 4:
-				this.validatePassword();	
+				this.validatePassword();
 				break;
 		}
 	}
@@ -230,17 +273,6 @@ class SignupController implements ng.IController {
 
 	public validatePassword() {
 		this.$scope.signup.password.$setValidity("required", true);
-	}
-
-	public checkForDuplicatePassword(first, secondary) {
-		this.$scope.signup.confirmPassword.$setValidity("invalid", first === secondary);
-		const passwordInvalid = this.$scope.signup.confirmPassword.$invalid;
-
-		if (passwordInvalid) {
-			this.registerPasswordMessage = "(Password does not match)";
-		} else {
-			this.registerPasswordMessage = "";
-		}
 	}
 
 	public handleLegalItem(legalItem) {
@@ -304,21 +336,6 @@ class SignupController implements ng.IController {
 			return "(" + this.passwordStrength + ")";
 		}
 		return "";
-	}
-
-	public checkForDuplicateEmail(first, secondary) {
-		this.$scope.signup.confirmEmail.$setValidity("invalid", first === secondary);
-		const confirmEmailInvalid = this.$scope.signup.confirmEmail.$invalid;
-
-		if (confirmEmailInvalid) {
-			this.registerConfirmEmailMessage = "(Email does not match)";
-		} else {
-			this.registerConfirmEmailMessage = "";
-		}
-	}
-
-	public checkMaxLength() {
-		console.log(this.$scope.signup.username.$invalid)
 	}
 
 	/**

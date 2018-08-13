@@ -23,7 +23,7 @@
 						md-input-container(flex)
 							label Username {{ vm.registerMaxCharMessageUser }}
 							input(name="username", type='text', ng-model='vm.newUser.username', required, ng-keypress="vm.register($event)", tdr-focus="true", 
-							ng-maxlength="10")
+							ng-maxlength="{{ vm.maxLength }}")
 
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
@@ -32,7 +32,7 @@
 						md-input-container(flex)
 							label Confirm Password {{vm.registerPasswordMessage}}
 							input(name="confirmPassword" type='password', ng-model='vm.newUser.confirmPassword', required, 
-							 ng-blur="vm.checkForDuplicatePassword(vm.newUser.password, vm.newUser.confirmPassword)" ng-keypress="vm.register($event)")
+							 ng-blur="vm.checkDuplicateValues(vm.newUser.password, vm.newUser.confirmPassword)", ng-focus="vm.isUsed=true;",ng-keypress="vm.register($event)")
 
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
@@ -49,26 +49,16 @@
 						md-input-container(flex)
 							label Confirm Email {{vm.registerConfirmEmailMessage}}
 							input(name="confirmEmail" type='email', ng-model='vm.newUser.confirmEmail', required, 
-							ng-blur="vm.checkForDuplicateEmail(vm.newUser.email, vm.newUser.confirmEmail)" ng-keypress="vm.register($event)")
+							ng-blur="vm.checkDuplicateValues(vm.newUser.email, vm.newUser.confirmEmail)", ng-focus="vm.isUsed = false" ng-keypress="vm.register($event)")
 
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
 							label Company {{vm.registerMaxCharMessage}}
-							input(type="text", name="company",ng-model="vm.newUser.company", ng-maxlength="25")
+							input(type="text", name="company",ng-model="vm.newUser.company", ng-maxlength="{{ vm.maxLength }}")
 						md-input-container(flex)
 							label Country
 							md-select#country-select(ng-model="vm.newUser.country", required)
 								md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
-						//- //md-input-container(flex)
-						//- 	label Job title
-						//- 	md-select(ng-model="vm.newUser.jobTitle", required)
-						//- 		md-option(ng-repeat="jobTitle in vm.jobTitles", value="{{jobTitle}}") {{jobTitle}}
-						//- //md-input-container(flex ng-if="vm.newUser.jobTitle=='Other'")
-						//- 	input(type='text', ng-model='vm.newUser.otherJobTitle', placeholder='Please specify' ng-required="vm.newUser.jobTitle=='Other'")
-
-							//- md-input-container(flex)
-							//- 	label Phone number
-							//- 		input(name="phoneNo" type="text", ng-model="vm.newUser.phoneNo")
 
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
