@@ -158,9 +158,9 @@ class BottomButtonsController implements ng.IController {
 				const slower = diff > 0;
 				for (let i = 0; i < Math.abs(diff); ++i) {
 					if (slower) {
-						this.ViewerService.helicopterSpeedUp();
+						this.ViewerService.helicopterSpeedUp(undefined);
 					} else {
-						this.ViewerService.helicopterSpeedDown();
+						this.ViewerService.helicopterSpeedDown(undefined);
 					}
 				}
 			}

@@ -624,8 +624,8 @@ export class ViewerService {
 	}
 
 	private helicopterSpeedUpdate(value: number) {
-		this.heliSpeed = value;
-		if (this.account && this.model && value) {
+		if (this.account && this.model && Number.isInteger(value)) {
+			this.heliSpeed = value;
 			this.APIService.put(this.account + "/" + this.model + "/settings/heliSpeed", {heliSpeed: value})
 				.catch((err) => {
 				console.error("Failed to update helicopter speed", err);
