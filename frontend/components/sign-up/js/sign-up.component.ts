@@ -55,18 +55,13 @@ class SignupController implements ng.IController {
 	private allowedPhone;
 	private registerErrorMessage: string;
 	private registerPasswordMessage: string;
-	private registerMaxCharMessageUser: string;
-	private registerMaxCharMessage: string;
 	private registerConfirmEmailMessage: string;
-	private maxLength: number;
-	private isUsed: boolean;
-	private isMax: boolean;
 
 	constructor(
 		private $scope,
 		private $mdDialog,
 		private $location,
-		private $window,
+		private ewindow,
 
 		private ClientConfigService,
 		private APIService,
@@ -90,13 +85,9 @@ class SignupController implements ng.IController {
 			console.debug("User is not logged in");
 		});
 
-		this.isUsed = false;
-		this.isUsed = false;
-
-		this.maxLength = 10;
-		this.enterKey = 13,
-			this.agreeToText = "",
-			this.haveReadText = "";
+		this.enterKey = 13;
+		this.agreeToText = "",
+		this.haveReadText = "";
 
 		this.buttonLabel = "Sign Up!";
 		this.newUser = {
@@ -182,6 +173,7 @@ class SignupController implements ng.IController {
 				const result = this.PasswordService.evaluatePassword(this.newUser.password);
 				this.passwordResult = result;
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newUser.password, result.score);
+				console.log(result.score);
 				this.checkInvalidPassword(result.score);
 			}
 		}, true);
@@ -192,49 +184,22 @@ class SignupController implements ng.IController {
 				this.goToLoginPage();
 			}
 		});
-
-		this.$scope.$watch("vm.newUser.username", (newValue) => {
-			if (this.isDefined(newValue)) {
-				if (newValue.length > 9) {
-					this.$scope.signup.username.invalid = true;
-					this.registerMaxCharMessageUser = "(Maxium Characters Exceeded)";
-				} else {
-					this.registerMaxCharMessageUser = "";
-				}
-			}
-		});
-
-		this.$scope.$watch("vm.newUser.company", (newValue) => {
-			if (this.isDefined(newValue)) {
-				if (newValue.length > 20) {
-					this.$scope.signup.company.invalid = true;
-					this.registerMaxCharMessage = "(Maxium Characters Exceeded)";
-				} else {
-					this.registerMaxCharMessage = "";
-				}
-			}
-		});
 	}
 
 	/**
-	 * @param firstValue : first user input value
-	 * @param secondValue: confirmed value
 	 * Take two user input values and check for duplicate values
 	 */
 
-	public checkDuplicateValues(first, secondary) {
-		if (this.isUsed) {
-			this.$scope.signup.confirmPassword.$setValidity("invalid", first === secondary);
-			const passwordInvalid = this.$scope.signup.confirmPassword.$invalid;
-			(passwordInvalid ? this.registerPasswordMessage
-				= "(Password does not match)" : this.registerPasswordMessage = "");
-		}
-
-		if (!this.isUsed) {
-			this.$scope.signup.confirmEmail.$setValidity("invalid", first === secondary);
-			const confirmEmailInvalid = this.$scope.signup.confirmEmail.$invalid;
-			(confirmEmailInvalid ? this.registerConfirmEmailMessage =
-				"(Email does not match)" : this.registerConfirmEmailMessage = "");
+	public checkDuplicateValues(isPasswordField) {
+		if (isPasswordField) {
+			const passwordValid = this.newUser.password === this.newUser.confirmPassword;
+			this.$scope.signup.confirmPassword.$setValidity("invalid", passwordValid);
+			this.registerPasswordMessage = passwordValid ? "" : "(Password mismatched)";
+		} else {
+			// The only other thing to check is email
+			const emailValid = this.newUser.email === this.newUser.confirmEmail;
+			this.$scope.signup.confirmEmail.$setValidity("invalid", emailValid);
+			this.registerConfirmEmailMessage = emailValid ? "" : "(Email mismatched)";
 		}
 	}
 
@@ -342,6 +307,7 @@ class SignupController implements ng.IController {
 			(!this.isDefined(this.newUser.email)) ||
 			(!this.isDefined(this.newUser.confirmEmail)) ||
 			(!this.isDefined(this.newUser.password)) ||
+			(!this.isDefined(this.newUser.confirmPassword)) ||
 			(!this.isDefined(this.newUser.firstName)) ||
 			(!this.isDefined(this.newUser.lastName)) ||
 			(!this.isDefined(this.newUser.country))
