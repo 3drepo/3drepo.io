@@ -22,15 +22,15 @@ const allFonts = [
   './node_modules/font-awesome/fonts/*.{eot,svg,ttf,woff,woff2}'
 ]
 
-const allCss = [ 
+const allCss = [
     './css/ui.css',
-    './node_modules/angular-material/angular-material.css', 
+    './node_modules/angular-material/angular-material.css',
     './node_modules/font-awesome/css/font-awesome.css',
     './components/**/**.css'
 ]
 
 const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
-const icons = './icons/*.svg';
+const icons = './icons/*';
 
 function exitOnError(error) {
   gutil.log(gutil.colors.red('[Error]'), error.toString());
@@ -64,7 +64,7 @@ gulp.task('pug', function(done){
         .pipe(gulp.dest("./../public/templates/"))
         .pipe(livereload())
         .on("end", done);
-  
+
 });
 
 gulp.task('css', function(done) {
@@ -81,7 +81,7 @@ gulp.task('css', function(done) {
 });
 
 gulp.task('icons', function (done) {
-  return gulp.src('./icons/*.svg')
+  return gulp.src('./icons/*')
     .on('error', swallowError)
     //.pipe(print())
     .pipe(gulp.dest('./../public/icons/'))
@@ -107,14 +107,31 @@ gulp.task('fonts', function(done) {
 
 gulp.task('unity', function(done) {
   return gulp.src("./unity/**")
-        .on('error', swallowError)  
+        .on('error', swallowError)
         .pipe(gulp.dest('./../public/unity/'))
         .on("end", done);
 });
 
+gulp.task("zxcvbn", function(done) {
+   const sourcemaps = require('gulp-sourcemaps');
+   const webpack = require('webpack-stream');
+   const localWebpack = require('webpack');
+   return gulp.src(['./zxcvbn-entry.js'])
+    .pipe(sourcemaps.init())
+    .pipe(webpack({
+      output: {
+        filename: 'zxcvbn.js',
+        libraryTarget: 'umd',
+        // library: 'strength'
+      },
+    }, localWebpack))
+    .pipe(gulp.dest("./../public/dist/"))
+
+ });
+
 gulp.task('custom', function(done) {
   return gulp.src("./custom/**")
-        .on('error', swallowError)  
+        .on('error', swallowError)
         .pipe(gulp.dest('./../public/custom/'))
         .on("end", done);
 });
@@ -174,7 +191,7 @@ gulp.task("typedoc", function() {
     ;
 });
 
-gulp.task("reload", function() { 
+gulp.task("reload", function() {
   return gulp
     .src(["./../public/dist/three_d_repo.min.js"])
     .pipe(livereload())
@@ -201,7 +218,7 @@ gulp.task('webpack-watch', function (cb) {
 gulp.task('gulp-watch', function() {
   isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
-  
+
   // WATCHERS
   gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
   gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
@@ -218,17 +235,18 @@ gulp.task("watch", gulp.parallel(["gulp-watch", "webpack-watch"]));
 
 gulp.task('build', gulp.series(
   gulp.parallel(
-    'index', 
+    'index',
     'pug',
-    'css', 
-    'icons', 
-    'fonts', 
-    'images', 
-    'unity', 
+    'css',
+    'icons',
+    'fonts',
+    'images',
+    'unity',
     'custom',
-    'manifest-icons', 
+    'manifest-icons',
     'manifest-file',
-    'webpack-build'
+    'webpack-build',
+	 "zxcvbn"
   ),
   'service-workers'
   )

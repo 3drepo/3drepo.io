@@ -588,7 +588,6 @@ export class GroupsService {
 		return areEqual;
 	}
 
-
 	/**
 	 * Compare groups objects
 	 * @param objectsA a group objects to be compared

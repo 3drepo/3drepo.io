@@ -148,7 +148,7 @@ groups .group {
 groups .groupsList {
     display: block;
     position: relative;
-	cursor: pointer;
+    cursor: pointer;
     height: calc(100% - 52px);
     overflow-y: scroll;
 }

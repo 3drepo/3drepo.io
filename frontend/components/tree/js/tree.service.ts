@@ -722,7 +722,6 @@ export class TreeService {
 		}
 	}
 
-
 	/**
 	 * Hide all tree nodes.
 	 */
