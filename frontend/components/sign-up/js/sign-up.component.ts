@@ -173,8 +173,7 @@ class SignupController implements ng.IController {
 				const result = this.PasswordService.evaluatePassword(this.newUser.password);
 				this.passwordResult = result;
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newUser.password, result.score);
-				console.log(result.score);
-				this.checkInvalidPassword(result.score);
+				this.$scope.signup.password.$setValidity("required", result.score > 2);
 			}
 		}, true);
 
@@ -201,34 +200,6 @@ class SignupController implements ng.IController {
 			this.$scope.signup.confirmEmail.$setValidity("invalid", emailValid);
 			this.registerConfirmEmailMessage = emailValid ? "" : "(Email mismatched)";
 		}
-	}
-
-	public checkInvalidPassword(score) {
-		switch (score) {
-			case 0:
-				this.invalidatePassword();
-				break;
-			case 1:
-				this.invalidatePassword();
-				break;
-			case 2:
-				this.validatePassword();
-				break;
-			case 3:
-				this.validatePassword();
-				break;
-			case 4:
-				this.validatePassword();
-				break;
-		}
-	}
-
-	public invalidatePassword() {
-		this.$scope.signup.password.$setValidity("required", false);
-	}
-
-	public validatePassword() {
-		this.$scope.signup.password.$setValidity("required", true);
 	}
 
 	public handleLegalItem(legalItem) {
