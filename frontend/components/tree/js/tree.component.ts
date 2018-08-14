@@ -33,8 +33,6 @@ class TreeController implements ng.IController {
 	private revision;
 	private promise;
 	private highlightSelectedViewerObject: boolean;
-	private clickedHidden;
-	private clickedShown;
 	private nodes; // in pug
 	private allNodes;
 	private nodesToShow; // in pug
@@ -54,7 +52,6 @@ class TreeController implements ng.IController {
 	private latestSearch: string;
 	private showFilter: boolean;
 	private nodeHeight = 45;
-	private lastSelection: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -83,8 +80,6 @@ class TreeController implements ng.IController {
 		this.showProgress = true;
 		this.progressInfo = "Loading full tree structure";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
-		this.TreeService.resetClickedHidden(); // Nodes that have actually been clicked to hide
-		this.TreeService.resetClickedShown(); // Nodes that have actually been clicked to show
 		this.hideIfc = true;
 		this.allNodes = [];
 		this.initTreeOnReady();
@@ -101,33 +96,11 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-
-				if ((event.value.source !== "tree") && this.TreeService.highlightSelectedViewerObject) {
-					const objectID = event.value.id;
-
-					if (objectID && this.TreeService.getCachedIdToPath()) {
-
-						const path = this.TreeService.getPath(objectID);
-						if (!path) {
-							console.error("Couldn't find the object path");
-						} else if (this.showTree) {
-
-							this.TreeService.expandToSelection(path, 0, undefined, this.MultiSelectService.isMultiMode())
-								.then((selectedIndex) => {
-									this.updateTopIndex(selectedIndex);
-								});
-							this.TreeService.updateModelVisibility(this.allNodes[0]);
-
-						} else {
-							const nodes = [this.TreeService.getNodeById(objectID)];
-							this.TreeService.selectNodes(nodes, this.MultiSelectService.isMultiMode(), undefined, true);
-						}
-
-					}
-				}
+				const nodes = [this.TreeService.getNodeById(event.value.id)];
+				this.TreeService.nodesClicked(nodes);
 
 			} else if (event.type === this.EventService.EVENT.VIEWER.MULTI_OBJECTS_SELECTED) {
-				this.TreeService.selectNodesBySharedIds(event.value.selectedNodes, this.MultiSelectService.isMultiMode());
+				this.TreeService.nodesClickedBySharedIds(event.value.selectedNodes);
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				this.TreeService.clearCurrentlySelected();
 				this.GroupsService.clearSelectionHighlights();
@@ -208,7 +181,6 @@ class TreeController implements ng.IController {
 			this.showProgress = false;
 			this.initNodesToShow();
 			this.setupInfiniteItemsFilter();
-			this.TreeService.expandFirstNode();
 			this.setContentHeight(this.fetchNodesToShow());
 			this.$timeout(); // Force digest
 		});
@@ -283,13 +255,9 @@ class TreeController implements ng.IController {
 	}
 
 	public selectAndCentreNode(node: any) {
-
-		const notInvisible = node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible;
-		if (notInvisible && this.lastSelection) {
+		if (node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible) {
 			this.$timeout(() => {
-				this.lastSelection.then(() => {
-					this.ViewerService.zoomToHighlightedMeshes();
-				});
+				this.ViewerService.zoomToHighlightedMeshes();
 			});
 		}
 
@@ -358,14 +326,7 @@ class TreeController implements ng.IController {
 		if (this.ignoreSelection($event, node)) {
 			return;
 		}
-		this.lastSelection = this.TreeService.selectNodes(
-			[node],
-			this.MultiSelectService.isMultiMode(),
-			undefined,
-			false
-		);
-
-		return this.lastSelection;
+		return this.TreeService.nodesClicked([node], true);
 	}
 
 	public updateTopIndex(selectedIndex) {
@@ -398,22 +359,23 @@ class TreeController implements ng.IController {
 			return;
 		}
 
-		const multi = this.MultiSelectService.isMultiMode();
+		const addGroup = this.MultiSelectService.isAccumMode();
+		const removeGroup = this.MultiSelectService.isDecumMode();
+		const multi = addGroup || removeGroup;
+
+		const selectedComponentNode = this.TreeService.getNodeById(this.nodes[node.index]._id);
 
 		if (!multi) {
 			this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
-			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
-		} else {
-			this.nodes[node.index].selected = (this.nodes[node.index].selected !== this.TreeService.SELECTION_STATES.selected) ?
-												this.TreeService.SELECTION_STATES.selected :
-												this.TreeService.SELECTION_STATES.unselected;
+			this.TreeService.clearCurrentlySelected();
 		}
 
-		const selectedComponentNode = this.nodes[node.index];
-
-		if (selectedComponentNode) {
-			const serviceNode = this.TreeService.getNodeById(selectedComponentNode._id);
-			this.TreeService.selectNodes([serviceNode], multi, undefined, false);
+		if (removeGroup) {
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.unselected;
+			this.TreeService.deselectNodes([selectedComponentNode]);
+		} else {
+			this.nodes[node.index].selected = this.TreeService.SELECTION_STATES.selected;
+			this.TreeService.selectNodes([selectedComponentNode], true);
 		}
 
 	}

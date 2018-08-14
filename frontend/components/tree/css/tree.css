@@ -34,6 +34,7 @@ tree .treeNodes p {
 }
 
 tree .treeNode {
+  cursor: pointer;
   outline: none;
   height: 45px;
   max-height: 45px;
@@ -42,7 +43,6 @@ tree .treeNode {
 }
 
 tree .treeNode:hover {
-  cursor: pointer;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }
