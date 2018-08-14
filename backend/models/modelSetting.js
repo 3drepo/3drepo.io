@@ -60,7 +60,8 @@ const schema = mongoose.Schema({
 		_id: false,
 		database: String,
 		model: String
-	}]
+	}],
+	heliSpeed: Number
 });
 
 schema.statics.defaultTopicTypes = [
@@ -139,6 +140,7 @@ schema.methods.updateProperties = function(updateObj) {
 			this[key] = updateObj[key];
 		}
 	});
+	return this.save();
 };
 
 schema.methods.changePermissions = function(permissions) {
