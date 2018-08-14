@@ -283,7 +283,7 @@ function createAndAssignRole(modelName, account, username, data, toyFed) {
 		return ModelSetting.findById({account, model}, model);
 
 	}).then(setting => {
-
+		// FIXME: this should be inside modelSettings.js
 		setting = setting || ModelSetting.createInstance({
 			account: account,
 			model: model
