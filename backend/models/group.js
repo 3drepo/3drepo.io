@@ -408,7 +408,6 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 
 	const model = dbCol.model;
 
-
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.save().then((savedGroup)=>{
 		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
