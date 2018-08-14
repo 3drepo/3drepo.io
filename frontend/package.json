@@ -58,6 +58,7 @@
     "gulp-pug": "4.0.1",
     "gulp-concat": "2.6.1",
     "gulp-rename": "1.2.2",
+	"gulp-sourcemaps": "2.6.2",
     "gulp-typedoc": "2.2.0",
     "gulp-util": "3.0.8",
     "gulp-watch": "5.0.0",
@@ -68,6 +69,7 @@
     "typedoc": "0.11.1",
     "typescript": "2.8.3",
     "webpack": "4.8.1",
+	"webpack-stream": "4.0.0",
     "webpack-cli": "2.1.3"
   }
 }
