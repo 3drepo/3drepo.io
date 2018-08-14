@@ -23,7 +23,7 @@
 						md-input-container(flex)
 							label Username {{ vm.registerMaxCharMessageUser }}
 							input(name="username", type='text', ng-model='vm.newUser.username', required, ng-keypress="vm.register($event)", tdr-focus="true", 
-							ng-maxlength="{{ vm.maxLength }}")
+							ng-maxlength="10")
 
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
@@ -54,7 +54,7 @@
 					div(layout="row", layout-xs="column")
 						md-input-container(flex)
 							label Company {{vm.registerMaxCharMessage}}
-							input(type="text", name="company",ng-model="vm.newUser.company", ng-maxlength="{{ vm.maxLength }}")
+							input(type="text", name="company",ng-model="vm.newUser.company", ng-maxlength="25")
 						md-input-container(flex)
 							label Country
 							md-select#country-select(ng-model="vm.newUser.country", required)

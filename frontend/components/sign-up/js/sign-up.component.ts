@@ -194,40 +194,31 @@ class SignupController implements ng.IController {
 		});
 
 		this.$scope.$watch("vm.newUser.username", (newValue) => {
-			this.checkMaxLength(10, newValue);
+			if (this.isDefined(newValue)) {
+				if (newValue.length > 9) {
+					this.$scope.signup.username.invalid = true;
+					this.registerMaxCharMessageUser = "(Maxium Characters Exceeded)";
+				} else {
+					this.registerMaxCharMessageUser = "";
+				}
+			}
 		});
 
 		this.$scope.$watch("vm.newUser.company", (newValue) => {
-			this.checkMaxLength(25, newValue);
+			if (this.isDefined(newValue)) {
+				if (newValue.length > 20) {
+					this.$scope.signup.company.invalid = true;
+					this.registerMaxCharMessage = "(Maxium Characters Exceeded)";
+				} else {
+					this.registerMaxCharMessage = "";
+				}
+			}
 		});
-	}
-
-	public checkMaxLength(maxlength: number, value: string) {
-
-		this.maxLength = maxlength;
-
-		if (this.isDefined(value)) {
-			if (value.length > 9) {
-				this.$scope.signup.username.invalid = true;
-				this.registerMaxCharMessageUser = "(Maxium Characters Exceeded)";
-			} else {
-				this.registerMaxCharMessageUser = "";
-			}
-		}
-
-		if (this.isDefined(value)) {
-			if (value.length > 20) {
-				this.$scope.signup.username.invalid = true;
-				this.registerMaxCharMessage = "(Maxium Characters Exceeded)";
-			} else {
-				this.registerMaxCharMessage = "";
-			}
-		}
 	}
 
 	/**
 	 * @param firstValue : first user input value
-	 * @param secondValue: confirmation value
+	 * @param secondValue: confirmed value
 	 * Take two user input values and check for duplicate values
 	 */
 
