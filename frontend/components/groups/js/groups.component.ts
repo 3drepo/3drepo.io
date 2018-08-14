@@ -169,11 +169,11 @@ class GroupsController implements ng.IController {
 	}
 
 	public resetToSavedGroup() {
-		if (this.selectedGroup && this.savedGroupData) {
+		if (this.selectedGroup && !this.selectedGroup.new && this.savedGroupData) {
 			this.selectedGroup.name = this.savedGroupData.name;
 			this.selectedGroup.description = this.savedGroupData.description;
 			this.selectedGroup.color = this.savedGroupData.color;
-			this.GroupsService.updateSelectedGroupColor();
+			this.GroupsService.selectGroup(this.selectedGroup);
 		}
 	}
 
@@ -214,13 +214,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public deleteGroup(group: any) {
-		const deletePromises = this.GroupsService.deleteGroups(this.teamspace, this.model);
-
-		deletePromises.then((deleteResponse) => {
-			if (deleteResponse) {
-				this.GroupsService.selectNextGroup();
-			}
-		})
+		this.GroupsService.deleteGroups(this.teamspace, this.model)
 		.catch((error) => {
 			this.errorDialog(error);
 		});
@@ -244,8 +238,7 @@ class GroupsController implements ng.IController {
 
 	public addGroup() {
 
-		this.GroupsService.generateNewGroup().then((newGroup) => {
-			this.GroupsService.selectGroup(newGroup);
+		this.GroupsService.generateNewGroup().then(() => {
 			this.showGroupPane();
 		});
 
