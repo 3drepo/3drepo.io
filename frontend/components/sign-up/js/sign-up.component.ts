@@ -61,7 +61,7 @@ class SignupController implements ng.IController {
 		private $scope,
 		private $mdDialog,
 		private $location,
-		private ewindow,
+		private $window,
 
 		private ClientConfigService,
 		private APIService,
