@@ -303,7 +303,7 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(associatedActivity);
+						.send(associatedActivity)
 						.expect(200, done);
 				},
 				function(done) {
@@ -334,44 +334,13 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(description);
+						.send(description)
 						.expect(200, done);
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
 							expect(res.body.desc = description.desc);
-							done(err);
-						});
-				}
-			], done);
-		});
-
-		it("change owner should succeed", function(done) {
-
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
-			let riskId;
-
-			const owner = { owner: "cleaning and maintenance" };
-
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
-						.send(risk)
-						.expect(200, function(err, res) {
-							riskId = res.body._id;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(associatedActivity);
-						.expect(200, done);
-				},
-				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
-						.expect(200, function(err, res) {
-							expect(res.body.associated_activity = associatedActivity.associated_activity);
 							done(err);
 						});
 				}
@@ -396,13 +365,44 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(assignedRoles);
+						.send(assignedRoles)
 						.expect(200, done);
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
 							expect(res.body.assigned_roles).to.deep.equal(assignedRoles.assigned_roles);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("change category should succeed", function(done) {
+
+			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			let riskId;
+
+			const category = { category: "environmental issue" };
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks.json`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+						.send(category)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+						.expect(200, function(err, res) {
+							expect(res.body.associated_activity = associatedActivity.associated_activity);
 							done(err);
 						});
 				}
@@ -427,7 +427,7 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(likelihood);
+						.send(likelihood)
 						.expect(200, done);
 				},
 				function(done) {
@@ -458,7 +458,7 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(consequence);
+						.send(consequence)
 						.expect(200, done);
 				},
 				function(done) {
@@ -489,7 +489,7 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(mitigationStatus);
+						.send(mitigationStatus)
 						.expect(200, done);
 				},
 				function(done) {
@@ -520,7 +520,7 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(mitigation);
+						.send(mitigation)
 						.expect(200, done);
 				},
 				function(done) {
@@ -551,7 +551,7 @@ describe("Risks", function () {
 				},
 				function(done) {
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(levelOfRisk);
+						.send(levelOfRisk)
 						.expect(400, function(err, res) {
 							expect(res.body.value).to.equal(responseCodes.RISK_LEVEL_READONLY.value);
 							done(err);
