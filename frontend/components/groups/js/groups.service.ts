@@ -19,6 +19,8 @@ export class GroupsService {
 
 	public static $inject: string[] = [
 		"$q",
+		"$timeout",
+
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
@@ -26,10 +28,11 @@ export class GroupsService {
 		"ViewerService"
 	];
 
-	private state;
+	public state;
 
 	constructor(
 		private $q: ng.IQService,
+		private $timeout: any,
 		private APIService: any,
 		private TreeService: any,
 		private MultiSelectService: any,
@@ -255,7 +258,7 @@ export class GroupsService {
 	/**
 	 * Convert a colour from hex to an RGBA value
 	 */
-	public hexToRGBA(hex: string, alpha: number) {
+	public hexToRGBA(hex: string, alpha?: number) {
 
 		alpha = (alpha !== undefined) ? alpha : 1;
 
@@ -303,34 +306,36 @@ export class GroupsService {
 	}
 
 	/**
-	 * Delete selected groups
+	 * Deletes highlighted groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
 	 */
-	public deleteGroups(teamspace: string, model: string, all?: boolean) {
-		const groupsToDelete = [];
-		let nextGroup;
-		for (let i = 0; i < this.state.groups.length; ++i) {
-			const group = this.state.groups[i];
-			if (all || group.highlighted) {
-				groupsToDelete.push(group);
-				const nextGroupIdx = i + 1 === this.state.groups.length ? 0 : i + 1;
-				nextGroup = this.state.groups[nextGroupIdx];
-			}
-		}
+	public deleteHighlightedGroups(teamspace: string, model: string) {
+		const groupsToDelete = this.state.groups.filter( (g) => g.highlighted);
+		return this.deleteGroups(teamspace, model, groupsToDelete);
+	}
 
-		if (groupsToDelete.length > 0) {
-			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => group._id).join(",")}`;
+	/**
+	 * Deletes all groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 */
+	public deleteAllGroups(teamspace: string, model: string) {
+		return this.deleteGroups(teamspace, model, [].concat(this.state.groups));
+	}
+
+	/**
+	 * Deletes an array of groups in the backend
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 * @param groups the groups array to delete
+	 */
+	public deleteGroups(teamspace: string, model: string, groups: any) {
+		if (groups.length > 0) {
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
-					groupsToDelete.forEach((group) => {
-						this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
-							this.TreeService.deselectNodes(nodes);
-						});
-						this.removeColorOverride(group._id);
-						this.deleteStateGroup(group);
-						if (this.state.groups.length) {
-							this.selectGroup(nextGroup);
-						}
-					});
+					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
 				});
 		} else {
@@ -339,10 +344,13 @@ export class GroupsService {
 	}
 
 	/**
-	 * Delete all groups
+	 * Deselects the objects from a particular group
+	 * @param group the group that contains the objects I wish to deselect
 	 */
-	public deleteAllGroups(teamspace: string, model: string) {
-		return this.deleteGroups(teamspace, model, true);
+	public deselectObjectsFromGroup(group: any) {
+		this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
+			this.TreeService.deselectNodes(nodes);
+		});
 	}
 
 	/**
@@ -468,10 +476,10 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
 		return this.getSelectedObjects().then((currentHighlights) => {
 			group.objects = currentHighlights;
+			group.totalSavedMeshes = this.state.selectedObjectsLen;
 
 			return this.APIService.put(groupUrl, group)
 				.then((response) => {
-					group.totalSavedMeshes = this.state.selectedObjectsLen;
 					this.replaceStateGroup(group);
 					this.selectGroup(group);
 					return group;
@@ -511,18 +519,42 @@ export class GroupsService {
 
 	/**
 	 * Remove a group from the data model
-	 * @param deleteGroup the group to delete
+	 * @param group the group to delete
 	 */
-	public deleteStateGroup(deleteGroup: any) {
+	public deleteStateGroup(group: any) {
+		this.deselectObjectsFromGroup(group);
+		this.removeColorOverride(group._id);
+		const groupIndex = this.state.groups.indexOf(group);
+		const groupsCount = this.state.groups.length;
 
-		this.state.groups = this.state.groups.filter((g) => {
-			return deleteGroup._id !== g._id;
-		});
-
-		if (this.state.selectedGroup && deleteGroup._id === this.state.selectedGroup._id) {
-			this.state.selectedGroup = null;
+		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
+			const nextGroup = this.state.groups[ (groupIndex + 1) % groupsCount];
+			this.selectGroup(nextGroup);
 		}
 
+		this.state.groups = this.state.groups.filter((g) => {
+			return group._id !== g._id;
+		});
+	}
+
+	/**
+	 * Removes all the groups with the ids contained in the ids array from the state
+	 * @param ids the ids of the groups to be deleted
+	 */
+	public deleteStateGroupsByIds(ids: string[]) {
+		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		groups.forEach(this.deleteStateGroup.bind(this));
+	}
+
+	/**
+	 * Removes all the groups with the ids contained in the ids array from the state after 4 seconds
+	 * while showing a feedback that these groups has been deleted
+	 * @param ids the ids of the groups to be deleted
+	 */
+	public deleteStateGroupsByIdsDeferred(ids: string[]) {
+		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		groups.forEach((g) => g.justBeenDeleted = true);
+		this.$timeout(this.deleteStateGroupsByIds.bind(this, ids) , 4000);
 	}
 
 	/**
@@ -542,6 +574,43 @@ export class GroupsService {
 		if (newGroup._id === this.state.selectedGroup._id) {
 			this.state.selectedGroup = newGroup;
 		}
+	}
+
+	/**
+	 * Compares groups without taking in consideration focus/selection or objects contained in the group
+	 * @param groupA a group to be compared
+	 * @param groupB the other group to be compared
+	 */
+	public areGroupsEqual(groupA: any, groupB: any): boolean {
+		const fields = ["_id", "__v", "name", "author", "createdAt", "updatedBy", "updatedAt", "color"];
+		const areEqual = fields.every( (f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]) );
+
+		return areEqual;
+	}
+
+	/**
+	 * Compare groups objects
+	 * @param objectsA a group objects to be compared
+	 * @param objectsB the other groups objects to be compared
+	 */
+	public areGroupObjectsEqual(objectsA: [any], objectsB: [any]): boolean {
+		const objAIds = this.getFullIdsForNodes(objectsA);
+		const objBIds = this.getFullIdsForNodes(objectsB);
+		let areEqual = objAIds.length === objBIds.length;
+		areEqual =  areEqual && objAIds.every((i) => objBIds.indexOf(i) >=  0);
+		return areEqual;
+	}
+
+	private getFullIdsForNodes(nodes: [any]) {
+		return nodes.reduce((obj, currentVal) => {
+			const nsp = currentVal.account + "." + currentVal.model ;
+			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));
+			if (Array.isArray(currentVal.ifc_guids)) {
+				ids = ids.concat(currentVal.ifc_guids.map( (id) => nsp + "." + id ));
+			}
+
+			return ids;
+		} , []);
 	}
 
 	/**

@@ -1,3 +1,4 @@
+
 /**
  *	Copyright (C) 2018 3D Repo Ltd
  *
@@ -16,7 +17,6 @@
  */
 
 class GroupsController implements ng.IController {
-
 	public static $inject: string[] = [
 		"$scope",
 		"$timeout",
@@ -27,7 +27,8 @@ class GroupsController implements ng.IController {
 		"TreeService",
 		"AuthService",
 		"ClientConfigService",
-		"IconsConstant"
+		"IconsConstant",
+		"NotificationService"
 	];
 
 	private onContentHeightRequest: any;
@@ -39,6 +40,7 @@ class GroupsController implements ng.IController {
 	private loading: boolean;
 	private account: string;
 	private onShowItem;
+	private onHideItem;
 	private toShow: string;
 	private savingGroup: boolean;
 	private changed: boolean;
@@ -47,31 +49,31 @@ class GroupsController implements ng.IController {
 	private selectedObjectsLen: number;
 	private dialogThreshold: number;
 	private canAddGroup: boolean;
+	private justUpdated: boolean;
 	private modelSettings: any;
 	private savedGroupData: any;
 	private customIcons: any;
 	private lastColorOverride: any;
+	private selectedNodes: [any];
 
 	constructor(
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
 		private $element: ng.IRootElementService,
-
 		private GroupsService: any,
 		private DialogService: any,
 		private TreeService: any,
 		private AuthService: any,
 		private ClientConfigService: any,
-		private IconsConstant: any
+		private IconsConstant: any,
+		private NotificationService: any
 	) {}
 
 	public $onInit() {
-
 		this.customIcons = this.IconsConstant;
 
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
-		this.changed = false;
 		this.teamspace = this.account; // Workaround legacy naming
 		this.onContentHeightRequest({height: 1000});
 		this.GroupsService.reset();
@@ -94,6 +96,9 @@ class GroupsController implements ng.IController {
 
 	public $onDestroy() {
 		this.groups = [];
+
+		this.NotificationService.unsubscribe.newGroup(this.account, this.model);
+		this.NotificationService.unsubscribe.groupsDeleted(this.account, this.model);
 	}
 
 	public watchers() {
@@ -101,13 +106,11 @@ class GroupsController implements ng.IController {
 		this.$scope.$watch(() => {
 			return this.GroupsService.state;
 		}, (newState, oldState) => {
-
 			angular.extend(this, newState);
-			this.changed = true;
-
+			this.updateChangeStatus();
 		}, true);
 
-		this.$scope.$watch("vm.groups", () => {
+		this.$scope.$watchCollection("vm.groups", () => {
 			this.setContentHeight();
 		});
 
@@ -138,17 +141,21 @@ class GroupsController implements ng.IController {
 					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
 					this.modelSettings.permissions
 				);
+
+				this.watchNotification();
 			}
+
 		});
 
 		this.$scope.$watchCollection(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
-
-			this.GroupsService.updateSelectedObjectsLen().then(() => {
-				this.changed = true;
+			this.GroupsService.updateSelectedObjectsLen().then( () => {
+				this.GroupsService.getSelectedObjects().then((currentHighlights) => {
+					this.selectedNodes = currentHighlights;
+					this.updateChangeStatus();
+				});
 			});
-
 		});
 
 		this.$scope.$watch("vm.selectedMenuOption",
@@ -201,8 +208,6 @@ class GroupsController implements ng.IController {
 	}
 
 	public editGroup() {
-		this.changed = false;
-
 		// Save the color override to be re-enabled later
 		if (this.GroupsService.hasColorOverride(this.selectedGroup)) {
 			this.lastColorOverride = this.selectedGroup;
@@ -213,8 +218,8 @@ class GroupsController implements ng.IController {
 		this.showGroupPane();
 	}
 
-	public deleteGroup(group: any) {
-		this.GroupsService.deleteGroups(this.teamspace, this.model)
+	public deleteHighlightedGroups() {
+		this.GroupsService.deleteHighlightedGroups(this.teamspace, this.model)
 		.catch((error) => {
 			this.errorDialog(error);
 		});
@@ -296,7 +301,6 @@ class GroupsController implements ng.IController {
 			this.hexColor = "";
 		}
 		this.GroupsService.setSelectedGroupColor(color);
-		this.changed = true;
 	}
 
 	public reselectGroup() {
@@ -316,7 +320,6 @@ class GroupsController implements ng.IController {
 	}
 
 	public updateGroup() {
-
 		this.GroupsService.updateGroup(
 			this.teamspace,
 			this.model,
@@ -326,11 +329,6 @@ class GroupsController implements ng.IController {
 			.then(() => {
 				this.savingGroup = false;
 				this.savedGroupData = Object.assign({}, this.selectedGroup);
-				// Wrapped in timeout to avoid watcher clashing
-				this.$timeout(() => {
-					this.changed = false;
-				});
-
 			})
 			.catch((error) => {
 				this.handleGroupError("update");
@@ -349,11 +347,7 @@ class GroupsController implements ng.IController {
 			.then(() => {
 				this.savingGroup = false;
 				this.savedGroupData = Object.assign({}, this.selectedGroup);
-				// Wrapped in timeout to avoid watcher clashing
-				this.$timeout(() => {
-					this.changed = false;
-				});
-
+				this.updateChangeStatus();
 			})
 			.catch((error) => {
 				this.handleGroupError("create");
@@ -361,6 +355,10 @@ class GroupsController implements ng.IController {
 				console.error(error);
 			});
 
+	}
+
+	public isEditing(): boolean {
+		return this.toShow === "group";
 	}
 
 	public getColorOverrideRGBA(group: any): string {
@@ -375,10 +373,16 @@ class GroupsController implements ng.IController {
 		this.savedGroupData = Object.assign({}, this.selectedGroup);
 		this.toShow = "group";
 		this.hexColor = "";
+
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 		this.focusGroupName();
+		this.GroupsService.updateSelectedObjectsLen();
+	}
 
+	public cancelEdit() {
+		this.hexColor = "";
+		this.onHideItem();
 	}
 
 	public focusGroupName() {
@@ -390,6 +394,16 @@ class GroupsController implements ng.IController {
 
 	public selectGroup(group: any) {
 		this.GroupsService.selectGroup(group);
+	}
+
+	public updateChangeStatus(): void {
+		if (!this.savedGroupData || !this.selectedGroup) {
+			this.changed = false;
+		} else {
+			const differsFromSavedData = !this.GroupsService.areGroupsEqual(this.savedGroupData, this.selectedGroup);
+			const differsdObjects = !this.GroupsService.areGroupObjectsEqual(this.selectedNodes, this.selectedGroup.objects);
+			this.changed = (differsFromSavedData || differsdObjects);
+		}
 	}
 
 	public setContentHeight() {
@@ -412,6 +426,69 @@ class GroupsController implements ng.IController {
 
 	}
 
+	/*** Realtime sync  */
+	public watchNotification() {
+
+		// Watch for new groups
+		this.NotificationService.subscribe.newGroup(
+			this.account,
+			this.model,
+			this.newGroupListener.bind(this)
+		);
+
+		this.NotificationService.subscribe.groupsDeleted(
+			this.account,
+			this.model,
+			this.groupsDeletedListener.bind(this)
+		);
+
+		this.NotificationService.subscribe.groupChanged(
+			this.account,
+			this.model,
+			this.groupChangedListener.bind(this)
+		);	}
+
+	public newGroupListener(group, submodel) {
+		this.GroupsService.state.groups.push(group);
+
+		if (this.GroupsService.state.overrideAll) {
+			this.GroupsService.colorOverride(group);
+		}
+	}
+
+	public groupsDeletedListener(ids, submodel) {
+		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
+			this.cancelEdit();
+		}
+
+		this.GroupsService.deleteStateGroupsByIdsDeferred(ids);
+	}
+
+	public groupChangedListener(group, submodel) {
+		const shouldPaintObjects = this.GroupsService.hasColorOverride(group);
+		if (shouldPaintObjects) {
+			this.GroupsService.removeColorOverride(group._id);
+		}
+
+		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
+		this.savedGroupData = Object.assign({}, group);
+		this.GroupsService.replaceStateGroup(group);
+		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
+
+		if (this.justUpdated) {
+			this.GroupsService.selectGroup(group);
+		}
+
+		if (shouldPaintObjects) {
+			this.GroupsService.colorOverride(group);
+		}
+	}
+
+	private resetJustUpdated() {
+		this.justUpdated = false;
+	}
+
+	/***/
 }
 
 export const GroupsComponent: ng.IComponentOptions = {
@@ -422,6 +499,7 @@ export const GroupsComponent: ng.IComponentOptions = {
 		modelSettings: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
+		onHideItem: "&",
 		hideItem: "<",
 		selectedMenuOption: "="
 	},

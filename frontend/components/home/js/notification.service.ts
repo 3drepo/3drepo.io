@@ -68,7 +68,10 @@ export class NotificationService {
 			commentDeleted: this.subscribeCommentDeleted,
 			issueChanged: this.subscribeIssueChanged,
 			modelStatusChanged: this.subscribeModelStatusChanged,
-			newModel: this.subscribeNewModel
+			newModel: this.subscribeNewModel,
+			newGroup: this.subscribeNewGroup,
+			groupChanged: this.subscribeGroupChanged,
+			groupsDeleted: this.subscribeGroupsDeleted
 		};
 
 		this.unsubscribe = {
@@ -84,7 +87,10 @@ export class NotificationService {
 			commentDeleted: this.unsubscribeCommentDeleted,
 			issueChanged: this.unsubscribeIssueChanged,
 			modelStatusChanged: this.unsubscribeModelStatusChanged,
-			newModel: this.unsubscribeNewModel
+			newModel: this.unsubscribeNewModel,
+			newGroup: this.unsubscribeNewGroup,
+			groupChanged: this.unsubscribeGroupChanged,
+			groupsDeleted: this.unsubscribeGroupsDeleted
 		};
 
 	}
@@ -217,6 +223,35 @@ export class NotificationService {
 			this.performUnsubscribe(account, model, [issueId], "issueChanged");
 		}
 	}
+
+	/**
+	 *  Groups messaging
+	 */
+	public subscribeNewGroup(account: string, model: string, callback: any) {
+		this.performSubscribe(account, model, [], "newGroups", callback);
+	}
+
+	public unsubscribeNewGroup(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "newGroups");
+	}
+
+	public subscribeGroupsDeleted(account: string, model: string, callback: any) {
+		this.performSubscribe(account, model, [], "groupsDeleted", callback);
+	}
+
+	public unsubscribeGroupsDeleted(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "groupsDeleted");
+	}
+
+	public subscribeGroupChanged(account: string, model: string,  callback: any) {
+		this.performSubscribe(account, model, [], "groupChanged", callback);
+	}
+
+	public unsubscribeGroupChanged(account: string, model: string) {
+		this.performUnsubscribe(account, model, [], "groupChanged");
+	}
+
+	/** end groups messanging */
 
 	public subscribeModelStatusChanged(account: string, model: string, callback: any) {
 		this.performSubscribe(account, model, [], "modelStatusChanged", callback);

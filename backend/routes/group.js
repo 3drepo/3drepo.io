@@ -96,11 +96,11 @@ function findGroup(req, res, next) {
 }
 
 function createGroup(req, res, next) {
-
 	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	if(req.body.objects) {
-		const create = Group.createGroup(getDbColOptions(req), req.body);
+	if (req.body.objects) {
+		const create = Group.createGroup(getDbColOptions(req), sessionId , req.body);
 
 		create.then(group => {
 
@@ -125,13 +125,14 @@ function deleteGroup(req, res, next) {
 }
 
 function deleteGroups(req, res, next) {
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
 	systemLogger.logError(JSON.stringify(req.query));
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
 
-		Group.deleteGroups(getDbColOptions(req), ids).then(() => {
+		Group.deleteGroups(getDbColOptions(req),sessionId , ids).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -142,9 +143,9 @@ function deleteGroups(req, res, next) {
 }
 
 function updateGroup(req, res, next) {
-
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	let groupItem;
 	if (req.params.rid) {
@@ -158,7 +159,7 @@ function updateGroup(req, res, next) {
 		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			return group.updateAttrs(dbCol, req.body);
+			return group.updateGroup(dbCol, sessionId, req.body);
 		}
 
 	}).then(group => {

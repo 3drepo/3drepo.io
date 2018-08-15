@@ -17,6 +17,7 @@
 
 "use strict";
 
+const _ = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
@@ -26,6 +27,7 @@ const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
 const db = require("../db/db");
+const ChatEvent = require("./chatEvent");
 
 const groupSchema = Schema({
 	_id: Object,
@@ -342,6 +344,12 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 	});
 };
 
+groupSchema.methods.updateGroup = function(dbCol, sessionId, data) {
+	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
+	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));
+	return update;
+};
+
 groupSchema.methods.updateAttrs = function(dbCol, data) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
@@ -352,7 +360,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 			"name" : "[object String]",
 			"author" : "[object String]",
 			"createdAt" : "[object Number]",
-			"updatedBy" : "[object Number]",
+			"updatedBy" : "[object String]",
 			"updatedAt" : "[object Number]",
 			"objects" :  "[object Array]",
 			"color" : "[object Array]",
@@ -390,15 +398,24 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 	});
 };
 
-groupSchema.statics.createGroup = function(dbCol, data) {
+groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
+	data = _.omit(data, ["focus", "highlighted"]);
+
 	const group = this.model("Group").createInstance({
 		account: dbCol.account,
 		model: dbCol.model
 	});
 
+	const model = dbCol.model;
+
 	group._id = utils.stringToUUID(uuid.v1());
 	return group.save().then((savedGroup)=>{
-		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
+		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
+			data._id = utils.uuidToString(savedGroup._id);
+			ChatEvent.newGroups(sessionId, dbCol.account , model,  data);
+			return data;
+		}
+			,(err) => {
 			// remove the recently saved new group as update attributes failed
 			return Group.deleteGroup(dbCol, group._id).then(() => {
 				return Promise.reject(err);
@@ -408,10 +425,17 @@ groupSchema.statics.createGroup = function(dbCol, data) {
 };
 
 groupSchema.methods.clean = function() {
-
 	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+
+	if (Date.prototype.isPrototypeOf(cleaned.createdAt)) {
+		cleaned.createdAt = cleaned.createdAt.getTime();
+	}
+
+	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
+		cleaned.updatedAt = cleaned.updatedAt.getTime();
+	}
 
 	return cleaned;
 };
@@ -439,7 +463,9 @@ const Group = ModelFactory.createClass(
 	}
 );
 
-Group.deleteGroups = function(dbCol, ids) {
+Group.deleteGroups = function(dbCol, sessionId, ids) {
+	const groupsIds = [].concat(ids);
+
 	for (let i = 0; i < ids.length; i++) {
 		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
 			ids[i] = utils.stringToUUID(ids[i]);
@@ -451,6 +477,9 @@ Group.deleteGroups = function(dbCol, ids) {
 			if (!deleteResponse.result.ok) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
+
+			// Success!
+			ChatEvent.groupsDeleted(sessionId, dbCol.account ,  dbCol.model, groupsIds);
 		});
 	});
 };
