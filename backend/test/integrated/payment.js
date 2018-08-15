@@ -647,7 +647,7 @@ describe("Enrolling to a subscription", function () {
 		describe("and then assigning it", function() {
 
 			it("to a non existing user should fail", function(done) {
-				agent.post(`/${username}/members/payment_non_existing`)
+				agent.post(`/${username}/members`, {user: "payment_non_existing"})
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 						done(err);
