@@ -57,21 +57,30 @@ class PasswordForgotController implements ng.IController {
 	public requestPasswordChange(event) {
 		const enterKey = 13;
 		let requestChange = false;
+		let timeout = null;
 
-		if (event !== undefined && event !== null) {
-			requestChange = (event.which === enterKey);
-		} else {
+		clearTimeout(timeout);
+
+		if (event) {
+			// timeout = setTimeout(() => {
+			// console.log(event);
 			requestChange = true;
+			// }, 500);
 		}
 
-		if (requestChange) {
-			if (this.username && this.email) {
+		// if (event !== undefined && event !== null) {
+		// 	requestChange = (event.which === enterKey);
+		// } else {
+		// 	requestChange = true;
+		// }
 
+		if (requestChange) {
+			if (this.email) {
 				this.messageColor = this.messageColour;
 				this.message = "Please wait...";
 				this.showProgress = true;
-				this.buttonDisabled = true;
-				this.APIService.post(this.username + "/forgot-password", {email: this.email})
+				this.buttonDisabled = false;
+				this.APIService.post(this.username + "/forgot-password", {email: this.email, username: this.username})
 					.then((response) => {
 						this.showProgress = false;
 						if (response.status === 200) {

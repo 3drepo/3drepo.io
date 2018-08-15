@@ -267,7 +267,7 @@ function verify(req, res, next) {
 function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	if (Object.prototype.toString.call(req.body.email) === "[object String]") {
+	if (Object.prototype.toString.call(req.body.email) === "[object String]" || Object.prototype.toString.call(req.body.username) === "[object String]") {
 
 		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
 
