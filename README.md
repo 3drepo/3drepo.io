@@ -48,13 +48,13 @@ In general, to configure a new configuration enviroment called <config_name>:
 
 The repository includes a script `run_app` and `run_app.cmd` specifically for Windows to run the server. It has two arguments:
 
-**./run/run_app \<config\> \<debug\>**
-* **config** This is the directory under config that the configuration resides in
-* **debug** Type debug here for node.js debugging, or leave it out for none.
+`./run/run_app <config> [debug]`
+- `config` This is the directory under config that the configuration resides in
+- `debug` Type debug here for node.js debugging, or leave it out for none.
   
 Typically you will want to run the server using pm2 (install with `npm -g install pm2` under the superuser account):
 
-**./run_app_pm2 \<config\>**
+`./run_app_pm2 <config>`
 * **config** This is the directory under config that the configuration resides in
 
 ### File Watching & Live Reloading
