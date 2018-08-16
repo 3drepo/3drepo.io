@@ -37,7 +37,7 @@ export class NotificationsChannel {
 	public model: NotificationModelEvents;
 
 	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
-		this.groups = new NotificationEvents(this, "groups");
+		this.groups = new NotificationEvents(this, "group");
 		this.issues = new NotificationIssuesEvents(this);
 		this.model = new NotificationModelEvents(this);
 	}

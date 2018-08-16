@@ -22,13 +22,13 @@ export class NotificationIssuesEvents extends NotificationEvents {
 	private comments: { [id: string]: NotificationEvents};
 
 	constructor(protected channel: NotificationsChannel) {
-		super(channel, "issues");
+		super(channel, "issue");
 		this.comments = {};
 	}
 
 	public getCommentsNotifications(id: string) {
 		if (!this.comments[id]) {
-			this.comments[id] =  new NotificationEvents(this.channel, "comments", id);
+			this.comments[id] =  new NotificationEvents(this.channel, "comment", id);
 		}
 
 		return this.comments[id];

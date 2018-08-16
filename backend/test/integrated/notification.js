@@ -170,7 +170,7 @@ describe("Notification", function () {
 		// other users post an issue
 		const issue = Object.assign({"name":"Issue test"}, baseIssue);
 
-		socket.on(`${username}::${model}::newIssues`, function(issues) {
+		socket.on(`${username}::${model}::issueCreated`, function(issues) {
 
 			expect(issues[0]).to.exist;
 			expect(issues[0].name).to.equal(issue.name);
@@ -210,7 +210,7 @@ describe("Notification", function () {
 	it("subscribe new comment notification should succeed", function(done) {
 		const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 
-		socket.on(`${username}::${model}::${issueId}::newComment`, function(resComment) {
+		socket.on(`${username}::${model}::${issueId}::commentCreated`, function(resComment) {
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			expect(resComment.viewpoint.up).to.deep.equal(comment.viewpoint.up);
@@ -239,7 +239,7 @@ describe("Notification", function () {
 	it("subscribe comment changed notification should succeed", function(done) {
 		const comment = {"comment":"abc123456","edit":true,"commentIndex":0};
 
-		socket.on(`${username}::${model}::${issueId}::commentChanged`, function(resComment) {
+		socket.on(`${username}::${model}::${issueId}::commentUpdated`, function(resComment) {
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			done();
@@ -272,18 +272,18 @@ describe("Notification", function () {
 
 		const status = {"priority":"high","status":"open","topic_type":"for info","assigned_roles":["testproject.collaborator"]};
 
-		socket.off(`${username}::${model}::${issueId}::newComment`);
+		socket.off(`${username}::${model}::${issueId}::commentCreated`);
 
 		async.parallel([
 			function(done) {
-				socket.on(`${username}::${model}::${issueId}::newComment`, function(resComment) {
+				socket.on(`${username}::${model}::${issueId}::commentCreated`, function(resComment) {
 					expect(resComment).to.exist;
 					expect(resComment.action).to.deep.equal({"property":"priority","from":"low","to":"high"});
 					done();
 				});
 			},
 			function(done) {
-				socket.on(`${username}::${model}::${issueId}::issueChanged`, function(issue) {
+				socket.on(`${username}::${model}::issueUpdated`, function(issue) {
 					expect(issue).to.exist;
 					expect(issue.priority).to.equal("high");
 					done();
