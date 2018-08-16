@@ -57,7 +57,7 @@ Typically you will want to run the server using pm2 (install with `npm -g instal
 `./run_app_pm2 <config>`
 * **config** This is the directory under config that the configuration resides in
 
-### File Watching & Live Reloading
+## File Watching & Live Reloading
 
 All frontend files are observed and automatically re-compiled if you run `yarn run watch`.
 
