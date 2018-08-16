@@ -25,6 +25,7 @@ module.exports = {
 		secret: "a",
 		parser_secret : "b"
 	},
+	HTTPSredirect: false,
 	servers: [
 		{
 			service: "api",
