@@ -2,7 +2,7 @@
 
 3drepo.io a web based BIM collaboration platform. It is one of the 4 parts of the 3D Repo ecosystem. 
 
-![skanska2](https://user-images.githubusercontent.com/3008807/32048840-c75fc92e-ba42-11e7-964d-1587974dce6e.png)
+![3drepo](https://user-images.githubusercontent.com/11945337/44221768-60634280-a17a-11e8-989e-089a650e3710.png)
 
 ## Latest Release & API
 * Latest release: https://github.com/3drepo/3drepo.io/releases/tag/latest
