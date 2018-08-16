@@ -66,11 +66,26 @@ function newModel(emitter, account, data) {
 	return insertEventQueue("newModel", emitter, account, null, null, data);
 }
 
+function newGroups(emitter, account, model, data) {
+	return insertEventQueue("newGroups", emitter, account, model, null, data);
+}
+
+function groupsDeleted(emitter, account, model, ids) {
+	return insertEventQueue("groupsDeleted", emitter, account, model, null, ids);
+}
+
+function groupChanged(emitter, account, model, data) {
+	return insertEventQueue("groupChanged", emitter, account, model, null, data);
+}
+
 module.exports = {
 	newIssues,
 	newComment,
+	newGroups,
 	commentChanged,
 	commentDeleted,
+	groupChanged,
+	groupsDeleted,
 	modelStatusChanged,
 	issueChanged,
 	newModel
