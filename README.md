@@ -21,7 +21,7 @@ To setup the whole 3D Repo Ecosystem, you will need the following:
 
 Note: To generate viewable 3D models, you will need 3drepounity to create asset bundles. **This is a closed source project**. Please contact sales@3drepo.org for a business license, alternatively you can use 3drepo.io version v1.12 which uses the old x3dom rendering engine.
 
-##Installation
+## Installation
 
 Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e. Right click -> Run as Administrator).
 
@@ -33,8 +33,7 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 7. Install the required frontend dependencies: `cd frontend && yarn install`
 8. Compile the frontend: `cd frontend && yarn run build` (for file watching/live reloading, see `Running the application` below)
 
-Configuration
--------------
+## Configuration
 
 The configuration files are contained in the `config` folder. Each directory in config represents a different configuration. This allows you to quickly switch between, for example, a development environment and a production environment. Each configuration folder is expected to have a config.js file, which details the configuration settings for the particular environment.
 
@@ -45,8 +44,7 @@ In general, to configure a new configuration enviroment called <config_name>:
 3. Copy config/sample_config.js to the new directory as config.js: `cp config_sample.js <config_name>/config.js`
 4. Edit config.js as described in [Configuration File](https://github.com/3drepo/3drepo.io/wiki/Configuration-File)
 
-Running the application
------------------------
+## Running the application
 
 The repository includes a script `run_app` and `run_app.cmd` specifically for Windows to run the server. It has two arguments:
 
