@@ -141,7 +141,7 @@ export class GroupsService {
 	/**
 	 * Remove all color overrides from a given group based on it's ID
 	 */
-	public removeColorOverride(groupId: string) {
+	public removeColorOverride(groupId: string, shouldDisableOverrideAll: boolean = true) {
 
 		const group = this.state.colorOverride[groupId];
 
@@ -165,7 +165,7 @@ export class GroupsService {
 
 			delete this.state.colorOverride[groupId];
 
-			if (this.state.overrideAll &&
+			if (shouldDisableOverrideAll && this.state.overrideAll &&
 				this.state.groups.length !==
 				Object.keys(this.state.colorOverride).length) {
 				this.state.overrideAll = false;

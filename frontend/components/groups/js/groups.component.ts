@@ -219,7 +219,7 @@ class GroupsController implements ng.IController {
 		}
 
 		// We don't want color over ride when we're editing
-		this.GroupsService.removeColorOverride(this.selectedGroup._id);
+		this.GroupsService.removeColorOverride(this.selectedGroup._id, false);
 		this.showGroupPane();
 	}
 
