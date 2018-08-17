@@ -55,7 +55,7 @@ The repository includes a script `run_app` and `run_app.cmd` specifically for Wi
 Typically you will want to run the server using pm2 (install with `npm -g install pm2` under the superuser account):
 
 `./run_app_pm2 <config>`
-* **config** This is the directory under config that the configuration resides in
+* `config` This is the directory under config that the configuration resides in
 
 ## File Watching & Live Reloading
 
