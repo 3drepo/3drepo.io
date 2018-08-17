@@ -29,6 +29,7 @@ const https = require("https");
 const http = require("http");
 const tls  = require("tls");
 const vhost = require("vhost");
+const crypto = require("crypto");
 
 const certs = {};
 const certMap = {};
@@ -66,9 +67,9 @@ function setupSSL() {
 			// ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3",
 			honorCipherOrder: true,
 			ecdhCurve: "secp384r1",
-			secureOptions: tls.constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION |
-						tls.constants.SSL_OP_NO_SSLv2 |
-						tls.constants.SSL_OP_NO_SSLv3
+			secureOptions: crypto.constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION |
+						crypto.constants.SSL_OP_NO_SSLv2 |
+						crypto.constants.SSL_OP_NO_SSLv3
 		};
 
 		// This is the optional certificate authority
