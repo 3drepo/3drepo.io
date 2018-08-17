@@ -36,6 +36,12 @@ export class NotificationsChannel {
 	 */
 	public model: NotificationModelEvents;
 
+	/**
+	 * This dictionary holds the callbacks for every event in the channel .
+	 * When the last callback has been unsubscribed, the channel unsubscribe from the event completely.
+	 */
+	private subscriptions: { [event: string]: Array<{callback: (data: any) => void, context: object}> } = {};
+
 	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
 		this.groups = new NotificationEvents(this, "group");
 		this.issues = new NotificationIssuesEvents(this);
@@ -49,8 +55,14 @@ export class NotificationsChannel {
 	 * @param callback the callback that will be used when the event is remotely triggered
 	 * @param keys extra keys for suscribing to a particular entity events
 	 */
-	public suscribe(event: string, callback, keys = null) {
-		this.notificationService.performSubscribe(this.account, this.modelStr, keys, event, callback);
+	public subscribe(event: string, callback: (data: any) => void, context: any , keys = null) {
+		const eventFullName = this.notificationService.getEventName(this.account, this.modelStr, keys, event);
+		if (!this.hasSubscriptions(eventFullName)) {
+			this.notificationService.performSubscribe(this.account, this.modelStr, keys, event,
+													this.onEvent.bind(this, eventFullName));
+		}
+
+		this.AddCallback(eventFullName, callback, context);
 	}
 
 	/**
@@ -59,7 +71,43 @@ export class NotificationsChannel {
 	 * @param event the event name
 	 * @param keys extra keys for unsuscribing to a particular entity events
 	 */
-	public unsuscribe(event: string, keys = null) {
-		this.notificationService.performUnsubscribe(this.account, this.modelStr, keys, event);
+	public unsubscribe(event: string, callback: (data: any) => void, keys = null) {
+		const eventFullName = this.notificationService.getEventName(this.account, this.modelStr, keys, event);
+
+		this.removeCallBack(eventFullName, callback);
+
+		if (!this.hasSubscriptions(eventFullName)) {
+			this.notificationService.performUnsubscribe(this.account, this.modelStr, keys, event);
+		}
 	}
+
+	private onEvent(event: string, data: any) {
+		this.subscriptions[event].forEach( (cb) => cb.callback.call(cb.context, data) );
+	}
+
+	private AddCallback(event, callback, context): void {
+		if (! this.hasSubscriptions(event)) {
+			this.subscriptions[event] = [];
+		}
+
+		this.subscriptions[event].push({ callback , context });
+	}
+
+	private removeCallBack(event, callback): void {
+		if (! this.hasSubscriptions(event)) {
+			return;
+		}
+
+		const index: number = this.subscriptions[event].findIndex((cb) => cb.callback === callback);
+		this.subscriptions[event].splice(index, 1);
+
+		if (this.subscriptions[event].length === 0) {
+			delete this.subscriptions[event];
+		}
+	}
+
+	private hasSubscriptions(event: string) {
+		return (this.subscriptions[event] || []).length > 0;
+	}
+
 }

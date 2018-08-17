@@ -101,9 +101,9 @@ class GroupsController implements ng.IController {
 
 	public $onDestroy() {
 		this.groups = [];
-		this.groupsNotifications.offCreated();
-		this.groupsNotifications.offUpdated();
-		this.groupsNotifications.offDeleted();
+		this.groupsNotifications.offCreated(this.onGroupsCreated);
+		this.groupsNotifications.offUpdated(this.onGroupsUpdated);
+		this.groupsNotifications.offDeleted(this.onGroupsDeleted);
 	}
 
 	public watchers() {
@@ -437,12 +437,12 @@ class GroupsController implements ng.IController {
 
 	/*** Realtime sync  */
 	public watchNotification() {
-		this.groupsNotifications.onCreated(this.onGroupsCreated.bind(this));
-		this.groupsNotifications.onUpdated(this.onGroupsUpdated.bind(this));
-		this.groupsNotifications.onDeleted(this.onGroupsDeleted.bind(this));
+		this.groupsNotifications.onCreated(this.onGroupsCreated, this);
+		this.groupsNotifications.onUpdated(this.onGroupsUpdated, this);
+		this.groupsNotifications.onDeleted(this.onGroupsDeleted, this);
 	}
 
-	public onGroupsCreated(group, submodel) {
+	public onGroupsCreated(group) {
 		this.GroupsService.state.groups.push(group);
 
 		if (this.GroupsService.state.overrideAll) {
@@ -450,7 +450,7 @@ class GroupsController implements ng.IController {
 		}
 	}
 
-	public onGroupsDeleted(ids, submodel) {
+	public onGroupsDeleted(ids) {
 		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
 			this.cancelEdit();
 		}
@@ -458,7 +458,7 @@ class GroupsController implements ng.IController {
 		this.GroupsService.deleteStateGroupsByIdsDeferred(ids);
 	}
 
-	public onGroupsUpdated(group, submodel) {
+	public onGroupsUpdated(group) {
 		const shouldPaintObjects = this.GroupsService.hasColorOverride(group);
 		if (shouldPaintObjects) {
 			this.GroupsService.removeColorOverride(group._id);

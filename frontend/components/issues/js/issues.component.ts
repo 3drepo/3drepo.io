@@ -132,14 +132,14 @@ class IssuesController implements ng.IController {
 
 		let channel = this.notificationService.getChannel(this.account, this.model);
 
-		channel.issues.offCreated();
-		channel.issues.offUpdated();
+		channel.issues.offCreated(this.newIssueListener);
+		channel.issues.offUpdated(this.handleIssueChanged);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
 				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
-				channel.issues.offCreated();
-				channel.issues.offUpdated();
+				channel.issues.offCreated(this.newIssueListener);
+				channel.issues.offUpdated(this.handleIssueChanged);
 		});
 	}
 
@@ -269,25 +269,26 @@ class IssuesController implements ng.IController {
 		const onIssueCreated = this.newIssueListener.bind(this);
 		const onIssueUpdated = this.handleIssueChanged.bind(this);
 
-		channel.issues.onCreated(onIssueCreated);
-		channel.issues.onUpdated(onIssueUpdated);
+		channel.issues.onCreated(onIssueCreated, this);
+		channel.issues.onUpdated(onIssueUpdated, this);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
 			if (subModel) {
 				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
-				channel.issues.onCreated(onIssueCreated);
-				channel.issues.onUpdated(onIssueUpdated);
+				channel.issues.onCreated(onIssueCreated, this);
+				channel.issues.onUpdated(onIssueUpdated, this);
 			} else {
 				console.error("Submodel was expected to be defined for issue subscription: ", subModel);
 			}
 		});
 	}
 
-	public newIssueListener(issues, submodel) {
+	public newIssueListener(issues) {
+		// TODO: fix submodel part;
 
 		issues.forEach((issue) => {
-			this.shouldShowIssue(issue, submodel);
+			this.shouldShowIssue(issue);
 		});
 
 	}
@@ -296,14 +297,14 @@ class IssuesController implements ng.IController {
 		this.IssuesService.updateIssues(issue);
 	}
 
-	public shouldShowIssue(issue, submodel) {
+	public shouldShowIssue(issue) {
 
 		if (!issue) {
 			console.error("Issue is undefined/null: ", issue);
 			return;
 		}
 
-		const isSubmodelIssue = (submodel !== undefined);
+		const isSubmodelIssue = (this.model !== issue.model);
 		let issueShouldAdd = false;
 
 		if (this.revisions && this.revisions.length) {
@@ -330,19 +331,18 @@ class IssuesController implements ng.IController {
 
 			} else {
 				// If submodel
-				if (submodel) {
 
-					this.RevisionsService.listAll(submodel.database, submodel.model)
-						.then((submodelRevisions) => {
-							issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, submodelRevisions);
-							if (issueShouldAdd) {
-								this.IssuesService.addIssue(issue);
-							}
-						})
-						.catch((error) => {
-							console.error("Something went wrong getting submodel revisions", error);
-						});
-				}
+				this.RevisionsService.listAll(issue.account, issue.model)
+					.then((submodelRevisions) => {
+
+						issueShouldAdd = this.checkIssueShouldAdd(issue, submodelRevisions[0], submodelRevisions);
+						if (issueShouldAdd) {
+							this.IssuesService.addIssue(issue);
+						}
+					})
+					.catch((error) => {
+						console.error("Something went wrong getting submodel revisions", error);
+					});
 
 			}
 		}
