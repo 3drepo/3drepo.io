@@ -60,7 +60,6 @@ router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, midd
 function storeIssue(req, res, next) {
 
 	const place = utils.APIInfo(req);
-	// let data = JSON.parse(req.body.data);
 	const data = req.body;
 	data.owner = req.session.user.username;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
@@ -68,20 +67,7 @@ function storeIssue(req, res, next) {
 	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, model: req.params.model}, data).then(issue => {
-
-		// let resData = {
-		// 	_id: issue._id,
-		// 	account: req.params.account,
-		// 	model: req.params.model,
-		// 	issue_id : issue._id,
-		// 	number : issue.number,
-		// 	created : issue.created,
-		// 	scribble: data.scribble,
-		// 	issue: issue
-		// };
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
