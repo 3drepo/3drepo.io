@@ -582,7 +582,7 @@ export class GroupsService {
 	 * @param groupB the other group to be compared
 	 */
 	public areGroupsEqual(groupA: any, groupB: any): boolean {
-		const fields = ["_id", "__v", "name", "author", "createdAt", "updatedBy", "updatedAt", "color"];
+		const fields = ["_id", "__v", "name", "author", "description", "createdAt", "updatedBy", "updatedAt", "color"];
 		const areEqual = fields.every( (f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]) );
 
 		return areEqual;
