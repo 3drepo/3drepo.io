@@ -18,32 +18,33 @@
 import { NotificationsChannel } from "./notifications.channel";
 
 export class NotificationEvents {
+
 	constructor(protected channel: NotificationsChannel, private entity: string, private keys: any = null) {
 
 	}
 
-	public onCreated(callback: (data: any) => void): void {
-		this.channel.suscribe(this.entity + "Created", callback, this.keys);
+	public onCreated(callback: (data: any) => void, context: any): void {
+		this.channel.subscribe(this.entity + "Created", callback, context, this.keys );
 	}
 
-	public onUpdated(callback: (data: any) => void): void {
-		this.channel.suscribe(this.entity + "Updated", callback, this.keys);
+	public onUpdated(callback: (data: any) => void, context: any): void {
+		this.channel.subscribe(this.entity + "Updated", callback,  context, this.keys);
 	}
 
-	public onDeleted(callback: (data: any) => void): void {
-		this.channel.suscribe(this.entity + "Deleted", callback, this.keys );
+	public onDeleted(callback: (data: any) => void, context: any): void {
+		this.channel.subscribe(this.entity + "Deleted", callback,  context, this.keys );
 	}
 
-	public offCreated(): void {
-		this.channel.unsuscribe(this.entity + "Created");
+	public offCreated(callback: (data: any) => void): void {
+		this.channel.unsubscribe(this.entity + "Created", callback, this.keys);
 	}
 
-	public offUpdated(): void {
-		this.channel.unsuscribe(this.entity + "Updated");
+	public offUpdated(callback: (data: any) => void): void {
+		this.channel.unsubscribe(this.entity + "Updated", callback, this.keys);
 	}
 
-	public offDeleted(): void {
-		this.channel.unsuscribe(this.entity + "Deleted");
+	public offDeleted(callback: (data: any) => void): void {
+		this.channel.unsubscribe(this.entity + "Deleted", callback, this.keys);
 	}
 
 }

@@ -221,10 +221,10 @@ class IssueController implements ng.IController {
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.issuesNotifications.offUpdated();
-			this.commentsNotifications.offCreated();
-			this.commentsNotifications.offUpdated ();
-			this.commentsNotifications.offDeleted();
+			this.issuesNotifications.offUpdated(this.onIssueUpdated);
+			this.commentsNotifications.offCreated(this.onCommentCreated);
+			this.commentsNotifications.offUpdated (this.onCommentUpdated);
+			this.commentsNotifications.offDeleted(this.onCommentDeleted);
 		}
 
 	}
@@ -1226,7 +1226,7 @@ class IssueController implements ng.IController {
 		});
 	}
 
-	public handleIssueChange(issue) {
+	public onIssueUpdated(issue) {
 		if (issue._id !== this.data._id) {
 			return;
 		}
@@ -1249,57 +1249,67 @@ class IssueController implements ng.IController {
 			* Watch for issue change
 			*/
 
-			this.issuesNotifications.onUpdated( this.handleIssueChange.bind(this));
+			this.issuesNotifications.onUpdated( this.onIssueUpdated, this);
+
+			this.commentsNotifications = this.issuesNotifications.getCommentsNotifications(this.data._id);
 
 			/*
 			* Watch for new comments
 			*/
-
-			this.commentsNotifications =  this.issuesNotifications.getCommentsNotifications(this.data._id);
-
-			this.commentsNotifications.onCreated((comment) => {
-				if (comment.action) {
-					this.IssuesService.convertActionCommentToText(comment, this.topic_types);
-				}
-
-				this.afterNewComment(comment, true);
-
-				// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
-				this.$scope.$apply();
-				this.commentAreaScrollToBottom();
-			});
+			this.commentsNotifications.onCreated(this.onCommentCreated, this);
 
 			/*
 			* Watch for comment changed
 			*/
-			this.commentsNotifications.onUpdated( (newComment) => {
-				const comment = this.issueData.comments.find((oldComment) => oldComment.guid === newComment.guid );
-
-				comment.comment = newComment.comment;
-
-				this.$scope.$apply();
-				this.commentAreaScrollToBottom();
-			});
+			this.commentsNotifications.onUpdated(this.onCommentUpdated, this);
 
 			/*
 			* Watch for comment deleted
 			*/
-			this.commentsNotifications.onDeleted((newComment) => {
-				let deleteIndex;
-				deleteIndex = this.issueData.comments.findIndex((comment) => comment.guid === newComment.guid);
-
-				this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
-
-				this.$scope.$apply();
-				this.commentAreaScrollToBottom();
-
-				this.$timeout(() => {
-					this.issueData.comments.splice(deleteIndex, 1);
-				}, 4000);
-			});
+			this.commentsNotifications.onDeleted(this.onCommentDeleted, this);
 		}
 	}
 
+	public onCommentCreated(comment) {
+		if (comment.action) {
+			this.IssuesService.convertActionCommentToText(comment, this.topic_types);
+		}
+
+		this.afterNewComment(comment, true);
+
+		// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
+		this.$scope.$apply();
+		this.commentAreaScrollToBottom();
+	}
+
+	/*
+	* Watch for comment changed
+	*/
+	public onCommentUpdated( newComment ) {
+		const comment = this.issueData.comments.find((oldComment) => oldComment.guid === newComment.guid );
+
+		comment.comment = newComment.comment;
+
+		this.$scope.$apply();
+		this.commentAreaScrollToBottom();
+	}
+
+	/*
+	* Watch for comment deleted
+	*/
+	public onCommentDeleted(newComment) {
+		let deleteIndex;
+		deleteIndex = this.issueData.comments.findIndex((comment) => comment.guid === newComment.guid);
+
+		this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
+
+		this.$scope.$apply();
+		this.commentAreaScrollToBottom();
+
+		this.$timeout(() => {
+			this.issueData.comments.splice(deleteIndex, 1);
+		}, 4000);
+	}
 }
 
 export const IssueComponent: ng.IComponentOptions = {
