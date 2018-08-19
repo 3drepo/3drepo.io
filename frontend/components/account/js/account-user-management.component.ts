@@ -174,10 +174,8 @@ class AccountUserManagementController implements ng.IController {
 		 * Generate licences summary
 		 */
 		public getLicencesLabel(): string {
-			const limit = isNumber(this.licencesLimit) ?
-				`${this.licencesLimit} licences left` :
-				"unlimited assigned";
-			return `Assign licences (${this.members.length} of ${limit})`;
+			const limit = isNumber(this.licencesLimit) ? this.licencesLimit : "unlimited assigned";
+			return `Assigned licences: ${this.members.length} out of ${limit}`;
 		}
 
 		/**
