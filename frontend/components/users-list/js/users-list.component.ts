@@ -207,7 +207,7 @@ class UsersListController implements ng.IController {
 			[matches({type: USERS}), ({order}) => {
 				return orderBy(
 					members,
-					({firstName, lastName}) => `${firstName} ${lastName}`.toLowerCase().trim(),
+					({firstName, lastName}) => `${lastName}`.toLowerCase().trim(),
 					order
 				);
 			}],
