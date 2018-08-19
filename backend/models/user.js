@@ -1056,7 +1056,7 @@ schema.methods.addTeamMember = function(user, job, permissions) {
 						promises.push(teamspaceEntry.customData.permissions.add({user, permissions}));
 					}
 
-					return Promise.all(promises).then(userEntry.getBaseData.bind(userEntry));
+					return Promise.all(promises).then(userEntry.getBasicDetails.bind(userEntry));
 				})
 					.then(userData => Object.assign({job, permissions}, userData));
 
@@ -1065,7 +1065,7 @@ schema.methods.addTeamMember = function(user, job, permissions) {
 	});
 };
 
-schema.methods.getBaseData = function() {
+schema.methods.getBasicDetails = function() {
 	const {user, customData} = this;
 	return {
 		user,
