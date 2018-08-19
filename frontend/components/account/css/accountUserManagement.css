@@ -16,6 +16,10 @@
   transform: rotate(45deg);
 }
 
+.accountUserManagement .addButton[ng-disabled] {
+  background-color: #E0E0E0 !important;
+}
+
 .accountUserManagement .addPanel {
   z-index: 2;
   right: 67px;
