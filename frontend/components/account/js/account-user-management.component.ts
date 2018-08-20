@@ -49,7 +49,7 @@ class AccountUserManagementController implements ng.IController {
 
 		private TABS_TYPES = TABS_TYPES;
 
-		private account;
+		private currentUser;
 		private accounts;
 		private teamspaces = [];
 		private members;
@@ -88,7 +88,7 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public onTeamspaceChange = (): void => {
 			this.isLoadingTeamspace = true;
-			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.account);
+			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.currentUser);
 			const membersPromise = this.setTeamspaceMembers(this.currentTeamspace.account);
 			const jobsPromise = this.setTeamspaceJobs(this.currentTeamspace.account);
 
@@ -133,7 +133,7 @@ class AccountUserManagementController implements ng.IController {
 			return {
 				...member,
 				isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-				isCurrentUser: this.account === member.user
+				isCurrentUser: this.currentUser === member.user
 			};
 		}
 
@@ -203,7 +203,7 @@ class AccountUserManagementController implements ng.IController {
 
 export const AccountUserManagementComponent: ng.IComponentOptions = {
 		bindings: {
-			account: "<",
+			currentUser: "<",
 			accounts: "<",
 			showPage: "&?"
 		},
