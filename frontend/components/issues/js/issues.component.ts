@@ -130,14 +130,14 @@ class IssuesController implements ng.IController {
 
 		let channel = this.notificationService.getChannel(this.account, this.model);
 
-		channel.issues.offCreated(this.newIssueListener);
-		channel.issues.offUpdated(this.handleIssueChanged);
+		channel.issues.unsubscribeCreated(this.newIssueListener);
+		channel.issues.unsubscribeUpdated(this.handleIssueChanged);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
 				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
-				channel.issues.offCreated(this.newIssueListener);
-				channel.issues.offUpdated(this.handleIssueChanged);
+				channel.issues.unsubscribeCreated(this.newIssueListener);
+				channel.issues.unsubscribeUpdated(this.handleIssueChanged);
 		});
 	}
 
@@ -267,15 +267,15 @@ class IssuesController implements ng.IController {
 		const onIssueCreated = this.newIssueListener.bind(this);
 		const onIssueUpdated = this.handleIssueChanged.bind(this);
 
-		channel.issues.onCreated(onIssueCreated, this);
-		channel.issues.onUpdated(onIssueUpdated, this);
+		channel.issues.subscribeCreated(onIssueCreated, this);
+		channel.issues.subscribeUpdated(onIssueUpdated, this);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
 			if (subModel) {
 				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
-				channel.issues.onCreated(onIssueCreated, this);
-				channel.issues.onUpdated(onIssueUpdated, this);
+				channel.issues.subscribeCreated(onIssueCreated, this);
+				channel.issues.subscribeUpdated(onIssueUpdated, this);
 			} else {
 				console.error("Submodel was expected to be defined for issue subscription: ", subModel);
 			}

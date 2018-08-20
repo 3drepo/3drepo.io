@@ -104,9 +104,9 @@ class GroupsController implements ng.IController {
 
 	public $onDestroy() {
 		this.groups = [];
-		this.groupsNotifications.offCreated(this.onGroupsCreated);
-		this.groupsNotifications.offUpdated(this.onGroupsUpdated);
-		this.groupsNotifications.offDeleted(this.onGroupsDeleted);
+		this.groupsNotifications.unsubscribeCreated(this.onGroupsCreated);
+		this.groupsNotifications.unsubscribeUpdated(this.onGroupsUpdated);
+		this.groupsNotifications.unsubscribeDeleted(this.onGroupsDeleted);
 	}
 
 	public watchers() {
@@ -440,9 +440,9 @@ class GroupsController implements ng.IController {
 
 	/*** Realtime sync  */
 	public watchNotification() {
-		this.groupsNotifications.onCreated(this.onGroupsCreated, this);
-		this.groupsNotifications.onUpdated(this.onGroupsUpdated, this);
-		this.groupsNotifications.onDeleted(this.onGroupsDeleted, this);
+		this.groupsNotifications.subscribeCreated(this.onGroupsCreated, this);
+		this.groupsNotifications.subscribeUpdated(this.onGroupsUpdated, this);
+		this.groupsNotifications.subscribeDeleted(this.onGroupsDeleted, this);
 	}
 
 	public onGroupsCreated(group) {
