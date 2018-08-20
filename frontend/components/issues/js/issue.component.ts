@@ -825,7 +825,8 @@ class IssueController implements ng.IController {
 		const groupData = {
 			name: this.issueData.name,
 			color: [255, 0, 0],
-			objects: nodes
+			objects: nodes,
+			isIssueGroup: true
 		};
 
 		return nodes.length === 0 ? null : groupData;
