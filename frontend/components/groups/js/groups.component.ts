@@ -17,8 +17,8 @@
 import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
 import { GroupsService } from "./groups.service";
-import { NotificationEvents } from "../../home/js/notifications/notification.events";
-import { NotificationService } from "../../home/js/notifications/notification.service";
+import { NotificationEvents } from "../../notifications/js/notification.events";
+import { NotificationService } from "../../notifications/js/notification.service";
 import { TreeService } from "../../tree/js/tree.service";
 
 class GroupsController implements ng.IController {

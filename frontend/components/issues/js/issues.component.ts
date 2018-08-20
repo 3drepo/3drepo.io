@@ -18,7 +18,7 @@ import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
 import { EventService } from "../../home/js/event.service";
 import { IssuesService } from "./issues.service";
-import { NotificationService } from "../../home/js/notifications/notification.service";
+import { NotificationService } from "../../notifications/js/notification.service";
 import { RevisionsService } from "../../revisions/js/revisions.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
 
