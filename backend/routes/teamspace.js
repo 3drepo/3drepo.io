@@ -24,7 +24,6 @@
 	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
-	const C = require("../constants");
 
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
 
@@ -55,11 +54,7 @@
 	}
 
 	function findUsersWithoutMembership(req, res, next) {
-		User.findAllByQuery(req.params.account, req.params.query).then((users) => {
-			const notMembers = users.filter(({roles}) => {
-				const isMemberOfTeamspace = roles.some(({ db, role }) => db === req.params.account && role === C.DEFAULT_MEMBER_ROLE);
-				return !isMemberOfTeamspace;
-			});
+		User.findUsersWithoutMembership(req.params.account, req.params.query).then((notMembers) => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, notMembers);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

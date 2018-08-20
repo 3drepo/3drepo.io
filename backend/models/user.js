@@ -146,7 +146,7 @@ schema.statics.findByUserName = function(user) {
 	return this.findOne({account: "admin"}, { user });
 };
 
-schema.statics.findAllByQuery = function (teamspace, query) {
+schema.statics.findUsersWithoutMembership = function (teamspace, query) {
 	const db = require("../db/db");
 	return db.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
@@ -161,16 +161,25 @@ schema.statics.findAllByQuery = function (teamspace, query) {
 				]
 			}).toArray();
 	}).then((users) => {
-		const usersData = users.map(({user, roles, customData}) => {
-			return {
-				user,
-				roles,
-				firstName: customData.firstName,
-				lastName: customData.lastName,
-				email: customData.email
-			};
-		});
-		return Promise.resolve(usersData);
+		const notMembers = users.reduce(({user, roles, customData}, members) => {
+			const isMemberOfTeamspace = roles.some((roleItem) => {
+				return roleItem.db === teamspace && roleItem.role === C.DEFAULT_MEMBER_ROLE;
+			});
+
+			if (!isMemberOfTeamspace) {
+				members.push({
+					user,
+					roles,
+					firstName: customData.firstName,
+					lastName: customData.lastName,
+					email: customData.email
+				});
+			}
+
+			return members;
+		}, []);
+
+		return Promise.resolve(notMembers);
 	});
 };
 
