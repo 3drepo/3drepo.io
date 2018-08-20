@@ -146,15 +146,15 @@ schema.statics.findByUserName = function(user) {
 	return this.findOne({account: "admin"}, { user });
 };
 
-schema.statics.findUsersWithoutMembership = function (teamspace, query) {
+schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 	const db = require("../db/db");
 	return db.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
 			.find({
 				$and: [{
 					$or: [
-						{ user: query },
-						{ "customData.email": { $regex: `.*${query}.*` }}
+						{ user: searchString },
+						{ "customData.email": { $regex: `.*${searchString}.*` }}
 					]
 				},
 				{ "customData.inactive": { "$exists": false }}
