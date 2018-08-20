@@ -14,10 +14,18 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { NotificationService } from "../../home/js/notifications/notification.service";
-import { NotificationIssuesEvents } from "../../home/js/notifications/notification.issues.events";
+import { AnalyticService } from "../../home/js/analytic.service";
+import { APIService } from "../../home/js/api.service";
+import { AuthService } from "../../home/js/auth.service";
+import { DialogService } from "../../home/js/dialog.service";
+import { IssuesService } from "./issues.service";
+import { MeasureService } from "../../measure/js/measure.service";
 import { NotificationEvents } from "../../home/js/notifications/notification.events";
+import { NotificationIssuesEvents } from "../../home/js/notifications/notification.issues.events";
+import { NotificationService } from "../../home/js/notifications/notification.service";
+import { StateManagerService } from "../../home/js/state-manager.service";
+import { TreeService } from "../../tree/js/tree.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 class IssueController implements ng.IController {
 
@@ -34,7 +42,6 @@ class IssueController implements ng.IController {
 		"APIService",
 		"NotificationService",
 		"AuthService",
-		"ClientConfigService",
 		"AnalyticService",
 		"StateManager",
 		"MeasureService",
@@ -97,17 +104,16 @@ class IssueController implements ng.IController {
 		private $timeout,
 		private $scope,
 
-		private IssuesService,
-		private APIService,
+		private issuesService: IssuesService,
+		private apiService: APIService,
 		private notificationService: NotificationService,
-		private AuthService,
-		private ClientConfigService,
-		private AnalyticService,
-		private StateManager,
-		private MeasureService,
-		private ViewerService,
-		private TreeService,
-		private DialogService
+		private authService: AuthService,
+		private analyticService: AnalyticService,
+		private stateManager: StateManagerService,
+		private measureService: MeasureService,
+		private viewerService: ViewerService,
+		private treeService: TreeService,
+		private dialogService: DialogService
 	) {}
 
 	public $onInit() {
@@ -181,11 +187,11 @@ class IssueController implements ng.IController {
 		history.pushState(null, null, document.URL);
 
 		this.popStateHandler = (event) => {
-			this.StateManager.popStateHandler(event, this.account, this.model);
+			this.stateManager.popStateHandler(event, this.account, this.model);
 		};
 
 		this.refreshHandler = (event) => {
-			return this.StateManager.refreshHandler(event);
+			return this.stateManager.refreshHandler(event);
 		};
 
 		// listen for user clicking the back button
@@ -203,11 +209,11 @@ class IssueController implements ng.IController {
 		window.removeEventListener("popstate", this.popStateHandler);
 		window.removeEventListener("beforeunload", this.refreshHandler);
 
-		this.ViewerService.removeUnsavedPin();
+		this.viewerService.removeUnsavedPin();
 
 		this.aboutToBeDestroyed = true;
 		if (this.comment) {
-			this.IssuesService.updateIssues(this.issueData); // So that issues list is notified
+			this.issuesService.updateIssues(this.issueData); // So that issues list is notified
 			this.saveComment();
 		}
 		if (this.editingCommentIndex !== null) {
@@ -215,8 +221,8 @@ class IssueController implements ng.IController {
 		}
 		// Get out of pin drop mode
 
-		this.ViewerService.pin.pinDropMode = false;
-		this.MeasureService.setDisabled(false);
+		this.viewerService.pin.pinDropMode = false;
+		this.measureService.setDisabled(false);
 		this.clearPin = true;
 
 		// unsubscribe on destroy
@@ -269,14 +275,14 @@ class IssueController implements ng.IController {
 				this.issueFailedToLoad = false;
 				this.issueData = null;
 
-				this.IssuesService.getIssue(this.data.account, this.data.model, this.data._id)
+				this.issuesService.getIssue(this.data.account, this.data.model, this.data._id)
 					.then((fetchedIssue) => {
 						this.setEditIssueData(fetchedIssue);
 						this.startNotification();
 						this.issueFailedToLoad = false;
 						// Update the issue data on issue service so search would work better
-						this.IssuesService.updateIssues(this.issueData);
-						this.IssuesService.showIssue(this.issueData, this.revision);
+						this.issuesService.updateIssues(this.issueData);
+						this.issuesService.showIssue(this.issueData, this.revision);
 					})
 					.catch((error) => {
 						this.issueFailedToLoad = true;
@@ -285,8 +291,8 @@ class IssueController implements ng.IController {
 
 			} else {
 				const creatorRole = this.userJob._id;
-				this.issueData = this.IssuesService.createBlankIssue(creatorRole);
-				this.IssuesService.populateIssue(this.issueData);
+				this.issueData = this.issuesService.createBlankIssue(creatorRole);
+				this.issuesService.populateIssue(this.issueData);
 				this.setContentHeight();
 
 			}
@@ -373,7 +379,7 @@ class IssueController implements ng.IController {
 		if (this.issueData && this.issueData.comments) {
 			this.issueData.comments.forEach((comment) => {
 				if (comment.action && comment.action.property === "topic_type") {
-					this.IssuesService.convertActionCommentToText(comment, this.topic_types);
+					this.issuesService.convertActionCommentToText(comment, this.topic_types);
 				}
 			});
 		}
@@ -389,9 +395,9 @@ class IssueController implements ng.IController {
 			this.disabledReason = this.reasonTitleText;
 		}
 
-		this.issueData.thumbnailPath = this.APIService.getAPIUrl(this.issueData.thumbnail);
+		this.issueData.thumbnailPath = this.apiService.getAPIUrl(this.issueData.thumbnail);
 		this.issueData.comments.forEach((comment) => {
-			if (comment.owner !== this.AuthService.getUsername()) {
+			if (comment.owner !== this.authService.getUsername()) {
 				comment.sealed = true;
 			}
 		});
@@ -410,13 +416,13 @@ class IssueController implements ng.IController {
 		this.canComment();
 		this.convertCommentTopicType();
 
-		this.IssuesService.populateIssue(this.issueData);
+		this.issuesService.populateIssue(this.issueData);
 		this.setContentHeight();
 
 	}
 
 	public canChangeDescription() {
-		return this.IssuesService.canChangeDescription(
+		return this.issuesService.canChangeDescription(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -441,7 +447,7 @@ class IssueController implements ng.IController {
 	}
 
 	public canChangePriority() {
-		return this.IssuesService.canChangePriority(
+		return this.issuesService.canChangePriority(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -450,7 +456,7 @@ class IssueController implements ng.IController {
 
 	public disableStatusOption(status) {
 		return (status.value === "closed" || status.value === "open") &&
-			!this.IssuesService.canChangeStatusToClosed(
+			!this.issuesService.canChangeStatusToClosed(
 				this.issueData,
 				this.userJob,
 				this.modelSettings.permissions
@@ -458,7 +464,7 @@ class IssueController implements ng.IController {
 	}
 
 	public canChangeStatus() {
-		return this.IssuesService.canChangeStatus(
+		return this.issuesService.canChangeStatus(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -466,7 +472,7 @@ class IssueController implements ng.IController {
 	}
 
 	public canChangeType() {
-		return this.IssuesService.canChangeType(
+		return this.issuesService.canChangeType(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -474,7 +480,7 @@ class IssueController implements ng.IController {
 	}
 
 	public canChangeDueDate() {
-		return this.IssuesService.canChangeDueDate(
+		return this.issuesService.canChangeDueDate(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -482,7 +488,7 @@ class IssueController implements ng.IController {
 	}
 
 	public canChangeAssigned() {
-		return this.IssuesService.canChangeAssigned(
+		return this.issuesService.canChangeAssigned(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -490,7 +496,7 @@ class IssueController implements ng.IController {
 	}
 
 	public canComment() {
-		return this.IssuesService.canComment(
+		return this.issuesService.canComment(
 			this.issueData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -516,23 +522,23 @@ class IssueController implements ng.IController {
 				assigned_roles: this.issueData.assigned_roles
 			};
 
-			this.IssuesService.updateIssue(this.issueData, statusChangeData)
+			this.issuesService.updateIssue(this.issueData, statusChangeData)
 				.then((response) => {
 					if (response) {
 						const respData = response.data.issue;
-						this.IssuesService.populateIssue(respData);
+						this.issuesService.populateIssue(respData);
 						this.issueData = respData;
 
 						// Add info for new comment
 						this.issueData.comments.forEach((comment) => {
 							if (comment && comment.viewpoint && comment.viewpoint.screenshot) {
-								comment.viewpoint.screenshotPath = this.APIService.getAPIUrl(comment.viewpoint.screenshot);
+								comment.viewpoint.screenshotPath = this.apiService.getAPIUrl(comment.viewpoint.screenshot);
 							}
 							if (comment && comment.action && comment.action.property) {
-								this.IssuesService.convertActionCommentToText(comment, this.topic_types);
+								this.issuesService.convertActionCommentToText(comment, this.topic_types);
 							}
 							if (comment && comment.created) {
-								comment.timeStamp = this.IssuesService.getPrettyTime(comment.created);
+								comment.timeStamp = this.issuesService.getPrettyTime(comment.created);
 							}
 						});
 
@@ -542,7 +548,7 @@ class IssueController implements ng.IController {
 						}
 
 						// Update the actual data model
-						this.IssuesService.updateIssues(this.issueData);
+						this.issuesService.updateIssues(this.issueData);
 
 						this.commentAreaScrollToBottom();
 					}
@@ -552,14 +558,14 @@ class IssueController implements ng.IController {
 
 			this.canComment();
 
-			this.AnalyticService.sendEvent({
+			this.analyticService.sendEvent({
 				eventCategory: "Issue",
 				eventAction: "edit"
 			});
 		}
 
 		// This is called so icon and assignment colour changes for new issues.
-		this.IssuesService.populateIssue(this.issueData);
+		this.issuesService.populateIssue(this.issueData);
 	}
 
 	public handleUpdateError(error) {
@@ -567,7 +573,7 @@ class IssueController implements ng.IController {
 		"If this continues please message support@3drepo.io.";
 		const escapable = true;
 		console.error(error);
-		this.DialogService.text("Error Updating Issue", content, escapable);
+		this.dialogService.text("Error Updating Issue", content, escapable);
 	}
 
 	public getCommentPlaceholderText() {
@@ -607,7 +613,7 @@ class IssueController implements ng.IController {
 			// overwrite the original issue data itself
 			const newViewpointData = angular.copy(this.issueData);
 			newViewpointData.viewpoint = viewpoint;
-			this.IssuesService.showIssue(newViewpointData, this.revision);
+			this.issuesService.showIssue(newViewpointData, this.revision);
 
 		}
 	}
@@ -621,7 +627,7 @@ class IssueController implements ng.IController {
 		if (viewpoint.screenshot) {
 
 			// We have a saved screenshot we use that
-			this.screenShot = this.APIService.getAPIUrl(viewpoint.screenshot);
+			this.screenShot = this.apiService.getAPIUrl(viewpoint.screenshot);
 			this.showScreenshotDialog(event);
 		} else if (this.issueData.descriptionThumbnail) {
 
@@ -661,12 +667,12 @@ class IssueController implements ng.IController {
 		case "pin":
 
 			if (selected) {
-				this.ViewerService.pin.pinDropMode = true;
-				this.MeasureService.deactivateMeasure();
-				this.MeasureService.setDisabled(true);
+				this.viewerService.pin.pinDropMode = true;
+				this.measureService.deactivateMeasure();
+				this.measureService.setDisabled(true);
 			} else {
-				this.ViewerService.pin.pinDropMode = false;
-				this.MeasureService.setDisabled(false);
+				this.viewerService.pin.pinDropMode = false;
+				this.measureService.setDisabled(false);
 			}
 			break;
 
@@ -709,11 +715,11 @@ class IssueController implements ng.IController {
 				const data = {
 					desc: this.issueData.desc
 				};
-				this.IssuesService.updateIssue(this.issueData, data)
+				this.issuesService.updateIssue(this.issueData, data)
 					.then((issueData) => {
 
 						if (issueData) {
-							this.IssuesService.updateIssues(this.issueData);
+							this.issuesService.updateIssues(this.issueData);
 							this.savedDescription = this.issueData.desc;
 						} else {
 							this.handleUpdateError(issueData);
@@ -758,20 +764,20 @@ class IssueController implements ng.IController {
 			viewpointPromise.resolve(this.commentViewpoint);
 		} else {
 			// Get the viewpoint
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.account, model: this.model}
 			);
 		}
 
 		// Get selected objects
-		this.ViewerService.getObjectsStatus({
+		this.viewerService.getObjectsStatus({
 			promise: objectsPromise
 		});
 
 		return Promise.all([viewpointPromise.promise, objectsPromise.promise])
 			.then((results) => {
 				const [viewpoint, objectInfo] = results;
-				viewpoint.hideIfc = this.TreeService.getHideIfc();
+				viewpoint.hideIfc = this.treeService.getHideIfc();
 				return this.handleObjects(viewpoint, objectInfo, screenShotPromise);
 			})
 			.catch((error) => {
@@ -783,7 +789,7 @@ class IssueController implements ng.IController {
 				"If this continues please message support@3drepo.io.";
 				const escapable = true;
 
-				this.DialogService.text("Error Saving Issue", content, escapable);
+				this.dialogService.text("Error Saving Issue", content, escapable);
 				console.error("Something went wrong saving the Issue: ", error);
 			});
 
@@ -803,7 +809,7 @@ class IssueController implements ng.IController {
 
 		} else {
 			// Get a screen shot if not already created
-			this.ViewerService.getScreenshot(screenShotPromise);
+			this.viewerService.getScreenshot(screenShotPromise);
 
 			return screenShotPromise.promise
 				.then((screenShot) => {
@@ -843,7 +849,7 @@ class IssueController implements ng.IController {
 		const promises = [];
 
 		if (highlightedGroupData) {
-			const highlightPromise = this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
+			const highlightPromise = this.apiService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 				});
@@ -851,7 +857,7 @@ class IssueController implements ng.IController {
 		}
 
 		if (hiddenGroupData) {
-			const hiddenPromise = this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
+			const hiddenPromise = this.apiService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
 				.then((hiddenGroupResponse) => {
 					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
 				});
@@ -896,13 +902,13 @@ class IssueController implements ng.IController {
 		};
 
 		// Pin data
-		const pinData = this.ViewerService.getPinData();
+		const pinData = this.viewerService.getPinData();
 		if (pinData !== null) {
 			issue.pickedPos = pinData.pickedPos;
 			issue.pickedNorm = pinData.pickedNorm;
 		}
 
-		return this.IssuesService.saveIssue(issue)
+		return this.issuesService.saveIssue(issue)
 			.then((response) => {
 				this.data = response.data; // So that new changes are registered as updates
 				const responseIssue = response.data;
@@ -911,13 +917,13 @@ class IssueController implements ng.IController {
 				this.pinHidden = true;
 
 				// Notify parent of new issue
-				this.IssuesService.populateIssue(responseIssue);
+				this.issuesService.populateIssue(responseIssue);
 				this.issueData = responseIssue;
-				this.IssuesService.addIssue(this.issueData);
-				this.IssuesService.setSelectedIssue(this.issueData, true, this.revision);
+				this.issuesService.addIssue(this.issueData);
+				this.issuesService.setSelectedIssue(this.issueData, true, this.revision);
 
 				// Hide some actions
-				this.ViewerService.pin.pinDropMode = false;
+				this.viewerService.pin.pinDropMode = false;
 
 				this.submitDisabled = true;
 				this.setContentHeight();
@@ -941,7 +947,7 @@ class IssueController implements ng.IController {
 					{notify: false}
 				);
 
-				this.AnalyticService.sendEvent({
+				this.analyticService.sendEvent({
 					eventCategory: "Issue",
 					eventAction: "create"
 				});
@@ -954,7 +960,7 @@ class IssueController implements ng.IController {
 		const objectsPromise = this.$q.defer();
 
 		// Get selected objects
-		this.ViewerService.getObjectsStatus({
+		this.viewerService.getObjectsStatus({
 			promise: objectsPromise
 		});
 
@@ -968,7 +974,7 @@ class IssueController implements ng.IController {
 
 		if (!angular.isDefined(this.commentThumbnail)) {
 			const viewpointPromise = this.$q.defer();
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
 			);
 			initPromises.push(viewpointPromise.promise.then((viewpoint) => {
@@ -987,22 +993,22 @@ class IssueController implements ng.IController {
 			const promises = [];
 
 			if (highlightedGroupData) {
-				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
+				promises.push(this.apiService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
 					.then((highlightedGroupResponse) => {
 						this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 					}));
 			}
 
 			if (hiddenGroupData) {
-				promises.push(this.APIService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
+				promises.push(this.apiService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
 					.then((hiddenGroupResponse) => {
 						this.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-						this.commentViewpoint.hideIfc = this.TreeService.getHideIfc();
+						this.commentViewpoint.hideIfc = this.treeService.getHideIfc();
 					}));
 			}
 
 			Promise.all(promises).then(() => {
-				this.IssuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
+				this.issuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
 						this.saving = false;
 						this.afterNewComment(response.data.issue, false);
@@ -1014,7 +1020,7 @@ class IssueController implements ng.IController {
 				console.error(error);
 			});
 
-			this.AnalyticService.sendEvent({
+			this.analyticService.sendEvent({
 				eventCategory: "Issue",
 				eventAction: "comment"
 			});
@@ -1026,7 +1032,7 @@ class IssueController implements ng.IController {
 		const content = "Something went wrong saving the comment. " +
 		"If this continues please message support@3drepo.io.";
 		const escapable = true;
-		this.DialogService.text("Error Saving Comment", content, escapable);
+		this.dialogService.text("Error Saving Comment", content, escapable);
 		console.error("Something went wrong saving the issue comment: ", error);
 	}
 
@@ -1034,7 +1040,7 @@ class IssueController implements ng.IController {
 		const content = "Something went wrong deleting the comment. " +
 		"If this continues please message support@3drepo.io.";
 		const escapable = true;
-		this.DialogService.text("Error Deleting Comment", content, escapable);
+		this.dialogService.text("Error Deleting Comment", content, escapable);
 		console.error("Something went wrong deleting the issue comment: ", error);
 	}
 
@@ -1043,7 +1049,7 @@ class IssueController implements ng.IController {
 		"If this continues please message support@3drepo.io.";
 		const escapable = true;
 
-		this.DialogService.text("Error Saving Screenshot", content, escapable);
+		this.dialogService.text("Error Saving Screenshot", content, escapable);
 		console.error("Something went wrong saving the screenshot: ", error);
 	}
 
@@ -1058,12 +1064,12 @@ class IssueController implements ng.IController {
 			otherComment.sealed = true;
 		});
 
-		if (comment.owner !== this.AuthService.getUsername()) {
+		if (comment.owner !== this.authService.getUsername()) {
 			comment.sealed = true;
 		}
 
 		if (comment.viewpoint && comment.viewpoint.screenshot) {
-			comment.viewpoint.screenshotPath = this.APIService.getAPIUrl(comment.viewpoint.screenshot);
+			comment.viewpoint.screenshotPath = this.apiService.getAPIUrl(comment.viewpoint.screenshot);
 		}
 
 		// Add new comment to issue
@@ -1075,7 +1081,7 @@ class IssueController implements ng.IController {
 			guid: comment.guid,
 			comment: comment.comment,
 			owner: comment.owner,
-			timeStamp: this.IssuesService.getPrettyTime(comment.created),
+			timeStamp: this.issuesService.getPrettyTime(comment.created),
 			viewpoint: comment.viewpoint,
 			action: comment.action
 		});
@@ -1083,7 +1089,7 @@ class IssueController implements ng.IController {
 		if (!noDeleteInput) {
 			delete this.comment;
 			delete this.commentThumbnail;
-			this.IssuesService.updateIssues(this.issueData);
+			this.issuesService.updateIssues(this.issueData);
 			this.submitDisabled = true;
 		}
 
@@ -1103,7 +1109,7 @@ class IssueController implements ng.IController {
 		event.stopPropagation();
 		const commentIndex = (this.issueData.comments.length - 1) - index;
 
-		this.IssuesService.deleteComment(this.issueData, commentIndex)
+		this.issuesService.deleteComment(this.issueData, commentIndex)
 			.then(() => {
 				this.issueData.comments.splice(commentIndex, 1);
 			})
@@ -1111,7 +1117,7 @@ class IssueController implements ng.IController {
 				this.errorDeleteComment(error);
 			});
 
-		this.AnalyticService.sendEvent({
+		this.analyticService.sendEvent({
 			eventCategory: "Issue",
 			eventAction: "deleteComment"
 		});
@@ -1135,7 +1141,7 @@ class IssueController implements ng.IController {
 
 			// Get the viewpoint and add the screen shot to it
 			// Remove base64 header text from screen shot
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.issueData.account, model: this.issueData.model}
 			);
 
@@ -1143,7 +1149,7 @@ class IssueController implements ng.IController {
 			// Description
 			this.issueData.descriptionThumbnail = data.screenShot;
 
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.account, model: this.model}
 			);
 		}
@@ -1232,7 +1238,7 @@ class IssueController implements ng.IController {
 			return;
 		}
 
-		this.IssuesService.populateIssue(issue);
+		this.issuesService.populateIssue(issue);
 		this.issueData = issue;
 
 		this.$scope.$apply();
@@ -1273,7 +1279,7 @@ class IssueController implements ng.IController {
 
 	public onCommentCreated(comment) {
 		if (comment.action) {
-			this.IssuesService.convertActionCommentToText(comment, this.topic_types);
+			this.issuesService.convertActionCommentToText(comment, this.topic_types);
 		}
 
 		this.afterNewComment(comment, true);

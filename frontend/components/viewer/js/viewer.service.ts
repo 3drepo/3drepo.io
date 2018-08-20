@@ -29,11 +29,12 @@ export class ViewerService {
 		"EventService"
 	];
 
-	private newPinId: string;
-	private pinData: object;
+	public pin: any;
+	public newPinId: string;
+	public currentModel: any;
+
+	private pinData: any;
 	private viewer: any;
-	private currentModel: any;
-	private pin: any;
 	private initialised: any;
 	private Viewer: any;
 	private model: string;
@@ -66,7 +67,7 @@ export class ViewerService {
 		this.initialised = $q.defer();
 	}
 
-	public getPinData() {
+	public getPinData(): any {
 		return this.pinData;
 	}
 
