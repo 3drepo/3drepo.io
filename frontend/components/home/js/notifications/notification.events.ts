@@ -23,27 +23,27 @@ export class NotificationEvents {
 
 	}
 
-	public onCreated(callback: (data: any) => void, context: any): void {
+	public subscribeCreated(callback: (data: any) => void, context: any): void {
 		this.channel.subscribe(this.entity + "Created", callback, context, this.keys );
 	}
 
-	public onUpdated(callback: (data: any) => void, context: any): void {
+	public subscribeUpdated(callback: (data: any) => void, context: any): void {
 		this.channel.subscribe(this.entity + "Updated", callback,  context, this.keys);
 	}
 
-	public onDeleted(callback: (data: any) => void, context: any): void {
+	public subscribeDeleted(callback: (data: any) => void, context: any): void {
 		this.channel.subscribe(this.entity + "Deleted", callback,  context, this.keys );
 	}
 
-	public offCreated(callback: (data: any) => void): void {
+	public unsubscribeCreated(callback: (data: any) => void): void {
 		this.channel.unsubscribe(this.entity + "Created", callback, this.keys);
 	}
 
-	public offUpdated(callback: (data: any) => void): void {
+	public unsubscribeUpdated(callback: (data: any) => void): void {
 		this.channel.unsubscribe(this.entity + "Updated", callback, this.keys);
 	}
 
-	public offDeleted(callback: (data: any) => void): void {
+	public unsubscribeDeleted(callback: (data: any) => void): void {
 		this.channel.unsubscribe(this.entity + "Deleted", callback, this.keys);
 	}
 

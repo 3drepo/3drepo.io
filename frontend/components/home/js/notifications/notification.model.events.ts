@@ -21,19 +21,11 @@ export class NotificationModelEvents {
 	constructor(private channel: NotificationsChannel) {
 	}
 
-	public onStatusChanged(callback: (data: any) => void, context: any) {
+	public subscribeStatusChanged(callback: (data: any) => void, context: any) {
 		this.channel.subscribe("modelStatusChanged", callback, context);
 	}
 
-	public offStatusChanged(callback: (data: any) => void) {
+	public unsubscribeStatusChanged(callback: (data: any) => void) {
 		this.channel.unsubscribe("modelStatusChanged", callback);
-	}
-
-	public onCreated(callback: (data: any) => void, context: any) {
-		this.channel.subscribe("modelCreated", callback, context);
-	}
-
-	public offCreated(callback: (data: any) => void) {
-		this.channel.unsubscribe("modelCreated", callback);
 	}
 }

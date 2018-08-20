@@ -227,10 +227,10 @@ class IssueController implements ng.IController {
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.issuesNotifications.offUpdated(this.onIssueUpdated);
-			this.commentsNotifications.offCreated(this.onCommentCreated);
-			this.commentsNotifications.offUpdated (this.onCommentUpdated);
-			this.commentsNotifications.offDeleted(this.onCommentDeleted);
+			this.issuesNotifications.unsubscribeUpdated(this.onIssueUpdated);
+			this.commentsNotifications.unsubscribeCreated(this.onCommentCreated);
+			this.commentsNotifications.unsubscribeUpdated (this.onCommentUpdated);
+			this.commentsNotifications.unsubscribeDeleted(this.onCommentDeleted);
 		}
 
 	}
@@ -1256,24 +1256,24 @@ class IssueController implements ng.IController {
 			* Watch for issue change
 			*/
 
-			this.issuesNotifications.onUpdated( this.onIssueUpdated, this);
+			this.issuesNotifications.subscribeUpdated( this.onIssueUpdated, this);
 
 			this.commentsNotifications = this.issuesNotifications.getCommentsNotifications(this.data._id);
 
 			/*
 			* Watch for new comments
 			*/
-			this.commentsNotifications.onCreated(this.onCommentCreated, this);
+			this.commentsNotifications.subscribeCreated(this.onCommentCreated, this);
 
 			/*
 			* Watch for comment changed
 			*/
-			this.commentsNotifications.onUpdated(this.onCommentUpdated, this);
+			this.commentsNotifications.subscribeUpdated(this.onCommentUpdated, this);
 
 			/*
 			* Watch for comment deleted
 			*/
-			this.commentsNotifications.onDeleted(this.onCommentDeleted, this);
+			this.commentsNotifications.subscribeDeleted(this.onCommentDeleted, this);
 		}
 	}
 
