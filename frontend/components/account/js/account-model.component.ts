@@ -20,8 +20,8 @@ import { AnalyticService } from "../../home/js/analytic.service";
 import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
-import { NotificationModelEvents } from "../../home/js/notifications/notification.model.events";
-import { NotificationService } from "../../home/js/notifications/notification.service";
+import { NotificationModelEvents } from "../../notifications/js/notification.model.events";
+import { NotificationService } from "../../notifications/js/notification.service";
 import { RevisionsService } from "../../revisions/js/revisions.service";
 
 class AccountModelController implements ng.IController {
