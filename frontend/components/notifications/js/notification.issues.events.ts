@@ -26,7 +26,7 @@ export class NotificationIssuesEvents extends NotificationEvents {
 		this.comments = {};
 	}
 
-	public getCommentsNotifications(id: string) {
+	public getCommentsNotifications(id: string): NotificationEvents {
 		if (!this.comments[id]) {
 			this.comments[id] =  new NotificationEvents(this.channel, "comment", id);
 		}
