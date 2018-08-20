@@ -593,7 +593,7 @@ export class GroupsService {
 	 * @param objectsA a group objects to be compared
 	 * @param objectsB the other groups objects to be compared
 	 */
-	public areGroupObjectsEqual(objectsA: [any], objectsB: [any]): boolean {
+	public areGroupObjectsEqual(objectsA: any[], objectsB: any[]): boolean {
 		const objAIds = this.getFullIdsForNodes(objectsA);
 		const objBIds = this.getFullIdsForNodes(objectsB);
 		let areEqual = objAIds.length === objBIds.length;
@@ -601,7 +601,7 @@ export class GroupsService {
 		return areEqual;
 	}
 
-	private getFullIdsForNodes(nodes: [any]) {
+	private getFullIdsForNodes(nodes: any[]) {
 		return nodes.reduce((obj, currentVal) => {
 			const nsp = currentVal.account + "." + currentVal.model ;
 			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));

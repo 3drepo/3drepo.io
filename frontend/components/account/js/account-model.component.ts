@@ -15,16 +15,20 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { NotificationService } from "../../home/js/notifications/notification.service";
+import { AccountUploadService } from "./account-upload.service";
+import { AnalyticService } from "../../home/js/analytic.service";
+import { APIService } from "../../home/js/api.service";
+import { AuthService } from "../../home/js/auth.service";
+import { DialogService } from "../../home/js/dialog.service";
 import { NotificationModelEvents } from "../../home/js/notifications/notification.model.events";
+import { NotificationService } from "../../home/js/notifications/notification.service";
+import { RevisionsService } from "../../revisions/js/revisions.service";
 
 class AccountModelController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"$location",
-		"$timeout",
-		"$interval",
 		"$filter",
 
 		"DialogService",
@@ -34,7 +38,6 @@ class AccountModelController implements ng.IController {
 		"NotificationService",
 		"AuthService",
 		"AnalyticService",
-		"AccountService",
 		"AccountUploadService"
 	];
 
@@ -68,19 +71,16 @@ class AccountModelController implements ng.IController {
 	constructor(
 		private $scope: any,
 		private $location: any,
-		private $timeout: any,
-		private $interval: any,
 		private $filter: any,
 
-		private DialogService: any,
-		private APIService: any,
-		private ClientConfigService: any,
-		private RevisionsService: any,
+		private dialogService: DialogService,
+		private apiService: APIService,
+		private clientConfigService: any,
+		private revisionsService: RevisionsService,
 		private notificationService: NotificationService,
-		private AuthService: any,
-		private AnalyticService: any,
-		private AccountService: any,
-		private AccountUploadService: any
+		private authService: AuthService,
+		private analyticService: AnalyticService,
+		private accountUploadService: AccountUploadService
 	) {}
 
 	public $onInit() {
@@ -97,19 +97,19 @@ class AccountModelController implements ng.IController {
 		}
 
 		this.model.canUpload = true;
-		const perms = this.ClientConfigService.permissions;
+		const perms = this.clientConfigService.permissions;
 
 		// Options
 		this.modelOptions = {
 			upload: {
 				label: "Upload file",
 				icon: "cloud_upload",
-				hidden: !this.AuthService.hasPermission(perms.PERM_UPLOAD_FILES, this.model.permissions)
+				hidden: !this.authService.hasPermission(perms.PERM_UPLOAD_FILES, this.model.permissions)
 			},
 			permissions: {
 				label: "Permissions",
 				icon: "group",
-				hidden: !this.AuthService.hasPermission("manage_model_permission", this.model.permissions)
+				hidden: !this.authService.hasPermission("manage_model_permission", this.model.permissions)
 			},
 			revision: {
 				label: "Revisions",
@@ -119,7 +119,7 @@ class AccountModelController implements ng.IController {
 			modelsetting: {
 				label: "Settings",
 				icon: "settings",
-				hidden: !this.AuthService.hasPermission(perms.PERM_CHANGE_MODEL_SETTINGS, this.model.permissions)
+				hidden: !this.authService.hasPermission(perms.PERM_CHANGE_MODEL_SETTINGS, this.model.permissions)
 			}
 		};
 
@@ -127,14 +127,14 @@ class AccountModelController implements ng.IController {
 			this.modelOptions.download = {
 				label: "Download",
 				icon: "cloud_download",
-				hidden: !this.AuthService.hasPermission(perms.PERM_DOWNLOAD_MODEL, this.model.permissions)
+				hidden: !this.authService.hasPermission(perms.PERM_DOWNLOAD_MODEL, this.model.permissions)
 			};
 		}
 		this.uploadButtonDisabled = true;
 		this.modelOptions.delete = {
 			label: "Delete",
 			icon: "delete",
-			hidden: !this.AuthService.hasPermission(perms.PERM_DELETE_MODEL, this.model.permissions),
+			hidden: !this.authService.hasPermission(perms.PERM_DELETE_MODEL, this.model.permissions),
 			color: "#F44336"
 		};
 
@@ -149,7 +149,7 @@ class AccountModelController implements ng.IController {
 		this.modelToUploadFileWatch = undefined;
 
 		// Unsubscribe for notifications
-		this.modelNotifications.offStatusChanged();
+		this.modelNotifications.offStatusChanged(this.onModelStatusChanged);
 	}
 
 	public watchers() {
@@ -161,7 +161,7 @@ class AccountModelController implements ng.IController {
 
 				this.uploadErrorMessage = null;
 				const extension = names[names.length - 1].toLowerCase();
-				const valid = this.ClientConfigService.acceptedFormat.indexOf(extension) === -1;
+				const valid = this.clientConfigService.acceptedFormat.indexOf(extension) === -1;
 
 				if (names.length === 1) {
 					this.uploadErrorMessage = "Filename must have extension";
@@ -187,12 +187,12 @@ class AccountModelController implements ng.IController {
 		if (!this.model.uploading) {
 			if (this.model.timestamp === null) {
 				// No timestamp indicates no model previously uploaded
-				const permission = this.ClientConfigService.permissions.PERM_UPLOAD_FILES;
-				if (this.AuthService.hasPermission(permission, this.model.permissions)) {
+				const permission = this.clientConfigService.permissions.PERM_UPLOAD_FILES;
+				if (this.authService.hasPermission(permission, this.model.permissions)) {
 					this.tag = null;
 					this.desc = null;
 					this.modelToUpload = null;
-					this.DialogService.showDialog(
+					this.dialogService.showDialog(
 						"upload-model-dialog.html",
 						this.$scope,
 						event,
@@ -206,7 +206,7 @@ class AccountModelController implements ng.IController {
 				}
 			} else {
 				this.$location.path("/" + this.account + "/" + this.model.model, "_self").search("page", null);
-				this.AnalyticService.sendEvent({
+				this.analyticService.sendEvent({
 					eventCategory: "Model",
 					eventAction: "view"
 				});
@@ -237,7 +237,7 @@ class AccountModelController implements ng.IController {
 			this.tag = null;
 			this.desc = null;
 			this.uploadButtonDisabled = true;
-			this.DialogService.showDialog(
+			this.dialogService.showDialog(
 				"upload-model-dialog.html",
 				this.$scope,
 				event,
@@ -252,11 +252,11 @@ class AccountModelController implements ng.IController {
 		case "download":
 			const url = `${this.account}/${this.model.model}/download/latest`;
 			window.open(
-				this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, url),
+				this.clientConfigService.apiUrl(this.clientConfigService.GET_API, url),
 				"_blank"
 			);
 
-			this.AnalyticService.sendEvent({
+			this.analyticService.sendEvent({
 				eventCategory: "Model",
 				eventAction: "download"
 			});
@@ -279,11 +279,11 @@ class AccountModelController implements ng.IController {
 		case "revision":
 			this.revisionsLoading = true;
 			this.revisions = null;
-			this.RevisionsService.listAll(this.account, this.model.model).then((revisions) => {
+			this.revisionsService.listAll(this.account, this.model.model).then((revisions) => {
 				this.revisions = revisions;
 				this.revisionsLoading = false;
 			});
-			this.DialogService.showDialog("revisions-dialog.html", this.$scope, event, true, null, false, this.dialogCloseToId);
+			this.dialogService.showDialog("revisions-dialog.html", this.$scope, event, true, null, false, this.dialogCloseToId);
 			break;
 		}
 	}
@@ -293,14 +293,14 @@ class AccountModelController implements ng.IController {
 	 */
 	public setupAddLicenses() {
 		this.onShowPage({page: "billing", callingPage: "permissionsspaces"});
-		this.DialogService.closeDialog();
+		this.dialogService.closeDialog();
 	}
 
 	/**
 	 * Close the dialog
 	 */
 	public closeDialog() {
-		this.DialogService.closeDialog();
+		this.dialogService.closeDialog();
 	}
 
 	/**
@@ -331,7 +331,7 @@ class AccountModelController implements ng.IController {
 			desc: this.desc
 		};
 
-		this.AccountUploadService.uploadRevisionToModel(uploadFileData)
+		this.accountUploadService.uploadRevisionToModel(uploadFileData)
 			.then(() => {
 				this.addButtons = false;
 				this.addButtonType = "add";
@@ -346,7 +346,7 @@ class AccountModelController implements ng.IController {
 	}
 
 	public revisionTimestamp(timestamp) {
-		return this.RevisionsService.revisionDateFilter(timestamp);
+		return this.revisionsService.revisionDateFilter(timestamp);
 	}
 
 	/**
@@ -354,7 +354,7 @@ class AccountModelController implements ng.IController {
 	*/
 	public goToRevision(revId) {
 		this.$location.path(`/${this.account}/${this.model.model}/${revId}`, "_self");
-		this.AnalyticService.sendEvent({
+		this.analyticService.sendEvent({
 			eventCategory: "Model",
 			eventAction: "view"
 		});
@@ -366,11 +366,11 @@ class AccountModelController implements ng.IController {
 	public watchModelStatus() {
 
 		// If we're refreshing the page, handle the data recieved
-		this.handleModelStatus(this.model, false);
+		this.onModelStatusChanged(this.model, false);
 
 		// Else if there's dynamic updates to the model listen for them
 		this.modelNotifications = this.notificationService.getChannel(this.account, this.model.model).model;
-		this.modelNotifications.onStatusChanged(this.handleModelStatus.bind(this));
+		this.modelNotifications.onStatusChanged(this.onModelStatusChanged, this);
 	}
 
 	/**
@@ -384,7 +384,7 @@ class AccountModelController implements ng.IController {
 	/**
 	 * Process the status of the model and set the view
 	 */
-	public handleModelStatus(modelData, freshModel) {
+	public onModelStatusChanged(modelData, isFreshModel = true) {
 
 		if (modelData.status) {
 			this.model.status = modelData.status;
@@ -396,12 +396,11 @@ class AccountModelController implements ng.IController {
 			// that the errors are acceptable
 			const error = modelData.errorReason;
 			const valid = modelData.status === "ok" ||
-				(error && error.value === this.APIService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) ||
-				(error && error.value === this.APIService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
+				(error && error.value === this.apiService.getResponseCode("FILE_IMPORT_MISSING_TEXTURES")) ||
+				(error && error.value === this.apiService.getResponseCode("FILE_IMPORT_MISSING_NODES"));
 
 			// We don't want to show the import successful message
 			// for models that were there before, so we use the isFreshModel flag
-			const isFreshModel = freshModel === undefined;
 			if (valid && isFreshModel) {
 				this.model.timestamp = new Date();
 				this.model.timestampPretty = this.$filter("prettyDate")(this.model.timestamp, {showSeconds: true});
@@ -422,10 +421,6 @@ class AccountModelController implements ng.IController {
 			} else if (errorStatus) {
 				this.fileUploadInfo = "Failed to import model";
 			}
-
-			// $timeout(function () {
-			// 	this.fileUploadInfo = "";
-			// }, this.infoTimeout);
 
 		} else if (modelData.status === "queued") {
 

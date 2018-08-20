@@ -3,6 +3,9 @@ export class ClientConfigService {
 
 	public static $inject: string[] = [];
 
+	public permissions: any;
+	public acceptedFormat: any[];
+
 	private apiUrls;
 	private apiUrl;
 	private apiAlgorithm;
