@@ -149,7 +149,7 @@ class AccountModelController implements ng.IController {
 		this.modelToUploadFileWatch = undefined;
 
 		// Unsubscribe for notifications
-		this.modelNotifications.unsubscribeStatusChanged(this.onModelStatusChanged);
+		this.modelNotifications.unsubscribeFromStatusChanged(this.onModelStatusChanged);
 	}
 
 	public watchers() {
@@ -370,7 +370,7 @@ class AccountModelController implements ng.IController {
 
 		// Else if there's dynamic updates to the model listen for them
 		this.modelNotifications = this.notificationService.getChannel(this.account, this.model.model).model;
-		this.modelNotifications.subscribeStatusChanged(this.onModelStatusChanged, this);
+		this.modelNotifications.subscribeToStatusChanged(this.onModelStatusChanged, this);
 	}
 
 	/**

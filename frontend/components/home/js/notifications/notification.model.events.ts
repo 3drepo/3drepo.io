@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,11 +21,11 @@ export class NotificationModelEvents {
 	constructor(private channel: NotificationsChannel) {
 	}
 
-	public subscribeStatusChanged(callback: (data: any) => void, context: any) {
+	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {
 		this.channel.subscribe("modelStatusChanged", callback, context);
 	}
 
-	public unsubscribeStatusChanged(callback: (data: any) => void) {
+	public unsubscribeFromStatusChanged(callback: (data: any) => void) {
 		this.channel.unsubscribe("modelStatusChanged", callback);
 	}
 }
