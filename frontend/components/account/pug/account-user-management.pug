@@ -55,7 +55,6 @@
 						jobs="vm.jobs"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onMembersChange(updatedMembers)")
-					.flex
 					.accountUserManagementFooter(
 						ng-if="vm.licencesLabel"
 						layout="row"
@@ -72,9 +71,7 @@
 						projects="vm.projects"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onMembersChange(updatedMembers)")
-					.flex
 					.accountUserManagementFooter(
-						ng-if="vm.licencesLabel"
 						layout="row"
-						layout-align="end center") {{vm.licencesLabel}}
+						layout-align="end center") Assign project permissions
 						

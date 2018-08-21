@@ -17,10 +17,18 @@
 import {first, get} from "lodash";
 
 class ProjectsPermissionsController implements ng.IController {
-	public static $inject: string[] = [];
+	public static $inject: string[] = [
+		"ProjectsService"
+	];
 
-	private projects;
+	private projects: object[];
 	private currentProject;
+	private currentTeamspace;
+	private members;
+	private permissions;
+	private models;
+
+	constructor(private ProjectsService: any) {}
 
 	public $onInit(): void {}
 
@@ -31,7 +39,16 @@ class ProjectsPermissionsController implements ng.IController {
 		}
 	}
 
-	public onProjectChange(): void {}
+	public onProjectChange(): void {
+		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject)
+			.then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
+				this.permissions = project.permissions.map(({user, permissions = []}: {user: string, permissions: string[]}) => {
+					const memberData = this.members.find((member) => member.user === user) || {};
+					return {...memberData, permissions};
+				});
+				this.models = project.models;
+			});
+	}
 
 	public goToModelsPermissions(): void {}
 }

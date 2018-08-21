@@ -46,14 +46,14 @@ export class AccountService {
 	}
 
 	public getFederationsByProjectName(teamspaces, teamspaceName, projectName) {
-		const project = this.getProject(teamspaces, teamspaceName, projectName);
+		const project = this.getSelectedProjectDetails(teamspaces, teamspaceName, projectName);
 		return project.models.filter((model) => {
 			return model.subModels;
 		});
 	}
 
 	public getIndividualModelsByProjectName(teamspaces, teamspaceName, projectName) {
-		const project = this.getProject(teamspaces, teamspaceName, projectName);
+		const project = this.getSelectedProjectDetails(teamspaces, teamspaceName, projectName);
 		return project.models.filter((model) =>  {
 			return !model.subModels;
 		});
@@ -163,7 +163,7 @@ export class AccountService {
 
 	}
 
-	public getProject(teamspaces, teamspaceName, projectName) {
+	public getSelectedProjectDetails(teamspaces, teamspaceName, projectName) {
 
 		// Return models that are not federated (federations)
 		const selectedTeamspace = teamspaces.filter((teamspace) => {
@@ -175,7 +175,6 @@ export class AccountService {
 		})[0];
 
 		return selectedProject;
-
 	}
 
 	public getModel(teamspaces, teamspaceName, projectName, id) {
@@ -185,12 +184,12 @@ export class AccountService {
 	}
 
 	public getModels(teamspaces, teamspaceName, projectName) {
-		return this.getProject(teamspaces, teamspaceName, projectName).models;
+		return this.getSelectedProjectDetails(teamspaces, teamspaceName, projectName).models;
 	}
 
 	public removeModelByProjectName(teamspaces, teamspaceName, projectName, modelName) {
 		const models = this.getModels(teamspaces, teamspaceName, projectName);
-		const project = this.getProject(teamspaces, teamspaceName, projectName);
+		const project = this.getSelectedProjectDetails(teamspaces, teamspaceName, projectName);
 		models.forEach((model, i) => {
 			if (model.model === modelName) {
 				project.models.splice(i, 1);
@@ -391,6 +390,16 @@ export class AccountService {
 	 */
 	public findMembers = (teamspace, searchText): Promise<any> => {
 		return this.APIService.get(`${teamspace}/members/search/${searchText}`);
+	}
+
+	/**
+	 * Return project details
+	 * @param teamspace
+	 * @param project
+	 * @returns {*|promise}
+	 */
+	public getProject = (teamspace, project): Promise<any> => {
+		return this.APIService.get(`${teamspace}/projects/${project}`);
 	}
 }
 

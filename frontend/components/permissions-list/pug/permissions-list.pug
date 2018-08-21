@@ -18,9 +18,9 @@
 
 	.permissionsListBody(ng-if="!vm.isLoading")
 		div.permissionsListRow(
-			ng-repeat="member in vm.processedMembers track by member.user"
+			ng-repeat="permissions in vm.processedPermissions track by permissions.user"
 			layout="row"
 			layout-align="start center")
 
 			//User details
-			member-card.permissionsListCell(data="member" flex="30")
+			member-card.permissionsListCell(data="permissions" flex="30")

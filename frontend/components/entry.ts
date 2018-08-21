@@ -26,6 +26,7 @@ window.TDR = TDR;
 window.TDR();
 
 // Register all the angularjs modules
+import "../services/projects.service";
 import "./account/js/account-assign.component";
 import "./account/js/account-billing.component";
 import "./account/js/account.component";

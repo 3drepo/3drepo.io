@@ -14,25 +14,19 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 import {values, cond, matches, orderBy} from "lodash";
 
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
-		"$rootScope",
 		"$mdDialog",
-		"APIService",
-		"AccountService",
-		"DialogService"
+		"ProjectsService"
 	];
 
-	private TEAMSPACE_PERMISSIONS = values(TEAMSPACE_PERMISSIONS);
 	private SORT_TYPES = SORT_TYPES;
 
-	private members;
-	private processedMembers;
-	private jobs;
+	private permissions;
+	private processedPermissions;
 	private currentTeamspace;
 	private currentSort;
 	private onChange;
@@ -40,11 +34,8 @@ class PermissionsListController implements ng.IController {
 	private isLoading = true;
 
 	constructor(
-		private $rootScope: any,
 		private $mdDialog: any,
-		private APIService: any,
-		private AccountService: any,
-		private DialogService: any
+		private ProjectsService: any
 	) {
 		this.currentSort = {
 			type: SORT_TYPES.USERS,
@@ -54,107 +45,13 @@ class PermissionsListController implements ng.IController {
 
 	public $onInit(): void {}
 
-	public $onChanges({members}: {members?: any}): void {
-		if (members && members.currentValue && this.currentSort) {
-			if (!this.processedMembers) {
+	public $onChanges({permissions}: {permissions?: any}): void {
+		if (permissions && permissions.currentValue && this.currentSort) {
+			if (!this.processedPermissions) {
 				this.isLoading = false;
 			}
-			this.processedMembers = this.processMembers();
+			this.processedPermissions = this.processData();
 		}
-	}
-
-	/**
-	 * Remove license for a member
-	 */
-	public removeMember(member): void {
-		this.AccountService.removeMember(this.currentTeamspace.account, member.user)
-			.then(this.onMemberRemove.bind(null, member))
-			.catch((error) => {
-				if (error.status === 400) {
-					const responseCode = this.APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
-					if (error.data.value === responseCode) {
-						const dialogData: any = this.$rootScope.$new();
-						dialogData.models = error.data.models,
-						dialogData.projects = error.data.projects,
-						dialogData.memberName = member.user;
-						dialogData.onRemove = this.removeLicenseConfirmed.bind(null, this.currentTeamspace.account, member);
-
-						if (error.data.teamspace) {
-							dialogData.teamspacePerms = error.data.teamspace.permissions.join(", ");
-						}
-
-						this.DialogService.showDialog("remove-license-dialog.html", dialogData);
-					}
-				} else {
-					this.DialogService.showError("remove", "licence", error);
-				}
-
-			});
-	}
-
-	/**
-	* Remove license from user who is a team member of a model
-	*/
-	public removeLicenseConfirmed = (teamspace, member) => {
-		this.AccountService.removeMemberCascade(teamspace, member.user)
-			.then(this.onMemberRemove.bind(null, member))
-			.catch(this.DialogService.showError.bind(null, "remove", "licence"));
-	}
-
-	/**
-	 * Call on member remove
-	 */
-	public onMemberRemove = (member, response): void => {
-		if (response.status === 200) {
-			this.members = this.members.filter(({user}) => user !== member.user);
-			this.processedMembers = this.processMembers();
-
-			this.onChange({updatedMembers: this.members});
-		}
-		this.$mdDialog.cancel();
-	}
-
-	/**
-	 * Update member job title
-	 * @param member
-	 */
-	public onJobChange(member): void {
-		const {job, user} = member;
-		const updatePromise = this.AccountService[job ? "updateMemberJob" : "removeMemberJob"];
-		const acionType = job ? "assign" : "unassign";
-
-		member.isPending = true;
-		updatePromise(this.currentTeamspace.account, job, user)
-			.then((response) => {
-				if (response.status !== 200) {
-					throw (response);
-				}
-			})
-			.catch(this.DialogService.showError.bind(null, acionType, "job"))
-			.finally(() => {
-				member.isPending = false;
-				this.updateOriginMember(member);
-			});
-	}
-
-	/**
-	 * Update member permissions
-	 * @param member
-	 */
-	public onPermissionsChange(member): void {
-		const permissionData = {
-			user: member.user,
-			permissions: member.isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
-		};
-
-		member.isPending = true;
-		this.AccountService
-			.setMemberPermissions(this.currentTeamspace.account, permissionData)
-			.catch(this.DialogService.showError.bind(null, "update", "teamspace permissions"))
-			.finally(() => {
-				member.isPending = false;
-				this.updateOriginMember(member);
-			});
 	}
 
 	/**
@@ -164,20 +61,20 @@ class PermissionsListController implements ng.IController {
 	 */
 	public setSortType(type, order): void {
 		this.currentSort = {type, order};
-		this.processedMembers = this.processMembers();
+		this.processedPermissions = this.processData();
 	}
 
 	/**
 	 * Search callback
 	 */
 	public onSearch(): void {
-		this.processedMembers = this.processMembers();
+		this.processedPermissions = this.processData();
 	}
 
-	public processMembers(): object[] {
-		const filteredMembers = this.getFilteredMembers(this.members, this.searchText);
-		const processedMembers = this.getSortedMembers(filteredMembers);
-		return processedMembers;
+	public processData(): object[] {
+		const filteredPermissions = this.getFilteredData(this.permissions, this.searchText);
+		const processedPermissions = this.getSortedData(filteredPermissions);
+		return processedPermissions;
 	}
 
 	/**
@@ -186,7 +83,7 @@ class PermissionsListController implements ng.IController {
 	 * @param options
 	 * @returns {Array}
 	 */
-	public getFilteredMembers(members = [], query = ""): object[] {
+	public getFilteredData(members = [], query = ""): object[] {
 		if (!query) {
 			return members;
 		}
@@ -197,17 +94,17 @@ class PermissionsListController implements ng.IController {
 	}
 
 	/**
-	 * Return list of sorted members
-	 * @param members
+	 * Return list of sorted data
+	 * @param data
 	 * @param options
 	 * @returns {Array}
 	 */
-	public getSortedMembers(members = [], options = this.currentSort): object[] {
-		const {USERS, JOBS, PERMISSIONS} = SORT_TYPES;
+	public getSortedData(data = [], options = this.currentSort): object[] {
+		const {USERS} = SORT_TYPES;
 		const sort = cond([
 			[matches({type: USERS}), ({order}) => {
 				return orderBy(
-					members,
+					data,
 					({firstName, lastName}) => `${lastName}`.toLowerCase().trim(),
 					order
 				);
@@ -220,17 +117,16 @@ class PermissionsListController implements ng.IController {
 	 * Refresh data on non processed members list
 	 */
 	public updateOriginMember(updatedMember) {
-		const memberIndex = this.members.findIndex(({email}) => updatedMember.email);
+		const memberIndex = this.permissions.findIndex(({email}) => updatedMember.email);
 		if (memberIndex !== -1) {
-			this.members[memberIndex] = {...updatedMember};
-			this.onChange({updatedMembers: this.members});
+			this.permissions[memberIndex] = {...updatedMember};
+			this.onChange({updatedMembers: this.permissions});
 		}
 	}
 }
 
 export const PermissionsListComponent: ng.IComponentOptions = {
 	bindings: {
-		members: "<?",
 		permissions: "<?",
 		currentTeamspace: "<?",
 		onChange: "&?"

@@ -12,7 +12,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   height: 100%;
-  max-height: calc(100% - 160px);
+  max-height: calc(100% - 62px);
 }
 
 .permissionsListRow {

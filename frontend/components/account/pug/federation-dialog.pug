@@ -43,7 +43,7 @@ md-dialog#federationDialog(
 					
 					md-option(
 						required
-						ng-repeat="project in vm.getProjects(vm.federationData.teamspace)"
+						ng-repeat="project in vm.getSelectedProjectDetails(vm.federationData.teamspace)"
 						ng-if="project.permissions.indexOf('create_federation') !== -1"
 						ng-selected="vm.federationData.project === project.name"
 						value="{{project.name}}") {{project.name}}
