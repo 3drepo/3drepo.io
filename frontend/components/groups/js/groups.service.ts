@@ -141,7 +141,7 @@ export class GroupsService {
 	/**
 	 * Remove all color overrides from a given group based on it's ID
 	 */
-	public removeColorOverride(groupId: string) {
+	public removeColorOverride(groupId: string, shouldDisableOverrideAll: boolean = true) {
 
 		const group = this.state.colorOverride[groupId];
 
@@ -165,7 +165,7 @@ export class GroupsService {
 
 			delete this.state.colorOverride[groupId];
 
-			if (this.state.overrideAll &&
+			if (shouldDisableOverrideAll && this.state.overrideAll &&
 				this.state.groups.length !==
 				Object.keys(this.state.colorOverride).length) {
 				this.state.overrideAll = false;
@@ -582,7 +582,7 @@ export class GroupsService {
 	 * @param groupB the other group to be compared
 	 */
 	public areGroupsEqual(groupA: any, groupB: any): boolean {
-		const fields = ["_id", "__v", "name", "author", "createdAt", "updatedBy", "updatedAt", "color"];
+		const fields = ["_id", "__v", "name", "author", "description", "createdAt", "updatedBy", "updatedAt", "color"];
 		const areEqual = fields.every( (f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]) );
 
 		return areEqual;
