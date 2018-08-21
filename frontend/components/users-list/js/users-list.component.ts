@@ -76,6 +76,7 @@ class UsersListController implements ng.IController {
 						const dialogData: any = this.$rootScope.$new();
 						dialogData.models = error.data.models,
 						dialogData.projects = error.data.projects,
+						dialogData.memberName = member.user;
 						dialogData.onRemove = this.removeLicenseConfirmed.bind(null, this.currentTeamspace.account, member);
 
 						if (error.data.teamspace) {
@@ -190,8 +191,8 @@ class UsersListController implements ng.IController {
 			return members;
 		}
 
-		return members.filter(({firstName, lastName, user, email}) => {
-			return `${firstName} ${lastName} ${user} ${email}`.includes(query);
+		return members.filter(({firstName, lastName, user, company}) => {
+			return `${firstName} ${lastName} ${user} ${company}`.includes(query);
 		});
 	}
 

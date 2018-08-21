@@ -62,7 +62,6 @@
 	}
 
 	function getMemberList(req, res, next) {
-
 		User.findByUserName(req.session.user.username).then(user => {
 
 			if(!user) {

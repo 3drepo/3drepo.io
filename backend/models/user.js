@@ -1077,7 +1077,7 @@ schema.methods.getBasicDetails = function() {
 		user,
 		firstName: customData.firstName,
 		lastName: customData.lastName,
-		email: customData.email
+		company: _.get(customData, "billing.billingInfo.company", null)
 	};
 };
 
@@ -1122,7 +1122,7 @@ schema.statics.getMembers = function(teamspace) {
 					user,
 					firstName: customData.firstName,
 					lastName: customData.lastName,
-					email: customData.email,
+					company: _.get(customData, "billing.billingInfo.company", null),
 					permissions: _.get(permissions, "permissions", []),
 					job: _.get(memToJob, user)
 				};
