@@ -18,6 +18,10 @@
   top: 160px;
 }
 
+.accountUserManagement .addButton md-icon {
+  transition: all 200ms ease-in-out;
+}
+
 .accountUserManagement .addButton.active md-icon {
   transform: rotate(45deg);
 }
@@ -58,9 +62,18 @@
 }
 
 .accountUserManagement list-sort-button.active button {
-  background: rgb(6,86,60) !important;
+  background: rgb(6, 86, 60) !important;
 }
 
 .accountUserManagement list-sort-button.active md-icon {
   color: rgba(255, 255, 255, 1) !important;
+}
+
+.accountUserManagementLoader {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  bottom: 0;
+  height: calc(100% - 187px);
+  background: #fafafa;
 }

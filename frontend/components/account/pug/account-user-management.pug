@@ -21,9 +21,8 @@
 
 		md-button.md-accent.md-fab.md-mini.addButton(
 			aria-label="Add new member"
-			ng-if="!vm.isLoadingTeamspace"
 			ng-click="vm.toggleNewDataPanel()"
-			ng-disabled="vm.members.length === vm.licencesLimit"
+			ng-disabled="vm.members.length === vm.licencesLimit || vm.isLoadingTeamspace"
 			ng-class="{'active': vm.showAddingPanel}")
 			md-icon.angular-material-icons add
 
@@ -38,6 +37,9 @@
 		.addPanelBackdrop(
 			ng-class="{'addPanelBackdropVisible': vm.showAddingPanel}"
 			ng-click="vm.toggleNewDataPanel(true)")
+
+		.accountUserManagementLoader(ng-if="vm.isLoadingTeamspace" layout="row" layout-align="center center")
+			md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
 		md-tabs(
 			flex
