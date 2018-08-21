@@ -1,5 +1,10 @@
 .permissionsList
 	.permissionsListHeader(layout="row" layout-align="start center")
+		.permissionsListCell(layout="row" layout-align="center center" flex="10")
+			md-checkbox(
+				ng-change="vm.toggleAllItems()"
+				ng-model="vm.shouldSelectAllItems")
+	
 		.permissionsListCell(layout="row" layout-align="start center" flex="30")
 			list-sort-button(
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
@@ -13,6 +18,16 @@
 					placeholder="User"
 					ng-change="vm.onSearch()")
 
+		.permissionsListCell(
+			layout="row"
+			layout-align="center center"
+			flex="15"
+			ng-repeat="permission in vm.PROJECT_PERMISSIONS")
+			list-sort-button(
+				ng-class="{'active': vm.currentSort.type === vm.CUSTOM_SORT_TYPES[permission.key]}"
+				on-change="vm.setCustomSortType(vm.CUSTOM_SORT_TYPES[permission.key], order)")
+			.usersListCellLabel {{::permission.label}}
+
 	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
@@ -22,5 +37,21 @@
 			layout="row"
 			layout-align="start center")
 
+			//Checkbox
+			.permissionsListCell(layout="row" layout-align="center center" flex="10")
+				md-checkbox(ng-model="permissions.isSelected")
+
 			//User details
 			member-card.permissionsListCell(data="permissions" flex="30")
+
+			//Permissions
+			md-radio-group(flex="30" ng-model="permissions.key" layout="row" layout-align="start center")
+				.permissionsListCell(
+					ng-repeat="permission in vm.PROJECT_PERMISSIONS"
+					flex
+					layout="row"
+					layout-align="center center")
+					md-radio-button(
+						ng-disabled="permissions.isAdmin"
+						ng-value="permission.key"
+						aria-label="{{::permission.label}}")

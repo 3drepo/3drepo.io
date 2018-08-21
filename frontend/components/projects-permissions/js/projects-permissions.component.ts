@@ -15,6 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import {first, get} from "lodash";
+import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 class ProjectsPermissionsController implements ng.IController {
 	public static $inject: string[] = [
@@ -44,7 +45,14 @@ class ProjectsPermissionsController implements ng.IController {
 			.then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
 				this.permissions = project.permissions.map(({user, permissions = []}: {user: string, permissions: string[]}) => {
 					const memberData = this.members.find((member) => member.user === user) || {};
-					return {...memberData, permissions};
+					const projectPermissionsKey = memberData.isAdmin ?
+						PROJECT_ROLES_TYPES.ADMINSTRATOR :
+						PROJECT_ROLES_TYPES.UNASSIGNED;
+
+					return {
+						...memberData,
+						key: projectPermissionsKey
+					};
 				});
 				this.models = project.models;
 			});

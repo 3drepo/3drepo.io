@@ -14,8 +14,9 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 import {values, cond, matches, orderBy} from "lodash";
+import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
+import {PROJECT_ROLES_LIST} from "../../../constants/project-permissions";
 
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
@@ -24,6 +25,7 @@ class PermissionsListController implements ng.IController {
 	];
 
 	private SORT_TYPES = SORT_TYPES;
+	private PROJECT_PERMISSIONS = PROJECT_ROLES_LIST;
 
 	private permissions;
 	private processedPermissions;
@@ -32,6 +34,7 @@ class PermissionsListController implements ng.IController {
 	private onChange;
 	private searchText;
 	private isLoading = true;
+	private shouldSelectAllItems;
 
 	constructor(
 		private $mdDialog: any,
@@ -116,12 +119,22 @@ class PermissionsListController implements ng.IController {
 	/**
 	 * Refresh data on non processed members list
 	 */
-	public updateOriginMember(updatedMember) {
+	public updateOriginMember(updatedMember): void {
 		const memberIndex = this.permissions.findIndex(({email}) => updatedMember.email);
 		if (memberIndex !== -1) {
 			this.permissions[memberIndex] = {...updatedMember};
 			this.onChange({updatedMembers: this.permissions});
 		}
+	}
+
+	/**
+	 * Toggle list items
+	 */
+	public toggleAllItems(): void {
+		this.permissions = this.permissions.map((permission) => {
+			return {...permission, isSelected: this.shouldSelectAllItems};
+		});
+		this.processedPermissions = this.processData();
 	}
 }
 
