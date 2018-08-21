@@ -1,5 +1,6 @@
 .usersList {
-
+  height: 47vh;
+  overflow: hidden;
 }
 
 .usersListHeader {
@@ -10,7 +11,7 @@
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 30vh;
+  max-height: calc(100% - 62px);
 }
 
 .usersListRow {
