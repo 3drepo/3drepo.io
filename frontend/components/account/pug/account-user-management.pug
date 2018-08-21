@@ -10,7 +10,7 @@
 		.teamspaceSelectWrapper(layout="row")
 			md-input-container.teamspaceSelectContainer(md-no-float, flex)
 				md-select(
-					ng-model="vm.account"
+					ng-model="vm.currentUser"
 					placeholder="Select a teamspace"
 					ng-change="vm.onTeamspaceChange()"
 					ng-disabled="!vm.teamspaces.length")

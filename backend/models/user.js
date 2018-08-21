@@ -153,15 +153,15 @@ schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 			.find({
 				$and: [{
 					$or: [
-						{ user: searchString },
-						{ "customData.email": { $regex: `.*${searchString}.*` }}
+						{ user: { $regex: `.*${searchString}.*` } },
+						{ "customData.email": searchString }
 					]
 				},
 				{ "customData.inactive": { "$exists": false }}
 				]
 			}).toArray();
 	}).then((users) => {
-		const notMembers = users.reduce(({user, roles, customData}, members) => {
+		const notMembers = users.reduce((members, {user, roles, customData}) => {
 			const isMemberOfTeamspace = roles.some((roleItem) => {
 				return roleItem.db === teamspace && roleItem.role === C.DEFAULT_MEMBER_ROLE;
 			});
@@ -172,7 +172,7 @@ schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 					roles,
 					firstName: customData.firstName,
 					lastName: customData.lastName,
-					email: customData.email
+					company: _.get(customData, "billing.billingInfo.company", null)
 				});
 			}
 
@@ -1042,13 +1042,11 @@ schema.methods.removeTeamMember = function(username, cascadeRemove) {
 schema.methods.addTeamMember = function(user, job, permissions) {
 	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
 		const limits = this.customData.billing.getSubscriptionLimits();
+
 		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
 			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
 		} else {
-			return Promise.all([
-				User.findByUserName(user),
-				User.findByUserName(this.user)
-			]).then(([userEntry, teamspaceEntry]) => {
+			return User.findByUserName(user).then((userEntry) => {
 				if(!userEntry) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
@@ -1062,13 +1060,12 @@ schema.methods.addTeamMember = function(user, job, permissions) {
 						promises.push(Job.addUserToJob(this.user, user, job));
 					}
 					if (permissions && permissions.length) {
-						promises.push(teamspaceEntry.customData.permissions.add({user, permissions}));
+						promises.push(this.customData.permissions.add({user, permissions}));
 					}
 
 					return Promise.all(promises).then(userEntry.getBasicDetails.bind(userEntry));
 				})
 					.then(userData => Object.assign({job, permissions}, userData));
-
 			});
 		}
 	});

@@ -77,8 +77,8 @@ class AccountUserManagementController implements ng.IController {
 			this.onTeamspaceChange();
 		}
 
-		public $onChanges({account: accountName, accounts}: {account?: any, accounts?: any}): void {
-			if (accountName.currentValue && accounts.currentValue) {
+		public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
+			if (currentUser.currentValue && accounts.currentValue) {
 				this.teamspaces = accounts.currentValue.filter(({isAdmin}) => isAdmin);
 			}
 		}
@@ -174,7 +174,7 @@ class AccountUserManagementController implements ng.IController {
 		 * Generate licences summary
 		 */
 		public getLicencesLabel(): string {
-			const limit = isNumber(this.licencesLimit) ? this.licencesLimit : "unlimited assigned";
+			const limit = isNumber(this.licencesLimit) ? this.licencesLimit : "unlimited";
 			return `Assigned licences: ${this.members.length} out of ${limit}`;
 		}
 

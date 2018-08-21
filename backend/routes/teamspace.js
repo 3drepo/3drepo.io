@@ -29,7 +29,7 @@
 
 	router.get("/members", middlewares.loggedIn, getMemberList);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
-	router.get("/members/search/:query", middlewares.isAccountAdmin, findUsersWithoutMembership);
+	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
 	function getQuotaInfo(req, res, next) {
@@ -54,7 +54,7 @@
 	}
 
 	function findUsersWithoutMembership(req, res, next) {
-		User.findUsersWithoutMembership(req.params.account, req.params.query).then((notMembers) => {
+		User.findUsersWithoutMembership(req.params.account, req.params.searchString).then((notMembers) => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, notMembers);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

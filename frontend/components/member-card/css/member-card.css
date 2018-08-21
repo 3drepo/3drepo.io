@@ -3,14 +3,14 @@
 }
 
 .memberCardLogin,
-.memberCardEmail {
+.memberCardCompany {
 	font-size: 10px;
 	color: rgba(0,0,0,.4);
 }
 
 .memberCardName,
 .memberCardLogin,
-.memberCardEmail {
+.memberCardCompany {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;

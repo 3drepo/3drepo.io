@@ -11,7 +11,7 @@ form.newMemberForm(name="newMemberForm" layout="column")
 		md-search-text="vm.searchText"
 		md-selected-item-change="vm.selectedUserChange(item)"
 		md-items="item in vm.querySearch(vm.searchText)"
-		md-item-text="item.email"
+		md-item-text="item.user"
 		md-min-length="1"
 		ng-required
 		md-menu-class="newMemberFormAutocompleteMenu"

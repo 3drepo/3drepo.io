@@ -1,4 +1,4 @@
 .memberCard(layout="column", layout-align="center start")
 	.memberCardName {{vm.data.lastName | uppercase}}, {{vm.data.firstName}}
 	.memberCardLogin {{vm.data.user}}
-	.memberCardEmail {{vm.data.email}}
+	.memberCardCompany(ng-if="vm.data.company") {{vm.data.company}}
