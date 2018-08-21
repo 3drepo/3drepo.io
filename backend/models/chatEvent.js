@@ -54,7 +54,6 @@ function newComment(emitter, account, model, issueId, data) {
 	return insertEventQueue("comment" + eventTypes.CREATED, emitter, account, model, [issueId], data);
 }
 
-
 function commentChanged(emitter, account, model, issueId, data) {
 	return insertEventQueue("comment" + eventTypes.UPDATED, emitter, account, model, [issueId], data);
 }
@@ -62,7 +61,6 @@ function commentChanged(emitter, account, model, issueId, data) {
 function commentDeleted(emitter, account, model, issueId, data) {
 	return insertEventQueue("comment" + eventTypes.DELETED, emitter, account, model, [issueId], data);
 }
-
 
 function modelStatusChanged(emitter, account, model, data) {
 	return insertEventQueue("modelStatusChanged", emitter, account, model, null, data);

@@ -130,14 +130,14 @@ class IssuesController implements ng.IController {
 
 		let channel = this.notificationService.getChannel(this.account, this.model);
 
-		channel.issues.unsubscribeFromCreated(this.newIssueListener);
-		channel.issues.unsubscribeFromUpdated(this.handleIssueChanged);
+		channel.issues.unsubscribeFromCreated(this.onIssueCreated);
+		channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
 				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
-				channel.issues.unsubscribeFromCreated(this.newIssueListener);
-				channel.issues.unsubscribeFromUpdated(this.handleIssueChanged);
+				channel.issues.unsubscribeFromCreated(this.onIssueCreated);
+				channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
 		});
 	}
 
@@ -264,35 +264,25 @@ class IssuesController implements ng.IController {
 		// Watch for new issues
 
 		let channel = this.notificationService.getChannel(this.account, this.model);
-		const onIssueCreated = this.newIssueListener.bind(this);
-		const onIssueUpdated = this.handleIssueChanged.bind(this);
 
-		channel.issues.subscribeToCreated(onIssueCreated, this);
-		channel.issues.subscribeToUpdated(onIssueUpdated, this);
+		channel.issues.subscribeToCreated(this.onIssueCreated, this);
+		channel.issues.subscribeToUpdated(this.issuesService.updateIssues, this.issuesService);
 
 		// Do the same for all subModels
-		([] || this.subModels).forEach((subModel) => {
-			if (subModel) {
+		(this.subModels || []).forEach((subModel) => {
 				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
-				channel.issues.subscribeToCreated(onIssueCreated, this);
-				channel.issues.subscribeToUpdated(onIssueUpdated, this);
-			} else {
-				console.error("Submodel was expected to be defined for issue subscription: ", subModel);
-			}
+				channel.issues.subscribeToCreated(this.onIssueCreated, this);
+				channel.issues.subscribeToUpdated(this.issuesService.updateIssues, this.issuesService);
 		});
 	}
 
-	public newIssueListener(issues) {
+	public onIssueCreated(issues) {
 		// TODO: fix submodel part;
 
 		issues.forEach((issue) => {
 			this.shouldShowIssue(issue);
 		});
 
-	}
-
-	public handleIssueChanged(issue) {
-		this.issuesService.updateIssues(issue);
 	}
 
 	public shouldShowIssue(issue) {
@@ -320,35 +310,16 @@ class IssuesController implements ng.IController {
 			}
 
 			// If Federation
-			if (!isSubmodelIssue) {
-
-				issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
-				if (issueShouldAdd) {
-					this.issuesService.addIssue(issue);
-				}
-
-			} else {
-				// If submodel
-
-				this.revisionsService.listAll(issue.account, issue.model)
-					.then((submodelRevisions) => {
-
-						issueShouldAdd = this.checkIssueShouldAdd(issue, submodelRevisions[0], submodelRevisions);
-						if (issueShouldAdd) {
-							this.issuesService.addIssue(issue);
-						}
-					})
-					.catch((error) => {
-						console.error("Something went wrong getting submodel revisions", error);
-					});
-
+			issueShouldAdd = isSubmodelIssue || this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
+			if (issueShouldAdd) {
+				this.issuesService.addIssue(issue);
 			}
 		}
 
 	}
 
 	public checkIssueShouldAdd(issue, currentRevision, revisions) {
-
+		// Searches for the full revision object in the revisions of the model
 		const issueRevision = revisions.find((rev) => {
 			return rev._id === issue.rev_id;
 		});
@@ -358,9 +329,9 @@ class IssuesController implements ng.IController {
 			return true;
 		}
 
+		// Checks that the revision of the issue is the same as the model's current revision or that is a previous revision.
 		const issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
 		return issueRevision && issueInDate;
-
 	}
 
 	/**
