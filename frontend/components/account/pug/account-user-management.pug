@@ -39,20 +39,22 @@
 			ng-click="vm.toggleNewDataPanel(true)")
 
 		md-tabs(
-			md-dynamic-height
+			flex
 			md-border-bottom
 			md-selected="vm.selectedTab"
 			md-on-select="vm.onTabChange()") 
 			md-tab(label="Users")
-				users-list(
-					members="vm.members"
-					jobs="vm.jobs"
-					current-teamspace="vm.currentTeamspace"
-					on-change="vm.onMembersChange(updatedMembers)")
-				.accountUserManagementFooter(
-					ng-if="vm.licencesLabel"
-					layout="row"
-					layout-align="end center") {{vm.licencesLabel}}
+				div(layout="column" layout-fill)
+					users-list(
+						members="vm.members"
+						jobs="vm.jobs"
+						current-teamspace="vm.currentTeamspace"
+						on-change="vm.onMembersChange(updatedMembers)")
+					.flex
+					.accountUserManagementFooter(
+						ng-if="vm.licencesLabel"
+						layout="row"
+						layout-align="end center") {{vm.licencesLabel}}
 
 			md-tab(label="Jobs")
 				.jobsList
