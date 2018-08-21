@@ -93,12 +93,13 @@ function sendVerifyUserEmail(to, data) {
 
 function sendResetPasswordEmail(to, data) {
 
+	console.log('SEND', data);
+
 	data.url = getURL("forgotPassword", {token: data.token, username: data.username});
 
 	if(!data.url) {
 		return rejectNoUrl("forgotPassword");
 	}
-
 	const template = require("./templates/forgotPassword");
 	return sendEmail(template, to, data);
 }

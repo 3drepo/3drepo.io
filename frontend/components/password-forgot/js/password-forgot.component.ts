@@ -27,10 +27,9 @@ class PasswordForgotController implements ng.IController {
 	private messageErrorColour;
 	private buttonDisabled;
 	private message;
-	private username;
 	private messageColor;
 	private verified;
-	private email;
+	private usernameOrEmail;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -46,9 +45,9 @@ class PasswordForgotController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watchGroup(["vm.username", "vm.email"], () => {
+		this.$scope.$watch("vm.usernameOrEmail", () => {
 			this.message = "";
-			if (this.username && this.email) {
+			if (this.usernameOrEmail) {
 				this.buttonDisabled = false;
 			}
 		});
@@ -57,30 +56,20 @@ class PasswordForgotController implements ng.IController {
 	public requestPasswordChange(event) {
 		const enterKey = 13;
 		let requestChange = false;
-		let timeout = null;
 
-		clearTimeout(timeout);
-
-		if (event) {
-			// timeout = setTimeout(() => {
-			// console.log(event);
+		if (event !== undefined && event !== null) {
+			requestChange = (event.which === enterKey);
+		} else {
 			requestChange = true;
-			// }, 500);
 		}
 
-		// if (event !== undefined && event !== null) {
-		// 	requestChange = (event.which === enterKey);
-		// } else {
-		// 	requestChange = true;
-		// }
-
 		if (requestChange) {
-			if (this.email) {
+			if (this.usernameOrEmail) {
 				this.messageColor = this.messageColour;
 				this.message = "Please wait...";
 				this.showProgress = true;
 				this.buttonDisabled = false;
-				this.APIService.post(this.username + "/forgot-password", {email: this.email, username: this.username})
+				this.APIService.post("forgot-password", {userNameOrEmail: this.usernameOrEmail})
 					.then((response) => {
 						this.showProgress = false;
 						if (response.status === 200) {
