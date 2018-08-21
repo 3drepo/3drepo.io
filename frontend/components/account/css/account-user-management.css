@@ -9,12 +9,13 @@
 
 .accountUserManagement .teamspaceSelectContainer {
   margin: 24px;
+  margin-top: 40px;
 }
 
 .accountUserManagement .addButton {
   position: absolute;
   right: 6px;
-  top: 142px;
+  top: 160px;
 }
 
 .accountUserManagement .addButton.active md-icon {
