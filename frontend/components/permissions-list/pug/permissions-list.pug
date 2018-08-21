@@ -1,0 +1,26 @@
+.permissionsList
+	.permissionsListHeader(layout="row" layout-align="start center")
+		.permissionsListCell(layout="row" layout-align="start center" flex="30")
+			list-sort-button(
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+
+			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="User"
+					ng-change="vm.onSearch()")
+
+	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.permissionsListBody(ng-if="!vm.isLoading")
+		div.permissionsListRow(
+			ng-repeat="member in vm.processedMembers track by member.user"
+			layout="row"
+			layout-align="start center")
+
+			//User details
+			member-card.permissionsListCell(data="member" flex="30")

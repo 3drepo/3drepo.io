@@ -1,0 +1,115 @@
+.permissionsList {
+  height: calc(47vh - 101px);
+  overflow: hidden;
+}
+
+.permissionsListHeader {
+  height: 62px;
+}
+
+.permissionsListBody {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+  max-height: calc(100% - 160px);
+}
+
+.permissionsListRow {
+  height: 62px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.permissionsListCell {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  padding: 0 24px;
+}
+
+.permissionsListCell md-checkbox {
+  margin-bottom: 0;
+  width: 20px;
+  margin-right: -24px;
+}
+
+.permissionsListCell md-input-container {
+  width: 100%;
+}
+
+.permissionsListCell md-select .md-select-value {
+  padding-left: 0;
+  border-bottom-color: transparent !important;
+}
+
+.permissionsListCell md-select[disabled] .md-select-value {
+  background-image: none;
+}
+
+.permissionsListCell md-select[disabled] .md-select-icon {
+  display: none;
+}
+
+.permissionsListCell .md-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+  white-space: nowrap;
+  display: block; 
+}
+
+.permissionsListRemoveButton.md-button {
+  margin-right: 13px;
+}
+
+.permissionsListJobColor {
+  min-height: 6px;
+  min-width: 6px;
+  border-radius: 100%;
+  margin-right: 12px;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.permissionsListCellSearch {
+  margin: 0;
+  margin-bottom: 4px;
+  padding-left: 20px !important;
+}
+
+.permissionsListCellSearch .md-input {
+  padding-top: 5px !important;
+}
+
+.permissionsListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input {
+  border-color: transparent;
+}
+
+.permissionsListCellSearch.md-icon-float md-icon {
+  height: 14px;
+	font-size: 14px;
+	width: 14px;
+	min-width: 14px;
+  min-height: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  top: 12px;
+}
+
+.permissionsListCellSearch.md-icon-float > label {
+  color: rgba(0, 0, 0, 0.6);
+  width: calc(100% - 20px - 18px) !important;
+  left: 20px !important;
+  margin-bottom: 1px;
+}
+
+.permissionsListCellSearch.md-input-focused > label,
+.permissionsListCellSearch.md-input-has-value > label {
+  transform: translate3d(0,12px,0) scale(.75) !important;
+}
+
+.permissionsListCellSearch .md-errors-spacer {
+  display: none;
+}
+
+.permissionsListLoader {
+  width: 100%;
+  height: 62px;
+}

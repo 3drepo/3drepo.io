@@ -1,0 +1,27 @@
+.projectsPermissions
+  div(layout="row" layout-align="start center")
+    md-input-container.projectSelectContainer(md-no-float)
+      label Project
+      md-select(
+        ng-model="vm.currentProject"
+        placeholder="Select a project"
+        ng-change="vm.onProjectChange()"
+        ng-disabled="!vm.projects.length")
+        md-option(
+          ng-value="project.name"
+          ng-repeat="project in vm.projects") {{::project.name}}
+
+    .flex
+
+    md-button.md-accent.switchButton(
+      ng-disabled="!vm.currentProject.models.length"
+      ng-click="vm.goToModelsPermissions()")
+        div(layout="row" layout-align="start center") Model & Federation permissions
+          md-icon.angular-material-icons keyboard_arrow_right
+
+  permissions-list(
+    flex="grow"
+    permissions="vm.permissions"
+    members="vm.members"
+    current-teamspace="vm.currentTeamspace"
+    on-change="vm.onPermissionsChange(permissions)")
