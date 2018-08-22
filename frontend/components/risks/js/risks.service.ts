@@ -774,8 +774,7 @@ export class RisksService {
 
 	public getRisk(account, model, riskId) {
 
-		// TODO: Retrieve risk
-		const riskUrl = account + "/" + model + "/issues/" + riskId + ".json";
+		const riskUrl = account + "/" + model + "/risks/" + riskId + ".json";
 
 		return this.APIService.get(riskUrl)
 			.then((res) => {
@@ -787,12 +786,11 @@ export class RisksService {
 
 	public getRisks(account, model, revision) {
 
-		// TODO: Retrieve risks
 		let endpoint;
 		if (revision) {
-			endpoint = account + "/" + model + "/revision/" + revision + "/issues.json";
+			endpoint = account + "/" + model + "/revision/" + revision + "/risks.json";
 		} else {
-			endpoint = account + "/" + model + "/issues.json";
+			endpoint = account + "/" + model + "/risks.json";
 		}
 
 		return this.APIService.get(endpoint)
@@ -807,6 +805,7 @@ export class RisksService {
 
 	public saveRisk(risk) {
 
+		// TODO save risk
 		let saveUrl;
 		const base = risk.account + "/" + risk.model;
 		if (risk.rev_id) {
@@ -846,6 +845,7 @@ export class RisksService {
 
 		let endpoint = risk.account + "/" + risk.model;
 
+		// TODO put risk
 		if (risk.rev_id) {
 			endpoint += "/revision/" + risk.rev_id + "/issues/" +  risk._id + ".json";
 		} else {
@@ -947,28 +947,6 @@ export class RisksService {
 		}
 
 		return statusIcon;
-	}
-
-	/**
-	* Import bcf
-	*/
-	public importBcf(account, model, revision, file) {
-
-		let bcfUrl = account + "/" + model + "/issues.bcfzip";
-		if (revision) {
-			bcfUrl = account + "/" + model + "/revision/" + revision + "/issues.bcfzip";
-		}
-
-		const formData = new FormData();
-		formData.append("file", file);
-
-		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
-			.then((res) => {
-				if (res.status !== 200) {
-					throw res.data;
-				}
-			});
-
 	}
 
 	/**
