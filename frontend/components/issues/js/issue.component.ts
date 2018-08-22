@@ -1239,10 +1239,20 @@ class IssueController implements ng.IController {
 		}
 
 		this.issuesService.populateIssue(issue);
+		issue.comments.forEach( (c , index) => {
+			if (!!c.action) {
+				this.issuesService.convertActionCommentToText(c, undefined);
+				issue.comments[index] = c;
+			}
+
+			if (c.hasOwnProperty("created")) {
+				c.timeStamp = this.issuesService.getPrettyTime(c.created);
+			}
+
+		});
+
 		this.issueData = issue;
-
 		this.$scope.$apply();
-
 	}
 
 	public startNotification() {
