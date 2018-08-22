@@ -484,9 +484,9 @@ schema.statics.getForgotPasswordToken = function (userNameOrEmail, tokenExpiryTi
 			token: resetPasswordToken.token,
 			email: user.customData.email,
 			username: user.user
-		}
+		};
 
-		return updateUser(user.user, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
+		return updateUser(user.user, { $set: { "customData.resetPasswordToken": resetPasswordToken } });
 
 	}).then(() => {
 		return Promise.resolve(resetPasswordUserInfo);
