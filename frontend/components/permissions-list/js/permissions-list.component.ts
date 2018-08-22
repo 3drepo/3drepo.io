@@ -64,8 +64,8 @@ class PermissionsListController implements ng.IController {
 	 * @param type
 	 * @param order
 	 */
-	public setSortType(type, order): void {
-		this.currentSort = {type, order};
+	public setSortType(type, order, config = {}): void {
+		this.currentSort = {type, order, config};
 		this.processedPermissions = this.processData();
 	}
 
@@ -105,12 +105,19 @@ class PermissionsListController implements ng.IController {
 	 * @returns {Array}
 	 */
 	public getSortedData(data = [], options = this.currentSort): object[] {
-		const {USERS} = SORT_TYPES;
+		const {USERS, FIELD} = SORT_TYPES;
 		const sort = cond([
 			[matches({type: USERS}), ({order}) => {
 				return orderBy(
 					data,
-					({firstName, lastName}) => `${lastName}`.toLowerCase().trim(),
+					({lastName}) => `${lastName}`.toLowerCase().trim(),
+					order
+				);
+			}],
+			[matches({type: FIELD}), ({order, config}) => {
+				return orderBy(
+					data,
+					({key}) => key === config.key,
 					order
 				);
 			}]
@@ -146,10 +153,18 @@ class PermissionsListController implements ng.IController {
 		this.shouldSelectAllItems = selectedItems.length === this.processedPermissions.length;
 	}
 
+	/**
+	 * Pass single item to onChange callback
+	 * @param permission
+	 */
 	public updatePermission(permission): void {
 		this.onChange({updatedPermissions: [permission]});
 	}
 
+	/**
+	 * Prepare data and call onChange callback
+	 * @param selectedPermission
+	 */
 	public updatePermissionsForSelected(selectedPermission): void {
 		const updatedPermissions = this.processedPermissions
 			.reduce((permissionsList, permission) => {

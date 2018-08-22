@@ -31,8 +31,8 @@
 				ng-repeat="permission in vm.PROJECT_PERMISSIONS")
 				div(layout="row" layout-align="center center")
 					list-sort-button(
-						ng-class="{'active': vm.currentSort.type === vm.CUSTOM_SORT_TYPES[permission.key]}"
-						on-change="vm.setCustomSortType(vm.CUSTOM_SORT_TYPES[permission.key], order)")
+						ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.key === permission.key}"
+						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
 					.usersListCellLabel {{::permission.label}}
 				md-radio-button(
 					ng-disabled="!vm.hasSelectedItem"
