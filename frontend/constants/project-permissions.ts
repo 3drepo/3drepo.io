@@ -3,7 +3,8 @@ export const PROJECT_ROLES_TYPES = {
 	VIEWER: "viewer",
 	COMMENTER: "commenter",
 	COLLABORATOR: "collaborator",
-	UNASSIGNED: null
+	UNASSIGNED: null,
+	NONE: "none"
 };
 
 export const PROJECT_ROLE_PERMISSIONS = {

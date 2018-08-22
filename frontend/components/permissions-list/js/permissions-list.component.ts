@@ -16,7 +16,7 @@
  */
 import {values, cond, matches, orderBy} from "lodash";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
-import {PROJECT_ROLES_LIST} from "../../../constants/project-permissions";
+import {PROJECT_ROLES_LIST, PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
@@ -35,6 +35,8 @@ class PermissionsListController implements ng.IController {
 	private searchText;
 	private isLoading = true;
 	private shouldSelectAllItems;
+	private hasSelectedItem;
+	private permissionsForSelected = PROJECT_ROLES_TYPES.NONE;
 
 	constructor(
 		private $mdDialog: any,
@@ -135,6 +137,29 @@ class PermissionsListController implements ng.IController {
 			return {...permission, isSelected: this.shouldSelectAllItems};
 		});
 		this.processedPermissions = this.processData();
+		this.hasSelectedItem = this.shouldSelectAllItems;
+	}
+
+	public onSelectionChange(): void {
+		const selectedItems = this.processedPermissions.filter(({isSelected}) => isSelected);
+		this.hasSelectedItem = Boolean(selectedItems.length);
+		this.shouldSelectAllItems = selectedItems.length === this.processedPermissions.length;
+	}
+
+	public updatePermission(permission): void {
+		this.onChange({updatedPermissions: [permission]});
+	}
+
+	public updatePermissionsForSelected(selectedPermission): void {
+		const updatedPermissions = this.processedPermissions
+			.reduce((permissionsList, permission) => {
+				if (permission.isSelected && !permission.isAdmin) {
+					permissionsList.push({...permission, key: selectedPermission});
+				}
+				return permissionsList;
+			}, []);
+
+		this.onChange({updatedPermissions});
 	}
 }
 

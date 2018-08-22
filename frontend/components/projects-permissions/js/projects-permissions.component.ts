@@ -14,12 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {first, get} from "lodash";
+import {first, get, omit} from "lodash";
 import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 class ProjectsPermissionsController implements ng.IController {
 	public static $inject: string[] = [
-		"ProjectsService"
+		"ProjectsService",
+		"DialogService"
 	];
 
 	private projects: object[];
@@ -29,7 +30,10 @@ class ProjectsPermissionsController implements ng.IController {
 	private permissions;
 	private models;
 
-	constructor(private ProjectsService: any) {}
+	constructor(
+		private ProjectsService: any,
+		private DialogService: any
+	) {}
 
 	public $onInit(): void {}
 
@@ -43,19 +47,56 @@ class ProjectsPermissionsController implements ng.IController {
 	public onProjectChange(): void {
 		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject)
 			.then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
-				this.permissions = project.permissions.map(({user, permissions = []}: {user: string, permissions: string[]}) => {
-					const memberData = this.members.find((member) => member.user === user) || {};
-					const projectPermissionsKey = memberData.isAdmin ?
-						PROJECT_ROLES_TYPES.ADMINSTRATOR :
-						PROJECT_ROLES_TYPES.UNASSIGNED;
-
-					return {
-						...memberData,
-						key: projectPermissionsKey
-					};
-				});
+				this.permissions = this.getExtendedProjectPermissions(project.permissions);
 				this.models = project.models;
 			});
+	}
+
+	/**
+	 * Bind permissions with members data
+	 * @param projectPermissions
+	 */
+	public getExtendedProjectPermissions = (projectPermissions) => {
+		return projectPermissions.map(({user, permissions = []}: {user: string, permissions: string[]}) => {
+			const memberData = this.members.find((member) => member.user === user) || {};
+			let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
+			if (memberData.isAdmin) {
+				projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINSTRATOR;
+			} else {
+				projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
+			}
+
+			return {
+				...memberData,
+				permissions,
+				key: projectPermissionsKey
+			};
+		});
+	}
+
+	/**
+	 * Send updated data to the server
+	 * @param updatedPermissions
+	 */
+	public onPermissionsChange(updatedPermissions: any[]): void {
+		const permissionsToSave = this.permissions.map(({user, permissions}: {user: string, permissions: string}) => {
+			const newPermissions = updatedPermissions.find((permission) => permission.user === user);
+
+			if (newPermissions) {
+				return {
+					user,
+					permissions: newPermissions.key ? [newPermissions.key] : []
+				};
+			}
+
+			return {user, permissions};
+		});
+
+		const updateData = {name: this.currentProject, permissions: permissionsToSave};
+		this.ProjectsService.updateProject(this.currentTeamspace.account, updateData)
+			.then(({data: updatedProject}) => {
+				this.permissions = this.getExtendedProjectPermissions(permissionsToSave);
+			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
 
 	public goToModelsPermissions(): void {}
@@ -65,8 +106,7 @@ export const ProjectsPermissionsComponent: ng.IComponentOptions = {
 	bindings: {
 		currentTeamspace: "<",
 		members: "<",
-		projects: "<",
-		onPermissionsChange: "&"
+		projects: "<"
 	},
 	controller: ProjectsPermissionsController,
 	controllerAs: "vm",

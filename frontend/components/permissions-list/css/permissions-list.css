@@ -4,7 +4,7 @@
 }
 
 .permissionsListHeader {
-  height: 62px;
+  height: 72px;
 }
 
 .permissionsListBody {
@@ -12,7 +12,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   height: 100%;
-  max-height: calc(100% - 62px);
+  max-height: calc(100% - 72px);
 }
 
 .permissionsListRow {
@@ -36,37 +36,12 @@
   width: 100%;
 }
 
-.permissionsListCell md-select .md-select-value {
-  padding-left: 0;
-  border-bottom-color: transparent !important;
-}
-
-.permissionsListCell md-select[disabled] .md-select-value {
-  background-image: none;
-}
-
-.permissionsListCell md-select[disabled] .md-select-icon {
-  display: none;
-}
-
 .permissionsListCell .md-text {
   text-overflow: ellipsis;
   overflow: hidden;
   width: 100%;
   white-space: nowrap;
   display: block; 
-}
-
-.permissionsListRemoveButton.md-button {
-  margin-right: 13px;
-}
-
-.permissionsListJobColor {
-  min-height: 6px;
-  min-width: 6px;
-  border-radius: 100%;
-  margin-right: 12px;
-  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .permissionsListCellSearch {
@@ -114,6 +89,10 @@
   height: 62px;
 }
 
+.permissionsList md-radio-button {
+  margin-right: -9px !important;
+}
+
 .permissionsList md-radio-button[disabled="disabled"] .md-on {
   background-color: rgba(0,0,0,0.38) !important;
 }
@@ -121,4 +100,8 @@
 .permissionsList md-radio-button .md-container {
   left: auto;
   right: 0;
+}
+
+.permissionsListHeader md-radio-button {
+  margin-top: 12px !important;
 }

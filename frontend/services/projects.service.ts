@@ -31,6 +31,14 @@ export class ProjectsService {
 	public getProject = (teamspace, project): Promise<any> => {
 		return this.APIService.get(`${teamspace}/projects/${project}`);
 	}
+
+	public updateProject = (teamspace, project): Promise<any> => {
+		return this.APIService.put(`${teamspace}/projects/${project.name}`, project);
+	}
+
+	public updateMultipleProjects = (teamspace, projects): Promise<any> => {
+		return this.APIService.put(`${teamspace}/projects`, {projects});
+	}
 }
 
 export const ProjectsServiceModule = angular

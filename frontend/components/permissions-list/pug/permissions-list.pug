@@ -18,15 +18,26 @@
 					placeholder="User"
 					ng-change="vm.onSearch()")
 
-		.permissionsListCell(
+		md-radio-group(
+			flex="30"
+			ng-model="vm.permissionsForSelected"
+			ng-change="vm.updatePermissionsForSelected(vm.permissionsForSelected)"
 			layout="row"
-			layout-align="center center"
-			flex="15"
-			ng-repeat="permission in vm.PROJECT_PERMISSIONS")
-			list-sort-button(
-				ng-class="{'active': vm.currentSort.type === vm.CUSTOM_SORT_TYPES[permission.key]}"
-				on-change="vm.setCustomSortType(vm.CUSTOM_SORT_TYPES[permission.key], order)")
-			.usersListCellLabel {{::permission.label}}
+			layout-align="start center")
+			.permissionsListCell(
+				layout="column"
+				layout-align="center center"
+				flex="50"
+				ng-repeat="permission in vm.PROJECT_PERMISSIONS")
+				div(layout="row" layout-align="center center")
+					list-sort-button(
+						ng-class="{'active': vm.currentSort.type === vm.CUSTOM_SORT_TYPES[permission.key]}"
+						on-change="vm.setCustomSortType(vm.CUSTOM_SORT_TYPES[permission.key], order)")
+					.usersListCellLabel {{::permission.label}}
+				md-radio-button(
+					ng-disabled="!vm.hasSelectedItem"
+					ng-value="permission.key"
+					aria-label="{{::permission.label}}")
 
 	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
@@ -39,13 +50,18 @@
 
 			//Checkbox
 			.permissionsListCell(layout="row" layout-align="center center" flex="10")
-				md-checkbox(ng-model="permissions.isSelected")
+				md-checkbox(ng-model="permissions.isSelected" ng-change="vm.onSelectionChange()")
 
 			//User details
 			member-card.permissionsListCell(data="permissions" flex="30")
 
 			//Permissions
-			md-radio-group(flex="30" ng-model="permissions.key" layout="row" layout-align="start center")
+			md-radio-group(
+				flex="30"
+				ng-model="permissions.key"
+				ng-change="vm.updatePermission(permissions)"
+				layout="row"
+				layout-align="start center")
 				.permissionsListCell(
 					ng-repeat="permission in vm.PROJECT_PERMISSIONS"
 					flex
