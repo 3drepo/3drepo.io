@@ -12,10 +12,6 @@ viewpoints .viewpointContainer {
     overflow-y: auto;
 }
 
-viewpoints .noViews {
-    text-align: center;
-}
-
 viewpoints .addHolder {
     bottom: 0;
     right: 0;
@@ -63,7 +59,7 @@ viewpoints .viewpointMain {
 viewpoints .viewpointMetaData {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;   
+    text-overflow: ellipsis;
     width: 100px;
 }
 

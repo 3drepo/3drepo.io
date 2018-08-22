@@ -7,7 +7,7 @@ div.groupsContainer
         h3 Loading groups...
 
     div.groupsList(
-        ng-show="vm.toShow === 'groups'"
+        ng-show="vm.toShow === 'groups' && vm.groups.length > 0 || vm.loading"
     )
 
         div.group(
@@ -66,12 +66,10 @@ div.groupsContainer
             .remoteNotification.groupJustDeleted(ng-if="group.justBeenDeleted")
                 .message This group has been deleted
 
-        md-container.noGroups(
-            ng-if="vm.groups.length === 0 && !vm.loading"
-            layout-fill
-            layout="column")
-
-            h3 No groups have been created yet
+    .cardInfo(
+    	ng-show="vm.toShow === 'groups' && vm.groups.length === 0 && !vm.loading"
+        )
+        p No groups have been created yet
 
     div.groupContainer(
         layout="column"
