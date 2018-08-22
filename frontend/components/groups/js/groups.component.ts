@@ -54,7 +54,7 @@ class GroupsController implements ng.IController {
 	private savedGroupData: any;
 	private customIcons: any;
 	private lastColorOverride: any;
-	private selectedNodes: [any];
+	private selectedNodes: any[];
 
 	constructor(
 		private $scope: ng.IScope,
@@ -72,6 +72,7 @@ class GroupsController implements ng.IController {
 	public $onInit() {
 		this.customIcons = this.IconsConstant;
 
+		this.selectedNodes = [];
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.teamspace = this.account; // Workaround legacy naming
@@ -114,6 +115,10 @@ class GroupsController implements ng.IController {
 			this.setContentHeight();
 		});
 
+		this.$scope.$watchCollection("vm.savedGroupData", () => {
+			this.updateChangeStatus();
+		});
+
 		this.$scope.$watch("vm.hideItem", (newValue) => {
 			if (newValue) {
 				this.toShow = "groups";
@@ -152,7 +157,7 @@ class GroupsController implements ng.IController {
 		}, () => {
 			this.GroupsService.updateSelectedObjectsLen().then( () => {
 				this.GroupsService.getSelectedObjects().then((currentHighlights) => {
-					this.selectedNodes = currentHighlights;
+					this.selectedNodes = currentHighlights || [];
 					this.updateChangeStatus();
 				});
 			});
@@ -214,7 +219,7 @@ class GroupsController implements ng.IController {
 		}
 
 		// We don't want color over ride when we're editing
-		this.GroupsService.removeColorOverride(this.selectedGroup._id);
+		this.GroupsService.removeColorOverride(this.selectedGroup._id, false);
 		this.showGroupPane();
 	}
 
@@ -327,8 +332,8 @@ class GroupsController implements ng.IController {
 			this.selectedGroup
 		)
 			.then(() => {
-				this.savingGroup = false;
 				this.savedGroupData = Object.assign({}, this.selectedGroup);
+				this.savingGroup = false;
 			})
 			.catch((error) => {
 				this.handleGroupError("update");
