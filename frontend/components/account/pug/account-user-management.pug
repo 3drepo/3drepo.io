@@ -1,0 +1,68 @@
+.homeUserContent.userContentNoMargin.accountUserManagement
+	md-content.md-whiteframe-1dp(
+		aria-label="User Management",
+		layout="column",
+		flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 User Management
+
+		.teamspaceSelectWrapper(layout="row")
+			md-input-container.teamspaceSelectContainer(md-no-float, flex)
+				label Teamspace
+				md-select(
+					ng-model="vm.currentUser"
+					placeholder="Select a teamspace"
+					ng-change="vm.onTeamspaceChange()"
+					ng-disabled="!vm.teamspaces.length")
+					md-option(
+						ng-value="teamspace.account"
+						ng-repeat="teamspace in vm.teamspaces") {{::teamspace.account}}
+
+		md-button.md-accent.md-fab.md-mini.addButton(
+			aria-label="Add new member"
+			ng-click="vm.toggleNewDataPanel()"
+			ng-disabled="vm.members.length === vm.licencesLimit || vm.isLoadingTeamspace"
+			ng-class="{'active': vm.showAddingPanel}")
+			md-icon.angular-material-icons add
+
+		.addPanel(ng-if="vm.showAddingPanel")
+			new-member-form(
+				ng-if="vm.selectedTab === vm.TABS_TYPES.USERS"
+				current-teamspace="vm.currentTeamspace.account"
+				jobs="vm.jobs"
+				title="vm.licencesLabel"
+				on-save="vm.onMemberSave(newMember)")
+
+		.addPanelBackdrop(
+			ng-class="{'addPanelBackdropVisible': vm.showAddingPanel}"
+			ng-click="vm.toggleNewDataPanel(true)")
+
+		.accountUserManagementLoader(ng-if="vm.isLoadingTeamspace" layout="row" layout-align="center center")
+			md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+		md-tabs(
+			flex
+			md-border-bottom
+			md-selected="vm.selectedTab"
+			md-on-select="vm.onTabChange()") 
+			md-tab(label="Users")
+				div(layout="column" layout-fill)
+					users-list(
+						flex="grow"
+						members="vm.members"
+						jobs="vm.jobs"
+						current-teamspace="vm.currentTeamspace"
+						on-change="vm.onMembersChange(updatedMembers)")
+					.flex
+					.accountUserManagementFooter(
+						ng-if="vm.licencesLabel"
+						layout="row"
+						layout-align="end center") {{vm.licencesLabel}}
+
+			md-tab(label="Jobs")
+				.jobsList
+
+			md-tab(label="Projects")
+				.projectsList
+						
