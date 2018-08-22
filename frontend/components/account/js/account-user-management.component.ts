@@ -39,15 +39,22 @@ const TABS = {
 	}
 };
 
+const PERMISSIONS_VIEWS = {
+	PROJECTS: 0,
+	MODELS: 1
+};
+
 class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
 			"$q",
 			"AccountService",
-			"DialogService"
+			"DialogService",
+			"$state"
 		];
 
 		private TABS_TYPES = TABS_TYPES;
+		private PERMISSIONS_VIEWS = PERMISSIONS_VIEWS;
 
 		private currentUser;
 		private accounts;
@@ -57,7 +64,6 @@ class AccountUserManagementController implements ng.IController {
 		private jobsColors;
 		private projects;
 		private currentTeamspace;
-		private currentTabConfig;
 		private licencesLimit;
 		private licencesLabel;
 		private isLoadingTeamspace;
@@ -66,14 +72,20 @@ class AccountUserManagementController implements ng.IController {
 		private selectedTab;
 		private selectedProject;
 		private showAddingPanel;
+		private selectedView;
 
 		constructor(
 			private $q: any,
 			private AccountService: any,
-			private DialogService: any
+			private DialogService: any,
+			private $state: any
 		) {}
 
 		public $onInit(): void {
+			const {tab, view} = this.$state.params;
+			this.selectedTab = parseInt(tab, 10);
+			this.selectedView = parseInt(view, 10);
+
 			this.onTeamspaceChange();
 		}
 
@@ -111,7 +123,12 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace details
 		 */
 		public onTabChange = (): void => {
-			this.currentTabConfig = TABS[this.selectedTab];
+			const newParams: any = {tab: this.selectedTab};
+
+			if (this.selectedTab !== TABS_TYPES.PROJECTS) {
+				newParams.view = null;
+			}
+			this.$state.go(this.$state.$current.name, newParams, {notify: false});
 		}
 
 		/**
