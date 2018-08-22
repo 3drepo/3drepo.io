@@ -159,7 +159,7 @@ export class IssuesService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public setupIssuesToShow(model: string, filterText: string) {
+	public setupIssuesToShow(model: string, filterText: string = "" ) {
 		this.state.issuesToShow = [];
 
 		if (this.state.allIssues.length > 0) {
@@ -176,50 +176,63 @@ export class IssuesService {
 				});
 			}
 
-			// TODO: There is certainly a better way of doing this, but I don't want to
-			// dig into it right before release
+			// Hardcoded criteria for testing purposes
 
-			// Filter text
-			const notEmpty = angular.isDefined(filterText) && filterText !== "";
-			if (notEmpty) {
-				this.state.issuesToShow = this.filteredIssues(filterText);
+			this.state.issueDisplay.dateRange = [new Date("8/20/2018"), new Date("8/30/2018 23:59:59")];
+			this.state.issueDisplay.priority = ["high"];
+
+			// ---------------------------------------
+
+			let filters = [];
+			filters = filters.concat(this.getAndClause(this.state.issueDisplay.excludeRoles, this.filterRole));
+			filters = filters.concat(this.getOrClause(filterText.split(" ").filter( (s) => s !== ""), this.handleIssueFilter));
+
+			if (!this.state.issueDisplay.showClosed) {
+				filters.push((issue) => issue.status !== "closed");
 			}
 
-			// Closed
-			for (let i = this.state.issuesToShow.length - 1; i >= 0; i--) {
-				if (!this.state.issueDisplay.showClosed &&
-					"closed" === this.state.issuesToShow[i].status) {
-					this.state.issuesToShow.splice(i, 1);
-				}
+			if (!this.state.issueDisplay.showSubModelIssues) {
+				filters.push((issue) => issue.model === model);
 			}
 
-			// Sub models
-			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
-			});
+			if ((this.state.issueDisplay.dateRange || []).length > 0 ) {
+				filters.push((issue) => issue.created >= this.state.issueDisplay.dateRange[0].getTime() );
+			}
 
-			// Sub models
-			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
-			});
+			if ((this.state.issueDisplay.dateRange || []).length > 1 ) {
+				filters.push((issue) => issue.created <= this.state.issueDisplay.dateRange[1].getTime());
+			}
 
-			// Roles Filter
-			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
-			});
+			filters = filters.concat(this.getOrClause(this.state.issueDisplay.priority, this.filterPriority));
 
+			// It filters the issue list by applying every filter to it.
+			this.state.issuesToShow = this.state.issuesToShow.filter( (issue) => filters.every( (f) => f(issue)));
 		}
-
 	}
 
-	public filteredIssues(filterText: string) {
-		return (this.$filter("filter")(
-			this.state.issuesToShow,
-			(issue) => {
-				return this.handleIssueFilter(issue, filterText);
-			}
+	/** filters */
 
-		));
+	public getAndClause(tags: any[], comparator) {
+		if (tags.length === 0) {
+			return[];
+		}
+		return [(value, index, array) => tags.every( comparator.bind(this, value) )];
+	}
+
+	public getOrClause(tags: any[], comparator) {
+		if (tags.length === 0) {
+			return[];
+		}
+
+		return [(value, index, array) => tags.some( comparator.bind(this, value) )];
+	}
+
+	public filterRole(issue, tag): boolean {
+		return issue.creator_role !== tag;
+	}
+
+	public filterPriority(issue, tag): boolean {
+		return issue.priority === tag;
 	}
 
 	public handleIssueFilter(issue: any, filterText: string) {
@@ -259,6 +272,8 @@ export class IssuesService {
 		return false;
 
 	}
+
+	/****/
 
 	public resetSelectedIssue() {
 		this.state.selectedIssue = undefined;
