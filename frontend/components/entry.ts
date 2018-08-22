@@ -32,7 +32,6 @@ import "./account/js/account.component";
 import "./account/js/account-federations.component";
 import "./account/js/account-info.component";
 import "./account/js/account-items.component";
-import "./account/js/account-licenses.component";
 import "./account/js/account-menu.component";
 import "./account/js/account-model.component";
 import "./account/js/account-modelsetting.component";
@@ -40,6 +39,7 @@ import "./account/js/account-profile.component";
 import "./account/js/account.service";
 import "./account/js/account-teamspaces.component";
 import "./account/js/account-upload.service";
+import "./account/js/account-user-management.component";
 import "./bottom-buttons/js/bottom-buttons.component";
 import "./clip/js/clip.component";
 import "./clip/js/clip.service";
@@ -106,6 +106,10 @@ import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
 import "./viewpoints/js/viewpoints.component";
 import "./viewpoints/js/viewpoints.service";
+import "./member-card/js/member-card.component";
+import "./list-sort-button/js/list-sort-button.component";
+import "./new-member-form/js/new-member-form.component";
+import "./users-list/js/users-list.component";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

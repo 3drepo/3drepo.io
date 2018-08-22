@@ -146,6 +146,43 @@ schema.statics.findByUserName = function(user) {
 	return this.findOne({account: "admin"}, { user });
 };
 
+schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
+	const db = require("../db/db");
+	return db.getCollection("admin", "system.users").then(dbCol => {
+		return dbCol
+			.find({
+				$and: [{
+					$or: [
+						{ user: new RegExp(`.*${searchString}.*`, "i") },
+						{ "customData.email": searchString }
+					]
+				},
+				{ "customData.inactive": { "$exists": false }}
+				]
+			}).toArray();
+	}).then((users) => {
+		const notMembers = users.reduce((members, {user, roles, customData}) => {
+			const isMemberOfTeamspace = roles.some((roleItem) => {
+				return roleItem.db === teamspace && roleItem.role === C.DEFAULT_MEMBER_ROLE;
+			});
+
+			if (!isMemberOfTeamspace) {
+				members.push({
+					user,
+					roles,
+					firstName: customData.firstName,
+					lastName: customData.lastName,
+					company: _.get(customData, "billing.billingInfo.company", null)
+				});
+			}
+
+			return members;
+		}, []);
+
+		return Promise.resolve(notMembers);
+	});
+};
+
 // case insenstive
 schema.statics.isUserNameTaken = function(username) {
 	return this.count({account: "admin"}, {
@@ -1002,24 +1039,46 @@ schema.methods.removeTeamMember = function(username, cascadeRemove) {
 
 };
 
-schema.methods.addTeamMember = function(user) {
-
+schema.methods.addTeamMember = function(user, job, permissions) {
 	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
 		const limits = this.customData.billing.getSubscriptionLimits();
+
 		if(limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
 			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
 		} else {
-			return User.findByUserName(user).then(userEntry => {
+			return User.findByUserName(user).then((userEntry) => {
 				if(!userEntry) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 				if(userEntry.isMemberOfTeamspace(this.user)) {
 					return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
 				}
-				return Role.grantTeamSpaceRoleToUser(user, this.user);
+
+				return Role.grantTeamSpaceRoleToUser(user, this.user).then(() => {
+					const promises = [];
+					if (job) {
+						promises.push(Job.addUserToJob(this.user, user, job));
+					}
+					if (permissions && permissions.length) {
+						promises.push(this.customData.permissions.add({user, permissions}));
+					}
+
+					return Promise.all(promises).then(userEntry.getBasicDetails.bind(userEntry));
+				})
+					.then(userData => Object.assign({job, permissions}, userData));
 			});
 		}
 	});
+};
+
+schema.methods.getBasicDetails = function() {
+	const {user, customData} = this;
+	return {
+		user,
+		firstName: customData.firstName,
+		lastName: customData.lastName,
+		company: _.get(customData, "billing.billingInfo.company", null)
+	};
 };
 
 schema.methods.isMemberOfTeamspace = function(teamspace) {
@@ -1036,45 +1095,51 @@ schema.statics.getQuotaInfo = function(teamspace) {
 	});
 };
 
-schema.statics.getMembersAndJobs = function(teamspace) {
-	let memberArr = [];
-	let memToJob = {};
+schema.statics.getMembers = function(teamspace) {
 	const promises = [];
 
-	const getTSMemProm = this.getAllUsersInTeamspace(teamspace).then(members => {
-		memberArr = members;
+	const getTeamspaceMembers = this.findUsersInTeamspace(teamspace, {
+		user: 1,
+		customData: 1
 	});
+	const getJobInfo = Job.usersWithJob(teamspace);
 
-	const getJobInfoProm = Job.usersWithJob(teamspace).then(_memToJob => {
-		memToJob = _memToJob;
-	});
-	promises.push(getTSMemProm);
-	promises.push(getJobInfoProm);
+	const getTeamspacePermissions = User.findByUserName(teamspace)
+		.then(user => user.toObject().customData.permissions);
 
-	return Promise.all(promises).then(() => {
-		const resultArr = [];
-		memberArr.forEach(mem => {
-			const entry = {user: mem};
-			if(memToJob[mem]) {
-				entry.job = memToJob[mem];
-			}
+	promises.push(
+		getTeamspaceMembers,
+		getTeamspacePermissions,
+		getJobInfo
+	);
 
-			resultArr.push(entry);
+	return Promise.all(promises)
+		.then(([members = [], teamspacePermissions, memToJob = {}]) => {
+			return members.map(({user, customData}) => {
+				const permissions = _.find(teamspacePermissions, {user});
+
+				return {
+					user,
+					firstName: customData.firstName,
+					lastName: customData.lastName,
+					company: _.get(customData, "billing.billingInfo.company", null),
+					permissions: _.get(permissions, "permissions", []),
+					job: _.get(memToJob, user)
+				};
+			});
 		});
-		return resultArr;
-	});
 };
 
 schema.statics.getAllUsersInTeamspace = function(teamspace) {
-
-	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return this.find({account: "admin"}, query , {user : 1}).then(users => {
-		const res = [];
-		users.forEach(user => {
-			res.push(user.user);
-		});
-		return Promise.resolve(res);
+	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
+		const results = users.map(({user}) => user);
+		return Promise.resolve(results);
 	});
+};
+
+schema.statics.findUsersInTeamspace = function (teamspace, fields) {
+	const query = { "roles.db": teamspace, "roles.role": C.DEFAULT_MEMBER_ROLE };
+	return this.find({ account: "admin" }, query, fields);
 };
 
 schema.statics.teamspaceMemberCheck = function(teamspace, user) {

@@ -236,7 +236,7 @@ export class AccountService {
 	 * @returns {*|promise}
 	 */
 	public newSubscription(teamspace, data): Promise<any> {
-		return this.APIService.post(teamspace + "/subscriptions", data);
+		return this.APIService.post(`${teamspace}/subscriptions`, data);
 	}
 
 	/**
@@ -246,11 +246,152 @@ export class AccountService {
 	 * @returns {*|promise}
 	 */
 	public getUserInfo(username): Promise<any> {
-		const currentAccount = this.APIService.get(username + ".json");
+		const currentAccount = this.APIService.get(`${username}.json`);
 		this.accountDefer.resolve(currentAccount);
 		return currentAccount;
 	}
 
+	/**
+	 * Get quota info
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getQuotaInfo(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/quota`);
+	}
+
+	/**
+	 * Get quota info
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getMembers(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/members`);
+	}
+
+	/**
+	 * Get jobs list
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getJobs(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/jobs`);
+	}
+
+	/**
+	 * Get teamspace permissions
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getPermissions(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/permissions`);
+	}
+
+	/**
+	 * Get teamspace permissions
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getPermissionTemplates(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/permission-templates`);
+	}
+
+	/**
+	 * Get model permissions
+	 *
+	 * @param teamspace
+	 * @param model
+	 * @returns {*|promise}
+	 */
+	public getModelPermissionTemplates(teamspace, model): Promise<any> {
+		return this.APIService.get(`${teamspace}/${model}/permission-templates`);
+	}
+
+	/**
+	 * Get model permissions
+	 *
+	 * @param teamspace
+	 * @param model
+	 * @returns {*|promise}
+	 */
+	public getModelPermissions(teamspace, model): Promise<any> {
+		return this.APIService.get(`${teamspace}/${model}/permission`);
+	}
+
+	/**
+	 * Remove member from teamspace
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public removeMember(teamspace, member): Promise<any> {
+		return this.APIService.delete(`${teamspace}/members/${member}`, {});
+	}
+
+	/**
+	 * Remove member from teamspace
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public removeMemberCascade(teamspace, member): Promise<any> {
+		return this.APIService.delete(`${teamspace}/members/${member}?cascadeRemove=true`, {});
+	}
+
+	/**
+	 * Update member job
+	 * @param teamspace
+	 * @param job
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public updateMemberJob = (teamspace, job, member): Promise<any> => {
+		return this.APIService.post(`${teamspace}/jobs/${job}/${member}`);
+	}
+
+	/**
+	 * Remove member job
+	 * @param teamspace
+	 * @param job
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public removeMemberJob = (teamspace, job, member): Promise<any> => {
+		return this.APIService.delete(`${teamspace}/jobs/unassign/${member}`);
+	}
+
+	/**
+	 * Set member permissions
+	 * @param teamspace
+	 * @param permissionData
+	 * @returns {*|promise}
+	 */
+	public setMemberPermissions = (teamspace, permissionsData): Promise<any> => {
+		return this.APIService.post(`${teamspace}/permissions/`, permissionsData);
+	}
+
+	/**
+	 * Add new member
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public addMember = (teamspace, member): Promise<any> => {
+		return this.APIService.post(`${teamspace}/members`, member);
+	}
+
+	/**
+	 * Find members by usernname and email
+	 * @param teamspace
+	 * @param member
+	 * @returns {*|promise}
+	 */
+	public findMembers = (teamspace, searchText): Promise<any> => {
+		return this.APIService.get(`${teamspace}/members/search/${searchText}`);
+	}
 }
 
 export const AccountServiceModule = angular

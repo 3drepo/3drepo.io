@@ -48,9 +48,10 @@ class AccountInfoController implements ng.IController {
 	public $onInit() {
 		this.accountOptions = {
 			teamspaces: {label: "Teamspaces"},
+			userManagement: {label: "User Management"},
 			profile: {label: "Profile"},
 			billing: {label: "Billing"},
-			licenses: {label: "Licences & Jobs"},
+			licenses: {label: "Jobs"},
 			assign: {label: "Assign Permissions" }
 		};
 		this.imageLoaded = false;

@@ -1,0 +1,41 @@
+form.newMemberForm(name="newMemberForm" layout="column")
+	.newMemberFormTitle {{vm.title}}
+	md-autocomplete(
+		class="newMemberFormAutocomplete"
+		md-autofocus="true"
+		md-clear-button="false"
+		ng-disabled="vm.isDisabled"
+		md-no-cache="true"
+		md-selected-item="vm.selectedUser"
+		md-search-text-change="vm.searchTextChange(vm.searchText)"
+		md-search-text="vm.searchText"
+		md-selected-item-change="vm.selectedUserChange(item)"
+		md-items="item in vm.querySearch(vm.searchText)"
+		md-item-text="item.user"
+		md-min-length="1"
+		ng-required
+		md-menu-class="newMemberFormAutocompleteMenu"
+		md-floating-label="Username or email address")
+		md-item-template
+			member-card(data="item")
+
+		md-not-found No matches found.
+	
+	md-input-container(md-no-float)
+		md-select(ng-model="vm.newMember.job" placeholder="Select a job")
+			md-option(
+				ng-value="job._id"
+				ng-repeat="job in vm.jobs track by job._id")
+				div(layout="row" layout-align="start center")
+					span.userListJobColor(ng-style="{'background-color': job.color}")
+					.userListJobName {{job._id}}
+
+	.newMemberFormPermissions(layout="row" layout-align="space-between center")
+		p Add as Teamspace Admin
+		md-checkbox(ng-model="vm.newMember.isAdmin")
+
+	md-button.md-accent.md-raised.newMemberFormButton(
+		ng-disabled="!vm.newMember.user"
+		ng-click="vm.addMember()") + Add user
+
+	
