@@ -18,6 +18,8 @@ import {values, cond, matches, orderBy} from "lodash";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 import {PROJECT_ROLES_LIST, PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
+import {sortByName} from "../../../helpers/sorting";
+
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
 		"$mdDialog",
@@ -76,7 +78,7 @@ class PermissionsListController implements ng.IController {
 		this.processedPermissions = this.processData();
 	}
 
-	public processData(): object[] {
+	public processData() {
 		const filteredPermissions = this.getFilteredData(this.permissions, this.searchText);
 		const processedPermissions = this.getSortedData(filteredPermissions);
 		return processedPermissions;
@@ -104,16 +106,10 @@ class PermissionsListController implements ng.IController {
 	 * @param options
 	 * @returns {Array}
 	 */
-	public getSortedData(data = [], options = this.currentSort): object[] {
+	public getSortedData(data = [], options = this.currentSort) {
 		const {USERS, FIELD} = SORT_TYPES;
 		const sort = cond([
-			[matches({type: USERS}), ({order}) => {
-				return orderBy(
-					data,
-					({lastName}) => `${lastName}`.toLowerCase().trim(),
-					order
-				);
-			}],
+			[matches({type: USERS}), sortByName.bind(null, data)],
 			[matches({type: FIELD}), ({order, config}) => {
 				return orderBy(
 					data,
@@ -123,17 +119,6 @@ class PermissionsListController implements ng.IController {
 			}]
 		]);
 		return sort(options);
-	}
-
-	/**
-	 * Refresh data on non processed members list
-	 */
-	public updateOriginMember(updatedMember): void {
-		const memberIndex = this.permissions.findIndex(({email}) => updatedMember.email);
-		if (memberIndex !== -1) {
-			this.permissions[memberIndex] = {...updatedMember};
-			this.onChange({updatedMembers: this.permissions});
-		}
 	}
 
 	/**

@@ -14,7 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {first, get, omit} from "lodash";
+import {first, get} from "lodash";
 import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 class ProjectsPermissionsController implements ng.IController {

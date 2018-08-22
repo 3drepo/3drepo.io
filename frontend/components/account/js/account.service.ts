@@ -391,16 +391,6 @@ export class AccountService {
 	public findMembers = (teamspace, searchText): Promise<any> => {
 		return this.APIService.get(`${teamspace}/members/search/${searchText}`);
 	}
-
-	/**
-	 * Return project details
-	 * @param teamspace
-	 * @param project
-	 * @returns {*|promise}
-	 */
-	public getProject = (teamspace, project): Promise<any> => {
-		return this.APIService.get(`${teamspace}/projects/${project}`);
-	}
 }
 
 export const AccountServiceModule = angular

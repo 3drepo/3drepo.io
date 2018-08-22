@@ -5,7 +5,7 @@
 				ng-change="vm.toggleAllItems()"
 				ng-model="vm.shouldSelectAllItems")
 	
-		.permissionsListCell(layout="row" layout-align="start center" flex="30")
+		.permissionsListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
@@ -53,7 +53,8 @@
 				md-checkbox(ng-model="permissions.isSelected" ng-change="vm.onSelectionChange()")
 
 			//User details
-			member-card.permissionsListCell(data="permissions" flex="30")
+			.permissionsListCell(flex="25")
+				member-card(data="permissions")
 
 			//Permissions
 			md-radio-group(

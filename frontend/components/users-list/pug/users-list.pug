@@ -1,6 +1,6 @@
 .usersList
 	.usersListHeader(layout="row" layout-align="start center")
-		.usersListCell(layout="row" layout-align="start center" flex="30")
+		.usersListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
@@ -35,7 +35,8 @@
 			layout-align="start center")
 
 			//User details
-			member-card.usersListCell(data="member" flex="30")
+			.usersListCell(flex="25")
+				member-card(data="member")
 
 			//Job
 			.usersListCell(layout="row" layout-align="start center" flex="25")
