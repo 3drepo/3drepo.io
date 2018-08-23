@@ -364,7 +364,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 			"updatedAt" : "[object Number]",
 			"objects" :  "[object Array]",
 			"color" : "[object Array]",
-			"issue_id": "[object String]"
+			"issue_id": "[object Object]"
 		};
 
 		let typeCorrect = true;
@@ -412,7 +412,10 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 	return group.save().then((savedGroup)=>{
 		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
 			data._id = utils.uuidToString(savedGroup._id);
-			ChatEvent.newGroups(sessionId, dbCol.account , model,  data);
+			if (!data.isIssueGroup) {
+				ChatEvent.newGroups(sessionId, dbCol.account , model,  data);
+			}
+
 			return data;
 		}
 			,(err) => {

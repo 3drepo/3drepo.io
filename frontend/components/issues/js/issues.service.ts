@@ -37,7 +37,7 @@ export class IssuesService {
 		"DialogService"
 	];
 
-	private state: any;
+	public state: any;
 	private groupsCache: any;
 
 	constructor(
