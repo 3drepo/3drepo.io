@@ -6,6 +6,10 @@
   color: rgba(0, 0, 0, .6);
 }
 
+.projectsPermissions .projectSelectContainer md-select-value {
+  margin-bottom: 0;
+}
+
 .projectsPermissions .switchButton {
   margin-right: 10px;
 }
