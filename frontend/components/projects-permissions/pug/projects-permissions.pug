@@ -34,6 +34,7 @@
       on-change="vm.onModelSelectionChange(selectedModels)")
 
     permissions-list(
+      ng-disabled="!vm.selectedModels.length"
       flex="grow"
       data="vm.assignedModelPermissions"
       permissions="vm.MODEL_ROLES_LIST"

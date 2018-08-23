@@ -31,6 +31,10 @@ export class ModelsService {
 	public getPermissions = (teamspace, model): Promise<any> => {
 		return this.APIService.get(`${teamspace}/${model}/permissions`);
 	}
+
+	public getMulitpleModelsPermissions = (teamspace, models): Promise<any> => {
+		return this.APIService.get(`${teamspace}/models/permissions?models=${models.join(",")}`);
+	}
 }
 
 export const ModelsServiceModule = angular

@@ -82,6 +82,6 @@
 					layout="row"
 					layout-align="center center")
 					md-radio-button(
-						ng-disabled="row.isAdmin || permissions.isCurrentUser"
+						ng-disabled="row.isAdmin || row.isDisabled || row.isCurrentUser"
 						ng-value="permission.key"
 						aria-label="{{::permission.label}}")

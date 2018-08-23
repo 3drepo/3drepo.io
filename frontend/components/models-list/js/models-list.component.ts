@@ -21,8 +21,7 @@ import {sortByName} from "../../../helpers/sorting";
 
 class ModelsListController implements ng.IController {
 	public static $inject: string[] = [
-		"$mdDialog",
-		"ProjectsService"
+		"$mdDialog"
 	];
 
 	private SORT_TYPES = SORT_TYPES;
@@ -38,8 +37,7 @@ class ModelsListController implements ng.IController {
 	private hasSelectedItem;
 
 	constructor(
-		private $mdDialog: any,
-		private ProjectsService: any
+		private $mdDialog: any
 	) {
 		this.currentSort = {
 			type: SORT_TYPES.USERS,
@@ -120,36 +118,16 @@ class ModelsListController implements ng.IController {
 		});
 		this.processedModels = this.processData();
 		this.hasSelectedItem = this.shouldSelectAllItems;
+
+		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
+		this.onChange({selectedModels: selectedItems});
 	}
 
 	public onSelectionChange(): void {
 		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
 		this.shouldSelectAllItems = selectedItems.length === this.processedModels.length;
-	}
-
-	/**
-	 * Pass single item to onChange callback
-	 * @param permission
-	 */
-	public updatePermission(permission): void {
-		this.onChange({updatedPermissions: [permission]});
-	}
-
-	/**
-	 * Prepare data and call onChange callback
-	 * @param selectedPermission
-	 */
-	public updatePermissionsForSelected(selectedPermission): void {
-		const updatedPermissions = this.processedModels
-			.reduce((permissionsList, permission) => {
-				if (permission.isSelected && !permission.isAdmin) {
-					permissionsList.push({...permission, key: selectedPermission});
-				}
-				return permissionsList;
-			}, []);
-
-		this.onChange({updatedPermissions});
+		this.onChange({selectedModels: selectedItems});
 	}
 }
 

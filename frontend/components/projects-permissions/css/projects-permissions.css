@@ -1,6 +1,3 @@
-.projectsPermissions {}
-
-
 .projectsPermissions .projectSelectContainer {
   margin: 24px;
   margin-top: 40px;
@@ -16,4 +13,27 @@
 .projectsPermissions .modelsList {
   width: 240px;
   border-right: 1px solid rgba(0, 0, 0, .06);
+}
+
+.projectsPermissions permissions-list {
+  position: relative;
+}
+
+.projectsPermissions permissions-list:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #fafafa;
+  z-index: 2;
+  opacity: 0;
+  top: 1px;
+  pointer-events: none;
+  transition: opacity 100ms ease-in-out;
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+.projectsPermissions permissions-list[disabled="disabled"]:before {
+  opacity: 0.9;
+  pointer-events: all;
 }
