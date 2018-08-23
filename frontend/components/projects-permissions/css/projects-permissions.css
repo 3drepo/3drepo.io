@@ -11,7 +11,16 @@
 }
 
 .projectsPermissions .switchButton {
-  margin-right: 10px;
+  margin-right: 20px;
+}
+
+.projectsPermissions .switchButton md-icon {
+  margin-left: -8px;
+}
+
+.projectsPermissions .switchButton span + md-icon {
+  margin-left: 0;
+  margin-right: -8px;
 }
 
 .projectsPermissions .modelsList {
