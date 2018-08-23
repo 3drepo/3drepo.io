@@ -24,16 +24,15 @@
 					ng-change="vm.onSearch()")
 
 		md-radio-group(
-			flex="30"
 			ng-model="vm.permissionsForSelected"
 			ng-change="vm.updatePermissionsForSelected(vm.permissionsForSelected)"
 			layout="row"
 			layout-align="start center")
-			.permissionsListCell(
+			.permissionsListCell.noPadding(
 				layout="column"
 				layout-align="center center"
-				flex="50"
-				ng-repeat="permission in vm.PROJECT_PERMISSIONS")
+				ng-style="{'width': permission.width}"
+				ng-repeat="permission in vm.permissions")
 				div(layout="row" layout-align="center center")
 					list-sort-button(
 						ng-disabled="!vm.processedPermissions.length"
@@ -59,7 +58,7 @@
 		data-simplebar
 		data-simplebar-x-hidden)
 		div.permissionsListRow(
-			ng-repeat="permissions in vm.processedPermissions track by permissions.user"
+			ng-repeat="row in vm.processedData track by row.user"
 			layout="row"
 			layout-align="start center")
 
@@ -67,26 +66,25 @@
 			.permissionsListCell(layout="row" layout-align="center center" flex="10")
 				md-checkbox(
 					ng-disabled="permissions.isAdmin"
-					ng-model="permissions.isSelected"
+					ng-model="row.isSelected"
 					ng-change="vm.onSelectionChange()")
 
 			//User details
 			.permissionsListCell(flex="25")
-				member-card(data="permissions")
+				member-card(data="row")
 
 			//Permissions
 			md-radio-group(
-				flex="30"
-				ng-model="permissions.key"
-				ng-change="vm.updatePermission(permissions)"
+				ng-model="row.key"
+				ng-change="vm.updatePermission(row)"
 				layout="row"
 				layout-align="start center")
-				.permissionsListCell(
-					ng-repeat="permission in vm.PROJECT_PERMISSIONS"
-					flex
+				.permissionsListCell.noPadding(
+					ng-repeat="permission in vm.permissions"
+					ng-style="{'width': permission.width}"
 					layout="row"
 					layout-align="center center")
 					md-radio-button(
-						ng-disabled="permissions.isAdmin || permissions.isCurrentUser"
+						ng-disabled="row.isAdmin || permissions.isCurrentUser"
 						ng-value="permission.key"
 						aria-label="{{::permission.label}}")

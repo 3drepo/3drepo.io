@@ -15,30 +15,50 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import {first, get, identity} from "lodash";
-import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
+import {PROJECT_ROLES_TYPES, PROJECT_ROLES_LIST} from "../../../constants/project-permissions";
+import {MODEL_ROLES_TYPES, MODEL_ROLES_LIST} from "../../../constants/model-permissions";
+
+const PERMISSIONS_VIEWS = {
+	PROJECTS: 0,
+	MODELS: 1
+};
 
 class ProjectsPermissionsController implements ng.IController {
 	public static $inject: string[] = [
 		"ProjectsService",
 		"DialogService",
-		"$q"
+		"$q",
+		"$state",
+		"ModelsService"
 	];
 
-	private projects: object[];
+	private PERMISSIONS_VIEWS = PERMISSIONS_VIEWS;
+	private PROJECT_ROLES_LIST = PROJECT_ROLES_LIST;
+	private MODEL_ROLES_LIST = MODEL_ROLES_LIST;
+
+	private projects;
 	private currentProject;
 	private currentTeamspace;
 	private members;
 	private permissions;
 	private models;
+	private currentView;
+	private assignedModelPermissions;
+	private assignedProjectPermissions;
 	private projectRequestCanceler;
 
 	constructor(
 		private ProjectsService: any,
 		private DialogService: any,
-		private $q: any
+		private $q: any,
+		private $state: any,
+		private ModelsService: any
 	) {}
 
-	public $onInit(): void {}
+	public $onInit(): void {
+		const {view} = this.$state.params;
+		this.currentView = parseInt(view, 10);
+	}
 
 	public $onChanges(
 		{projects, members, currentTeamspace}: {projects?: any, members?: any, currentTeamspace?: any}
@@ -66,13 +86,13 @@ class ProjectsPermissionsController implements ng.IController {
 			this.projectRequestCanceler.resolve();
 		}
 
-		this.projectRequestCanceler = this.$q.defer();
-		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
+		this.projectRequestCanceler = this.$q.defer();this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
 			timeout: this.projectRequestCanceler.promise
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
-			this.permissions = this.getExtendedProjectPermissions(project.permissions);
-			this.models = project.models;
-		}).catch(identity)
+				const projectData =this.projects.find(({name}) => name === this.currentProject);
+				this.models = get(projectData, "models", []);
+				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
+				this.assignedModelPermissions = this.getExtendedModelPermissions([]);}).catch(identity)
 			.finally(() => {
 				this.projectRequestCanceler = null;
 			});
@@ -107,28 +127,47 @@ class ProjectsPermissionsController implements ng.IController {
 	 * @param updatedPermissions
 	 */
 	public onPermissionsChange(updatedPermissions: any[]): void {
-		const permissionsToSave = this.permissions.map(({user, permissions}: {user: string, permissions: string}) => {
-			const newPermissions = updatedPermissions.find((permission) => permission.user === user);
+		if (this.currentView === PERMISSIONS_VIEWS.PROJECTS) {
+			this.onProjectPermissionsChange(updatedPermissions);
+		} else {
+			this.onModelPermissionsChange(updatedPermissions);
+		}
+	}
+
+	public onProjectPermissionsChange(updatedPermissions: any[]): void {
+		const permissionsToSave = this.assignedProjectPermissions
+			.map(({user, permissions}: {user: string, permissions: string}) => {
+				const newPermissions = updatedPermissions.find((permission) => permission.user === user);
 
 			if (newPermissions) {
 				return {
 					user,
-					isSelected: newPermissions.isSelected,
-					permissions: newPermissions.key ? [newPermissions.key] : []
+					isSelected: newPermissions.isSelected,permissions: newPermissions.key ? [newPermissions.key] : []
 				};
 			}
 
-			return {user, permissions};
-		});
+				return {user, permissions};
+			});
 
 		const updateData = {name: this.currentProject, permissions: permissionsToSave};
 		this.ProjectsService.updateProject(this.currentTeamspace.account, updateData)
 			.then(({data: updatedProject}) => {
-				this.permissions = [...this.getExtendedProjectPermissions(permissionsToSave)];
+				this.assignedProjectPermissions = [...this.getExtendedProjectPermissions(permissionsToSave)];
 			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
 
-	public goToModelsPermissions(): void {}
+	public onModelPermissionsChange(updatedPermissions: any[]): void {
+		console.log("model permissions update");
+	}
+
+	public toggleView(): void {
+		const nextView = this.currentView === PERMISSIONS_VIEWS.MODELS ?
+			PERMISSIONS_VIEWS.PROJECTS :
+			PERMISSIONS_VIEWS.MODELS;
+
+		this.$state.go(this.$state.$current.name, { view: nextView}, {notify: false});
+		this.currentView = nextView;
+	}
 }
 
 export const ProjectsPermissionsComponent: ng.IComponentOptions = {

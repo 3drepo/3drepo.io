@@ -44,6 +44,11 @@
   width: 100%;
 }
 
+.permissionsListCell.noPadding {
+  padding: 0;
+  margin: 6px;
+}
+
 .permissionsListCell .md-text {
   text-overflow: ellipsis;
   overflow: hidden;

@@ -14,11 +14,14 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {values, cond, matches, orderBy} from "lodash";
+import {values, cond, matches, orderBy, sumBy} from "lodash";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 import {PROJECT_ROLES_LIST, PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 import {sortByName} from "../../../helpers/sorting";
+
+const UNDEFINED_PERMISSIONS = "undefined";
+const PERMISSION_COLUMN_SIZE = 12;
 
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
@@ -27,10 +30,9 @@ class PermissionsListController implements ng.IController {
 	];
 
 	private SORT_TYPES = SORT_TYPES;
-	private PROJECT_PERMISSIONS = PROJECT_ROLES_LIST;
 
-	private permissions;
-	private processedPermissions;
+	private data;
+	private processedData;
 	private currentTeamspace;
 	private currentSort;
 	private onChange;
@@ -38,7 +40,10 @@ class PermissionsListController implements ng.IController {
 	private isLoading = true;
 	private shouldSelectAllItems = false;
 	private hasSelectedItem = false;
-	private permissionsForSelected = PROJECT_ROLES_TYPES.NONE;
+	private permissionsForSelected = UNDEFINED_PERMISSIONS;
+	private permissions;
+	private permissionsContainerSize;
+	private permissionSize;
 
 	constructor(
 		private $mdDialog: any,
@@ -50,27 +55,29 @@ class PermissionsListController implements ng.IController {
 		};
 	}
 
-	public $onInit(): void {}
+	public $onInit(): void {
+		this.permissionsContainerSize = sumBy(this.permissions, "width");
+	}
 
-	public $onChanges({permissions, currentTeamspace}: {permissions?: any, currentTeamspace?: any}): void {
-		if (currentTeamspace) {
-			this.processedPermissions = null;
-		}
+    public $onChanges({permissions, currentTeamspace}: {permissions?: any, currentTeamspace?: any}): void {
+        if (currentTeamspace) {
+            this.processedPData = null;
+        }
 
-		if (permissions && this.currentSort) {
-			this.isLoading = true;
+        if (data && this.currentSort) {
+            this.isLoading = true;
 
-			if (!this.processedPermissions || !this.processedPermissions.length) {
-				this.processedPermissions = this.processData();
+			if ( !this.processedData || !this.processedData.length) {
+			this.processedData = this.processData();
 			} else {
 				this.processedPermissions = this.processedPermissions.map(({user}) => {
 					return permissions.currentValue.find((newPermission) => newPermission.user === user);
 				});
 			}
 
-			this.isLoading = false;
-			this.permissionsForSelected = PROJECT_ROLES_TYPES.NONE;
-		}
+            this.isLoading = false;
+            this.permissionsForSelected = UNDEFINED_PERMISSIONS;
+        }
 	}
 
 	/**
@@ -80,14 +87,14 @@ class PermissionsListController implements ng.IController {
 	 */
 	public setSortType(type, order, config = {}): void {
 		this.currentSort = {type, order, config};
-		this.processedPermissions = this.processData();
+		this.processedData = this.processData();
 	}
 
 	/**
 	 * Search callback
 	 */
 	public onSearch(): void {
-		this.processedPermissions = this.processData();
+		this.processedData = this.processData();
 	}
 
 	/**
@@ -95,9 +102,9 @@ class PermissionsListController implements ng.IController {
 	 * @param param
 	 */
 	public processData() {
-		const filteredPermissions = this.getFilteredData(this.permissions, this.searchText);
-		const processedPermissions = this.getSortedData(filteredPermissions);
-		return processedPermissions;
+		const filteredPermissions = this.getFilteredData(this.data, this.searchText);
+		const processedData = this.getSortedData(filteredPermissions);
+		return processedData;
 	}
 
 	/**
@@ -141,18 +148,18 @@ class PermissionsListController implements ng.IController {
 	 * Toggle list items
 	 */
 	public toggleAllItems(): void {
-		this.permissions = this.permissions.map((permission) => {
+		this.data = this.data.map((row) => {
 			const isVisible = this.processedPermissions.some(({user}) => user === permission.user);
-			return {...permission, isSelected: this.shouldSelectAllItems && isVisible};
+			return {...row, isSelected: this.shouldSelectAllItems && isVisible};
 		});
-		this.processedPermissions = this.processData();
+		this.processedData = this.processData();
 		this.hasSelectedItem = this.shouldSelectAllItems;
 	}
 
 	public onSelectionChange(): void {
-		const selectedItems = this.processedPermissions.filter(({isSelected}) => isSelected);
+		const selectedItems = this.processedData.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = selectedItems.length === this.processedPermissions.length;
+		this.shouldSelectAllItems = selectedItems.length === this.processedData.length;
 	}
 
 	/**
@@ -168,7 +175,7 @@ class PermissionsListController implements ng.IController {
 	 * @param selectedPermission
 	 */
 	public updatePermissionsForSelected(selectedPermission): void {
-		const updatedPermissions = this.processedPermissions
+		const updatedPermissions = this.processedData
 			.reduce((permissionsList, permission) => {
 				if (permission.isSelected && !permission.isAdmin) {
 					permissionsList.push({...permission, key: selectedPermission});
@@ -182,8 +189,9 @@ class PermissionsListController implements ng.IController {
 
 export const PermissionsListComponent: ng.IComponentOptions = {
 	bindings: {
-		permissions: "<?",
+		data: "<?",
 		currentTeamspace: "<?",
+		permissions: "<?",
 		onChange: "&?"
 	},
 	controller: PermissionsListController,

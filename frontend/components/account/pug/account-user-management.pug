@@ -44,6 +44,7 @@
 
 		md-tabs(
 			flex
+			md-enable-disconnect
 			md-border-bottom
 			md-selected="vm.selectedTab")
 			md-tab(
@@ -72,19 +73,8 @@
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)
 					projects-permissions(
-						ng-if="vm.selectedView !== vm.PERMISSIONS_VIEWS.MODELS"
 						flex="grow"
 						layout="row"
 						members="vm.members"
 						projects="vm.projects"
 						current-teamspace="vm.currentTeamspace")
-					models-permissions(
-						ng-if="vm.selectedView === vm.PERMISSIONS_VIEWS.MODELS"
-						flex="grow"
-						members="vm.members"
-						models="vm.models"
-						current-teamspace="vm.currentTeamspace")
-					.accountUserManagementFooter(
-						layout="row"
-						layout-align="end center") Assign project permissions
-						

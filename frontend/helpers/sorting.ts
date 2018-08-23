@@ -3,7 +3,7 @@ import {orderBy} from "lodash";
 export const sortByName = (data = [], options: {order: any}) => {
 	return orderBy(
 		data,
-		({lastName}) => `${lastName}`.toLowerCase().trim(),
+		({lastName, name}) => `${lastName || name}`.toLowerCase().trim(),
 		options.order
 	);
 };

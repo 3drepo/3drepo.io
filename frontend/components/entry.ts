@@ -28,6 +28,7 @@ window.TDR();
 
 // Register all the angularjs modules
 import "../services/projects.service";
+import "../services/models.service";
 import "./account/js/account-assign.component";
 import "./account/js/account-billing.component";
 import "./account/js/account.component";
@@ -114,7 +115,6 @@ import "./new-member-form/js/new-member-form.component";
 import "./users-list/js/users-list.component";
 import "./projects-permissions/js/projects-permissions.component";
 import "./permissions-list/js/permissions-list.component";
-import "./models-permissions/js/models-permissions.component";
 import "./models-list/js/models-list.component";
 
 // Kickstart the application

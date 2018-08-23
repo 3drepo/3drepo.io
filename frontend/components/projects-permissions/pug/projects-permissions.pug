@@ -6,7 +6,7 @@
         ng-model="vm.currentProject"
         placeholder="Select a project"
         ng-change="vm.onProjectChange()"
-        ng-disabled="!vm.projects.length")
+        ng-disabled="!vm.projects.length || vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
         md-option(
           ng-value="project.name"
           ng-repeat="project in vm.projects") {{::project.name}}
@@ -15,12 +15,32 @@
 
     md-button.md-accent.switchButton(
       ng-disabled="!vm.models.length"
-      ng-click="vm.goToModelsPermissions()")
+      ng-click="vm.toggleView()")
         div(layout="row" layout-align="start center") Model & Federation permissions
           md-icon.angular-material-icons keyboard_arrow_right
 
   permissions-list(
+    ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
     flex="grow"
-    permissions="vm.permissions"
+    data="vm.assignedProjectPermissions"
+    permissions="vm.PROJECT_ROLES_LIST"
     current-teamspace="vm.currentTeamspace"
     on-change="vm.onPermissionsChange(updatedPermissions)")
+
+  div(flex="grow" layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
+    models-list(
+      models="vm.models"
+      current-teamspace="vm.currentTeamspace"
+      on-change="vm.onModelSelectionChange(selectedModels)")
+
+    permissions-list(
+      flex="grow"
+      data="vm.assignedModelPermissions"
+      permissions="vm.MODEL_ROLES_LIST"
+      current-teamspace="vm.currentTeamspace"
+      on-change="vm.onPermissionsChange(updatedPermissions)")
+
+  .accountUserManagementFooter(
+    layout="row"
+    layout-align="end center") Assign {{vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS ? 'project' : 'model and federation'}} permissions
+    
