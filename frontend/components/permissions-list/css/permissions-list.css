@@ -3,6 +3,11 @@
   overflow: hidden;
 }
 
+.permissionsList .highlight {
+  color: #06563c;
+  font-weight: 500;
+}
+
 .permissionsListHeader {
   height: 72px;
 }

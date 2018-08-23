@@ -3,6 +3,11 @@
   overflow: hidden;
 }
 
+.modelsList .highlight {
+  color: #06563c;
+  font-weight: 500;
+}
+
 .modelsListHeader {
   height: 72px;
 }
