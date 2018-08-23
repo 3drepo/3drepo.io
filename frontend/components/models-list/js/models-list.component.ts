@@ -80,19 +80,17 @@ class ModelsListController implements ng.IController {
 	}
 
 	/**
-	 * Filter members by query
+	 * Filter models by query
 	 * @param members
 	 * @param options
 	 * @returns {Array}
 	 */
-	public getFilteredData(members = [], query = ""): object[] {
+	public getFilteredData(data = [], query = ""): object[] {
 		if (!query) {
-			return members;
+			return data;
 		}
 
-		return members.filter(({firstName, lastName, user, company}) => {
-			return `${firstName} ${lastName} ${user} ${company}`.includes(query);
-		});
+		return data.filter(({name}) => name.includes(query));
 	}
 
 	/**
