@@ -18,6 +18,8 @@ import {first, get, identity} from "lodash";
 import {PROJECT_ROLES_TYPES, PROJECT_ROLES_LIST} from "../../../constants/project-permissions";
 import {MODEL_ROLES_TYPES, MODEL_ROLES_LIST} from "../../../constants/model-permissions";
 
+const UNDEFINED_PERMISSIONS = "undefined";
+
 const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,
 	MODELS: 1
@@ -45,6 +47,7 @@ class ProjectsPermissionsController implements ng.IController {
 	private currentView;
 	private assignedModelPermissions;
 	private assignedProjectPermissions;
+	private selectedModels;
 	private projectRequestCanceler;
 
 	constructor(
@@ -91,15 +94,16 @@ class ProjectsPermissionsController implements ng.IController {
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
 				const projectData =this.projects.find(({name}) => name === this.currentProject);
 				this.models = get(projectData, "models", []);
+				this.selectedModels = [];
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
-				this.assignedModelPermissions = this.getExtendedModelPermissions([]);}).catch(identity)
+				this.assignedModelPermissions = this.getExtendedModelPermissions();}).catch(identity)
 			.finally(() => {
 				this.projectRequestCanceler = null;
 			});
 	}
 
 	/**
-	 * Bind permissions with members data
+	 * Bind project permissions with members data
 	 * @param projectPermissions
 	 */
 	public getExtendedProjectPermissions = (projectPermissions) => {
@@ -120,6 +124,32 @@ class ProjectsPermissionsController implements ng.IController {
 					isSelected
 				};
 			});
+	}
+
+	/**
+	 * Bind model permissions with members data
+	 * @param modelPermissions
+	 */
+	public getExtendedModelPermissions = (modelPermissions?) => {
+		return this.members.map((memberData) => {
+			const memberModelPermissions = (modelPermissions || []).find(({user}) => user === memberData.user);
+			let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
+
+			if (memberData.isAdmin) {
+				modelPermissionsKey = MODEL_ROLES_TYPES.ADMINSTRATOR;
+			} else {
+				modelPermissionsKey = memberModelPermissions ?
+					first(memberModelPermissions.permissions) || MODEL_ROLES_TYPES.UNASSIGNED :
+					UNDEFINED_PERMISSIONS;
+			}
+
+			return {
+				...memberData,
+				permissions: get(memberModelPermissions, "permissions", []),
+				key: modelPermissionsKey,
+				isDisabled: !modelPermissions
+			};
+		});
 	}
 
 	/**
@@ -156,8 +186,26 @@ class ProjectsPermissionsController implements ng.IController {
 			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
 
-	public onModelPermissionsChange(updatedPermissions: any[]): void {
+	public onModelPermissionsChange(selectedModels: any[]): void {
 		console.log("model permissions update");
+
+		this.ModelsService.updatePermissions(this.currentTeamspace.account, selectedModels[0]);
+	}
+
+	public onModelSelectionChange(selectedModels: any[]): void {
+		if (selectedModels.length) {
+			const requiredModels = selectedModels.map(({model}) => model);
+			this.ModelsService
+				.getMulitpleModelsPermissions(this.currentTeamspace.account, requiredModels)
+				.then(({data: modelsWithPermissions}) => {
+					this.selectedModels = modelsWithPermissions;
+					const permissionsToShow = this.selectedModels.length === 1 ? this.selectedModels[0].permissions : [];
+					this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
+				});
+		} else {
+			this.selectedModels = [];
+			this.assignedModelPermissions = this.getExtendedModelPermissions();
+		}
 	}
 
 	public toggleView(): void {
