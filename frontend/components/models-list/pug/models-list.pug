@@ -31,5 +31,5 @@
 			.modelsListCell(layout="row" layout-align="center center" flex="10")
 				md-checkbox(ng-model="model.isSelected" ng-change="vm.onSelectionChange()")
 
-			//User details
-			.modelsListCell(flex) {{model.name}}
+			//Model details
+			.modelsListCell(flex md-highlight-text="vm.searchText") {{model.name}}
