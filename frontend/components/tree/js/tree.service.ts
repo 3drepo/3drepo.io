@@ -28,6 +28,7 @@ export class TreeService {
 	public highlightMap;
 	public highlightMapUpdateTime;
 	public selectionDataUpdateTime;
+	public currentSelectedNodes;
 	public visibilityUpdateTime;
 	public selectedIndex;
 	public treeReady;
@@ -38,7 +39,6 @@ export class TreeService {
 	private baseURL;
 
 	private allNodes;
-	private currentSelectedNodes;
 	private nodesToShow;
 	private subTreesById;
 	private subModelIdToPath;
