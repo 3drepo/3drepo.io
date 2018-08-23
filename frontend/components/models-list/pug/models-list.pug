@@ -1,1 +1,35 @@
 .modelsList
+	.modelsListHeader(layout="row" layout-align="start center")
+		.modelsListCell(layout="row" layout-align="center center" flex="10")
+			md-checkbox(
+				ng-change="vm.toggleAllItems()"
+				ng-model="vm.shouldSelectAllItems")
+	
+		.modelsListCell(layout="row" layout-align="start center" flex)
+			list-sort-button(
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+
+			md-input-container.modelsListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="Model/federation"
+					ng-change="vm.onSearch()")
+
+	.modelsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.modelsListBody(ng-if="!vm.isLoading")
+		div.modelsListRow(
+			ng-repeat="model in vm.processedModels track by model.name"
+			layout="row"
+			layout-align="start center")
+
+			//Checkbox
+			.modelsListCell(layout="row" layout-align="center center" flex="10")
+				md-checkbox(ng-model="model.isSelected" ng-change="vm.onSelectionChange()")
+
+			//User details
+			.modelsListCell(flex) {{model.name}}

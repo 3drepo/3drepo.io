@@ -10,22 +10,27 @@ export const MODEL_ROLES_TYPES = {
 export const MODEL_ROLES_LIST = [
 	{
 		key: MODEL_ROLES_TYPES.UNASSIGNED,
-		label: "Unassigned"
+		label: "Unassigned",
+		width: "100px"
 	},
 	{
 		key: MODEL_ROLES_TYPES.VIEWER,
-		label: "Viewer"
+		label: "Viewer",
+		width: "70px"
 	},
 	{
 		key: MODEL_ROLES_TYPES.COMMENTER,
-		label: "Commenter"
+		label: "Commenter",
+		width: "100px"
 	},
 	{
 		key: MODEL_ROLES_TYPES.COLLABORATOR,
-		label: "Collaborator"
+		label: "Collaborator",
+		width: "100px"
 	},
 	{
 		key: MODEL_ROLES_TYPES.ADMINSTRATOR,
-		label: "Admin"
+		label: "Admin",
+		width: "70px"
 	}
 ];

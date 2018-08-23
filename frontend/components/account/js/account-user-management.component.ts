@@ -39,11 +39,6 @@ const TABS = {
 	}
 };
 
-const PERMISSIONS_VIEWS = {
-	PROJECTS: 0,
-	MODELS: 1
-};
-
 class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
@@ -54,7 +49,6 @@ class AccountUserManagementController implements ng.IController {
 		];
 
 		private TABS_TYPES = TABS_TYPES;
-		private PERMISSIONS_VIEWS = PERMISSIONS_VIEWS;
 
 		private currentUser;
 		private accounts;
@@ -82,9 +76,8 @@ class AccountUserManagementController implements ng.IController {
 		) {}
 
 		public $onInit(): void {
-			const {tab, view} = this.$state.params;
+			const {tab} = this.$state.params;
 			this.selectedTab = parseInt(tab, 10);
-			this.selectedView = parseInt(view, 10);
 
 			this.onTeamspaceChange();
 		}
