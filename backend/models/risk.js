@@ -57,6 +57,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 	const account = dbCol.account;
 	const model = dbCol.model;
 
+	console.log(model);
 	let filter = {};
 	let historySearch = Promise.resolve();
 
@@ -106,7 +107,16 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 							account: dbCol.account,
 							model: ref.project
 						}
-						subModelsPromises.push(this.findRisksByModelName(subDbCol, username, "master", null, projection));
+						subModelsPromises.push(
+								this.findRisksByModelName(subDbCol, username, "master", null, projection).then((risks) => {
+									risks.forEach((risk) => {
+										risk.origin_account = subDbCol.account;
+										risk.origin_model = subDbCol.model;
+									});
+
+									return risks;
+								})
+						);
 					});
 
 					return Promise.all(subModelsPromises).then((subModelsRisks) => {
@@ -133,7 +143,7 @@ risk.findByUID = function(dbCol, uid, projection) {
 		return _dbCol.findOne({ _id: uid }, projection).then((risk) => {
 
 			if (!risk) {
-				return Promise.reject(responseCodes.VIEW_NOT_FOUND); // TODO
+				return Promise.reject(responseCodes.RISK_NOT_FOUND);
 			}
 
 			return risk;
