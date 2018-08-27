@@ -83,21 +83,23 @@ class ProjectsPermissionsController implements ng.IController {
 	 * @param projectPermissions
 	 */
 	public getExtendedProjectPermissions = (projectPermissions) => {
-		return projectPermissions.map(({user, permissions = []}: {user: string, permissions: string[]}) => {
-			const memberData = this.members.find((member) => member.user === user) || {};
-			let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
-			if (memberData.isAdmin) {
-				projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINSTRATOR;
-			} else {
-				projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
-			}
+		return projectPermissions
+			.map(({user, permissions = [], isSelected = false}: {user: string, permissions: string[], isSelected?: boolean}) => {
+				const memberData = this.members.find((member) => member.user === user) || {};
+				let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
+				if (memberData.isAdmin) {
+					projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINSTRATOR;
+				} else {
+					projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
+				}
 
-			return {
-				...memberData,
-				permissions,
-				key: projectPermissionsKey
-			};
-		});
+				return {
+					...memberData,
+					permissions,
+					key: projectPermissionsKey,
+					isSelected
+				};
+			});
 	}
 
 	/**
@@ -111,6 +113,7 @@ class ProjectsPermissionsController implements ng.IController {
 			if (newPermissions) {
 				return {
 					user,
+					isSelected: newPermissions.isSelected,
 					permissions: newPermissions.key ? [newPermissions.key] : []
 				};
 			}
