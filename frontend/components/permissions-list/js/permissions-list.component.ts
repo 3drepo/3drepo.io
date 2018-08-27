@@ -67,11 +67,11 @@ class PermissionsListController implements ng.IController {
 		if (data && this.currentSort) {
 			this.isLoading = true;
 
-            if (!this.processedData || !this.processedData.length) {
-                this.processedData = this.processData();
+			if (!this.processedData || !this.processedData.length) {
+				this.processedData = this.processData();
 			} else {
 				this.processedData = this.processedData.map(({user}) => {
-					return permissions.currentValue.find((newPermission) => newPermission.user === user);
+					return data.currentValue.find((newPermission) => newPermission.user === user);
 				});
 			}
 
