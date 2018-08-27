@@ -37,18 +37,18 @@ class ProjectsPermissionsController implements ng.IController {
 
 	public $onInit(): void {}
 
-	public $onChanges({projects, members}: {projects?: any, members?: any}): void {
-		if (projects.currentValue) {
-/* 			if (!this.currentProject) {
-				this.currentProject = get(projects.currentValue, "[0].name", null);
-				this.onProjectChange();
-			} */
+	public $onChanges(
+		{projects, members, currentTeamspace}: {projects?: any, members?: any, currentTeamspace?: any}
+	): void {
+		if (currentTeamspace && currentTeamspace.currentValue) {
+			this.currentProject = null;
+			this.permissions = [];
+			this.models = [];
 		}
 
-/* 		if (members.currentValue) {
-			console.log('test');
+		if (members && members.currentValue && this.currentProject) {
 			this.onProjectChange();
-		} */
+		}
 	}
 
 	public onProjectChange(): void {

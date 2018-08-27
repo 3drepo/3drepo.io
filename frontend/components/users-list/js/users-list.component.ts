@@ -157,6 +157,7 @@ class UsersListController implements ng.IController {
 			.finally(() => {
 				member.isPending = false;
 				this.updateOriginMember(member);
+				this.onChange({updatedMembers: this.members});
 			});
 	}
 
