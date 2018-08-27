@@ -1,13 +1,15 @@
-.usersList
+.usersList(flex)
 	.usersListHeader(layout="row" layout-align="start center")
 		.usersListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
+				ng-disabled="!vm.processedMembers.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
 
 			md-input-container.usersListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
 				input(
+					ng-disabled="!vm.members.length"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
 					placeholder="User"
@@ -15,12 +17,14 @@
 
 		.usersListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
+				ng-disabled="!vm.processedMembers.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.JOBS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.JOBS, order)")
 			.usersListCellLabel Job
 
 		.usersListCell(layout="row" layout-align="start center" flex="30")
 			list-sort-button(
+				ng-disabled="!vm.processedMembers.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.PERMISSIONS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.PERMISSIONS, order)")
 			.usersListCellLabel Permissions

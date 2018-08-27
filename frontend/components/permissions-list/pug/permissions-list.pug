@@ -17,7 +17,7 @@
 			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
 				input(
-					ng-disabled="!vm.processedPermissions.length"
+					ng-disabled="!vm.permissions.length"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
 					placeholder="User"
@@ -41,7 +41,7 @@
 						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
 					.usersListCellLabel {{::permission.label}}
 				md-radio-button(
-					ng-disabled="!vm.hasSelectedItem || !vm.processedPermissions.length"
+					ng-disabled="!vm.hasSelectedItem || !vm.permissions.length"
 					ng-value="permission.key"
 					aria-label="{{::permission.label}}")
 
@@ -49,12 +49,12 @@
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
 	.permissionsListPlaceholder(
-		ng-if="!vm.isLoading && !vm.processedPermissions.length"
+		ng-if="!vm.isLoading && !vm.permissions.length"
 		layout="row"
 		layout-align="center center")
 		p Select a project to view the users' permissions
 
-	.permissionsListBody(ng-if="!vm.isLoading && vm.processedPermissions.length")
+	.permissionsListBody(ng-if="!vm.isLoading && vm.permissions.length" data-simplebar)
 		div.permissionsListRow(
 			ng-repeat="permissions in vm.processedPermissions track by permissions.user"
 			layout="row"

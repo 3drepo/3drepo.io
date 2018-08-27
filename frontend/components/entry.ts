@@ -9,6 +9,7 @@ import "angular-sanitize";
 import "angular-aria";
 import "angular-recaptcha";
 import * as io from "socket.io-client";
+import "simplebar";
 
 // TypeScript compiled globals
 import { UnityUtil } from "../globals/unity-util";
