@@ -1,5 +1,5 @@
 .modelsList {
-  height: calc(47vh - 101px);
+  height: calc(29rem - 104px);
   overflow: hidden;
 }
 
@@ -92,4 +92,20 @@
 .modelsListLoader {
   width: 100%;
   height: 62px;
+}
+
+.modelsListBody .simplebar-scroll-content,
+.modelsListBody .simplebar-content {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.modelsListBody .simplebar-track.horizontal {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.modelsListBody .simplebar-track.vertical {
+  display: none;
 }
