@@ -28,8 +28,8 @@ export class ProjectsService {
 	 * @param project
 	 * @returns {*|promise}
 	 */
-	public getProject = (teamspace, project): Promise<any> => {
-		return this.APIService.get(`${teamspace}/projects/${project}`);
+	public getProject = (teamspace, project, options): Promise<any> => {
+		return this.APIService.get(`${teamspace}/projects/${project}`, options);
 	}
 
 	public updateProject = (teamspace, project): Promise<any> => {

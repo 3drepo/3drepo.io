@@ -14,13 +14,14 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {first, get} from "lodash";
+import {first, get, identity} from "lodash";
 import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 class ProjectsPermissionsController implements ng.IController {
 	public static $inject: string[] = [
 		"ProjectsService",
-		"DialogService"
+		"DialogService",
+		"$q"
 	];
 
 	private projects: object[];
@@ -29,10 +30,12 @@ class ProjectsPermissionsController implements ng.IController {
 	private members;
 	private permissions;
 	private models;
+	private projectRequestCanceler;
 
 	constructor(
 		private ProjectsService: any,
-		private DialogService: any
+		private DialogService: any,
+		private $q: any
 	) {}
 
 	public $onInit(): void {}
@@ -40,22 +43,38 @@ class ProjectsPermissionsController implements ng.IController {
 	public $onChanges(
 		{projects, members, currentTeamspace}: {projects?: any, members?: any, currentTeamspace?: any}
 	): void {
-		if (currentTeamspace && currentTeamspace.currentValue) {
+		const membersChanged = members && members.currentValue;
+		const teamspaceChanged = currentTeamspace && currentTeamspace.currentValue;
+
+		if (teamspaceChanged) {
 			this.currentProject = null;
 			this.permissions = [];
 			this.models = [];
+
+			if (this.projectRequestCanceler) {
+				this.projectRequestCanceler.resolve();
+			}
 		}
 
-		if (members && members.currentValue && this.currentProject) {
+		if (membersChanged && this.currentProject) {
 			this.onProjectChange();
 		}
 	}
 
 	public onProjectChange(): void {
-		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject)
-			.then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
-				this.permissions = this.getExtendedProjectPermissions(project.permissions);
-				this.models = project.models;
+		if (this.projectRequestCanceler) {
+			this.projectRequestCanceler.resolve();
+		}
+
+		this.projectRequestCanceler = this.$q.defer();
+		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
+			timeout: this.projectRequestCanceler.promise
+		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
+			this.permissions = this.getExtendedProjectPermissions(project.permissions);
+			this.models = project.models;
+		}).catch(identity)
+			.finally(() => {
+				this.projectRequestCanceler = null;
 			});
 	}
 
