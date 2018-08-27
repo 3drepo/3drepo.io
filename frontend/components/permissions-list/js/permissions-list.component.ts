@@ -50,10 +50,6 @@ class PermissionsListController implements ng.IController {
 		};
 	}
 
-	public $postLink(): void {
-
-	}
-
 	public $onInit(): void {}
 
 	public $onChanges({permissions, currentTeamspace}: {permissions?: any, currentTeamspace?: any}): void {
