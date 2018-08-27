@@ -21,7 +21,7 @@
 	.modelsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
-	.modelsListBody(ng-if="!vm.isLoading")
+	.modelsListBody(ng-if="!vm.isLoading" data-simplebar)
 		div.modelsListRow(
 			ng-repeat="model in vm.processedModels track by model.name"
 			layout="row"
