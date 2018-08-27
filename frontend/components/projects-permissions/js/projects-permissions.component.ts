@@ -14,7 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {first, get, identity} from "lodash";
+import {first, get, isUndefined, identity} from "lodash";
 import {PROJECT_ROLES_TYPES, PROJECT_ROLES_LIST} from "../../../constants/project-permissions";
 import {MODEL_ROLES_TYPES, MODEL_ROLES_LIST} from "../../../constants/model-permissions";
 
@@ -186,10 +186,34 @@ class ProjectsPermissionsController implements ng.IController {
 			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
 
-	public onModelPermissionsChange(selectedModels: any[]): void {
-		console.log("model permissions update");
+	public onModelPermissionsChange(updatedPermissions: any[]): void {
+		if (this.selectedModels.length) {
+			console.log("model permissions update", updatedPermissions);
+			const permissionsList = this.selectedModels.map((selectedModel) => {
+				const newPermissions = selectedModel.permissions.map((currentPermission) => {
+					const memberPermission = updatedPermissions.find(({user}) => user === currentPermission.user);
 
-		this.ModelsService.updatePermissions(this.currentTeamspace.account, selectedModels[0]);
+					if (memberPermission) {
+						return {
+							user: currentPermission.user,
+							permissions: memberPermission.key
+						};
+					}
+
+					return {
+						user: currentPermission.user,
+						permissions: currentPermission.permission
+					};
+				}).filter(({permissions}) => !isUndefined(permissions));
+
+				return {
+					model: selectedModel.model,
+					permissions: newPermissions
+				};
+			});
+
+			this.ModelsService.updateMulitpleModelsPermissions(this.currentTeamspace.account, permissionsList);
+		}
 	}
 
 	public onModelSelectionChange(selectedModels: any[]): void {
