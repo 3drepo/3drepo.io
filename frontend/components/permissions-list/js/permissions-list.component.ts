@@ -126,7 +126,8 @@ class PermissionsListController implements ng.IController {
 	 */
 	public toggleAllItems(): void {
 		this.permissions = this.permissions.map((permission) => {
-			return {...permission, isSelected: this.shouldSelectAllItems};
+			const isVisible = this.processedPermissions.some(({user}) => user === permission.user);
+			return {...permission, isSelected: this.shouldSelectAllItems && isVisible};
 		});
 		this.processedPermissions = this.processData();
 		this.hasSelectedItem = this.shouldSelectAllItems;
