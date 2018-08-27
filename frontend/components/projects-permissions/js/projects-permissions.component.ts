@@ -59,8 +59,12 @@ class ProjectsPermissionsController implements ng.IController {
 	) {}
 
 	public $onInit(): void {
-		const {view} = this.$state.params;
-		this.currentView = parseInt(view, 10);
+		const {project, view} = this.$state.params;
+
+		if (project) {
+			this.currentProject = project;
+			this.currentView = parseInt(view, 10);
+		}
 	}
 
 	public $onChanges(
@@ -89,14 +93,16 @@ class ProjectsPermissionsController implements ng.IController {
 			this.projectRequestCanceler.resolve();
 		}
 
-		this.projectRequestCanceler = this.$q.defer();this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
+		this.projectRequestCanceler = this.$q.defer();
+		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
 			timeout: this.projectRequestCanceler.promise
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
 				const projectData =this.projects.find(({name}) => name === this.currentProject);
 				this.models = get(projectData, "models", []);
 				this.selectedModels = [];
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
-				this.assignedModelPermissions = this.getExtendedModelPermissions();}).catch(identity)
+				this.assignedModelPermissions = this.getExtendedModelPermissions();
+			}).catch(identity)
 			.finally(() => {
 				this.projectRequestCanceler = null;
 			});
@@ -169,12 +175,13 @@ class ProjectsPermissionsController implements ng.IController {
 			.map(({user, permissions}: {user: string, permissions: string}) => {
 				const newPermissions = updatedPermissions.find((permission) => permission.user === user);
 
-			if (newPermissions) {
-				return {
-					user,
-					isSelected: newPermissions.isSelected,permissions: newPermissions.key ? [newPermissions.key] : []
-				};
-			}
+				if (newPermissions) {
+					return {
+						user,
+						isSelected: newPermissions.isSelected,
+						permissions: newPermissions.key ? [newPermissions.key] : []
+					};
+				}
 
 				return {user, permissions};
 			});
