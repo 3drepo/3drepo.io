@@ -2,8 +2,10 @@
 	.permissionsListHeader(layout="row" layout-align="start center")
 		.permissionsListCell(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
+				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
 				ng-disabled="!vm.processedPermissions.length"
 				ng-change="vm.toggleAllItems()"
+				ng-checked="vm.shouldSelectAllItems"
 				ng-model="vm.shouldSelectAllItems")
 	
 		.permissionsListCell(layout="row" layout-align="start center" flex="25")
@@ -60,7 +62,10 @@
 
 			//Checkbox
 			.permissionsListCell(layout="row" layout-align="center center" flex="10")
-				md-checkbox(ng-model="permissions.isSelected" ng-change="vm.onSelectionChange()")
+				md-checkbox(
+					ng-disabled="permissions.isAdmin"
+					ng-model="permissions.isSelected"
+					ng-change="vm.onSelectionChange()")
 
 			//User details
 			.permissionsListCell(flex="25")

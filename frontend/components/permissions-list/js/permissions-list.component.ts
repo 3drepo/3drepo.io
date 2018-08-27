@@ -36,8 +36,8 @@ class PermissionsListController implements ng.IController {
 	private onChange;
 	private searchText;
 	private isLoading = true;
-	private shouldSelectAllItems;
-	private hasSelectedItem;
+	private shouldSelectAllItems = false;
+	private hasSelectedItem = false;
 	private permissionsForSelected = PROJECT_ROLES_TYPES.NONE;
 
 	constructor(
@@ -57,9 +57,7 @@ class PermissionsListController implements ng.IController {
 			this.isLoading = true;
 			this.processedPermissions = this.processData();
 			this.isLoading = false;
-		}
-		if (permissions && permissions.currentValue && this.currentSort) {
-
+			this.permissionsForSelected = PROJECT_ROLES_TYPES.NONE;
 		}
 	}
 
