@@ -3,21 +3,21 @@
 		.permissionsListCell(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
 				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
-				ng-disabled="!vm.processedPermissions.length"
+				ng-disabled="!vm.processedData.length"
 				ng-change="vm.toggleAllItems()"
 				ng-checked="vm.shouldSelectAllItems"
 				ng-model="vm.shouldSelectAllItems")
 	
 		.permissionsListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
-				ng-disabled="!vm.processedPermissions.length"
+				ng-disabled="!vm.processedData.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
 
 			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
 				input(
-					ng-disabled="!vm.permissions.length"
+					ng-disabled="!vm.data.length"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
 					placeholder="User"
@@ -35,12 +35,12 @@
 				ng-repeat="permission in vm.permissions")
 				div(layout="row" layout-align="center center")
 					list-sort-button(
-						ng-disabled="!vm.processedPermissions.length"
+						ng-disabled="!vm.processedData.length"
 						ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.key === permission.key}"
 						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
 					.usersListCellLabel {{::permission.label}}
 				md-radio-button(
-					ng-disabled="!vm.hasSelectedItem || !vm.permissions.length"
+					ng-disabled="!vm.hasSelectedItem || !vm.data.length"
 					ng-value="permission.key"
 					aria-label="{{::permission.label}}")
 
@@ -48,13 +48,13 @@
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
 	.permissionsListPlaceholder(
-		ng-if="!vm.isLoading && !vm.permissions.length"
+		ng-if="!vm.isLoading && !vm.data.length"
 		layout="row"
 		layout-align="center center")
 		p Select a project to view the users' permissions
 
 	.permissionsListBody(
-		ng-if="!vm.isLoading && vm.permissions.length"
+		ng-if="!vm.isLoading && vm.data.length"
 		data-simplebar
 		data-simplebar-x-hidden)
 		div.permissionsListRow(
