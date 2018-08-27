@@ -59,25 +59,25 @@ class PermissionsListController implements ng.IController {
 		this.permissionsContainerSize = sumBy(this.permissions, "width");
 	}
 
-    public $onChanges({permissions, currentTeamspace}: {permissions?: any, currentTeamspace?: any}): void {
-        if (currentTeamspace) {
-            this.processedPData = null;
-        }
+	public $onChanges({data, currentTeamspace}: {data?: any, currentTeamspace?: any}): void {
+		if (currentTeamspace) {
+			this.processedData = null;
+		}
 
-        if (data && this.currentSort) {
-            this.isLoading = true;
+		if (data && this.currentSort) {
+			this.isLoading = true;
 
-			if ( !this.processedData || !this.processedData.length) {
-			this.processedData = this.processData();
+			if (!this.processedData || !this.processedData.length) {
+				this.processedData = this.processData();
 			} else {
-				this.processedPermissions = this.processedPermissions.map(({user}) => {
+				this.processedData = this.processedData.map(({user}) => {
 					return permissions.currentValue.find((newPermission) => newPermission.user === user);
 				});
 			}
 
-            this.isLoading = false;
-            this.permissionsForSelected = UNDEFINED_PERMISSIONS;
-        }
+			this.isLoading = false;
+			this.permissionsForSelected = UNDEFINED_PERMISSIONS;
+		}
 	}
 
 	/**
