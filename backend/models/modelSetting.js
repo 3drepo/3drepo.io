@@ -160,6 +160,7 @@ schema.methods.changePermissions = function(permissions) {
 		permissions.forEach(permission => {
 			if (Object.prototype.toString.call(permission.user) !== "[object String]" ||
 					Object.prototype.toString.call(permission.permission) !== "[object String]") {
+				console.log('permission', permission)
 				throw responseCodes.INVALID_ARGUMENTS;
 			}
 
@@ -214,6 +215,14 @@ schema.statics.populateUsers = function(account, permissions) {
 
 		return permissions;
 	});
+};
+
+schema.statics.populateUsersForMultiplePermissions = function (account, permissionsList) {
+	const promises = permissionsList.map((permissions) => {
+		return schema.statics.populateUsers(account, permissions);
+	});
+
+	return Promise.all(promises);
 };
 
 const ModelSetting = ModelFactory.createClass(
