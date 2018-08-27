@@ -47,7 +47,7 @@
 			md-border-bottom
 			md-selected="vm.selectedTab"
 			md-on-select="vm.onTabChange()") 
-			md-tab(label="Users")
+			md-tab(label="Users" ng-disabled="!vm.currentTeamspace.isAdmin")
 				div(layout="column" layout-fill)
 					users-list(
 						flex="grow"
@@ -60,7 +60,7 @@
 						layout="row"
 						layout-align="end center") {{vm.licencesLabel}}
 
-			md-tab(label="Jobs")
+			md-tab(label="Jobs" ng-disabled="!vm.currentTeamspace.isAdmin")
 				.jobsList
 
 			md-tab(label="Projects")

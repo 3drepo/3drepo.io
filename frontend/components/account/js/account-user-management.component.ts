@@ -79,7 +79,12 @@ class AccountUserManagementController implements ng.IController {
 
 		public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
 			if (currentUser.currentValue && accounts.currentValue) {
-				this.teamspaces = accounts.currentValue.filter(({isAdmin}) => isAdmin);
+				this.teamspaces = accounts.currentValue.map((account) => {
+					return {
+						...account,
+						isProjectAdmin: Boolean(account.projects.length)
+					};
+				});
 			}
 		}
 
