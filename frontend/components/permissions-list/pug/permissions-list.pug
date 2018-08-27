@@ -2,17 +2,20 @@
 	.permissionsListHeader(layout="row" layout-align="start center")
 		.permissionsListCell(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
+				ng-disabled="!vm.processedPermissions.length"
 				ng-change="vm.toggleAllItems()"
 				ng-model="vm.shouldSelectAllItems")
 	
 		.permissionsListCell(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
+				ng-disabled="!vm.processedPermissions.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
 
 			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
 				input(
+					ng-disabled="!vm.processedPermissions.length"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
 					placeholder="User"
@@ -31,18 +34,25 @@
 				ng-repeat="permission in vm.PROJECT_PERMISSIONS")
 				div(layout="row" layout-align="center center")
 					list-sort-button(
+						ng-disabled="!vm.processedPermissions.length"
 						ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.key === permission.key}"
 						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
 					.usersListCellLabel {{::permission.label}}
 				md-radio-button(
-					ng-disabled="!vm.hasSelectedItem"
+					ng-disabled="!vm.hasSelectedItem || !vm.processedPermissions.length"
 					ng-value="permission.key"
 					aria-label="{{::permission.label}}")
 
 	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
-	.permissionsListBody(ng-if="!vm.isLoading")
+	.permissionsListPlaceholder(
+		ng-if="!vm.isLoading && !vm.processedPermissions.length"
+		layout="row"
+		layout-align="center center")
+		p Select a project to view the users' permissions
+
+	.permissionsListBody(ng-if="!vm.isLoading && vm.processedPermissions.length")
 		div.permissionsListRow(
 			ng-repeat="permissions in vm.processedPermissions track by permissions.user"
 			layout="row"

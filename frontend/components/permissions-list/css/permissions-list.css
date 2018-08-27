@@ -7,6 +7,12 @@
   height: 72px;
 }
 
+.permissionsListPlaceholder {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  height: calc(100% - 72px);
+  color: rgba(155, 155, 155, 1);
+}
+
 .permissionsListBody {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   overflow-x: hidden;
@@ -24,6 +30,10 @@
   color: rgba(0, 0, 0, 0.6);
   font-size: 14px;
   padding: 0 24px;
+}
+
+.usersListCellLabel {
+  font-weight: 500;
 }
 
 .permissionsListCell md-checkbox {
@@ -54,8 +64,10 @@
   padding-top: 5px !important;
 }
 
-.permissionsListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input {
+.permissionsListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input,
+.permissionsListCellSearch .md-input[disabled="disabled"] {
   border-color: transparent;
+  background: none;
 }
 
 .permissionsListCellSearch.md-icon-float md-icon {
@@ -73,6 +85,7 @@
   width: calc(100% - 20px - 18px) !important;
   left: 20px !important;
   margin-bottom: 1px;
+  font-weight: 500;
 }
 
 .permissionsListCellSearch.md-input-focused > label,

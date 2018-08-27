@@ -53,11 +53,13 @@ class PermissionsListController implements ng.IController {
 	public $onInit(): void {}
 
 	public $onChanges({permissions}: {permissions?: any}): void {
-		if (permissions && permissions.currentValue && this.currentSort) {
-			if (!this.processedPermissions) {
-				this.isLoading = false;
-			}
+		if (permissions && this.currentSort) {
+			this.isLoading = true;
 			this.processedPermissions = this.processData();
+			this.isLoading = false;
+		}
+		if (permissions && permissions.currentValue && this.currentSort) {
+
 		}
 	}
 

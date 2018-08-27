@@ -183,7 +183,7 @@ class AccountUserManagementController implements ng.IController {
 		 * @param updatedMembers
 		 */
 		public onMembersChange(updatedMembers): void {
-			this.members = updatedMembers;
+			this.members = [...updatedMembers];
 			this.licencesLabel = this.getLicencesLabel();
 		}
 

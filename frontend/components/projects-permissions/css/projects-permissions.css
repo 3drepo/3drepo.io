@@ -12,7 +12,3 @@
 .projectsPermissions .switchButton {
   margin-right: 10px;
 }
-
-.projectsPermissions .permissionsList {
-  border-top: 1px solid rgba(0, 0, 0, .06);
-}
