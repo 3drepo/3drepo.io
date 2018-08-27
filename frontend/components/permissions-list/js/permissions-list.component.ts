@@ -94,9 +94,9 @@ class PermissionsListController implements ng.IController {
 	 * Filter and sort the data
 	 * @param param
 	 */
-	public processData() {
+	public processData(shouldSort?: boolean) {
 		const filteredPermissions = this.getFilteredData(this.permissions, this.searchText);
-		const processedPermissions = this.getSortedData(filteredPermissions);
+		const processedPermissions = shouldSort ? this.getSortedData(filteredPermissions) : filteredPermissions;
 		return processedPermissions;
 	}
 
