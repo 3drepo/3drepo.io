@@ -67,8 +67,8 @@ class PermissionsListController implements ng.IController {
 		if (data && this.currentSort) {
 			this.isLoading = true;
 
-			if (!this.processedData || !this.processedData.length) {
-				this.processedData = this.processData();
+            if (!this.processedData || !this.processedData.length) {
+                this.processedData = this.processData();
 			} else {
 				this.processedData = this.processedData.map(({user}) => {
 					return permissions.currentValue.find((newPermission) => newPermission.user === user);
@@ -101,7 +101,7 @@ class PermissionsListController implements ng.IController {
 	 * Filter and sort the data
 	 * @param param
 	 */
-	public processData(shouldSort?: boolean) {
+	public processData(shouldSort = true) {
 		const filteredPermissions = this.getFilteredData(this.data, this.searchText);
 		const processedData = shouldSort ? this.getSortedData(filteredPermissions) : filteredPermissions;
 		return processedData;
@@ -149,7 +149,7 @@ class PermissionsListController implements ng.IController {
 	 */
 	public toggleAllItems(): void {
 		this.data = this.data.map((row) => {
-			const isVisible = this.processedPermissions.some(({user}) => user === permission.user);
+			const isVisible = this.processedData.some(({user}) => user === row.user);
 			return {...row, isSelected: this.shouldSelectAllItems && isVisible};
 		});
 		this.processedData = this.processData();
