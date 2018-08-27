@@ -124,7 +124,7 @@ class ProjectsPermissionsController implements ng.IController {
 		const updateData = {name: this.currentProject, permissions: permissionsToSave};
 		this.ProjectsService.updateProject(this.currentTeamspace.account, updateData)
 			.then(({data: updatedProject}) => {
-				this.permissions = this.getExtendedProjectPermissions(permissionsToSave);
+				this.permissions = [...this.getExtendedProjectPermissions(permissionsToSave)];
 			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
 

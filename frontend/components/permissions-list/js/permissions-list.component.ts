@@ -62,6 +62,10 @@ class PermissionsListController implements ng.IController {
 
 			if (!this.processedPermissions || !this.processedPermissions.length) {
 				this.processedPermissions = this.processData();
+			} else {
+				this.processedPermissions = this.processedPermissions.map(({user}) => {
+					return permissions.currentValue.find((newPermission) => newPermission.user === user);
+				});
 			}
 
 			this.isLoading = false;
@@ -86,6 +90,10 @@ class PermissionsListController implements ng.IController {
 		this.processedPermissions = this.processData();
 	}
 
+	/**
+	 * Filter and sort the data
+	 * @param param
+	 */
 	public processData() {
 		const filteredPermissions = this.getFilteredData(this.permissions, this.searchText);
 		const processedPermissions = this.getSortedData(filteredPermissions);
