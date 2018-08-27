@@ -52,10 +52,18 @@ class PermissionsListController implements ng.IController {
 
 	public $onInit(): void {}
 
-	public $onChanges({permissions}: {permissions?: any}): void {
+	public $onChanges({permissions, currentTeamspace}: {permissions?: any, currentTeamspace?: any}): void {
+		if (currentTeamspace) {
+			this.processedPermissions = null;
+		}
+
 		if (permissions && this.currentSort) {
 			this.isLoading = true;
-			this.processedPermissions = this.processData();
+
+			if (!this.processedPermissions || !this.processedPermissions.length) {
+				this.processedPermissions = this.processData();
+			}
+
 			this.isLoading = false;
 			this.permissionsForSelected = PROJECT_ROLES_TYPES.NONE;
 		}
