@@ -361,7 +361,7 @@ class HomeController implements ng.IController {
 		}
 
 		if (!this.topLogo) {
-			this.topLogo = "/images/3drepo-logo-blue.png";
+			this.topLogo = "/images/3drepo-logo-white.png";
 		}
 		if (!this.backgroundImage) {
 			this.backgroundImage = "/images/viewer_background.png";
