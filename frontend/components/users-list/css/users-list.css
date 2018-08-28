@@ -1,5 +1,5 @@
 .usersList {
-  height: calc(29rem - 16px);
+  height: 100%;
   overflow: hidden;
 }
 

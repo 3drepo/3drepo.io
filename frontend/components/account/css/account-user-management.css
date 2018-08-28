@@ -60,6 +60,7 @@
   font-size: 14px;
   color: rgba(130, 130, 130, 0.6);
   border-top: 1px solid rgba(0, 0, 0, .06);
+  height: 45px;
 }
 
 .accountUserManagement list-sort-button.active button:not([disabled="disabled"]) {

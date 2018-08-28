@@ -1,5 +1,5 @@
 .modelsList {
-  height: calc(29rem - 104px);
+  height: 100%;
   overflow: hidden;
 }
 
