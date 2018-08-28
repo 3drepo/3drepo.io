@@ -6,6 +6,10 @@
   color: rgba(0, 0, 0, .6);
 }
 
+.projectsPermissionsOptions {
+  height: 98px;
+}
+
 .projectsPermissions .projectSelectContainer md-select-value {
   margin-bottom: 0;
 }
@@ -55,6 +59,7 @@
   font-size: 14px;
   color: rgba(130, 130, 130, 0.6);
   border-top: 1px solid rgba(0, 0, 0, .06);
+  height: 45px;
 }
 
 .projectsPermissions .modelsPermissionsWrapper {

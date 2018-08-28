@@ -1,5 +1,5 @@
-.projectsPermissions(flex)
-  div(layout="row" layout-align="start center")
+.projectsPermissions(flex layout="column")
+  div.projectsPermissionsOptions(layout="row" layout-align="start center" flex="none")
     md-input-container.projectSelectContainer(md-no-float)
       label Project
       md-select(
@@ -31,7 +31,7 @@
 
   permissions-list(
     ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
-    flex="grow"
+    flex
     data="vm.assignedProjectPermissions"
     permissions="vm.PROJECT_ROLES_LIST"
     current-teamspace="vm.currentTeamspace"

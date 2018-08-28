@@ -48,12 +48,12 @@
 			md-border-bottom
 			md-selected="vm.selectedTab")
 			md-tab(
-                label="Users"
-                md-on-select="vm.onTabChange()"
-                ng-disabled="!vm.currentTeamspace.isAdmin")
+				label="Users"
+				md-on-select="vm.onTabChange()"
+				ng-disabled="!vm.currentTeamspace.isAdmin")
 				div(layout="column" layout-fill)
 					users-list(
-						flex="grow"
+						flex
 						layout="row"
 						members="vm.members"
 						jobs="vm.jobs"
@@ -73,7 +73,7 @@
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)
 					projects-permissions(
-						flex="grow"
+						flex
 						layout="row"
 						members="vm.members"
 						projects="vm.projects"
