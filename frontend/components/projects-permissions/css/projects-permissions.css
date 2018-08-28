@@ -75,5 +75,5 @@
 }
 
 .projectsPermissions .modelsPermissions .permissionsList {
-  width: 730px;
+  min-width: 730px;
 }

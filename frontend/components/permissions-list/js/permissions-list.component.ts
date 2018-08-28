@@ -72,11 +72,11 @@ class PermissionsListController implements ng.IController {
 				this.processedData = this.processedData.map(({user}) => {
 					return data.currentValue.find((newPermission) => newPermission.user === user);
 				});
+				this.onSelectionChange();
 			}
 
 			this.isLoading = false;
 			this.permissionsForSelected = UNDEFINED_PERMISSIONS;
-			this.onSelectionChange();
 		}
 	}
 
@@ -175,7 +175,6 @@ class PermissionsListController implements ng.IController {
 	 * @param selectedPermission
 	 */
 	public updatePermissionsForSelected(selectedPermission): void {
-		debugger
 		const updatedPermissions = this.processedData
 			.reduce((permissionsList, permission) => {
 				if (permission.isSelected && !permission.isAdmin) {
