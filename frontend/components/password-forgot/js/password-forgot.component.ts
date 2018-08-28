@@ -64,9 +64,7 @@ class PasswordForgotController implements ng.IController {
 		}
 
 		if (requestChange) {
-			if (this.usernameOrEmail) {
-				this.messageColor = this.messageColour;
-				this.message = "Please wait...";
+			if (this.usernameOrEmail && this.usernameOrEmail !== "") {
 				this.showProgress = true;
 				this.buttonDisabled = false;
 				this.APIService.post("forgot-password", {userNameOrEmail: this.usernameOrEmail})
@@ -79,19 +77,12 @@ class PasswordForgotController implements ng.IController {
 						} else {
 							this.buttonDisabled = false;
 							this.messageColor = this.messageErrorColour;
-							this.message = response.data.message;
 						}
 					})
 					.catch((error) => {
 						this.showProgress = false;
-						this.messageColor = this.messageErrorColour;
-						this.message = error.data.message;
 						this.buttonDisabled = false;
 					});
-
-			} else {
-				this.messageColor = this.messageErrorColour;
-				this.message = "Missing username or email";
 			}
 		}
 	}

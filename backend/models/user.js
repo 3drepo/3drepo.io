@@ -474,11 +474,10 @@ schema.statics.getForgotPasswordToken = function (userNameOrEmail, tokenExpiryTi
 
 		user = _user;
 
-		if (!user) {
-			return Promise.reject(responseCodes.INVALID_USERNAME);
+		// set token only if username is found.
+		if (user) {
+			user.customData.resetPasswordToken = resetPasswordToken;
 		}
-
-		user.customData.resetPasswordToken = resetPasswordToken;
 
 		resetPasswordUserInfo = {
 			token: resetPasswordToken.token,

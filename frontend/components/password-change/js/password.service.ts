@@ -23,12 +23,18 @@ export class PasswordService {
 	];
 
 	public accountDefer;
+	public passwordMessage;
 
 	constructor(
 		private $q,
 		private APIService
 	) {
 		this.accountDefer = $q.defer();
+	}
+
+	public checkDuplicates(password, confirmPassword) {
+		const passwordValid = password === confirmPassword;
+		return this.passwordMessage;
 	}
 
 	public passwordLibraryAvailable() {
@@ -42,7 +48,7 @@ export class PasswordService {
 		} else if (this.passwordLibraryAvailable()) {
 			strengthVal = window.zxcvbn(password).score;
 		}
-		return {score: strengthVal};
+		return { score: strengthVal };
 	}
 
 	public getPasswordStrength(password: string, score: number) {
@@ -50,16 +56,16 @@ export class PasswordService {
 			return "Must be at least 8 characters";
 		}
 		switch (score) {
-		case 0:
-			return "Very Weak";
-		case 1:
-			return "Weak";
-		case 2:
-			return "OK";
-		case 3:
-			return "Strong";
-		case 4:
-			return "Very Strong";
+			case 0:
+				return "Very Weak";
+			case 1:
+				return "Weak";
+			case 2:
+				return "OK";
+			case 3:
+				return "Strong";
+			case 4:
+				return "Very Strong";
 		}
 		return "Very Weak";
 	}

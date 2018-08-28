@@ -50,12 +50,14 @@ class PasswordChangeController implements ng.IController {
 	private messageErrorColour;
 	private buttonDisabled;
 	private password;
+	private confirmPassword;
 	private message;
 	private newPassword;
 	private token;
 	private messageColor;
 	private username;
 	private passwordStrength;
+	private registerMessage;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -63,7 +65,7 @@ class PasswordChangeController implements ng.IController {
 		private APIService: any,
 		private StateManager: any,
 		private PasswordService: any
-	) {}
+	) { }
 
 	public $onInit() {
 		this.passwordChanged = false;
@@ -105,35 +107,37 @@ class PasswordChangeController implements ng.IController {
 
 	}
 
+	public confirmPasswordInput() {
+		return this.registerMessage = this.PasswordService.checkDuplicates(this.newPassword, this.confirmPassword);
+	}
+
 	public checkInvalidPassword(result) {
 		switch (result.score) {
-		case 0:
-			this.invalidatePassword(result);
-			break;
-		case 1:
-			this.invalidatePassword(result);
-			break;
-		case 2:
-			this.validatePassword();
-			break;
-		case 3:
-			this.validatePassword();
-			break;
-		case 4:
-			this.validatePassword();
-			break;
+			case 0:
+				this.invalidatePassword(result);
+				break;
+			case 1:
+				this.invalidatePassword(result);
+				break;
+			case 2:
+				this.validatePassword();
+				break;
+			case 3:
+				this.validatePassword();
+				break;
+			case 4:
+				this.validatePassword();
+				break;
 		}
 	}
 
 	public invalidatePassword(result) {
-		// this.$scope.password.new.$setValidity("required", false);
 		this.buttonDisabled = true;
-		this.message = "Password is too weak; " + result.feedback.suggestions.join(" ");
+		this.message = "Password is too weak";
 		this.messageColor = this.messageErrorColour;
 	}
 
 	public validatePassword() {
-		// this.$scope.password.new.$setValidity("required", true);
 		this.buttonDisabled = false;
 		this.message = "";
 		this.messageColor = this.messageColour;
@@ -154,9 +158,9 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public doPasswordChange() {
+		if (this.newPassword === this.confirmPassword) {
 		if (this.username && this.token) {
 			if (this.newPassword && this.newPassword !== "") {
-
 				this.messageColor = this.messageColour;
 				this.message = "Please wait...";
 				this.showProgress = true;
@@ -201,7 +205,7 @@ class PasswordChangeController implements ng.IController {
 		this.buttonDisabled = true;
 		this.message = "Token or username is missing!";
 	}
-
+	}
 }
 
 export const PasswordChangeComponent: ng.IComponentOptions = {
