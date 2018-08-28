@@ -28,11 +28,11 @@
   border-right: 1px solid rgba(0, 0, 0, .06);
 }
 
-.projectsPermissions permissions-list {
+.projectsPermissions permissions-list .permissionsList {
   position: relative;
 }
 
-.projectsPermissions permissions-list:before {
+.projectsPermissions permissions-list .permissionsList:before {
   content: "";
   position: absolute;
   width: 100%;
@@ -45,7 +45,7 @@
   transition: opacity 100ms ease-in-out;
 }
 
-.projectsPermissions permissions-list[disabled="disabled"]:before {
+.projectsPermissions permissions-list[disabled="disabled"] .permissionsList:before {
   opacity: 0.9;
   pointer-events: all;
 }
@@ -55,4 +55,25 @@
   font-size: 14px;
   color: rgba(130, 130, 130, 0.6);
   border-top: 1px solid rgba(0, 0, 0, .06);
+}
+
+.projectsPermissions .modelsPermissionsWrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.projectsPermissions .modelsPermissions .permissionsListCheckbox {
+  min-width: 60px !important;
+  flex: 0;
+  max-width: initial;
+}
+
+.projectsPermissions .modelsPermissions .permissionsListUser {
+  min-width: 130px;
+  max-width: 150px;
+  padding-right: 0;
+}
+
+.projectsPermissions .modelsPermissions .permissionsList {
+  width: 730px;
 }

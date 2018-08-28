@@ -1,6 +1,6 @@
 .permissionsList
 	.permissionsListHeader(layout="row" layout-align="start center")
-		.permissionsListCell(layout="row" layout-align="center center" flex="10")
+		.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
 				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
 				ng-disabled="!vm.processedData.length"
@@ -8,7 +8,7 @@
 				ng-checked="vm.shouldSelectAllItems"
 				ng-model="vm.shouldSelectAllItems")
 	
-		.permissionsListCell(layout="row" layout-align="start center" flex="25")
+		.permissionsListCell.permissionsListUser(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
 				ng-disabled="!vm.processedData.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
@@ -60,14 +60,14 @@
 			layout-align="start center")
 
 			//Checkbox
-			.permissionsListCell(layout="row" layout-align="center center" flex="10")
+			.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 				md-checkbox(
 					ng-disabled="row.isAdmin"
 					ng-model="row.isSelected"
 					ng-change="vm.onSelectionChange()")
 
 			//User details
-			.permissionsListCell(flex="25")
+			.permissionsListCell.permissionsListUser(flex="25")
 				member-card(data="row")
 
 			//Permissions

@@ -1,0 +1,24 @@
+.simplebar-scroll-content,
+.simplebar-content {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.simplebar-track {
+  position: absolute;
+}
+
+.simplebar-track.horizontal {
+  right: 0;
+  top: 0;
+}
+
+/* .simplebar-track.horizontal {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.simplebar-track.vertical {
+  display: none;
+} */

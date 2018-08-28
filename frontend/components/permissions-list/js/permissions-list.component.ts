@@ -150,7 +150,7 @@ class PermissionsListController implements ng.IController {
 	public toggleAllItems(): void {
 		this.data = this.data.map((row) => {
 			const isVisible = this.processedData.some(({user}) => user === row.user);
-			return {...row, isSelected: this.shouldSelectAllItems && isVisible};
+			return {...row, isSelected: this.shouldSelectAllItems && isVisible && !row.isAdmin};
 		});
 		this.processedData = this.processData();
 		this.hasSelectedItem = this.shouldSelectAllItems;
@@ -175,6 +175,7 @@ class PermissionsListController implements ng.IController {
 	 * @param selectedPermission
 	 */
 	public updatePermissionsForSelected(selectedPermission): void {
+		debugger
 		const updatedPermissions = this.processedData
 			.reduce((permissionsList, permission) => {
 				if (permission.isSelected && !permission.isAdmin) {
