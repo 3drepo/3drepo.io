@@ -1,5 +1,5 @@
 .permissionsList {
-  height: 100%;
+  height: calc(29rem - 102px);
   overflow: hidden;
 }
 

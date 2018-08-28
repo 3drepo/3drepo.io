@@ -32,12 +32,13 @@
   permissions-list(
     ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
     flex
+    layout="column"
     data="vm.assignedProjectPermissions"
     permissions="vm.PROJECT_ROLES_LIST"
     current-teamspace="vm.currentTeamspace"
     on-change="vm.onPermissionsChange(updatedPermissions)")
 
-  div.modelsPermissions(flex="grow" layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
+  div.modelsPermissions(flex layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
     models-list(
       models="vm.models"
       current-teamspace="vm.currentTeamspace"
