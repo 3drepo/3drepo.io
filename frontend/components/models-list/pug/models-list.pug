@@ -32,4 +32,6 @@
 				md-checkbox(ng-model="model.isSelected" ng-change="vm.onSelectionChange()")
 
 			//Model details
-			.modelsListCell(flex md-highlight-text="vm.searchText") {{model.name}}
+			.modelsListCell(flex layout="column" layout-align="center start")
+				div(md-highlight-text="vm.searchText") {{model.name}}
+				.modelsListType {{model.federate ? "Federation" : "Model"}}

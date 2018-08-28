@@ -59,11 +59,11 @@ router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBun
 router.put("/:model", middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
 // model permission
-router.post("/models/permissions", middlewares.hasEditPermissionsAccessToModel, updateMultiplePermissions)
+router.post("/models/permissions", middlewares.hasEditPermissionsAccessToModel, updateMultiplePermissions);
 router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 // model permission
-router.get("/models/permissions", middlewares.hasEditPermissionsAccessToModel, getMultipleModelsPermissions)
+router.get("/models/permissions", middlewares.hasEditPermissionsAccessToModel, getMultipleModelsPermissions);
 router.get("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, getSingleModelPermissions);
 
 // master tree

@@ -133,18 +133,6 @@
   margin-top: 12px !important;
 }
 
-.permissionsListBody .simplebar-scroll-content,
-.permissionsListBody .simplebar-content {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.permissionsListBody .simplebar-track.horizontal {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
 .permissionsListBody .simplebar-track.vertical {
   display: none;
 }

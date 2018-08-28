@@ -43,7 +43,7 @@
       current-teamspace="vm.currentTeamspace"
       on-change="vm.onModelSelectionChange(selectedModels)")
 
-    .modelsPermissionsWrapper(data-simplebar)
+    .modelsPermissionsWrapper(flex="grow" data-simplebar)
       permissions-list(
         ng-disabled="!vm.selectedModels.length"
         flex="grow"
