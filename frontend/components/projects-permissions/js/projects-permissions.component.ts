@@ -99,7 +99,7 @@ class ProjectsPermissionsController implements ng.IController {
 		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
 			timeout: this.projectRequestCanceler.promise
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
-				const projectData =this.projects.find(({name}) => name === this.currentProject);
+				const projectData = this.projects.find(({name}) => name === this.currentProject);
 				this.models = get(projectData, "models", []);
 				this.selectedModels = [];
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
@@ -147,7 +147,7 @@ class ProjectsPermissionsController implements ng.IController {
 				modelPermissionsKey = MODEL_ROLES_TYPES.ADMINSTRATOR;
 			} else {
 				modelPermissionsKey = memberModelPermissions ?
-					first(memberModelPermissions.permissions) || MODEL_ROLES_TYPES.UNASSIGNED :
+					memberModelPermissions.permission || MODEL_ROLES_TYPES.UNASSIGNED :
 					UNDEFINED_PERMISSIONS;
 			}
 
@@ -155,7 +155,8 @@ class ProjectsPermissionsController implements ng.IController {
 				...memberData,
 				permissions: get(memberModelPermissions, "permissions", []),
 				key: modelPermissionsKey,
-				isDisabled: !modelPermissions
+				isDisabled: !modelPermissions,
+				isSelected: get(memberModelPermissions, "isSelected", false)
 			};
 		});
 	}
@@ -190,7 +191,7 @@ class ProjectsPermissionsController implements ng.IController {
 
 		const updateData = {name: this.currentProject, permissions: permissionsToSave};
 		this.ProjectsService.updateProject(this.currentTeamspace.account, updateData)
-			.then(({data: updatedProject}) => {
+			.then(() => {
 				this.assignedProjectPermissions = [...this.getExtendedProjectPermissions(permissionsToSave)];
 			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
@@ -204,6 +205,7 @@ class ProjectsPermissionsController implements ng.IController {
 					if (memberPermission) {
 						return {
 							user: currentPermission.user,
+							isSelected: memberPermission.isSelected,
 							permission: memberPermission.key
 						};
 					}
@@ -220,7 +222,18 @@ class ProjectsPermissionsController implements ng.IController {
 				};
 			});
 
-			this.ModelsService.updateMulitpleModelsPermissions(this.currentTeamspace.account, permissionsList);
+			this.ModelsService.updateMulitpleModelsPermissions(this.currentTeamspace.account, permissionsList)
+				.then(() => {
+					this.selectedModels = permissionsList.map(({permissions}, index) => {
+						const {model, federate, name} = this.selectedModels[index];
+						return {model, permissions, federate, name};
+					});
+					const permissionsToShow = this.selectedModels.length === 1 ?
+						this.selectedModels[0].permissions :
+						updatedPermissions.map(({user, isSelected}) => ({user, isSelected, permission: UNDEFINED_PERMISSIONS}));
+
+					this.assignedModelPermissions = [...this.getExtendedModelPermissions(permissionsToShow)];
+				}).catch(this.DialogService.showError.bind(null, "update", "model/federation permissions"));
 		}
 	}
 
