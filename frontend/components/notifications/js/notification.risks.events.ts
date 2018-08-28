@@ -18,7 +18,7 @@
 import { NotificationEvents } from "./notification.events";
 import { NotificationsChannel } from "./notifications.channel";
 
-export class NotificationIssuesEvents extends NotificationEvents {
+export class NotificationRisksEvents extends NotificationEvents {
 	private comments: { [id: string]: NotificationEvents};
 
 	constructor(protected channel: NotificationsChannel) {

@@ -19,7 +19,7 @@ import { NotificationService } from "./notification.service";
 import { NotificationEvents } from "./notification.events";
 import { NotificationModelEvents } from "./notification.model.events";
 import { NotificationIssuesEvents } from "./notification.issues.events";
-import { NotificationIssuesEvents } from "./notification.risks.events";
+import { NotificationRisksEvents } from "./notification.risks.events";
 
 export class NotificationsChannel {
 	/**
@@ -30,7 +30,7 @@ export class NotificationsChannel {
 	/**
 	 * This property contains the object to suscribe to the risks and comments for the risks notification events
 	 */
-	public risks: NotificationIssuesEvents;
+	public risks: NotificationRisksEvents;
 
 	/**
 	 * This property contains the object to suscribe to the groups notification events
@@ -51,7 +51,7 @@ export class NotificationsChannel {
 	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
 		this.groups = new NotificationEvents(this, "group");
 		this.issues = new NotificationIssuesEvents(this);
-		this.risks = new NotificationIssuesEvents(this);
+		this.risks = new NotificationRisksEvents(this);
 		this.model = new NotificationModelEvents(this);
 	}
 

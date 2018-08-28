@@ -18,11 +18,11 @@ import { AnalyticService } from "../../home/js/analytic.service";
 import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
-import { IssuesService } from "./issues.service";
 import { MeasureService } from "../../measure/js/measure.service";
 import { NotificationEvents } from "../../notifications/js/notification.events";
-import { NotificationIssuesEvents } from "../../notifications/js/notification.issues.events";
+import { NotificationRisksEvents } from "../../notifications/js/notification.risks.events";
 import { NotificationService } from "../../notifications/js/notification.service";
+import { RisksService } from "./risks.service";
 import { StateManagerService } from "../../home/js/state-manager.service";
 import { TreeService } from "../../tree/js/tree.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
@@ -1037,7 +1037,7 @@ class RiskItemController implements ng.IController {
 		if (this.data && !this.notificationStarted) {
 			this.notificationStarted = true;
 
-			this.riskNotifications = this.notificationService.getChannel(this.data.account, this.data.model).risks;
+			this.risksNotifications = this.notificationService.getChannel(this.data.account, this.data.model).risks;
 
 			// Watch for risk change
 			this.risksNotifications.subscribeToUpdated(this.onRiskUpdated, this);
