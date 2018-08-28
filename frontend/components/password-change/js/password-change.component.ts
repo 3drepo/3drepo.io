@@ -108,7 +108,7 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public confirmPasswordInput() {
-		return this.registerMessage = this.PasswordService.checkDuplicates(this.newPassword, this.confirmPassword);
+		 return this.registerMessage = this.PasswordService.checkDuplicates(this.newPassword, this.confirmPassword);
 	}
 
 	public checkInvalidPassword(result) {
