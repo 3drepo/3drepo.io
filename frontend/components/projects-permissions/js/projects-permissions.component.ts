@@ -166,7 +166,7 @@ class ProjectsPermissionsController implements ng.IController {
 	 * @param updatedPermissions
 	 */
 	public onPermissionsChange(updatedPermissions: any[]): void {
-		if (this.currentView === PERMISSIONS_VIEWS.PROJECTS) {
+		if (this.currentView !== PERMISSIONS_VIEWS.MODELS) {
 			this.onProjectPermissionsChange(updatedPermissions);
 		} else {
 			this.onModelPermissionsChange(updatedPermissions);

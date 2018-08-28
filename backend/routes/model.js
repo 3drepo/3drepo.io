@@ -482,23 +482,18 @@ function updatePermissions(req, res, next) {
 function updateMultiplePermissions(req, res, next) {
 
 	const account = req.params.account;
-	const modelsIds = req.body.permissionsList.map(({model}) => model);
+	const modelsIds = req.body.map(({model}) => model);
 
 	return ModelSetting.find({account}, {"_id" : {"$in" : modelsIds}}).then((modelsList) => {
 		if (!modelsList.length) {
-			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND });
+			return Promise.reject({resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
 			const permissionsPromises = modelsList.map((model) => {
-				const newPermissions = req.body.permissionsList.find((permissions) => permissions.model === model._id);
-				return model.changePermissions(account, newPermissions.permissions || []);
+				const newModelPermissions = req.body.find((modelPermissions) => modelPermissions.model === model._id);
+				return model.changePermissions(newModelPermissions.permissions || {}, account);
 			});
 
-			Promise.all(permissionsPromises).then((updatedPermissionsList) => {
-				return updatedPermissionsList.map((permissions, index) => {
-					const {model} = req.body.permissionsList[index];
-					return {model, permissions};
-				});
-			});
+			return Promise.all(permissionsPromises);
 		}
 	}).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);

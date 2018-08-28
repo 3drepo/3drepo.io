@@ -37,19 +37,20 @@
     current-teamspace="vm.currentTeamspace"
     on-change="vm.onPermissionsChange(updatedPermissions)")
 
-  div(flex="grow" layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
+  div.modelsPermissions(flex="grow" layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
     models-list(
       models="vm.models"
       current-teamspace="vm.currentTeamspace"
       on-change="vm.onModelSelectionChange(selectedModels)")
 
-    permissions-list(
-      ng-disabled="!vm.selectedModels.length"
-      flex="grow"
-      data="vm.assignedModelPermissions"
-      permissions="vm.MODEL_ROLES_LIST"
-      current-teamspace="vm.currentTeamspace"
-      on-change="vm.onPermissionsChange(updatedPermissions)")
+    .modelsPermissionsWrapper(data-simplebar)
+      permissions-list(
+        ng-disabled="!vm.selectedModels.length"
+        flex="grow"
+        data="vm.assignedModelPermissions"
+        permissions="vm.MODEL_ROLES_LIST"
+        current-teamspace="vm.currentTeamspace"
+        on-change="vm.onPermissionsChange(updatedPermissions)")
 
   .projectsPermissionsFooter(
     layout="row"
