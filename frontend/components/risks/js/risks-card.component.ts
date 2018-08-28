@@ -14,6 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { AuthService } from "../../home/js/auth.service";
+import { DialogService } from "../../home/js/dialog.service";
+import { EventService } from "../../home/js/event.service";
+import { IssuesService } from "./issues.service";
+import { NotificationService } from "../../notifications/js/notification.service";
+import { RevisionsService } from "../../revisions/js/revisions.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 enum RisksCardState {
 	ShowRisksList,
@@ -73,28 +80,28 @@ class RisksCardController implements ng.IController {
 		private $state,
 		private $q,
 
-		private RisksService,
-		private EventService,
-		private AuthService,
-		private NotificationService,
-		private RevisionsService,
-		private ClientConfigService,
-		private DialogService,
-		private ViewerService
+		private risksService: RisksService,
+		private eventService: EventService,
+		private authService: AuthService,
+		private notificationService: NotificationService,
+		private revisionsService: RevisionsService,
+		private clientConfigService: ClientConfigService,
+		private dialogService: DialogService,
+		private viewerService: ViewerService
 	) {}
 
 	public $onInit() {
 
-		this.RisksService.reset();
+		this.risksService.reset();
 
 		this.showProgress = true;
 		this.progressInfo = "Loading risks";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
 		this.savingRisk = false;
-		this.revisionsStatus = this.RevisionsService.status;
+		this.revisionsStatus = this.revisionsService.status;
 
 		// Get the user roles for the model
-		this.risksReady = this.RisksService.getRisksAndJobs(this.account, this.model, this.revision)
+		this.risksReady = this.risksService.getRisksAndJobs(this.account, this.model, this.revision)
 			.then(() => {
 				this.$timeout(() => {
 					this.toShow = RisksCardState.ShowRisksList;
@@ -105,7 +112,7 @@ class RisksCardController implements ng.IController {
 				const content = "Failed to retrieve risks and jobs for this model. " +
 					"If this continues, please message support@3drepo.org.";
 				const escapable = true;
-				this.DialogService.text("Error getting risks and jobs", content, escapable);
+				this.dialogService.text("Error getting risks and jobs", content, escapable);
 				console.error(error);
 			});
 
@@ -115,15 +122,15 @@ class RisksCardController implements ng.IController {
 
 	public $onDestroy() {
 
-		this.RisksService.reset();
-		// TODO Move Notifications to RisksService
-		this.NotificationService.unsubscribe.newIssues(this.account, this.model);
-		this.NotificationService.unsubscribe.issueChanged(this.account, this.model);
+		this.risksService.reset();
+
+		this.notificationService.unsubscribe.newIssues(this.account, this.model);
+		this.notificationService.unsubscribe.issueChanged(this.account, this.model);
 
 		if (this.subModels) {
 			this.subModels.forEach((subModel) => {
-				this.NotificationService.unsubscribe.newIssues(subModel.database, subModel.model);
-				this.NotificationService.unsubscribe.issueChanged(subModel.database, subModel.model);
+				this.notificationService.unsubscribe.newIssues(subModel.database, subModel.model);
+				this.notificationService.unsubscribe.issueChanged(subModel.database, subModel.model);
 			});
 		}
 
@@ -135,8 +142,8 @@ class RisksCardController implements ng.IController {
 			if (this.modelSettings) {
 
 				this.risksReady.then(() => {
-					this.canAddRisk = this.AuthService.hasPermission(
-						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+					this.canAddRisk = this.authService.hasPermission(
+						this.clientConfigService.permissions.PERM_CREATE_ISSUE,
 						this.modelSettings.permissions
 					);
 				});
@@ -148,15 +155,15 @@ class RisksCardController implements ng.IController {
 		});
 
 		this.$scope.$watch(() => {
-			return this.RevisionsService.status.data;
+			return this.revisionsService.status.data;
 		}, () => {
-			if (this.RevisionsService.status.data) {
-				this.revisions = this.RevisionsService.status.data[this.account + ":" + this.model];
+			if (this.revisionsService.status.data) {
+				this.revisions = this.revisionsService.status.data[this.account + ":" + this.model];
 			}
 		}, true);
 
 		this.$scope.$watch(() => {
-			return this.RisksService.state;
+			return this.risksService.state;
 		}, (state) => {
 
 			if (state) {
@@ -168,10 +175,10 @@ class RisksCardController implements ng.IController {
 		/**
 		 * Set up event watching
 		 */
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+		this.$scope.$watch(this.eventService.currentEvent, (event) => {
 
 			// TODO Need to listen to a new type of event for Risks
-			if (event.type === this.EventService.EVENT.VIEWER.CLICK_PIN) {
+			if (event.type === this.eventService.EVENT.VIEWER.CLICK_PIN) {
 				for (let i = 0; i < this.allRisks.length; i++) {
 					if (this.allRisks[i]._id === event.value.id) {
 						this.editRisk(this.allRisks[i]);
@@ -190,8 +197,8 @@ class RisksCardController implements ng.IController {
 				this.toShow = RisksCardState.ShowRisksList;
 				let risksListItemId;
 
-				if (this.RisksService.state.selectedRisk && this.RisksService.state.selectedRisk._id) {
-					risksListItemId = "risk" + this.RisksService.state.selectedRisk._id;
+				if (this.risksService.state.selectedRisk && this.risksService.state.selectedRisk._id) {
+					risksListItemId = "risk" + this.risksService.state.selectedRisk._id;
 				}
 
 				this.$state.go("home.account.model",
@@ -218,7 +225,7 @@ class RisksCardController implements ng.IController {
 	 * Returns true if model loaded.
 	 */
 	public modelLoaded() {
-		return this.RisksService.modelLoaded();
+		return this.risksService.modelLoaded();
 	}
 
 	/**
@@ -237,61 +244,34 @@ class RisksCardController implements ng.IController {
 	}
 
 	public watchNotification() {
-
 		// Watch for new risks
-		this.NotificationService.subscribe.newIssues(
-			this.account,
-			this.model,
-			this.newRiskListener.bind(this)
-		);
 
-		// Watch for status changes for all risks
-		this.NotificationService.subscribe.issueChanged(
-			this.account,
-			this.model,
-			this.handleRiskChange.bind(this)
-		);
+		let channel = this.notificationService.getChannel(this.account, this.model);
+
+		channel.risks.subscribeToCreated(this.onRiskCreated, this);
+		channel.risks.subscribeToUpdated(this.risksService.updateRisks, this.risksService);
 
 		// Do the same for all subModels
-		if (this.subModels) {
-			this.subModels.forEach((subModel) => {
-
-				if (subModel) {
-					this.NotificationService.subscribe.newIssues(
-						subModel.database,
-						subModel.model,
-						this.newRiskListener.bind(this)
-					);
-					this.NotificationService.subscribe.issueChanged(
-						subModel.database,
-						subModel.model,
-						this.handleRiskChange.bind(this)
-					);
-				} else {
-					console.error("Submodel was expected to be defined for risk subscription: ", subModel);
-				}
-
-			});
-		}
-
+		(this.subModels || []).forEach((subModel) => {
+				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel.risks.subscribeToCreated(this.onRiskCreated, this);
+				channel.risks.subscribeToUpdated(this.risksService.updateRisks, this.risksService);
+		});
 	}
 
-	public newRiskListener(risks, submodel) {
+	public onRiskCreated(risks) {
+		// TODO: fix submodel part;
 
 		risks.forEach((risk) => {
-			this.shouldShowRisk(risk, submodel);
+			this.shouldShowRisk(risk);
 		});
 
 	}
 
-	public handleRiskChange(risk) {
-		this.RisksService.updateRisks(risk);
-	}
-
-	public shouldShowRisk(risk, submodel) {
+	public shouldShowRisk(risk) {
 
 		if (risk) {
-			const isSubmodelRisk = (submodel !== undefined);
+			const isSubmodelRisk = (this.model !== risk.model);
 			let riskShouldAdd = false;
 
 			if (this.revisions && this.revisions.length) {
@@ -309,26 +289,9 @@ class RisksCardController implements ng.IController {
 				}
 
 				// If Federation
-				if (!isSubmodelRisk) {
-
-					riskShouldAdd = this.checkRiskShouldAdd(risk, currentRevision, this.revisions);
-					if (riskShouldAdd) {
-						this.RisksService.addRisk(risk);
-					}
-
-				} else if (submodel) {
-					// If submodel
-
-					this.RevisionsService.listAll(submodel.database, submodel.model)
-						.then((submodelRevisions) => {
-							riskShouldAdd = this.checkRiskShouldAdd(risk, currentRevision, submodelRevisions);
-							if (riskShouldAdd) {
-								this.RisksService.addRisk(risk);
-							}
-						})
-						.catch((error) => {
-							console.error("Something went wrong getting submodel revisions", error);
-						});
+				riskShouldAdd = isSubmodelRisk || this.checkRiskShouldAdd(risk, currentRevision, this.revisions);
+				if (riskShouldAdd) {
+					this.risksService.addRisk(risk);
 				}
 			}
 		} else {
@@ -338,7 +301,7 @@ class RisksCardController implements ng.IController {
 	}
 
 	public checkRiskShouldAdd(risk, currentRevision, revisions) {
-
+		// Searches for the full revision object in the revisions of the model
 		const riskRevision = revisions.find((rev) => {
 			return rev._id === risk.rev_id;
 		});
@@ -348,6 +311,7 @@ class RisksCardController implements ng.IController {
 			return true;
 		}
 
+		// Checks that the revision of the issue is the same as the model's current revision or that is a previous revision.
 		const riskInDate = new Date(riskRevision.timestamp) <= new Date(currentRevision.timestamp);
 		return riskRevision && riskInDate;
 
@@ -359,13 +323,13 @@ class RisksCardController implements ng.IController {
 	 */
 	public editRisk(risk) {
 
-		if (this.RisksService.state.selectedRisk) {
-			this.RisksService.deselectPin(this.RisksService.state.selectedRisk);
+		if (this.risksService.state.selectedRisk) {
+			this.risksService.deselectPin(this.risksService.state.selectedRisk);
 		}
 
 		if (risk) {
 
-			this.ViewerService.highlightObjects([]);
+			this.viewerService.highlightObjects([]);
 			this.$state.go("home.account.model.issue",
 				{
 					account: this.account,
@@ -377,10 +341,10 @@ class RisksCardController implements ng.IController {
 				{notify: false}
 			);
 
-			this.RisksService.setSelectedRisk(risk, true, this.revision);
+			this.risksService.setSelectedRisk(risk, true, this.revision);
 
 		} else {
-			this.RisksService.resetSelectedRisk();
+			this.risksService.resetSelectedRisk();
 		}
 
 		this.toShow = RisksCardState.ShowRiskItem;

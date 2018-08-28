@@ -63,7 +63,6 @@ class RisksListController implements ng.IController {
 		this.focusedRiskIndex = null;
 		this.selectedRiskIndex = null;
 		this.internalSelectedRisk = null;
-		this.setupBcfImportInput();
 		this.watchers();
 
 	}
@@ -112,36 +111,6 @@ class RisksListController implements ng.IController {
 
 			}
 
-		});
-
-	}
-
-	public setupBcfImportInput() {
-
-		if (this.bcfInputHandler) {
-			return;
-		}
-
-		const template = `<input
-							id='bcfImportInput'
-							type='file'
-							style='display: none;'
-							accept='.zip,.bcfzip,.bcf'>`;
-
-		const linkFn = this.$compile(template);
-		const content = linkFn(this.$scope);
-		this.$element.append(content);
-
-		this.$timeout(() => {
-			this.bcfInputHandler = document.getElementById("bcfImportInput");
-			this.bcfInputHandler.addEventListener("change", () => {
-				if (this.bcfInputHandler && this.bcfInputHandler.files) {
-					this.importBcf({file: this.bcfInputHandler.files[0]});
-				} else {
-					console.error("No file selected");
-				}
-				this.bcfInputHandler.value = null; // Reset the change watcher
-			});
 		});
 
 	}

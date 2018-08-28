@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2016 3D Repo Ltd
+ *	Copyright (C) 2018 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -14,6 +14,18 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { AnalyticService } from "../../home/js/analytic.service";
+import { APIService } from "../../home/js/api.service";
+import { AuthService } from "../../home/js/auth.service";
+import { DialogService } from "../../home/js/dialog.service";
+import { IssuesService } from "./issues.service";
+import { MeasureService } from "../../measure/js/measure.service";
+import { NotificationEvents } from "../../notifications/js/notification.events";
+import { NotificationIssuesEvents } from "../../notifications/js/notification.issues.events";
+import { NotificationService } from "../../notifications/js/notification.service";
+import { StateManagerService } from "../../home/js/state-manager.service";
+import { TreeService } from "../../tree/js/tree.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 class RiskItemController implements ng.IController {
 
@@ -30,9 +42,8 @@ class RiskItemController implements ng.IController {
 		"APIService",
 		"NotificationService",
 		"AuthService",
-		"ClientConfigService",
 		"AnalyticService",
-		"StateManager",
+		"StateManagerService",
 		"MeasureService",
 		"ViewerService",
 		"TreeService",
@@ -81,6 +92,7 @@ class RiskItemController implements ng.IController {
 	private riskItemComponent;
 	private commentThumbnail;
 	private contentHeight;
+	private risksNotifications: NotificationRisksEvents;
 
 	constructor(
 		private $location,
@@ -91,17 +103,16 @@ class RiskItemController implements ng.IController {
 		private $timeout,
 		private $scope,
 
-		private RisksService,
-		private APIService,
-		private NotificationService,
-		private AuthService,
-		private ClientConfigService,
-		private AnalyticService,
-		private StateManager,
-		private MeasureService,
-		private ViewerService,
-		private TreeService,
-		private DialogService
+		private risksService: RisksService,
+		private apiService: APIService,
+		private notificationService: NotificationService,
+		private authService: AuthService,
+		private analyticService: AnalyticService,
+		private stateManager: StateManagerService,
+		private measureService: MeasureService,
+		private viewerService: ViewerService,
+		private treeService: TreeService,
+		private dialogService: DialogService
 	) {}
 
 	public $onInit() {
@@ -175,11 +186,11 @@ class RiskItemController implements ng.IController {
 		history.pushState(null, null, document.URL);
 
 		this.popStateHandler = (event) => {
-			this.StateManager.popStateHandler(event, this.account, this.model);
+			this.stateManager.popStateHandler(event, this.account, this.model);
 		};
 
 		this.refreshHandler = (event) => {
-			return this.StateManager.refreshHandler(event);
+			return this.stateManager.refreshHandler(event);
 		};
 
 		// listen for user clicking the back button
@@ -197,27 +208,24 @@ class RiskItemController implements ng.IController {
 		window.removeEventListener("popstate", this.popStateHandler);
 		window.removeEventListener("beforeunload", this.refreshHandler);
 
-		this.ViewerService.removeUnsavedPin();
+		this.viewerService.removeUnsavedPin();
 
 		this.aboutToBeDestroyed = true;
 		if (this.comment) {
-			this.RisksService.updateRisks(this.riskData); // So that risks list is notified
+			this.risksService.updateRisks(this.riskData); // So that risks list is notified
 		}
 		if (this.editingCommentIndex !== null) {
 			this.riskData.comments[this.editingCommentIndex].editing = false;
 		}
 		// Get out of pin drop mode
 
-		this.ViewerService.pin.pinDropMode = false;
-		this.MeasureService.setDisabled(false);
+		this.viewerService.pin.pinDropMode = false;
+		this.measureService.setDisabled(false);
 		this.clearPin = true;
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.NotificationService.unsubscribe.newComment(this.data.account, this.data.model, this.data._id);
-			this.NotificationService.unsubscribe.commentChanged(this.data.account, this.data.model, this.data._id);
-			this.NotificationService.unsubscribe.commentDeleted(this.data.account, this.data.model, this.data._id);
-			this.NotificationService.unsubscribe.issueChanged(this.data.account, this.data.model, this.data._id);
+			this.risksNotifications.unsubscribeFromUpdated(this.onRiskUpdated);
 		}
 
 	}
@@ -227,7 +235,7 @@ class RiskItemController implements ng.IController {
 		// This keeps the colours updated etc
 		this.$scope.$watch("vm.riskData", () => {
 			// if (this.riskData) {
-			// 	RisksService.populateIssue(this.riskData);
+			// 	risksService.populateRisk(this.riskData);
 			// }
 		}, true);
 
@@ -262,14 +270,14 @@ class RiskItemController implements ng.IController {
 				this.failedToLoad = false;
 				this.riskData = null;
 
-				this.RisksService.getRisk(this.data.account, this.data.model, this.data._id)
+				this.risksService.getRisk(this.data.account, this.data.model, this.data._id)
 					.then((fetchedRisk) => {
 						this.setEditRiskData(fetchedRisk);
 						this.startNotification();
 						this.failedToLoad = false;
 						// Update the risk data on risk service so search would work better
-						this.RisksService.updateRisks(this.riskData);
-						this.RisksService.showRisk(this.riskData, this.revision);
+						this.risksService.updateRisks(this.riskData);
+						this.risksService.showRisk(this.riskData, this.revision);
 					})
 					.catch((error) => {
 						this.failedToLoad = true;
@@ -278,8 +286,8 @@ class RiskItemController implements ng.IController {
 
 			} else {
 				const creatorRole = this.userJob._id;
-				this.riskData = this.RisksService.createBlankRisk(creatorRole);
-				this.RisksService.populateRisk(this.riskData);
+				this.riskData = this.risksService.createBlankRisk(creatorRole);
+				this.risksService.populateRisk(this.riskData);
 				this.setContentHeight();
 
 			}
@@ -356,7 +364,7 @@ class RiskItemController implements ng.IController {
 		if (this.riskData && this.riskData.comments) {
 			this.riskData.comments.forEach((comment) => {
 				if (comment.action && comment.action.property === "topic_type") {
-					this.RisksService.convertActionCommentToText(comment, this.topic_types);
+					this.risksService.convertActionCommentToText(comment, this.topic_types);
 				}
 			});
 		}
@@ -366,18 +374,11 @@ class RiskItemController implements ng.IController {
 
 		this.riskData = newRiskData;
 
-		this.riskData.comments = this.riskData.comments || [];
-
 		if (!this.riskData.name) {
 			this.disabledReason = this.reasonTitleText;
 		}
 
-		this.riskData.thumbnailPath = this.APIService.getAPIUrl(this.riskData.thumbnail);
-		this.riskData.comments.forEach((comment) => {
-			if (comment.owner !== this.AuthService.getUsername()) {
-				comment.sealed = true;
-			}
-		});
+		this.riskData.thumbnailPath = this.apiService.getAPIUrl(this.riskData.thumbnail);
 
 		// Old risks
 		this.riskData.priority = (!this.riskData.priority) ? "none" : this.riskData.priority;
@@ -385,21 +386,16 @@ class RiskItemController implements ng.IController {
 		this.riskData.topic_type = (!this.riskData.topic_type) ? "for_information" : this.riskData.topic_type;
 		this.riskData.assigned_roles = (!this.riskData.assigned_roles) ? [] : this.riskData.assigned_roles;
 
-		this.handleBCFPriority(this.riskData.priority);
-		this.handleBCFStatus(this.riskData.status);
-		this.handleBCFAssign(this.riskData.assigned_roles);
-		this.handleBCFType(this.riskData.topic_type);
-
 		this.canComment();
 		this.convertCommentTopicType();
 
-		this.RisksService.populateRisk(this.riskData);
+		this.risksService.populateRisk(this.riskData);
 		this.setContentHeight();
 
 	}
 
 	public canChangeDescription() {
-		return this.RisksService.canChangeDescription(
+		return this.risksService.canChangeDescription(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -413,18 +409,8 @@ class RiskItemController implements ng.IController {
 		}
 	}
 
-	/**
-	 * Disable the save button when commenting on an risk if there is no comment
-	 */
-	public commentChange() {
-		this.submitDisabled = (this.data && !this.comment);
-		if (!this.submitDisabled) {
-			this.disabledReason = this.reasonCommentText;
-		}
-	}
-
 	public canChangePriority() {
-		return this.RisksService.canChangePriority(
+		return this.risksService.canChangePriority(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -433,7 +419,7 @@ class RiskItemController implements ng.IController {
 
 	public disableStatusOption(status) {
 		return (status.value === "closed" || status.value === "open") &&
-			!this.RisksService.canChangeStatusToClosed(
+			!this.risksService.canChangeStatusToClosed(
 				this.riskData,
 				this.userJob,
 				this.modelSettings.permissions
@@ -441,7 +427,7 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canChangeStatus() {
-		return this.RisksService.canChangeStatus(
+		return this.risksService.canChangeStatus(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -449,7 +435,7 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canChangeType() {
-		return this.RisksService.canChangeType(
+		return this.risksService.canChangeType(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -457,7 +443,7 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canChangeDueDate() {
-		return this.RisksService.canChangeDueDate(
+		return this.risksService.canChangeDueDate(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -465,7 +451,7 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canChangeAssigned() {
-		return this.RisksService.canChangeAssigned(
+		return this.risksService.canChangeAssigned(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -473,7 +459,7 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canComment() {
-		return this.RisksService.canComment(
+		return this.risksService.canComment(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -499,23 +485,23 @@ class RiskItemController implements ng.IController {
 				assigned_roles: this.riskData.assigned_roles
 			};
 
-			this.RisksService.updateRisk(this.riskData, statusChangeData)
+			this.risksService.updateRisk(this.riskData, statusChangeData)
 				.then((response) => {
 					if (response) {
 						const respData = response.data.issue;
-						this.RisksService.populateRisk(respData);
+						this.risksService.populateRisk(respData);
 						this.riskData = respData;
 
 						// Add info for new comment
 						this.riskData.comments.forEach((comment) => {
 							if (comment && comment.viewpoint && comment.viewpoint.screenshot) {
-								comment.viewpoint.screenshotPath = this.APIService.getAPIUrl(comment.viewpoint.screenshot);
+								comment.viewpoint.screenshotPath = this.apiService.getAPIUrl(comment.viewpoint.screenshot);
 							}
 							if (comment && comment.action && comment.action.property) {
-								this.RisksService.convertActionCommentToText(comment, this.topic_types);
+								this.risksService.convertActionCommentToText(comment, this.topic_types);
 							}
 							if (comment && comment.created) {
-								comment.timeStamp = this.RisksService.getPrettyTime(comment.created);
+								comment.timeStamp = this.risksService.getPrettyTime(comment.created);
 							}
 						});
 
@@ -525,7 +511,7 @@ class RiskItemController implements ng.IController {
 						}
 
 						// Update the actual data model
-						this.RisksService.updateRisks(this.riskData);
+						this.risksService.updateRisks(this.riskData);
 
 						this.commentAreaScrollToBottom();
 					}
@@ -535,14 +521,14 @@ class RiskItemController implements ng.IController {
 
 			this.canComment();
 
-			this.AnalyticService.sendEvent({
+			this.analyticService.sendEvent({
 				eventCategory: "Risk",
 				eventAction: "edit"
 			});
 		}
 
 		// This is called so icon and assignment colour changes for new risks.
-		this.RisksService.populateRisk(this.riskData);
+		this.risksService.populateRisk(this.riskData);
 	}
 
 	public handleUpdateError(error) {
@@ -550,7 +536,7 @@ class RiskItemController implements ng.IController {
 		"Contact support@3drepo.org if problem persists.";
 		const escapable = true;
 		console.error(error);
-		this.DialogService.text("Error Updating risk", content, escapable);
+		this.dialogService.text("Error Updating risk", content, escapable);
 	}
 
 	public getCommentPlaceholderText() {
@@ -586,7 +572,7 @@ class RiskItemController implements ng.IController {
 			// overwrite the original issue data itself
 			const newViewpointData = angular.copy(this.riskData);
 			newViewpointData.viewpoint = viewpoint;
-			this.RisksService.showRisk(newViewpointData, this.revision);
+			this.risksService.showRisk(newViewpointData, this.revision);
 
 		}
 	}
@@ -600,7 +586,7 @@ class RiskItemController implements ng.IController {
 		if (viewpoint.screenshot) {
 
 			// We have a saved screenshot we use that
-			this.screenShot = this.APIService.getAPIUrl(viewpoint.screenshot);
+			this.screenShot = this.apiService.getAPIUrl(viewpoint.screenshot);
 			this.showScreenshotDialog(event);
 		} else if (this.riskData.descriptionThumbnail) {
 
@@ -640,12 +626,12 @@ class RiskItemController implements ng.IController {
 		case "pin":
 
 			if (selected) {
-				this.ViewerService.pin.pinDropMode = true;
-				this.MeasureService.deactivateMeasure();
-				this.MeasureService.setDisabled(true);
+				this.viewerService.pin.pinDropMode = true;
+				this.measureService.deactivateMeasure();
+				this.measureService.setDisabled(true);
 			} else {
-				this.ViewerService.pin.pinDropMode = false;
-				this.MeasureService.setDisabled(false);
+				this.viewerService.pin.pinDropMode = false;
+				this.measureService.setDisabled(false);
 			}
 			break;
 
@@ -688,11 +674,11 @@ class RiskItemController implements ng.IController {
 				const data = {
 					desc: this.riskData.desc
 				};
-				this.RisksService.updateRisk(this.riskData, data)
+				this.risksService.updateRisk(this.riskData, data)
 					.then((riskData) => {
 
 						if (riskData) {
-							this.RisksService.updateRisks(this.riskData);
+							this.risksService.updateRisks(this.riskData);
 							this.savedDescription = this.riskData.desc;
 						} else {
 							this.handleUpdateError(riskData);
@@ -737,20 +723,20 @@ class RiskItemController implements ng.IController {
 			viewpointPromise.resolve(this.commentViewpoint);
 		} else {
 			// Get the viewpoint
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.account, model: this.model}
 			);
 		}
 
 		// Get selected objects
-		this.ViewerService.getObjectsStatus({
+		this.viewerService.getObjectsStatus({
 			promise: objectsPromise
 		});
 
 		return Promise.all([viewpointPromise.promise, objectsPromise.promise])
 			.then((results) => {
 				const [viewpoint, objectInfo] = results;
-				viewpoint.hideIfc = this.TreeService.getHideIfc();
+				viewpoint.hideIfc = this.treeService.getHideIfc();
 				return this.handleObjects(viewpoint, objectInfo, screenShotPromise);
 			})
 			.catch((error) => {
@@ -762,7 +748,7 @@ class RiskItemController implements ng.IController {
 				"If this continues please message support@3drepo.org";
 				const escapable = true;
 
-				this.DialogService.text("Error saving risk", content, escapable);
+				this.dialogService.text("Error saving risk", content, escapable);
 				console.error("Something went wrong saving the risk: ", error);
 			});
 
@@ -782,7 +768,7 @@ class RiskItemController implements ng.IController {
 
 		} else {
 			// Get a screen shot if not already created
-			this.ViewerService.getScreenshot(screenShotPromise);
+			this.viewerService.getScreenshot(screenShotPromise);
 
 			return screenShotPromise.promise
 				.then((screenShot) => {
@@ -821,7 +807,7 @@ class RiskItemController implements ng.IController {
 		const promises = [];
 
 		if (highlightedGroupData) {
-			const highlightPromise = this.APIService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
+			const highlightPromise = this.apiService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 				});
@@ -829,7 +815,7 @@ class RiskItemController implements ng.IController {
 		}
 
 		if (hiddenGroupData) {
-			const hiddenPromise = this.APIService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
+			const hiddenPromise = this.apiService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
 				.then((hiddenGroupResponse) => {
 					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
 				});
@@ -874,13 +860,13 @@ class RiskItemController implements ng.IController {
 		};
 
 		// Pin data
-		const pinData = this.ViewerService.getPinData();
+		const pinData = this.viewerService.getPinData();
 		if (pinData !== null) {
 			risk.pickedPos = pinData.pickedPos;
 			risk.pickedNorm = pinData.pickedNorm;
 		}
 
-		return this.RisksService.saveRisk(risk)
+		return this.risksService.saveRisk(risk)
 			.then((response) => {
 				this.data = response.data; // So that new changes are registered as updates
 				const responseIssue = response.data;
@@ -889,13 +875,13 @@ class RiskItemController implements ng.IController {
 				this.pinHidden = true;
 
 				// Notify parent of new risk
-				this.RisksService.populateRisk(responseIssue);
+				this.risksService.populateRisk(responseIssue);
 				this.riskData = responseIssue;
-				this.RisksService.addRisk(this.riskData);
-				this.RisksService.setSelectedRisk(this.riskData, true, this.revision);
+				this.risksService.addRisk(this.riskData);
+				this.risksService.setSelectedRisk(this.riskData, true, this.revision);
 
 				// Hide some actions
-				this.ViewerService.pin.pinDropMode = false;
+				this.viewerService.pin.pinDropMode = false;
 
 				this.submitDisabled = true;
 				this.setContentHeight();
@@ -919,7 +905,7 @@ class RiskItemController implements ng.IController {
 					{notify: false}
 				);
 
-				this.AnalyticService.sendEvent({
+				this.analyticService.sendEvent({
 					eventCategory: "Risk",
 					eventAction: "create"
 				});
@@ -933,7 +919,7 @@ class RiskItemController implements ng.IController {
 		"If this continues please message support@3drepo.io.";
 		const escapable = true;
 
-		this.DialogService.text("Error Saving Screenshot", content, escapable);
+		this.dialogService.text("Error Saving Screenshot", content, escapable);
 		console.error("Something went wrong saving the screenshot: ", error);
 	}
 
@@ -953,7 +939,7 @@ class RiskItemController implements ng.IController {
 
 			// Get the viewpoint and add the screen shot to it
 			// Remove base64 header text from screen shot
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.riskData.account, model: this.riskData.model}
 			);
 
@@ -961,7 +947,7 @@ class RiskItemController implements ng.IController {
 			// Description
 			this.riskData.descriptionThumbnail = data.screenShot;
 
-			this.ViewerService.getCurrentViewpoint(
+			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.account, model: this.model}
 			);
 		}
@@ -984,8 +970,6 @@ class RiskItemController implements ng.IController {
 
 		const newRiskHeight = 305;
 		const descriptionTextHeight = 80;
-		const commentTextHeight = 80;
-		const commentImageHeight = 170;
 		const additionalInfoHeight = 160;
 		const thumbnailHeight = 180;
 		const riskMinHeight = 370;
@@ -1003,15 +987,6 @@ class RiskItemController implements ng.IController {
 			// New comment thumbnail
 			if (this.commentThumbnail) {
 				height += thumbnailHeight;
-			}
-			// Comments
-			if (this.riskData && this.riskData.comments) {
-				for (let i = 0; i < this.riskData.comments.length; i++) {
-					height += commentTextHeight;
-					if (this.riskData.comments[i].viewpoint && this.riskData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
-						height += commentImageHeight;
-					}
-				}
 			}
 
 		} else {
@@ -1045,9 +1020,12 @@ class RiskItemController implements ng.IController {
 		});
 	}
 
-	public handleRiskChange(risk) {
+	public onRiskUpdated(risk) {
+		if (risk._id !== this.data._id) {
+			return;
+		}
 
-		this.RisksService.populateRisk(risk);
+		this.risksService.populateRisk(risk);
 		this.riskData = risk;
 
 		this.$scope.$apply();
@@ -1057,84 +1035,12 @@ class RiskItemController implements ng.IController {
 	public startNotification() {
 
 		if (this.data && !this.notificationStarted) {
-
 			this.notificationStarted = true;
 
-			/*
-			* Watch for risk change
-			*/
+			this.riskNotifications = this.notificationService.getChannel(this.data.account, this.data.model).risks;
 
-			this.NotificationService.subscribe.issueChanged(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				this.handleRiskChange.bind(this)
-			);
-
-			/*
-			* Watch for new comments
-			*/
-			this.NotificationService.subscribe.newComment(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				(comment) => {
-					if (comment.action) {
-						this.RisksService.convertActionCommentToText(comment, this.topic_types);
-					}
-
-					// necessary to apply scope.apply and reapply scroll down again here because vm function is not triggered from UI
-					this.$scope.$apply();
-					this.commentAreaScrollToBottom();
-				}
-			);
-
-			/*
-			* Watch for comment changed
-			*/
-			this.NotificationService.subscribe.commentChanged(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				(newComment) => {
-					const comment = this.riskData.comments.find((oldComment) => {
-						return oldComment.guid === newComment.guid;
-					});
-
-					comment.comment = newComment.comment;
-
-					this.$scope.$apply();
-					this.commentAreaScrollToBottom();
-				}
-			);
-
-			/*
-			* Watch for comment deleted
-			*/
-			this.NotificationService.subscribe.commentDeleted(
-				this.data.account,
-				this.data.model,
-				this.data._id,
-				(newComment) => {
-
-					let deleteIndex;
-					this.riskData.comments.forEach((comment, i) => {
-						if (comment.guid === newComment.guid) {
-							deleteIndex = i;
-						}
-					});
-
-					this.riskData.comments[deleteIndex].comment = "This comment has been deleted.";
-
-					this.$scope.$apply();
-					this.commentAreaScrollToBottom();
-
-					this.$timeout(() => {
-						this.riskData.comments.splice(deleteIndex, 1);
-					}, 4000);
-				}
-			);
-
+			// Watch for risk change
+			this.risksNotifications.subscribeToUpdated(this.onRiskUpdated, this);
 		}
 	}
 
