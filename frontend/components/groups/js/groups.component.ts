@@ -55,6 +55,7 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
+	private filterText: string;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -67,7 +68,7 @@ class GroupsController implements ng.IController {
 		private ClientConfigService: any,
 		private IconsConstant: any,
 		private NotificationService: any
-	) {}
+	) { }
 
 	public $onInit() {
 		this.customIcons = this.IconsConstant;
@@ -76,7 +77,7 @@ class GroupsController implements ng.IController {
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.teamspace = this.account; // Workaround legacy naming
-		this.onContentHeightRequest({height: 1000});
+		this.onContentHeightRequest({ height: 1000 });
 		this.GroupsService.reset();
 		this.watchers();
 		this.toShow = "groups";
@@ -103,6 +104,10 @@ class GroupsController implements ng.IController {
 	}
 
 	public watchers() {
+		this.$scope.$watch("vm.filterText", (newValue) => {
+			// Filter text
+			console.log(newValue);
+		});
 
 		this.$scope.$watch(() => {
 			return this.GroupsService.state;
@@ -155,7 +160,7 @@ class GroupsController implements ng.IController {
 		this.$scope.$watchCollection(() => {
 			return this.TreeService.currentSelectedNodes;
 		}, () => {
-			this.GroupsService.updateSelectedObjectsLen().then( () => {
+			this.GroupsService.updateSelectedObjectsLen().then(() => {
 				this.GroupsService.getSelectedObjects().then((currentHighlights) => {
 					this.selectedNodes = currentHighlights || [];
 					this.updateChangeStatus();
@@ -207,9 +212,9 @@ class GroupsController implements ng.IController {
 
 	public saveDisabled() {
 		return !this.canAddGroup ||
-				!this.selectedGroup ||
-				!this.selectedGroup.name ||
-				!this.changed;
+			!this.selectedGroup ||
+			!this.selectedGroup.name ||
+			!this.changed;
 	}
 
 	public editGroup() {
@@ -225,9 +230,9 @@ class GroupsController implements ng.IController {
 
 	public deleteHighlightedGroups() {
 		this.GroupsService.deleteHighlightedGroups(this.teamspace, this.model)
-		.catch((error) => {
-			this.errorDialog(error);
-		});
+			.catch((error) => {
+				this.errorDialog(error);
+			});
 	}
 
 	public deleteAllGroups() {
@@ -243,7 +248,7 @@ class GroupsController implements ng.IController {
 			.then(() => {
 				this.GroupsService.deleteAllGroups(this.teamspace, this.model);
 			})
-			.catch(() => {});
+			.catch(() => { });
 	}
 
 	public addGroup() {
@@ -379,7 +384,7 @@ class GroupsController implements ng.IController {
 		this.toShow = "group";
 		this.hexColor = "";
 
-		this.onContentHeightRequest({height: 310});
+		this.onContentHeightRequest({ height: 310 });
 		this.onShowItem();
 		this.focusGroupName();
 		this.GroupsService.updateSelectedObjectsLen();
@@ -427,7 +432,7 @@ class GroupsController implements ng.IController {
 			contentHeight = 130;
 		}
 
-		this.onContentHeightRequest({height: contentHeight });
+		this.onContentHeightRequest({ height: contentHeight });
 
 	}
 
@@ -451,7 +456,8 @@ class GroupsController implements ng.IController {
 			this.account,
 			this.model,
 			this.groupChangedListener.bind(this)
-		);	}
+		);
+	}
 
 	public newGroupListener(group, submodel) {
 		this.GroupsService.state.groups.push(group);
@@ -462,7 +468,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public groupsDeletedListener(ids, submodel) {
-		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
+		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0) {
 			this.cancelEdit();
 		}
 
@@ -478,7 +484,7 @@ class GroupsController implements ng.IController {
 		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
 		this.savedGroupData = Object.assign({}, group);
 		this.GroupsService.replaceStateGroup(group);
-		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
+		this.$timeout(this.resetJustUpdated.bind(this), 4000);
 
 		if (this.justUpdated) {
 			this.GroupsService.selectGroup(group);
@@ -502,6 +508,7 @@ export const GroupsComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
+		filterText: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
 		onHideItem: "&",

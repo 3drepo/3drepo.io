@@ -185,8 +185,10 @@ export class PanelService {
 				}
 			],
 			options: [
-				{type: "menu", visible: true}
-			]
+				{type: "menu", visible: true},
+				{type: "filter", visible: true}
+			],
+			add: true
 		});
 
 		this.panelCards.left.push({
@@ -198,7 +200,10 @@ export class PanelService {
 			icon: "camera_alt",
 			minHeight: 80,
 			fixedHeight: false,
-			options: []
+			options: [
+				{type: "menu", visible: true},
+				{type: "filter", visible: true}
+			]
 		});
 
 		this.panelCards.left.push({
