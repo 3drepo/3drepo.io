@@ -78,6 +78,10 @@ class AccountUserManagementController implements ng.IController {
 		}
 
 		public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
+			if (currentUser.currentValue && !this.selectedTeamspace) {
+				this.selectedTeamspace = currentUser.currentValue;
+			}
+
 			if (currentUser.currentValue && accounts.currentValue) {
 				this.teamspaces = accounts.currentValue.map((account) => {
 					return {
@@ -93,7 +97,7 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public onTeamspaceChange = (): void => {
 			this.isLoadingTeamspace = true;
-			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.currentUser);
+			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
 			const membersPromise = this.setTeamspaceMembers(this.currentTeamspace.account);
 			const jobsPromise = this.setTeamspaceJobs(this.currentTeamspace.account);
 

@@ -11,7 +11,7 @@
 			md-input-container.teamspaceSelectContainer(md-no-float, flex)
 				label Teamspace
 				md-select(
-					ng-model="vm.currentUser"
+					ng-model="vm.selectedTeamspace"
 					placeholder="Select a teamspace"
 					ng-change="vm.onTeamspaceChange()"
 					ng-disabled="!vm.teamspaces.length")
