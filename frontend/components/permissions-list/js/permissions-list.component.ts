@@ -66,7 +66,6 @@ class PermissionsListController implements ng.IController {
 
 		if (data && this.currentSort) {
 			this.isLoading = true;
-
 			if (!this.processedData || !this.processedData.length) {
 				this.processedData = this.processData();
 			} else {
