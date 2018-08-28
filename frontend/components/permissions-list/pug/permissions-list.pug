@@ -62,7 +62,7 @@
 			//Checkbox
 			.permissionsListCell(layout="row" layout-align="center center" flex="10")
 				md-checkbox(
-					ng-disabled="permissions.isAdmin"
+					ng-disabled="row.isAdmin"
 					ng-model="row.isSelected"
 					ng-change="vm.onSelectionChange()")
 

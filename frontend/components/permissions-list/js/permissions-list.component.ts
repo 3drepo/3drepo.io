@@ -76,6 +76,7 @@ class PermissionsListController implements ng.IController {
 
 			this.isLoading = false;
 			this.permissionsForSelected = UNDEFINED_PERMISSIONS;
+			this.onSelectionChange();
 		}
 	}
 
