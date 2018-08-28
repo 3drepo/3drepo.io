@@ -14,7 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {first, get, isUndefined, identity} from "lodash";
+import {first, get, isUndefined, isNull, identity} from "lodash";
 import {PROJECT_ROLES_TYPES, PROJECT_ROLES_LIST} from "../../../constants/project-permissions";
 import {MODEL_ROLES_TYPES, MODEL_ROLES_LIST} from "../../../constants/model-permissions";
 
@@ -94,6 +94,8 @@ class ProjectsPermissionsController implements ng.IController {
 		}
 
 		this.projectRequestCanceler = this.$q.defer();
+		this.$state.go(this.$state.$current.name, {project: this.currentProject}, {notify: false});
+
 		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
 			timeout: this.projectRequestCanceler.promise
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
@@ -195,7 +197,6 @@ class ProjectsPermissionsController implements ng.IController {
 
 	public onModelPermissionsChange(updatedPermissions: any[]): void {
 		if (this.selectedModels.length) {
-			console.log("model permissions update", updatedPermissions);
 			const permissionsList = this.selectedModels.map((selectedModel) => {
 				const newPermissions = selectedModel.permissions.map((currentPermission) => {
 					const memberPermission = updatedPermissions.find(({user}) => user === currentPermission.user);
@@ -203,15 +204,15 @@ class ProjectsPermissionsController implements ng.IController {
 					if (memberPermission) {
 						return {
 							user: currentPermission.user,
-							permissions: memberPermission.key
+							permission: memberPermission.key
 						};
 					}
 
 					return {
 						user: currentPermission.user,
-						permissions: currentPermission.permission
+						permission: currentPermission.permission
 					};
-				}).filter(({permissions}) => !isUndefined(permissions));
+				}).filter(({permission}) => permission);
 
 				return {
 					model: selectedModel.model,
