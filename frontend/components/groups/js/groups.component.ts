@@ -1,4 +1,3 @@
-
 /**
  *	Copyright (C) 2018 3D Repo Ltd
  *
@@ -15,6 +14,12 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { AuthService } from "../../home/js/auth.service";
+import { DialogService } from "../../home/js/dialog.service";
+import { GroupsService } from "./groups.service";
+import { NotificationEvents } from "../../notifications/js/notification.events";
+import { NotificationService } from "../../notifications/js/notification.service";
+import { TreeService } from "../../tree/js/tree.service";
 
 class GroupsController implements ng.IController {
 	public static $inject: string[] = [
@@ -55,33 +60,34 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
+	private groupsNotifications: NotificationEvents;
 
 	constructor(
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
 		private $element: ng.IRootElementService,
-		private GroupsService: any,
-		private DialogService: any,
-		private TreeService: any,
-		private AuthService: any,
-		private ClientConfigService: any,
-		private IconsConstant: any,
-		private NotificationService: any
+		private groupsService: GroupsService,
+		private dialogService: DialogService,
+		private treeService: TreeService,
+		private authService: AuthService,
+		private clientConfigService: any,
+		private iconsConstant: any,
+		private notificationService: NotificationService
 	) {}
 
 	public $onInit() {
-		this.customIcons = this.IconsConstant;
+		this.customIcons = this.iconsConstant;
 
 		this.selectedNodes = [];
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.teamspace = this.account; // Workaround legacy naming
 		this.onContentHeightRequest({height: 1000});
-		this.GroupsService.reset();
+		this.groupsService.reset();
 		this.watchers();
 		this.toShow = "groups";
 		this.loading = true;
-		this.GroupsService.getGroups(this.account, this.model, this.revision)
+		this.groupsService.getGroups(this.account, this.model, this.revision)
 			.then(() => {
 				this.loading = false;
 			});
@@ -93,19 +99,20 @@ class GroupsController implements ng.IController {
 			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]]
 		];
 
+		this.groupsNotifications =  this.notificationService.getChannel(this.account, this.model).groups;
 	}
 
 	public $onDestroy() {
 		this.groups = [];
-
-		this.NotificationService.unsubscribe.newGroup(this.account, this.model);
-		this.NotificationService.unsubscribe.groupsDeleted(this.account, this.model);
+		this.groupsNotifications.unsubscribeFromCreated(this.onGroupsCreated);
+		this.groupsNotifications.unsubscribeFromUpdated(this.onGroupsUpdated);
+		this.groupsNotifications.unsubscribeFromDeleted(this.onGroupsDeleted);
 	}
 
 	public watchers() {
 
 		this.$scope.$watch(() => {
-			return this.GroupsService.state;
+			return this.groupsService.state;
 		}, (newState, oldState) => {
 			angular.extend(this, newState);
 			this.updateChangeStatus();
@@ -125,7 +132,7 @@ class GroupsController implements ng.IController {
 				this.setContentHeight();
 				this.resetToSavedGroup();
 				if (this.lastColorOverride) {
-					this.GroupsService.colorOverride(this.lastColorOverride);
+					this.groupsService.colorOverride(this.lastColorOverride);
 					this.lastColorOverride = null;
 				}
 			}
@@ -133,7 +140,7 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch("vm.hexColor", () => {
 			if (this.hexColor) {
-				const validHex = this.GroupsService.hexToRGBA(this.hexColor);
+				const validHex = this.groupsService.hexToRGBA(this.hexColor);
 				if (validHex.length === 3) {
 					this.setSelectedGroupColor(validHex, true);
 				}
@@ -142,8 +149,8 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
-				this.canAddGroup = this.AuthService.hasPermission(
-					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+				this.canAddGroup = this.authService.hasPermission(
+					this.clientConfigService.permissions.PERM_CREATE_ISSUE,
 					this.modelSettings.permissions
 				);
 
@@ -153,10 +160,10 @@ class GroupsController implements ng.IController {
 		});
 
 		this.$scope.$watchCollection(() => {
-			return this.TreeService.currentSelectedNodes;
+			return this.treeService.currentSelectedNodes;
 		}, () => {
-			this.GroupsService.updateSelectedObjectsLen().then( () => {
-				this.GroupsService.getSelectedObjects().then((currentHighlights) => {
+			this.groupsService.updateSelectedObjectsLen().then( () => {
+				this.groupsService.getSelectedObjects().then((currentHighlights) => {
 					this.selectedNodes = currentHighlights || [];
 					this.updateChangeStatus();
 				});
@@ -168,7 +175,7 @@ class GroupsController implements ng.IController {
 				if (selectedOption && selectedOption.hasOwnProperty("value")) {
 					switch (selectedOption.value) {
 						case "overrideAll":
-							this.GroupsService.colorOverrideAllGroups(selectedOption.selected);
+							this.groupsService.colorOverrideAllGroups(selectedOption.selected);
 							break;
 						case "deleteAll":
 							this.deleteAllGroups();
@@ -185,20 +192,20 @@ class GroupsController implements ng.IController {
 			this.selectedGroup.name = this.savedGroupData.name;
 			this.selectedGroup.description = this.savedGroupData.description;
 			this.selectedGroup.color = this.savedGroupData.color;
-			this.GroupsService.selectGroup(this.selectedGroup);
+			this.groupsService.selectGroup(this.selectedGroup);
 		}
 	}
 
 	public toggleColorOverride($event, group: any) {
 		$event.stopPropagation();
-		this.GroupsService.toggleColorOverride(group);
+		this.groupsService.toggleColorOverride(group);
 	}
 
 	public handleGroupError(method: string) {
 		const content = `Group ${method} failed.
 			Contact support@3drepo.org if problem persists.`;
 		const escapable = true;
-		this.DialogService.text(`Group Error`, content, escapable);
+		this.dialogService.text(`Group Error`, content, escapable);
 	}
 
 	public openColorMenu($mdMenu: any, event: any) {
@@ -214,17 +221,17 @@ class GroupsController implements ng.IController {
 
 	public editGroup() {
 		// Save the color override to be re-enabled later
-		if (this.GroupsService.hasColorOverride(this.selectedGroup)) {
+		if (this.groupsService.hasColorOverride(this.selectedGroup)) {
 			this.lastColorOverride = this.selectedGroup;
 		}
 
 		// We don't want color over ride when we're editing
-		this.GroupsService.removeColorOverride(this.selectedGroup._id, false);
+		this.groupsService.removeColorOverride(this.selectedGroup._id, false);
 		this.showGroupPane();
 	}
 
 	public deleteHighlightedGroups() {
-		this.GroupsService.deleteHighlightedGroups(this.teamspace, this.model)
+		this.groupsService.deleteHighlightedGroups(this.teamspace, this.model)
 		.catch((error) => {
 			this.errorDialog(error);
 		});
@@ -239,16 +246,16 @@ class GroupsController implements ng.IController {
 	public confirmDeleteAllDialog() {
 		const content = `Delete all groups?`;
 		const escapable = true;
-		this.DialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
+		this.dialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
 			.then(() => {
-				this.GroupsService.deleteAllGroups(this.teamspace, this.model);
+				this.groupsService.deleteAllGroups(this.teamspace, this.model);
 			})
 			.catch(() => {});
 	}
 
 	public addGroup() {
 
-		this.GroupsService.generateNewGroup().then(() => {
+		this.groupsService.generateNewGroup().then(() => {
 			this.showGroupPane();
 		});
 
@@ -279,14 +286,14 @@ class GroupsController implements ng.IController {
 		const content = "Delete group failed. Contact support@3drepo.io if problem persists.";
 		const escapable = true;
 		console.error(error);
-		this.DialogService.text("Error Deleting Groups", content, escapable);
+		this.dialogService.text("Error Deleting Groups", content, escapable);
 	}
 
 	public confirmUpdateDialog(saved: number, selected: number) {
 		const content = `A significant change is about to be applied to this group
 					(${saved} to ${selected} objects). Do you wish to proceed?`;
 		const escapable = true;
-		this.DialogService.confirm(`Confirm Group Update`, content, escapable, "Update", "Cancel")
+		this.dialogService.confirm(`Confirm Group Update`, content, escapable, "Update", "Cancel")
 			.then(() => {
 				this.updateGroup();
 			})
@@ -298,26 +305,26 @@ class GroupsController implements ng.IController {
 
 	public isolateGroup($event, group: any) {
 		$event.stopPropagation();
-		this.GroupsService.isolateGroup(group);
+		this.groupsService.isolateGroup(group);
 	}
 
 	public setSelectedGroupColor(color: number[], isHex: boolean) {
 		if (!isHex) {
 			this.hexColor = "";
 		}
-		this.GroupsService.setSelectedGroupColor(color);
+		this.groupsService.setSelectedGroupColor(color);
 	}
 
 	public reselectGroup() {
-		this.GroupsService.reselectGroup(this.selectedGroup);
+		this.groupsService.reselectGroup(this.selectedGroup);
 	}
 
 	public getRGBA(color: any) {
-		return this.GroupsService.getRGBA(color);
+		return this.groupsService.getRGBA(color);
 	}
 
 	public getGroupRGBAColor(group: any) {
-		return this.GroupsService.getGroupRGBAColor(group);
+		return this.groupsService.getGroupRGBAColor(group);
 	}
 
 	public getFormattedDate(timestamp: number) {
@@ -325,7 +332,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public updateGroup() {
-		this.GroupsService.updateGroup(
+		this.groupsService.updateGroup(
 			this.teamspace,
 			this.model,
 			this.selectedGroup._id,
@@ -344,7 +351,7 @@ class GroupsController implements ng.IController {
 
 	public createGroup() {
 
-		this.GroupsService.createGroup(
+		this.groupsService.createGroup(
 			this.teamspace,
 			this.model,
 			this.selectedGroup
@@ -367,7 +374,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public getColorOverrideRGBA(group: any): string {
-		const hasOverride = this.GroupsService.hasColorOverride(group);
+		const hasOverride = this.groupsService.hasColorOverride(group);
 		if (hasOverride) {
 			return this.getGroupRGBAColor(group);
 		}
@@ -382,7 +389,7 @@ class GroupsController implements ng.IController {
 		this.onContentHeightRequest({height: 310});
 		this.onShowItem();
 		this.focusGroupName();
-		this.GroupsService.updateSelectedObjectsLen();
+		this.groupsService.updateSelectedObjectsLen();
 	}
 
 	public cancelEdit() {
@@ -398,15 +405,15 @@ class GroupsController implements ng.IController {
 	}
 
 	public selectGroup(group: any) {
-		this.GroupsService.selectGroup(group);
+		this.groupsService.selectGroup(group);
 	}
 
 	public updateChangeStatus(): void {
 		if (!this.savedGroupData || !this.selectedGroup) {
 			this.changed = false;
 		} else {
-			const differsFromSavedData = !this.GroupsService.areGroupsEqual(this.savedGroupData, this.selectedGroup);
-			const differsdObjects = !this.GroupsService.areGroupObjectsEqual(this.selectedNodes, this.selectedGroup.objects);
+			const differsFromSavedData = !this.groupsService.areGroupsEqual(this.savedGroupData, this.selectedGroup);
+			const differsdObjects = !this.groupsService.areGroupObjectsEqual(this.selectedNodes, this.selectedGroup.objects);
 			this.changed = (differsFromSavedData || differsdObjects);
 		}
 	}
@@ -433,59 +440,44 @@ class GroupsController implements ng.IController {
 
 	/*** Realtime sync  */
 	public watchNotification() {
+		this.groupsNotifications.subscribeToCreated(this.onGroupsCreated, this);
+		this.groupsNotifications.subscribeToUpdated(this.onGroupsUpdated, this);
+		this.groupsNotifications.subscribeToDeleted(this.onGroupsDeleted, this);
+	}
 
-		// Watch for new groups
-		this.NotificationService.subscribe.newGroup(
-			this.account,
-			this.model,
-			this.newGroupListener.bind(this)
-		);
+	public onGroupsCreated(group) {
+		this.groupsService.state.groups.push(group);
 
-		this.NotificationService.subscribe.groupsDeleted(
-			this.account,
-			this.model,
-			this.groupsDeletedListener.bind(this)
-		);
-
-		this.NotificationService.subscribe.groupChanged(
-			this.account,
-			this.model,
-			this.groupChangedListener.bind(this)
-		);	}
-
-	public newGroupListener(group, submodel) {
-		this.GroupsService.state.groups.push(group);
-
-		if (this.GroupsService.state.overrideAll) {
-			this.GroupsService.colorOverride(group);
+		if (this.groupsService.state.overrideAll) {
+			this.groupsService.colorOverride(group);
 		}
 	}
 
-	public groupsDeletedListener(ids, submodel) {
+	public onGroupsDeleted(ids) {
 		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
 			this.cancelEdit();
 		}
 
-		this.GroupsService.deleteStateGroupsByIdsDeferred(ids);
+		this.groupsService.deleteStateGroupsByIdsDeferred(ids);
 	}
 
-	public groupChangedListener(group, submodel) {
-		const shouldPaintObjects = this.GroupsService.hasColorOverride(group);
+	public onGroupsUpdated(group) {
+		const shouldPaintObjects = this.groupsService.hasColorOverride(group);
 		if (shouldPaintObjects) {
-			this.GroupsService.removeColorOverride(group._id);
+			this.groupsService.removeColorOverride(group._id);
 		}
 
 		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
 		this.savedGroupData = Object.assign({}, group);
-		this.GroupsService.replaceStateGroup(group);
+		this.groupsService.replaceStateGroup(group);
 		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
 
 		if (this.justUpdated) {
-			this.GroupsService.selectGroup(group);
+			this.groupsService.selectGroup(group);
 		}
 
 		if (shouldPaintObjects) {
-			this.GroupsService.colorOverride(group);
+			this.groupsService.colorOverride(group);
 		}
 	}
 

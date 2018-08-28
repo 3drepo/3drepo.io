@@ -24,7 +24,7 @@ div.viewpointsContainer
                     div(
                         ng-if="vm.editSelectedView._id !== viewpoint._id").viewpointName {{viewpoint.name || "(Unnamed View)"}}
                     textarea.viewpointName(
-                        ng-model="vm.editSelectedView.name" 
+                        ng-model="vm.editSelectedView.name"
                         maxlength="{{vm.viewpointNameMaxlength}}"
                         ng-if="vm.editSelectedView._id === viewpoint._id")
 
@@ -60,12 +60,11 @@ div.viewpointsContainer
                 layout="row"
                 layout-align="center center")
 
-        md-container.noViews(
+        .cardInfo(
             ng-if="vm.viewpoints.length === 0 && !vm.loading"
-            layout-fill
-            layout="column")
+            )
 
-            h3 No viewpoints have been created yet
+            p No viewpoints have been created yet
 
     div.viewpointContainer(
         layout="column"
@@ -81,14 +80,14 @@ div.viewpointsContainer
                         type="text"
                         ng-required
                         ng-disabled="!vm.canAddView"
-                        ng-model="vm.newView.name" 
+                        ng-model="vm.newView.name"
                         maxlength="{{vm.viewpointNameMaxlength}}")
 
 
     div.addHolder(layout="row" flex="100")
 
         div(flex="50" layout="row" layout-align="start center")
-            button(class="md-icon-button md-button md-ink-ripple" 
+            button(class="md-icon-button md-button md-ink-ripple"
                 type="button"
                 ng-if="vm.viewpoints.length > 0"
                 aria-label="Delete"
@@ -100,8 +99,8 @@ div.viewpointsContainer
                     aria-hidden="true") delete
 
         div(flex="50" layout="row" layout-align="end center")
-            button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
+            button(class="md-accent md-fab md-mini md-button md-ink-ripple"
+                type="button"
                 aria-label="Add"
                 ng-show="vm.toShow === 'views'"
                 ng-disabled="vm.addViewDisabled()"
@@ -110,11 +109,11 @@ div.viewpointsContainer
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
                     aria-hidden="true") add
-            
+
             button(
-                class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
-                aria-label="Add" 
+                class="md-accent md-fab md-mini md-button md-ink-ripple"
+                type="button"
+                aria-label="Add"
                 ng-disabled="!vm.newView || !vm.newView.name"
                 ng-show="vm.toShow === 'view' && !vm.savingView"
                 ng-click="vm.createViewpoint()")
@@ -123,13 +122,13 @@ div.viewpointsContainer
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
                     aria-hidden="true") save
-            
+
             md-progress-circular.spinner(
                 ng-if="vm.toShow === 'view' && vm.savingView")
 
 
 
 
-        
-        
+
+
 

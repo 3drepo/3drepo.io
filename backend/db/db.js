@@ -56,6 +56,10 @@
 		connectString += hostPorts.join(",");
 		connectString += "/" + database + "?authSource=admin";
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
+
+		if(Number.isInteger(config.db.timeout)) {
+			connectString += "&socketTimeoutMS=" + config.db.timeout;
+		}
 		return connectString;
 	}
 
