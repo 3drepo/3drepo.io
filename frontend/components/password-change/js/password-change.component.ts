@@ -112,22 +112,12 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public checkInvalidPassword(result) {
-		switch (result.score) {
-			case 0:
-				this.invalidatePassword(result);
-				break;
-			case 1:
-				this.invalidatePassword(result);
-				break;
-			case 2:
-				this.validatePassword();
-				break;
-			case 3:
-				this.validatePassword();
-				break;
-			case 4:
-				this.validatePassword();
-				break;
+		const scoreThreshold = 2;
+
+		if (result.score < scoreThreshold) {
+			this.invalidatePassword(result);
+		} else {
+			this.validatePassword();
 		}
 	}
 
@@ -159,52 +149,52 @@ class PasswordChangeController implements ng.IController {
 
 	public doPasswordChange() {
 		if (this.newPassword === this.confirmPassword) {
-		if (this.username && this.token) {
-			if (this.newPassword && this.newPassword !== "") {
-				this.messageColor = this.messageColour;
-				this.message = "Please wait...";
-				this.showProgress = true;
-				this.buttonDisabled = true;
-				const url = this.username + "/password";
+			if (this.username && this.token) {
+				if (this.newPassword && this.newPassword !== "") {
+					this.messageColor = this.messageColour;
+					this.message = "Please wait...";
+					this.showProgress = true;
+					this.buttonDisabled = true;
+					const url = this.username + "/password";
 
-				this.APIService.put(url, {
-					newPassword: this.newPassword,
-					token: this.token
-				})
-					.then((response) => {
-
-						this.showProgress = false;
-						if (response.status === 400) {
-							this.buttonDisabled = false;
-							this.messageColor = this.messageErrorColour;
-							this.message = "Error changing password: " + response.data.message;
-						} else {
-							this.buttonDisabled = true;
-							this.passwordChanged = true;
-							this.showProgress = false;
-							this.messageColor = this.messageColour;
-							this.message = "Your password has been reset. Please go to the login page.";
-						}
+					this.APIService.put(url, {
+						newPassword: this.newPassword,
+						token: this.token
 					})
-					.catch((error) => {
-						this.buttonDisabled = false;
-						this.showProgress = false;
-						this.messageColor = this.messageErrorColour;
-						this.message = "Error changing password";
-						if (error.data.message) {
-							this.message += ": " + error.data.message;
-						}
-					});
+						.then((response) => {
 
-			} else {
-				this.messageColor = this.messageErrorColour;
-				this.message = "A new password must be entered";
-				this.buttonDisabled = true;
+							this.showProgress = false;
+							if (response.status === 400) {
+								this.buttonDisabled = false;
+								this.messageColor = this.messageErrorColour;
+								this.message = "Error changing password: " + response.data.message;
+							} else {
+								this.buttonDisabled = true;
+								this.passwordChanged = true;
+								this.showProgress = false;
+								this.messageColor = this.messageColour;
+								this.message = "Your password has been reset. Please go to the login page.";
+							}
+						})
+						.catch((error) => {
+							this.buttonDisabled = false;
+							this.showProgress = false;
+							this.messageColor = this.messageErrorColour;
+							this.message = "Error changing password";
+							if (error.data.message) {
+								this.message += ": " + error.data.message;
+							}
+						});
+
+				} else {
+					this.messageColor = this.messageErrorColour;
+					this.message = "A new password must be entered";
+					this.buttonDisabled = true;
+				}
 			}
+			this.buttonDisabled = true;
+			this.message = "Token or username is missing!";
 		}
-		this.buttonDisabled = true;
-		this.message = "Token or username is missing!";
-	}
 	}
 }
 
