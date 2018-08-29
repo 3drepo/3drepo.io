@@ -80,12 +80,18 @@ class PasswordChangeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.newPassword", () => {
+		this.$scope.$watchGroup(["vm.newPassword", "vm.confirmPassword"], () => {
 			this.message = "";
 			if (this.newPassword !== undefined) {
 				const result = this.PasswordService.evaluatePassword(this.newPassword);
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
 				this.checkInvalidPassword(result);
+			}
+			if (this.confirmPassword !== undefined && this.confirmPassword === this.newPassword) {
+				this.confirmPasswordInput();
+				this.buttonDisabled = false;
+			} else {
+				this.buttonDisabled = true;
 			}
 		});
 
@@ -108,7 +114,7 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public confirmPasswordInput() {
-		 return this.registerMessage = this.PasswordService.checkDuplicates(this.newPassword, this.confirmPassword);
+		return this.registerMessage = this.PasswordService.checkDuplicates(this.newPassword, this.confirmPassword);
 	}
 
 	public checkInvalidPassword(result) {
@@ -122,13 +128,11 @@ class PasswordChangeController implements ng.IController {
 	}
 
 	public invalidatePassword(result) {
-		this.buttonDisabled = true;
 		this.message = "Password is too weak";
 		this.messageColor = this.messageErrorColour;
 	}
 
 	public validatePassword() {
-		this.buttonDisabled = false;
 		this.message = "";
 		this.messageColor = this.messageColour;
 	}

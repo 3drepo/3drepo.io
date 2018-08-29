@@ -34,8 +34,8 @@ export class PasswordService {
 
 	public checkDuplicates(password, confirmPassword) {
 		const passwordValid = password === confirmPassword;
-		return this.passwordMessage = passwordValid ? "" : "(Password mismatched)";
-
+		this.passwordMessage = passwordValid ? "" : "(Password mismatched)";
+		return this.passwordMessage;
 	}
 
 	public passwordLibraryAvailable() {
