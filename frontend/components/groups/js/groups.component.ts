@@ -33,6 +33,7 @@ class GroupsController implements ng.IController {
 
 	private onContentHeightRequest: any;
 	private groups: any;
+	private groupsToShow;
 	private selectedGroup: any;
 	private teamspace: string;
 	private model: string;
@@ -72,7 +73,8 @@ class GroupsController implements ng.IController {
 
 	public $onInit() {
 		this.customIcons = this.IconsConstant;
-
+		this.groups = [];
+		this.groupsToShow = [];
 		this.selectedNodes = [];
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
@@ -105,8 +107,9 @@ class GroupsController implements ng.IController {
 
 	public watchers() {
 		this.$scope.$watch("vm.filterText", (newValue) => {
-			// Filter text
+			// search method will go here.
 			console.log(newValue);
+			this.groupFilterSearch(newValue);
 		});
 
 		this.$scope.$watch(() => {
@@ -183,6 +186,20 @@ class GroupsController implements ng.IController {
 					}
 				}
 			});
+	}
+
+	// Search function to connect to serach query in service.
+	public groupFilterSearch(searchString) {
+		let i;
+		let singleGroup;
+		for (i = 0; i < this.groups.length; i++) {
+			singleGroup = this.groups[i];
+			console.log("type of -->>", typeof(singleGroup));
+			if (singleGroup.name === searchString) {
+				return console.log('results -->', singleGroup);
+			}
+				console.log("all groups", this.groups);
+		}
 	}
 
 	public resetToSavedGroup() {
@@ -404,6 +421,7 @@ class GroupsController implements ng.IController {
 
 	public selectGroup(group: any) {
 		this.GroupsService.selectGroup(group);
+		console.log('grouping', group);
 	}
 
 	public updateChangeStatus(): void {

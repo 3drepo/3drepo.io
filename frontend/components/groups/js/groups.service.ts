@@ -48,6 +48,7 @@ export class GroupsService {
 	public reset() {
 		this.state = {
 			groups: [],
+			groupsToShow : [],
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes : 0,
@@ -63,6 +64,7 @@ export class GroupsService {
 		return this.getGroups(teamspace, model, revision)
 			.then((groups) => {
 				this.state.groups = groups;
+				console.log(teamspace, model, revision);
 				this.cleanGroups(this.state.groups);
 			});
 	}
@@ -450,6 +452,7 @@ export class GroupsService {
 	public getGroups(teamspace: string, model: string, revision: string) {
 		let groupUrl;
 		if (revision) {
+			console.log('revision', revision);
 			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
 		} else {
 			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true`;
