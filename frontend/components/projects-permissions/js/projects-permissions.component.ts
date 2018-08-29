@@ -104,6 +104,14 @@ class ProjectsPermissionsController implements ng.IController {
 			timeout: this.projectRequestCanceler.promise
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
 				const projectData = this.projects.find(({name}) => name === this.currentProject);
+
+				this.members = this.members.map((member) => {
+					const isProjectAdmin = project.permissions.some(({user, permissions}: {user: string, permissions: any}) => {
+						return permissions.includes(PROJECT_ROLES_TYPES.ADMINSTRATOR) && user === member.user;
+					});
+
+					return {...member, isProjectAdmin};
+				});
 				this.models = get(projectData, "models", []);
 				this.selectedModels = [];
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
@@ -147,7 +155,7 @@ class ProjectsPermissionsController implements ng.IController {
 			const memberModelPermissions = (modelPermissions || []).find(({user}) => user === memberData.user);
 			let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
 
-			if (memberData.isAdmin) {
+			if (memberData.isAdmin || memberData.isProjectAdmin) {
 				modelPermissionsKey = MODEL_ROLES_TYPES.ADMINSTRATOR;
 			} else if (memberModelPermissions) {
 				modelPermissionsKey = get(memberModelPermissions, "permission", MODEL_ROLES_TYPES.UNASSIGNED);
