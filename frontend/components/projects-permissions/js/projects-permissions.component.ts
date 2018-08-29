@@ -27,11 +27,13 @@ const PERMISSIONS_VIEWS = {
 
 class ProjectsPermissionsController implements ng.IController {
 	public static $inject: string[] = [
-		"ProjectsService",
-		"DialogService",
 		"$q",
 		"$state",
-		"ModelsService"
+		"$mdDialog",
+
+		"ModelsService",
+		"ProjectsService",
+		"DialogService"
 	];
 
 	private PERMISSIONS_VIEWS = PERMISSIONS_VIEWS;
@@ -51,11 +53,13 @@ class ProjectsPermissionsController implements ng.IController {
 	private projectRequestCanceler;
 
 	constructor(
-		private ProjectsService: any,
-		private DialogService: any,
 		private $q: any,
 		private $state: any,
-		private ModelsService: any
+		private $mdDialog: any,
+
+		private ModelsService: any,
+		private ProjectsService: any,
+		private DialogService: any
 	) {}
 
 	public $onInit(): void {
@@ -198,50 +202,107 @@ class ProjectsPermissionsController implements ng.IController {
 
 	public onModelPermissionsChange(updatedPermissions: any[]): void {
 		if (this.selectedModels.length) {
-			const permissionsList = this.selectedModels.map((selectedModel) => {
-				const newPermissions = selectedModel.permissions.map((currentPermission) => {
-					const memberPermission = updatedPermissions.find(({user}) => user === currentPermission.user);
+			this.handleModelPermissionsPreSave(updatedPermissions).then(() => {
+				const permissionsList = this.selectedModels.map((selectedModel) => {
+					const newPermissions = selectedModel.permissions.map((currentPermission) => {
+						const memberPermission = updatedPermissions.find(({user}) => user === currentPermission.user);
 
-					if (memberPermission) {
+						if (memberPermission) {
+							return {
+								user: currentPermission.user,
+								isSelected: memberPermission.isSelected,
+								permission: memberPermission.key
+							};
+						}
+
 						return {
 							user: currentPermission.user,
-							isSelected: memberPermission.isSelected,
-							permission: memberPermission.key
+							permission: currentPermission.permission
 						};
-					}
+					}).filter(({permission}) => permission);
 
 					return {
-						user: currentPermission.user,
-						permission: currentPermission.permission
+						model: selectedModel.model,
+						permissions: newPermissions
 					};
-				}).filter(({permission}) => permission);
+				});
 
-				return {
-					model: selectedModel.model,
-					permissions: newPermissions
-				};
+				this.ModelsService.updateMulitpleModelsPermissions(this.currentTeamspace.account, permissionsList)
+					.then(({data: updatedModels}) => {
+						this.selectedModels = updatedModels.filter(({model}) => {
+							return this.selectedModels.some((selectedModel) => selectedModel.model === model);
+						});
+
+						const permissionsToShow = this.selectedModels[0].permissions.map(({user, permission}) => {
+							const isSelected = updatedPermissions
+								.some((userPermission) => userPermission.isSelected && userPermission.user === user);
+
+							return {
+								user,
+								isSelected,
+								permission: this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS
+							};
+						});
+
+						this.assignedModelPermissions = [...this.getExtendedModelPermissions(permissionsToShow)];
+					}).catch(this.DialogService.showError.bind(null, "update", "model/federation permissions"));
 			});
-
-			this.ModelsService.updateMulitpleModelsPermissions(this.currentTeamspace.account, permissionsList)
-				.then(({data: updatedModels}) => {
-					this.selectedModels = updatedModels.filter(({model}) => {
-						return this.selectedModels.some((selectedModel) => selectedModel.model === model);
-					});
-
-					const permissionsToShow = this.selectedModels[0].permissions.map(({user, permission}) => {
-						const isSelected = updatedPermissions
-							.some((userPermission) => userPermission.isSelected && userPermission.user === user);
-
-						return {
-							user,
-							isSelected,
-							permission: this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS
-						};
-					});
-
-					this.assignedModelPermissions = [...this.getExtendedModelPermissions(permissionsToShow)];
-				}).catch(this.DialogService.showError.bind(null, "update", "model/federation permissions"));
 		}
+	}
+
+	public handleModelPermissionsPreSave(updatedPermissions): Promise {
+		const currentProject = this.projects.find(({name}) => name === this.currentProject);
+		const permissionlessModels = [];
+
+		for (let index = 0; index < this.selectedModels.length; index++) {
+			const selectedModel = this.selectedModels[index];
+
+			if (selectedModel.federate && selectedModel.subModels.length > 0) {
+				selectedModel.subModels.forEach((subModel) => {
+					Object.keys(currentProject.models).forEach((modelId) => {
+						const projectModel = currentProject.models[modelId];
+						if (subModel.model === projectModel.model) {
+							permissionlessModels.push(projectModel.name);
+						}
+					});
+				});
+			}
+		}
+
+		if (!permissionlessModels.length) {
+			return Promise.resolve();
+		}
+
+		const modelsString = permissionlessModels.reduce((modelsList, modelName, i) => {
+			modelsList += `<strong>${modelName}</strong>`;
+
+			if (i !== permissionlessModels.length - 1) {
+				modelsList += ", ";
+			}
+
+			if ((i + 1) % 4 === 0) {
+				modelsList += "<br><br>";
+			}
+
+			return modelsList;
+		}, "");
+
+		const content = `
+			Just to let you know, the assigned users(s) will need permissions on submodels also to see them.
+			<br><br>
+			These are the models in question:
+			<br><br>
+			${modelsString}
+		`;
+
+		return this.$mdDialog.show(
+			this.$mdDialog.alert()
+				.clickOutsideToClose(true)
+				.title("Reminder about Federation Permissions")
+				.htmlContent(content)
+				.ariaLabel("Reminder about Federations")
+				.ok("OK")
+		);
 	}
 
 	public onModelSelectionChange(selectedModels: any[]): void {

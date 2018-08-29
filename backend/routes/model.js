@@ -500,8 +500,8 @@ function updateMultiplePermissions(req, res, next) {
 
 				return Promise.all(populatedPermissionsPromises).then((populatedPermissions) => {
 					return populatedPermissions.map((permissions, index) => {
-						const {name, federate, _id: model} =  models[index] || {};
-						return {name, federate, model, permissions};
+						const {name, federate, _id: model, subModels} =  models[index] || {};
+						return {name, federate, model, permissions, subModels};
 					});
 				});
 			});
@@ -545,12 +545,13 @@ function getMultipleModelsPermissions(req, res, next) {
 			return ModelSetting.populateUsersForMultiplePermissions(account, permissionsList)
 				.then((populatedPermissions) => {
 					return populatedPermissions.map((permissions, index) => {
-						const {_id, federate, name} = modelsList[index];
+						const {_id, federate, name, subModels} = modelsList[index];
 						return {
 							model:_id,
 							federate,
 							name,
-							permissions
+							permissions,
+							subModels
 						};
 					});
 				});
