@@ -164,7 +164,6 @@ export class AccountService {
 	}
 
 	public getSelectedProjectDetails(teamspaces, teamspaceName, projectName) {
-
 		// Return models that are not federated (federations)
 		const selectedTeamspace = teamspaces.filter((teamspace) => {
 			return teamspace.name === teamspaceName;
