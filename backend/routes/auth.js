@@ -266,16 +266,20 @@ function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
 		User.getForgotPasswordToken(req.body.userNameOrEmail, config.tokenExpiry.forgotPassword).then(data => {
-			// send forgot password email
-			return Mailer.sendResetPasswordEmail(data.email, {
-				token : data.token,
-				email: data.email,
-				username: data.username
-			}).catch(err => {
-				// catch email error instead of returning to client
-				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
-				return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
-			});
+			if (data.email && data.token && data.username) {
+				// send forgot password email
+				return Mailer.sendResetPasswordEmail(data.email, {
+					token : data.token,
+					email: data.email,
+					username: data.username
+				}).catch(err => {
+					// catch email error instead of returning to client
+					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
+					return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
+				});
+			} else {
+				return Promise.resolve();
+			}
 		}).then(emailRes => {
 			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
