@@ -20,7 +20,7 @@ import {MODEL_ROLES_TYPES, MODEL_ROLES_LIST} from "../../../constants/model-perm
 
 const UNDEFINED_PERMISSIONS = "undefined";
 
-const PERMISSIONS_VIEWS = {
+export const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,
 	MODELS: 1
 };
@@ -100,14 +100,21 @@ class ProjectsPermissionsController implements ng.IController {
 			timeout: this.projectRequestCanceler.promise
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
 				const projectData = this.projects.find(({name}) => name === this.currentProject);
-				this.models = get(projectData, "models", []);
-				this.selectedModels = [];
+				const modelInState = this.$state.params.modelId;
+				this.models = get(projectData, "models", []).map((model) => {
+					return {
+						...model,
+						isSelected: model.model === modelInState
+					};
+				});
+
+				this.selectedModels = this.models.filter(({isSelected}) => isSelected);
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
-				this.assignedModelPermissions = this.getExtendedModelPermissions();
+				this.onModelSelectionChange(this.selectedModels);
 			}).catch(identity)
-			.finally(() => {
-				this.projectRequestCanceler = null;
-			});
+				.finally(() => {
+					this.projectRequestCanceler = null;
+				});
 	}
 
 	/**

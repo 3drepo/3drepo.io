@@ -21,7 +21,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state("home", {
 		name: "home",
-		url: "/?page&tab&project&view&model",
+		url: "/?page&tab&project&view&modelId",
 		resolve: {
 			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
 				StateManager.state.authInitialized = false;

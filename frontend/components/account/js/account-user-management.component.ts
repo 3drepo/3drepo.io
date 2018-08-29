@@ -18,7 +18,7 @@
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {get, uniq, map, isNumber} from "lodash";
 
-const TABS_TYPES = {
+export const TABS_TYPES = {
 	USERS: 0,
 	JOBS: 1,
 	PROJECTS: 2
