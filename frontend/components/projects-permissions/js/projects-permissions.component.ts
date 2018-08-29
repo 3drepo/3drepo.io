@@ -145,10 +145,10 @@ class ProjectsPermissionsController implements ng.IController {
 
 			if (memberData.isAdmin) {
 				modelPermissionsKey = MODEL_ROLES_TYPES.ADMINSTRATOR;
+			} else if (memberModelPermissions) {
+				modelPermissionsKey = get(memberModelPermissions, "permission", MODEL_ROLES_TYPES.UNASSIGNED);
 			} else {
-				modelPermissionsKey = memberModelPermissions ?
-					memberModelPermissions.permission || MODEL_ROLES_TYPES.UNASSIGNED :
-					UNDEFINED_PERMISSIONS;
+				modelPermissionsKey = UNDEFINED_PERMISSIONS;
 			}
 
 			return {
@@ -223,14 +223,21 @@ class ProjectsPermissionsController implements ng.IController {
 			});
 
 			this.ModelsService.updateMulitpleModelsPermissions(this.currentTeamspace.account, permissionsList)
-				.then(() => {
-					this.selectedModels = permissionsList.map(({permissions}, index) => {
-						const {model, federate, name} = this.selectedModels[index];
-						return {model, permissions, federate, name};
+				.then(({data: updatedModels}) => {
+					this.selectedModels = updatedModels.filter(({model}) => {
+						return this.selectedModels.some((selectedModel) => selectedModel.model === model);
 					});
-					const permissionsToShow = this.selectedModels.length === 1 ?
-						this.selectedModels[0].permissions :
-						updatedPermissions.map(({user, isSelected}) => ({user, isSelected, permission: UNDEFINED_PERMISSIONS}));
+
+					const permissionsToShow = this.selectedModels[0].permissions.map(({user, permission}) => {
+						const isSelected = updatedPermissions
+							.some((userPermission) => userPermission.isSelected && userPermission.user === user);
+
+						return {
+							user,
+							isSelected,
+							permission: this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS
+						};
+					});
 
 					this.assignedModelPermissions = [...this.getExtendedModelPermissions(permissionsToShow)];
 				}).catch(this.DialogService.showError.bind(null, "update", "model/federation permissions"));

@@ -203,7 +203,6 @@ schema.statics.populateUsers = function(account, permissions) {
 	const User = require("./user");
 
 	return User.getAllUsersInTeamspace(account).then(users => {
-
 		users.forEach(user => {
 			const permissionFound = permissions && permissions.find(p => p.user ===  user);
 
