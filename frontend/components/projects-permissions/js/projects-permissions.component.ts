@@ -266,7 +266,7 @@ class ProjectsPermissionsController implements ng.IController {
 		}
 	}
 
-	public handleModelPermissionsPreSave(updatedPermissions): Promise {
+	public handleModelPermissionsPreSave(updatedPermissions): Promise<any> {
 		const currentProject = this.projects.find(({name}) => name === this.currentProject);
 		const permissionlessModels = [];
 
