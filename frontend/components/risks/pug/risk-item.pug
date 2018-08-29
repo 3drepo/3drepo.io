@@ -1,12 +1,12 @@
 
-md-content#issueInformation(
+md-content#riskInformation(
 	ng-if="vm.riskData && vm.modelSettings"
 	layout="column"
 	tabindex="0"
 	tdr-focus="true")
 
 	// Title
-	.issueItemContainer#issueTitleArea(
+	.riskItemContainer#riskTitleArea(
 		layout="column"
 		layout-align="start"
 		flex
@@ -15,12 +15,12 @@ md-content#issueInformation(
 
 			div(layout="row", flex, layout-align="space-between")
 				div(layout="row", flex)
-					#issueRoleIndicator(ng-style="{backgroundColor: vm.riskData.roleColor}")
+					#riskRoleIndicator(ng-style="{backgroundColor: vm.riskData.roleColor}")
 					
 					div(ng-if="!vm.data"
 						layout="column"
 						flex)
-						md-input-container#issueTitleInput(
+						md-input-container#riskTitleInput(
 							style="width=100%;"
 							flex
 							md-no-float)
@@ -39,7 +39,7 @@ md-content#issueInformation(
 								placeholder="Title",
 								ng-click="vm.titleInputClick($event)")
 
-					label#issueTitle(ng-if="vm.data") {{vm.riskData.title}}
+					label#riskTitle(ng-if="vm.data") {{vm.riskData.title}}
 
 				span(flex="5")
 				div
@@ -50,19 +50,19 @@ md-content#issueInformation(
 					md-tooltip(ng-if="vm.showAdditional") Hide additional information
 
 	// Info
-	.issueItemContainer#issueInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
+	.riskItemContainer#riskInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
 		div(flex="10")
-			md-icon.angular-material-icons#issueStatusIcon(
+			md-icon.angular-material-icons#riskStatusIcon(
 				style="color:{{vm.riskData.statusIcon.colour}}") {{vm.riskData.statusIcon.icon}}
 
-		.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
+		.riskRiskOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
 			label {{vm.data.owner}}
 			label {{vm.data.timeStamp}}
 
 	// Status
-	.issueItemContainer#issueAdditional(layout="column", ng-if="vm.showAdditional")
+	.riskItemContainer#riskAdditional(layout="column", ng-if="vm.showAdditional")
 		div(layout="row")
-			md-input-container.issueItemStatus(flex)
+			md-input-container.riskItemStatus(flex)
 				label SafetiBase ID
 				md-select(
 					id="issuePriority"
@@ -72,7 +72,7 @@ md-content#issueInformation(
 			
 					md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
 			
-			md-input-container.issueItemStatus(flex)
+			md-input-container.riskItemStatus(flex)
 				label Associated Activity
 				md-select(
 					id="issueStatus"
@@ -85,7 +85,7 @@ md-content#issueInformation(
 						ng-disabled="vm.disableStatusOption(status)"
 						value="{{status.value}}") {{status.label}}
 
-	.issueItemContainer#issueDescriptionContainer(layout="column", layout-align="start", flex)
+	.riskItemContainer#riskDescriptionContainer(layout="column", layout-align="start", flex)
 		div(layout="column", layout-align="start", flex)
 			div(ng-if="!vm.data", flex, layout="column")
 				md-input-container#descriptionText()
@@ -96,7 +96,7 @@ md-content#issueInformation(
 						ng-focus="vm.textInputHasFocus(true)"
 						ng-blur="vm.textInputHasFocus(false)")
 
-			#issueDescription(
+			#riskDescription(
 				ng-if="vm.data"
 				layout="column"
 				ng-click="vm.showViewpoint($event, vm.riskData.viewpoint)")
@@ -113,7 +113,7 @@ md-content#issueInformation(
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
 					
-					.issueTextActions(layout="row", ng-if="vm.canChangeDescription()")
+					.riskTextActions(layout="row", ng-if="vm.canChangeDescription()")
 						md-button.md-icon-button.md-accent(
 							aria-label="Edit Description Toggle"
 							ng-click="vm.toggleEditDescription($event)")
@@ -133,13 +133,13 @@ md-content#issueInformation(
 								style="color:{{vm.editCommentColor}}") save
 							
 			
-			.issueThumbnail(
+			.riskThumbnail(
 				ng-if="vm.riskData.descriptionThumbnail"
 				ng-click="vm.showScreenShot($event, vm.riskData.viewpoint)")
-				img.issueThumbnailImage(ng-src="{{vm.riskData.descriptionThumbnail}}")
+				img.riskThumbnailImage(ng-src="{{vm.riskData.descriptionThumbnail}}")
 
 
-	.issueItemContainer#issueAdditional(layout="column")
+	.riskItemContainer#riskAdditional(layout="column")
 
 		div(layout="row")
 			md-input-container(flex)
@@ -183,7 +183,7 @@ md-content#issueInformation(
 					
 					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
-	.issueItemContainer#issueAdditional(layout="column")
+	.riskItemContainer#riskAdditional(layout="column")
 
 		div(layout="row")
 			md-input-container(flex)
@@ -217,21 +217,21 @@ md-content#issueInformation(
 
 md-divider
 
-.issueItemContainer#issueFooterButtons(layout="column")
+.riskItemContainer#riskFooterButtons(layout="column")
 
-	.issueThumbnail.fillHeight(
+	.riskThumbnail.fillHeight(
 		layout="row"
 		layout-align="center"
 		ng-if="vm.commentThumbnail"
 		ng-click="vm.showThumbnail()")
 
-		img.issueThumbnailImage(
+		img.riskThumbnailImage(
 			id="commentThumbnail"
 			ng-src="{{vm.commentThumbnail}}")
 	
 	div(layout="row" flex="100")
 		// New comment
-		.issueItemContainer#issueNewComment(
+		.riskItemContainer#riskNewComment(
 			layout="row"
 			layout-align="start center"
 			flex="100"
@@ -275,7 +275,7 @@ md-divider
 				md-icon.angular-material-icons save
 			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
 		
-// Whilst issue is loading
+// Whilst risk is loading
 div.heightFix(
 	ng-if="!vm.modelSettings || !vm.riskData"
 	flex
@@ -298,4 +298,4 @@ div.heightFix(
 		layout="column"
 		flex 
 		layout-align="center center")
-			h3 Issue Failed to Load
+			h3 Risk Failed to Load

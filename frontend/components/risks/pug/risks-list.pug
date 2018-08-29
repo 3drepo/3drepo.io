@@ -1,4 +1,4 @@
-#issuesListContainer(
+#risksListContainer(
 	ng-switch="vm.toShow" 
 	tabindex="0"
 	tdr-focus="true"
@@ -6,41 +6,41 @@
 	
 	// List
 	div(ng-switch-when="list")
-		.issueListItem(
+		.riskListItem(
 			id="{{'risk' + risk._id}}"
 			ng-repeat="risk in vm.risksToShow track by $index"
 			layout="column"
 			ng-click="vm.selectRisk(risk)")
 
-			#issuesListItemContent(layout='column')
+			#risksListItemContent(layout='column')
 				
 				div(layout='row')
-					#issueRoleIndicator(ng-style="{backgroundColor: risk.roleColor}")
-					.issueListItemThumbnail(layout="column", layout-align="center center")
+					#riskRoleIndicator(ng-style="{backgroundColor: risk.roleColor}")
+					.riskListItemThumbnail(layout="column", layout-align="center center")
 						img(ng-if="risk.thumbnail", ng-src="{{risk.thumbnailPath}}")
-						md-icon.angular-material-icons.issueListItemMissingThumbnail(
+						md-icon.angular-material-icons.riskListItemMissingThumbnail(
 							ng-if="!risk.thumbnail") insert_photo
 					
 					div(flex, layout="column")
-						label#issuesListItemTitle(flex="none") {{risk.title}}
-						#issuesListItemInfo(layout="row", layout-align="space-between center", flex="none")
+						label#risksListItemTitle(flex="none") {{risk.title}}
+						#risksListItemInfo(layout="row", layout-align="space-between center", flex="none")
 							div(layout="row", layout-align="start start")
 
-								md-icon.angular-material-icons#issueListItemStatus(
+								md-icon.angular-material-icons#riskListItemStatus(
 									aria-label="Status Icon"
 									ng-style="{'color': risk.statusIcon.colour }") {{risk.statusIcon.icon}}
 
 								label(flex) {{risk.owner}}
 							label {{risk.timeStamp}}
-						#issuesListItemDescription
+						#risksListItemDescription
 							label(ng-bind-html="risk.desc | linky:'_blank'") {{risk.desc}}
 
-			.issueJustClosed(ng-if="risk.justClosed" flex="none")
+			.riskJustClosed(ng-if="risk.justClosed" flex="none")
 				.closedText This risk is now closed
 
 			md-divider
 
-			#issuesListItemEnter(
+			#risksListItemEnter(
 				ng-if="vm.isSelectedRisk(risk)"
 				ng-click="vm.editRisk(risk)"
 				layout="column"

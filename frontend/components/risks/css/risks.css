@@ -1,4 +1,4 @@
-/** Issues ************************************************************************************************************/
+/** Risks ************************************************************************************************************/
 
 risks-card {
   display: block;
@@ -6,29 +6,29 @@ risks-card {
   position: relative;
 }
 
-risks-card #issuesAddContainer {
+risks-card #risksAddContainer {
   position: relative;
   margin: 15px;
 }
-risks-card #issuesAddContainer .md-dialog-container {
+risks-card #risksAddContainer .md-dialog-container {
   top: 0 !important;
   height: 200px !important;
 }
-risks-card #issuesAddContainer .md-dialog-backdrop {
+risks-card #risksAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
-risks-card #issuesAddContainer md-input-container {
+risks-card #risksAddContainer md-input-container {
   margin-bottom: 0;
 }
-risks-card #issuesAddContainer h4 {
+risks-card #risksAddContainer h4 {
   margin-left: 4px;
   color: rgba(0, 0, 0, 0.6);
 }
 
-risks-card .issueHeader {
+risks-card .riskHeader {
   position: relative;
 }
-risks-card .issueHeader:hover {
+risks-card .riskHeader:hover {
   background-color: #EEEEEE;
   cursor: pointer;
 }
@@ -37,14 +37,14 @@ risks-card md-list {
   padding: 0;
 }
 
-risks-card .issuesInfo {
+risks-card .risksInfo {
   text-align: center;
   padding: 15px;
   background: #E8EAF6;
   margin: 15px;
   border-radius: 4px;
 }
-risks-card .issuesInfo p {
+risks-card .risksInfo p {
   margin: 0;
   color: rgba(0, 0, 0, 0.7);
 }
@@ -89,11 +89,11 @@ risks-card #risksAddButton {
   float: right;
 } */
 
-risks-card #issueDescriptionContainer {
+risks-card #riskDescriptionContainer {
   margin-top: 0px;
 }
 
-risks-card #issueInformation {
+risks-card #riskInformation {
   display: block;
   overflow-y: scroll;
   position: relative;
@@ -104,13 +104,13 @@ risks-card .importBCFLoading {
   margin: 10px auto;
 }
 
-risks-card #issueRoleIndicator {
+risks-card #riskRoleIndicator {
   width: 8px;
   border: 1px solid #DDDDDD;
   margin-right: 10px;
 }
 
-/** Issue *************************************************************************************************************/
+/** Risk *************************************************************************************************************/
 risk-item {
   display: block;
   height: 100%;
@@ -140,63 +140,63 @@ risk-item #descriptionText textarea {
   overflow-y: auto;
 }
 
-risk-item .issueCommentsContainer {
+risk-item .riskCommentsContainer {
   padding: 0 15px 0 25px
 }
-risk-item .issueCommentsContainer md-list-item {
+risk-item .riskCommentsContainer md-list-item {
   padding: 0 !important;
 }
 
-risk-item .issueCommentsContainer md-list-item .commentModifyButton {
+risk-item .riskCommentsContainer md-list-item .commentModifyButton {
   width: 20px;
   height: 20px;
   font-size: 20px;
   margin: 0 0 0 20px;
   outline: none;
 }
-risk-item .issueCommentsContainer .issueCommentInfo {
+risk-item .riskCommentsContainer .riskCommentInfo {
   position: relative;
 }
-risk-item .issueCommentsContainer .issueCommentInfo p {
+risk-item .riskCommentsContainer .riskCommentInfo p {
   color: rgba(0,0,0,0.35) !important;
 }
-risk-item .issueCommentsContainer .issueCommentsFooter {
+risk-item .riskCommentsContainer .riskCommentsFooter {
   margin-top: -15px;
   padding-bottom: 10px;
   /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
 }
 
-md-list-item.issueRole {
+md-list-item.riskRole {
   padding: 0;
 }
-md-list-item .issueAssignColourMarker {
+md-list-item .riskAssignColourMarker {
   display: block;
   width: 10px;
   height: 25px;
   margin-right: 10px;
 }
 
-risk-item .issueOpenContainer {
+risk-item .riskOpenContainer {
   margin-top: 10px;
 }
 
-risk-item #issueDueDate .md-datepicker-button {
+risk-item #riskDueDate .md-datepicker-button {
   margin-left: 0px;
   margin-right: 0px;
   padding-left: 0px;
   padding-right: 0px;
 }
 
-risk-item #issueDueDate .md-datepicker-button md-icon {
+risk-item #riskDueDate .md-datepicker-button md-icon {
   margin-left: 0px;
 }
 
-risk-item #issueDueDate .md-datepicker-input-container {
+risk-item #riskDueDate .md-datepicker-input-container {
   margin: 0px;
   width: 167.5px;
 }
 
-/** Issues List *******************************************************************************************************/
+/** Risks List *******************************************************************************************************/
 risks-list {
   display: block;
   height: calc(100% - 50px);
@@ -204,57 +204,57 @@ risks-list {
   overflow-y: scroll;
 }
 
-risks-list .issueListItem {
+risks-list .riskListItem {
   position: relative;
   outline: none;
 }
-risks-list .issueListItem:hover {
+risks-list .riskListItem:hover {
   cursor: pointer;
   background: #f3f3f3;
 
 }
-risks-list .issueListItem *:hover {
+risks-list .riskListItem *:hover {
   cursor: inherit;
 }
 
-risks-list .issueListItem div:first-child {
+risks-list .riskListItem div:first-child {
   outline: none;
 }
 
-risks-list #issuesListItemContent {
+risks-list #risksListItemContent {
   padding: 10px;
   padding-right: 40px;
   overflow: hidden;  
 }
 
-risks-list #issuesListItemTitle {
+risks-list #risksListItemTitle {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 
-risks-list #issuesListItemInfo {
+risks-list #risksListItemInfo {
   margin: 5px 0;
 }
 
-risks-list #issuesListItemInfo label,
-risks-list #issuesListItemDescription label {
+risks-list #risksListItemInfo label,
+risks-list #risksListItemDescription label {
   color: rgba(0, 0, 0, 0.5);
   word-wrap: break-word;
 }
 
-risks-list #issuesListItemDescription {
+risks-list #risksListItemDescription {
   height: 60px;
   font-size: 13px;
 }
-risks-list #issuesListItemDescription label {
+risks-list #risksListItemDescription label {
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
-risks-list #issuesListItemEnter {
+risks-list #risksListItemEnter {
   position: absolute;
   top: 0;
   right: 0;
@@ -263,22 +263,22 @@ risks-list #issuesListItemEnter {
   background: rgb(12, 47, 84);
   outline: none;
 }
-risks-list #issuesListItemEnter md-icon {
+risks-list #risksListItemEnter md-icon {
   color: #FFFFFF;
 }
 
-risks-list .issueListItemThumbnail {
+risks-list .riskListItemThumbnail {
   margin-right: 10px;
   height: 120px;
   width: 120px;
   background: rgba(240,240,240,1)
 }
 
-risks-list #issuesListContainer {
+risks-list #risksListContainer {
   outline: none;
 }
 
-risks-list .issueJustClosed{
+risks-list .riskJustClosed{
   position: absolute;
   width: 100%;
   height: 100%;
@@ -294,8 +294,8 @@ risks-list .closedText{
   border: 1px solid #DDDDDD;
  }
 
-/** Issues List Item **************************************************************************************************/
-.userRoleIssueListItemTitle {
+/** Risks List Item **************************************************************************************************/
+.userRoleRiskListItemTitle {
   border: 1px solid rgba(240,240,240,1);
   margin-left: -4px;
   padding-left: 4px;
@@ -305,30 +305,30 @@ risks-list-item:hover {
    background: #eaeaea;
 }
 
-risks-list-item .issueListItemMissingThumbnail {
+risks-list-item .riskListItemMissingThumbnail {
   font-size: 50px;
   width: 50px;
   height: 50px;
   opacity: 0.3;
 }
 
-risks-list-item #issueListItemStatus {
+risks-list-item #riskListItemStatus {
   margin-right: 5px;
 }
 
-/** Issue Comp ********************************************************************************************************/
+/** Risk Comp ********************************************************************************************************/
 risk-item {
   display: block;
   height: 100%;
   position: relative;
 }
 
-risk-item #issueAll {
+risk-item #riskAll {
   outline: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-risk-item #issueFooterButtons {
+risk-item #riskFooterButtons {
   background: white;
   width: 100%;
   z-index: 10;
@@ -337,7 +337,7 @@ risk-item #issueFooterButtons {
   position: absolute;
 }
 
-risk-item .issueItemContainer {
+risk-item .riskItemContainer {
   z-index: 10;
   padding: 10px;
   margin-top: 8px; 
@@ -345,38 +345,38 @@ risk-item .issueItemContainer {
   padding-bottom: 10px;
 }
 
-risk-item .issueItemContainer div {
+risk-item .riskItemContainer div {
   outline: none;
 }
 
-risk-item #issueeArea {
+risk-item #riskeArea {
   padding-top: 15px;
   padding-bottom: 15px;
   outline: none;
 }
-risk-item .issueTitleArea:hover {
+risk-item .riskTitleArea:hover {
   background: rgba(250,250,250,1);
   cursor: pointer;
 }
-risk-item .issueTitleArea #issueTitle {
+risk-item .riskTitleArea #riskTitle {
   cursor: inherit;
 }
 
-risk-item #issueInfoArea {
+risk-item #riskInfoArea {
   padding-top: 5px;
   padding-bottom: 20px;
 }
 
-risk-item #issueTitleInput {
+risk-item #riskTitleInput {
   margin: 2px 0 0;
   height: 40px;
 }
 
-risk-item #issueTitle {
+risk-item #riskTitle {
   margin: 10px 0;
 }
 
-risk-item .issueItemStatus {
+risk-item .riskItemStatus {
   margin-right: 5px;
 }
 
@@ -388,7 +388,7 @@ risk-item .fullHeight {
   height: 100%;
 }
 
-risk-item .issueThumbnail {
+risk-item .riskThumbnail {
   position: relative;
   display: inline-block;
   padding: 0px;
@@ -400,45 +400,45 @@ risk-item .issueThumbnail {
   background-size: contain;
 }
 
-risk-item .issueThumbnailImage {
+risk-item .riskThumbnailImage {
   width: 100%;
   height: 100%;
 }
 
-risk-item .issueThumbnailImage:hover {
+risk-item .riskThumbnailImage:hover {
   cursor: pointer;
   opacity: 0.8;
 }
 
-risk-item .issuesLabel {
+risk-item .risksLabel {
   padding-bottom: 10px;
 }
 
-risk-item .issueIssueOwner {
+risk-item .riskRiskOwner {
   margin-top: 0;
 }
 
-risk-item .issueAutoComment,
-risk-item .issueCommentOwner {
+risk-item .riskAutoComment,
+risk-item .riskCommentOwner {
   margin-bottom: 10px;
 }
 
-risk-item .issueIssueOwner label,
-risk-item .issueCommentOwner label {
+risk-item .riskRiskOwner label,
+risk-item .riskCommentOwner label {
   color: rgba(0, 0, 0, 0.5);
   font-size: 14px;
 }
 
-risk-item .issueCommentOwner .issueNotification {
+risk-item .riskCommentOwner .riskNotification {
   color: rgb(6, 86, 60);
 }
 
-risk-item .issueOrthogonalView {
+risk-item .riskOrthogonalView {
   color: #949494;
 }
 
 
-risk-item .issueOrthogonalViewIssue {
+risk-item .riskOrthogonalViewRisk {
   color: #949494;
   font-size: 14px;
   margin-top: 0px;
@@ -446,40 +446,40 @@ risk-item .issueOrthogonalViewIssue {
 }
 
 
-risk-item .issueAutoComment label {
+risk-item .riskAutoComment label {
   color: rgba(0, 0, 0, 0.5);
   /*font-style: italic;*/
   font-size: 14px;
 }
 
-risk-item .issueComment {
+risk-item .riskComment {
   margin: 0 0 5px;
 }
 
-risk-item .issueCommentTitle {
+risk-item .riskCommentTitle {
   margin: 10px 0;
   font-size: 14px;
 }
 
-risk-item .issueTextActions {
+risk-item .riskTextActions {
   z-index: 2;
 }
 
-risk-item #issueDescription {
+risk-item #riskDescription {
   outline: none;
   margin-bottom: 10px;
 }
-risk-item #issueDescription label {
+risk-item #riskDescription label {
   word-break: break-all;
 }
 
-risk-item .issueComment:hover,
-risk-item #issueDescription:hover {
+risk-item .riskComment:hover,
+risk-item #riskDescription:hover {
   background: rgba(250,250,250,1);
   cursor: pointer;
 }
-risk-item .issueComment *:hover,
-risk-item #issueDescription *:hover {
+risk-item .riskComment *:hover,
+risk-item #riskDescription *:hover {
   cursor: pointer;
 }
 
@@ -487,12 +487,12 @@ risk-item #additionalInfoButton {
   margin: 0 5px 0 -8px;
 }
 
-risk-item #issueAdditional {
+risk-item #riskAdditional {
   margin: -10px 0;
   padding-top: 5px;
 }
 
-risk-item #issueNewComment {
+risk-item #riskNewComment {
   padding-top:  0px;
   padding-bottom: 0px;
   margin: 0px;
@@ -500,18 +500,18 @@ risk-item #issueNewComment {
   overflow-y: auto;
 }
 
-risk-item #issueNewComment textarea {
+risk-item #riskNewComment textarea {
   background-color: rgba(255, 255, 255, 0.3);
   border: 1px solid rgb(230, 230, 230);
   border-radius: 2px;
   color: black;
 }
 
-risk-item #issueNewComment md-input-container {
+risk-item #riskNewComment md-input-container {
   margin: 0px;
 }
 
-risk-item #issueAdditional md-input-container {
+risk-item #riskAdditional md-input-container {
   margin-top: 12px;
   margin-bottom: 8px;
   font-size: 14px;
@@ -522,63 +522,63 @@ risk-item #descriptionAndComments {
   overflow-x:hidden;
 }
 
-risk-item #issueRoleIndicator {
+risk-item #riskRoleIndicator {
   margin-left: 7px;
   margin-top: 5px;
   height: 28px;
 }
 
-/** Issue Screen Shot  ************************************************************************************************/
-#issueScreenShotDialog {
+/** Risk Screen Shot  ************************************************************************************************/
+#riskScreenShotDialog {
   width:80%;
   height: calc(80% + 40px); /* 40px is the height of the dialog toolbar */
   max-height: calc(80% + 40px);
   overflow: hidden;
 }
 
-#issueScreenShotDialog #issueScreenShotPenIndicator {
+#riskScreenShotDialog #riskScreenShotPenIndicator {
   min-height: 1px !important;
   min-width: 1px !important;
   height: initial;
   width: initial;
 }
 
-issues-screen-shot .sizeContainer {
+risks-screen-shot .sizeContainer {
   display: inline-block;
   vertical-align: middle;
 }
 
-issues-screen-shot .sizeContainer .md-errors-spacer {
+risks-screen-shot .sizeContainer .md-errors-spacer {
   min-height: 0px !important;
   height: 0px;
 }
 
-issues-screen-shot .size input {
+risks-screen-shot .size input {
   text-align: center;
   color: black;
 }
 
 
-issues-screen-shot .colorContainer {
+risks-screen-shot .colorContainer {
   width: 60px;
   display: inline-block;
   margin-right: 30px;
 }
 
 
-issues-screen-shot .colorContainer md-select {
+risks-screen-shot .colorContainer md-select {
   margin: 0px;
 }
 
-issues-screen-shot .colorContainer .penColor {
+risks-screen-shot .colorContainer .penColor {
   width: 83px;
 }
 
-issues-screen-shot .colorContainer md-select-value span {
+risks-screen-shot .colorContainer md-select-value span {
   min-height: 19px;
 }
 
-issues-screen-shot #issueScreenShotActions {
+risks-screen-shot #riskScreenShotActions {
   position: absolute;
   padding-left: 40px;
   bottom: 50px;
@@ -591,17 +591,17 @@ issues-screen-shot #issueScreenShotActions {
   border-radius: 4px;
 }
 
-issues-screen-shot #issueScreenShotFAIcon {
+risks-screen-shot #riskScreenShotFAIcon {
   font-size: 24px;
 }
 
-issues-screen-shot #issueScreenShotContent {
+risks-screen-shot #riskScreenShotContent {
   overflow: hidden;
   height: calc(100% - 40px);
   background: #cecccb;
 }
 
-issues-screen-shot #scribbleCanvas {
+risks-screen-shot #scribbleCanvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -609,7 +609,7 @@ issues-screen-shot #scribbleCanvas {
   width: 100%;
 }
 
-issues-screen-shot #screenShotCanvas {
+risks-screen-shot #screenShotCanvas {
   position: absolute;
   top: 40px;
   left: 0;
@@ -618,13 +618,13 @@ issues-screen-shot #screenShotCanvas {
   z-index: -1;
 }
 
-issues-screen-shot #issueScreenShotContainer {
+risks-screen-shot #riskScreenShotContainer {
   max-height: 100%;
   height: 100%;
   width: 100%;
 }
 
-issues-screen-shot #issueScreenShotImage {
+risks-screen-shot #riskScreenShotImage {
   text-align: center;
   margin: auto;
   padding: 0px;
@@ -633,7 +633,7 @@ issues-screen-shot #issueScreenShotImage {
   top: 0;
 }
 
-issues-screen-shot #issueScreenShotPenIndicator {
+risks-screen-shot #riskScreenShotPenIndicator {
   position: absolute;
   display: block;
   color: #FFFFFF;

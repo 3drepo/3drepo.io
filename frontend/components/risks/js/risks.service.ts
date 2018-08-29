@@ -809,9 +809,9 @@ export class RisksService {
 		let saveUrl;
 		const base = risk.account + "/" + risk.model;
 		if (risk.rev_id) {
-			saveUrl = base + "/revision/" + risk.rev_id + "/issues.json";
+			saveUrl = base + "/revision/" + risk.rev_id + "/risks.json";
 		} else {
-			saveUrl = base + "/issues.json";
+			saveUrl = base + "/risks.json";
 		}
 
 		const config = {withCredentials: true};

@@ -125,15 +125,17 @@ class RisksCardController implements ng.IController {
 
 		this.risksService.reset();
 
-		this.notificationService.unsubscribe.newIssues(this.account, this.model);
-		this.notificationService.unsubscribe.issueChanged(this.account, this.model);
+		let channel = this.notificationService.getChannel(this.account, this.model);
 
-		if (this.subModels) {
-			this.subModels.forEach((subModel) => {
-				this.notificationService.unsubscribe.newIssues(subModel.database, subModel.model);
-				this.notificationService.unsubscribe.issueChanged(subModel.database, subModel.model);
-			});
-		}
+		channel.risks.unsubscribeFromCreated(this.onRiskCreated);
+		channel.risks.unsubscribeFromUpdated(this.risksService.updateRisks);
+
+		// Do the same for all subModels
+		([] || this.subModels).forEach((subModel) => {
+				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel.risks.unsubscribeFromCreated(this.onRiskCreated);
+				channel.risks.unsubscribeFromUpdated(this.risksService.updateRisks);
+		});
 
 	}
 
