@@ -43,7 +43,7 @@ class RiskItemController implements ng.IController {
 		"NotificationService",
 		"AuthService",
 		"AnalyticService",
-		"StateManagerService",
+		"StateManager",
 		"MeasureService",
 		"ViewerService",
 		"TreeService",

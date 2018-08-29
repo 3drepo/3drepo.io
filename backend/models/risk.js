@@ -53,11 +53,10 @@ risk.findById = function() {
 risk.findBySharedId = function() {
 };
 
-risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, noClean, ids, sortBy) {
+risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids) {
 	const account = dbCol.account;
 	const model = dbCol.model;
 
-	console.log(model);
 	let filter = {};
 	let historySearch = Promise.resolve();
 

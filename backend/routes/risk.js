@@ -90,8 +90,10 @@ function clean(dbCol, risk) {
 		});
 
 		risk.viewpoints.forEach((vp, i) => {
-			risk.viewpoints[i].screenshot = risk.account + "/" + risk.model + "/risks/" + risk._id + "/viewpoints/" + risk.viewpoints[i].guid + "/screenshot.png";
-			risk.viewpoints[i].screenshotSmall = risk.account + "/" + risk.model + "/risks/" + risk._id + "/viewpoints/" + risk.viewpoints[i].guid + "/screenshotSmall.png";
+			if (risk.viewpoints[i].screenshot) {
+				risk.viewpoints[i].screenshot = risk.account + "/" + risk.model + "/risks/" + risk._id + "/viewpoints/" + risk.viewpoints[i].guid + "/screenshot.png";
+				risk.viewpoints[i].screenshotSmall = risk.account + "/" + risk.model + "/risks/" + risk._id + "/viewpoints/" + risk.viewpoints[i].guid + "/screenshotSmall.png";
+			}
 		});
 
 		if (risk.viewpoints.length > 0) {
@@ -274,8 +276,6 @@ function renderRisksHTML(req, res, next) {
 
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-	let findIssue;
-	const noClean = false;
 
 	const projection = {
 		extras: 0,
@@ -287,38 +287,36 @@ function renderRisksHTML(req, res, next) {
 	};
 
 	let ids;
-	if(req.query.ids) {
+	let findRisk;
+
+	if (req.query.ids) {
 		ids = req.query.ids.split(",");
 	}
 
 	if (req.params.rid) {
-		findIssue = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
+		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, ids);
 	} else {
-		findIssue = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
+		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
 	}
 
-	findIssue.then(issues => {
-		// Split issues by type
-		const splitIssues   = {open : [], closed: []};
+	findRisk.then(risks => {
+		// Split risks by status
+		const splitRisks = {open : [], closed: []};
 
-		for (let i = 0; i < issues.length; i++) {
-			if (issues[i].hasOwnProperty("comments")) {
-				for (let j = 0; j < issues[i].comments.length; j++) {
-					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
-				}
-			}
+		risks = risks.map(risk => clean(dbCol, risk));
 
-			if(issues[i].closed || issues[i].status === "closed") {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.closed.push(issues[i]);
+		for (let i = 0; i < risks.length; i++) {
+			if (risks[i].closed || risks[i].status === "closed") {
+				risks[i].created = new Date(risks[i].created).toString();
+				splitRisks.closed.push(risks[i]);
 			} else {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.open.push(issues[i]);
+				risks[i].created = new Date(risks[i].created).toString();
+				splitRisks.open.push(risks[i]);
 			}
 		}
 
-		res.render("issues.pug", {
-			issues : splitIssues,
+		res.render("risks.pug", {
+			risks : splitRisks,
 			url: function (path) {
 				return config.apiAlgorithm.apiUrl(C.GET_API, path);
 			}
