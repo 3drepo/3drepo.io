@@ -488,12 +488,23 @@ function updateMultiplePermissions(req, res, next) {
 		if (!modelsList.length) {
 			return Promise.reject({resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
-			const permissionsPromises = modelsList.map((model) => {
+			const modelsPromises = modelsList.map((model) => {
 				const newModelPermissions = req.body.find((modelPermissions) => modelPermissions.model === model._id);
 				return model.changePermissions(newModelPermissions.permissions || {}, account);
 			});
 
-			return Promise.all(permissionsPromises);
+			return Promise.all(modelsPromises).then((models) => {
+				const populatedPermissionsPromises = models.map(({permissions}) => {
+					return ModelSetting.populateUsers(account, permissions);
+				});
+
+				return Promise.all(populatedPermissionsPromises).then((populatedPermissions) => {
+					return populatedPermissions.map((permissions, index) => {
+						const {name, federate, _id: model} =  models[index] || {};
+						return {name, federate, model, permissions};
+					});
+				});
+			});
 		}
 	}).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
