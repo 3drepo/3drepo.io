@@ -2,6 +2,8 @@
 	.modelsListHeader(layout="row" layout-align="start center")
 		.modelsListCell(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
+				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				ng-checked="vm.shouldSelectAllItems"
 				ng-change="vm.toggleAllItems()"
 				ng-model="vm.shouldSelectAllItems")
 	
@@ -21,7 +23,10 @@
 	.modelsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
-	.modelsListBody(ng-if="!vm.isLoading" data-simplebar)
+	.modelsListBody(
+		ng-if="!vm.isLoading"
+		data-simplebar
+		data-simplebar-x-hidden)
 		div.modelsListRow(
 			ng-repeat="model in vm.processedModels track by model.name"
 			layout="row"

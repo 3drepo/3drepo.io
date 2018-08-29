@@ -53,6 +53,7 @@ class ModelsListController implements ng.IController {
 				this.isLoading = false;
 			}
 			this.processedModels = this.processData();
+			this.onSelectionChange();
 		}
 	}
 
