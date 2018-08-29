@@ -69,6 +69,7 @@ import "./home/js/theme.config";
 import "./icons/js/icons.constant.ts";
 import "./issues/js/issue.component";
 import "./issues/js/issues.component";
+import "./issues/js/issues-filter.component";
 import "./issues/js/issue-screen-shot.component";
 import "./issues/js/issues-list.component";
 import "./issues/js/issues.service";

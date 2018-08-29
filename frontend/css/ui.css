@@ -98,3 +98,42 @@ html, body {
 	display: block;
 	background-color: #4AD36B;
 }
+
+md-chip-template   {
+	font-weight: 400 !important;
+	font-size: 13px !important;
+}
+
+.md-chips.md-removable md-chip .md-chip-content{
+	padding-right: 8px !important;
+}
+.md-chips md-chip .md-chip-remove md-icon {
+	min-width: 0px;
+	min-height: 0px;
+	width:14px !important;
+	height:14px !important;
+	color: #eaeaea;
+}
+
+.md-chips md-chip .md-chip-remove {
+	background: rgba(0, 0, 0, 0.87) !important;
+	width: 16px !important;
+	height: 16px !important;
+	border-radius: 8px;
+	opacity: .4;
+}
+
+.md-chips md-chip .md-chip-remove:hover {
+	opacity: .54;
+}
+
+.md-chips md-chip .md-chip-remove-container {
+	height: 24px;
+	width: 24px;
+	margin-top:9px;
+}
+
+.md-chips md-chip .md-chip-content {
+	display: inline-block;
+	float: none;
+}

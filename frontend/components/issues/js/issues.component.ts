@@ -69,6 +69,7 @@ class IssuesController implements ng.IController {
 	private hideItem: boolean;
 	private modelSettings: any;
 	private canAddIssue: boolean;
+	private filterChips: [] = [];
 
 	constructor(
 		private $scope: any,
@@ -177,7 +178,8 @@ class IssuesController implements ng.IController {
 		}, (state) => {
 
 			if (state) {
-				angular.extend(this, state);
+				angular.extend(this, state); // IMPORTANT: This little thing sets the state inside the issues service to
+				// this component. Including issuesToShow, allIssues, etc.
 			}
 
 		}, true);
@@ -277,7 +279,6 @@ class IssuesController implements ng.IController {
 	}
 
 	public onIssueCreated(issues) {
-		// TODO: fix submodel part;
 
 		issues.forEach((issue) => {
 			this.shouldShowIssue(issue);
@@ -422,7 +423,7 @@ export const IssuesComponent: ng.IComponentOptions = {
 		model: "=",
 		branch:  "=",
 		revision: "=",
-		filterText: "=",
+		filterText: "=", // this is only used to bind the issuesToShow in the issues service to the issues list component.
 		modelSettings: "=",
 		show: "=",
 		showAdd: "=",

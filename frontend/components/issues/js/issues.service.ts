@@ -159,68 +159,80 @@ export class IssuesService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public setupIssuesToShow(model: string, filterText: string = "" ) {
+	public setupIssuesToShow(model: string, chips: Array<{name: string, type: string}> ) {
 		this.state.issuesToShow = [];
 
 		if (this.state.allIssues.length > 0) {
-
-			// Sort
-			this.state.issuesToShow = this.state.allIssues.slice();
-			if (this.state.issueDisplay.sortOldestFirst) {
-				this.state.issuesToShow.sort((a, b) => {
-					return a.created - b.created;
-				});
-			} else {
-				this.state.issuesToShow.sort((a, b) => {
-					return b.created - a.created;
-				});
-			}
-
-			// Hardcoded criteria for testing purposes
-
-			this.state.issueDisplay.dateRange = [new Date("8/20/2018"), new Date("8/30/2018 23:59:59")];
-			this.state.issueDisplay.priority = ["high"];
-
-			// ---------------------------------------
-
-			let filters = [];
-			filters = filters.concat(this.getAndClause(this.state.issueDisplay.excludeRoles, this.filterRole));
-			filters = filters.concat(this.getOrClause(filterText.split(" ").filter( (s) => s !== ""), this.handleIssueFilter));
-
-			if (!this.state.issueDisplay.showClosed) {
-				filters.push((issue) => issue.status !== "closed");
-			}
-
-			if (!this.state.issueDisplay.showSubModelIssues) {
-				filters.push((issue) => issue.model === model);
-			}
-
-			if ((this.state.issueDisplay.dateRange || []).length > 0 ) {
-				filters.push((issue) => issue.created >= this.state.issueDisplay.dateRange[0].getTime() );
-			}
-
-			if ((this.state.issueDisplay.dateRange || []).length > 1 ) {
-				filters.push((issue) => issue.created <= this.state.issueDisplay.dateRange[1].getTime());
-			}
-
-			filters = filters.concat(this.getOrClause(this.state.issueDisplay.priority, this.filterPriority));
-
-			// It filters the issue list by applying every filter to it.
-			this.state.issuesToShow = this.state.issuesToShow.filter( (issue) => filters.every( (f) => f(issue)));
+			const filteredIssues = this.filterIssues(model, this.state.allIssues, chips) ;
+			const sortOldest = this.state.issueDisplay.sortOldestFirst;
+			filteredIssues.sort((a, b) => {
+				return sortOldest ? a.created - b.created : b.created - a.created;
+			});
+			this.state.issuesToShow = filteredIssues;
 		}
+	}
+
+	public filterIssues(model: string, issues: any[], chips: Array<{name: string, type: string}>): any[] {
+		let filters = [];
+		const criteria = this.getCriteria(chips);
+
+		/* tslint:disable:no-string-literal */
+// 		filters = filters.concat(this.getAndClause(this.state.issueDisplay.excludeRoles, this.filterRole));
+// 		filters = filters.concat(this.getOrClause(filterText.split(" ").filter( (s) => s !== ""), this.handleIssueFilter));
+
+		filters = filters.concat(this.getOrClause(criteria["Status"] , this.filterStatus));
+		filters = filters.concat(this.getOrClause(criteria[""], this.handleIssueFilter));
+
+/*		if (!this.state.issueDisplay.showClosed) {
+			filters.push((issue) => issue.status !== "closed");
+		}
+
+		if (!this.state.issueDisplay.showSubModelIssues) {
+			filters.push((issue) => issue.model === model);
+		}
+
+		if ((this.state.issueDisplay.dateRange || []).length > 0 ) {
+			filters.push((issue) => issue.created >= this.state.issueDisplay.dateRange[0].getTime() );
+		}
+
+		if ((this.state.issueDisplay.dateRange || []).length > 1 ) {
+			filters.push((issue) => issue.created <= this.state.issueDisplay.dateRange[1].getTime());
+		}
+
+		filters = filters.concat(this.getOrClause(this.state.issueDisplay.priority, this.filterPriority));
+*/
+
+		/* tslint:enable:no-string-literal */
+
+		// It filters the issue list by applying every filter to it.
+		const filteredIssues = issues.filter( (issue) => filters.every( (f) => f(issue)));
+		return filteredIssues;
+	}
+
+	public getCriteria(chips: Array<{name: string, type: string}>): any {
+		const initialValue = {};
+
+		return  chips.reduce((object, currVal) => {
+			if (!object[currVal.type]) {
+				object[currVal.type] = [];
+			}
+
+			object[currVal.type].push(currVal.name);
+			return object;
+		}, initialValue);
 	}
 
 	/** filters */
 
 	public getAndClause(tags: any[], comparator) {
-		if (tags.length === 0) {
+		if ((tags || []).length === 0) {
 			return[];
 		}
 		return [(value, index, array) => tags.every( comparator.bind(this, value) )];
 	}
 
 	public getOrClause(tags: any[], comparator) {
-		if (tags.length === 0) {
+		if ((tags || []).length === 0) {
 			return[];
 		}
 
@@ -233,6 +245,10 @@ export class IssuesService {
 
 	public filterPriority(issue, tag): boolean {
 		return issue.priority === tag;
+	}
+
+	public filterStatus(issue, tag): boolean {
+		return issue.status === tag;
 	}
 
 	public handleIssueFilter(issue: any, filterText: string) {

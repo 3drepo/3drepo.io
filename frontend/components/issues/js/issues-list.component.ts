@@ -75,32 +75,18 @@ class IssuesListController implements ng.IController {
 				return this.IssuesService.state.allIssues;
 			},
 			() => {
-
-				if (this.IssuesService.state.allIssues) {
-					if (this.IssuesService.state.allIssues.length > 0) {
-
-						this.toShow = "list";
-						this.setupIssuesToShow();
-						// this.checkShouldShowIssue();
-
-					} else {
-						this.toShow = "info";
-						this.info = "There are currently no open issues";
-						this.contentHeight({height: this.IssuesService.state.heights.infoHeight});
-					}
-				}
-
 				this.allIssues = this.IssuesService.state.allIssues;
-
 			},
 			true
 		);
 
-		this.$scope.$watch("vm.filterText", () => {
+		this.$scope.$watch("vm.issuesToShow", () => {
+			this.setContentAndSize();
+			this.IssuesService.showIssuePins(this.account, this.model);
+		});
 
-			// Filter text
-			this.setupIssuesToShow();
-
+		this.$scope.$watchCollection("vm.filterChips", (chips) => {
+			this.IssuesService.setupIssuesToShow(this.model, chips);
 		});
 
 		this.$scope.$watch("vm.menuOption", () => {
@@ -213,13 +199,9 @@ class IssuesListController implements ng.IController {
 				break;
 		}
 
-		this.setupIssuesToShow();
 	}
 
-	public setupIssuesToShow() {
-
-		this.IssuesService.setupIssuesToShow(this.model, this.filterText);
-
+	public setContentAndSize() {
 		// Setup what to show
 		if (this.IssuesService.state.issuesToShow.length > 0) {
 			this.toShow = "list";
@@ -234,7 +216,6 @@ class IssuesListController implements ng.IController {
 			this.contentHeight({height: this.IssuesService.state.heights.infoHeight});
 		}
 
-		this.IssuesService.showIssuePins(this.account, this.model);
 	}
 
 	public selectIssue(issue) {
@@ -259,6 +240,7 @@ export const IssuesListComponent: ng.IComponentOptions = {
 		revision: "<",
 		allIssues: "<",
 		issuesToShow: "<",
+		filterChips: "=",
 		filterText: "<",
 		onEditIssue: "&",
 		nonListSelect: "<",
