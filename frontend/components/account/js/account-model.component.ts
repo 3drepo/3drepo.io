@@ -16,6 +16,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {PERMISSIONS_VIEWS} from "../../projects-permissions/js/projects-permissions.component";
+import {TABS_TYPES} from "./account-user-management.component";
+
 class AccountModelController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -24,6 +27,7 @@ class AccountModelController implements ng.IController {
 		"$timeout",
 		"$interval",
 		"$filter",
+		"$state",
 
 		"DialogService",
 		"APIService",
@@ -63,11 +67,12 @@ class AccountModelController implements ng.IController {
 	private project;
 
 	constructor(
-		private $scope: any,
-		private $location: any,
-		private $timeout: any,
-		private $interval: any,
-		private $filter: any,
+		private $scope,
+		private $location,
+		private $timeout,
+		private $interval,
+		private $filter,
+		private $state,
 
 		private DialogService: any,
 		private APIService: any,
@@ -448,15 +453,14 @@ class AccountModelController implements ng.IController {
 	 * Set up permissions of modelt
 	 */
 	public goToPermissions(event, account, project, model) {
-
-		this.$location.search("account", account);
-		this.$location.search("project", project.name);
-		this.$location.search("model", model.model);
-		this.$location.search("page", "assign");
-		this.onShowPage({page: "assign", callingPage: "teamspaces"});
-
+		this.$state.go(this.$state.$current.name, {
+			page: "userManagement",
+			project: project.name,
+			modelId: model.model,
+			tab: TABS_TYPES.PROJECTS,
+			view: PERMISSIONS_VIEWS.MODELS
+		}, {notify: false});
 	}
-
 }
 
 export const AccountModelComponent: ng.IComponentOptions = {
