@@ -1,0 +1,13 @@
+[data-simplebar=init] .simplebar-content,
+[data-simplebar=init] .simplebar-scroll-content {
+  min-height: 100%;
+}
+
+[data-simplebar=init][data-simplebar-x-hidden] .simplebar-content {
+  overflow-x: hidden;
+  padding-bottom: 0 !important
+}
+
+[data-simplebar=init][data-simplebar-y-hidden] .simplebar-content {
+  overflow-y: hidden;
+}

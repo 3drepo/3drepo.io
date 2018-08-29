@@ -15,8 +15,6 @@
 
 .permissionsListBody {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  overflow-x: hidden;
-  overflow-y: auto;
   height: 100%;
   max-height: calc(100% - 72px);
 }
@@ -117,20 +115,4 @@
 
 .permissionsListHeader md-radio-button {
   margin-top: 12px !important;
-}
-
-.permissionsListBody .simplebar-scroll-content,
-.permissionsListBody .simplebar-content {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.permissionsListBody .simplebar-track.horizontal {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
-.permissionsListBody .simplebar-track.vertical {
-  display: none;
 }
