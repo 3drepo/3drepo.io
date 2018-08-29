@@ -52,6 +52,8 @@ class ModelsListController implements ng.IController {
 			if (!this.processedModels) {
 				this.isLoading = false;
 			}
+			this.shouldSelectAllItems = false;
+			this.hasSelectedItem = false;
 			this.processedModels = this.processData();
 			this.onSelectionChange();
 		}
@@ -125,7 +127,7 @@ class ModelsListController implements ng.IController {
 	public onSelectionChange(): void {
 		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = selectedItems.length === this.processedModels.length;
+		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedModels.length;
 		this.onChange({selectedModels: selectedItems});
 	}
 }

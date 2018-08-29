@@ -455,6 +455,7 @@ class AccountModelController implements ng.IController {
 	public goToPermissions(event, account, project, model) {
 		this.$state.go(this.$state.$current.name, {
 			page: "userManagement",
+			teamspace: account,
 			project: project.name,
 			modelId: model.model,
 			tab: TABS_TYPES.PROJECTS,

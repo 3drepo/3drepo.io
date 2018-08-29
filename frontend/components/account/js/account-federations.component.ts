@@ -351,6 +351,7 @@ class AccountFederationsController implements ng.IController {
 		this.$state.go(this.$state.$current.name, {
 			page: "userManagement",
 			project: project.name,
+			teamspace: account,
 			modelId: model.model,
 			tab: TABS_TYPES.PROJECTS,
 			view: PERMISSIONS_VIEWS.MODELS

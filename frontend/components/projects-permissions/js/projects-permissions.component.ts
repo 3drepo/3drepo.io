@@ -113,17 +113,23 @@ class ProjectsPermissionsController implements ng.IController {
 					return {...member, isProjectAdmin};
 				});
 
+				this.models = get(projectData, "models", []);
+
 				const modelInState = this.$state.params.modelId;
-				this.models = get(projectData, "models", []).map((model) => {
-					return {
-						...model,
-						isSelected: model.model === modelInState
-					};
-				});
+				if (modelInState) {
+					this.models = this.models.map((model) => {
+						return {
+							...model,
+							isSelected: model.model === modelInState
+						};
+					});
+				}
 
 				this.selectedModels = this.models.filter(({isSelected}) => isSelected);
+				if (modelInState) {
+					this.onModelSelectionChange(this.selectedModels);
+				}
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
-				this.onModelSelectionChange(this.selectedModels);
 			}).catch(identity)
 				.finally(() => {
 					this.projectRequestCanceler = null;
@@ -159,6 +165,10 @@ class ProjectsPermissionsController implements ng.IController {
 	 * @param modelPermissions
 	 */
 	public getExtendedModelPermissions = (modelPermissions?) => {
+		if (!this.members) {
+			return [];
+		}
+
 		return this.members.map((memberData) => {
 			const memberModelPermissions = (modelPermissions || []).find(({user}) => user === memberData.user);
 			let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;

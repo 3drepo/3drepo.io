@@ -73,12 +73,16 @@ class AccountUserManagementController implements ng.IController {
 			private AccountService: any,
 			private DialogService: any,
 			private $state: any
-		) {}
-
-		public $onInit(): void {
-			const {tab} = this.$state.params;
+		) {
+			const {tab, teamspace} = this.$state.params;
 			this.selectedTab = parseInt(tab, 10);
 
+			if (teamspace) {
+				this.selectedTeamspace = teamspace;
+			}
+		}
+
+		public $onInit(): void {
 			this.onTeamspaceChange();
 		}
 
@@ -105,6 +109,8 @@ class AccountUserManagementController implements ng.IController {
 			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
 			const membersPromise = this.setTeamspaceMembers(this.currentTeamspace.account);
 			const jobsPromise = this.setTeamspaceJobs(this.currentTeamspace.account);
+
+			this.$state.go(this.$state.$current.name, {teamspace: this.selectedTeamspace}, {notify: false});
 
 			this.$q.all([membersPromise, jobsPromise]).then(() => {
 				this.projects = [...this.currentTeamspace.projects];

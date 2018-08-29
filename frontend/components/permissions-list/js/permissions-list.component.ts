@@ -160,7 +160,7 @@ class PermissionsListController implements ng.IController {
 	public onSelectionChange(): void {
 		const selectedItems = this.processedData.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = selectedItems.length === this.processedData.length;
+		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedData.length;
 	}
 
 	/**

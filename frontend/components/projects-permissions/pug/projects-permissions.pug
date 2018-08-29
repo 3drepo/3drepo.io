@@ -6,16 +6,14 @@
         ng-model="vm.currentProject"
         placeholder="Select a project"
         ng-change="vm.onProjectChange()"
-        ng-disabled="!vm.projects.length || vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
+        ng-disabled="!vm.projects.length")
         md-option(
           ng-value="project.name"
           ng-repeat="project in vm.projects") {{::project.name}}
 
     .flex
 
-    md-button.md-accent.switchButton(
-      ng-disabled="!vm.models.length"
-      ng-click="vm.toggleView()")
+    md-button.md-accent.switchButton(ng-click="vm.toggleView()")
         div(
           ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
           layout="row"
