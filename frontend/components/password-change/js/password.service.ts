@@ -32,12 +32,6 @@ export class PasswordService {
 		this.accountDefer = $q.defer();
 	}
 
-	public checkDuplicates(password, confirmPassword) {
-		const passwordValid = password === confirmPassword;
-		this.passwordMessage = passwordValid ? "" : "(Password mismatched)";
-		return this.passwordMessage;
-	}
-
 	public passwordLibraryAvailable() {
 		return window.zxcvbn !== undefined;
 	}

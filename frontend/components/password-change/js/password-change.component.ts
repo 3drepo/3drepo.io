@@ -87,11 +87,12 @@ class PasswordChangeController implements ng.IController {
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
 				this.checkInvalidPassword(result);
 			}
-			if (this.confirmPassword !== undefined && this.confirmPassword === this.newPassword) {
-				this.confirmPasswordInput();
-				this.buttonDisabled = false;
-			} else {
+			if (this.confirmPassword !== undefined && this.confirmPassword !== this.newPassword) {
 				this.buttonDisabled = true;
+				this.registerMessage = "(Passwords Mismatched)";
+			} else {
+				this.buttonDisabled = false;
+				this.registerMessage = "";
 			}
 		});
 
@@ -113,16 +114,13 @@ class PasswordChangeController implements ng.IController {
 
 	}
 
-	public confirmPasswordInput() {
-		return this.registerMessage = this.PasswordService.checkDuplicates(this.newPassword, this.confirmPassword);
-	}
-
 	public checkInvalidPassword(result) {
 		const scoreThreshold = 2;
-
 		if (result.score < scoreThreshold) {
+			this.buttonDisabled = false;
 			this.invalidatePassword(result);
 		} else {
+			this.buttonDisabled = true;
 			this.validatePassword();
 		}
 	}
