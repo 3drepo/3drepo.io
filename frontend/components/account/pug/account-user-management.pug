@@ -11,7 +11,7 @@
 			md-input-container.teamspaceSelectContainer(md-no-float, flex)
 				label Teamspace
 				md-select(
-					ng-model="vm.currentUser"
+					ng-model="vm.selectedTeamspace"
 					placeholder="Select a teamspace"
 					ng-change="vm.onTeamspaceChange()"
 					ng-disabled="!vm.teamspaces.length")
@@ -22,6 +22,7 @@
 		md-button.md-accent.md-fab.md-mini.addButton(
 			aria-label="Add new member"
 			ng-click="vm.toggleNewDataPanel()"
+			ng-if="vm.selectedTab !== vm.TABS_TYPES.PROJECTS"
 			ng-disabled="vm.members.length === vm.licencesLimit || vm.isLoadingTeamspace"
 			ng-class="{'active': vm.showAddingPanel}")
 			md-icon.angular-material-icons add
@@ -46,23 +47,32 @@
 			md-border-bottom
 			md-selected="vm.selectedTab"
 			md-on-select="vm.onTabChange()") 
-			md-tab(label="Users")
+			md-tab(label="Users" ng-disabled="!vm.currentTeamspace.isAdmin")
 				div(layout="column" layout-fill)
 					users-list(
 						flex="grow"
+						layout="row"
 						members="vm.members"
 						jobs="vm.jobs"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onMembersChange(updatedMembers)")
-					.flex
 					.accountUserManagementFooter(
 						ng-if="vm.licencesLabel"
 						layout="row"
 						layout-align="end center") {{vm.licencesLabel}}
 
-			md-tab(label="Jobs")
+			md-tab(label="Jobs" ng-disabled="!vm.currentTeamspace.isAdmin")
 				.jobsList
 
 			md-tab(label="Projects")
-				.projectsList
+				div(layout="column" layout-fill)
+					projects-permissions(
+						flex="grow"
+						layout="row"
+						members="vm.members"
+						projects="vm.projects"
+						current-teamspace="vm.currentTeamspace")
+					.accountUserManagementFooter(
+						layout="row"
+						layout-align="end center") Assign project permissions
 						

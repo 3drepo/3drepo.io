@@ -9,6 +9,7 @@ import "angular-sanitize";
 import "angular-aria";
 import "angular-recaptcha";
 import * as io from "socket.io-client";
+import "simplebar";
 
 // TypeScript compiled globals
 import { UnityUtil } from "../globals/unity-util";
@@ -26,6 +27,7 @@ window.TDR = TDR;
 window.TDR();
 
 // Register all the angularjs modules
+import "../services/projects.service";
 import "./account/js/account-assign.component";
 import "./account/js/account-billing.component";
 import "./account/js/account.component";
@@ -110,6 +112,8 @@ import "./member-card/js/member-card.component";
 import "./list-sort-button/js/list-sort-button.component";
 import "./new-member-form/js/new-member-form.component";
 import "./users-list/js/users-list.component";
+import "./projects-permissions/js/projects-permissions.component";
+import "./permissions-list/js/permissions-list.component";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });
