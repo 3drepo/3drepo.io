@@ -1,0 +1,14 @@
+.projectsPermissions {}
+
+
+.projectsPermissions .projectSelectContainer {
+  margin: 24px;
+  margin-top: 40px;
+  width: 45%;
+  font-size: 14px;
+  color: rgba(0, 0, 0, .6);
+}
+
+.projectsPermissions .switchButton {
+  margin-right: 10px;
+}

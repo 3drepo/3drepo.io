@@ -24,6 +24,8 @@ const allFonts = [
 
 const allCss = [
     './css/ui.css',
+    './css/simplebar.css',
+    './node_modules/simplebar/dist/simplebar.css',
     './node_modules/angular-material/angular-material.css',
     './node_modules/font-awesome/css/font-awesome.css',
     './components/**/**.css'

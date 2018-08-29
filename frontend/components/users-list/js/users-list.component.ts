@@ -14,9 +14,12 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import {values, cond, matches, orderBy} from "lodash";
+
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
-import {values, cond, matches, orderBy} from "lodash";
+
+import {sortByName, sortByJob} from "../../../helpers/sorting";
 
 class UsersListController implements ng.IController {
 	public static $inject: string[] = [
@@ -154,6 +157,7 @@ class UsersListController implements ng.IController {
 			.finally(() => {
 				member.isPending = false;
 				this.updateOriginMember(member);
+				this.onChange({updatedMembers: this.members});
 			});
 	}
 
@@ -174,7 +178,7 @@ class UsersListController implements ng.IController {
 		this.processedMembers = this.processMembers();
 	}
 
-	public processMembers(): object[] {
+	public processMembers() {
 		const filteredMembers = this.getFilteredMembers(this.members, this.searchText);
 		const processedMembers = this.getSortedMembers(filteredMembers);
 		return processedMembers;
@@ -202,19 +206,11 @@ class UsersListController implements ng.IController {
 	 * @param options
 	 * @returns {Array}
 	 */
-	public getSortedMembers(members = [], options = this.currentSort): object[] {
+	public getSortedMembers(members = [], options = this.currentSort) {
 		const {USERS, JOBS, PERMISSIONS} = SORT_TYPES;
 		const sort = cond([
-			[matches({type: USERS}), ({order}) => {
-				return orderBy(
-					members,
-					({firstName, lastName}) => `${lastName}`.toLowerCase().trim(),
-					order
-				);
-			}],
-			[matches({type: JOBS}), ({order}) => {
-				return orderBy(members, ["job"], order);
-			}],
+			[matches({type: USERS}), sortByName.bind(null, members)],
+			[matches({type: JOBS}), sortByJob.bind(null, members)],
 			[matches({type: PERMISSIONS}), ({order}) => {
 				return orderBy(members, ["isAdmin"], order);
 			}]

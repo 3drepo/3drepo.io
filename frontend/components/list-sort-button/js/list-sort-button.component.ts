@@ -46,6 +46,7 @@ class ListSortButtonController implements ng.IController {
 
 export const ListSortButtonComponent: ng.IComponentOptions = {
 	bindings: {
+		ngDisabled: "<?",
 		onChange: "&?"
 	},
 	controller: ListSortButtonController,

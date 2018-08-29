@@ -1,0 +1,92 @@
+.permissionsList
+	.permissionsListHeader(layout="row" layout-align="start center")
+		.permissionsListCell(layout="row" layout-align="center center" flex="10")
+			md-checkbox(
+				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				ng-disabled="!vm.processedPermissions.length"
+				ng-change="vm.toggleAllItems()"
+				ng-checked="vm.shouldSelectAllItems"
+				ng-model="vm.shouldSelectAllItems")
+	
+		.permissionsListCell(layout="row" layout-align="start center" flex="25")
+			list-sort-button(
+				ng-disabled="!vm.processedPermissions.length"
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+
+			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-disabled="!vm.permissions.length"
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="User"
+					ng-change="vm.onSearch()")
+
+		md-radio-group(
+			flex="30"
+			ng-model="vm.permissionsForSelected"
+			ng-change="vm.updatePermissionsForSelected(vm.permissionsForSelected)"
+			layout="row"
+			layout-align="start center")
+			.permissionsListCell(
+				layout="column"
+				layout-align="center center"
+				flex="50"
+				ng-repeat="permission in vm.PROJECT_PERMISSIONS")
+				div(layout="row" layout-align="center center")
+					list-sort-button(
+						ng-disabled="!vm.processedPermissions.length"
+						ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.key === permission.key}"
+						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
+					.usersListCellLabel {{::permission.label}}
+				md-radio-button(
+					ng-disabled="!vm.hasSelectedItem || !vm.permissions.length"
+					ng-value="permission.key"
+					aria-label="{{::permission.label}}")
+
+	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.permissionsListPlaceholder(
+		ng-if="!vm.isLoading && !vm.permissions.length"
+		layout="row"
+		layout-align="center center")
+		p Select a project to view the users' permissions
+
+	.permissionsListBody(
+		ng-if="!vm.isLoading && vm.permissions.length"
+		data-simplebar
+		data-simplebar-x-hidden)
+		div.permissionsListRow(
+			ng-repeat="permissions in vm.processedPermissions track by permissions.user"
+			layout="row"
+			layout-align="start center")
+
+			//Checkbox
+			.permissionsListCell(layout="row" layout-align="center center" flex="10")
+				md-checkbox(
+					ng-disabled="permissions.isAdmin"
+					ng-model="permissions.isSelected"
+					ng-change="vm.onSelectionChange()")
+
+			//User details
+			.permissionsListCell(flex="25")
+				member-card(data="permissions")
+
+			//Permissions
+			md-radio-group(
+				flex="30"
+				ng-model="permissions.key"
+				ng-change="vm.updatePermission(permissions)"
+				layout="row"
+				layout-align="start center")
+				.permissionsListCell(
+					ng-repeat="permission in vm.PROJECT_PERMISSIONS"
+					flex
+					layout="row"
+					layout-align="center center")
+					md-radio-button(
+						ng-disabled="permissions.isAdmin || permissions.isCurrentUser"
+						ng-value="permission.key"
+						aria-label="{{::permission.label}}")
