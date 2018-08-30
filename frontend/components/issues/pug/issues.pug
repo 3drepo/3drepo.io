@@ -8,12 +8,6 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-issues-filter(
-	place-holder="Search issues"
-	suggestions="[{name:'closed', type:'Status'}, {name:'open', type:'Status'}]"
-	chips="vm.filterChips"
-	)
-
 // Issues list
 issues-list(
 	ng-if="!vm.showProgress && vm.toShow === 'showIssues'"

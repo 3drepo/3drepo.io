@@ -197,6 +197,14 @@ panel-card-filter md-icon:hover {
   cursor: pointer;
 }
 
+/** Panel Card Chips Filter ****************************************************************************************************/
+panel-card-chips-filter .md-chip-input-container{
+  width: 100%;
+}
+
+panel-card-chips-filter input {
+  border-bottom: 1px solid rgb(12, 47, 84) !important;
+}
 
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {

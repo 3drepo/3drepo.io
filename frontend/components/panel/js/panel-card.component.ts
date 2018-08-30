@@ -34,6 +34,9 @@ class PanelCardController implements ng.IController {
 	private showHelp;
 	private visibleStatus;
 	private showFilter;
+	private chipsFilterVisible;
+	private chipsFilterSuggestions;
+
 	private showClearFilterButton;
 	private showAdd;
 	private hideMenuButton;
@@ -60,7 +63,12 @@ class PanelCardController implements ng.IController {
 	public $onInit() {
 
 		this.showHelp = false;
-		this.showFilter = false;
+		this.showFilter = false; // This flag is only set in the panel-card-option-filter.component
+
+		this.chipsFilterVisible = false; // This flag is only set in the panel-card-option-chip-filter.component
+		this.chipsFilterSuggestions = [];
+		this.chipsFilterVisible = false;
+
 		this.visibleStatus = false;
 		this.showClearFilterButton = false;
 		this.showAdd = false;
@@ -72,7 +80,6 @@ class PanelCardController implements ng.IController {
 		});
 
 		this.watchers();
-
 	}
 
 	public isDefined(variable) {
@@ -116,15 +123,35 @@ class PanelCardController implements ng.IController {
 				this.statusIcon = this.contentData.icon;
 			}
 		});
+
+		/*
+		* Watch for content item to hide itself
+		*/
+		this.$scope.$watch("vm.chipsFilterVisible", (newValue) => {
+			// Recalculate the height
+			this.onContentHeightRequest(this.contentData.requestedHeight);
+		});
+
+		this.$scope.$watch ( () => this.$element[0].querySelector("#header").clientHeight,
+			(newValue, oldValue) => {
+				this.contentData.panelTakenHeight = newValue;
+				this.onContentHeightRequest(this.contentData.requestedHeight);
+		});
 	}
 
 	/*
 	* Watch type on contentData to create content and tool bar options
 	*/
 	public hasFilter() {
-		const filter = this.contentData.options.find((item) => {
-			return item.type === "filter";
-		});
+		const filter = this.contentData.options.find((item) => item.type === "filter");
+		return filter !== undefined;
+	}
+
+	/*
+	* Watch type on contentData to create content and tool bar options
+	*/
+	public hasChipsFilter() {
+		const filter = this.contentData.options.find((item) => item.type === "chips-filter");
 		return filter !== undefined;
 	}
 
@@ -132,8 +159,12 @@ class PanelCardController implements ng.IController {
 	 * A content item is requesting a height change
 	 * @param height
 	 */
-	public onContentHeightRequest(height) {
+	public onContentHeightRequest(height) { // *** This method is angular-binded to
+											// the content component inside the panel card ***
 		this.contentHeight = height;
+
+		// *** This method is angular-binded from the parent component that contains the panel card:
+		// Alias for PanelController.heightRequest(contentItem: any, height: number) ***
 		this.onHeightRequest({
 			contentItem: this.contentData,
 			height: this.contentHeight
@@ -162,9 +193,6 @@ class PanelCardController implements ng.IController {
 	 * Create the tool bar options
 	 */
 	public createToolbarOptions() {
-
-		// TODO: We shouldn't use string concat and angular.element
-		// definite antipattern
 		let option;
 		let optionElement;
 		const optionData = this.contentData.options;
@@ -174,8 +202,9 @@ class PanelCardController implements ng.IController {
 			optionData.forEach((op, i) => {
 				const optionType = op.type;
 				optionElement = this.getOptionElement(optionType, i);
-				option = angular.element(optionElement);
+				this.setAditionalOptionData(op);
 
+				option = angular.element(optionElement);
 				// Create the element
 				if (option !== null && this.options) {
 					this.options.prepend(option);
@@ -209,11 +238,22 @@ class PanelCardController implements ng.IController {
 		return optionElement;
 	}
 
+	public setAditionalOptionData(option) {
+		switch (option.type) {
+			case "chips-filter":
+				this.chipsFilterSuggestions = option.suggestions;
+				break;
+		}
+	}
+
 	public getOptionSpecificAttrs(optionType) {
 
 		switch (optionType) {
 		case "filter":
 			return "show-filter='vm.showFilter'";
+
+		case "chips-filter":
+			return "chips-filter-visible='vm.chipsFilterVisible'";
 
 		case "visible":
 			return " visible='vm.visible'";

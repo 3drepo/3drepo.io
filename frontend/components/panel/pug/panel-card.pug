@@ -1,24 +1,30 @@
 div(layout="column", class="md-whiteframe-1dp")
+	div(id="header")
+		// Tool bar
+		md-toolbar(class="md-primary" flex)
+			.md-toolbar-tools
+				span.panel-icon(aria-label="Status", ng-click="vm.hideItem()")
+					md-icon.angular-material-icons( flex="none") {{vm.statusIcon}}
+				span(ng-if="!vm.showFilter" flex="50")
+					h2
+						span {{vm.contentData.title}}
+				#filterContainer(flex)
+					panel-card-filter(
+						ng-if="vm.hasFilter()"
+						show-filter='vm.showFilter'
+						filter-text='vm.filterText')
 
-	// Tool bar
-	md-toolbar(class="md-primary" flex)
-		.md-toolbar-tools
-			span.panel-icon(aria-label="Status", ng-click="vm.hideItem()")
-				md-icon.angular-material-icons( flex="none") {{vm.statusIcon}}
-			span(ng-if="!vm.showFilter" flex="50")
-				h2
-					span {{vm.contentData.title}}
-			#filterContainer(flex)
-				panel-card-filter(
-					ng-if="vm.hasFilter()"
-					show-filter='vm.showFilter' 
-					filter-text='vm.filterText')
+				div(flex, ng-if="!vm.showFilter")
 
-			div(flex, ng-if="!vm.showFilter")
+				// Options
+				#options(layout="row")
 
-			// Options
-			#options(layout="row")
-		div
+		panel-card-chips-filter(id="chips-filter"
+								ng-show="vm.chipsFilterVisible"
+								chips="vm.chipsFilterChips"
+								suggestions="vm.chipsFilterSuggestions"
+								place-holder=" Filter"
+								)
 
 	// Card content
 	#panelCardContainer
@@ -34,14 +40,12 @@ div(layout="column", class="md-whiteframe-1dp")
 				on-show-item='vm.showItem()'
 				hide-item='vm.hideSelectedItem'
 				show-edit='vm.showEdit'
-
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				selected-objects='vm.selectedObjects' 
+				selected-objects='vm.selectedObjects'
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-				
-				filter-text='vm.filterText'
+				filter-chips="vm.chipsFilterChips"
 				selected-menu-option='vm.selectedMenuOption')
 
 			groups(
@@ -80,7 +84,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				selected-objects='vm.selectedObjects' 
+				selected-objects='vm.selectedObjects'
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})')
 
 			clip(
@@ -96,7 +100,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
-				selected-objects='vm.selectedObjects' 
+				selected-objects='vm.selectedObjects'
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
 				visible='vm.visible')
 
@@ -114,7 +118,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
 
-				selected-objects='vm.selectedObjects' 
+				selected-objects='vm.selectedObjects'
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
 				show-filter="vm.showFilter"
 				filter-text='vm.filterText'

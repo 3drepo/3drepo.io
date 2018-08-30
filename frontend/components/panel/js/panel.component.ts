@@ -36,7 +36,7 @@ class PanelController implements ng.IController {
 	public activate;
 	public itemGap;
 	public panelToolbarHeight;
-	public contentItemsShown;
+	public contentItemsShown: any[];
 	public position;
 
 	private highlightBackground;
@@ -147,19 +147,6 @@ class PanelController implements ng.IController {
 	}
 
 	/**
-	 * Check new panels data to see if menus have changed
-	 */
-	// public updatePanelMenus(newPanels: any) {
-	// 	this.contentItems.forEach((panel) => {
-	// 		const matching = newPanels.find((m) => m.type === panel.type);
-	// 		const exist = matching && panel.menu;
-	// 		if (exist && panel.menu.length !== matching.menu.length) {
-	// 			panel.menu = matching.menu;
-	// 		}
-	// 	});
-	// }
-
-	/**
 	 * The last card should not have a gap so that scrolling in resized window works correctly
 	 */
 	public hideLastItemGap() {
@@ -212,6 +199,7 @@ class PanelController implements ng.IController {
 		}
 	}
 
+	// *** This method is angular-binded to the panel-cards contained in the panel component ***
 	public heightRequest(contentItem: any, height: number) {
 
 		contentItem.requestedHeight = height; // Keep a note of the requested height
@@ -225,72 +213,25 @@ class PanelController implements ng.IController {
 	}
 
 	/**
-	 * Start the recursive calculation of the content heghts
+	 * Start the recursive calculation of the content heights
 	 */
 	public calculateContentHeights() {
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
-		const tempContentItemsShown = angular.copy(this.contentItemsShown);
-		this.assignHeights(this.maxHeightAvailable, tempContentItemsShown, null);
-	}
+		const spaceUsedInGaps = this.itemGap * ( this.contentItemsShown.length - 1);
+		let availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
 
-	public assignHeights(heightAvailable: number, contentItems: any[], previousContentItems: any[]) {
+		let spaceDivisions =  availableHeight / this.contentItemsShown.length ;
 
-		let availableHeight = heightAvailable;
-		const h = (this.panelToolbarHeight * contentItems.length);
-		const g = (this.itemGap * (contentItems.length - 1));
-		const maxContentItemHeight = (availableHeight - h - g) / contentItems.length;
-		let prev = null;
+		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => a.height - b.height);
 
-		const hasPreviousContent = Array.isArray(previousContentItems) &&
-									(previousContentItems.length === contentItems.length);
+		let itemsLeftToCalculateSpace = this.contentItemsShown.length;
 
-		if (hasPreviousContent) {
-			// End the recurse by dividing out the remaining space to remaining content
-			for (let i = (contentItems.length - 1); i >= 0; i -= 1) {
-				if (!contentItems[i] || !contentItems[i].type) {
-					continue;
-				}
-
-				const contentItem = this.getContentItemShownFromType(contentItems[i].type);
-				// Flexible content shouldn't have a size smaller than its minHeight
-				// or a requested height that is less than the minHeight
-				if (maxContentItemHeight < contentItem.minHeight) {
-					if (contentItem.requestedHeight < contentItem.minHeight) {
-						contentItem.height = contentItem.requestedHeight;
-					} else {
-						contentItem.height = contentItem.minHeight;
-						availableHeight -= contentItem.height + this.panelToolbarHeight + this.itemGap;
-						contentItems.splice(i, 1);
-						this.assignHeights(availableHeight, contentItems, prev);
-					}
-				} else {
-					contentItem.height = maxContentItemHeight;
-				}
-
-			}
-		} else {
-
-			// Let content have requested height if less than max available for each
-			prev = angular.copy(contentItems);
-			for (let i = (contentItems.length - 1); i >= 0; i -= 1) {
-
-				const lessThanMax = (contentItems[i].requestedHeight < maxContentItemHeight);
-				const hasFixed = contentItems[i].fixedHeight;
-				const canAssign = lessThanMax || hasFixed;
-
-				if (canAssign) {
-					const contentItem = this.getContentItemShownFromType(contentItems[i].type);
-					contentItem.height = contentItems[i].requestedHeight;
-					availableHeight -= contentItem.height + this.panelToolbarHeight + this.itemGap;
-					contentItems.splice(i, 1);
-				}
-
-			}
-
-			if (contentItems.length > 0) {
-				this.assignHeights(availableHeight, contentItems, prev);
-			}
-		}
+		orderedContentItems.forEach( (c) => {
+			spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
+			itemsLeftToCalculateSpace--;
+			c.height = Math.max( Math.min( c.requestedHeight, spaceDivisions - c.panelTakenHeight ) , c.minHeight);
+			availableHeight -= c.height + c.panelTakenHeight;
+		});
 	}
 
 	/**

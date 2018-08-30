@@ -152,7 +152,13 @@ export class PanelService {
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
-				{type: "filter", visible: true}
+				{
+					type: "chips-filter",
+					visible: true,
+					suggestions: [
+						{type: "Status", name: "closed"},
+						{type: "Status", name: "open"}]
+				}
 			],
 			add: true
 		});

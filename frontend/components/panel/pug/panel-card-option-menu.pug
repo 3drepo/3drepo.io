@@ -26,5 +26,5 @@ md-menu(md-position-mode="target-right target", md-offset="2 14")
 						md-icon(md-font-icon="fa-check", class="fa", ng-if="!menuItem.keepCheckSpace && menuItem.selected && !menuItem.noToggle")
 						md-icon(md-font-icon="fa-check", class="fa", ng-if="menuItem.keepCheckSpace" ng-style="{'visibility': menuItem.selected?'visible':'hidden'}")
 						p(flex="") {{menuItem.label}}
-						
+
 					md-divider(ng-if="menuItem.divider" flex)

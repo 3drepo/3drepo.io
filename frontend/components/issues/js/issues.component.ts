@@ -69,7 +69,7 @@ class IssuesController implements ng.IController {
 	private hideItem: boolean;
 	private modelSettings: any;
 	private canAddIssue: boolean;
-	private filterChips: [] = [];
+	private filterChips: Array<{name: string, type: string}> = [];
 
 	constructor(
 		private $scope: any,
@@ -423,7 +423,7 @@ export const IssuesComponent: ng.IComponentOptions = {
 		model: "=",
 		branch:  "=",
 		revision: "=",
-		filterText: "=", // this is only used to bind the issuesToShow in the issues service to the issues list component.
+		filterChips: "=",
 		modelSettings: "=",
 		show: "=",
 		showAdd: "=",

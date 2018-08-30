@@ -178,9 +178,14 @@ export class IssuesService {
 
 		/* tslint:disable:no-string-literal */
 // 		filters = filters.concat(this.getAndClause(this.state.issueDisplay.excludeRoles, this.filterRole));
-// 		filters = filters.concat(this.getOrClause(filterText.split(" ").filter( (s) => s !== ""), this.handleIssueFilter));
+
+		if (!criteria["Status"]) { // If there is no explicit filter for status dont show closed issues
+									// thats the general criteria for showing issues.
+			filters.push((issue) => issue.status !== "closed");
+		}
 
 		filters = filters.concat(this.getOrClause(criteria["Status"] , this.filterStatus));
+
 		filters = filters.concat(this.getOrClause(criteria[""], this.handleIssueFilter));
 
 /*		if (!this.state.issueDisplay.showClosed) {

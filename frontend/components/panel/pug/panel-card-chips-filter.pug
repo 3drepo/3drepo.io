@@ -1,0 +1,15 @@
+md-chips(ng-model="vm.chips"
+	md-transform-chip="vm.transformChip($chip)"
+	md-separator-keys="vm.chipSeparators")
+
+	md-autocomplete(
+		md-selected-item="vm.selectedItem"
+		md-search-text="vm.searchText"
+		md-items="item in vm.querySearch(vm.searchText)"
+		md-item-text="item.name"
+		placeholder="{{vm.placeHolder}}")
+
+		span(md-highlight-text="vm.searchText") {{item.type}}:{{item.name}}
+
+	md-chip-template
+		span {{ vm.formatChip($chip) }}

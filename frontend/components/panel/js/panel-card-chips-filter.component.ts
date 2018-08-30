@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class IssuesFilterController implements ng.IController {
+class PanelCardChipsFilterController implements ng.IController {
 	public static $inject: string[] = [
 		"$mdConstant"
 	];
 
-	public suggestions: any[] = [];
-	public chips: any[] = [];
+	public suggestions: Array<{name: string, type: string}> = [];
+	public chips: Array<{name: string, type: string}> = [];
 
 	private selectedItem: any = null;
 	private searchText: string = null;
@@ -47,7 +47,7 @@ class IssuesFilterController implements ng.IController {
 	}
 
 	private querySearch(query) {
-		const results = query ? (this.suggestions || []).filter(this.matchAutocomplete.bind(this, query)) : [];
+		const results = query ? (this.suggestions || []).filter( this.matchAutocomplete.bind(this, query)) : [];
 		return results;
 	}
 
@@ -56,31 +56,28 @@ class IssuesFilterController implements ng.IController {
 	}
 
 	/**
-	 * Create filter function for a query string
+	 * Filter the suggestion
 	 */
-	private matchAutocomplete(query, suggestion ) {
-		const lowercaseQuery = angular.lowercase(query);
-
-		return function filterFn(vegetable) {
-			return (vegetable._lowername.indexOf(lowercaseQuery) === 0) ||
-				(vegetable._lowertype.indexOf(lowercaseQuery) === 0);
-			};
+	private matchAutocomplete(query, suggestion) {
+		const l = angular.lowercase;
+		const lowercaseQuery = l(query);
+		return (l(suggestion.name).indexOf(lowercaseQuery) === 0) ||
+				(l(suggestion.type).indexOf(lowercaseQuery) === 0);
 	}
-
 }
 
-export const IssuesFilterComponent: ng.IComponentOptions = {
+export const PanelCardChipsFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		chips: "=",
 		suggestions: "=",
 		placeHolder: "@"
 	},
 
-	controller: IssuesFilterController,
-	controllerAs: "ctrl",
-	templateUrl: "templates/issues-filter.html"
+	controller: PanelCardChipsFilterController,
+	controllerAs: "vm",
+	templateUrl: "templates/panel-card-chips-filter.html"
 };
 
-export const IssuesComponentModule = angular
+export const PanelCardChipsFilterComponentModule = angular
 	.module("3drepo")
-	.component("issuesFilter", IssuesFilterComponent);
+	.component("panelCardChipsFilter", PanelCardChipsFilterComponent);
