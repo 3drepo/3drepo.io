@@ -44,7 +44,105 @@ const C = require("../constants");
 
 const risk = {};
 
-risk.createRisk = function() {
+risk.createRisk = function(dbCol, newRisk) {
+	const riskAttrPromises = [];
+
+	let branch;
+
+	newRisk._id = utils.stringToUUID(uuid.v1());
+
+	if (!newRisk.name) {
+		return Promise.reject({ resCode: responseCodes.RISK_NO_NAME });
+	}
+
+	if (newRisk.object_id) {
+		riskAttrPromises.push(
+			GenericObject.getSharedId(dbCol, data.object_id).then((sid) => {
+				newRisk.parent = utils.stringToUUID(sid);
+			})
+		);
+		newRisk.object_id = utils.stringToUUID(newRisk.object_id);
+	}
+
+	// TODO do we want revId like this?
+	if (!newRisk.revId) {
+		branch = "master";
+	}
+
+	// Assign rev_id for risk
+	riskAttrPromises.push(
+		History.getHistory(dbCol, branch, newRisk.revId, { _id: 1 }).then((history) => {
+			if (!history && newRisk.revId) {
+				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
+			} else if (history) {
+				newRisk.rev_id = history._id;
+			}
+		})
+	);
+
+	return Promise.all(riskAttrPromises).then(() => {
+
+		newRisk.created = (new Date()).getTime();
+
+		if (!newRisk.desc || newRisk.desc === "") {
+			newRisk.desc = "(No Description)"; // TODO do we really want this stored?
+		}
+
+		if (newRisk.viewpoint) {
+			newRisk.viewpoint.guid = utils.generateUUID();
+
+			if (newRisk.viewpoint.highlighted_group_id) {
+				newRisk.viewpoint.highlighted_group_id = utils.stringToUUID(newRisk.viewpoint.highlighted_group_id);
+			}
+
+			if (newRisk.viewpoint.hidden_group_id) {
+				newRisk.viewpoint.hidden_group_id = utils.stringToUUID(newRisk.viewpoint.hidden_group_id);
+			}
+
+			if (newRisk.viewpoint.shown_group_id) {
+				newRisk.viewpoint.shown_group_id = utils.stringToUUID(newRisk.viewpoint.shown_group_id);
+			}
+
+			if (newRisk.viewpoint.scribble) {
+				newRisk.viewpoint.scribble = {
+					content: new Buffer.from(newRisk.viewpoint.scribble, "base64"),
+					flag: 1
+				};
+			}
+
+			if (newRisk.viewpoint.screenshot) {
+				newRisk.viewpoint.screenshot = {
+					content: new Buffer.from(newRisk.viewpoint.screenshot, "base64"),
+					flag: 1
+				};
+
+				return utils.resizeAndCropScreenshot(newRisk.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
+					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+						account: dbCol.account,
+						model: dbCol.model,
+						riskId: utils.uuidToString(newRisk._id),
+						viewpointId: utils.uuidToString(newRisk.viewpoint.guid),
+						err
+					});
+				});
+			}
+		}
+
+		return Promise.resolve();
+	}).then((image) => {
+		if (image) {
+			newRisk.thumbnail = {
+				flag: 1,
+				content: image
+			};
+		}
+
+		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+			return _dbCol.insert(newRisk).then(() => {
+				return Promise.resolve(newRisk);
+			})
+		});
+	});
 };
 
 risk.findById = function() {
@@ -105,16 +203,16 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 						const subDbCol = {
 							account: dbCol.account,
 							model: ref.project
-						}
+						};
 						subModelsPromises.push(
-								this.findRisksByModelName(subDbCol, username, "master", null, projection).then((risks) => {
-									risks.forEach((risk) => {
-										risk.origin_account = subDbCol.account;
-										risk.origin_model = subDbCol.model;
-									});
+							this.findRisksByModelName(subDbCol, username, "master", null, projection).then((risks) => {
+								risks.forEach((risk) => {
+									risk.origin_account = subDbCol.account;
+									risk.origin_model = subDbCol.model;
+								});
 
-									return risks;
-								})
+								return risks;
+							})
 						);
 					});
 
@@ -200,11 +298,11 @@ risk.getSmallScreenshot = function(dbCol, uid, vid) {
 								{$set: {"viewpoints.$.screenshot.resizedContent": resized}}
 								).catch((err) => {
 								systemLogger.logError("Error while saving resized screenshot",
-										{
-											riskId: utils.uuidToString(uid),
-											viewpointId: utils.uuidToString(vid),
-											err: err
-										});
+									{
+										riskId: utils.uuidToString(uid),
+										viewpointId: utils.uuidToString(vid),
+										err: err
+									});
 							});
 						});
 

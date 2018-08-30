@@ -24,14 +24,11 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Risk = require("../models/risk");
 const utils = require("../utils");
-const multer = require("multer");
 const config = require("../config.js");
 
 const User = require("../models/user");
 const Job = require("../models/job");
 const ModelHelper = require("../models/helper/model");
-
-const stringToUUID = utils.stringToUUID;
 
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -111,15 +108,19 @@ function clean(dbCol, risk) {
 
 function storeRisk(req, res, next) {
 
+	console.log("storeRisk");
 	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
 	const data = req.body;
+
 	data.owner = req.session.user.username;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-
 	data.revId = req.params.rid;
 
-	Risk.createRisk({account: req.params.account, model: req.params.model}, data).then(issue => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
+	Risk.createRisk(dbCol, data).then(risk => {
+		risk = clean(dbCol, risk);
+
+		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
