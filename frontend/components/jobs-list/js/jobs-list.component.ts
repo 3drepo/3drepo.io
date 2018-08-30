@@ -26,8 +26,8 @@ class JobsListController implements ng.IController {
 
 	private SORT_TYPES = SORT_TYPES;
 
-	private models;
-	private processedModels;
+	private jobs;
+	private processedJobs;
 	private currentTeamspace;
 	private currentSort;
 	private onChange;
@@ -47,14 +47,14 @@ class JobsListController implements ng.IController {
 
 	public $onInit(): void {}
 
-	public $onChanges({models}: {models?: any}): void {
-		if (models && models.currentValue && this.currentSort) {
-			if (!this.processedModels) {
+	public $onChanges({jobs}: {jobs?: any}): void {
+		if (jobs && jobs.currentValue && this.currentSort) {
+			if (!this.processedJobs) {
 				this.isLoading = false;
 			}
 			this.shouldSelectAllItems = false;
 			this.hasSelectedItem = false;
-			this.processedModels = this.processData();
+			this.processedJobs = this.processData();
 			this.onSelectionChange();
 		}
 	}
@@ -66,20 +66,20 @@ class JobsListController implements ng.IController {
 	 */
 	public setSortType(type, order, config = {}): void {
 		this.currentSort = {type, order, config};
-		this.processedModels = this.processData();
+		this.processedJobs = this.processData();
 	}
 
 	/**
 	 * Search callback
 	 */
 	public onSearch(): void {
-		this.processedModels = this.processData();
+		this.processedJobs = this.processData();
 	}
 
 	public processData() {
-		const filteredPermissions = this.getFilteredData(this.models, this.searchText);
-		const processedModels = this.getSortedData(filteredPermissions);
-		return processedModels;
+		const filteredPermissions = this.getFilteredData(this.jobs, this.searchText);
+		const processedJobs = this.getSortedData(filteredPermissions);
+		return processedJobs;
 	}
 
 	/**
@@ -114,27 +114,28 @@ class JobsListController implements ng.IController {
 	 * Toggle list items
 	 */
 	public toggleAllItems(): void {
-		this.models = this.models.map((model) => {
+		this.jobs = this.jobs.map((model) => {
 			return {...model, isSelected: this.shouldSelectAllItems};
 		});
-		this.processedModels = this.processData();
+		this.processedJobs = this.processData();
 		this.hasSelectedItem = this.shouldSelectAllItems;
 
-		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
+		const selectedItems = this.processedJobs.filter(({isSelected}) => isSelected);
 		this.onChange({selectedModels: selectedItems});
 	}
 
 	public onSelectionChange(): void {
-		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
+		const selectedItems = this.processedJobs.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedModels.length;
+		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedJobs.length;
 		this.onChange({selectedModels: selectedItems});
 	}
 }
 
 export const JobsListComponent: ng.IComponentOptions = {
 	bindings: {
-		models: "<",
+		jobs: "<",
+		colors: "<",
 		currentTeamspace: "<",
 		onChange: "&",
 		ngDisabled: "<",
