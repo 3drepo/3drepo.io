@@ -1,13 +1,5 @@
 .jobsList(ng-disabled="vm.ngDisabled")
 	.jobsListHeader(layout="row" layout-align="start center")
-		.jobsListCell(layout="row" layout-align="center center" flex="10")
-			md-checkbox(
-				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
-				ng-checked="vm.shouldSelectAllItems"
-				ng-change="vm.toggleAllItems()"
-				ng-disabled="vm.ngDisabled || !vm.processedModels.length"
-				ng-model="vm.shouldSelectAllItems")
-	
 		.jobsListCell(layout="row" layout-align="start center" flex)
 			list-sort-button(
 				ng-disabled="vm.ngDisabled"
@@ -20,35 +12,27 @@
 					ng-disabled="vm.ngDisabled"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
-					placeholder="Model/federation"
+					placeholder="Job name"
 					ng-change="vm.onSearch()")
 
 	.jobsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
 	.jobsListPlaceholder(
-		ng-if="!vm.isLoading && !vm.models.length"
+		ng-if="!vm.isLoading && !vm.jobs.length"
 		layout="row"
 		layout-align="center center")
 		p {{::vm.messageEmptyList}}
 
 	.jobsListBody(
-		ng-if="!vm.isLoading && vm.models.length"
+		ng-if="!vm.isLoading && vm.jobs.length"
 		data-simplebar
 		data-simplebar-x-hidden)
 		div.jobsListRow(
-			ng-repeat="model in vm.processedModels track by model.name"
+			ng-repeat="job in vm.processedJobs track by job._id"
 			layout="row"
 			layout-align="start center")
 
-			//Checkbox
-			.jobsListCell(layout="row" layout-align="center center" flex="10")
-				md-checkbox(
-					ng-model="model.isSelected"
-					ng-change="vm.onSelectionChange()"
-					ng-disabled="vm.ngDisabled")
-
-			//Model details
+			//Job details
 			.jobsListCell(flex layout="column" layout-align="center start")
-				div(md-highlight-text="vm.searchText") {{model.name}}
-				.jobsListType {{model.federate ? "Federation" : "Model"}}
+				div(md-highlight-text="vm.searchText") {{job._id}}
