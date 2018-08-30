@@ -275,13 +275,20 @@ class ProjectsPermissionsController implements ng.IController {
 						});
 
 						const permissionsToShow = this.selectedModels[0].permissions.map(({user, permission}) => {
-							const isSelected = updatedPermissions
-								.some((userPermission) => userPermission.isSelected && userPermission.user === user);
+							let isSelected = false;
+							let updatedPermissionKey = this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS;
+
+							const updatedPermissionsData = updatedPermissions.find((userPermission) => userPermission.user === user);
+
+							if (updatedPermissionsData) {
+								isSelected = updatedPermissionsData.isSelected;
+								updatedPermissionKey = updatedPermissionsData.key;
+							}
 
 							return {
 								user,
 								isSelected,
-								permission: this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS
+								permission: updatedPermissionKey
 							};
 						});
 
