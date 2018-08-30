@@ -83,12 +83,10 @@ function checkPermissions(permsRequest) {
 		}
 
 		checkLogin.then(() => {
-
 			const username = req.session.user.username;
 			const account = req.params.account;
 			const model = req.params.model;
 			const project = req.params.project;
-
 			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
 
 		}).then(data => {
@@ -107,6 +105,52 @@ function checkPermissions(permsRequest) {
 			next(err);
 		});
 	};
-
 }
-module.exports = { checkPermissions, checkPermissionsHelper};
+
+function checkMultiplePermissions(permsRequest) {
+	return function (req, res, next) {
+		const models = [];
+
+		// POST request
+		if (req.params.models) {
+			models.push(...req.params.models.map(({model}) => model));
+		}
+
+		// GET request
+		if (req.query.models) {
+			models.push(...req.query.models.split(","));
+		}
+
+		let checkLogin = Promise.resolve();
+
+		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+			checkLogin = Promise.reject(responseCodes.NOT_LOGGED_IN);
+		}
+
+		checkLogin.then(() => {
+			const username = req.session.user.username;
+			const account = req.params.account;
+
+			const promises = [];
+
+			models.forEach((model) => {
+				const permissionCheckPromise = checkPermissionsHelper(username, account, null, model, permsRequest, getPermissionsAdapter);
+				promises.push(permissionCheckPromise);
+			});
+
+			return Promise.all(promises);
+		}).then(results => {
+			const isGranted = results.every((data) => data.granted);
+
+			if (isGranted) {
+				next();
+			} else {
+				return Promise.reject(responseCodes.NOT_AUTHORIZED);
+			}
+
+		}).catch(err => {
+			next(err);
+		});
+	};
+}
+module.exports = { checkPermissions, checkPermissionsHelper, checkMultiplePermissions};
