@@ -1,21 +1,23 @@
-.modelsList
+.modelsList(ng-disabled="vm.ngDisabled")
 	.modelsListHeader(layout="row" layout-align="start center")
 		.modelsListCell(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
 				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
 				ng-checked="vm.shouldSelectAllItems"
 				ng-change="vm.toggleAllItems()"
-				ng-disabled="!vm.processedModels.length"
+				ng-disabled="vm.ngDisabled || !vm.processedModels.length"
 				ng-model="vm.shouldSelectAllItems")
 	
 		.modelsListCell(layout="row" layout-align="start center" flex)
 			list-sort-button(
+				ng-disabled="vm.ngDisabled"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
 
 			md-input-container.modelsListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
 				input(
+					ng-disabled="vm.ngDisabled"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
 					placeholder="Model/federation"
@@ -24,8 +26,14 @@
 	.modelsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
+	.modelsListPlaceholder(
+		ng-if="!vm.isLoading && !vm.models.length"
+		layout="row"
+		layout-align="center center")
+		p {{::vm.messageEmptyList}}
+
 	.modelsListBody(
-		ng-if="!vm.isLoading"
+		ng-if="!vm.isLoading && vm.models.length"
 		data-simplebar
 		data-simplebar-x-hidden)
 		div.modelsListRow(
@@ -35,7 +43,10 @@
 
 			//Checkbox
 			.modelsListCell(layout="row" layout-align="center center" flex="10")
-				md-checkbox(ng-model="model.isSelected" ng-change="vm.onSelectionChange()")
+				md-checkbox(
+					ng-model="model.isSelected"
+					ng-change="vm.onSelectionChange()"
+					ng-disabled="vm.ngDisabled")
 
 			//Model details
 			.modelsListCell(flex layout="column" layout-align="center start")

@@ -94,10 +94,6 @@
   height: 62px;
 }
 
-.modelsListBody .simplebar-track.vertical {
-  display: none;
-}
-
 .modelsListCell .modelsListType {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -106,4 +102,17 @@
   font-size: 10px;
   color: rgba(0,0,0,.4);
   margin-top: 4px;
+}
+
+.modelsListPlaceholder {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  height: calc(100% - 72px);
+  color: rgba(155, 155, 155, 1);
+  text-align: center;
+}
+
+.modelsListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input,
+.modelsListCellSearch .md-input[disabled="disabled"] {
+  border-color: transparent;
+  background: none;
 }

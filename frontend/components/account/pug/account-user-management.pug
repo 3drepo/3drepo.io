@@ -54,7 +54,7 @@
 				div(layout="column" layout-fill)
 					users-list(
 						flex
-						ng-if="!vm.isLoadingTeamspace && !vm.currentTeamspace.isAdmin"
+						ng-if="!vm.isLoadingTeamspace"
 						layout="row"
 						members="vm.members"
 						jobs="vm.jobs"

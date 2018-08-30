@@ -193,7 +193,9 @@ export const PermissionsListComponent: ng.IComponentOptions = {
 		data: "<?",
 		currentTeamspace: "<?",
 		permissions: "<?",
-		onChange: "&?"
+		onChange: "&?",
+		ngDisabled: "<",
+		messageEmptyList: "@?"
 	},
 	controller: PermissionsListController,
 	controllerAs: "vm",

@@ -32,23 +32,6 @@
   border-right: 1px solid rgba(0, 0, 0, .06);
 }
 
-.projectsPermissions permissions-list .permissionsList {
-  position: relative;
-}
-
-.projectsPermissions permissions-list .permissionsList:before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: calc(100% - 1px);
-  background: #fafafa;
-  z-index: 2;
-  opacity: 0;
-  top: 1px;
-  pointer-events: none;
-  transition: opacity 100ms ease-in-out;
-}
-
 .projectsPermissions permissions-list[disabled="disabled"] .permissionsList:before {
   opacity: 0.9;
   pointer-events: all;
@@ -81,4 +64,26 @@
 
 .projectsPermissions .modelsPermissions .permissionsList {
   min-width: 730px;
+}
+
+.projectsPermissions .modelsPermissions {
+  position: relative;
+}
+
+.projectsPermissions .modelsPermissionsPlaceholder {
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 73px);
+  bottom: 0;
+  z-index: 1;
+  color: rgba(155, 155, 155, 1);
+  background: rgba(250, 250, 250, 0.89);
+}
+
+.projectsPermissions permissions-list .permissionsList {
+  position: relative;
+}
+
+.projectsPermissions .modelsPermissions permissions-list .permissionsList {
+  position: initial;
 }

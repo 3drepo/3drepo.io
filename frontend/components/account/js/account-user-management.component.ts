@@ -103,7 +103,7 @@ class AccountUserManagementController implements ng.IController {
 
 		/**
 		 * Get teamspace details
-		 */
+		*/
 		public onTeamspaceChange = (): void => {
 			this.isLoadingTeamspace = true;
 			const currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);

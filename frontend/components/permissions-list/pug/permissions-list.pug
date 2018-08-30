@@ -1,23 +1,23 @@
-.permissionsList
+.permissionsList(ng-disabled="vm.ngDisabled || !vm.data.length")
 	.permissionsListHeader(layout="row" layout-align="start center")
 		.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
 				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
-				ng-disabled="!vm.processedData.length"
+				ng-disabled="vm.ngDisabled || !vm.processedData.length"
 				ng-change="vm.toggleAllItems()"
 				ng-checked="vm.shouldSelectAllItems"
 				ng-model="vm.shouldSelectAllItems")
 	
 		.permissionsListCell.permissionsListUser(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
-				ng-disabled="!vm.processedData.length"
+				ng-disabled="vm.ngDisabled || !vm.processedData.length"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
 				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
 
 			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
 				input(
-					ng-disabled="!vm.data.length"
+					ng-disabled="vm.ngDisabled || !vm.data.length"
 					ng-model="vm.searchText"
 					ng-model-options="{debounce: 200}"
 					placeholder="User"
@@ -35,12 +35,12 @@
 				ng-repeat="permission in vm.permissions")
 				div(layout="row" layout-align="center center")
 					list-sort-button(
-						ng-disabled="!vm.processedData.length"
+						ng-disabled="vm.ngDisabled || !vm.processedData.length"
 						ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.key === permission.key}"
 						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
 					.usersListCellLabel {{::permission.label}}
 				md-radio-button(
-					ng-disabled="!vm.hasSelectedItem || !vm.data.length"
+					ng-disabled="vm.ngDisabled || !vm.hasSelectedItem || !vm.data.length"
 					ng-value="permission.key"
 					aria-label="{{::permission.label}}")
 
@@ -48,10 +48,10 @@
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
 
 	.permissionsListPlaceholder(
-		ng-if="!vm.isLoading && !vm.data.length"
+		ng-if="!vm.isLoading && !vm.data.length || vm.ngDisabled"
 		layout="row"
 		layout-align="center center")
-		p Select a project to view the users' permissions
+		p {{::vm.messageEmptyList}}
 
 	.permissionsListBody(
 		ng-if="!vm.isLoading && vm.data.length"
@@ -65,7 +65,7 @@
 			//Checkbox
 			.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 				md-checkbox(
-					ng-disabled="row.isAdmin || row.isDisabled || row.isCurrentUser || row.isProjectAdmin"
+					ng-disabled="vm.ngDisabled || row.isAdmin || row.isDisabled || row.isCurrentUser || row.isProjectAdmin"
 					ng-model="row.isSelected"
 					ng-change="vm.onSelectionChange()")
 
@@ -85,6 +85,6 @@
 					layout="row"
 					layout-align="center center")
 					md-radio-button(
-						ng-disabled="row.isAdmin || row.isDisabled || row.isCurrentUser || row.isProjectAdmin"
+						ng-disabled="vm.ngDisabled || row.isAdmin || row.isDisabled || row.isCurrentUser || row.isProjectAdmin"
 						ng-value="permission.key"
 						aria-label="{{::permission.label}}")

@@ -136,7 +136,9 @@ export const ModelsListComponent: ng.IComponentOptions = {
 	bindings: {
 		models: "<",
 		currentTeamspace: "<",
-		onChange: "&"
+		onChange: "&",
+		ngDisabled: "<",
+		messageEmptyList: "@?"
 	},
 	controller: ModelsListController,
 	controllerAs: "vm",
