@@ -1,0 +1,54 @@
+.jobsList(ng-disabled="vm.ngDisabled")
+	.jobsListHeader(layout="row" layout-align="start center")
+		.jobsListCell(layout="row" layout-align="center center" flex="10")
+			md-checkbox(
+				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				ng-checked="vm.shouldSelectAllItems"
+				ng-change="vm.toggleAllItems()"
+				ng-disabled="vm.ngDisabled || !vm.processedModels.length"
+				ng-model="vm.shouldSelectAllItems")
+	
+		.jobsListCell(layout="row" layout-align="start center" flex)
+			list-sort-button(
+				ng-disabled="vm.ngDisabled"
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+
+			md-input-container.jobsListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-disabled="vm.ngDisabled"
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="Model/federation"
+					ng-change="vm.onSearch()")
+
+	.jobsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.jobsListPlaceholder(
+		ng-if="!vm.isLoading && !vm.models.length"
+		layout="row"
+		layout-align="center center")
+		p {{::vm.messageEmptyList}}
+
+	.jobsListBody(
+		ng-if="!vm.isLoading && vm.models.length"
+		data-simplebar
+		data-simplebar-x-hidden)
+		div.jobsListRow(
+			ng-repeat="model in vm.processedModels track by model.name"
+			layout="row"
+			layout-align="start center")
+
+			//Checkbox
+			.jobsListCell(layout="row" layout-align="center center" flex="10")
+				md-checkbox(
+					ng-model="model.isSelected"
+					ng-change="vm.onSelectionChange()"
+					ng-disabled="vm.ngDisabled")
+
+			//Model details
+			.jobsListCell(flex layout="column" layout-align="center start")
+				div(md-highlight-text="vm.searchText") {{model.name}}
+				.jobsListType {{model.federate ? "Federation" : "Model"}}
