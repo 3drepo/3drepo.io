@@ -30,6 +30,7 @@ class ProjectsPermissionsController implements ng.IController {
 		"$q",
 		"$state",
 		"$mdDialog",
+		"$scope",
 
 		"ModelsService",
 		"ProjectsService",
@@ -56,6 +57,7 @@ class ProjectsPermissionsController implements ng.IController {
 		private $q: any,
 		private $state: any,
 		private $mdDialog: any,
+		private $scope: any,
 
 		private ModelsService: any,
 		private ProjectsService: any,
@@ -63,12 +65,7 @@ class ProjectsPermissionsController implements ng.IController {
 	) {}
 
 	public $onInit(): void {
-		const {project, view} = this.$state.params;
-
-		if (project) {
-			this.currentProject = project;
-			this.currentView = parseInt(view, 10);
-		}
+		this.currentView = parseInt(this.$state.params.view, 10);
 	}
 
 	public $onChanges(
@@ -78,7 +75,6 @@ class ProjectsPermissionsController implements ng.IController {
 		const teamspaceChanged = currentTeamspace && currentTeamspace.currentValue;
 
 		if (teamspaceChanged) {
-			this.currentProject = null;
 			this.permissions = [];
 			this.models = [];
 
@@ -87,9 +83,28 @@ class ProjectsPermissionsController implements ng.IController {
 			}
 		}
 
+		if (projects && projects.currentValue) {
+			const {project} = this.$state.params;
+
+			if (project) {
+				const isValidProject = projects.currentValue.some(({ name }) => name === project);
+
+				if (isValidProject) {
+					this.currentProject = project;
+				} else {
+					this.currentProject = null;
+					this.setCurrentProjectToState();
+				}
+			}
+		}
+
 		if (membersChanged && this.currentProject) {
 			this.onProjectChange();
 		}
+	}
+
+	public setCurrentProjectToState() {
+		this.$state.go(this.$state.$current.name, {project: this.currentProject}, {notify: false});
 	}
 
 	public onProjectChange(): void {
@@ -98,7 +113,7 @@ class ProjectsPermissionsController implements ng.IController {
 		}
 
 		this.projectRequestCanceler = this.$q.defer();
-		this.$state.go(this.$state.$current.name, {project: this.currentProject}, {notify: false});
+		this.setCurrentProjectToState();
 
 		this.ProjectsService.getProject(this.currentTeamspace.account, this.currentProject, {
 			timeout: this.projectRequestCanceler.promise

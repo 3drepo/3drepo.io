@@ -106,13 +106,19 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public onTeamspaceChange = (): void => {
 			this.isLoadingTeamspace = true;
-			this.currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
-			const membersPromise = this.setTeamspaceMembers(this.currentTeamspace.account);
-			const jobsPromise = this.setTeamspaceJobs(this.currentTeamspace.account);
+			const currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
+			const membersPromise = this.getTeamspaceMembersData(currentTeamspace.account);
+			const jobsPromise = this.getTeamspaceJobsData(currentTeamspace.account);
 
 			this.$state.go(this.$state.$current.name, {teamspace: this.selectedTeamspace}, {notify: false});
 
-			this.$q.all([membersPromise, jobsPromise]).then(() => {
+			this.$q.all([membersPromise, jobsPromise]).then(([membersData, jobsData]) => {
+				this.currentTeamspace = currentTeamspace;
+				this.members = membersData.members;
+				this.licencesLimit = membersData.licencesLimit;
+				this.jobs = jobsData.jobs;
+				this.jobsColors = jobsData.colors;
+				this.licencesLabel = this.getLicencesLabel();
 				this.projects = [...this.currentTeamspace.projects];
 				this.isLoadingTeamspace = false;
 			});
@@ -134,7 +140,7 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace users list
 		 * @param teamspaceName
 		 */
-		public setTeamspaceMembers(teamspaceName: string): void {
+		public getTeamspaceMembersData(teamspaceName: string): void {
 			const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
 				.catch(this.DialogService.showError.bind(null, "retrieve", "subscriptions"));
 
@@ -143,9 +149,10 @@ class AccountUserManagementController implements ng.IController {
 
 			return this.$q.all([quotaInfoPromise, memberListPromise])
 				.then(([quotaInfoResponse, membersResponse]) => {
-					this.licencesLimit = get(quotaInfoResponse, "data.collaboratorLimit", 0);
-					this.members = membersResponse.data.members.map(this.prepareMemberData);
-					this.licencesLabel = this.getLicencesLabel();
+					return {
+						licencesLimit: get(quotaInfoResponse, "data.collaboratorLimit", 0),
+						members: [...membersResponse.data.members.map(this.prepareMemberData)]
+					};
 				});
 		}
 
@@ -166,13 +173,16 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace jobs list
 		 * @param teamspaceName
 		 */
-		public setTeamspaceJobs(teamspaceName: string): void {
+		public getTeamspaceJobsData(teamspaceName: string): void {
 			return this.AccountService.getJobs(teamspaceName)
+				.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"))
 				.then((response) => {
-					this.jobs = get(response, "data", []);
-					this.jobsColors = uniq(map(this.jobs, "color"));
-				})
-				.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"));
+					const jobs = get(response, "data", []);
+					return {
+						jobs,
+						colors: uniq(map(jobs, "color"))
+					};
+				});
 		}
 
 		/**
