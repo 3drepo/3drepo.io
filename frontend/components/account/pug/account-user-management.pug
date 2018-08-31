@@ -34,6 +34,13 @@
 				jobs="vm.jobs"
 				title="vm.licencesLabel"
 				on-save="vm.onMemberSave(newMember)")
+			new-job-form(
+				ng-if="vm.selectedTab === vm.TABS_TYPES.JOBS"
+				current-teamspace="vm.currentTeamspace.account"
+				jobs="vm.jobs"
+				colors="vm.jobsColors"
+				title="Add new job"
+				on-save="vm.onJobSave(newJob)")
 
 		.addPanelBackdrop(
 			ng-class="{'addPanelBackdropVisible': vm.showAddingPanel}"

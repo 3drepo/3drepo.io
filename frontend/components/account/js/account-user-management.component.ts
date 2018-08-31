@@ -46,9 +46,11 @@ class AccountUserManagementController implements ng.IController {
 
 		public static $inject: string[] = [
 			"$q",
+			"$state",
+
 			"AccountService",
 			"DialogService",
-			"$state"
+			"JobsService"
 		];
 
 		private TABS_TYPES = TABS_TYPES;
@@ -74,9 +76,11 @@ class AccountUserManagementController implements ng.IController {
 
 		constructor(
 			private $q: any,
+			private $state: any,
+
 			private AccountService: any,
 			private DialogService: any,
-			private $state: any
+			private JobsService: any
 		) {
 			const {tab, teamspace} = this.$state.params;
 			this.selectedTab = parseInt(tab, 10);
@@ -194,8 +198,8 @@ class AccountUserManagementController implements ng.IController {
 		 */
 		public getTeamspaceJobsData(teamspaceName: string): Promise<any> {
 			const jobsPromises = [
-				this.AccountService.getJobs(teamspaceName),
-				this.AccountService.getJobsColors(teamspaceName)
+				this.JobsService.getList(teamspaceName),
+				this.JobsService.getColors(teamspaceName)
 			];
 			return Promise.all(jobsPromises)
 				.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"))
@@ -254,6 +258,19 @@ class AccountUserManagementController implements ng.IController {
 				this.prepareMemberData(this.currentTeamspace.account, newMember)
 			];
 			this.licencesLabel = this.getLicencesLabel();
+			this.showAddingPanel = false;
+		}
+
+		/**
+		 * Add new job to local list of jobs
+		 * @param updatedMembers
+		 */
+		public onJobSave(newJob): void {
+			this.jobs = [...this.jobs, newJob];
+
+			if (newJob.color && !this.jobsColors.includes(newJob.color)) {
+				this.jobsColors = [...this.jobsColors, newJob.color];
+			}
 			this.showAddingPanel = false;
 		}
 }
