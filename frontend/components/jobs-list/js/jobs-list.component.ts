@@ -17,7 +17,7 @@
 import {values, cond, matches, orderBy} from "lodash";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 
-import {sortByName} from "../../../helpers/sorting";
+import {sortByField} from "../../../helpers/sorting";
 
 class JobsListController implements ng.IController {
 	public static $inject: string[] = [
@@ -46,8 +46,11 @@ class JobsListController implements ng.IController {
 		private DialogService: any
 	) {
 		this.currentSort = {
-			type: SORT_TYPES.USERS,
-			order: SORT_ORDER_TYPES.ASCENDING
+			type: SORT_TYPES.FIELD,
+			order: SORT_ORDER_TYPES.ASCENDING,
+			config: {
+				field: "_id"
+			}
 		};
 	}
 
@@ -108,11 +111,7 @@ class JobsListController implements ng.IController {
 	 * @returns {Array}
 	 */
 	public getSortedData(data = [], options = this.currentSort) {
-		const {USERS, FIELD} = SORT_TYPES;
-		const sort = cond([
-			[matches({type: USERS}), sortByName.bind(null, data)]
-		]);
-		return sort(options);
+		return sortByField(data, options);
 	}
 
 	/**
