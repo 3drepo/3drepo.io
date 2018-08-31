@@ -82,7 +82,8 @@
 						layout="row"
 						jobs="vm.jobs"
 						colors="vm.jobsColors"
-						current-teamspace="vm.currentTeamspace")
+						current-teamspace="vm.currentTeamspace"
+						on-change="vm.onJobsChange(updatedJobs)")
 
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)

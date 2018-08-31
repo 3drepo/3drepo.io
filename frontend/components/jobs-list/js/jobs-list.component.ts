@@ -21,7 +21,10 @@ import {sortByName} from "../../../helpers/sorting";
 
 class JobsListController implements ng.IController {
 	public static $inject: string[] = [
-		"$mdDialog"
+		"$mdDialog",
+
+		"JobsService",
+		"DialogService"
 	];
 
 	private SORT_TYPES = SORT_TYPES;
@@ -37,7 +40,10 @@ class JobsListController implements ng.IController {
 	private hasSelectedItem;
 
 	constructor(
-		private $mdDialog: any
+		private $mdDialog: any,
+
+		private JobsService: any,
+		private DialogService: any
 	) {
 		this.currentSort = {
 			type: SORT_TYPES.USERS,
@@ -55,7 +61,6 @@ class JobsListController implements ng.IController {
 			this.shouldSelectAllItems = false;
 			this.hasSelectedItem = false;
 			this.processedJobs = this.processData();
-			this.onSelectionChange();
 		}
 	}
 
@@ -111,24 +116,16 @@ class JobsListController implements ng.IController {
 	}
 
 	/**
-	 * Toggle list items
+	 * Remove job
+	 * @param job
 	 */
-	public toggleAllItems(): void {
-		this.jobs = this.jobs.map((model) => {
-			return {...model, isSelected: this.shouldSelectAllItems};
-		});
-		this.processedJobs = this.processData();
-		this.hasSelectedItem = this.shouldSelectAllItems;
-
-		const selectedItems = this.processedJobs.filter(({isSelected}) => isSelected);
-		this.onChange({selectedModels: selectedItems});
-	}
-
-	public onSelectionChange(): void {
-		const selectedItems = this.processedJobs.filter(({isSelected}) => isSelected);
-		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedJobs.length;
-		this.onChange({selectedModels: selectedItems});
+	public removeJob(job) {
+		this.JobsService.delete(this.currentTeamspace.account, job._id)
+			.then(() => {
+				const jobs = this.jobs.filter(({_id}) => _id !== job._id);
+				this.onChange({updatedJobs: jobs});
+			})
+			.catch(this.DialogService.showError.bind(null, "delete", "job"));
 	}
 }
 
