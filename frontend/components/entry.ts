@@ -27,8 +27,13 @@ window.TDR = TDR;
 window.TDR();
 
 // Register all the angularjs modules
+
+// Shared services
 import "../services/projects.service";
 import "../services/models.service";
+import "../services/jobs.service";
+
+// Components & services
 import "./account/js/account-billing.component";
 import "./account/js/account.component";
 import "./account/js/account-federations.component";
@@ -116,6 +121,7 @@ import "./projects-permissions/js/projects-permissions.component";
 import "./permissions-list/js/permissions-list.component";
 import "./models-list/js/models-list.component";
 import "./jobs-list/js/jobs-list.component";
+import "./new-job-form/js/new-job-form.component";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

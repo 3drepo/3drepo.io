@@ -16,13 +16,43 @@
  */
 
 class NewJobFormController implements ng.IController {
-	public static $inject: string[] = [];
+	public static $inject: string[] = [
+		"JobsService",
+		"DialogService"
+	];
 
-	public $onInit(): void {}
+	private newJob;
+	private onSave;
+	private currentTeamspace;
+
+	constructor(
+		private JobsService: any,
+		private DialogService: any
+	) {}
+
+	public $onInit(): void {
+		this.newJob = {};
+	}
+
+	public addJob(): void {
+		this.JobsService.create(this.currentTeamspace, this.newJob)
+			.then(({data: job}) => {
+				if (this.onSave) {
+					this.onSave({newJob: job});
+				}
+			})
+			.catch(this.DialogService.showError.bind(null, "create", "job"));
+	}
 }
 
 export const NewJobFormComponent: ng.IComponentOptions = {
-	bindings: {},
+	bindings: {
+		currentTeamspace: "<",
+		jobs: "<",
+		colors: "<",
+		onSave: "&",
+		title: "@"
+	},
 	controller: NewJobFormController,
 	controllerAs: "vm",
 	templateUrl: "templates/new-job-form.html"
