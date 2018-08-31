@@ -4,11 +4,6 @@
   .userContent {
     height: 100% !important;
   }
-
-  account-assign md-tabs-content-wrapper {
-    height: 100% !important;
-  }
-
 }
 
 account-modelsetting .loadingHolder {
@@ -122,13 +117,14 @@ account-dir {
 }
 
 account-dir #account .userContentNoMargin {
-  margin-top: 0px !important;
+  margin-top: 0 !important;
 }
 
 account-dir #account {  
   background-size: contain;
   position: absolute;
   width: 100%;
+  height: calc(100% - 15vh);
 }
 
 account-dir #accountHolder {
@@ -591,91 +587,6 @@ account-billing .accountBillingAddressInfo {
   color: rgba(0, 0, 0, 0.4);
 }
 
-/** Account Licenses *********************************************************************************************/
-account-licenses .licenseIcon {
-  margin: 0 10px !important;
-}
-
-account-licenses .licenseColorBox {
-  margin-top: 25px;
-  margin-right: 35px !important;
-}
-
-account-licenses .colorBox {
-  width: 25px;
-  margin-right: 10px;
-  height: 25px;
-  vertical-align: middle;
-  border: 1px solid grey;
-}
-
-account-licenses .colorOption {
-  width: 119px;
-}
-
-account-licenses .accountLicensesSubheader {
-  margin-bottom: 10px;
-}
-
-account-licenses #accountLicensesAdd {
-  margin-top: -10px;
-}
-account-licenses .userContent md-input-container {
-  margin-bottom: 0;
-  width: 80%;
-}
-
-account-licenses .selectJob {
-  margin-left: -10px;
-}
-
-account-licenses .assignButton {
-  margin-bottom: 25px;
-}
-
-account-licenses #errorMessage {
-  font-size: 12px;
-  color: red;
-  margin-bottom: 20px;
-}
-
-account-licenses .jobTableText {
-  text-align: center;
-  margin: auto;
-  font-weight: bold;
-}
-
-account-licenses .md-subheader .md-subheader-inner {
-  padding-left: 0px !important;
-}
-
-account-licenses #accountJobList #jobIcon md-icon {
-  padding-top: 12px;
-}
-
-account-licenses #accountLicensesUnassigned md-icon {
-  margin-bottom: 0px;
-  margin: 0px;
-}
-
-account-licenses #accountLicensesUnassigned {
-  opacity: 0.4;
-  margin-top: -5px;
-}
-
-account-licenses #accountLicenseMessage {
-  margin: 0;
-  opacity: 0.8;
-}
-
-account-licenses #accountLicensesList {
-  overflow-y: auto;
-}
-
-account-licenses #accountLicensesBillingPage {
-  margin-top: 30px;
-}
-
 /** Account Team ******************************************************************************************************/
 account-team {
   width: 500px;
@@ -881,137 +792,3 @@ account-teamspaces md-content {
   margin-bottom: 30px;
   min-height: 300px;
 }
-
-account-assign .assignDropDowns {
-  padding: 20px;
-}
-
-account-assign .assignDropDowns md-label {
-  font-weight: bold;
-}
-
-/** Account Assign ***********************************************************************************************/
-account-assign .assignTabHolder {
-  padding: 20px;
-}
-
-div.md-select-menu-container, 
-div.md-select-menu-container md-select-menu, 
-div.md-select-menu-container md-select-menu md-content {
-  max-height: 50vh !important;
-}
-
-account-assign .assignTabHolder .noUsers {
-  text-align: center;
-}
-
-account-assign .adminRadio div.md-on {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-/* account-assign .roleLoading {
-  width: 25px !important;
-  height: 25px !important;
-  display: block;
-  margin: auto;
-}
-
-account-assign .roleLoading svg {
-  width: 25px !important;
-  height: 25px !important;
-  transform-origin: initial !important;
-} */
-
-account-assign .loading {
-    width: 50px;
-    height: 50px;
-    margin: 0 auto;
-    margin-top: 20px;
-}
-
-account-assign .loadingHolder {
-  margin: auto 0;
-  display: block;
-}
-
-account-assign .loadingHolder h3 {
-  text-align: center;
-  margin-top: 40px;
-}
-
-account-assign .scrollable {
-  overflow-x: auto;
-}
-
-account-assign thead { 
-  padding-bottom: 20px;
-  padding-top: 20px;
-}
-
-account-assign .md-label {
-  line-height: 4;
-}
-
-account-assign h5 {
-  margin: 0;
-}
-
-account-assign md-checkbox span { 
-  font-size: 12px;
-}
-
-account-assign .userTitleColumn {
-  border-right: black solid 1px;
-  max-width: 250px;
-  width: 250px;
-}
-
-account-assign .userColumn {
-  max-width: 250px;
-  width: 250px;
-}
-
-account-assign .rowSelects {
-  padding-right: 20px;
-}
-
-account-assign md-checkbox .md-container {
-  margin-left: 25%;
-}
-
-account-assign .radioButtons {
-  margin-left: 8px;
-}
-
-account-assign md-radio-button > div {
-  margin-left: 50%;
-}
-
-account-assign table td, account-assign table th {
-    width: 120px;
-    min-width: 120px;
-    height: 40px;
-    margin-left: 0px;
-    margin-right: 0px;
-    text-align: center;
-    padding: 0;
-}
-
-account-assign .checkboxes { 
-  overflow-x: hidden;
-}
-
-account-assign .checkboxes p {
-  margin-top: 0px;
-}
-
-account-assign .radiobuttons p {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-account-assign .sentenceCase {
-  text-transform: capitalize;
-  
-}
-

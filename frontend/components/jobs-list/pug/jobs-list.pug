@@ -1,6 +1,6 @@
 .jobsList(ng-disabled="vm.ngDisabled")
 	.jobsListHeader(layout="row" layout-align="start center")
-		.jobsListCell(layout="row" layout-align="start center" flex)
+		.jobsListCell(layout="row" layout-align="start center" flex="30")
 			list-sort-button(
 				ng-disabled="vm.ngDisabled"
 				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
@@ -14,6 +14,15 @@
 					ng-model-options="{debounce: 200}"
 					placeholder="Job name"
 					ng-change="vm.onSearch()")
+
+		.jobsListCell(flex="25" layout="row" layout-align="start center")
+			list-sort-button(
+				ng-disabled="vm.ngDisabled"
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.COLOR, order)")
+			.usersListCellLabel Color
+
+			div(flex)
 
 	.jobsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")
@@ -34,5 +43,26 @@
 			layout-align="start center")
 
 			//Job details
-			.jobsListCell(flex layout="column" layout-align="center start")
+			.jobsListCell(flex="30" layout="column" layout-align="center start")
 				div(md-highlight-text="vm.searchText") {{job._id}}
+
+			//Color
+			.jobsListCell(flex="25" layout="row" layout-align="start center")
+				md-input-container(md-no-float)
+					md-select(
+						ng-model="job.color"
+						ng-disabled="!vm.colors.length"
+						placeholder="Select a color"
+						ng-change="vm.onColorChange(job)")
+						md-option(
+							ng-value="color"
+							ng-repeat="color in vm.colors")
+							div(layout="row" layout-align="start center")
+								span.usersListJobColor(ng-style="{'background-color': color}")
+								.usersListJobName {{color}}
+
+			div(flex)
+
+			//Remove action
+			md-button.md-icon-button.jobsListRemoveButton(ng-click="vm.removeJob(job)")
+				md-icon.angular-material-icons remove_circle

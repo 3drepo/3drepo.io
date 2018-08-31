@@ -50,7 +50,7 @@
 			md-tab(
 				label="Users"
 				md-on-select="vm.onTabChange()"
-				ng-disabled="!vm.currentTeamspace.isAdmin")
+				ng-disabled="!vm.isTeamspaceAdmin")
 				div(layout="column" layout-fill)
 					users-list(
 						flex
@@ -68,7 +68,7 @@
 			md-tab(
 				label="Jobs"
 				md-on-select="vm.onTabChange()"
-				ng-disabled="!vm.currentTeamspace.isAdmin")
+				ng-disabled="!vm.isTeamspaceAdmin")
 				div(layout="column" layout-fill)
 					jobs-list(
 						flex
