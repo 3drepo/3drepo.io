@@ -50,9 +50,7 @@ class AccountInfoController implements ng.IController {
 			teamspaces: {label: "Teamspaces"},
 			userManagement: {label: "User Management"},
 			profile: {label: "Profile"},
-			billing: {label: "Billing"},
-			licenses: {label: "Jobs"},
-			assign: {label: "Assign Permissions" }
+			billing: {label: "Billing"}
 		};
 		this.imageLoaded = false;
 		this.registerUrlCallback();

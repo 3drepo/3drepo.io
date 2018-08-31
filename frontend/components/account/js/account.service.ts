@@ -280,6 +280,16 @@ export class AccountService {
 	}
 
 	/**
+	 * Get jobs colors list
+	 *
+	 * @param teamspace
+	 * @returns {*|promise}
+	 */
+	public getJobsColors(teamspace): Promise<any> {
+		return this.APIService.get(`${teamspace}/jobs/colors`);
+	}
+
+	/**
 	 * Get teamspace permissions
 	 * @param teamspace
 	 * @returns {*|promise}

@@ -117,3 +117,20 @@
   border-color: transparent;
   background: none;
 }
+
+.jobsListRemoveButton.md-button {
+  margin-right: 13px;
+}
+
+.jobsListCell md-select .md-select-value {
+  padding-left: 0;
+  border-bottom-color: transparent !important;
+}
+
+.jobsListCell md-select[disabled] .md-select-value {
+  background-image: none;
+}
+
+.jobsListCell md-select[disabled] .md-select-icon {
+  display: none;
+}

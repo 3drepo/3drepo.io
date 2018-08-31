@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {get, uniq, map, isNumber} from "lodash";
+import {get, isNumber} from "lodash";
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
@@ -64,6 +64,7 @@ class AccountUserManagementController implements ng.IController {
 		private licencesLimit;
 		private licencesLabel;
 		private isLoadingTeamspace;
+		private isTeamspaceAdmin;
 
 		private selectedTeamspace;
 		private selectedTab;
@@ -125,6 +126,7 @@ class AccountUserManagementController implements ng.IController {
 			const jobsPromise = this.getTeamspaceJobsData(currentTeamspace.account);
 
 			this.$state.go(this.$state.$current.name, {teamspace: this.selectedTeamspace}, {notify: false});
+			this.isTeamspaceAdmin = currentTeamspace.isAdmin;
 
 			this.$q.all([membersPromise, jobsPromise]).then(([membersData, jobsData]) => {
 				this.currentTeamspace = currentTeamspace;
@@ -190,15 +192,18 @@ class AccountUserManagementController implements ng.IController {
 		 * Get teamspace jobs list
 		 * @param teamspaceName
 		 */
-		public getTeamspaceJobsData(teamspaceName: string): void {
-			return this.AccountService.getJobs(teamspaceName)
+		public getTeamspaceJobsData(teamspaceName: string): Promise<any> {
+			const jobsPromises = [
+				this.AccountService.getJobs(teamspaceName),
+				this.AccountService.getJobsColors(teamspaceName)
+			];
+			return Promise.all(jobsPromises)
 				.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"))
-				.then((response) => {
-					const jobs = get(response, "data", []);
-					return {
-						jobs,
-						colors: uniq(map(jobs, "color"))
-					};
+				.then(([jobsResponse, colorsResponse]) => {
+					const jobs = get(jobsResponse, "data", []);
+					const colors = get(colorsResponse, "data", []);
+
+					return {jobs, colors};
 				});
 		}
 
