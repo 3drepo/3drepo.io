@@ -1,8 +1,7 @@
 form.newJobForm(name="newJobForm" layout="column")
 	.newJobFormTitle {{::vm.title}}
-	md-input-container(md-no-float)
-		label Set job name
-		input(ng-model="vm.newJob._id" required)
+	md-input-container(md-no-float="true")
+		input(ng-model="vm.newJob._id" placeholder="Set job name")
 
 	md-input-container(md-no-float)
 		md-select(ng-model="vm.newJob.color" placeholder="Select a color")
