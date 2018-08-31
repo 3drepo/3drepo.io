@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
+const _ = require("lodash");
+const repoBase = require("./base/repo");
+const mongoose = require("mongoose");
+const ModelFactory = require("./factory/modelFactory");
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
+const Schema = mongoose.Schema;
 
-var Schema = mongoose.Schema;
-
-var refSchema = Schema(
+const refSchema = Schema(
 	_.extend({}, repoBase.attrs, {
 		// no extra attributes
 		_id: Object,
-		type: { type: String, default: 'ref'},
+		type: { type: String, default: "ref"},
 		unique: Object,
 		project: String,
 		owner: String,
@@ -36,15 +36,13 @@ var refSchema = Schema(
 	})
 );
 
-
 refSchema.statics = {};
 refSchema.methods = {};
 
-
-var Ref = ModelFactory.createClass(
-	'Ref', 
-	refSchema, 
-	arg => { 
+const Ref = ModelFactory.createClass(
+	"Ref",
+	refSchema,
+	arg => {
 		return `${arg.model}.scene`;
 	}
 );

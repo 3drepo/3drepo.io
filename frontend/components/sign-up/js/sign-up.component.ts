@@ -52,9 +52,10 @@ class SignupController implements ng.IController {
 	private countries;
 	private legalText;
 	private legalTitle;
-	private registerErrorMessage;
-	private emailInvalid;
 	private allowedPhone;
+	private registerErrorMessage: string;
+	private registerPasswordMessage: string;
+	private registerConfirmEmailMessage: string;
 
 	constructor(
 		private $scope,
@@ -71,6 +72,7 @@ class SignupController implements ng.IController {
 	}
 
 	public $onInit() {
+
 		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
 
 		this.PasswordService.addPasswordStrengthLib();
@@ -83,12 +85,15 @@ class SignupController implements ng.IController {
 			console.debug("User is not logged in");
 		});
 
-		this.enterKey = 13,
+		this.enterKey = 13;
 		this.agreeToText = "",
 		this.haveReadText = "";
 
 		this.buttonLabel = "Sign Up!";
-		this.newUser = {username: "", email: "", password: "", mailListAgreed: true, tcAgreed: false};
+		this.newUser = {
+			username: "", email: "", confirmEmail: "",
+			company: "", confirmPassword: "", password: "", mailListAgreed: true, tcAgreed: false
+		};
 		this.version = this.ClientConfigService.VERSION;
 		this.logo = "/images/3drepo-logo-white.png";
 		this.captchaKey = this.ClientConfigService.captcha_client_key;
@@ -98,9 +103,6 @@ class SignupController implements ng.IController {
 		this.useReCAPTCHA = false;
 		this.registering = false;
 		this.showLegalText = false;
-
-		this.emailInvalid = false;
-
 		this.countries = this.ClientConfigService.countries.concat();
 		let gbIndex;
 
@@ -117,7 +119,7 @@ class SignupController implements ng.IController {
 		*/
 
 		const reCaptchaExists = this.ClientConfigService.auth.hasOwnProperty("captcha") &&
-								(this.ClientConfigService.auth.captcha);
+			(this.ClientConfigService.auth.captcha);
 
 		if (reCaptchaExists) {
 			if (this.ClientConfigService.captcha_client_key) {
@@ -159,10 +161,11 @@ class SignupController implements ng.IController {
 	}
 
 	public watchers() {
-		/*
+		/**
 		* Watch changes to register fields to clear warning message
 		*/
-		this.$scope.$watch("vm.newUser", (newValue) =>  {
+
+		this.$scope.$watch("vm.newUser", (newValue) => {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
 			}
@@ -170,8 +173,7 @@ class SignupController implements ng.IController {
 				const result = this.PasswordService.evaluatePassword(this.newUser.password);
 				this.passwordResult = result;
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newUser.password, result.score);
-				this.checkInvalidPassword(result.score);
-
+				this.$scope.signup.password.$setValidity("required", result.score > 2);
 			}
 		}, true);
 
@@ -181,35 +183,23 @@ class SignupController implements ng.IController {
 				this.goToLoginPage();
 			}
 		});
-
 	}
 
-	public checkInvalidPassword(score) {
-		switch (score) {
-		case 0:
-			this.invalidatePassword();
-			break;
-		case 1:
-			this.invalidatePassword();
-			break;
-		case 2:
-			this.validatePassword();
-			break;
-		case 3:
-			this.validatePassword();
-			break;
-		case 4:
-			this.validatePassword();
-			break;
+	/**
+	 * Take two user input values and check for duplicate values
+	 */
+
+	public checkDuplicateValues(isPasswordField) {
+		if (isPasswordField) {
+			const passwordValid = this.newUser.password === this.newUser.confirmPassword;
+			this.$scope.signup.confirmPassword.$setValidity("invalid", passwordValid);
+			this.registerPasswordMessage = passwordValid ? "" : "(Password mismatched)";
+		} else {
+			// The only other thing to check is email
+			const emailValid = this.newUser.email === this.newUser.confirmEmail;
+			this.$scope.signup.confirmEmail.$setValidity("invalid", emailValid);
+			this.registerConfirmEmailMessage = emailValid ? "" : "(Email mismatched)";
 		}
-	}
-
-	public invalidatePassword() {
-		this.$scope.signup.password.$setValidity("required", false);
-	}
-
-	public validatePassword() {
-		this.$scope.signup.password.$setValidity("required", true);
 	}
 
 	public handleLegalItem(legalItem) {
@@ -279,18 +269,19 @@ class SignupController implements ng.IController {
 	 * Do the user registration
 	 */
 	public doRegister() {
-		let	allowRegister = true;
+		let allowRegister = true;
 		const formatRegex = this.ClientConfigService.usernameRegExp;
 		const allowedFormat = new RegExp(formatRegex); // English letters, numbers, underscore, not starting with number
 
 		if (
 			(!this.isDefined(this.newUser.username)) ||
 			(!this.isDefined(this.newUser.email)) ||
+			(!this.isDefined(this.newUser.confirmEmail)) ||
 			(!this.isDefined(this.newUser.password)) ||
+			(!this.isDefined(this.newUser.confirmPassword)) ||
 			(!this.isDefined(this.newUser.firstName)) ||
 			(!this.isDefined(this.newUser.lastName)) ||
 			(!this.isDefined(this.newUser.country))
-
 		) {
 
 			const emailInvalid = this.$scope.signup.$error.email;
@@ -308,7 +299,7 @@ class SignupController implements ng.IController {
 			return;
 		}
 
-		if ( !this.newUser.password || this.newUser.password.length < 8 ) {
+		if (!this.newUser.password || this.newUser.password.length < 8) {
 			this.registerErrorMessage = "Password must be at least 8 characters long";
 			return;
 		}

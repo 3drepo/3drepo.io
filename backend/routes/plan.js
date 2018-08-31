@@ -15,21 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require("express");
-var responseCodes = require("../response_codes.js");
-var router = express.Router({mergeParams: true});
-var utils = require('../utils');
-var config = require("../config");
+"use strict";
+const express = require("express");
+const responseCodes = require("../response_codes.js");
+const router = express.Router({mergeParams: true});
+const utils = require("../utils");
+const config = require("../config");
 
 router.get("/plans", listPlans);
 
-
-function listPlans(req, res, next){
-	'use strict';
-	let place = utils.APIInfo(req);
-	let subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
+function listPlans(req, res, next) {
+	const place = utils.APIInfo(req);
+	const subscriptions = config.subscriptions.plans ?  config.subscriptions.plans : {};
 	responseCodes.respond(place, req, res, next, responseCodes.OK, subscriptions);
 }
-
 
 module.exports = router;

@@ -14,45 +14,44 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-(() => {
-	"use strict";
 
-	const mongoose = require('mongoose');
-	const ModelFactory = require('./factory/modelFactory');
-		
-	let schema = mongoose.Schema({
+"use strict";
+(() => {
+
+	const mongoose = require("mongoose");
+	const ModelFactory = require("./factory/modelFactory");
+
+	const schema = mongoose.Schema({
 		createdAt: Date,
 		message: {}
 	});
 
+	schema.pre("save", function(next) {
 
-	schema.pre('save', function(next){
-
-		if(!this.createdAt){
+		if(!this.createdAt) {
 			this.createdAt = new Date();
 		}
 
 		next();
 	});
 
-	schema.statics.save = function(ipnMessage){
-		
-		let ipn = IPN.createInstance({ account: 'admin' });
+	schema.statics.save = function(ipnMessage) {
+
+		const ipn = IPN.createInstance({ account: "admin" });
 		ipn.message = ipnMessage;
-		ipn.markModified('message');
+		ipn.markModified("message");
 
 		return ipn.save();
 	};
 
-
-	let IPN = ModelFactory.createClass(
-		'IPN',
+	const IPN = ModelFactory.createClass(
+		"IPN",
 		schema,
 		() => {
-			return 'ipns';
+			return "ipns";
 		}
 	);
 
 	module.exports = IPN;
-	
+
 })();

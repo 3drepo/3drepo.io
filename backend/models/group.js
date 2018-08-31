@@ -17,6 +17,7 @@
 
 "use strict";
 
+const _ = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
@@ -26,6 +27,7 @@ const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
 const db = require("../db/db");
+const ChatEvent = require("./chatEvent");
 
 const groupSchema = Schema({
 	_id: Object,
@@ -50,8 +52,7 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch,
 	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
 	const project = { parents: 1, _id: 0 };
 
-	const db = require("../db/db");
-	return db.getCollection(account, model+ ".scene").then(dbCol => {
+	return db.getCollection(account, model + ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
 			return History.getHistory({ account, model }, branch, revId).then(history => {
 				if (!history) {
@@ -74,12 +75,12 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch,
 groupSchema.statics.uuidToIfcGuids = function(obj) {
 	const account = obj.account;
 	const model = obj.model;
-	const uid =("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
+	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
 	const parent = utils.stringToUUID(uid);
 
 	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
-			let ifcGuids = [];
+			const ifcGuids = [];
 			results.forEach(res => {
 				if (this.isIfcGuid(res.metadata["IFC GUID"])) {
 					ifcGuids.push(res.metadata["IFC GUID"]);
@@ -92,8 +93,7 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 function uuidsToIfcGuids(account, model, ids) {
 	const query = { type: "meta", parents: {$in: ids}, "metadata.IFC GUID": {$exists: true} };
 	const project =  { "metadata.IFC GUID": 1 , parents: 1};
-	const db = require("../db/db");
-	return db.getCollection(account, model+ ".scene").then(dbCol => {
+	return db.getCollection(account, model + ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
 			return results;
 		});
@@ -110,7 +110,7 @@ groupSchema.statics.isIfcGuid = function(value) {
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsToString) {
+groupSchema.methods.getObjectsArrayAsIfcGuids = function(data) {
 
 	const ifcGuidPromises = [];
 
@@ -122,14 +122,14 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 		const account = data.objects[i].account;
 		const model = data.objects[i].model;
 
-		if (!(account && model) || data.objects[i].ifc_guid || data.objects[i].shared_id) {
+		if (!(account && model) || (!data.objects[i].ifc_guids && !data.objects[i].shared_ids)) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
 		const sharedIdsSet = new Set();
 		const ifcGuidsSet = new Set();
 
-		let sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+		const sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
 
 		for (let j = 0; j < sharedIds.length; j++) {
 			if ("[object String]" === Object.prototype.toString.call(sharedIds[j])) {
@@ -186,11 +186,9 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data, convertSharedIDsT
 	});
 };
 
-groupSchema.statics.findIfcGroupByUID = function(dbCol, uid){
+groupSchema.statics.findIfcGroupByUID = function(dbCol, uid) {
 
 	// Extract a unique list of IDs only
-	let groupObjectsMap = [];
-
 	return this.findOne(dbCol, { _id: uid })
 		.then(group => {
 
@@ -223,7 +221,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 		const _branch = (model === sharedIdObject.model) ? branch : "master";
 		const _revId = (model === sharedIdObject.model) ? revId : null;
 
-		let ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
+		const ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
 
 		for (let j = 0; this.objects[i].shared_ids && j < this.objects[i].shared_ids.length; j++) {
 			let sharedId = this.objects[i].shared_ids[j];
@@ -234,12 +232,12 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 		}
 
 		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
-					sharedIdObject.account,
-					sharedIdObject.model,
-					ifcGuids,
-					_branch,
-					_revId
-					).then(sharedIdResults => {
+			sharedIdObject.account,
+			sharedIdObject.model,
+			ifcGuids,
+			_branch,
+			_revId
+		).then(sharedIdResults => {
 			for (let j = 0; j < sharedIdResults.length; j++) {
 				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
 					sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
@@ -266,7 +264,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 	});
 };
 
-groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
+groupSchema.statics.findByUID = function(dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -283,7 +281,7 @@ groupSchema.statics.findByUID = function(dbCol, uid, branch, revId){
 
 };
 
-groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
+groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -301,7 +299,7 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId){
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId){
+groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId) {
 
 	const query = {};
 
@@ -340,50 +338,88 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 			};
 
 			return group.updateAttrs(dbCol, issueIdData);
-		}
-		else {
+		} else {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 	});
 };
 
-groupSchema.methods.updateAttrs = function(dbCol, data){
+groupSchema.methods.updateGroup = function(dbCol, sessionId, data) {
+	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
+	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));
+	return update;
+};
+
+groupSchema.methods.updateAttrs = function(dbCol, data) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
-		
+		const fieldTypes = {
+			"description" : "[object String]" ,
+			"name" : "[object String]",
+			"author" : "[object String]",
+			"createdAt" : "[object Number]",
+			"updatedBy" : "[object String]",
+			"updatedAt" : "[object Number]",
+			"objects" :  "[object Array]",
+			"color" : "[object Array]",
+			"issue_id": "[object Object]"
+		};
+
+		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
-				if (key === "objects" && data.objects) {
-					toUpdate.objects = convertedObjects;
-				} else if (key === "color") {
-					toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+				if(Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+					if (key === "objects" && data.objects) {
+						toUpdate.objects = convertedObjects;
+					} else if (key === "color") {
+						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
+					} else {
+						toUpdate[key] = data[key];
+					}
 				} else {
-					toUpdate[key] = data[key];
+					typeCorrect = false;
 				}
 			}
+
 		});
 
-		const db = require("../db/db");
-		return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-			return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
-				return {_id: utils.uuidToString(this._id)};
-			}); 
-		});
+		if (typeCorrect) {
+			return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
+				return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
+					return {_id: utils.uuidToString(this._id)};
+				});
+			});
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
+
 	});
 };
 
-groupSchema.statics.createGroup = function(dbCol, data){
+groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
+	data = _.omit(data, ["focus", "highlighted"]);
+
 	const group = this.model("Group").createInstance({
-		account: dbCol.account, 
+		account: dbCol.account,
 		model: dbCol.model
 	});
 
+	const model = dbCol.model;
+
 	group._id = utils.stringToUUID(uuid.v1());
-	return group.save().then( (savedGroup)=>{
-		return savedGroup.updateAttrs(dbCol, data).catch((err) => {
-			//remove the recently saved new group as update attributes failed
+	return group.save().then((savedGroup)=>{
+		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
+			data._id = utils.uuidToString(savedGroup._id);
+			if (!data.isIssueGroup) {
+				ChatEvent.newGroups(sessionId, dbCol.account , model,  data);
+			}
+
+			return data;
+		}
+			,(err) => {
+			// remove the recently saved new group as update attributes failed
 			return Group.deleteGroup(dbCol, group._id).then(() => {
 				return Promise.reject(err);
 			});
@@ -391,17 +427,23 @@ groupSchema.statics.createGroup = function(dbCol, data){
 	});
 };
 
-groupSchema.methods.clean = function(){
-
-	let cleaned = this.toObject();
+groupSchema.methods.clean = function() {
+	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+
+	if (Date.prototype.isPrototypeOf(cleaned.createdAt)) {
+		cleaned.createdAt = cleaned.createdAt.getTime();
+	}
+
+	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
+		cleaned.updatedAt = cleaned.updatedAt.getTime();
+	}
 
 	return cleaned;
 };
 
-
-groupSchema.statics.deleteGroup = function(dbCol, id){
+groupSchema.statics.deleteGroup = function(dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
@@ -409,7 +451,7 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 
 	return Group.findOneAndRemove(dbCol, { _id : id}).then(group => {
 
-		if(!group){
+		if(!group) {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 
@@ -417,14 +459,16 @@ groupSchema.statics.deleteGroup = function(dbCol, id){
 };
 
 const Group = ModelFactory.createClass(
-	"Group", 
-	groupSchema, 
-	arg => { 
+	"Group",
+	groupSchema,
+	arg => {
 		return `${arg.model}.groups`;
 	}
 );
 
-Group.deleteGroups = function(dbCol, ids) {
+Group.deleteGroups = function(dbCol, sessionId, ids) {
+	const groupsIds = [].concat(ids);
+
 	for (let i = 0; i < ids.length; i++) {
 		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
 			ids[i] = utils.stringToUUID(ids[i]);
@@ -436,6 +480,9 @@ Group.deleteGroups = function(dbCol, ids) {
 			if (!deleteResponse.result.ok) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
+
+			// Success!
+			ChatEvent.groupsDeleted(sessionId, dbCol.account ,  dbCol.model, groupsIds);
 		});
 	});
 };

@@ -30,7 +30,7 @@ const allCss = [
 ]
 
 const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
-const icons = './icons/*.svg';
+const icons = './icons/*';
 
 function exitOnError(error) {
   gutil.log(gutil.colors.red('[Error]'), error.toString());
@@ -81,7 +81,7 @@ gulp.task('css', function(done) {
 });
 
 gulp.task('icons', function (done) {
-  return gulp.src('./icons/*.svg')
+  return gulp.src('./icons/*')
     .on('error', swallowError)
     //.pipe(print())
     .pipe(gulp.dest('./../public/icons/'))

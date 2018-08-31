@@ -15,153 +15,145 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-var https = require('https');
+"use strict";
+const https = require("https");
 
 const httpsAgent = new https.Agent({keepAlive:true});
 
-function parseUrl(url){
-	'use strict';
+function parseUrl(url) {
 
-	let urlPart = {};
+	const urlPart = {};
 
-	let parsedUrl = url.split('://');
+	let parsedUrl = url.split("://");
 
-	if(parsedUrl.length === 1){
-		throw new Error('Malformed URL');
+	if(parsedUrl.length === 1) {
+		throw new Error("Malformed URL");
 	}
 
-
 	urlPart.protocol = parsedUrl.shift();
-	
-	parsedUrl = parsedUrl[0].split('/');
-	let host =  parsedUrl.shift().split(':');
+
+	parsedUrl = parsedUrl[0].split("/");
+	const host =  parsedUrl.shift().split(":");
 	urlPart.host = host[0];
-	
-	urlPart.port = host[1] || urlPart.protocol === 'https' ? 443 : 80;
-	urlPart.path = '/' + parsedUrl.join('/');
-	
+
+	urlPart.port = host[1] || urlPart.protocol === "https" ? 443 : 80;
+	urlPart.path = "/" + parsedUrl.join("/");
+
 	return urlPart;
 }
 
+function get(hostname, path) {
 
-function get(hostname, path){
-	'use strict';
-	
 	const options = {
 		hostname,
 		path,
 		agent: httpsAgent
-	}
+	};
 	return new Promise((resolve, reject) => {
 		https.get(options, result => {
-			//console.log(url + qs);
+			// console.log(url + qs);
 			// Buffer the body entirely for processing as a whole.
 
-			//console.log(result.headers);
+			// console.log(result.headers);
 
-			var bodyChunks = [];
-			result.on('data', function(chunk) {
+			const bodyChunks = [];
+			result.on("data", function(chunk) {
 				bodyChunks.push(chunk);
-			}).on('end', function() {
-				var body = Buffer.concat(bodyChunks);
+			}).on("end", function() {
+				let body = Buffer.concat(bodyChunks);
 
 				// console.log(result.headers['content-type']);
-				if(result.headers['content-type'].startsWith('application/json')){
+				if(result.headers["content-type"].startsWith("application/json")) {
 					body = JSON.parse(body);
 				}
 
-				if([200, 201].indexOf(result.statusCode) === -1){
+				if([200, 201].indexOf(result.statusCode) === -1) {
 					reject({resCode : result.statusCode, message: result.statusMessage});
 				} else {
 					resolve(body);
 				}
-				
+
 			});
 
-		}).on('error', function(e) {
+		}).on("error", function(e) {
 			reject(e);
 		});
 	});
 
 }
 
-function makePostData(obj){
-	
-	var params = [];
-	
-	Object.keys(obj).forEach( key => {
+function makePostData(obj) {
+
+	const params = [];
+
+	Object.keys(obj).forEach(key => {
 		params.push(`${key}=${encodeURIComponent(obj[key])}`);
 	});
 
-	return params.join('&');
+	return params.join("&");
 }
 
-function post(url, obj, type){
-	'use strict';
+function post(url, obj, type) {
 
-	if(!type){
-		type = 'application/x-www-form-urlencoded';
+	if(!type) {
+		type = "application/x-www-form-urlencoded";
 	}
 
 	let stringify = makePostData;
 
-	if(type === 'application/json'){
+	if(type === "application/json") {
 		stringify = JSON.stringify;
 	}
 
 	let stringifiedData;
 
-	if(typeof obj === 'string'){
+	if(typeof obj === "string") {
 		stringifiedData = obj;
 	} else {
 		stringifiedData = stringify(obj);
 	}
 
+	const parsedUrl = parseUrl(url);
 
-	let parsedUrl = parseUrl(url);
-
-	let options = {
+	const options = {
 		hostname: parsedUrl.host,
 		port: parsedUrl.port,
 		path: parsedUrl.path,
-		method: 'POST',
+		method: "POST",
 		headers: {
-			'Content-Type': type,
-			'Content-Length': stringifiedData.length
+			"Content-Type": type,
+			"Content-Length": stringifiedData.length
 		}
 	};
 
 	return new Promise((resolve, reject) => {
 
-		let req = https.request(options, (res) => {
-			
-			let bodyChunks = [];
+		const req = https.request(options, (res) => {
 
-			res.on('data', (chunk) => {
+			const bodyChunks = [];
+
+			res.on("data", (chunk) => {
 				bodyChunks.push(chunk);
-			}).on('end', () => {
+			}).on("end", () => {
 
 				let body = Buffer.concat(bodyChunks);
 
-				if(res.headers['content-type'].startsWith('application/json')){
+				if(res.headers["content-type"].startsWith("application/json")) {
 					body = JSON.parse(body);
 				} else {
 					body = body.toString();
 				}
 
-
-				if([200, 201].indexOf(res.statusCode) === -1){
+				if([200, 201].indexOf(res.statusCode) === -1) {
 					reject(body);
 				} else {
 					resolve(body);
 				}
 
 			});
-		}).on('error', err => {
+		}).on("error", err => {
 			reject(err);
 		});
-
 
 		req.write(stringifiedData);
 		req.end();
@@ -170,9 +162,8 @@ function post(url, obj, type){
 }
 
 module.exports = {
-	get: get, 
+	get: get,
 	post: post,
 	querystring: makePostData
 };
-
 

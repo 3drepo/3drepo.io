@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
-	const ModelFactory = require('./factory/modelFactory');
-	const responseCodes = require('../response_codes.js');
-	const json2csv = require('json2csv');
+	const ModelFactory = require("./factory/modelFactory");
+	const responseCodes = require("../response_codes.js");
+	const json2csv = require("json2csv");
 
-	function getField(field){
+	function getField(field) {
 		try {
 			return require(`./aggregate_fields/issue/${field}`);
 		} catch (e) {
@@ -31,12 +31,12 @@
 	}
 
 	module.exports = {
-		
-		groupBy: (account, project, groups, sort, format) => {
+
+		groupBy: (account, model, groups, sort, format) => {
 
 			return ModelFactory.dbManager.getCollection(account, `${model}.issues`).then(collection => {
 
-				let fields = {};
+				const fields = {};
 
 				groups.forEach(group => {
 					fields[group] = getField(group);
@@ -45,28 +45,28 @@
 				const field = `_id.${groups[0]}`;
 
 				const pipeline = [
-					{ '$group' : { _id: fields, 'count': { '$sum': 1 } }},
-					{ '$sort': {'count': sort, [field]: sort}}
+					{ "$group" : { _id: fields, "count": { "$sum": 1 } }},
+					{ "$sort": {"count": sort, [field]: sort}}
 				];
 
-				if(!pipeline){
+				if(!pipeline) {
 					return Promise.reject(responseCodes.GROUP_BY_FIELD_NOT_SUPPORTED);
 				}
 
 				const promise = collection.aggregate(pipeline).toArray();
 
-				if(format === 'csv'){
+				if(format === "csv") {
 
-					let csvFields = [];
-					let csvFieldNames = [];
+					const csvFields = [];
+					const csvFieldNames = [];
 
 					groups.forEach(group => {
 						csvFields.push(`_id.${group}`);
 						csvFieldNames.push(group);
 					});
 
-					csvFieldNames.push('count');
-					csvFields.push('count');
+					csvFieldNames.push("count");
+					csvFields.push("count");
 
 					return promise.then(data => {
 						return json2csv({ data, fields: csvFields, fieldNames: csvFieldNames });

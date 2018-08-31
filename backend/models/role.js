@@ -14,12 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-(() => {
-	"use strict";
 
-	const mongoose = require('mongoose');
-	const ModelFactory = require('./factory/modelFactory');
-	const C = require('../constants');
+"use strict";
+(() => {
+
+	const mongoose = require("mongoose");
+	const ModelFactory = require("./factory/modelFactory");
+	const C = require("../constants");
 
 	const schema = mongoose.Schema({
 		_id : String,
@@ -32,64 +33,63 @@
 		const roleId = `${account}.${C.DEFAULT_MEMBER_ROLE}`;
 
 		return Role.findByRoleID(roleId).then(roleFound => {
-			if(roleFound){
+			if(roleFound) {
 				roleFound = roleFound.toObject();
 				return { role: roleFound.role, db: roleFound.db};
 			} else {
-				let roleName = C.DEFAULT_MEMBER_ROLE;
-				let createRoleCmd = {
-					'createRole': roleName,
-			   		'privileges':[{
-							"resource":{
-								"db": account,
-			   					"collection": "settings"
-							},
-			   				"actions": ["find"]}
-						],
-			   		'roles': []
+				const roleName = C.DEFAULT_MEMBER_ROLE;
+				const createRoleCmd = {
+					"createRole": roleName,
+					"privileges":[{
+						"resource":{
+							"db": account,
+							"collection": "settings"
+						},
+						"actions": ["find"]}
+					],
+					"roles": []
 				};
 
 				return ModelFactory.dbManager.runCommand(account, createRoleCmd).then(()=> {
-							return {role: roleName, db: account};
-						});
+					return {role: roleName, db: account};
+				});
 			}
 		});
 
 	};
 
 	schema.statics.dropTeamSpaceRole = function (account) {
-		let dropRoleCmd = {
-			'dropRole' : C.DEFAULT_MEMBER_ROLE
+		const dropRoleCmd = {
+			"dropRole" : C.DEFAULT_MEMBER_ROLE
 		};
 
 		return this.findByRoleID(`${account}.${C.DEFAULT_MEMBER_ROLE}`).then(role => {
-			if(!role){
+			if(!role) {
 				return Promise.resolve();
 			} else {
 				return ModelFactory.dbManager.runCommand(account, dropRoleCmd);
 			}
 		});
-		
+
 	};
 
 	schema.statics.grantTeamSpaceRoleToUser = function (username, account) {
-		
-		let grantRoleCmd = {
+
+		const grantRoleCmd = {
 			grantRolesToUser: username,
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
-		
+
 		return ModelFactory.dbManager.runCommand("admin", grantRoleCmd);
 	};
 
-
-	schema.statics.findByRoleID = function(id){
-		return this.findOne({ account: 'admin'}, { _id: id});
+	schema.statics.findByRoleID = function(id) {
+		return this.findOne({ account: "admin"}, { _id: id});
 	};
 
-	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account){
+	schema.statics.revokeTeamSpaceRoleFromUser = function(username, account) {
 
-		let cmd = {
+		const cmd = {
 			revokeRolesFromUser: username,
 			roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 		};
@@ -97,11 +97,11 @@
 		return ModelFactory.dbManager.runCommand("admin", cmd);
 	};
 
-	var Role = ModelFactory.createClass(
-		'Role', 
-		schema, 
+	const Role = ModelFactory.createClass(
+		"Role",
+		schema,
 		() => {
-			return 'system.roles';
+			return "system.roles";
 		}
 	);
 

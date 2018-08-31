@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 module.exports = {
 	stringToUUID: o => o,
 	uuidToString: o => o
-}
+};

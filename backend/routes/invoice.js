@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const middlewares = require("../middlewares/middlewares");
 	const express = require("express");
@@ -26,16 +26,15 @@
 	const config = require("../config");
 	const utils = require("../utils");
 	const Invoice = require("../models/invoice");
-	const moment = require('moment');
+	const moment = require("moment");
 
 	router.get("/invoices", middlewares.isAccountAdmin, listInvoices);
 	router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
 	router.get("/invoices/:invoiceNo.pdf", middlewares.isAccountAdmin, renderInvoicePDF);
 
+	function listInvoices(req, res, next) {
 
-	function listInvoices(req, res, next){
-
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		Invoice.findByAccount(req.params.account).then(invoices => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, invoices);
@@ -44,23 +43,23 @@
 		});
 	}
 
-	function renderInvoice(req, res, next){
+	function renderInvoice(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(invoice => {
 
-			if(!invoice){
+			if(!invoice) {
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
 			let template = "invoice.pug";
 
-			if(invoice.type === "refund"){
+			if(invoice.type === "refund") {
 				template = "refund.pug";
 			}
 
-			//console.log( invoice.toJSON());
-			
+			// console.log( invoice.toJSON());
+
 			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
 
 		}).catch(err => {
@@ -68,15 +67,15 @@
 		});
 	}
 
-	function renderInvoicePDF(req, res, next){
+	function renderInvoicePDF(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		let invoice;
 
 		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_invoice => {
 
 			invoice = _invoice;
-			if(!invoice){
+			if(!invoice) {
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
@@ -84,11 +83,10 @@
 
 		}).then(pdf => {
 
-
 			res.writeHead(200, {
-				'Content-Type': 'application/pdf',
-				'Content-disposition': `inline; filename="${moment(invoice.createdAtDate).utc().format('YYYY-MM-DD')}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
-				'Content-Length': pdf.length
+				"Content-Type": "application/pdf",
+				"Content-disposition": `inline; filename="${moment(invoice.createdAtDate).utc().format("YYYY-MM-DD")}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
+				"Content-Length": pdf.length
 			});
 
 			res.end(pdf);
@@ -97,7 +95,6 @@
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
-
 
 	module.exports = router;
 

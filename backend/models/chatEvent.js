@@ -15,12 +15,18 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Queue = require('../services/queue');
+"use strict";
+const Queue = require("../services/queue");
 
-function insertEventQueue(event, emitter, account, model, extraKeys, data){
-	'use strict';
+const eventTypes = Object.freeze({
+	CREATED : "Created",
+	UPDATED : "Updated",
+	DELETED : "Deleted"
+});
 
-	let msg = {
+function insertEventQueue(event, emitter, account, model, extraKeys, data) {
+
+	const msg = {
 		event,
 		emitter,
 		account,
@@ -33,53 +39,61 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data){
 	return Queue.insertEventMessage(msg);
 }
 
-function newIssues(emitter, account, model, data){
-	'use strict';
-	return insertEventQueue('newIssues', emitter, account, model, null, data);
+// Issues notifications
+function newIssues(emitter, account, model, data) {
+	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
-function newComment(emitter, account, model, issueId, data){
-	'use strict';
-	return insertEventQueue('newComment', emitter, account, model, [issueId], data);
+function issueChanged(emitter, account, model, issueId, data) {
+	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null, data);
+}
+// ---
+
+// comments notifications
+function newComment(emitter, account, model, issueId, data) {
+	return insertEventQueue("comment" + eventTypes.CREATED, emitter, account, model, [issueId], data);
 }
 
-function commentChanged(emitter, account, model, issueId, data){
-	'use strict';
-	return insertEventQueue('commentChanged', emitter, account, model, [issueId], data);
+function commentChanged(emitter, account, model, issueId, data) {
+	return insertEventQueue("comment" + eventTypes.UPDATED, emitter, account, model, [issueId], data);
 }
 
-function commentDeleted(emitter, account, model, issueId, data){
-	'use strict';
-	return insertEventQueue('commentDeleted', emitter, account, model, [issueId], data);
+function commentDeleted(emitter, account, model, issueId, data) {
+	return insertEventQueue("comment" + eventTypes.DELETED, emitter, account, model, [issueId], data);
 }
 
-
-function modelStatusChanged(emitter, account, model, data){
-	'use strict';
-	return insertEventQueue('modelStatusChanged', emitter, account, model, null, data);
+function modelStatusChanged(emitter, account, model, data) {
+	return insertEventQueue("modelStatusChanged", emitter, account, model, null, data);
 }
 
-function issueChanged(emitter, account, model, issueId, data){
-	'use strict';
-
-	//send event to single issue changed listener and any issues changed listener
-	return Promise.all([
-		insertEventQueue('issueChanged', emitter, account, model, [issueId], data),
-		insertEventQueue('issueChanged', emitter, account, model, null, data)
-	]);
+// Not sure if this one is being used.
+function newModel(emitter, account, data) {
+	return insertEventQueue("model" + eventTypes.CREATED, emitter, account, null, null, data);
 }
 
-function newModel(emitter, account, data){
-	'use strict';
-	return insertEventQueue('newModel', emitter, account, null, null, data);
+// Groups notifications
+function newGroups(emitter, account, model, data) {
+	return insertEventQueue("group" + eventTypes.CREATED, emitter, account, model, null, data);
+}
+
+function groupChanged(emitter, account, model, data) {
+	return insertEventQueue("group" + eventTypes.UPDATED, emitter, account, model, null, data);
+}
+
+function groupsDeleted(emitter, account, model, ids) {
+	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
 module.exports = {
 	newIssues,
 	newComment,
+	newGroups,
 	commentChanged,
 	commentDeleted,
+	groupChanged,
+	groupsDeleted,
 	modelStatusChanged,
 	issueChanged,
-	newModel
+	newModel,
+	eventTypes
 };

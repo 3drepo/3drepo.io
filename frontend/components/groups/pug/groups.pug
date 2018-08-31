@@ -6,75 +6,75 @@ div.groupsContainer
         ng-if="vm.loading")
         h3 Loading groups...
 
-    md-container.groupsList(
-        ng-show="vm.toShow === 'groups'"
-        flex="100"
-        layout="column")
+    div.groupsList(
+        ng-show="vm.toShow === 'groups' && vm.groups.length > 0 || vm.loading"
+    )
 
         div.group(
-            layout="row"
+            layout="column"
             ng-if="vm.groups.length > 0"
             ng-click="vm.selectGroup(group)"
             style="background-color: {{group.highlighted ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
             ng-repeat="group in vm.groups track by $index")
 
-            div.groupMain(layout="row")
-                div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
-                div.groupMetaData(layout="column", flex="100" layout-margin)
-                    div(layout="row" layout-align="space-between center"  flex="100")
-                        span.groupName {{group.name}}
-                    div(layout="row" flex="100")
-                        span.groupMeta  {{group.author}}
-                        span.groupMeta  {{ vm.getFormattedDate(group.createdAt)  | date:"MM/dd/yyyy"}}
-                    div(layout="row"  flex="100")
-                        span.groupDescription {{group.description}}
-            
-            div.groupColorHolder(
-                layout="row"
-                layout-align="center center")
+            div.groupDetails(layout="row")
+                div.groupMain(layout="row")
+                    div.groupColorBar(style="background-color: {{vm.getGroupRGBAColor(group)}};")
+                    div.groupMetaData(layout="column", flex="100" layout-margin)
+                        div(layout="row" layout-align="space-between center"  flex="100")
+                            span.groupName {{group.name}}
+                        div(layout="row" flex="100")
+                            span.groupMeta  {{group.author}}
+                            span.groupMeta  {{ vm.getFormattedDate(group.createdAt)  | date:"MM/dd/yyyy"}}
+                        div(layout="row"  flex="100")
+                            span.groupDescription {{group.description}}
 
-                div
-                    md-button.md-icon-button(
-                        aria-label="Invert Colors"
-                        ng-click="vm.isolateGroup($event, group)")
-                        svg(width="24px" height="24px" viewBox="0 0 24 24")
-                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate1}}")
-                            path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate2}}")
-                    md-tooltip Isolate
+                div.groupColorHolder(
+                    layout="row"
+                    layout-align="center center")
 
-                div
-                    md-button.md-icon-button(
-                        ng-click="vm.toggleColorOverride($event, group)"
-                        aria-label="Invert Colors")
-                        md-icon.angular-material-icons(
-                            style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
-                    md-tooltip Toggle Colour Override
-            
-            div.groupEnterHolder(
-                ng-click="vm.editGroup()"
-                ng-if="group.selected === true"
-                layout="row"
-                layout-align="center center")
+                    div
+                        md-button.md-icon-button(
+                            aria-label="Invert Colors"
+                            ng-click="vm.isolateGroup($event, group)")
+                            svg(width="24px" height="24px" viewBox="0 0 24 24")
+                                path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate1}}")
+                                path(fill="rgba(0,0,0,0.54)" ng-attr-d="{{vm.customIcons.isolate2}}")
+                        md-tooltip Isolate
 
-                md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
+                    div
+                        md-button.md-icon-button(
+                            ng-click="vm.toggleColorOverride($event, group)"
+                            aria-label="Invert Colors")
+                            md-icon.angular-material-icons(
+                                style="color : {{vm.getColorOverrideRGBA(group)}}") invert_colors
+                        md-tooltip Toggle Colour Override
 
-            div.groupEnterSpace(
-                ng-if="group.selected !== true"
-                layout="row"
-                layout-align="center center")
+                div.groupEnterHolder(
+                    ng-click="vm.editGroup()"
+                    ng-if="group.focus"
+                    layout="row"
+                    layout-align="center center")
 
-        md-container.noGroups(
-            ng-if="vm.groups.length === 0 && !vm.loading"
-            layout-fill
-            layout="column")
+                    md-icon(class="angular-material-icons material-icons" role="img" aria-label="arrow_forward") arrow_forward
 
-            h3 No groups have been created yet
+                div.groupEnterSpace(
+                    ng-if="!group.focus"
+                    layout="row"
+                    layout-align="center center")
+
+            .remoteNotification.groupJustDeleted(ng-if="group.justBeenDeleted")
+                .message This group has been deleted
+
+    .cardInfo(
+    	ng-show="vm.toShow === 'groups' && vm.groups.length === 0 && !vm.loading"
+        )
+        p No groups have been created yet
 
     div.groupContainer(
         layout="column"
         layout-margin
         ng-show="vm.toShow === 'group'")
-
 
         div(layout="row" flex).groupMarginBottom
             div.openedGroupColorBar(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
@@ -84,7 +84,7 @@ div.groupsContainer
                     input#groupName(
                         type="text"
                         ng-disabled="!vm.canAddGroup"
-                        ng-model="vm.selectedGroup.name" 
+                        ng-model="vm.selectedGroup.name"
                         maxlength="80")
 
         md-input-container
@@ -96,43 +96,45 @@ div.groupsContainer
         md-container.groupObjectMetaContainer(
             layout="row"
             layout-align="space-between center")
-            div.groupObjectMeta  Saved Objects: {{ vm.selectedGroup.totalSavedMeshes }} 
+            div.groupObjectMeta  Saved Objects: {{ vm.selectedGroup.totalSavedMeshes }}
             div.groupObjectMeta  Selected Objects: {{ vm.selectedObjectsLen || 0 }}
-        
+
         md-container(
             layout="row"
             layout-align="space-between center")
 
             div.metaMargin
-                label.groupMeta Author: 
+                label.groupMeta Author:
                 span.groupMeta {{ vm.selectedGroup.author }}
 
             div.metaMargin
-                label.groupMeta Creation Date: 
+                label.groupMeta Creation Date:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.createdAt)  | date:"MM/dd/yyyy"}}
-           
-        md-container(
+
+        div(
             layout="row"
             layout-align="space-between center")
 
             div.metaMargin
-                label.groupMeta Last Updated By: 
+                label.groupMeta Last Updated By:
                 span.groupMeta {{ vm.selectedGroup.updatedBy }}
 
             div.metaMargin
-                label.groupMeta Updated On: 
+                label.groupMeta Updated On:
                 span.groupMeta {{ vm.getFormattedDate(vm.selectedGroup.updatedAt) | date:"MM/dd/yyyy"}}
 
+    .remoteNotification.groupJustUpdated(ng-if="vm.justUpdated && vm.toShow === 'group'")
+        .message This group has been updated by someone else
 
     div.addHolder(layout="row" flex="100")
 
         div(flex="50" layout="row" layout-align="start center")
-            button(class="md-icon-button md-button md-ink-ripple" 
+            button(class="md-icon-button md-button md-ink-ripple"
                 type="button"
                 ng-if="vm.groups.length > 0"
                 aria-label="Delete"
                 ng-show="vm.toShow === 'groups'"
-                ng-click="vm.deleteGroup()")
+                ng-click="vm.deleteHighlightedGroups()")
                 md-icon(
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
@@ -140,9 +142,9 @@ div.groupsContainer
 
             md-menu
                 button(
-                    class="md-icon-button md-button md-ink-ripple" 
-                    type="button" 
-                    aria-label="Color" 
+                    class="md-icon-button md-button md-ink-ripple"
+                    type="button"
+                    aria-label="Color"
                     ng-disabled="!vm.canAddGroup"
                     ng-show="vm.toShow === 'group' && !vm.savingGroup"
                     ng-click="vm.openColorMenu($mdMenu, $event)")
@@ -167,9 +169,9 @@ div.groupsContainer
                             div(layout-fill).groupCurrentColorHolder
                                 label.groupCurrentColor Current Colour
                                 div.groupCurrentColorBlock(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
-            
 
-            button(class="md-icon-button md-button md-ink-ripple" 
+
+            button(class="md-icon-button md-button md-ink-ripple"
                 type="button"
                 ng-if="vm.groups.length > 0"
                 aria-label="Reselect"
@@ -182,8 +184,8 @@ div.groupsContainer
                     aria-hidden="true") replay
 
         div(flex="50" layout="row" layout-align="end center")
-            button(class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
+            button(class="md-accent md-fab md-mini md-button md-ink-ripple"
+                type="button"
                 aria-label="Add"
                 ng-show="vm.toShow === 'groups'"
                 ng-disabled="!vm.canAddGroup"
@@ -192,11 +194,11 @@ div.groupsContainer
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
                     aria-hidden="true") add
-            
+
             button(
-                class="md-accent md-fab md-mini md-button md-ink-ripple" 
-                type="button" 
-                aria-label="Add" 
+                class="md-accent md-fab md-mini md-button md-ink-ripple"
+                type="button"
+                aria-label="Add"
                 ng-disabled="vm.saveDisabled()"
                 ng-show="vm.toShow === 'group' && !vm.savingGroup"
                 ng-click="vm.handleGroupSave()")
@@ -205,13 +207,13 @@ div.groupsContainer
                     class="angular-material-icons ng-scope material-icons"
                     role="img"
                     aria-hidden="true") save
-            
+
             md-progress-circular.spinner(
                 ng-if="vm.toShow === 'group' && vm.savingGroup")
 
 
 
 
-        
-        
+
+
 

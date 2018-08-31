@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (() => {
-	"use strict";
 
 	const utils = require("./utils.js");
 
@@ -27,11 +27,11 @@
 		});
 	}
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// New API
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	// Overall constants
 	define("MASTER_BRANCH_NAME", "master");
@@ -47,11 +47,11 @@
 	define("REPO_COLLECTION_HISTORY", "history");
 	define("REPO_COLLECTION_STASH", "stash");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Node types
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_NODE_TYPE_TRANSFORMATION", "transformation");
 	define("REPO_NODE_TYPE_MESH", "mesh");
@@ -63,11 +63,11 @@
 	define("REPO_NODE_TYPE_META", "meta");
 	define("REPO_NODE_TYPE_MAP", "map");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Shared fields
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_NODE_LABEL_ID", "_id"); // TODO: remove all references to replace with UNIQUE_ID instead
 	define("REPO_NODE_LABEL_UNIQUE_ID", "_id");
@@ -80,19 +80,19 @@
 	define("REPO_NODE_LABEL_PARENTS", "parents");
 	define("REPO_NODE_LABEL_NAME", "name");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Transformation fields
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_NODE_LABEL_MATRIX", "matrix");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Mesh fields
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_NODE_LABEL_VERTICES", "vertices");
 	define("REPO_NODE_LABEL_VERTICES_COUNT", "vertices_count");
@@ -105,20 +105,20 @@
 	define("REPO_NODE_LABEL_UV_CHANNELS_COUNT", "uv_channels_count");
 	define("REPO_NODE_LABEL_BOUNDING_BOX", "bounding_box");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Texture fields
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_NODE_LABEL_EXTENSION", "extension");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Camera fields
 	//
-	//-----------------------------------------------------------------------------
-	
+	// -----------------------------------------------------------------------------
+
 	define("REPO_NODE_LABEL_LOOK_AT", "look_at");
 	define("REPO_NODE_LABEL_POSITION", "position");
 	define("REPO_NODE_LABEL_UP", "up");
@@ -127,11 +127,11 @@
 	define("REPO_NODE_LABEL_FAR", "far");
 	define("REPO_NODE_LABEL_ASPECT_RATIO", "aspect_ratio");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Revision fields
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_NODE_LABEL_AUTHOR", "author");
 	define("REPO_NODE_LABEL_BRANCH", "branch");
@@ -144,12 +144,12 @@
 	define("REPO_NODE_LABEL_MODIFIED_SHARED_IDS", "modified");
 	define("REPO_NODE_LABEL_UNMODIFIED_SHARED_IDS", "unmodified");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Merge map
 	//
-	//-----------------------------------------------------------------------------
-	
+	// -----------------------------------------------------------------------------
+
 	define("REPO_NODE_LABEL_MERGED_NODES", "merged_nodes");
 	define("REPO_NODE_LABEL_VERTEX_MAP", "v_map");
 	define("REPO_NODE_LABEL_TRIANGLE_MAP", "t_map");
@@ -164,7 +164,7 @@
 	define("REPO_NODE_LABEL_COMBINED_MAP", "m_map");
 	define("REPO_NODE_LABEL_MERGE_MAP_OFFSET", "offset");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	// Following fields are not stored in the repository,
 	// they are only implied!
 	// TODO: refactor name such as UNUSED_LABEL to distinguishe from DB fields!
@@ -179,20 +179,20 @@
 	define("REPO_SCENE_LABEL_METAS_COUNT", "meta_count");
 	define("REPO_SCENE_LABEL_MAPS_COUNT", "map_count");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// SRC format output
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("SRC_IDX_LIST", "idx_list");
 	define("SRC_VERTEX_LIMIT", 65535);
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// API server constants
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_REST_API_ACCOUNT", "account");
 	define("REPO_REST_API_PROJECT", "project");
@@ -216,42 +216,42 @@
 	define("GET_API", "all");
 	define("MAP_API", "map");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// MongoDB error codes
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("MONGO_AUTH_FAILED", 18);
 	define("MONGO_DUPLICATE_KEY", "11000");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Payment types
 	//
-	//-----------------------------------------------------------------------------
-	define("PRO_RATA_PAYMENT", 'pro-rata');
-	define("REGULAR_PAYMENT", 'regular');
+	// -----------------------------------------------------------------------------
+	define("PRO_RATA_PAYMENT", "pro-rata");
+	define("REGULAR_PAYMENT", "regular");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Date format strings
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	define("DATE_FORMAT", "YYYY-MM-DD");
 	define("DATE_TIME_FORMAT", "DD-MM-YYYY HH:mm");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Permissions
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	// not sure when to use
 	define("PERM_CREATE_TEAM_SPACE", "create_team_space");
 	define("PERM_DELETE_TEAM_SPACE", "delete_team_space");
 
-	//team space
+	// team space
 	define("PERM_ASSIGN_LICENCE", "assign_licence");
 	define("PERM_REVOKE_LICENCE","revoke_licence");
 	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
@@ -261,7 +261,7 @@
 	define("PERM_ASSIGN_JOB","assign_job");
 	define("PERM_VIEW_PROJECTS", "view_projects"),
 
-	//project level permission
+	// project level permission
 	define("PERM_CREATE_MODEL", "create_model");
 	define("PERM_CREATE_FEDERATION", "create_federation");
 	define("PERM_PROJECT_ADMIN", "admin_project");
@@ -290,9 +290,7 @@
 	define("PERM_DELETE_MODEL", "delete_model");
 	define("PERM_MANAGE_MODEL_PERMISSION", "manage_model_permission");
 
-
-
-	//team space
+	// team space
 	define("ACCOUNT_PERM_LIST", [
 		module.exports.PERM_ASSIGN_LICENCE,
 		module.exports.PERM_REVOKE_LICENCE,
@@ -304,7 +302,7 @@
 		module.exports.PERM_VIEW_PROJECTS
 	]);
 
-	//project level permission
+	// project level permission
 	define("PROJECT_PERM_LIST", [
 		module.exports.PERM_CREATE_MODEL,
 		module.exports.PERM_CREATE_FEDERATION,
@@ -352,64 +350,64 @@
 
 	define("IMPLIED_PERM", {
 		[module.exports.PERM_TEAMSPACE_ADMIN]:{
-			'account': module.exports.ACCOUNT_PERM_LIST,
-			'project': module.exports.PROJECT_PERM_LIST,
-			'model': module.exports.MODEL_PERM_LIST
+			"account": module.exports.ACCOUNT_PERM_LIST,
+			"project": module.exports.PROJECT_PERM_LIST,
+			"model": module.exports.MODEL_PERM_LIST
 		},
 
 		[module.exports.PERM_VIEW_PROJECTS]:{
-			'project': [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
-			'model': [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
+			"project": [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
+			"model": [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
 		},
 
 		[module.exports.PERM_PROJECT_ADMIN]: {
-			'project': module.exports.PROJECT_PERM_LIST,
-			'model': module.exports.MODEL_PERM_LIST
+			"project": module.exports.PROJECT_PERM_LIST,
+			"model": module.exports.MODEL_PERM_LIST
 		},
 
 		[module.exports.PERM_UPLOAD_FILES_ALL_MODELS]: {
-			'model': [module.exports.PERM_UPLOAD_FILES]
+			"model": [module.exports.PERM_UPLOAD_FILES]
 		},
 
 		[module.exports.PERM_EDIT_FEDERATION_ALL_MODELS]: {
-			'model': [module.exports.PERM_EDIT_FEDERATION]
+			"model": [module.exports.PERM_EDIT_FEDERATION]
 		},
 
 		[module.exports.PERM_CREATE_ISSUE_ALL_MODELS]: {
-			'model': [module.exports.PERM_CREATE_ISSUE]
+			"model": [module.exports.PERM_CREATE_ISSUE]
 		},
 
 		[module.exports.PERM_COMMENT_ISSUE_ALL_MODELS]: {
-			'model': [module.exports.PERM_COMMENT_ISSUE]
+			"model": [module.exports.PERM_COMMENT_ISSUE]
 		},
 
 		[module.exports.PERM_VIEW_ISSUE_ALL_MODELS]: {
-			'model': [module.exports.PERM_VIEW_ISSUE]
+			"model": [module.exports.PERM_VIEW_ISSUE]
 		},
 
 		[module.exports.PERM_VIEW_MODEL_ALL_MODELS]: {
-			'model': [module.exports.PERM_VIEW_MODEL]
+			"model": [module.exports.PERM_VIEW_MODEL]
 		},
 
 		[module.exports.PERM_DOWNLOAD_MODEL_ALL_MODELS]: {
-			'model': [module.exports.PERM_DOWNLOAD_MODEL]
+			"model": [module.exports.PERM_DOWNLOAD_MODEL]
 		},
 
 		[module.exports.PERM_CHANGE_MODEL_SETTINGS_ALL_MODELS]: {
-			'model': [module.exports.PERM_CHANGE_MODEL_SETTINGS]
+			"model": [module.exports.PERM_CHANGE_MODEL_SETTINGS]
 		},
 
 		[module.exports.PERM_MANAGE_MODEL_PERMISSION]: {
-			'model': module.exports.MODEL_PERM_LIST
+			"model": module.exports.MODEL_PERM_LIST
 		}
 
 	});
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// User templates
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("ADMIN_TEMPLATE", "admin");
 	define("COLLABORATOR_TEMPLATE", "collaborator");
@@ -435,18 +433,18 @@
 		module.exports.PERM_VIEW_ISSUE,
 		module.exports.PERM_VIEW_MODEL,
 		module.exports.PERM_DOWNLOAD_MODEL,
-		module.exports.PERM_EDIT_FEDERATION,
+		module.exports.PERM_EDIT_FEDERATION
 	]);
 
 	define("ADMIN_TEMPLATE_PERMISSIONS",[
 		module.exports.PERM_MANAGE_MODEL_PERMISSION
 	]);
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Blacklist
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("REPO_BLACKLIST_USERNAME", [
 		"payment",
@@ -479,47 +477,45 @@
 		"system"
 	]);
 
-
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Regular expressions
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 
 	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
-	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/);
+	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/);
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Repo subscription plans
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	define("BASIC_PLAN", "BASIC");
 	define("PAID_PLAN", "THE-100-QUID-PLAN");
 
-
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Invocie state
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	define("INV_INIT", "init");
 	define("INV_PENDING", "pending");
 	define("INV_COMPLETE", "complete");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Invocie type
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	define("INV_TYPE_INVOICE", "invoice");
 	define("INV_TYPE_REFUND", "refund");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// ipn type
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	define("IPN_PAYMENT_INIT", "init");
 	define("IPN_PAYMENT_SUCCESS", "success");
 	define("IPN_PAYMENT_CANCEL", "cancel");
@@ -528,39 +524,38 @@
 	define("IPN_PAYMENT_REFUNDED", "refunded");
 	define("IPN_UNKONWN", "unkonwn");
 
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	//
 	// Headers
 	//
-	//-----------------------------------------------------------------------------
+	// -----------------------------------------------------------------------------
 	define("HEADER_SOCKET_ID", "x-socket-id");
 
 	define("PROJECT_DEFAULT_ID", "default");
 
+	// issues
 
-	//issues
+	define("ISSUE_STATUS_OPEN", "open");
+	define("ISSUE_STATUS_IN_PROGRESS", "in progress");
+	define("ISSUE_STATUS_FOR_APPROVAL", "for approval");
+	define("ISSUE_STATUS_CLOSED", "closed");
 
-	define('ISSUE_STATUS_OPEN', 'open'); 
-	define('ISSUE_STATUS_IN_PROGRESS', 'in progress'); 
-	define('ISSUE_STATUS_FOR_APPROVAL', 'for approval'); 
-	define('ISSUE_STATUS_CLOSED', 'closed'); 
-
-	define('MAIL_URLS',{
-		'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
-		'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
-		'model': data => `/${data.account}/${data.model}`
+	define("MAIL_URLS",{
+		"forgotPassword": data => `/passwordChange?username=${data.username}&token=${data.token}`,
+		"verify": data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
+		"model": data => `/${data.account}/${data.model}`
 	});
 
-	define('DEFAULT_JOBS',[
-		{ _id: 'Client', "color": "#a6cee3" },
-		{ _id: 'Architect', "color": "#213f99"},
-		{ _id: 'Structural Engineer', "color" : "#33a02c"},
-		{ _id: 'MEP Engineer', "color": "#fb9a99"},
-		{ _id: 'Project Manager', "color": "#e31a1c"},
-		{ _id: 'Quantity Surveyor', "color": "#ff7f00"},
-		{ _id: 'Asset Manager', "color" : "#ffff99"},
-		{ _id: 'Main Contractor', "color": "#b15928"},
-		{ _id: 'Supplier', "color": "#6a3d9a"}
+	define("DEFAULT_JOBS",[
+		{ _id: "Client", "color": "#a6cee3" },
+		{ _id: "Architect", "color": "#213f99"},
+		{ _id: "Structural Engineer", "color" : "#33a02c"},
+		{ _id: "MEP Engineer", "color": "#fb9a99"},
+		{ _id: "Project Manager", "color": "#e31a1c"},
+		{ _id: "Quantity Surveyor", "color": "#ff7f00"},
+		{ _id: "Asset Manager", "color" : "#ffff99"},
+		{ _id: "Main Contractor", "color": "#b15928"},
+		{ _id: "Supplier", "color": "#6a3d9a"}
 	]);
-	
+
 })();

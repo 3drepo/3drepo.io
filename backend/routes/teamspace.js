@@ -15,36 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
 
-	const express = require('express');
+	const express = require("express");
 	const router = express.Router({mergeParams: true});
-	const responseCodes = require('../response_codes');
-	const middlewares = require('../middlewares/middlewares');
+	const responseCodes = require("../response_codes");
+	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
 
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
-	
-	router.get("/members", middlewares.loggedIn, getMemberList);	
+
+	router.get("/members", middlewares.loggedIn, getMemberList);
 	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 
-
-	function getQuotaInfo(req, res, next){
+	function getQuotaInfo(req, res, next) {
 
 		User.findByUserName(req.session.user.username).then(user => {
 
-			if(!user){
+			if(!user) {
 				return Promise.reject(responseCodes.USER_NOT_FOUND);
 			}
 
 			if(user.isMemberOfTeamspace(req.params.account)) {
 				return User.getQuotaInfo(req.params.account);
 
-			}
-			else {
+			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
 		}).then(quotaInfo => {
@@ -53,11 +51,10 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
 
-
-	function getMemberList(req, res, next){
+	function getMemberList(req, res, next) {
 
 		User.findByUserName(req.session.user.username).then(user => {
 
@@ -68,8 +65,7 @@
 			if(user.isMemberOfTeamspace(req.params.account)) {
 				return User.getMembersAndJobs(req.params.account);
 
-			}
-			else {
+			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
 		}).then(memArray => {
@@ -78,34 +74,33 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-		
+
 	}
-	
-	
+
 	function addTeamMember(req, res, next) {
-	
-		let responsePlace = utils.APIInfo(req);
-	
+
+		const responsePlace = utils.APIInfo(req);
+
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				if(req.params.user)
+				if(req.params.user) {
 					return dbUser.addTeamMember(req.params.user);
-				else
+				} else {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
+				}
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
 			})
 			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, 
+				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 			});
 	}
 
-	
 	function removeTeamMember(req, res, next) {
 
-		let responsePlace = utils.APIInfo(req);
+		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
 				return dbUser.removeTeamMember(req.params.user, req.query.cascadeRemove);
@@ -114,11 +109,10 @@
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
 			})
 			.catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, 
+				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 			});
 	}
-
 
 	module.exports = router;
 }());

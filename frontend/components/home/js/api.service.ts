@@ -95,7 +95,7 @@ export class APIService {
 	 * @param headers
 	 * @returns {*}
 	 */
-	public post(url: string, data: any, headers: any) {
+	public post(url: string, data: any, headers: any = null) {
 
 		this.checkUrl(url);
 		url = encodeURI(url);

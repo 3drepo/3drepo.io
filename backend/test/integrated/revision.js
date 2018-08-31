@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2016 3D Repo Ltd
@@ -17,257 +17,250 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
-let responseCodes = require("../../response_codes.js");
-let helpers = require("./helpers");
-let C = require('../../constants');
-let async = require('async');
-let ModelSetting = require('../../models/modelSetting');
-let User = require('../../models/user');
-let config = require('../../config');
-let fs = require('fs');
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
+const responseCodes = require("../../response_codes.js");
+const helpers = require("./helpers");
+const C = require("../../constants");
+const async = require("async");
+const ModelSetting = require("../../models/modelSetting");
+const User = require("../../models/user");
+const config = require("../../config");
+const fs = require("fs");
 
-describe('Revision', function () {
+describe("Revision", function () {
 
-	let User = require('../../models/user');
+	const User = require("../../models/user");
 	let server;
 	let agent;
-	let username = 'rev';
-	let password = '123456';
-	let model = 'monkeys';
+	const username = "rev";
+	const password = "123456";
+	const model = "monkeys";
 	let revisions;
 
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
 			agent = request.agent(server);
-			agent.post('/login')
-			.send({ username, password })
-			.expect(200, function(err, res){
-				expect(res.body.username).to.equal(username);
-				done(err);
-			});
+			agent.post("/login")
+				.send({ username, password })
+				.expect(200, function(err, res) {
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
 
 		});
 
 	});
 
-	after(function(done){
+	after(function(done) {
 
-		server.close(function(){
-			console.log('API test server is closed');
+		server.close(function() {
+			console.log("API test server is closed");
 			done();
 		});
 
 	});
 
-
-	it('list revisions should succeed', function(done){
+	it("list revisions should succeed", function(done) {
 		agent.get(`/${username}/${model}/revisions.json`)
-		.expect(200, function(err, res){
-			expect(res.body.length).to.equal(3);
-			expect(res.body[0]).to.have.property("_id");
-			expect(res.body[0]).to.have.property("timestamp");
-			expect(res.body[0]).to.have.property("author");
-			revisions = res.body;
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				expect(res.body.length).to.equal(3);
+				expect(res.body[0]).to.have.property("_id");
+				expect(res.body[0]).to.have.property("timestamp");
+				expect(res.body[0]).to.have.property("author");
+				revisions = res.body;
+				done(err);
+			});
 	});
 
-	it('get asset bundle list by revision id should succeed', function(done){
+	it("get asset bundle list by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/unityAssets.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get asset bundle list by revision tag should succeed', function(done){
+	it("get asset bundle list by revision tag should succeed", function(done) {
 
-		let revWithTag = revisions.find(rev => rev.tag);
+		const revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/unityAssets.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get asset bundle list of non existing rev should fail', function(done){
+	it("get asset bundle list of non existing rev should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/invalidtag/unityAssets.json`)
-		.expect(400, function(err, res){
-			done(err);
-		});
+			.expect(400, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get issues by revision id should succeed', function(done){
+	it("get issues by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/${revisions[0]._id}/issues.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get issues by revision tag should succeed', function(done){
-		let revWithTag = revisions.find(rev => rev.tag);
+	it("get issues by revision tag should succeed", function(done) {
+		const revWithTag = revisions.find(rev => rev.tag);
 		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/issues.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-
-	it('get tree by revision tag should succeed', function(done){
+	it("get tree by revision tag should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/original/fulltree.json`)
-		.expect(200, function(err, res){
-			expect(JSON.parse(res.text).mainTree.nodes.name).to.equal('suzanne-flat.obj');
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				expect(JSON.parse(res.text).mainTree.nodes.name).to.equal("suzanne-flat.obj");
+				done(err);
+			});
 	});
 
-
-	it('get tree by revision id should succeed', function(done){
+	it("get tree by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/6c558faa-8236-4255-a48a-a4ce99465182/fulltree.json`)
-		.expect(200, function(err, res){
-			expect(JSON.parse(res.text).mainTree.nodes.name).to.equal('suzanne-flat.obj');
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				expect(JSON.parse(res.text).mainTree.nodes.name).to.equal("suzanne-flat.obj");
+				done(err);
+			});
 	});
 
-	it('get tree by non existing revision should fail', function(done){
+	it("get tree by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/fulltree.json`)
-		.expect(404, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.TREE_NOT_FOUND.value);
-			done(err);
-		});
+			.expect(404, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.TREE_NOT_FOUND.value);
+				done(err);
+			});
 	});
 
-
-
-	it('get tree of head of master should succeed', function(done){
+	it("get tree of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/fulltree.json`)
-		.expect(200, function(err, res){
-			expect(JSON.parse(res.text).mainTree.nodes.name).to.equal('3DrepoBIM.obj');
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				expect(JSON.parse(res.text).mainTree.nodes.name).to.equal("3DrepoBIM.obj");
+				done(err);
+			});
 	});
 
-	//IdMap
-	it('get idMap by revision id should succeed', function(done){
+	// IdMap
+	it("get idMap by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/idMap.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get idMap by non existing revision should fail', function(done){
+	it("get idMap by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/idMap.json`)
-		.expect(400, function(err, res){
-			done(err);
-		});
+			.expect(400, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get idMap of head of master should succeed', function(done){
+	it("get idMap of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/idMap.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
-	});	
+			.expect(200, function(err, res) {
+				done(err);
+			});
+	});
 
-	//IdToMeshes
-	it('get idToMeshes by revision id should succeed', function(done){
+	// IdToMeshes
+	it("get idToMeshes by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/idToMeshes.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get idToMeshes by non existing revision should fail', function(done){
+	it("get idToMeshes by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/idToMeshes.json`)
-		.expect(400, function(err, res){
-			done(err);
-		});
+			.expect(400, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get idToMeshes of head of master should succeed', function(done){
+	it("get idToMeshes of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/idToMeshes.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
-	});	
+			.expect(200, function(err, res) {
+				done(err);
+			});
+	});
 
-	//meshes
-	it('get all meshes by revision id should succeed', function(done){
+	// meshes
+	it("get all meshes by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/meshes.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get meshes by non existing revision should fail', function(done){
+	it("get meshes by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/meshes.json`)
-		.expect(400, function(err, res){
-			done(err);
-		});
+			.expect(400, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get meshes of head of master should succeed', function(done){
+	it("get meshes of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/meshes.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
-	});	
+			.expect(200, function(err, res) {
+				done(err);
+			});
+	});
 
-
-
-	//treePath
-	it('get treePath by revision id should succeed', function(done){
+	// treePath
+	it("get treePath by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/tree_path.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
+			.expect(200, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get treePath by non existing revision should fail', function(done){
+	it("get treePath by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/tree_path.json`)
-		.expect(400, function(err, res){
-			done(err);
-		});
+			.expect(400, function(err, res) {
+				done(err);
+			});
 	});
 
-	it('get treePath of head of master should succeed', function(done){
+	it("get treePath of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/tree_path.json`)
-		.expect(200, function(err, res){
-			done(err);
-		});
-	});	
+			.expect(200, function(err, res) {
+				done(err);
+			});
+	});
 
-	it('upload with exisitng tag name should fail', function(done){
+	it("upload with exisitng tag name should fail", function(done) {
 
-		let revWithTag = revisions.find(rev => rev.tag);
+		const revWithTag = revisions.find(rev => rev.tag);
 		agent.post(`/${username}/${model}/upload`)
-		.field('tag', revWithTag.tag)
-		.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value)
-			done(err);
-		});
+			.field("tag", revWithTag.tag)
+			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
+				done(err);
+			});
 
 	});
 
-	it('upload with invalid tag name should fail', function(done){
+	it("upload with invalid tag name should fail", function(done) {
 
 		agent.post(`/${username}/${model}/upload`)
-		.field('tag', 'a!b')
-		.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
-		.expect(400, function(err, res){
-			expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value)
-			done(err);
-		});
+			.field("tag", "a!b")
+			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+				done(err);
+			});
 
 	});
 });

@@ -26,7 +26,7 @@ export class EventService {
 		"$timeout"
 	];
 
-	private EVENT = {
+	public EVENT = {
 		AUTO_META_DATA: "EVENT_AUTO_META_DATA",
 		FILTER: "EVENT_FILTER",
 		FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",

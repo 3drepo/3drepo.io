@@ -78,7 +78,7 @@ class BottomButtonsController implements ng.IController {
 					mode: "RESET",
 					label: "Reset",
 					fn: () => {
-						this.ViewerService.helicopterSpeedReset();
+						this.ViewerService.helicopterSpeedReset(true);
 						this.navigationState.VALUE = 1;
 						this.$timeout(); // Force digest
 					}
@@ -88,8 +88,7 @@ class BottomButtonsController implements ng.IController {
 					label: "Increase",
 					fn: () => {
 						if (this.navigationState.VALUE < 99) {
-							this.ViewerService.helicopterSpeedUp();
-							this.navigationState.VALUE++;
+							this.ViewerService.helicopterSpeedUp(++this.navigationState.VALUE);
 							this.$timeout();  // Force digest
 						}
 					}
@@ -99,8 +98,7 @@ class BottomButtonsController implements ng.IController {
 					label: "Decrease",
 					fn: () => {
 						if (this.navigationState.VALUE > -99) {
-							this.ViewerService.helicopterSpeedDown();
-							this.navigationState.VALUE--;
+							this.ViewerService.helicopterSpeedDown(--this.navigationState.VALUE);
 							this.$timeout();  // Force digest
 						}
 					}
@@ -149,6 +147,22 @@ class BottomButtonsController implements ng.IController {
 			const newMode = this.ViewerService.getNavMode();
 			if (newMode !== this.selectedMode) {
 				this.selectedMode = newMode;
+			}
+			const heliSpeed = this.ViewerService.getHeliSpeed();
+			if (this.selectedMode === this.navigationState.MODES.HELICOPTER.mode &&
+				heliSpeed && heliSpeed !== this.navigationState.VALUE) {
+
+				this.ViewerService.helicopterSpeedReset(false);
+				const diff = heliSpeed - 1;
+				this.navigationState.VALUE = heliSpeed;
+				const slower = diff > 0;
+				for (let i = 0; i < Math.abs(diff); ++i) {
+					if (slower) {
+						this.ViewerService.helicopterSpeedUp(undefined);
+					} else {
+						this.ViewerService.helicopterSpeedDown(undefined);
+					}
+				}
 			}
 		}, 1000);
 
@@ -200,7 +214,6 @@ class BottomButtonsController implements ng.IController {
 		if (mode !== undefined) {
 			// Set the viewing mode
 			this.selectedMode = mode;
-			this.navigationState.SPEED.RESET.fn();
 			this.ViewerService.setNavMode(this.navigationState.MODES[mode].mode);
 			this.showNavigationState = false;
 		}

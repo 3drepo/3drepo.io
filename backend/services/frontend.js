@@ -17,10 +17,9 @@
 
 "use strict";
 
-
 /**
- * Creates frontend API Express app 
- * 
+ * Creates frontend API Express app
+ *
  * @param {Object} serverConfig - Config for server instance
  * @returns
  */
@@ -36,11 +35,11 @@ module.exports.createApp = function () {
 	const cors = require("cors");
 
 	app.use("/config", configRoute);
-	
+
 	const publicDir = __dirname + "/../../public";
 
 	app.use(compress({ level: 9 }));
-	app.use(cors({ origin: true, credentials: true }));	
+	app.use(cors({ origin: true, credentials: true }));
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
@@ -57,7 +56,7 @@ module.exports.createApp = function () {
 			next();
 		}
 		res.sendFile(path.resolve(publicDir + "/index.html"));
-		
+
 	});
 
 	return app;

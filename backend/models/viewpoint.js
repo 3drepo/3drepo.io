@@ -27,18 +27,18 @@ const view = {};
 view.findByUID = function(dbCol, uid, projection) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(view => {
+		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
 
-			if (!view) {
+			if (!vp) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
 
-			return view;
+			return vp;
 		});
 	});
 };
 
-view.listViewpoints = function(dbCol){
+view.listViewpoints = function(dbCol) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
@@ -54,20 +54,20 @@ view.listViewpoints = function(dbCol){
 
 };
 
-view.getThumbnail = function(dbColOptions, uid){
+view.getThumbnail = function(dbColOptions, uid) {
 
-	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(view => {
-		if (!view.screenshot) {
+	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {
+		if (!vp.screenshot) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			// Mongo stores it as it's own binary object, so we need to do buffer.buffer!
-			return view.screenshot.buffer.buffer;
+			return vp.screenshot.buffer.buffer;
 		}
 	});
 
 };
 
-view.updateAttrs = function(dbCol, id, data){
+view.updateAttrs = function(dbCol, id, data) {
 
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
@@ -86,7 +86,7 @@ view.updateAttrs = function(dbCol, id, data){
 	});
 };
 
-view.createViewpoint = function(dbCol, data){
+view.createViewpoint = function(dbCol, data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -128,7 +128,7 @@ view.createViewpoint = function(dbCol, data){
 	});
 };
 
-view.deleteViewpoint = function(dbCol, id){
+view.deleteViewpoint = function(dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);

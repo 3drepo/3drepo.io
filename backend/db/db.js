@@ -15,20 +15,20 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+"use strict";
 (function() {
-	"use strict";
-	
+
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
 	const connConfig = {
-				autoReconnect: true
-			};
+		autoReconnect: true
+	};
 
 	let db;
-	
+
 	function disconnect() {
-		if(db){
+		if(db) {
 			db.close();
 			db = null;
 		}
@@ -38,33 +38,33 @@
 		getDB(database).then(dbConn => {
 			dbConn.dropCollection(collection.name);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
-
 
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
 		let connectString = "mongodb://" + config.db.username + ":" + config.db.password + "@";
-		let hostPorts = [];
+		const hostPorts = [];
 
-		/* jshint ignore:start */
-		for(let host in config.db.host)
-		/* jshint ignore:end */
-		{
+		for(const host in config.db.host) {
 			hostPorts.push(config.db.host[host] + ":" + config.db.port[host]);
 		}
 
 		connectString += hostPorts.join(",");
 		connectString += "/" + database + "?authSource=admin";
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
+
+		if(Number.isInteger(config.db.timeout)) {
+			connectString += "&socketTimeoutMS=" + config.db.timeout;
+		}
 		return connectString;
 	}
 
 	function getDB(database) {
-		if(db){
+		if(db) {
 			return Promise.resolve(db.db(database));
 		} else {
 			return MongoClient.connect(getURL(database), connConfig).then(_db => {
@@ -75,7 +75,7 @@
 	}
 
 	function getAuthDB() {
-		return MongoClient.connect(getURL('admin'), connConfig).then(_db => {
+		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
 			return _db;
 		});
 	}
@@ -84,7 +84,7 @@
 		return getDB(database).then(dbConn => {
 			return new GridFSBucket(dbConn, collection);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
@@ -93,7 +93,7 @@
 		return getDB(database).then(dbConn => {
 			return dbConn.collection(colName);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
@@ -102,12 +102,12 @@
 		return getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}
 
-	//FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
+	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
 	function _getCollection(database, colName)	{
 		return db.db(database).collection(colName);
 	}
@@ -116,17 +116,17 @@
 		return getDB(database).then(dbConn => {
 			return dbConn.listCollections().toArray();
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
-		
+
 	}
-	
+
 	function runCommand(database, cmd) {
 		return getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
 		}).catch(err => {
-			disconnect();	
+			disconnect();
 			return Promise.reject(err);
 		});
 	}

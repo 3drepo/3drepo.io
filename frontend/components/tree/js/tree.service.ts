@@ -21,13 +21,14 @@ export class TreeService {
 		"$q",
 		"APIService",
 		"ViewerService",
-		"DocsService"
+		"DocsService",
+		"MultiSelectService"
 	];
 
-	public highlightSelectedViewerObject;
 	public highlightMap;
 	public highlightMapUpdateTime;
 	public selectionDataUpdateTime;
+	public currentSelectedNodes;
 	public visibilityUpdateTime;
 	public selectedIndex;
 	public treeReady;
@@ -38,9 +39,6 @@ export class TreeService {
 	private baseURL;
 
 	private allNodes;
-	private currentSelectedNodes;
-	private clickedHidden;
-	private clickedShown;
 	private nodesToShow;
 	private subTreesById;
 	private subModelIdToPath;
@@ -59,7 +57,8 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
-		private DocsService
+		private DocsService,
+		private MultiSelectService
 	) {
 		this.reset();
 
@@ -77,14 +76,11 @@ export class TreeService {
 		this.allNodes = [];
 		this.idToPath = {};
 		this.currentSelectedNodes = {};
-		this.clickedHidden = {}; // or reset?
-		this.clickedShown = {}; // or reset?
 		this.nodesToShow = [];
 		this.subTreesById = {};
 		this.subModelIdToPath = {};
 		this.idToObjRef = {};
 		this.highlightMapUpdateTime = Date.now();
-		this.highlightSelectedViewerObject = true;
 
 		this.SELECTION_STATES = {
 			parentOfUnselected : 0,
@@ -102,13 +98,6 @@ export class TreeService {
 
 	public onReady() {
 		return this.ready.promise;
-	}
-
-	/**
-	 * @param value	True if OBJECT_SELECTED should be handled by component
-	 */
-	public setHighlightSelected(value: boolean) {
-		this.highlightSelectedViewerObject = value;
 	}
 
 	public genIdToObjRef(tree: any, map: any) {
@@ -434,22 +423,6 @@ export class TreeService {
 		this.currentSelectedNodes = nodes;
 	}
 
-	public getClickedHidden() {
-		return this.clickedHidden;
-	}
-
-	public resetClickedHidden() {
-		this.clickedHidden = {};
-	}
-
-	public getClickedShown() {
-		return this.clickedShown;
-	}
-
-	public resetClickedShown() {
-		this.clickedShown = {};
-	}
-
 	public getNodesToShow() {
 		return this.nodesToShow;
 	}
@@ -479,31 +452,24 @@ export class TreeService {
 	 * @param nodes	Array of root node to show.
 	 */
 	public initNodesToShow(nodes) {
-		// TODO: Is it a good idea to save tree state within each node?
 		this.nodesToShow = nodes;
 		this.nodesToShow[0].level = 0;
 		this.nodesToShow[0].expanded = false;
 		this.nodesToShow[0].selected = this.SELECTION_STATES.unselected;
-	}
-
-	/**
-	 * Show the first set of children using the expand function but deselect the child used for this.
-	 */
-	public expandFirstNode() {
-		if (this.nodesToShow.length > 0) {
-			this.toggleNodeExpansion(null, this.nodesToShow[0]._id);
-		}
+		this.expandTreeNode(this.nodesToShow[0]);
 	}
 
 	/**
 	 * Get map of meshes and associated colours from an array of nodes
 	 */
-	public getMeshMapFromNodes(nodes: any, idToMeshes: any, colour?: number[]) {
+	public getMeshMapFromNodes(nodes: any) {
 
 		if (!Array.isArray(nodes)) {
 			console.error("getMeshMapFromNodes nodes is not an array: ", nodes);
 			return;
 		}
+
+		const idToMeshes = this.treeMap.idToMeshes;
 
 		if (!idToMeshes) {
 			console.error("getMeshMapFromNodes - idToMeshes is not defined: ", idToMeshes);
@@ -527,10 +493,6 @@ export class TreeService {
 
 			if (highlightMap[key] === undefined) {
 				highlightMap[key] = {};
-			}
-
-			if (highlightMap[key].colour === undefined) {
-				highlightMap[key].colour = colour;
 			}
 
 			// Check top level and then check if sub model of fed
@@ -656,131 +618,6 @@ export class TreeService {
 				this.expandTreeNode(nodeToExpand);
 			}
 		}
-	}
-
-	/**
-	* Collapse a given tree node in the UI
-	* @param nodeToCollapse the node to collapse
-	*/
-	public collapseTreeNode(nodeToCollapse: any) {
-
-		let subNodes = [];
-		if (nodeToCollapse.children) {
-			subNodes = subNodes.concat(nodeToCollapse.children);
-		}
-
-		nodeToCollapse.expanded = false;
-
-		while (subNodes.length > 0) {
-
-			const subNodeToCollapse = subNodes.pop();
-
-			// Collapse the node
-			if (subNodeToCollapse.expanded) {
-				// If it has children lets collapse those too
-				if (subNodeToCollapse.children) {
-					subNodes = subNodes.concat(subNodeToCollapse.children);
-				}
-				subNodeToCollapse.expanded = false;
-			}
-
-			// Remove the node from the visible tree
-			const subNodeToCollapseIndex = this.nodesToShow.indexOf(subNodeToCollapse);
-
-			if (subNodeToCollapseIndex !== -1) {
-				this.nodesToShow.splice(subNodeToCollapseIndex, 1);
-			}
-		}
-	}
-
-	/**
-	 * Expand a given tree node in the UI
-	 * @param nodeToExpand the path array to traverse down
-	 */
-	public expandTreeNode(nodeToExpand: any) {
-
-		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
-
-			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
-			const numChildren = nodeToExpand.children.length;
-
-			let position = 0; // We don't want to use i as some childNodes aren't displayed (no name)
-			for (let i = 0; i < numChildren; i++) {
-
-				const childNode = nodeToExpand.children[i];
-				childNode.level = nodeToExpand.level + 1;
-
-				if (childNode && childNode.hasOwnProperty("name")) {
-					if (this.nodesToShow.indexOf(childNode) === -1) {
-						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
-						position++;
-					}
-				}
-
-			}
-			nodeToExpand.expanded = true;
-		}
-
-	}
-
-	/**
-	 * Given a node expand the UI tree to that node and select it
-	 * @param path the path array to traverse down
-	 * @param level the level to start expanding at (generally the root node)
-	 * @param noHighlight whether no highlighting should take place
-	 * @param multi wether multiple nodes are selected in the selection
-	 */
-	public expandToSelection(path: any[], level: number, noHighlight: boolean, multi: boolean) {
-
-		let selectedIndex;
-
-		// Cut it to the level provided
-		path = path.slice(level, path.length);
-
-		for (let i = 0; i < path.length; i++) {
-			const node = this.getNodeById(path[i]);
-			const nextNode = this.getNodeById(path[i + 1]);
-
-			this.expandTreeNode(node);
-
-			// Collapse all the children that aren't next
-			// down the expansion path
-			if (node.children) {
-				node.children.forEach((n) => {
-					if (n !== nextNode || nextNode === undefined) {
-						this.collapseTreeNode(n);
-					}
-				});
-			}
-
-			// If it's the last node in the path
-			// scroll to it
-			if (i === path.length - 1) {
-				selectedIndex = this.nodesToShow.indexOf(node);
-
-				if (selectedIndex === -1) {
-					// Sometimes we have an edge case where an object doesn't exist in the tree
-					// because it has no name. It is often objects like a window, so what we do
-					// is select its parent object to highlight that instead
-					const specialNodeParent = this.getNodeById(path[i - 1]);
-					selectedIndex =  this.nodesToShow.indexOf(specialNodeParent);
-				}
-			}
-		}
-
-		if (!noHighlight) {
-
-			return this.selectNodes([this.nodesToShow[selectedIndex]], multi, undefined, false)
-				.then(() => {
-					this.selectedIndex = selectedIndex;
-					return selectedIndex;
-				});
-
-		}
-
-		this.selectedIndex = selectedIndex;
-		return Promise.resolve(selectedIndex);
-
 	}
 
 	/**
@@ -928,11 +765,11 @@ export class TreeService {
 		const selectedNodes = this.getCurrentSelectedNodesAsArray();
 
 		// Hide all
-		this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
+		this.hideAllTreeNodes(true); // We can just reset the state without hiding in the UI
 		// Show selected
 		if (selectedNodes) {
-			this.setCurrentSelectedNodesFromArray(selectedNodes);
 			this.showTreeNodes(selectedNodes);
+			this.setCurrentSelectedNodesFromArray(selectedNodes);
 		}
 	}
 
@@ -998,15 +835,16 @@ export class TreeService {
 	}
 
 	/**
-	 * Update the state of clickedHidden and clickedShown, which are used by tree component
-	 * to apply changes to the viewer.
+	 * Apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
 	public updateModelVisibility(node: any) {
 
 		return this.onReady().then(() => {
 
-			const childNodes = this.getMeshMapFromNodes([node], this.treeMap.idToMeshes);
+			const childNodes = this.getMeshMapFromNodes([node]);
+			const hidden = {};
+			const shown = {};
 
 			for (const key in childNodes) {
 				if (!key) {
@@ -1026,23 +864,23 @@ export class TreeService {
 					if (childNode) {
 
 						if (childNode.toggleState === this.VISIBILITY_STATES.invisible) {
-							this.clickedHidden[childNode._id] = childNode;
+							hidden[childNode._id] = childNode;
 						} else {
-							delete this.clickedHidden[childNode._id];
+							delete hidden[childNode._id];
 						}
 
 						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
-							this.clickedShown[childNode._id] = childNode;
+							shown[childNode._id] = childNode;
 						} else {
-							delete this.clickedShown[childNode._id];
+							delete shown[childNode._id];
 						}
 
 					}
 				}
 			}
 
-			this.handleVisibility(this.getClickedHidden(), false);
-			this.handleVisibility(this.getClickedShown(), true);
+			this.handleVisibility(hidden, false);
+			this.handleVisibility(shown, true);
 
 		});
 
@@ -1188,18 +1026,30 @@ export class TreeService {
 
 	}
 
-	public getMeshHighlights(nodes) {
-		return this.onReady().then(() => {
-			return this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes);
-		});
-	}
-
 	/**
 	 * Return a map of currently selected meshes
 	 */
 	public getCurrentMeshHighlights() {
-		const objectsPromise = this.$q.defer();
-		return this.getMeshHighlights(this.getCurrentSelectedNodesAsArray());
+		return this.onReady().then(() => {
+			return this.getMeshMapFromNodes(this.getCurrentSelectedNodesAsArray());
+		});
+	}
+
+	public nodesClicked(nodes: any[], skipExpand?: boolean) {
+		const addGroup = this.MultiSelectService.isAccumMode();
+		const removeGroup = this.MultiSelectService.isDecumMode();
+		const multi = addGroup || removeGroup;
+
+		if (!multi) {
+			// If it is not multiselect mode, remove all highlights
+			this.clearCurrentlySelected();
+		}
+
+		if (removeGroup) {
+			this.deselectNodes(nodes);
+		} else {
+			this.selectNodes(nodes, skipExpand);
+		}
 	}
 
 	/**
@@ -1213,92 +1063,9 @@ export class TreeService {
 			this.setNodeSelection(node, false);
 		}
 
-		return this.unhighlightNodes(nodes);
-
-	}
-
-	/**
-	 * Select nodes in the tree.
-	 * @param nodes	Nodes to select.
-	 * @param multi	Is multi select enabled.
-	 * @param colour the colour array for selection in the viewer
-	 * @param forceReHighlight whether to force highlighting (for example in a different colour)
-	 */
-	public selectNodes(nodes: any[], multi: boolean, colour: number[], forceReHighlight: boolean): any {
-
-		if (!multi) {
-			// If it is not multiselect mode, remove all highlights
-			this.clearCurrentlySelected();
-		}
-
-		if (!nodes || nodes.length === 0) {
-			return Promise.resolve("No nodes specified");
-		}
-
-		const highlight = [];
-		const unhighlight = [];
-		const promises = [];
-
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-
-			if (!node) {
-				continue;
-			}
-
-			const selected = (node.selected !== this.SELECTION_STATES.parentOfUnselected &&
-								node.selected !== this.SELECTION_STATES.selected);
-
-			const shouldSelect = !multi || forceReHighlight || selected;
-
-			this.setNodeSelection(node, shouldSelect);
-
-			if (shouldSelect) {
-				highlight.push(node);
-			} else {
-				unhighlight.push(node);
-			}
-
-		}
-
-		if (highlight.length) {
-			const lastNode = nodes[nodes.length - 1] ;
-			this.handleMetadata(lastNode);
-			promises.push(this.highlightNodes(highlight, multi, colour, forceReHighlight));
-		}
-
-		if (unhighlight.length) {
-			promises.push(this.unhighlightNodes(unhighlight));
-		}
-
-		return Promise.all(promises);
-
-	}
-
-	/**
-	 * Show metadata in the metadata panel if necessary
-	 * @param node the node to show the metadata for
-	 */
-	public handleMetadata(node: any) {
-
-		if (node && node.meta) {
-			this.DocsService.displayDocs(
-				node.account,
-				node.model || node.project,
-				node.meta
-			);
-		}
-
-	}
-
-	/**
-	 * Unhighlight a set of nodes in the viewer
-	 * @param nodes	Nodes to unhighlight in the viewer
-	 */
-	public unhighlightNodes(nodes: any) {
 		return this.onReady().then(() => {
 
-			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, undefined);
+			const highlightMap = this.getMeshMapFromNodes(nodes);
 
 			for (const key in highlightMap) {
 				if (!highlightMap.hasOwnProperty(key)) {
@@ -1319,58 +1086,55 @@ export class TreeService {
 
 			return highlightMap;
 		});
+
 	}
 
 	/**
-	 * Call the highlighting in the viewer
-	 * @param nodes	Nodes to highlight in the model.
-	 * @param multi	Is multi select enabled.
-	 * @param colour the colour to highlight
-     * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
+	 * Select nodes in the tree.
+	 * @param nodes	Nodes to select.
+	 * @param colour the colour array for selection in the viewer
 	 */
-	public highlightNodes(nodes: any, multi: boolean, colour: number[], forceReHighlight: boolean) {
+	public selectNodes(nodes: any[], skipExpand?: boolean, colour?: number[]): any {
+
+		if (!nodes || nodes.length === 0) {
+			return Promise.resolve("No nodes specified");
+		}
+
+		for (let i = 0; i < nodes.length; i++) {
+			this.setNodeSelection(nodes[i], true);
+		}
+
+		const lastNode = nodes[nodes.length - 1];
+		this.handleMetadata(lastNode);
+		if (!skipExpand) {
+			this.expandToNode(lastNode);
+		}
 
 		return this.onReady().then(() => {
-			const highlightMap = this.getMeshMapFromNodes(nodes, this.treeMap.idToMeshes, colour);
-
-			// Update viewer highlights
-			if (!multi) {
-				this.ViewerService.clearHighlights();
-			}
-
+			const highlightMap = this.getMeshMapFromNodes(nodes);
 			for (const key in highlightMap) {
-				if (!highlightMap.hasOwnProperty(key) ||
-					!highlightMap[key].meshes ||
-					highlightMap[key].meshes.length === 0) {
-					continue;
-				}
 
-				const meshes = [];
-
-				// Remove any unselected meshes - use for loop for perfomance
-				for (let i = 0; i < highlightMap[key].meshes.length; i++) {
-					const mesh = highlightMap[key].meshes[i];
-					if (this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected) {
-						meshes.push(mesh);
-					}
-				}
-
-				if (meshes.length) {
-					const vals = key.split("@");
-					const account = vals[0];
-					const model = vals[1];
-					// Separately highlight the children
-					// but only for multipart meshes
-
-					this.ViewerService.highlightObjects({
-						account,
-						ids: meshes,
-						colour: highlightMap[key].colour,
-						model,
-						multi: true,
-						source: "tree",
-						forceReHighlight
+				if (highlightMap[key].meshes) {
+					const meshes = highlightMap[key].meshes.filter((mesh) => {
+						return this.idToNodeMap[mesh].selected === this.SELECTION_STATES.selected;
 					});
+
+					if (meshes.length > 0) {
+						const vals = key.split("@");
+						const account = vals[0];
+						const model = vals[1];
+						// Separately highlight the children
+						// but only for multipart meshes
+						this.ViewerService.highlightObjects({
+							account,
+							ids: meshes,
+							colour,
+							model,
+							multi: true,
+							source: "tree",
+							forceReHighlight : true
+						});
+					}
 
 				}
 
@@ -1379,6 +1143,22 @@ export class TreeService {
 			return highlightMap;
 
 		});
+	}
+
+	/**
+	 * Show metadata in the metadata panel if necessary
+	 * @param node the node to show the metadata for
+	 */
+	public handleMetadata(node: any) {
+
+		if (node && node.meta) {
+			this.DocsService.displayDocs(
+				node.account,
+				node.model || node.project,
+				node.meta
+			);
+		}
+
 	}
 
 	/**
@@ -1419,12 +1199,11 @@ export class TreeService {
 	 * Show a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to show
 	 */
-	public showTreeNodesBySharedIds(objects: any[]) {
+	public showNodesBySharedIds(objects: any[]) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
-				this.updateModelVisibility(this.allNodes[0]);
+				this.showTreeNodes(nodes);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1439,11 +1218,11 @@ export class TreeService {
 	 * @param colour the colour to highlight
 	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
-	public selectNodesBySharedIds(objects: any[], multi: boolean,  colour: number[], forceReHighlight: boolean) {
+	public selectNodesBySharedIds(objects: any[],  colour: number[]) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				return this.selectNodes(nodes, multi, colour, forceReHighlight);
+				return this.selectNodes(nodes, false, colour);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1451,40 +1230,31 @@ export class TreeService {
 	}
 
 	/**
-	 * Highlight a series of nodes based on shared IDs (rather than unique IDs)
+	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to select
-	 * @param multi	Is multi select enabled
-	 * @param colour the colour to highlight
-	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
-	public highlightNodesBySharedId(
-		objects: any[], multi: boolean, colour: number[], forceReHighlight: boolean
-	) {
+	public nodesClickedBySharedIds(objects: any[]) {
+
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-				this.highlightNodes(nodes, multi, colour, forceReHighlight);
+				return this.nodesClicked(nodes);
 			})
 			.catch((error) => {
 				console.error(error);
 			});
-
 	}
 
 	/**
 	 * Isolate selected objects by their shared IDs
 	 * @param objects an array of objects with shared_id properties
 	 */
-	public isolateNodesBySharedId(objects) {
+	public isolateNodesBySharedIds(objects) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-
-				// Hide all
-				this.hideAllTreeNodes(false); // We can just reset the state without hiding in the UI
-				// Show selected
-
 				this.setCurrentSelectedNodesFromArray(nodes);
-				this.showTreeNodes(nodes);
+
+				this.isolateSelected();
 
 			})
 			.catch((error) => {
@@ -1497,62 +1267,12 @@ export class TreeService {
 	 * Hide series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects objects to hide
 	 */
-	public hideBySharedId(objects: any[]) {
+	public hideNodesBySharedIds(objects: any[]) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
 
 				this.hideTreeNodes(nodes);
-
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-
-	}
-
-	/**
-	 * Show a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects objects to show
-	 */
-	public showBySharedId(objects: any[]) {
-
-		if (!objects || objects.length === 0) {
-			return;
-		}
-
-		return this.getNodesFromSharedIds(objects)
-			.then((nodes) => {
-
-				this.hideAllTreeNodes(false);
-				this.showTreeNodes(nodes);
-
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-
-	}
-
-	/**
-	 * Highlight a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects objects to show
-	 */
-	public highlightsBySharedId(objects: any) {
-
-		return this.getNodesFromSharedIds(objects)
-			.then((nodes) => {
-
-				if (nodes && nodes.length) {
-
-					const selectedIndex = this.selectNodes(nodes, true, undefined, true);
-
-					const lastNodeId = nodes[nodes.length - 1]._id;
-					const lastNodePath = this.getPath(lastNodeId);
-
-					this.expandToSelection(lastNodePath, 0, true, true);
-					return selectedIndex;
-				}
 
 			})
 			.catch((error) => {
@@ -1649,6 +1369,121 @@ export class TreeService {
 	 */
 	public getAllNodes() {
 		return this.allNodes;
+	}
+
+	/**
+	 * Given a node expand the UI tree to that node and select it
+	 * @param path the path array to traverse down
+	 * @param level the level to start expanding at (generally the root node)
+	 */
+	private expandToNode(nodeToExpand: any) {
+
+		const path = nodeToExpand ?  this.getPath(nodeToExpand._id) : undefined;
+
+		if (path) {
+			let selectedIndex;
+			for (let i = 0; i < path.length; i++) {
+				const node = this.getNodeById(path[i]);
+				const nextNode = this.getNodeById(path[i + 1]);
+
+				this.expandTreeNode(node);
+
+				// Collapse all the children that aren't next
+				// down the expansion path
+				if (node.children) {
+					node.children.forEach((n) => {
+						if (n !== nextNode || nextNode === undefined) {
+							this.collapseTreeNode(n);
+						}
+					});
+				}
+
+				// If it's the last node in the path
+				// scroll to it
+				if (i === path.length - 1) {
+					selectedIndex = this.nodesToShow.indexOf(node);
+
+					if (selectedIndex === -1) {
+						// Sometimes we have an edge case where an object doesn't exist in the tree
+						// because it has no name. It is often objects like a window, so what we do
+						// is select its parent object to highlight that instead
+						const specialNodeParent = this.getNodeById(path[i - 1]);
+						selectedIndex =  this.nodesToShow.indexOf(specialNodeParent);
+					}
+				}
+			}
+
+			this.selectedIndex = selectedIndex;
+			return Promise.resolve(selectedIndex);
+		} else {
+			return Promise.reject("Failed to find path for node");
+		}
+
+	}
+
+		/**
+	* Collapse a given tree node in the UI
+	* @param nodeToCollapse the node to collapse
+	*/
+	private collapseTreeNode(nodeToCollapse: any) {
+
+		let subNodes = [];
+		if (nodeToCollapse.children) {
+			subNodes = subNodes.concat(nodeToCollapse.children);
+		}
+
+		nodeToCollapse.expanded = false;
+
+		while (subNodes.length > 0) {
+
+			const subNodeToCollapse = subNodes.pop();
+
+			// Collapse the node
+			if (subNodeToCollapse.expanded) {
+				// If it has children lets collapse those too
+				if (subNodeToCollapse.children) {
+					subNodes = subNodes.concat(subNodeToCollapse.children);
+				}
+				subNodeToCollapse.expanded = false;
+			}
+
+			// Remove the node from the visible tree
+			const subNodeToCollapseIndex = this.nodesToShow.indexOf(subNodeToCollapse);
+
+			if (subNodeToCollapseIndex !== -1) {
+				this.nodesToShow.splice(subNodeToCollapseIndex, 1);
+			}
+		}
+	}
+
+	/**
+	 * Expand a given tree node in the UI
+	 * @param nodeToExpand the path array to traverse down
+	 */
+	private expandTreeNode(nodeToExpand: any) {
+
+		if (nodeToExpand.children && nodeToExpand.children.length > 0) {
+
+			const nodeToExpandIndex = this.nodesToShow.indexOf(nodeToExpand);
+			const numChildren = nodeToExpand.children.length;
+
+			let position = 0; // We don't want to use i as some childNodes aren't displayed (no name)
+			for (let i = 0; i < numChildren; i++) {
+
+				const childNode = nodeToExpand.children[i];
+				childNode.level = nodeToExpand.level + 1;
+
+				if (childNode && childNode.hasOwnProperty("name")) {
+					if (this.nodesToShow.indexOf(childNode) === -1) {
+						this.nodesToShow.splice(nodeToExpandIndex + position + 1, 0, childNode);
+						position++;
+					}
+				}
+
+			}
+			nodeToExpand.expanded = true;
+		}
+
 	}
 
 }

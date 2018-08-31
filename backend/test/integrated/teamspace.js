@@ -33,52 +33,51 @@ describe("Checking Quota Info  ", function() {
 		user: "sub_noSub",
 		password: "password",
 		quota: {spaceLimit: 1, collaboratorLimit: 0, spaceUsed: 0}
-	}
+	};
 
 	const paypalUser = {
 		user: "sub_paypal",
 		password: "password",
 		quota: {spaceLimit: 20481, collaboratorLimit: 2, spaceUsed: 0}
-	}
+	};
 
 	const enterpriseUser = {
 		user: "sub_enterprise",
 		password: "password",
 		quota: {spaceLimit: 2049, collaboratorLimit: 5, spaceUsed: 0}
-	}
+	};
 
 	const discretionaryUser = {
 		user: "sub_discretionary",
 		password: "password",
 		quota: {spaceLimit: 1025, collaboratorLimit: 10, spaceUsed: 0}
-	}
+	};
 
 	const mixedUser1 = {
 		user: "sub_all",
 		password: "password",
 		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0}
-	}
+	};
 
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
 		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0}
-	}
+	};
 
 	const mixedUser3 = {
 		user: "sub_all3",
 		password: "password",
 		quota: {spaceLimit: 21505, collaboratorLimit: 4, spaceUsed: 0}
-	}
+	};
 
 	const mixedUser4 = {
 		user: "sub_all4",
 		password: "password",
 		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0}
-	}
+	};
 
-
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
 			agent = request.agent(server);
@@ -87,13 +86,13 @@ describe("Checking Quota Info  ", function() {
 		});
 	});
 
-	after(function(done){
-		
-		server.close(function(){
+	after(function(done) {
+
+		server.close(function() {
 			console.log("API test server is closed");
 			done();
 		});
-		
+
 	});
 
 	describe("user with no subscription", function(done) {
@@ -101,23 +100,23 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have basic quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 
@@ -126,25 +125,24 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have basic & paypal quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
-
 
 	});
 
@@ -153,23 +151,23 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have basic & enterprise quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 
@@ -178,23 +176,23 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have basic & discretionary quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 
@@ -203,49 +201,48 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have the correct aggregated quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 
-	
 	describe("user with mixed subscription with expired subscriptions (1)", function(done) {
 		const user =  mixedUser2;
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have the correct aggregated quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 
@@ -254,23 +251,23 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have the correct aggregated quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 
@@ -279,24 +276,24 @@ describe("Checking Quota Info  ", function() {
 		before(function(done) {
 			this.timeout(timeout);
 			agent.post("/login")
-			.send({username: user.user, password: user.password})
-			.expect(200, done);
-			
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
 		});
 
 		it("should have the correct aggregated quota", function(done) {
 			agent.get(`/${user.user}/quota`)
-			.expect(200, function(err, res) {
-				console.log(res.body);
-				expect(res.body).to.deep.equal(user.quota);
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					console.log(res.body);
+					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
 		});
 
 		after(function(done) {
 			this.timeout(timeout);
 			agent.post("/logout")
-			.expect(200, done);
+				.expect(200, done);
 		});
 	});
 

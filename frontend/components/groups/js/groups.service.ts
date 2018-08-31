@@ -19,6 +19,8 @@ export class GroupsService {
 
 	public static $inject: string[] = [
 		"$q",
+		"$timeout",
+
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
@@ -26,10 +28,11 @@ export class GroupsService {
 		"ViewerService"
 	];
 
-	private state;
+	public state;
 
 	constructor(
 		private $q: ng.IQService,
+		private $timeout: any,
 		private APIService: any,
 		private TreeService: any,
 		private MultiSelectService: any,
@@ -115,7 +118,7 @@ export class GroupsService {
 
 				// Create a map of meshes
 				// for the colour overiding
-				const meshes = this.TreeService.getMeshMapFromNodes(nodes,  treeMap.idToMeshes);
+				const meshes = this.TreeService.getMeshMapFromNodes(nodes);
 
 				for (const key in meshes) {
 					if (key) {
@@ -138,7 +141,7 @@ export class GroupsService {
 	/**
 	 * Remove all color overrides from a given group based on it's ID
 	 */
-	public removeColorOverride(groupId: string) {
+	public removeColorOverride(groupId: string, shouldDisableOverrideAll: boolean = true) {
 
 		const group = this.state.colorOverride[groupId];
 
@@ -162,7 +165,7 @@ export class GroupsService {
 
 			delete this.state.colorOverride[groupId];
 
-			if (this.state.overrideAll &&
+			if (shouldDisableOverrideAll && this.state.overrideAll &&
 				this.state.groups.length !==
 				Object.keys(this.state.colorOverride).length) {
 				this.state.overrideAll = false;
@@ -218,7 +221,6 @@ export class GroupsService {
 	 */
 	public setSelectedGroupColor(color) {
 		this.state.selectedGroup.color = color;
-		this.updateSelectedGroupColor();
 	}
 
 	/**
@@ -256,7 +258,7 @@ export class GroupsService {
 	/**
 	 * Convert a colour from hex to an RGBA value
 	 */
-	public hexToRGBA(hex: string, alpha: number) {
+	public hexToRGBA(hex: string, alpha?: number) {
 
 		alpha = (alpha !== undefined) ? alpha : 1;
 
@@ -291,39 +293,49 @@ export class GroupsService {
 	 * @param group the group to isolate
 	 */
 	public isolateGroup(group: any) {
-		this.selectGroup(group).then(() => {
-			this.TreeService.isolateNodesBySharedId(this.state.selectedGroup.objects);
-		});
+		this.clearSelectionHighlights();
+		this.TreeService.isolateNodesBySharedIds(group.objects);
 	}
 
 	public clearSelectionHighlights() {
 		this.state.groups.forEach((group) => {
 			group.highlighted = false;
+			group.focus = false;
 		});
+		this.TreeService.clearCurrentlySelected();
 	}
 
 	/**
-	 * Delete selected groups
+	 * Deletes highlighted groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
 	 */
-	public deleteGroups(teamspace: string, model: string, all?: boolean) {
-		const groupsToDelete = [];
-		this.state.groups.forEach((group) => {
-			if (all || group.highlighted) {
-				groupsToDelete.push(group);
-			}
-		});
+	public deleteHighlightedGroups(teamspace: string, model: string) {
+		const groupsToDelete = this.state.groups.filter( (g) => g.highlighted);
+		return this.deleteGroups(teamspace, model, groupsToDelete);
+	}
 
-		if (groupsToDelete.length > 0) {
-			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groupsToDelete.map((group) => group._id).join(",")}`;
+	/**
+	 * Deletes all groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 */
+	public deleteAllGroups(teamspace: string, model: string) {
+		return this.deleteGroups(teamspace, model, [].concat(this.state.groups));
+	}
+
+	/**
+	 * Deletes an array of groups in the backend
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 * @param groups the groups array to delete
+	 */
+	public deleteGroups(teamspace: string, model: string, groups: any) {
+		if (groups.length > 0) {
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
-					groupsToDelete.forEach((group) => {
-						this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
-							this.TreeService.deselectNodes(nodes);
-						});
-						this.removeColorOverride(group._id);
-						this.deleteStateGroup(group);
-					});
+					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
 				});
 		} else {
@@ -332,10 +344,13 @@ export class GroupsService {
 	}
 
 	/**
-	 * Delete all groups
+	 * Deselects the objects from a particular group
+	 * @param group the group that contains the objects I wish to deselect
 	 */
-	public deleteAllGroups(teamspace: string, model: string) {
-		return this.deleteGroups(teamspace, model, true);
+	public deselectObjectsFromGroup(group: any) {
+		this.TreeService.getNodesFromSharedIds(group.objects).then((nodes) => {
+			this.TreeService.deselectNodes(nodes);
+		});
 	}
 
 	/**
@@ -343,70 +358,21 @@ export class GroupsService {
 	 * @param group the group to select
 	 */
 	public selectGroup(group: any) {
+		const addGroup = this.MultiSelectService.isAccumMode();
+		const removeGroup = this.MultiSelectService.isDecumMode();
+		const multiSelect = addGroup || removeGroup;
 
-		const sameGroup = this.state.selectedGroup === group;
-		const multi = this.MultiSelectService.isMultiMode();
-
-		// Deselect previous group (perhaps can be moved to new func?)
-		if (this.state.selectedGroup) {
-			this.state.selectedGroup.selected = false;
-		}
-		this.state.selectedGroup = group;
-		this.state.selectedGroup.selected = true;
-		this.state.selectedGroup.highlighted = !this.state.selectedGroup.highlighted; // Toggle
-
-		// If it has no set totalSavedMeshes
-		if (this.state.selectedGroup.totalSavedMeshes === undefined) {
-			this.state.selectedGroup.totalSavedMeshes = 0;
-		}
-
-		let color = this.ViewerService.getDefaultHighlightColor();
-		if (!this.state.selectedGroup.new) {
-			color = this.state.selectedGroup.color.map((c) => c / 255);
-		}
-
-		const isGroupSelected = this.state.multiSelectedGroups.includes(group);
-
-		if (!multi) {
-			this.state.multiSelectedGroups = [group];
+		if (!multiSelect) {
+			this.state.multiSelectedGroups = [];
 			this.clearSelectionHighlights();
-			this.state.selectedGroup.highlighted = true;
-		} else if (!isGroupSelected) {
-			// selecting group that's not selected
-			this.state.multiSelectedGroups.push(group);
 		}
 
-		if (!multi || !isGroupSelected) {
-
-			return this.TreeService.showTreeNodesBySharedIds(this.state.selectedGroup.objects).then(() => {
-				return this.TreeService.selectNodesBySharedIds(
-					this.state.selectedGroup.objects,
-					multi, // multi
-					color,
-					true
-				).then((meshes) => {
-					this.setTotalSavedMeshes();
-
-				});
-			});
-
+		if (removeGroup) {
+			this.unhighlightGroup(group);
 		} else {
-
-			// Remove the group from selected groups
-			const index = this.state.multiSelectedGroups.indexOf(group);
-			this.state.multiSelectedGroups.splice(index, 1);
-
-			// selecting a group that's already selected
-			return this.TreeService.getNodesFromSharedIds(this.state.selectedGroup.objects)
-				.then((nodes) => {
-
-					this.TreeService.deselectNodes(nodes).then((meshes) => {
-						this.setTotalSavedMeshes();
-					});
-
-				});
+			this.focus(group);
+			this.highlightGroup(group);
 		}
-
 	}
 
 	public getObjectsStatus() {
@@ -435,32 +401,26 @@ export class GroupsService {
 		});
 	}
 
-	public setTotalSavedMeshes() {
+	public setTotalSavedMeshes(group) {
 		this.getTotalMeshes().then((totalMeshes) => {
 			// If we haven't saved don't update saved meshes
-			if (!this.state.selectedGroup.new) {
-				this.state.selectedGroup.totalSavedMeshes = totalMeshes;
+			if (!group.new) {
+				group.totalSavedMeshes = totalMeshes;
 			}
 		});
 	}
-
-	// This is how we would calculate total meshes if we didn't use the viewer:
-	// public getTotalMeshes(meshes) {
-	// 	let total = 0;
-	// 	for (const key in meshes) {
-	// 		if (key && meshes[key] && meshes[key].meshes) {
-	// 			total += meshes[key].meshes.length;
-	// 		}
-	// 	}
-	// 	return total;
-	// }
 
 	/**
 	 * Generate a placeholder object for a new group
 	 */
 	public generateNewGroup(): any {
 		return this.getSelectedObjects().then((objects) => {
-			return {
+
+			this.TreeService.selectNodesBySharedIds(
+				objects
+			);
+
+			this.focus({
 				new: true,
 				createdAt: Date.now(),
 				updatedAt: Date.now(),
@@ -469,40 +429,10 @@ export class GroupsService {
 				description: "",
 				name: this.getDefaultGroupName(this.state.groups),
 				color: this.getRandomColor(),
-				objects
-			};
-		});
-	}
-
-	/**
-	 * Update the selected group color in the viewer
-	 */
-	public updateSelectedGroupColor() {
-
-		if (!this.state.selectedGroup.color) {
-			return;
-		}
-
-		const color = this.state.selectedGroup.color.map((c) => c / 255);
-
-		if (this.state.selectedGroup.objects && !this.state.selectedGroup.new) {
-
-			const currentSelected = this.TreeService.getCurrentSelectedNodesAsArray();
-			const groupObjects = this.state.selectedGroup.objects.concat();
-
-			// Find the nodes from the group that are currently selected
-			const intersection = groupObjects.filter((o) => {
-				return currentSelected.find((n) => n.shared_id === o.shared_id );
+				objects,
+				totalSavedMeshes: 0
 			});
-
-			this.TreeService.highlightNodesBySharedId(
-				intersection,
-				true, // multi
-				color,
-				true
-			);
-		}
-
+		});
 	}
 
 	/**
@@ -546,13 +476,11 @@ export class GroupsService {
 		const groupUrl = `${teamspace}/${model}/groups/${groupId}`;
 		return this.getSelectedObjects().then((currentHighlights) => {
 			group.objects = currentHighlights;
-			const savedMeshesLength = this.state.selectedObjectsLen;
+			group.totalSavedMeshes = this.state.selectedObjectsLen;
 
 			return this.APIService.put(groupUrl, group)
 				.then((response) => {
-					group.totalSavedMeshes = savedMeshesLength;
 					this.replaceStateGroup(group);
-					this.updateSelectedGroupColor();
 					this.selectGroup(group);
 					return group;
 				});
@@ -573,15 +501,12 @@ export class GroupsService {
 		return this.getSelectedObjects().then((currentHighlights) => {
 
 			group.objects = currentHighlights;
-			const savedMeshesLength = this.state.selectedObjectsLen;
 
 			return this.APIService.post(groupUrl, group)
 				.then((response) => {
 					group._id = response.data._id;
 					this.state.groups.push(group);
-					this.state.selectedGroup = group;
-					this.state.selectedGroup.totalSavedMeshes = savedMeshesLength;
-					this.updateSelectedGroupColor();
+					group.totalSavedMeshes = this.state.selectedObjectsLen;
 					this.selectGroup(group);
 					if (this.state.overrideAll) {
 						this.colorOverride(group);
@@ -592,47 +517,44 @@ export class GroupsService {
 
 	}
 
-	public selectNextGroup() {
-		if (this.state.groups.length) {
-			this.selectGroup(this.state.groups[0]);
-		}
-	}
-
-	/**
-	 * Delete a group in the backend
-	 * @param teamspace the teamspace name for the group
-	 * @param model the model id for the group
-	 * @param group the group object to delete
-	 */
-	public deleteGroup(teamspace: string, model: string, deleteGroup: any) {
-		if (deleteGroup._id) {
-			const groupUrl = `${teamspace}/${model}/groups/${deleteGroup._id}`;
-			return this.APIService.delete(groupUrl)
-				.then((response) => {
-					this.TreeService.getNodesFromSharedIds(deleteGroup.objects).then((nodes) => {
-						this.TreeService.deselectNodes(nodes);
-					});
-					this.removeColorOverride(deleteGroup._id);
-					this.deleteStateGroup(deleteGroup);
-					return response;
-				});
-		}
-	}
-
 	/**
 	 * Remove a group from the data model
-	 * @param deleteGroup the group to delete
+	 * @param group the group to delete
 	 */
-	public deleteStateGroup(deleteGroup: any) {
+	public deleteStateGroup(group: any) {
+		this.deselectObjectsFromGroup(group);
+		this.removeColorOverride(group._id);
+		const groupIndex = this.state.groups.indexOf(group);
+		const groupsCount = this.state.groups.length;
 
-		this.state.groups = this.state.groups.filter((g) => {
-			return deleteGroup._id !== g._id;
-		});
-
-		if (this.state.selectedGroup && deleteGroup._id === this.state.selectedGroup._id) {
-			this.state.selectedGroup = null;
+		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
+			const nextGroup = this.state.groups[ (groupIndex + 1) % groupsCount];
+			this.selectGroup(nextGroup);
 		}
 
+		this.state.groups = this.state.groups.filter((g) => {
+			return group._id !== g._id;
+		});
+	}
+
+	/**
+	 * Removes all the groups with the ids contained in the ids array from the state
+	 * @param ids the ids of the groups to be deleted
+	 */
+	public deleteStateGroupsByIds(ids: string[]) {
+		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		groups.forEach(this.deleteStateGroup.bind(this));
+	}
+
+	/**
+	 * Removes all the groups with the ids contained in the ids array from the state after 4 seconds
+	 * while showing a feedback that these groups has been deleted
+	 * @param ids the ids of the groups to be deleted
+	 */
+	public deleteStateGroupsByIdsDeferred(ids: string[]) {
+		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		groups.forEach((g) => g.justBeenDeleted = true);
+		this.$timeout(this.deleteStateGroupsByIds.bind(this, ids) , 4000);
 	}
 
 	/**
@@ -652,6 +574,103 @@ export class GroupsService {
 		if (newGroup._id === this.state.selectedGroup._id) {
 			this.state.selectedGroup = newGroup;
 		}
+	}
+
+	/**
+	 * Compares groups without taking in consideration focus/selection or objects contained in the group
+	 * @param groupA a group to be compared
+	 * @param groupB the other group to be compared
+	 */
+	public areGroupsEqual(groupA: any, groupB: any): boolean {
+		const fields = ["_id", "__v", "name", "author", "description", "createdAt", "updatedBy", "updatedAt", "color"];
+		const areEqual = fields.every( (f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]) );
+
+		return areEqual;
+	}
+
+	/**
+	 * Compare groups objects
+	 * @param objectsA a group objects to be compared
+	 * @param objectsB the other groups objects to be compared
+	 */
+	public areGroupObjectsEqual(objectsA: any[], objectsB: any[]): boolean {
+		const objAIds = this.getFullIdsForNodes(objectsA);
+		const objBIds = this.getFullIdsForNodes(objectsB);
+		let areEqual = objAIds.length === objBIds.length;
+		areEqual =  areEqual && objAIds.every((i) => objBIds.indexOf(i) >=  0);
+		return areEqual;
+	}
+
+	private getFullIdsForNodes(nodes: any[]) {
+		return nodes.reduce((obj, currentVal) => {
+			const nsp = currentVal.account + "." + currentVal.model ;
+			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));
+			if (Array.isArray(currentVal.ifc_guids)) {
+				ids = ids.concat(currentVal.ifc_guids.map( (id) => nsp + "." + id ));
+			}
+
+			return ids;
+		} , []);
+	}
+
+	/**
+	 * Focus on the group given
+	 * @param group the group
+	 */
+	private focus(group: any) {
+		// Deselect previous group (perhaps can be moved to new func?)
+		if (this.state.selectedGroup) {
+			this.state.selectedGroup.focus = false;
+		}
+
+		this.state.selectedGroup = group;
+		this.state.selectedGroup.focus = true;
+	}
+
+	/**
+	 * Highlight the group. This updates the internal states and also
+	 * make calls to highlight the meshes
+	 * @param group the group to select
+	 */
+	private highlightGroup(group: any) {
+		group.highlighted = true;
+
+		const color = group.color ? group.color.map((c) => c / 255) :
+						this.ViewerService.getDefaultHighlightColor();
+
+		if (!this.state.multiSelectedGroups.includes(group)) {
+			this.state.multiSelectedGroups.push(group);
+		}
+
+		if (group.objects && group.objects.length > 0) {
+			return this.TreeService.showNodesBySharedIds(group.objects).then(() => {
+				return this.TreeService.selectNodesBySharedIds(
+					group.objects,
+					color
+				).then((meshes) => {
+					this.setTotalSavedMeshes(group);
+				});
+			});
+		}
+	}
+
+	/**
+	 * Highlight the group. This updates the internal states and also
+	 * make calls to highlight the meshes
+	 * @param group the group to select
+	 */
+	private unhighlightGroup(group: any) {
+		const index = this.state.multiSelectedGroups.indexOf(group);
+		this.state.multiSelectedGroups.splice(index, 1);
+		group.highlighted = false;
+		group.focus = false;
+
+		return this.TreeService.getNodesFromSharedIds(group.objects)
+			.then((nodes) => {
+				this.TreeService.deselectNodes(nodes).then((meshes) => {
+					this.setTotalSavedMeshes(group);
+				});
+			});
 	}
 
 }

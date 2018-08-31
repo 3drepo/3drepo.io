@@ -22,16 +22,20 @@ export class MultiSelectService {
 		"$document"
 	];
 
-	private keys = {
-		cmdKey : 91,
-		ctrlKey : 17,
-		escKey : 27,
-		shiftKey : 16
-	};
-
 	private isMac = (navigator.platform.indexOf("Mac") !== -1);
-	private multiMode = false;
+	private accumMode = false;
+	private decumMode = false;
 	private areaSelectMode = false;
+
+	private cursorIcons = {
+		accumMode : "url(./icons/cursor_add.png), auto",
+		decumMode : "url(./icons/cursor_del.png), auto",
+		areaMode  : "url(./icons/cursor_rect.png), auto",
+		areaAccumMode: "url(./icons/cursor_rect_add.png), auto",
+		areaDecumMode: "url(./icons/cursor_rect_del.png), auto",
+		noneCanvas     : "default",
+		nonePanel       : "pointer"
+	};
 
 	constructor(
 		public ViewerService: any,
@@ -59,25 +63,89 @@ export class MultiSelectService {
 			return;
 		}
 
-		if (this.isMultiSelectDown(key)) {
-			this.toggleMultiSelect(keyDown);
-		} else if (this.isShiftKey(key)) {
-			this.toggleAreaSelect(keyDown);
+		switch (key) {
+			case 16:
+				// Shift
+				this.toggleAreaSelect(keyDown);
+				break;
+			case 17:
+				// Ctrl
+				if (!this.isMac) {
+					this.setAccumMode(keyDown);
+				}
+				break;
+			case 18:
+				// Alt
+				this.setDecumMode(keyDown);
+				break;
+			case 91:
+				// Command key(Mac)
+				if (this.isMac) {
+					this.setAccumMode(keyDown);
+				}
+				break;
 		}
 	}
 
-	public isMultiMode() {
-		return this.multiMode;
+	public isAccumMode() {
+		return this.accumMode;
 	}
 
-	public toggleMultiSelect(on: boolean) {
-		if (this.multiMode !== on) {
-			this.multiMode = on;
-			this.ViewerService.setMultiSelectMode(on);
+	public isDecumMode() {
+		return this.decumMode;
+	}
+
+	private determineCursorIcon() {
+		let canvasIcon = this.cursorIcons.noneCanvas;
+		let panelIcon = this.cursorIcons.nonePanel;
+		if (this.areaSelectMode) {
+			if (this.accumMode) {
+				canvasIcon = this.cursorIcons.areaAccumMode;
+				panelIcon = this.cursorIcons.accumMode;
+			} else if (this.decumMode) {
+				canvasIcon = this.cursorIcons.areaDecumMode;
+				panelIcon = this.cursorIcons.decumMode;
+			} else {
+				canvasIcon = this.cursorIcons.areaMode;
+			}
+		} else if (this.accumMode) {
+			canvasIcon = panelIcon = this.cursorIcons.accumMode;
+		} else if (this.decumMode) {
+			canvasIcon = panelIcon = this.cursorIcons.decumMode;
+		}
+
+		if (document.getElementById("#canvas")) {
+			document.getElementById("#canvas").style.cursor = canvasIcon;
+		}
+
+		const groupElements: any = document.getElementsByClassName("groupsList");
+		for (let i = 0; i < groupElements.length; ++i) {
+			groupElements[i].style.cursor = panelIcon;
+		}
+
+		const treeNodeElements: any = document.getElementsByClassName("treeNode");
+		for (let i = 0; i < treeNodeElements.length; ++i) {
+			treeNodeElements[i].style.cursor = panelIcon;
 		}
 	}
 
-	public toggleAreaSelect(on: boolean) {
+	private setAccumMode(on: boolean) {
+		if (this.accumMode !== on) {
+			this.accumMode = on;
+			this.decumMode = on ? false : this.decumMode;
+			this.determineCursorIcon();
+		}
+	}
+
+	private setDecumMode(on: boolean) {
+		if (this.decumMode !== on) {
+			this.decumMode = on;
+			this.accumMode = on ? false : this.accumMode;
+			this.determineCursorIcon();
+		}
+	}
+
+	private toggleAreaSelect(on: boolean) {
 		if (this.areaSelectMode !== on) {
 			this.areaSelectMode = on;
 			if (on) {
@@ -85,25 +153,9 @@ export class MultiSelectService {
 			} else {
 				this.ViewerService.stopAreaSelect();
 			}
+			this.determineCursorIcon();
 		}
 	}
-
-	public isCmd(key: number) {
-		return this.isMac && this.keys.cmdKey === key;
-	}
-
-	public isCtrlKey(key: number) {
-		return !this.isMac && this.keys.ctrlKey === key;
-	}
-
-	public isMultiSelectDown(key: number) {
-		return this.isCmd(key) || this.isCtrlKey(key);
-	}
-
-	public isShiftKey(key: number) {
-		return this.keys.shiftKey === key;
-	}
-
 }
 
 export const MultiSelectServiceModule = angular

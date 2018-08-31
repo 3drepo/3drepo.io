@@ -37,7 +37,7 @@ export class IssuesService {
 		"DialogService"
 	];
 
-	private state: any;
+	public state: any;
 	private groupsCache: any;
 
 	constructor(
@@ -721,7 +721,7 @@ export class IssuesService {
 	public handleHighlights(objects) {
 		this.TreeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
 		this.$timeout(() => {
-		this.TreeService.highlightsBySharedId(objects)
+		this.TreeService.selectNodesBySharedIds(objects)
 			.then(() => {
 				angular.element((window as any)).triggerHandler("resize");
 			});
@@ -729,11 +729,11 @@ export class IssuesService {
 	}
 
 	public handleHidden(objects) {
-		this.TreeService.hideBySharedId(objects);
+		this.TreeService.hideNodesBySharedIds(objects);
 	}
 
 	public handleShown(objects) {
-		this.TreeService.showBySharedId(objects);
+		this.TreeService.isolateNodesBySharedIds(objects);
 	}
 
 	public handleTree(response) {

@@ -15,29 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var router = express.Router({mergeParams: true});
-var middlewares = require('../middlewares/middlewares');
-var C = require('../constants');
+"use strict";
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const middlewares = require("../middlewares/middlewares");
+const C = require("../constants");
 
-var responseCodes = require('../response_codes.js');
-var History = require('../models/history');
-var utils = require('../utils');
+const responseCodes = require("../response_codes.js");
+const History = require("../models/history");
+const utils = require("../utils");
 
-router.get('/revisions.json', middlewares.hasReadAccessToModel, listRevisions);
-router.get('/revisions/:branch.json', middlewares.hasReadAccessToModel, listRevisionsByBranch);
-router.put('/revisions/:id/tag', middlewares.hasReadAccessToModel, updateRevisionTag);
+router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
+router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
+router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
 
-function listRevisions(req, res, next){
-	'use strict';
+function listRevisions(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
-
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	History.listByBranch({account, model}, null, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
-		
+
 		histories = History.clean(histories);
 
 		histories.forEach(function(history) {
@@ -47,20 +46,18 @@ function listRevisions(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
 
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 	});
 }
 
-function listRevisionsByBranch(req, res, next){
-	'use strict';
+function listRevisionsByBranch(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
-
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	History.listByBranch({account, model}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
-		
+
 		histories = History.clean(histories);
 
 		histories.forEach(function(history) {
@@ -70,19 +67,18 @@ function listRevisionsByBranch(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
 
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 	});
 }
 
-function updateRevisionTag(req, res, next){
-	'use strict';
+function updateRevisionTag(req, res, next) {
 
-	let place = utils.APIInfo(req);
-	let account = req.params.account;
-	let model = req.params.model;
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
 
 	History.findByUID({account, model}, req.params.id, {_id : 1, tag: 1}).then(history => {
-		if (!history){
+		if (!history) {
 			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else {
 			history.tag = req.body.tag;

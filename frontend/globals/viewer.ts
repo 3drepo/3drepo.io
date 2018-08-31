@@ -93,7 +93,6 @@ export class Viewer {
 	public inline = null;
 	public runtime = null;
 	public fullscreen = false;
-	public multiSelectMode = false;
 	public pinDropMode = false;
 	public measureMode = false;
 	public clickingEnabled = false;
@@ -457,8 +456,7 @@ export class Viewer {
 			if (idsIn) {
 				const uniqueIds = Array.from(new Set(idsIn));
 				if (uniqueIds.length) {
-					const multi = multiOverride || this.multiSelectMode;
-					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
+					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multiOverride, forceReHighlight);
 					return;
 				}
 			}
@@ -486,27 +484,6 @@ export class Viewer {
 		}
 	}
 
-	public applyModelProperties(account, model, properties) {
-
-		if (properties) {
-			if (properties.hiddenNodes && properties.hiddenNodes.length > 0) {
-				this.switchObjectVisibility(
-					account,
-					model,
-					properties.hiddenNodes,
-					false
-				);
-			}
-
-			if (properties.subModels) {
-				for (let i = 0; i < properties.subModels.length; i++) {
-					const entry = properties.subModels[i];
-					this.applyModelProperties(entry.account, entry.model, entry.properties);
-				}
-			}
-		}
-	}
-
 	public setNavMode(mode, force) {
 		if (this.currentNavMode !== mode || force) {
 			// If the navigation mode has changed
@@ -530,7 +507,6 @@ export class Viewer {
 	}
 
 	public reset() {
-		this.setMultiSelectMode(false);
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = "none";
@@ -601,12 +577,6 @@ export class Viewer {
 
 			this.fullscreen = false;
 		}
-	}
-
-	public setMultiSelectMode(on: boolean) {
-
-		this.multiSelectMode = on;
-		// element.style.cursor =  on ? "copy" = "-webkit-grab";
 	}
 
 	public setPinDropMode(on: boolean) {

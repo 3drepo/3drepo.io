@@ -29,13 +29,17 @@ export class ViewerService {
 		"EventService"
 	];
 
-	private newPinId: string;
-	private pinData: object;
+	public pin: any;
+	public newPinId: string;
+	public currentModel: any;
+
+	private pinData: any;
 	private viewer: any;
-	private currentModel: any;
-	private pin: any;
 	private initialised: any;
 	private Viewer: any;
+	private model: string;
+	private account: string;
+	private heliSpeed: number = 1;
 
 	constructor(
 		public $q: ng.IQService,
@@ -63,7 +67,7 @@ export class ViewerService {
 		this.initialised = $q.defer();
 	}
 
-	public getPinData() {
+	public getPinData(): any {
 		return this.pinData;
 	}
 
@@ -453,6 +457,9 @@ export class ViewerService {
 			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
 			return Promise.reject("Account, model, branch or revision was not defined!");
 		} else {
+			this.account = account;
+			this.model = model;
+			this.setHelicopterSpeed();
 			this.currentModel.promise = this.viewer.loadModel(
 				account,
 				model,
@@ -470,46 +477,6 @@ export class ViewerService {
 			return this.currentModel.promise;
 		}
 
-	}
-
-	public fetchModelProperties(account, model, branch, revision) {
-
-		if (account && model) {
-
-			if (!branch) {
-				branch = !revision ? "master" : "";
-			}
-
-			if (!revision || branch === "master") {
-				// revision is master/head
-				revision = branch + "/head";
-			}
-
-			const url = account + "/" + model + "/revision/" + revision + "/modelProperties.json";
-
-			this.APIService.get(url)
-				.then((response) => {
-					if (response.data && response.data.status) {
-						if (response.data.status === "NOT_FOUND") {
-							console.error("Model properties was not found from API");
-						}
-					}
-
-					if (response.data && response.data.properties) {
-						this.viewer.applyModelProperties(account, model, response.data.properties);
-					} else {
-						const message = "No data properties returned. This was the response:";
-						console.error(message, response);
-					}
-				})
-				.catch((error) => {
-					console.error("Model properties failed to fetch", error);
-				});
-
-		} else {
-			console.error("Account and model were not set correctly " +
-			"for model property fetching: ", account, model);
-		}
 	}
 
 	// DIFF
@@ -630,21 +597,52 @@ export class ViewerService {
 		}
 	}
 
-	public helicopterSpeedDown() {
+	public helicopterSpeedDown(value: number) {
 		if (this.viewer) {
 			this.viewer.helicopterSpeedDown();
+			this.helicopterSpeedUpdate(value);
 		}
 	}
 
-	public helicopterSpeedUp() {
+	public helicopterSpeedUp(value: number) {
 		if (this.viewer) {
 			this.viewer.helicopterSpeedUp();
+			this.helicopterSpeedUpdate(value);
 		}
 	}
 
-	public helicopterSpeedReset() {
+	public helicopterSpeedReset(updateDefaultSpeed: boolean) {
 		if (this.viewer) {
 			this.viewer.helicopterSpeedReset();
+			if (updateDefaultSpeed) {
+				this.helicopterSpeedUpdate(1);
+			}
+		}
+	}
+
+	public getHeliSpeed() {
+		return this.heliSpeed;
+	}
+
+	private helicopterSpeedUpdate(value: number) {
+		if (this.account && this.model && Number.isInteger(value)) {
+			this.heliSpeed = value;
+			this.APIService.put(this.account + "/" + this.model + "/settings/heliSpeed", {heliSpeed: value})
+				.catch((err) => {
+				console.error("Failed to update helicopter speed", err);
+			});
+		}
+	}
+
+	private setHelicopterSpeed() {
+		if (this.account && this.model) {
+			this.APIService.get(this.account + "/" + this.model + "/settings/heliSpeed")
+				.then((res) => {
+					this.heliSpeed = res.data.heliSpeed ? res.data.heliSpeed : 1;
+				})
+				.catch((err) => {
+				console.error("Failed to fetch helicopter speed", err);
+			});
 		}
 	}
 

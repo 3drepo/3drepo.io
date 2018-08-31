@@ -14,6 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { AuthService } from "../../home/js/auth.service";
+import { DialogService } from "../../home/js/dialog.service";
+import { EventService } from "../../home/js/event.service";
+import { IssuesService } from "./issues.service";
+import { NotificationService } from "../../notifications/js/notification.service";
+import { RevisionsService } from "../../revisions/js/revisions.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 class IssuesController implements ng.IController {
 
@@ -21,19 +28,15 @@ class IssuesController implements ng.IController {
 		"$scope",
 		"$timeout",
 		"$state",
-		"$q",
 
 		"IssuesService",
 		"EventService",
 		"AuthService",
-		"APIService",
 		"NotificationService",
 		"RevisionsService",
 		"ClientConfigService",
-		"AnalyticService",
 		"DialogService",
-		"ViewerService",
-		"PanelService"
+		"ViewerService"
 	];
 
 	private model: string;
@@ -68,27 +71,23 @@ class IssuesController implements ng.IController {
 	private canAddIssue: boolean;
 
 	constructor(
-		private $scope,
-		private $timeout,
-		private $state,
-		private $q,
+		private $scope: any,
+		private $timeout: any,
+		private $state: any,
 
-		private IssuesService,
-		private EventService,
-		private AuthService,
-		private APIService,
-		private NotificationService,
-		private RevisionsService,
-		private ClientConfigService,
-		private AnalyticService,
-		private DialogService,
-		private ViewerService,
-		private PanelService
+		private issuesService: IssuesService,
+		private eventService: EventService,
+		private authService: AuthService,
+		private notificationService: NotificationService,
+		private revisionsService: RevisionsService,
+		private clientConfigService: any,
+		private dialogService: DialogService,
+		private viewerService: ViewerService
 	) {}
 
 	public $onInit() {
 
-		this.ViewerService.setPin({data: null});
+		this.viewerService.setPin({data: null});
 
 		this.saveIssueDisabled = true;
 		this.allIssues = [];
@@ -100,10 +99,10 @@ class IssuesController implements ng.IController {
 		this.autoSaveComment = false;
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
 		this.savingIssue = false;
-		this.revisionsStatus = this.RevisionsService.status;
+		this.revisionsStatus = this.revisionsService.status;
 
 		// Get the user roles for the model
-		this.issuesReady = this.IssuesService.getIssuesAndJobs(this.account, this.model, this.revision)
+		this.issuesReady = this.issuesService.getIssuesAndJobs(this.account, this.model, this.revision)
 			.then(() => {
 				this.$timeout(() => {
 					this.toShow = "showIssues";
@@ -115,7 +114,7 @@ class IssuesController implements ng.IController {
 				const content = "We had an issue getting all the issues and jobs for this model. " +
 					"If this continues please message support@3drepo.io.";
 				const escapable = true;
-				this.DialogService.text("Error Getting Model Issues and Jobs", content, escapable);
+				this.dialogService.text("Error Getting Model Issues and Jobs", content, escapable);
 				console.error(error);
 			});
 
@@ -128,16 +127,18 @@ class IssuesController implements ng.IController {
 		this.allIssues = [];
 		this.issuesToShow = [];
 		this.removeUnsavedPin();
-		this.NotificationService.unsubscribe.newIssues(this.account, this.model);
-		this.NotificationService.unsubscribe.issueChanged(this.account, this.model);
 
-		if (this.subModels) {
-			this.subModels.forEach((subModel) => {
-				this.NotificationService.unsubscribe.newIssues(subModel.database, subModel.model);
-				this.NotificationService.unsubscribe.issueChanged(subModel.database, subModel.model);
-			});
-		}
+		let channel = this.notificationService.getChannel(this.account, this.model);
 
+		channel.issues.unsubscribeFromCreated(this.onIssueCreated);
+		channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
+
+		// Do the same for all subModels
+		([] || this.subModels).forEach((subModel) => {
+				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel.issues.unsubscribeFromCreated(this.onIssueCreated);
+				channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
+		});
 	}
 
 	public watchers() {
@@ -151,8 +152,8 @@ class IssuesController implements ng.IController {
 			if (this.modelSettings) {
 
 				this.issuesReady.then(() => {
-					this.canAddIssue = this.AuthService.hasPermission(
-						this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
+					this.canAddIssue = this.authService.hasPermission(
+						this.clientConfigService.permissions.PERM_CREATE_ISSUE,
 						this.modelSettings.permissions
 					);
 				});
@@ -164,15 +165,15 @@ class IssuesController implements ng.IController {
 		});
 
 		this.$scope.$watch(() => {
-			return this.RevisionsService.status.data;
+			return this.revisionsService.status.data;
 		}, () => {
-			if (this.RevisionsService.status.data) {
-				this.revisions = this.RevisionsService.status.data[this.account + ":" + this.model];
+			if (this.revisionsService.status.data) {
+				this.revisions = this.revisionsService.status.data[this.account + ":" + this.model];
 			}
 		}, true);
 
 		this.$scope.$watch(() => {
-			return this.IssuesService.state;
+			return this.issuesService.state;
 		}, (state) => {
 
 			if (state) {
@@ -184,12 +185,12 @@ class IssuesController implements ng.IController {
 		/**
 		 * Set up event watching
 		 */
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
+		this.$scope.$watch(this.eventService.currentEvent, (event) => {
 
-			if (event.type === this.EventService.EVENT.VIEWER.CLICK_PIN) {
+			if (event.type === this.eventService.EVENT.VIEWER.CLICK_PIN) {
 
-				for (let i = 0; i < this.IssuesService.state.allIssues.length; i++) {
-					const iterIssue = this.IssuesService.state.allIssues;
+				for (let i = 0; i < this.issuesService.state.allIssues.length; i++) {
+					const iterIssue = this.issuesService.state.allIssues;
 					if (iterIssue[i]._id === event.value.id) {
 						this.editIssue(iterIssue[i]);
 						break;
@@ -209,11 +210,11 @@ class IssuesController implements ng.IController {
 				this.showAddButton = true;
 				let issueListItemId;
 
-				if (this.IssuesService.state.selectedIssue && this.IssuesService.state.selectedIssue._id) {
-					issueListItemId = "issue" + this.IssuesService.state.selectedIssue._id;
+				if (this.issuesService.state.selectedIssue && this.issuesService.state.selectedIssue._id) {
+					issueListItemId = "issue" + this.issuesService.state.selectedIssue._id;
 				}
 
-				this.IssuesService.state.displayIssue = null;
+				this.issuesService.state.displayIssue = null;
 
 				this.$state.go("home.account.model",
 					{
@@ -236,12 +237,12 @@ class IssuesController implements ng.IController {
 	}
 
 	public removeUnsavedPin() {
-		this.ViewerService.removePin({id: this.ViewerService.newPinId });
-		this.ViewerService.setPin({data: null});
+		this.viewerService.removePin({id: this.viewerService.newPinId });
+		this.viewerService.setPin({data: null});
 	}
 
 	public modelLoaded() {
-		return !!this.ViewerService.currentModel.model;
+		return !!this.viewerService.currentModel.model;
 	}
 
 	/**
@@ -260,65 +261,38 @@ class IssuesController implements ng.IController {
 	}
 
 	public watchNotification() {
-
 		// Watch for new issues
-		this.NotificationService.subscribe.newIssues(
-			this.account,
-			this.model,
-			this.newIssueListener.bind(this)
-		);
 
-		// Watch for status changes for all issues
-		this.NotificationService.subscribe.issueChanged(
-			this.account,
-			this.model,
-			this.handleIssueChanged.bind(this)
-		);
+		let channel = this.notificationService.getChannel(this.account, this.model);
+
+		channel.issues.subscribeToCreated(this.onIssueCreated, this);
+		channel.issues.subscribeToUpdated(this.issuesService.updateIssues, this.issuesService);
 
 		// Do the same for all subModels
-		if (this.subModels) {
-			this.subModels.forEach((subModel) => {
-
-				if (subModel) {
-					this.NotificationService.subscribe.newIssues(
-						subModel.database,
-						subModel.model,
-						this.newIssueListener.bind(this)
-					);
-					this.NotificationService.subscribe.issueChanged(
-						subModel.database,
-						subModel.model,
-						this.handleIssueChanged.bind(this)
-					);
-				} else {
-					console.error("Submodel was expected to be defined for issue subscription: ", subModel);
-				}
-
-			});
-		}
-
+		(this.subModels || []).forEach((subModel) => {
+				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel.issues.subscribeToCreated(this.onIssueCreated, this);
+				channel.issues.subscribeToUpdated(this.issuesService.updateIssues, this.issuesService);
+		});
 	}
 
-	public newIssueListener(issues, submodel) {
+	public onIssueCreated(issues) {
+		// TODO: fix submodel part;
 
 		issues.forEach((issue) => {
-			this.shouldShowIssue(issue, submodel);
+			this.shouldShowIssue(issue);
 		});
 
 	}
 
-	public handleIssueChanged(issue) {
-		this.IssuesService.updateIssues(issue);
-	}
-
-	public shouldShowIssue(issue, submodel) {
+	public shouldShowIssue(issue) {
 
 		if (!issue) {
 			console.error("Issue is undefined/null: ", issue);
 			return;
 		}
 
-		const isSubmodelIssue = (submodel !== undefined);
+		const isSubmodelIssue = (this.model !== issue.model);
 		let issueShouldAdd = false;
 
 		if (this.revisions && this.revisions.length) {
@@ -336,36 +310,16 @@ class IssuesController implements ng.IController {
 			}
 
 			// If Federation
-			if (!isSubmodelIssue) {
-
-				issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
-				if (issueShouldAdd) {
-					this.IssuesService.addIssue(issue);
-				}
-
-			} else {
-				// If submodel
-				if (submodel) {
-
-					this.RevisionsService.listAll(submodel.database, submodel.model)
-						.then((submodelRevisions) => {
-							issueShouldAdd = this.checkIssueShouldAdd(issue, currentRevision, submodelRevisions);
-							if (issueShouldAdd) {
-								this.IssuesService.addIssue(issue);
-							}
-						})
-						.catch((error) => {
-							console.error("Something went wrong getting submodel revisions", error);
-						});
-				}
-
+			issueShouldAdd = isSubmodelIssue || this.checkIssueShouldAdd(issue, currentRevision, this.revisions);
+			if (issueShouldAdd) {
+				this.issuesService.addIssue(issue);
 			}
 		}
 
 	}
 
 	public checkIssueShouldAdd(issue, currentRevision, revisions) {
-
+		// Searches for the full revision object in the revisions of the model
 		const issueRevision = revisions.find((rev) => {
 			return rev._id === issue.rev_id;
 		});
@@ -375,9 +329,9 @@ class IssuesController implements ng.IController {
 			return true;
 		}
 
+		// Checks that the revision of the issue is the same as the model's current revision or that is a previous revision.
 		const issueInDate = new Date(issueRevision.timestamp) <= new Date(currentRevision.timestamp);
 		return issueRevision && issueInDate;
-
 	}
 
 	/**
@@ -390,14 +344,14 @@ class IssuesController implements ng.IController {
 			this.importingBCF = true;
 		});
 
-		this.IssuesService.importBcf(this.account, this.model, this.revision, file)
+		this.issuesService.importBcf(this.account, this.model, this.revision, file)
 			.then(() => {
-				return this.IssuesService.getIssues(this.account, this.model, this.revision);
+				return this.issuesService.getIssues(this.account, this.model, this.revision);
 			})
 			.then((data) => {
 
 				this.importingBCF = false;
-				this.IssuesService.state.allIssues = (data === "") ? [] : data;
+				this.issuesService.state.allIssues = (data === "") ? [] : data;
 				this.$timeout();
 
 			})
@@ -407,7 +361,7 @@ class IssuesController implements ng.IController {
 				const content = "We tried to get import BCF but it failed. " +
 					"If this continues please message support@3drepo.io.";
 				const escapable = true;
-				this.DialogService.text("Error Getting User Job", content, escapable);
+				this.dialogService.text("Error Getting User Job", content, escapable);
 				console.error(error);
 				this.$timeout();
 
@@ -421,13 +375,13 @@ class IssuesController implements ng.IController {
 	 */
 	public editIssue(issue) {
 
-		if (this.IssuesService.state.selectedIssue) {
-			this.IssuesService.deselectPin(this.IssuesService.state.selectedIssue);
+		if (this.issuesService.state.selectedIssue) {
+			this.issuesService.deselectPin(this.issuesService.state.selectedIssue);
 		}
 
 		if (issue) {
 
-			this.ViewerService.highlightObjects([]);
+			this.viewerService.highlightObjects([]);
 			this.$state.go("home.account.model.issue",
 				{
 					account: this.account,
@@ -439,10 +393,10 @@ class IssuesController implements ng.IController {
 				{notify: false}
 			);
 
-			this.IssuesService.setSelectedIssue(issue, true, this.revision);
+			this.issuesService.setSelectedIssue(issue, true, this.revision);
 
 		} else {
-			this.IssuesService.resetSelectedIssue();
+			this.issuesService.resetSelectedIssue();
 		}
 
 		this.toShow = "showIssue";

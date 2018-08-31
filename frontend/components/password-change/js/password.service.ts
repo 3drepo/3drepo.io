@@ -36,7 +36,13 @@ export class PasswordService {
 	}
 
 	public evaluatePassword(password: string) {
-		return window.zxcvbn(password);
+		let strengthVal = 4;
+		if (password.length < 8) {
+			strengthVal = 0;
+		} else if (this.passwordLibraryAvailable()) {
+			strengthVal = window.zxcvbn(password).score;
+		}
+		return {score: strengthVal};
 	}
 
 	public getPasswordStrength(password: string, score: number) {

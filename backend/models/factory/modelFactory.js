@@ -15,8 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- // mongoose model factory for different db and collection name for each instance
-var mongoose = require('mongoose');
+// mongoose model factory for different db and collection name for each instance
+"use strict";
+const mongoose = require("mongoose");
 mongoose.Promise = Promise;
 
 module.exports = {
@@ -25,45 +26,40 @@ module.exports = {
 
 	dbManager: null,
 
-	setDB: function(dbManager){	
+	setDB: function(dbManager) {
 		this.dbManager = dbManager;
 	},
 
-	__checkDb: function(){
-		this.dbManager.getAuthDB().then(db =>
-			{
-				if (!db){
-					throw new Error('db connection is null');
-				}
-			});
+	__checkDb: function() {
+		this.dbManager.getAuthDB().then(db => {
+			if (!db) {
+				throw new Error("db connection is null");
+			}
+		});
 	},
 
-	get: function (modelName, options){
-		'use strict';
+	get: function (modelName, options) {
 		this.__checkDb();
 
-		let Model = mongoose.model(modelName);
-		
-		let data  = options && options.data || {};
+		const Model = mongoose.model(modelName);
 
-		let item = new Model(data);
-		
-		//FIXME: this needs to use the normal getCollection(), which returns a promise.
+		const data  = options && options.data || {};
+
+		const item = new Model(data);
+
+		// FIXME: this needs to use the normal getCollection(), which returns a promise.
 		item.collection = this.dbManager._getCollection(options.account, this.__collectionName(modelName, options));
 
 		item._dbcolOptions = options;
 
-		return item;		
+		return item;
 	},
 
-	__collectionName: function(modelName, options){
-		'use strict';
-		
+	__collectionName: function(modelName, options) {
 		let collectionName;
 
-
-		//collectionName can be a function or a static string
-		if (typeof this.models[modelName].collectionName === 'function'){
+		// collectionName can be a function or a static string
+		if (typeof this.models[modelName].collectionName === "function") {
 
 			collectionName = this.models[modelName].collectionName(options);
 		} else {
@@ -74,9 +70,7 @@ module.exports = {
 	},
 
 	createClass: function(modelName, schema, collectionName) {
-		'use strict';
-
-		if (this.models[modelName] && this.models[modelName].mongooseModel){
+		if (this.models[modelName] && this.models[modelName].mongooseModel) {
 
 			return this.models[modelName].mongooseModel;
 		}
@@ -84,14 +78,13 @@ module.exports = {
 		let mongooseModel;
 		if (mongoose.models[modelName]) {
 			mongooseModel = mongoose.model(modelName);
-		  } else {
+		} else {
 			mongooseModel = mongoose.model(modelName, schema);
-		  }
-		
+		}
 
-		//let mongooseModel =  mongoose.model(modelName, schema);
+		// let mongooseModel =  mongoose.model(modelName, schema);
 
-		this.models[modelName] = { 
+		this.models[modelName] = {
 			collectionName,
 			mongooseModel
 		};
@@ -101,38 +94,34 @@ module.exports = {
 			return this.get(modelName, options);
 		};
 
-		let self = this;
+		const self = this;
 
-		function staticFunctionProxy(staticFuncName){
+		function staticFunctionProxy(staticFuncName) {
 
-			let staticFunc = mongooseModel[staticFuncName];
+			const staticFunc = mongooseModel[staticFuncName];
 
-			return function(options){
+			return function(options) {
 
-				var args = Array.prototype.slice.call(arguments);
+				const args = Array.prototype.slice.call(arguments);
 				args.shift();
 
 				// resetting the static collection
-				if (!options || !options.account){
-					throw new Error('account name (db) is missing');
+				if (!options || !options.account) {
+					throw new Error("account name (db) is missing");
 				}
 
 				return self.dbManager.getCollection(options.account, self.__collectionName(modelName, options)).then(collection => {
 					mongooseModel.collection = collection;
 					const applyPromise = staticFunc.apply(this, args).then(items => {
-						if (Array.isArray(items)){
+						if (Array.isArray(items)) {
 
 							items.forEach((item, index, array) => {
 								item.collection = collection;
 								item._dbcolOptions = options;
 								array[index] = item;
 							});
-						
-						} else if (typeof items === 'number') {
 
-
-						} else if (items){
-	
+						} else if (items && typeof items !== "number") {
 							items.collection = collection;
 							items._dbcolOptions = options;
 						}
@@ -150,14 +139,13 @@ module.exports = {
 			};
 		}
 
-		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove', 'remove'].forEach(staticFuncName => {
+		["find", "findOne", "count", "distinct", "where", "findOneAndUpdate", "findOneAndRemove", "remove"].forEach(staticFuncName => {
 			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
 		});
 
+		mongooseModel.findById = function(options, id) {
 
-		mongooseModel.findById = function(options, id){
-
-			var args = Array.prototype.slice.call(arguments);
+			const args = Array.prototype.slice.call(arguments);
 			args.splice(0, 2);
 
 			args.unshift(options, { _id: id});
@@ -165,22 +153,21 @@ module.exports = {
 			return mongooseModel.findOne.apply(mongooseModel, args);
 		};
 
+		const update = mongooseModel.update;
 
-		let update = mongooseModel.update;
-
-		mongooseModel.update = function(options){
-			//FIXME: another one that breaks when I turn it into a promise.
-			let collection = self.dbManager._getCollection(options.account,self.__collectionName(modelName, options));
+		mongooseModel.update = function(options) {
+			// FIXME: another one that breaks when I turn it into a promise.
+			const collection = self.dbManager._getCollection(options.account,self.__collectionName(modelName, options));
 			mongooseModel.collection = collection;
 
-			var args = Array.prototype.slice.call(arguments);
+			const args = Array.prototype.slice.call(arguments);
 			args.shift();
 
 			return update.apply(mongooseModel, args);
 		};
 
-		mongooseModel.prototype.model = modelName => {
-			let model = this.models[modelName].mongooseModel;
+		mongooseModel.prototype.model = _modelName => {
+			const model = this.models[_modelName].mongooseModel;
 			return model;
 		};
 

@@ -27,10 +27,10 @@ const config = require("../../config");
 describe("VAT from http://ec.europa.eu ", function () {
 
 	let server;
-	const skip = config && config.vat && config.vat.debug 
+	const skip = config && config.vat && config.vat.debug
 					&& config.vat.debug.skipChecking;
 
-	before(function(done){
+	before(function(done) {
 
 		if (skip) {
 			this.skip();
@@ -41,12 +41,12 @@ describe("VAT from http://ec.europa.eu ", function () {
 				done();
 			});
 		}
-		
+
 	});
 
-	after(function(done){
+	after(function(done) {
 		if (!skip) {
-			server.close(function(){
+			server.close(function() {
 				console.log("API test server is closed");
 				done();
 			});
@@ -54,27 +54,26 @@ describe("VAT from http://ec.europa.eu ", function () {
 			done();
 		}
 	});
-		
 
 	it("checkVAT works correctly with valid code and VAT number", function(done) {
 
-		vat.checkVAT("GB", "206909015").then(function(vatRes){
+		vat.checkVAT("GB", "206909015").then(function(vatRes) {
 			expect(vatRes).to.be.defined;
 			expect(vatRes).to.have.property("valid");
 			expect(vatRes.valid).to.equal(true);
 			done();
 		})
-		.catch(function(err) {
-			done(err);
-		});
-		
+			.catch(function(err) {
+				done(err);
+			});
+
 	});
 
 	it("checkVAT passes correctly with non EU code and some valid looking VAT number", function(done) {
-		
+
 		// Mexico
 		vat.checkVAT("MX", "P&G851223B24")
-			.then(function(vatRes){
+			.then(function(vatRes) {
 				expect(vatRes).to.be.defined;
 				expect(vatRes).to.have.property("valid");
 				expect(vatRes.valid).to.equal(true);
@@ -84,14 +83,13 @@ describe("VAT from http://ec.europa.eu ", function () {
 				expect(err).to.be.undefined;
 				done(err);
 			});
-		
+
 	});
-	
 
 	it("checkVAT fails correctly with valid code and invalid VAT number", function(done) {
-		
+
 		vat.checkVAT("GB", "XXX")
-			.then(function(vatRes){
+			.then(function(vatRes) {
 				expect(vatRes).to.be.defined;
 				expect(vatRes).to.have.property("valid");
 				expect(vatRes.valid).to.equal(false);
@@ -102,13 +100,13 @@ describe("VAT from http://ec.europa.eu ", function () {
 				expect(err).to.be.undefined;
 				done(err);
 			});
-		
+
 	});
 
 	it("checkVAT fails with invalid code and a invalid VAT number", function(done) {
 
 		vat.checkVAT("XXX", "XXX")
-			.then(function(vatRes){
+			.then(function(vatRes) {
 				expect(vatRes).to.be.undefined;
 				done();
 			})
@@ -116,7 +114,7 @@ describe("VAT from http://ec.europa.eu ", function () {
 				expect(err).to.be.defined;
 				done();
 			});
-		
+
 	});
 
 });

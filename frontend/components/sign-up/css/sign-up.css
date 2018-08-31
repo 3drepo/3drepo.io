@@ -36,6 +36,11 @@ sign-up #sub p {
     margin: 2px 0 20px 10px;
 }
 
+md-input-container .md-placeholder, md-input-container label:not(.md-no-float):not(.md-container-ignore){
+	overflow-x : visible;
+	overflow-y : visible;
+}
+
 sign-up .sign-up-button {
     margin-left: 10%;
     margin-right: 10%;
@@ -57,7 +62,7 @@ sign-up .sign-up-button md-progress-circular {
 }
 
 sign-up #loginCaptcha > div {
-    margin-left: 20px;  
+    margin-left: 20px;
 }
 
 sign-up #registerWait {

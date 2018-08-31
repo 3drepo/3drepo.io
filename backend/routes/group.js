@@ -26,24 +26,25 @@ const Group = require("../models/group");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
-router.get('/groups/revision/master/head/', middlewares.issue.canView, listGroups);
-router.get('/groups/revision/:rid/', middlewares.issue.canView, listGroups);
-router.get('/groups/revision/master/head/:uid', middlewares.issue.canView, findGroup);
-router.get('/groups/revision/:rid/:uid', middlewares.issue.canView, findGroup);
+router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
+router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
+router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
+router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
-router.put('/groups/:uid', middlewares.issue.canCreate, updateGroup);
-router.post('/groups/', middlewares.issue.canCreate, createGroup);
-router.delete('/groups/:id', middlewares.issue.canCreate, deleteGroup);
-router.delete('/groups/', middlewares.issue.canCreate, deleteGroups);
+router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
+router.post("/groups/", middlewares.issue.canCreate, createGroup);
+// @deprecated -  use deleteGroups with single id instead.
+router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
+router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
-const getDbColOptions = function(req){
+const getDbColOptions = function(req) {
 	return {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 };
 
-function listGroups(req, res, next){
+function listGroups(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	let groupList;
 	if (req.params.rid) {
@@ -68,10 +69,10 @@ function listGroups(req, res, next){
 	});
 }
 
-function findGroup(req, res, next){
+function findGroup(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 
 	let groupItem;
 	if (req.params.rid) {
@@ -80,8 +81,8 @@ function findGroup(req, res, next){
 		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null);
 	}
 
-	groupItem.then( group => {
-		if(!group){
+	groupItem.then(group => {
+		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
 			return Promise.resolve(group);
@@ -94,53 +95,57 @@ function findGroup(req, res, next){
 	});
 }
 
-function createGroup(req, res, next){
+function createGroup(req, res, next) {
+	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	let place = utils.APIInfo(req);
+	if (req.body.objects) {
+		const create = Group.createGroup(getDbColOptions(req), sessionId , req.body);
 
-	let create = Group.createGroup(getDbColOptions(req), req.body);
+		create.then(group => {
 
-	create.then(group => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
-
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+		}).catch(err => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
+		});
+	} else {
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
-function deleteGroup(req, res, next){
+/**
+ * @deprecated -  use deleteGroups with single id instead.
+ */
+function deleteGroup(req, res, next) {
 
-	if (!req.query.ids || "[object Array]" !== Object.prototype.toString.call(req.query.ids)) {
-		req.query.ids = [];
-	}
+	req.query.ids = req.params.id;
 
-	req.query.ids.push(req.params.id);
-
-	return deleteGroup(req, res, next);
+	return deleteGroups(req, res, next);
 }
 
 function deleteGroups(req, res, next) {
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
+	systemLogger.logError(JSON.stringify(req.query));
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
 
-		Group.deleteGroups(getDbColOptions(req), ids).then(() => {
+		Group.deleteGroups(getDbColOptions(req),sessionId , ids).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 		}).catch(err => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 		});
 	} else {
-		//responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-		responseCodes.respond(place, req, res, next, { message: "Missing or invalid arguments", status: 400 }, { message: "Missing or invalid arguments", status: 400 });
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 	}
 }
 
-function updateGroup(req, res, next){
-
+function updateGroup(req, res, next) {
 	const dbCol = getDbColOptions(req);
-	let place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	let groupItem;
 	if (req.params.rid) {
@@ -149,19 +154,19 @@ function updateGroup(req, res, next){
 		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
 	}
 
-	groupItem.then( group => {
+	groupItem.then(group => {
 
-		if(!group){
+		if(!group) {
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		} else {
-			return group.updateAttrs(dbCol, req.body);
+			return group.updateGroup(dbCol, sessionId, req.body);
 		}
 
 	}).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 	});
 }
 

@@ -24,7 +24,7 @@ let log;
 
 /**
  * The repoLogger init and factory
- * 
+ *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {string} id - Unique logger ID
@@ -32,7 +32,7 @@ let log;
  */
 const repoLogger = function (req, res, id) {
 
-	let self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
+	const self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
 
 	self.uid = id;
 
@@ -76,9 +76,9 @@ function createLogger() {
 			fatal: "grey"
 		}
 	};
-	
+
 	let fileOutTransport;
-	
+
 	if (config.logfile.logDirectory) {
 		fileOutTransport = new winston.transports.DailyRotateFile({
 			filename: config.logfile.logDirectory + "/3drepo",
@@ -91,18 +91,18 @@ function createLogger() {
 			filename: config.logfile.filename
 		});
 	}
-	
+
 	const transports = [
 		fileOutTransport
 	];
-	
+
 	if (config.logfile.silent === undefined || config.logfile.silent === false) {
 		transports.push(new winston.transports.Console({
 			colorize: true,
-			level: config.logfile.console_level,
+			level: config.logfile.console_level
 		}));
 	}
-	
+
 	// Creates logger which outputs to both the console
 	// and a log file simultaneously
 	// Levels are set separately in the config.
@@ -118,16 +118,16 @@ function createLogger() {
  *
  * @private
  * @param {string} type - Log level
- * @param {string} msg - Message to log 
+ * @param {string} msg - Message to log
  * @param {Object} meta - Extra data to put into the log file
  */
 repoLogger.prototype.logMessage = function (type, msg, meta) {
-	let currentTime = (new Date())
+	const currentTime = (new Date())
 		.getTime();
-	let timeDiff = currentTime - this.startTime;
+	const timeDiff = currentTime - this.startTime;
 
-	let metadata = Object.assign({}, meta, {
-		uid: this.uid,
+	const metadata = Object.assign({}, meta, {
+		uid: this.uid
 	});
 
 	this.session && this.session.user && (metadata.username = this.session.user.username);
@@ -140,7 +140,7 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
 
 /**
  * Function to log an info message
- * 
+ *
  * @param {string} msg - Information message
  * @param {Object} meta - Extra informative metadata
  */
@@ -150,7 +150,7 @@ repoLogger.prototype.logInfo = function (msg, meta) {
 
 /**
  * Function to log an error message
- * 
+ *
  * @param {string} msg - Error message
  * @param {Object} meta - Extra informative metadata
  */
@@ -160,7 +160,7 @@ repoLogger.prototype.logError = function (msg, meta) {
 
 /**
  * Function to log a debug message
- * 
+ *
  * @param {string} msg - Debug message
  * @param {Object} meta - Extra informative metadata
  */
@@ -170,7 +170,7 @@ repoLogger.prototype.logDebug = function (msg, meta) {
 
 /**
  * Function to log a warning message
- * 
+ *
  * @param {string} msg - Warning message
  * @param {Object} meta - Extra informative metadata
  */
@@ -180,7 +180,7 @@ repoLogger.prototype.logWarning = function (msg, meta) {
 
 /**
  * Function to log a warning message
- * 
+ *
  * @param {string} msg - Warning message
  * @param {Object} meta - Extra informative metadata
  */
@@ -190,7 +190,7 @@ repoLogger.prototype.logTrace = function (msg, meta) {
 
 /**
  * Function to log a fatal message
- * 
+ *
  * @param {string} msg - Fatal message
  * @param {Object} meta - Extra informative metadata
  */
@@ -198,13 +198,12 @@ repoLogger.prototype.logFatal = function (msg, meta) {
 	this.logMessage("fatal", msg, meta);
 };
 
-
 const systemLogger = new repoLogger(null, null, "system");
 
 /**
  * Middleware to call at the start of every request to
  * initialize logger
- * 
+ *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {function} next - Next middleware
@@ -216,10 +215,10 @@ module.exports.startRequest = function (req, res, next) {
 
 	req[C.REQ_REPO] = {};
 	req[C.REQ_REPO].logger = systemLogger;
-	
+
 	// req[C.REQ_REPO].logger = new repoLogger(req, res, shortid.generate()); // Create logger for this request
 
 	next();
 };
-	
+
 module.exports.systemLogger = systemLogger;

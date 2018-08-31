@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -17,70 +17,68 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let request = require('supertest');
-let expect = require('chai').expect;
-let app = require("../../services/api.js").createApp(
-	{ session: require('express-session')({ secret: 'testing',  resave: false,   saveUninitialized: false }) }
+const request = require("supertest");
+const expect = require("chai").expect;
+const app = require("../../services/api.js").createApp(
+	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-let logger = require("../../logger.js");
-let systemLogger = logger.systemLogger;
-let responseCodes = require("../../response_codes.js");
+const logger = require("../../logger.js");
+const systemLogger = logger.systemLogger;
+const responseCodes = require("../../response_codes.js");
 
-
-
-describe('Verify', function () {
-	let User = require('../../models/user');
+describe("Verify", function () {
+	const User = require("../../models/user");
 	let server;
-	let username = 'v_username';
-	let username_not_verified = 'v_name_not_verified';
-	let username_double_verified = 'v_name_db_verified';
-	let username_expired_token = 'v_name_expired';
+	const username = "v_username";
+	const username_not_verified = "v_name_not_verified";
+	const username_double_verified = "v_name_db_verified";
+	const username_expired_token = "v_name_expired";
 
-	let password = 'password';
-	let email = suf => `test3drepo_verification_${suf}@mailinator.com`;
-	let async = require('async');
+	const password = "password";
+	const email = suf => `test3drepo_verification_${suf}@mailinator.com`;
+	const async = require("async");
 
-	before(function(done){
+	before(function(done) {
 
 		server = app.listen(8080, function () {
-			console.log('API test server is listening on port 8080!');
+			console.log("API test server is listening on port 8080!");
 
-			//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-			request(server).get('/info').end(() => {
+			// hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
+			request(server).get("/info").end(() => {
 				done();
 			});
-			
+
 		});
 
 	});
 
-	after(function(done){
-		server.close(function(){
-			console.log('API test server is closed');
+	after(function(done) {
+		server.close(function() {
+			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	it('user should success if username and token is correct', function(done){
+	it("user should success if username and token is correct", function(done) {
 		// create a user
 		this.timeout(15000);
 
 		User.createUser(systemLogger, username, password, {
-			email: email('success')
+			email: email("success")
 		}, 200000).then(emailVerifyToken => {
 
 			request(server)
-			.post(`/${username}/verify`)
-			.send({ token: emailVerifyToken.token })
-			.expect(200, function(err, res){
-				
-				done(err);
+				.post(`/${username}/verify`)
+				.send({ token: emailVerifyToken.token })
+				.expect(200, function(err, res) {
+
+					done(err);
 				// // give the system some time to import the toy model after users verified
 				// setTimeout(function(){
 				// 	done(err);
 				// }, 10000);
 
-			});
+				});
 
 		}).catch(err => {
 			done(err);
@@ -91,7 +89,7 @@ describe('Verify', function () {
 	// it('verified user should have toy model imported', function(done){
 
 	// 	let agent = request.agent(server);
-		
+
 	// 	async.series([
 	// 		function(done){
 	// 			agent.post('/login')
@@ -112,95 +110,94 @@ describe('Verify', function () {
 
 	// });
 
-	it('user should fail if verify more than once', function(done){
+	it("user should fail if verify more than once", function(done) {
 		// create a user
 		User.createUser(systemLogger, username_double_verified, password, {
-			email: email('double')
+			email: email("double")
 		}, 200000).then(emailVerifyToken => {
 
 			request(server)
-			.post(`/${username_double_verified}/verify`)
-			.send({ token: emailVerifyToken.token })
-			.expect(200, function(err, res){
+				.post(`/${username_double_verified}/verify`)
+				.send({ token: emailVerifyToken.token })
+				.expect(200, function(err, res) {
 
-				if(err){
-					done(err)
-				} else {
-					//double verify
-					request(server)
-					.post(`/${username_double_verified}/verify`)
-					.send({ token: emailVerifyToken.token })
-					.expect(400, function(err, res){
-						expect(res.body.value).to.equal(responseCodes.ALREADY_VERIFIED.value);
+					if(err) {
 						done(err);
-					});
-				}
+					} else {
+					// double verify
+						request(server)
+							.post(`/${username_double_verified}/verify`)
+							.send({ token: emailVerifyToken.token })
+							.expect(400, function(err, res) {
+								expect(res.body.value).to.equal(responseCodes.ALREADY_VERIFIED.value);
+								done(err);
+							});
+					}
 
-			});
+				});
 
 		}).catch(err => {
 			done(err);
 		});
 	});
 
-
-	describe('user should fail', function() {
+	describe("user should fail", function() {
 
 		let token;
 
-		before(function(){
+		before(function() {
 			return User.createUser(systemLogger, username_not_verified, password, {
-				email: email('invalid')
+				email: email("invalid")
 			}, 200000).then(emailVerifyToken => {
 				token = emailVerifyToken.token;
 			});
 		});
 
-		it('if token provided is invalid', function(done){
+		it("if token provided is invalid", function(done) {
 			request(server)
-			.post(`/${username_not_verified}/verify`)
-			.send({ token: token + '123'})
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
-				done(err);
-			});
-		});
-
-		it('if no token is provided', function(done){
-			request(server)
-			.post(`/${username_not_verified}/verify`)
-			.send({})
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
-				done(err);
-			});
-		});
-
-		it('if username provided is invalid', function(done){
-			request(server)
-			.post(`/${username_not_verified}123/verify`)
-			.send({ token: token})
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
-				done(err);
-			});
-		});
-
-		it('if token is expired', function(done){
-
-			let expiryTime = -1;
-
-			User.createUser(systemLogger, username_expired_token, password, {
-				email: email('expired')
-			}, expiryTime).then(emailVerifyToken => {
-
-				request(server)
-				.post(`/${username_expired_token}/verify`)
-				.send({ token: emailVerifyToken.token })
-				.expect(400, function(err, res){
+				.post(`/${username_not_verified}/verify`)
+				.send({ token: token + "123"})
+				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
 					done(err);
 				});
+		});
+
+		it("if no token is provided", function(done) {
+			request(server)
+				.post(`/${username_not_verified}/verify`)
+				.send({})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
+					done(err);
+				});
+		});
+
+		it("if username provided is invalid", function(done) {
+			request(server)
+				.post(`/${username_not_verified}123/verify`)
+				.send({ token: token})
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
+					done(err);
+				});
+		});
+
+		it("if token is expired", function(done) {
+
+			const expiryTime = -1;
+
+			User.createUser(systemLogger, username_expired_token, password, {
+				email: email("expired")
+			}, expiryTime).then(emailVerifyToken => {
+
+				request(server)
+					.post(`/${username_expired_token}/verify`)
+					.send({ token: emailVerifyToken.token })
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.TOKEN_INVALID.value);
+						done(err);
+					});
 
 			}).catch(err => {
 				done(err);
@@ -208,6 +205,5 @@ describe('Verify', function () {
 
 		});
 	});
-
 
 });
