@@ -61,7 +61,18 @@ export class JobsService {
 	 * @returns {*|promise}
 	 */
 	public delete(teamspace, jobId): Promise<any> {
-		return this.APIService.delete(`${teamspace}/jobs/${jobId}`;
+		return this.APIService.delete(`${teamspace}/jobs/${jobId}`);
+	}
+
+	/**
+	 * Update job by id
+	 *
+	 * @param teamspace
+	 * @param jobId
+	 * @returns {*|promise}
+	 */
+	public update(teamspace, job): Promise<any> {
+		return this.APIService.put(`${teamspace}/jobs/${job._id}`, job);
 	}
 }
 
