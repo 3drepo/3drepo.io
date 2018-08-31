@@ -17,6 +17,11 @@
 .newJobForm md-input-container {
 	margin: 0;
 	margin-bottom: 16px;
+	padding-left: 0;
+}
+
+.newJobForm md-input-container label {
+	padding-left: 0 !important;
 }
 
 .newJobFormButton {
