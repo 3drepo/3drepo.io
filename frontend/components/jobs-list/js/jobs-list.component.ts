@@ -101,7 +101,7 @@ class JobsListController implements ng.IController {
 			return data;
 		}
 
-		return data.filter(({name}) => name.includes(query));
+		return data.filter(({_id}) => _id.includes(query));
 	}
 
 	/**
