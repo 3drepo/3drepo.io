@@ -118,7 +118,6 @@ schema.statics.addJob = function(teamspace, jobData) {
 			newJobEntry.color = jobData.color;
 		}
 		return newJobEntry.save();
-
 	});
 };
 

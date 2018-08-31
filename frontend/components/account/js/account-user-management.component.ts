@@ -44,74 +44,71 @@ const TABS = {
 
 class AccountUserManagementController implements ng.IController {
 
-		public static $inject: string[] = [
-			"$q",
-			"$state",
+	public static $inject: string[] = [
+		"$q",
+		"$state",
 
-			"AccountService",
-			"DialogService",
-			"JobsService"
-		];
+		"AccountService",
+		"DialogService",
+		"JobsService"
+	];
 
-		private TABS_TYPES = TABS_TYPES;
+	private TABS_TYPES = TABS_TYPES;
 
-		private currentUser;
-		private accounts;
-		private teamspaces = [];
-		private members;
-		private jobs;
-		private jobsColors;
-		private projects;
-		private currentTeamspace;
-		private licencesLimit;
-		private licencesLabel;
-		private isLoadingTeamspace;
-		private isTeamspaceAdmin;
+	private currentUser;
+	private accounts;
+	private teamspaces = [];
+	private members;
+	private jobs;
+	private jobsColors;
+	private projects;
+	private currentTeamspace;
+	private licencesLimit;
+	private licencesLabel;
+	private isLoadingTeamspace;
+	private isTeamspaceAdmin;
 
-		private selectedTeamspace;
-		private selectedTab;
-		private selectedProject;
-		private showAddingPanel;
-		private selectedView;
+	private selectedTeamspace;
+	private selectedTab;
+	private selectedProject;
+	private showAddingPanel;
+	private selectedView;
 
-		constructor(
-			private $q: any,
-			private $state: any,
+	constructor(
+		private $q: any,
+		private $state: any,
 
-			private AccountService: any,
-			private DialogService: any,
-			private JobsService: any
-		) {
-			const {tab, teamspace} = this.$state.params;
-			this.selectedTab = parseInt(tab, 10);
+		private AccountService: any,
+		private DialogService: any,
+		private JobsService: any
+	) {
+		const {tab, teamspace} = this.$state.params;
+		this.selectedTab = parseInt(tab, 10);
 
-			if (teamspace) {
-				this.selectedTeamspace = teamspace;
-			}
+		if (teamspace) {
+			this.selectedTeamspace = teamspace;
 		}
+	}
 
-		public $onInit(): void {
-			this.onTeamspaceChange();
+	public $onInit(): void {
+		this.onTeamspaceChange();
+	}
+
+	public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
+		if (currentUser.currentValue && !this.selectedTeamspace) {
+			this.selectedTeamspace = currentUser.currentValue;
 		}
-
-		public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
-			if (currentUser.currentValue && !this.selectedTeamspace) {
-				this.selectedTeamspace = currentUser.currentValue;
-			}
 
 			if (currentUser.currentValue && accounts.currentValue) {
-				this.teamspaces = accounts.currentValue.reduce((teamspaces, account) => {
+				this.teamspaces = accounts.currentValue.reduce((teamspaces,account) => {
 					const {isProjectAdmin, isModelAdmin} = account.projects.reduce((flags, { permissions, models }) => {
 						flags.isProjectAdmin = permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
-						flags.isModelAdmin = models.some((model) => model.permissions.includes(MODEL_ROLES_TYPES.ADMINISTRATOR));
-
-						return flags;
-					}, {});
-
-					if (account.isAdmin || isProjectAdmin || isModelAdmin) {
+						flags.isModelAdmin = models.some((model) => model.permissions.includes(MODEL_ROLES_TYPES.ADMINISTRATOR));return flags;
+						},{});
+						if (account.isAdmin ||isProjectAdmin|| isModelAdmin) {
 						teamspaces.push({
 							...account,
-							isProjectAdmin
+					isProjectAdmin
 						});
 					}
 
@@ -120,159 +117,159 @@ class AccountUserManagementController implements ng.IController {
 			}
 		}
 
-		/**
-		 * Get teamspace details
-		*/
-		public onTeamspaceChange = (): void => {
-			this.isLoadingTeamspace = true;
-			const currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
-			const membersPromise = this.getTeamspaceMembersData(currentTeamspace.account);
-			const jobsPromise = this.getTeamspaceJobsData(currentTeamspace.account);
+	/**
+	 * Get teamspace details
+	*/
+	public onTeamspaceChange = (): void => {
+		this.isLoadingTeamspace = true;
+		const currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
+		const membersPromise = this.getTeamspaceMembersData(currentTeamspace.account);
+		const jobsPromise = this.getTeamspaceJobsData(currentTeamspace.account);
 
-			this.$state.go(this.$state.$current.name, {teamspace: this.selectedTeamspace}, {notify: false});
-			this.isTeamspaceAdmin = currentTeamspace.isAdmin;
+		this.$state.go(this.$state.$current.name, {teamspace: this.selectedTeamspace}, {notify: false});
+		this.isTeamspaceAdmin = currentTeamspace.isAdmin;
 
-			this.$q.all([membersPromise, jobsPromise]).then(([membersData, jobsData]) => {
-				this.currentTeamspace = currentTeamspace;
-				this.members = membersData.members;
-				this.licencesLimit = membersData.licencesLimit;
-				this.jobs = jobsData.jobs;
-				this.jobsColors = jobsData.colors;
-				this.licencesLabel = this.getLicencesLabel();
-				this.projects = this.currentTeamspace.projects.filter(({permissions}) => {
+		this.$q.all([membersPromise, jobsPromise]).then(([membersData, jobsData]) => {
+			this.currentTeamspace = currentTeamspace;
+			this.members = membersData.members;
+			this.licencesLimit = membersData.licencesLimit;
+			this.jobs = jobsData.jobs;
+			this.jobsColors = jobsData.colors;
+			this.licencesLabel = this.getLicencesLabel();
+			this.projects = this.currentTeamspace.projects.filter(({permissions}) => {
 					return this.currentTeamspace.isAdmin || permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
 				});
-				this.isLoadingTeamspace = false;
+			this.isLoadingTeamspace = false;
+		});
+	}
+
+	/**
+	 * Get teamspace details
+	 */
+	public onTabChange = (): void => {
+		const newParams: any = {tab: this.selectedTab};
+
+		if (this.selectedTab !== TABS_TYPES.PROJECTS) {
+			newParams.view = null;
+		}
+		this.$state.go(this.$state.$current.name, newParams, {notify: false});
+	}
+
+	/**
+	 * Get teamspace users list
+	 * @param teamspaceName
+	 */
+	public getTeamspaceMembersData(teamspaceName: string): void {
+		const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
+			.catch(this.DialogService.showError.bind(null, "retrieve", "subscriptions"));
+
+		const memberListPromise = this.AccountService.getMembers(teamspaceName)
+			.catch(this.DialogService.showError.bind(null, "retrieve", "members"));
+
+		return this.$q.all([quotaInfoPromise, memberListPromise])
+			.then(([quotaInfoResponse, membersResponse]) => {
+				return {
+					licencesLimit: get(quotaInfoResponse, "data.collaboratorLimit", 0),
+					members: [...membersResponse.data.members.map(this.prepareMemberData.bind(null, teamspaceName))]
+				};
 			});
-		}
+	}
 
-		/**
-		 * Get teamspace details
-		 */
-		public onTabChange = (): void => {
-			const newParams: any = {tab: this.selectedTab};
-
-			if (this.selectedTab !== TABS_TYPES.PROJECTS) {
-				newParams.view = null;
-			}
-			this.$state.go(this.$state.$current.name, newParams, {notify: false});
-		}
-
-		/**
-		 * Get teamspace users list
-		 * @param teamspaceName
-		 */
-		public getTeamspaceMembersData(teamspaceName: string): void {
-			const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
-				.catch(this.DialogService.showError.bind(null, "retrieve", "subscriptions"));
-
-			const memberListPromise = this.AccountService.getMembers(teamspaceName)
-				.catch(this.DialogService.showError.bind(null, "retrieve", "members"));
-
-			return this.$q.all([quotaInfoPromise, memberListPromise])
-				.then(([quotaInfoResponse, membersResponse]) => {
-					return {
-						licencesLimit: get(quotaInfoResponse, "data.collaboratorLimit", 0),
-						members: [...membersResponse.data.members.map(this.prepareMemberData.bind(null, teamspaceName))]
-					};
-				});
-		}
-
-		/**
-		 * Convert member data to proper format
-		 * @param member
-		 * @returns
-		 */
-		public prepareMemberData = (teamspaceName, member): object => {
-			return {
-				...member,
-				isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-				isCurrentUser: this.currentUser === member.user,
+	/**
+	 * Convert member data to proper format
+	 * @param member
+	 * @returns
+	 */
+	public prepareMemberData = (teamspaceName, member): object => {
+		return {
+			...member,
+			isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
+			isCurrentUser: this.currentUser === member.user,
 				isOwner: teamspaceName === member.user
-			};
-		}
+		};
+	}
 
-		/**
-		 * Get teamspace jobs list
-		 * @param teamspaceName
-		 */
-		public getTeamspaceJobsData(teamspaceName: string): Promise<any> {
-			const jobsPromises = [
-				this.JobsService.getList(teamspaceName),
-				this.JobsService.getColors(teamspaceName)
-			];
-			return Promise.all(jobsPromises)
-				.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"))
-				.then(([jobsResponse, colorsResponse]) => {
-					const jobs = get(jobsResponse, "data", []);
-					const colors = get(colorsResponse, "data", []);
+	/**
+	 * Get teamspace jobs list
+	 * @param teamspaceName
+	 */
+	public getTeamspaceJobsData(teamspaceName: string): Promise<any> {
+		const jobsPromises = [
+			this.JobsService.getList(teamspaceName),
+			this.JobsService.getColors(teamspaceName)
+		];
+		return Promise.all(jobsPromises)
+			.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"))
+			.then(([jobsResponse, colorsResponse]) => {
+				const jobs = get(jobsResponse, "data", []);
+				const colors = get(colorsResponse, "data", []);
 
-					return {jobs, colors};
-				});
-		}
+				return {jobs, colors};
+			});
+	}
 
-		/**
-		 * Get teamspace projects list
-		 * @param teamspaceName
-		 */
-		public getTeamspaceProjects(teamspaceName: string): object[] {
-			if (!teamspaceName) {
-				return [];
-			}
-			// TODO: Handle request
+	/**
+	 * Get teamspace projects list
+	 * @param teamspaceName
+	 */
+	public getTeamspaceProjects(teamspaceName: string): object[] {
+		if (!teamspaceName) {
 			return [];
 		}
+		// TODO: Handle request
+		return [];
+	}
 
-		/**
-		 * Change panel visibility
-		 * @param forceHide
-		 */
-		public toggleNewDataPanel(forceHide = false): void {
-			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
+	/**
+	 * Change panel visibility
+	 * @param forceHide
+	 */
+	public toggleNewDataPanel(forceHide = false): void {
+		this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
+	}
+
+	/**
+	 * Generate licences summary
+	 */
+	public getLicencesLabel(): string {
+		const limit = isNumber(this.licencesLimit) ? this.licencesLimit : "unlimited";
+		return `Assigned licences: ${this.members.length} out of ${limit}`;
+	}
+
+	/**
+	 * Update local list of members
+	 * @param updatedMembers
+	 */
+	public onMembersChange(updatedMembers): void {
+		this.members = [...updatedMembers];
+		this.licencesLabel = this.getLicencesLabel();
+	}
+
+	/**
+	 * Add new member to local list of members
+	 * @param updatedMembers
+	 */
+	public onMemberSave = (newMember): void => {
+		this.members = [
+			...this.members,
+			this.prepareMemberData(this.currentTeamspace.account, newMember)
+		];
+		this.licencesLabel = this.getLicencesLabel();
+		this.showAddingPanel = false;
+	}
+
+	/**
+	 * Add new job to local list of jobs
+	 * @param updatedMembers
+	 */
+	public onJobSave(newJob): void {
+		this.jobs = [...this.jobs, newJob];
+
+		if (newJob.color && !this.jobsColors.includes(newJob.color)) {
+			this.jobsColors = [...this.jobsColors, newJob.color];
 		}
-
-		/**
-		 * Generate licences summary
-		 */
-		public getLicencesLabel(): string {
-			const limit = isNumber(this.licencesLimit) ? this.licencesLimit : "unlimited";
-			return `Assigned licences: ${this.members.length} out of ${limit}`;
-		}
-
-		/**
-		 * Update local list of members
-		 * @param updatedMembers
-		 */
-		public onMembersChange(updatedMembers): void {
-			this.members = [...updatedMembers];
-			this.licencesLabel = this.getLicencesLabel();
-		}
-
-		/**
-		 * Add new member to local list of members
-		 * @param updatedMembers
-		 */
-		public onMemberSave = (newMember): void => {
-			this.members = [
-				...this.members,
-				this.prepareMemberData(this.currentTeamspace.account, newMember)
-			];
-			this.licencesLabel = this.getLicencesLabel();
-			this.showAddingPanel = false;
-		}
-
-		/**
-		 * Add new job to local list of jobs
-		 * @param updatedMembers
-		 */
-		public onJobSave(newJob): void {
-			this.jobs = [...this.jobs, newJob];
-
-			if (newJob.color && !this.jobsColors.includes(newJob.color)) {
-				this.jobsColors = [...this.jobsColors, newJob.color];
-			}
-			this.showAddingPanel = false;
-		}
+		this.showAddingPanel = false;
+	}
 
 	public onJobsChange(updatedJobs): void {
 		this.jobs = [...updatedJobs];

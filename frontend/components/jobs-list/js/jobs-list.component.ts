@@ -119,11 +119,19 @@ class JobsListController implements ng.IController {
 	 * Remove job
 	 * @param job
 	 */
-	public removeJob(job) {
+	public onRemove(job) {
 		this.JobsService.delete(this.currentTeamspace.account, job._id)
 			.then(() => {
 				const jobs = this.jobs.filter(({_id}) => _id !== job._id);
 				this.onChange({updatedJobs: jobs});
+			})
+			.catch(this.DialogService.showError.bind(null, "delete", "job"));
+	}
+
+	public onColorChange(job) {
+		this.JobsService.update(this.currentTeamspace.account, job)
+			.then(() => {
+				this.onChange({updatedJobs: this.jobs});
 			})
 			.catch(this.DialogService.showError.bind(null, "delete", "job"));
 	}
