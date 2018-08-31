@@ -3,8 +3,8 @@
 		.jobsListCell(layout="row" layout-align="start center" flex="30")
 			list-sort-button(
 				ng-disabled="vm.ngDisabled"
-				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
-				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.field === '_id'}"
+				on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {field: '_id'})")
 
 			md-input-container.jobsListCellSearch(layout="row" layout-align="start center")
 				md-icon.angular-material-icons search
@@ -18,8 +18,8 @@
 		.jobsListCell(flex="25" layout="row" layout-align="start center")
 			list-sort-button(
 				ng-disabled="vm.ngDisabled"
-				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
-				on-change="vm.setSortType(vm.SORT_TYPES.COLOR, order)")
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.field === 'color'}"
+				on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {field: 'color'})")
 			.usersListCellLabel Color
 
 			div(flex)
