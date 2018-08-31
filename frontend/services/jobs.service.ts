@@ -52,6 +52,17 @@ export class JobsService {
 	public create(teamspace, job): Promise<any> {
 		return this.APIService.post(`${teamspace}/jobs`, job);
 	}
+
+	/**
+	 * Delete job by id
+	 *
+	 * @param teamspace
+	 * @param jobId
+	 * @returns {*|promise}
+	 */
+	public delete(teamspace, jobId): Promise<any> {
+		return this.APIService.delete(`${teamspace}/jobs/${jobId}`;
+	}
 }
 
 export const JobsServiceModule = angular

@@ -273,6 +273,10 @@ class AccountUserManagementController implements ng.IController {
 			}
 			this.showAddingPanel = false;
 		}
+
+	public onJobsChange(updatedJobs): void {
+		this.jobs = [...updatedJobs];
+	}
 }
 
 export const AccountUserManagementComponent: ng.IComponentOptions = {

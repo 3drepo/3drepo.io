@@ -80,7 +80,8 @@
 						layout="row"
 						members="vm.members"
 						projects="vm.projects"
-						current-teamspace="vm.currentTeamspace")
+						current-teamspace="vm.currentTeamspace"
+						on-change="vm.onJobsChange(updatedJobs)")
 
             md-tab(
                 label="Jobs"
