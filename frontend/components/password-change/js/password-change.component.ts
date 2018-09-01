@@ -85,15 +85,18 @@ class PasswordChangeController implements ng.IController {
 			if (this.newPassword !== undefined) {
 				const result = this.PasswordService.evaluatePassword(this.newPassword);
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
-				this.checkInvalidPassword(result);
+				this.checkInvalidPassword(result);					
 			}
-			if (this.confirmPassword !== undefined && this.confirmPassword !== this.newPassword) {
-				this.buttonDisabled = true;
-				this.registerMessage = "(Passwords Mismatched)";
-			} else {
-				this.buttonDisabled = false;
-				this.registerMessage = "";
+
+			if (this.confirmPassword !== undefined) {
+				const result = this.PasswordService.evaluatePassword(this.confirmPassword);
+				this.passwordStrength = this.PasswordService.getPasswordStrength(this.confirmPassword, result.score);
+				this.checkInvalidPassword(result);	
+				this.checkDuplicate();
+			} else if (this.confirmPassword === this.newPassword && this.checkDuplicate()) {
 			}
+
+
 		});
 
 		this.$scope.$watch("vm.token", () => {
@@ -112,25 +115,36 @@ class PasswordChangeController implements ng.IController {
 			}
 		});
 
+	}x
+
+	public checkDuplicate() {
+		if (this.confirmPassword !== this.newPassword) {
+			this.registerMessage = "(Passwords Mismatched)";
+			this.buttonDisabled = true;
+			return false;
+		} else {
+			this.registerMessage = "";
+			return true;
+		}
 	}
 
 	public checkInvalidPassword(result) {
 		const scoreThreshold = 2;
-		if (result.score < scoreThreshold) {
-			this.buttonDisabled = false;
+		if (result.score < scoreThreshold && this.confirmPassword !== this.newPassword) {
 			this.invalidatePassword(result);
-		} else {
-			this.buttonDisabled = true;
+		} else if(this.newPassword === this.confirmPassword && result.score > scoreThreshold) {
 			this.validatePassword();
 		}
 	}
 
 	public invalidatePassword(result) {
+		this.buttonDisabled = true;
 		this.message = "Password is too weak";
 		this.messageColor = this.messageErrorColour;
 	}
 
 	public validatePassword() {
+		this.buttonDisabled = false;
 		this.message = "";
 		this.messageColor = this.messageColour;
 	}
