@@ -115,7 +115,7 @@ class PasswordChangeController implements ng.IController {
 			}
 		});
 
-	}x
+	}
 
 	public checkDuplicate() {
 		if (this.confirmPassword !== this.newPassword) {
