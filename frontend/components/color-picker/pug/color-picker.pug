@@ -25,7 +25,7 @@
 	.colorPickerPanel(ng-class="{active: vm.isOpened}")
 		.colorPickerPredefinedColors(ng-if="vm.predefinedColors.length" layout="row")
 			.colorPickerPredefinedColor(
-				ng-repeat="color in vm.predefinedColors track by $index | limitTo:7"
+				ng-repeat="color in vm.predefinedColors track by $index | limitTo:6"
 				ng-click="vm.onPredefinedColorClick(color)"
 				ng-style="{'background-color': color}")
 
