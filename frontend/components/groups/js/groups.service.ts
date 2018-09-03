@@ -64,9 +64,17 @@ export class GroupsService {
 		return this.getGroups(teamspace, model, revision)
 			.then((groups) => {
 				this.state.groups = groups;
-				console.log(teamspace, model, revision);
 				this.cleanGroups(this.state.groups);
 			});
+	}
+
+	// Helper  for searching strings
+	public stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
 	/**

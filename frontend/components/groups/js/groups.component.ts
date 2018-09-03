@@ -195,7 +195,7 @@ class GroupsController implements ng.IController {
 		for (i = 0; i < this.groups.length; i++) {
 			singleGroup = this.groups[i];
 			console.log("type of -->>", typeof(singleGroup));
-			if (singleGroup.name === searchString) {
+			if (this.GroupsService.stringSearch(searchString, singleGroup.name)) {
 				return console.log('results -->', singleGroup);
 			}
 				console.log("all groups", this.groups);
