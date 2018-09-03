@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {get, isNumber} from "lodash";
+import {get, isNumber, uniq, compact} from "lodash";
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
