@@ -20,8 +20,8 @@ import {get, uniq, map, isNumber} from "lodash";
 
 export const TABS_TYPES = {
 	USERS: 0,
-	JOBS: 1,
-	PROJECTS: 2
+	PROJECTS: 1,
+	JOBS: 2
 };
 
 const TABS = {
@@ -29,13 +29,13 @@ const TABS = {
 		id: TABS_TYPES.USERS,
 		label: "Users"
 	},
-	[TABS_TYPES.JOBS]: {
-		id: TABS_TYPES.JOBS,
-		label: "Jobs"
-	},
 	[TABS_TYPES.PROJECTS]: {
 		id: TABS_TYPES.PROJECTS,
 		label: "Projects"
+	},
+	[TABS_TYPES.JOBS]: {
+		id: TABS_TYPES.JOBS,
+		label: "Jobs"
 	}
 };
 
