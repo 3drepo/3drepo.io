@@ -16,7 +16,7 @@
  */
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
-import {get, isNumber} from "lodash";
+import {get, isNumber, uniq, compact} from "lodash";
 
 export const TABS_TYPES = {
 	USERS: 0,
