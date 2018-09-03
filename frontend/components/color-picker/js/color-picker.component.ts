@@ -109,7 +109,7 @@ class ColorPickerController implements ng.IController {
 	}
 
 	public onModelChange = (): void => {
-		this.setColor(this.ngModelCtrl.$viewValue)
+		this.setColor(this.ngModelCtrl.$viewValue);
 	}
 
 	public onUpdate(): void {
