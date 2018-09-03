@@ -1,1 +1,35 @@
 .colorPicker
+	.colorPickerSelect(
+		flex
+		ng-click="vm.togglePanel($event)"
+		layout-fill
+		layout="row"
+		layout-align="start center")
+		.colorPickerValue(
+			ng-if="vm.color"
+			flex
+			layout="row"
+			layout-align="start center")
+			span.usersListJobColor(ng-style="{'background-color': vm.color}")
+			.usersListJobName {{vm.color}}
+
+		.colorPickerPlaceholder(
+			ng-if="!vm.color"
+			flex
+			layout="row"
+			layout-align="start center") {{vm.placeholder}}
+
+		.colorPickerIcon(flex="none")
+			md-icon.angular-material-icons arrow_drop_down
+
+	.colorPickerPanel(ng-class="{active: vm.isOpened}")
+		.colorPickerPredefinedColors(ng-if="vm.predefinedColors.length")
+			.colorPickerPredefinedColor(
+				ng-repeat="color in vm.predefinedColors track by $index"
+				ng-style="{'background-color': color}")
+
+		.colorPickerCanvas(layout="row" layout-align="space-between center")
+			canvas.colorBlock(width="185" height="170")
+			canvas.colorStrip(width="23" height="170")
+
+	.colorPickerBackdrop(ng-if="vm.isOpened")
