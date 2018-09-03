@@ -155,7 +155,7 @@ class AccountUserManagementController implements ng.IController {
 				.then(([quotaInfoResponse, membersResponse]) => {
 					return {
 						licencesLimit: get(quotaInfoResponse, "data.collaboratorLimit", 0),
-						members: [...membersResponse.data.members.map(this.prepareMemberData)]
+						members: [...membersResponse.data.members.map(this.prepareMemberData.bind(null, teamspaceName))]
 					};
 				});
 		}
@@ -165,11 +165,12 @@ class AccountUserManagementController implements ng.IController {
 		 * @param member
 		 * @returns
 		 */
-		public prepareMemberData = (member): object => {
+		public prepareMemberData = (teamspaceName, member): object => {
 			return {
 				...member,
 				isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-				isCurrentUser: this.currentUser === member.user
+				isCurrentUser: this.currentUser === member.user,
+				isOwner: teamspaceName === member.user
 			};
 		}
 
@@ -230,10 +231,10 @@ class AccountUserManagementController implements ng.IController {
 		 * Add new member to local list of members
 		 * @param updatedMembers
 		 */
-		public onMemberSave(newMember): void {
+		public onMemberSave = (newMember): void => {
 			this.members = [
 				...this.members,
-				this.prepareMemberData(newMember)
+				this.prepareMemberData(this.currentTeamspace.account, newMember)
 			];
 			this.licencesLabel = this.getLicencesLabel();
 			this.showAddingPanel = false;
