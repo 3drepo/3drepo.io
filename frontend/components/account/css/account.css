@@ -355,11 +355,15 @@ account-info {
 }
 
 @media (max-width: 767px) {
-  
   account-info #accountInfoContent {
      max-height: 100% !important;
   }
-  
+}
+
+@media (min-width: 960px) {
+  account-info {
+     max-width: 300px !important;
+  }
 }
 
 account-info #accountInfoContent {
