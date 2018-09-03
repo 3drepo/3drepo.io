@@ -59,6 +59,7 @@ class PasswordChangeController implements ng.IController {
 	private passwordStrength;
 	private confirmPasswordStrength;
 	private duplicateErrMessage;
+	private passwordChangeFlag;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -69,6 +70,7 @@ class PasswordChangeController implements ng.IController {
 	) { }
 
 	public $onInit() {
+		this.passwordChangeFlag = false;
 		this.passwordChanged = false;
 		this.showProgress = false;
 		this.enterKey = 13;
@@ -140,12 +142,13 @@ class PasswordChangeController implements ng.IController {
 		// check both fields match the needed criteria
 		if (result.score > scoreThreshold && this.confirmPassword === this.newPassword) {
 			this.buttonDisabled = false;
+			this.passwordChangeFlag = true;
 		}
 	}
 
 	public passwordChange(event) {
 		if (event !== undefined && event !== null) {
-			if (event.which === this.enterKey) {
+			if (event.which === this.enterKey && this.passwordChangeFlag) {
 				this.doPasswordChange();
 			}
 		} else {
@@ -159,51 +162,51 @@ class PasswordChangeController implements ng.IController {
 
 	public doPasswordChange() {
 		if (this.newPassword === this.confirmPassword) {
-			if (this.username && this.token) {
-				if (this.newPassword && this.newPassword !== "") {
-					this.messageColor = this.messageColour;
-					this.message = "Please wait...";
-					this.showProgress = true;
-					this.buttonDisabled = true;
-					const url = this.username + "/password";
+		if (this.username && this.token) {
+			if (this.newPassword && this.newPassword !== "") {
+				this.messageColor = this.messageColour;
+				this.message = "Please wait...";
+				this.showProgress = true;
+				this.buttonDisabled = true;
+				const url = this.username + "/password";
 
-					this.APIService.put(url, {
-						newPassword: this.newPassword,
-						token: this.token
-					})
-						.then((response) => {
+				this.APIService.put(url, {
+					newPassword: this.newPassword,
+					token: this.token
+				})
+					.then((response) => {
 
-							this.showProgress = false;
-							if (response.status === 400) {
-								this.buttonDisabled = false;
-								this.messageColor = this.messageErrorColour;
-								this.message = "Error changing password: " + response.data.message;
-							} else {
-								this.buttonDisabled = true;
-								this.passwordChanged = true;
-								this.showProgress = false;
-								this.messageColor = this.messageColour;
-								this.message = "Your password has been reset. Please go to the login page.";
-							}
-						})
-						.catch((error) => {
+						this.showProgress = false;
+						if (response.status === 400) {
 							this.buttonDisabled = false;
-							this.showProgress = false;
 							this.messageColor = this.messageErrorColour;
-							this.message = "Error changing password";
-							if (error.data.message) {
-								this.message += ": " + error.data.message;
-							}
-						});
+							this.message = "Error changing password: " + response.data.message;
+						} else {
+							this.buttonDisabled = true;
+							this.passwordChanged = true;
+							this.showProgress = false;
+							this.messageColor = this.messageColour;
+							this.message = "Your password has been reset. Please go to the login page.";
+						}
+					})
+					.catch((error) => {
+						this.buttonDisabled = false;
+						this.showProgress = false;
+						this.messageColor = this.messageErrorColour;
+						this.message = "Error changing password";
+						if (error.data.message) {
+							this.message += ": " + error.data.message;
+						}
+					});
 
-				} else {
-					this.messageColor = this.messageErrorColour;
-					this.message = "A new password must be entered";
-					this.buttonDisabled = true;
-				}
+			} else {
+				this.messageColor = this.messageErrorColour;
+				this.message = "A new password must be entered";
+				this.buttonDisabled = true;
 			}
-			this.buttonDisabled = true;
-			this.message = "Token or username is missing!";
+		}
+		this.buttonDisabled = true;
+		this.message = "Token or username is missing!";
 		}
 	}
 }

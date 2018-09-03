@@ -195,7 +195,6 @@ class SignupController implements ng.IController {
 			this.$scope.signup.confirmPassword.$setValidity("invalid", passwordValid);
 			this.registerPasswordMessage = passwordValid ? "" : "(Password mismatched)";
 		} else {
-			// The only other thing to check is email
 			const emailValid = this.newUser.email === this.newUser.confirmEmail;
 			this.$scope.signup.confirmEmail.$setValidity("invalid", emailValid);
 			this.registerConfirmEmailMessage = emailValid ? "" : "(Email mismatched)";
