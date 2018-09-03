@@ -1,3 +1,8 @@
+color-picker {
+	width: 100%;
+	min-width: 115px;
+}
+
 .colorPicker {
 	height: 30px;
 	position: relative;
