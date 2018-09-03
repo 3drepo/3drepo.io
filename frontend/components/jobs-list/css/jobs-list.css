@@ -134,3 +134,7 @@
 .jobsListCell md-select[disabled] .md-select-icon {
   display: none;
 }
+
+.jobsListCell .colorPickerSelect {
+  border-bottom: transparent;
+}
