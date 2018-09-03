@@ -15,8 +15,10 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {get, uniq, map, isNumber} from "lodash";
+
+import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
+import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -119,7 +121,9 @@ class AccountUserManagementController implements ng.IController {
 				this.jobs = jobsData.jobs;
 				this.jobsColors = jobsData.colors;
 				this.licencesLabel = this.getLicencesLabel();
-				this.projects = [...this.currentTeamspace.projects];
+				this.projects = this.currentTeamspace.projects.filter(({permissions}) => {
+					return this.currentTeamspace.isAdmin || permissions.includes(PROJECT_ROLES_TYPES.ADMINSTRATOR);
+				});
 				this.isLoadingTeamspace = false;
 			});
 		}
