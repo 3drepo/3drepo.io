@@ -120,13 +120,7 @@ class ProjectsPermissionsController implements ng.IController {
 		}).then(({data: project}: {data: {permissions?: object[], models?: object[]}}) => {
 				const projectData = this.projects.find(({name}) => name === this.currentProject);
 
-				this.members = this.members.map((member) => {
-					const isProjectAdmin = project.permissions.some(({user, permissions}: {user: string, permissions: any}) => {
-						return permissions.includes(PROJECT_ROLES_TYPES.ADMINSTRATOR) && user === member.user;
-					});
-
-					return {...member, isProjectAdmin};
-				});
+				this.setProperMembersPermissions(project.permissions);
 
 				this.models = get(projectData, "models", []);
 
@@ -149,6 +143,20 @@ class ProjectsPermissionsController implements ng.IController {
 				.finally(() => {
 					this.projectRequestCanceler = null;
 				});
+	}
+
+	/**
+	 * Bind to members proper permissions` values
+	 * @param projectPermissions
+	 */
+	public setProperMembersPermissions(projectPermissions): void {
+		this.members = this.members.map((member) => {
+			const isProjectAdmin = projectPermissions.some(({ user, permissions }: { user: string, permissions: any }) => {
+				return permissions.includes(PROJECT_ROLES_TYPES.ADMINSTRATOR) && user === member.user;
+			});
+
+			return { ...member, isProjectAdmin };
+		});
 	}
 
 	/**
@@ -236,7 +244,8 @@ class ProjectsPermissionsController implements ng.IController {
 
 		const updateData = {name: this.currentProject, permissions: permissionsToSave};
 		this.ProjectsService.updateProject(this.currentTeamspace.account, updateData)
-			.then(() => {
+			.then(({data: project}) => {
+				this.setProperMembersPermissions(project.permissions);
 				this.assignedProjectPermissions = [...this.getExtendedProjectPermissions(permissionsToSave)];
 			}).catch(this.DialogService.showError.bind(null, "update", "project permissions"));
 	}
