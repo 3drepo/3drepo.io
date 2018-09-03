@@ -47,14 +47,39 @@
 	height: 20px;
 }
 
+.colorPickerPredefinedColor:not(:last-child) {
+	margin-right: 15px;
+}
+
 .colorPickerCanvas {
 	padding-bottom: 14px;
+}
+
+.colorPickerCanvas .colorPickerBlockWrapper,
+.colorPickerCanvas .colorPickerStripWrapper {
+	position: relative;
 }
 
 .colorPickerCanvas .colorBlock,
 .colorPickerCanvas .colorStrip {
 	cursor: crosshair;
-	height: 170px;
+	height: 170px;	
+}
+
+.colorPickerCanvas .colorPointer {
+	position: absolute;
+}
+
+.colorPickerBlockWrapper .colorPointer {
+	width: 6px;
+	height: 6px;
+	border: 1px solid #fff;
+	border-radius: 100%;
+	content: "";
+	transform: translate(-3px, -6px);
+}
+
+.colorPickerStripWrapper .colorPointer {
 	
 }
 
@@ -64,4 +89,23 @@
 
 .colorPickerCanvas .colorStrip {
 	width: 23px;
+}
+
+.colorPickerSelectedColor {
+	width: 55px;
+	height: 20px;
+}
+
+.colorPickerSelectedHash {
+	margin-left: 14px;
+	font-weight: 400;
+}
+
+.colorPickerSelectedHash input {
+	width: 70px;
+	height: 20px;
+	color: #333333;
+	font-size: 12px;
+	margin-left: 2px;
+	outline: none;
 }

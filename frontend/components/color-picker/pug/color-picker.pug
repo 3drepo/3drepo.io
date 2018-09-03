@@ -10,11 +10,11 @@
 			flex
 			layout="row"
 			layout-align="start center")
-			span.usersListJobColor(ng-style="{'background-color': vm.color}")
-			.usersListJobName {{vm.color}}
+			span.usersListJobColor(ng-style="{'background-color': vm.colorHash}")
+			.usersListJobName {{vm.colorHash}}
 
 		.colorPickerPlaceholder(
-			ng-if="!vm.color"
+			ng-if="!vm.colorHash"
 			flex
 			layout="row"
 			layout-align="start center") {{vm.placeholder}}
@@ -23,13 +23,25 @@
 			md-icon.angular-material-icons arrow_drop_down
 
 	.colorPickerPanel(ng-class="{active: vm.isOpened}")
-		.colorPickerPredefinedColors(ng-if="vm.predefinedColors.length")
+		.colorPickerPredefinedColors(ng-if="vm.predefinedColors.length" layout="row")
 			.colorPickerPredefinedColor(
-				ng-repeat="color in vm.predefinedColors track by $index"
+				ng-repeat="color in vm.predefinedColors track by $index | limitTo:7"
 				ng-style="{'background-color': color}")
 
 		.colorPickerCanvas(layout="row" layout-align="space-between center")
-			canvas.colorBlock(width="185" height="170")
-			canvas.colorStrip(width="23" height="170")
+			.colorPickerBlockWrapper
+				canvas.colorBlock(width="185" height="170")
+				.colorPointer
+
+			.colorPickerStripWrapper
+				canvas.colorStrip(width="23" height="170")
+				.colorPointer
+
+		.colorPickerSelectedData(layout="row")
+			.colorPickerSelectedColor(ng-style="{'background-color': vm.colorHash}")
+			.colorPickerSelectedHash(layout="row" layout-align="start center")
+				span #
+				input(ng-model="vm.color" ng-change="vm.onColorHashChange()")
+
 
 	.colorPickerBackdrop(ng-if="vm.isOpened")

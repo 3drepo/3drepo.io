@@ -15,14 +15,43 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const STRIP_MAIN_COLORS = {
+import {memoize} from "lodash";
+
+const COLORS = {
 	RED: "rgba(255,0,0,1)",
 	GREEN: "rgba(0, 255, 0, 1)",
 	SKY_BLUE: "rgba(0, 255, 255, 1)",
 	BLUE: "rgba(0, 0, 255, 1)",
 	YELLOW: "rgba(255, 255, 0, 1)",
-	PURPLE: "rgba(255, 0, 255, 1)"
+	PURPLE: "rgba(255, 0, 255, 1)",
+	BLACK: "rgba(0,0,0,1)",
+	BLACK_TRANSPARENT: "rgba(0,0,0,0)",
+	WHITE: "rgba(255,255,255,1)",
+	WHITE_TRANSPARENT: "rgba(255,255,255,0)"
 };
+
+const componentToHex = memoize((c) => {
+	const hex = c.toString(16);
+	return hex.length === 1 ? "0" + hex : hex;
+});
+
+function rgbToHex(r, g, b) {
+	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+const rgbaToHex = memoize((rgbaColor) => {
+	const [r, g, b] = rgbaColor.match(/[.\d]+/g).map(Number);
+	debugger
+	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+});
+
+const hexToRgba = memoize((hex) => {
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+	return result
+		? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, 1)`
+		: COLORS.BLACK;
+});
 
 class ColorPickerController implements ng.IController {
 	public static $inject: string[] = [
@@ -37,6 +66,7 @@ class ColorPickerController implements ng.IController {
 	private colorBlockCanvas;
 	private colorStripCanvas;
 	private ngModelCtrl;
+	private colorHash;
 	private color;
 	private isOpened;
 	private isInitilized;
@@ -61,31 +91,41 @@ class ColorPickerController implements ng.IController {
 	}
 
 	public $onDestroy(): void {
-		this.toggleListeners();
+		this.togglePanelListeners();
+		this.toggleCanvasListeners();
 	}
 
 	public onModelChange = (): void => {
-		this.color = this.ngModelCtrl.$viewValue;
+		this.colorHash = this.ngModelCtrl.$viewValue || "";
+		this.color = this.colorHash.replace("#", "");
 	}
 
 	public onUpdate(): void {
-		this.ngModelCtrl.$setViewValue(this.color);
+		this.ngModelCtrl.$setViewValue(`#${this.color.toUpperCase()}`);
 	}
 
 	public togglePanel($event): void {
 		$event.stopPropagation();
 		this.isOpened = !this.isOpened;
 		if (this.isOpened && !this.isInitilized) {
-			this.toggleListeners(true);
+			this.togglePanelListeners(true);
+			this.toggleCanvasListeners(true);
 			this.initializeBlockCanvas();
 			this.initializeStripCanvas();
 			this.isInitilized = true;
 		}
 	}
 
-	public toggleListeners(shouldOpen = true): void {
+	public togglePanelListeners(shouldOpen = true): void {
 		const method = shouldOpen ? "addEventListener" : "removeEventListener";
 		this.bodyElement[method]("click", this.onOuterClick);
+	}
+
+	public toggleCanvasListeners(shouldBind = true): void {
+		const method = shouldBind ? "addEventListener" : "removeEventListener";
+
+		this.colorStripCanvas[method]("click", this.onStripCanvasClick, false);
+		this.colorBlockCanvas[method]("click", this.onBlockCanvasClick, false);
 	}
 
 	public onOuterClick = (event): void => {
@@ -106,7 +146,7 @@ class ColorPickerController implements ng.IController {
 		const drag = false;
 
 		ctx.rect(0, 0, width, height);
-		this.fillBlockCanvas(STRIP_MAIN_COLORS.RED, width, height);
+		this.fillBlockCanvas(COLORS.RED, width, height);
 	}
 
 	public fillBlockCanvas(rgbaColor, width, height): void {
@@ -115,14 +155,14 @@ class ColorPickerController implements ng.IController {
 		ctx.fillRect(0, 0, width, height);
 
 		const whiteGradient = ctx.createLinearGradient(0, 0, width, 0);
-		whiteGradient.addColorStop(0, 'rgba(255,255,255,1)');
-		whiteGradient.addColorStop(1, 'rgba(255,255,255,0)');
+		whiteGradient.addColorStop(0, COLORS.WHITE);
+		whiteGradient.addColorStop(1, COLORS.WHITE_TRANSPARENT);
 		ctx.fillStyle = whiteGradient;
 		ctx.fillRect(0, 0, width, height);
 
 		const blackGradient = ctx.createLinearGradient(0, 0, 0, height);
-		blackGradient.addColorStop(0, 'rgba(0,0,0,0)');
-		blackGradient.addColorStop(1, 'rgba(0,0,0,1)');
+		blackGradient.addColorStop(0, COLORS.BLACK_TRANSPARENT);
+		blackGradient.addColorStop(1, COLORS.BLACK);
 		ctx.fillStyle = blackGradient;
 		ctx.fillRect(0, 0, width, height);
 	}
@@ -133,25 +173,58 @@ class ColorPickerController implements ng.IController {
 		const height = this.colorStripCanvas.height;
 		ctx.rect(0, 0, width, height);
 
-		const gradient = ctx.createLinearGradient(0, 0, 0, height);
-		gradient.addColorStop(0, STRIP_MAIN_COLORS.RED);
-		gradient.addColorStop(0.17, STRIP_MAIN_COLORS.YELLOW);
-		gradient.addColorStop(0.34, STRIP_MAIN_COLORS.GREEN);
-		gradient.addColorStop(0.51, STRIP_MAIN_COLORS.SKY_BLUE);
-		gradient.addColorStop(0.68, STRIP_MAIN_COLORS.BLUE);
-		gradient.addColorStop(0.85, STRIP_MAIN_COLORS.PURPLE);
-		gradient.addColorStop(1, STRIP_MAIN_COLORS.RED);
-
-		ctx.fillStyle = gradient;
-		ctx.fill();
-
 		this.fillStripCanvas();
 	}
 
-	public fillStripCanvas(rgbaColor?): void {
+	public fillStripCanvas(): void {
 		const ctx = this.colorStripCanvas.getContext("2d");
 		const width = this.colorStripCanvas.width;
 		const height = this.colorStripCanvas.height;
+
+		const gradient = ctx.createLinearGradient(0, 0, 0, height);
+		gradient.addColorStop(0, COLORS.RED);
+		gradient.addColorStop(0.17, COLORS.YELLOW);
+		gradient.addColorStop(0.34, COLORS.GREEN);
+		gradient.addColorStop(0.51, COLORS.SKY_BLUE);
+		gradient.addColorStop(0.68, COLORS.BLUE);
+		gradient.addColorStop(0.85, COLORS.PURPLE);
+		gradient.addColorStop(1, COLORS.RED);
+
+		ctx.fillStyle = gradient;
+		ctx.fill();
+	}
+
+	public onStripCanvasClick = (): void => {
+		console.log('test strip')
+	}
+
+	public onBlockCanvasClick = (event): void => {
+		const ctx = this.colorBlockCanvas.getContext("2d");
+		const x = event.offsetX;
+		const y = event.offsetY;
+
+		const imageData = ctx.getImageData(x, y, 1, 1).data;
+		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
+		debugger
+		this.colorHash = rgbaToHex(rgbaColor).toUpperCase();
+		this.color = this.colorHash.replace("#", "");
+
+		this.onColorHashChange();
+		this.setBlockColorPointerPosition(x, y);
+	}
+
+	public onColorHashChange(): void {
+		const isValidColor = /(^[0-9A-F]{6}$)/i.test(this.color.toUpperCase());
+
+		if (isValidColor) {
+			this.onUpdate();
+		}
+	}
+
+	public setBlockColorPointerPosition(x, y): void {
+		const pointer = this.colorBlockCanvas.nextElementSibling;
+		pointer.style.left = `${x}px`;
+		pointer.style.top = `${y}px`;
 	}
 }
 
