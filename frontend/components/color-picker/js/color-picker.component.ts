@@ -35,23 +35,35 @@ const componentToHex = memoize((c) => {
 	return hex.length === 1 ? "0" + hex : hex;
 });
 
-function rgbToHex(r, g, b) {
-	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
-
 const rgbaToHex = memoize((rgbaColor) => {
 	const [r, g, b] = rgbaColor.match(/[.\d]+/g).map(Number);
-	debugger
 	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 });
 
 const hexToRgba = memoize((hex) => {
-	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.toLowerCase());
 
 	return result
 		? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, 1)`
 		: COLORS.BLACK;
 });
+
+const findColorPositionOnCanvas = (canvas, colorHash): { x: number, y: number } => {
+	const ctx = canvas.getContext("2d");
+	const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+	const rgbaColor = hexToRgba(colorHash);
+
+	const position = { x: 0, y: 0 };
+	for (let i = 0; i < data.length; i += 4) {
+		const isSameColor = `rgba(${data[i]}, ${data[i + 1]}, ${data[i + 2]}, 1)` === rgbaColor;
+		if (isSameColor) {
+			position.x = i / 4 % canvas.width;
+			position.y = (i / 4 - position.x) / canvas.width;
+			break;
+		}
+	}
+	return position;
+};
 
 class ColorPickerController implements ng.IController {
 	public static $inject: string[] = [
@@ -68,6 +80,7 @@ class ColorPickerController implements ng.IController {
 	private ngModelCtrl;
 	private colorHash;
 	private color;
+	private colorRgba;
 	private isOpened;
 	private isInitilized;
 
@@ -96,12 +109,17 @@ class ColorPickerController implements ng.IController {
 	}
 
 	public onModelChange = (): void => {
-		this.colorHash = this.ngModelCtrl.$viewValue || "";
-		this.color = this.colorHash.replace("#", "");
+		this.setColor(this.ngModelCtrl.$viewValue)
 	}
 
 	public onUpdate(): void {
 		this.ngModelCtrl.$setViewValue(`#${this.color.toUpperCase()}`);
+	}
+
+	public setColor(colorHash = ""): void {
+		this.colorHash = colorHash;
+		this.color = colorHash.replace("#", "");
+		this.colorRgba = hexToRgba(colorHash);
 	}
 
 	public togglePanel($event): void {
@@ -146,11 +164,17 @@ class ColorPickerController implements ng.IController {
 		const drag = false;
 
 		ctx.rect(0, 0, width, height);
-		this.fillBlockCanvas(COLORS.RED, width, height);
+		const currentColor = hexToRgba(this.colorHash);
+		this.fillBlockCanvas(currentColor);
+
+		const colorPosition = findColorPositionOnCanvas(this.colorBlockCanvas, this.colorHash);
+		this.setBlockColorPointerPosition(colorPosition.x, colorPosition.y);
 	}
 
-	public fillBlockCanvas(rgbaColor, width, height): void {
+	public fillBlockCanvas(rgbaColor): void {
 		const ctx = this.colorBlockCanvas.getContext("2d");
+		const width = this.colorBlockCanvas.width;
+		const height = this.colorBlockCanvas.height;
 		ctx.fillStyle = rgbaColor;
 		ctx.fillRect(0, 0, width, height);
 
@@ -194,8 +218,17 @@ class ColorPickerController implements ng.IController {
 		ctx.fill();
 	}
 
-	public onStripCanvasClick = (): void => {
-		console.log('test strip')
+	public onStripCanvasClick = (event): void => {
+		const ctx = this.colorStripCanvas.getContext("2d");
+		const x = event.offsetX;
+		const y = event.offsetY;
+
+		const imageData = ctx.getImageData(x, y, 1, 1).data;
+		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
+		this.setColor(rgbaToHex(rgbaColor).toUpperCase());
+
+		this.fillBlockCanvas(this.colorRgba);
+		this.onColorHashChange(this.color, {x, y});
 	}
 
 	public onBlockCanvasClick = (event): void => {
@@ -205,20 +238,34 @@ class ColorPickerController implements ng.IController {
 
 		const imageData = ctx.getImageData(x, y, 1, 1).data;
 		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-		debugger
 		this.colorHash = rgbaToHex(rgbaColor).toUpperCase();
 		this.color = this.colorHash.replace("#", "");
 
-		this.onColorHashChange();
-		this.setBlockColorPointerPosition(x, y);
+		this.onColorHashChange(this.color, {x, y});
 	}
 
-	public onColorHashChange(): void {
+	public onColorHashChange = (color = this.color, position?): void => {
 		const isValidColor = /(^[0-9A-F]{6}$)/i.test(this.color.toUpperCase());
 
 		if (isValidColor) {
 			this.onUpdate();
+			this.setColor(`#${this.color}`);
+			if (!position) {
+				this.fillBlockCanvas(this.colorHash);
+			}
+
+			const colorBlockPosition = position || findColorPositionOnCanvas(this.colorBlockCanvas, this.colorHash);
+			this.setBlockColorPointerPosition(colorBlockPosition.x, colorBlockPosition.y);
 		}
+	}
+
+	public onPredefinedColorClick = (predefinedColor): void => {
+		this.colorHash = predefinedColor.toUpperCase();
+		this.color = this.colorHash.replace("#", "");
+
+		const rgbaColor = hexToRgba(this.colorHash);
+		this.fillBlockCanvas(rgbaColor);
+		this.onColorHashChange();
 	}
 
 	public setBlockColorPointerPosition(x, y): void {

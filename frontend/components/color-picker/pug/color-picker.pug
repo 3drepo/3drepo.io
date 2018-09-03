@@ -26,6 +26,7 @@
 		.colorPickerPredefinedColors(ng-if="vm.predefinedColors.length" layout="row")
 			.colorPickerPredefinedColor(
 				ng-repeat="color in vm.predefinedColors track by $index | limitTo:7"
+				ng-click="vm.onPredefinedColorClick(color)"
 				ng-style="{'background-color': color}")
 
 		.colorPickerCanvas(layout="row" layout-align="space-between center")
