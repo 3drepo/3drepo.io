@@ -57,7 +57,8 @@ class PasswordChangeController implements ng.IController {
 	private messageColor;
 	private username;
 	private passwordStrength;
-	private registerMessage;
+	private confirmPasswordStrength;
+	private duplicateErrMessage;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -80,23 +81,20 @@ class PasswordChangeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watchGroup(["vm.newPassword", "vm.confirmPassword"], () => {
+		this.$scope.$watch("vm.newPassword", () => {
 			this.message = "";
 			if (this.newPassword !== undefined) {
 				const result = this.PasswordService.evaluatePassword(this.newPassword);
 				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
-				this.checkInvalidPassword(result);					
+				this.checkInvalidPassword(result);
 			}
+		});
 
+		this.$scope.$watch("vm.confirmPassword", () => {
 			if (this.confirmPassword !== undefined) {
 				const result = this.PasswordService.evaluatePassword(this.confirmPassword);
-				this.passwordStrength = this.PasswordService.getPasswordStrength(this.confirmPassword, result.score);
-				this.checkInvalidPassword(result);	
-				this.checkDuplicate();
-			} else if (this.confirmPassword === this.newPassword && this.checkDuplicate()) {
+				this.checkInvalidPassword(result);
 			}
-
-
 		});
 
 		this.$scope.$watch("vm.token", () => {
@@ -117,36 +115,32 @@ class PasswordChangeController implements ng.IController {
 
 	}
 
-	public checkDuplicate() {
-		if (this.confirmPassword !== this.newPassword) {
-			this.registerMessage = "(Passwords Mismatched)";
-			this.buttonDisabled = true;
-			return false;
-		} else {
-			this.registerMessage = "";
-			return true;
-		}
-	}
-
 	public checkInvalidPassword(result) {
+
 		const scoreThreshold = 2;
-		if (result.score < scoreThreshold && this.confirmPassword !== this.newPassword) {
-			this.invalidatePassword(result);
-		} else if(this.newPassword === this.confirmPassword && result.score > scoreThreshold) {
-			this.validatePassword();
+
+		// check password strength
+		if (result.score < scoreThreshold) {
+			this.message = "Password is too weak";
+			this.messageColor = this.messageErrorColour;
+			this.buttonDisabled = true;
+		} else {
+			this.message = "";
+			this.messageColor = this.messageColour;
 		}
-	}
 
-	public invalidatePassword(result) {
-		this.buttonDisabled = true;
-		this.message = "Password is too weak";
-		this.messageColor = this.messageErrorColour;
-	}
+		// check password duplication
+		if (this.confirmPassword !== this.newPassword) {
+			this.buttonDisabled = true;
+			this.duplicateErrMessage = "(Passwords Mismatched)";
+		} else {
+			this.duplicateErrMessage = "";
+		}
 
-	public validatePassword() {
-		this.buttonDisabled = false;
-		this.message = "";
-		this.messageColor = this.messageColour;
+		// check both fields match the needed criteria
+		if (result.score > scoreThreshold && this.confirmPassword === this.newPassword) {
+			this.buttonDisabled = false;
+		}
 	}
 
 	public passwordChange(event) {
