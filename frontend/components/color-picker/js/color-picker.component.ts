@@ -260,11 +260,8 @@ class ColorPickerController implements ng.IController {
 	}
 
 	public onPredefinedColorClick = (predefinedColor): void => {
-		this.colorHash = predefinedColor.toUpperCase();
-		this.color = this.colorHash.replace("#", "");
-
-		const rgbaColor = hexToRgba(this.colorHash);
-		this.fillBlockCanvas(rgbaColor);
+		this.setColor(predefinedColor.toUpperCase());
+		this.fillBlockCanvas(this.colorRgba);
 		this.onColorHashChange();
 	}
 
