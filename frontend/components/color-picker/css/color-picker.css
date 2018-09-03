@@ -1,1 +1,67 @@
-.colorPicker {}
+.colorPicker {
+	height: 30px;
+	position: relative;
+	width: 100%;
+}
+
+.colorPickerSelect {
+	outline: none;
+	cursor: pointer;
+	border-bottom: 1px solid rgba(0, 0, 0, .12);
+}
+
+.colorPickerValue {
+
+}
+
+.colorPickerPlaceholder {
+	color: rgba(0, 0, 0, .38);
+}
+
+.colorPickerIcon {
+	margin-left: 5px;
+}
+
+.colorPickerPanel {
+	display: none;
+	top: 0;
+	position: absolute;
+	z-index: 1;
+	width: 228px;
+	padding: 16px;
+	box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.1);
+	background: rgba(255, 255, 255, 1);
+}
+
+.colorPickerPanel.active {
+	display: block;
+}
+
+.colorPickerPredefinedColors {
+	padding-bottom: 14px;
+}
+
+.colorPickerPredefinedColor {
+	border-radius: 100%;
+	width: 20px;
+	height: 20px;
+}
+
+.colorPickerCanvas {
+	padding-bottom: 14px;
+}
+
+.colorPickerCanvas .colorBlock,
+.colorPickerCanvas .colorStrip {
+	cursor: crosshair;
+	height: 170px;
+	
+}
+
+.colorPickerCanvas .colorBlock {
+	width: 185px;
+}
+
+.colorPickerCanvas .colorStrip {
+	width: 23px;
+}

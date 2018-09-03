@@ -48,18 +48,12 @@
 
 			//Color
 			.jobsListCell(flex="25" layout="row" layout-align="start center")
-				md-input-container(md-no-float)
-					md-select(
-						ng-model="job.color"
-						ng-disabled="!vm.colors.length"
-						placeholder="Select a color"
-						ng-change="vm.onColorChange(job)")
-						md-option(
-							ng-value="color"
-							ng-repeat="color in vm.colors")
-							div(layout="row" layout-align="start center")
-								span.usersListJobColor(ng-style="{'background-color': color}")
-								.usersListJobName {{color}}
+				color-picker(
+					ng-model="job.color"
+					ng-disabled="!vm.colors.length"
+					placeholder="Select a color"
+					ng-change="vm.onColorChange(job)"
+					predefined-colors="vm.colors")
 
 			div(flex)
 
