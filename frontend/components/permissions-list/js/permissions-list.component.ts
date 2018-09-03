@@ -95,6 +95,7 @@ class PermissionsListController implements ng.IController {
 	 */
 	public onSearch(): void {
 		this.processedData = this.processData();
+		this.onSelectionChange();
 	}
 
 	/**
@@ -154,13 +155,13 @@ class PermissionsListController implements ng.IController {
 			return {...row, isSelected: this.shouldSelectAllItems && isVisible && !isUnavailable};
 		});
 		this.processedData = this.processData();
-		this.hasSelectedItem = this.shouldSelectAllItems;
+		this.onSelectionChange();
 	}
 
 	public onSelectionChange(): void {
 		const selectedItems = this.processedData.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedData.length;
+		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.data.length;
 	}
 
 	/**

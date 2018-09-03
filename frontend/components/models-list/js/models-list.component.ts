@@ -74,11 +74,12 @@ class ModelsListController implements ng.IController {
 	 */
 	public onSearch(): void {
 		this.processedModels = this.processData();
+		this.onSelectionChange();
 	}
 
 	public processData() {
-		const filteredPermissions = this.getFilteredData(this.models, this.searchText);
-		const processedModels = this.getSortedData(filteredPermissions);
+		const filteredModels = this.getFilteredData(this.models, this.searchText);
+		const processedModels = this.getSortedData(filteredModels);
 		return processedModels;
 	}
 
@@ -115,19 +116,18 @@ class ModelsListController implements ng.IController {
 	 */
 	public toggleAllItems(): void {
 		this.models = this.models.map((model) => {
-			return {...model, isSelected: this.shouldSelectAllItems};
+			const isVisible = this.processedModels.some(({ user }) => user === model.user);
+			return {...model, isSelected: this.shouldSelectAllItems && isVisible};
 		});
 		this.processedModels = this.processData();
-		this.hasSelectedItem = this.shouldSelectAllItems;
 
-		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
-		this.onChange({selectedModels: selectedItems});
+		this.onSelectionChange();
 	}
 
 	public onSelectionChange(): void {
 		const selectedItems = this.processedModels.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedModels.length;
+		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.models.length;
 		this.onChange({selectedModels: selectedItems});
 	}
 }
