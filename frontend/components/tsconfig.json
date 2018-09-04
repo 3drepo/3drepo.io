@@ -1,10 +1,16 @@
 {
-    "compilerOptions": {
-      "types": ["angular", "angular-material"],
-      "lib": [
-        "es5",
-        "es6",
-        "dom",
-      ],
-    }
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "types": ["angular", "angular-material", "react", "react-dom"],
+    "lib": [
+      "es5",
+      "es6",
+      "dom",
+    ],
+    "target": "es5",
+    "jsx": "react"
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }
