@@ -7,9 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "gulp": "gulp",
-    "build": "gulp build",
-    "watch": "gulp watch",
+    "gulp": "gulp --gulpfile ./internals/gulpfile.js",
+    "build": "yarn gulp build",
+    "watch": "yarn gulp watch",
     "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
     "wdm:update": "webdriver-manager update --standalone",
@@ -17,7 +17,7 @@
     "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js && yarn run e2e:ie",
     "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./tests",
-    "unity-util": "webpack --config webpack.demo.config.js",
+    "unity-util": "webpack --config ./internals/webpack/webpack.demo.config.js",
     "lint": "tslint --project ./components --format stylish",
     "lint:fix": "tslint --project ./components --format stylish --fix"
   },

@@ -14,25 +14,25 @@ const exec = require('child_process').exec;
 let isWatch = false;
 
 const allImages = [
-  './images/**'
+  '../images/**'
 ]
 
 const allFonts = [
-  './node_modules/material-design-icons/iconfont/*.{eot,svg,ttf,woff,woff2}',
-  './node_modules/font-awesome/fonts/*.{eot,svg,ttf,woff,woff2}'
+  '../node_modules/material-design-icons/iconfont/*.{eot,svg,ttf,woff,woff2}',
+  '../node_modules/font-awesome/fonts/*.{eot,svg,ttf,woff,woff2}'
 ]
 
 const allCss = [
-    './css/ui.css',
-    './css/simplebar.css',
-    './node_modules/simplebar/dist/simplebar.css',
-    './node_modules/angular-material/angular-material.css',
-    './node_modules/font-awesome/css/font-awesome.css',
-    './components/**/**.css',
+    '../css/ui.css',
+    '../css/simplebar.css',
+    '../node_modules/simplebar/dist/simplebar.css',
+    '../node_modules/angular-material/angular-material.css',
+    '../node_modules/font-awesome/css/font-awesome.css',
+    '../components/**/**.css',
 ]
 
-const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];
-const icons = './icons/*';
+const allPug = ['../components/**/**.pug', './../../pug/legal/**.pug'];
+const icons = '../icons/*';
 
 function exitOnError(error) {
   gutil.log(gutil.colors.red('[Error]'), error.toString());
@@ -49,9 +49,9 @@ function swallowError (error) {
 }
 
 gulp.task('index', function(done){
-    return gulp.src('./index.html')
+    return gulp.src('../index.html')
           .on('error', swallowError)
-          .pipe(gulp.dest('./../public/'))
+          .pipe(gulp.dest('./../../public/'))
           .pipe(livereload())
           .on("end", done);
 })
@@ -63,7 +63,7 @@ gulp.task('pug', function(done){
         .pipe(rename({dirname: ''}))
         .pipe(pug({ verbose : false }))
         .on('error', swallowError)
-        .pipe(gulp.dest("./../public/templates/"))
+        .pipe(gulp.dest("./../../public/templates/"))
         .pipe(livereload())
         .on("end", done);
 
@@ -76,17 +76,17 @@ gulp.task('css', function(done) {
          .pipe(concat("three_d_repo.min.css"))
          .pipe(cssnano())
          .on('error', swallowError)
-         .pipe(gulp.dest("./../public/dist/"))
+         .pipe(gulp.dest("./../../public/dist/"))
          .pipe(livereload())
          .on("end", done);
 
 });
 
 gulp.task('icons', function (done) {
-  return gulp.src('./icons/*')
+  return gulp.src('../icons/*')
     .on('error', swallowError)
     //.pipe(print())
-    .pipe(gulp.dest('./../public/icons/'))
+    .pipe(gulp.dest('./../../public/icons/'))
     .pipe(livereload())
     .on("end", done);
 });
@@ -94,7 +94,7 @@ gulp.task('icons', function (done) {
 gulp.task('images', function(done) {
   return gulp.src(allImages)
         .on('error', swallowError)
-        .pipe(gulp.dest('./../public/images/'))
+        .pipe(gulp.dest('./../../public/images/'))
         .pipe(livereload())
         .on("end", done);
 });
@@ -102,15 +102,15 @@ gulp.task('images', function(done) {
 gulp.task('fonts', function(done) {
   return gulp.src(allFonts)
         .on('error', swallowError)
-        .pipe(gulp.dest('./../public/fonts/'))
+        .pipe(gulp.dest('./../../public/fonts/'))
         .pipe(livereload())
         .on("end", done);
 });
 
 gulp.task('unity', function(done) {
-  return gulp.src("./unity/**")
+  return gulp.src("../unity/**")
         .on('error', swallowError)
-        .pipe(gulp.dest('./../public/unity/'))
+        .pipe(gulp.dest('./../../public/unity/'))
         .on("end", done);
 });
 
@@ -132,23 +132,23 @@ gulp.task("zxcvbn", function(done) {
  });
 
 gulp.task('custom', function(done) {
-  return gulp.src("./custom/**")
+  return gulp.src("../custom/**")
         .on('error', swallowError)
-        .pipe(gulp.dest('./../public/custom/'))
+        .pipe(gulp.dest('./../../public/custom/'))
         .on("end", done);
 });
 
 gulp.task('manifest-file', function(done) {
-  return gulp.src("./manifest.json")
+  return gulp.src("../manifest.json")
     .on('error', swallowError)
-    .pipe(gulp.dest('./../public/'))
+    .pipe(gulp.dest('./../../public/'))
     .on("end", done);
 });
 
 gulp.task('manifest-icons', function(done) {
-  return gulp.src("./manifest-icons/**.png")
+  return gulp.src("../manifest-icons/**.png")
     .on('error', swallowError)
-    .pipe(gulp.dest('./../public/manifest-icons/'))
+    .pipe(gulp.dest('./../../public/manifest-icons/'))
     .on("end", done);
 });
 
@@ -156,7 +156,7 @@ const sw = function(callback, verbose) {
   var swPrecache = require('sw-precache');
   var serviceWorkerName = "service-worker";
   console.log("Service workers");
-  const dir = "../public/";
+  const dir = "../../public/";
   swPrecache.write(path.join(dir, `${serviceWorkerName}.js`) , {
     staticFileGlobs: [
       `${dir}/index.html`,
@@ -183,7 +183,7 @@ gulp.task('service-workers-dev', function(callback) {
 // BUILD COMPONENTS
 gulp.task("typedoc", function() {
     return gulp
-        .src(["./components/**/*.ts"])
+        .src(["../components/**/*.ts"])
         .pipe(typedoc({
             module: "commonjs",
             target: "es6",
@@ -195,13 +195,13 @@ gulp.task("typedoc", function() {
 
 gulp.task("reload", function() {
   return gulp
-    .src(["./../public/dist/three_d_repo.min.js"])
+    .src(["./../../public/dist/three_d_repo.min.js"])
     .pipe(livereload())
 });
 
 
 gulp.task('webpack-build', function (cb) {
-  exec('webpack --config webpack.prod.config.js', function (err, stdout, stderr) {
+  exec('webpack --config ./webpack/webpack.prod.config.js', function (err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     cb(err);
@@ -209,7 +209,7 @@ gulp.task('webpack-build', function (cb) {
 })
 
 gulp.task('webpack-watch', function (cb) {
-  exec('webpack --watch --config webpack.dev.config.js', function (err, stdout, stderr) {
+  exec('webpack --watch --config ./webpack/webpack.dev.config.js', function (err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     cb(err);
@@ -222,14 +222,14 @@ gulp.task('gulp-watch', function() {
   livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
 
   // WATCHERS
-  gulp.watch(["./index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
-  gulp.watch(["./../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
+  gulp.watch(["../index.html"], gulp.series(["index", "service-workers-dev"]))
+  gulp.watch(["./../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
+  gulp.watch(["./../../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))
-  gulp.watch(["./manifest.json"], gulp.series(['manifest-file', "service-workers-dev"]))
-  gulp.watch(["./manifest-icons/**.png"], gulp.series(['manifest-icons', "service-workers-dev"]))
+  gulp.watch(["./../manifest.json"], gulp.series(['manifest-file', "service-workers-dev"]))
+  gulp.watch(["./../manifest-icons/**.png"], gulp.series(['manifest-icons', "service-workers-dev"]))
 
 });
 
