@@ -27,8 +27,8 @@
   margin-right: -8px;
 }
 
-.projectsPermissions .modelsList {
-  width: 240px;
+.projectsPermissions models-list {
+  min-width: 300px;
   border-right: 1px solid rgba(0, 0, 0, .06);
 }
 
