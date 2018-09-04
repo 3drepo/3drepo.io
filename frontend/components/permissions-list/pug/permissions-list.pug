@@ -90,6 +90,6 @@
 					layout="row"
 					layout-align="center center")
 					md-radio-button(
-						ng-disabled="vm.isDisabledRow(row)"
+						ng-disabled="(vm.mode === vm.MODES.MODELS && permission.key === vm.MODEL_ROLES_TYPES.ADMINISTRATOR) || vm.isDisabledRow(row)"
 						ng-value="permission.key"
 						aria-label="{{::permission.label}}")

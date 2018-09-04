@@ -1,5 +1,5 @@
 export const MODEL_ROLES_TYPES = {
-	ADMINSTRATOR: "admin",
+	ADMINISTRATOR: "admin",
 	COLLABORATOR: "collaborator",
 	COMMENTER: "commenter",
 	VIEWER: "viewer",
@@ -12,7 +12,7 @@ export const MODEL_ROLES_DESC = {
 	VIEWER: "Can only view",
 	COMMENTER: "View and create issues",
 	COLLABORATOR: "Full access and ability to upload/download revisions",
-	ADMINSTRATOR: "Collaborator access and edit permissions"
+	ADMINISTRATOR: "Collaborator access and edit permissions"
 };
 
 export const MODEL_ROLES_LIST = [
@@ -41,9 +41,9 @@ export const MODEL_ROLES_LIST = [
 		tooltip: MODEL_ROLES_DESC.COLLABORATOR
 	},
 	{
-		key: MODEL_ROLES_TYPES.ADMINSTRATOR,
+		key: MODEL_ROLES_TYPES.ADMINISTRATOR,
 		label: "Admin",
 		width: "70px",
-		tooltip: MODEL_ROLES_DESC.ADMINSTRATOR
+		tooltip: MODEL_ROLES_DESC.ADMINISTRATOR
 	}
 ];

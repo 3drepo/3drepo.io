@@ -152,7 +152,7 @@ class ProjectsPermissionsController implements ng.IController {
 	public setProperMembersPermissions(projectPermissions): void {
 		this.members = this.members.map((member) => {
 			const isProjectAdmin = projectPermissions.some(({ user, permissions }: { user: string, permissions: any }) => {
-				return permissions.includes(PROJECT_ROLES_TYPES.ADMINSTRATOR) && user === member.user;
+				return permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR) && user === member.user;
 			});
 
 			return { ...member, isProjectAdmin };
@@ -169,7 +169,7 @@ class ProjectsPermissionsController implements ng.IController {
 				const memberData = this.members.find((member) => member.user === user) || {};
 				let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
 				if (memberData.isAdmin) {
-					projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINSTRATOR;
+					projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINISTRATOR;
 				} else {
 					projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
 				}
@@ -197,7 +197,7 @@ class ProjectsPermissionsController implements ng.IController {
 			let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
 
 			if (memberData.isAdmin || memberData.isProjectAdmin) {
-				modelPermissionsKey = MODEL_ROLES_TYPES.ADMINSTRATOR;
+				modelPermissionsKey = MODEL_ROLES_TYPES.ADMINISTRATOR;
 			} else if (memberModelPermissions) {
 				modelPermissionsKey = get(memberModelPermissions, "permission", MODEL_ROLES_TYPES.UNASSIGNED);
 			} else {
@@ -210,7 +210,7 @@ class ProjectsPermissionsController implements ng.IController {
 				key: modelPermissionsKey,
 				isDisabled: !modelPermissions,
 				isSelected: get(memberModelPermissions, "isSelected", false),
-				isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINSTRATOR
+				isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
 			};
 		});
 	}

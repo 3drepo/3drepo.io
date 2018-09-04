@@ -17,8 +17,8 @@
 import {values, cond, matches, orderBy, sumBy} from "lodash";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 import {PROJECT_ROLES_LIST, PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
-
 import {sortByName} from "../../../helpers/sorting";
+import {MODEL_ROLES_TYPES} from "../../../constants/model-permissions";
 
 const UNDEFINED_PERMISSIONS = "undefined";
 const PERMISSION_COLUMN_SIZE = 12;
@@ -35,6 +35,8 @@ class PermissionsListController implements ng.IController {
 	];
 
 	private SORT_TYPES = SORT_TYPES;
+	private MODEL_ROLES_TYPES = MODEL_ROLES_TYPES;
+	private MODES = MODES;
 
 	private data;
 	private processedData;
