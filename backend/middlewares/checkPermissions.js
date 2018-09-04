@@ -100,7 +100,12 @@ function checkPermissions(permsRequest) {
 			const account = req.params.account;
 			const model = req.params.model;
 			const project = req.params.project;
-			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
+			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter).then((data) => {
+				if (data.userPermissions) {
+					req.session.user.permissions = data.userPermissions;
+				}
+				return data;
+			});
 		}).then(validatePermissions.bind(null, next))
 			.catch(err => {
 				next(err);
