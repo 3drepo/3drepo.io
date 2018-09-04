@@ -43,6 +43,7 @@
 					ng-disabled="vm.ngDisabled || !vm.hasSelectedItem || !vm.data.length"
 					ng-value="permission.key"
 					aria-label="{{::permission.label}}")
+				md-tooltip.permissionsListTooltip {{::permission.tooltip}}
 
 	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
 		md-progress-circular(md-mode="indeterminate" md-diameter="20")

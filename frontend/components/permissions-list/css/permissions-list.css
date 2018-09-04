@@ -140,3 +140,7 @@
 .permissionsList[disabled="disabled"] {
   pointer-events: none;
 }
+
+.permissionsListTooltip {
+  margin-left: 10px;
+}
