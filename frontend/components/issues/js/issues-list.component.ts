@@ -44,6 +44,7 @@ class IssuesListController implements ng.IController {
 	private revision: string;
 	private filterText: string;
 	private bcfInputHandler: any;
+	private filterChips: Array<{name: string, type: string}>;
 
 	constructor(
 		private $scope,
@@ -95,7 +96,7 @@ class IssuesListController implements ng.IController {
 			if (this.menuOption && this.menuOption.value) {
 
 				this.handleMenuOptions();
-
+				this.IssuesService.setupIssuesToShow(this.model, this.filterChips);
 			}
 
 		});
@@ -197,8 +198,21 @@ class IssuesListController implements ng.IController {
 					}
 				}
 				break;
+			case "priority":
+				this.toggleChip("priority", this.menuOption.subItem.value);
+				break;
 		}
 
+	}
+
+	public toggleChip(type: string, name: string): void {
+		const chipIndex = this.filterChips.findIndex( (c) => c.type === type && c.name === name);
+
+		if (chipIndex === -1) {
+			this.filterChips.push( { type, name });
+		} else {
+			this.filterChips.splice(chipIndex, 1);
+		}
 	}
 
 	public setContentAndSize() {

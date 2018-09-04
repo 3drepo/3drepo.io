@@ -12,15 +12,15 @@
     <title>3D Repo | Online BIM collaboration platform</title>
     <!-- Manifest file (PWA)-->
     <link rel="manifest" href="/manifest.json">
-    
+
     <!-- All CSS minified-->
     <link rel="stylesheet" type="text/css" href="/dist/three_d_repo.min.css">
-    
+
     <!-- Styling used in the Angular Material demos-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-    
+
   </head>
-  <body>
+  <body class="threeDRepo">
 
     <!-- Inline CSS if CSS fails, also faster-->
     <style>
@@ -40,19 +40,19 @@
       	z-index: 10;
       	font-size: 20px;
       }
-      
+
       body #notSupported a {
       	color: #289874;
       }
-      
+
       body #notSupported img {
       	margin: 4%;
       	width: 90%;
       	max-width: 500px;
       }
-      
+
       body #notSupported div {
-      	margin: 4%; 
+      	margin: 4%;
       	text-align: center;
       }
 
@@ -70,7 +70,7 @@
       <div>
 
         Your browser is not supported.
-        Please upgrade to the latest version of 
+        Please upgrade to the latest version of
         <a id="notSupportedChrome" href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a> or
         <a id="notSupportedFirefox" href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a>
         <br><br><br>
@@ -87,12 +87,12 @@
             <td style='padding:60px'>
               <img src="images/maintenance.svg" alt="Hammer and Wrench">
             </td>
-              
+
             <td style='padding: 30px; width: 50vw; font-family: Roboto; font-size: 40px;'>
               <h4 style="font-weight: lighter;">
                 Apologies, but the site is currently down for maintenance. We'll be back up as soon as possible.
               </h4>
-            </td> 
+            </td>
 
             <td style='padding:60px'>
               <img src="images/maintenance.svg" alt="Hammer and Wrench">
@@ -106,7 +106,7 @@
     <script type="text/javascript" async>
 
       if (window && window.navigator && window.navigator.userAgent) {
-        
+
         var ua = window.navigator.userAgent;
         var ie = false;
 
@@ -120,28 +120,28 @@
         if (trident > 0) {
             // IE 11 => return version number
             ie = true;
-        } 
+        }
 
         if (ie === true) {
           document.getElementById('notSupported').style.visibility='visible';
           document.getElementById('notSupportedButton').style.display = 'visible';
         }
 
-      } 
+      }
 
     </script>
-    	
- 
+
+
 
     <!-- Entry point for all components-->
     <home flex layout="column"></home>
-    
+
     <!-- CSS AND JAVASCRIPT -->
 
     <!-- Load config from server and dependencies + 3D Repo JavaScript-->
     <script type="text/javascript" src="/config/config.js"></script>
     <script type="text/javascript" src="/dist/three_d_repo.min.js" async></script>
-   
+
     <script type="text/javascript", src="https://www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded" async></script>
 
     <!-- Load LiveReload if on Dev-->

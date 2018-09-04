@@ -233,7 +233,7 @@ class PanelCardController implements ng.IController {
 
 		const options = this.getOptionSpecificAttrs(optionType);
 		optionElement += ` style='color:{{vm.contentData.options[${i}].color}}'
-						   ${options} ><panel-card-option-${optionType}>`;
+						   ${options} />`;
 
 		return optionElement;
 	}

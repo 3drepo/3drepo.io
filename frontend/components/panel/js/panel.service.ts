@@ -52,6 +52,7 @@ interface IMenuItem {
 	divider?: boolean;
 	upperDivider?: boolean;
 	disabled?: boolean;
+	menu?: IMenuItem[];
 }
 
 export class PanelService {
@@ -124,13 +125,34 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "showClosed",
-					label: "Show closed issues",
-					toggle: true,
+					value: "priority",
+					label: "Priority",
+					toggle: false,
 					selected: false,
 					firstSelected: false,
 					secondSelected: false,
-					keepCheckSpace: true
+					keepCheckSpace: false,
+					menu: [{
+							hidden: false,
+							value: "none",
+							label: "None",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "low",
+							label: "Low",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "medium",
+							label: "Medium",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "high",
+							label: "High",
+							toggle: true
+						}]
 				},
 				{
 					hidden: false,
@@ -141,7 +163,8 @@ export class PanelService {
 					firstSelected: false,
 					secondSelected: false,
 					keepCheckSpace: true
-				}, {
+				},
+				{
 					hidden: false,
 					upperDivider: true,
 					disabled: true,
@@ -322,6 +345,8 @@ export class PanelService {
 	}
 
 	public setIssuesMenu(jobsData: any) {
+		return;
+
 		const menu: IMenuItem[] = [];
 		jobsData.forEach((role) => {
 			menu.push({

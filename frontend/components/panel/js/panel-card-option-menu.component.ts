@@ -22,8 +22,8 @@ class PanelCardOptionMenuController implements ng.IController {
 	];
 
 	public menu;
+	public buttonLabel: string = "";
 	public selectedMenuOption;
-	public sortIndex;
 
 	constructor(
 		private $timeout: ng.ITimeoutService
@@ -31,32 +31,28 @@ class PanelCardOptionMenuController implements ng.IController {
 
 	public $ngInit() {}
 
-	// TODO: Not actually sure what's going on here?
-	public menuItemSelected(index: number) {
-
-		const menuItem = this.menu[index];
+	public menuItemSelected(menuItem, parentMenuItem = null) {
 
 		if (menuItem.hasOwnProperty("toggle")) {
 			if (menuItem.toggle) {
 				menuItem.selected = !menuItem.selected;
-				this.selectedMenuOption = menuItem;
 			} else {
-				if (index !== this.sortIndex) {
-					this.sortIndex = index;
-				}
-				this.menu[this.sortIndex].firstSelected = !this.menu[this.sortIndex].firstSelected;
-				this.menu[this.sortIndex].secondSelected = !this.menu[this.sortIndex].secondSelected;
-				this.selectedMenuOption = this.menu[this.sortIndex];
+				// If its not a toogle type item then it switches between
+				// the two selected icons for the menu-item.
+				// Normally used for sorting type of menu-item.
+
+				menuItem.firstSelected = !menuItem.firstSelected;
+				menuItem.secondSelected = !menuItem.secondSelected;
 			}
-		} else {
-			this.selectedMenuOption = menuItem;
 		}
 
-		// TODO: What is this about? - James
-		// 'Reset' this.selectedMenuOption so that selecting the same option can be registered down the line
-		this.$timeout(() => {
-			this.selectedMenuOption = undefined;
-		});
+		if (!!parentMenuItem) {
+			const subitem = angular.copy(menuItem);
+			menuItem = angular.copy(parentMenuItem);
+			menuItem.subItem = subitem;
+		}
+
+		this.selectedMenuOption = menuItem;
 	}
 
 }
@@ -64,7 +60,8 @@ class PanelCardOptionMenuController implements ng.IController {
 export const PanelCardOptionMenuComponent: ng.IComponentOptions = {
 	bindings: {
 		menu: "=",
-		selectedMenuOption: "="
+		selectedMenuOption: "=",
+		buttonLabel: "&?"
 	},
 	controller: PanelCardOptionMenuController,
 	controllerAs: "vm",

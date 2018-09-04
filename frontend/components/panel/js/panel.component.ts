@@ -213,18 +213,19 @@ class PanelController implements ng.IController {
 	}
 
 	/**
-	 * Start the recursive calculation of the content heights
+	 *  Calculate content heights
 	 */
 	public calculateContentHeights() {
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 		const spaceUsedInGaps = this.itemGap * ( this.contentItemsShown.length - 1);
 		let availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
 
-		let spaceDivisions =  availableHeight / this.contentItemsShown.length ;
-
-		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => a.height - b.height);
+		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => {
+			return  a.requestedHeight + a.panelToolbarHeight - b.requestedHeight - b.panelTakenHeight;
+		});
 
 		let itemsLeftToCalculateSpace = this.contentItemsShown.length;
+		let spaceDivisions = 0;
 
 		orderedContentItems.forEach( (c) => {
 			spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
