@@ -2,11 +2,16 @@
 	.permissionsListHeader(layout="row" layout-align="start center")
 		.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 			md-checkbox(
-				md-indeterminate="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				ng-if="!(vm.hasSelectedItem && !vm.shouldSelectAllItems)"
 				ng-disabled="vm.ngDisabled || !vm.processedData.length"
 				ng-change="vm.toggleAllItems()"
 				ng-checked="vm.shouldSelectAllItems"
 				ng-model="vm.shouldSelectAllItems")
+			md-checkbox(
+				ng-if="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				md-indeterminate="true"
+				ng-disabled="vm.ngDisabled || !vm.processedData.length"
+				ng-click="vm.toggleAllItems(true)")
 	
 		.permissionsListCell.permissionsListUser(layout="row" layout-align="start center" flex="25")
 			list-sort-button(
@@ -40,7 +45,7 @@
 						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
 					.usersListCellLabel {{::permission.label}}
 				md-radio-button(
-					ng-disabled="vm.ngDisabled || !vm.hasSelectedItem || !vm.data.length"
+					ng-disabled="vm.ngDisabled || !vm.hasSelectedItem || !vm.data.length || (vm.mode === vm.MODES.MODELS && permission.key === vm.MODEL_ROLES_TYPES.ADMINISTRATOR)"
 					ng-value="permission.key"
 					aria-label="{{::permission.label}}")
 				md-tooltip.permissionsListTooltip {{::permission.tooltip}}
