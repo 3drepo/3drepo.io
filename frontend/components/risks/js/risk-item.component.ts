@@ -492,24 +492,6 @@ class RiskItemController implements ng.IController {
 						this.risksService.populateRisk(respData);
 						this.riskData = respData;
 
-						// Add info for new comment
-						this.riskData.comments.forEach((comment) => {
-							if (comment && comment.viewpoint && comment.viewpoint.screenshot) {
-								comment.viewpoint.screenshotPath = this.apiService.getAPIUrl(comment.viewpoint.screenshot);
-							}
-							if (comment && comment.action && comment.action.property) {
-								this.risksService.convertActionCommentToText(comment, this.topic_types);
-							}
-							if (comment && comment.created) {
-								comment.timeStamp = this.risksService.getPrettyTime(comment.created);
-							}
-						});
-
-						// Update last but one comment in case it was "sealed"
-						if (this.riskData.comments.length > 1) {
-							this.riskData.comments[this.riskData.comments.length - 2].sealed = true;
-						}
-
 						// Update the actual data model
 						this.risksService.updateRisks(this.riskData);
 

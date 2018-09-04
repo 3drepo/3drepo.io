@@ -39,7 +39,7 @@ md-content#riskInformation(
 								placeholder="Title",
 								ng-click="vm.titleInputClick($event)")
 
-					label#riskTitle(ng-if="vm.data") {{vm.riskData.title}}
+					label#riskTitle(ng-if="vm.data") {{vm.riskData.name}}
 
 				span(flex="5")
 				div
@@ -57,7 +57,7 @@ md-content#riskInformation(
 
 		.riskRiskOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
 			label {{vm.data.owner}}
-			label {{vm.data.timeStamp}}
+			label {{vm.data.created | prettyDate }}
 
 	// Status
 	.riskItemContainer#riskAdditional(layout="column", ng-if="vm.showAdditional")
@@ -230,25 +230,6 @@ md-divider
 			ng-src="{{vm.commentThumbnail}}")
 	
 	div(layout="row" flex="100")
-		// New comment
-		.riskItemContainer#riskNewComment(
-			layout="row"
-			layout-align="start center"
-			flex="100"
-			ng-if="vm.data")
-			
-			textarea(
-				flex="100"
-				placeholder="{{vm.getCommentPlaceholderText()}}"
-				id="newCommentInput"
-				aria-label="New Comment"
-				ng-model="vm.comment"
-				ng-change="vm.commentChange()"
-				ng-focus="vm.textInputHasFocus(true)"
-				ng-blur="vm.textInputHasFocus(false)"
-				ng-disabled="!vm.canComment() || vm.failedToLoad"
-				ng-required="true")
-				
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
 

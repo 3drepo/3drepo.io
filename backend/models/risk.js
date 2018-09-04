@@ -49,10 +49,15 @@ risk.createRisk = function(dbCol, newRisk) {
 
 	let branch;
 
-	newRisk._id = utils.stringToUUID(uuid.v1());
-
 	if (!newRisk.name) {
 		return Promise.reject({ resCode: responseCodes.RISK_NO_NAME });
+	}
+
+	newRisk._id = utils.stringToUUID(uuid.v1());
+	newRisk.created = (new Date()).getTime();
+
+	if (!newRisk.desc || newRisk.desc === "") {
+		newRisk.desc = "(No Description)"; // TODO do we really want this stored?
 	}
 
 	if (newRisk.object_id) {
@@ -81,12 +86,6 @@ risk.createRisk = function(dbCol, newRisk) {
 	);
 
 	return Promise.all(riskAttrPromises).then(() => {
-
-		newRisk.created = (new Date()).getTime();
-
-		if (!newRisk.desc || newRisk.desc === "") {
-			newRisk.desc = "(No Description)"; // TODO do we really want this stored?
-		}
 
 		if (newRisk.viewpoint) {
 			newRisk.viewpoint.guid = utils.generateUUID();
@@ -137,6 +136,13 @@ risk.createRisk = function(dbCol, newRisk) {
 			};
 		}
 
+		delete newRisk.pickedPos;
+		delete newRisk.pickedNorm;
+		delete newRisk.objectId;
+		delete newRisk.sessionId;
+		delete newRisk.revId;
+		delete newRisk.nope;
+
 		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 			return _dbCol.insert(newRisk).then(() => {
 				return Promise.resolve(newRisk);
@@ -185,7 +191,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 			// Only retrieve risks for current and older revisions
 			filter.rev_id = {"$in": historySearchResults.revIds};
 
-			return db.getCollection(account, model + ".issues").then((_dbCol) => {
+			return db.getCollection(account, model + ".risks").then((_dbCol) => {
 				// Retrieve risks from top level model/federation
 				return _dbCol.find(filter, projection).toArray();
 			}).then((mainRisks) => {
@@ -236,7 +242,7 @@ risk.findByUID = function(dbCol, uid, projection) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
+	return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 		return _dbCol.findOne({ _id: uid }, projection).then((risk) => {
 
 			if (!risk) {
@@ -291,7 +297,7 @@ risk.getSmallScreenshot = function(dbCol, uid, vid) {
 			} else {
 				return utils.resizeAndCropScreenshot(risk.viewpoints[0].screenshot.content.buffer, 365)
 					.then((resized) => {
-						db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
+						db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 							_dbCol.update({
 								_id: uid,
 								"viewpoints.guid": vid},

@@ -75,35 +75,34 @@ function invoiceDate() {
 }
 
 function prettyDate() {
-	return (input, showSeconds) => {
+	return (input, showFullDateTime) => {
 		const date: Date = new Date(input);
-		let modelDate: string;
+		const today: Date = new Date();
+		const options = {};
 
-		modelDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-			((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
-			date.getFullYear();
+		if (showFullDateTime ||
+			today.getFullYear() === date.getFullYear() &&
+			today.getMonth() === date.getMonth() &&
+			today.getDate() === date.getDate()) {
+			options.hour = "numeric";
+			options.minute = "numeric";
 
-		const showSecondsDefined = (showSeconds !== undefined && showSeconds !== undefined);
-		if (showSecondsDefined) {
-			modelDate += ", " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-				(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
+			if (showFullDateTime) {
+				options.second = "numeric"
+			} else {
+				options.hour12 = true;
+				options.weekday = "short";
+			}
+		} else {
+			if ((new Date).getFullYear() !== date.getFullYear()) {
+				options.year = "numeric";
+			}
+
+			options.month = "short";
+			options.day =  "numeric";
 		}
 
-		return modelDate;
-	};
-}
-
-function prettyGMTDate() {
-	return (input) => {
-		const date = new Date(input);
-		return date.toISOString().substr(0, 10);
-	};
-}
-
-function revisionDate() {
-	return (input) => {
-		const date = new Date(Date.parse(input)).toLocaleString();
-		return date.replace(",", "");
+		return date.toLocaleDateString('en-GB', options).replace(",", "");
 	};
 }
 
@@ -123,10 +122,3 @@ export const PrettyDateModule = angular
 	.module("3drepo")
 	.filter("prettyDate", prettyDate);
 
-export const PrettyGMTDate = angular
-	.module("3drepo")
-	.filter("prettyGMTDate", prettyGMTDate);
-
-export const RevisionDateModule = angular
-	.module("3drepo")
-	.filter("revisionDate", revisionDate);

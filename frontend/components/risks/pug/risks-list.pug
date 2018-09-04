@@ -22,7 +22,7 @@
 							ng-if="!risk.thumbnail") insert_photo
 					
 					div(flex, layout="column")
-						label#risksListItemTitle(flex="none") {{risk.title}}
+						label#risksListItemTitle(flex="none") {{risk.name}}
 						#risksListItemInfo(layout="row", layout-align="space-between center", flex="none")
 							div(layout="row", layout-align="start start")
 
@@ -31,7 +31,7 @@
 									ng-style="{'color': risk.statusIcon.colour }") {{risk.statusIcon.icon}}
 
 								label(flex) {{risk.owner}}
-							label {{risk.timeStamp}}
+							label {{ risk.created | prettyDate }}
 						#risksListItemDescription
 							label(ng-bind-html="risk.desc | linky:'_blank'") {{risk.desc}}
 

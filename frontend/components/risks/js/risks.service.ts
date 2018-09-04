@@ -195,9 +195,8 @@ export class RisksService {
 
 		// Exit the function as soon as we found a match.
 
-		// Search the title, timestamp, type and owner
+		// Search the title, type and owner
 		if ( this.stringSearch(risk.title, filterText) ||
-				this.stringSearch(risk.timeStamp, filterText) ||
 			this.stringSearch(risk.owner, filterText) ||
 			this.stringSearch(risk.topic_type, filterText)) {
 			return true;
@@ -332,11 +331,7 @@ export class RisksService {
 	public populateRisk(risk) {
 
 		if (risk) {
-			risk.title = this.generateTitle(risk);
 			risk.statusIcon = this.getStatusIcon(risk);
-			if (risk.created) {
-				risk.timeStamp = this.getPrettyTime(risk.created);
-			}
 
 			if (risk.thumbnail) {
 				risk.thumbnailPath = this.getThumbnailPath(risk.thumbnail);
@@ -460,7 +455,7 @@ export class RisksService {
 
 	public deselectPin(risk) {
 		// Risk with position means pin
-		if (risk.position.length > 0 && risk._id) {
+		if (risk.position && risk.position.length > 0 && risk._id) {
 			this.ViewerService.changePinColours({
 				id: risk._id,
 				colours: Pin.pinColours.blue
@@ -716,56 +711,6 @@ export class RisksService {
 			this.handleHighlights(response.data.objects);
 		}
 
-	}
-
-	// TODO: Internationalise and make globally accessible
-	public getPrettyTime(time) {
-		const date = new Date(time);
-		const currentDate = new Date();
-		let	prettyTime;
-		let	postFix;
-		let	hours;
-
-		const	monthToText = [
-			"Jan", "Feb", "Mar", "Apr",
-			"May", "Jun", "Jul", "Aug",
-			"Sep", "Oct", "Nov", "Dec"
-		];
-
-		if ((date.getFullYear() === currentDate.getFullYear()) &&
-			(date.getMonth() === currentDate.getMonth()) &&
-			(date.getDate() === currentDate.getDate())) {
-			hours = date.getHours();
-			if (hours > 11) {
-				postFix = " PM";
-				if (hours > 12) {
-					hours -= 12;
-				}
-			} else {
-				postFix = " AM";
-				if (hours === 0) {
-					hours = 12;
-				}
-			}
-
-			prettyTime = hours + ":" + ("0" + date.getMinutes()).slice(-2) + postFix;
-		} else if (date.getFullYear() === currentDate.getFullYear()) {
-			prettyTime = date.getDate() + " " + monthToText[date.getMonth()];
-		} else {
-			prettyTime = monthToText[date.getMonth()] + " '" + (date.getFullYear()).toString().slice(-2);
-		}
-
-		return prettyTime;
-	}
-
-	public generateTitle(risk) {
-		if (risk.modelCode) {
-			return risk.modelCode + "." + risk.number + " " + risk.name;
-		} else if (risk.typePrefix) {
-			return risk.typePrefix + "." + risk.number + " " + risk.name;
-		} else {
-			return risk.number + " " + risk.name;
-		}
 	}
 
 	public getThumbnailPath(thumbnailUrl) {
@@ -1059,14 +1004,8 @@ export class RisksService {
 	 */
 	public cleanRisk(risk: any) {
 
-		risk.timeStamp = this.getPrettyTime(risk.created);
-		risk.title = this.generateTitle(risk);
-
 		if (risk.hasOwnProperty("comments")) {
 			for (let j = 0, numComments = risk.comments.length; j < numComments; j++) {
-				if (risk.comments[j].hasOwnProperty("created")) {
-					risk.comments[j].timeStamp = this.getPrettyTime(risk.comments[j].created);
-				}
 				// Action comment text
 				if (risk.comments[j].action) {
 					risk.comments[j].comment = this.convertActionCommentToText(risk.comments[j], undefined);
