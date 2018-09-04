@@ -456,10 +456,10 @@ schema.statics.findUsernameOrEmail = function (userNameOrEmail) {
 	});
 };
 
-schema.statics.getForgotPasswordToken = function (userNameOrEmail, tokenExpiryTime) {
+schema.statics.getForgotPasswordToken = function (userNameOrEmail) {
 
 	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
 
 	const resetPasswordToken = {
 		token: crypto.randomBytes(64).toString("hex"),

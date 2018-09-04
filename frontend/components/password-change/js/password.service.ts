@@ -22,53 +22,37 @@ export class PasswordService {
 		"APIService"
 	];
 
-	public accountDefer;
-	public passwordMessage;
+	private loaded: boolean;
 
 	constructor(
 		private $q,
 		private APIService
 	) {
-		this.accountDefer = $q.defer();
+		this.loaded = false;
 	}
 
 	public passwordLibraryAvailable() {
+		if (!this.loaded) {
+			this.addPasswordStrengthLib();
+			this.loaded = true;
+		}
 		return window.zxcvbn !== undefined;
 	}
 
 	public evaluatePassword(password: string) {
 		let strengthVal = 4;
+		let strengthMsg = "OK";
 		if (password.length < 8) {
 			strengthVal = 0;
+			strengthMsg = "Must be at least 8 characters";
 		} else if (this.passwordLibraryAvailable()) {
 			strengthVal = window.zxcvbn(password).score;
+			strengthMsg = this.getPasswordEvalMessage(strengthVal);
 		}
-		return { score: strengthVal };
+		return { validPassword: strengthVal > 1, comment: strengthMsg };
 	}
 
-	public getPasswordStrength(password: string, score: number) {
-		if (password.length < 8) {
-			return "Must be at least 8 characters";
-		}
-		switch (score) {
-			case 0:
-				return "Very Weak";
-			case 1:
-				return "Weak";
-			case 2:
-				return "OK";
-			case 3:
-				return "Strong";
-			case 4:
-				return "Very Strong";
-		}
-		return "Very Weak";
-	}
-
-	public addPasswordStrengthLib() {
-		if (this.passwordLibraryAvailable()) {
-			return;
-		}
+	private addPasswordStrengthLib() {
 		const ZXCVBN_SRC = "/dist/zxcvbn.js";
 		const script = document.createElement("script");
 		script.src = ZXCVBN_SRC;
@@ -76,6 +60,11 @@ export class PasswordService {
 		script.async = true;
 		const first = document.getElementsByTagName("script")[0];
 		document.body.appendChild(script);
+	}
+
+	private getPasswordEvalMessage(score: number) {
+		const scoreMapping = ["Very Weak", "Weak", "OK", "Strong", "Very Strong"];
+		return score >= scoreMapping.length ? "Very Strong" : scoreMapping[score];
 	}
 
 }

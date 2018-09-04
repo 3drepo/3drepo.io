@@ -265,7 +265,7 @@ function verify(req, res, next) {
 function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
-		User.getForgotPasswordToken(req.body.userNameOrEmail, config.tokenExpiry.forgotPassword).then(data => {
+		User.getForgotPasswordToken(req.body.userNameOrEmail).then(data => {
 			if (data.email && data.token && data.username) {
 				// send forgot password email
 				return Mailer.sendResetPasswordEmail(data.email, {
@@ -277,8 +277,6 @@ function forgotPassword(req, res, next) {
 					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
 					return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
 				});
-			} else {
-				return Promise.resolve();
 			}
 		}).then(emailRes => {
 			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));

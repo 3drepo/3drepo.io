@@ -74,9 +74,6 @@ class SignupController implements ng.IController {
 	public $onInit() {
 
 		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
-
-		this.PasswordService.addPasswordStrengthLib();
-
 		this.AuthService.sendLoginRequest().then((response) => {
 			if (response.data.username) {
 				this.goToLoginPage();
@@ -171,9 +168,9 @@ class SignupController implements ng.IController {
 			}
 			if (this.newUser.password !== undefined && this.PasswordService.passwordLibraryAvailable()) {
 				const result = this.PasswordService.evaluatePassword(this.newUser.password);
-				this.passwordResult = result;
-				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newUser.password, result.score);
-				this.$scope.signup.password.$setValidity("required", result.score > 2);
+				this.passwordResult = result.validPassword;
+				this.passwordStrength = result.comment;
+				this.$scope.signup.password.$setValidity("required", this.passwordResult);
 			}
 		}, true);
 
@@ -303,8 +300,8 @@ class SignupController implements ng.IController {
 			return;
 		}
 
-		if (this.passwordResult && this.passwordResult.score < 2) {
-			this.registerErrorMessage = "Password is too weak; " + this.passwordResult.feedback.suggestions.join(" ");
+		if (!this.passwordResult) {
+			this.registerErrorMessage = "Password is too weak; ";
 			return;
 		}
 
