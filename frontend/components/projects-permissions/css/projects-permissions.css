@@ -87,3 +87,7 @@
 .projectsPermissions .modelsPermissions permissions-list .permissionsList {
   position: initial;
 }
+
+.projectsPermissions .modelsPermissions .permissionsListAdminIcon {
+  margin-right: -18px;
+}

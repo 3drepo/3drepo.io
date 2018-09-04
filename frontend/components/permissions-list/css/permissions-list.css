@@ -155,3 +155,12 @@
 .permissionsList md-checkbox.md-indeterminate:not(.md-checked) .md-icon {
   border-color: transparent;
 }
+
+.permissionsListCheckbox {
+  position: relative;
+}
+
+.permissionsListAdminIcon {
+  position: absolute;
+  left: 50%;
+}

@@ -66,9 +66,13 @@
 			//Checkbox
 			.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 				md-checkbox(
-					ng-disabled="vm.isDisabledRow(row)"
+					ng-if="!vm.isDisabledRow(row)"
 					ng-model="row.isSelected"
 					ng-change="vm.onSelectionChange()")
+				md-icon.permissionsListAdminIcon.angular-material-icons(
+					ng-if="vm.isDisabledRow(row)"
+					md-svg-src="icons/how_to_reg.svg"
+				)
 
 			//User details
 			.permissionsListCell.permissionsListUser(flex="25")
