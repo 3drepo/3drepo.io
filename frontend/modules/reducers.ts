@@ -1,14 +1,9 @@
-import { combineReducers } from 'redux-immutable';
+import { combineReducers } from 'redux';
 
-import { reducer as routerReducer } from './router/router.redux';
-import { reducer as localesReducer } from './locales/locales.redux';
-import { reducer as maintainersReducer } from './maintainers/maintainers.redux';
-//<-- IMPORT MODULE REDUCER -->
+import { reducer as teamspaceReducer } from './teamspace/teamspace.redux';
 
 export default function createReducer() {
-  return combineReducers({
-    route: routerReducer,
-    maintainers: maintainersReducer,
-    locales: localesReducer,
-    //<-- INJECT MODULE REDUCER -->
-  });
+	return combineReducers({
+		teamspace: teamspaceReducer
+	});
+}
