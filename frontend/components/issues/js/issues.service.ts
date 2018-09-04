@@ -18,7 +18,6 @@
 declare const Pin;
 
 export class IssuesService {
-
 	public static $inject: string[] = [
 		"$q",
 		"$sanitize",

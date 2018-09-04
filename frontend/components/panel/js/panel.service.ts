@@ -44,6 +44,7 @@ interface IMenuItem {
 	firstSelectedIcon?: string;
 	secondSelectedIcon?: string;
 	toggle?: boolean;
+	toggleFilterChips?: boolean;
 	firstSelected?: boolean;
 	secondSelected?: boolean;
 	keepCheckSpace?: boolean;
@@ -132,6 +133,7 @@ export class PanelService {
 					firstSelected: false,
 					secondSelected: false,
 					keepCheckSpace: false,
+					toggleFilterChips: true,
 					menu: [{
 							hidden: false,
 							value: "none",
@@ -364,6 +366,26 @@ export class PanelService {
 		});
 
 		this.setPanelMenu("left", "issues", menu);
+	}
+
+	public toggleValueFromMenu(cardType: string, menuType: string, menuSubType: string) {
+		let panelCard = this.panelCards.left.find( (pc) => pc.type === cardType);
+
+		if (!!panelCard) {
+			this.toggleValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
+		}
+
+		panelCard = this.panelCards.right.find( (pc) => pc.type === cardType);
+
+		if (!!panelCard) {
+			this.toggleValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
+		}
+	}
+
+	public toggleValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string ) {
+		const menu = panelCard.menu.find((m) => m.value === menuType);
+		const item = menu.menu.find((m) => m.value === menuSubType );
+		item.selected = !item.selected;
 	}
 
 	public hideSubModels(issuesCardIndex: number, hide: boolean) {

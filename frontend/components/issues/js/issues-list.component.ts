@@ -14,6 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { APIService } from "../../home/js/api.service";
+import { IssuesService } from "./issues.service";
 
 class IssuesListController implements ng.IController {
 
@@ -53,9 +55,9 @@ class IssuesListController implements ng.IController {
 		private $compile,
 		private $element,
 
-		private APIService,
-		private IssuesService,
-		private ClientConfigService
+		private apiService: APIService,
+		private issuesService: IssuesService,
+		private clientConfigService: any
 	) {}
 
 	public $onInit() {
@@ -73,21 +75,21 @@ class IssuesListController implements ng.IController {
 
 		this.$scope.$watch(
 			() => {
-				return this.IssuesService.state.allIssues;
+				return this.issuesService.state.allIssues;
 			},
 			() => {
-				this.allIssues = this.IssuesService.state.allIssues;
+				this.allIssues = this.issuesService.state.allIssues;
 			},
 			true
 		);
 
 		this.$scope.$watch("vm.issuesToShow", () => {
 			this.setContentAndSize();
-			this.IssuesService.showIssuePins(this.account, this.model);
+			this.issuesService.showIssuePins();
 		});
 
 		this.$scope.$watchCollection("vm.filterChips", (chips) => {
-			this.IssuesService.setupIssuesToShow(this.model, chips);
+			this.issuesService.setupIssuesToShow(this.model, chips);
 		});
 
 		this.$scope.$watch("vm.menuOption", () => {
@@ -96,14 +98,14 @@ class IssuesListController implements ng.IController {
 			if (this.menuOption && this.menuOption.value) {
 
 				this.handleMenuOptions();
-				this.IssuesService.setupIssuesToShow(this.model, this.filterChips);
+				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
 			}
 
 		});
 
 		this.$scope.$watch(
 			() => {
-				return this.IssuesService.getDisplayIssue();
+				return this.issuesService.getDisplayIssue();
 			},
 			(issueToDisplay) => {
 				if (issueToDisplay) {
@@ -147,36 +149,36 @@ class IssuesListController implements ng.IController {
 
 	public handleMenuOptions() {
 		const ids = [];
-		this.IssuesService.state.issuesToShow.forEach((issue) => {
+		this.issuesService.state.issuesToShow.forEach((issue) => {
 			ids.push(issue._id);
 		});
 
 		switch (this.menuOption.value) {
 
 			case "sortByDate":
-				this.IssuesService.state.issueDisplay.sortOldestFirst =
-					!this.IssuesService.state.issueDisplay.sortOldestFirst;
+				this.issuesService.state.issueDisplay.sortOldestFirst =
+					!this.issuesService.state.issueDisplay.sortOldestFirst;
 				break;
 
 			case "showClosed":
-				this.IssuesService.state.issueDisplay.showClosed =
-					!this.IssuesService.state.issueDisplay.showClosed;
+				this.issuesService.state.issueDisplay.showClosed =
+					!this.issuesService.state.issueDisplay.showClosed;
 				break;
 
 			case "showSubModels":
-				this.IssuesService.state.issueDisplay.showSubModelIssues =
-					!this.IssuesService.state.issueDisplay.showSubModelIssues;
+				this.issuesService.state.issueDisplay.showSubModelIssues =
+					!this.issuesService.state.issueDisplay.showSubModelIssues;
 				break;
 
 			case "print":
 				const printEndpoint = this.account + "/" + this.model + "/issues.html?ids=" + ids.join(",");
-				const printUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, printEndpoint);
+				const printUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, printEndpoint);
 				this.$window.open(printUrl, "_blank");
 				break;
 
 			case "exportBCF":
 				const bcfEndpoint = this.account + "/" + this.model + "/issues.bcfzip?ids=" + ids.join(",");
-				const bcfUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, bcfEndpoint);
+				const bcfUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, bcfEndpoint);
 				this.$window.open(bcfUrl, "_blank");
 				break;
 
@@ -187,58 +189,45 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "filterRole":
-				const roleIndex = this.IssuesService.state.issueDisplay.excludeRoles.indexOf(this.menuOption.role);
+				const roleIndex = this.issuesService.state.issueDisplay.excludeRoles.indexOf(this.menuOption.role);
 				if (this.menuOption.selected) {
 					if (roleIndex !== -1) {
-						this.IssuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
+						this.issuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
 					}
 				} else {
 					if (roleIndex === -1) {
-						this.IssuesService.state.issueDisplay.excludeRoles.push(this.menuOption.role);
+						this.issuesService.state.issueDisplay.excludeRoles.push(this.menuOption.role);
 					}
 				}
 				break;
-			case "priority":
-				this.toggleChip("priority", this.menuOption.subItem.value);
-				break;
 		}
 
-	}
-
-	public toggleChip(type: string, name: string): void {
-		const chipIndex = this.filterChips.findIndex( (c) => c.type === type && c.name === name);
-
-		if (chipIndex === -1) {
-			this.filterChips.push( { type, name });
-		} else {
-			this.filterChips.splice(chipIndex, 1);
-		}
 	}
 
 	public setContentAndSize() {
 		// Setup what to show
-		if (this.IssuesService.state.issuesToShow.length > 0) {
+		if (this.issuesService.state.issuesToShow.length > 0) {
 			this.toShow = "list";
 			const buttonSpace = 70;
-			const numOfIssues = this.IssuesService.state.issuesToShow.length;
-			const heights = this.IssuesService.state.heights.issuesListItemHeight + buttonSpace;
+			const numOfIssues = this.issuesService.state.issuesToShow.length;
+			const heights = this.issuesService.state.heights.issuesListItemHeight + buttonSpace;
 			const issuesHeight = numOfIssues * heights;
 			this.contentHeight({height: issuesHeight });
 		} else {
 			this.toShow = "info";
 			this.info = "There are currently no open issues";
-			this.contentHeight({height: this.IssuesService.state.heights.infoHeight});
+			this.contentHeight({height: this.issuesService.state.heights.infoHeight});
 		}
 
 	}
 
 	public selectIssue(issue) {
-		this.IssuesService.setSelectedIssue(issue, false, this.revision);
+		this.issuesService.setSelectedIssue(issue, false, this.revision);
 		angular.element(this.$window).triggerHandler("resize");
 	}
 
 	public isSelectedIssue(issue) {
-		return this.IssuesService.isSelectedIssue(issue);
+		return this.issuesService.isSelectedIssue(issue);
 	}
 
 	public editIssue(issue) {

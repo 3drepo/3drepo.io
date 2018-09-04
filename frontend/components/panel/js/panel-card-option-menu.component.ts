@@ -32,6 +32,7 @@ class PanelCardOptionMenuController implements ng.IController {
 	public $ngInit() {}
 
 	public menuItemSelected(menuItem, parentMenuItem = null) {
+		menuItem = angular.copy(menuItem);
 
 		if (menuItem.hasOwnProperty("toggle")) {
 			if (menuItem.toggle) {
@@ -47,7 +48,7 @@ class PanelCardOptionMenuController implements ng.IController {
 		}
 
 		if (!!parentMenuItem) {
-			const subitem = angular.copy(menuItem);
+			const subitem = menuItem;
 			menuItem = angular.copy(parentMenuItem);
 			menuItem.subItem = subitem;
 		}

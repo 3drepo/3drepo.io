@@ -1,4 +1,3 @@
-
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -15,6 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PanelService } from "./panel.service";
 
 class PanelCardController implements ng.IController {
 
@@ -46,8 +46,9 @@ class PanelCardController implements ng.IController {
 	private options;
 	private statusIcon;
 	private hideSelectedItem;
-
+	private selectedMenuOption;
 	private onHeightRequest;
+	private chipsFilterChips;
 
 	constructor(
 		private $window: ng.IWindowService,
@@ -56,8 +57,8 @@ class PanelCardController implements ng.IController {
 		private $element: ng.IRootElementService,
 		private $compile: ng.ICompileService,
 
-		private PanelService: any,
-		private EventService: any
+		private panelService: PanelService,
+		private eventService: any
 	) {}
 
 	public $onInit() {
@@ -68,6 +69,7 @@ class PanelCardController implements ng.IController {
 		this.chipsFilterVisible = false; // This flag is only set in the panel-card-option-chip-filter.component
 		this.chipsFilterSuggestions = [];
 		this.chipsFilterVisible = false;
+		this.chipsFilterChips = [];
 
 		this.visibleStatus = false;
 		this.showClearFilterButton = false;
@@ -137,6 +139,28 @@ class PanelCardController implements ng.IController {
 				this.contentData.panelTakenHeight = newValue;
 				this.onContentHeightRequest(this.contentData.requestedHeight);
 		});
+
+		this.$scope.$watch("vm.selectedMenuOption", (newValue: any) => {
+			if (!!newValue && newValue.toggleFilterChips) {
+				this.toggleFilterChips(newValue.value, newValue.subItem.value);
+			}
+		});
+
+		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: any[], oldValue: any[]) => {
+			let diff: any = null;
+
+			if (newValue.length > oldValue.length) { // A chip has been added
+				diff = newValue[newValue.length - 1]; // Assumption: the new value is appended to the end of the chips array
+			}
+
+			if (newValue.length < oldValue.length) { // A chip has been deleted
+				diff = oldValue.find((ov) => !newValue.some( (nv) => nv.type === ov.type && nv.name === ov.name));
+			}
+
+			if (!!diff) {
+				this.panelService.toggleValueFromMenu(this.contentData.type, diff.type, diff.name);
+			}
+		});
 	}
 
 	/*
@@ -153,6 +177,16 @@ class PanelCardController implements ng.IController {
 	public hasChipsFilter() {
 		const filter = this.contentData.options.find((item) => item.type === "chips-filter");
 		return filter !== undefined;
+	}
+
+	public toggleFilterChips(type: string, name: string): void {
+		const chipIndex = this.chipsFilterChips.findIndex( (c) => c.type === type && c.name === name);
+
+		if (chipIndex === -1) {
+			this.chipsFilterChips.push( { type, name });
+		} else {
+			this.chipsFilterChips.splice(chipIndex, 1);
+		}
 	}
 
 	/**
@@ -264,11 +298,9 @@ class PanelCardController implements ng.IController {
 		case "close":
 			return "show='vm.contentData.show'";
 		}
-
 	}
 
 	public showToolbarOptions(addOptions, show) {
-
 		this.contentData.options.forEach((option) => {
 			if (addOptions.indexOf(option.type) !== -1) {
 				option.visible = show;
