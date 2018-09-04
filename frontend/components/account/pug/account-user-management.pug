@@ -83,14 +83,14 @@
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onJobsChange(updatedJobs)")
 
-            md-tab(
-                label="Jobs"
-                md-on-select="vm.onTabChange()"
-                ng-disabled="!vm.isTeamspaceAdmin")
-                    div(layout="column" layout-fill)
-                        jobs-list(
-                        flex
-                        layout="row"
-                        jobs="vm.jobs"
-                        colors="vm.jobsColors"
-                        current-teamspace="vm.currentTeamspace")
+			md-tab(
+				label="Jobs"
+				md-on-select="vm.onTabChange()"
+				ng-disabled="!vm.isTeamspaceAdmin")
+					div(layout="column" layout-fill)
+						jobs-list(
+							flex
+							layout="row"
+							jobs="vm.jobs"
+							colors="vm.jobsColors"
+							current-teamspace="vm.currentTeamspace")
