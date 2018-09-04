@@ -118,3 +118,17 @@ color-picker {
 	margin-left: 2px;
 	outline: none;
 }
+
+.colorPickerButtons {
+	border-top: 1px solid #efefef;
+	margin-top: 16px;
+	min-width: calc(100% + 32px);
+	margin-left: -16px;
+	margin-bottom: -16px;
+	padding-right: 10px;
+}
+
+.colorPickerButtons .md-button {
+	margin-right: 0;
+	min-width: auto;
+}

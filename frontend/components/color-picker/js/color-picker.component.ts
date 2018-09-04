@@ -117,7 +117,7 @@ class ColorPickerController implements ng.IController {
 	}
 
 	public setColor(colorHash = ""): void {
-		this.colorHash = colorHash;
+		this.colorHash = `${colorHash}`;
 		this.color = colorHash.replace("#", "");
 		this.colorRgba = hexToRgba(colorHash);
 	}
@@ -131,6 +131,13 @@ class ColorPickerController implements ng.IController {
 			this.initializeBlockCanvas();
 			this.initializeStripCanvas();
 			this.isInitilized = true;
+		}
+		if (this.isOpened) {
+			this.setColor(this.ngModelCtrl.$viewValue);
+			this.fillBlockCanvas(this.colorRgba);
+		} else {
+			this.togglePanelListeners();
+			this.toggleCanvasListeners();
 		}
 	}
 
@@ -238,9 +245,8 @@ class ColorPickerController implements ng.IController {
 
 		const imageData = ctx.getImageData(x, y, 1, 1).data;
 		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-		this.colorHash = rgbaToHex(rgbaColor).toUpperCase();
-		this.color = this.colorHash.replace("#", "");
 
+		this.setColor(rgbaToHex(rgbaColor).toUpperCase());
 		this.onColorHashChange(this.color, {x, y});
 	}
 
@@ -248,7 +254,6 @@ class ColorPickerController implements ng.IController {
 		const isValidColor = /(^[0-9A-F]{6}$)/i.test(this.color.toUpperCase());
 
 		if (isValidColor) {
-			this.onUpdate();
 			this.setColor(`#${this.color}`);
 			if (!position) {
 				this.fillBlockCanvas(this.colorHash);
@@ -269,6 +274,11 @@ class ColorPickerController implements ng.IController {
 		const pointer = this.colorBlockCanvas.nextElementSibling;
 		pointer.style.left = `${x}px`;
 		pointer.style.top = `${y}px`;
+	}
+
+	public saveColor($event): void {
+		this.onUpdate();
+		this.togglePanel($event);
 	}
 }
 
