@@ -209,7 +209,8 @@ class ProjectsPermissionsController implements ng.IController {
 				permissions: get(memberModelPermissions, "permissions", []),
 				key: modelPermissionsKey,
 				isDisabled: !modelPermissions,
-				isSelected: get(memberModelPermissions, "isSelected", false)
+				isSelected: get(memberModelPermissions, "isSelected", false),
+				isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINSTRATOR
 			};
 		});
 	}

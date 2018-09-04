@@ -23,6 +23,11 @@ import {sortByName} from "../../../helpers/sorting";
 const UNDEFINED_PERMISSIONS = "undefined";
 const PERMISSION_COLUMN_SIZE = 12;
 
+const MODES = {
+	PROJECTS: "projects",
+	MODELS: "models"
+};
+
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
 		"$mdDialog",
@@ -44,6 +49,9 @@ class PermissionsListController implements ng.IController {
 	private permissions;
 	private permissionsContainerSize;
 	private permissionSize;
+	private ngDisabled;
+	private currentUser;
+	private mode;
 
 	constructor(
 		private $mdDialog: any,
@@ -77,6 +85,10 @@ class PermissionsListController implements ng.IController {
 
 			this.isLoading = false;
 			this.permissionsForSelected = UNDEFINED_PERMISSIONS;
+
+			if (data.currentValue) {
+				this.currentUser = data.currentValue.find(({isCurrentUser}) => isCurrentUser);
+			}
 		}
 	}
 
@@ -151,7 +163,7 @@ class PermissionsListController implements ng.IController {
 	public toggleAllItems(): void {
 		this.data = this.data.map((row) => {
 			const isVisible = this.processedData.some(({user}) => user === row.user);
-			const isUnavailable = row.isAdmin || row.isProjectAdmin || row.isCurrentUser;
+			const isUnavailable = row.isAdmin || row.isProjectAdmin || row.isCurrentUser || row.isOwner;
 			return {...row, isSelected: this.shouldSelectAllItems && isVisible && !isUnavailable};
 		});
 		this.processedData = this.processData();
@@ -187,6 +199,33 @@ class PermissionsListController implements ng.IController {
 
 		this.onChange({updatedPermissions});
 	}
+
+	/**
+	 * Check if row should be disabled
+	 */
+	public isDisabledRow(row): boolean {
+		const passBaseValidation = this.ngDisabled || row.isDisabled || row.isOwner || row.isAdmin || row.isCurrentUser;
+
+		if (passBaseValidation) {
+			return true;
+		}
+
+		if (!passBaseValidation) {
+			if (this.mode === MODES.PROJECTS && row.isProjectAdmin) {
+				return !(this.currentUser.isAdmin || this.currentUser.isOwner || this.currentUser.isProjectAdmin);
+			}
+
+			if (this.mode === MODES.MODELS && row.isProjectAdmin) {
+				return true;
+			}
+
+			if (this.mode === MODES.MODELS && row.isModelAdmin) {
+				return !(this.currentUser.isAdmin || this.currentUser.isOwner || this.currentUser.isProjectAdmin);
+			}
+		}
+
+		return false;
+	}
 }
 
 export const PermissionsListComponent: ng.IComponentOptions = {
@@ -196,7 +235,8 @@ export const PermissionsListComponent: ng.IComponentOptions = {
 		permissions: "<?",
 		onChange: "&?",
 		ngDisabled: "<",
-		messageEmptyList: "@?"
+		messageEmptyList: "@?",
+		mode: "@"
 	},
 	controller: PermissionsListController,
 	controllerAs: "vm",

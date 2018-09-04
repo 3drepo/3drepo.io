@@ -35,7 +35,8 @@
     permissions="vm.PROJECT_ROLES_LIST"
     current-teamspace="vm.currentTeamspace"
     message-empty-list="Select a project to view the users' permissions"
-    on-change="vm.onPermissionsChange(updatedPermissions)")
+    on-change="vm.onPermissionsChange(updatedPermissions)"
+    mode="projects")
 
   .modelsPermissions(flex layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
     .modelsPermissionsPlaceholder(
@@ -61,7 +62,8 @@
         permissions="vm.MODEL_ROLES_LIST"
         current-teamspace="vm.currentTeamspace"
         message-empty-list="Select a model to view the users' permissions"
-        on-change="vm.onPermissionsChange(updatedPermissions)")
+        on-change="vm.onPermissionsChange(updatedPermissions)"
+        mode="models")
 
   .projectsPermissionsFooter(
     layout="row"

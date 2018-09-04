@@ -65,7 +65,7 @@
 			//Checkbox
 			.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
 				md-checkbox(
-					ng-disabled="vm.ngDisabled || row.isAdmin || row.isDisabled || row.isCurrentUser || row.isProjectAdmin"
+					ng-disabled="vm.isDisabledRow(row)"
 					ng-model="row.isSelected"
 					ng-change="vm.onSelectionChange()")
 
@@ -85,6 +85,6 @@
 					layout="row"
 					layout-align="center center")
 					md-radio-button(
-						ng-disabled="vm.ngDisabled || row.isAdmin || row.isDisabled || row.isCurrentUser || row.isProjectAdmin"
+						ng-disabled="vm.isDisabledRow(row)"
 						ng-value="permission.key"
 						aria-label="{{::permission.label}}")
