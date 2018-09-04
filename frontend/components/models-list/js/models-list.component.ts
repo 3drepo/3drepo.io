@@ -128,7 +128,7 @@ class ModelsListController implements ng.IController {
 		}
 
 		this.models = this.models.map((model) => {
-			const isVisible = this.processedModels.some(({ user }) => user === model.user);
+			const isVisible = this.processedModels.some(({ model: modelName }) => modelName === model.model);
 			return {...model, isSelected: this.shouldSelectAllItems && isVisible};
 		});
 		this.processedModels = this.processData();

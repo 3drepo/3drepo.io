@@ -57,6 +57,7 @@
 
 .modelsListCellSearch .md-input {
   padding-top: 5px !important;
+  font-weight: 500;
 }
 
 .modelsListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input {
@@ -78,6 +79,7 @@
   width: calc(100% - 20px - 18px) !important;
   left: 20px !important;
   margin-bottom: 1px;
+  font-weight: 500;
 }
 
 .modelsListCellSearch.md-input-focused > label,
