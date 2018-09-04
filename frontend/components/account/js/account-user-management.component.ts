@@ -122,7 +122,7 @@ class AccountUserManagementController implements ng.IController {
 				this.jobsColors = jobsData.colors;
 				this.licencesLabel = this.getLicencesLabel();
 				this.projects = this.currentTeamspace.projects.filter(({permissions}) => {
-					return this.currentTeamspace.isAdmin || permissions.includes(PROJECT_ROLES_TYPES.ADMINSTRATOR);
+					return this.currentTeamspace.isAdmin || permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
 				});
 				this.isLoadingTeamspace = false;
 			});

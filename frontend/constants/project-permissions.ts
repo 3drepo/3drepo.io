@@ -1,11 +1,11 @@
 export const PROJECT_ROLES_TYPES = {
-	ADMINSTRATOR: "admin_project",
+	ADMINISTRATOR: "admin_project",
 	UNASSIGNED: null
 };
 
 export const PROJECT_ROLES_DESC = {
 	UNASSIGNED: "No access",
-	ADMINSTRATOR: "Collaborator access and edit permissions"
+	ADMINISTRATOR: "Collaborator access and edit permissions"
 };
 
 export const PROJECT_ROLES_LIST = [
@@ -16,9 +16,9 @@ export const PROJECT_ROLES_LIST = [
 		tooltip: PROJECT_ROLES_DESC.UNASSIGNED
 	},
 	{
-		key: PROJECT_ROLES_TYPES.ADMINSTRATOR,
+		key: PROJECT_ROLES_TYPES.ADMINISTRATOR,
 		label: "Admin",
 		width: "70px",
-		tooltip: PROJECT_ROLES_DESC.ADMINSTRATOR
+		tooltip: PROJECT_ROLES_DESC.ADMINISTRATOR
 	}
 ];

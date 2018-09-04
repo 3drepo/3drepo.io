@@ -17,8 +17,8 @@
 import {values, cond, matches, orderBy, sumBy} from "lodash";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
 import {PROJECT_ROLES_LIST, PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
-
 import {sortByName} from "../../../helpers/sorting";
+import {MODEL_ROLES_TYPES} from "../../../constants/model-permissions";
 
 const UNDEFINED_PERMISSIONS = "undefined";
 const PERMISSION_COLUMN_SIZE = 12;
@@ -31,10 +31,13 @@ const MODES = {
 class PermissionsListController implements ng.IController {
 	public static $inject: string[] = [
 		"$mdDialog",
+		"$timeout",
 		"ProjectsService"
 	];
 
 	private SORT_TYPES = SORT_TYPES;
+	private MODEL_ROLES_TYPES = MODEL_ROLES_TYPES;
+	private MODES = MODES;
 
 	private data;
 	private processedData;
@@ -55,6 +58,7 @@ class PermissionsListController implements ng.IController {
 
 	constructor(
 		private $mdDialog: any,
+		private $timeout: any,
 		private ProjectsService: any
 	) {
 		this.currentSort = {
@@ -160,10 +164,15 @@ class PermissionsListController implements ng.IController {
 	/**
 	 * Toggle list items
 	 */
-	public toggleAllItems(): void {
+	public toggleAllItems(isIndenterminate): void {
+		if (isIndenterminate) {
+			this.hasSelectedItem = false;
+			this.shouldSelectAllItems = false;
+		}
+
 		this.data = this.data.map((row) => {
 			const isVisible = this.processedData.some(({user}) => user === row.user);
-			const isUnavailable = row.isAdmin || row.isProjectAdmin || row.isCurrentUser || row.isOwner;
+			const isUnavailable = row.isAdmin || row.isCurrentUser || row.isOwner;
 			return {...row, isSelected: this.shouldSelectAllItems && isVisible && !isUnavailable};
 		});
 		this.processedData = this.processData();
@@ -173,7 +182,7 @@ class PermissionsListController implements ng.IController {
 	public onSelectionChange(): void {
 		const selectedItems = this.processedData.filter(({isSelected}) => isSelected);
 		this.hasSelectedItem = Boolean(selectedItems.length);
-		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.data.length;
+		this.shouldSelectAllItems = this.hasSelectedItem && selectedItems.length === this.processedData.length;
 	}
 
 	/**
@@ -190,9 +199,9 @@ class PermissionsListController implements ng.IController {
 	 */
 	public updatePermissionsForSelected(selectedPermission): void {
 		const updatedPermissions = this.processedData
-			.reduce((permissionsList, permission) => {
-				if (permission.isSelected && !permission.isAdmin) {
-					permissionsList.push({...permission, key: selectedPermission});
+			.reduce((permissionsList, row) => {
+				if (row.isSelected && !this.isDisabledRow(row)) {
+					permissionsList.push({...row, key: selectedPermission});
 				}
 				return permissionsList;
 			}, []);

@@ -121,9 +121,14 @@ class ModelsListController implements ng.IController {
 	/**
 	 * Toggle list items
 	 */
-	public toggleAllItems(): void {
+	public toggleAllItems(isIndenterminate): void {
+		if (isIndenterminate) {
+			this.hasSelectedItem = false;
+			this.shouldSelectAllItems = false;
+		}
+
 		this.models = this.models.map((model) => {
-			const isVisible = this.processedModels.some(({ user }) => user === model.user);
+			const isVisible = this.processedModels.some(({ model: modelName }) => modelName === model.model);
 			return {...model, isSelected: this.shouldSelectAllItems && isVisible};
 		});
 		this.processedModels = this.processData();

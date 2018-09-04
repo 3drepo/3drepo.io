@@ -80,6 +80,7 @@
 
 .usersListCellSearch .md-input {
   padding-top: 5px !important;
+  font-weight: 500;
 }
 
 .usersListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input {
