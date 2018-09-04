@@ -34,15 +34,16 @@ class PasswordChangeController implements ng.IController {
 	private username;
 	private passwordStrength;
 	private passwordConfirmMessage;
+	private newPasswordValid: boolean;
 
-	private const PAGE_STATE = {
+	private PAGE_STATE = {
 		CHANGING: 0,
 		CHANGED: 1,
 		INVALID: 2
 	};
 
 	constructor(
-		private $scope: ng.IScope,
+		private $scope: any,
 		private APIService: any,
 		private StateManager: any,
 		private PasswordService: any
@@ -78,7 +79,7 @@ class PasswordChangeController implements ng.IController {
 
 	public passwordChange(event) {
 		if (event !== undefined && event !== null) {
-			if (event.which === this.enterKey && allowSubmission) {
+			if (event.which === this.enterKey) {
 				this.doPasswordChange();
 			}
 		} else {
