@@ -54,7 +54,8 @@
     .modelsPermissionsWrapper(
       flex="grow"
       data-simplebar
-      ng-attr-data-simplebar-x-hidden="{{!vm.selectedModels.length || undefined}}")
+      ng-attr-data-simplebar-x-hidden="{{!vm.selectedModels.length || undefined}}"
+      data-simplebar-y-hidden)
       permissions-list(
         ng-disabled="!vm.selectedModels.length"
         flex="grow"
