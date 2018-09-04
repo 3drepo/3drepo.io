@@ -132,7 +132,7 @@ class AccountProfileController implements ng.IController {
 
 	public passwordUpdateDisabled() {
 		const inputValid = this.oldPassword && this.newPassword
-							&& this.oldPassword === this.newPassword
+							&& this.oldPassword !== this.newPassword
 							&& this.passwordValid;
 		return !inputValid;
 	}
