@@ -1,0 +1,14 @@
+import { put, takeLatest } from 'redux-saga/effects';
+import { {{ pascalCase name }}Types, {{ pascalCase name }}Actions } from './{{ camelCase name }}.redux';
+
+export function* fetch() {
+  try {
+    console.log('{{ pascalCase name }} saga started!');
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+export default function* {{ pascalCase name }}Saga() {
+  yield takeLatest({{ pascalCase name }}Types.FETCH, fetch);
+}
