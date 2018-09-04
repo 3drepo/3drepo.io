@@ -209,18 +209,6 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	/**
-	 * Get teamspace projects list
-	 * @param teamspaceName
-	 */
-	public getTeamspaceProjects(teamspaceName: string): object[] {
-		if (!teamspaceName) {
-			return [];
-		}
-		// TODO: Handle request
-		return [];
-	}
-
-	/**
 	 * Change panel visibility
 	 * @param forceHide
 	 */

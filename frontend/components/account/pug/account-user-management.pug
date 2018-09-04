@@ -23,7 +23,7 @@
 			aria-label="Add new member"
 			ng-click="vm.toggleNewDataPanel()"
 			ng-if="vm.selectedTab !== vm.TABS_TYPES.PROJECTS"
-			ng-disabled="vm.members.length === vm.licencesLimit || vm.isLoadingTeamspace"
+			ng-disabled="(vm.members.length === vm.licencesLimit && vm.selectedTab === vm.TABS_TYPES.USERS) || vm.isLoadingTeamspace"
 			ng-class="{'active': vm.showAddingPanel}")
 			md-icon.angular-material-icons add
 

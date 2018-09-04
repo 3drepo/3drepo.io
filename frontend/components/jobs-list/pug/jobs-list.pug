@@ -16,10 +16,6 @@
 					ng-change="vm.onSearch()")
 
 		.jobsListCell(flex="25" layout="row" layout-align="start center")
-			list-sort-button(
-				ng-disabled="vm.ngDisabled"
-				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.field === 'color'}"
-				on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {field: 'color'})")
 			.usersListCellLabel Color
 
 			div(flex)
