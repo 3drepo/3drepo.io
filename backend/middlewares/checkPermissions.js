@@ -72,38 +72,39 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 	});
 }
 
+function validateUserSession(req) {
+	if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+		return Promise.reject(responseCodes.NOT_LOGGED_IN);
+	}
+
+	return Promise.resolve();
+}
+
+function validatePermissions(next, result) {
+	const results = _.isArray(result) ? result : [result];
+	const isGranted = results.every((data) => data.granted);
+
+	if (isGranted) {
+		next();
+	} else {
+		return Promise.reject(responseCodes.NOT_AUTHORIZED);
+	}
+}
+
 // function that returns a middleware function for checking permissions
 function checkPermissions(permsRequest) {
 
 	return function(req, res, next) {
-		let checkLogin = Promise.resolve();
-
-		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-			checkLogin = Promise.reject(responseCodes.NOT_LOGGED_IN);
-		}
-
-		checkLogin.then(() => {
+		validateUserSession(req).then(() => {
 			const username = req.session.user.username;
 			const account = req.params.account;
 			const model = req.params.model;
 			const project = req.params.project;
 			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter);
-
-		}).then(data => {
-
-			if (data.userPermissions) {
-				req.session.user.permissions = data.userPermissions;
-			}
-
-			if(data.granted) {
-				next();
-			} else {
-				return Promise.reject(responseCodes.NOT_AUTHORIZED);
-			}
-
-		}).catch(err => {
-			next(err);
-		});
+		}).then(validatePermissions.bind(null, next))
+			.catch(err => {
+				next(err);
+			});
 	};
 }
 
@@ -121,13 +122,7 @@ function checkMultiplePermissions(permsRequest) {
 			models.push(...req.query.models.split(","));
 		}
 
-		let checkLogin = Promise.resolve();
-
-		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-			checkLogin = Promise.reject(responseCodes.NOT_LOGGED_IN);
-		}
-
-		checkLogin.then(() => {
+		validateUserSession(req).then(() => {
 			const username = req.session.user.username;
 			const account = req.params.account;
 
@@ -139,18 +134,10 @@ function checkMultiplePermissions(permsRequest) {
 			});
 
 			return Promise.all(promises);
-		}).then(results => {
-			const isGranted = results.every((data) => data.granted);
-
-			if (isGranted) {
-				next();
-			} else {
-				return Promise.reject(responseCodes.NOT_AUTHORIZED);
-			}
-
-		}).catch(err => {
-			next(err);
-		});
+		}).then(validatePermissions.bind(null, next))
+			.catch(err => {
+				next(err);
+			});
 	};
 }
 module.exports = { checkPermissions, checkPermissionsHelper, checkMultiplePermissions};
