@@ -144,3 +144,14 @@
 .permissionsListTooltip {
   margin-left: 10px;
 }
+
+.permissionsList md-checkbox.md-indeterminate .md-container {
+  background: rgba(6,86,60,0.87);
+  color: #fff;
+  border-radius: 2px;
+  transition: all 150ms ease-in-out;
+}
+
+.permissionsList md-checkbox.md-indeterminate:not(.md-checked) .md-icon {
+  border-color: transparent;
+}
