@@ -124,5 +124,8 @@ import "./jobs-list/js/jobs-list.component";
 import "./new-job-form/js/new-job-form.component";
 import "./color-picker/js/color-picker.component";
 
+// React components
+import "../routes/components/angularBindings";
+
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

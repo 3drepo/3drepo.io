@@ -10,7 +10,7 @@ module.exports = (options) => {
       filename: 'three_d_repo.min.js'
     }, options.output),
     resolve: {
-      extensions: ['.ts', '.js', 'tsx']
+      extensions: ['.ts', '.js', '.tsx']
     },
     module: {
       rules: [
