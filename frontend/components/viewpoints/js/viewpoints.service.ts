@@ -48,8 +48,26 @@ export class ViewpointsService {
 	 */
 	public reset() {
 		this.state = {
-			viewpoints : []
+			viewpoints: []
 		};
+	}
+
+	// Helper  for searching strings
+	public stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+	}
+
+	public filterViewpoints(searchQuery: string) {
+
+		const viewpointSearchResults = this.state.viewpoints.filter((view) => {
+			return this.stringSearch(view.name, searchQuery);
+		});
+
+		return viewpointSearchResults;
 	}
 
 	/**
@@ -185,7 +203,7 @@ export class ViewpointsService {
 				viewpoint.viewpoint.view_dir = results[0].view_dir;
 				viewpoint.viewpoint.right = results[0].right;
 				viewpoint.screenshot = {
-					base64 : base64Screenshot
+					base64: base64Screenshot
 				};
 				return viewpoint;
 			});

@@ -33,7 +33,6 @@ class GroupsController implements ng.IController {
 
 	private onContentHeightRequest: any;
 	private groups: any;
-	private groupsToShow;
 	private selectedGroup: any;
 	private teamspace: string;
 	private model: string;
@@ -56,7 +55,6 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
-	private filterText: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -74,7 +72,6 @@ class GroupsController implements ng.IController {
 	public $onInit() {
 		this.customIcons = this.IconsConstant;
 		this.groups = [];
-		this.groupsToShow = [];
 		this.selectedNodes = [];
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
@@ -100,16 +97,14 @@ class GroupsController implements ng.IController {
 
 	public $onDestroy() {
 		this.groups = [];
-		this.groupsToShow = [];
 		this.NotificationService.unsubscribe.newGroup(this.account, this.model);
 		this.NotificationService.unsubscribe.groupsDeleted(this.account, this.model);
 	}
 
 	public watchers() {
 		this.$scope.$watch("vm.filterText", (searchQuery) => {
-			this.filterText = searchQuery;
-			if (this.filterText !== undefined || this.filterText !== "") {
-				this.groups = this.GroupsService.groupsFilterSearch(this.filterText);
+			if (searchQuery !== undefined || searchQuery !== "") {
+				this.groups = this.GroupsService.groupsFilterSearch(searchQuery);
 			}
 		});
 
@@ -408,7 +403,6 @@ class GroupsController implements ng.IController {
 
 	public selectGroup(group: any) {
 		this.GroupsService.selectGroup(group);
-		console.log('grouping', group);
 	}
 
 	public updateChangeStatus(): void {

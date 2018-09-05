@@ -48,7 +48,6 @@ export class GroupsService {
 	public reset() {
 		this.state = {
 			groups: [],
-			groupsToShow: [],
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes: 0,

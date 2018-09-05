@@ -76,6 +76,12 @@ class ViewsController implements ng.IController {
 
 	public watchers() {
 
+		this.$scope.$watch("vm.filterText", (searchQuery) => {
+			if (searchQuery !== undefined || searchQuery !== "") {
+				this.viewpoints = this.ViewpointsService.filterViewpoints(searchQuery);
+			}
+		});
+
 		this.$scope.$watch(() => {
 			return this.ViewpointsService.state;
 		}, (newState, oldState) => {
@@ -227,6 +233,7 @@ export const ViewpointsComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
+		filterText: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
 		onHideItem: "&",
