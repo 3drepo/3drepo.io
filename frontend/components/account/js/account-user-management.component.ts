@@ -19,6 +19,7 @@ import {get, uniq, map, isNumber} from "lodash";
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
+import { MODEL_ROLES_TYPES } from "../../../constants/model-permissions";
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -94,12 +95,23 @@ class AccountUserManagementController implements ng.IController {
 			}
 
 			if (currentUser.currentValue && accounts.currentValue) {
-				this.teamspaces = accounts.currentValue.map((account) => {
-					return {
-						...account,
-						isProjectAdmin: Boolean(account.projects.length)
-					};
-				});
+				this.teamspaces = accounts.currentValue.reduce((teamspaces, account) => {
+					const {isProjectAdmin, isModelAdmin} = account.projects.reduce((flags, { permissions, models }) => {
+						flags.isProjectAdmin = permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
+						flags.isModelAdmin = models.some((model) => model.permissions.includes(MODEL_ROLES_TYPES.ADMINISTRATOR));
+
+						return flags;
+					}, {});
+
+					if (account.isAdmin || isProjectAdmin || isModelAdmin) {
+						teamspaces.push({
+							...account,
+							isProjectAdmin
+						});
+					}
+
+					return teamspaces;
+				}, []);
 			}
 		}
 
