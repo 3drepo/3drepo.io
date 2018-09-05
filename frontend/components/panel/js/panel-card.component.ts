@@ -157,9 +157,25 @@ class PanelCardController implements ng.IController {
 				diff = oldValue.find((ov) => !newValue.some( (nv) => nv.type === ov.type && nv.name === ov.name));
 			}
 
-			if (!!diff) {
-				this.panelService.toggleValueFromMenu(this.contentData.type, diff.type, diff.name);
+			if (!!diff) {  // this is for toggling the value in the menu
+				this.panelService.toggleChipsValueFromMenu(this.contentData.type, diff.type, diff.name);
 			}
+		});
+
+		this.$scope.$watchCollection("vm.contentData.menu", (newValue: any[], oldValue: any[]) => {
+			if (!newValue) {
+				return;
+			}
+
+			const suggestions = newValue.filter((mi) => mi.toggleFilterChips).reduce((accum: [], menuItem: any) => {
+				// Transforms the menu item to suggestions format
+				const menuSuggestions: [] = menuItem.menu.map((subItem) => ({type : menuItem.value, name: subItem.value}));
+
+				// Concats the new suggestions with the ones from previous menuitems
+				return accum.concat(menuSuggestions);
+			}, []);
+
+			this.chipsFilterSuggestions = suggestions;
 		});
 	}
 
@@ -236,8 +252,6 @@ class PanelCardController implements ng.IController {
 			optionData.forEach((op, i) => {
 				const optionType = op.type;
 				optionElement = this.getOptionElement(optionType, i);
-				this.setAditionalOptionData(op);
-
 				option = angular.element(optionElement);
 				// Create the element
 				if (option !== null && this.options) {
@@ -270,14 +284,6 @@ class PanelCardController implements ng.IController {
 						   ${options} />`;
 
 		return optionElement;
-	}
-
-	public setAditionalOptionData(option) {
-		switch (option.type) {
-			case "chips-filter":
-				this.chipsFilterSuggestions = option.suggestions;
-				break;
-		}
 	}
 
 	public getOptionSpecificAttrs(optionType) {

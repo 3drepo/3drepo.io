@@ -368,24 +368,28 @@ export class PanelService {
 		this.setPanelMenu("left", "issues", menu);
 	}
 
-	public toggleValueFromMenu(cardType: string, menuType: string, menuSubType: string) {
+	public toggleChipsValueFromMenu(cardType: string, menuType: string, menuSubType: string) {
 		let panelCard = this.panelCards.left.find( (pc) => pc.type === cardType);
 
 		if (!!panelCard) {
-			this.toggleValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
+			this.toggleChipsValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
 		}
 
 		panelCard = this.panelCards.right.find( (pc) => pc.type === cardType);
 
 		if (!!panelCard) {
-			this.toggleValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
+			this.toggleChipsValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
 		}
 	}
 
-	public toggleValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string ) {
+	public toggleChipsValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string ) {
 		const menu = panelCard.menu.find((m) => m.value === menuType);
-		const item = menu.menu.find((m) => m.value === menuSubType );
-		item.selected = !item.selected;
+		if (!!menu && menu.toggleFilterChips) {
+			const item = menu.menu.find((m) => m.value === menuSubType );
+			if (!!item) {
+				item.selected = !item.selected;
+			}
+		}
 	}
 
 	public hideSubModels(issuesCardIndex: number, hide: boolean) {
