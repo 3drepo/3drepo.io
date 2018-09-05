@@ -58,7 +58,6 @@ class AccountProfileController implements ng.IController {
 		this.lastNameNew = this.lastName;
 		this.emailNew = this.email;
 		this.passwordStrength = "";
-		this.PasswordService.addPasswordStrengthLib();
 		this.watchers();
 	}
 
@@ -70,55 +69,11 @@ class AccountProfileController implements ng.IController {
 			}
 
 			const result = this.PasswordService.evaluatePassword(newPassword);
-			this.passwordStrength = this.PasswordService.getPasswordStrength(newPassword, result.score);
-			this.checkInvalidPassword(result);
+			this.passwordStrength = `(${result.comment})`;
+			this.passwordValid = result.validPassword;
+			this.$scope.password.new.$setValidity("required", this.passwordValid);
 
 		});
-	}
-
-	public checkInvalidPassword(result) {
-		if (!this.newPassword) {
-			return;
-		}
-
-		if (this.newPassword.length  < 8) {
-			this.invalidatePassword();
-			this.passwordSaveError = "Password must be at least 8 characters";
-			return;
-		}
-
-		switch (result.score) {
-		case 0:
-			this.invalidatePassword();
-			this.passwordSaveError = "Password is too weak; " + result.feedback.suggestions.join(" ");
-			break;
-		case 1:
-			this.invalidatePassword();
-			this.passwordSaveError = "Password is too weak; " + result.feedback.suggestions.join(" ");
-			break;
-		case 2:
-			this.validatePassword();
-			this.passwordSaveError = "";
-			break;
-		case 3:
-			this.validatePassword();
-			this.passwordSaveError = "";
-			break;
-		case 4:
-			this.validatePassword();
-			this.passwordSaveError = "";
-			break;
-		}
-	}
-
-	public invalidatePassword() {
-		this.$scope.password.new.$setValidity("required", false);
-		this.passwordValid = false;
-	}
-
-	public validatePassword() {
-		this.$scope.password.new.$setValidity("required", true);
-		this.passwordValid = true;
 	}
 
 	/**
@@ -131,16 +86,11 @@ class AccountProfileController implements ng.IController {
 			lastName: this.lastNameNew
 		})
 			.then((response) => {
-				if (response.status === 200) {
-					this.infoSaveInfo = "Saved";
-					this.updateError = "";
-					this.firstName = this.firstNameNew;
-					this.lastName = this.lastNameNew;
-					this.email = this.emailNew;
-
-				} else {
-					this.updateError = response.data.message;
-				}
+				this.infoSaveInfo = "Saved";
+				this.updateError = "";
+				this.firstName = this.firstNameNew;
+				this.lastName = this.lastNameNew;
+				this.email = this.emailNew;
 			})
 			.catch((error) => {
 				if (error && error.data && error.data.message) {
@@ -181,16 +131,10 @@ class AccountProfileController implements ng.IController {
 	}
 
 	public passwordUpdateDisabled() {
-		if (!this.oldPassword || !this.newPassword) {
-			return true;
-		}
-		if (this.oldPassword === this.newPassword) {
-			return true;
-		}
-		if (!this.passwordValid) {
-			return true;
-		}
-		return false;
+		const inputValid = this.oldPassword && this.newPassword
+							&& this.oldPassword !== this.newPassword
+							&& this.passwordValid;
+		return !inputValid;
 	}
 
 	public canUpdate() {
