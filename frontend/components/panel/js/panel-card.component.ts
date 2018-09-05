@@ -167,9 +167,9 @@ class PanelCardController implements ng.IController {
 				return;
 			}
 
-			const suggestions = newValue.filter((mi) => mi.toggleFilterChips).reduce((accum: [], menuItem: any) => {
+			const suggestions = newValue.filter((mi) => mi.toggleFilterChips).reduce((accum: any[], menuItem: any) => {
 				// Transforms the menu item to suggestions format
-				const menuSuggestions: [] = menuItem.menu.map((subItem) => ({type : menuItem.value, name: subItem.value}));
+				const menuSuggestions: any[] = menuItem.menu.map((subItem) => ({type : menuItem.value, name: subItem.value}));
 
 				// Concats the new suggestions with the ones from previous menuitems
 				return accum.concat(menuSuggestions);

@@ -14,6 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { APIService } from "../../home/js/api.service";
+import { AuthService } from "../../home/js/auth.service";
+import { ClipService } from "../../clip/js/clip.service";
+import { PanelService } from "../../panel/js/panel.service";
+import { TreeService } from "../../tree/js/tree.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 declare const Pin;
 
@@ -25,15 +31,12 @@ export class IssuesService {
 		"$filter",
 
 		"ClientConfigService",
-		"EventService",
 		"APIService",
 		"TreeService",
 		"AuthService",
-		"MultiSelectService",
 		"ClipService",
 		"ViewerService",
-		"PanelService",
-		"DialogService"
+		"PanelService"
 	];
 
 	public state: any;
@@ -45,16 +48,13 @@ export class IssuesService {
 		private $timeout,
 		private $filter,
 
-		private ClientConfigService,
-		private EventService,
-		private APIService,
-		private TreeService,
-		private AuthService,
-		private MultiSelectService,
-		private ClipService,
-		private ViewerService,
-		private PanelService,
-		private DialogService
+		private clientConfigService: any,
+		private apiService: APIService,
+		private treeService: TreeService,
+		private authService: AuthService,
+		private clipService: ClipService,
+		private viewerService: ViewerService,
+		private panelService: PanelService
 	) {
 		this.reset();
 	}
@@ -106,10 +106,16 @@ export class IssuesService {
 	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
 		const url = account + "/jobs";
 
-		return this.APIService.get(url)
+		return this.apiService.get(url)
 			.then((response) => {
 				this.state.availableJobs = response.data;
-				this.PanelService.setIssuesMenu(response.data);
+
+				const menuChips =  response.data.map( (role ) => ({
+					value: role._id,
+					label: role._id
+				}));
+
+				this.panelService.setChipFilterMenuItem("issues", {label: "Created By", value: "CreatedBy"}, menuChips);
 				return this.state.availableJobs;
 			});
 
@@ -118,7 +124,7 @@ export class IssuesService {
 	public getUserJobForModel(account: string, model: string): Promise<any> {
 		const url = account + "/myJob";
 
-		return this.APIService.get(url)
+		return this.apiService.get(url)
 			.then((response) => {
 				this.state.modelUserJob = response.data;
 				return this.state.modelUserJob;
@@ -329,7 +335,7 @@ export class IssuesService {
 					pinColor = Pin.pinColours.yellow;
 				}
 
-				this.ViewerService.addPin({
+				this.viewerService.addPin({
 					id: issue._id,
 					account: issue.account,
 					model: issue.model,
@@ -341,7 +347,7 @@ export class IssuesService {
 
 			} else {
 				// Remove pin
-				this.ViewerService.removePin({ id: issue._id });
+				this.viewerService.removePin({ id: issue._id });
 			}
 		});
 
@@ -420,7 +426,7 @@ export class IssuesService {
 
 			if (!issue.descriptionThumbnail) {
 				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
-					issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+					issue.descriptionThumbnail = this.apiService.getAPIUrl(issue.viewpoint.screenshotSmall);
 				}
 			}
 		}
@@ -433,8 +439,8 @@ export class IssuesService {
 	}
 
 	public isViewer(permissions) {
-		return permissions && !this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
+		return permissions && !this.authService.hasPermission(
+			this.clientConfigService.permissions.PERM_COMMENT_ISSUE,
 			permissions
 		);
 	}
@@ -448,15 +454,15 @@ export class IssuesService {
 	}
 
 	public isAdmin(permissions) {
-		return permissions && this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
+		return permissions && this.authService.hasPermission(
+			this.clientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
 			permissions
 		);
 	}
 
 	public isJobOwner(issueData, userJob, permissions) {
 		return issueData && userJob &&
-			(issueData.owner === this.AuthService.getUsername() ||
+			(issueData.owner === this.authService.getUsername() ||
 			this.userJobMatchesCreator(userJob, issueData)) &&
 			!this.isViewer(permissions);
 	}
@@ -518,8 +524,8 @@ export class IssuesService {
 
 		const ableToComment = this.isAdmin(permissions) ||
 			this.isJobOwner(issueData, userJob, permissions) ||
-			this.AuthService.hasPermission(
-				this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
+			this.authService.hasPermission(
+				this.clientConfigService.permissions.PERM_COMMENT_ISSUE,
 				permissions
 			);
 
@@ -530,7 +536,7 @@ export class IssuesService {
 	public deselectPin(issue) {
 		// Issue with position means pin
 		if (issue.position.length > 0 && issue._id) {
-			this.ViewerService.changePinColours({
+			this.viewerService.changePinColours({
 				id: issue._id,
 				colours: Pin.pinColours.blue
 			});
@@ -538,21 +544,18 @@ export class IssuesService {
 	}
 
 	public showIssue(issue, revision) {
-
-		this.TreeService.showProgress = true;
-
 		this.showIssuePins();
 
 		// Remove highlight from any multi objects
-		this.ViewerService.highlightObjects([]);
-		this.TreeService.clearCurrentlySelected();
+		this.viewerService.highlightObjects([]);
+		this.treeService.clearCurrentlySelected();
 
 		// Reset object visibility
 		if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
-			this.TreeService.setHideIfc(issue.viewpoint.hideIfc);
+			this.treeService.setHideIfc(issue.viewpoint.hideIfc);
 		}
 
-		this.TreeService.showAllTreeNodes(false);
+		this.treeService.showAllTreeNodes(false);
 
 		// Show multi objects
 		if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
@@ -562,12 +565,10 @@ export class IssuesService {
 				issue.hasOwnProperty("group_id")) {
 
 			this.showMultiIds(issue, revision).then(() => {
-				this.TreeService.showProgress = false;
 				this.handleShowIssue(issue);
 			});
 
 		} else {
-			this.TreeService.showProgress = false;
 			this.handleShowIssue(issue);
 		}
 
@@ -584,7 +585,7 @@ export class IssuesService {
 			model: issue.model
 		};
 
-		this.ViewerService.setCamera(issueData);
+		this.viewerService.setCamera(issueData);
 
 	}
 
@@ -603,15 +604,15 @@ export class IssuesService {
 				model: issue.model
 			};
 
-			this.ClipService.updateClippingPlane(issueData);
+			this.clipService.updateClippingPlane(issueData);
 
 		} else {
 			// This issue does not have a viewpoint, go to default viewpoint
-			this.ViewerService.goToExtent();
+			this.viewerService.goToExtent();
 		}
 
-		this.TreeService.onReady().then(() => {
-			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
+		this.treeService.onReady().then(() => {
+			this.treeService.updateModelVisibility(this.treeService.allNodes[0]);
 		});
 
 	}
@@ -640,7 +641,7 @@ export class IssuesService {
 					hiddenPromise = this.handleHidden(this.groupsCache[hiddenGroupUrl]);
 				} else {
 
-					hiddenPromise = this.APIService.get(hiddenGroupUrl)
+					hiddenPromise = this.apiService.get(hiddenGroupUrl)
 						.then((response) => {
 							this.groupsCache[hiddenGroupUrl] = response.data.objects;
 							return this.handleHidden(response.data.objects);
@@ -671,7 +672,7 @@ export class IssuesService {
 					shownPromise = this.handleShown(this.groupsCache[shownGroupUrl]);
 				} else {
 
-					shownPromise = this.APIService.get(shownGroupUrl)
+					shownPromise = this.apiService.get(shownGroupUrl)
 						.then( (response) => {
 							this.groupsCache[shownGroupUrl] = response.data.objects;
 							return this.handleShown(response.data.objects);
@@ -700,7 +701,7 @@ export class IssuesService {
 					highlightPromise = this.handleHighlights(this.groupsCache[highlightedGroupUrl]);
 				} else {
 
-					highlightPromise = this.APIService.get(highlightedGroupUrl)
+					highlightPromise = this.apiService.get(highlightedGroupUrl)
 						.then((response) => {
 							this.groupsCache[highlightedGroupUrl] = response.data.objects;
 							return this.handleHighlights(response.data.objects);
@@ -731,7 +732,7 @@ export class IssuesService {
 				handleTreePromise = this.handleTree(this.groupsCache[groupUrl]);
 			} else {
 
-				handleTreePromise = this.APIService.get(groupUrl)
+				handleTreePromise = this.apiService.get(groupUrl)
 					.then((response) => {
 						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
 							response.data.hiddenObjects = null;
@@ -754,9 +755,9 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
+		this.treeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
 		this.$timeout(() => {
-		this.TreeService.selectNodesBySharedIds(objects)
+		this.treeService.selectNodesBySharedIds(objects)
 			.then(() => {
 				angular.element((window as any)).triggerHandler("resize");
 			});
@@ -764,11 +765,11 @@ export class IssuesService {
 	}
 
 	public handleHidden(objects) {
-		this.TreeService.hideNodesBySharedIds(objects);
+		this.treeService.hideNodesBySharedIds(objects);
 	}
 
 	public handleShown(objects) {
-		this.TreeService.isolateNodesBySharedIds(objects);
+		this.treeService.isolateNodesBySharedIds(objects);
 	}
 
 	public handleTree(response) {
@@ -838,14 +839,14 @@ export class IssuesService {
 	}
 
 	public getThumbnailPath(thumbnailUrl) {
-		return this.APIService.getAPIUrl(thumbnailUrl);
+		return this.apiService.getAPIUrl(thumbnailUrl);
 	}
 
 	public getIssue(account, model, issueId) {
 
 		const issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
 
-		return this.APIService.get(issueUrl)
+		return this.apiService.get(issueUrl)
 			.then((res) => {
 				res.data = this.cleanIssue(res.data);
 				return res.data;
@@ -862,7 +863,7 @@ export class IssuesService {
 			endpoint = account + "/" + model + "/issues.json";
 		}
 
-		return this.APIService.get(endpoint)
+		return this.apiService.get(endpoint)
 			.then((response) => {
 				const issuesData = response.data;
 				for (let i = 0; i < response.data.length; i ++) {
@@ -889,7 +890,7 @@ export class IssuesService {
 			issue.norm = issue.pickedNorm;
 		}
 
-		return this.APIService.post(saveUrl, issue, config);
+		return this.apiService.post(saveUrl, issue, config);
 
 	}
 
@@ -919,10 +920,7 @@ export class IssuesService {
 			endpoint += "/issues/" + issue._id + ".json";
 		}
 
-		const putConfig = {withCredentials: true};
-
-		return this.APIService.put(endpoint, putData, putConfig);
-
+		return this.apiService.put(endpoint, putData);
 	}
 
 	public toggleCloseIssue(issue) {
@@ -1085,7 +1083,7 @@ export class IssuesService {
 		const formData = new FormData();
 		formData.append("file", file);
 
-		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
+		return this.apiService.post(bcfUrl, formData, {"Content-Type": undefined})
 			.then((res) => {
 				if (res.status !== 200) {
 					throw res.data;
@@ -1218,7 +1216,7 @@ export class IssuesService {
 				}
 				// screen shot path
 				if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
-					issue.comments[j].viewpoint.screenshotPath = this.APIService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
+					issue.comments[j].viewpoint.screenshotPath = this.apiService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
 				}
 			}
 		}

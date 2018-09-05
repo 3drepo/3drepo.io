@@ -38,7 +38,6 @@ interface IMenuItem {
 	hidden: boolean;
 	label: string;
 	value?: string;
-	role?: string;
 	selected?: boolean;
 	stopClose?: boolean;
 	firstSelectedIcon?: string;
@@ -327,55 +326,70 @@ export class PanelService {
 
 	}
 
-	public setPanelMenu(side: string, panelType: string, newMenu: any[]) {
+	/**
+	 * Adds a menu item for chips filtering.
+	 * This method is used from within the contained panelCard
+	 * generally for creating menues from data from an API call.
+	 *
+	 * @param panelType The type of the panel e.g. "issues"
+	 * @param menuItem The new menu containing all the menu items for filtering
+	 * @param subItems The menu items that will be added to the new menu
+	 */
+	public setChipFilterMenuItem( panelType: string, menuItem: any, subItems: any[] ) {
+		let panel: IPanelCard = this.panelCards.left.find((pc) => pc.type === panelType );
 
-		// Check if the card exists
-		const item = this.panelCards[side].find((content) => {
-			return content.type === panelType;
-		});
+		const newMenu: IMenuItem =  {
+			hidden: false,
+			value: menuItem.value,
+			label: menuItem.label,
+			toggle: false,
+			toggleFilterChips: true
+		};
 
-		// Append all the menu items to it
-		if (item && item.menu) {
-			newMenu.forEach((newItem) => {
-				const exists = item.menu.find( (oldItem) => oldItem.role === newItem.role);
-				if (!exists) {
-					item.menu.push(newItem);
-				}
-			});
+		newMenu.menu = subItems.map((si) => ({
+			value: si.value,
+			label: si.label,
+			hidden: false,
+			toggle: true
+		}));
+
+		if (!!panel) {
+			this.setPanelMenu(panel, newMenu);
 		}
 
+		panel = this.panelCards.right.find((pc) => pc.type === panelType );
+
+		if (!!panel) {
+			this.setPanelMenu(panel, newMenu);
+		}
 	}
 
-	public setIssuesMenu(jobsData: any) {
-		return;
+	public setPanelMenu(panel: IPanelCard,  menu: any) {
+		const oldMenuIndex = panel.menu.findIndex((mi) => mi.value === menu.value);
 
-		const menu: IMenuItem[] = [];
-		jobsData.forEach((role) => {
-			menu.push({
-				value: "filterRole",
-				hidden: false,
-				role: role._id,
-				label: role._id,
-				keepCheckSpace: true,
-				toggle: true,
-				selected: true,
-				stopClose: true,
-				firstSelected: false,
-				secondSelected: false
-			});
-		});
-
-		this.setPanelMenu("left", "issues", menu);
+		if (oldMenuIndex > 0) {
+			panel.menu[oldMenuIndex] = menu;
+		} else {
+			panel.menu.push(menu);
+		}
 	}
 
-	public toggleChipsValueFromMenu(cardType: string, menuType: string, menuSubType: string) {
-		let panelCard = this.panelCards.left.find( (pc) => pc.type === cardType);
+	/**
+	 * Toggles the selected property inside a submenuitem.
+	 * This method is being used by the chips filter subsystem for reflecting
+	 * which chips are actually being selected in the chips.
+	 * @param panelCardType the panel card that contains the menu. ie: "issues"
+	 * @param menuType the menu type. ie: "priority" from  the issues panel card
+	 * @param menuSubType the submenu type. ie: "none" in the priority menu from the issues panel card
+	 */
+	public toggleChipsValueFromMenu(panelCardType: string, menuType: string, menuSubType: string) {
+		let panelCard = this.panelCards.left.find( (pc) => pc.type === panelCardType);
 
 		if (!!panelCard) {
 			this.toggleChipsValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
 		}
 
-		panelCard = this.panelCards.right.find( (pc) => pc.type === cardType);
+		panelCard = this.panelCards.right.find( (pc) => pc.type === panelCardType);
 
 		if (!!panelCard) {
 			this.toggleChipsValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
