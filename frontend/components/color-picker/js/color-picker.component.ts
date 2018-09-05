@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {memoize} from "lodash";
+import {memoize, debounce} from "lodash";
 
 const COLORS = {
 	RED: "rgba(255,0,0,1)",
@@ -80,9 +80,9 @@ class ColorPickerController implements ng.IController {
 	private ngModelCtrl;
 	private colorHash;
 	private color;
-	private colorRgba;
 	private isOpened;
 	private isInitilized;
+	private isDragEnabled;
 
 	constructor(
 		private $element: any,
@@ -116,10 +116,9 @@ class ColorPickerController implements ng.IController {
 		this.ngModelCtrl.$setViewValue(`#${this.color.toUpperCase()}`);
 	}
 
-	public setColor(colorHash = ""): void {
+	public setColor = (colorHash = "") => {
 		this.colorHash = `${colorHash}`;
 		this.color = colorHash.replace("#", "");
-		this.colorRgba = hexToRgba(colorHash);
 	}
 
 	public togglePanel($event): void {
@@ -134,7 +133,7 @@ class ColorPickerController implements ng.IController {
 		}
 		if (this.isOpened) {
 			this.setColor(this.ngModelCtrl.$viewValue);
-			this.fillBlockCanvas(this.colorRgba);
+			this.fillBlockCanvas(this.colorHash);
 		} else {
 			this.togglePanelListeners();
 			this.toggleCanvasListeners();
@@ -150,7 +149,10 @@ class ColorPickerController implements ng.IController {
 		const method = shouldBind ? "addEventListener" : "removeEventListener";
 
 		this.colorStripCanvas[method]("click", this.onStripCanvasClick, false);
-		this.colorBlockCanvas[method]("click", this.onBlockCanvasClick, false);
+
+		this.colorBlockCanvas[method]("mousedown", this.onBlockCanvasClick.bind(null, true), false);
+		this.colorBlockCanvas[method]("mouseup", this.onBlockCanvasClick.bind(null, false), false);
+		this.colorBlockCanvas[method]("mousemove", this.onBlockCanvasMove, false);
 	}
 
 	public onOuterClick = (event): void => {
@@ -171,18 +173,17 @@ class ColorPickerController implements ng.IController {
 		const drag = false;
 
 		ctx.rect(0, 0, width, height);
-		const currentColor = hexToRgba(this.colorHash);
-		this.fillBlockCanvas(currentColor);
+		this.fillBlockCanvas(this.colorHash);
 
 		const colorPosition = findColorPositionOnCanvas(this.colorBlockCanvas, this.colorHash);
 		this.setBlockColorPointerPosition(colorPosition.x, colorPosition.y);
 	}
 
-	public fillBlockCanvas(rgbaColor): void {
+	public fillBlockCanvas(color): void {
 		const ctx = this.colorBlockCanvas.getContext("2d");
 		const width = this.colorBlockCanvas.width;
 		const height = this.colorBlockCanvas.height;
-		ctx.fillStyle = rgbaColor;
+		ctx.fillStyle = color;
 		ctx.fillRect(0, 0, width, height);
 
 		const whiteGradient = ctx.createLinearGradient(0, 0, width, 0);
@@ -227,47 +228,52 @@ class ColorPickerController implements ng.IController {
 
 	public onStripCanvasClick = (event): void => {
 		const ctx = this.colorStripCanvas.getContext("2d");
-		const x = event.offsetX;
-		const y = event.offsetY;
-
-		const imageData = ctx.getImageData(x, y, 1, 1).data;
-		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-		this.setColor(rgbaToHex(rgbaColor).toUpperCase());
-
-		this.fillBlockCanvas(this.colorRgba);
-		this.onColorHashChange(this.color, {x, y});
+		this.onSelectedImageDataChange(event, ctx, true);
 	}
 
-	public onBlockCanvasClick = (event): void => {
-		const ctx = this.colorBlockCanvas.getContext("2d");
-		const x = event.offsetX;
-		const y = event.offsetY;
+	public onBlockCanvasClick = (dragState, event): void => {
+		this.isDragEnabled = dragState;
 
-		const imageData = ctx.getImageData(x, y, 1, 1).data;
-		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
-
-		this.setColor(rgbaToHex(rgbaColor).toUpperCase());
-		this.onColorHashChange(this.color, {x, y});
+		if (dragState) {
+			this.onBlockCanvasMove(event);
+		}
 	}
 
-	public onColorHashChange = (color = this.color, position?): void => {
-		const isValidColor = /(^[0-9A-F]{6}$)/i.test(this.color.toUpperCase());
+	public onBlockCanvasMove = (event): void => {
+		if (this.isDragEnabled) {
+			const ctx = this.colorBlockCanvas.getContext("2d");
+			this.onSelectedImageDataChange(event, ctx);
+		}
+	}
+
+	public onSelectedImageDataChange(event, canvasCtx, shouldRefreshCanvas = false) {
+		const x = event.offsetX;
+		const y = event.offsetY;
+		const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
+		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
+
+		this.onColorHashChange(rgbaToHex(rgbaColor).toUpperCase().replace("#", ""), {x, y}, shouldRefreshCanvas);
+	}
+
+	public onColorHashChange = (color = this.color, position?, shouldRefreshCanvas = false): void => {
+		const isValidColor = /(^[0-9A-F]{6}$)/i.test(color.toUpperCase());
 
 		if (isValidColor) {
-			this.setColor(`#${this.color}`);
-			if (!position) {
-				this.fillBlockCanvas(this.colorHash);
-			}
+			this.$timeout(() => {
+				this.setColor(`#${color}`);
 
-			const colorBlockPosition = position || findColorPositionOnCanvas(this.colorBlockCanvas, this.colorHash);
-			this.setBlockColorPointerPosition(colorBlockPosition.x, colorBlockPosition.y);
+				if (!position || shouldRefreshCanvas) {
+					this.fillBlockCanvas(this.colorHash);
+				}
+
+				const colorBlockPosition = position || findColorPositionOnCanvas(this.colorBlockCanvas, this.colorHash);
+				this.setBlockColorPointerPosition(colorBlockPosition.x, colorBlockPosition.y);
+			});
 		}
 	}
 
 	public onPredefinedColorClick = (predefinedColor): void => {
-		this.setColor(predefinedColor.toUpperCase());
-		this.fillBlockCanvas(this.colorRgba);
-		this.onColorHashChange();
+		this.onColorHashChange(predefinedColor.toUpperCase().replace("#", ""));
 	}
 
 	public setBlockColorPointerPosition(x, y): void {
