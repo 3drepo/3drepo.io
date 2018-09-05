@@ -164,12 +164,6 @@ export class PanelService {
 					firstSelected: false,
 					secondSelected: false,
 					keepCheckSpace: true
-				},
-				{
-					hidden: false,
-					upperDivider: true,
-					disabled: true,
-					label: "Created by: "
 				}
 			],
 			minHeight: 260,

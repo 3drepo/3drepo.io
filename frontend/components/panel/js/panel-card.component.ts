@@ -129,9 +129,13 @@ class PanelCardController implements ng.IController {
 		/*
 		* Watch for content item to hide itself
 		*/
-		this.$scope.$watch("vm.chipsFilterVisible", (newValue) => {
+		this.$scope.$watch("vm.chipsFilterVisible", (visible) => {
 			// Recalculate the height
 			this.onContentHeightRequest(this.contentData.requestedHeight);
+
+			if (!visible && this.chipsFilterChips.length > 0) {
+				this.chipsFilterChips = [];
+			}
 		});
 
 		this.$scope.$watch ( () => this.$element[0].querySelector("#header").clientHeight,
@@ -147,18 +151,25 @@ class PanelCardController implements ng.IController {
 		});
 
 		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: any[], oldValue: any[]) => {
-			let diff: any = null;
+			let diff: any[] = newValue.filter( (nv) => oldValue.indexOf((ov) => nv.type === ov.type && nv.name === ov.name) < 0);
 
-			if (newValue.length > oldValue.length) { // A chip has been added
-				diff = newValue[newValue.length - 1]; // Assumption: the new value is appended to the end of the chips array
-			}
+			diff = diff.concat(oldValue.filter((ov) =>
+						newValue.indexOf((nv) => nv.type === ov.type && nv.name === ov.name) < 0));
 
-			if (newValue.length < oldValue.length) { // A chip has been deleted
-				diff = oldValue.find((ov) => !newValue.some( (nv) => nv.type === ov.type && nv.name === ov.name));
-			}
+			// if (newValue.length > oldValue.length) { // A chip has been added
+			// 	diff = newValue[newValue.length - 1]; // Assumption: the new value is appended to the end of the chips array
+			// }
+
+			// if (newValue.length < oldValue.length) { // A chip has been deleted
+			// 	diff = oldValue.find((ov) => !newValue.some( (nv) => nv.type === ov.type && nv.name === ov.name));
+			// }
 
 			if (!!diff) {  // this is for toggling the value in the menu
-				this.panelService.toggleChipsValueFromMenu(this.contentData.type, diff.type, diff.name);
+				diff.forEach((c) => this.panelService.toggleChipsValueFromMenu(this.contentData.type, c.type, c.name));
+			}
+
+			if (newValue.length > 0 && !this.chipsFilterVisible) {
+				this.chipsFilterVisible = true;
 			}
 		});
 
