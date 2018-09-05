@@ -23,7 +23,8 @@ class MemberCardController implements ng.IController {
 
 export const MemberCardComponent: ng.IComponentOptions = {
 	bindings: {
-		data: "<"
+		data: "<",
+		highlightText: "<?"
 	},
 	controller: MemberCardController,
 	controllerAs: "vm",

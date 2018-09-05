@@ -1,5 +1,5 @@
-.projectsPermissions(flex)
-  div(layout="row" layout-align="start center")
+.projectsPermissions(flex layout="column")
+  div.projectsPermissionsOptions(layout="row" layout-align="start center" flex="none")
     md-input-container.projectSelectContainer(md-no-float)
       label Project
       md-select(
@@ -9,18 +9,65 @@
         ng-disabled="!vm.projects.length")
         md-option(
           ng-value="project.name"
-          ng-repeat="project in vm.projects") {{::project.name}}
+          ng-repeat="project in vm.projects") {{project.name}}
 
     .flex
 
-    md-button.md-accent.switchButton(
-      ng-disabled="!vm.currentProject.models.length"
-      ng-click="vm.goToModelsPermissions()")
-        div(layout="row" layout-align="start center") Model & Federation permissions
+    md-button.md-accent.switchButton(ng-click="vm.toggleView()")
+        div(
+          ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
+          layout="row"
+          layout-align="start center")
+          span Model & Federation permissions
           md-icon.angular-material-icons keyboard_arrow_right
+        div(
+          ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS"
+          layout="row"
+          layout-align="start center")
+          md-icon.angular-material-icons keyboard_arrow_left
+          span Projects permissions
 
   permissions-list(
-    flex="grow"
-    permissions="vm.permissions"
+    ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
+    flex
+    layout="column"
+    data="vm.assignedProjectPermissions"
+    permissions="vm.PROJECT_ROLES_LIST"
     current-teamspace="vm.currentTeamspace"
-    on-change="vm.onPermissionsChange(updatedPermissions)")
+    message-empty-list="Select a project to view the users' permissions"
+    on-change="vm.onPermissionsChange(updatedPermissions)"
+    mode="projects")
+
+  .modelsPermissions(flex layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
+    .modelsPermissionsPlaceholder(
+      layout="row"
+      layout-align="center center"
+      ng-if="!vm.currentProject")
+      p Select a project to view the models' list
+
+    models-list(
+      flex="30"
+      ng-disabled="!vm.models.length"
+      models="vm.models"
+      current-teamspace="vm.currentTeamspace"
+      on-change="vm.onModelSelectionChange(selectedModels)")
+
+    .modelsPermissionsWrapper(
+      flex="grow"
+      data-simplebar
+      ng-attr-data-simplebar-x-hidden="{{!vm.selectedModels.length || undefined}}"
+      data-simplebar-y-hidden)
+      permissions-list(
+        ng-disabled="!vm.selectedModels.length"
+        flex="grow"
+        data="vm.assignedModelPermissions"
+        permissions="vm.MODEL_ROLES_LIST"
+        current-teamspace="vm.currentTeamspace"
+        message-empty-list="Select a model to view the users' permissions"
+        on-change="vm.onPermissionsChange(updatedPermissions)"
+        mode="models")
+
+  .projectsPermissionsFooter(
+    layout="row"
+    layout-align="end center") Assign {{vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS ? 'project' : 'model and federation'}} permissions
+    

@@ -8,6 +8,15 @@
   padding-bottom: 0 !important
 }
 
+[data-simplebar=init][data-simplebar-x-hidden] .simplebar-track.horizontal{
+  display: none;
+}
+
 [data-simplebar=init][data-simplebar-y-hidden] .simplebar-content {
-  overflow-y: hidden;
+  overflow-y: hidden !important;
+  padding-bottom: 0 !important;
+}
+
+[data-simplebar=init][data-simplebar-y-hidden] .simplebar-track.vertical {
+  display: none;
 }
