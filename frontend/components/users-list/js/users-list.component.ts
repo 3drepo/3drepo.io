@@ -196,7 +196,8 @@ class UsersListController implements ng.IController {
 		}
 
 		return members.filter(({firstName, lastName, user, company}) => {
-			return `${firstName} ${lastName} ${user} ${company}`.includes(query);
+			return `${firstName} ${lastName} ${user} ${company}`
+				.toLowerCase().includes(query.toLowerCase());
 		});
 	}
 

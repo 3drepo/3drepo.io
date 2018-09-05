@@ -1,0 +1,59 @@
+.modelsList(ng-disabled="vm.ngDisabled")
+	.modelsListHeader(layout="row" layout-align="start center")
+		.modelsListCell(layout="row" layout-align="center center" flex="10")
+			md-checkbox(
+				ng-if="!(vm.hasSelectedItem && !vm.shouldSelectAllItems)"
+				ng-disabled="vm.ngDisabled || !vm.processedModels.length"
+				ng-change="vm.toggleAllItems()"
+				ng-checked="vm.shouldSelectAllItems"
+				ng-model="vm.shouldSelectAllItems")
+			md-checkbox(
+				ng-if="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				md-indeterminate="true"
+				ng-disabled="vm.ngDisabled || !vm.processedModels.length"
+				ng-click="vm.toggleAllItems(true)")
+	
+		.modelsListCell(layout="row" layout-align="start center" flex)
+			list-sort-button(
+				ng-disabled="vm.ngDisabled"
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+
+			md-input-container.modelsListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-disabled="vm.ngDisabled"
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="Model/federation"
+					ng-change="vm.onSearch()")
+
+	.modelsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.modelsListPlaceholder(
+		ng-if="!vm.isLoading && !vm.models.length"
+		layout="row"
+		layout-align="center center")
+		p {{::vm.messageEmptyList}}
+
+	.modelsListBody(
+		ng-if="!vm.isLoading && vm.models.length"
+		data-simplebar
+		data-simplebar-x-hidden)
+		div.modelsListRow(
+			ng-repeat="model in vm.processedModels track by model.name"
+			layout="row"
+			layout-align="start center")
+
+			//Checkbox
+			.modelsListCell(layout="row" layout-align="center center" flex="10")
+				md-checkbox(
+					ng-model="model.isSelected"
+					ng-change="vm.onSelectionChange()"
+					ng-disabled="vm.ngDisabled")
+
+			//Model details
+			.modelsListCell(flex layout="column" layout-align="center start")
+				div(md-highlight-text="vm.searchText" md-highlight-flags="i") {{model.name}}
+				.modelsListType(md-highlight-text="vm.searchText" md-highlight-flags="i") {{model.federate ? "Federation" : "Model"}}

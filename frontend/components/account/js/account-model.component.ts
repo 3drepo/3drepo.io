@@ -24,12 +24,16 @@ import { NotificationModelEvents } from "../../notifications/js/notification.mod
 import { NotificationService } from "../../notifications/js/notification.service";
 import { RevisionsService } from "../../revisions/js/revisions.service";
 
+import {PERMISSIONS_VIEWS} from "../../projects-permissions/js/projects-permissions.component";
+import {TABS_TYPES} from "./account-user-management.component";
+
 class AccountModelController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"$location",
 		"$filter",
+		"$state",
 
 		"DialogService",
 		"APIService",
@@ -71,7 +75,10 @@ class AccountModelController implements ng.IController {
 	constructor(
 		private $scope: any,
 		private $location: any,
+		private $timeout: any,
+		private $interval: any,
 		private $filter: any,
+		private $state: any,
 
 		private dialogService: DialogService,
 		private apiService: APIService,
@@ -442,15 +449,15 @@ class AccountModelController implements ng.IController {
 	 * Set up permissions of modelt
 	 */
 	public goToPermissions(event, account, project, model) {
-
-		this.$location.search("account", account);
-		this.$location.search("project", project.name);
-		this.$location.search("model", model.model);
-		this.$location.search("page", "assign");
-		this.onShowPage({page: "assign", callingPage: "teamspaces"});
-
+		this.$state.go(this.$state.$current.name, {
+			page: "userManagement",
+			teamspace: account,
+			project: project.name,
+			modelId: model.model,
+			tab: TABS_TYPES.PROJECTS,
+			view: PERMISSIONS_VIEWS.MODELS
+		}, {notify: false});
 	}
-
 }
 
 export const AccountModelComponent: ng.IComponentOptions = {

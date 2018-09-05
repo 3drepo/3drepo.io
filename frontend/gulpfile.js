@@ -28,7 +28,7 @@ const allCss = [
     './node_modules/simplebar/dist/simplebar.css',
     './node_modules/angular-material/angular-material.css',
     './node_modules/font-awesome/css/font-awesome.css',
-    './components/**/**.css'
+    './components/**/**.css',
 ]
 
 const allPug = ['./components/**/**.pug', './../pug/legal/**.pug'];

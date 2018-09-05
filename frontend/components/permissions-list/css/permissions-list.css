@@ -1,22 +1,33 @@
 .permissionsList {
-  height: calc(29rem - 104px);
+  height: calc(29rem - 102px);
   overflow: hidden;
 }
 
+.permissionsList .highlight {
+  color: #06563c;
+  font-weight: 500;
+}
+
 .permissionsListHeader {
-  height: 72px;
+  height: 73px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .permissionsListPlaceholder {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  height: calc(100% - 72px);
+  height: calc(100% - 73px);
   color: rgba(155, 155, 155, 1);
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: rgba(250, 250, 250, 0.89);
+  z-index: 1;
 }
 
 .permissionsListBody {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
   height: 100%;
   max-height: calc(100% - 72px);
+  opacity: 1;
+  transition: opacity 150ms ease-in-out;
 }
 
 .permissionsListRow {
@@ -44,6 +55,11 @@
   width: 100%;
 }
 
+.permissionsListCell.noPadding {
+  padding: 0;
+  margin: 6px;
+}
+
 .permissionsListCell .md-text {
   text-overflow: ellipsis;
   overflow: hidden;
@@ -60,6 +76,7 @@
 
 .permissionsListCellSearch .md-input {
   padding-top: 5px !important;
+  font-weight: 500;
 }
 
 .permissionsListCellSearch:not(:hover):not(.md-input-has-value):not(.md-input-focused) .md-input,
@@ -95,6 +112,10 @@
   display: none;
 }
 
+.permissionsListUser {
+  min-width: 150px;
+}
+
 .permissionsListLoader {
   width: 100%;
   height: 62px;
@@ -115,4 +136,32 @@
 
 .permissionsListHeader md-radio-button {
   margin-top: 12px !important;
+}
+
+.permissionsList[disabled="disabled"] {
+  pointer-events: none;
+}
+
+.permissionsListTooltip {
+  margin-left: 10px;
+}
+
+.permissionsList md-checkbox.md-indeterminate .md-container {
+  background: rgba(6,86,60,0.87);
+  color: #fff;
+  border-radius: 2px;
+  transition: all 150ms ease-in-out;
+}
+
+.permissionsList md-checkbox.md-indeterminate:not(.md-checked) .md-icon {
+  border-color: transparent;
+}
+
+.permissionsListCheckbox {
+  position: relative;
+}
+
+.permissionsListAdminIcon {
+  position: absolute;
+  left: 50%;
 }
