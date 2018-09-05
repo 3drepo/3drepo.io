@@ -1,34 +1,3 @@
-// This file acts a way for Webpack to get all the required dependencies in one place
-// then compile everything down to one file that the browser can understand
-
-// npm dependencies
-import "angular";
-import "angular-ui-router";
-import "angular-material";
-import "angular-sanitize";
-import "angular-aria";
-import "angular-recaptcha";
-import * as io from "socket.io-client";
-import "simplebar";
-
-// TypeScript compiled globals
-import { UnityUtil } from "../globals/unity-util";
-import { Pin } from "../globals/pin";
-import { Viewer } from "../globals/viewer";
-import { TDR } from "./init";
-
-window.io = io;
-window.UnityUtil = UnityUtil;
-window.Viewer = Viewer;
-window.Pin = Pin;
-window.TDR = TDR;
-
-// Initialise 3D Repo
-window.TDR();
-
-// Register all the angularjs modules
-
-// Shared services
 import "../services/projects.service";
 import "../services/models.service";
 import "../services/jobs.service";
@@ -123,9 +92,3 @@ import "./models-list/js/models-list.component";
 import "./jobs-list/js/jobs-list.component";
 import "./new-job-form/js/new-job-form.component";
 import "./color-picker/js/color-picker.component";
-
-// React components
-import "../routes/components/angularBindings";
-
-// Kickstart the application
-angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

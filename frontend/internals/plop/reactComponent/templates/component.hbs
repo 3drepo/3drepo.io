@@ -16,14 +16,17 @@
  */
 
 import * as React from 'react';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 
 import { Container } from './{{ camelCase name }}.styles';
 
-interface IProps {}
+interface IProps {
+	noop: string // TODO: Remove sample
+}
 
 export class {{ pascalCase name }} extends React.PureComponent<IProps, any> {
 	public static propTypes = {
+		 noop: PropTypes.string // TODO: Remove sample
 	};
 
 	public render() {

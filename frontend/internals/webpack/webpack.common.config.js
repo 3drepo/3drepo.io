@@ -4,7 +4,7 @@ module.exports = (options) => {
   const config = {
     mode: options.mode || 'development',
     context: resolve(process.cwd(), '../'),
-    entry: options.entry || './components/entry.ts',
+    entry: options.entry || './main.ts',
     output: Object.assign({
       path: __dirname + './../../../public/dist/',
       filename: 'three_d_repo.min.js'

@@ -19,10 +19,16 @@ import { connect } from '../../helpers/migration';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { ReactRoute } from './reactRoute.component';
+import { selectButtonText } from '../../modules/teamspace/teamspace.selectors';
+import { TeamspaceActions } from '../../modules/teamspace/teamspace.redux';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	buttonText: selectButtonText
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	updateButtonText: TeamspaceActions.updateButtonText
+}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export default connect(mapStateToProps, mapDispatchToProps)(ReactRoute);

@@ -17,27 +17,35 @@
 
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { ButtonProps } from '@material-ui/core/Button';
 
-import { ButtonContainer } from './reactButton.styles';
+import { Container } from './reactRoute.styles';
+import { ReactButton } from '../components/reactButton/reactButton.component';
 
-interface IProps extends ButtonProps {
-	textValue: string;
+interface IProps {
+	buttonText: string;
+	updateButtonText: any;
 }
 
-export class ReactButton extends React.PureComponent<IProps, any> {
+export class ReactRoute extends React.PureComponent<IProps, any> {
 	public static propTypes = {
-		textValue: PropTypes.string
+		buttonText: PropTypes.string,
+		updateButtonText: PropTypes.func
 	};
 
+	public handleReactButtonClick = () => {
+		this.props.updateButtonText('Button was clicked');
+	}
+
 	public render() {
+		const { buttonText } = this.props;
+
 		return (
-			<ButtonContainer
-				color="primary"
-				variant="raised"
-				onClick={this.props.onClick}>
-				{this.props.textValue}
-			</ButtonContainer>
+			<Container>
+				<ReactButton
+					textValue={buttonText}
+					onClick={this.handleReactButtonClick}
+				/>
+			</Container>
 		);
 	}
 }

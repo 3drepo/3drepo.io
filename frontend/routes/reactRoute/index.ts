@@ -15,14 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../helpers/migration';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
-
-const mapStateToProps = createStructuredSelector({});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export { default as ReactRoute } from './reactRoute.container';

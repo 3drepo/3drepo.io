@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
-const selectTeamspaceDomain = (state) => state.get('teamspace');
+const selectTeamspaceDomain = (state) => Object.assign({}, state.teamspace);
 
-export const selectTeamspace = createSelector(
-	selectTeamspaceDomain, (state) => state
+export const selectButtonText = createSelector(
+	selectTeamspaceDomain, (state) => state.buttonText
 );

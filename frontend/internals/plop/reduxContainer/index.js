@@ -27,7 +27,7 @@ module.exports = (plop) => {
       templateFile: path.join(templatesPath, 'container.hbs'),
     }, {
       type: 'add',
-      path: `${containerDirectory}/{{ camelCase name }}.component.ts`,
+      path: `${containerDirectory}/{{ camelCase name }}.component.tsx`,
       templateFile: path.join(componentTemplatesPath, 'component.hbs'),
     }, {
       type: 'add',

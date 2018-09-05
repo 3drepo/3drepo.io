@@ -5,12 +5,16 @@ import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}, history) {
+export default function configureStore(initialState = {}) {
 	const middlewares = [
 		sagaMiddleware
 	];
 
 	const enhancers = [];
+
+	if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+		enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+	}
 
 	const store = createStore(
 		createReducer(),
