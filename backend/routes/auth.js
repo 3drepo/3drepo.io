@@ -36,7 +36,7 @@ router.post("/login", login);
 router.post("/logout", logout);
 
 router.get("/login", checkLogin);
-
+router.post("/forgot-password", forgotPassword);
 router.get("/version", printVersion);
 
 router.get("/:account.json", middlewares.loggedIn, listInfo);
@@ -44,11 +44,9 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
-
 router.post("/:account", signUp);
 
 router.post("/:account/verify", verify);
-router.post("/:account/forgot-password", forgotPassword);
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
@@ -266,24 +264,21 @@ function verify(req, res, next) {
 
 function forgotPassword(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-
-	if (Object.prototype.toString.call(req.body.email) === "[object String]") {
-
-		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
-
-			// send forgot password email
-			return Mailer.sendResetPasswordEmail(req.body.email, {
-				token : data.token,
-				email: req.body.email,
-				username: req.params[C.REPO_REST_API_ACCOUNT]
-			}).catch(err => {
-				// catch email error instead of returning to client
-				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
-				return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
-			});
-
+	if (Object.prototype.toString.call(req.body.userNameOrEmail) === "[object String]") {
+		User.getForgotPasswordToken(req.body.userNameOrEmail).then(data => {
+			if (data.email && data.token && data.username) {
+				// send forgot password email
+				return Mailer.sendResetPasswordEmail(data.email, {
+					token : data.token,
+					email: data.email,
+					username: data.username
+				}).catch(err => {
+					// catch email error instead of returning to client
+					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
+					return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
+				});
+			}
 		}).then(emailRes => {
-
 			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
