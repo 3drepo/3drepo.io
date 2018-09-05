@@ -56,4 +56,4 @@
 			//Model details
 			.modelsListCell(flex layout="column" layout-align="center start")
 				div(md-highlight-text="vm.searchText" md-highlight-flags="i") {{model.name}}
-				.modelsListType {{model.federate ? "Federation" : "Model"}}
+				.modelsListType(md-highlight-text="vm.searchText" md-highlight-flags="i") {{model.federate ? "Federation" : "Model"}}
