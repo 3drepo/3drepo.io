@@ -1,7 +1,6 @@
 import styled from 'styled-components';
+import Button from '@material-ui/core/button';
 
-export const Container = styled.div`
-  border: 1px solid red;
-  width: 30px;
-  height: 30px;
+export const ButtonContainer = styled(Button)`
+  color: red !important;
 `;

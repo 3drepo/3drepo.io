@@ -14,7 +14,11 @@ module.exports = (options) => {
     },
     module: {
       rules: [
-        { test: /\.(ts|tsx)$/, loader: 'ts-loader' }
+        {
+          test: /\.(ts|tsx)$/,
+          loader: 'ts-loader',
+          exclude: /node_modules/
+        }
       ]
     }
   };

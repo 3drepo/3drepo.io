@@ -15,9 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions,
-} from './{{ camelCase name }}.redux';
+import { createMuiTheme } from '@material-ui/core/styles';
 
-export * from './{{ camelCase name }}.selectors';
+export const theme = createMuiTheme({
+	palette: {
+		primary: {
+			main: '#0C2F54',
+			light: '#3c5876',
+			dark: '#08203a',
+			contrastText: '#fff'
+		},
+		secondary: {
+			main: '#06563c',
+			light: '#377763',
+			dark: '#043c2a',
+			contrastText: '#fff'
+		}
+	}
+});
