@@ -78,7 +78,7 @@ function prettyDate() {
 	return (input, showFullDateTime) => {
 		const date: Date = new Date(input);
 		const today: Date = new Date();
-		const options = {};
+		const options: any = {};
 
 		if (showFullDateTime ||
 			today.getFullYear() === date.getFullYear() &&

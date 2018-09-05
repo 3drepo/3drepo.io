@@ -333,12 +333,12 @@ class RisksCardController implements ng.IController {
 		if (risk) {
 
 			this.viewerService.highlightObjects([]);
-			this.$state.go("home.account.model.issue",
+			this.$state.go("home.account.model.risk",
 				{
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					issue: risk._id,
+					risk: risk._id,
 					noSet: true
 				},
 				{notify: false}

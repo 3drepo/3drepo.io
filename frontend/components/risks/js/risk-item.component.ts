@@ -488,7 +488,7 @@ class RiskItemController implements ng.IController {
 			this.risksService.updateRisk(this.riskData, statusChangeData)
 				.then((response) => {
 					if (response) {
-						const respData = response.data.issue;
+						const respData = response.data.risk;
 						this.risksService.populateRisk(respData);
 						this.riskData = respData;
 
@@ -701,14 +701,10 @@ class RiskItemController implements ng.IController {
 		const screenShotPromise = this.$q.defer();
 		const objectsPromise = this.$q.defer();
 
-		if (this.commentViewpoint) {
-			viewpointPromise.resolve(this.commentViewpoint);
-		} else {
-			// Get the viewpoint
-			this.viewerService.getCurrentViewpoint(
-				{promise: viewpointPromise, account: this.account, model: this.model}
-			);
-		}
+		// Get the viewpoint
+		this.viewerService.getCurrentViewpoint(
+			{promise: viewpointPromise, account: this.account, model: this.model}
+		);
 
 		// Get selected objects
 		this.viewerService.getObjectsStatus({
@@ -882,7 +878,7 @@ class RiskItemController implements ng.IController {
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"home.account.model.issue",
+					"home.account.model.risk",
 					riskState,
 					{notify: false}
 				);

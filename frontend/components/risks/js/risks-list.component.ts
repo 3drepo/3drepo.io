@@ -124,7 +124,7 @@ class RisksListController implements ng.IController {
 		switch (this.menuOption.value) {
 
 			case "print":
-				const printEndpoint = this.account + "/" + this.model + "/issues.html?ids=" + ids.join(",");
+				const printEndpoint = this.account + "/" + this.model + "/risks.html?ids=" + ids.join(",");
 				const printUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, printEndpoint);
 				this.$window.open(printUrl, "_blank");
 				break;
