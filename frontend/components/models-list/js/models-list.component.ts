@@ -98,7 +98,7 @@ class ModelsListController implements ng.IController {
 		const federationsRequired = "federation".includes(lowercasedQuery);
 
 		return data.filter(({name, federate}) => {
-			return name.includes(query) ||
+			return name.toLowerCase().includes(query.toLowerCase()) ||
 				(modelsRequired && !federate) ||
 				(federationsRequired && federate);
 		});
