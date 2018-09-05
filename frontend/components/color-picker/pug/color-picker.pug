@@ -1,7 +1,7 @@
 .colorPicker
 	.colorPickerSelect(
 		flex
-		ng-click="vm.togglePanel($event)"
+		ng-click="vm.showPanel($event)"
 		layout-fill
 		layout="row"
 		layout-align="start center")
@@ -21,29 +21,3 @@
 
 		.colorPickerIcon(flex="none")
 			md-icon.angular-material-icons arrow_drop_down
-
-	.colorPickerPanel(ng-class="{active: vm.isOpened}")
-		.colorPickerPredefinedColors(ng-if="vm.predefinedColors.length" layout="row")
-			.colorPickerPredefinedColor(
-				ng-repeat="color in vm.predefinedColors | limitTo:7 track by $index"
-				ng-click="vm.onPredefinedColorClick(color)"
-				ng-style="{'background-color': color}")
-
-		.colorPickerCanvas(layout="row" layout-align="space-between center")
-			.colorPickerBlockWrapper
-				canvas.colorBlock(width="185" height="170")
-				.colorPointer
-
-			.colorPickerStripWrapper
-				canvas.colorStrip(width="23" height="170")
-				.colorPointer
-
-		.colorPickerSelectedData(layout="row")
-			.colorPickerSelectedColor(ng-style="{'background-color': vm.colorHash}")
-			.colorPickerSelectedHash(layout="row" layout-align="start center")
-				span #
-				input(ng-model="vm.color" ng-change="vm.onColorHashChange()")
-
-		.colorPickerButtons(layout="row" layout-align="start center")
-			md-button.md-raised.md-primary(ng-click="vm.saveColor($event)") Save
-			md-button.md-primary(ng-click="vm.togglePanel($event)") Cancel

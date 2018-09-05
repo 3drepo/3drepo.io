@@ -69,7 +69,8 @@ class ColorPickerController implements ng.IController {
 	public static $inject: string[] = [
 		"$element",
 		"$document",
-		"$timeout"
+		"$timeout",
+		"$mdPanel"
 	];
 
 	private containerElement;
@@ -83,11 +84,13 @@ class ColorPickerController implements ng.IController {
 	private isOpened;
 	private isInitilized;
 	private isDragEnabled;
+	private panelRef;
 
 	constructor(
 		private $element: any,
 		private $document: any,
-		private $timeout: any
+		private $timeout: any,
+		private $mdPanel: any
 	) {}
 
 	public $onInit(): void {
@@ -95,16 +98,11 @@ class ColorPickerController implements ng.IController {
 	}
 
 	public $postLink(): void {
-		this.containerElement = this.$element[0].querySelectorAll(".colorPicker")[0];
-		this.panelElement = this.$element[0].querySelectorAll(".colorPickerPanel")[0];
 		this.bodyElement = this.$document.find("body")[0];
-
-		this.colorBlockCanvas = this.panelElement.querySelectorAll(".colorBlock")[0];
-		this.colorStripCanvas = this.panelElement.querySelectorAll(".colorStrip")[0];
+		this.containerElement = this.$element[0].querySelectorAll(".colorPicker")[0];
 	}
 
 	public $onDestroy(): void {
-		this.togglePanelListeners();
 		this.toggleCanvasListeners();
 	}
 
@@ -116,36 +114,61 @@ class ColorPickerController implements ng.IController {
 		this.ngModelCtrl.$setViewValue(`#${this.color.toUpperCase()}`);
 	}
 
+	/**
+	 * CSet new color data
+	 */
 	public setColor = (colorHash = "") => {
 		this.colorHash = `${colorHash}`;
 		this.color = colorHash.replace("#", "");
 	}
 
-	public togglePanel($event): void {
-		$event.stopPropagation();
-		this.isOpened = !this.isOpened;
-		if (this.isOpened && !this.isInitilized) {
-			this.togglePanelListeners(true);
+	/**
+	 * Open picker panel
+	 */
+	public showPanel($event) {
+		const panelPosition = this.$mdPanel.newPanelPosition()
+			.relativeTo(this.$element)
+			.addPanelPosition(this.$mdPanel.xPosition.ALIGN_START, this.$mdPanel.yPosition.ALIGN_TOPS);
+
+		const config = {
+			attachTo: angular.element(document.body),
+			controller: () => {},
+			locals: {
+				parentCtrl: this
+			},
+			bindToController: true,
+			controllerAs: "vm",
+			position: panelPosition,
+			targetEvent: $event,
+			templateUrl: "templates/color-picker-panel.html",
+			clickOutsideToClose: true,
+			escapeToClose: true,
+			focusOnOpen: true
+		};
+
+		this.$mdPanel.open(config).then((panelRef) => {
+			this.panelRef = panelRef;
+
+			this.panelElement = this.panelRef.panelEl[0].querySelectorAll(".colorPickerPanel")[0];
+			this.colorBlockCanvas = this.panelElement.querySelectorAll(".colorBlock")[0];
+			this.colorStripCanvas = this.panelElement.querySelectorAll(".colorStrip")[0];
+
 			this.toggleCanvasListeners(true);
 			this.initializeBlockCanvas();
 			this.initializeStripCanvas();
-			this.isInitilized = true;
-		}
-		if (this.isOpened) {
-			this.setColor(this.ngModelCtrl.$viewValue);
-			this.fillBlockCanvas(this.colorHash);
-		} else {
-			this.togglePanelListeners();
-			this.toggleCanvasListeners();
+		});
+	}
+
+	/**
+	 * Close picker panel
+	 */
+	public closePanel($event) {
+		if (this.panelRef) {
+			this.panelRef.close();
 		}
 	}
 
-	public togglePanelListeners(shouldOpen = true): void {
-		const method = shouldOpen ? "addEventListener" : "removeEventListener";
-		this.bodyElement[method]("click", this.onOuterClick);
-	}
-
-	public toggleCanvasListeners(shouldBind = true): void {
+	public toggleCanvasListeners = (shouldBind = true): void => {
 		const method = shouldBind ? "addEventListener" : "removeEventListener";
 
 		this.colorStripCanvas[method]("click", this.onStripCanvasClick, false);
@@ -153,15 +176,6 @@ class ColorPickerController implements ng.IController {
 		this.colorBlockCanvas[method]("mousedown", this.onBlockCanvasClick.bind(null, true), false);
 		this.colorBlockCanvas[method]("mouseup", this.onBlockCanvasClick.bind(null, false), false);
 		this.colorBlockCanvas[method]("mousemove", this.onBlockCanvasMove, false);
-	}
-
-	public onOuterClick = (event): void => {
-		const isClickedChildOfPanel = this.panelElement.contains(event.target);
-		if (!isClickedChildOfPanel) {
-			this.$timeout(() => {
-				this.isOpened = false;
-			});
-		}
 	}
 
 	public initializeBlockCanvas(): void {
@@ -284,7 +298,7 @@ class ColorPickerController implements ng.IController {
 
 	public saveColor($event): void {
 		this.onUpdate();
-		this.togglePanel($event);
+		this.closePanel($event);
 	}
 }
 

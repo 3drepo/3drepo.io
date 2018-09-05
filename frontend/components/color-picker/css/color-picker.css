@@ -24,18 +24,10 @@ color-picker {
 }
 
 .colorPickerPanel {
-	display: none;
-	top: 0;
-	position: absolute;
-	z-index: 1;
 	width: 228px;
 	padding: 16px;
 	box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.1);
 	background: rgba(255, 255, 255, 1);
-}
-
-.colorPickerPanel.active {
-	display: block;
 }
 
 .colorPickerPredefinedColors {
@@ -86,10 +78,6 @@ color-picker {
 	border-radius: 100%;
 	content: "";
 	transform: translate(-3px, -6px);
-}
-
-.colorPickerStripWrapper .colorPointer {
-	
 }
 
 .colorPickerCanvas .colorBlock {

@@ -1,0 +1,25 @@
+.colorPickerPanel
+  .colorPickerPredefinedColors(ng-if="vm.parentCtrl.predefinedColors.length" layout="row")
+    .colorPickerPredefinedColor(
+      ng-repeat="color in vm.parentCtrl.predefinedColors | limitTo:7 track by $index"
+      ng-click="vm.parentCtrl.onPredefinedColorClick(color)"
+      ng-style="{'background-color': color}")
+
+  .colorPickerCanvas(layout="row" layout-align="space-between center")
+    .colorPickerBlockWrapper
+      canvas.colorBlock(width="185" height="170")
+      .colorPointer
+
+    .colorPickerStripWrapper
+      canvas.colorStrip(width="23" height="170")
+      .colorPointer
+
+  .colorPickerSelectedData(layout="row")
+    .colorPickerSelectedColor(ng-style="{'background-color': vm.parentCtrl.colorHash}")
+    .colorPickerSelectedHash(layout="row" layout-align="start center")
+      span #
+      input(ng-model="vm.parentCtrl.color" ng-change="vm.parentCtrl.onColorHashChange()")
+
+  .colorPickerButtons(layout="row" layout-align="start center")
+    md-button.md-raised.md-primary(ng-click="vm.parentCtrl.saveColor($event)") Save
+    md-button.md-primary(ng-click="vm.parentCtrl.closePanel($event)") Cancel
