@@ -44,6 +44,6 @@
 				span #
 				input(ng-model="vm.color" ng-change="vm.onColorHashChange()")
 
-		.colorPickerButtons(layout="row" layout-align="end center")
-			md-button(ng-click="vm.saveColor($event)") Ok
-			md-button(ng-click="vm.togglePanel($event)") Cancel
+		.colorPickerButtons(layout="row" layout-align="start center")
+			md-button.md-raised.md-primary(ng-click="vm.saveColor($event)") Save
+			md-button.md-primary(ng-click="vm.togglePanel($event)") Cancel
