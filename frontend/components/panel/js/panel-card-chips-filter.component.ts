@@ -15,13 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export interface IChip {
+	name: string;
+	nameType: string;
+	value: string;
+	type: string;
+}
+
 class PanelCardChipsFilterController implements ng.IController {
 	public static $inject: string[] = [
 		"$mdConstant"
 	];
 
-	public suggestions: Array<{name: string, type: string}> = [];
-	public chips: Array<{name: string, type: string}> = [];
+	public suggestions: IChip[] = [];
+	public chips: IChip[] = [];
 
 	private selectedItem: any = null;
 	private searchText: string = null;
@@ -36,33 +43,33 @@ class PanelCardChipsFilterController implements ng.IController {
 		this.chips = [];
 	}
 
-	private transformChip(chip) {
+	private transformChip(chip): IChip {
 		// If it is an object, it's already a known chip
 		if (angular.isObject(chip)) {
 			return chip;
 		}
 
 		// Otherwise, create a new one
-		return { name: chip, type: "" };
+		return { name: chip, value: chip, nameType: "", type: "" };
 	}
 
-	private querySearch(query) {
+	private querySearch(query: string): IChip[] {
 		const results = query ? (this.suggestions || []).filter( this.matchAutocomplete.bind(this, query)) : [];
 		return results;
 	}
 
 	private formatChip(chip) {
-		return  chip.type + (chip.type === "" ? "" : ":" ) + chip.name;
+		return  chip.nameType + (chip.nameType === "" ? "" : ":" ) + chip.name;
 	}
 
 	/**
 	 * Filter the suggestion
 	 */
-	private matchAutocomplete(query, suggestion) {
+	private matchAutocomplete(query: string, suggestion: IChip): boolean {
 		const l = angular.lowercase;
 		const lowercaseQuery = l(query);
 		return (l(suggestion.name).indexOf(lowercaseQuery) === 0) ||
-				(l(suggestion.type).indexOf(lowercaseQuery) === 0);
+				(l(suggestion.nameType).indexOf(lowercaseQuery) === 0);
 	}
 }
 

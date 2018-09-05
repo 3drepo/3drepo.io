@@ -14,7 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PanelService } from "./panel.service";
+import { PanelService, IMenuItem } from "./panel.service";
+import { IChip } from "./panel-card-chips-filter.component";
 
 class PanelCardController implements ng.IController {
 
@@ -48,7 +49,7 @@ class PanelCardController implements ng.IController {
 	private hideSelectedItem;
 	private selectedMenuOption;
 	private onHeightRequest;
-	private chipsFilterChips;
+	private chipsFilterChips: IChip[];
 
 	constructor(
 		private $window: ng.IWindowService,
@@ -146,26 +147,20 @@ class PanelCardController implements ng.IController {
 
 		this.$scope.$watch("vm.selectedMenuOption", (newValue: any) => {
 			if (!!newValue && newValue.toggleFilterChips) {
-				this.toggleFilterChips(newValue.value, newValue.subItem.value);
+				this.toggleFilterChips(newValue);
 			}
 		});
 
-		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: any[], oldValue: any[]) => {
-			let diff: any[] = newValue.filter( (nv) => oldValue.indexOf((ov) => nv.type === ov.type && nv.name === ov.name) < 0);
+		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: IChip[], oldValue: IChip[]) => {
+
+			let diff: IChip[] = newValue.filter( (nv) =>
+						!oldValue.find((ov) => nv.type === ov.type && nv.value === ov.value) );
 
 			diff = diff.concat(oldValue.filter((ov) =>
-						newValue.indexOf((nv) => nv.type === ov.type && nv.name === ov.name) < 0));
-
-			// if (newValue.length > oldValue.length) { // A chip has been added
-			// 	diff = newValue[newValue.length - 1]; // Assumption: the new value is appended to the end of the chips array
-			// }
-
-			// if (newValue.length < oldValue.length) { // A chip has been deleted
-			// 	diff = oldValue.find((ov) => !newValue.some( (nv) => nv.type === ov.type && nv.name === ov.name));
-			// }
+						!newValue.find((nv) => nv.type === ov.type && nv.value === ov.value)) );
 
 			if (!!diff) {  // this is for toggling the value in the menu
-				diff.forEach((c) => this.panelService.toggleChipsValueFromMenu(this.contentData.type, c.type, c.name));
+				diff.forEach((c) => this.panelService.toggleChipsValueFromMenu(this.contentData.type, c.type, c.value));
 			}
 
 			if (newValue.length > 0 && !this.chipsFilterVisible) {
@@ -173,14 +168,20 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watchCollection("vm.contentData.menu", (newValue: any[], oldValue: any[]) => {
+		this.$scope.$watchCollection("vm.contentData.menu", (newValue: IMenuItem[], oldValue: IMenuItem[]) => {
 			if (!newValue) {
 				return;
 			}
 
-			const suggestions = newValue.filter((mi) => mi.toggleFilterChips).reduce((accum: any[], menuItem: any) => {
+			const suggestions = newValue.filter((mi) => mi.toggleFilterChips).reduce((accum: IChip[], menuItem: IMenuItem) => {
 				// Transforms the menu item to suggestions format
-				const menuSuggestions: any[] = menuItem.menu.map((subItem) => ({type : menuItem.value, name: subItem.value}));
+
+				const menuSuggestions: IChip[] = menuItem.menu.map((subItem) => ({
+					name: subItem.label,
+					nameType: menuItem.label,
+					type : menuItem.value,
+					value: subItem.value
+				}));
 
 				// Concats the new suggestions with the ones from previous menuitems
 				return accum.concat(menuSuggestions);
@@ -206,11 +207,16 @@ class PanelCardController implements ng.IController {
 		return filter !== undefined;
 	}
 
-	public toggleFilterChips(type: string, name: string): void {
-		const chipIndex = this.chipsFilterChips.findIndex( (c) => c.type === type && c.name === name);
+	public toggleFilterChips(item: IMenuItem): void {
+		const chipIndex = this.chipsFilterChips.findIndex( (c) => c.type === item.value && c.value === item.subItem.value);
 
 		if (chipIndex === -1) {
-			this.chipsFilterChips.push( { type, name });
+			this.chipsFilterChips.push({
+				name: item.subItem.label,
+				nameType: item.label,
+				value: item.subItem.value,
+				type: item.value
+			});
 		} else {
 			this.chipsFilterChips.splice(chipIndex, 1);
 		}

@@ -9,7 +9,7 @@ md-chips(ng-model="vm.chips"
 		md-item-text="item.name"
 		placeholder="{{vm.placeHolder}}")
 
-		span(md-highlight-text="vm.searchText") {{item.type}}:{{item.name}}
+		span(md-highlight-text="vm.searchText") {{item.nameType}}:{{item.name}}
 
 	md-chip-template
 		span {{ vm.formatChip($chip) }}

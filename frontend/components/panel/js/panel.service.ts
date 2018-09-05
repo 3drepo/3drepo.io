@@ -34,7 +34,7 @@ interface IPanelCard {
 	minHeight?: number;
 }
 
-interface IMenuItem {
+export interface IMenuItem {
 	hidden: boolean;
 	label: string;
 	value?: string;
@@ -53,6 +53,7 @@ interface IMenuItem {
 	upperDivider?: boolean;
 	disabled?: boolean;
 	menu?: IMenuItem[];
+	subItem?: IMenuItem;
 }
 
 export class PanelService {
