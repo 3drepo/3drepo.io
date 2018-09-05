@@ -56,7 +56,7 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
-	private filterText: string;
+	private filterText: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -100,16 +100,17 @@ class GroupsController implements ng.IController {
 
 	public $onDestroy() {
 		this.groups = [];
-
+		this.groupsToShow = [];
 		this.NotificationService.unsubscribe.newGroup(this.account, this.model);
 		this.NotificationService.unsubscribe.groupsDeleted(this.account, this.model);
 	}
 
 	public watchers() {
-		this.$scope.$watch("vm.filterText", (newValue) => {
-			// search method will go here.
-			console.log(newValue);
-			this.groupFilterSearch(newValue);
+		this.$scope.$watch("vm.filterText", (searchQuery) => {
+			this.filterText = searchQuery;
+			if (this.filterText !== undefined || this.filterText !== "") {
+				this.groups = this.GroupsService.groupsFilterSearch(this.filterText);
+			}
 		});
 
 		this.$scope.$watch(() => {
@@ -186,20 +187,6 @@ class GroupsController implements ng.IController {
 					}
 				}
 			});
-	}
-
-	// Search function to connect to serach query in service.
-	public groupFilterSearch(searchString) {
-		let i;
-		let singleGroup;
-		for (i = 0; i < this.groups.length; i++) {
-			singleGroup = this.groups[i];
-			console.log("type of -->>", typeof(singleGroup));
-			if (this.GroupsService.stringSearch(searchString, singleGroup.name)) {
-				return console.log('results -->', singleGroup);
-			}
-				console.log("all groups", this.groups);
-		}
 	}
 
 	public resetToSavedGroup() {
