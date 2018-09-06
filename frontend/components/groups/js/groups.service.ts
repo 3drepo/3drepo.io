@@ -466,7 +466,6 @@ export class GroupsService {
 	public getGroups(teamspace: string, model: string, revision: string) {
 		let groupUrl;
 		if (revision) {
-			console.log('revision', revision);
 			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
 		} else {
 			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true`;
