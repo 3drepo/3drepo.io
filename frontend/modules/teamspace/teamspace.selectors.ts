@@ -13,7 +13,3 @@ export const selectCurrentUser = createSelector(
 export const selectIsPending = createSelector(
 	selectTeamspaceDomain, (state) => state.isPending
 );
-
-export const selectButtonText = createSelector(
-	selectTeamspaceDomain, (state) => state.buttonText
-);

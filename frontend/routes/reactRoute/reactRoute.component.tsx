@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 
 import { Container } from './reactRoute.styles';
 import { ReactButton } from '../components/reactButton/reactButton.component';
@@ -28,18 +27,8 @@ interface IProps {
 }
 
 export class ReactRoute extends React.PureComponent<IProps, any> {
-	public static propTypes = {
-		buttonText: PropTypes.string,
-		updateButtonText: PropTypes.func,
-		fetchUser: PropTypes.func
-	};
-
-	public componentDidMount() {
-		this.props.fetchUser('charence');
-	}
-
 	public handleReactButtonClick = () => {
-		this.props.updateButtonText('Button was clicked');
+		console.log('Button was clicked');
 	}
 
 	public render() {
@@ -48,7 +37,7 @@ export class ReactRoute extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<ReactButton
-					textValue={buttonText}
+					textValue={buttonText || 'Undefined button text'}
 					onClick={this.handleReactButtonClick}
 				/>
 			</Container>

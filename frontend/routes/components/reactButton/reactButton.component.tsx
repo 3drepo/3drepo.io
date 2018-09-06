@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 import { ButtonProps } from '@material-ui/core/Button';
 
 import { ButtonContainer } from './reactButton.styles';
@@ -26,10 +25,6 @@ interface IProps extends ButtonProps {
 }
 
 export class ReactButton extends React.PureComponent<IProps, any> {
-	public static propTypes = {
-		textValue: PropTypes.string
-	};
-
 	public render() {
 		return (
 			<ButtonContainer

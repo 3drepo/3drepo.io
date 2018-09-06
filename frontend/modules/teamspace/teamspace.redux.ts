@@ -10,8 +10,6 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 }, { prefix: 'TEAMSPACE_' });
 
 export const INITIAL_STATE = {
-	buttonText: 'Sample button',
-	users: [],
 	currentTeamspace: '',
 	currentUser: {},
 	isPending: true
@@ -19,13 +17,6 @@ export const INITIAL_STATE = {
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return Object.assign({}, state, { isPending: pendingState });
-};
-
-const updateButtonText = (state = INITIAL_STATE, { value }) => {
-	return {
-		...state,
-		updateButtonText: ''
-	};
 };
 
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
@@ -41,7 +32,6 @@ const fetchUserError = (state = INITIAL_STATE, { error }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[TeamspaceTypes.UPDATE_BUTTON_TEXT]: updateButtonText,
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[TeamspaceTypes.FETCH_USER_ERROR]: fetchUserError,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState

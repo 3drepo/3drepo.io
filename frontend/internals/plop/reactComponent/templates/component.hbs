@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 
 import { Container } from './{{ camelCase name }}.styles';
 
@@ -25,9 +24,6 @@ interface IProps {
 }
 
 export class {{ pascalCase name }} extends React.PureComponent<IProps, any> {
-	public static propTypes = {
-		 noop: PropTypes.string // TODO: Remove sample
-	};
 
 	public render() {
 		return (

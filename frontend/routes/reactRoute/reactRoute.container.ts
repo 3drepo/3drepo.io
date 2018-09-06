@@ -20,15 +20,10 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ReactRoute } from './reactRoute.component';
-import { TeamspaceActions, selectButtonText } from '../../modules/teamspace';
+import { TeamspaceActions } from '../../modules/teamspace';
 
-const mapStateToProps = createStructuredSelector({
-	buttonText: selectButtonText
-});
+const mapStateToProps = createStructuredSelector({});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	updateButtonText: TeamspaceActions.updateButtonText,
-	fetchUser: TeamspaceActions.fetchUser
-}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ReactRoute);
