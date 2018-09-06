@@ -310,7 +310,7 @@ class PanelCardController implements ng.IController {
 			return "show-filter='vm.showFilter'";
 
 		case "chips-filter":
-			return "chips-filter-visible='vm.chipsFilterVisible'";
+			return "chips-filter-visible='vm.chipsFilterVisible' ng-show='!vm.hideMenuButton'";
 
 		case "visible":
 			return " visible='vm.visible'";

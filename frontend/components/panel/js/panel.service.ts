@@ -188,8 +188,6 @@ export class PanelService {
 							toggle: true
 						}]
 				},
-
-
 				{
 					hidden: false,
 					value: "showSubModels",

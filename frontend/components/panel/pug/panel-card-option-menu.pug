@@ -11,11 +11,11 @@ md-menu-bar
 				ng-repeat="menuItem in vm.menu track by menuItem.label"
 				ng-if="!menuItem.hidden")
 
-				md-button(ng-click="vm.menuItemSelected(menuItem)" ng-if="menuItem.menu===undefined" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
+				md-button(ng-click="vm.menuItemSelected(menuItem)" aria-label="{{menuItem.label}}"  ng-if="menuItem.menu===undefined" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
 					ng-include(src="'/templates/panel-card-option-menu-item.html'")
 
 				md-menu(ng-if="menuItem.menu!==undefined")
-					md-button( ng-click="$mdMenu.open($event)" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
+					md-button( ng-click="$mdMenu.open($event)" aria-label="{{menuItem.label}}" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
 						ng-include(src="'templates/panel-card-option-menu-item.html'")
 
 					md-menu-content(width="4" style="max-height:none"  ng-init="parentItem = menuItem")
@@ -23,5 +23,5 @@ md-menu-bar
 							ng-repeat="menuItem in menuItem.menu track by menuItem.label"
 							ng-if="!menuItem.hidden")
 
-							md-button(ng-click="vm.menuItemSelected(menuItem, parentItem)" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
+							md-button(ng-click="vm.menuItemSelected(menuItem, parentItem)" aria-label="{{menuItem.label}}" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
 								ng-include(src="'/templates/panel-card-option-menu-item.html'")

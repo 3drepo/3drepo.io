@@ -20,7 +20,7 @@ div(layout="column", class="md-whiteframe-1dp")
 				#options(layout="row")
 
 		panel-card-chips-filter(id="chips-filter"
-								ng-show="vm.chipsFilterVisible"
+								ng-show="vm.chipsFilterVisible && !vm.hideMenuButton"
 								chips="vm.chipsFilterChips"
 								suggestions="vm.chipsFilterSuggestions"
 								place-holder=" Filter"
