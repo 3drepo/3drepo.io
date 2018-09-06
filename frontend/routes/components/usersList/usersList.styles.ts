@@ -15,21 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import styled from 'styled-components';
 
-import { Container } from './{{ camelCase name }}.styles';
-
-interface IProps {
-	noop: string; // TODO: Remove sample
-}
-
-export class {{ pascalCase name }} extends React.PureComponent<IProps, any> {
-
-	public render() {
-		return (
-			<Container>
-				{{ pascalCase name }} component
-			</Container>
-		);
-	}
-}
+export const Container = styled.div``;

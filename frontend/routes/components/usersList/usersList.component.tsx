@@ -16,19 +16,24 @@
  */
 
 import * as React from 'react';
+import Table from '@material-ui/core/Table';
 
-import { Container } from './{{ camelCase name }}.styles';
+import { Container } from './usersList.styles';
 
 interface IProps {
 	noop: string; // TODO: Remove sample
+	members: any[];
+	jobs: any[];
+	currentTeamspace: string;
+	onChange: void;
 }
 
-export class {{ pascalCase name }} extends React.PureComponent<IProps, any> {
-
+export class UsersList extends React.PureComponent<IProps, any> {
+	const 
 	public render() {
 		return (
 			<Container>
-				{{ pascalCase name }} component
+				UsersList component
 			</Container>
 		);
 	}
