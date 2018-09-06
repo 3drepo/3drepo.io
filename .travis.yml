@@ -37,7 +37,6 @@ install:
     - yarn run lint
     - cd ./../frontend
     - yarn install
-    - npm ls --depth 0
     - ls node_modules/@material-ui/core/Button
     - ls node_modules/@material-ui/core/
     - yarn run lint
