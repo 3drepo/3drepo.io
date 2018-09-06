@@ -4,13 +4,10 @@ module.exports = (options) => {
   const config = {
     mode: options.mode || 'development',
     context: resolve(__dirname, '../../'),
-    entry: {
-      vendors: ['react', 'react-dom'],
-      'three_d_repo': options.entry || './main.ts'
-    },
+    entry: options.entry || './main.ts',
     output: Object.assign({
       path: resolve(__dirname, '../../../public/dist/'),
-      filename: '[name].min.js'
+      filename: 'three_d_repo.min.js'
     }, options.output),
     resolve: {
       extensions: ['.ts', '.js', '.tsx']
@@ -21,10 +18,17 @@ module.exports = (options) => {
           test: /\.(ts|tsx)$/,
           loader: 'ts-loader',
           exclude: /node_modules/
+        },
+        {
+          test: /\.(ts|tsx)$/,
+          loader: 'lodash-ts-imports-loader',
+          exclude: /node_modules/,
+          enforce: 'pre'
         }
       ]
-    }
-  };
+    },
+    plugins: [...(options.plugins || [])]
+  }
 
   return config;
 };

@@ -14,9 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import get from "lodash/get";
-import pick from "lodash/pick";
-
+import {get, pick} from "lodash";
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 
 class NewMemberFormController implements ng.IController {

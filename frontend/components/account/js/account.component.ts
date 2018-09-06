@@ -15,12 +15,12 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import debounce from "lodash/debounce";
-import { subscribe } from "../../../helpers/migration";
+import { debounce } from 'lodash';
+import { subscribe } from '../../../helpers/migration';
 import {
 	selectCurrentUser,
 	selectIsPending
-} from "../../../modules/teamspace";
+} from '../../../modules/teamspace';
 
 class AccountController implements ng.IController {
 

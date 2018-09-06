@@ -14,10 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import values from "lodash/values";
-import cond from "lodash/cond";
-import matches from "lodash/matches";
-import orderBy from "lodash/orderBy";
+import {values, cond, matches, orderBy} from "lodash";
 
 import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
 import {SORT_TYPES, SORT_ORDER_TYPES} from "../../../constants/sorting";
