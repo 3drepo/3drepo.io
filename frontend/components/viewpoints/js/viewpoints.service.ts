@@ -24,7 +24,6 @@ export class ViewpointsService {
 	public static $inject: string[] = [
 		"$timeout",
 		"$q",
-
 		"APIService",
 		"ClipService",
 		"ViewerService"
@@ -61,7 +60,7 @@ export class ViewpointsService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public filterViewpoints(searchQuery: string) {
+	public filterViewpoints(searchQuery: string): any[] {
 
 		const viewpointSearchResults = this.state.viewpoints.filter((view) => {
 			return this.stringSearch(view.name, searchQuery);

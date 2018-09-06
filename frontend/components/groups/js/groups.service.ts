@@ -20,7 +20,6 @@ export class GroupsService {
 	public static $inject: string[] = [
 		"$q",
 		"$timeout",
-
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
