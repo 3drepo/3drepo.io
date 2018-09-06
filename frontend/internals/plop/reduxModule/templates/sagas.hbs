@@ -16,6 +16,8 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
+
+import api from '../../services/api';
 import { {{ pascalCase name }}Types, {{ pascalCase name }}Actions } from './{{ camelCase name }}.redux';
 
 export function* fetch() {

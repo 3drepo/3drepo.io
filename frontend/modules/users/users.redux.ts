@@ -15,9 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions
-} from './{{ camelCase name }}.redux';
+import { createActions, createReducer } from 'reduxsauce';
 
-export * from './{{ camelCase name }}.selectors';
+export const { Types: UsersTypes, Creators: UsersActions } = createActions({
+	fetch: [] // TODO: remove this action
+}, { prefix: 'USERS_' });
+
+export const INITIAL_STATE = {};
+
+export const reducer = createReducer(INITIAL_STATE, {
+});

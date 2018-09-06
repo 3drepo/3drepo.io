@@ -15,9 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions
-} from './{{ camelCase name }}.redux';
+import { put, takeLatest } from 'redux-saga/effects';
 
-export * from './{{ camelCase name }}.selectors';
+import api from '../../services/api';
+import { UsersTypes, UsersActions } from './users.redux';
+
+export function* fetch() {
+	try {
+		console.log('Users saga started!');
+	} catch(error) {
+		console.error(error);
+	}
+}
+
+export default function* UsersSaga() {
+	yield takeLatest(UsersTypes.FETCH, fetch);
+}

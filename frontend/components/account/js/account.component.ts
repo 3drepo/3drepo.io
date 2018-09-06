@@ -15,6 +15,13 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { debounce } from 'lodash';
+import { subscribe } from '../../../helpers/migration';
+import {
+	selectCurrentUser,
+	selectIsPending
+} from '../../../modules/teamspace';
+
 class AccountController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -58,7 +65,30 @@ class AccountController implements ng.IController {
 		private AuthService,
 		private APIService,
 		private DialogService
-	) {}
+	) {
+		this.getUserInfo = debounce(this.getUserInfo, 150);
+
+		subscribe(this, (state) => {
+			const currentUser = selectCurrentUser(state);
+			const isPending = selectIsPending(state);
+
+			// Pre-populate billing name if it doesn't exist with profile name
+			let billingAddress: any = {};
+			if (currentUser.hasOwnProperty("billingInfo") && currentUser.firstName !== this.firstName) {
+				billingAddress = currentUser.billingInfo;
+				if (!billingAddress.hasOwnProperty("firstName")) {
+					billingAddress.firstName = currentUser.firstName;
+					billingAddress.lastName = currentUser.lastName;
+				}
+			}
+
+			return {
+				...currentUser,
+				billingAddress,
+				loadingAccount: isPending
+			};
+		});
+	}
 
 	public $onInit() {
 
@@ -68,7 +98,6 @@ class AccountController implements ng.IController {
 
 		this.initUserData();
 		this.watchers();
-
 	}
 
 	public watchers() {
@@ -203,54 +232,15 @@ class AccountController implements ng.IController {
 	 * @param callingPage
 	 */
 	public showPage(page, callingPage, data) {
-
 		this.itemToShow = page;
 		this.callingPage = callingPage;
 		this.data = data;
-
 	}
 
-	public getUserInfo() {
-
-		if (this.userInfoPromise) {
-			return this.userInfoPromise;
-		} else {
-			this.userInfoPromise = this.AccountService.getUserInfo(this.account)
-				.then((response) => {
-					if (response.data) {
-						this.accounts = response.data.accounts;
-						this.username = this.account;
-						this.firstName = response.data.firstName;
-						this.lastName = response.data.lastName;
-						this.email = response.data.email;
-						this.hasAvatar = response.data.hasAvatar;
-
-						// Pre-populate billing name if it doesn't exist with profile name
-						this.billingAddress = {};
-						if (response.data.hasOwnProperty("billingInfo")) {
-							this.billingAddress = response.data.billingInfo;
-							if (!this.billingAddress.hasOwnProperty("firstName")) {
-								this.billingAddress.firstName = this.firstName;
-								this.billingAddress.lastName = this.lastName;
-							}
-						}
-
-						this.loadingAccount = false;
-					} else {
-						console.debug("Reponse doesn't have data", response);
-					}
-
-				})
-				.catch((error) => {
-					// TODO: ADD POPUP ERROR!
-					console.error("Error", error);
-				});
-
-			return this.userInfoPromise;
-		}
-
+	public getUserInfo = () => {
+		debugger
+		this.userInfoPromise = this.AccountService.getUserInfo(this.account);
 	}
-
 }
 
 export const AccountComponent: ng.IComponentOptions = {

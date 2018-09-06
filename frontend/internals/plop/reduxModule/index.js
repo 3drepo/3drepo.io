@@ -40,7 +40,7 @@ module.exports = (plop) => {
       type: 'modify',
       path: 'modules/sagas.ts',
       pattern: /(\/\/ <-- IMPORT MODULE SAGA -->)/g,
-      template: 'import { watch{{ pascalCase name }} } from \'./{{ camelCase name }}/{{ camelCase name }}.sagas\';\n$1',
+      template: 'import {{ pascalCase name }}Saga from \'./{{ camelCase name }}/{{ camelCase name }}.sagas\';\n$1',
     }, {
       type: 'modify',
       path: 'modules/sagas.ts',

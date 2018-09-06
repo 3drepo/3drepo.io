@@ -24,13 +24,19 @@ import { ReactButton } from '../components/reactButton/reactButton.component';
 interface IProps {
 	buttonText: string;
 	updateButtonText: any;
+	fetchUser: any;
 }
 
 export class ReactRoute extends React.PureComponent<IProps, any> {
 	public static propTypes = {
 		buttonText: PropTypes.string,
-		updateButtonText: PropTypes.func
+		updateButtonText: PropTypes.func,
+		fetchUser: PropTypes.func
 	};
+
+	public componentDidMount() {
+		this.props.fetchUser('charence');
+	}
 
 	public handleReactButtonClick = () => {
 		this.props.updateButtonText('Button was clicked');

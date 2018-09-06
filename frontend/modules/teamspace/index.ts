@@ -16,8 +16,8 @@
  */
 
 export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions
-} from './{{ camelCase name }}.redux';
+	TeamspaceTypes,
+	TeamspaceActions
+} from './teamspace.redux';
 
-export * from './{{ camelCase name }}.selectors';
+export * from './teamspace.selectors';

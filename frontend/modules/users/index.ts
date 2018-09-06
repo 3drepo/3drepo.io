@@ -16,8 +16,8 @@
  */
 
 export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions
-} from './{{ camelCase name }}.redux';
+	UsersTypes,
+	UsersActions
+} from './users.redux';
 
-export * from './{{ camelCase name }}.selectors';
+export * from './users.selectors';

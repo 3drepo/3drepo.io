@@ -15,9 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions
-} from './{{ camelCase name }}.redux';
+import { createSelector } from 'reselect';
 
-export * from './{{ camelCase name }}.selectors';
+export const selectUsersDomain = state => Object.assign({}, 'users');
