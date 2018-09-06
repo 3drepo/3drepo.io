@@ -201,7 +201,6 @@ export class PanelService {
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "menu", visible: true},
 				{type: "filter", visible: true}
 			]
 		});
