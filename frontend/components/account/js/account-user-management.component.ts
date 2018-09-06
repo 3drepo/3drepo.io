@@ -94,13 +94,13 @@ class AccountUserManagementController implements ng.IController {
 		this.onTeamspaceChange();
 	}
 
-		public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
-			const currentUserChanged = currentUser &&currentUser.currentValue;
-			const accountsChanged = accounts && accounts.currentValue;
+	public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
+		const currentUserChanged = currentUser &&currentUser.currentValue;
+		const accountsChanged = accounts && accounts.currentValue;
 
-			if (currentUserChanged && !this.selectedTeamspace) {
-				this.selectedTeamspace = currentUser.currentValue;
-			}
+		if (currentUserChanged && !this.selectedTeamspace) {
+			this.selectedTeamspace = currentUser.currentValue;
+		}
 
 		if (currentUserChanged && accountsChanged) {
 			this.teamspaces = accounts.currentValue.reduce((teamspaces, account) => {
@@ -111,12 +111,11 @@ class AccountUserManagementController implements ng.IController {
 				}, {});
 
 				if (account.isAdmin || isProjectAdmin || isModelAdmin) {
-						teamspaces.push({
-							...account,
-							isProjectAdmin
-						});
+					teamspaces.push({
+						...account,
+						isProjectAdmin
+					});
 				}
-
 				return teamspaces;
 			}, []);
 		}
