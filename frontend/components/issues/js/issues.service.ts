@@ -17,6 +17,7 @@
 import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { ClipService } from "../../clip/js/clip.service";
+import { IChip } from "../../panel/js/panel-card-chips-filter.component";
 import { PanelService } from "../../panel/js/panel.service";
 import { TreeService } from "../../tree/js/tree.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
@@ -115,7 +116,10 @@ export class IssuesService {
 					label: role._id
 				}));
 
-				this.panelService.setChipFilterMenuItem("issues", {label: "Created By", value: "CreatedBy"}, menuChips);
+				this.panelService.setChipFilterMenuItem("issues", {label: "Created By", value: "creator_role"}, menuChips);
+
+				this.panelService.setChipFilterMenuItem("issues", {label: "Assigned To", value: "assigned_roles"}, menuChips);
+
 				return this.state.availableJobs;
 			});
 
@@ -129,6 +133,10 @@ export class IssuesService {
 				this.state.modelUserJob = response.data;
 				return this.state.modelUserJob;
 			});
+	}
+
+	public setTypesMenu(topicTypes: any) {
+		this.panelService.setChipFilterMenuItem("issues", {label: "Type", value: "topic_type"}, topicTypes);
 	}
 
 	public createBlankIssue(creatorRole) {
@@ -164,7 +172,7 @@ export class IssuesService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public setupIssuesToShow(model: string, chips: Array<{name: string, type: string}> ) {
+	public setupIssuesToShow(model: string, chips: IChip[] ) {
 		this.state.issuesToShow = [];
 
 		if (this.state.allIssues.length > 0) {
@@ -177,25 +185,27 @@ export class IssuesService {
 		}
 	}
 
-	public filterIssues(model: string, issues: any[], chips: Array<{name: string, type: string}>): any[] {
+	public filterIssues(model: string, issues: any[], chips: IChip[]): any[] {
 		let filters = [];
 		const criteria = this.getCriteria(chips);
 
-		/* tslint:disable:no-string-literal */
-// 		filters = filters.concat(this.getAndClause(this.state.issueDisplay.excludeRoles, this.filterRole));
-
-		if (!criteria["Status"]) { // If there is no explicit filter for status dont show closed issues
+		if (!criteria.status) { // If there is no explicit filter for status dont show closed issues
 									// thats the general criteria for showing issues.
 			filters.push((issue) => issue.status !== "closed");
 		}
 
-		filters = filters.concat(this.getOrClause(criteria["Status"] , this.filterStatus));
-
 		filters = filters.concat(this.getOrClause(criteria[""], this.handleIssueFilter));
 
-/*		if (!this.state.issueDisplay.showClosed) {
-			filters.push((issue) => issue.status !== "closed");
-		}
+		filters = filters.concat(this.createFilterByField(criteria, "priority"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "creator_role"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "status"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "assigned_roles"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "topic_type"));
+/*
 
 		if (!this.state.issueDisplay.showSubModelIssues) {
 			filters.push((issue) => issue.model === model);
@@ -208,18 +218,18 @@ export class IssuesService {
 		if ((this.state.issueDisplay.dateRange || []).length > 1 ) {
 			filters.push((issue) => issue.created <= this.state.issueDisplay.dateRange[1].getTime());
 		}
-
-		filters = filters.concat(this.getOrClause(this.state.issueDisplay.priority, this.filterPriority));
 */
-
-		/* tslint:enable:no-string-literal */
 
 		// It filters the issue list by applying every filter to it.
 		const filteredIssues = issues.filter( (issue) => filters.every( (f) => f(issue)));
 		return filteredIssues;
 	}
 
-	public getCriteria(chips: Array<{name: string, type: string}>): any {
+	public createFilterByField(criteria: any, field: string) {
+		return this.getOrClause(criteria[field], this.filterByField.bind(this, field));
+	}
+
+	public getCriteria(chips: IChip[]): any {
 		const initialValue = {};
 
 		return  chips.reduce((object, currVal) => {
@@ -227,7 +237,7 @@ export class IssuesService {
 				object[currVal.type] = [];
 			}
 
-			object[currVal.type].push(currVal.name);
+			object[currVal.type].push(currVal.value);
 			return object;
 		}, initialValue);
 	}
@@ -249,16 +259,12 @@ export class IssuesService {
 		return [(value, index, array) => tags.some( comparator.bind(this, value) )];
 	}
 
-	public filterRole(issue, tag): boolean {
-		return issue.creator_role !== tag;
-	}
+	public filterByField(field, issue, tag): boolean {
+		if (Array.isArray(issue[field])) {
+			return issue[field].indexOf(tag) >= 0;
+		}
 
-	public filterPriority(issue, tag): boolean {
-		return issue.priority === tag;
-	}
-
-	public filterStatus(issue, tag): boolean {
-		return issue.status === tag;
+		return issue[field] === tag;
 	}
 
 	public handleIssueFilter(issue: any, filterText: string) {

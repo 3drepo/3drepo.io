@@ -126,6 +126,38 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "status",
+					label: "Status",
+					toggle: false,
+					selected: false,
+					firstSelected: false,
+					secondSelected: false,
+					keepCheckSpace: false,
+					toggleFilterChips: true,
+					menu: [{
+							hidden: false,
+							value: "open",
+							label: "Open",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "in progress",
+							label: "In progress",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "for approval",
+							label: "For approval",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "closed",
+							label: "Closed",
+							toggle: true
+						}]
+				},
+				{
+					hidden: false,
 					value: "priority",
 					label: "Priority",
 					toggle: false,
@@ -156,6 +188,8 @@ export class PanelService {
 							toggle: true
 						}]
 				},
+
+
 				{
 					hidden: false,
 					value: "showSubModels",

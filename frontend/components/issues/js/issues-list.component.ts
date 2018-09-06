@@ -16,6 +16,7 @@
  */
 import { APIService } from "../../home/js/api.service";
 import { IssuesService } from "./issues.service";
+import { IChip } from "../../panel/js/panel-card-chips-filter.component";
 
 class IssuesListController implements ng.IController {
 
@@ -46,7 +47,7 @@ class IssuesListController implements ng.IController {
 	private revision: string;
 	private filterText: string;
 	private bcfInputHandler: any;
-	private filterChips: Array<{name: string, type: string}>;
+	private filterChips: IChip[];
 
 	constructor(
 		private $scope,
