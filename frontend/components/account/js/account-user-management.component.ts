@@ -95,7 +95,7 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
-		const currentUserChanged = currentUser &&currentUser.currentValue;
+		const currentUserChanged = currentUser && currentUser.currentValue;
 		const accountsChanged = accounts && accounts.currentValue;
 
 		if (currentUserChanged && !this.selectedTeamspace) {
