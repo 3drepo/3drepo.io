@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
+import TableHead from '@material-ui/core/TableHead';
 
-export const Container = styled.div`
-  width: 100%;
-`;
+export const TableHeadContainer = styled(TableHead)``;

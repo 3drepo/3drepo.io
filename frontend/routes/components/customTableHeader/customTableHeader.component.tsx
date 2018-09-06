@@ -15,8 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import * as React from 'react';
+import TableRow from '@material-ui/core/TableRow';
+import TableHead from '@material-ui/core/TableHead';
+import TableCell from '@material-ui/core/TableCell';
 
-export const Container = styled.div`
-  width: 100%;
-`;
+import { TableHeadContainer } from './customTableHeader.styles';
+
+interface IProps {
+	cells: any[];
+}
+
+export class CustomTableHeader extends React.PureComponent<IProps, any> {
+
+	public renderCells = (cells) => {
+		return cells.map((cell, index) => {
+			return <TableCell key={index}>{cell}</TableCell>;
+		});
+	}
+
+	public render() {
+		const { cells } = this.props;
+		return (
+			<TableHeadContainer>
+				<TableRow>
+					{this.renderCells(cells)}
+				</TableRow>
+			</TableHeadContainer>
+		);
+	}
+}

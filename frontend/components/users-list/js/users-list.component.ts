@@ -245,4 +245,4 @@ export const UsersListComponent: ng.IComponentOptions = {
 
 export const UsersListComponentModule = angular
 	.module("3drepo")
-	.component("usersList", UsersListComponent);
+	.component("usersListOld", UsersListComponent);
