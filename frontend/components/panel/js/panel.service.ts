@@ -134,16 +134,19 @@ export class PanelService {
 					secondSelected: false,
 					keepCheckSpace: false,
 					toggleFilterChips: true,
+					upperDivider: true,
 					menu: [{
 							hidden: false,
 							value: "open",
 							label: "Open",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}, {
 							hidden: false,
 							value: "in progress",
 							label: "In progress",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}, {
 							hidden: false,
 							value: "for approval",
@@ -153,7 +156,8 @@ export class PanelService {
 							hidden: false,
 							value: "closed",
 							label: "Closed",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}]
 				},
 				{
@@ -170,22 +174,26 @@ export class PanelService {
 							hidden: false,
 							value: "none",
 							label: "None",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}, {
 							hidden: false,
 							value: "low",
 							label: "Low",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}, {
 							hidden: false,
 							value: "medium",
 							label: "Medium",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}, {
 							hidden: false,
 							value: "high",
 							label: "High",
-							toggle: true
+							toggle: true,
+							stopClose: true
 						}]
 				},
 				{
@@ -205,10 +213,7 @@ export class PanelService {
 				{type: "menu", visible: true},
 				{
 					type: "chips-filter",
-					visible: true,
-					suggestions: [
-						{type: "Status", name: "closed"},
-						{type: "Status", name: "open"}]
+					visible: true
 				}
 			],
 			add: true
@@ -377,7 +382,8 @@ export class PanelService {
 			value: si.value,
 			label: si.label,
 			hidden: false,
-			toggle: true
+			toggle: true,
+			stopClose: true
 		}));
 
 		if (!!panel) {
