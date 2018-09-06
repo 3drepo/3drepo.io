@@ -99,23 +99,25 @@ class AccountUserManagementController implements ng.IController {
 			this.selectedTeamspace = currentUser.currentValue;
 		}
 
-			if (currentUser.currentValue && accounts.currentValue) {
-				this.teamspaces = accounts.currentValue.reduce((teamspaces,account) => {
-					const {isProjectAdmin, isModelAdmin} = account.projects.reduce((flags, { permissions, models }) => {
-						flags.isProjectAdmin = permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
-						flags.isModelAdmin = models.some((model) => model.permissions.includes(MODEL_ROLES_TYPES.ADMINISTRATOR));return flags;
-						},{});
-						if (account.isAdmin ||isProjectAdmin|| isModelAdmin) {
+		if (currentUser.currentValue && accounts.currentValue) {
+			this.teamspaces = accounts.currentValue.reduce((teamspaces, account) => {
+				const {isProjectAdmin, isModelAdmin} = account.projects.reduce((flags, { permissions, models }) => {
+					flags.isProjectAdmin = permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
+					flags.isModelAdmin = models.some((model) => model.permissions.includes(MODEL_ROLES_TYPES.ADMINISTRATOR));
+					return flags;
+				}, {});
+
+				if (account.isAdmin || isProjectAdmin || isModelAdmin) {
 						teamspaces.push({
 							...account,
-					isProjectAdmin
+							isProjectAdmin
 						});
-					}
+				}
 
-					return teamspaces;
-				}, []);
-			}
+				return teamspaces;
+			}, []);
 		}
+	}
 
 	/**
 	 * Get teamspace details
