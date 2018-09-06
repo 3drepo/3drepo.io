@@ -18,8 +18,8 @@
     "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./tests",
     "unity-util": "webpack --config ./internals/webpack/webpack.demo.config.js",
-    "lint": "tslint --project ./components --format stylish",
-    "lint:fix": "tslint --project ./components --format stylish --fix"
+    "lint": "tslint --config tslint.json --project ./ --exclude tests --format stylish",
+    "lint:fix": "yarn lint --fix"
   },
   "keywords": [
     "3drepo",

@@ -28,7 +28,7 @@ interface IProps {
 
 export class ReactRoute extends React.PureComponent<IProps, any> {
 	public handleReactButtonClick = () => {
-		console.log('Button was clicked');
+		console.debug('Button was clicked');
 	}
 
 	public render() {

@@ -238,7 +238,6 @@ class AccountController implements ng.IController {
 	}
 
 	public getUserInfo = () => {
-		debugger
 		this.userInfoPromise = this.AccountService.getUserInfo(this.account);
 	}
 }
