@@ -61,13 +61,6 @@ div#accountHolder(
 				data="vm.data"
 				show-page="vm.showPage(page, callingPage, data)")
 
-			account-assign(
-				ng-if="vm.username && vm.itemToShow === 'assign'"
-				account="vm.account"
-				model="vm.model"
-				data="vm.data"
-				show-page="vm.showPage(page, callingPage, data)")
-
 			account-user-management(
 				ng-if="vm.username && vm.itemToShow === 'userManagement'"
 				current-user="vm.account"

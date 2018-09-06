@@ -1,0 +1,23 @@
+.colorPicker
+	.colorPickerSelect(
+		flex
+		ng-click="vm.showPanel($event)"
+		layout-fill
+		layout="row"
+		layout-align="start center")
+		.colorPickerValue(
+			ng-if="vm.color"
+			flex
+			layout="row"
+			layout-align="start center")
+			span.usersListJobColor(ng-style="{'background-color': vm.ngModel}")
+			.usersListJobName {{vm.ngModel}}
+
+		.colorPickerPlaceholder(
+			ng-if="!vm.colorHash"
+			flex
+			layout="row"
+			layout-align="start center") {{vm.placeholder}}
+
+		.colorPickerIcon(flex="none")
+			md-icon.angular-material-icons arrow_drop_down

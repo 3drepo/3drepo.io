@@ -23,7 +23,7 @@
 			aria-label="Add new member"
 			ng-click="vm.toggleNewDataPanel()"
 			ng-if="vm.selectedTab !== vm.TABS_TYPES.PROJECTS"
-			ng-disabled="vm.members.length === vm.licencesLimit || vm.isLoadingTeamspace"
+			ng-disabled="(vm.members.length === vm.licencesLimit && vm.selectedTab === vm.TABS_TYPES.USERS) || vm.isLoadingTeamspace"
 			ng-class="{'active': vm.showAddingPanel}")
 			md-icon.angular-material-icons add
 
@@ -34,6 +34,13 @@
 				jobs="vm.jobs"
 				title="vm.licencesLabel"
 				on-save="vm.onMemberSave(newMember)")
+			new-job-form(
+				ng-if="vm.selectedTab === vm.TABS_TYPES.JOBS"
+				current-teamspace="vm.currentTeamspace.account"
+				jobs="vm.jobs"
+				colors="vm.jobsColors"
+				title="Add new job"
+				on-save="vm.onJobSave(newJob)")
 
 		.addPanelBackdrop(
 			ng-class="{'addPanelBackdropVisible': vm.showAddingPanel}"
@@ -50,7 +57,7 @@
 			md-tab(
 				label="Users"
 				md-on-select="vm.onTabChange()"
-				ng-disabled="!vm.currentTeamspace.isAdmin")
+				ng-disabled="!vm.isTeamspaceAdmin")
 				div(layout="column" layout-fill)
 					users-list(
 						flex
@@ -73,10 +80,18 @@
 						layout="row"
 						members="vm.members"
 						projects="vm.projects"
-						current-teamspace="vm.currentTeamspace")
+						current-teamspace="vm.currentTeamspace"
+						on-change="vm.onJobsChange(updatedJobs)")
 
 			md-tab(
 				label="Jobs"
 				md-on-select="vm.onTabChange()"
-				ng-disabled="!vm.currentTeamspace.isAdmin")
-				.jobsList
+				ng-disabled="!vm.isTeamspaceAdmin")
+					div(layout="column" layout-fill)
+						jobs-list(
+							flex
+							layout="row"
+							jobs="vm.jobs"
+							colors="vm.jobsColors"
+							current-teamspace="vm.currentTeamspace")
+						.accountUserManagementFooter(layout="row" layout-align="end center") Manage jobs
