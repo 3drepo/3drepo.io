@@ -1,4 +1,4 @@
-import {orderBy} from "lodash";
+import orderBy from "lodash/orderBy";
 
 export const sortByName = (data = [], options: {order: any}) => {
 	return orderBy(
