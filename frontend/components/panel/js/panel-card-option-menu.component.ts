@@ -35,7 +35,7 @@ class PanelCardOptionMenuController implements ng.IController {
 		Array.from(pickerButtons).forEach((p) => p.setAttribute("md-prevent-menu-close", "true"));
 	}
 
-	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem = null) {
+	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem) {
 		menuItem = angular.copy(menuItem);
 
 		if (menuItem.hasOwnProperty("toggle")) {
@@ -62,9 +62,15 @@ class PanelCardOptionMenuController implements ng.IController {
 		this.selectedMenuOption = menuItem;
 	}
 
-	public onDateChanged(item: IMenuItem, parentMenuItem: IMenuItem , menu) {
-		console.log("date changed" + item.date);
+	public onClickItem(menuItem: IMenuItem, parentMenuItem: IMenuItem = null) {
+		if (menuItem.date) {
+			return;
+		}
+		this.menuItemSelected(menuItem, parentMenuItem);
+	}
 
+	public onDateChanged(item: IMenuItem, parentMenuItem: IMenuItem,  menu) {
+		this.menuItemSelected(item, parentMenuItem);
 		if (!item.stopClose) {
 			menu.close(true, {closeAll: true});
 		}

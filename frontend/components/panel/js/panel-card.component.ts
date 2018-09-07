@@ -25,6 +25,7 @@ class PanelCardController implements ng.IController {
 		"$timeout",
 		"$element",
 		"$compile",
+		"$filter",
 
 		"PanelService",
 		"EventService"
@@ -57,6 +58,7 @@ class PanelCardController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 		private $element: ng.IRootElementService,
 		private $compile: ng.ICompileService,
+		private $filter: any,
 
 		private panelService: PanelService,
 		private eventService: any
@@ -146,7 +148,7 @@ class PanelCardController implements ng.IController {
 		});
 
 		this.$scope.$watch("vm.selectedMenuOption", (newValue: any) => {
-			if (!!newValue && newValue.toggleFilterChips) {
+			if (!!newValue && (newValue.toggleFilterChips || (newValue.subItem && newValue.subItem.toggleFilterChips))) {
 				this.toggleFilterChips(newValue);
 			}
 		});
@@ -159,9 +161,15 @@ class PanelCardController implements ng.IController {
 			diff = diff.concat(oldValue.filter((ov) =>
 						!newValue.find((nv) => nv.type === ov.type && nv.value === ov.value)) );
 
-			if (!!diff) {  // this is for toggling the value in the menu
-				diff.forEach((c) => this.panelService.toggleChipsValueFromMenu(this.contentData.type, c.type, c.value));
-			}
+			diff.filter((c) => !Date.prototype.isPrototypeOf(c.value)) // filter out the date types
+				.forEach((c) => this.panelService.toggleValueFromMenu(this.contentData.type, c.type, c.value));
+
+			// In case any date chip cas been deleted.
+			diff.filter((c) => Date.prototype.isPrototypeOf(c.value) && oldValue.indexOf(c) > -1 )
+				.forEach((c) => {
+					const types = c.type.split("_");
+					this.panelService.setDateValueFromMenu(this.contentData.type,  types[0], types[1], null);
+				});
 
 			if (newValue.length > 0 && !this.chipsFilterVisible) {
 				this.chipsFilterVisible = true;
@@ -173,7 +181,8 @@ class PanelCardController implements ng.IController {
 				return;
 			}
 
-			const suggestions = newValue.filter((mi) => mi.toggleFilterChips).reduce((accum: IChip[], menuItem: IMenuItem) => {
+			const suggestions = newValue.filter((mi) => mi.toggleFilterChips && !mi.date)
+				.reduce((accum: IChip[], menuItem: IMenuItem) => {
 				// Transforms the menu item to suggestions format
 
 				const menuSuggestions: IChip[] = menuItem.menu.map((subItem) => ({
@@ -208,7 +217,15 @@ class PanelCardController implements ng.IController {
 	}
 
 	public toggleFilterChips(item: IMenuItem): void {
-		const chipIndex = this.chipsFilterChips.findIndex( (c) => c.type === item.value && c.value === item.subItem.value);
+		if (item.subItem.date) { // TODO: find a way to generalize this and make it cleaner.
+			this.toggleDateFilterChip(item);
+		} else {
+			this.toggleStringFilterChip(item);
+		}
+	}
+
+	public toggleStringFilterChip(item: IMenuItem) {
+		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value && c.value === item.subItem.value) ;
 
 		if (chipIndex === -1) {
 			this.chipsFilterChips.push({
@@ -219,6 +236,22 @@ class PanelCardController implements ng.IController {
 			});
 		} else {
 			this.chipsFilterChips.splice(chipIndex, 1);
+		}
+	}
+
+	public toggleDateFilterChip(item: IMenuItem) {
+		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value) ;
+		const newChip: IChip = {
+			name: this.$filter("date")(item.subItem.dateValue, "d/M/yyyy"),
+			nameType: item.value + item.subItem.label,
+			value: item.subItem.dateValue,
+			type: item.value + "_" + item.subItem.value
+		};
+
+		if (chipIndex === -1) {
+			this.chipsFilterChips.push(newChip);
+		} else {
+			this.chipsFilterChips.splice(chipIndex, 1, newChip);
 		}
 	}
 

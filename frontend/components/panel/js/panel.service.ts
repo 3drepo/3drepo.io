@@ -211,7 +211,7 @@ export class PanelService {
 					toggle: false
 				},
 				{
-					value: "assigned_roles", // the whole menu will be replaced once the assigened roles are loaded
+					value: "assigned_roles", // the whole menu will be replaced once the assigned roles are loaded
 					hidden: false,
 					label: "Assigned to",
 					toggle: false
@@ -224,15 +224,17 @@ export class PanelService {
 					menu: [{
 							hidden: false,
 							value: "from",
-							label: "From:",
+							label: "From",
 							stopClose: true,
+							toggleFilterChips: true,
 							date: true
 						},
 						{
 							hidden: false,
 							value: "to",
-							label: "To:     ",
+							label: "To     ",
 							stopClose: true,
+							toggleFilterChips: true,
 							date: true
 						}
 					]
@@ -456,28 +458,55 @@ export class PanelService {
 	 * @param menuType the menu type. ie: "priority" from  the issues panel card
 	 * @param menuSubType the submenu type. ie: "none" in the priority menu from the issues panel card
 	 */
-	public toggleChipsValueFromMenu(panelCardType: string, menuType: string, menuSubType: string) {
+	public toggleValueFromMenu(panelCardType: string, menuType: string, menuSubType: string) {
+		this.getPanelsByType(panelCardType).forEach(
+			(panelCard) => this.toggleSelectedFromMenuInPanelCard(panelCard, menuType, menuSubType));
+	}
+
+	public toggleSelectedFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string ) {
+		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+		if (!!item) {
+			item.selected = !item.selected;
+		}
+	}
+
+	public setDateValueFromMenu(panelCardType: string, menuType: string, menuSubType: string, value: Date) {
+		this.getPanelsByType(panelCardType).forEach(
+			(panelCard) => this.setDateValueFromMenuInPanelCard(panelCard, menuType, menuSubType, value));
+	}
+
+	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, value: Date ) {
+		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+		if (!!item) {
+			item.dateValue = value;
+		}
+	}
+
+	public getSubmenu(panelCard: IPanelCard,  menuType: string, menuSubType: string): IMenuItem {
+		const menu = panelCard.menu.find((m) => m.value === menuType);
+		if (!!menu) {
+			const item = menu.menu.find((m) => m.value === menuSubType );
+			return item;
+		}
+
+		return null;
+	}
+
+	public getPanelsByType(panelCardType: string): IPanelCard[] {
+		const panels: IPanelCard[] = [];
 		let panelCard = this.panelCards.left.find( (pc) => pc.type === panelCardType);
 
 		if (!!panelCard) {
-			this.toggleChipsValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
+			panels.push(panelCard);
 		}
 
 		panelCard = this.panelCards.right.find( (pc) => pc.type === panelCardType);
 
 		if (!!panelCard) {
-			this.toggleChipsValueFromMenuInPanelCard(panelCard, menuType, menuSubType);
+			panels.push(panelCard);
 		}
-	}
 
-	public toggleChipsValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string ) {
-		const menu = panelCard.menu.find((m) => m.value === menuType);
-		if (!!menu && menu.toggleFilterChips) {
-			const item = menu.menu.find((m) => m.value === menuSubType );
-			if (!!item) {
-				item.selected = !item.selected;
-			}
-		}
+		return panels;
 	}
 
 	public hideSubModels(issuesCardIndex: number, hide: boolean) {

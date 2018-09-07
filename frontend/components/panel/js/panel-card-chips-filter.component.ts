@@ -18,7 +18,7 @@
 export interface IChip {
 	name: string;
 	nameType: string;
-	value: string;
+	value: any;
 	type: string;
 }
 
