@@ -19,7 +19,7 @@ import { IMenuItem } from "./panel.service";
 class PanelCardOptionMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$timeout"
+		"$element"
 	];
 
 	public menu;
@@ -27,10 +27,13 @@ class PanelCardOptionMenuController implements ng.IController {
 	public selectedMenuOption;
 
 	constructor(
-		private $timeout: ng.ITimeoutService
+		private $element: ng.IRootElementService
 	) {}
 
-	public $ngInit() {}
+	public addPreventCloseToDatepicker() {
+		const pickerButtons = this.$element[0].getElementsByClassName("md-datepicker-triangle-button");
+		Array.from(pickerButtons).forEach((p) => p.setAttribute("md-prevent-menu-close", "true"));
+	}
 
 	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem = null) {
 		menuItem = angular.copy(menuItem);
@@ -48,6 +51,8 @@ class PanelCardOptionMenuController implements ng.IController {
 			}
 		}
 
+		// If its a submenu item thats being clicked then
+		// pass on the parent and the item as a subitem
 		if (!!parentMenuItem) {
 			const subitem = menuItem;
 			menuItem = angular.copy(parentMenuItem);
@@ -57,6 +62,13 @@ class PanelCardOptionMenuController implements ng.IController {
 		this.selectedMenuOption = menuItem;
 	}
 
+	public onDateChanged(item: IMenuItem, parentMenuItem: IMenuItem , menu) {
+		console.log("date changed" + item.date);
+
+		if (!item.stopClose) {
+			menu.close(true, {closeAll: true});
+		}
+	}
 }
 
 export const PanelCardOptionMenuComponent: ng.IComponentOptions = {

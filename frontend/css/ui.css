@@ -177,3 +177,6 @@ html, body {
 	background-color: #3171B6;
 }
 
+.threeDRepo md-menu-item p {
+	white-space: pre-wrap;
+}

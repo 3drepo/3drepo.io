@@ -22,6 +22,5 @@ md-menu-bar
 						md-menu-item.menuHighlight(
 							ng-repeat="menuItem in menuItem.menu track by menuItem.label"
 							ng-if="!menuItem.hidden")
-
 							md-button(ng-click="vm.menuItemSelected(menuItem, parentItem)" aria-label="{{menuItem.label}}" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
 								ng-include(src="'/templates/panel-card-option-menu-item.html'")

@@ -116,9 +116,9 @@ export class IssuesService {
 					label: role._id
 				}));
 
-				this.panelService.setChipFilterMenuItem("issues", {label: "Created By", value: "creator_role"}, menuChips);
+				this.panelService.setChipFilterMenuItem("issues", {label: "Created by", value: "creator_role"}, menuChips);
 
-				this.panelService.setChipFilterMenuItem("issues", {label: "Assigned To", value: "assigned_roles"}, menuChips);
+				this.panelService.setChipFilterMenuItem("issues", {label: "Assigned to", value: "assigned_roles"}, menuChips);
 
 				return this.state.availableJobs;
 			});

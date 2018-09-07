@@ -54,6 +54,8 @@ export interface IMenuItem {
 	disabled?: boolean;
 	menu?: IMenuItem[];
 	subItem?: IMenuItem;
+	date?: boolean;
+	dateValue?: Date;
 }
 
 export class PanelService {
@@ -195,6 +197,45 @@ export class PanelService {
 							toggle: true,
 							stopClose: true
 						}]
+				},
+				{
+					value: "topic_type", // the whole menu will be replaced once the topic types are loaded
+					hidden: false,
+					label: "Type",
+					toggle: false
+				},
+				{
+					value: "creator_role", // the whole menu will be replaced once the creators roles are loaded
+					hidden: false,
+					label: "Created by",
+					toggle: false
+				},
+				{
+					value: "assigned_roles", // the whole menu will be replaced once the assigened roles are loaded
+					hidden: false,
+					label: "Assigned to",
+					toggle: false
+				},
+				{
+					value: "date",
+					hidden: false,
+					label: "Date",
+					toggle: false,
+					menu: [{
+							hidden: false,
+							value: "from",
+							label: "From:",
+							stopClose: true,
+							date: true
+						},
+						{
+							hidden: false,
+							value: "to",
+							label: "To:     ",
+							stopClose: true,
+							date: true
+						}
+					]
 				},
 				{
 					hidden: false,
