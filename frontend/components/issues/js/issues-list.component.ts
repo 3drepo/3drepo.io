@@ -26,6 +26,7 @@ class IssuesListController implements ng.IController {
 		"$timeout",
 		"$compile",
 		"$element",
+		"$filter",
 
 		"APIService",
 		"IssuesService",
@@ -55,6 +56,7 @@ class IssuesListController implements ng.IController {
 		private $timeout,
 		private $compile,
 		private $element,
+		private $filter,
 
 		private apiService: APIService,
 		private issuesService: IssuesService,
@@ -89,7 +91,29 @@ class IssuesListController implements ng.IController {
 			this.issuesService.showIssuePins();
 		});
 
-		this.$scope.$watchCollection("vm.filterChips", (chips) => {
+		this.$scope.$watchCollection("vm.filterChips", (chips: IChip[], oldChips: IChip[]) => {
+			const dateFromChip = chips.find((c) => c.type === "date_from");
+			const dateToChip = chips.find((c) => c.type === "date_to");
+
+			const oldDateFromChip = oldChips.find((c) => c.type === "date_from");
+			const oldDateToChip = oldChips.find((c) => c.type === "date_to");
+
+			if (!!dateFromChip && !!dateToChip) {
+				if (dateFromChip.value.getTime() > dateToChip.value.getTime()) {
+					if (!oldDateFromChip  || dateFromChip.value !== oldDateFromChip.value) {
+						this.issuesService.setToDateMenuValue(dateFromChip.value);
+						dateToChip.value = dateFromChip.value;
+						dateToChip.name = this.$filter("date")(dateToChip.value, "d/M/yyyy");
+					}
+
+					if (!oldDateToChip  || dateToChip.value !== oldDateToChip.value) {
+						this.issuesService.setFromDateMenuValue(dateToChip.value);
+						dateFromChip.value = dateToChip.value;
+						dateFromChip.name = this.$filter("date")(dateFromChip.value, "d/M/yyyy");
+					}
+				}
+			}
+
 			this.issuesService.setupIssuesToShow(this.model, chips);
 		});
 

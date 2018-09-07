@@ -164,8 +164,8 @@ class PanelCardController implements ng.IController {
 			diff.filter((c) => !Date.prototype.isPrototypeOf(c.value)) // filter out the date types
 				.forEach((c) => this.panelService.toggleValueFromMenu(this.contentData.type, c.type, c.value));
 
-			// In case any date chip cas been deleted.
-			diff.filter((c) => Date.prototype.isPrototypeOf(c.value) && oldValue.indexOf(c) > -1 )
+			// In case any date chip has been deleted.
+			oldValue.filter((c) => Date.prototype.isPrototypeOf(c.value) && newValue.map((nv) => nv.type).indexOf(c.type) === -1)
 				.forEach((c) => {
 					const types = c.type.split("_");
 					this.panelService.setDateValueFromMenu(this.contentData.type,  types[0], types[1], null);
@@ -240,7 +240,7 @@ class PanelCardController implements ng.IController {
 	}
 
 	public toggleDateFilterChip(item: IMenuItem) {
-		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value) ;
+		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value + "_" + item.subItem.value) ;
 		const newChip: IChip = {
 			name: this.$filter("date")(item.subItem.dateValue, "d/M/yyyy"),
 			nameType: item.value + item.subItem.label,

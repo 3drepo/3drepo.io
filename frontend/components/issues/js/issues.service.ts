@@ -163,6 +163,14 @@ export class IssuesService {
 		return false;
 	}
 
+	public setFromDateMenuValue(date: Date) {
+		this.panelService.setDateValueFromMenu("issues", "date", "from", date);
+	}
+
+	public setToDateMenuValue(date: Date) {
+		this.panelService.setDateValueFromMenu("issues", "date", "to", date);
+	}
+
 	// Helper  for searching strings
 	public stringSearch(superString, subString) {
 		if (!superString) {
@@ -215,7 +223,7 @@ export class IssuesService {
 		}
 
 		if (criteria.date_to) {
-			//  86399000 is the 23:59:59 in milliseconds
+			//  86399000 is 23:59:59 in milliseconds
 			filters.push((issue) => issue.created <= criteria.date_to[0].getTime() + 86399000 );
 		}
 
