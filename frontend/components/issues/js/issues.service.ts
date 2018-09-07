@@ -205,20 +205,19 @@ export class IssuesService {
 		filters = filters.concat(this.createFilterByField(criteria, "assigned_roles"));
 
 		filters = filters.concat(this.createFilterByField(criteria, "topic_type"));
-/*
 
 		if (!this.state.issueDisplay.showSubModelIssues) {
 			filters.push((issue) => issue.model === model);
 		}
 
-		if ((this.state.issueDisplay.dateRange || []).length > 0 ) {
-			filters.push((issue) => issue.created >= this.state.issueDisplay.dateRange[0].getTime() );
+		if (criteria.date_from) {
+			filters.push((issue) => issue.created >= criteria.date_from[0].getTime());
 		}
 
-		if ((this.state.issueDisplay.dateRange || []).length > 1 ) {
-			filters.push((issue) => issue.created <= this.state.issueDisplay.dateRange[1].getTime());
+		if (criteria.date_to) {
+			//  86399000 is the 23:59:59 in milliseconds
+			filters.push((issue) => issue.created <= criteria.date_to[0].getTime() + 86399000 );
 		}
-*/
 
 		// It filters the issue list by applying every filter to it.
 		const filteredIssues = issues.filter( (issue) => filters.every( (f) => f(issue)));
