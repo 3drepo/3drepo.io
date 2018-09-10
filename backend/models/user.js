@@ -1133,8 +1133,8 @@ schema.statics.getMembers = function (teamspace) {
 	promises.push(
 		getTeamspaceMembers,
 		getTeamspacePermissions,
-			getJobInfo
-			);
+		getJobInfo
+	);
 
 	return Promise.all(promises)
 		.then(([members = [], teamspacePermissions, memToJob = {}]) => {
@@ -1160,7 +1160,8 @@ schema.statics.getAllUsersInTeamspace = function (teamspace) {
 	});
 };
 
-schema.statics.findUsersInTeamspace = function (teamspace, fields) {	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
+schema.statics.findUsersInTeamspace = function (teamspace, fields) {
+	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
 	return this.find({account: "admin"}, query , fields);
 };
 
