@@ -102,6 +102,7 @@
   width: calc(100% - 20px - 18px) !important;
   left: 20px !important;
   margin-bottom: 1px;
+  font-weight: 500;  
 }
 
 .usersListCellSearch.md-input-focused > label,
