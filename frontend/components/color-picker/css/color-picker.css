@@ -1,12 +1,12 @@
 color-picker {
-	width: 100%;
-	min-width: 115px;
+	min-width: 50px;
 }
 
 .colorPicker {
 	height: 30px;
 	position: relative;
 	width: 100%;
+	padding-left: 1px;
 }
 
 .colorPickerSelect {
@@ -15,7 +15,19 @@ color-picker {
 	border-bottom: 1px solid rgba(0, 0, 0, .12);
 }
 
+.colorPickerValue,
+.colorPickerPlaceholderValue {
+	width: 16px;
+	height: 16px;
+	border-radius: 100%;
+}
+
+.colorPickerPlaceholderValue {
+	border: 2px dotted rgba(0, 0, 0, .38);
+}
+
 .colorPickerPlaceholder {
+	margin-left: 10px;
 	color: rgba(0, 0, 0, .38);
 }
 
