@@ -30,6 +30,19 @@
   background-color: #E0E0E0 !important;
 }
 
+.accountUserManagement .addButton[disabled="disabled"] .addButtonEventCatcher {
+  visibility: visible;
+}
+
+.accountUserManagement .addButtonEventCatcher {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+}
+
 .accountUserManagement .addPanel {
   z-index: 2;
   right: 67px;

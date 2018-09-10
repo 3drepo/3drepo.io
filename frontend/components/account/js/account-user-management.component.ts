@@ -215,7 +215,9 @@ class AccountUserManagementController implements ng.IController {
 	 * @param forceHide
 	 */
 	public toggleNewDataPanel(forceHide = false): void {
-		this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
+		if (!this.isAddButtonDisabled()) {
+			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
+		}
 	}
 
 	/**
@@ -263,6 +265,11 @@ class AccountUserManagementController implements ng.IController {
 
 	public onJobsChange(updatedJobs): void {
 		this.jobs = [...updatedJobs];
+	}
+
+	public isAddButtonDisabled(): boolean {
+		return (this.members && this.members.length === this.licencesLimit && this.selectedTab === this.TABS_TYPES.USERS)
+			|| this.isLoadingTeamspace;
 	}
 }
 
