@@ -565,7 +565,7 @@ class AccountItemsController implements ng.IController {
 	 */
 	public saveFederation(teamspaceName: string, projectName: string) {
 		let promise;
-		const project = this.AccountService.getProject(this.accounts, teamspaceName, projectName);
+		const project = this.AccountService.getSelectedProjectDetails(this.accounts, teamspaceName, projectName);
 		const isEdit = this.federationData._isEdit;
 
 		const currentFederation = this.federationData.name;

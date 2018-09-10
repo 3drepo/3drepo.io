@@ -37,6 +37,7 @@
     "angular-ui-router": "0.4.2",
     "font-awesome": "4.7.0",
     "material-design-icons": "3.0.1",
+    "simplebar": "^3.0.0-beta.4",
     "socket.io-client": "2.0.4",
     "sw-precache": "5.2.0",
     "zxcvbn": "^4.4.2"
@@ -62,6 +63,7 @@
     "gulp-typedoc": "2.2.0",
     "gulp-util": "3.0.8",
     "gulp-watch": "5.0.0",
+    "inquirer-directory": "^2.1.0",
     "mocha": "4.0.1",
     "protractor": "5.3.1",
     "ts-loader": "4.3.0",

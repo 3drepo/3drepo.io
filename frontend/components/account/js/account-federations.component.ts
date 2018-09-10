@@ -15,12 +15,16 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {PERMISSIONS_VIEWS} from "../../projects-permissions/js/projects-permissions.component";
+import {TABS_TYPES} from "./account-user-management.component";
+
 class AccountFederationsController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"$location",
 		"$timeout",
+		"$state",
 
 		"APIService",
 		"ClientConfigService",
@@ -60,6 +64,7 @@ class AccountFederationsController implements ng.IController {
 		private $scope: ng.IScope,
 		private $location: ng.ILocationService,
 		private $timeout: ng.ITimeoutService,
+		private $state,
 
 		private APIService,
 		private ClientConfigService,
@@ -343,16 +348,15 @@ class AccountFederationsController implements ng.IController {
 	 * Set up permissions of federation
 	 */
 	public goToPermissions(event: any, account: any, project: any, model: any) {
-
-		// Account is an object here
-		this.$location.search("account", account.account);
-		this.$location.search("project", project.name);
-		this.$location.search("model", model.model);
-
-		this.$location.search("page", "assign");
-		this.onShowPage({page: "assign", callingPage: "teamspaces"});
+		this.$state.go(this.$state.$current.name, {
+			page: "userManagement",
+			project: project.name,
+			teamspace: account,
+			modelId: model.model,
+			tab: TABS_TYPES.PROJECTS,
+			view: PERMISSIONS_VIEWS.MODELS
+		}, { notify: false });
 	}
-
 }
 
 export const AccountFederationsComponent: ng.IComponentOptions = {

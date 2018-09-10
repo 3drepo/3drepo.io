@@ -1,0 +1,100 @@
+.permissionsList(ng-disabled="vm.ngDisabled || !vm.data.length")
+	.permissionsListHeader(layout="row" layout-align="start center")
+		.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
+			md-checkbox(
+				ng-if="!(vm.hasSelectedItem && !vm.shouldSelectAllItems)"
+				ng-disabled="vm.ngDisabled || !vm.processedData.length"
+				ng-change="vm.toggleAllItems()"
+				ng-checked="vm.shouldSelectAllItems"
+				ng-model="vm.shouldSelectAllItems")
+			md-checkbox(
+				ng-if="vm.hasSelectedItem && !vm.shouldSelectAllItems"
+				md-indeterminate="true"
+				ng-disabled="vm.ngDisabled || !vm.processedData.length"
+				ng-click="vm.toggleAllItems(true)")
+	
+		.permissionsListCell.permissionsListUser(layout="row" layout-align="start center" flex="25")
+			list-sort-button(
+				ng-disabled="vm.ngDisabled || !vm.processedData.length"
+				ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.USERS}"
+				on-change="vm.setSortType(vm.SORT_TYPES.USERS, order)")
+
+			md-input-container.permissionsListCellSearch(layout="row" layout-align="start center")
+				md-icon.angular-material-icons search
+				input(
+					ng-disabled="vm.ngDisabled || !vm.data.length"
+					ng-model="vm.searchText"
+					ng-model-options="{debounce: 200}"
+					placeholder="User"
+					ng-change="vm.onSearch()")
+
+		md-radio-group(
+			ng-model="vm.permissionsForSelected"
+			ng-change="vm.updatePermissionsForSelected(vm.permissionsForSelected)"
+			layout="row"
+			layout-align="start center")
+			.permissionsListCell.noPadding(
+				layout="column"
+				layout-align="center center"
+				ng-style="{'width': permission.width}"
+				ng-repeat="permission in vm.permissions")
+				div(layout="row" layout-align="center center")
+					list-sort-button(
+						ng-disabled="vm.ngDisabled || !vm.processedData.length"
+						ng-class="{'active': vm.currentSort.type === vm.SORT_TYPES.FIELD && vm.currentSort.config.key === permission.key}"
+						on-change="vm.setSortType(vm.SORT_TYPES.FIELD, order, {key: permission.key})")
+					.usersListCellLabel {{::permission.label}}
+				md-radio-button(
+					ng-disabled="vm.ngDisabled || !vm.hasSelectedItem || !vm.data.length || (vm.mode === vm.MODES.MODELS && permission.key === vm.MODEL_ROLES_TYPES.ADMINISTRATOR)"
+					ng-value="permission.key"
+					aria-label="{{::permission.label}}")
+				md-tooltip.permissionsListTooltip {{::permission.tooltip}}
+
+	.permissionsListLoader(ng-if="vm.isLoading" layout="row" layout-align="center center")
+		md-progress-circular(md-mode="indeterminate" md-diameter="20")
+
+	.permissionsListPlaceholder(
+		ng-if="!vm.isLoading && !vm.data.length || vm.ngDisabled"
+		layout="row"
+		layout-align="center center")
+		p {{::vm.messageEmptyList}}
+
+	.permissionsListBody(
+		ng-if="!vm.isLoading && vm.data.length"
+		data-simplebar
+		data-simplebar-x-hidden)
+		div.permissionsListRow(
+			ng-repeat="row in vm.processedData track by row.user"
+			layout="row"
+			layout-align="start center")
+
+			//Checkbox
+			.permissionsListCell.permissionsListCheckbox(layout="row" layout-align="center center" flex="10")
+				md-checkbox(
+					ng-if="!vm.isDisabledRow(row)"
+					ng-model="row.isSelected"
+					ng-change="vm.onSelectionChange()")
+				md-icon.permissionsListAdminIcon.angular-material-icons(
+					ng-if="vm.isDisabledRow(row)"
+					md-svg-src="icons/how_to_reg.svg"
+				)
+
+			//User details
+			.permissionsListCell.permissionsListUser(flex="25")
+				member-card(data="row" highlight-text="vm.searchText")
+
+			//Permissions
+			md-radio-group(
+				ng-model="row.key"
+				ng-change="vm.updatePermission(row)"
+				layout="row"
+				layout-align="start center")
+				.permissionsListCell.noPadding(
+					ng-repeat="permission in vm.permissions"
+					ng-style="{'width': permission.width}"
+					layout="row"
+					layout-align="center center")
+					md-radio-button(
+						ng-disabled="(vm.mode === vm.MODES.MODELS && permission.key === vm.MODEL_ROLES_TYPES.ADMINISTRATOR) || vm.isDisabledRow(row)"
+						ng-value="permission.key"
+						aria-label="{{::permission.label}}")
