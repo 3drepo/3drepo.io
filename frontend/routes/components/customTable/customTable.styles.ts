@@ -16,12 +16,17 @@
  */
 
 import styled from 'styled-components';
+import Table from '@material-ui/core/Table';
 import TableRow from '@material-ui/core/TableRow';
+import * as CellUser from './components/cellUser/cellUser.styles';
 
-export const Container = styled.div`
+export const Container = styled(Table)`
   width: 100%;
-  color: rgba(0, 0, 0, .6) !important;
-  font-size: 14px;
+
+  ${CellUser.Name} {
+    color: rgba(0, 0, 0, .6);
+    font-size: 14px;
+  }
 `;
 
 export const Row = styled(TableRow)`

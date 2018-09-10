@@ -25,12 +25,6 @@ import { Container, Row } from './customTable.styles';
 import { CellUser } from './components/cellUser/cellUser.component';
 import { CellJob } from './components/cellJob/cellJob.component';
 
-interface IProps {
-	cells: any[];
-	rows: any[];
-	onChange: any;
-}
-
 export const CELL_TYPES = {
 	USER: 1,
 	JOB: 2,
@@ -41,13 +35,19 @@ export const CELL_TYPES = {
 };
 
 const HEADER_CELL_COMPONENTS = {
-	//[CELL_TYPES.USER]: 
+	// [CELL_TYPES.USER]:
 };
 
 const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: CellUser,
 	[CELL_TYPES.JOB]: CellJob
 };
+
+interface IProps {
+	cells: any[];
+	rows: any[];
+	onChange: any;
+}
 
 export class CustomTable extends React.PureComponent<IProps, any> {
 	/**
@@ -87,15 +87,13 @@ export class CustomTable extends React.PureComponent<IProps, any> {
 		const { cells, rows } = this.props;
 
 		return (
-			<Container>
-				<Table aria-labelledby="Users list">
-					<TableHead>
-						<Row>{this.renderHeader(cells)}</Row>
-					</TableHead>
-					<TableBody>
-						{this.renderRows(rows, cells)}
-					</TableBody>
-				</Table>
+			<Container aria-labelledby="Users list">
+				<TableHead>
+					<Row>{this.renderHeader(cells)}</Row>
+				</TableHead>
+				<TableBody>
+					{this.renderRows(rows, cells)}
+				</TableBody>
 			</Container>
 		);
 	}
