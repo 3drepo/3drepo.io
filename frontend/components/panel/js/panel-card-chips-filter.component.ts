@@ -36,7 +36,7 @@ class PanelCardChipsFilterController implements ng.IController {
 	private placeHolder: string = "Search";
 
 	constructor(private $mdConstant: any) {
-		this.chipSeparators = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA, $mdConstant.KEY_CODE.SPACE];
+		this.chipSeparators = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
 	}
 
 	public $onInit() {

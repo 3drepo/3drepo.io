@@ -78,6 +78,8 @@ export class IssuesService {
 				excludeRoles: []
 			},
 			availableJobs : [],
+			allTopicTypes : [],
+			allJobs: [],
 			modelUserJob: null
 		};
 	}
@@ -96,6 +98,23 @@ export class IssuesService {
 				if (newIssues) {
 					newIssues.forEach(this.populateIssue.bind(this));
 					this.state.allIssues = newIssues;
+
+					const newJobs: any = {};
+					const newTopicTypes: any = {};
+					newIssues.forEach( (i) =>  {
+						newJobs[i.creator_role] = true;
+						newTopicTypes[i.topic_type] = true;
+						i.assigned_roles.forEach( (r) => newJobs[r] = true);
+					});
+
+					const jobs = Object.keys(newJobs).map( (j) => ({_id : j }));
+					this.addJobsToAllJobs(jobs);
+
+					const toPascal = (w) => w.split("_").map( (ws) => ws[0].toUpperCase() + ws.substring(1)).join(" ");
+					const topicTypes = Object.keys(newTopicTypes).map( (t) => ({ value: t , label : toPascal(t)} )) ;
+
+					this.addToAllTypes(topicTypes);
+
 				} else {
 					throw new Error("Error");
 				}
@@ -110,19 +129,31 @@ export class IssuesService {
 		return this.apiService.get(url)
 			.then((response) => {
 				this.state.availableJobs = response.data;
-
-				const menuChips =  response.data.map( (role ) => ({
-					value: role._id,
-					label: role._id
-				}));
-
-				this.panelService.setChipFilterMenuItem("issues", {label: "Created by", value: "creator_role"}, menuChips);
-
-				this.panelService.setChipFilterMenuItem("issues", {label: "Assigned to", value: "assigned_roles"}, menuChips);
-
+				this.addJobsToAllJobs(response.data);
 				return this.state.availableJobs;
 			});
+	}
 
+	public addJobsToAllJobs(jobs: any[]) {
+		const newJobs = jobs.filter((r) => !this.state.allJobs.find( (j) => j._id === r._id ));
+		this.state.allJobs = this.state.allJobs.concat(newJobs).sort( (a, b) => a._id > b._id ? 1 : -1);
+
+		const menuChips =  this.state.allJobs.map((role ) => ({
+			value: role._id,
+			label: role._id
+		}));
+
+		this.panelService.setChipFilterMenuItem("issues", {label: "Created by", value: "creator_role"}, menuChips);
+		this.panelService.setChipFilterMenuItem("issues", {label: "Assigned to", value: "assigned_roles"}, menuChips);
+	}
+
+	public addToAllTypes(topicTypes: any) {
+		const newTopicsTypes = topicTypes.filter((r) => !this.state.allTopicTypes.find( (j) => j.value === r.value ));
+
+		this.state.allTopicTypes = this.state.allTopicTypes.concat(newTopicsTypes)
+									.sort( (a, b) => a.label > b.label ? 1 : -1);
+
+		this.panelService.setChipFilterMenuItem("issues", {label: "Type", value: "topic_type"}, topicTypes);
 	}
 
 	public getUserJobForModel(account: string, model: string): Promise<any> {
@@ -133,10 +164,6 @@ export class IssuesService {
 				this.state.modelUserJob = response.data;
 				return this.state.modelUserJob;
 			});
-	}
-
-	public setTypesMenu(topicTypes: any) {
-		this.panelService.setChipFilterMenuItem("issues", {label: "Type", value: "topic_type"}, topicTypes);
 	}
 
 	public createBlankIssue(creatorRole) {

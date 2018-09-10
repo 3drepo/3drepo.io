@@ -162,7 +162,7 @@ class IssuesController implements ng.IController {
 				this.subModels = this.modelSettings.subModels || [];
 				this.watchNotification();
 
-				this.issuesService.setTypesMenu((this.modelSettings.properties && this.modelSettings.properties.topicTypes || []));
+				this.issuesService.addToAllTypes((this.modelSettings.properties && this.modelSettings.properties.topicTypes || []));
 			}
 		});
 

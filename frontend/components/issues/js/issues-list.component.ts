@@ -240,7 +240,7 @@ class IssuesListController implements ng.IController {
 			this.contentHeight({height: issuesHeight });
 		} else {
 			this.toShow = "info";
-			this.info = "There are currently no open issues";
+			this.info = this.filterChips.length > 0 ? "No results found" : "There are currently no open issues";
 			this.contentHeight({height: this.issuesService.state.heights.infoHeight});
 		}
 

@@ -458,16 +458,15 @@ export class PanelService {
 	 * @param menuType the menu type. ie: "priority" from  the issues panel card
 	 * @param menuSubType the submenu type. ie: "none" in the priority menu from the issues panel card
 	 */
-	public toggleValueFromMenu(panelCardType: string, menuType: string, menuSubType: string) {
+	public setSelectedFromMenu(panelCardType: string, menuType: string, menuSubType: string, selected: boolean) {
 		this.getPanelsByType(panelCardType).forEach(
-			(panelCard) => this.toggleSelectedFromMenuInPanelCard(panelCard, menuType, menuSubType));
+			(panelCard) => this.setSelectedMenuInPanelCard(panelCard, menuType, menuSubType, selected));
 	}
 
-	public toggleSelectedFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string ) {
+	public setSelectedMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, selected: boolean) {
 		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
-		if (!!item) {
-			item.selected = !item.selected;
-		}
+		if (!item) { return; }
+		item.selected = selected;
 	}
 
 	public setDateValueFromMenu(panelCardType: string, menuType: string, menuSubType: string, value: Date) {
@@ -477,32 +476,27 @@ export class PanelService {
 
 	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, value: Date ) {
 		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
-		if (!!item) {
-			item.dateValue = value;
-		}
+		if (!item) { return; }
+		item.dateValue = value;
 	}
 
 	public getSubmenu(panelCard: IPanelCard,  menuType: string, menuSubType: string): IMenuItem {
 		const menu = panelCard.menu.find((m) => m.value === menuType);
-		if (!!menu) {
-			const item = menu.menu.find((m) => m.value === menuSubType );
-			return item;
-		}
-
-		return null;
+		if (!menu) { return null; }
+		return menu.menu.find((m) => m.value === menuSubType );
 	}
 
 	public getPanelsByType(panelCardType: string): IPanelCard[] {
 		const panels: IPanelCard[] = [];
 		let panelCard = this.panelCards.left.find( (pc) => pc.type === panelCardType);
 
-		if (!!panelCard) {
+		if (panelCard) {
 			panels.push(panelCard);
 		}
 
 		panelCard = this.panelCards.right.find( (pc) => pc.type === panelCardType);
 
-		if (!!panelCard) {
+		if (panelCard) {
 			panels.push(panelCard);
 		}
 

@@ -36,8 +36,6 @@ class PanelCardOptionMenuController implements ng.IController {
 	}
 
 	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem) {
-		menuItem = angular.copy(menuItem);
-
 		if (menuItem.hasOwnProperty("toggle")) {
 			if (menuItem.toggle) {
 				menuItem.selected = !menuItem.selected;
@@ -50,6 +48,8 @@ class PanelCardOptionMenuController implements ng.IController {
 				menuItem.secondSelected = !menuItem.secondSelected;
 			}
 		}
+
+		menuItem = angular.copy(menuItem);
 
 		// If its a submenu item thats being clicked then
 		// pass on the parent and the item as a subitem

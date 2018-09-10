@@ -71,7 +71,6 @@ class PanelCardController implements ng.IController {
 
 		this.chipsFilterVisible = false; // This flag is only set in the panel-card-option-chip-filter.component
 		this.chipsFilterSuggestions = [];
-		this.chipsFilterVisible = false;
 		this.chipsFilterChips = [];
 
 		this.visibleStatus = false;
@@ -154,22 +153,21 @@ class PanelCardController implements ng.IController {
 		});
 
 		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: IChip[], oldValue: IChip[]) => {
+			const deletedChips = oldValue.filter((ov) => newValue.map((nv) => nv.type).indexOf(ov.type) === -1);
+			const addedChips = newValue.filter((nv) => oldValue.map((ov) => ov.type).indexOf(nv.type) === -1);
 
-			let diff: IChip[] = newValue.filter( (nv) =>
-						!oldValue.find((ov) => nv.type === ov.type && nv.value === ov.value) );
-
-			diff = diff.concat(oldValue.filter((ov) =>
-						!newValue.find((nv) => nv.type === ov.type && nv.value === ov.value)) );
-
-			diff.filter((c) => !Date.prototype.isPrototypeOf(c.value)) // filter out the date types
-				.forEach((c) => this.panelService.toggleValueFromMenu(this.contentData.type, c.type, c.value));
-
-			// In case any date chip has been deleted.
-			oldValue.filter((c) => Date.prototype.isPrototypeOf(c.value) && newValue.map((nv) => nv.type).indexOf(c.type) === -1)
-				.forEach((c) => {
+			deletedChips.forEach((c) => {
+				if (Date.prototype.isPrototypeOf(c.value)) {
 					const types = c.type.split("_");
 					this.panelService.setDateValueFromMenu(this.contentData.type,  types[0], types[1], null);
-				});
+					return;
+				}
+				this.panelService.setSelectedFromMenu(this.contentData.type, c.type, c.value, false);
+			});
+
+			addedChips.forEach((c) => {
+				this.panelService.setSelectedFromMenu(this.contentData.type, c.type, c.value, true);
+			});
 
 			if (newValue.length > 0 && !this.chipsFilterVisible) {
 				this.chipsFilterVisible = true;
@@ -240,10 +238,11 @@ class PanelCardController implements ng.IController {
 	}
 
 	public toggleDateFilterChip(item: IMenuItem) {
-		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value + "_" + item.subItem.value) ;
+		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value + "_" + item.subItem.value);
+
 		const newChip: IChip = {
 			name: this.$filter("date")(item.subItem.dateValue, "d/M/yyyy"),
-			nameType: item.value + item.subItem.label,
+			nameType: item.label + item.subItem.label,
 			value: item.subItem.dateValue,
 			type: item.value + "_" + item.subItem.value
 		};
