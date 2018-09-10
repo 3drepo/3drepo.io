@@ -3,7 +3,7 @@ color-picker {
 }
 
 .colorPicker {
-	height: 30px;
+	height: 32px;
 	position: relative;
 	width: 100%;
 	padding-left: 1px;
@@ -16,19 +16,14 @@ color-picker {
 }
 
 .colorPickerValue,
-.colorPickerPlaceholderValue {
+.colorPickerPlaceholder{
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
 }
 
-.colorPickerPlaceholderValue {
-	border: 2px dotted rgba(0, 0, 0, .38);
-}
-
 .colorPickerPlaceholder {
-	margin-left: 10px;
-	color: rgba(0, 0, 0, .38);
+	border: 2px dotted rgba(0, 0, 0, .38);
 }
 
 .colorPickerIcon {

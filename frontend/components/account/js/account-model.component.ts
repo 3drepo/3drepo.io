@@ -75,8 +75,6 @@ class AccountModelController implements ng.IController {
 	constructor(
 		private $scope: any,
 		private $location: any,
-		private $timeout: any,
-		private $interval: any,
 		private $filter: any,
 		private $state: any,
 

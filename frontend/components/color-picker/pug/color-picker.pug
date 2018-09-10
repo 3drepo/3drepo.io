@@ -9,13 +9,7 @@
 			ng-if="vm.color"
 			ng-style="{'background-color': vm.ngModel}")
 
-		.colorPickerPlaceholderValue(ng-if="!vm.color")
-
-		.colorPickerPlaceholder(
-			ng-if="vm.placeholder && !vm.color"
-			flex
-			layout="row"
-			layout-align="start center") {{::vm.placeholder}}
+		.colorPickerPlaceholder(ng-if="!vm.color")
 
 		.colorPickerIcon(flex="none")
 			md-icon.angular-material-icons arrow_drop_down

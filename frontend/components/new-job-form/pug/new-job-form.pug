@@ -1,13 +1,16 @@
 form.newJobForm(name="newJobForm" layout="column")
 	.newJobFormTitle {{::vm.title}}
-	md-input-container(md-no-float="true")
-		input(ng-model="vm.newJob._id" placeholder="Set job name")
 
-	color-picker(
-		ng-model="vm.newJob.color"
-		ng-disabled="!vm.colors.length"
-		placeholder="Select a color"
-		predefined-colors="vm.colors")
+	div(layout="row" layout-align="start start")
+		md-input-container(md-no-float="true" flex)
+			input(ng-model="vm.newJob._id" placeholder="Set job name")
+
+		div(flex="5")
+
+		color-picker(
+			ng-model="vm.newJob.color"
+			ng-disabled="!vm.colors.length"
+			predefined-colors="vm.colors")
 
 	md-button.md-accent.md-raised.newJobFormButton(
 		ng-disabled="!vm.newJob._id"

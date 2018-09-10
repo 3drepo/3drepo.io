@@ -171,11 +171,15 @@ class ColorPickerController implements ng.IController {
 	public toggleCanvasListeners = (shouldBind = true): void => {
 		const method = shouldBind ? "addEventListener" : "removeEventListener";
 
-		this.colorStripCanvas[method]("click", this.onStripCanvasClick, false);
+		if (this.colorStripCanvas) {
+			this.colorStripCanvas[method]("click", this.onStripCanvasClick, false);
+		}
 
-		this.colorBlockCanvas[method]("mousedown", this.onBlockCanvasClick.bind(null, true), false);
-		this.colorBlockCanvas[method]("mouseup", this.onBlockCanvasClick.bind(null, false), false);
-		this.colorBlockCanvas[method]("mousemove", this.onBlockCanvasMove, false);
+		if (this.colorBlockCanvas) {
+			this.colorBlockCanvas[method]("mousedown", this.onBlockCanvasClick.bind(null, true), false);
+			this.colorBlockCanvas[method]("mouseup", this.onBlockCanvasClick.bind(null, false), false);
+			this.colorBlockCanvas[method]("mousemove", this.onBlockCanvasMove, false);
+		}
 	}
 
 	public initializeBlockCanvas(): void {
@@ -308,8 +312,7 @@ export const ColorPickerComponent: ng.IComponentOptions = {
 	},
 	bindings: {
 		ngModel: "<",
-		predefinedColors: "<?",
-		placeholder: "@?"
+		predefinedColors: "<?"
 	},
 	controller: ColorPickerController,
 	controllerAs: "vm",
