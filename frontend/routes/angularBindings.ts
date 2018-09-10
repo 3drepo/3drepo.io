@@ -7,14 +7,14 @@ import { react2angular as wrap } from 'react2angular';
 
 // Components
 import { ReactButton } from './components/reactButton/reactButton.component';
-import { UsersList } from './components/usersList/usersList.component';
 
 // Routes
 import ReactRoute from './reactRoute/reactRoute.container';
+import Users from './users/users.container';
 
 angular
 	.module("3drepo")
 	.component("reactButton", wrap(ReactButton))
-	.component("usersList", wrap(UsersList))
+	.component("users", wrap(Users, ['users', 'jobs', 'onUsersChange']))
 
 	.component("reactRoute", wrap(ReactRoute));

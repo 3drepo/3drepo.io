@@ -16,6 +16,14 @@
  */
 
 import styled from 'styled-components';
-import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
-export const TableHeadContainer = styled(TableHead)``;
+export const Container = styled.div`
+  width: 100%;
+  color: rgba(0, 0, 0, .6) !important;
+  font-size: 14px;
+`;
+
+export const Row = styled(TableRow)`
+  height: 62px !important;
+`;

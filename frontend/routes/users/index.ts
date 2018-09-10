@@ -15,8 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const Container = styled.div`
-  width: 100%;
-`;
+export { default as Users } from './users.container';

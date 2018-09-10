@@ -61,19 +61,19 @@
 				md-on-select="vm.onTabChange()"
 				ng-disabled="!vm.isTeamspaceAdmin")
 				div(layout="column" layout-fill)
-					//- users-list-old(
-					//- 	flex
-					//- 	ng-if="!vm.isLoadingTeamspace"
-					//- 	layout="row"
-					//- 	members="vm.members"
-					//- 	jobs="vm.jobs"
-					//- 	current-teamspace="vm.currentTeamspace"
-					//- 	on-change="vm.onMembersChange(updatedMembers)")
-					users-list(
+					users-list-old(
 						flex
 						ng-if="!vm.isLoadingTeamspace"
 						layout="row"
 						members="vm.members"
+						jobs="vm.jobs"
+						current-teamspace="vm.currentTeamspace"
+						on-change="vm.onMembersChange(updatedMembers)")
+					users(
+						flex
+						ng-if="!vm.isLoadingTeamspace"
+						layout="row"
+						users="vm.members"
 						jobs="vm.jobs"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onMembersChange(updatedMembers)")

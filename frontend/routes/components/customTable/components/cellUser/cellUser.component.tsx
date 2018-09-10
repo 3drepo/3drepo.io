@@ -16,32 +16,29 @@
  */
 
 import * as React from 'react';
-import TableRow from '@material-ui/core/TableRow';
-import TableHead from '@material-ui/core/TableHead';
-import TableCell from '@material-ui/core/TableCell';
+import { upperCase } from 'lodash';
 
-import { TableHeadContainer } from './customTableHeader.styles';
+import Grid from '@material-ui/core/Grid';
+import { Name, Login, Company } from './cellUser.styles';
 
 interface IProps {
-	cells: any[];
+	data: any;
 }
 
-export class CustomTableHeader extends React.PureComponent<IProps, any> {
-
-	public renderCells = (cells) => {
-		return cells.map((cell, index) => {
-			return <TableCell key={index}>{cell}</TableCell>;
-		});
-	}
+export class CellUser extends React.PureComponent<IProps, any> {
 
 	public render() {
-		const { cells } = this.props;
 		return (
-			<TableHeadContainer>
-				<TableRow>
-					{this.renderCells(cells)}
-				</TableRow>
-			</TableHeadContainer>
+			<Grid
+				container
+				direction="column"
+				justify="center"
+				alignItems="flex-start"
+			>
+				<Name item>{upperCase(this.props.data.lastName)}, {this.props.data.firstName}</Name>
+				<Login item>{this.props.data.user}</Login>
+				<Company item>{this.props.data.company}</Company>
+			</Grid>
 		);
 	}
 }
