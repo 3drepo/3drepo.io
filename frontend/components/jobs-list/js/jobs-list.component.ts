@@ -121,7 +121,7 @@ class JobsListController implements ng.IController {
 	public onRemove(job) {
 		this.JobsService.delete(this.currentTeamspace.account, job._id)
 			.then(() => {
-				const jobs = this.jobs.filter(({_id}) => _id !== job._id);
+				const jobs = [...this.jobs.filter(({_id}) => _id !== job._id)];
 				this.onChange({updatedJobs: jobs});
 			})
 			.catch(this.DialogService.showError.bind(null, "delete", "job"));
@@ -132,7 +132,7 @@ class JobsListController implements ng.IController {
 			.then(() => {
 				this.onChange({updatedJobs: this.jobs});
 			})
-			.catch(this.DialogService.showError.bind(null, "delete", "job"));
+			.catch(this.DialogService.showError.bind(null, "change", "job color"));
 	}
 }
 
