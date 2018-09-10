@@ -18,7 +18,7 @@ export const PROJECT_ROLES_LIST = [
 	{
 		key: PROJECT_ROLES_TYPES.ADMINISTRATOR,
 		label: "Admin",
-		width: "70px",
+		width: "100px",
 		tooltip: PROJECT_ROLES_DESC.ADMINISTRATOR
 	}
 ];

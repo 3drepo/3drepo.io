@@ -25,7 +25,7 @@ export const MODEL_ROLES_LIST = [
 	{
 		key: MODEL_ROLES_TYPES.VIEWER,
 		label: "Viewer",
-		width: "70px",
+		width: "100px",
 		tooltip: MODEL_ROLES_DESC.VIEWER
 	},
 	{
@@ -43,7 +43,7 @@ export const MODEL_ROLES_LIST = [
 	{
 		key: MODEL_ROLES_TYPES.ADMINISTRATOR,
 		label: "Admin",
-		width: "70px",
+		width: "100px",
 		tooltip: MODEL_ROLES_DESC.ADMINISTRATOR
 	}
 ];
