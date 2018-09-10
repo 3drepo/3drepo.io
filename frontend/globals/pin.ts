@@ -24,6 +24,7 @@ export class Pin {
 	};
 
 	public id: number;
+	public type: string;
 	public position: string;
 	public highlighted: boolean;
 	public norm;
@@ -40,17 +41,18 @@ export class Pin {
 	public coneDepth;
 
 	constructor(
-		id: number, position: string, norm, colours, viewpoint,
+		id: number, type: string,  position: string, norm, colours, viewpoint,
 		account: string, model: string
 	) {
 
 		this.id = id;
+		this.type = type;
 
 		this.highlighted = false;
 		this.viewpoint = viewpoint;
 		this.account = account;
 		this.model = model;
-		UnityUtil.dropPin(id, position, norm, colours);
+		UnityUtil.dropPin(id, type, position, norm, colours);
 
 	}
 

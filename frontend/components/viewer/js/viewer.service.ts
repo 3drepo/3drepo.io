@@ -61,7 +61,7 @@ export class ViewerService {
 		};
 
 		this.pin = {
-			pinDropMode : false
+			pinDropMode : null
 		};
 
 		this.initialised = $q.defer();
@@ -157,6 +157,7 @@ export class ViewerService {
 						account,
 						colours: event.value.selectColour,
 						id: this.newPinId,
+						type: this.pin.pinDropMode,
 						model,
 						pickedNorm: normal,
 						pickedPos: position,
@@ -238,6 +239,7 @@ export class ViewerService {
 				params.account,
 				params.model,
 				params.id,
+				params.type,
 				params.pickedPos,
 				params.pickedNorm,
 				params.colours,
