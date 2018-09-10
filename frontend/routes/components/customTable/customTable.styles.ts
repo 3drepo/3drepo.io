@@ -18,14 +18,24 @@
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import TableRow from '@material-ui/core/TableRow';
+import Select from '@material-ui/core/TableRow';
+
 import * as CellUser from './components/cellUser/cellUser.styles';
+import * as CellJob from './components/cellJob/cellJob.styles';
+
+export const StyledSelect = styled(Select)``;
 
 export const Container = styled(Table)`
   width: 100%;
 
-  ${CellUser.Name} {
+  ${CellUser.Name}, ${CellJob.Name} {
     color: rgba(0, 0, 0, .6);
     font-size: 14px;
+  }
+
+  ${CellJob.StyledSelect}:after,
+  ${CellJob.StyledSelect}:before {
+    display: none;
   }
 `;
 

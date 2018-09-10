@@ -46,7 +46,6 @@ const ROW_CELL_COMPONENTS = {
 interface IProps {
 	cells: any[];
 	rows: any[];
-	onChange: any;
 }
 
 export class CustomTable extends React.PureComponent<IProps, any> {
@@ -72,7 +71,7 @@ export class CustomTable extends React.PureComponent<IProps, any> {
 							<TableCell key={cellIndex}>
 								{
 									CellComponent ?
-										(<CellComponent data={data} />)
+										(<CellComponent {...data} />)
 										: Object.keys(data).join(', ')
 								}
 							</TableCell>

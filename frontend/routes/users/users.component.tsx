@@ -31,18 +31,7 @@ const USERS_TABLE_CELLS = [{
 }, {
 	name: 'Permissions',
 	type: CELL_TYPES.SELECT
-}];
-
-const getUsersTableRows = (users = []): any[] => {
-	return users.map((user) => {
-		const data = [
-			pick(user, ['firstName', 'lastName', 'company', 'user']),
-			user.job,
-			user.permissions
-		];
-		return {...user, data};
-	});
-};
+}, {}];
 
 interface IProps {
 	users: any[];
@@ -52,37 +41,55 @@ interface IProps {
 
 interface IState {
 	rows: any[];
+	jobs: any[];
 }
 
 export class Users extends React.PureComponent<IProps, IState> {
+	public static state = {
+		rows: [],
+		jobs: []
+	};
+
 	public static getDerivedStateFromProps(nextProps: IProps) {
-		const rows = getUsersTableRows(nextProps.users);
 		return {
-			rows
+			rows: nextProps.users,
+			jobs: nextProps.jobs
 		};
 	}
 
-	constructor(props, context) {
-		super(props, context);
-
-		this.state = {
-			rows: []
-		};
+	public onJobChange = (user, updatedValue) => {
+		console.log("User jobchanged!", updatedValue);
 	}
 
-	public onUsersChange = () => {
-		console.log("Users changed!");
+	public onPermissionsChange = () => {
+		console.log("User permissions changed!");
+	}
+
+	public onRemove = () => {
+		console.log("User removed!");
+	}
+
+	public getUsersTableRows = (users = [], jobs = []): any[] => {
+		return users.map((user) => {
+			const data = [
+				pick(user, ['firstName', 'lastName', 'company', 'user']),
+				{ name: user.job, jobs, onChange: this.onJobChange.bind(null, user) },
+				{ permission: user.permissions, onChange: this.onPermissionsChange.bind(null, user) },
+				{ id: user.user, onClick: this.onRemove.bind(null, user) }
+			];
+			return { ...user, data };
+		});
 	}
 
 	public render() {
-		const { rows } = this.state;
+		const { rows, jobs } = this.state;
 
+		const preparedRows = this.getUsersTableRows(rows, jobs);
 		return (
 			<Container>
 				<CustomTable
 					cells={USERS_TABLE_CELLS}
-					rows={rows}
-					onChange={this.onUsersChange}
+					rows={preparedRows}
 				/>
 			</Container>
 		);

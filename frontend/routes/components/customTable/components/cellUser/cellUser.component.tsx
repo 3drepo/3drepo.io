@@ -22,7 +22,11 @@ import Grid from '@material-ui/core/Grid';
 import { Name, Login, Company } from './cellUser.styles';
 
 interface IProps {
-	data: any;
+	firstName?: string;
+	lastName?: string;
+	user?: string;
+	company?: string;
+	onChange: () => void;	
 }
 
 export class CellUser extends React.PureComponent<IProps, any> {
@@ -35,9 +39,9 @@ export class CellUser extends React.PureComponent<IProps, any> {
 				justify="center"
 				alignItems="flex-start"
 			>
-				<Name item>{upperCase(this.props.data.lastName)}, {this.props.data.firstName}</Name>
-				<Login item>{this.props.data.user}</Login>
-				<Company item>{this.props.data.company}</Company>
+				<Name item>{upperCase(this.props.lastName)}, {this.props.firstName}</Name>
+				<Login item>{this.props.user}</Login>
+				<Company item>{this.props.company}</Company>
 			</Grid>
 		);
 	}

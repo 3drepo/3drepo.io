@@ -16,20 +16,72 @@
  */
 
 import * as React from 'react';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Grid from '@material-ui/core/Grid';
 
-import { Container } from './cellJob.styles';
+import { Color, Name, StyledSelect } from './cellJob.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	name: string;
+	jobs: any[];
+	onChange: (currentValue: string) => void;
 }
 
-export class CellJob extends React.PureComponent<IProps, any> {
+interface IState {
+	currentValue: any;
+}
+
+export class CellJob extends React.PureComponent<IProps, IState> {
+	public static state = {
+		currentValue: ''
+	};
+
+	public static getDerivedStateFromProps(nextProps) {
+		return {
+			currentValue: nextProps.name
+		};
+	}
+
+	/**
+	 * Render jobs with colors
+	 */
+	public renderJobOptions = (jobs) => {
+		return jobs.map(({_id, color}, index) => {
+			return (
+				<MenuItem key={index} value={_id}>
+					<Grid
+						container
+						direction="row"
+						justify="flex-start"
+						alignItems="center"
+					>
+						<Color item color={color} />
+						<Name item>{_id}</Name>
+					</Grid>
+				</MenuItem>
+			);
+		});
+	}
+
+	public handleChange = (event) => {
+		const currentValue = event.target.value;
+		this.props.onChange(currentValue);
+		this.setState({currentValue});
+	}
 
 	public render() {
+		const { jobs } = this.props;
+		const { currentValue } = this.state;
+
 		return (
-			<Container>
-				CellJob component
-			</Container>
+			<StyledSelect
+				value={currentValue}
+				onChange={this.handleChange}
+			>
+				{this.renderJobOptions(jobs)}
+			</StyledSelect>
 		);
 	}
 }
