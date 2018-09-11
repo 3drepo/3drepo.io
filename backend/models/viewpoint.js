@@ -17,14 +17,16 @@
 
 "use strict";
 
+const _ = require("lodash");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
 const db = require("../db/db");
+const ChatEvent = require("./chatEvent");
 
 const view = {};
 
-view.findByUID = function(dbCol, uid, projection) {
+view.findByUID = function (dbCol, uid, projection) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
@@ -38,7 +40,7 @@ view.findByUID = function(dbCol, uid, projection) {
 	});
 };
 
-view.listViewpoints = function(dbCol) {
+view.listViewpoints = function (dbCol) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
@@ -54,7 +56,7 @@ view.listViewpoints = function(dbCol) {
 
 };
 
-view.getThumbnail = function(dbColOptions, uid) {
+view.getThumbnail = function (dbColOptions, uid) {
 
 	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {
 		if (!vp.screenshot) {
@@ -67,8 +69,15 @@ view.getThumbnail = function(dbColOptions, uid) {
 
 };
 
-view.updateAttrs = function(dbCol, id, data) {
+view.updateViewpoint = function (dbCol, sessionId, data, id) {
+	console.log("from my update", data);
+	const update = this.updateAttrs(dbCol, id, _.cloneDeep(data));
+	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, data);
+	// console.log('Make sure i am being called and this is the update object', update);
+	return update;
+}
 
+view.updateAttrs = function (dbCol, id, data) {
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
 
@@ -80,13 +89,13 @@ view.updateAttrs = function(dbCol, id, data) {
 	});
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-		return _dbCol.update({_id: id}, {$set: toUpdate}).then(() => {
-			return {_id: utils.uuidToString(id)};
+		return _dbCol.update({ _id: id }, { $set: toUpdate }).then(() => {
+			return { _id: utils.uuidToString(id) };
 		});
 	});
 };
 
-view.createViewpoint = function(dbCol, data) {
+view.createViewpoint = function (dbCol, data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -128,15 +137,15 @@ view.createViewpoint = function(dbCol, data) {
 	});
 };
 
-view.deleteViewpoint = function(dbCol, id) {
+view.deleteViewpoint = function (dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		return _dbCol.findOneAndDelete({ _id : id}).then((deleteResponse) => {
-			if(!deleteResponse.value) {
+		return _dbCol.findOneAndDelete({ _id: id }).then((deleteResponse) => {
+			if (!deleteResponse.value) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
 		});

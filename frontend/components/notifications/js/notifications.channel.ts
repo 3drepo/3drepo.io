@@ -32,6 +32,11 @@ export class NotificationsChannel {
 	public groups: NotificationEvents;
 
 	/**
+	 * This property contains the object to suscribe to the views notification events
+	 */
+	public views: NotificationEvents;
+
+	/**
 	 * This property contains the object to suscribe to the general modem status notification events
 	 */
 	public model: NotificationModelEvents;
@@ -43,9 +48,10 @@ export class NotificationsChannel {
 	private subscriptions: { [event: string]: Array<{callback: (data: any) => void, context: object}> } = {};
 
 	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
-		this.groups = new NotificationEvents(this, "group");
+		// this.groups = new NotificationEvents(this, "group");
 		this.issues = new NotificationIssuesEvents(this);
 		this.model = new NotificationModelEvents(this);
+		this.views = new NotificationEvents(this, "view");
 	}
 
 	/**

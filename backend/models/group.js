@@ -344,6 +344,7 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 	});
 };
 
+// Group Update with Event 
 groupSchema.methods.updateGroup = function(dbCol, sessionId, data) {
 	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
 	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));

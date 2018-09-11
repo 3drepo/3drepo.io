@@ -113,13 +113,14 @@ function updateViewpoint(req, res, next) {
 			Object.prototype.toString.call(req.body.name) === "[object String]") {
 		const dbCol = getDbColOptions(req);
 		const place = utils.APIInfo(req);
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 		Viewpoint.findByUID(dbCol, req.params.uid)
 			.then(view => {
 				if(!view) {
 					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 				} else {
-					return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
+					return Viewpoint.updateViewpoint(dbCol, sessionId, req.body, utils.stringToUUID(req.params.uid));
 				}
 			}).then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);

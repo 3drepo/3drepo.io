@@ -15,6 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NotificationEvents } from "../../notifications/js/notification.events";
+import { NotificationService } from "../../notifications/js/notification.service";
+
 class ViewsController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -25,7 +28,8 @@ class ViewsController implements ng.IController {
 		"DialogService",
 		"AuthService",
 		"ClientConfigService",
-		"ViewpointsService"
+		"ViewpointsService",
+		"NotificationService"
 	];
 
 	private onShowItem: any;
@@ -43,6 +47,7 @@ class ViewsController implements ng.IController {
 	private newView: any;
 	private editSelectedView: any;
 	private viewpointNameMaxlength: number;
+	private viewsNotifications: NotificationEvents;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -52,7 +57,8 @@ class ViewsController implements ng.IController {
 		private DialogService,
 		private AuthService,
 		private ClientConfigService: any,
-		private ViewpointsService: any
+		private ViewpointsService: any,
+		private notificationsService: NotificationService
 	) {}
 
 	public $onInit() {
@@ -68,10 +74,16 @@ class ViewsController implements ng.IController {
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
 		this.watchers();
+		console.log("models " + this.model + "account " + this.account);
+		this.viewsNotifications = this.notificationsService.getChannel(this.account, this.model).views;
 	}
 
 	public $onDestroy() {
 		this.ViewpointsService.reset();
+		this.viewpoints = [];
+		this.viewsNotifications.unsubscribeFromCreated(this.createViewpoint);
+		this.viewsNotifications.unsubscribeFromUpdated(this.deleteViewpoint);
+		this.viewsNotifications.unsubscribeFromDeleted(this.saveEditedView);
 	}
 
 	public watchers() {
@@ -100,6 +112,7 @@ class ViewsController implements ng.IController {
 					this.modelSettings.permissions
 				);
 			}
+			this.watchNotification();
 		});
 
 	}
@@ -120,6 +133,19 @@ class ViewsController implements ng.IController {
 			this.ViewpointsService.showViewpoint(this.account, this.model, view);
 		}
 
+	}
+
+	/*** Realtime sync  */
+	public watchNotification() {
+		console.log("am i getting run");
+		this.viewsNotifications.subscribeToCreated(this.deleteViewpoint, this);
+		this.viewsNotifications.subscribeToUpdated(this.updateViewpoint, this);
+		this.viewsNotifications.subscribeToDeleted(this.editView, this);
+	}
+
+	public updateViewpoint(data) {
+		console.log('view being passed and if ....', data);
+		//this.ViewpointsService.replaceStateViewpoint(this.newView);
 	}
 
 	public createViewpoint() {
@@ -157,6 +183,7 @@ class ViewsController implements ng.IController {
 				.then(() => {
 					this.selectedView.name = this.editSelectedView.name;
 					this.resetEditState();
+					console.log("A change was made");
 				})
 				.catch((error) => {
 					this.handleViewError("update", error);

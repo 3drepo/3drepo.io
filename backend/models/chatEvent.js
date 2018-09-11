@@ -33,8 +33,9 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 		model,
 		extraKeys,
 		data
-
 	};
+
+	console.log(msg)
 
 	return Queue.insertEventMessage(msg);
 }
@@ -77,11 +78,29 @@ function newGroups(emitter, account, model, data) {
 }
 
 function groupChanged(emitter, account, model, data) {
+console.log("group changed")
+
+	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("group" + eventTypes.UPDATED, emitter, account, model, null, data);
 }
 
 function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
+}
+
+// Viewpoints notifications
+
+function viewpointsCreated(emitter, account, model, data) {
+	return insertEventQueue("view" + eventTypes.CREATED, emitter, account, model, null, data);
+}
+
+function viewpointsChanged(emitter, account, model, data) {
+	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
+	return insertEventQueue("view" + eventTypes.UPDATED, emitter, account, model, null, data);
+}
+
+function viewpointsDeleted(emitter, account, model, ids) {	
+	return insertEventQueue("view" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
 module.exports = {
@@ -92,6 +111,9 @@ module.exports = {
 	commentDeleted,
 	groupChanged,
 	groupsDeleted,
+	viewpointsChanged,
+	viewpointsCreated,
+	viewpointsDeleted,
 	modelStatusChanged,
 	issueChanged,
 	newModel,

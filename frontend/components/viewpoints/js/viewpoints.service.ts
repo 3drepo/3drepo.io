@@ -78,6 +78,7 @@ export class ViewpointsService {
 					viewpoint.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpoint.screenshot.thumbnail);
 				});
 				this.state.viewpoints = response.data;
+				console.log('Viewpoints', this.state.viewpoints);
 			});
 
 	}
@@ -93,8 +94,13 @@ export class ViewpointsService {
 
 		const viewId = view._id;
 		const viewpointsUrl = `${teamspace}/${model}/viewpoints/${viewId}/`;
-
+		console.log('url method name ?', viewpointsUrl);
 		return this.APIService.put(viewpointsUrl, { name: view.name });
+	}
+
+	public testMethod() {
+		// bascially need new method 
+		this.APIService.put("updateViewpoint", {name : view.name} );
 	}
 
 	/**
