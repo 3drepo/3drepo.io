@@ -17,4 +17,8 @@
 
 import { createSelector } from 'reselect';
 
-export const select{{ pascalCase name }}Domain = state => Object.assign({}, state.{{ camelCase name }});
+export const selectUsersDomain = (state) => Object.assign({}, state.users);
+
+export const selectUsersList = createSelector(
+	selectUsersDomain, (state) => state.users
+);

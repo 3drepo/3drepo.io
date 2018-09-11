@@ -3,7 +3,7 @@ import { put, takeLatest, all } from 'redux-saga/effects';
 import api from '../../services/api';
 import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
 
-export function* fetchUser({username}) {
+export function* fetchUser({ username }) {
 	try {
 		yield put(TeamspaceActions.setPendingState(true));
 

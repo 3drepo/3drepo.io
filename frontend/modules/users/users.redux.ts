@@ -15,6 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { createActions, createReducer } from 'reduxsauce';
 
-export const select{{ pascalCase name }}Domain = state => Object.assign({}, state.{{ camelCase name }});
+export const { Types: UsersTypes, Creators: UsersActions } = createActions({
+	fetchUsers: ['teamspace', 'searchText'],
+	removeUser: ['teamspace', 'username'],
+	removeUserCascade: ['teamspace', 'username'],
+	updateMemberJob: ['teamspace', 'job', 'username'],
+	removeMemberJob: ['teamspace', 'job', 'username'],
+	setMemberPermissions: ['teamspace', 'permissionsData'],
+	addMember: ['teamspace', 'username']
+}, { prefix: 'USERS_' });
+
+export const INITIAL_STATE = {
+	users: []
+};
+
+export const reducer = createReducer(INITIAL_STATE, {
+});
