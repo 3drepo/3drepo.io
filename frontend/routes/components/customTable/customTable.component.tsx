@@ -20,18 +20,23 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { Container, Row } from './customTable.styles';
 import { CellUser } from './components/cellUser/cellUser.component';
-import { CellJob } from './components/cellJob/cellJob.component';
+import { CellSelect } from './components/cellSelect/cellSelect.component';
+import { JobItem } from '../jobItem/jobItem.component';
+
+import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 
 export const CELL_TYPES = {
 	USER: 1,
 	JOB: 2,
-	SELECT: 3,
-	COLOR: 4,
-	RADIO_BUTTON: 5,
-	CHECKBOX: 6
+	COLOR: 3,
+	RADIO_BUTTON: 4,
+	CHECKBOX: 5,
+	PERMISSIONS: 6
 };
 
 const HEADER_CELL_COMPONENTS = {
@@ -40,21 +45,68 @@ const HEADER_CELL_COMPONENTS = {
 
 const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: CellUser,
-	[CELL_TYPES.JOB]: CellJob
+	[CELL_TYPES.JOB]: CellSelect,
+	[CELL_TYPES.PERMISSIONS]: CellSelect
 };
+
+const ROW_CELL_EXTRA_DATA = {
+	[CELL_TYPES.JOB]: {
+		itemTemplate: JobItem
+	}
+};
+
+const HeaderCell = ({cell, orderBy, order}) => (
+	<TableSortLabel
+		active={orderBy === cell.type}
+		direction={order}
+		onClick={() => this.sortBy(cell.type)}
+	>
+		{cell.name}
+	</TableSortLabel>
+);
 
 interface IProps {
 	cells: any[];
 	rows: any[];
 }
 
-export class CustomTable extends React.PureComponent<IProps, any> {
+interface IState {
+	orderBy: number;
+	order: string;
+}
+
+export class CustomTable extends React.PureComponent<IProps, IState> {
+	public state = {
+		orderBy: CELL_TYPES.USER,
+		order: SORT_ORDER_TYPES.ASCENDING
+	};
+
 	/**
 	 * Renders row for each user
 	 */
 	public renderHeader = (cells) => {
+		const { orderBy, order } = this.state;
+		const setTooltip = (Component, text) => (
+			<Tooltip
+				title={text}
+				placement="bottom-end"
+			>
+				<Component />
+			</Tooltip>
+		);
+
 		return cells.map((cell, index) => {
-			return <TableCell key={index}>{cell.name}</TableCell>;
+			return (
+				<TableCell key={index}>
+					{cell.tooltipText ? setTooltip(HeaderCell, cell.tooltipText) : (
+						<HeaderCell
+							cell={cell}
+							orderBy={orderBy}
+							order={order}
+						/>
+					)}
+				</TableCell>
+			);
 		});
 	}
 
@@ -66,13 +118,19 @@ export class CustomTable extends React.PureComponent<IProps, any> {
 			return (
 				<Row key={index}>
 					{row.data.map((data, cellIndex) => {
-						const CellComponent = ROW_CELL_COMPONENTS[cells[cellIndex].type];
+						const type = cells[cellIndex].type;
+						const CellComponent = ROW_CELL_COMPONENTS[type];
+						const cellData = {
+							...(ROW_CELL_EXTRA_DATA[type] || {}),
+							...data
+						};
+
 						return (
 							<TableCell key={cellIndex}>
 								{
 									CellComponent ?
-										(<CellComponent {...data} />)
-										: Object.keys(data).join(', ')
+										(<CellComponent {...cellData} />) :
+										cellData.value
 								}
 							</TableCell>
 						);
@@ -80,6 +138,10 @@ export class CustomTable extends React.PureComponent<IProps, any> {
 				</Row>
 			);
 		});
+	}
+
+	public sortBy = (type): void => {
+		console.log('sorted!');
 	}
 
 	public render() {

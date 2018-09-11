@@ -19,68 +19,68 @@ import * as React from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import Grid from '@material-ui/core/Grid';
 
-import { Color, Name, StyledSelect } from './cellJob.styles';
+import { Item, StyledSelect } from './cellSelect.styles';
 
 interface IProps {
-	name: string;
-	jobs: any[];
-	onChange: (currentValue: string) => void;
+	value: string;
+	items: any[];
+	itemTemplate?: React.Component;
+	onChange: (selectedValue: string) => void;
 }
 
 interface IState {
-	currentValue: any;
+	selectedValue: string;
 }
 
-export class CellJob extends React.PureComponent<IProps, IState> {
-	public static state = {
-		currentValue: ''
-	};
-
+export class CellSelect extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps) {
 		return {
-			currentValue: nextProps.name
+			selectedValue: nextProps.value
 		};
 	}
 
+	public state = {
+		selectedValue: ''
+	};
+
 	/**
-	 * Render jobs with colors
+	 * Render items
 	 */
-	public renderJobOptions = (jobs) => {
-		return jobs.map(({_id, color}, index) => {
+	public renderOptions = (items, TemplateComponent) => {
+		return items.map((item, index) => {
 			return (
-				<MenuItem key={index} value={_id}>
-					<Grid
-						container
-						direction="row"
-						justify="flex-start"
-						alignItems="center"
-					>
-						<Color item color={color} />
-						<Name item>{_id}</Name>
-					</Grid>
-				</MenuItem>
+				<Item
+					disabled={item.isDisabled}
+					key={index}
+					value={item.value}
+				>
+					{
+						TemplateComponent ?
+							(<TemplateComponent {...item}/>) :
+							item.name || item.value
+					}
+				</Item>
 			);
 		});
 	}
 
 	public handleChange = (event) => {
-		const currentValue = event.target.value;
-		this.props.onChange(currentValue);
-		this.setState({currentValue});
+		const selectedValue = event.target.value;
+		this.props.onChange(selectedValue);
+		this.setState({selectedValue});
 	}
 
 	public render() {
-		const { jobs } = this.props;
-		const { currentValue } = this.state;
+		const { items, itemTemplate } = this.props;
+		const { selectedValue } = this.state;
 
 		return (
 			<StyledSelect
-				value={currentValue}
+				value={selectedValue}
 				onChange={this.handleChange}
 			>
-				{this.renderJobOptions(jobs)}
+				{this.renderOptions(items, itemTemplate)}
 			</StyledSelect>
 		);
 	}

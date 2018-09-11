@@ -16,11 +16,13 @@
  */
 
 import * as React from 'react';
-import { pick } from 'lodash';
+import { pick, get} from 'lodash';
 
 import { Container } from './users.styles';
 
 import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
+import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
+import { values } from 'lodash';
 
 const USERS_TABLE_CELLS = [{
 	name: 'Users',
@@ -30,7 +32,7 @@ const USERS_TABLE_CELLS = [{
 	type: CELL_TYPES.JOB
 }, {
 	name: 'Permissions',
-	type: CELL_TYPES.SELECT
+	type: CELL_TYPES.PERMISSIONS
 }, {}];
 
 interface IProps {
@@ -44,25 +46,24 @@ interface IState {
 	jobs: any[];
 }
 
+const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
+	.map(({label: name, isAdmin: value }: {label: string, isAdmin: boolean}) => ({ name, value }));
+
 export class Users extends React.PureComponent<IProps, IState> {
-	public static state = {
+	public static getDerivedStateFromProps(nextProps: IProps) {
+		return {
+			rows: nextProps.users,
+			jobs: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name}))
+		};
+	}
+
+	public state = {
 		rows: [],
 		jobs: []
 	};
 
-	public static getDerivedStateFromProps(nextProps: IProps) {
-		return {
-			rows: nextProps.users,
-			jobs: nextProps.jobs
-		};
-	}
-
-	public onJobChange = (user, updatedValue) => {
-		console.log("User jobchanged!", updatedValue);
-	}
-
-	public onPermissionsChange = () => {
-		console.log("User permissions changed!");
+	public onUserChange = (user, updatedValue) => {
+		console.log("User changed!", updatedValue);
 	}
 
 	public onRemove = () => {
@@ -73,8 +74,16 @@ export class Users extends React.PureComponent<IProps, IState> {
 		return users.map((user) => {
 			const data = [
 				pick(user, ['firstName', 'lastName', 'company', 'user']),
-				{ name: user.job, jobs, onChange: this.onJobChange.bind(null, user) },
-				{ permission: user.permissions, onChange: this.onPermissionsChange.bind(null, user) },
+				{
+					value: user.job,
+					items: jobs,
+					onChange: this.onUserChange.bind(null, user)
+				},
+				{
+					value: user.isAdmin,
+					items: teamspacePermissions,
+					onChange: this.onUserChange.bind(null, user)
+				},
 				{ id: user.user, onClick: this.onRemove.bind(null, user) }
 			];
 			return { ...user, data };

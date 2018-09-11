@@ -20,21 +20,23 @@ import Table from '@material-ui/core/Table';
 import TableRow from '@material-ui/core/TableRow';
 import Select from '@material-ui/core/TableRow';
 
+import * as JobItem from '../jobItem/jobItem.styles';
 import * as CellUser from './components/cellUser/cellUser.styles';
-import * as CellJob from './components/cellJob/cellJob.styles';
+import * as CellSelect from './components/cellSelect/cellSelect.styles';
 
 export const StyledSelect = styled(Select)``;
 
 export const Container = styled(Table)`
   width: 100%;
 
-  ${CellUser.Name}, ${CellJob.Name} {
+  ${CellUser.Name},
+  ${CellSelect.StyledSelect} {
     color: rgba(0, 0, 0, .6);
     font-size: 14px;
   }
 
-  ${CellJob.StyledSelect}:after,
-  ${CellJob.StyledSelect}:before {
+  ${CellSelect.StyledSelect}:after,
+  ${CellSelect.StyledSelect}:before {
     display: none;
   }
 `;

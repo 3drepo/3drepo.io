@@ -15,34 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { upperCase } from 'lodash';
-
+import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
-import { Name, Login, Company } from './cellUser.styles';
 
-interface IProps {
-	firstName?: string;
-	lastName?: string;
-	user?: string;
-	company?: string;
-	onChange: () => void;
-}
+export const Name = styled(Grid) ``;
 
-export class CellUser extends React.PureComponent<IProps, any> {
-
-	public render() {
-		return (
-			<Grid
-				container
-				direction="column"
-				justify="center"
-				alignItems="flex-start"
-			>
-				<Name item>{upperCase(this.props.lastName)}, {this.props.firstName}</Name>
-				<Login item>{this.props.user}</Login>
-				<Company item>{this.props.company}</Company>
-			</Grid>
-		);
-	}
-}
+export const Color = styled(Grid) `
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+  background-color: ${(props) => props.color};
+  margin-right: 12px !important;
+`;

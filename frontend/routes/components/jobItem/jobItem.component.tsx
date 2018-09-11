@@ -16,33 +16,26 @@
  */
 
 import * as React from 'react';
-import { upperCase } from 'lodash';
-
 import Grid from '@material-ui/core/Grid';
-import { Name, Login, Company } from './cellUser.styles';
+
+import { Name, Color } from './jobItem.styles';
 
 interface IProps {
-	firstName?: string;
-	lastName?: string;
-	user?: string;
-	company?: string;
-	onChange: () => void;
+	name: string;
+	value: string;
+	color?: string;
 }
 
-export class CellUser extends React.PureComponent<IProps, any> {
-
-	public render() {
-		return (
-			<Grid
-				container
-				direction="column"
-				justify="center"
-				alignItems="flex-start"
-			>
-				<Name item>{upperCase(this.props.lastName)}, {this.props.firstName}</Name>
-				<Login item>{this.props.user}</Login>
-				<Company item>{this.props.company}</Company>
-			</Grid>
-		);
-	}
-}
+export const JobItem = (props: IProps) => {
+	return (
+		<Grid
+			container
+			direction="row"
+			justify="flex-start"
+			alignItems="center"
+		>
+			<Color item color={props.color} />
+			<Name item>{props.name}</Name>
+		</Grid>
+	);
+};
