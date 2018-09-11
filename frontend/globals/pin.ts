@@ -20,7 +20,9 @@ export class Pin {
 
 	public static pinColours = {
 		blue : [12 / 255, 47 / 255, 84 / 255], // [0, 69/255, 148/255],
-		yellow : [255 / 255, 255 / 255, 54 / 255]
+		yellow : [255 / 255, 255 / 255, 54 / 255],
+		red : [220 / 255, 20 / 255, 60 / 255],
+		maroon : [128 / 255, 0, 0]
 	};
 
 	public id: number;

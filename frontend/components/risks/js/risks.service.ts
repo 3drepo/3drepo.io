@@ -255,12 +255,12 @@ export class RisksService {
 
 			if (show !== undefined && pinPosition) {
 
-				let pinColor = Pin.pinColours.blue;
+				let pinColor = Pin.pinColours.maroon;
 				const isSelectedPin = this.state.selectedRisk &&
 									risk._id === this.state.selectedRisk._id;
 
 				if (isSelectedPin) {
-					pinColor = Pin.pinColours.yellow;
+					pinColor = Pin.pinColours.red;
 				}
 
 				this.ViewerService.addPin({
