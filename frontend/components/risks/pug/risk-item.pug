@@ -64,26 +64,22 @@ md-content#riskInformation(
 		div(layout="row")
 			md-input-container.riskItemStatus(flex)
 				label SafetiBase ID
-				md-select(
-					id="issuePriority"
-					ng-model="vm.riskData.priority"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangePriority()")
-			
-					md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
+				textarea(
+					id="riskSafetibaseId"
+					ng-model="vm.riskData.safetibase_id"
+					ng-change="vm.statusChange()")
 			
 			md-input-container.riskItemStatus(flex)
 				label Associated Activity
 				md-select(
-					id="issueStatus"
-					ng-model="vm.riskData.status"
+					id="riskActivity"
+					ng-model="vm.riskData.associated_activity"
 					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangeStatus()")
 					
 					md-option(
-						ng-repeat="status in vm.statuses"
-						ng-disabled="vm.disableStatusOption(status)"
-						value="{{status.value}}") {{status.label}}
+						ng-repeat="activity in vm.activities"
+						value="{{activity.value}}") {{activity.label}}
 
 	.riskItemContainer#riskDescriptionContainer(layout="column", layout-align="start", flex)
 		div(layout="column", layout-align="start", flex)
@@ -145,43 +141,45 @@ md-content#riskInformation(
 			md-input-container(flex)
 				label Risk Owner
 				md-select(
-					id="issueType"
-					ng-model="vm.riskData.topic_type"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangeType()")
+					id="riskOwner"
+					ng-model="vm.riskData.assigned_roles[0]"
+					ng-change="vm.statusChange()")
 					
-					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+					md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
 			
 			md-input-container(flex)
 				label Category
 				md-select(
-					id="issueType"
-					ng-model="vm.riskData.topic_type"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangeType()")
+					id="riskCategory"
+					ng-model="vm.riskData.category"
+					ng-change="vm.statusChange()")
 					
-					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+					md-option(
+						ng-repeat="category in vm.categories"
+						value="{{category.value}}") {{category.label}}
 
 		div(layout="row")
 			md-input-container(flex)
 				label Risk Likelihood
 				md-select(
-					id="issueType"
-					ng-model="vm.riskData.topic_type"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangeType()")
+					id="riskLikelihood"
+					ng-model="vm.riskData.likelihood"
+					ng-change="vm.statusChange()")
 					
-					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+					md-option(
+						ng-repeat="likelihood in vm.likelihoods"
+						value="{{likelihood.value}}") {{likelihood.label}}
 
 			md-input-container(flex)
 				label Risk Consequence
 				md-select(
-					id="issueType"
-					ng-model="vm.riskData.topic_type"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangeType()")
+					id="riskConsequence"
+					ng-model="vm.riskData.consequence"
+					ng-change="vm.statusChange()")
 					
-					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+					md-option(
+						ng-repeat="consequence in vm.consequences"
+						value="{{consequence.value}}") {{consequence.label}}
 
 	.riskItemContainer#riskAdditional(layout="column")
 
@@ -189,29 +187,31 @@ md-content#riskInformation(
 			md-input-container(flex)
 				label Level of Risk
 				md-select(
-					id="issueType"
-					ng-model="vm.riskData.topic_type"
+					id="riskLevelOfRisk"
+					ng-model="vm.riskData.level_of_risk"
 					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangeType()")
 					
-					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+					md-option(
+						ng-repeat="level in vm.levels"
+						value="{{level.value}}") {{level.label}}
 			
 			md-input-container(flex)
 				label Mitigation Status
 				md-select(
-					id="issueType"
-					ng-model="vm.riskData.topic_type"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangeType()")
+					id="riskMitigationStatus"
+					ng-model="vm.riskData.mitigation_status"
+					ng-change="vm.statusChange()")
 					
-					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
+					md-option(
+						ng-repeat="status in vm.statuses"
+						value="{{status.value}}") {{status.label}}
 
 		div(flex, layout="column")
 			md-input-container#descriptionText()
 				label Mitigation
 				textarea(
-					ng-model="vm.riskData.desc"
-					ng-disabled="vm.data"
+					ng-model="vm.riskData.mitigation_desc"
 					ng-focus="vm.textInputHasFocus(true)"
 					ng-blur="vm.textInputHasFocus(false)")
 

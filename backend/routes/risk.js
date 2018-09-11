@@ -26,10 +26,6 @@ const Risk = require("../models/risk");
 const utils = require("../utils");
 const config = require("../config.js");
 
-const User = require("../models/user");
-const Job = require("../models/job");
-const ModelHelper = require("../models/helper/model");
-
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
@@ -44,10 +40,10 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 router.post("/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
-router.put("/risks/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
 
 router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
-router.put("/revision/:rid/risks/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
 
 function clean(dbCol, risk) {
 	const keys = ["_id", "rev_id", "parent"];
@@ -108,7 +104,6 @@ function clean(dbCol, risk) {
 
 function storeRisk(req, res, next) {
 
-	console.log("storeRisk");
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 	const data = req.body;
@@ -129,93 +124,31 @@ function storeRisk(req, res, next) {
 function updateRisk(req, res, next) {
 
 	const place = utils.APIInfo(req);
-	// let data = JSON.parse(req.body.data);
+	const dbCol = {account: req.params.account, model: req.params.model};
 	const data = req.body;
+
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const dbCol = {account: req.params.account, model: req.params.model};
-	const issueId = req.params.issueId;
-	let action;
+	const riskId = req.params.riskId;
 
-	Risk.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
-
-		if(!issue) {
-			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
-		}
-
-		if (data.hasOwnProperty("comment") && data.edit) {
-			action = issue.updateComment(data.commentIndex, data);
-
-		} else if(data.sealed) {
-			action = issue.updateComment(data.commentIndex, data);
-
-		} else if(data.commentIndex >= 0 && data.delete) {
-			action = issue.removeComment(data.commentIndex, data);
-
-		} else if (data.hasOwnProperty("comment")) {
-			action = issue.updateComment(null, data);
-
-		} else if (data.hasOwnProperty("closed") && data.closed) {
-			action = Promise.reject("This action is deprecated, use PUT issues/id.json {\"status\": \"closed\"}");
-
-		} else if (data.hasOwnProperty("closed") && !data.closed) {
-			action = Promise.reject("This action is deprecated, use PUT issues/id.json {\"status\": \"closed\"}");
-
-		} else {
-
-			action = User.findByUserName(req.params.account).then(dbUser => {
-
-				return Job.findByUser(dbUser.user, req.session.user.username).then(_job => {
-					const job = _job ?  _job._id : null;
-					const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
-					const userIsAdmin = ModelHelper.isUserAdmin(
-						req.params.account,
-						req.params.model,
-						req.session.user.username
-					);
-
-					return userIsAdmin.then(projAdmin => {
-
-						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = issue.creator_role === job && issue.creator_role && job;
-						const hasAssignedJob = job === issue.assigned_roles[0];
-
-						return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
-
-					}).catch(err =>{
-						if(err) {
-							return Promise.reject(err);
-						} else{
-							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);
-						}
-					});
-
-				});
-
-			});
-		}
-
-		return action;
-
-	}).then(issue => {
+	return Risk.updateAttrs(dbCol, riskId, data).then((risk) => {
 		const resData = {
-			_id: issueId,
+			_id: riskId,
 			account: req.params.account,
 			model: req.params.model,
-			issue: issue,
-			issue_id : issueId,
-			number: issue.number,
-			owner: data.hasOwnProperty("comment") ?  data.owner : issue.owner,
-			created: issue.created
+			risk: risk,
+			risk_id : riskId,
+			number: risk.number,
+			owner: risk.owner,
+			created: risk.created
 		};
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
 
-	}).catch(err => {
+	}).catch((err) => {
 
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

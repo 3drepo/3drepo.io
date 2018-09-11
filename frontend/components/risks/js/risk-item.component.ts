@@ -67,8 +67,12 @@ class RiskItemController implements ng.IController {
 	private showAdditional: boolean;
 	private editingDescription: boolean;
 	private clearPin: boolean;
-	private priorities: any[];
-	private statuses: any;
+	private activities: any[];
+	private categories: any[];
+	private likelihoods: any[];
+	private consequences: any[];
+	private levels: any[];
+	private statuses: any[];
 	private actions: any;
 	private notificationStarted = false;
 	private popStateHandler;
@@ -136,17 +140,56 @@ class RiskItemController implements ng.IController {
 		this.editingDescription = false;
 		this.clearPin = false;
 
-		this.priorities = [
-			{value: "none", label: "None"},
+		this.activities = [
+			{value: "cleaning_and_maintenance", label: "Cleaning and maintenance"},
+			{value: "replacement", label: "Replacement"},
+			{value: "", label: "UNSET"}
+		];
+		this.categories = [
+			{value: "health_material_effect", label: "Health - Material effect"},
+			{value: "health_mechanical_effect", label: "Health - Mechanical effect"},
+			{value: "safety_fall", label: "Safety Issue - Fall"},
+			{value: "safety_trapped", label: "Safety Issue - Trapped"},
+			{value: "safety_event", label: "Safety Issue - Event"},
+			{value: "safety_handling", label: "Safety Issue - Handling"},
+			{value: "safety_struck", label: "Safety Issue - Struck"},
+			{value: "safety_public", label: "Safety Issue - Public"},
+			{value: "environmental", label: "Environmental Issue"},
+			{value: "commercial", label: "Commercial Issue"},
+			{value: "social", label: "Social Issue"},
+			{value: "other", label: "Other Issue"},
+			{value: "unknown", label: "UNKNOWN"},
+			{value: "", label: "UNSET"}
+		];
+		this.likelihoods = [
+			{value: "very_low", label: "Very Low"},
 			{value: "low", label: "Low"},
-			{value: "medium", label: "Medium"},
-			{value: "high", label: "High"}
+			{value: "moderate", label: "Moderate"},
+			{value: "high", label: "High"},
+			{value: "very_high", label: "Very High"},
+			{value: "", label: "UNSET"}
+		];
+		this.consequences = [
+			{value: "very_low", label: "Very Low"},
+			{value: "low", label: "Low"},
+			{value: "moderate", label: "Moderate"},
+			{value: "high", label: "High"},
+			{value: "very_high", label: "Very High"},
+			{value: "", label: "UNSET"}
+		];
+		this.levels = [
+			{value: "very_low", label: "Very Low"},
+			{value: "low", label: "Low"},
+			{value: "moderate", label: "Moderate"},
+			{value: "high", label: "High"},
+			{value: "very_high", label: "Very High"},
+			{value: "", label: "UNSET"}
 		];
 		this.statuses = [
-			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
-			{value: "for approval", label: "For approval"},
-			{value: "closed", label: "Closed"}
+			{value: "proposed", label: "Proposed"},
+			{value: "approved", label: "Approved"},
+			{value: "accepted", label: "Accepted"},
+			{value: "", label: "UNSET"}
 		];
 
 		this.actions = {
@@ -219,7 +262,7 @@ class RiskItemController implements ng.IController {
 		}
 		// Get out of pin drop mode
 
-		this.viewerService.pin.pinDropMode = false;
+		this.viewerService.pin.pinDropMode = null;
 		this.measureService.setDisabled(false);
 		this.clearPin = true;
 
@@ -296,70 +339,6 @@ class RiskItemController implements ng.IController {
 
 	}
 
-	public handleBCFPriority(BCFPriority: string) {
-
-		const exists = this.priorities.find((priority) => {
-			return BCFPriority === priority.value;
-		});
-
-		if (!exists) {
-			const newPriority = {
-				value: BCFPriority,
-				label: BCFPriority
-			};
-			this.priorities.push(newPriority);
-			this.$timeout(() => {});
-
-		}
-
-	}
-
-	public handleBCFStatus(BCFStatus: string) {
-
-		const exists = this.statuses.find((status) => {
-			return BCFStatus === status.value;
-		});
-
-		if (!exists) {
-			const newStatus = {
-				value: BCFStatus,
-				label: BCFStatus
-			};
-			this.statuses.push(newStatus);
-			this.$timeout(() => {});
-
-		}
-
-	}
-
-	public handleBCFAssign(BCFAssign: [string]) {
-		BCFAssign.forEach((unknownJob) => {
-			if (this.modelJobs.indexOf(unknownJob) === -1) {
-				this.modelJobs.push(unknownJob);
-				this.$timeout(() => {});
-			}
-		});
-
-	}
-
-	public handleBCFType(BCFType: string) {
-
-		const exists = this.topic_types.find((type) => {
-			return BCFType === type.value;
-		});
-
-		if (!exists) {
-			const newType = {
-				value: BCFType,
-				label: BCFType
-			};
-			this.topic_types.push(newType);
-			this.$timeout(() => {});
-
-		}
-
-	}
-
 	public convertCommentTopicType() {
 		if (this.riskData && this.riskData.comments) {
 			this.riskData.comments.forEach((comment) => {
@@ -381,9 +360,6 @@ class RiskItemController implements ng.IController {
 		this.riskData.thumbnailPath = this.apiService.getAPIUrl(this.riskData.thumbnail);
 
 		// Old risks
-		this.riskData.priority = (!this.riskData.priority) ? "none" : this.riskData.priority;
-		this.riskData.status = (!this.riskData.status) ? "open" : this.riskData.status;
-		this.riskData.topic_type = (!this.riskData.topic_type) ? "for_information" : this.riskData.topic_type;
 		this.riskData.assigned_roles = (!this.riskData.assigned_roles) ? [] : this.riskData.assigned_roles;
 
 		this.canComment();
@@ -608,11 +584,11 @@ class RiskItemController implements ng.IController {
 		case "pin":
 
 			if (selected) {
-				this.viewerService.pin.pinDropMode = true;
+				this.viewerService.pin.pinDropMode = "risk";
 				this.measureService.deactivateMeasure();
 				this.measureService.setDisabled(true);
 			} else {
-				this.viewerService.pin.pinDropMode = false;
+				this.viewerService.pin.pinDropMode = null;
 				this.measureService.setDisabled(false);
 			}
 			break;
@@ -821,20 +797,24 @@ class RiskItemController implements ng.IController {
 		const risk = {
 			account: this.account,
 			model: this.model,
+			rev_id: this.revision,
 			objectId: null,
-			name: this.riskData.name,
-			viewpoint,
 			creator_role: this.userJob._id,
+			name: this.riskData.name,
+			safetibase_id: this.riskData.safetibase_id,
+			associated_activity: this.riskData.associated_activity,
+			desc: this.riskData.desc,
+			viewpoint,
+			assigned_roles: this.riskData.assigned_roles,
+			category: this.riskData.category,
+			likelihood: this.riskData.likelihood,
+			consequence: this.riskData.consequence,
+			level_of_risk: this.riskData.level_of_risk,
+			mitigation_status: this.riskData.mitigation_status,
+			mitigation_desc: this.riskData.mitigation_desc,
 			pickedPos: null,
 			pickedNorm: null,
-			scale: 1.0,
-			assigned_roles: this.riskData.assigned_roles,
-			priority: this.riskData.priority,
-			status: this.riskData.status,
-			topic_type: this.riskData.topic_type,
-			due_date: Date.parse(this.riskData.due_date),
-			desc: this.riskData.desc,
-			rev_id: this.revision
+			scale: 1.0
 		};
 
 		// Pin data
@@ -859,7 +839,7 @@ class RiskItemController implements ng.IController {
 				this.risksService.setSelectedRisk(this.riskData, true, this.revision);
 
 				// Hide some actions
-				this.viewerService.pin.pinDropMode = false;
+				this.viewerService.pin.pinDropMode = null;
 
 				this.submitDisabled = true;
 				this.setContentHeight();
@@ -877,11 +857,12 @@ class RiskItemController implements ng.IController {
 
 				this.disabledReason = this.reasonCommentText;
 
-				this.$state.go(
+				// TOOD Change state to risk
+				/*this.$state.go(
 					"home.account.model.risk",
 					riskState,
 					{notify: false}
-				);
+				);*/
 
 				this.analyticService.sendEvent({
 					eventCategory: "Risk",

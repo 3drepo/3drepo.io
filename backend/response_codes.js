@@ -156,6 +156,7 @@
 		RISK_CONSEQUENCE_INVALID: { message: "Invalid risk consequence", status: 400 },
 		RISK_LEVEL_READONLY: { message: "Level of risk cannot be changed", status: 400 },
 		RISK_NOT_FOUND: { message: "Risk not found", status: 404 },
+		RISK_UPDATE_FAILED: { message: "Failed updating risk", status: 500 },
 
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },

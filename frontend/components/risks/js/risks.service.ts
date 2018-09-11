@@ -127,15 +127,19 @@ export class RisksService {
 	public createBlankRisk(creatorRole) {
 		return {
 			creator_role: creatorRole,
-			priority: "none",
-			status: "open",
+			associated_activity: "",
+			category: "",
+			likelihood: "",
+			consequence: "",
+			level_of_risk: "",
+			mitigation_status: "",
 			assigned_roles: [],
 			topic_type: "for_information",
 			viewpoint: {}
 		};
 	}
 
-	// Helper  for searching strings
+	// Helper for searching strings
 	public stringSearch(superString, subString) {
 		if (!superString) {
 			return false;
@@ -261,6 +265,7 @@ export class RisksService {
 
 				this.ViewerService.addPin({
 					id: risk._id,
+					type: "risk",
 					account: risk.account,
 					model: risk.model,
 					pickedPos: risk.position,
@@ -792,9 +797,9 @@ export class RisksService {
 
 		// TODO put risk
 		if (risk.rev_id) {
-			endpoint += "/revision/" + risk.rev_id + "/issues/" +  risk._id + ".json";
+			endpoint += "/revision/" + risk.rev_id + "/risks/" +  risk._id + ".json";
 		} else {
-			endpoint += "/issues/" + risk._id + ".json";
+			endpoint += "/risks/" + risk._id + ".json";
 		}
 
 		const putConfig = {withCredentials: true};

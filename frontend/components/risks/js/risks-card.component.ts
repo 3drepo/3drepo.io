@@ -333,7 +333,8 @@ class RisksCardController implements ng.IController {
 		if (risk) {
 
 			this.viewerService.highlightObjects([]);
-			this.$state.go("home.account.model.risk",
+			// TODO Change state to risk
+			/*this.$state.go("home.account.model.risk",
 				{
 					account: this.account,
 					model: this.model,
@@ -342,7 +343,7 @@ class RisksCardController implements ng.IController {
 					noSet: true
 				},
 				{notify: false}
-			);
+			);*/
 
 			this.risksService.setSelectedRisk(risk, true, this.revision);
 

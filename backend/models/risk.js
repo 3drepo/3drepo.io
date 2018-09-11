@@ -40,11 +40,37 @@ const xml2js = require("xml2js");
 const systemLogger = require("../logger.js").systemLogger;
 const Group = require("./group");
 const Meta = require("./meta");
+const User = require("./user");
+const Job = require("./job");
+const ModelHelper = require("./helper/model");
+
 const C = require("../constants");
 
 const risk = {};
 
 risk.createRisk = function(dbCol, newRisk) {
+	const riskAttributes = [
+		"_id",
+		"rev_id",
+		"thumbnail",
+		"creator_role",
+		"name",
+		"owner",
+		"created",
+		"safetibase_id",
+		"associated_activity",
+		"desc",
+		"viewpoint",
+		"assigned_roles",
+		"category",
+		"likelihood",
+		"consequence",
+		"level_of_risk",
+		"mitigation_status",
+		"mitigation_desc",
+		"position",
+		"norm"
+	];
 	const riskAttrPromises = [];
 
 	let branch;
@@ -136,12 +162,11 @@ risk.createRisk = function(dbCol, newRisk) {
 			};
 		}
 
-		delete newRisk.pickedPos;
-		delete newRisk.pickedNorm;
-		delete newRisk.objectId;
-		delete newRisk.sessionId;
-		delete newRisk.revId;
-		delete newRisk.nope;
+		Object.keys(newRisk).forEach((key) => {
+			if (!riskAttributes.includes(key)) {
+				delete newRisk[key];
+			}
+		});
 
 		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 			return _dbCol.insert(newRisk).then(() => {
@@ -151,7 +176,57 @@ risk.createRisk = function(dbCol, newRisk) {
 	});
 };
 
-risk.findById = function() {
+risk.updateAttrs = function(dbCol, uid, data) {
+
+	if ("[object String]" === Object.prototype.toString.call(uid)) {
+		uid = utils.stringToUUID(uid);
+	}
+
+	return this.findByUID(dbCol, uid).then((oldRisk) => {
+		if (oldRisk) {
+			return User.findByUserName(dbCol.account).then((dbUser) => {
+
+				return Job.findByUser(dbUser.user, data.requester).then((_job) => {
+					const job = _job ?  _job._id : null;
+					const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
+					const userIsAdmin = ModelHelper.isUserAdmin(
+						dbCol.account,
+						dbCol.model,
+						data.requester
+					);
+
+					return userIsAdmin.then(projAdmin => {
+
+						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+						const isAdmin = projAdmin || tsAdmin;
+						const hasOwnerJob = oldRisk.creator_role === job && oldRisk.creator_role && job;
+						const hasAssignedJob = job === oldRisk.assigned_roles[0];
+
+						return {
+							isAdmin,
+							hasOwnerJob,
+							hasAssignedJob
+						};
+
+					}).then((user) => {
+						console.log(user.isAdmin);
+						console.log(user.hasOwnerJob);
+						console.log(user.hasAssignedJob);
+						return oldRisk;
+					}).catch((err) => {
+						if (err) {
+							return Promise.reject(err);
+						} else {
+							return Promise.reject(responseCodes.RISK_UPDATE_FAILED);
+						}
+					});
+
+				});
+			});
+		} else {
+			return Promise.reject({ resCode: responseCodes.RISK_NOT_FOUND });
+		}
+	});
 };
 
 risk.findBySharedId = function() {
@@ -252,9 +327,6 @@ risk.findByUID = function(dbCol, uid, projection) {
 			return risk;
 		});
 	});
-};
-
-risk.update = function() {
 };
 
 risk.getScreenshot = function(dbCol, uid, vid) {
