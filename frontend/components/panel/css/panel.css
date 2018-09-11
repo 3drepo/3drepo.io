@@ -206,6 +206,21 @@ panel-card-chips-filter input {
   border-bottom: 1px solid rgb(12, 47, 84) !important;
 }
 
+panel-card-chips-filter .collapse-button {
+  position: absolute;
+  top: 45px;
+  right: 0px;
+}
+
+panel-card-chips-filter md-chips md-chips-wrap {
+  padding-right: 35px;
+}
+
+panel-card-chips-filter md-chips.collapsed md-chips-wrap {
+  max-height: 40px;
+  overflow: hidden;
+}
+
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {
   position: absolute;
@@ -228,3 +243,5 @@ panel-card-option-pin md-icon {
 .leftButtons {
   margin-left: 5px;
 }
+
+

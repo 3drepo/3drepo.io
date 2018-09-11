@@ -102,8 +102,14 @@ export class IssuesService {
 					const newJobs: any = {};
 					const newTopicTypes: any = {};
 					newIssues.forEach( (i) =>  {
-						newJobs[i.creator_role] = true;
-						newTopicTypes[i.topic_type] = true;
+						if (i.creator_role) {
+							newJobs[i.creator_role] = true;
+						}
+
+						if (i.topic_type) {
+							newTopicTypes[i.topic_type] = true;
+						}
+
 						i.assigned_roles.forEach( (r) => newJobs[r] = true);
 					});
 
@@ -143,8 +149,10 @@ export class IssuesService {
 			label: role._id
 		}));
 
+		const assignedMenu = menuChips.concat([{value: null, label: "Unassigned"}]);
+
 		this.panelService.setChipFilterMenuItem("issues", {label: "Created by", value: "creator_role"}, menuChips);
-		this.panelService.setChipFilterMenuItem("issues", {label: "Assigned to", value: "assigned_roles"}, menuChips);
+		this.panelService.setChipFilterMenuItem("issues", {label: "Assigned to", value: "assigned_roles"}, assignedMenu);
 	}
 
 	public addToAllTypes(topicTypes: any) {
@@ -237,7 +245,7 @@ export class IssuesService {
 
 		filters = filters.concat(this.createFilterByField(criteria, "status"));
 
-		filters = filters.concat(this.createFilterByField(criteria, "assigned_roles"));
+		filters = filters.concat(this.getOrClause(criteria.assigned_roles, this.filterAssignedRoles));
 
 		filters = filters.concat(this.createFilterByField(criteria, "topic_type"));
 
@@ -299,6 +307,13 @@ export class IssuesService {
 		}
 
 		return issue[field] === tag;
+	}
+
+	public filterAssignedRoles(issue, tag): boolean {
+		if (!tag) {
+			return issue.assigned_roles.length === 0;
+		}
+		return this.filterByField("assigned_roles", issue, tag);
 	}
 
 	public handleIssueFilter(issue: any, filterText: string) {

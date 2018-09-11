@@ -24,23 +24,39 @@ export interface IChip {
 
 class PanelCardChipsFilterController implements ng.IController {
 	public static $inject: string[] = [
-		"$mdConstant"
+		"$mdConstant",
+		"$scope",
+		"$element"
 	];
 
 	public suggestions: IChip[] = [];
 	public chips: IChip[] = [];
+	public collapsed: boolean = false;
 
 	private selectedItem: any = null;
 	private searchText: string = null;
 	private chipSeparators: any[];
 	private placeHolder: string = "Search";
 
-	constructor(private $mdConstant: any) {
+	constructor(private $mdConstant: any, private $scope: ng.IScope, private $element: any) {
 		this.chipSeparators = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
+		this.watchers();
 	}
 
 	public $onInit() {
 		this.chips = [];
+	}
+
+	public watchers() {
+		this.$scope.$watch("vm.showFilter", (newValue) => {
+			if (newValue) {
+				const filterInput: any = angular.element(this.$element[0].querySelector("#panelCardFilterInput"));
+				filterInput.value = "";
+
+				this.collapsed = false;
+
+			}
+		});
 	}
 
 	private transformChip(chip): IChip {
@@ -77,7 +93,8 @@ export const PanelCardChipsFilterComponent: ng.IComponentOptions = {
 	bindings: {
 		chips: "=",
 		suggestions: "=",
-		placeHolder: "@"
+		placeHolder: "@",
+		showFilter: "="
 	},
 
 	controller: PanelCardChipsFilterController,
