@@ -16,23 +16,26 @@
  */
 
 import * as React from 'react';
+import { matches, cond, orderBy } from 'lodash';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
+import { SORT_TYPES } from '../../../constants/sorting';
+import { sortByName, sortByJob } from '../../../helpers/sorting';
+import { JobItem } from '../jobItem/jobItem.component';
 
 import { CellUser } from './components/cellUser/cellUser.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
-import { JobItem } from '../jobItem/jobItem.component';
 import { Container, Head, Body, Row, SortLabel, Cell } from './customTable.styles';
 
-const HeaderCell = ({cell, orderBy, order}) => {
+const HeaderCell = ({cell, sortBy, order, onClick}) => {
 	return cell.name ? (
 		<SortLabel
-			active={orderBy === cell.type}
-			direction={order}
-			onClick={() => this.sortBy(cell.type)}
+			active={sortBy === cell.type}
+			direction={sortBy === cell.type ? order : SORT_ORDER_TYPES.ASCENDING}
+			onClick={onClick}
 		>
 			{cell.name}
 		</SortLabel>
@@ -88,27 +91,77 @@ const ROW_CELL_EXTRA_DATA = {
 	}
 };
 
+/**
+ * Return list of sorted items
+ * @param members
+ * @param options
+ * @returns {Array}
+ */
+const getSortedRows = (rows, type, order): any[] => {
+	const { USER, JOB, PERMISSIONS } = CELL_TYPES;
+	const sort = cond([
+		[matches({ type: USER }), sortByName.bind(null, rows)],
+		[matches({ type: JOB }), sortByJob.bind(null, rows)],
+		[matches({ type: PERMISSIONS }), (options) => {
+			return orderBy(rows, ["isAdmin"], options.order);
+		}]
+	]);
+
+	// tslint:disable-next-line
+	return sort({type, order});
+};
+
+const getFilteredRows = (rows, type, order): any[] => {
+	return getSortedRows(rows, type, order);
+};
+
 interface IProps {
 	cells: any[];
 	rows: any[];
 }
 
 interface IState {
-	orderBy: number;
+	sortBy: number;
 	order: string;
+	filteredRows: any[];
 }
 
 export class CustomTable extends React.PureComponent<IProps, IState> {
+	public static getDerivedStateFromProps(nextProps, prevState) {
+		return {
+			filteredRows: getFilteredRows(
+				nextProps.rows,
+				prevState.sortBy,
+				prevState.order
+			)
+		};
+	}
+
 	public state = {
-		orderBy: CELL_TYPES.USER,
-		order: SORT_ORDER_TYPES.ASCENDING
+		sortBy: CELL_TYPES.USER,
+		order: SORT_ORDER_TYPES.ASCENDING,
+		filteredRows: []
 	};
+
+	public createSortHandler = (sortBy) => (event) => {
+		let order = SORT_ORDER_TYPES.ASCENDING;
+
+		if (this.state.order === order && this.state.sortBy === sortBy) {
+			order = SORT_ORDER_TYPES.DESCENDING;
+		}
+
+		this.setState({
+			filteredRows: getFilteredRows(this.props.rows, sortBy, order),
+			sortBy,
+			order
+		});
+	}
 
 	/**
 	 * Renders row for each user
 	 */
 	public renderHeader = (cells) => {
-		const { orderBy, order } = this.state;
+		const { sortBy, order } = this.state;
 		const setTooltip = (Component, text) => (
 			<Tooltip
 				title={text}
@@ -129,8 +182,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{cellData.tooltipText ? setTooltip(HeaderCell, cellData.tooltipText) : (
 						<HeaderCell
 							cell={cellData}
-							orderBy={orderBy}
+							sortBy={sortBy}
 							order={order}
+							onClick={this.createSortHandler(cell.type)}
 						/>
 					)}
 				</Cell>
@@ -168,18 +222,15 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public sortBy = (type): void => {
-		console.log('sorted!');
-	}
-
 	public render() {
-		const { cells, rows } = this.props;
+		const { cells } = this.props;
+		const { filteredRows } = this.state;
 
 		return (
 			<Container>
 				<Head>{this.renderHeader(cells)}</Head>
 				<Body>
-					{this.renderRows(rows, cells)}
+					{this.renderRows(filteredRows, cells)}
 				</Body>
 			</Container>
 		);
