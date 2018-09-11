@@ -242,6 +242,25 @@ export class RisksService {
 		}
 	}
 
+	public calculateLevelOfRisk(likelihood: number, consequence: number): number {
+		const likelihoodConsequenceScore: number = parseInt(likelihood) + parseInt(consequence);
+		let levelOfRisk;
+
+		if (6 < likelihoodConsequenceScore) {
+			levelOfRisk = 4;
+		} else if (5 < likelihoodConsequenceScore) {
+			levelOfRisk = 3;
+		} else if (2 < likelihoodConsequenceScore) {
+			levelOfRisk = 2;
+		} else if (1 < likelihoodConsequenceScore) {
+			levelOfRisk = 1;
+		} else {
+			levelOfRisk = 0;
+		}
+
+		return levelOfRisk;
+	}
+
 	public showRiskPins() {
 
 		// TODO: This is still inefficent and unclean
@@ -255,13 +274,36 @@ export class RisksService {
 
 			if (show !== undefined && pinPosition) {
 
-				let pinColor = Pin.pinColours.maroon;
+				const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
+				const levelOfRiskColors = {
+					4: {
+						pinColor: Pin.pinColours.maroon,
+						selectedColor: Pin.pinColours.red
+					},
+					3: {
+						pinColor: Pin.pinColours.darkOrange,
+						selectedColor: Pin.pinColours.orange
+					},
+					2: {
+						pinColor: Pin.pinColours.lemonChiffon,
+						selectedColor: Pin.pinColours.lightYellow
+					},
+					1: {
+						pinColor: Pin.pinColours.limeGreen,
+						selectedColor: Pin.pinColours.lightGreen
+					},
+					0: {
+						pinColor: Pin.pinColours.green,
+						selectedColor: Pin.pinColours.medSeaGreen
+					}
+				}
+
 				const isSelectedPin = this.state.selectedRisk &&
 									risk._id === this.state.selectedRisk._id;
 
-				if (isSelectedPin) {
-					pinColor = Pin.pinColours.red;
-				}
+				const pinColor = (isSelectedPin) ?
+					levelOfRiskColors[levelOfRisk].selectedColor :
+					levelOfRiskColors[levelOfRisk].pinColor;
 
 				this.ViewerService.addPin({
 					id: risk._id,

@@ -212,7 +212,33 @@ risk.updateAttrs = function(dbCol, uid, data) {
 						console.log(user.isAdmin);
 						console.log(user.hasOwnerJob);
 						console.log(user.hasAssignedJob);
-						return oldRisk;
+
+						const toUpdate = {};
+						const fieldsCanBeUpdated = [
+							"safetibase_id",
+							"associated_activity",
+							"desc",
+							"assigned_roles",
+							"category",
+							"likelihood",
+							"consequence",
+							"level_of_risk",
+							"mitigation_status",
+							"mitigation_desc"
+						];
+
+						fieldsCanBeUpdated.forEach((key) => {
+							if (data[key]) {
+								toUpdate[key] = data[key];
+								oldRisk[key] = data[key];
+							}
+						});
+
+						return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
+								return oldRisk;
+							});
+						});
 					}).catch((err) => {
 						if (err) {
 							return Promise.reject(err);

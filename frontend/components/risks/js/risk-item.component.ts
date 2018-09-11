@@ -162,27 +162,27 @@ class RiskItemController implements ng.IController {
 			{value: "", label: "UNSET"}
 		];
 		this.likelihoods = [
-			{value: "very_low", label: "Very Low"},
-			{value: "low", label: "Low"},
-			{value: "moderate", label: "Moderate"},
-			{value: "high", label: "High"},
-			{value: "very_high", label: "Very High"},
+			{value: 0, label: "Very Low"},
+			{value: 1, label: "Low"},
+			{value: 2, label: "Moderate"},
+			{value: 3, label: "High"},
+			{value: 4, label: "Very High"},
 			{value: "", label: "UNSET"}
 		];
 		this.consequences = [
-			{value: "very_low", label: "Very Low"},
-			{value: "low", label: "Low"},
-			{value: "moderate", label: "Moderate"},
-			{value: "high", label: "High"},
-			{value: "very_high", label: "Very High"},
+			{value: 0, label: "Very Low"},
+			{value: 1, label: "Low"},
+			{value: 2, label: "Moderate"},
+			{value: 3, label: "High"},
+			{value: 4, label: "Very High"},
 			{value: "", label: "UNSET"}
 		];
 		this.levels = [
-			{value: "very_low", label: "Very Low"},
-			{value: "low", label: "Low"},
-			{value: "moderate", label: "Moderate"},
-			{value: "high", label: "High"},
-			{value: "very_high", label: "Very High"},
+			{value: 0, label: "Very Low"},
+			{value: 1, label: "Low"},
+			{value: 2, label: "Moderate"},
+			{value: 3, label: "High"},
+			{value: 4, label: "Very High"},
 			{value: "", label: "UNSET"}
 		];
 		this.statuses = [
@@ -282,6 +282,10 @@ class RiskItemController implements ng.IController {
 			// }
 		}, true);
 
+		this.$scope.$watch("vm.riskData.level_of_risk", () => {
+			this.risksService.showRiskPins(this.riskData);
+		}, true);
+
 		this.$scope.$watch("vm.modelSettings", () => {
 			if (this.modelSettings) {
 				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
@@ -337,6 +341,16 @@ class RiskItemController implements ng.IController {
 
 		});
 
+	}
+
+	public setLevelOfRisk() {
+		if (this.riskData.likelihood && this.riskData.consequence) {
+			console.debug(this.riskData.likelihood);
+			console.debug(this.riskData.consequence);
+			this.riskData.level_of_risk = this.risksService.calculateLevelOfRisk(
+				this.riskData.likelihood,
+				this.riskData.consequence);
+		}
 	}
 
 	public convertCommentTopicType() {

@@ -164,7 +164,7 @@ md-content#riskInformation(
 				md-select(
 					id="riskLikelihood"
 					ng-model="vm.riskData.likelihood"
-					ng-change="vm.statusChange()")
+					ng-change="vm.setLevelOfRisk()")
 					
 					md-option(
 						ng-repeat="likelihood in vm.likelihoods"
@@ -175,7 +175,7 @@ md-content#riskInformation(
 				md-select(
 					id="riskConsequence"
 					ng-model="vm.riskData.consequence"
-					ng-change="vm.statusChange()")
+					ng-change="vm.setLevelOfRisk()")
 					
 					md-option(
 						ng-repeat="consequence in vm.consequences"
