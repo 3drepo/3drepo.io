@@ -61,14 +61,6 @@
 				md-on-select="vm.onTabChange()"
 				ng-disabled="!vm.isTeamspaceAdmin")
 				div(layout="column" layout-fill)
-					users-list-old(
-						flex
-						ng-if="!vm.isLoadingTeamspace"
-						layout="row"
-						members="vm.members"
-						jobs="vm.jobs"
-						current-teamspace="vm.currentTeamspace"
-						on-change="vm.onMembersChange(updatedMembers)")
 					users(
 						flex
 						ng-if="!vm.isLoadingTeamspace"
@@ -77,10 +69,10 @@
 						jobs="vm.jobs"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onMembersChange(updatedMembers)")
-					.accountUserManagementFooter(
-						ng-if="vm.licencesLabel"
-						layout="row"
-						layout-align="end center") {{vm.licencesLabel}}
+					//- .accountUserManagementFooter(
+					//- 	ng-if="vm.licencesLabel"
+					//- 	layout="row"
+					//- 	layout-align="end center") {{vm.licencesLabel}}
 
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)

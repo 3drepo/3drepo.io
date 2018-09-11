@@ -28,12 +28,16 @@ const USERS_TABLE_CELLS = [{
 	name: 'Users',
 	type: CELL_TYPES.USER
 }, {
-	name: 'Jobs',
+	name: 'Job',
 	type: CELL_TYPES.JOB
 }, {
 	name: 'Permissions',
 	type: CELL_TYPES.PERMISSIONS
-}, {}];
+}, {
+	type: CELL_TYPES.EMPTY
+}, {
+	type: CELL_TYPES.ICON_BUTTON
+}];
 
 interface IProps {
 	users: any[];
@@ -44,6 +48,7 @@ interface IProps {
 interface IState {
 	rows: any[];
 	jobs: any[];
+	licencesLabel: string;
 }
 
 const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
@@ -59,7 +64,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		rows: [],
-		jobs: []
+		jobs: [],
+		licencesLabel: ''
 	};
 
 	public onUserChange = (user, updatedValue) => {
@@ -84,14 +90,18 @@ export class Users extends React.PureComponent<IProps, IState> {
 					items: teamspacePermissions,
 					onChange: this.onUserChange.bind(null, user)
 				},
-				{ id: user.user, onClick: this.onRemove.bind(null, user) }
+				{},
+				{
+					icon: 'remove_circle',
+					onClick: this.onRemove.bind(null, user)
+				}
 			];
 			return { ...user, data };
 		});
 	}
 
 	public render() {
-		const { rows, jobs } = this.state;
+		const { rows, jobs, licencesLabel } = this.state;
 
 		const preparedRows = this.getUsersTableRows(rows, jobs);
 		return (
@@ -100,6 +110,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 					cells={USERS_TABLE_CELLS}
 					rows={preparedRows}
 				/>
+				<div>{ licencesLabel }</div>
 			</Container>
 		);
 	}

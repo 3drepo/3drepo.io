@@ -16,31 +16,98 @@
  */
 
 import styled from 'styled-components';
-import Table from '@material-ui/core/Table';
-import TableRow from '@material-ui/core/TableRow';
-import Select from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import { memoize } from 'lodash';
+
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 import * as JobItem from '../jobItem/jobItem.styles';
 import * as CellUser from './components/cellUser/cellUser.styles';
 import * as CellSelect from './components/cellSelect/cellSelect.styles';
 
-export const StyledSelect = styled(Select)``;
+const flexMemoized = memoize(({flex}) => {
+	if (flex === 100) {
+		return `1 1 100%`;
+	}
 
-export const Container = styled(Table)`
-  width: 100%;
+	return flex ? `1 0 100%` : 'none';
+}, ({flex}) => flex);
 
-  ${CellUser.Name},
-  ${CellSelect.StyledSelect} {
-    color: rgba(0, 0, 0, .6);
-    font-size: 14px;
-  }
+export const SortLabel = styled(TableSortLabel)`
+	&& {
+		flex-direction: row-reverse;
+		font-weight: ${FONT_WEIGHT.SEMIBOLD};
+		margin-left: ${({active}) => active ? 0 : '-5px'};
+	}
 
-  ${CellSelect.StyledSelect}:after,
-  ${CellSelect.StyledSelect}:before {
-    display: none;
-  }
+	&::before {
+		width: 18px;
+		height: 18px;
+		left: -2px;
+		border-radius: 100%;
+		position: absolute;
+		top: -1px;
+		transition: 200ms ease-in-out;
+		content: '';
+		background: ${({active}) => active ? '#15563c' : 'transparent'};
+	}
+
+	svg {
+		opacity: 1;
+		margin-left: 0;
+		margin-right: 10px;
+		width: 14px;
+		height: 14px;
+		fill: ${({active}) => active ? COLOR.WHITE : COLOR.BLACK_60};
+	}
 `;
 
-export const Row = styled(TableRow)`
-  height: 62px !important;
+export const Cell = styled.div`
+	overflow: hidden;
+	white-space: nowrap;
+	display: flex;
+	box-sizing: border-box;
+	justify-content: flex-start;
+	align-items: center;
+	padding: 0 24px;
+
+	flex: ${flexMemoized};
+	max-width: ${(props: any) => props.flex ? `${props.flex}%` : 'initial'};
+	width: ${(props: any) => props.width || 'auto'};
+`;
+
+export const Container = styled.div`
+	&& {
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	${CellUser.Name},
+	${CellSelect.StyledSelect},
+	${SortLabel} {
+		color: ${COLOR.BLACK_60};
+		font-size: 14px;
+	}
+
+	${CellSelect.StyledSelect}:after,
+	${CellSelect.StyledSelect}:before {
+		display: none;
+	}
+`;
+
+export const Body = styled.div`
+	overflow: scroll;
+`;
+
+export const Row = styled.div`
+	height: 62px;
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+`;
+
+export const Head = styled(Row)`
+	flex: none;
 `;

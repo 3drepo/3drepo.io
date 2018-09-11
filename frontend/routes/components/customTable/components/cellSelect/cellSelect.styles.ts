@@ -20,6 +20,8 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-export const StyledSelect = styled(Select) ``;
+export const StyledSelect = styled(Select) `
+  width: 100%;
+`;
 
 export const Item = styled(MenuItem)``;

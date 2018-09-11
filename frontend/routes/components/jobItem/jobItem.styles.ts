@@ -18,9 +18,13 @@
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 
-export const Name = styled(Grid) ``;
+import { ellipsis } from '../../../styles';
 
-export const Color = styled(Grid) `
+export const Name = styled(Grid)`
+  ${ellipsis('calc(100% - 18px)')};
+`;
+
+export const Color = styled(Grid)`
   width: 6px;
   height: 6px;
   border-radius: 100%;

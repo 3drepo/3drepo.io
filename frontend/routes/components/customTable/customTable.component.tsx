@@ -16,19 +16,36 @@
  */
 
 import * as React from 'react';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
 
-import { Container, Row } from './customTable.styles';
+import { SORT_ORDER_TYPES } from '../../../constants/sorting';
+
 import { CellUser } from './components/cellUser/cellUser.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { JobItem } from '../jobItem/jobItem.component';
+import { Container, Head, Body, Row, SortLabel, Cell } from './customTable.styles';
 
-import { SORT_ORDER_TYPES } from '../../../constants/sorting';
+const HeaderCell = ({cell, orderBy, order}) => {
+	return cell.name ? (
+		<SortLabel
+			active={orderBy === cell.type}
+			direction={order}
+			onClick={() => this.sortBy(cell.type)}
+		>
+			{cell.name}
+		</SortLabel>
+	) : (<></>);
+};
+
+const RowCellButton = ({icon, onClick}) => {
+	return (
+		<IconButton onClick={onClick}>
+			<Icon>{icon}</Icon>
+		</IconButton>
+	);
+};
 
 export const CELL_TYPES = {
 	USER: 1,
@@ -36,7 +53,9 @@ export const CELL_TYPES = {
 	COLOR: 3,
 	RADIO_BUTTON: 4,
 	CHECKBOX: 5,
-	PERMISSIONS: 6
+	PERMISSIONS: 6,
+	ICON_BUTTON: 7,
+	EMPTY: 8
 };
 
 const HEADER_CELL_COMPONENTS = {
@@ -46,24 +65,28 @@ const HEADER_CELL_COMPONENTS = {
 const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: CellUser,
 	[CELL_TYPES.JOB]: CellSelect,
-	[CELL_TYPES.PERMISSIONS]: CellSelect
+	[CELL_TYPES.PERMISSIONS]: CellSelect,
+	[CELL_TYPES.ICON_BUTTON]: RowCellButton
 };
 
 const ROW_CELL_EXTRA_DATA = {
+	[CELL_TYPES.EMPTY]: {
+		flex: 100
+	},
 	[CELL_TYPES.JOB]: {
-		itemTemplate: JobItem
+		itemTemplate: JobItem,
+		flex: 25
+	},
+	[CELL_TYPES.USER]: {
+		flex: 25
+	},
+	[CELL_TYPES.PERMISSIONS]: {
+		flex: 25
+	},
+	[CELL_TYPES.ICON_BUTTON]: {
+		width: '83px'
 	}
 };
-
-const HeaderCell = ({cell, orderBy, order}) => (
-	<TableSortLabel
-		active={orderBy === cell.type}
-		direction={order}
-		onClick={() => this.sortBy(cell.type)}
-	>
-		{cell.name}
-	</TableSortLabel>
-);
 
 interface IProps {
 	cells: any[];
@@ -96,16 +119,21 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		);
 
 		return cells.map((cell, index) => {
+			const cellData = {
+				...(ROW_CELL_EXTRA_DATA[cell.type] || {}),
+				...cell
+			};
+
 			return (
-				<TableCell key={index}>
-					{cell.tooltipText ? setTooltip(HeaderCell, cell.tooltipText) : (
+				<Cell key={index} {...cellData}>
+					{cellData.tooltipText ? setTooltip(HeaderCell, cellData.tooltipText) : (
 						<HeaderCell
-							cell={cell}
+							cell={cellData}
 							orderBy={orderBy}
 							order={order}
 						/>
 					)}
-				</TableCell>
+				</Cell>
 			);
 		});
 	}
@@ -126,13 +154,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 						};
 
 						return (
-							<TableCell key={cellIndex}>
+							<Cell key={cellIndex} {...cellData}>
 								{
 									CellComponent ?
 										(<CellComponent {...cellData} />) :
 										cellData.value
 								}
-							</TableCell>
+							</Cell>
 						);
 					})}
 				</Row>
@@ -148,13 +176,11 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const { cells, rows } = this.props;
 
 		return (
-			<Container aria-labelledby="Users list">
-				<TableHead>
-					<Row>{this.renderHeader(cells)}</Row>
-				</TableHead>
-				<TableBody>
+			<Container>
+				<Head>{this.renderHeader(cells)}</Head>
+				<Body>
 					{this.renderRows(rows, cells)}
-				</TableBody>
+				</Body>
 			</Container>
 		);
 	}
