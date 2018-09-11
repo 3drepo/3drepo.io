@@ -10,6 +10,7 @@
         "no-empty": false,
         "ordered-imports": false,
         "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
-        "forin": false
+        "forin": false,
+        "no-bitwise": false
     }
 }

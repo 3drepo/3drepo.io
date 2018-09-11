@@ -143,10 +143,9 @@ schema.methods.updateProperties = function(updateObj) {
 	return this.save();
 };
 
-schema.methods.changePermissions = function(permissions) {
+schema.methods.changePermissions = function(permissions, account = this._dbcolOptions.account) {
 
 	const User = require("./user");
-	const account = this._dbcolOptions.account;
 
 	if (Object.prototype.toString.call(permissions) !== "[object Array]") {
 		throw responseCodes.INVALID_ARGUMENTS;
@@ -154,7 +153,6 @@ schema.methods.changePermissions = function(permissions) {
 
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
-
 	return User.findByUserName(account).then(dbUser => {
 
 		const promises = [];
@@ -168,6 +166,7 @@ schema.methods.changePermissions = function(permissions) {
 			if (!dbUser.customData.permissionTemplates.findById(permission.permission)) {
 				return promises.push(Promise.reject(responseCodes.PERM_NOT_FOUND));
 			}
+
 			promises.push(User.findByUserName(permission.user).then(assignedUser => {
 				if (!assignedUser) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
@@ -177,6 +176,7 @@ schema.methods.changePermissions = function(permissions) {
 				if (!isMember) {
 					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 				}
+
 				const perm = this.permissions.find(_perm => _perm.user === permission.user);
 
 				if(perm) {
@@ -205,7 +205,6 @@ schema.statics.populateUsers = function(account, permissions) {
 	const User = require("./user");
 
 	return User.getAllUsersInTeamspace(account).then(users => {
-
 		users.forEach(user => {
 			const permissionFound = permissions && permissions.find(p => p.user ===  user);
 
@@ -216,6 +215,14 @@ schema.statics.populateUsers = function(account, permissions) {
 
 		return permissions;
 	});
+};
+
+schema.statics.populateUsersForMultiplePermissions = function (account, permissionsList) {
+	const promises = permissionsList.map((permissions) => {
+		return schema.statics.populateUsers(account, permissions);
+	});
+
+	return Promise.all(promises);
 };
 
 const ModelSetting = ModelFactory.createClass(
