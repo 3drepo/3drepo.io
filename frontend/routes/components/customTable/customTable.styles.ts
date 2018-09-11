@@ -92,7 +92,8 @@ export const Container = styled.div`
 	}
 
 	${CellSelect.StyledSelect}:after,
-	${CellSelect.StyledSelect}:before {
+	${CellSelect.StyledSelect}:before,
+	${CellSelect.StyledSelect}[class*='-disabled-'] svg {
 		display: none;
 	}
 `;

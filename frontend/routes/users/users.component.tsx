@@ -88,7 +88,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
-					onChange: this.onUserChange.bind(null, user)
+					onChange: this.onUserChange.bind(null, user),
+					isDisabled: user.isCurrentUser || user.isOwner
 				},
 				{},
 				{

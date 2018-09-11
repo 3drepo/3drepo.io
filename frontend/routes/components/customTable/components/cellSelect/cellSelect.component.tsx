@@ -26,6 +26,7 @@ interface IProps {
 	value: string;
 	items: any[];
 	itemTemplate?: React.Component;
+	isDisabled?: boolean;
 	onChange: (selectedValue: string) => void;
 }
 
@@ -72,11 +73,12 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemTemplate } = this.props;
+		const { items, itemTemplate, isDisabled } = this.props;
 		const { selectedValue } = this.state;
 
 		return (
 			<StyledSelect
+				disabled={isDisabled}
 				value={selectedValue}
 				onChange={this.handleChange}
 			>
