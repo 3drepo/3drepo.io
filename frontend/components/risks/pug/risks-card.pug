@@ -63,7 +63,6 @@ risk-item(
 		
 		span.addHint(ng-if="!vm.modelLoaded()") Model loading
 		span.addHint(ng-if="!vm.canAddRisk && vm.modelLoaded()") Insufficient privileges to add a risk
-		span.addHint(ng-if="vm.canAddRisk && vm.modelLoaded()") {{vm.risksCardOptions}}
 
 	md-button.md-accent.md-fab.md-mini(
 		id="addRisk"
