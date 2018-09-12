@@ -27,6 +27,7 @@ import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
 
 import { CellUser } from './components/cellUser/cellUser.component';
+import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Body, Row, SortLabel, Cell } from './customTable.styles';
 
@@ -62,7 +63,7 @@ export const CELL_TYPES = {
 };
 
 const HEADER_CELL_COMPONENTS = {
-	// [CELL_TYPES.USER]:
+	[CELL_TYPES.USER]: CellUserSearch
 };
 
 const ROW_CELL_COMPONENTS = {
@@ -172,6 +173,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		);
 
 		return cells.map((cell, index) => {
+			const CellComponent = HEADER_CELL_COMPONENTS[cell.type] || HeaderCell;
 			const cellData = {
 				...(ROW_CELL_EXTRA_DATA[cell.type] || {}),
 				...cell
@@ -179,8 +181,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 			return (
 				<Cell key={index} {...cellData}>
-					{cellData.tooltipText ? setTooltip(HeaderCell, cellData.tooltipText) : (
-						<HeaderCell
+					{cellData.tooltipText ? setTooltip(CellComponent, cellData.tooltipText) : (
+						<CellComponent
 							cell={cellData}
 							sortBy={sortBy}
 							order={order}
