@@ -76,12 +76,13 @@ class ViewsController implements ng.IController {
 		this.watchers();
 		console.log("models " + this.model + "account " + this.account);
 		this.viewsNotifications = this.notificationsService.getChannel(this.account, this.model).views;
+		this.watchNotification();
 	}
 
 	public $onDestroy() {
 		this.ViewpointsService.reset();
 		this.viewpoints = [];
-		this.viewsNotifications.unsubscribeFromCreated(this.createViewpoint);
+		this.viewsNotifications.unsubscribeFromCreated(this.createdViewpoint);
 		this.viewsNotifications.unsubscribeFromUpdated(this.deleteViewpoint);
 		this.viewsNotifications.unsubscribeFromDeleted(this.saveEditedView);
 	}
@@ -112,7 +113,7 @@ class ViewsController implements ng.IController {
 					this.modelSettings.permissions
 				);
 			}
-			this.watchNotification();
+
 		});
 
 	}
@@ -137,15 +138,21 @@ class ViewsController implements ng.IController {
 
 	/*** Realtime sync  */
 	public watchNotification() {
-		console.log("am i getting run");
-		this.viewsNotifications.subscribeToCreated(this.deleteViewpoint, this);
-		this.viewsNotifications.subscribeToUpdated(this.updateViewpoint, this);
-		this.viewsNotifications.subscribeToDeleted(this.editView, this);
+		this.viewsNotifications.subscribeToUpdated(this.updatedViewpoint, this);
+		this.viewsNotifications.subscribeToCreated(this.createdViewpoint, this);
 	}
 
-	public updateViewpoint(data) {
-		console.log('view being passed and if ....', data);
-		//this.ViewpointsService.replaceStateViewpoint(this.newView);
+	public updatedViewpoint(data) {
+		this.ViewpointsService.replaceStateViewpoint(data);
+	}
+
+	public createdViewpoint(data) {
+		console.log("viewpoint being created", data);
+		// console.log("viewpoint being created : account", this.account);
+		// console.log("viewpoint being created : model", this.model);
+		// this.ViewpointsService.createViewpoint(this.account, this.model, data);
+		this.ViewpointsService.updatedCreatedViewpoint(data);
+		// this.ViewpointsService.getViewpoints(this.account, this.model);
 	}
 
 	public createViewpoint() {
@@ -183,7 +190,6 @@ class ViewsController implements ng.IController {
 				.then(() => {
 					this.selectedView.name = this.editSelectedView.name;
 					this.resetEditState();
-					console.log("A change was made");
 				})
 				.catch((error) => {
 					this.handleViewError("update", error);

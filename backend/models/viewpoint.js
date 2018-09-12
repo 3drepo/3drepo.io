@@ -70,11 +70,8 @@ view.getThumbnail = function (dbColOptions, uid) {
 };
 
 view.updateViewpoint = function (dbCol, sessionId, data, id) {
-	console.log("from my update", data);
-	const update = this.updateAttrs(dbCol, id, _.cloneDeep(data));
-	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, data);
-	// console.log('Make sure i am being called and this is the update object', update);
-	return update;
+	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)} ,data));
+	return this.updateAttrs(dbCol, id, data);
 }
 
 view.updateAttrs = function (dbCol, id, data) {
@@ -95,7 +92,7 @@ view.updateAttrs = function (dbCol, id, data) {
 	});
 };
 
-view.createViewpoint = function (dbCol, data) {
+view.createViewpoint = function (dbCol,sessionId,data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -126,6 +123,8 @@ view.createViewpoint = function (dbCol, data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
+				console.log("HERRRRREEEEE", sessionId, dbCol.account , dbCol.model , data);
+				ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)}, data));
 				return this.updateAttrs(dbCol, id, data).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {

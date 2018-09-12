@@ -78,7 +78,7 @@ export class ViewpointsService {
 					viewpoint.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpoint.screenshot.thumbnail);
 				});
 				this.state.viewpoints = response.data;
-				console.log('Viewpoints', this.state.viewpoints);
+				console.log("Viewpoints b4", this.state.viewpoints);
 			});
 
 	}
@@ -91,16 +91,13 @@ export class ViewpointsService {
 	 * @return promise
 	 */
 	public updateViewpoint(teamspace: string, model: string, view: any) {
-
 		const viewId = view._id;
 		const viewpointsUrl = `${teamspace}/${model}/viewpoints/${viewId}/`;
-		console.log('url method name ?', viewpointsUrl);
 		return this.APIService.put(viewpointsUrl, { name: view.name });
 	}
 
-	public testMethod() {
-		// bascially need new method 
-		this.APIService.put("updateViewpoint", {name : view.name} );
+	public updatedCreatedViewpoint(view) {
+		this.state.viewpoints.push(view);
 	}
 
 	/**
@@ -111,10 +108,11 @@ export class ViewpointsService {
 	 * @return promise
 	 */
 	public createViewpoint(teamspace: string, model: string, viewName: string) {
-
 		return this.generateViewpointObject(teamspace, model, viewName)
 			.then((view: any) => {
 				const viewpointsUrl = `${teamspace}/${model}/viewpoints/`;
+				console.log("from service ", teamspace, model, viewName);
+
 				return this.APIService.post(viewpointsUrl, view)
 					.then((response: any) => {
 						view._id = response.data._id;
@@ -170,6 +168,7 @@ export class ViewpointsService {
 	public generateViewpointObject(teamspace: string, model: string, viewName: string) {
 		const viewpointDefer = this.$q.defer();
 		const screenshotDefer = this.$q.defer();
+		console.log("from genearte service ", teamspace, model, viewName);
 
 		this.ViewerService.getCurrentViewpoint({
 			promise: viewpointDefer,

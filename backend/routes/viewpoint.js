@@ -83,8 +83,9 @@ function createViewpoint(req, res, next) {
 			Object.prototype.toString.call(req.body.screenshot) === "[object Object]" &&
 			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
 		const place = utils.APIInfo(req);
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-		Viewpoint.createViewpoint(getDbColOptions(req), req.body)
+		Viewpoint.createViewpoint(getDbColOptions(req), sessionId, req.body)
 			.then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
 			}).catch(err => {
@@ -108,7 +109,7 @@ function deleteViewpoint(req, res, next) {
 }
 
 function updateViewpoint(req, res, next) {
-
+	console.log("REQUEST BODY", req.body)
 	if (Object.keys(req.body).length >= 1 &&
 			Object.prototype.toString.call(req.body.name) === "[object String]") {
 		const dbCol = getDbColOptions(req);

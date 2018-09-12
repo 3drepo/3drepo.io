@@ -48,7 +48,6 @@ function newIssues(emitter, account, model, data) {
 function issueChanged(emitter, account, model, issueId, data) {
 	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null, data);
 }
-// ---
 
 // comments notifications
 function newComment(emitter, account, model, issueId, data) {
@@ -74,13 +73,12 @@ function newModel(emitter, account, data) {
 
 // Groups notifications
 function newGroups(emitter, account, model, data) {
+	console.log("GROUP CHANGED")
+	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("group" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
 function groupChanged(emitter, account, model, data) {
-console.log("group changed")
-
-	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("group" + eventTypes.UPDATED, emitter, account, model, null, data);
 }
 
@@ -91,11 +89,12 @@ function groupsDeleted(emitter, account, model, ids) {
 // Viewpoints notifications
 
 function viewpointsCreated(emitter, account, model, data) {
+	console.log('VIEW CREATED')
+	// console.log("emitter from VIEW " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("view" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
 function viewpointsChanged(emitter, account, model, data) {
-	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("view" + eventTypes.UPDATED, emitter, account, model, null, data);
 }
 
