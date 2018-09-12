@@ -25,7 +25,7 @@ import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { values } from 'lodash';
 
 const USERS_TABLE_CELLS = [{
-	name: 'Users',
+	name: 'User',
 	type: CELL_TYPES.USER,
 	allowSearch: true
 }, {

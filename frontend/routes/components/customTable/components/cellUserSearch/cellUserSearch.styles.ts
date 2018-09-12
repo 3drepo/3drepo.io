@@ -17,11 +17,18 @@
 
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
+import Icon from '@material-ui/core/Icon';
 
 import { FONT_WEIGHT, COLOR } from '../../../../../styles';
 
-export const Container = styled.div``;
+export const SearchIcon = styled(Icon)`
+  && {
+    font-size: 14px;
+    font-weight: ${FONT_WEIGHT.SEMIBOLD};
+    color: ${COLOR.BLACK_60};
+    margin-right: 8px;
+  }
+`;
 
 export const SearchField = styled(TextField)`
   && {
@@ -40,6 +47,17 @@ export const SearchField = styled(TextField)`
 
   [class*='-formControl-'] {
     margin-top: 3px;
+  }
+
+  label[data-shrink='false'] ~ [class*='-formControl-'] {
+    &:before, &:after {
+      opacity: 1;
+      transform: opacity 200ms ease-in-out;
+    }
+
+    &:not(:hover):before {
+      opacity: 0;
+    }
   }
 
   label {

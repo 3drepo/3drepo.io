@@ -16,8 +16,9 @@
  */
 
 import * as React from 'react';
+import Icon from '@material-ui/core/Icon';
 
-import { SearchField } from './cellUserSearch.styles';
+import { SearchField, SearchIcon } from './cellUserSearch.styles';
 import { SortLabel } from '../../customTable.styles';
 import { SORT_ORDER_TYPES } from '../../../../../constants/sorting';
 
@@ -52,7 +53,8 @@ export class CellUserSearch extends React.PureComponent<IProps, IState> {
 					active={sortBy === cell.type}
 					direction={sortBy === cell.type ? order : SORT_ORDER_TYPES.ASCENDING}
 					onClick={onClick}
-				></SortLabel>
+				/>
+				<SearchIcon>search</SearchIcon>
 				<SearchField
 					label={cell.name}
 					value={searchText}
