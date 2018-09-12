@@ -72,7 +72,7 @@ export class RisksService {
 			risksToShow: [],
 			risksCardOptions: {
 				showSubModelRisks: false,
-				showPins: false,
+				showPins: true,
 				sortOldestFirst : false
 			},
 			availableJobs : [],
@@ -272,7 +272,7 @@ export class RisksService {
 			// Check that there is a position for the pin
 			const pinPosition = risk.position && risk.position.length;
 
-			if (show !== undefined && pinPosition) {
+			if (this.state.risksCardOptions.showPins && show !== undefined && pinPosition) {
 
 				const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
 				const levelOfRiskColors = {

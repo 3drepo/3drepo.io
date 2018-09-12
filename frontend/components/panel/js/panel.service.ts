@@ -179,7 +179,8 @@ export class PanelService {
 					hidden: false,
 					value: "showPins",
 					label: "Show Pins",
-					selected: false,
+					toggle: true,
+					selected: true,
 					noToggle: false,
 					keepCheckSpace: true
 				}
