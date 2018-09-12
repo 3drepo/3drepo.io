@@ -15,21 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createMuiTheme } from '@material-ui/core/styles';
+import styled from 'styled-components';
+import Button from '@material-ui/core/Button';
 
-export const theme = createMuiTheme({
-	palette: {
-		primary: {
-			main: '#0C2F54',
-			light: '#3c5876',
-			dark: '#08203a',
-			contrastText: '#fff'
-		},
-		secondary: {
-			main: '#06563c',
-			light: '#377763',
-			dark: '#377763',
-			contrastText: '#fff'
-		}
-	}
-});
+export const Container = styled.div``;
+
+export const FloatingButton = styled(Button) `
+  && {
+    position: absolute;
+    top: 166px;
+    right: 14px;
+  }
+`;

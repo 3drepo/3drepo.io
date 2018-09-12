@@ -22,8 +22,10 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 
 import { theme } from '../../styles';
-import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
+import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
+import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 
 import { Container, Content, Footer, FloatingButton } from './users.styles';
 
@@ -81,12 +83,21 @@ export class Users extends React.PureComponent<IProps, IState> {
 		active: true
 	};
 
+	public componentDidMount() {
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		this.setState({ containerElement });
+	}
+
 	public onUserChange = (user, updatedValue) => {
 		console.log("User changed!", updatedValue);
 	}
 
 	public onRemove = () => {
 		console.log("User removed!");
+	}
+
+	public onSave = () => {
+		console.log("User saved!");
 	}
 
 	public getUsersTableRows = (users = [], jobs = []): any[] => {
@@ -114,26 +125,23 @@ export class Users extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderFloatingButton = (container) => {
-		const button = (
-			<FloatingButton
-				variant="fab"
-				color="secondary"
-				aria-label="Add"
-				mini={true}
-			>
-				<Icon>add</Icon>
-			</FloatingButton>
+	public renderNewUserForm = (container) => {
+		const formProps = {
+			jobs: this.state.jobs,
+			onSave: this.onSave
+		};
+		const panel = (
+			<FloatingActionPanel
+				open={this.state.active}
+				render={({closePanel}) => {
+					return <NewUserForm {...formProps} onCancel={closePanel} />;
+				}}
+			/>
 		);
 		return ReactDOM.createPortal(
-			button,
+			panel,
 			container
 		);
-	}
-
-	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
-		this.setState({containerElement});
 	}
 
 	public render() {
@@ -157,7 +165,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 						</Content>
 						<Footer item>Test{licencesLabel}</Footer>
 					</Container>
-					{ active && containerElement && this.renderFloatingButton(containerElement)}
+					{ active && containerElement && this.renderNewUserForm(containerElement)}
 				</>
 			</MuiThemeProvider>
 		);
