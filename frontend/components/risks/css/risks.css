@@ -130,13 +130,12 @@ risk-item h4 {
 }
 
 risk-item #descriptionText {
-  max-height: 120px;
-  height: 100px;
+  max-height: 100px;
 }
 
 risk-item #descriptionText textarea {
-  max-height: 120px;
-  height: 100px;
+  max-height: 100px;
+  height: 30px;
   overflow-y: auto;
 }
 
@@ -347,6 +346,11 @@ risk-item .riskItemContainer {
 
 risk-item .riskItemContainer div {
   outline: none;
+}
+
+risk-item .riskItemContainer .md-errors-spacer {
+  min-height: 0px !important;
+  height: 0px;
 }
 
 risk-item #riskeArea {
