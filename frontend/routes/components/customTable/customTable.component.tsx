@@ -150,7 +150,7 @@ interface IProps {
 interface IState {
 	sortBy: number;
 	order: string;
-	processedRows: any[];
+	processedRows: any;
 	searchFields: any;
 	searchText: string;
 }

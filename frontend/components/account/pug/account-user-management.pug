@@ -22,7 +22,7 @@
 		md-button.md-accent.md-fab.md-mini.addButton(
 			aria-label="Add new member"
 			ng-click="vm.toggleNewDataPanel()"
-			ng-show="vm.selectedTab !== vm.TABS_TYPES.PROJECTS"
+			ng-show="vm.selectedTab === vm.TABS_TYPES.JOBS"
 			ng-class="{'active': vm.showAddingPanel}",
 			ng-disabled="vm.isAddButtonDisabled()")
 			md-icon.angular-material-icons add
@@ -53,7 +53,6 @@
 
 		md-tabs(
 			flex
-			md-enable-disconnect
 			md-border-bottom
 			md-selected="vm.selectedTab")
 			md-tab(
@@ -63,16 +62,13 @@
 				div(layout="column" layout-fill)
 					users(
 						flex
-						ng-if="!vm.isLoadingTeamspace"
 						layout="row"
 						users="vm.members"
 						jobs="vm.jobs"
+						active="vm.selectedTab === vm.TABS_TYPES.USERS"
+						ng-if="!vm.isLoadingTeamspace"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onMembersChange(updatedMembers)")
-					//- .accountUserManagementFooter(
-					//- 	ng-if="vm.licencesLabel"
-					//- 	layout="row"
-					//- 	layout-align="end center") {{vm.licencesLabel}}
 
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)

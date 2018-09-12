@@ -13,8 +13,8 @@ import ReactRoute from './reactRoute/reactRoute.container';
 import Users from './users/users.container';
 
 angular
-	.module("3drepo")
-	.component("reactButton", wrap(ReactButton))
-	.component("users", wrap(Users, ['users', 'jobs', 'onUsersChange']))
+	.module('3drepo')
+	.component('reactButton', wrap(ReactButton))
 
-	.component("reactRoute", wrap(ReactRoute));
+	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active']))
+	.component('reactRoute', wrap(ReactRoute));

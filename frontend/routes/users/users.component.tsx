@@ -16,13 +16,16 @@
  */
 
 import * as React from 'react';
-import { pick, get} from 'lodash';
+import * as ReactDOM from 'react-dom';
+import { pick, get, values } from 'lodash';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import Icon from '@material-ui/core/Icon';
 
-import { Container } from './users.styles';
-
+import { theme } from '../../styles';
 import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
-import { values } from 'lodash';
+
+import { Container, Content, Footer, FloatingButton } from './users.styles';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
@@ -43,20 +46,27 @@ const USERS_TABLE_CELLS = [{
 interface IProps {
 	users: any[];
 	jobs: any[];
-	onUsersChange: void;
+	active?: boolean;
+	onUsersChange?: void;
 }
 
 interface IState {
 	rows: any[];
 	jobs: any[];
 	licencesLabel: string;
+	containerElement: Element;
+	active: boolean;
 }
 
 const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
 	.map(({label: name, isAdmin: value }: {label: string, isAdmin: boolean}) => ({ name, value }));
 
 export class Users extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps(nextProps: IProps) {
+	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
+		if (nextProps.active !== prevState.active) {
+			return {active: nextProps.active};
+		}
+
 		return {
 			rows: nextProps.users,
 			jobs: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name}))
@@ -66,7 +76,9 @@ export class Users extends React.PureComponent<IProps, IState> {
 	public state = {
 		rows: [],
 		jobs: [],
-		licencesLabel: ''
+		licencesLabel: '',
+		containerElement: null,
+		active: true
 	};
 
 	public onUserChange = (user, updatedValue) => {
@@ -102,18 +114,52 @@ export class Users extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public renderFloatingButton = (container) => {
+		const button = (
+			<FloatingButton
+				variant="fab"
+				color="secondary"
+				aria-label="Add"
+				mini={true}
+			>
+				<Icon>add</Icon>
+			</FloatingButton>
+		);
+		return ReactDOM.createPortal(
+			button,
+			container
+		);
+	}
+
+	public componentDidMount() {
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		this.setState({containerElement});
+	}
+
 	public render() {
-		const { rows, jobs, licencesLabel } = this.state;
+		const { rows, jobs, licencesLabel, containerElement, active } = this.state;
 
 		const preparedRows = this.getUsersTableRows(rows, jobs);
 		return (
-			<Container>
-				<CustomTable
-					cells={USERS_TABLE_CELLS}
-					rows={preparedRows}
-				/>
-				<div>{ licencesLabel }</div>
-			</Container>
+			<MuiThemeProvider theme={theme}>
+				<>
+					<Container
+						container
+						direction="column"
+						alignItems="stretch"
+						wrap="nowrap"
+					>
+						<Content item>
+							<CustomTable
+								cells={USERS_TABLE_CELLS}
+								rows={preparedRows}
+							/>
+						</Content>
+						<Footer item>Test{licencesLabel}</Footer>
+					</Container>
+					{ active && containerElement && this.renderFloatingButton(containerElement)}
+				</>
+			</MuiThemeProvider>
 		);
 	}
 }
