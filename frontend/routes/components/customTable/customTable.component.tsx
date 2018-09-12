@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy } from 'lodash';
+import { matches, cond, orderBy, pick, values } from 'lodash';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -31,7 +31,7 @@ import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.compo
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Body, Row, SortLabel, Cell } from './customTable.styles';
 
-const HeaderCell = ({cell, sortBy, order, onClick}) => {
+const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
 	return cell.name ? (
 		<SortLabel
 			active={sortBy === cell.type}
@@ -98,7 +98,7 @@ const ROW_CELL_EXTRA_DATA = {
  * @param options
  * @returns {Array}
  */
-const getSortedRows = (rows, type, order): any[] => {
+const getSortedRows = (rows, type, order) => {
 	const { USER, JOB, PERMISSIONS } = CELL_TYPES;
 	const sort = cond([
 		[matches({ type: USER }), sortByName.bind(null, rows)],
@@ -108,12 +108,38 @@ const getSortedRows = (rows, type, order): any[] => {
 		}]
 	]);
 
-	// tslint:disable-next-line
 	return sort({type, order});
 };
 
-const getFilteredRows = (rows, type, order): any[] => {
-	return getSortedRows(rows, type, order);
+/**
+ * Filter rows by search text
+ * @param row
+ * @param searchFields
+ * @param searchText
+ * @returns {Array}
+ */
+const getFilteredRows = (rows = [], searchFields, searchText): object[] => {
+	if (!searchText) {
+		return rows;
+	}
+
+	const lowerCasedSearchText = searchText.toLowerCase();
+	return rows.filter((row) => {
+		const requiredFields = pick(row, searchFields);
+		return values(requiredFields).join(' ').toLowerCase()
+			.includes(lowerCasedSearchText);
+	});
+};
+
+const getProcessedRows = ({rows, sortBy, order, searchFields, searchText}) => {
+	const filteredRows = getFilteredRows(rows, searchFields, searchText);
+	return getSortedRows(filteredRows, sortBy, order);
+};
+
+const getSearchFields = (cells) => {
+	const searchFields = cells.find(({searchBy}) => searchBy);
+
+	return searchFields ? searchFields.searchBy : [];
 };
 
 interface IProps {
@@ -124,38 +150,67 @@ interface IProps {
 interface IState {
 	sortBy: number;
 	order: string;
-	filteredRows: any[];
+	processedRows: any[];
+	searchFields: any;
+	searchText: string;
 }
 
 export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
+		const searchFields = getSearchFields(nextProps.cells);
+		const {sortBy, order, searchText} = prevState;
 		return {
-			filteredRows: getFilteredRows(
-				nextProps.rows,
-				prevState.sortBy,
-				prevState.order
-			)
+			searchFields,
+			processedRows: getProcessedRows({
+				rows: nextProps.rows,
+				sortBy,
+				order,
+				searchFields,
+				searchText
+			})
 		};
 	}
 
 	public state = {
 		sortBy: CELL_TYPES.USER,
 		order: SORT_ORDER_TYPES.ASCENDING,
-		filteredRows: []
+		processedRows: [],
+		searchFields: {},
+		searchText: ''
 	};
 
-	public createSortHandler = (sortBy) => (event) => {
+	public createSortHandler = (sortBy, searchBy = []) => () => {
 		let order = SORT_ORDER_TYPES.ASCENDING;
 
 		if (this.state.order === order && this.state.sortBy === sortBy) {
 			order = SORT_ORDER_TYPES.DESCENDING;
 		}
 
+		const {searchFields, searchText} = this.state;
+
 		this.setState({
-			filteredRows: getFilteredRows(this.props.rows, sortBy, order),
+			processedRows: getProcessedRows({
+				rows: this.props.rows,
+				sortBy,
+				order,
+				searchFields,
+				searchText
+			}),
 			sortBy,
 			order
 		});
+	}
+
+	public createSearchHandler = () => (searchText) => {
+		const {sortBy, order, searchFields} = this.state;
+		const processedRows = getProcessedRows({
+			rows: this.props.rows,
+			sortBy,
+			order,
+			searchFields,
+			searchText
+		});
+		this.setState({processedRows, searchText});
 	}
 
 	/**
@@ -187,6 +242,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 							sortBy={sortBy}
 							order={order}
 							onClick={this.createSortHandler(cell.type)}
+							onChange={this.createSearchHandler()}
 						/>
 					)}
 				</Cell>
@@ -206,7 +262,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 						const CellComponent = ROW_CELL_COMPONENTS[type];
 						const cellData = {
 							...(ROW_CELL_EXTRA_DATA[type] || {}),
-							...data
+							...data,
+							searchText: this.state.searchText
 						};
 
 						return (
@@ -226,13 +283,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { cells } = this.props;
-		const { filteredRows } = this.state;
+		const { processedRows } = this.state;
 
 		return (
 			<Container>
 				<Head>{this.renderHeader(cells)}</Head>
 				<Body>
-					{this.renderRows(filteredRows, cells)}
+					{this.renderRows(processedRows, cells)}
 				</Body>
 			</Container>
 		);

@@ -19,6 +19,7 @@ import * as React from 'react';
 import { upperCase } from 'lodash';
 
 import Grid from '@material-ui/core/Grid';
+import { Highlight } from '../../../highlight/highlight.component';
 import { Name, Login, Company } from './cellUser.styles';
 
 interface IProps {
@@ -26,12 +27,17 @@ interface IProps {
 	lastName?: string;
 	user?: string;
 	company?: string;
+	searchText?: string;
 	onChange: () => void;
 }
 
 export class CellUser extends React.PureComponent<IProps, any> {
 
 	public render() {
+		const highlightProps = {
+			search: this.props.searchText || ''
+		};
+
 		return (
 			<Grid
 				container
@@ -39,9 +45,24 @@ export class CellUser extends React.PureComponent<IProps, any> {
 				justify="center"
 				alignItems="flex-start"
 			>
-				<Name item>{upperCase(this.props.lastName)}, {this.props.firstName}</Name>
-				<Login item>{this.props.user}</Login>
-				<Company item>{this.props.company}</Company>
+				<Name item>
+					<Highlight
+						{...highlightProps}
+						text={`${upperCase(this.props.lastName)}, ${this.props.firstName}`}
+					/>
+				</Name>
+				<Login item>
+					<Highlight
+						{...highlightProps}
+						text={this.props.user}
+					/>
+				</Login>
+				<Company item>
+					<Highlight
+						{...highlightProps}
+						text={this.props.company || ''}
+					/>
+				</Company>
 			</Grid>
 		);
 	}

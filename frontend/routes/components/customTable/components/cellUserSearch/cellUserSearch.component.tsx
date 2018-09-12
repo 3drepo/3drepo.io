@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { debounce } from 'lodash';
 import Icon from '@material-ui/core/Icon';
 
 import { SearchField, SearchIcon } from './cellUserSearch.styles';
@@ -39,9 +40,15 @@ export class CellUserSearch extends React.PureComponent<IProps, IState> {
 		searchText: ''
 	};
 
+	public debouncedOnChange = debounce((searchText) => {
+		this.props.onChange(searchText);
+	}, 200);
+
 	public handleChange = (event) => {
-		this.setState({searchText: event.target.value});
-		this.props.onChange(this.state.searchText);
+		event.persist();
+		const searchText = event.target.value;
+		this.setState({searchText});
+		this.debouncedOnChange(searchText);
 	}
 
 	public render() {

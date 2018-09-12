@@ -27,7 +27,7 @@ import { values } from 'lodash';
 const USERS_TABLE_CELLS = [{
 	name: 'User',
 	type: CELL_TYPES.USER,
-	allowSearch: true
+	searchBy: ['firstName', 'lastName', 'user', 'company']
 }, {
 	name: 'Job',
 	type: CELL_TYPES.JOB
