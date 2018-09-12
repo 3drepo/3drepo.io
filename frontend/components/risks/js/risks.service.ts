@@ -242,7 +242,7 @@ export class RisksService {
 		}
 	}
 
-	public calculateLevelOfRisk(likelihood: number, consequence: number): number {
+	public calculateLevelOfRisk(likelihood: string, consequence: string): number {
 		const likelihoodConsequenceScore: number = parseInt(likelihood) + parseInt(consequence);
 		let levelOfRisk;
 

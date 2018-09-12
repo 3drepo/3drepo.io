@@ -283,7 +283,7 @@ class RiskItemController implements ng.IController {
 		}, true);
 
 		this.$scope.$watch("vm.riskData.level_of_risk", () => {
-			this.risksService.showRiskPins(this.riskData);
+			this.risksService.showRiskPins();
 		}, true);
 
 		this.$scope.$watch("vm.modelSettings", () => {
