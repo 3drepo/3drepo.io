@@ -31,8 +31,8 @@ router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail)
 
 router.get("/risks.json", middlewares.issue.canView, listRisks);
 
-router.get("/risks/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
-router.get("/risks/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreenshot);
+router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
 
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
@@ -73,25 +73,21 @@ function clean(dbCol, risk) {
 		});
 	}
 
-	if (risk.viewpoints) {
-		risk.viewpoints.forEach((vp, i) => {
-			vpKeys.forEach((key) => {
-				if (risk.viewpoints[i] && risk.viewpoints[i][key]) {
-					risk.viewpoints[i][key] = utils.uuidToString(risk.viewpoints[i][key]);
-				}
-			});
-		});
+	if (risk.viewpoints && risk.viewpoints.length > 0) {
+		risk.viewpoint = risk.viewpoints[0];
+		delete risk.viewpoints;
+	}
 
-		risk.viewpoints.forEach((vp, i) => {
-			if (risk.viewpoints[i].screenshot) {
-				risk.viewpoints[i].screenshot = risk.account + "/" + risk.model + "/risks/" + risk._id + "/viewpoints/" + risk.viewpoints[i].guid + "/screenshot.png";
-				risk.viewpoints[i].screenshotSmall = risk.account + "/" + risk.model + "/risks/" + risk._id + "/viewpoints/" + risk.viewpoints[i].guid + "/screenshotSmall.png";
+	if (risk.viewpoint) {
+		vpKeys.forEach((key) => {
+			if (risk.viewpoint && risk.viewpoint[key]) {
+				risk.viewpoint[key] = utils.uuidToString(risk.viewpoint[key]);
 			}
 		});
 
-		if (risk.viewpoints.length > 0) {
-			risk.viewpoint = risk.viewpoints[0];
-			delete risk.viewpoints;
+		if (risk.viewpoint.screenshot) {
+			risk.viewpoint.screenshot = risk.account + "/" + risk.model + "/risks/" + risk._id + "/screenshot.png";
+			risk.viewpoint.screenshotSmall = risk.account + "/" + risk.model + "/risks/" + risk._id + "/screenshotSmall.png";
 		}
 	}
 
@@ -161,10 +157,10 @@ function listRisks(req, res, next) {
 	const projection = {
 		extras: 0,
 		"comments": 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
+		"viewpoint.extras": 0,
+		"viewpoint.scribble": 0,
+		"viewpoint.screenshot.content": 0,
+		"viewpoint.screenshot.resizedContent": 0,
 		"thumbnail.content": 0
 	};
 
@@ -213,10 +209,10 @@ function renderRisksHTML(req, res, next) {
 
 	const projection = {
 		extras: 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
+		"viewpoint.extras": 0,
+		"viewpoint.scribble": 0,
+		"viewpoint.screenshot.content": 0,
+		"viewpoint.screenshot.resizedContent": 0,
 		"thumbnail.content": 0
 	};
 
@@ -266,7 +262,7 @@ function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Risk.getScreenshot(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -279,7 +275,7 @@ function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Risk.getSmallScreenshot(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

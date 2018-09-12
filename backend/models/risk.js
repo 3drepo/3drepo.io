@@ -355,56 +355,43 @@ risk.findByUID = function(dbCol, uid, projection) {
 	});
 };
 
-risk.getScreenshot = function(dbCol, uid, vid) {
+risk.getScreenshot = function(dbCol, uid) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	if ("[object String]" === Object.prototype.toString.call(vid)) {
-		vid = utils.stringToUUID(vid);
-	}
-
-	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } },
-		"viewpoints.screenshot.resizedContent": 0
-	}).then((risk) => {
-		if (!_.get(risk, "viewpoints[0].screenshot.content.buffer")) {
+	return this.findByUID(dbCol, uid, { "viewpoint.screenshot.content": 1 }).then((risk) => {
+		if (!_.get(risk, "viewpoint.screenshot.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			return risk.viewpoints[0].screenshot.content.buffer;
+			return risk.viewpoint.screenshot.content.buffer;
 		}
 	});
 };
 
-risk.getSmallScreenshot = function(dbCol, uid, vid) {
+risk.getSmallScreenshot = function(dbCol, uid) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	if ("[object String]" === Object.prototype.toString.call(vid)) {
-		vid = utils.stringToUUID(vid);
-	}
-
-	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } } })
+	return this.findByUID(dbCol, uid, { viewpoint: 1 })
 		.then((risk) => {
-			if (_.get(risk, "viewpoints[0].screenshot.resizedContent.buffer")) {
-				return risk.viewpoints[0].screenshot.resizedContent.buffer;
-			} else if (!_.get(risk, "viewpoints[0].screenshot.content.buffer")) {
+			if (_.get(risk, "viewpoint.screenshot.resizedContent.buffer")) {
+				return risk.viewpoint.screenshot.resizedContent.buffer;
+			} else if (!_.get(risk, "viewpoint.screenshot.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return utils.resizeAndCropScreenshot(risk.viewpoints[0].screenshot.content.buffer, 365)
+				return utils.resizeAndCropScreenshot(risk.viewpoint.screenshot.content.buffer, 365)
 					.then((resized) => {
 						db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-							_dbCol.update({
-								_id: uid,
-								"viewpoints.guid": vid},
-								{$set: {"viewpoints.$.screenshot.resizedContent": resized}}
+							_dbCol.update({ _id: uid },
+								{$set: {"viewpoint.screenshot.resizedContent": resized}}
 								).catch((err) => {
 								systemLogger.logError("Error while saving resized screenshot",
 									{
 										riskId: utils.uuidToString(uid),
-										viewpointId: utils.uuidToString(vid),
 										err: err
 									});
 							});

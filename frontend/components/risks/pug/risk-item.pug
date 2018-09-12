@@ -83,52 +83,14 @@ md-content#riskInformation(
 
 	.riskItemContainer#riskDescriptionContainer(layout="column", layout-align="start", flex)
 		div(layout="column", layout-align="start", flex)
-			div(ng-if="!vm.data", flex, layout="column")
+			div(flex, layout="column")
 				md-input-container#descriptionText()
 					label Description
 					textarea(
 						ng-model="vm.riskData.desc"
-						ng-disabled="vm.data"
 						ng-focus="vm.textInputHasFocus(true)"
 						ng-blur="vm.textInputHasFocus(false)")
 
-			#riskDescription(
-				ng-if="vm.data"
-				layout="column"
-				ng-click="vm.showViewpoint($event, vm.riskData.viewpoint)")
-
-				div(layout='row', layout-align="space-between", flex)
-					label(
-						ng-if="!vm.editingDescription"
-						ng-bind-html="vm.riskData.desc | linky:'_blank'") {{vm.riskData.desc}}
-					md-input-container(flex, ng-if="vm.editingDescription")
-						textarea(
-							ng-model="vm.riskData.desc"
-							aria-label="Description"
-							tdr-focus="true"
-							ng-focus="vm.textInputHasFocus(true)"
-							ng-blur="vm.textInputHasFocus(false)")
-					
-					.riskTextActions(layout="row", ng-if="vm.canChangeDescription()")
-						md-button.md-icon-button.md-accent(
-							aria-label="Edit Description Toggle"
-							ng-click="vm.toggleEditDescription($event)")
-
-							md-tooltip(
-								ng-if="!vm.editingDescription"
-								md-direction="bottom") Edit Description
-							md-icon.angular-material-icons(
-								ng-if="!vm.editingDescription"
-								style="color:{{vm.editCommentColor}}") mode_edit
-
-							md-tooltip(
-								ng-if="vm.editingDescription"
-								md-direction="bottom") Save Description
-							md-icon.angular-material-icons(
-								ng-if="vm.editingDescription"
-								style="color:{{vm.editCommentColor}}") save
-							
-			
 			.riskThumbnail(
 				ng-if="vm.riskData.descriptionThumbnail"
 				ng-click="vm.showScreenShot($event, vm.riskData.viewpoint)")
@@ -142,8 +104,7 @@ md-content#riskInformation(
 				label Risk Owner
 				md-select(
 					id="riskOwner"
-					ng-model="vm.riskData.assigned_roles[0]"
-					ng-change="vm.statusChange()")
+					ng-model="vm.riskData.assigned_roles[0]")
 					
 					md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
 			
@@ -151,8 +112,7 @@ md-content#riskInformation(
 				label Category
 				md-select(
 					id="riskCategory"
-					ng-model="vm.riskData.category"
-					ng-change="vm.statusChange()")
+					ng-model="vm.riskData.category")
 					
 					md-option(
 						ng-repeat="category in vm.categories"
@@ -189,7 +149,6 @@ md-content#riskInformation(
 				md-select(
 					id="riskLevelOfRisk"
 					ng-model="vm.riskData.level_of_risk"
-					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangeType()")
 					
 					md-option(
@@ -200,8 +159,7 @@ md-content#riskInformation(
 				label Mitigation Status
 				md-select(
 					id="riskMitigationStatus"
-					ng-model="vm.riskData.mitigation_status"
-					ng-change="vm.statusChange()")
+					ng-model="vm.riskData.mitigation_status")
 					
 					md-option(
 						ng-repeat="status in vm.statuses"
