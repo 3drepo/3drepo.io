@@ -54,7 +54,6 @@ class PanelCardChipsFilterController implements ng.IController {
 				filterInput.value = "";
 
 				this.collapsed = false;
-
 			}
 		});
 	}

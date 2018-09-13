@@ -221,6 +221,11 @@ panel-card-chips-filter md-chips.collapsed md-chips-wrap {
   overflow: hidden;
 }
 
+#clipboard-target {
+  width: 1px;
+  height: 1px;
+}
+
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {
   position: absolute;

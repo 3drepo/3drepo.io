@@ -17,9 +17,13 @@ md-chips(ng-model="vm.chips"
 	md-chip-template
 		span {{ vm.formatChip($chip) }}
 
+
+
 md-button.md-icon-button#additionalInfoButton(aria-label="Collapse Toggle" class="collapse-button" ng-show="vm.chips.length>0" ng-click="vm.collapsed = !vm.collapsed")
 	md-icon.angular-material-icons(ng-if="vm.collapsed") keyboard_arrow_right
 	md-icon.angular-material-icons(ng-if="!vm.collapsed") keyboard_arrow_down
 	md-tooltip(ng-if="vm.collapsed") Expand
 	md-tooltip(ng-if="!vm.collapsed") Collapse
 
+input(id="clipboard-target" value="{{vm.chips}}")
+button(ngclipboard data-clipboard-target="#clipboard-target") copy dude
