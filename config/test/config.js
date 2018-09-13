@@ -54,7 +54,7 @@ module.exports = {
 		}
 	],
 	customLogins: {
-		test: {	
+		test: {
 			loginMessage: "Test",
 			css: "custom/test/css/test.css",
 			topLogo: "custom/test/images/test_logo.png",
@@ -64,7 +64,7 @@ module.exports = {
 	},
 	js_debug_level: 'debug',
 	logfile: {
-		//silent: true,
+		silent: true,
 		filename: './3drepo.log',
 		console_level: 'info',
 		file_level: 'debug'
