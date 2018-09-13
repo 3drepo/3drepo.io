@@ -324,9 +324,6 @@ export class IssuesService {
 
 		// Search the title, timestamp, type and owner
 		if ( this.stringSearch(issue.title, filterText) ||
-				this.stringSearch(issue.timeStamp, filterText) ||
-			this.stringSearch(issue.owner, filterText) ||
-			this.stringSearch(issue.topic_type, filterText) ||
 			this.stringSearch(issue.desc, filterText)) {
 			return true;
 		}
