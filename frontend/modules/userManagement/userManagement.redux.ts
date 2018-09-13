@@ -27,7 +27,11 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	removeUser: ['username'],
 	removeUserSuccess: ['username'],
 	removeUserFailure: [],
-	setTeamspace: ['teamspace']
+	setTeamspace: ['teamspace'],
+	updateJob: ['username', 'job'],
+	updateJobSuccess: ['username', 'job'],
+	updatePermissions: ['permissions'],
+	updatePermissionsSuccess: ['permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -87,11 +91,36 @@ export const setTeamspace = (state = INITIAL_STATE, { teamspace }) => {
 	return { ...state, teamspace };
 };
 
+export const updateJobSuccess = (state = INITIAL_STATE, { username, job }) => {
+	const users = [...state.users].map((userData) => {
+		if (userData.user === username) {
+			userData.job = job;
+		}
+
+		return userData;
+	});
+	return { ...state, users };
+};
+
+export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
+	const users = [...state.users].map((userData) => {
+		if (userData.user === permissions.user) {
+			const newUserData = {...userData, ...permissions};
+			return prepareUserData(state.teamspace, newUserData);
+		}
+
+		return userData;
+	});
+	return { ...state, users };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
 	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
 	[UserManagementTypes.REMOVE_USER_FAILURE]: removeUserFailure,
-	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace
+	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,
+	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
+	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess
 });

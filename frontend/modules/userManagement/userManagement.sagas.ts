@@ -64,8 +64,36 @@ export function* removeUser({ username }) {
 	}
 }
 
+export function* updateJob({ username, job }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield (
+				job ?
+				API.updateUserJob(teamspace, job, username) :
+				API.removeUserJob(teamspace, username)
+		);
+		yield put(UserManagementActions.updateJobSuccess(username, job));
+	} catch (error) {
+		yield put(UserManagementActions.removeUserFailure(error));
+		console.error(error);
+	}
+}
+
+export function* updatePermissions({ permissions }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.setUserPermissions(teamspace, permissions);
+		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
+	} catch (error) {
+		yield put(UserManagementActions.removeUserFailure(error));
+		console.error(error);
+	}
+}
+
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);
+	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateJob);
+	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 }

@@ -32,12 +32,6 @@ interface IState {
 }
 
 export class CellSelect extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps(nextProps) {
-		return {
-			selectedValue: nextProps.value
-		};
-	}
-
 	public state = {
 		selectedValue: ''
 	};
@@ -65,8 +59,11 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 
 	public handleChange = (event) => {
 		const selectedValue = event.target.value;
-		this.props.onChange(selectedValue);
-		this.setState({selectedValue});
+
+		if (this.state.selectedValue !== selectedValue) {
+			this.setState({selectedValue});
+			this.props.onChange(selectedValue);
+		}
 	}
 
 	public render() {
@@ -76,7 +73,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		return (
 			<StyledSelect
 				disabled={isDisabled}
-				value={selectedValue}
+				value={selectedValue || this.props.value}
 				onChange={this.handleChange}
 			>
 				{this.renderOptions(items, itemTemplate)}

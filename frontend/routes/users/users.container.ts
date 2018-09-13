@@ -26,7 +26,9 @@ const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	addUser: UserManagementActions.addUser,
-	removeUser: UserManagementActions.removeUser
+	removeUser: UserManagementActions.removeUser,
+	updateJob: UserManagementActions.updateJob,
+	updatePermissions: UserManagementActions.updatePermissions
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Users);

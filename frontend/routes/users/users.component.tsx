@@ -28,6 +28,8 @@ import { FloatingActionPanel } from '../components/floatingActionPanel/floatingA
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 
 import { Container, Content, Footer, FloatingButton } from './users.styles';
+import { cond } from 'lodash';
+import { matches } from 'lodash';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
@@ -53,6 +55,8 @@ interface IProps {
 	active?: boolean;
 	addUser: (user) => void;
 	removeUser: (username) => void;
+	updateJob: (username, job) => void;
+	updatePermissions: (permissions) => void;
 }
 
 interface IState {
@@ -91,9 +95,19 @@ export class Users extends React.PureComponent<IProps, IState> {
 		this.setState({ containerElement });
 	}
 
-	public onUserChange = (user, updatedValue) => {
-		console.log("User changed!", updatedValue);
+	public onPermissionsChange = (username, isAdmin) => {
+		const permissionData = {
+			user: username,
+			permissions: isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
+		};
+
+		this.props.updatePermissions(permissionData);
 	}
+
+	public handleChange = (user, field) => (value) => cond([
+		[matches('job'), () => this.props.updateJob(user.user, value)],
+		[matches('permissions'), () => this.onPermissionsChange(user.user, value)]
+	])(field)
 
 	public onRemove = (username) => {
 		this.props.removeUser(username);
@@ -116,12 +130,12 @@ export class Users extends React.PureComponent<IProps, IState> {
 				{
 					value: user.job,
 					items: jobs,
-					onChange: this.onUserChange.bind(null, user)
+					onChange: this.handleChange(user, 'job')
 				},
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
-					onChange: this.onUserChange.bind(null, user),
+					onChange: this.handleChange(user, 'permissions'),
 					isDisabled: user.isCurrentUser || user.isOwner
 				},
 				{},
