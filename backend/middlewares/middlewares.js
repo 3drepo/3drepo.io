@@ -31,6 +31,7 @@
 	const getPermissionsAdapter = require("./getPermissionsAdapter");
 	const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
 	const checkPermissions = require("./checkPermissions").checkPermissions;
+	const checkMultiplePermissions = require("./checkPermissions").checkMultiplePermissions;
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -214,6 +215,7 @@
 		hasEditAccessToFedModel: checkPermissions([C.PERM_EDIT_FEDERATION]),
 		hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
 		hasEditPermissionsAccessToModel: checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
+		hasEditPermissionsAccessToMulitpleModels: checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
 
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],

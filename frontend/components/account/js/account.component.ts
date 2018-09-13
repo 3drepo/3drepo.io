@@ -215,12 +215,9 @@ class AccountController implements ng.IController {
 		if (this.userInfoPromise) {
 			return this.userInfoPromise;
 		} else {
-
 			this.userInfoPromise = this.AccountService.getUserInfo(this.account)
 				.then((response) => {
-
 					if (response.data) {
-
 						this.accounts = response.data.accounts;
 						this.username = this.account;
 						this.firstName = response.data.firstName;

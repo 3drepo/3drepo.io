@@ -61,10 +61,12 @@ router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBun
 router.put("/:model", middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
 
 // model permission
+router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
 router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 // model permission
-router.get("/:model/permissions",  middlewares.hasEditPermissionsAccessToModel, getPermissions);
+router.get("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, getMultipleModelsPermissions);
+router.get("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, getSingleModelPermissions);
 
 // master tree
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
@@ -510,19 +512,83 @@ function updatePermissions(req, res, next) {
 	});
 }
 
-function getPermissions(req, res, next) {
+function updateMultiplePermissions(req, res, next) {
+
+	const account = req.params.account;
+	const modelsIds = req.body.map(({model}) => model);
+
+	return ModelSetting.find({account}, {"_id" : {"$in" : modelsIds}}).then((modelsList) => {
+		if (!modelsList.length) {
+			return Promise.reject({resCode: responseCodes.MODEL_INFO_NOT_FOUND});
+		} else {
+			const modelsPromises = modelsList.map((model) => {
+				const newModelPermissions = req.body.find((modelPermissions) => modelPermissions.model === model._id);
+				return model.changePermissions(newModelPermissions.permissions || {}, account);
+			});
+
+			return Promise.all(modelsPromises).then((models) => {
+				const populatedPermissionsPromises = models.map(({permissions}) => {
+					return ModelSetting.populateUsers(account, permissions);
+				});
+
+				return Promise.all(populatedPermissionsPromises).then((populatedPermissions) => {
+					return populatedPermissions.map((permissions, index) => {
+						const {name, federate, _id: model, subModels} =  models[index] || {};
+						return {name, federate, model, permissions, subModels};
+					});
+				});
+			});
+		}
+	}).then(permissions => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getSingleModelPermissions(req, res, next) {
 
 	const account = req.params.account;
 	const model = req.params.model;
 
 	return ModelSetting.findById({account, model}, model).then(setting => {
-
 		if (!setting) {
 			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND});
 		} else {
 			return ModelSetting.populateUsers(account, setting.permissions);
 		}
 
+	}).then(permissions => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getMultipleModelsPermissions(req, res, next) {
+
+	const account = req.params.account;
+	const models = req.query.models.split(",");
+
+	return ModelSetting.find({account}, {"_id" : {"$in" : models}}).then((modelsList) => {
+		if (!modelsList.length) {
+			return Promise.reject({ resCode: responseCodes.MODEL_INFO_NOT_FOUND });
+		} else {
+			const permissionsList = modelsList.map(({permissions}) => permissions || []);
+			return ModelSetting.populateUsersForMultiplePermissions(account, permissionsList)
+				.then((populatedPermissions) => {
+					return populatedPermissions.map((permissions, index) => {
+						const {_id, federate, name, subModels} = modelsList[index];
+						return {
+							model:_id,
+							federate,
+							name,
+							permissions,
+							subModels
+						};
+					});
+				});
+		}
 	}).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
