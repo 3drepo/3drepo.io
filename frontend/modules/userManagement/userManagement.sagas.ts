@@ -15,29 +15,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, call, takeLatest, all } from 'redux-saga/effects';
+import { put, call, takeLatest, all, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
+import { selectCurrentTeamspace } from '../teamspace/teamspace.selectors';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
 
 		const response = yield all([
-			call(API.fetchUsers, [teamspace]),
-			call(API.getQuotaInfo, [teamspace]),
-			call(API.getJobs, [teamspace]),
-			call(API.getJobsColors, [teamspace])
+			API.fetchUsers(teamspace),
+			API.getQuotaInfo(teamspace),
+			API.getJobs(teamspace),
+			API.getJobsColors(teamspace)
 		]);
 
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(...response.map(({data}) => data)));
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
+			teamspace,
+			...response.map(({data}) => data)
+		));
 	} catch (error) {
 		yield put(UserManagementActions.setPendingState(false));
 		console.error(error);
 	}
 }
 
+export function* addUser({ user }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const { data } = yield API.addUser(teamspace, user);
+		yield put(UserManagementActions.addUserSuccess(data));
+	} catch (error) {
+		yield put(UserManagementActions.removeUserFailure(error));
+		console.error(error);
+	}
+}
+
+export function* removeUser({ username }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.removeUser(teamspace, username);
+		yield put(UserManagementActions.removeUserSuccess(username));
+	} catch (error) {
+		yield put(UserManagementActions.removeUserFailure(error));
+		console.error(error);
+	}
+}
+
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
+	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
+	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);
 }

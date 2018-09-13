@@ -42,7 +42,7 @@ export const findUsers = (teamspace, searchText) => {
  * @param teamspace
  * @param username
  */
-export const removeUser = (teamspace, username) => {
+export const removeUser = (teamspace, username): Promise<any> => {
 	return api.delete(`${teamspace}/members/${username}`);
 };
 
@@ -61,7 +61,7 @@ export const removeUserCascade = (teamspace, username) => {
  * @param job
  * @param username
  */
-export const updateMemberJob = (teamspace, job, username) => {
+export const updateUserJob = (teamspace, job, username) => {
 	return api.post(`${teamspace}/jobs/${job}/${username}`);
 };
 
@@ -71,7 +71,7 @@ export const updateMemberJob = (teamspace, job, username) => {
  * @param job
  * @param username
  */
-export const removeMemberJob = (teamspace, job, username) => {
+export const removeUserJob = (teamspace, job, username) => {
 	return api.delete(`${teamspace}/jobs/unassign/${username}`);
 };
 
@@ -80,7 +80,7 @@ export const removeMemberJob = (teamspace, job, username) => {
  * @param teamspace
  * @param permissionData
  */
-export const setMemberPermissions = (teamspace, permissionsData) => {
+export const setUserPermissions = (teamspace, permissionsData) => {
 	return api.post(`${teamspace}/permissions/`, permissionsData);
 };
 
@@ -89,6 +89,6 @@ export const setMemberPermissions = (teamspace, permissionsData) => {
  * @param teamspace
  * @param username
  */
-export const addMember = (teamspace, username) => {
-	return api.post(`${teamspace}/members`, username);
+export const addUser = (teamspace, user) => {
+	return api.post(`${teamspace}/members`, user);
 };

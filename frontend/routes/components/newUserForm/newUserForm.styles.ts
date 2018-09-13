@@ -51,7 +51,8 @@ export const Container = styled.div`
 
   ${StyledTextField} , ${StyledTextField} *,
   ${StyledSelect}, ${StyledSelect} input,
-  ${StyledSelect} ~ label {
+  ${StyledSelect} ~ label,
+  [class*='MuiTypography'] {
     font-size: 14px;
     color: ${COLOR.BLACK_60};
   }

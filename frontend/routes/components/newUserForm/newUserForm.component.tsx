@@ -24,6 +24,8 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import {
@@ -32,23 +34,33 @@ import {
 
 interface IProps {
 	jobs: any[];
-	onSave: () => void;
+	onSave: (user) => void;
 	onCancel: () => void;
 }
 
 interface IState {
 	name: string;
 	job: string;
+	isAdmin: boolean;
 }
 
 export class NewUserForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		name: '',
-		job: ''
+		job: '',
+		isAdmin: false
 	};
 
 	public handleChange = (field) => (event) => {
 		this.setState({[field]: event.target.value || ''});
+	}
+
+	public handlePermissionsChange = (event, isAdmin) => {
+		this.setState({isAdmin});
+	}
+
+	public handleSave = () => {
+		this.props.onSave({...this.state});
 	}
 
 	public renderJobs = (jobs) => {
@@ -89,6 +101,17 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 						</StyledSelect>
 					</FormControl>
 
+					<FormControlLabel
+						control={
+							<Checkbox
+								color="secondary"
+								checked={this.state.isAdmin}
+								onChange={this.handlePermissionsChange}
+							/>
+						}
+						label="Add as Teamspace Admin"
+					/>
+
 					<Grid
 						container
 						direction="row">
@@ -97,7 +120,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 							color="secondary"
 							disabled={!this.state.name}
 							aria-label="Save"
-							onClick={onSave}>
+							onClick={this.handleSave}>
 							+ Add user
 						</SaveButton>
 					</Grid>

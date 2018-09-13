@@ -110,7 +110,7 @@ class AccountUserManagementController implements ng.IController {
 
 		return {
 			...props,
-			users: this.getUsers(selectUsers(state), currentTeamspace.account),
+			users: selectUsers(state),
 			licencesLimit: selectUsersLimit(state),
 			jobs: selectJobs(state),
 			jobsColors: selectJobsColors(state),
@@ -120,10 +120,6 @@ class AccountUserManagementController implements ng.IController {
 			isTeamspaceAdmin: currentTeamspace.isAdmin,
 			currentTeamspace
 		};
-	}
-
-	public getUsers(users, teamspaceName): any[] {
-		return users.map(this.prepareMemberData.bind(null, teamspaceName));
 	}
 
 	public $onInit(): void {
@@ -180,40 +176,6 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	/**
-	 * Get teamspace users list
-	 * @param teamspaceName
-	 */
-	public getTeamspaceMembersData(teamspaceName: string): void {
-		const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
-			.catch(this.DialogService.showError.bind(null, "retrieve", "subscriptions"));
-
-		const memberListPromise = this.AccountService.getMembers(teamspaceName)
-			.catch(this.DialogService.showError.bind(null, "retrieve", "members"));
-
-		return this.$q.all([quotaInfoPromise, memberListPromise])
-			.then(([quotaInfoResponse, membersResponse]) => {
-				return {
-					licencesLimit: get(quotaInfoResponse, "data.collaboratorLimit", 0),
-					members: [...membersResponse.data.members.map(this.prepareMemberData.bind(null, teamspaceName))]
-				};
-			});
-	}
-
-	/**
-	 * Convert member data to proper format
-	 * @param member
-	 * @returns
-	 */
-	public prepareMemberData = (teamspaceName, member): object => {
-		return {
-			...member,
-			isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-			isCurrentUser: this.currentUser === member.user,
-				isOwner: teamspaceName === member.user
-		};
-	}
-
-	/**
 	 * Get teamspace jobs list
 	 * @param teamspaceName
 	 */
@@ -242,18 +204,6 @@ class AccountUserManagementController implements ng.IController {
 	 */
 	public onMembersChange(updatedMembers): void {
 		this.users = [...updatedMembers];
-	}
-
-	/**
-	 * Add new member to local list of members
-	 * @param updatedMembers
-	 */
-	public onMemberSave = (newMember): void => {
-		this.users = [
-			...this.users,
-			this.prepareMemberData(this.currentTeamspace.account, newMember)
-		];
-		this.showAddingPanel = false;
 	}
 
 	/**

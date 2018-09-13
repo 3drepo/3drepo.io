@@ -46,11 +46,13 @@ const USERS_TABLE_CELLS = [{
 }];
 
 interface IProps {
+	currentTeamspace: string;
 	users: any[];
 	limit: any;
 	jobs: any[];
 	active?: boolean;
-	onUsersChange?: void;
+	addUser: (user) => void;
+	removeUser: (username) => void;
 }
 
 interface IState {
@@ -93,12 +95,18 @@ export class Users extends React.PureComponent<IProps, IState> {
 		console.log("User changed!", updatedValue);
 	}
 
-	public onRemove = () => {
-		console.log("User removed!");
+	public onRemove = (username) => {
+		this.props.removeUser(username);
 	}
 
-	public onSave = () => {
-		console.log("User saved!");
+	public onSave = ({name, job, isAdmin = false}) => {
+		const user = {
+			job,
+			user: name,
+			permissions: isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
+		};
+
+		this.props.addUser(user);
 	}
 
 	public getUsersTableRows = (users = [], jobs = []): any[] => {
@@ -119,7 +127,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 				{},
 				{
 					icon: 'remove_circle',
-					onClick: this.onRemove.bind(null, user)
+					onClick: this.onRemove.bind(null, user.user)
 				}
 			];
 			return { ...user, data };
