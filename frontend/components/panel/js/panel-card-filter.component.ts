@@ -29,6 +29,7 @@ class PanelCardFilterController implements ng.IController {
 	private filterText;
 	private showClearFilterButton;
 	private showFilter: boolean;
+	private collapsed: boolean;
 
 	constructor(
 		private $timeout: ng.ITimeoutService,
@@ -55,7 +56,11 @@ class PanelCardFilterController implements ng.IController {
 				this.$timeout(() => {
 					this.filterInput = angular.element(this.$element[0].querySelector("#panelCardFilterInput"));
 					this.filterInput.focus();
+					this.filterInput.value = "";
 				});
+
+				this.collapsed = false;
+
 			}
 		});
 	}

@@ -69,7 +69,7 @@ export class APIService {
 	 * @param url
 	 * @returns {*|promise}
 	 */
-	public get(url: string, options: any) {
+	public get(url: string, options?: any) {
 		this.checkUrl(url);
 		url = encodeURI(url);
 		const urlUse = this.ClientConfigService.apiUrl(
