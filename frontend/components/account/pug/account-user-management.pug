@@ -20,7 +20,7 @@
 						ng-repeat="teamspace in vm.teamspaces") {{::teamspace.account}}
 
 		md-button.md-accent.md-fab.md-mini.addButton(
-			aria-label="Add new member"
+			aria-label="Add new job"
 			ng-click="vm.toggleNewDataPanel()"
 			ng-show="vm.selectedTab === vm.TABS_TYPES.JOBS"
 			ng-class="{'active': vm.showAddingPanel}",
@@ -63,8 +63,9 @@
 					users(
 						flex
 						layout="row"
-						users="vm.members"
+						users="vm.users"
 						jobs="vm.jobs"
+						limit="vm.licencesLimit"
 						active="vm.selectedTab === vm.TABS_TYPES.USERS"
 						ng-if="!vm.isLoadingTeamspace"
 						current-teamspace="vm.currentTeamspace"
@@ -76,7 +77,7 @@
 						flex
 						ng-if="!vm.isLoadingTeamspace"
 						layout="row"
-						members="vm.members"
+						members="vm.users"
 						projects="vm.projects"
 						current-teamspace="vm.currentTeamspace"
 						on-change="vm.onJobsChange(updatedJobs)")

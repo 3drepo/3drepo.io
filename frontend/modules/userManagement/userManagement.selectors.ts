@@ -17,8 +17,28 @@
 
 import { createSelector } from 'reselect';
 
-export const selectUsersDomain = (state) => Object.assign({}, state.users);
+export const selectUserManagementDomain = (state) => Object.assign({}, state.userManagement);
 
-export const selectUsersList = createSelector(
-	selectUsersDomain, (state) => state.users
+export const selectUsers = createSelector(
+	selectUserManagementDomain, (state) => state.users
+);
+
+export const selectUsersLimit = createSelector(
+	selectUserManagementDomain, (state) => state.collaboratorLimit || 0
+);
+
+export const selectJobs = createSelector(
+	selectUserManagementDomain, (state) => state.jobs
+);
+
+export const selectJobsColors = createSelector(
+	selectUserManagementDomain, (state) => state.jobsColors
+);
+
+export const selectProjects = createSelector(
+	selectUserManagementDomain, (state) => state.projects
+);
+
+export const selectIsPending = createSelector(
+	selectUserManagementDomain, (state) => state.isPending
 );

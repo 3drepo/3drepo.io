@@ -16,5 +16,5 @@ angular
 	.module('3drepo')
 	.component('reactButton', wrap(ReactButton))
 
-	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active']))
+	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active', 'limit']))
 	.component('reactRoute', wrap(ReactRoute));

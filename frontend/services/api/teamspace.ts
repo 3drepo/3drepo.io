@@ -15,9 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	UsersTypes,
-	UsersActions
-} from './users.redux';
+import api from './';
 
-export * from './users.selectors';
+/**
+ * Get users
+ * @param teamspace
+ * @param searchText
+ */
+export const fetchTeamspace = (teamspace) => {
+	return api.get(`${teamspace}.json`);
+};
+
+/**
+ * Get quota info
+ * @param teamspace
+ */
+export const getQuotaInfo = (teamspace) => {
+	return api.get(`${teamspace}/quota`);
+};

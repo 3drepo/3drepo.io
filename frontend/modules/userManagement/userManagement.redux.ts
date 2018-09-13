@@ -17,19 +17,31 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 
-export const { Types: UsersTypes, Creators: UsersActions } = createActions({
-	fetchUsers: ['teamspace', 'searchText'],
-	removeUser: ['teamspace', 'username'],
-	removeUserCascade: ['teamspace', 'username'],
-	updateMemberJob: ['teamspace', 'job', 'username'],
-	removeMemberJob: ['teamspace', 'job', 'username'],
-	setMemberPermissions: ['teamspace', 'permissionsData'],
-	addMember: ['teamspace', 'username']
-}, { prefix: 'USERS_' });
+export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
+	fetchTeamspaceDetails: ['teamspace'],
+	fetchTeamspaceDetailsSuccess: ['users', 'quotaInfo', 'jobs', 'jobsColors'],
+	setPendingState: ['isPending']
+}, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
-	users: []
+	users: [],
+	jobs: [],
+	jobsColors: [],
+	projects: [],
+	collaboratorLimit: null,
+	isPending: false
+};
+
+export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
+	const { users = [], quotaInfo = {}, jobs, jobsColors } = action;
+	return { ...state, ...quotaInfo, users, jobs, jobsColors, isPending: false };
+};
+
+export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return { ...state, isPending };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
+	[UserManagementTypes.SET_PENDING_STATE]: setPendingState
 });

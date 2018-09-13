@@ -15,19 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, call, takeLatest, all } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { {{ pascalCase name }}Types, {{ pascalCase name }}Actions } from './{{ camelCase name }}.redux';
+import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 
-export function* fetch() {
+export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
-		console.log('{{ pascalCase name }} saga started!');
-	} catch(error) {
+		yield put(UserManagementActions.setPendingState(true));
+
+		const response = yield all([
+			call(API.fetchUsers, [teamspace]),
+			call(API.getQuotaInfo, [teamspace]),
+			call(API.getJobs, [teamspace]),
+			call(API.getJobsColors, [teamspace])
+		]);
+
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(...response.map(({data}) => data)));
+	} catch (error) {
+		yield put(UserManagementActions.setPendingState(false));
 		console.error(error);
 	}
 }
 
-export default function* {{ pascalCase name }}Saga() {
-	yield takeLatest({{ pascalCase name }}Types.FETCH, fetch);
+export default function* UserManagementSaga() {
+	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 }

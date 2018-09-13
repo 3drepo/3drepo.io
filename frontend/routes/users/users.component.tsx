@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, get, values } from 'lodash';
+import { pick, get, values, isNumber } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 
@@ -47,6 +47,7 @@ const USERS_TABLE_CELLS = [{
 
 interface IProps {
 	users: any[];
+	limit: any;
 	jobs: any[];
 	active?: boolean;
 	onUsersChange?: void;
@@ -144,6 +145,15 @@ export class Users extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	/**
+	 * Generate licences summary
+	 */
+	public renderFooter = () => {
+		const limit = isNumber(this.props.limit) ? this.props.limit : "unlimited";
+		const content = `Assigned licences: ${ this.props.users.length } out of ${ limit }`;
+		return <Footer item>{content}</Footer>;
+	}
+
 	public render() {
 		const { rows, jobs, licencesLabel, containerElement, active } = this.state;
 
@@ -163,9 +173,9 @@ export class Users extends React.PureComponent<IProps, IState> {
 								rows={preparedRows}
 							/>
 						</Content>
-						<Footer item>Test{licencesLabel}</Footer>
+						{rows && this.renderFooter()}
 					</Container>
-					{ active && containerElement && this.renderNewUserForm(containerElement)}
+					{active && containerElement && this.renderNewUserForm(containerElement)}
 				</>
 			</MuiThemeProvider>
 		);
