@@ -743,11 +743,11 @@ export class RisksService {
 	}
 
 	public handleHidden(objects) {
-		this.TreeService.hideBySharedId(objects);
+		this.TreeService.hideNodesBySharedIds(objects);
 	}
 
 	public handleShown(objects) {
-		this.TreeService.showBySharedId(objects);
+		this.TreeService.isolateNodesBySharedIds(objects);
 	}
 
 	public handleTree(response) {
