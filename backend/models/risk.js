@@ -21,25 +21,25 @@ const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
 const db = require("../db/db");
 
-const ModelFactory = require("./factory/modelFactory");
+//RMconst ModelFactory = require("./factory/modelFactory");
 const ModelSetting = require("./modelSetting");
-const stringToUUID = utils.stringToUUID;
-const uuidToString = utils.uuidToString;
+//RMconst stringToUUID = utils.stringToUUID;
+//RMconst uuidToString = utils.uuidToString;
 const History = require("./history");
 const Ref = require("./ref");
 const GenericObject = require("./base/repo").GenericObject;
-const middlewares = require("../middlewares/middlewares");
+//const middlewares = require("../middlewares/middlewares");
 const _ = require("lodash");
 
-const ChatEvent = require("./chatEvent");
+//RMconst ChatEvent = require("./chatEvent");
 
-const moment = require("moment");
-const archiver = require("archiver");
-const yauzl = require("yauzl");
-const xml2js = require("xml2js");
+//RMconst moment = require("moment");
+//RMconst archiver = require("archiver");
+//RMconst yauzl = require("yauzl");
+//RMconst xml2js = require("xml2js");
 const systemLogger = require("../logger.js").systemLogger;
-const Group = require("./group");
-const Meta = require("./meta");
+//const Group = require("./group");
+//RMconst Meta = require("./meta");
 const User = require("./user");
 const Job = require("./job");
 const ModelHelper = require("./helper/model");
@@ -88,7 +88,7 @@ risk.createRisk = function(dbCol, newRisk) {
 
 	if (newRisk.object_id) {
 		riskAttrPromises.push(
-			GenericObject.getSharedId(dbCol, data.object_id).then((sid) => {
+			GenericObject.getSharedId(dbCol, newRisk.object_id).then((sid) => {
 				newRisk.parent = utils.stringToUUID(sid);
 			})
 		);
@@ -171,7 +171,7 @@ risk.createRisk = function(dbCol, newRisk) {
 		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 			return _dbCol.insert(newRisk).then(() => {
 				return Promise.resolve(newRisk);
-			})
+			});
 		});
 	});
 };
@@ -209,9 +209,9 @@ risk.updateAttrs = function(dbCol, uid, data) {
 						};
 
 					}).then((user) => {
-						console.log(user.isAdmin);
-						console.log(user.hasOwnerJob);
-						console.log(user.hasAssignedJob);
+						//console.log(user.isAdmin);
+						//console.log(user.hasOwnerJob);
+						//console.log(user.hasAssignedJob);
 
 						const toUpdate = {};
 						const fieldsCanBeUpdated = [
@@ -262,7 +262,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 	const account = dbCol.account;
 	const model = dbCol.model;
 
-	let filter = {};
+	const filter = {};
 	let historySearch = Promise.resolve();
 
 	if (ids) {
@@ -296,9 +296,9 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 				// Retrieve risks from top level model/federation
 				return _dbCol.find(filter, projection).toArray();
 			}).then((mainRisks) => {
-				mainRisks.forEach((risk) => {
-					risk.typePrefix = (settings.type) ? settings.type : "";
-					risk.modelCode = (settings.properties && settings.properties.code) ?
+				mainRisks.forEach((mainRisk) => {
+					mainRisk.typePrefix = (settings.type) ? settings.type : "";
+					mainRisk.modelCode = (settings.properties && settings.properties.code) ?
 						settings.properties.code : "";
 				});
 
@@ -312,13 +312,13 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 							model: ref.project
 						};
 						subModelsPromises.push(
-							this.findRisksByModelName(subDbCol, username, "master", null, projection).then((risks) => {
-								risks.forEach((risk) => {
-									risk.origin_account = subDbCol.account;
-									risk.origin_model = subDbCol.model;
+							this.findRisksByModelName(subDbCol, username, "master", null, projection).then((subRisks) => {
+								subRisks.forEach((subRisk) => {
+									subRisk.origin_account = subDbCol.account;
+									subRisk.origin_model = subDbCol.model;
 								});
 
-								return risks;
+								return subRisks;
 							})
 						);
 					});
@@ -344,13 +344,13 @@ risk.findByUID = function(dbCol, uid, projection) {
 	}
 
 	return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-		return _dbCol.findOne({ _id: uid }, projection).then((risk) => {
+		return _dbCol.findOne({ _id: uid }, projection).then((foundRisk) => {
 
-			if (!risk) {
+			if (!foundRisk) {
 				return Promise.reject(responseCodes.RISK_NOT_FOUND);
 			}
 
-			return risk;
+			return foundRisk;
 		});
 	});
 };
@@ -361,11 +361,11 @@ risk.getScreenshot = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { "viewpoint.screenshot.content": 1 }).then((risk) => {
-		if (!_.get(risk, "viewpoint.screenshot.content.buffer")) {
+	return this.findByUID(dbCol, uid, { "viewpoint.screenshot.content": 1 }).then((foundRisk) => {
+		if (!_.get(foundRisk, "viewpoint.screenshot.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			return risk.viewpoint.screenshot.content.buffer;
+			return foundRisk.viewpoint.screenshot.content.buffer;
 		}
 	});
 };
@@ -377,18 +377,18 @@ risk.getSmallScreenshot = function(dbCol, uid) {
 	}
 
 	return this.findByUID(dbCol, uid, { viewpoint: 1 })
-		.then((risk) => {
-			if (_.get(risk, "viewpoint.screenshot.resizedContent.buffer")) {
-				return risk.viewpoint.screenshot.resizedContent.buffer;
-			} else if (!_.get(risk, "viewpoint.screenshot.content.buffer")) {
+		.then((foundRisk) => {
+			if (_.get(foundRisk, "viewpoint.screenshot.resizedContent.buffer")) {
+				return foundRisk.viewpoint.screenshot.resizedContent.buffer;
+			} else if (!_.get(foundRisk, "viewpoint.screenshot.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return utils.resizeAndCropScreenshot(risk.viewpoint.screenshot.content.buffer, 365)
+				return utils.resizeAndCropScreenshot(foundRisk.viewpoint.screenshot.content.buffer, 365)
 					.then((resized) => {
 						db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 							_dbCol.update({ _id: uid },
 								{$set: {"viewpoint.screenshot.resizedContent": resized}}
-								).catch((err) => {
+							).catch((err) => {
 								systemLogger.logError("Error while saving resized screenshot",
 									{
 										riskId: utils.uuidToString(uid),
@@ -409,11 +409,11 @@ risk.getThumbnail = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { thumbnail: 1 }).then((risk) => {
-		if (!_.get(risk, "thumbnail.content.buffer")) {
+	return this.findByUID(dbCol, uid, { thumbnail: 1 }).then((foundRisk) => {
+		if (!_.get(foundRisk, "thumbnail.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			return risk.thumbnail.content.buffer;
+			return foundRisk.thumbnail.content.buffer;
 		}
 	});
 };
