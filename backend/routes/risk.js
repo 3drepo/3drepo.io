@@ -131,18 +131,9 @@ function updateRisk(req, res, next) {
 	const riskId = req.params.riskId;
 
 	return Risk.updateAttrs(dbCol, riskId, data).then((risk) => {
-		const resData = {
-			_id: riskId,
-			account: req.params.account,
-			model: req.params.model,
-			risk: risk,
-			risk_id : riskId,
-			number: risk.number,
-			owner: risk.owner,
-			created: risk.created
-		};
+		risk = clean(dbCol, risk);
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 
 	}).catch((err) => {
 

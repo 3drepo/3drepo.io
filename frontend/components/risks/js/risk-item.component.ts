@@ -345,8 +345,6 @@ class RiskItemController implements ng.IController {
 
 	public setLevelOfRisk() {
 		if (this.riskData.likelihood && this.riskData.consequence) {
-			console.debug(this.riskData.likelihood);
-			console.debug(this.riskData.consequence);
 			this.riskData.level_of_risk = this.risksService.calculateLevelOfRisk(
 				this.riskData.likelihood,
 				this.riskData.consequence);
@@ -416,8 +414,16 @@ class RiskItemController implements ng.IController {
 			);
 	}
 
-	public canChangeStatus() {
-		return this.risksService.canChangeStatus(
+	public canUpdateRisk() {
+		return this.risksService.canUpdateRisk(
+			this.riskData,
+			this.userJob,
+			this.modelSettings.permissions
+		);
+	}
+
+	public canSubmitUpdateRisk() {
+		return this.risksService.canSubmitUpdateRisk(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
@@ -456,54 +462,8 @@ class RiskItemController implements ng.IController {
 		);
 	}
 
-	/**
-	 * Handle status change
-	 */
-	public statusChange() {
-		if (this.data && this.riskData.account && this.riskData.model) {
-
-			// If it's unassigned we can update so that there are no assigned roles
-			if (this.riskData.assigned_roles.indexOf("Unassigned") !== -1) {
-				this.riskData.assigned_roles = [];
-			}
-
-			const statusChangeData = {
-				priority: this.riskData.priority,
-				status: this.riskData.status,
-				topic_type: this.riskData.topic_type,
-				due_date: Date.parse(this.riskData.due_date),
-				assigned_roles: this.riskData.assigned_roles
-			};
-
-			this.risksService.updateRisk(this.riskData, statusChangeData)
-				.then((response) => {
-					if (response) {
-						const respData = response.data.risk;
-						this.risksService.populateRisk(respData);
-						this.riskData = respData;
-
-						// Update the actual data model
-						this.risksService.updateRisks(this.riskData);
-
-						this.commentAreaScrollToBottom();
-					}
-
-				})
-				.catch(this.handleUpdateError.bind(this));
-
-			this.canComment();
-
-			this.analyticService.sendEvent({
-				eventCategory: "Risk",
-				eventAction: "edit"
-			});
-		}
-
-		// This is called so icon and assignment colour changes for new risks.
-		this.risksService.populateRisk(this.riskData);
-	}
-
 	public handleUpdateError(error) {
+		this.saving = false;
 		const content = "Property update failed." +
 		"Contact support@3drepo.org if problem persists.";
 		const escapable = true;
@@ -526,8 +486,11 @@ class RiskItemController implements ng.IController {
 
 		this.saving = true;
 
-		this.saveRisk();
-
+		if (this.data) {
+			this.updateRisk();
+		} else {
+			this.saveRisk();
+		}
 	}
 
 	/**
@@ -720,6 +683,56 @@ class RiskItemController implements ng.IController {
 				console.error("Something went wrong saving the risk: ", error);
 			});
 
+	}
+
+	/**
+	 * Update risk
+	 */
+	public updateRisk() {
+		if (this.data && this.riskData.account && this.riskData.model) {
+
+			// If it's unassigned we can update so that there are no assigned roles
+			if (this.riskData.assigned_roles.indexOf("Unassigned") !== -1) {
+				this.riskData.assigned_roles = [];
+			}
+
+			const updatedRiskData = {
+				safetibase_id: this.riskData.safetibase_id,
+				associated_activity: this.riskData.associated_activity,
+				desc: this.riskData.desc,
+				assigned_roles: this.riskData.assigned_roles,
+				category: this.riskData.category,
+				likelihood: this.riskData.likelihood,
+				consequence: this.riskData.consequence,
+				level_of_risk: this.riskData.level_of_risk,
+				mitigation_status: this.riskData.mitigation_status,
+				mitigation_desc: this.riskData.mitigation_desc,
+			};
+
+			this.risksService.updateRisk(this.riskData, updatedRiskData)
+				.then((response) => {
+					if (response) {
+						const updatedRisk = response.data;
+						this.risksService.populateRisk(updatedRisk);
+						this.riskData = updatedRisk;
+
+						// Update the actual data model
+						this.risksService.updateRisks(this.riskData);
+
+						this.saving = false;
+					}
+
+				})
+				.catch(this.handleUpdateError.bind(this));
+
+			this.analyticService.sendEvent({
+				eventCategory: "Risk",
+				eventAction: "edit"
+			});
+		}
+
+		// This is called so icon and assignment colour changes for new risks.
+		this.risksService.populateRisk(this.riskData);
 	}
 
 	public handleObjects(viewpoint, objectInfo, screenShotPromise) {

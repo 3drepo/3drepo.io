@@ -129,9 +129,9 @@ export class RisksService {
 			creator_role: creatorRole,
 			associated_activity: "",
 			category: "",
-			likelihood: "",
-			consequence: "",
-			level_of_risk: "",
+			likelihood: 0,
+			consequence: 0,
+			level_of_risk: 0,
 			mitigation_status: "",
 			assigned_roles: [],
 			topic_type: "for_information",
@@ -243,19 +243,22 @@ export class RisksService {
 	}
 
 	public calculateLevelOfRisk(likelihood: string, consequence: string): number {
-		const likelihoodConsequenceScore: number = parseInt(likelihood) + parseInt(consequence);
-		let levelOfRisk;
+		let levelOfRisk = 0;
 
-		if (6 < likelihoodConsequenceScore) {
-			levelOfRisk = 4;
-		} else if (5 < likelihoodConsequenceScore) {
-			levelOfRisk = 3;
-		} else if (2 < likelihoodConsequenceScore) {
-			levelOfRisk = 2;
-		} else if (1 < likelihoodConsequenceScore) {
-			levelOfRisk = 1;
-		} else {
-			levelOfRisk = 0;
+		if (likelihood && consequence) {
+			const likelihoodConsequenceScore: number = parseInt(likelihood) + parseInt(consequence);
+
+			if (6 < likelihoodConsequenceScore) {
+				levelOfRisk = 4;
+			} else if (5 < likelihoodConsequenceScore) {
+				levelOfRisk = 3;
+			} else if (2 < likelihoodConsequenceScore) {
+				levelOfRisk = 2;
+			} else if (1 < likelihoodConsequenceScore) {
+				levelOfRisk = 1;
+			} else {
+				levelOfRisk = 0;
+			}
 		}
 
 		return levelOfRisk;
@@ -443,11 +446,14 @@ export class RisksService {
 		return this.isAdmin(permissions) || this.isJobOwner(riskData, userJob, permissions);
 	}
 
-	public canChangeStatus(riskData, userJob, permissions) {
+	public canUpdateRisk(riskData, userJob, permissions) {
 		return this.canChangeStatusToClosed(riskData, userJob, permissions) ||
 			this.isAssignedJob(riskData, userJob, permissions);
 	}
 
+	public canSubmitUpdateRisk(riskData, userJob, permissions) {
+		return this.canUpdateRisk(riskData, userJob, permissions);
+	}
 	public canChangeType(riskData, userJob, permissions) {
 		return (this.isAdmin(permissions) || this.isJobOwner(riskData, userJob, permissions)) &&
 			this.canComment(riskData, userJob, permissions);
@@ -850,37 +856,6 @@ export class RisksService {
 
 	}
 
-	public hexToRgb(hex) {
-		// If nothing comes end, then send nothing out.
-		if (!hex) {
-			return undefined;
-		}
-
-		let hexColours = [];
-
-		if (hex.charAt(0) === "#") {
-			hex = hex.substr(1);
-		}
-
-		if (hex.length === 6) {
-			hexColours.push(hex.substr(0, 2));
-			hexColours.push(hex.substr(2, 2));
-			hexColours.push(hex.substr(4, 2));
-		} else if (hex.length === 3) {
-			hexColours.push(hex.substr(0, 1) + hex.substr(0, 1));
-			hexColours.push(hex.substr(1, 1) + hex.substr(1, 1));
-			hexColours.push(hex.substr(2, 1) + hex.substr(2, 1));
-		} else {
-			hexColours = ["00", "00", "00"];
-		}
-
-		return [
-			(parseInt(hexColours[0], 16) / 255.0),
-			(parseInt(hexColours[1], 16) / 255.0),
-			(parseInt(hexColours[2], 16) / 255.0)
-		];
-	}
-
 	public getJobColor(id) {
 		let roleColor = "#ffffff";
 		let found = false;
@@ -907,35 +882,39 @@ export class RisksService {
 
 		const statusIcon: any = {};
 
-		switch (risk.priority) {
-		case "none":
-			statusIcon.colour = "#7777777";
-			break;
-		case "low":
-			statusIcon.colour = "#4CAF50";
-			break;
-		case "medium":
-			statusIcon.colour = "#FF9800";
-			break;
-		case "high":
-			statusIcon.colour = "#F44336";
-			break;
+		console.debug(Pin.pinColours.green);
+		switch (risk.level_of_risk) {
+			case 0:
+				statusIcon.colour = "#dc143c";
+				break;
+			case 1:
+				statusIcon.colour = "#32cd32";
+				break;
+			case 2:
+				statusIcon.colour = "#fffacd";
+				break;
+			case 3:
+				statusIcon.colour = "#ff8c00";
+				break;
+			case 4:
+				statusIcon.colour = "#800000";
+				break;
 		}
 
-		switch (risk.status) {
-		case "open":
-			statusIcon.icon = "panorama_fish_eye";
-			break;
-		case "in progress":
-			statusIcon.icon = "lens";
-			break;
-		case "for approval":
-			statusIcon.icon = "adjust";
-			break;
-		case "closed":
-			statusIcon.icon = "check_circle";
-			statusIcon.colour = "#0C2F54";
-			break;
+		switch (risk.mitigation_status) {
+			case "proposed":
+				statusIcon.icon = "panorama_fish_eye";
+				break;
+			case "approved":
+				statusIcon.icon = "lens";
+				break;
+			case "accepted":
+				statusIcon.icon = "adjust";
+				break;
+			case "":
+				statusIcon.icon = "check_circle";
+				statusIcon.colour = "#0C2F54";
+				break;
 		}
 
 		return statusIcon;

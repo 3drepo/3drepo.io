@@ -10,8 +10,7 @@ md-content#riskInformation(
 		layout="column"
 		layout-align="start"
 		flex
-		ng-class="{issueTitleArea: vm.data}"
-		ng-click="vm.toggleShowAdditional()")
+		ng-class="{issueTitleArea: vm.data}")
 
 			div(layout="row", flex, layout-align="space-between")
 				div(layout="row", flex)
@@ -41,14 +40,6 @@ md-content#riskInformation(
 
 					label#riskTitle(ng-if="vm.data") {{vm.riskData.name}}
 
-				span(flex="5")
-				div
-					md-button.md-icon-button#additionalInfoButton(aria-label="Status Toggle")
-						md-icon.angular-material-icons(ng-if="!vm.showAdditional") keyboard_arrow_right
-						md-icon.angular-material-icons(ng-if="vm.showAdditional") keyboard_arrow_down
-					md-tooltip(ng-if="!vm.showAdditional") Show additional information
-					md-tooltip(ng-if="vm.showAdditional") Hide additional information
-
 	// Info
 	.riskItemContainer#riskInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
 		div(flex="10")
@@ -66,16 +57,14 @@ md-content#riskInformation(
 				label SafetiBase ID
 				textarea(
 					id="riskSafetibaseId"
-					ng-model="vm.riskData.safetibase_id"
-					ng-change="vm.statusChange()")
+					ng-model="vm.riskData.safetibase_id")
 			
 			md-input-container.riskItemStatus(flex)
 				label Associated Activity
 				md-select(
 					id="riskActivity"
 					ng-model="vm.riskData.associated_activity"
-					ng-change="vm.statusChange()"
-					ng-disabled="!vm.canChangeStatus()")
+					ng-disabled="!vm.canUpdateRisk()")
 					
 					md-option(
 						ng-repeat="activity in vm.activities"
@@ -201,13 +190,13 @@ md-divider
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
 		
-		div(flex="100" ng-if="!vm.data")
+		div(flex="100")
 
 		div(layout="row" layout-align="end center")
 			md-button.md-fab.md-mini(
 				id="submitCommentButton"
 				aria-label="Submit"
-				ng-disabled="vm.submitDisabled || vm.failedToLoad"
+				ng-disabled="!vm.canSubmitUpdateRisk() || vm.failedToLoad"
 				ng-click="vm.submit()"
 				ng-if="!vm.saving")
 				md-tooltip(md-direction="bottom") Submit
