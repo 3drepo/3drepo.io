@@ -209,10 +209,10 @@ panel-card-chips-filter input {
 panel-card-chips-filter .collapse-button {
   position: absolute;
   top: 45px;
-  right: 0px;
+  right: -2px;
 }
 
-panel-card-chips-filter md-chips md-chips-wrap {
+panel-card-chips-filter md-chips-wrap.md-chips {
   padding-right: 35px;
 }
 
