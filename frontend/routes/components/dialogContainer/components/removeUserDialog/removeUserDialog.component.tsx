@@ -3,6 +3,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 
+import { Headline } from './removeUserDialog.styles';
+
 interface IProps {
 	models: any[];
 	projects: any[];
@@ -26,17 +28,16 @@ export const RemoveUserDialog = (props) => {
 		<>
 			<DialogContent>
 				{description}
-				<br /><br />
 				{props.projects.length ? (
 					<>
-						<b>Projects: </b>
+						<Headline>Projects: </Headline>
 						{renderItems(props.projects)}
 					</>
 				) : ''}
 
 				{props.models.length ? (
 					<>
-						<b>Models: </b>
+						<Headline>Models: </Headline>
 						{renderItems(props.models)}
 					</>
 				) : ''}

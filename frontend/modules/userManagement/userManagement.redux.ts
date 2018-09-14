@@ -25,6 +25,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	addUser: ['user'],
 	addUserSuccess: ['user'],
 	removeUser: ['username'],
+	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
 	removeUserFailure: [],
 	setTeamspace: ['teamspace'],

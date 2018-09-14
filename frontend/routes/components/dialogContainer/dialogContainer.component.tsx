@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { dispatch } from '../../../helpers/migration';
 import { invoke } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -49,12 +50,18 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public handleClose = () => {
 		this.props.hide();
-		invoke(this.props.config, 'onCancel');
+
+		if (this.props.config.onCancel) {
+			dispatch(this.props.config.onCancel());
+		}
 	}
 
 	public handleResolve = () => {
 		this.props.hide();
-		invoke(this.props.config, 'onConfirm');
+
+		if (this.props.config.onConfirm) {
+			dispatch(this.props.config.onConfirm());
+		}
 	}
 
 	public render() {

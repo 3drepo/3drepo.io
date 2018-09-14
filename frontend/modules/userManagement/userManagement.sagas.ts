@@ -67,7 +67,7 @@ export function* removeUser({ username }) {
 				title: 'Remove licence',
 				templateType: 'confirmUserRemove',
 				confirmText: 'Remove',
-				onConfirm: () => console.log('confirmed!'),
+				onConfirm: () => UserManagementActions.removeUserCascade(username),
 				data: {
 					models: errorData.models,
 					projects: errorData.projects,
@@ -84,6 +84,16 @@ export function* removeUser({ username }) {
 		} else {
 			yield put(DialogActions.showErrorDialog('remove', 'licence', error.response));
 		}
+	}
+}
+
+export function* removeUserCascade({ username }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.removeUserCascade(teamspace, username);
+		yield put(UserManagementActions.removeUserSuccess(username));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'licence', error.response));
 	}
 }
 
@@ -115,6 +125,7 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);
+	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateJob);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 }

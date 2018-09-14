@@ -67,44 +67,6 @@ class UsersListController implements ng.IController {
 	}
 
 	/**
-	 * Remove license for a member
-	 */
-	public removeMember(member): void {
-		this.AccountService.removeMember(this.currentTeamspace.account, member.user)
-			.then(this.onMemberRemove.bind(null, member))
-			.catch((error) => {
-				if (error.status === 400) {
-					const responseCode = this.APIService.getResponseCode("USER_IN_COLLABORATOR_LIST");
-					if (error.data.value === responseCode) {
-						const dialogData: any = this.$rootScope.$new();
-						dialogData.models = error.data.models,
-						dialogData.projects = error.data.projects,
-						dialogData.memberName = member.user;
-						dialogData.onRemove = this.removeLicenseConfirmed.bind(null, this.currentTeamspace.account, member);
-
-						if (error.data.teamspace) {
-							dialogData.teamspacePerms = error.data.teamspace.permissions.join(", ");
-						}
-
-						this.DialogService.showDialog("remove-license-dialog.html", dialogData);
-					}
-				} else {
-					this.DialogService.showError("remove", "licence", error);
-				}
-
-			});
-	}
-
-	/**
-	* Remove license from user who is a team member of a model
-	*/
-	public removeLicenseConfirmed = (teamspace, member) => {
-		this.AccountService.removeMemberCascade(teamspace, member.user)
-			.then(this.onMemberRemove.bind(null, member))
-			.catch(this.DialogService.showError.bind(null, "remove", "licence"));
-	}
-
-	/**
 	 * Call on member remove
 	 */
 	public onMemberRemove = (member, response): void => {
