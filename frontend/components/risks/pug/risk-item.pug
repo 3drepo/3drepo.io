@@ -41,7 +41,7 @@ md-content#riskInformation(
 					label#riskTitle(ng-if="vm.data") {{vm.riskData.name}}
 
 	// Info
-	.riskItemContainer#riskInfoArea(layout="row", layout-align="start center", flex="none", ng-if="vm.showAdditional")
+	.riskItemContainer#riskInfoArea(layout="row", layout-align="start center", flex="none")
 		div(flex="10")
 			md-icon.angular-material-icons#riskStatusIcon(
 				style="color:{{vm.riskData.statusIcon.colour}}") {{vm.riskData.statusIcon.icon}}
@@ -51,7 +51,7 @@ md-content#riskInformation(
 			label {{vm.data.created | prettyDate }}
 
 	// Status
-	.riskItemContainer#riskAdditional(layout="column", ng-if="vm.showAdditional")
+	.riskItemContainer#riskAdditional(layout="column")
 		div(layout="row")
 			md-input-container.riskItemStatus(flex)
 				label SafetiBase ID
@@ -138,7 +138,7 @@ md-content#riskInformation(
 				md-select(
 					id="riskLevelOfRisk"
 					ng-model="vm.riskData.level_of_risk"
-					ng-disabled="!vm.canChangeType()")
+					ng-disabled="true")
 					
 					md-option(
 						ng-repeat="level in vm.levels"

@@ -14,6 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { RisksService } from "./risks.service";
 
 class RisksListController implements ng.IController {
 
@@ -24,7 +25,6 @@ class RisksListController implements ng.IController {
 		"$compile",
 		"$element",
 
-		"APIService",
 		"RisksService",
 		"ClientConfigService"
 	];
@@ -52,9 +52,8 @@ class RisksListController implements ng.IController {
 		private $compile,
 		private $element,
 
-		private APIService,
-		private RisksService,
-		private ClientConfigService
+		private risksService: RisksService,
+		private clientConfigService: any
 	) {}
 
 	public $onInit() {
@@ -71,12 +70,12 @@ class RisksListController implements ng.IController {
 
 		this.$scope.$watch(
 			() => {
-				return this.RisksService.state.allRisks;
+				return this.risksService.state.allRisks;
 			},
 			() => {
 
-				if (this.RisksService.state.allRisks) {
-					if (this.RisksService.state.allRisks.length > 0) {
+				if (this.risksService.state.allRisks) {
+					if (this.risksService.state.allRisks.length > 0) {
 
 						this.toShow = "list";
 						this.setupRisksToShow();
@@ -85,11 +84,11 @@ class RisksListController implements ng.IController {
 					} else {
 						this.toShow = "info";
 						this.info = "There are currently no open risks";
-						this.contentHeight({height: this.RisksService.state.heights.infoHeight});
+						this.contentHeight({height: this.risksService.state.heights.infoHeight});
 					}
 				}
 
-				this.allRisks = this.RisksService.state.allRisks;
+				this.allRisks = this.risksService.state.allRisks;
 
 			},
 			true
@@ -117,7 +116,7 @@ class RisksListController implements ng.IController {
 
 	public handleMenuOptions() {
 		const ids = [];
-		this.RisksService.state.risksToShow.forEach((risk) => {
+		this.risksService.state.risksToShow.forEach((risk) => {
 			ids.push(risk._id);
 		});
 
@@ -125,15 +124,14 @@ class RisksListController implements ng.IController {
 
 			case "print":
 				const printEndpoint = this.account + "/" + this.model + "/risks.html?ids=" + ids.join(",");
-				const printUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, printEndpoint);
+				const printUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, printEndpoint);
 				this.$window.open(printUrl, "_blank");
 				break;
 
 			case "showPins":
-				this.RisksService.state.risksCardOptions.showPins =
-					!this.RisksService.state.risksCardOptions.showPins;
+				this.risksService.state.risksCardOptions.showPins =
+					!this.risksService.state.risksCardOptions.showPins;
 				break;
-
 		}
 
 		this.setupRisksToShow();
@@ -141,32 +139,32 @@ class RisksListController implements ng.IController {
 
 	public setupRisksToShow() {
 
-		this.RisksService.setupRisksToShow(this.model, this.filterText);
+		this.risksService.setupRisksToShow(this.model, this.filterText);
 
 		// Setup what to show
-		if (this.RisksService.state.risksToShow.length > 0) {
+		if (this.risksService.state.risksToShow.length > 0) {
 			this.toShow = "list";
 			const buttonSpace = 70;
-			const numOfRisks = this.RisksService.state.risksToShow.length;
-			const heights = this.RisksService.state.heights.risksListItemHeight + buttonSpace;
+			const numOfRisks = this.risksService.state.risksToShow.length;
+			const heights = this.risksService.state.heights.risksListItemHeight + buttonSpace;
 			const risksHeight = numOfRisks * heights;
 			this.contentHeight({height: risksHeight });
 		} else {
 			this.toShow = "info";
 			this.info = "There are currently no open risks";
-			this.contentHeight({height: this.RisksService.state.heights.infoHeight});
+			this.contentHeight({height: this.risksService.state.heights.infoHeight});
 		}
 
-		this.RisksService.showRiskPins(this.account, this.model);
+		this.risksService.showRiskPins(this.account, this.model);
 	}
 
 	public selectRisk(risk) {
-		this.RisksService.setSelectedRisk(risk, false, this.revision);
+		this.risksService.setSelectedRisk(risk, false, this.revision);
 		angular.element(this.$window).triggerHandler("resize");
 	}
 
 	public isSelectedRisk(risk) {
-		return this.RisksService.isSelectedRisk(risk);
+		return this.risksService.isSelectedRisk(risk);
 	}
 
 	public editRisk(risk) {

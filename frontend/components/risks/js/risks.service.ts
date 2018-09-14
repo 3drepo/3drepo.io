@@ -14,6 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { APIService } from "../../home/js/api.service";
+import { AuthService } from "../../home/js/auth.service";
+import { ClipService } from "../../clip/js/clip.service";
+import { TreeService } from "../../tree/js/tree.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 declare const Pin;
 
@@ -26,15 +31,11 @@ export class RisksService {
 		"$filter",
 
 		"ClientConfigService",
-		"EventService",
 		"APIService",
 		"TreeService",
 		"AuthService",
-		"MultiSelectService",
 		"ClipService",
-		"ViewerService",
-		"PanelService",
-		"DialogService"
+		"ViewerService"
 	];
 
 	public state: any;
@@ -46,16 +47,12 @@ export class RisksService {
 		private $timeout,
 		private $filter,
 
-		private ClientConfigService,
-		private EventService,
-		private APIService,
-		private TreeService,
-		private AuthService,
-		private MultiSelectService,
-		private ClipService,
-		private ViewerService,
-		private PanelService,
-		private DialogService
+		private clientConfigService: any,
+		private apiService: APIService,
+		private treeService: TreeService,
+		private authService: AuthService,
+		private clipService: ClipService,
+		private viewerService: ViewerService
 	) {
 		this.reset();
 	}
@@ -106,7 +103,7 @@ export class RisksService {
 	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
 		const url = account + "/jobs";
 
-		return this.APIService.get(url)
+		return this.apiService.get(url)
 			.then((response) => {
 				this.state.availableJobs = response.data;
 				return this.state.availableJobs;
@@ -117,7 +114,7 @@ export class RisksService {
 	public getUserJobForModel(account: string, model: string): Promise<any> {
 		const url = account + "/myJob";
 
-		return this.APIService.get(url)
+		return this.apiService.get(url)
 			.then((response) => {
 				this.state.modelUserJob = response.data;
 				return this.state.modelUserJob;
@@ -308,7 +305,7 @@ export class RisksService {
 					levelOfRiskColors[levelOfRisk].selectedColor :
 					levelOfRiskColors[levelOfRisk].pinColor;
 
-				this.ViewerService.addPin({
+				this.viewerService.addPin({
 					id: risk._id,
 					type: "risk",
 					account: risk.account,
@@ -321,7 +318,7 @@ export class RisksService {
 
 			} else {
 				// Remove pin
-				this.ViewerService.removePin({ id: risk._id });
+				this.viewerService.removePin({ id: risk._id });
 			}
 		});
 
@@ -396,7 +393,7 @@ export class RisksService {
 
 			if (!risk.descriptionThumbnail) {
 				if (risk.viewpoint && risk.viewpoint.screenshotSmall && risk.viewpoint.screenshotSmall !== "undefined") {
-					risk.descriptionThumbnail = this.APIService.getAPIUrl(risk.viewpoint.screenshotSmall);
+					risk.descriptionThumbnail = this.apiService.getAPIUrl(risk.viewpoint.screenshotSmall);
 				}
 			}
 		}
@@ -409,8 +406,8 @@ export class RisksService {
 	}
 
 	public isViewer(permissions) {
-		return permissions && !this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
+		return permissions && !this.authService.hasPermission(
+			this.clientConfigService.permissions.PERM_COMMENT_ISSUE,
 			permissions
 		);
 	}
@@ -424,22 +421,17 @@ export class RisksService {
 	}
 
 	public isAdmin(permissions) {
-		return permissions && this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
+		return permissions && this.authService.hasPermission(
+			this.clientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
 			permissions
 		);
 	}
 
 	public isJobOwner(riskData, userJob, permissions) {
 		return riskData && userJob &&
-			(riskData.owner === this.AuthService.getUsername() ||
+			(riskData.owner === this.authService.getUsername() ||
 			this.userJobMatchesCreator(userJob, riskData)) &&
 			!this.isViewer(permissions);
-	}
-
-	public canChangePriority(riskData, userJob, permissions) {
-		return (this.isAdmin(permissions) || this.isJobOwner(riskData, userJob, permissions)) &&
-			this.canComment(riskData, userJob, permissions);
 	}
 
 	public canChangeStatusToClosed(riskData, userJob, permissions) {
@@ -454,62 +446,11 @@ export class RisksService {
 	public canSubmitUpdateRisk(riskData, userJob, permissions) {
 		return this.canUpdateRisk(riskData, userJob, permissions);
 	}
-	public canChangeType(riskData, userJob, permissions) {
-		return (this.isAdmin(permissions) || this.isJobOwner(riskData, userJob, permissions)) &&
-			this.canComment(riskData, userJob, permissions);
-	}
-
-	public canChangeDescription(riskData, userJob, permissions) {
-		return (this.isAdmin(permissions) || this.isJobOwner(riskData, userJob, permissions)) &&
-			this.canComment(riskData, userJob, permissions);
-	}
-
-	public canChangeDueDate(riskData, userJob, permissions) {
-		return (this.isAdmin(permissions) || this.isJobOwner(riskData, userJob, permissions)) &&
-			this.canComment(riskData, userJob, permissions);
-	}
-
-	public canChangeAssigned(riskData, userJob, permissions) {
-		return (this.isAdmin(permissions) ||
-			this.isJobOwner(riskData, userJob, permissions) ||
-			this.isAssignedJob(riskData, userJob, permissions)) &&
-			this.canComment(riskData, userJob, permissions);
-	}
-
-	public isOpen(riskData) {
-		if (riskData) {
-			return riskData.status !== "closed";
-		}
-		return false;
-	}
-
-	/**
-	 * user can comment if they are a commenter/collaborator,
-	 * or if they have the same job as the risk owner (but not a viewer)
-	 * or if they are the risk owner (but not a viewer),
-	 * and the risk is not closed
-	 */
-	public canComment(riskData, userJob, permissions) {
-
-		const isNotClosed = riskData &&
-			riskData.status &&
-			this.isOpen(riskData);
-
-		const ableToComment = this.isAdmin(permissions) ||
-			this.isJobOwner(riskData, userJob, permissions) ||
-			this.AuthService.hasPermission(
-				this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
-				permissions
-			);
-
-		return ableToComment && isNotClosed;
-
-	}
 
 	public deselectPin(risk) {
 		// Risk with position means pin
 		if (risk.position && risk.position.length > 0 && risk._id) {
-			this.ViewerService.changePinColours({
+			this.viewerService.changePinColours({
 				id: risk._id,
 				colours: Pin.pinColours.blue
 			});
@@ -518,20 +459,20 @@ export class RisksService {
 
 	public showRisk(risk, revision) {
 
-		this.TreeService.showProgress = true;
+		this.treeService.showProgress = true;
 
 		this.showRiskPins();
 
 		// Remove highlight from any multi objects
-		this.ViewerService.highlightObjects([]);
-		this.TreeService.clearCurrentlySelected();
+		this.viewerService.highlightObjects([]);
+		this.treeService.clearCurrentlySelected();
 
 		// Reset object visibility
 		if (risk.viewpoint && risk.viewpoint.hasOwnProperty("hideIfc")) {
-			this.TreeService.setHideIfc(risk.viewpoint.hideIfc);
+			this.treeService.setHideIfc(risk.viewpoint.hideIfc);
 		}
 
-		this.TreeService.showAllTreeNodes(false);
+		this.treeService.showAllTreeNodes(false);
 
 		// Show multi objects
 		if ((risk.viewpoint && (risk.viewpoint.hasOwnProperty("highlighted_group_id") ||
@@ -541,12 +482,12 @@ export class RisksService {
 				risk.hasOwnProperty("group_id")) {
 
 			this.showMultiIds(risk, revision).then(() => {
-				this.TreeService.showProgress = false;
+				this.treeService.showProgress = false;
 				this.handleShowRisk(risk);
 			});
 
 		} else {
-			this.TreeService.showProgress = false;
+			this.treeService.showProgress = false;
 			this.handleShowRisk(risk);
 		}
 
@@ -563,7 +504,7 @@ export class RisksService {
 			model: risk.model
 		};
 
-		this.ViewerService.setCamera(riskData);
+		this.viewerService.setCamera(riskData);
 
 	}
 
@@ -582,15 +523,15 @@ export class RisksService {
 				model: risk.model
 			};
 
-			this.ClipService.updateClippingPlane(riskData);
+			this.clipService.updateClippingPlane(riskData);
 
 		} else {
 			// This risk does not have a viewpoint, go to default viewpoint
-			this.ViewerService.goToExtent();
+			this.viewerService.goToExtent();
 		}
 
-		this.TreeService.onReady().then(() => {
-			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
+		this.treeService.onReady().then(() => {
+			this.treeService.updateModelVisibility(this.treeService.allNodes[0]);
 		});
 
 	}
@@ -619,7 +560,7 @@ export class RisksService {
 					hiddenPromise = this.handleHidden(this.groupsCache[hiddenGroupUrl]);
 				} else {
 
-					hiddenPromise = this.APIService.get(hiddenGroupUrl)
+					hiddenPromise = this.apiService.get(hiddenGroupUrl)
 						.then((response) => {
 							this.groupsCache[hiddenGroupUrl] = response.data.objects;
 							return this.handleHidden(response.data.objects);
@@ -650,7 +591,7 @@ export class RisksService {
 					shownPromise = this.handleShown(this.groupsCache[shownGroupUrl]);
 				} else {
 
-					shownPromise = this.APIService.get(shownGroupUrl)
+					shownPromise = this.apiService.get(shownGroupUrl)
 						.then( (response) => {
 							this.groupsCache[shownGroupUrl] = response.data.objects;
 							return this.handleShown(response.data.objects);
@@ -679,7 +620,7 @@ export class RisksService {
 					highlightPromise = this.handleHighlights(this.groupsCache[highlightedGroupUrl]);
 				} else {
 
-					highlightPromise = this.APIService.get(highlightedGroupUrl)
+					highlightPromise = this.apiService.get(highlightedGroupUrl)
 						.then((response) => {
 							this.groupsCache[highlightedGroupUrl] = response.data.objects;
 							return this.handleHighlights(response.data.objects);
@@ -710,7 +651,7 @@ export class RisksService {
 				handleTreePromise = this.handleTree(this.groupsCache[groupUrl]);
 			} else {
 
-				handleTreePromise = this.APIService.get(groupUrl)
+				handleTreePromise = this.apiService.get(groupUrl)
 					.then((response) => {
 						if (response.data.hiddenObjects && response.data.hiddenObjects && !risk.viewpoint.hasOwnProperty("group_id")) {
 							response.data.hiddenObjects = null;
@@ -733,9 +674,9 @@ export class RisksService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
+		this.treeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
 		this.$timeout(() => {
-		this.TreeService.highlightsBySharedId(objects)
+		this.treeService.selectNodesBySharedIds(objects)
 			.then(() => {
 				angular.element((window as any)).triggerHandler("resize");
 			});
@@ -743,11 +684,11 @@ export class RisksService {
 	}
 
 	public handleHidden(objects) {
-		this.TreeService.hideNodesBySharedIds(objects);
+		this.treeService.hideNodesBySharedIds(objects);
 	}
 
 	public handleShown(objects) {
-		this.TreeService.isolateNodesBySharedIds(objects);
+		this.treeService.isolateNodesBySharedIds(objects);
 	}
 
 	public handleTree(response) {
@@ -767,16 +708,15 @@ export class RisksService {
 	}
 
 	public getThumbnailPath(thumbnailUrl) {
-		return this.APIService.getAPIUrl(thumbnailUrl);
+		return this.apiService.getAPIUrl(thumbnailUrl);
 	}
 
 	public getRisk(account, model, riskId) {
 
 		const riskUrl = account + "/" + model + "/risks/" + riskId + ".json";
 
-		return this.APIService.get(riskUrl)
+		return this.apiService.get(riskUrl)
 			.then((res) => {
-				res.data = this.cleanRisk(res.data);
 				return res.data;
 			});
 
@@ -791,7 +731,7 @@ export class RisksService {
 			endpoint = account + "/" + model + "/risks.json";
 		}
 
-		return this.APIService.get(endpoint)
+		return this.apiService.get(endpoint)
 			.then((response) => {
 				const risksData = response.data;
 				for (let i = 0; i < response.data.length; i ++) {
@@ -819,7 +759,7 @@ export class RisksService {
 			risk.norm = risk.pickedNorm;
 		}
 
-		return this.APIService.post(saveUrl, risk, config);
+		return this.apiService.post(saveUrl, risk, config);
 
 	}
 
@@ -852,7 +792,7 @@ export class RisksService {
 
 		const putConfig = {withCredentials: true};
 
-		return this.APIService.put(endpoint, putData, putConfig);
+		return this.apiService.put(endpoint, putData, putConfig);
 
 	}
 
@@ -882,7 +822,6 @@ export class RisksService {
 
 		const statusIcon: any = {};
 
-		console.debug(Pin.pinColours.green);
 		switch (risk.level_of_risk) {
 			case 0:
 				statusIcon.colour = "#dc143c";
@@ -920,169 +859,16 @@ export class RisksService {
 		return statusIcon;
 	}
 
-	/**
-	 * Convert an action comment to readable text
-	 * @param comment
-	 * @returns {string}
-	 */
-	public convertActionCommentToText(comment, topicTypes) {
-		let text = "";
-
-		if (comment) {
-			switch (comment.action.property) {
-			case "priority":
-
-				comment.action.propertyText = "Priority";
-				comment.action.from = this.convertActionValueToText(comment.action.from);
-				comment.action.to = this.convertActionValueToText(comment.action.to);
-				break;
-
-			case "status":
-
-				comment.action.propertyText = "Status";
-				comment.action.from = this.convertActionValueToText(comment.action.from);
-				comment.action.to = this.convertActionValueToText(comment.action.to);
-				break;
-
-			case "assigned_roles":
-
-				comment.action.propertyText = "Assigned";
-				comment.action.from = comment.action.from.toString();
-				comment.action.to = comment.action.to.toString();
-				break;
-
-			case "topic_type":
-
-				comment.action.propertyText = "Type";
-				if (topicTypes) {
-
-					const from = topicTypes.find((topicType) => {
-						return topicType.value === comment.action.from;
-					});
-
-					const to = topicTypes.find((topicType) => {
-						return topicType.value === comment.action.to;
-					});
-
-					if (from && from.label) {
-						comment.action.from = from.label;
-					}
-
-					if (to && to.label) {
-						comment.action.to = to.label;
-					}
-				}
-				break;
-
-			case "desc":
-
-				comment.action.propertyText = "Description";
-				break;
-
-			case "due_date":
-
-				comment.action.propertyText = "Due Date";
-				if (comment.action.to) {
-					comment.action.to = (new Date(parseInt(comment.action.to, 10))).toLocaleDateString();
-				}
-				if (comment.action.from) {
-					comment.action.from = (new Date(parseInt(comment.action.from, 10))).toLocaleDateString();
-				} else {
-					text = comment.action.propertyText + " set to " +
-						comment.action.to + " by " +
-						comment.owner;
-				}
-				break;
-
-			case "bcf_import":
-
-				comment.action.propertyText = "BCF Import";
-				text = comment.action.propertyText + " by " + comment.owner;
-				break;
-
-			}
-		}
-
-		if (0 === text.length) {
-			if (!comment.action.from) {
-				comment.action.from = "(empty)";
-			}
-
-			if (!comment.action.to) {
-				comment.action.to = "(empty)";
-			}
-
-			text = comment.action.propertyText + " updated from " +
-				comment.action.from + " to " +
-				comment.action.to + " by " +
-				comment.owner;
-		}
-
-		comment.action.text = text;
-
-		return text;
-	}
-
-	/**
-	 * generate title, screenshot path and comment for an risk
-	 * @param risk
-	 * @returns risk
-	 */
-	public cleanRisk(risk: any) {
-
-		if (risk.hasOwnProperty("comments")) {
-			for (let j = 0, numComments = risk.comments.length; j < numComments; j++) {
-				// Action comment text
-				if (risk.comments[j].action) {
-					risk.comments[j].comment = this.convertActionCommentToText(risk.comments[j], undefined);
-				}
-				// screen shot path
-				if (risk.comments[j].viewpoint && risk.comments[j].viewpoint.screenshot) {
-					risk.comments[j].viewpoint.screenshotPath = this.APIService.getAPIUrl(risk.comments[j].viewpoint.screenshot);
-				}
-			}
-		}
-
-		return risk;
-	}
-
-	/**
-	 * Convert an action value to readable text
-	 * @param value
-	 */
-	public convertActionValueToText(value: string) {
-		const actions = {
-			"none": "None",
-			"low": "Low",
-			"medium": "Medium",
-			"high": "High",
-			"open": "Open",
-			"in progress": "In progress",
-			"for approval": "For approval",
-			"closed": "Closed"
-		};
-
-		let actionText = value;
-
-		value = value.toLowerCase();
-
-		if (actions.hasOwnProperty(value)) {
-			actionText = actions[value];
-		}
-
-		return actionText;
-	}
-
 	public removeUnsavedPin() {
-		this.ViewerService.removePin({id: this.ViewerService.newPinId });
-		this.ViewerService.setPin({data: null});
+		this.viewerService.removePin({id: this.viewerService.newPinId });
+		this.viewerService.setPin({data: null});
 	}
 
 	/**
 	 * Returns true if model loaded.
 	 */
 	public modelLoaded() {
-		return this.ViewerService.currentModel.model;
+		return this.viewerService.currentModel.model;
 	}
 
 }

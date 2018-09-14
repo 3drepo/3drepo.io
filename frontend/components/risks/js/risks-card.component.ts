@@ -15,7 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { AuthService } from "../../home/js/auth.service";
-import { ClientConfigService } from "../../home/js/client-config.service";
 import { DialogService } from "../../home/js/dialog.service";
 import { EventService } from "../../home/js/event.service";
 import { NotificationService } from "../../notifications/js/notification.service";
@@ -72,7 +71,7 @@ class RisksCardController implements ng.IController {
 	private savingRisk: boolean;
 	private revisionsStatus: any;
 	private risksReady: any;
-	private onShowItem: any; // TODO remove?
+	private onShowItem: any;
 	private hideItem: boolean;
 
 	constructor(
@@ -86,7 +85,7 @@ class RisksCardController implements ng.IController {
 		private authService: AuthService,
 		private notificationService: NotificationService,
 		private revisionsService: RevisionsService,
-		private clientConfigService: ClientConfigService,
+		private clientConfigService: any,
 		private dialogService: DialogService,
 		private viewerService: ViewerService
 	) {}
