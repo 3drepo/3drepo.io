@@ -19,6 +19,8 @@ import { put, call, takeLatest, all, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
+import { DialogActions } from '../dialog/dialog.redux';
+
 import { selectCurrentTeamspace } from '../teamspace/teamspace.selectors';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
@@ -38,7 +40,6 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		));
 	} catch (error) {
 		yield put(UserManagementActions.setPendingState(false));
-		console.error(error);
 	}
 }
 
@@ -48,8 +49,7 @@ export function* addUser({ user }) {
 		const { data } = yield API.addUser(teamspace, user);
 		yield put(UserManagementActions.addUserSuccess(data));
 	} catch (error) {
-		yield put(UserManagementActions.removeUserFailure(error));
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('add', 'licence', error.response));
 	}
 }
 
@@ -59,8 +59,31 @@ export function* removeUser({ username }) {
 		const data = yield API.removeUser(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 	} catch (error) {
-		yield put(UserManagementActions.removeUserFailure(error));
-		console.error(error);
+		const responseCode = API.getResponseCode('USER_IN_COLLABORATOR_LIST');
+		const errorData = error.response.data || {};
+
+		if (errorData.status === 400 && errorData.value === responseCode) {
+			const config = {
+				title: 'Remove licence',
+				templateType: 'confirmUserRemove',
+				confirmText: 'Remove',
+				onConfirm: () => console.log('confirmed!'),
+				data: {
+					models: errorData.models,
+					projects: errorData.projects,
+					teamspacePerms: '',
+					username
+				}
+			};
+
+			if (errorData.teamspace) {
+				config.data.teamspacePerms = errorData.teamspace.permissions.join(", ");
+			}
+
+			yield put(DialogActions.showDialog(config));
+		} else {
+			yield put(DialogActions.showErrorDialog('remove', 'licence', error.response));
+		}
 	}
 }
 
@@ -74,8 +97,7 @@ export function* updateJob({ username, job }) {
 		);
 		yield put(UserManagementActions.updateJobSuccess(username, job));
 	} catch (error) {
-		yield put(UserManagementActions.removeUserFailure(error));
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('assign', 'job', error.response));
 	}
 }
 
@@ -85,8 +107,7 @@ export function* updatePermissions({ permissions }) {
 		const data = yield API.setUserPermissions(teamspace, permissions);
 		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
 	} catch (error) {
-		yield put(UserManagementActions.removeUserFailure(error));
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('update', 'teamspace permissions', error.response));
 	}
 }
 

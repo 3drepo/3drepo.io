@@ -118,50 +118,6 @@ class UsersListController implements ng.IController {
 	}
 
 	/**
-	 * Update member job title
-	 * @param member
-	 */
-	public onJobChange(member): void {
-		const {job, user} = member;
-		const updatePromise = this.AccountService[job ? "updateMemberJob" : "removeMemberJob"];
-		const acionType = job ? "assign" : "unassign";
-
-		member.isPending = true;
-		updatePromise(this.currentTeamspace.account, job, user)
-			.then((response) => {
-				if (response.status !== 200) {
-					throw (response);
-				}
-			})
-			.catch(this.DialogService.showError.bind(null, acionType, "job"))
-			.finally(() => {
-				member.isPending = false;
-				this.updateOriginMember(member);
-			});
-	}
-
-	/**
-	 * Update member permissions
-	 * @param member
-	 */
-	public onPermissionsChange(member): void {
-		const permissionData = {
-			user: member.user,
-			permissions: member.isAdmin ? [TEAMSPACE_PERMISSIONS.admin.key] : []
-		};
-
-		member.isPending = true;
-		this.AccountService
-			.setMemberPermissions(this.currentTeamspace.account, permissionData)
-			.catch(this.DialogService.showError.bind(null, "update", "teamspace permissions"))
-			.finally(() => {
-				member.isPending = false;
-				this.updateOriginMember(member);
-				this.onChange({updatedMembers: this.members});
-			});
-	}
-
-	/**
 	 * Set new sort type and order
 	 * @param type
 	 * @param order

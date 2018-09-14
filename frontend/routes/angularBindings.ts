@@ -11,10 +11,12 @@ import { ReactButton } from './components/reactButton/reactButton.component';
 // Routes
 import ReactRoute from './reactRoute/reactRoute.container';
 import Users from './users/users.container';
+import DialogContainer from './components/dialogContainer/dialogContainer.container';
 
 angular
 	.module('3drepo')
 	.component('reactButton', wrap(ReactButton))
 
 	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active', 'limit']))
-	.component('reactRoute', wrap(ReactRoute));
+	.component('reactRoute', wrap(ReactRoute))
+	.component('dialogContainer', wrap(DialogContainer));
