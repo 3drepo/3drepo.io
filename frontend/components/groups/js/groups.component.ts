@@ -59,6 +59,7 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
+	private searchQuery: any[];
 	private groupsNotifications: NotificationEvents;
 
 	constructor(
@@ -409,7 +410,9 @@ class GroupsController implements ng.IController {
 	}
 
 	public selectGroup(group: any) {
-		this.groupsService.selectGroup(group);
+		// if (this.searchQuery)	{
+			this.groupsService.selectGroup(group);
+		// }
 	}
 
 	public updateChangeStatus(): void {

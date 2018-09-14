@@ -51,22 +51,12 @@ export class ViewpointsService {
 		};
 	}
 
-	// Helper  for searching strings
-	public stringSearch(superString, subString) {
-		if (!superString) {
-			return false;
-		}
-
-		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
-	}
-
 	public filterViewpoints(searchQuery: string): any[] {
 
-		const viewpointSearchResults = this.state.viewpoints.filter((view) => {
+		return this.state.viewpoints.filter((view) => {
 			return this.stringSearch(view.name, searchQuery);
 		});
 
-		return viewpointSearchResults;
 	}
 
 	/**
@@ -232,6 +222,15 @@ export class ViewpointsService {
 
 			this.ClipService.updateClippingPlane(clipData);
 		}
+	}
+
+	// Helper  for searching strings
+	private stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 }
 

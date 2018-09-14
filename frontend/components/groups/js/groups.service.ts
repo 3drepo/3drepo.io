@@ -76,12 +76,10 @@ export class GroupsService {
 	}
 
 	public groupsFilterSearch(searchQuery: string): any[] {
-
-		const groupSearchResults = this.state.groups.filter((group) => {
-			return this.stringSearch(group.name, searchQuery) || this.stringSearch(group.description, searchQuery);
-		});
-
-		return groupSearchResults;
+			return this.state.groups.filter((group) => {
+				return this.stringSearch(group.name, searchQuery) || this.stringSearch(group.description, searchQuery)
+				|| this.stringSearch(group.author, searchQuery);
+			});
 	}
 	/**
 	 * Check if a group is currently color overriden
@@ -192,9 +190,9 @@ export class GroupsService {
 	/**
 	 * Reselect a group
 	 */
-	public reselectGroup(group) {
-		this.selectGroup(group);
-	}
+	// public reselectGroup(group) {
+	// 	this.selectGroup(group);
+	// }
 
 	/**
 	 * Return all the meshes for all currently highlighted objects
