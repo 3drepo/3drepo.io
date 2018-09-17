@@ -16,7 +16,7 @@ div.viewpointsContainer
             ng-if="vm.viewpoints.length > 0"
             ng-click="vm.selectView(viewpoint)"
             style="background-color: {{viewpoint.selected ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
-            ng-repeat="viewpoint in vm.viewpoints track by $index")
+            ng-repeat="viewpoint in vm.viewpointsToShow track by $index")
 
             div.viewpointMain(layout="row")
                 img.viewpointThumbnail(ng-src="{{viewpoint.screenshot.thumbnailUrl}}")

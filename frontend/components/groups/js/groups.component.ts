@@ -37,6 +37,7 @@ class GroupsController implements ng.IController {
 
 	private onContentHeightRequest: any;
 	private groups: any;
+	private groupsToShow: any;
 	private selectedGroup: any;
 	private teamspace: string;
 	private model: string;
@@ -73,16 +74,19 @@ class GroupsController implements ng.IController {
 		private clientConfigService: any,
 		private iconsConstant: any,
 		private notificationService: NotificationService
-	) {}
+	) { }
 
 	public $onInit() {
 		this.customIcons = this.iconsConstant;
+
+		this.groups = [];
+		this.groupsToShow = [];
 
 		this.selectedNodes = [];
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
 		this.teamspace = this.account; // Workaround legacy naming
-		this.onContentHeightRequest({height: 1000});
+		this.onContentHeightRequest({ height: 1000 });
 		this.groupsService.reset();
 		this.watchers();
 		this.toShow = "groups";
@@ -99,7 +103,7 @@ class GroupsController implements ng.IController {
 			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]]
 		];
 
-		this.groupsNotifications =  this.notificationService.getChannel(this.account, this.model).groups;
+		this.groupsNotifications = this.notificationService.getChannel(this.account, this.model).groups;
 	}
 
 	public $onDestroy() {
@@ -112,7 +116,9 @@ class GroupsController implements ng.IController {
 	public watchers() {
 		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
 			if (searchQuery !== undefined || searchQuery !== "") {
-				this.groups = this.groupsService.groupsFilterSearch(searchQuery);
+				this.groupsToShow = this.groupsService.groupsFilterSearch(searchQuery);
+			} else {
+				this.groupsToShow = this.groups.concat([]);
 			}
 		});
 
@@ -125,6 +131,7 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.groups", () => {
 			this.setContentHeight();
+			this.groupsToShow = this.groups.concat([]);
 		});
 
 		this.$scope.$watchCollection("vm.savedGroupData", () => {
@@ -167,7 +174,7 @@ class GroupsController implements ng.IController {
 		this.$scope.$watchCollection(() => {
 			return this.treeService.currentSelectedNodes;
 		}, () => {
-			this.groupsService.updateSelectedObjectsLen().then( () => {
+			this.groupsService.updateSelectedObjectsLen().then(() => {
 				this.groupsService.getSelectedObjects().then((currentHighlights) => {
 					this.selectedNodes = currentHighlights || [];
 					this.updateChangeStatus();
@@ -237,9 +244,9 @@ class GroupsController implements ng.IController {
 
 	public deleteHighlightedGroups() {
 		this.groupsService.deleteHighlightedGroups(this.teamspace, this.model)
-		.catch((error) => {
-			this.errorDialog(error);
-		});
+			.catch((error) => {
+				this.errorDialog(error);
+			});
 	}
 
 	public deleteAllGroups() {
@@ -321,7 +328,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public reselectGroup() {
-		this.groupsService.reselectGroup(this.selectedGroup);
+		this.groupsService.selectGroup(this.selectedGroup);
 	}
 
 	public getRGBA(color: any) {
@@ -410,9 +417,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public selectGroup(group: any) {
-		// if (this.searchQuery)	{
-			this.groupsService.selectGroup(group);
-		// }
+		this.groupsService.selectGroup(group);
 	}
 
 	public updateChangeStatus(): void {
@@ -461,7 +466,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public onGroupsDeleted(ids) {
-		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0 ) {
+		if (this.isEditing() && ids.indexOf(this.selectedGroup._id) >= 0) {
 			this.cancelEdit();
 		}
 
@@ -477,7 +482,7 @@ class GroupsController implements ng.IController {
 		this.justUpdated = !!this.selectedGroup && group._id === this.selectedGroup._id;
 		this.savedGroupData = Object.assign({}, group);
 		this.groupsService.replaceStateGroup(group);
-		this.$timeout(this.resetJustUpdated.bind(this) , 4000);
+		this.$timeout(this.resetJustUpdated.bind(this), 4000);
 
 		if (this.justUpdated) {
 			this.groupsService.selectGroup(group);

@@ -66,20 +66,12 @@ export class GroupsService {
 			});
 	}
 
-	// Helper  for searching strings
-	public stringSearch(superString, subString) {
-		if (!superString) {
-			return false;
-		}
-
-		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
-	}
-
 	public groupsFilterSearch(searchQuery: string): any[] {
-			return this.state.groups.filter((group) => {
-				return this.stringSearch(group.name, searchQuery) || this.stringSearch(group.description, searchQuery)
+		return this.state.groups.filter((group) => {
+			this.unhighlightGroup(group);
+			return this.stringSearch(group.name, searchQuery) || this.stringSearch(group.description, searchQuery)
 				|| this.stringSearch(group.author, searchQuery);
-			});
+		});
 	}
 	/**
 	 * Check if a group is currently color overriden
@@ -639,6 +631,15 @@ export class GroupsService {
 
 		this.state.selectedGroup = group;
 		this.state.selectedGroup.focus = true;
+	}
+
+	// Helper  for searching strings
+	private stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
 	/**
