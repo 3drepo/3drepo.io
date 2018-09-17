@@ -67,7 +67,7 @@ interface IState {
 	jobs: any[];
 	licencesLabel: string;
 	containerElement: Element;
-	active: boolean;
+	isNewUserFormActive: boolean;
 }
 
 const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
@@ -75,13 +75,10 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
 
 export class Users extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
-		if (nextProps.active !== prevState.active) {
-			return {active: nextProps.active};
-		}
-
 		return {
 			rows: nextProps.users,
-			jobs: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name}))
+			jobs: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name})),
+			isNewUserFormActive: false
 		};
 	}
 
@@ -90,7 +87,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		jobs: [],
 		licencesLabel: '',
 		containerElement: null,
-		active: true
+		isNewUserFormActive: false
 	};
 
 	public componentDidMount() {
@@ -145,6 +142,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 				{},
 				{
 					icon: 'remove_circle',
+					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
 				}
 			];
@@ -163,7 +161,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		};
 		const panel = (
 			<FloatingActionPanel
-				open={this.state.active}
+				open={this.state.isNewUserFormActive}
 				render={({closePanel}) => {
 					return <NewUserForm {...formProps} onCancel={closePanel} />;
 				}}

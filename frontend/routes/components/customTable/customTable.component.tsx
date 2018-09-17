@@ -43,9 +43,9 @@ const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
 	) : (<></>);
 };
 
-const RowCellButton = ({icon, onClick}) => {
+const RowCellButton = ({icon, onClick, disabled}) => {
 	return (
-		<IconButton onClick={onClick}>
+		<IconButton onClick={onClick} disabled={disabled}>
 			<Icon>{icon}</Icon>
 		</IconButton>
 	);
@@ -260,14 +260,14 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{row.data.map((data, cellIndex) => {
 						const type = cells[cellIndex].type;
 						const CellComponent = ROW_CELL_COMPONENTS[type];
+						const cellProps = ROW_CELL_DEFAULT_PROPS[type];
 						const cellData = {
-							...(ROW_CELL_DEFAULT_PROPS[type] || {}),
 							...data,
 							searchText: this.state.searchText
 						};
 
 						return (
-							<Cell key={cellIndex} {...cellData}>
+							<Cell key={cellIndex} {...cellProps}>
 								{
 									CellComponent ?
 										(<CellComponent {...cellData} />) :
