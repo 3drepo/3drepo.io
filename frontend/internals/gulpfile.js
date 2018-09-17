@@ -127,7 +127,7 @@ gulp.task("zxcvbn", function(done) {
         // library: 'strength'
       },
     }, localWebpack))
-    .pipe(gulp.dest("./../public/dist/"))
+    .pipe(gulp.dest("./../../public/dist/"))
 
  });
 
