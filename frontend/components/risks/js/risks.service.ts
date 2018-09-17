@@ -459,8 +459,6 @@ export class RisksService {
 
 	public showRisk(risk, revision) {
 
-		this.treeService.showProgress = true;
-
 		this.showRiskPins();
 
 		// Remove highlight from any multi objects
@@ -482,12 +480,10 @@ export class RisksService {
 				risk.hasOwnProperty("group_id")) {
 
 			this.showMultiIds(risk, revision).then(() => {
-				this.treeService.showProgress = false;
 				this.handleShowRisk(risk);
 			});
 
 		} else {
-			this.treeService.showProgress = false;
 			this.handleShowRisk(risk);
 		}
 
@@ -790,9 +786,7 @@ export class RisksService {
 			endpoint += "/risks/" + risk._id + ".json";
 		}
 
-		const putConfig = {withCredentials: true};
-
-		return this.apiService.put(endpoint, putData, putConfig);
+		return this.apiService.put(endpoint, putData);
 
 	}
 

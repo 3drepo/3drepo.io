@@ -155,7 +155,7 @@ class RisksListController implements ng.IController {
 			this.contentHeight({height: this.risksService.state.heights.infoHeight});
 		}
 
-		this.risksService.showRiskPins(this.account, this.model);
+		this.risksService.showRiskPins();
 	}
 
 	public selectRisk(risk) {
