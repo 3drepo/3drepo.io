@@ -21,10 +21,7 @@ const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
 const db = require("../db/db");
 
-//RMconst ModelFactory = require("./factory/modelFactory");
 const ModelSetting = require("./modelSetting");
-//RMconst stringToUUID = utils.stringToUUID;
-//RMconst uuidToString = utils.uuidToString;
 const History = require("./history");
 const Ref = require("./ref");
 const GenericObject = require("./base/repo").GenericObject;
@@ -33,13 +30,8 @@ const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
 
-//RMconst moment = require("moment");
-//RMconst archiver = require("archiver");
-//RMconst yauzl = require("yauzl");
-//RMconst xml2js = require("xml2js");
 const systemLogger = require("../logger.js").systemLogger;
 //const Group = require("./group");
-//RMconst Meta = require("./meta");
 const User = require("./user");
 const Job = require("./job");
 const ModelHelper = require("./helper/model");
@@ -199,7 +191,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = oldRisk.creator_role === job && oldRisk.creator_role && job;
+						const hasOwnerJob = oldRisk.creator_role === job;
 						const hasAssignedJob = job === oldRisk.assigned_roles[0];
 
 						return {
@@ -209,36 +201,36 @@ risk.updateAttrs = function(dbCol, uid, data) {
 						};
 
 					}).then((user) => {
-						//console.log(user.isAdmin);
-						//console.log(user.hasOwnerJob);
-						//console.log(user.hasAssignedJob);
+						if (user.isAdmin || user.hasOwnerJob || user.hasAssignedJob) {
+							const toUpdate = {};
+							const fieldsCanBeUpdated = [
+								"safetibase_id",
+								"associated_activity",
+								"desc",
+								"assigned_roles",
+								"category",
+								"likelihood",
+								"consequence",
+								"level_of_risk",
+								"mitigation_status",
+								"mitigation_desc"
+							];
 
-						const toUpdate = {};
-						const fieldsCanBeUpdated = [
-							"safetibase_id",
-							"associated_activity",
-							"desc",
-							"assigned_roles",
-							"category",
-							"likelihood",
-							"consequence",
-							"level_of_risk",
-							"mitigation_status",
-							"mitigation_desc"
-						];
-
-						fieldsCanBeUpdated.forEach((key) => {
-							if (data[key]) {
-								toUpdate[key] = data[key];
-								oldRisk[key] = data[key];
-							}
-						});
-
-						return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-								return oldRisk;
+							fieldsCanBeUpdated.forEach((key) => {
+								if (data[key]) {
+									toUpdate[key] = data[key];
+									oldRisk[key] = data[key];
+								}
 							});
-						});
+
+							return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+								return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
+									return oldRisk;
+								});
+							});
+						} else {
+							return Promise.reject(responseCodes.RISK_UPDATE_PERMISSION_DECLINED);
+						}
 					}).catch((err) => {
 						if (err) {
 							return Promise.reject(err);
