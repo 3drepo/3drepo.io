@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values } from 'lodash';
+import { matches, cond, orderBy, pick, values, stubTrue } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -26,8 +26,9 @@ import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 import { SORT_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
-
 import { UserItem } from '../userItem/userItem.component';
+import { Highlight } from '../highlight/highlight.component';
+
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Row, SortLabel, Cell } from './customTable.styles';
@@ -60,11 +61,13 @@ export const CELL_TYPES = {
 	CHECKBOX: 5,
 	PERMISSIONS: 6,
 	ICON_BUTTON: 7,
-	EMPTY: 8
+	EMPTY: 8,
+	NAME: 9
 };
 
 const HEADER_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: CellUserSearch
+	[CELL_TYPES.USER]: CellUserSearch,
+	[CELL_TYPES.NAME]: CellUserSearch
 };
 
 const ROW_CELL_COMPONENTS = {
@@ -80,6 +83,9 @@ const ROW_CELL_DEFAULT_PROPS = {
 	},
 	[CELL_TYPES.JOB]: {
 		itemTemplate: JobItem,
+		flex: 25
+	},
+	[CELL_TYPES.NAME]: {
 		flex: 25
 	},
 	[CELL_TYPES.USER]: {
@@ -105,7 +111,12 @@ const getSortedRows = (rows, type, order) => {
 		[matches({ type: USER }), sortByName.bind(null, rows)],
 		[matches({ type: JOB }), sortByJob.bind(null, rows)],
 		[matches({ type: PERMISSIONS }), (options) => {
-			return orderBy(rows, ["isAdmin"], options.order);
+			return orderBy(rows, ['isAdmin'], options.order);
+		}],
+
+		// Default action
+		[stubTrue, (options) => {
+			return orderBy(rows, ['value'], options.order);
 		}]
 	]);
 
@@ -262,17 +273,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 						const type = cells[cellIndex].type;
 						const CellComponent = ROW_CELL_COMPONENTS[type];
 						const cellProps = ROW_CELL_DEFAULT_PROPS[type];
-						const cellData = {
-							...data,
-							searchText: this.state.searchText
-						};
 
 						return (
 							<Cell key={cellIndex} {...cellProps}>
 								{
 									CellComponent ?
-										(<CellComponent {...cellData} />) :
-										cellData.value
+										(<CellComponent {...data} searchText={this.state.searchText} />) :
+										(<Highlight text={data.value} search={this.state.searchText} />)
 								}
 							</Cell>
 						);

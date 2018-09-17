@@ -16,20 +16,143 @@
  */
 
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { pick } from 'lodash';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
-import { Container } from './jobs.styles';
+import { theme } from '../../styles';
+import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import { NewUserForm } from '../components/newUserForm/newUserForm.component';
+import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
+
+import { Container, Content, Footer } from './jobs.styles';
+
+const JOBS_TABLE_CELLS = [{
+	name: 'Job name',
+	type: CELL_TYPES.NAME,
+	searchBy: ['name']
+}, {
+	name: 'Colour',
+	type: CELL_TYPES.COLOR
+}, {
+	type: CELL_TYPES.EMPTY
+}, {
+	type: CELL_TYPES.ICON_BUTTON
+}];
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	jobs: any[];
+	colors: any[];
+	create: (job) => void;
+	remove: (jobId) => void;
+	updateColor: (jobId, color) => void;
+	active?: boolean;
 }
 
 export class Jobs extends React.PureComponent<IProps, any> {
+	public static getDerivedStateFromProps(nextProps: IProps, prevState) {
+		if (nextProps.active !== prevState.active) {
+			return { active: nextProps.active };
+		}
+
+		return {
+			rows: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name})),
+			jobsSize: nextProps.jobs.length,
+			panelKey: nextProps.jobs.length !== prevState.rows.length ? Math.random() : prevState.panelKey
+		};
+	}
+
+	public state = {
+		rows: [],
+		jobsSize: 0,
+		containerElement: null,
+		active: true,
+		panelKey: Math.random()
+	};
+
+	public componentDidMount() {
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		this.setState({ containerElement });
+	}
+
+	public handleColorChange = (jobId) => (color) => {
+		this.props.updateColor(jobId, color);
+	}
+
+	public onRemove = (jobId) => {
+		this.props.remove(jobId);
+	}
+
+	public onSave = ({name, color}) => {
+		this.props.create({ _id: name, color });
+	}
+
+	public getJobsTableRows = (jobs = [], colors = []): any[] => {
+		return jobs.map((job) => {
+			const data = [
+				pick(job, ['value']),
+				{
+					value: job.color,
+					items: colors,
+					placeholder: 'Undefined',
+					onChange: this.handleColorChange(job._id)
+				},
+				{},
+				{
+					icon: 'remove_circle',
+					onClick: this.onRemove.bind(null, job._id)
+				}
+			];
+			return { ...job, data };
+		});
+	}
+
+	public renderNewJobForm = (container) => {
+		const formProps = {
+			title: 'Add new job',
+			jobs: this.props.jobs,
+			onSave: this.onSave
+		};
+
+		const panel = (
+			<FloatingActionPanel
+				key={this.state.panelKey}
+				render={({ closePanel }) => {
+					return <NewUserForm {...formProps} onCancel={closePanel} />;
+				}}
+			/>
+		);
+		return ReactDOM.createPortal(
+			panel,
+			container
+		);
+	}
 
 	public render() {
+		const { containerElement, active, rows } = this.state;
+		const { colors } = this.props;
+
+		const preparedRows = this.getJobsTableRows(rows, colors);
 		return (
-			<Container>
-				Jobs component
-			</Container>
+			<MuiThemeProvider theme={theme}>
+				<>
+					<Container
+						container
+						direction="column"
+						alignItems="stretch"
+						wrap="nowrap"
+					>
+						<Content item>
+							<CustomTable
+								cells={JOBS_TABLE_CELLS}
+								rows={preparedRows}
+							/>
+						</Content>
+						{rows.length && (<Footer item>Manage jobs</Footer>)}
+					</Container>
+					{active && containerElement && this.renderNewJobForm(containerElement)}
+				</>
+			</MuiThemeProvider>
 		);
 	}
 }

@@ -14,5 +14,5 @@ angular
 	.module('3drepo')
 
 	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active', 'limit']))
-	.component('jobs', wrap(Jobs))
+	.component('jobs', wrap(Jobs, ['active']))
 	.component('dialogContainer', wrap(DialogContainer));

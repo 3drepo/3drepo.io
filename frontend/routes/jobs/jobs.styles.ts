@@ -16,5 +16,28 @@
  */
 
 import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
+import { COLOR } from '../../styles';
 
-export const Container = styled.div``;
+const FOOTER_HEIGHT = 45;
+
+export const Container = styled(Grid) `
+  height: 100%;
+  overflow: hidden;
+`;
+
+export const Content = styled(Grid) `
+  max-height: calc(100% - ${FOOTER_HEIGHT}px);
+  flex: 1;
+`;
+
+export const Footer = styled(Grid) `
+  padding: 16px 24px;
+  font-size: 14px;
+  color: ${COLOR.BLACK_20};
+  border-top: 1px solid ${COLOR.BLACK_6};
+  height: ${FOOTER_HEIGHT}px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+`;

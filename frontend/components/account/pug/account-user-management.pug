@@ -87,7 +87,7 @@
 				md-on-select="vm.onTabChange()"
 				ng-disabled="!vm.isTeamspaceAdmin")
 					div(layout="column" layout-fill)
-						jobs(flex)
+						jobs(flex active="vm.selectedTab === vm.TABS_TYPES.JOBS")
 
 						jobs-list(
 							flex

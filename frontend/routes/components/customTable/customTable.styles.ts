@@ -86,7 +86,8 @@ export const Container = styled.div`
 
 	${UserItem.Name},
 	${CellSelect.StyledSelect},
-	${SortLabel} {
+	${SortLabel},
+	${Cell} {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
 	}
