@@ -24,7 +24,6 @@ interface IProps {
 	render: (closePanel: any) => void;
 	children?: any;
 	icon?: string;
-	open?: boolean;
 }
 
 interface IState {

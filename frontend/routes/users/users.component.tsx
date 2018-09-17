@@ -69,7 +69,7 @@ interface IState {
 	licencesLabel: string;
 	containerElement: Element;
 	active: boolean;
-	isNewUserFormOpen: boolean;
+	panelKey: number;
 }
 
 const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
@@ -84,7 +84,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		return {
 			rows: nextProps.users,
 			jobs: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name})),
-			isNewUserFormOpen: false
+			panelKey: nextProps.users !== prevState.rows ? Math.random() : prevState.panelKey
 		};
 	}
 
@@ -94,7 +94,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		licencesLabel: '',
 		containerElement: null,
 		active: true,
-		isNewUserFormOpen: false
+		panelKey: Math.random()
 	};
 
 	public componentDidMount() {
@@ -170,7 +170,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 		const panel = (
 			<FloatingActionPanel
-				open={this.state.isNewUserFormOpen}
+				key={this.state.panelKey}
 				render={({closePanel}) => {
 					return <NewUserForm {...formProps} onCancel={closePanel} />;
 				}}
