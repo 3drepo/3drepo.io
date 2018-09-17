@@ -45,4 +45,4 @@ export const Item = styled(MenuItem)`
 	}
 `;
 
-export const EmptyValue = styled(MenuItem) ``;
+export const EmptyValue = styled(Item)``;

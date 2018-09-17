@@ -4,6 +4,9 @@ import { render } from 'react-dom';
 import { invoke } from 'lodash';
 import configureStore from '../modules/store';
 
+// Angular service injector
+const getAngularService = (name) => angular.element(document.body).injector().get(name);
+
 // Should be replaced with proper react-redux connect if app is fully migrated
 const initialState = {};
 const store = configureStore(initialState);
@@ -17,7 +20,8 @@ export const dispatch = (action) => {
 
 // Use to listen store changes directly from AngularJS context
 // Should be removed if app is fully migrated
-export const subscribe = (context, selectors = {}) => {
+export const subscribe = (context, selectors: any = {}) => {
+	const $timeout = getAngularService('$timeout');
 	const subscribeHandlers = {
 		function: selectors,
 		object: (currentState) => {
@@ -32,12 +36,14 @@ export const subscribe = (context, selectors = {}) => {
 		}
 	};
 
-	const handlerType = typeof selectors;
+	const handlerType = selectors.constructor.name.toLowerCase();
 
 	store.subscribe(() => {
-		const currentState = store.getState();
-		const dataToBind = invoke(subscribeHandlers, handlerType, currentState) || {};
+		$timeout(() => {
+			const currentState = store.getState();
+			const dataToBind = invoke(subscribeHandlers, handlerType, currentState) || {};
 
-		Object.assign(context, dataToBind);
+			Object.assign(context, dataToBind);
+		});
 	});
 };
