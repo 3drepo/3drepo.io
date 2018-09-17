@@ -14,11 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { APIService } from "../../home/js/api.service";
+import { AuthService } from "../../home/js/auth.service";
+import { ClipService } from "../../clip/js/clip.service";
+import { IChip } from "../../panel/js/panel-card-chips-filter.component";
+import { PanelService } from "../../panel/js/panel.service";
+import { TreeService } from "../../tree/js/tree.service";
+import { ViewerService } from "../../viewer/js/viewer.service";
 
 declare const Pin;
 
 export class IssuesService {
-
 	public static $inject: string[] = [
 		"$q",
 		"$sanitize",
@@ -26,15 +32,12 @@ export class IssuesService {
 		"$filter",
 
 		"ClientConfigService",
-		"EventService",
 		"APIService",
 		"TreeService",
 		"AuthService",
-		"MultiSelectService",
 		"ClipService",
 		"ViewerService",
-		"PanelService",
-		"DialogService"
+		"PanelService"
 	];
 
 	public state: any;
@@ -46,16 +49,13 @@ export class IssuesService {
 		private $timeout,
 		private $filter,
 
-		private ClientConfigService,
-		private EventService,
-		private APIService,
-		private TreeService,
-		private AuthService,
-		private MultiSelectService,
-		private ClipService,
-		private ViewerService,
-		private PanelService,
-		private DialogService
+		private clientConfigService: any,
+		private apiService: APIService,
+		private treeService: TreeService,
+		private authService: AuthService,
+		private clipService: ClipService,
+		private viewerService: ViewerService,
+		private panelService: PanelService
 	) {
 		this.reset();
 	}
@@ -78,6 +78,8 @@ export class IssuesService {
 				excludeRoles: []
 			},
 			availableJobs : [],
+			allTopicTypes : [],
+			allJobs: [],
 			modelUserJob: null
 		};
 	}
@@ -96,6 +98,29 @@ export class IssuesService {
 				if (newIssues) {
 					newIssues.forEach(this.populateIssue.bind(this));
 					this.state.allIssues = newIssues;
+
+					const newJobs: any = {};
+					const newTopicTypes: any = {};
+					newIssues.forEach( (i) =>  {
+						if (i.creator_role) {
+							newJobs[i.creator_role] = true;
+						}
+
+						if (i.topic_type) {
+							newTopicTypes[i.topic_type] = true;
+						}
+
+						i.assigned_roles.forEach( (r) => newJobs[r] = true);
+					});
+
+					const jobs = Object.keys(newJobs).map( (j) => ({_id : j }));
+					this.addJobsToAllJobs(jobs);
+
+					const toPascal = (w) => w.split("_").map( (ws) => ws[0].toUpperCase() + ws.substring(1)).join(" ");
+					const topicTypes = Object.keys(newTopicTypes).map( (t) => ({ value: t , label : toPascal(t)} )) ;
+
+					this.addToAllTypes(topicTypes);
+
 				} else {
 					throw new Error("Error");
 				}
@@ -107,19 +132,42 @@ export class IssuesService {
 	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
 		const url = account + "/jobs";
 
-		return this.APIService.get(url)
+		return this.apiService.get(url)
 			.then((response) => {
 				this.state.availableJobs = response.data;
-				this.PanelService.setIssuesMenu(response.data);
+				this.addJobsToAllJobs(response.data);
 				return this.state.availableJobs;
 			});
+	}
 
+	public addJobsToAllJobs(jobs: any[]) {
+		const newJobs = jobs.filter((r) => !this.state.allJobs.find( (j) => j._id === r._id ));
+		this.state.allJobs = this.state.allJobs.concat(newJobs).sort( (a, b) => a._id > b._id ? 1 : -1);
+
+		const menuChips =  this.state.allJobs.map((role ) => ({
+			value: role._id,
+			label: role._id
+		}));
+
+		const assignedMenu = menuChips.concat([{value: null, label: "Unassigned"}]);
+
+		this.panelService.setChipFilterMenuItem("issues", {label: "Created by", value: "creator_role"}, menuChips);
+		this.panelService.setChipFilterMenuItem("issues", {label: "Assigned to", value: "assigned_roles"}, assignedMenu);
+	}
+
+	public addToAllTypes(topicTypes: any) {
+		const newTopicsTypes = topicTypes.filter((r) => !this.state.allTopicTypes.find( (j) => j.value === r.value ));
+
+		this.state.allTopicTypes = this.state.allTopicTypes.concat(newTopicsTypes)
+									.sort( (a, b) => a.label > b.label ? 1 : -1);
+
+		this.panelService.setChipFilterMenuItem("issues", {label: "Type", value: "topic_type"}, topicTypes);
 	}
 
 	public getUserJobForModel(account: string, model: string): Promise<any> {
 		const url = account + "/myJob";
 
-		return this.APIService.get(url)
+		return this.apiService.get(url)
 			.then((response) => {
 				this.state.modelUserJob = response.data;
 				return this.state.modelUserJob;
@@ -150,6 +198,14 @@ export class IssuesService {
 		return false;
 	}
 
+	public setFromDateMenuValue(date: Date) {
+		this.panelService.setDateValueFromMenu("issues", "date", "from", date);
+	}
+
+	public setToDateMenuValue(date: Date) {
+		this.panelService.setDateValueFromMenu("issues", "date", "to", date);
+	}
+
 	// Helper  for searching strings
 	public stringSearch(superString, subString) {
 		if (!superString) {
@@ -159,67 +215,105 @@ export class IssuesService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public setupIssuesToShow(model: string, filterText: string) {
+	public setupIssuesToShow(model: string, chips: IChip[] ) {
 		this.state.issuesToShow = [];
 
 		if (this.state.allIssues.length > 0) {
-
-			// Sort
-			this.state.issuesToShow = this.state.allIssues.slice();
-			if (this.state.issueDisplay.sortOldestFirst) {
-				this.state.issuesToShow.sort((a, b) => {
-					return a.created - b.created;
-				});
-			} else {
-				this.state.issuesToShow.sort((a, b) => {
-					return b.created - a.created;
-				});
-			}
-
-			// TODO: There is certainly a better way of doing this, but I don't want to
-			// dig into it right before release
-
-			// Filter text
-			const notEmpty = angular.isDefined(filterText) && filterText !== "";
-			if (notEmpty) {
-				this.state.issuesToShow = this.filteredIssues(filterText);
-			}
-
-			// Closed
-			for (let i = this.state.issuesToShow.length - 1; i >= 0; i--) {
-				if (!this.state.issueDisplay.showClosed &&
-					"closed" === this.state.issuesToShow[i].status) {
-					this.state.issuesToShow.splice(i, 1);
-				}
-			}
-
-			// Sub models
-			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
+			const filteredIssues = this.filterIssues(model, this.state.allIssues, chips) ;
+			const sortOldest = this.state.issueDisplay.sortOldestFirst;
+			filteredIssues.sort((a, b) => {
+				return sortOldest ? a.created - b.created : b.created - a.created;
 			});
-
-			// Sub models
-			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				return this.state.issueDisplay.showSubModelIssues ? true : (issue.model === model);
-			});
-
-			// Roles Filter
-			this.state.issuesToShow = this.state.issuesToShow.filter((issue) => {
-				return this.state.issueDisplay.excludeRoles.indexOf(issue.creator_role) === -1;
-			});
-
+			this.state.issuesToShow = filteredIssues;
 		}
-
 	}
 
-	public filteredIssues(filterText: string) {
-		return (this.$filter("filter")(
-			this.state.issuesToShow,
-			(issue) => {
-				return this.handleIssueFilter(issue, filterText);
+	public filterIssues(model: string, issues: any[], chips: IChip[]): any[] {
+		let filters = [];
+		const criteria = this.getCriteria(chips);
+
+		if (!criteria.status) { // If there is no explicit filter for status dont show closed issues
+									// thats the general criteria for showing issues.
+			filters.push((issue) => issue.status !== "closed");
+		}
+
+		filters = filters.concat(this.getOrClause(criteria[""], this.handleIssueFilter));
+
+		filters = filters.concat(this.createFilterByField(criteria, "priority"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "creator_role"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "status"));
+
+		filters = filters.concat(this.getOrClause(criteria.assigned_roles, this.filterAssignedRoles));
+
+		filters = filters.concat(this.createFilterByField(criteria, "topic_type"));
+
+		if (!this.state.issueDisplay.showSubModelIssues) {
+			filters.push((issue) => issue.model === model);
+		}
+
+		if (criteria.date_from) {
+			filters.push((issue) => issue.created >= criteria.date_from[0].getTime());
+		}
+
+		if (criteria.date_to) {
+			//  86399000 is 23:59:59 in milliseconds
+			filters.push((issue) => issue.created <= criteria.date_to[0].getTime() + 86399000 );
+		}
+
+		// It filters the issue list by applying every filter to it.
+		const filteredIssues = issues.filter( (issue) => filters.every( (f) => f(issue)));
+		return filteredIssues;
+	}
+
+	public createFilterByField(criteria: any, field: string) {
+		return this.getOrClause(criteria[field], this.filterByField.bind(this, field));
+	}
+
+	public getCriteria(chips: IChip[]): any {
+		const initialValue = {};
+
+		return  chips.reduce((object, currVal) => {
+			if (!object[currVal.type]) {
+				object[currVal.type] = [];
 			}
 
-		));
+			object[currVal.type].push(currVal.value);
+			return object;
+		}, initialValue);
+	}
+
+	/** filters */
+
+	public getAndClause(tags: any[], comparator) {
+		if ((tags || []).length === 0) {
+			return[];
+		}
+		return [(value, index, array) => tags.every( comparator.bind(this, value) )];
+	}
+
+	public getOrClause(tags: any[], comparator) {
+		if ((tags || []).length === 0) {
+			return[];
+		}
+
+		return [(value, index, array) => tags.some( comparator.bind(this, value) )];
+	}
+
+	public filterByField(field, issue, tag): boolean {
+		if (Array.isArray(issue[field])) {
+			return issue[field].indexOf(tag) >= 0;
+		}
+
+		return issue[field] === tag;
+	}
+
+	public filterAssignedRoles(issue, tag): boolean {
+		if (!tag) {
+			return issue.assigned_roles.length === 0;
+		}
+		return this.filterByField("assigned_roles", issue, tag);
 	}
 
 	public handleIssueFilter(issue: any, filterText: string) {
@@ -230,9 +324,7 @@ export class IssuesService {
 
 		// Search the title, timestamp, type and owner
 		if ( this.stringSearch(issue.title, filterText) ||
-				this.stringSearch(issue.timeStamp, filterText) ||
-			this.stringSearch(issue.owner, filterText) ||
-			this.stringSearch(issue.topic_type, filterText)) {
+			this.stringSearch(issue.desc, filterText)) {
 			return true;
 		}
 
@@ -259,6 +351,8 @@ export class IssuesService {
 		return false;
 
 	}
+
+	/****/
 
 	public resetSelectedIssue() {
 		this.state.selectedIssue = undefined;
@@ -294,7 +388,7 @@ export class IssuesService {
 					pinColor = Pin.pinColours.yellow;
 				}
 
-				this.ViewerService.addPin({
+				this.viewerService.addPin({
 					id: issue._id,
 					account: issue.account,
 					model: issue.model,
@@ -306,7 +400,7 @@ export class IssuesService {
 
 			} else {
 				// Remove pin
-				this.ViewerService.removePin({ id: issue._id });
+				this.viewerService.removePin({ id: issue._id });
 			}
 		});
 
@@ -385,7 +479,7 @@ export class IssuesService {
 
 			if (!issue.descriptionThumbnail) {
 				if (issue.viewpoint && issue.viewpoint.screenshotSmall && issue.viewpoint.screenshotSmall !== "undefined") {
-					issue.descriptionThumbnail = this.APIService.getAPIUrl(issue.viewpoint.screenshotSmall);
+					issue.descriptionThumbnail = this.apiService.getAPIUrl(issue.viewpoint.screenshotSmall);
 				}
 			}
 		}
@@ -398,8 +492,8 @@ export class IssuesService {
 	}
 
 	public isViewer(permissions) {
-		return permissions && !this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
+		return permissions && !this.authService.hasPermission(
+			this.clientConfigService.permissions.PERM_COMMENT_ISSUE,
 			permissions
 		);
 	}
@@ -413,15 +507,15 @@ export class IssuesService {
 	}
 
 	public isAdmin(permissions) {
-		return permissions && this.AuthService.hasPermission(
-			this.ClientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
+		return permissions && this.authService.hasPermission(
+			this.clientConfigService.permissions.PERM_MANAGE_MODEL_PERMISSION,
 			permissions
 		);
 	}
 
 	public isJobOwner(issueData, userJob, permissions) {
 		return issueData && userJob &&
-			(issueData.owner === this.AuthService.getUsername() ||
+			(issueData.owner === this.authService.getUsername() ||
 			this.userJobMatchesCreator(userJob, issueData)) &&
 			!this.isViewer(permissions);
 	}
@@ -483,8 +577,8 @@ export class IssuesService {
 
 		const ableToComment = this.isAdmin(permissions) ||
 			this.isJobOwner(issueData, userJob, permissions) ||
-			this.AuthService.hasPermission(
-				this.ClientConfigService.permissions.PERM_COMMENT_ISSUE,
+			this.authService.hasPermission(
+				this.clientConfigService.permissions.PERM_COMMENT_ISSUE,
 				permissions
 			);
 
@@ -495,7 +589,7 @@ export class IssuesService {
 	public deselectPin(issue) {
 		// Issue with position means pin
 		if (issue.position.length > 0 && issue._id) {
-			this.ViewerService.changePinColours({
+			this.viewerService.changePinColours({
 				id: issue._id,
 				colours: Pin.pinColours.blue
 			});
@@ -503,21 +597,18 @@ export class IssuesService {
 	}
 
 	public showIssue(issue, revision) {
-
-		this.TreeService.showProgress = true;
-
 		this.showIssuePins();
 
 		// Remove highlight from any multi objects
-		this.ViewerService.highlightObjects([]);
-		this.TreeService.clearCurrentlySelected();
+		this.viewerService.highlightObjects([]);
+		this.treeService.clearCurrentlySelected();
 
 		// Reset object visibility
 		if (issue.viewpoint && issue.viewpoint.hasOwnProperty("hideIfc")) {
-			this.TreeService.setHideIfc(issue.viewpoint.hideIfc);
+			this.treeService.setHideIfc(issue.viewpoint.hideIfc);
 		}
 
-		this.TreeService.showAllTreeNodes(false);
+		this.treeService.showAllTreeNodes(false);
 
 		// Show multi objects
 		if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
@@ -527,12 +618,10 @@ export class IssuesService {
 				issue.hasOwnProperty("group_id")) {
 
 			this.showMultiIds(issue, revision).then(() => {
-				this.TreeService.showProgress = false;
 				this.handleShowIssue(issue);
 			});
 
 		} else {
-			this.TreeService.showProgress = false;
 			this.handleShowIssue(issue);
 		}
 
@@ -549,7 +638,7 @@ export class IssuesService {
 			model: issue.model
 		};
 
-		this.ViewerService.setCamera(issueData);
+		this.viewerService.setCamera(issueData);
 
 	}
 
@@ -568,15 +657,15 @@ export class IssuesService {
 				model: issue.model
 			};
 
-			this.ClipService.updateClippingPlane(issueData);
+			this.clipService.updateClippingPlane(issueData);
 
 		} else {
 			// This issue does not have a viewpoint, go to default viewpoint
-			this.ViewerService.goToExtent();
+			this.viewerService.goToExtent();
 		}
 
-		this.TreeService.onReady().then(() => {
-			this.TreeService.updateModelVisibility(this.TreeService.allNodes[0]);
+		this.treeService.onReady().then(() => {
+			this.treeService.updateModelVisibility(this.treeService.allNodes[0]);
 		});
 
 	}
@@ -605,7 +694,7 @@ export class IssuesService {
 					hiddenPromise = this.handleHidden(this.groupsCache[hiddenGroupUrl]);
 				} else {
 
-					hiddenPromise = this.APIService.get(hiddenGroupUrl)
+					hiddenPromise = this.apiService.get(hiddenGroupUrl)
 						.then((response) => {
 							this.groupsCache[hiddenGroupUrl] = response.data.objects;
 							return this.handleHidden(response.data.objects);
@@ -636,7 +725,7 @@ export class IssuesService {
 					shownPromise = this.handleShown(this.groupsCache[shownGroupUrl]);
 				} else {
 
-					shownPromise = this.APIService.get(shownGroupUrl)
+					shownPromise = this.apiService.get(shownGroupUrl)
 						.then( (response) => {
 							this.groupsCache[shownGroupUrl] = response.data.objects;
 							return this.handleShown(response.data.objects);
@@ -665,7 +754,7 @@ export class IssuesService {
 					highlightPromise = this.handleHighlights(this.groupsCache[highlightedGroupUrl]);
 				} else {
 
-					highlightPromise = this.APIService.get(highlightedGroupUrl)
+					highlightPromise = this.apiService.get(highlightedGroupUrl)
 						.then((response) => {
 							this.groupsCache[highlightedGroupUrl] = response.data.objects;
 							return this.handleHighlights(response.data.objects);
@@ -696,7 +785,7 @@ export class IssuesService {
 				handleTreePromise = this.handleTree(this.groupsCache[groupUrl]);
 			} else {
 
-				handleTreePromise = this.APIService.get(groupUrl)
+				handleTreePromise = this.apiService.get(groupUrl)
 					.then((response) => {
 						if (response.data.hiddenObjects && response.data.hiddenObjects && !issue.viewpoint.hasOwnProperty("group_id")) {
 							response.data.hiddenObjects = null;
@@ -719,9 +808,9 @@ export class IssuesService {
 	}
 
 	public handleHighlights(objects) {
-		this.TreeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
+		this.treeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
 		this.$timeout(() => {
-		this.TreeService.selectNodesBySharedIds(objects)
+		this.treeService.selectNodesBySharedIds(objects)
 			.then(() => {
 				angular.element((window as any)).triggerHandler("resize");
 			});
@@ -729,11 +818,11 @@ export class IssuesService {
 	}
 
 	public handleHidden(objects) {
-		this.TreeService.hideNodesBySharedIds(objects);
+		this.treeService.hideNodesBySharedIds(objects);
 	}
 
 	public handleShown(objects) {
-		this.TreeService.isolateNodesBySharedIds(objects);
+		this.treeService.isolateNodesBySharedIds(objects);
 	}
 
 	public handleTree(response) {
@@ -803,14 +892,14 @@ export class IssuesService {
 	}
 
 	public getThumbnailPath(thumbnailUrl) {
-		return this.APIService.getAPIUrl(thumbnailUrl);
+		return this.apiService.getAPIUrl(thumbnailUrl);
 	}
 
 	public getIssue(account, model, issueId) {
 
 		const issueUrl = account + "/" + model + "/issues/" + issueId + ".json";
 
-		return this.APIService.get(issueUrl)
+		return this.apiService.get(issueUrl)
 			.then((res) => {
 				res.data = this.cleanIssue(res.data);
 				return res.data;
@@ -827,7 +916,7 @@ export class IssuesService {
 			endpoint = account + "/" + model + "/issues.json";
 		}
 
-		return this.APIService.get(endpoint)
+		return this.apiService.get(endpoint)
 			.then((response) => {
 				const issuesData = response.data;
 				for (let i = 0; i < response.data.length; i ++) {
@@ -854,7 +943,7 @@ export class IssuesService {
 			issue.norm = issue.pickedNorm;
 		}
 
-		return this.APIService.post(saveUrl, issue, config);
+		return this.apiService.post(saveUrl, issue, config);
 
 	}
 
@@ -884,10 +973,7 @@ export class IssuesService {
 			endpoint += "/issues/" + issue._id + ".json";
 		}
 
-		const putConfig = {withCredentials: true};
-
-		return this.APIService.put(endpoint, putData, putConfig);
-
+		return this.apiService.put(endpoint, putData);
 	}
 
 	public toggleCloseIssue(issue) {
@@ -1050,7 +1136,7 @@ export class IssuesService {
 		const formData = new FormData();
 		formData.append("file", file);
 
-		return this.APIService.post(bcfUrl, formData, {"Content-Type": undefined})
+		return this.apiService.post(bcfUrl, formData, {"Content-Type": undefined})
 			.then((res) => {
 				if (res.status !== 200) {
 					throw res.data;
@@ -1183,7 +1269,7 @@ export class IssuesService {
 				}
 				// screen shot path
 				if (issue.comments[j].viewpoint && issue.comments[j].viewpoint.screenshot) {
-					issue.comments[j].viewpoint.screenshotPath = this.APIService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
+					issue.comments[j].viewpoint.screenshotPath = this.apiService.getAPIUrl(issue.comments[j].viewpoint.screenshot);
 				}
 			}
 		}

@@ -34,16 +34,16 @@ interface IPanelCard {
 	minHeight?: number;
 }
 
-interface IMenuItem {
+export interface IMenuItem {
 	hidden: boolean;
 	label: string;
 	value?: string;
-	role?: string;
 	selected?: boolean;
 	stopClose?: boolean;
 	firstSelectedIcon?: string;
 	secondSelectedIcon?: string;
 	toggle?: boolean;
+	toggleFilterChips?: boolean;
 	firstSelected?: boolean;
 	secondSelected?: boolean;
 	keepCheckSpace?: boolean;
@@ -52,6 +52,10 @@ interface IMenuItem {
 	divider?: boolean;
 	upperDivider?: boolean;
 	disabled?: boolean;
+	menu?: IMenuItem[];
+	subItem?: IMenuItem;
+	date?: boolean;
+	dateValue?: Date;
 }
 
 export class PanelService {
@@ -124,13 +128,116 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "showClosed",
-					label: "Show closed issues",
-					toggle: true,
+					value: "status",
+					label: "Status",
+					toggle: false,
 					selected: false,
 					firstSelected: false,
 					secondSelected: false,
-					keepCheckSpace: true
+					keepCheckSpace: false,
+					toggleFilterChips: true,
+					upperDivider: true,
+					menu: [{
+							hidden: false,
+							value: "open",
+							label: "Open",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "in progress",
+							label: "In progress",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "for approval",
+							label: "For approval",
+							toggle: true
+						}, {
+							hidden: false,
+							value: "closed",
+							label: "Closed",
+							toggle: true,
+							stopClose: true
+						}]
+				},
+				{
+					hidden: false,
+					value: "priority",
+					label: "Priority",
+					toggle: false,
+					selected: false,
+					firstSelected: false,
+					secondSelected: false,
+					keepCheckSpace: false,
+					toggleFilterChips: true,
+					menu: [{
+							hidden: false,
+							value: "none",
+							label: "None",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "low",
+							label: "Low",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "medium",
+							label: "Medium",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "high",
+							label: "High",
+							toggle: true,
+							stopClose: true
+						}]
+				},
+				{
+					value: "topic_type", // the whole menu will be replaced once the topic types are loaded
+					hidden: false,
+					label: "Type",
+					toggle: false
+				},
+				{
+					value: "creator_role", // the whole menu will be replaced once the creators roles are loaded
+					hidden: false,
+					label: "Created by",
+					toggle: false
+				},
+				{
+					value: "assigned_roles", // the whole menu will be replaced once the assigned roles are loaded
+					hidden: false,
+					label: "Assigned to",
+					toggle: false
+				},
+				{
+					value: "date",
+					hidden: false,
+					label: "Date",
+					toggle: false,
+					menu: [{
+							hidden: false,
+							value: "from",
+							label: "From",
+							stopClose: true,
+							toggleFilterChips: true,
+							date: true
+						},
+						{
+							hidden: false,
+							value: "to",
+							label: "To     ",
+							stopClose: true,
+							toggleFilterChips: true,
+							date: true
+						}
+					]
 				},
 				{
 					hidden: false,
@@ -141,18 +248,16 @@ export class PanelService {
 					firstSelected: false,
 					secondSelected: false,
 					keepCheckSpace: true
-				}, {
-					hidden: false,
-					upperDivider: true,
-					disabled: true,
-					label: "Created by: "
 				}
 			],
 			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
-				{type: "filter", visible: true}
+				{
+					type: "chips-filter",
+					visible: true
+				}
 			],
 			add: true
 		});
@@ -300,43 +405,106 @@ export class PanelService {
 
 	}
 
-	public setPanelMenu(side: string, panelType: string, newMenu: any[]) {
+	/**
+	 * Adds a menu item for chips filtering.
+	 * This method is used from within the contained panelCard
+	 * generally for creating menues from data from an API call.
+	 *
+	 * @param panelType The type of the panel e.g. "issues"
+	 * @param menuItem The new menu containing all the menu items for filtering
+	 * @param subItems The menu items that will be added to the new menu
+	 */
+	public setChipFilterMenuItem( panelType: string, menuItem: any, subItems: any[] ) {
+		let panel: IPanelCard = this.panelCards.left.find((pc) => pc.type === panelType );
 
-		// Check if the card exists
-		const item = this.panelCards[side].find((content) => {
-			return content.type === panelType;
-		});
+		const newMenu: IMenuItem =  {
+			hidden: false,
+			value: menuItem.value,
+			label: menuItem.label,
+			toggle: false,
+			toggleFilterChips: true
+		};
 
-		// Append all the menu items to it
-		if (item && item.menu) {
-			newMenu.forEach((newItem) => {
-				const exists = item.menu.find( (oldItem) => oldItem.role === newItem.role);
-				if (!exists) {
-					item.menu.push(newItem);
-				}
-			});
+		newMenu.menu = subItems.map((si) => ({
+			value: si.value,
+			label: si.label,
+			hidden: false,
+			toggle: true,
+			stopClose: true
+		}));
+
+		if (!!panel) {
+			this.setPanelMenu(panel, newMenu);
 		}
 
+		panel = this.panelCards.right.find((pc) => pc.type === panelType );
+
+		if (!!panel) {
+			this.setPanelMenu(panel, newMenu);
+		}
 	}
 
-	public setIssuesMenu(jobsData: any) {
-		const menu: IMenuItem[] = [];
-		jobsData.forEach((role) => {
-			menu.push({
-				value: "filterRole",
-				hidden: false,
-				role: role._id,
-				label: role._id,
-				keepCheckSpace: true,
-				toggle: true,
-				selected: true,
-				stopClose: true,
-				firstSelected: false,
-				secondSelected: false
-			});
-		});
+	public setPanelMenu(panel: IPanelCard,  menu: any) {
+		const oldMenuIndex = panel.menu.findIndex((mi) => mi.value === menu.value);
 
-		this.setPanelMenu("left", "issues", menu);
+		if (oldMenuIndex > 0) {
+			panel.menu[oldMenuIndex] = menu;
+		} else {
+			panel.menu.push(menu);
+		}
+	}
+
+	/**
+	 * Toggles the selected property inside a submenuitem.
+	 * This method is being used by the chips filter subsystem for reflecting
+	 * which chips are actually being selected in the chips.
+	 * @param panelCardType the panel card that contains the menu. ie: "issues"
+	 * @param menuType the menu type. ie: "priority" from  the issues panel card
+	 * @param menuSubType the submenu type. ie: "none" in the priority menu from the issues panel card
+	 */
+	public setSelectedFromMenu(panelCardType: string, menuType: string, menuSubType: string, selected: boolean) {
+		this.getPanelsByType(panelCardType).forEach(
+			(panelCard) => this.setSelectedMenuInPanelCard(panelCard, menuType, menuSubType, selected));
+	}
+
+	public setSelectedMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, selected: boolean) {
+		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+		if (!item) { return; }
+		item.selected = selected;
+	}
+
+	public setDateValueFromMenu(panelCardType: string, menuType: string, menuSubType: string, value: Date) {
+		this.getPanelsByType(panelCardType).forEach(
+			(panelCard) => this.setDateValueFromMenuInPanelCard(panelCard, menuType, menuSubType, value));
+	}
+
+	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, value: Date ) {
+		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+		if (!item) { return; }
+		item.dateValue = value;
+	}
+
+	public getSubmenu(panelCard: IPanelCard,  menuType: string, menuSubType: string): IMenuItem {
+		const menu = panelCard.menu.find((m) => m.value === menuType);
+		if (!menu) { return null; }
+		return menu.menu.find((m) => m.value === menuSubType );
+	}
+
+	public getPanelsByType(panelCardType: string): IPanelCard[] {
+		const panels: IPanelCard[] = [];
+		let panelCard = this.panelCards.left.find( (pc) => pc.type === panelCardType);
+
+		if (panelCard) {
+			panels.push(panelCard);
+		}
+
+		panelCard = this.panelCards.right.find( (pc) => pc.type === panelCardType);
+
+		if (panelCard) {
+			panels.push(panelCard);
+		}
+
+		return panels;
 	}
 
 	public hideSubModels(issuesCardIndex: number, hide: boolean) {

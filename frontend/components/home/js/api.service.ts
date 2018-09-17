@@ -69,8 +69,7 @@ export class APIService {
 	 * @param url
 	 * @returns {*|promise}
 	 */
-	public get(url: string) {
-
+	public get(url: string, options?: any) {
 		this.checkUrl(url);
 		url = encodeURI(url);
 		const urlUse = this.ClientConfigService.apiUrl(
@@ -78,7 +77,8 @@ export class APIService {
 			url
 		);
 		const config = {
-			withCredentials: true
+			withCredentials: true,
+			...options
 		};
 
 		const request = this.$http.get(urlUse, config);

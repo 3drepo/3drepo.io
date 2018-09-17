@@ -1,0 +1,6 @@
+md-button.md-icon-button(
+	aria-label="Filter"
+	ng-click="vm.toggleFilter($event)"
+	)
+	md-icon(md-font-icon="fa-times-circle" class="fa" ng-if="vm.chipsFilterVisible")
+	md-icon.angular-material-icons(ng-if="!vm.chipsFilterVisible") search
