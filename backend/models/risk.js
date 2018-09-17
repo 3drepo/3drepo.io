@@ -31,7 +31,7 @@ const GenericObject = require("./base/repo").GenericObject;
 //const middlewares = require("../middlewares/middlewares");
 const _ = require("lodash");
 
-//RMconst ChatEvent = require("./chatEvent");
+const ChatEvent = require("./chatEvent");
 
 //RMconst moment = require("moment");
 //RMconst archiver = require("archiver");
@@ -252,6 +252,27 @@ risk.updateAttrs = function(dbCol, uid, data) {
 		} else {
 			return Promise.reject({ resCode: responseCodes.RISK_NOT_FOUND });
 		}
+	});
+};
+
+risk.deleteRisks = function(dbCol, sessionId, ids) {
+	const riskIdStrings = [].concat(ids);
+
+	for (let i = 0; i < ids.length; i++) {
+		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
+			ids[i] = utils.stringToUUID(ids[i]);
+		}
+	}
+
+	return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+		return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
+			if (!deleteResponse.result.ok) {
+				return Promise.reject(responseCodes.RISK_NOT_FOUND);
+			}
+
+			// Success!
+			ChatEvent.risksDeleted(sessionId, dbCol.account,  dbCol.model, riskIdStrings);
+		});
 	});
 };
 

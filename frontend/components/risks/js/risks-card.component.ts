@@ -382,7 +382,14 @@ class RisksCardController implements ng.IController {
 	 * Deletes currently selected risk.
 	 */
 	public deleteSelectedRisk() {
-		console.debug("delSelRisks");
+		this.risksService.deleteSelectedRisk(this.account, this.model)
+			.catch((err) => {
+				const content = "Risk deletion failed. " +
+					"If this continues, please contact support@3drepo.org.";
+				const escapable = true;
+				this.dialogService.text("Error deleting risks", content, escapable);
+				console.error(err);
+			});
 	}
 }
 

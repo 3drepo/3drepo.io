@@ -45,6 +45,8 @@ router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.ca
 router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
 router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
 
+router.delete("/risks/", middlewares.connectQueue, middlewares.issue.canCreate, deleteRisks);
+
 function clean(dbCol, risk) {
 	const keys = ["_id", "rev_id", "parent"];
 	const commentKeys = ["rev_id", "guid"];
@@ -139,6 +141,24 @@ function updateRisk(req, res, next) {
 
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
+}
+
+function deleteRisks(req, res, next) {
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const place = utils.APIInfo(req);
+	const dbCol = {account: req.params.account, model: req.params.model};
+
+	if (req.query.ids) {
+		const ids = req.query.ids.split(",");
+
+		Risk.deleteRisks(dbCol, sessionId, ids).then(() => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
+		}).catch((err) => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
+		});
+	} else {
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
 }
 
 function listRisks(req, res, next) {

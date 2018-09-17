@@ -84,6 +84,10 @@ function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
+function risksDeleted(emitter, account, model, ids) {
+	return insertEventQueue("risk" + eventTypes.DELETED, emitter, account, model, null, ids);
+}
+
 module.exports = {
 	newIssues,
 	newComment,
@@ -92,6 +96,7 @@ module.exports = {
 	commentDeleted,
 	groupChanged,
 	groupsDeleted,
+	risksDeleted,
 	modelStatusChanged,
 	issueChanged,
 	newModel,

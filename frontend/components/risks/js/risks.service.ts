@@ -375,6 +375,36 @@ export class RisksService {
 		});
 	}
 
+	public deleteSelectedRisk(teamspace: string, model: string) {
+		return this.deleteRisks(teamspace, model, [this.state.selectedRisk]);
+	}
+
+	public deleteRisks(teamspace: string, model: string, risks: any) {
+		if (risks.length > 0) {
+			const url = `${teamspace}/${model}/risks/?ids=${risks.map((risk) => risk._id).join(",")}`;
+			return this.apiService.delete(url, undefined)
+				.then((response) => {
+					risks.forEach(this.deleteRiskFromState.bind(this));
+					return response;
+				});
+		} else {
+			return Promise.resolve();
+		}
+	}
+
+	/**
+	 * Remove a risk from the data model
+	 * @param risk the risk to delete
+	 */
+	public deleteRiskFromState(risk: any) {
+		const riskIndex = this.state.allRisks.indexOf(risk);
+		const risksCount = this.state.allRisks.length;
+
+		this.state.allRisks = this.state.allRisks.filter((r) => {
+			return risk._id !== r._id;
+		});
+	}
+
 	public populateRisk(risk) {
 
 		if (risk) {
