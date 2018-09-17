@@ -80,6 +80,17 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		const { selectedValue } = this.state;
 		const hasNoOptions = !items.length;
 
+		const options = [];
+
+		if (placeholder) {
+			const placeholderValue = {
+				name: placeholder,
+				value: ''
+			};
+			options.push(placeholderValue);
+		}
+		options.push(...items);
+
 		return (
 			<StyledSelect
 				readOnly={readOnly}
@@ -88,8 +99,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				value={selectedValue || value}
 				onChange={this.handleChange}
 			>
-				{ placeholder ? <EmptyValue value="">{placeholder}</EmptyValue> : null }
-				{this.renderOptions(items, itemTemplate)}
+				{this.renderOptions(options, itemTemplate)}
 			</StyledSelect>
 		);
 	}

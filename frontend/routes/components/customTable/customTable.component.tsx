@@ -30,7 +30,7 @@ import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
-import { Container, Head, Body, Row, SortLabel, Cell } from './customTable.styles';
+import { Container, Head, Row, SortLabel, Cell } from './customTable.styles';
 
 const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
 	return cell.name ? (

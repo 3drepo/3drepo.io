@@ -26,6 +26,7 @@ import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
+import { JobItem } from '../components/jobItem/jobItem.component';
 
 import { Container, Content, Footer, FloatingButton } from './users.styles';
 import { cond } from 'lodash';
@@ -136,6 +137,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 				{
 					value: user.job,
 					items: jobs,
+					itemTemplate: JobItem,
 					placeholder: 'Unassigned',
 					onChange: this.handleChange(user, 'job')
 				},

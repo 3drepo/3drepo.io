@@ -17,9 +17,8 @@
 
 import * as React from 'react';
 import Icon from '@material-ui/core/Icon';
-import Popover from '@material-ui/core/Popover';
 
-import { Container, FloatingButton } from './floatingActionPanel.styles';
+import { Container, FloatingButton, Panel } from './floatingActionPanel.styles';
 
 interface IProps {
 	render: (closePanel: any) => void;
@@ -76,7 +75,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 				>
 					<Icon>{icon || 'add'}</Icon>
 				</FloatingButton>
-				<Popover
+				<Panel
 					open={shouldOpen}
 					anchorEl={anchorEl}
 					onClose={this.handleClose}
@@ -94,7 +93,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 							closePanel: this.handleClose
 						})
 					}
-				</Popover>
+				</Panel>
 			</Container>
 		);
 	}

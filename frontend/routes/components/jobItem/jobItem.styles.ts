@@ -31,6 +31,6 @@ export const Color = styled(Grid)`
   width: 6px;
   height: 6px;
   border-radius: 100%;
-  background-color: ${(props) => props.color};
+  background-color: ${(props) => props.color || COLOR.BLACK_6};
   margin-right: 12px !important;
 `;
