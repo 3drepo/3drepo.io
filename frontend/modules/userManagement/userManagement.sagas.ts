@@ -121,6 +121,16 @@ export function* updatePermissions({ permissions }) {
 	}
 }
 
+export function* getUsersSuggestions({ searchText }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const {data: suggestions} = yield API.findUsers(teamspace, searchText);
+		yield put(UserManagementActions.getUsersSuggestionsSuccess(suggestions));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('search', 'users', error.response));
+	}
+}
+
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
@@ -128,4 +138,5 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateJob);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
+	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
 }

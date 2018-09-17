@@ -16,26 +16,36 @@
  */
 
 import * as React from 'react';
+import * as Autosuggest from 'react-autosuggest';
 
 import { ButtonProps } from '@material-ui/core/Button';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
+import TextField from '@material-ui/core/TextField';
 
 import { JobItem } from '../jobItem/jobItem.component';
+import { UserItem } from '../userItem/userItem.component';
+
 import {
-	Container, Title, SaveButton, StyledTextField, StyledSelect
+	Container, Title, SaveButton, StyledTextField, StyledSelect, SuggestionsList, EmptySelectValue
 } from './newUserForm.styles';
 
 interface IProps {
+	title: string;
 	jobs: any[];
+	users: any[];
 	onSave: (user) => void;
 	onCancel: () => void;
+	clearSuggestions: () => void;
+	getUsersSuggestions: (searchText) => void;
 }
 
 interface IState {
@@ -50,6 +60,8 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 		job: '',
 		isAdmin: false
 	};
+
+	private popperNode = null;
 
 	public handleChange = (field) => (event) => {
 		this.setState({[field]: event.target.value || ''});
@@ -73,30 +85,99 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public render() {
-		const { onSave, onCancel, jobs } = this.props;
+	public renderInputComponent = (inputProps) => {
+		const {inputRef , ref, ...other} = inputProps;
 
+		return (
+			<StyledTextField
+				fullWidth
+				InputProps={{
+					inputRef: (node) => {
+						ref(node);
+						inputRef(node);
+					}
+				}}
+				{...other}
+			/>
+		);
+	}
+
+	public getSuggestionValue = (suggestion) => {
+		return suggestion.user;
+	}
+
+	public onSuggestionSelected = (event, {suggestion}) => {
+		this.setState({name: this.getSuggestionValue(suggestion)});
+	}
+
+	public onSuggestionsFetchRequested = ({value}) => {
+		this.props.getUsersSuggestions(value);
+	}
+
+	public renderUserSuggestion = (suggestion, {query, isHighlighted}) => {
+		return (
+			<MenuItem selected={isHighlighted} component="div">
+				<UserItem {...suggestion} searchText={query}/>
+			</MenuItem>
+		);
+	}
+
+	public render() {
+		const { onSave, onCancel, clearSuggestions, jobs, users, title } = this.props;
 		return (
 			<Container>
 
 				<Grid
 					container
 					direction="column">
-					<Title>Add new member</Title>
-					<StyledTextField
-						placeholder="Username or email address"
-						onChange={this.handleChange('name')}
-					/>
+					<Title>{title}</Title>
+
+					<FormControl required>
+						<Autosuggest
+							suggestions={users}
+							onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+							onSuggestionsClearRequested={clearSuggestions}
+							onSuggestionSelected={this.onSuggestionSelected}
+							getSuggestionValue={this.getSuggestionValue}
+							renderInputComponent={this.renderInputComponent}
+							renderSuggestion={this.renderUserSuggestion}
+							inputProps={{
+								onChange: this.handleChange('name'),
+								label: 'Username or email address',
+								value: this.state.name,
+								inputRef: (node) => {
+									this.popperNode = node;
+								}
+							}}
+							renderSuggestionsContainer={(options) => (
+								<SuggestionsList
+									anchorEl={this.popperNode}
+									open={Boolean(options.children)}
+									placement="bottom"
+								>
+									<Paper
+										square
+										{...options.containerProps}
+										style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
+									>
+										{options.children}
+									</Paper>
+								</SuggestionsList>
+							)}
+						/>
+					</FormControl>
 
 					<FormControl>
-						<InputLabel htmlFor="job">Job</InputLabel>
+						<InputLabel shrink htmlFor="job">Job</InputLabel>
 						<StyledSelect
 							value={this.state.job}
-							onChange={this.handleChange('job')}
+							displayEmpty
 							inputProps={{
-								id: 'job'
+								id: "job"
 							}}
+							onChange={this.handleChange('job')}
 						>
+							<EmptySelectValue value="">Unassigned</EmptySelectValue>
 							{this.renderJobs(jobs)}
 						</StyledSelect>
 					</FormControl>

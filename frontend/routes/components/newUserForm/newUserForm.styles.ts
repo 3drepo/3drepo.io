@@ -19,41 +19,79 @@ import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
+import Popper from '@material-ui/core/Popper';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import { COLOR } from '../../../styles';
 
 export const Title = styled.div`
-  color: ${COLOR.BLACK_20};
+	color: ${COLOR.BLACK_20};
 `;
 
-export const StyledTextField = styled(TextField)``;
+export const StyledTextField = styled(TextField)`
+	font-size: 14px;
+	margin-bottom: 12px;
+`;
+
 export const StyledSelect = styled(Select)``;
 
+export const EmptySelectValue = styled(MenuItem)`
+	&& {
+		font-size: 14px;
+		color: ${COLOR.BLACK_60};
+	}
+`;
+
 export const SaveButton = styled(Button)`
-  && {
-    width: 100%;
-    margin-top: 8px;
-  }
+	&& {
+		width: 100%;
+		margin-top: 8px;
+	}
 `;
 
 export const Container = styled.div`
-  padding: 16px;
-  width: 290px;
-  font-size: 14px;
-  box-sizing: border-box;
+	padding: 16px;
+	width: 290px;
+	font-size: 14px;
+	box-sizing: border-box;
 
-  ${StyledTextField},
-  ${StyledSelect},
-  ${Title} {
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
+	${StyledTextField},
+	${StyledSelect},
+	${Title} {
+		font-size: 14px;
+		margin-bottom: 12px;
+	}
 
-  ${StyledTextField} , ${StyledTextField} *,
-  ${StyledSelect}, ${StyledSelect} input,
-  ${StyledSelect} ~ label,
-  [class*='MuiTypography'] {
-    font-size: 14px;
-    color: ${COLOR.BLACK_60};
-  }
+	${StyledTextField}, ${StyledTextField} *,
+	${StyledSelect}, ${StyledSelect} input,
+	${StyledSelect} ~ label,
+	[class*='MuiTypography'] {
+		font-size: 14px;
+		color: ${COLOR.BLACK_60};
+	}
+`;
+
+export const SuggestionsList = styled(Popper)`
+	z-index: 12323;
+	margin-top: -15px;
+	position: absolute;
+	max-height: 250px;
+	overflow: auto;
+
+	.react-autosuggest__suggestions-list {
+		padding-left: 0;
+	}
+
+	.react-autosuggest__suggestion {
+		list-style: none;
+		height: 62px;
+		border-bottom: 1px solid ${COLOR.BLACK_6};
+		display: flex;
+		flex: 1;
+		align-items: center;
+	}
+
+	.react-autosuggest__suggestion > div {
+		flex: 1;
+	}
 `;

@@ -22,7 +22,6 @@ import { Name, Color } from './jobItem.styles';
 
 interface IProps {
 	name: string;
-	value: string;
 	color?: string;
 }
 

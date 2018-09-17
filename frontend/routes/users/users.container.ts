@@ -20,15 +20,19 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Users } from './users.component';
-import { UserManagementActions } from '../../modules/userManagement';
+import { UserManagementActions, selectUsersSuggestions } from '../../modules/userManagement';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	usersSuggestions: selectUsersSuggestions
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	addUser: UserManagementActions.addUser,
 	removeUser: UserManagementActions.removeUser,
 	updateJob: UserManagementActions.updateJob,
-	updatePermissions: UserManagementActions.updatePermissions
+	updatePermissions: UserManagementActions.updatePermissions,
+	onUsersSearch: UserManagementActions.getUsersSuggestions,
+	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Users);

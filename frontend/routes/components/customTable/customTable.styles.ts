@@ -22,7 +22,7 @@ import { memoize } from 'lodash';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 import * as JobItem from '../jobItem/jobItem.styles';
-import * as CellUser from './components/cellUser/cellUser.styles';
+import * as UserItem from '../UserItem/UserItem.styles';
 import * as CellSelect from './components/cellSelect/cellSelect.styles';
 
 const flexMemoized = memoize(({flex}) => {
@@ -84,7 +84,7 @@ export const Container = styled.div`
 		height: 100%;
 	}
 
-	${CellUser.Name},
+	${UserItem.Name},
 	${CellSelect.StyledSelect},
 	${SortLabel} {
 		color: ${COLOR.BLACK_60};

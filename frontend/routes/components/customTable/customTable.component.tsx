@@ -26,7 +26,7 @@ import { SORT_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
 
-import { CellUser } from './components/cellUser/cellUser.component';
+import { UserItem } from '../userItem/userItem.component';
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Body, Row, SortLabel, Cell } from './customTable.styles';
@@ -67,7 +67,7 @@ const HEADER_CELL_COMPONENTS = {
 };
 
 const ROW_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: CellUser,
+	[CELL_TYPES.USER]: UserItem,
 	[CELL_TYPES.JOB]: CellSelect,
 	[CELL_TYPES.PERMISSIONS]: CellSelect,
 	[CELL_TYPES.ICON_BUTTON]: RowCellButton

@@ -17,11 +17,14 @@
 
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+import { COLOR } from '../../../styles';
 
 import { ellipsis } from '../../../styles';
 
 export const Name = styled(Grid)`
   ${ellipsis('calc(100% - 18px)')};
+  font-size: 14px;
+	color: ${COLOR.BLACK_60};
 `;
 
 export const Color = styled(Grid)`

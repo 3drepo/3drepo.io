@@ -50,6 +50,7 @@ const USERS_TABLE_CELLS = [{
 interface IProps {
 	currentTeamspace: string;
 	users: any[];
+	usersSuggestions: any[];
 	limit: any;
 	jobs: any[];
 	active?: boolean;
@@ -57,6 +58,8 @@ interface IProps {
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
+	onUsersSearch: (searchText) => void;
+	clearUsersSuggestions: () => void;
 }
 
 interface IState {
@@ -150,8 +153,12 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public renderNewUserForm = (container) => {
 		const formProps = {
+			title: this.getFooterLabel(),
 			jobs: this.state.jobs,
-			onSave: this.onSave
+			users: this.props.usersSuggestions,
+			onSave: this.onSave,
+			clearSuggestions: this.props.clearUsersSuggestions,
+			getUsersSuggestions: this.props.onUsersSearch
 		};
 		const panel = (
 			<FloatingActionPanel
@@ -170,10 +177,9 @@ export class Users extends React.PureComponent<IProps, IState> {
 	/**
 	 * Generate licences summary
 	 */
-	public renderFooter = () => {
+	public getFooterLabel = () => {
 		const limit = isNumber(this.props.limit) ? this.props.limit : "unlimited";
-		const content = `Assigned licences: ${ this.props.users.length } out of ${ limit }`;
-		return <Footer item>{content}</Footer>;
+		return `Assigned licences: ${ this.props.users.length } out of ${ limit }`;
 	}
 
 	public render() {
@@ -195,7 +201,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 								rows={preparedRows}
 							/>
 						</Content>
-						{rows && this.renderFooter()}
+						{rows && (<Footer item>{this.getFooterLabel()}</Footer>)}
 					</Container>
 					{active && containerElement && this.renderNewUserForm(containerElement)}
 				</>

@@ -46,3 +46,7 @@ export const selectIsPending = createSelector(
 export const selectCurrentTeamspace = createSelector(
 	selectUserManagementDomain, (state) => state.teamspace
 );
+
+export const selectUsersSuggestions = createSelector(
+	selectUserManagementDomain, (state) => state.usersSuggestions
+);

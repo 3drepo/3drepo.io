@@ -15,19 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
+import { COLOR } from '../../../styles';
 
-import * as API from '../../services/api';
-import { DialogTypes, DialogActions } from './dialog.redux';
+const BaseStyles = styled(Grid)`
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+`;
 
-export function* fetch() {
-	try {
-		console.log('Dialog saga started!');
-	} catch(error) {
-		console.error(error);
-	}
-}
+export const Name = styled(BaseStyles)`
+  color: ${COLOR.BLACK_60};
+	font-size: 14px;
+  line-height: 20px;
+`;
 
-export default function* DialogSaga() {
-	//yield takeLatest(DialogTypes.FETCH, fetch);
-}
+export const Detail = styled(BaseStyles)`
+  font-size: 10px;
+  color: ${COLOR.BLACK_40};
+  line-height: 13px;
+`;

@@ -32,7 +32,10 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJob: ['username', 'job'],
 	updateJobSuccess: ['username', 'job'],
 	updatePermissions: ['permissions'],
-	updatePermissionsSuccess: ['permissions']
+	updatePermissionsSuccess: ['permissions'],
+	getUsersSuggestions: ['searchText'],
+	getUsersSuggestionsSuccess: ['suggestions'],
+	clearUsersSuggestions: []
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -42,7 +45,8 @@ export const INITIAL_STATE = {
 	jobsColors: [],
 	projects: [],
 	collaboratorLimit: null,
-	isPending: false
+	isPending: false,
+	usersSuggestions: []
 };
 
 /**
@@ -115,6 +119,14 @@ export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions })
 	return { ...state, users };
 };
 
+export const getUsersSuggestionsSuccess = (state = INITIAL_STATE, { suggestions }) => {
+	return { ...state, usersSuggestions: suggestions };
+};
+
+export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) => {
+	return { ...state, usersSuggestions: [] };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
 	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
@@ -123,5 +135,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.REMOVE_USER_FAILURE]: removeUserFailure,
 	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,
 	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
-	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess
+	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
+	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
+	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions
 });
