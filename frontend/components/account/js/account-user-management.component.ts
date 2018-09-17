@@ -95,11 +95,14 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	public $onChanges({currentUser, accounts}: {currentUser?: any, accounts?: any}): void {
-		if (currentUser.currentValue && !this.selectedTeamspace) {
+		const currentUserChanged = currentUser && currentUser.currentValue;
+		const accountsChanged = accounts && accounts.currentValue;
+
+		if (currentUserChanged && !this.selectedTeamspace) {
 			this.selectedTeamspace = currentUser.currentValue;
 		}
 
-		if (currentUser.currentValue && accounts.currentValue) {
+		if (currentUserChanged && accountsChanged) {
 			this.teamspaces = accounts.currentValue.reduce((teamspaces, account) => {
 				const {isProjectAdmin, isModelAdmin} = account.projects.reduce((flags, { permissions, models }) => {
 					flags.isProjectAdmin = permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
@@ -108,12 +111,11 @@ class AccountUserManagementController implements ng.IController {
 				}, {});
 
 				if (account.isAdmin || isProjectAdmin || isModelAdmin) {
-						teamspaces.push({
-							...account,
-							isProjectAdmin
-						});
+					teamspaces.push({
+						...account,
+						isProjectAdmin
+					});
 				}
-
 				return teamspaces;
 			}, []);
 		}
