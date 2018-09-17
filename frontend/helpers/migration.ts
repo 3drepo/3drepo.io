@@ -5,7 +5,7 @@ import { invoke } from 'lodash';
 import configureStore from '../modules/store';
 
 // Angular service injector
-const getAngularService = (name) => angular.element(document.body).injector().get(name);
+const getAngularService = (name, caller?) => angular.element(document.body).injector().get(name, caller);
 
 // Should be replaced with proper react-redux connect if app is fully migrated
 const initialState = {};
@@ -21,7 +21,7 @@ export const dispatch = (action) => {
 // Use to listen store changes directly from AngularJS context
 // Should be removed if app is fully migrated
 export const subscribe = (context, selectors: any = {}) => {
-	const $timeout = getAngularService('$timeout');
+	const $timeout = getAngularService('$timeout', context) as (callback) => void;
 	const subscribeHandlers = {
 		function: selectors,
 		object: (currentState) => {

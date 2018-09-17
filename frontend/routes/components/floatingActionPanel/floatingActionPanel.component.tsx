@@ -34,12 +34,6 @@ interface IState {
 }
 
 export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps(nextProps: IProps) {
-		return {
-			open: nextProps.open
-		};
-	}
-
 	public state = {
 		anchorEl: null,
 		open: false
@@ -55,14 +49,22 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 
 	public handleClose = () => {
 		this.setState({
-			anchorEl: null
+			anchorEl: null,
+			open: false
 		});
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		if (prevState.open !== this.state.open && !this.state.open) {
+			this.handleClose();
+		}
 	}
 
 	public render() {
 		const { icon } = this.props;
-		const { anchorEl } = this.state;
-		const open = Boolean(anchorEl);
+		const { anchorEl, open } = this.state;
+
+		const shouldOpen = open && Boolean(anchorEl);
 		return (
 			<Container>
 				<FloatingButton
@@ -75,7 +77,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 					<Icon>{icon || 'add'}</Icon>
 				</FloatingButton>
 				<Popover
-					open={open}
+					open={shouldOpen}
 					anchorEl={anchorEl}
 					onClose={this.handleClose}
 					anchorOrigin={{

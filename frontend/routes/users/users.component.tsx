@@ -165,6 +165,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 			clearSuggestions: this.props.clearUsersSuggestions,
 			getUsersSuggestions: this.props.onUsersSearch
 		};
+
 		const panel = (
 			<FloatingActionPanel
 				open={this.state.isNewUserFormOpen}

@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { matches, cond, orderBy, pick, values } from 'lodash';
+import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -281,6 +282,15 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public renderThumb = ({ style, ...props }) => {
+		const thumbStyle = {
+			backgroundColor: `red`
+		};
+		return (
+			<div style={{ ...style, ...thumbStyle }} {...props} />
+		);
+	}
+
 	public render() {
 		const { cells } = this.props;
 		const { processedRows } = this.state;
@@ -288,9 +298,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<Head>{this.renderHeader(cells)}</Head>
-				<Body>
+				<SimpleBar>
 					{this.renderRows(processedRows, cells)}
-				</Body>
+				</SimpleBar>
 			</Container>
 		);
 	}

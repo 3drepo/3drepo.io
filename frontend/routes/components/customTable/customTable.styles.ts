@@ -97,10 +97,6 @@ export const Container = styled.div`
 	}
 `;
 
-export const Body = styled.div`
-	overflow: scroll;
-`;
-
 export const Row = styled.div`
 	height: 62px;
 	display: flex;
