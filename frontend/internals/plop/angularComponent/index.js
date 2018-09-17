@@ -3,7 +3,7 @@ const templatesPath = join(__dirname, "templates");
 
 module.exports = (plop) => {
 	const containerDirectory = "components/{{ directory }}/{{ dashCase name }}";
-	plop.setGenerator("component", {
+	plop.setGenerator("Angular component", {
 		description: "Generate a Angular component",
 		prompts: [{
 			type: "input",
