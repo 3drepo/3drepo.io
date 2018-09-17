@@ -224,8 +224,7 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	public isAddButtonDisabled(): boolean {
-		return (this.members && this.members.length === this.licencesLimit && this.selectedTab === this.TABS_TYPES.USERS)
-			|| this.isLoadingTeamspace;
+		return this.isLoadingTeamspace;
 	}
 }
 
