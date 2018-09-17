@@ -73,7 +73,7 @@ const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.ICON_BUTTON]: RowCellButton
 };
 
-const ROW_CELL_EXTRA_DATA = {
+const ROW_CELL_DEFAULT_PROPS = {
 	[CELL_TYPES.EMPTY]: {
 		flex: 100
 	},
@@ -230,7 +230,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		return cells.map((cell, index) => {
 			const CellComponent = HEADER_CELL_COMPONENTS[cell.type] || HeaderCell;
 			const cellData = {
-				...(ROW_CELL_EXTRA_DATA[cell.type] || {}),
+				...(ROW_CELL_DEFAULT_PROPS[cell.type] || {}),
 				...cell
 			};
 
@@ -261,7 +261,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 						const type = cells[cellIndex].type;
 						const CellComponent = ROW_CELL_COMPONENTS[type];
 						const cellData = {
-							...(ROW_CELL_EXTRA_DATA[type] || {}),
+							...(ROW_CELL_DEFAULT_PROPS[type] || {}),
 							...data,
 							searchText: this.state.searchText
 						};

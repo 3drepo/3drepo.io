@@ -133,13 +133,14 @@ export class Users extends React.PureComponent<IProps, IState> {
 				{
 					value: user.job,
 					items: jobs,
+					placeholder: 'Unassigned',
 					onChange: this.handleChange(user, 'job')
 				},
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
-					isDisabled: user.isCurrentUser || user.isOwner
+					readOnly: user.isCurrentUser || user.isOwner
 				},
 				{},
 				{

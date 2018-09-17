@@ -17,13 +17,15 @@
 
 import * as React from 'react';
 
-import { Item, StyledSelect } from './cellSelect.styles';
+import { Item, StyledSelect, EmptyValue } from './cellSelect.styles';
 
 interface IProps {
-	value: string;
 	items: any[];
+	placeholder?: string;
+	readOnly?: boolean;
+	value?: string;
 	itemTemplate?: React.Component;
-	isDisabled?: boolean;
+	disabled?: boolean;
 	onChange: (selectedValue: string) => void;
 }
 
@@ -32,6 +34,13 @@ interface IState {
 }
 
 export class CellSelect extends React.PureComponent<IProps, IState> {
+	public static defaultProps = {
+		value: '',
+		items: [],
+		disabled: false,
+		readOnly: false
+	};
+
 	public state = {
 		selectedValue: ''
 	};
@@ -43,7 +52,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		return items.map((item, index) => {
 			return (
 				<Item
-					disabled={item.isDisabled}
+					disabled={item.disabled}
 					key={index}
 					value={item.value}
 				>
@@ -67,15 +76,19 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemTemplate, isDisabled } = this.props;
+		const { items, itemTemplate, disabled, placeholder, value, readOnly } = this.props;
 		const { selectedValue } = this.state;
+		const hasNoOptions = !items.length;
 
 		return (
 			<StyledSelect
-				disabled={isDisabled}
-				value={selectedValue || this.props.value}
+				readOnly={readOnly}
+				disabled={readOnly || disabled || hasNoOptions}
+				displayEmpty
+				value={selectedValue || value}
 				onChange={this.handleChange}
 			>
+				{ placeholder ? <EmptyValue value="">{placeholder}</EmptyValue> : null }
 				{this.renderOptions(items, itemTemplate)}
 			</StyledSelect>
 		);

@@ -19,9 +19,30 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import { COLOR } from '../../../../../styles';
 
-export const StyledSelect = styled(Select) `
-  width: 100%;
+export const StyledSelect = styled(Select).attrs({
+	classes: {
+		disabled: 'select--disabled',
+		icon: 'select__icon'
+	}
+})`
+	width: 100%;
+
+	.select--disabled ~ .select__icon {
+		opacity: 0.6;
+	}
+
+	.select__icon {
+		visibility: ${(props) => props.readOnly ? 'hidden' : 'visible'};
+	}
 `;
 
-export const Item = styled(MenuItem)``;
+export const Item = styled(MenuItem)`
+	&& {
+		font-size: 14px;
+		color: ${COLOR.BLACK_60};
+	}
+`;
+
+export const EmptyValue = styled(MenuItem) ``;

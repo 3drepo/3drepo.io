@@ -25,6 +25,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { COLOR } from '../../../styles';
 
 export const Title = styled.div`
+	font-size: 14px;
 	color: ${COLOR.BLACK_20};
 `;
 
@@ -58,13 +59,11 @@ export const Container = styled.div`
 	${StyledTextField},
 	${StyledSelect},
 	${Title} {
-		font-size: 14px;
 		margin-bottom: 12px;
 	}
 
 	${StyledTextField}, ${StyledTextField} *,
-	${StyledSelect}, ${StyledSelect} input,
-	${StyledSelect} ~ label,
+	${StyledSelect},
 	[class*='MuiTypography'] {
 		font-size: 14px;
 		color: ${COLOR.BLACK_60};
@@ -75,10 +74,10 @@ export const SuggestionsList = styled(Popper)`
 	z-index: 12323;
 	margin-top: -15px;
 	position: absolute;
-	max-height: 250px;
-	overflow: auto;
 
 	.react-autosuggest__suggestions-list {
+		max-height: 250px;
+		overflow: auto;
 		padding-left: 0;
 	}
 
