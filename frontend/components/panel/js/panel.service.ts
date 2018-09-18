@@ -288,10 +288,54 @@ export class PanelService {
 					selected: true,
 					noToggle: false,
 					keepCheckSpace: true
+				},
+				{
+					hidden: false,
+					value: "mitigation_status",
+					label: "Mitigation Status",
+					toggle: false,
+					selected: false,
+					firstSelected: false,
+					secondSelected: false,
+					keepCheckSpace: false,
+					toggleFilterChips: true,
+					upperDivider: true,
+					menu: [{
+							hidden: false,
+							value: "proposed",
+							label: "Proposed",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "approved",
+							label: "Approved",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "accepted",
+							label: "Accepted",
+							toggle: true,
+							stopClose: true
+						}]
+				},
+				{
+					value: "creator_role", // the whole menu will be replaced once the creators roles are loaded
+					hidden: false,
+					label: "Created by",
+					toggle: false
+				},
+				{
+					value: "assigned_roles", // the whole menu will be replaced once the assigned roles are loaded
+					hidden: false,
+					label: "Assigned to",
+					toggle: false
 				}
 			],
 			options: [
-				{type: "menu", visible: true}
+				{type: "menu", visible: true},
+				{type: "chips-filter", visible: true}
 			],
 			add: true
 		});

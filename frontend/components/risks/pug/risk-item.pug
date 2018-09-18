@@ -15,7 +15,7 @@ md-content#riskInformation(
 			div(layout="row", flex, layout-align="space-between")
 				div(layout="row", flex)
 					#riskRoleIndicator(ng-style="{backgroundColor: vm.riskData.roleColor}")
-					
+
 					div(ng-if="!vm.data"
 						layout="column"
 						flex)
@@ -65,7 +65,7 @@ md-content#riskInformation(
 					id="riskActivity"
 					ng-model="vm.riskData.associated_activity"
 					ng-disabled="!vm.canUpdateRisk()")
-					
+
 					md-option(
 						ng-repeat="activity in vm.activities"
 						value="{{activity.value}}") {{activity.label}}
@@ -94,15 +94,15 @@ md-content#riskInformation(
 				md-select(
 					id="riskOwner"
 					ng-model="vm.riskData.assigned_roles[0]")
-					
+
 					md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
-			
+
 			md-input-container(flex)
 				label Category
 				md-select(
 					id="riskCategory"
 					ng-model="vm.riskData.category")
-					
+
 					md-option(
 						ng-repeat="category in vm.categories"
 						value="{{category.value}}") {{category.label}}
@@ -125,7 +125,7 @@ md-content#riskInformation(
 					id="riskConsequence"
 					ng-model="vm.riskData.consequence"
 					ng-change="vm.setLevelOfRisk()")
-					
+
 					md-option(
 						ng-repeat="consequence in vm.consequences"
 						value="{{consequence.value}}") {{consequence.label}}
@@ -139,17 +139,17 @@ md-content#riskInformation(
 					id="riskLevelOfRisk"
 					ng-model="vm.riskData.level_of_risk"
 					ng-disabled="true")
-					
+
 					md-option(
 						ng-repeat="level in vm.levels"
 						value="{{level.value}}") {{level.label}}
-			
+
 			md-input-container(flex)
 				label Mitigation Status
 				md-select(
 					id="riskMitigationStatus"
 					ng-model="vm.riskData.mitigation_status")
-					
+
 					md-option(
 						ng-repeat="status in vm.statuses"
 						value="{{status.value}}") {{status.label}}
@@ -175,7 +175,7 @@ md-divider
 		img.riskThumbnailImage(
 			id="commentThumbnail"
 			ng-src="{{vm.commentThumbnail}}")
-	
+
 	div(layout="row" flex="100")
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
@@ -189,7 +189,7 @@ md-divider
 
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
-		
+
 		div(flex="100")
 
 		div(layout="row" layout-align="end center")
@@ -202,7 +202,7 @@ md-divider
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
-		
+
 // Whilst risk is loading
 div.heightFix(
 	ng-if="!vm.modelSettings || !vm.riskData"

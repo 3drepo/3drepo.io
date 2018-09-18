@@ -73,6 +73,7 @@ class RisksCardController implements ng.IController {
 	private risksReady: any;
 	private onShowItem: any;
 	private hideItem: boolean;
+	private filterChips: Array<{name: string, type: string}> = [];
 
 	constructor(
 		private $scope,
@@ -399,7 +400,7 @@ export const RisksCardComponent: ng.IComponentOptions = {
 		model: "=",
 		branch:  "=",
 		revision: "=",
-		filterText: "=",
+		filterChips: "=",
 		modelSettings: "=",
 		show: "=",
 		showAdd: "=",

@@ -15,6 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { RisksService } from "./risks.service";
+import { IChip } from "../../panel/js/panel-card-chips-filter.component";
 
 class RisksListController implements ng.IController {
 
@@ -24,6 +25,7 @@ class RisksListController implements ng.IController {
 		"$timeout",
 		"$compile",
 		"$element",
+		"$filter",
 
 		"RisksService",
 		"ClientConfigService"
@@ -44,6 +46,7 @@ class RisksListController implements ng.IController {
 	private revision: string;
 	private filterText: string;
 	private bcfInputHandler: any;
+	private filterChips: IChip[];
 
 	constructor(
 		private $scope,
@@ -51,6 +54,7 @@ class RisksListController implements ng.IController {
 		private $timeout,
 		private $compile,
 		private $element,
+		private $filter,
 
 		private risksService: RisksService,
 		private clientConfigService: any
@@ -73,31 +77,47 @@ class RisksListController implements ng.IController {
 				return this.risksService.state.allRisks;
 			},
 			() => {
-
-				if (this.risksService.state.allRisks) {
-					if (this.risksService.state.allRisks.length > 0) {
-
-						this.toShow = "list";
-						this.setupRisksToShow();
-						// this.checkShouldShowIssue();
-
-					} else {
-						this.toShow = "info";
-						this.info = "There are currently no open risks";
-						this.contentHeight({height: this.risksService.state.heights.infoHeight});
-					}
-				}
-
 				this.allRisks = this.risksService.state.allRisks;
 
 			},
 			true
 		);
 
+		this.$scope.$watch("vm.risksToShow", () => {
+			this.setContentAndSize();
+			this.risksService.showRiskPins();
+		});
+
+		this.$scope.$watchCollection("vm.filterChips", (chips: IChip[], oldChips: IChip[]) => {
+			/*const dateFromChip = chips.find((c) => c.type === "date_from");
+			const dateToChip = chips.find((c) => c.type === "date_to");
+
+			const oldDateFromChip = oldChips.find((c) => c.type === "date_from");
+			const oldDateToChip = oldChips.find((c) => c.type === "date_to");
+
+			if (!!dateFromChip && !!dateToChip) {
+				if (dateFromChip.value.getTime() > dateToChip.value.getTime()) {
+					if (!oldDateFromChip  || dateFromChip.value !== oldDateFromChip.value) {
+						this.issuesService.setToDateMenuValue(dateFromChip.value);
+						dateToChip.value = dateFromChip.value;
+						dateToChip.name = this.$filter("date")(dateToChip.value, "d/M/yyyy");
+					}
+
+					if (!oldDateToChip  || dateToChip.value !== oldDateToChip.value) {
+						this.issuesService.setFromDateMenuValue(dateToChip.value);
+						dateFromChip.value = dateToChip.value;
+						dateFromChip.name = this.$filter("date")(dateFromChip.value, "d/M/yyyy");
+					}
+				}
+			}*/
+
+			this.risksService.setupRisksToShow(this.model, chips);
+		});
+
 		this.$scope.$watch("vm.filterText", () => {
 
 			// Filter text
-			this.setupRisksToShow();
+			// this.setupRisksToShow();
 
 		});
 
@@ -107,7 +127,7 @@ class RisksListController implements ng.IController {
 			if (this.menuOption && this.menuOption.value) {
 
 				this.handleMenuOptions();
-
+				this.risksService.setupRisksToShow(this.model, this.filterChips);
 			}
 
 		});
@@ -133,13 +153,11 @@ class RisksListController implements ng.IController {
 					!this.risksService.state.risksCardOptions.showPins;
 				break;
 		}
-
-		this.setupRisksToShow();
 	}
 
-	public setupRisksToShow() {
+	public setContentAndSize() {
 
-		this.risksService.setupRisksToShow(this.model, this.filterText);
+		this.risksService.setupRisksToShow(this.model, this.filterChips);
 
 		// Setup what to show
 		if (this.risksService.state.risksToShow.length > 0) {
@@ -151,7 +169,7 @@ class RisksListController implements ng.IController {
 			this.contentHeight({height: risksHeight });
 		} else {
 			this.toShow = "info";
-			this.info = "There are currently no open risks";
+			this.info = this.filterChips.length > 0 ? "No results found" : "There are currently no open risks";
 			this.contentHeight({height: this.risksService.state.heights.infoHeight});
 		}
 
@@ -180,6 +198,7 @@ export const RisksListComponent: ng.IComponentOptions = {
 		revision: "<",
 		allRisks: "<",
 		risksToShow: "<",
+		filterChips: "=",
 		filterText: "<",
 		onEditRisk: "&",
 		nonListSelect: "<",

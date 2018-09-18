@@ -17,6 +17,8 @@
 import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { ClipService } from "../../clip/js/clip.service";
+import { IChip } from "../../panel/js/panel-card-chips-filter.component";
+import { PanelService } from "../../panel/js/panel.service";
 import { TreeService } from "../../tree/js/tree.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
 
@@ -35,7 +37,8 @@ export class RisksService {
 		"TreeService",
 		"AuthService",
 		"ClipService",
-		"ViewerService"
+		"ViewerService",
+		"PanelService"
 	];
 
 	public state: any;
@@ -52,7 +55,8 @@ export class RisksService {
 		private treeService: TreeService,
 		private authService: AuthService,
 		private clipService: ClipService,
-		private viewerService: ViewerService
+		private viewerService: ViewerService,
+		private panelService: PanelService
 	) {
 		this.reset();
 	}
@@ -73,6 +77,7 @@ export class RisksService {
 				sortOldestFirst : false
 			},
 			availableJobs : [],
+			allJobs: [],
 			modelUserJob: null
 		};
 		this.removeUnsavedPin();
@@ -92,6 +97,18 @@ export class RisksService {
 				if (risks) {
 					risks.forEach(this.populateRisk.bind(this));
 					this.state.allRisks = risks;
+
+					const newJobs: any = {};
+					risks.forEach((i) => {
+						if (i.creator_role) {
+							newJobs[i.creator_role] = true;
+						}
+
+						i.assigned_roles.forEach( (r) => newJobs[r] = true);
+					});
+
+					const jobs = Object.keys(newJobs).map( (j) => ({_id : j }));
+					this.addJobsToAllJobs(jobs);
 				} else {
 					throw new Error("Error");
 				}
@@ -106,9 +123,24 @@ export class RisksService {
 		return this.apiService.get(url)
 			.then((response) => {
 				this.state.availableJobs = response.data;
+				this.addJobsToAllJobs(response.data);
 				return this.state.availableJobs;
 			});
+	}
 
+	public addJobsToAllJobs(jobs: any[]) {
+		const newJobs = jobs.filter((r) => !this.state.allJobs.find( (j) => j._id === r._id ));
+		this.state.allJobs = this.state.allJobs.concat(newJobs).sort( (a, b) => a._id > b._id ? 1 : -1);
+
+		const menuChips =  this.state.allJobs.map((role) => ({
+			value: role._id,
+			label: role._id
+		}));
+
+		const assignedMenu = menuChips.concat([{value: null, label: "Unassigned"}]);
+
+		this.panelService.setChipFilterMenuItem("risks", {label: "Created by", value: "creator_role"}, menuChips);
+		this.panelService.setChipFilterMenuItem("risks", {label: "Assigned to", value: "assigned_roles"}, assignedMenu);
 	}
 
 	public getUserJobForModel(account: string, model: string): Promise<any> {
@@ -145,49 +177,111 @@ export class RisksService {
 		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
-	public setupRisksToShow(model: string, filterText: string) {
+	public setupRisksToShow(model: string, chips: IChip[]) {
 		this.state.risksToShow = [];
 
 		if (this.state.allRisks.length > 0) {
-
-			// Sort
-			this.state.risksToShow = this.state.allRisks.slice();
-			if (this.state.risksCardOptions.sortOldestFirst) {
-				this.state.risksToShow.sort((a, b) => {
-					return a.created - b.created;
-				});
-			} else {
-				this.state.risksToShow.sort((a, b) => {
-					return b.created - a.created;
-				});
-			}
-
-			// TODO: There is certainly a better way of doing this, but I don't want to
-			// dig into it right before release
-
-			// Filter text
-			const notEmpty = angular.isDefined(filterText) && filterText !== "";
-			if (notEmpty) {
-				this.state.risksToShow = this.filteredRisks(filterText);
-			}
-
-			// Sub models
-			this.state.risksToShow = this.state.risksToShow.filter((risk) => {
-				return this.state.risksCardOptions.showSubModelRisks ? true : (risk.model === model);
+			const filteredRisks = this.filterRisks(model, this.state.allRisks, chips) ;
+			const sortOldest = this.state.risksCardOptions.sortOldestFirst;
+			filteredRisks.sort((a, b) => {
+				return sortOldest ? a.created - b.created : b.created - a.created;
 			});
-
+			this.state.risksToShow = filteredRisks;
 		}
-
 	}
 
-	public filteredRisks(filterText: string) {
-		return (this.$filter("filter")(
-			this.state.risksToShow,
-			(risk) => {
-				return this.handleRiskFilter(risk, filterText);
+	public filterRisks(model: string, risks: any[], chips: IChip[]): any[] {
+		let filters = [];
+		const criteria = this.getCriteria(chips);
+
+		if (!criteria.mitigation_status) { // If there is no explicit filter for status dont show closed risks
+									// thats the general criteria for showing risks.
+			filters.push((risk) => risk.mitigation_status !== "accepted");
+		}
+
+		filters = filters.concat(this.getOrClause(criteria[""], this.handleRiskFilter));
+
+		filters = filters.concat(this.createFilterByField(criteria, "associated_activity"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "creator_role"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "mitigation_status"));
+
+		filters = filters.concat(this.getOrClause(criteria.assigned_roles, this.filterAssignedRoles));
+
+		filters = filters.concat(this.createFilterByField(criteria, "category"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "likelihood"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "consequence"));
+
+		filters = filters.concat(this.createFilterByField(criteria, "level_of_risk"));
+
+		if (!this.state.risksCardOptions.showSubModelRisks) {
+			filters.push((risk) => risk.model === model);
+		}
+
+		// if (criteria.date_from) {
+			// filters.push((issue) => issue.created >= criteria.date_from[0].getTime());
+		// }
+
+		// if (criteria.date_to) {
+			//  86399000 is 23:59:59 in milliseconds
+			// filters.push((issue) => issue.created <= criteria.date_to[0].getTime() + 86399000 );
+		// }
+
+		// It filters the risk list by applying every filter to it.
+		const filteredRisks = risks.filter((risk) => filters.every((f) => f(risk)));
+		return filteredRisks;
+	}
+
+	public createFilterByField(criteria: any, field: string) {
+		return this.getOrClause(criteria[field], this.filterByField.bind(this, field));
+	}
+
+	public getCriteria(chips: IChip[]): any {
+		const initialValue = {};
+
+		return  chips.reduce((object, currVal) => {
+			if (!object[currVal.type]) {
+				object[currVal.type] = [];
 			}
 
-		));
+			object[currVal.type].push(currVal.value);
+			return object;
+		}, initialValue);
+	}
+
+	/** filters */
+
+	public getAndClause(tags: any[], comparator) {
+		if ((tags || []).length === 0) {
+			return[];
+		}
+		return [(value, index, array) => tags.every( comparator.bind(this, value) )];
+	}
+
+	public getOrClause(tags: any[], comparator) {
+		if ((tags || []).length === 0) {
+			return[];
+		}
+
+		return [(value, index, array) => tags.some( comparator.bind(this, value) )];
+	}
+
+	public filterByField(field, risk, tag): boolean {
+		if (Array.isArray(risk[field])) {
+			return risk[field].indexOf(tag) >= 0;
+		}
+
+		return risk[field] === tag;
+	}
+
+	public filterAssignedRoles(risk, tag): boolean {
+		if (!tag) {
+			return risk.assigned_roles.length === 0;
+		}
+		return this.filterByField("assigned_roles", risk, tag);
 	}
 
 	public handleRiskFilter(risk: any, filterText: string) {
@@ -196,10 +290,9 @@ export class RisksService {
 
 		// Exit the function as soon as we found a match.
 
-		// Search the title, desc and owner
-		if ( this.stringSearch(risk.title, filterText) ||
-			this.stringSearch(risk.desc, filterText) ||
-			this.stringSearch(risk.owner, filterText)) {
+		// Search the title and desc
+		if (this.stringSearch(risk.title, filterText) ||
+			this.stringSearch(risk.desc, filterText)) {
 			return true;
 		}
 

@@ -322,7 +322,7 @@ export class IssuesService {
 
 		// Exit the function as soon as we found a match.
 
-		// Search the title, timestamp, type and owner
+		// Search the title and desc
 		if ( this.stringSearch(issue.title, filterText) ||
 			this.stringSearch(issue.desc, filterText)) {
 			return true;

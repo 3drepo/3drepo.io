@@ -59,14 +59,12 @@ div(layout="column", class="md-whiteframe-1dp")
 				on-show-item='vm.showItem()'
 				hide-item='vm.hideSelectedItem'
 				show-edit='vm.showEdit'
-
 				branch='vm.branch'
 				model-settings='vm.modelSettings'
 				revision='vm.revision'
 				selected-objects='vm.selectedObjects'
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-
-				filter-text='vm.filterText'
+				filter-chips="vm.chipsFilterChips"
 				selected-menu-option='vm.selectedMenuOption')
 
 			groups(
