@@ -66,11 +66,17 @@ export class GroupsService {
 			});
 	}
 
+	/**
+	 * Filter groups using @param searchQuery
+	 */
 	public groupsFilterSearch(searchQuery: string): any[] {
 		return this.state.groups.filter((group) => {
+			// Remove group highlight.
 			this.unhighlightGroup(group);
-			return this.stringSearch(group.name, searchQuery) || this.stringSearch(group.description, searchQuery)
-				|| this.stringSearch(group.author, searchQuery);
+
+			return this.stringSearch(group.name, searchQuery)
+			|| this.stringSearch(group.description, searchQuery)
+			|| this.stringSearch(group.author, searchQuery);
 		});
 	}
 	/**
@@ -182,9 +188,9 @@ export class GroupsService {
 	/**
 	 * Reselect a group
 	 */
-	// public reselectGroup(group) {
-	// 	this.selectGroup(group);
-	// }
+	public reselectGroup(group) {
+		this.selectGroup(group);
+	}
 
 	/**
 	 * Return all the meshes for all currently highlighted objects
