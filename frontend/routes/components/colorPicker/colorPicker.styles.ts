@@ -19,147 +19,123 @@ import styled from 'styled-components';
 import Popover from '@material-ui/core/Popover';
 import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
+
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 export const ColorSelect = styled(Grid)`
-  cursor: pointer;
+	cursor: pointer;
+	border-bottom: 1px solid rgba(0, 0, 0, .12);
 `;
 
 export const Dot = styled(Grid)`
-  width: 16px;
-  height: 16px;
-  border-radius: 100%;
-  background-color: ${(props) => props.color || 'transparent'};
-  border: 2px dotted ${(props) => props.color ? 'transparent' : 'rgba(0, 0, 0, .38)'};
+	width: 16px;
+	height: 16px;
+	border-radius: 100%;
+	background-color: ${(props) => props.color || 'transparent'};
+	border: 2px dotted ${(props) => props.color ? 'transparent' : 'rgba(0, 0, 0, .38)'};
 `;
 
-export const Panel = styled(Popover)``;
+export const Panel = styled(Popover).attrs({
+	classes: {
+		paper: 'color-picker__panel'
+	}
+})`
+	.color-picker__panel {
+		width: 228px;
+		padding: 16px;
+	}
+`;
 
-/* 
-color - picker {
-  min - width: 50px;
-}
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		width: 28px;
+		height: 28px;
+		margin-left: 5px;
+	}
+`;
 
-.colorPicker {
-  height: 32px;
-  position: relative;
-  width: 100 %;
-  padding - left: 1px;
-}
+export const CanvasContainer = styled(Grid)`
+	position: relative;
+`;
 
-.colorPickerSelect {
-  outline: none;
-  cursor: pointer;
-  border - bottom: 1px solid rgba(0, 0, 0, .12);
-}
+export const Canvas = styled.canvas`
+	cursor: crosshair;
+	height: 170px;
+	padding-bottom: 14px;
+`;
 
-.colorPickerValue,
-.colorPickerPlaceholder{
-  width: 16px;
-  height: 16px;
-  border - radius: 100 %;
-}
+export const BlockCanvas = styled(Canvas)``;
+export const StripCanvas = styled(Canvas) ``;
 
-.colorPickerPlaceholder {
-  border: 2px dotted rgba(0, 0, 0, .38);
-}
+export const PredefinedColorsContainer = styled.div`
+	padding-bottom: 14px;
+`;
 
-.colorPickerIcon {
-  margin - left: 5px;
-}
+export const PredefinedColor = styled.div`
+	border-radius: 100%;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	outline: none;
+	transition: box-shadow 200ms ease-in-out;
 
-.colorPickerPanel {
-  width: 228px;
-  padding: 16px;
-  box - shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 1);
-}
+	&:hover {
+		box-shadow: inset 0 0 10px rgba(0, 0, 0, .5)
+	}
 
-.colorPickerPredefinedColors {
-  padding - bottom: 14px;
-}
+	&:not(:last-child) {
+		margin - right: 15px;
+	}
+`;
 
-.colorPickerPredefinedColor {
-  border - radius: 100 %;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  outline: none;
-  transition: box - shadow 200ms ease -in -out;
-}
+export const ColorPointer = styled.div`
+	position: absolute;
+	pointer-events: none;
+	width: 6px;
+	height: 6px;
+	border: 1px solid ${COLOR.WHITE};
+	border-radius: 100%;
+	content: "";
+	transform: translate(-3px, -6px);
+`;
 
-.colorPickerPredefinedColor: hover {
-  box - shadow: inset 0 0 10px rgba(0, 0, 0, .5)
-}
+export const SelectedColor = styled.div`
+	width: 55px;
+	height: 20px;
+	background-color: ${(props) => props.color};
+	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
+`;
 
-.colorPickerPredefinedColor: not(: last - child) {
-  margin - right: 15px;
-}
+export const SelectedHash = styled(Input)`
+	&& {
+		margin-left: 25px;
+		font-weight: ${FONT_WEIGHT.NORMAL};
+		width: 70px;
+	}
 
-.colorPickerCanvas {
-  padding - bottom: 14px;
-}
+	input {
+		width: 70px;
+		height: 20px;
+		color: #333333;
+		font-size: 12px;
+		margin-left: 2px;
+		outline: none;
+	}
+`;
 
-.colorPickerCanvas.colorPickerBlockWrapper,
-.colorPickerCanvas.colorPickerStripWrapper {
-  position: relative;
-}
+export const StyledButton = styled(Button)`
+	&& {
+		margin-right: 8px;
+	}
+`;
 
-.colorPickerCanvas.colorBlock,
-.colorPickerCanvas.colorStrip {
-  cursor: crosshair;
-  height: 170px;
-}
-
-.colorPickerCanvas.colorPointer {
-  position: absolute;
-  pointer - events: none;
-}
-
-.colorPickerBlockWrapper.colorPointer {
-  width: 6px;
-  height: 6px;
-  border: 1px solid #fff;
-  border - radius: 100 %;
-  content: "";
-  transform: translate(-3px, -6px);
-}
-
-.colorPickerCanvas.colorBlock {
-  width: 185px;
-}
-
-.colorPickerCanvas.colorStrip {
-  width: 23px;
-}
-
-.colorPickerSelectedColor {
-  width: 55px;
-  height: 20px;
-}
-
-.colorPickerSelectedHash {
-  margin - left: 14px;
-  font - weight: 400;
-}
-
-.colorPickerSelectedHash input {
-  width: 70px;
-  height: 20px;
-  color: #333333;
-  font - size: 12px;
-  margin - left: 2px;
-  outline: none;
-}
-
-.colorPickerButtons {
-  border - top: 1px solid #efefef;
-  margin - top: 16px;
-  min - width: calc(100 % + 32px);
-  margin - left: -16px;
-  margin - bottom: -16px;
-  padding: 8px 16px;
-}
-
-.colorPickerButtons.md - button {
-  margin - left: 0;
-} */
+export const Footer = styled.div`
+	border-top: 1px solid #efefef;
+	margin-top: 16px;
+	min-width: calc(100% + 32px);
+	margin-left: -16px;
+	margin-bottom: -16px;
+	padding: 12px 16px;
+`;
