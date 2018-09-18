@@ -41,8 +41,9 @@ for database in db.database_names():
 ##### Write to database #####
 				if dry_run:
 					updated_json.update({'_id': rev_id})
-					print("\tWriting " + json.dumps(updated_json))
+					print("\t\tWriting " + json.dumps(updated_json))
 				else:
+					print("\t\tWriting assets file for rev: " + rev_id)
 					updated_json.update({'_id': uuid.UUID(rev_id)})
 					db[dest_col].insert(updated_json)
 
