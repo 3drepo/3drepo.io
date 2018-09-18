@@ -22,7 +22,7 @@ import { memoize } from 'lodash';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 import * as JobItem from '../jobItem/jobItem.styles';
-import * as UserItem from '../UserItem/UserItem.styles';
+import * as UserItem from '../userItem/userItem.styles';
 import * as CellSelect from './components/cellSelect/cellSelect.styles';
 
 const flexMemoized = memoize(({flex}) => {
