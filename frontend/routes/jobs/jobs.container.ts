@@ -32,7 +32,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	updateColor: UserManagementActions.updateJob,
+	updateColor: UserManagementActions.updateJobColor,
 	remove: UserManagementActions.removeJob,
 	create: UserManagementActions.createJob
 }, dispatch);

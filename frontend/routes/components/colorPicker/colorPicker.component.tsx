@@ -25,7 +25,6 @@ import Button from '@material-ui/core/Button';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormControl from '@material-ui/core/FormControl';
 
-import { COLOR } from '../../../styles';
 import {
 	Panel,
 	Dot,
@@ -115,7 +114,6 @@ interface IState {
 
 export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public static defaultProps: IProps = {
-		value: COLOR.WHITE,
 		predefinedColors: [],
 		onChange: identity
 	};
@@ -146,6 +144,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 
 	public handleSave = () => {
 		this.props.onChange(this.state.colorHash);
+		this.handleClose();
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
@@ -295,7 +294,14 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 
 	public renderPredefinedColors = (colors) => {
 		return colors.slice(0, 7).map((color, index) => {
-			return (<PredefinedColor item key={index} color={color} />);
+			return (
+				<PredefinedColor
+					item
+					key={index}
+					color={color}
+					onClick={() => this.onPredefinedColorClick(color)}
+				/>
+			);
 		});
 	}
 

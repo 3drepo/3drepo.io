@@ -36,7 +36,7 @@ export const Content = styled(Grid)`
 export const Footer = styled(Grid)`
   padding: 16px 24px;
   font-size: 14px;
-  color: ${COLOR.BLACK_20};
+  color: ${COLOR.BLACK_30};
   border-top: 1px solid ${COLOR.BLACK_6};
   height: ${FOOTER_HEIGHT}px;
   display: flex;

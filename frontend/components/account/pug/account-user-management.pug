@@ -88,12 +88,3 @@
 				ng-disabled="!vm.isTeamspaceAdmin")
 					div(layout="column" layout-fill)
 						jobs(flex active="vm.selectedTab === vm.TABS_TYPES.JOBS")
-
-						jobs-list(
-							flex
-							layout="row"
-							jobs="vm.jobs"
-							colors="vm.jobsColors"
-							on-change="vm.onJobsChange(updatedJobs)"
-							current-teamspace="vm.currentTeamspace")
-						.accountUserManagementFooter(layout="row" layout-align="end center") Manage jobs

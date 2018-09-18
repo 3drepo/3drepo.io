@@ -45,7 +45,7 @@ interface IProps {
 	colors: any[];
 	create: (job) => void;
 	remove: (jobId) => void;
-	updateColor: (jobId, color) => void;
+	updateColor: (job) => void;
 	active?: boolean;
 }
 
@@ -76,7 +76,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 	}
 
 	public handleColorChange = (jobId) => (color) => {
-		this.props.updateColor(jobId, color);
+		this.props.updateColor({_id: jobId, color});
 	}
 
 	public onRemove = (jobId) => {
@@ -93,7 +93,6 @@ export class Jobs extends React.PureComponent<IProps, any> {
 				pick(job, ['value']),
 				{
 					value: job.color,
-					placeholder: 'Undefined',
 					predefinedColors: colors,
 					onChange: this.handleColorChange(job.name)
 				},

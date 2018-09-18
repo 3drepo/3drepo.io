@@ -17,13 +17,19 @@
 
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+
 import { COLOR } from '../../styles';
+import * as ColorPicker from '../components/colorPicker/colorPicker.styles';
 
 const FOOTER_HEIGHT = 45;
 
 export const Container = styled(Grid) `
   height: 100%;
   overflow: hidden;
+
+  ${ColorPicker.ColorSelect} {
+    border: none;
+  }
 `;
 
 export const Content = styled(Grid) `
@@ -34,7 +40,7 @@ export const Content = styled(Grid) `
 export const Footer = styled(Grid) `
   padding: 16px 24px;
   font-size: 14px;
-  color: ${COLOR.BLACK_20};
+  color: ${COLOR.BLACK_30};
   border-top: 1px solid ${COLOR.BLACK_6};
   height: ${FOOTER_HEIGHT}px;
   display: flex;
