@@ -551,7 +551,6 @@ export class Viewer {
 	}
 
 	public getCurrentViewpointInfo(account, model, promise) {
-		console.log("getCurrent", account, model);
 		UnityUtil.requestViewpoint(account, model, promise);
 	}
 

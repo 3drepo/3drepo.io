@@ -74,6 +74,10 @@ view.updateViewpoint = function (dbCol, sessionId, data, id) {
 	return this.updateAttrs(dbCol, id, data);
 }
 
+view.createdViewpointUpdate = function (dbCol, sessionId, data, id) {
+	ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)}, data));
+}
+
 view.updateAttrs = function (dbCol, id, data) {
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
@@ -109,7 +113,7 @@ view.createViewpoint = function (dbCol,sessionId,data) {
 			const thumbnailUrl = `${dbCol.account}/${dbCol.model}/viewpoints/${utils.uuidToString(id)}/thumbnail.png`;
 
 			if (croppedScreenshot) {
-				// Remove the base64 version of the screenshot
+				// Remove the base64 version of the screenshotgetViewpointThumbnail
 				delete data.screenshot.base64;
 				data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
 				data.screenshot.thumbnail = thumbnailUrl;
@@ -123,8 +127,10 @@ view.createViewpoint = function (dbCol,sessionId,data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
-				console.log("HERRRRREEEEE", sessionId, dbCol.account , dbCol.model , data);
-				ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)}, data));
+				console.log("data object", data);
+				console.log("newViewpoint SCREENSHOT", newViewpoint);
+				console.log("Thumbnail URL", thumbnailUrl);
+				this.createdViewpointUpdate(dbCol, sessionId, Object.assign({thumbnailUrl:thumbnailUrl}, data), id);
 				return this.updateAttrs(dbCol, id, data).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {

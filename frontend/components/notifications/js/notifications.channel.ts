@@ -88,8 +88,6 @@ export class NotificationsChannel {
 	}
 
 	private onEvent(event: string, data: any) {
-		console.log('noti', data);
-		
 		this.subscriptions[event].forEach((cb) => cb.callback.call(cb.context, data));
 	}
 

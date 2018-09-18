@@ -148,11 +148,7 @@ class ViewsController implements ng.IController {
 
 	public createdViewpoint(data) {
 		console.log("viewpoint being created", data);
-		// console.log("viewpoint being created : account", this.account);
-		// console.log("viewpoint being created : model", this.model);
-		// this.ViewpointsService.createViewpoint(this.account, this.model, data);
 		this.ViewpointsService.updatedCreatedViewpoint(data);
-		// this.ViewpointsService.getViewpoints(this.account, this.model);
 	}
 
 	public createViewpoint() {
