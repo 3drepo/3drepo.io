@@ -1,9 +1,9 @@
 #risksListContainer(
-	ng-switch="vm.toShow" 
+	ng-switch="vm.toShow"
 	tabindex="0"
 	tdr-focus="true"
 	ng-mousemove="vm.initSetFocus()")
-	
+
 	// List
 	div(ng-switch-when="list")
 		.riskListItem(
@@ -20,7 +20,7 @@
 						img(ng-if="risk.thumbnail", ng-src="{{risk.thumbnailPath}}")
 						md-icon.angular-material-icons.riskListItemMissingThumbnail(
 							ng-if="!risk.thumbnail") insert_photo
-					
+
 					div(flex, layout="column")
 						label#risksListItemTitle(flex="none") {{risk.name}}
 						#risksListItemInfo(layout="row", layout-align="space-between center", flex="none")
@@ -45,7 +45,7 @@
 				ng-click="vm.editRisk(risk)"
 				layout="column"
 				layout-align="center center")
-				
+
 				md-icon.angular-material-icons arrow_forward
 
 

@@ -8,7 +8,6 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-
 // Risks list
 risks-list(
 	ng-if="!vm.showProgress && vm.showRisksList()"
@@ -17,6 +16,7 @@ risks-list(
 	model="vm.model"
 	revision="vm.revision"
 	filter-text="vm.filterText"
+	filter-chips="vm.filterChips"
 	on-edit-risk="vm.editRisk(risk)"
 	content-height="vm.setContentHeight(height)"
 	menu-option="vm.selectedMenuOption"
@@ -58,9 +58,9 @@ risk-item(
 	
 	div(
 		style="text-align: center;"
-		flex, 
+		flex,
 		layout-align="center center")
-		
+
 		span.addHint(ng-if="!vm.modelLoaded()") Model loading
 		span.addHint(ng-if="!vm.canAddRisk && vm.modelLoaded()") Insufficient privileges to add a risk
 
@@ -69,7 +69,7 @@ risk-item(
 		aria-label="Add"
 		ng-click="vm.editRisk()"
 		ng-disabled="!vm.canAddRisk || !vm.modelLoaded()")
-		
+
 		md-icon.angular-material-icons add
 
 
