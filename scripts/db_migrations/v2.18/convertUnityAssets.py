@@ -1,6 +1,8 @@
 import json
 import gridfs
 import sys
+import re
+import uuid
 from pymongo import MongoClient
 
 mongoURL = sys.argv[1]
@@ -17,32 +19,30 @@ db = MongoClient(connString)
 
 ##### Loop through each database other than admin and local #####
 for database in db.database_names():
-        if database != "admin" and database != "local":
-                db = MongoClient(connString)[database]
-                print("--database:" + database)
+	if database != "admin" and database != "local":
+		db = MongoClient(connString)[database]
+		print("--database:" + database)
 
 ##### Get a model ID #####
-                for settings in db.settings.find():
-                        model_id = settings.get('_id')
-                        colName = model_id + ".stash.json_mpc"
-                        fs = gridfs.GridFS(db, colName)
-                        fs_json = fs.find({"filename" : {"$regex": "unityAssets.json$" }})
+		for model in db.settings.find({"federate": {"$ne": True}}, {"_id": 1}):
+			model_id = model.get('_id')
+			print("\t--model:" + model_id)
+			source_col = model_id + ".stash.json_mpc"
+			dest_col = model_id + ".stash.unity3d"
 
-##### Get filename and IDs #####
-                        for single_file in fs_json:
-                                data = single_file.filename
-                                print data
-                                rev_id  = data[data.find("revision/")+9:data.find("/unityAssets.json")]
-                                file_id = single_file._id
-                                single_file = single_file.read()
-                                my_file = json.loads(single_file)
+##### Get file and update the json #####
+			fs = gridfs.GridFS(db, source_col)
+			unity_asset_files = fs.find({"filename" : {"$regex": "unityAssets.json$" }})
 
-##### Append Revision ID #####
-                                entry = {'revId': rev_id}
-                                my_file.update(entry)
+			for asset_file in unity_asset_files:
+				rev_id = re.search(r"(?<=revision/).*?(?=/unityAssets\.json)", asset_file.filename).group(0)
+				updated_json = json.loads(asset_file.read())
 
-##### Convert to BSON #####
-                                if dry_run == False:
-                                        colName = model_id + ".stash.unity3d"
-                                        collection = db.colName
-                                        collection.insert(my_file)
+##### Write to database #####
+				if dry_run:
+					updated_json.update({'_id': rev_id})
+					print("\tWriting " + json.dumps(updated_json))
+				else:
+					updated_json.update({'_id': uuid.UUID(rev_id)})
+					db[dest_col].insert(updated_json)
+
