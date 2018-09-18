@@ -568,7 +568,7 @@ class RiskItemController implements ng.IController {
 				consequence: this.riskData.consequence,
 				level_of_risk: this.riskData.level_of_risk,
 				mitigation_status: this.riskData.mitigation_status,
-				mitigation_desc: this.riskData.mitigation_desc,
+				mitigation_desc: this.riskData.mitigation_desc
 			};
 
 			this.risksService.updateRisk(this.riskData, updatedRiskData)

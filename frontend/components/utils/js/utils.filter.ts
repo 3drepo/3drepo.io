@@ -88,13 +88,13 @@ function prettyDate() {
 			options.minute = "numeric";
 
 			if (showFullDateTime) {
-				options.second = "numeric"
+				options.second = "numeric";
 			} else {
 				options.hour12 = true;
 				options.weekday = "short";
 			}
 		} else {
-			if ((new Date).getFullYear() !== date.getFullYear()) {
+			if ((new Date()).getFullYear() !== date.getFullYear()) {
 				options.year = "numeric";
 			}
 
@@ -102,7 +102,7 @@ function prettyDate() {
 			options.day =  "numeric";
 		}
 
-		return date.toLocaleDateString('en-GB', options).replace(",", "");
+		return date.toLocaleDateString("en-GB", options).replace(",", "");
 	};
 }
 
@@ -121,4 +121,3 @@ export const InvoiceDateModule = angular
 export const PrettyDateModule = angular
 	.module("3drepo")
 	.filter("prettyDate", prettyDate);
-
