@@ -196,10 +196,10 @@ export class RisksService {
 
 		// Exit the function as soon as we found a match.
 
-		// Search the title, type and owner
+		// Search the title, desc and owner
 		if ( this.stringSearch(risk.title, filterText) ||
-			this.stringSearch(risk.owner, filterText) ||
-			this.stringSearch(risk.topic_type, filterText)) {
+			this.stringSearch(risk.desc, filterText) ||
+			this.stringSearch(risk.owner, filterText)) {
 			return true;
 		}
 
@@ -207,17 +207,6 @@ export class RisksService {
 		if (risk.hasOwnProperty("assigned_roles")) {
 			for (let roleIdx = 0; roleIdx < risk.assigned_roles.length; ++roleIdx) {
 				if (this.stringSearch(risk.assigned_roles[roleIdx], filterText)) {
-					return true;
-				}
-			}
-		}
-
-		// Search the comments
-		if (risk.hasOwnProperty("comments")) {
-			for (let commentIdx = 0; commentIdx < risk.comments.length; ++commentIdx) {
-				if (!risk.comments[commentIdx].action &&  // skip any action comments (i.e system messages)
-					this.stringSearch(risk.comments[commentIdx].comment, filterText) ||
-					this.stringSearch(risk.comments[commentIdx].owner, filterText)) {
 					return true;
 				}
 			}
@@ -243,7 +232,7 @@ export class RisksService {
 		let levelOfRisk = 0;
 
 		if (likelihood && consequence) {
-			const likelihoodConsequenceScore: number = parseInt(likelihood) + parseInt(consequence);
+			const likelihoodConsequenceScore: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
 
 			if (6 < likelihoodConsequenceScore) {
 				levelOfRisk = 4;
