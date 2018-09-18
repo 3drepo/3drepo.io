@@ -88,7 +88,7 @@ const ROW_CELL_DEFAULT_PROPS = {
 		flex: 25
 	},
 	[CELL_TYPES.NAME]: {
-		flex: 25
+		flex: 30
 	},
 	[CELL_TYPES.USER]: {
 		flex: 25

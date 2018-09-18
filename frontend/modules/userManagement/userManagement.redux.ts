@@ -27,7 +27,6 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
-	removeUserFailure: [],
 	setTeamspace: ['teamspace'],
 	updateJob: ['username', 'job'],
 	updateUserJobSuccess: ['username', 'job'],
@@ -37,7 +36,8 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	getUsersSuggestionsSuccess: ['suggestions'],
 	clearUsersSuggestions: [],
 	createJob: ['job'],
-	removeJob: ['job'],
+	removeJob: ['jobId'],
+	removeJobSuccess: ['jobId'],
 	updateJobColor: ['job'],
 	updateJobSuccess: ['job']
 }, { prefix: 'USER_MANAGEMENT_' });
@@ -92,10 +92,6 @@ export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
 	return { ...state, users };
 };
 
-export const removeUserFailure = (state = INITIAL_STATE, action) => {
-	return state;
-};
-
 export const setTeamspace = (state = INITIAL_STATE, { teamspace }) => {
 	return { ...state, teamspace };
 };
@@ -148,16 +144,24 @@ export const updateJobSuccess = (state = INITIAL_STATE, { job }) => {
 	return { ...state, jobs, jobsColors };
 };
 
+export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
+	const jobs = [...state.jobs].filter(({_id}) => {
+		return _id !== jobId;
+	});
+
+	return { ...state, jobs };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
 	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
-	[UserManagementTypes.REMOVE_USER_FAILURE]: removeUserFailure,
 	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,
 	[UserManagementTypes.UPDATE_USER_JOB_SUCCESS]: updateUserJobSuccess,
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
-	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess
+	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
+	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess
 });

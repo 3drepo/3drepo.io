@@ -153,12 +153,12 @@ export function* createJob({ job }) {
 	}
 }
 
-export function* removeJob({ job }) {
+export function* removeJob({ jobId }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.createJob(teamspace, job);
+		const data = yield API.deleteJob(teamspace, jobId);
 
-		yield put(UserManagementActions.removeJobSuccess(job));
+		yield put(UserManagementActions.removeJobSuccess(jobId));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'job', error.response));
 	}
