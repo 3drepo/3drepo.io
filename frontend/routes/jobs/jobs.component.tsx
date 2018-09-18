@@ -93,14 +93,14 @@ export class Jobs extends React.PureComponent<IProps, any> {
 				pick(job, ['value']),
 				{
 					value: job.color,
-					items: colors,
 					placeholder: 'Undefined',
-					onChange: this.handleColorChange(job._id)
+					predefinedColors: colors,
+					onChange: this.handleColorChange(job.name)
 				},
 				{},
 				{
 					icon: 'remove_circle',
-					onClick: this.onRemove.bind(null, job._id)
+					onClick: this.onRemove.bind(null, job.name)
 				}
 			];
 			return { ...job, data };

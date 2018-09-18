@@ -69,24 +69,26 @@ export const Canvas = styled.canvas`
 export const BlockCanvas = styled(Canvas)``;
 export const StripCanvas = styled(Canvas) ``;
 
-export const PredefinedColorsContainer = styled.div`
+export const PredefinedColorsContainer = styled(Grid)`
 	padding-bottom: 14px;
 `;
 
-export const PredefinedColor = styled.div`
+export const PredefinedColor = styled(Grid)`
 	border-radius: 100%;
 	width: 20px;
 	height: 20px;
 	cursor: pointer;
 	outline: none;
 	transition: box-shadow 200ms ease-in-out;
+	background-color: ${(props) => props.color};
+	margin-right: 0.9rem !important;
 
 	&:hover {
 		box-shadow: inset 0 0 10px rgba(0, 0, 0, .5)
 	}
 
-	&:not(:last-child) {
-		margin - right: 15px;
+	&:last-child {
+		margin-right: 0 !important;
 	}
 `;
 
@@ -97,7 +99,7 @@ export const ColorPointer = styled.div`
 	height: 6px;
 	border: 1px solid ${COLOR.WHITE};
 	border-radius: 100%;
-	content: "";
+	content: '';
 	transform: translate(-3px, -6px);
 `;
 

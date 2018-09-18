@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { memoize } from 'lodash';
+import { memoize, identity } from 'lodash';
 import Popover from '@material-ui/core/Popover';
 import RootRef from '@material-ui/core/RootRef';
 import Icon from '@material-ui/core/Icon';
@@ -25,6 +25,7 @@ import Button from '@material-ui/core/Button';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormControl from '@material-ui/core/FormControl';
 
+import { COLOR } from '../../../styles';
 import {
 	Panel,
 	Dot,
@@ -113,15 +114,11 @@ interface IState {
 }
 
 export class ColorPicker extends React.PureComponent<IProps, IState> {
-/* 	public static getDerivedStateFromProps(nextProps, prevState) {
-		let state = {};
-
-		if (nextProps.value !== prevState.colorHash) {
-			state = {...state, ...getColorObject(nextProps.value)};
-		}
-
-		return state;
-	} */
+	public static defaultProps: IProps = {
+		value: COLOR.WHITE,
+		predefinedColors: [],
+		onChange: identity
+	};
 
 	public state: IState = {
 		open: false,
@@ -293,11 +290,17 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPredefinedColorClick = (predefinedColor): void => {
-		this.onColorHashChange(predefinedColor.toUpperCase().replace("#", ""));
+		this.onColorHashChange(predefinedColor.toUpperCase().replace('#', ''));
+	}
+
+	public renderPredefinedColors = (colors) => {
+		return colors.slice(0, 7).map((color, index) => {
+			return (<PredefinedColor item key={index} color={color} />);
+		});
 	}
 
 	public render() {
-		const {value} = this.props;
+		const {value, predefinedColors} = this.props;
 		const {open, pointerLeft, pointerTop, colorHash, color} = this.state;
 
 		return (
@@ -325,9 +328,18 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					onClose={this.handleClose}
 					onEnter={this.onPanelOpen}
 				>
-					<PredefinedColorsContainer>
-						<PredefinedColor />
-					</PredefinedColorsContainer>
+					{
+						predefinedColors.length ? (
+							<PredefinedColorsContainer
+								container
+								direction="row"
+								alignItems="center"
+								justify="flex-start"
+							>
+								{this.renderPredefinedColors(predefinedColors)}
+							</PredefinedColorsContainer>
+						) : null
+					}
 					<Grid
 						container
 						direction="row"
@@ -372,7 +384,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						<Grid item>
 							<FormControl>
 								<SelectedHash
-									value={color}
+									value={this.state.color}
 									onChange={(event) => this.onColorHashChange(event.currentTarget.value)}
 									startAdornment={<InputAdornment position="start">#</InputAdornment>}
 								/>
