@@ -28,6 +28,7 @@ import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
 import { Highlight } from '../highlight/highlight.component';
+import { ColorPicker } from '../colorPicker/colorPicker.component';
 
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
@@ -74,7 +75,8 @@ const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: UserItem,
 	[CELL_TYPES.JOB]: CellSelect,
 	[CELL_TYPES.PERMISSIONS]: CellSelect,
-	[CELL_TYPES.ICON_BUTTON]: RowCellButton
+	[CELL_TYPES.ICON_BUTTON]: RowCellButton,
+	[CELL_TYPES.COLOR]: ColorPicker
 };
 
 const ROW_CELL_DEFAULT_PROPS = {
@@ -287,15 +289,6 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				</Row>
 			);
 		});
-	}
-
-	public renderThumb = ({ style, ...props }) => {
-		const thumbStyle = {
-			backgroundColor: `red`
-		};
-		return (
-			<div style={{ ...style, ...thumbStyle }} {...props} />
-		);
 	}
 
 	public render() {
