@@ -379,27 +379,6 @@ class RiskItemController implements ng.IController {
 		);
 	}
 
-	private isRiskDataChanged() {
-		let changed = !this.data;
-
-		if (this.riskData) {
-			const keys = Object.keys(this.riskData);
-			let keyIdx = 0;
-
-			while (!changed && keyIdx < keys.length) {
-				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
-					changed = JSON.stringify(this.riskData[keys[keyIdx]]) !==
-						JSON.stringify(this.data[keys[keyIdx]]);
-				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
-					changed = this.riskData[keys[keyIdx]] !== this.data[keys[keyIdx]];
-				}
-				keyIdx++;
-			}
-		}
-
-		return changed;
-	}
-
 	public handleUpdateError(error) {
 		this.saving = false;
 		const content = "Property update failed." +
@@ -905,6 +884,27 @@ class RiskItemController implements ng.IController {
 			// Watch for risk change
 			this.risksNotifications.subscribeToUpdated(this.onRiskUpdated, this);
 		}
+	}
+
+	private isRiskDataChanged() {
+		let changed = !this.data;
+
+		if (this.riskData) {
+			const keys = Object.keys(this.riskData);
+			let keyIdx = 0;
+
+			while (!changed && keyIdx < keys.length) {
+				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+					changed = JSON.stringify(this.riskData[keys[keyIdx]]) !==
+						JSON.stringify(this.data[keys[keyIdx]]);
+				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+					changed = this.riskData[keys[keyIdx]] !== this.data[keys[keyIdx]];
+				}
+				keyIdx++;
+			}
+		}
+
+		return changed;
 	}
 
 }
