@@ -198,12 +198,15 @@ panel-card-filter md-icon:hover {
 }
 
 /** Panel Card Chips Filter ****************************************************************************************************/
-panel-card-chips-filter .md-chip-input-container{
+.threeDRepo panel-card-chips-filter .md-chip-input-container{
   width: 100%;
 }
 
-panel-card-chips-filter input {
-  border-bottom: 1px solid rgb(12, 47, 84) !important;
+.threeDRepo panel-card-chips-filter .md-chips .md-chip-input-container input {
+  border-top: 0px transparent;
+  border-left: 0px transparent;
+  border-top: 0px transparent;
+  border-bottom: 1px solid rgb(12, 47, 84);
 }
 
 panel-card-chips-filter .collapse-button {
@@ -221,10 +224,22 @@ panel-card-chips-filter md-chips.collapsed md-chips-wrap {
   overflow: hidden;
 }
 
+panel-card-chips-filter button.copy-button {
+  top: -41px;
+  margin-left: 280px;
+  position: relative;
+}
+
 #clipboard-target {
   width: 1px;
   height: 1px;
+  border: 0px transparent;
+  color: transparent;
+  outline: none;
+  position: absolute;
 }
+
+
 
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {

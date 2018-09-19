@@ -10,6 +10,7 @@ md-chips(ng-model="vm.chips"
 		md-items="item in vm.querySearch(vm.searchText)"
 		md-item-text="item.name"
 		placeholder="{{vm.placeHolder}}"
+		ng-paste="vm.onPaste($event)"
 		ng-show="!vm.collapsed || vm.chips.length === 0")
 
 		span(md-highlight-text="vm.searchText") {{item.nameType}}:{{item.name}}
@@ -18,12 +19,11 @@ md-chips(ng-model="vm.chips"
 		span {{ vm.formatChip($chip) }}
 
 
-
 md-button.md-icon-button#additionalInfoButton(aria-label="Collapse Toggle" class="collapse-button" ng-show="vm.chips.length>0" ng-click="vm.collapsed = !vm.collapsed")
 	md-icon.angular-material-icons(ng-if="vm.collapsed") keyboard_arrow_right
 	md-icon.angular-material-icons(ng-if="!vm.collapsed") keyboard_arrow_down
 	md-tooltip(ng-if="vm.collapsed") Expand
 	md-tooltip(ng-if="!vm.collapsed") Collapse
 
-input(id="clipboard-target" value="{{vm.chips}}")
-button(ngclipboard data-clipboard-target="#clipboard-target") copy dude
+input(id="clipboard-target" value="{{vm.chips.map(vm.formatChip).join(',')}}")
+button.copy-button(ngclipboard data-clipboard-target="#clipboard-target" ng-show="!vm.collapsed && vm.chips.length>0 ") copy dude
