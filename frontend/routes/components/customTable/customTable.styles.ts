@@ -75,6 +75,11 @@ export const Cell = styled.div`
 	width: ${(props: any) => props.width || 'auto'};
 `;
 
+export const CheckboxCell = styled(Cell)`
+	overflow: visible;
+	padding: 0 0 0 12px;
+`;
+
 export const Container = styled.div`
 	&& {
 		overflow: hidden;

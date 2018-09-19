@@ -33,7 +33,7 @@ import { ColorPicker } from '../colorPicker/colorPicker.component';
 
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
-import { Container, Head, Row, SortLabel, Cell } from './customTable.styles';
+import { Container, Head, Row, SortLabel, Cell, CheckboxCell } from './customTable.styles';
 
 const HeaderCell = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
 	if (!cell.name) {
@@ -86,8 +86,7 @@ export const CELL_TYPES = {
 
 const HEADER_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: CellUserSearch,
-	[CELL_TYPES.NAME]: CellUserSearch,
-	[CELL_TYPES.CHECKBOX]: CheckboxField
+	[CELL_TYPES.NAME]: CellUserSearch
 };
 
 const ROW_CELL_COMPONENTS = {
@@ -95,8 +94,7 @@ const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.JOB]: CellSelect,
 	[CELL_TYPES.PERMISSIONS]: CellSelect,
 	[CELL_TYPES.ICON_BUTTON]: RowCellButton,
-	[CELL_TYPES.COLOR]: ColorPicker,
-	[CELL_TYPES.CHECKBOX]: CheckboxField
+	[CELL_TYPES.COLOR]: ColorPicker
 };
 
 const CELL_DEFAULT_PROPS = {
@@ -118,6 +116,9 @@ const CELL_DEFAULT_PROPS = {
 	},
 	[CELL_TYPES.ICON_BUTTON]: {
 		width: '83px'
+	},
+	[CELL_TYPES.CHECKBOX]: {
+		width: '50px'
 	}
 };
 
@@ -340,10 +341,12 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				<Row key={index}>
 					{
 						showCheckbox ? (
-							<CheckboxField
-								onChange={this.handleSelectionChange(row)}
-								checked={row.selected}
-							/>
+							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
+								<CheckboxField
+									onChange={this.handleSelectionChange(row)}
+									checked={row.selected}
+								/>
+							</CheckboxCell>
 						) : null
 					}
 					{row.data.map((data, cellIndex) => {
@@ -380,11 +383,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				<Head>
 					{
 						showCheckbox ? (
-							<CheckboxField
-								onChange={this.handleSelectAll}
-								indeterminate={isIndeterminate}
-								checked={selectedAll || isIndeterminate}
-							/>
+							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
+								<CheckboxField
+									onChange={this.handleSelectAll}
+									indeterminate={isIndeterminate}
+									checked={selectedAll || isIndeterminate}
+								/>
+							</CheckboxCell>
 						) : null
 					}
 					{this.renderHeader(cells)}
