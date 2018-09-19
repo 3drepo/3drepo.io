@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secrete: "testing", resave: false, saveUninitialized: false }) }
+	{ session: require("express-session")({ secret: "testing", resave: false, saveUninitialized: false }) }
 	);
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
