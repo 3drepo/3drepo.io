@@ -105,7 +105,7 @@ describe("Risks", function () {
 							expect(res.body.name).to.equal(risk.name);
 							expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
 							expect(res.body.associated_activity).to.equal(risk.associated_activity);
-							expect(res.body.desc).to.equal(risk.associated_activity);
+							expect(res.body.desc).to.equal(risk.desc);
 							expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
 							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
@@ -168,7 +168,7 @@ describe("Risks", function () {
 
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err, res) {
-						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
+						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/screenshot.png`);
 						return done(err);
 					});
 				}
@@ -402,7 +402,7 @@ describe("Risks", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
-							expect(res.body.associated_activity = associatedActivity.associated_activity);
+							expect(res.body.category = category.category);
 							done(err);
 						});
 				}
@@ -527,33 +527,6 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
 							expect(res.body.mitigation_desc).to.equal(mitigation.mitigation_desc);
-							done(err);
-						});
-				}
-			], done);
-		});
-
-		it("change level of risk should fail", function(done) {
-
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
-			let riskId;
-
-			const levelOfRisk = { level_of_risk: "low" };
-
-			async.series([
-				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
-						.send(risk)
-						.expect(200, function(err, res) {
-							riskId = res.body._id;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
-						.send(levelOfRisk)
-						.expect(400, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.RISK_LEVEL_READONLY.value);
 							done(err);
 						});
 				}

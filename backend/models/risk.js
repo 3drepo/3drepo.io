@@ -105,6 +105,14 @@ risk.createRisk = function(dbCol, newRisk) {
 
 	return Promise.all(riskAttrPromises).then(() => {
 
+		if (newRisk.likelihood && isNaN(parseInt(newRisk.likelihood))) {
+			return Promise.reject(responseCodes.RISK_LIKELIHOOD_INVALID);
+		}
+
+		if (newRisk.consequence && isNaN(parseInt(newRisk.consequence))) {
+			return Promise.reject(responseCodes.RISK_CONSEQUENCE_INVALID);
+		}
+
 		if (newRisk.viewpoint) {
 			newRisk.viewpoint.guid = utils.generateUUID();
 
