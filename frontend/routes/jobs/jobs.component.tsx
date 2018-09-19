@@ -33,7 +33,8 @@ const JOBS_TABLE_CELLS = [{
 	searchBy: ['name']
 }, {
 	name: 'Colour',
-	type: CELL_TYPES.COLOR
+	type: CELL_TYPES.COLOR,
+	hideSortIcon: true
 }, {
 	type: CELL_TYPES.EMPTY
 }, {

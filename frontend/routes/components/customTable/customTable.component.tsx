@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values, stubTrue } from 'lodash';
+import { matches, cond, orderBy, pick, values, stubTrue, first } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -34,8 +34,16 @@ import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.compo
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Row, SortLabel, Cell } from './customTable.styles';
 
-const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
-	return cell.name ? (
+const HeaderCell = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
+	if (!cell.name) {
+		return (<></>);
+	}
+
+	if (hideSortIcon) {
+		return (<>{cell.name}</>);
+	}
+
+	return (
 		<SortLabel
 			active={sortBy === cell.type}
 			direction={sortBy === cell.type ? order : SORT_ORDER_TYPES.ASCENDING}
@@ -43,7 +51,7 @@ const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
 		>
 			{cell.name}
 		</SortLabel>
-	) : (<></>);
+	);
 };
 
 const RowCellButton = ({icon, onClick, disabled}) => {
@@ -79,7 +87,7 @@ const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.COLOR]: ColorPicker
 };
 
-const ROW_CELL_DEFAULT_PROPS = {
+const CELL_DEFAULT_PROPS = {
 	[CELL_TYPES.EMPTY]: {
 		flex: 100
 	},
@@ -173,11 +181,15 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		const {sortBy, order, searchText} = prevState;
+		const initialSortBy = (first(nextProps.cells) || {type: CELL_TYPES.NAME} as any).type;
+		const newSortBy = !prevState.processedRows.length ? initialSortBy : sortBy;
+
 		return {
 			searchFields,
+			sortBy: newSortBy,
 			processedRows: getProcessedRows({
 				rows: nextProps.rows,
-				sortBy,
+				sortBy: newSortBy,
 				order,
 				searchFields,
 				searchText
@@ -244,7 +256,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		return cells.map((cell, index) => {
 			const CellComponent = HEADER_CELL_COMPONENTS[cell.type] || HeaderCell;
 			const cellData = {
-				...(ROW_CELL_DEFAULT_PROPS[cell.type] || {}),
+				...(CELL_DEFAULT_PROPS[cell.type] || {}),
 				...cell
 			};
 
@@ -257,6 +269,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 							order={order}
 							onClick={this.createSortHandler(cell.type)}
 							onChange={this.createSearchHandler()}
+							hideSortIcon={cellData.hideSortIcon}
 						/>
 					)}
 				</Cell>
@@ -274,7 +287,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{row.data.map((data, cellIndex) => {
 						const type = cells[cellIndex].type;
 						const CellComponent = ROW_CELL_COMPONENTS[type];
-						const cellProps = ROW_CELL_DEFAULT_PROPS[type];
+						const cellProps = CELL_DEFAULT_PROPS[type];
 
 						return (
 							<Cell key={cellIndex} {...cellProps}>

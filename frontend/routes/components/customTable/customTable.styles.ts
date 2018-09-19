@@ -36,7 +36,6 @@ const flexMemoized = memoize(({flex}) => {
 export const SortLabel = styled(TableSortLabel)`
 	&& {
 		flex-direction: row-reverse;
-		font-weight: ${FONT_WEIGHT.SEMIBOLD};
 		margin-left: ${({active}) => active ? 0 : '-5px'};
 	}
 
@@ -107,4 +106,9 @@ export const Row = styled.div`
 
 export const Head = styled(Row)`
 	flex: none;
+
+	${SortLabel},
+	${Cell} {
+		font-weight: ${FONT_WEIGHT.SEMIBOLD};
+	}
 `;
