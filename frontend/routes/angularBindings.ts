@@ -9,10 +9,12 @@ import { react2angular as wrap } from 'react2angular';
 import Users from './users/users.container';
 import DialogContainer from './components/dialogContainer/dialogContainer.container';
 import Jobs from './jobs/jobs.container';
+import ModelsPermissions from './modelsPermissions/modelsPermissions.container';
 
 angular
 	.module('3drepo')
 
 	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active', 'limit']))
 	.component('jobs', wrap(Jobs, ['active']))
-	.component('dialogContainer', wrap(DialogContainer));
+	.component('dialogContainer', wrap(DialogContainer))
+	.component('modelsPermissions', wrap(ModelsPermissions, ['models']));

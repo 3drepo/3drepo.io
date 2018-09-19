@@ -16,11 +16,12 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values, stubTrue, first, isEqual } from 'lodash';
+import { matches, cond, orderBy, pick, values, stubTrue, first, isEqual, omit } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 import { SORT_TYPES } from '../../../constants/sorting';
@@ -62,6 +63,15 @@ const RowCellButton = ({icon, onClick, disabled}) => {
 	);
 };
 
+const CheckboxField = (props) => {
+	return (
+		<Checkbox
+			{...props}
+			color="secondary"
+		/>
+	);
+};
+
 export const CELL_TYPES = {
 	USER: 1,
 	JOB: 2,
@@ -76,7 +86,8 @@ export const CELL_TYPES = {
 
 const HEADER_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: CellUserSearch,
-	[CELL_TYPES.NAME]: CellUserSearch
+	[CELL_TYPES.NAME]: CellUserSearch,
+	[CELL_TYPES.CHECKBOX]: CheckboxField
 };
 
 const ROW_CELL_COMPONENTS = {
@@ -84,7 +95,8 @@ const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.JOB]: CellSelect,
 	[CELL_TYPES.PERMISSIONS]: CellSelect,
 	[CELL_TYPES.ICON_BUTTON]: RowCellButton,
-	[CELL_TYPES.COLOR]: ColorPicker
+	[CELL_TYPES.COLOR]: ColorPicker,
+	[CELL_TYPES.CHECKBOX]: CheckboxField
 };
 
 const CELL_DEFAULT_PROPS = {
@@ -168,6 +180,7 @@ const getSearchFields = (cells) => {
 interface IProps {
 	cells: any[];
 	rows: any[];
+	onSelectionChange: (selectedRows) => void;
 }
 
 interface IState {
@@ -176,6 +189,7 @@ interface IState {
 	processedRows: any;
 	searchFields: any;
 	searchText: string;
+	selectedRows: any[];
 }
 
 export class CustomTable extends React.PureComponent<IProps, IState> {
@@ -196,7 +210,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		order: SORT_ORDER_TYPES.ASCENDING,
 		processedRows: [],
 		searchFields: {},
-		searchText: ''
+		searchText: '',
+		selectedRows: []
 	};
 
 	public componentDidUpdate(prevProps, prevState) {
@@ -258,6 +273,26 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		this.setState({processedRows, searchText});
 	}
 
+	public handleSelectionChange = (row) => (event, checked) => {
+		const selectedRows = [...this.state.selectedRows]
+			.filter((selectedRow) => !isEqual(omit(selectedRow, 'selected'), omit(row, 'selected')));
+
+		if (checked) {
+			selectedRows.push(row);
+		}
+
+		this.setState({selectedRows}, () => {
+			this.props.onSelectionChange(selectedRows);
+		});
+	}
+
+	public handleSelectAll = (event, checked) => {
+		const selectedRows = checked ? [...this.state.processedRows] : [];
+		this.setState({selectedRows}, () => {
+			this.props.onSelectionChange(selectedRows);
+		});
+	}
+
 	/**
 	 * Renders row for each user
 	 */
@@ -299,10 +334,18 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	/**
 	 * Renders row for each user
 	 */
-	public renderRows = (rows = [], cells = []) => {
+	public renderRows = (rows = [], cells = [], showCheckbox) => {
 		return rows.map((row, index) => {
 			return (
 				<Row key={index}>
+					{
+						showCheckbox ? (
+							<CheckboxField
+								onChange={this.handleSelectionChange(row)}
+								checked={row.selected}
+							/>
+						) : null
+					}
 					{row.data.map((data, cellIndex) => {
 						const type = cells[cellIndex].type;
 						const CellComponent = ROW_CELL_COMPONENTS[type];
@@ -324,14 +367,30 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { cells } = this.props;
+		const { cells, onSelectionChange, rows } = this.props;
 		const { processedRows } = this.state;
+		const showCheckbox = Boolean(onSelectionChange);
+
+		const numberOfSelectedRows = processedRows.filter(({selected}) => selected).length;
+		const selectedAll = numberOfSelectedRows && numberOfSelectedRows === rows.length;
+		const isIndeterminate = Boolean(numberOfSelectedRows && !selectedAll);
 
 		return (
 			<Container>
-				<Head>{this.renderHeader(cells)}</Head>
+				<Head>
+					{
+						showCheckbox ? (
+							<CheckboxField
+								onChange={this.handleSelectAll}
+								indeterminate={isIndeterminate}
+								checked={selectedAll || isIndeterminate}
+							/>
+						) : null
+					}
+					{this.renderHeader(cells)}
+				</Head>
 				<SimpleBar>
-					{this.renderRows(processedRows, cells)}
+					{this.renderRows(processedRows, cells, showCheckbox)}
 				</SimpleBar>
 			</Container>
 		);

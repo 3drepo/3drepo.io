@@ -38,6 +38,14 @@
     on-change="vm.onPermissionsChange(updatedPermissions)"
     mode="projects")
 
+
+  models-permissions(
+    flex
+    layout="row"
+    ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS"
+    models="vm.models"
+  )
+
   .modelsPermissions(flex layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
     .modelsPermissionsPlaceholder(
       layout="row"
