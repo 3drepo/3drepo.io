@@ -918,59 +918,40 @@ export class TreeService {
 	}
 
 	/**
-	 * Set the selection state of a nodes parents to represent it's children
-	 * @param node the node to set a new selection state on
-	 * @param select wether the node should be selected or not
+	 * Set selection status of node.
+	 * @param node node to set selection status of
+	 * @param selectedState the new selection state of the node
 	 */
-	public traverseNodeAndSetSelected(node: any[], selectedState: number) {
+	public setNodeSelection(node: any, selectedState: number) {
 
-		let nodes: any[] = [node]; // make a copy
+		let nodes: any[] = [node];
 
 		const select = selectedState === this.SELECTION_STATES.selected;
 		while (nodes.length) {
 			const currentNode = nodes.pop();
+			if (currentNode) {
+				if (currentNode.toggleState !== this.VISIBILITY_STATES.invisible) {
 
-			const nodeSelected = this.currentSelectedNodes[currentNode];
+					if (!select) {
+						currentNode.selected = this.SELECTION_STATES.unselected;
+						if (this.currentSelectedNodes[currentNode._id]) {
+							delete this.currentSelectedNodes[currentNode._id];
+						}
+					} else if (currentNode.toggleState === this.VISIBILITY_STATES.parentOfInvisible) {
+						currentNode.selected = this.SELECTION_STATES.parentOfUnselected;
+					} else {
+						currentNode.selected = this.SELECTION_STATES.selected;
+						this.currentSelectedNodes[currentNode._id] = currentNode;
+					}
 
-			if (nodeSelected) {
-				delete this.currentSelectedNodes[currentNode._id];
-			} else if (select && currentNode.selected !== this.SELECTION_STATES.parentOfUnselected) {
-				this.currentSelectedNodes[currentNode._id] = currentNode;
-			}
-
-			if (currentNode.toggleState !== this.VISIBILITY_STATES.invisible) {
-
-				if (!select) {
-					currentNode.selected = this.SELECTION_STATES.unselected;
-				} else if (currentNode.toggleState === this.VISIBILITY_STATES.parentOfInvisible) {
-					currentNode.selected = this.SELECTION_STATES.parentOfUnselected;
-				} else {
-					currentNode.selected = this.SELECTION_STATES.selected;
+					if (currentNode.children && currentNode.children.length) {
+						nodes = nodes.concat(currentNode.children);
+					}
 				}
-
-				if (currentNode.children && currentNode.children.length) {
-					nodes = nodes.concat(currentNode.children);
-				}
-
 			}
-
 		}
 
 		this.setSelectionOnParentNodes(node, selectedState);
-
-	}
-
-	/**
-	 * Set selection status of node.
-	 * @param node node to set selection status of
-	 * @param selected the new selection state of the node
-	 */
-	public setNodeSelection(node: any, selected: number) {
-
-		if (!node && node.selected === selected || node.toggleState === this.VISIBILITY_STATES.invisible) {
-			return;
-		}
-		this.traverseNodeAndSetSelected(node, selected);
 
 	}
 
@@ -1351,7 +1332,7 @@ export class TreeService {
 			const startLevel = nodeToCollapse.level;
 			nodeToCollapse.expanded = false;
 
-			const idx = startIdx;
+			let idx = startIdx;
 
 			// collapse every descendent
 			while (this.nodesToShow.length > idx && this.nodesToShow[idx].level > startLevel) {
@@ -1367,7 +1348,7 @@ export class TreeService {
 	 * Expand a given tree node in the UI
 	 * @param nodeToExpand the path array to traverse down
 	 */
-	private expandTreeNode(nodeToExpand: any, collapseChildren?: boolean = false, exemptChild?: any) {
+	private expandTreeNode(nodeToExpand: any, collapseChildren?: boolean, exemptChild?: any) {
 
 		if (!nodeToExpand.expanded && nodeToExpand.children && nodeToExpand.children.length > 0) {
 
