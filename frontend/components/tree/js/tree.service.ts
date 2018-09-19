@@ -967,7 +967,7 @@ export class TreeService {
 	 */
 	public setNodeSelection(node: any, selected: number) {
 
-		if (node.selected === selected || node.toggleState === this.VISIBILITY_STATES.invisible) {
+		if (!node && node.selected === selected || node.toggleState === this.VISIBILITY_STATES.invisible) {
 			return;
 		}
 		this.traverseNodeAndSetSelected(node, selected);
