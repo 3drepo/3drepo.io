@@ -126,7 +126,6 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 		const { onSave, onCancel, clearSuggestions, jobs, users, title } = this.props;
 		return (
 			<Container>
-
 				<Grid
 					container
 					direction="column">

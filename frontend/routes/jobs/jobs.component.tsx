@@ -22,7 +22,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import { theme } from '../../styles';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
-import { NewUserForm } from '../components/newUserForm/newUserForm.component';
+import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 
 import { Container, Content, Footer } from './jobs.styles';
@@ -110,7 +110,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 	public renderNewJobForm = (container) => {
 		const formProps = {
 			title: 'Add new job',
-			jobs: this.props.jobs,
+			colors: this.props.colors,
 			onSave: this.onSave
 		};
 
@@ -118,7 +118,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 			<FloatingActionPanel
 				key={this.state.panelKey}
 				render={({ closePanel }) => {
-					return <NewUserForm {...formProps} onCancel={closePanel} />;
+					return <NewJobForm {...formProps} onCancel={closePanel} />;
 				}}
 			/>
 		);

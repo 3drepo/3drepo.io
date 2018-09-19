@@ -36,6 +36,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	getUsersSuggestionsSuccess: ['suggestions'],
 	clearUsersSuggestions: [],
 	createJob: ['job'],
+	createJobSuccess: ['job'],
 	removeJob: ['jobId'],
 	removeJobSuccess: ['jobId'],
 	updateJobColor: ['job'],
@@ -127,6 +128,20 @@ export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) =>
 	return { ...state, usersSuggestions: [] };
 };
 
+export const updateJobsColors = (state = INITIAL_STATE, { color }) => {
+	const jobsColors = [...state.jobsColors] as any;
+	if (color && !jobsColors.includes(color)) {
+		jobsColors.unshift(color);
+	}
+
+	return { ...state, jobsColors };
+};
+
+export const createJobSuccess = (state = INITIAL_STATE, { job }) => {
+	const jobs = [...state.jobs, job];
+	return updateJobsColors({ ...state, jobs }, job);
+};
+
 export const updateJobSuccess = (state = INITIAL_STATE, { job }) => {
 	const jobs = [...state.jobs].map((jobData) => {
 		if (jobData._id === job._id) {
@@ -136,12 +151,7 @@ export const updateJobSuccess = (state = INITIAL_STATE, { job }) => {
 		return jobData;
 	});
 
-	const jobsColors = [...state.jobsColors] as any;
-	if (job.color && !jobsColors.includes(job.color)) {
-		jobsColors.push(job.color);
-	}
-
-	return { ...state, jobs, jobsColors };
+	return updateJobsColors({ ...state, jobs }, job);
 };
 
 export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
@@ -162,6 +172,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
+	[UserManagementTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
 	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess
 });

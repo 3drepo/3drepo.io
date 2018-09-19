@@ -17,28 +17,43 @@
 
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
-import Popover from '@material-ui/core/Popover';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 
-export const Container = styled.div``;
+import { COLOR } from '../../../styles';
 
-export const FloatingButton = styled(Button) `
+export const Title = styled.div`
+	font-size: 14px;
+	color: ${COLOR.BLACK_20};
+`;
+
+export const StyledTextField = styled(TextField) `
+	font-size: 14px;
+	margin-bottom: 12px;
+`;
+
+export const StyledTextFieldContainer = styled(Grid) `
+	flex: 1;
+`;
+
+export const SaveButton = styled(Button) `
 	&& {
-		position: absolute;
-		top: 166px;
-		right: 14px;
+		width: 100%;
+		margin-top: 16px;
 	}
 `;
 
-export const Panel = styled(Popover).attrs({
-	classes: {
-		paper: 'floating-panel'
+export const Container = styled.div`
+	width: 250px;
+
+	${StyledTextField},
+	${Title} {
+		margin-bottom: 12px;
 	}
-})`
-	.floating-panel {
-		margin-left: -15px;
-		margin-top: -20px;
-		padding: 16px;
+
+	${StyledTextField}, ${StyledTextField} *
+	[class*='MuiTypography'] {
 		font-size: 14px;
-		box-sizing: border-box;
+		color: ${COLOR.BLACK_60};
 	}
 `;

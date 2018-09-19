@@ -116,9 +116,10 @@ const CELL_DEFAULT_PROPS = {
  * @returns {Array}
  */
 const getSortedRows = (rows, type, order) => {
-	const { USER, JOB, PERMISSIONS } = CELL_TYPES;
+	const { USER, JOB, PERMISSIONS, NAME } = CELL_TYPES;
 	const sort = cond([
 		[matches({ type: USER }), sortByName.bind(null, rows)],
+		[matches({ type: NAME }), sortByName.bind(null, rows)],
 		[matches({ type: JOB }), sortByJob.bind(null, rows)],
 		[matches({ type: PERMISSIONS }), (options) => {
 			return orderBy(rows, ['isAdmin'], options.order);

@@ -22,7 +22,6 @@ import RootRef from '@material-ui/core/RootRef';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import FormControl from '@material-ui/core/FormControl';
 
 import {
@@ -39,20 +38,21 @@ import {
 	PredefinedColorsContainer,
 	PredefinedColor,
 	SelectedColor,
-	SelectedHash
+	SelectedHash,
+	StyledStartAdornment
 } from './colorPicker.styles';
 
 const COLORS = {
-	RED: "rgba(255,0,0,1)",
-	GREEN: "rgba(0, 255, 0, 1)",
-	SKY_BLUE: "rgba(0, 255, 255, 1)",
-	BLUE: "rgba(0, 0, 255, 1)",
-	YELLOW: "rgba(255, 255, 0, 1)",
-	PURPLE: "rgba(255, 0, 255, 1)",
-	BLACK: "rgba(0,0,0,1)",
-	BLACK_TRANSPARENT: "rgba(0,0,0,0)",
-	WHITE: "rgba(255,255,255,1)",
-	WHITE_TRANSPARENT: "rgba(255,255,255,0)"
+	RED: 'rgba(255,0,0,1)',
+	GREEN: 'rgba(0, 255, 0, 1)',
+	SKY_BLUE: 'rgba(0, 255, 255, 1)',
+	BLUE: 'rgba(0, 0, 255, 1)',
+	YELLOW: 'rgba(255, 255, 0, 1)',
+	PURPLE: 'rgba(255, 0, 255, 1)',
+	BLACK: 'rgba(0,0,0,1)',
+	BLACK_TRANSPARENT: 'rgba(0,0,0,0)',
+	WHITE: 'rgba(255,255,255,1)',
+	WHITE_TRANSPARENT: 'rgba(255,255,255,0)'
 };
 
 const componentToHex = memoize((c) => {
@@ -91,9 +91,11 @@ const findColorPositionOnCanvas = (canvas, colorHash): { x: number, y: number } 
 };
 
 const getColorObject = (colorHash = '') => {
+	const colorValue = colorHash.replace('#', '');
 	return {
 		colorHash: `${colorHash}`,
-		color: colorHash.replace('#', '')
+		color: colorValue,
+		hashInput: colorValue
 	};
 };
 
@@ -110,6 +112,7 @@ interface IState {
 	color: string;
 	pointerTop?: number;
 	pointerLeft?: number;
+	hashInput?: string;
 }
 
 export class ColorPicker extends React.PureComponent<IProps, IState> {
@@ -122,7 +125,8 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		open: false,
 		isDragEnabled: false,
 		colorHash: '',
-		color: ''
+		color: '',
+		hashInput: ''
 	};
 
 	public colorSelectRef = React.createRef();
@@ -305,9 +309,15 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public handleHashInputChange = (event) => {
+		this.setState({ hashInput: event.currentTarget.value }, () => {
+			this.onColorHashChange(this.state.hashInput);
+		});
+	}
+
 	public render() {
 		const {value, predefinedColors} = this.props;
-		const {open, pointerLeft, pointerTop, colorHash, color} = this.state;
+		const {open, pointerLeft, pointerTop, colorHash, color, hashInput} = this.state;
 
 		return (
 			<>
@@ -390,9 +400,9 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						<Grid item>
 							<FormControl>
 								<SelectedHash
-									value={this.state.color}
-									onChange={(event) => this.onColorHashChange(event.currentTarget.value)}
-									startAdornment={<InputAdornment position="start">#</InputAdornment>}
+									value={hashInput}
+									onChange={this.handleHashInputChange}
+									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
 								/>
 							</FormControl>
 						</Grid>

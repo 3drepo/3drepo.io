@@ -21,6 +21,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 
@@ -110,6 +111,13 @@ export const SelectedColor = styled.div`
 	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
 `;
 
+export const StyledStartAdornment = styled(InputAdornment)`
+	&& {
+		max-height: 3em;
+		margin-right: 3px;
+	}
+`;
+
 export const SelectedHash = styled(Input)`
 	&& {
 		margin-left: 25px;
@@ -121,7 +129,7 @@ export const SelectedHash = styled(Input)`
 		width: 70px;
 		height: 20px;
 		color: #333333;
-		font-size: 12px;
+		font-size: 14px;
 		margin-left: 2px;
 		outline: none;
 	}

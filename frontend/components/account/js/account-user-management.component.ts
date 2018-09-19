@@ -81,7 +81,6 @@ class AccountUserManagementController implements ng.IController {
 	private selectedTeamspace;
 	private selectedTab;
 	private selectedProject;
-	private showAddingPanel;
 	private selectedView;
 
 	constructor(
@@ -189,42 +188,11 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	/**
-	 * Change panel visibility
-	 * @param forceHide
-	 */
-	public toggleNewDataPanel(forceHide = false): void {
-		if (!this.isAddButtonDisabled()) {
-			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
-		}
-	}
-
-	/**
 	 * Update local list of members
 	 * @param updatedMembers
 	 */
 	public onMembersChange(updatedMembers): void {
 		this.users = [...updatedMembers];
-	}
-
-	/**
-	 * Add new job to local list of jobs
-	 * @param updatedMembers
-	 */
-	public onJobSave(newJob): void {
-		this.jobs = [...this.jobs, newJob];
-
-		if (newJob.color && !this.jobsColors.includes(newJob.color)) {
-			this.jobsColors = [...this.jobsColors, newJob.color];
-		}
-		this.showAddingPanel = false;
-	}
-
-	public onJobsChange(updatedJobs): void {
-		this.jobs = [...updatedJobs];
-	}
-
-	public isAddButtonDisabled(): boolean {
-		return this.isLoadingTeamspace;
 	}
 }
 
