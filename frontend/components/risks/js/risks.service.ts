@@ -158,12 +158,11 @@ export class RisksService {
 			creator_role: creatorRole,
 			associated_activity: "",
 			category: "",
-			likelihood: 0,
-			consequence: 0,
-			level_of_risk: 0,
-			mitigation_status: "",
+			likelihood: "0",
+			consequence: "0",
+			level_of_risk: "0",
+			mitigation_status: "proposed",
 			assigned_roles: [],
-			topic_type: "for_information",
 			viewpoint: {}
 		};
 	}

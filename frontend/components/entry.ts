@@ -107,6 +107,7 @@ import "./risks/js/risk-item.component";
 import "./risks/js/risks-card.component";
 import "./risks/js/risks-list.component";
 import "./risks/js/risks.service";
+import "./screenshot/js/screenshot.component";
 import "./sign-up/js/sign-up.component";
 import "./terms/js/terms.component";
 import "./tree/js/tree.component";

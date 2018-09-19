@@ -188,15 +188,15 @@ class RiskItemController implements ng.IController {
 		];
 
 		this.actions = {
-			screen_shot: {
+			screenshot: {
 				id: "screenshot",
 				icon: "camera_alt",
-				label: "Screen shot",
+				label: "Screenshot",
 				disabled: () => {
 					return !this.data && this.submitDisabled;
 				},
 				visible: () => {
-					return true;
+					return !this.data;
 				},
 				selected: false
 			},
@@ -371,11 +371,33 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canSubmitUpdateRisk() {
-		return this.risksService.canSubmitUpdateRisk(
+		return this.isRiskDataChanged() &&
+			this.risksService.canSubmitUpdateRisk(
 			this.riskData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
+	}
+
+	private isRiskDataChanged() {
+		let changed = !this.data;
+
+		if (this.riskData) {
+			const keys = Object.keys(this.riskData);
+			let keyIdx = 0;
+
+			while (!changed && keyIdx < keys.length) {
+				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+					changed = JSON.stringify(this.riskData[keys[keyIdx]]) !==
+						JSON.stringify(this.data[keys[keyIdx]]);
+				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+					changed = this.riskData[keys[keyIdx]] !== this.data[keys[keyIdx]];
+				}
+				keyIdx++;
+			}
+		}
+
+		return changed;
 	}
 
 	public handleUpdateError(error) {
@@ -421,11 +443,11 @@ class RiskItemController implements ng.IController {
 	}
 
 	/**
-	 * Show screen shot
+	 * Show screenshot
 	 * @param event
 	 * @param viewpoint
 	 */
-	public showScreenShot(event, viewpoint) {
+	public showScreenshot(event, viewpoint) {
 		if (viewpoint.screenshot) {
 
 			// We have a saved screenshot we use that
@@ -440,19 +462,25 @@ class RiskItemController implements ng.IController {
 	}
 
 	/**
-	 * Show screen shot dialog
+	 * Show screenshot dialog
 	 * @param event
 	 */
-	public showScreenshotDialog(event) {
-		const parentScope = this;
-		this.$mdDialog.show({
-			controller() {
-				this.riskItemComponent = parentScope;
+	public showScreenshotDialog($event) {
+		const config = {
+			attachTo: angular.element(document.body),
+			controller: () => {},
+			locals: {
+				parentCtrl: this
 			},
+			bindToController: true,
 			controllerAs: "vm",
-			templateUrl: "templates/issue-screen-shot-dialog.html",
-			targetEvent: event
-		});
+			targetEvent: $event,
+			templateUrl: "templates/screenshot-dialog.html",
+			clickOutsideToClose: true,
+			escapeToClose: true,
+			focusOnOpen: true
+		};
+		this.$mdDialog.show(config);
 	}
 
 	/**
@@ -478,12 +506,12 @@ class RiskItemController implements ng.IController {
 			}
 			break;
 
-		case "screen_shot":
+		case "screenshot":
 
 			// There is no concept of selected in screenshot as there will be a popup once you click the button
 			this.actions[action].selected = false;
 
-			delete this.screenshot; // Remove any clicked on screen shot
+			delete this.screenshot; // Remove any clicked on screenshot
 			this.showScreenshotDialog(event);
 			break;
 
