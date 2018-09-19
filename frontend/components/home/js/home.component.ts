@@ -171,7 +171,6 @@ class HomeController implements ng.IController {
 		* Watch the state to handle moving to and from the login page
 		*/
 		this.$scope.$watch("vm.state", (oldState, newState) => {
-
 			const change = JSON.stringify(oldState) !== JSON.stringify(newState);
 
 			this.loggedIn = this.AuthService.isLoggedIn();
@@ -211,7 +210,15 @@ class HomeController implements ng.IController {
 					this.isLoggedOutPage = false;
 					this.page = "";
 					this.$location.search({}); // Reset query parameters
-					this.$location.path("/" + this.AuthService.getUsername());
+
+					let url = "/" + this.AuthService.getUsername();
+
+					if (this.state.returnUrl) {
+						url = this.state.returnUrl;
+						this.state.returnUrl = null;
+					}
+
+					this.$location.path(url);
 				} else if (
 					!this.AuthService.getUsername() &&
 					!legal &&
@@ -241,24 +248,24 @@ class HomeController implements ng.IController {
 
 			if (!currentData.error) {
 				if (!currentData.initialiser) {
+					if (!this.state.returnUrl) {
+						this.StateManager.updateState(true);
+					}
 
-					this.StateManager.updateState(true);
-
-					if (!this.StateManager.state.account) {
+					if (!this.state.account) {
 						const username = this.AuthService.getUsername();
 						if (!username) {
 							console.error("Username is not defined for statemanager!");
 						}
-						this.StateManager.setHomeState({
-							account: username
-						});
+
+						this.state.account = username;
+
 					}
-
 				} else if (!currentData.username) {
-
 					this.StateManager.setHomeState({
 						loggedIn: false,
-						account: null
+						account: null,
+						returnUrl: this.$location.path() !== "/" ? this.$location.path() : null
 					});
 
 					if (this.StateManager.query) {
