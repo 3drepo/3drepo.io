@@ -378,7 +378,7 @@ export class RisksService {
 						pinColor: Pin.pinColours.green,
 						selectedColor: Pin.pinColours.medSeaGreen
 					}
-				}
+				};
 
 				const isSelectedPin = this.state.selectedRisk &&
 									risk._id === this.state.selectedRisk._id;
