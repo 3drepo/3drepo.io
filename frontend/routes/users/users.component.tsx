@@ -27,8 +27,7 @@ import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.c
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
-
-import { Container, Content, Footer } from './users.styles';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
@@ -185,8 +184,13 @@ export class Users extends React.PureComponent<IProps, IState> {
 	 * Generate licences summary
 	 */
 	public getFooterLabel = () => {
-		const limit = isNumber(this.props.limit) ? this.props.limit : "unlimited";
-		return `Assigned licences: ${ this.props.users.length } out of ${ limit }`;
+		const {limit, users} = this.props;
+		if (!users) {
+			return '';
+		}
+
+		const limitValue = isNumber(limit) ? limit : 'unlimited';
+		return `Assigned licences: ${users.length} out of ${limitValue}`;
 	}
 
 	public render() {
@@ -196,20 +200,12 @@ export class Users extends React.PureComponent<IProps, IState> {
 		return (
 			<MuiThemeProvider theme={theme}>
 				<>
-					<Container
-						container
-						direction="column"
-						alignItems="stretch"
-						wrap="nowrap"
-					>
-						<Content item>
-							<CustomTable
-								cells={USERS_TABLE_CELLS}
-								rows={preparedRows}
-							/>
-						</Content>
-						{rows && (<Footer item>{this.getFooterLabel()}</Footer>)}
-					</Container>
+					<UserManagementTab footerLabel={this.getFooterLabel()}>
+						<CustomTable
+							cells={USERS_TABLE_CELLS}
+							rows={preparedRows}
+						/>
+					</UserManagementTab>
 					{active && containerElement && this.renderNewUserForm(containerElement)}
 				</>
 			</MuiThemeProvider>

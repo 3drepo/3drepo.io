@@ -24,8 +24,8 @@ import { theme } from '../../styles';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
-
-import { Container, Content, Footer } from './jobs.styles';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { Container } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
@@ -95,6 +95,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 				{
 					value: job.color,
 					predefinedColors: colors,
+					disableUnderline: true,
 					onChange: this.handleColorChange(job.name)
 				},
 				{},
@@ -132,23 +133,15 @@ export class Jobs extends React.PureComponent<IProps, any> {
 		const preparedRows = this.getJobsTableRows(rows, colors);
 		return (
 			<MuiThemeProvider theme={theme}>
-				<>
-					<Container
-						container
-						direction="column"
-						alignItems="stretch"
-						wrap="nowrap"
-					>
-						<Content item>
-							<CustomTable
-								cells={JOBS_TABLE_CELLS}
-								rows={preparedRows}
-							/>
-						</Content>
-						{rows.length && (<Footer item>Manage jobs</Footer>)}
-					</Container>
+				<Container>
+					<UserManagementTab footerLabel="Manage jobs">
+						<CustomTable
+							cells={JOBS_TABLE_CELLS}
+							rows={preparedRows}
+						/>
+					</UserManagementTab>
 					{active && containerElement && this.renderNewJobForm(containerElement)}
-				</>
+				</Container>
 			</MuiThemeProvider>
 		);
 	}

@@ -16,14 +16,5 @@
  */
 
 import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
 
-
-
-export const Container = styled.div `
-  height: 100%;
-
-	${ColorSelect} {
-    border: none;
-  }
-`;
+export const Container = styled.div``;

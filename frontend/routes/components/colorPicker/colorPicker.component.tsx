@@ -103,6 +103,7 @@ interface IProps {
 	value?: string;
 	predefinedColors?: string[];
 	onChange?: (color) => void;
+	disableUnderline?: boolean;
 }
 
 interface IState {

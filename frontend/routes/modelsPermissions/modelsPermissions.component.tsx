@@ -15,15 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import * as React from 'react';
 
+import { Container } from './modelsPermissions.styles';
 
+interface IProps {
+	noop: string; // TODO: Remove sample
+}
 
-export const Container = styled.div `
-  height: 100%;
+export class ModelsPermissions extends React.PureComponent<IProps, any> {
 
-	${ColorSelect} {
-    border: none;
-  }
-`;
+	public render() {
+		return (
+			<Container>
+				ModelsPermissions component
+			</Container>
+		);
+	}
+}
