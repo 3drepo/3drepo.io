@@ -43,7 +43,6 @@ export class TreeService {
 	private subTreesById;
 	private subModelIdToPath;
 	private idToNodeMap;
-	private shownByDefaultNodes;
 	private hiddenByDefaultNodes;
 	private treeMapReady;
 	private generatedMaps;
@@ -73,7 +72,7 @@ export class TreeService {
 
 		this.state = {};
 		this.state.hideIfc = true;
-		this.allNodes = [];
+		this.allNodes = undefined;
 		this.idToPath = {};
 		this.currentSelectedNodes = {};
 		this.nodesToShow = [];
@@ -139,7 +138,7 @@ export class TreeService {
 		return Promise.all(meshesAndTrees)
 			.then((meshAndTreeData) => {
 				const tree = meshAndTreeData[1];
-				this.setAllNodes([tree.nodes]);
+				this.setAllNodes(tree.nodes);
 				this.setSubTreesById(tree.subTreesById);
 				this.setCachedIdToPath(tree.idToPath);
 				this.setSubModelIdToPath(tree.subModelIdToPath);
@@ -451,8 +450,8 @@ export class TreeService {
 	 * Initialise the tree nodes to show to the first node.
 	 * @param nodes	Array of root node to show.
 	 */
-	public initNodesToShow(nodes) {
-		this.nodesToShow = nodes;
+	public initNodesToShow() {
+		this.nodesToShow = [this.allNodes];
 		this.nodesToShow[0].level = 0;
 		this.nodesToShow[0].selected = this.SELECTION_STATES.unselected;
 		this.expandTreeNode(this.nodesToShow[0]);
@@ -566,7 +565,7 @@ export class TreeService {
 
 		const nodes = [node];
 
-		while (nodes && nodes.length > 0) {
+		while (nodes.length > 0) {
 			const currentNode = nodes.pop();
 
 			// Store the state before it's potentially changed
@@ -658,7 +657,7 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
-		this.updateModelVisibility(this.allNodes[0]);
+		this.updateModelVisibility(this.allNodes);
 	}
 
 	/**
@@ -667,7 +666,7 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
-		this.updateModelVisibility(this.allNodes[0]);
+		this.updateModelVisibility(this.allNodes);
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
@@ -721,9 +720,9 @@ export class TreeService {
 	 * Hide all tree nodes.
 	 */
 	public hideAllTreeNodes(updateModel) {
-		this.setTreeNodeStatus(this.allNodes[0], this.VISIBILITY_STATES.invisible);
+		this.setTreeNodeStatus(this.allNodes, this.VISIBILITY_STATES.invisible);
 		if (updateModel) {
-			this.updateModelVisibility(this.allNodes[0]);
+			this.updateModelVisibility(this.allNodes);
 		}
 	}
 
@@ -731,12 +730,12 @@ export class TreeService {
 	 * Show all tree nodes.
 	 */
 	public showAllTreeNodes(updateModel) {
-		this.setTreeNodeStatus(this.allNodes[0], this.VISIBILITY_STATES.visible);
+		this.setTreeNodeStatus(this.allNodes, this.VISIBILITY_STATES.visible);
 
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
 		if (updateModel) {
-			this.updateModelVisibility(this.allNodes[0]);
+			this.updateModelVisibility(this.allNodes);
 		}
 	}
 
@@ -1178,6 +1177,19 @@ export class TreeService {
 	}
 
 	/**
+	 * Select a series of nodes by an array of uniqueIDs
+	 * @param ids ids to click
+	 */
+	public nodesClickedByIds( ids: string[]) {
+		return this.onReady().then(() => {
+			const nodes = ids.map((id) => this.getNodeById(id));
+			return this.nodesClicked(nodes);
+		}).catch((error) => {
+			console.error(error);
+		});
+	}
+
+	/**
 	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects	Nodes to select
 	 */
@@ -1230,13 +1242,6 @@ export class TreeService {
 	}
 
 	/**
-	 * @returns	List of leaf nodes that are shown by default.
-	 */
-	public getShownByDefaultNodes() {
-		return this.shownByDefaultNodes;
-	}
-
-	/**
 	 * @returns	List of nodes that are hidden by default (usu. IFC space).
 	 */
 	public getHiddenByDefaultNodes() {
@@ -1266,50 +1271,26 @@ export class TreeService {
 	}
 
 	/**
-	 * Creates a map of IDs to nodes, array of nodes shown by default, and
-	 * nodes hidden by default.
-	 */
-	public generateIdToNodeMap() {
-		this.idToNodeMap = {};
-		this.shownByDefaultNodes = [];
-		this.hiddenByDefaultNodes = [];
-		this.recurseIdToNodeMap(this.allNodes);
-	}
-
-	/**
-	 * Helper function for generateIdToNodeMap().
-	 * @param nodes	Collection of nodes to add to idToNodeMap.
-	 */
-	public recurseIdToNodeMap(nodes) {
-		if (nodes) {
-			for (let i = 0; i < nodes.length; i++) {
-
-				const node = nodes[i];
-
-				if (node._id) {
-					this.idToNodeMap[node._id] = node;
-					if (node.toggleState === this.VISIBILITY_STATES.visible && (!node.children || node.children.length === 0)) {
-						this.shownByDefaultNodes.push(node);
-					}
-					if (node.toggleState === this.VISIBILITY_STATES.invisible) {
-						this.hiddenByDefaultNodes.push(node);
-					}
-					node.defaultState = node.toggleState;
-					this.recurseIdToNodeMap(node.children);
-				}
-
-			}
-
-		}
-	}
-
-	/**
 	 * Sets the collection of all nodes and calls generateIdToNodeMap().
 	 * @param nodes	Collection of all nodes.
 	 */
-	public setAllNodes(nodes) {
-		this.allNodes = nodes;
-		this.generateIdToNodeMap();
+	public setAllNodes(root) {
+		this.allNodes = root;
+		this.idToNodeMap = {};
+		this.hiddenByDefaultNodes = [];
+		let processNodes = [root];
+
+		while (processNodes.length > 0) {
+			const node = processNodes.pop();
+			this.idToNodeMap[node._id] = node;
+			if (node.toggleState === this.VISIBILITY_STATES.invisible) {
+				this.hiddenByDefaultNodes.push(node);
+			}
+			node.defaultState = node.toggleState;
+			if (node.children) {
+				processNodes = processNodes.concat(node.children);
+			}
+		}
 	}
 
 	/**
