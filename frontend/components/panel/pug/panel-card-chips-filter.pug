@@ -26,4 +26,4 @@ md-button.md-icon-button#additionalInfoButton(aria-label="Collapse Toggle" class
 	md-tooltip(ng-if="!vm.collapsed") Collapse
 
 input(id="clipboard-target" value="{{vm.chips.map(vm.formatChip).join(',')}}")
-button.copy-button(ngclipboard data-clipboard-target="#clipboard-target" ng-show="!vm.collapsed && vm.chips.length>0 ") copy dude
+a.copy-button(ngclipboard data-clipboard-target="#clipboard-target" ng-show="!vm.collapsed && vm.chips.length>0 " href="") Copy

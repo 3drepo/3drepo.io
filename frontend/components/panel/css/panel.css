@@ -224,11 +224,18 @@ panel-card-chips-filter md-chips.collapsed md-chips-wrap {
   overflow: hidden;
 }
 
-panel-card-chips-filter button.copy-button {
-  top: -41px;
-  margin-left: 280px;
+panel-card-chips-filter .copy-button {
+  top: -35px;
+  margin-left: 312px;
   position: relative;
+  font-size: 14px;
+  color: #0c2f54;
 }
+
+panel-card-chips-filter a.copy-button:visited {
+  color: #0c2f54;
+}
+
 
 #clipboard-target {
   width: 1px;
