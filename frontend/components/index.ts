@@ -87,6 +87,3 @@ import "./list-sort-button/js/list-sort-button.component";
 import "./projects-permissions/js/projects-permissions.component";
 import "./permissions-list/js/permissions-list.component";
 import "./models-list/js/models-list.component";
-import "./jobs-list/js/jobs-list.component";
-import "./new-job-form/js/new-job-form.component";
-import "./color-picker/js/color-picker.component";
