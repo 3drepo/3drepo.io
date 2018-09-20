@@ -22,10 +22,10 @@ import Grid from '@material-ui/core/Grid';
 
 import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { theme } from '../../styles';
-import { Container } from './modelsPermissions.styles';
+import { Container, ModelsContainer } from './modelsPermissions.styles';
 
 const MODEL_TABLE_CELLS = [{
-	name: 'Name',
+	name: 'Model/federation',
 	type: CELL_TYPES.NAME,
 	searchBy: ['name']
 }];
@@ -83,16 +83,14 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 		return (
 			<MuiThemeProvider theme={theme}>
-				<Container>
-					<Grid container>
-						<Grid item>
-							<CustomTable
-								cells={MODEL_TABLE_CELLS}
-								rows={modelRows}
-								onSelectionChange={this.handleModelsSelectionChange}
-							/>
-						</Grid>
-					</Grid>
+				<Container container>
+					<ModelsContainer item>
+						<CustomTable
+							cells={MODEL_TABLE_CELLS}
+							rows={modelRows}
+							onSelectionChange={this.handleModelsSelectionChange}
+						/>
+					</ModelsContainer>
 				</Container>
 			</MuiThemeProvider>
 		);

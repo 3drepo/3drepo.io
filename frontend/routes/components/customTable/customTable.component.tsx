@@ -181,7 +181,7 @@ const getSearchFields = (cells) => {
 interface IProps {
 	cells: any[];
 	rows: any[];
-	onSelectionChange: (selectedRows) => void;
+	onSelectionChange?: (selectedRows) => void;
 }
 
 interface IState {
