@@ -24,7 +24,6 @@ import Icon from '@material-ui/core/Icon';
 import Checkbox from '@material-ui/core/Checkbox';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
-import { SORT_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
@@ -35,7 +34,7 @@ import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.compo
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Row, SortLabel, Cell, CheckboxCell } from './customTable.styles';
 
-const HeaderCell = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
+export const TableHeading = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
 	if (!cell.name) {
 		return (<></>);
 	}
@@ -55,7 +54,7 @@ const HeaderCell = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
 	);
 };
 
-const RowCellButton = ({icon, onClick, disabled}) => {
+export const TableButton = ({icon, onClick, disabled}) => {
 	return (
 		<IconButton onClick={onClick} disabled={disabled}>
 			<Icon>{icon}</Icon>
@@ -93,7 +92,7 @@ const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: UserItem,
 	[CELL_TYPES.JOB]: CellSelect,
 	[CELL_TYPES.PERMISSIONS]: CellSelect,
-	[CELL_TYPES.ICON_BUTTON]: RowCellButton,
+	[CELL_TYPES.ICON_BUTTON]: TableButton,
 	[CELL_TYPES.COLOR]: ColorPicker
 };
 
@@ -120,6 +119,19 @@ const CELL_DEFAULT_PROPS = {
 	[CELL_TYPES.CHECKBOX]: {
 		width: '50px'
 	}
+};
+
+export const TABLE_DATA_TYPES = {
+	USER: 1,
+	JOB: 2,
+	COLOR: 3,
+	RADIO_BUTTON: 4,
+	CHECKBOX: 5,
+	PERMISSIONS: 6,
+	ICON_BUTTON: 7,
+	EMPTY: 8,
+	NAME: 9,
+	DEFAULT: 10
 };
 
 /**
@@ -182,6 +194,7 @@ interface IProps {
 	cells: any[];
 	rows: any[];
 	onSelectionChange?: (selectedRows) => void;
+	defaultSort?: number;
 }
 
 interface IState {
@@ -197,7 +210,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		const {sortBy, order, searchText} = prevState;
-		const initialSortBy = (first(nextProps.cells) || {type: CELL_TYPES.NAME} as any).type;
+		const initialSortBy = nextProps.defaultSort || (first(nextProps.cells) || {type: CELL_TYPES.NAME} as any).type;
 		const newSortBy = !prevState.processedRows.length ? initialSortBy : sortBy;
 
 		return {
@@ -304,29 +317,34 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				title={text}
 				placement="bottom-end"
 			>
-				<Component />
+				{Component}
 			</Tooltip>
 		);
 
 		return cells.map((cell, index) => {
-			const CellComponent = HEADER_CELL_COMPONENTS[cell.type] || HeaderCell;
+			const type = cell.headerType || cell.type;
+			const BasicHeadingComponent = cell.HeadingComponent || TableHeading;
 			const cellData = {
-				...(CELL_DEFAULT_PROPS[cell.type] || {}),
+				...(CELL_DEFAULT_PROPS[type] || {}),
 				...cell
 			};
 
+			const HeadingComponent = <BasicHeadingComponent
+				cell={cellData}
+				sortBy={sortBy}
+				order={order}
+				onClick={this.createSortHandler(type)}
+				onChange={this.createSearchHandler()}
+				hideSortIcon={cellData.hideSortIcon}
+			/>;
+
 			return (
 				<Cell key={index} {...cellData}>
-					{cellData.tooltipText ? setTooltip(CellComponent, cellData.tooltipText) : (
-						<CellComponent
-							cell={cellData}
-							sortBy={sortBy}
-							order={order}
-							onClick={this.createSortHandler(cell.type)}
-							onChange={this.createSearchHandler()}
-							hideSortIcon={cellData.hideSortIcon}
-						/>
-					)}
+					{
+						cellData.tooltipText ?
+							setTooltip(HeadingComponent, cellData.tooltipText) :
+							HeadingComponent
+					}
 				</Cell>
 			);
 		});
@@ -335,8 +353,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	/**
 	 * Renders row for each user
 	 */
-	public renderRows = (rows = [], cells = [], showCheckbox) => {
-		return rows.map((row, index) => {
+	public renderRows = (cells = [], data = [], showCheckbox) => {
+		return data.map((row, index) => {
 			return (
 				<Row key={index}>
 					{
@@ -349,21 +367,24 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 							</CheckboxCell>
 						) : null
 					}
-					{row.data.map((data, cellIndex) => {
-						const type = cells[cellIndex].type;
-						const CellComponent = ROW_CELL_COMPONENTS[type];
-						const cellProps = CELL_DEFAULT_PROPS[type];
+					{
+						row.data.map((cellData, cellIndex) => {
+							const cellConfig = cells[cellIndex];
+							const type = cellConfig.type;
+							const CellComponent = cellConfig.CellComponent;
+							const cellProps = CELL_DEFAULT_PROPS[type];
 
-						return (
-							<Cell key={cellIndex} {...cellProps}>
-								{
-									CellComponent ?
-										(<CellComponent {...data} searchText={this.state.searchText} />) :
-										(<Highlight text={data.value} search={this.state.searchText} />)
-								}
-							</Cell>
-						);
-					})}
+							return (
+								<Cell key={cellIndex} {...cellProps}>
+									{
+										CellComponent ?
+											(<CellComponent {...cellData} searchText={this.state.searchText} />) :
+											(<Highlight text={cellData.value} search={this.state.searchText} />)
+									}
+								</Cell>
+							);
+						})
+					}
 				</Row>
 			);
 		});
@@ -395,7 +416,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{this.renderHeader(cells)}
 				</Head>
 				<SimpleBar>
-					{this.renderRows(processedRows, cells, showCheckbox)}
+					{this.renderRows(cells, processedRows, showCheckbox)}
 				</SimpleBar>
 			</Container>
 		);

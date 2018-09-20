@@ -23,10 +23,13 @@ import Grid from '@material-ui/core/Grid';
 import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { theme } from '../../styles';
 import { Container, ModelsContainer } from './modelsPermissions.styles';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 
 const MODEL_TABLE_CELLS = [{
 	name: 'Model/federation',
 	type: CELL_TYPES.NAME,
+	HeadingComponent: CellUserSearch,
+	CellComponent: (props) => (<div>{props.name}</div>),
 	searchBy: ['name']
 }];
 

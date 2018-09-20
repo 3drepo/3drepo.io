@@ -23,22 +23,28 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import { theme } from '../../styles';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
-import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
+import { CELL_TYPES, CustomTable, TableButton } from '../components/customTable/customTable.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { Container } from './jobs.styles';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
 	type: CELL_TYPES.NAME,
-	searchBy: ['name']
+	searchBy: ['name'],
+	HeadingComponent: CellUserSearch
 }, {
 	name: 'Colour',
 	type: CELL_TYPES.COLOR,
-	hideSortIcon: true
+	hideSortIcon: true,
+	CellComponent: ColorPicker
 }, {
 	type: CELL_TYPES.EMPTY
 }, {
-	type: CELL_TYPES.ICON_BUTTON
+	type: CELL_TYPES.ICON_BUTTON,
+	CellComponent: TableButton
 }];
 
 interface IProps {

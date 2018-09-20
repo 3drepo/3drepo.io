@@ -23,26 +23,34 @@ import Icon from '@material-ui/core/Icon';
 
 import { theme } from '../../styles';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
-import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
+import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { UserItem } from '../components/userItem/userItem.component';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
 	type: CELL_TYPES.USER,
+	HeadingComponent: CellUserSearch,
+	CellComponent: UserItem,
 	searchBy: ['firstName', 'lastName', 'user', 'company']
 }, {
 	name: 'Job',
+	CellComponent: CellSelect,
 	type: CELL_TYPES.JOB
 }, {
 	name: 'Permissions',
+	CellComponent: CellSelect,
 	type: CELL_TYPES.PERMISSIONS
 }, {
 	type: CELL_TYPES.EMPTY
 }, {
-	type: CELL_TYPES.ICON_BUTTON
+	type: CELL_TYPES.ICON_BUTTON,
+	CellComponent: TableButton
 }];
 
 interface IProps {
