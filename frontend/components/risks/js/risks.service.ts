@@ -21,6 +21,7 @@ import { IChip } from "../../panel/js/panel-card-chips-filter.component";
 import { PanelService } from "../../panel/js/panel.service";
 import { TreeService } from "../../tree/js/tree.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
+import { stringSearch } from "../../../helpers/searching";
 
 declare const Pin;
 
@@ -167,15 +168,6 @@ export class RisksService {
 		};
 	}
 
-	// Helper for searching strings
-	public stringSearch(superString, subString) {
-		if (!superString) {
-			return false;
-		}
-
-		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
-	}
-
 	public setupRisksToShow(model: string, chips: IChip[]) {
 		this.state.risksToShow = [];
 
@@ -290,15 +282,15 @@ export class RisksService {
 		// Exit the function as soon as we found a match.
 
 		// Search the title and desc
-		if (this.stringSearch(risk.title, filterText) ||
-			this.stringSearch(risk.desc, filterText)) {
+		if (stringSearch(risk.name, filterText) ||
+			stringSearch(risk.desc, filterText)) {
 			return true;
 		}
 
 		// Search the list of assigned risks
 		if (risk.hasOwnProperty("assigned_roles")) {
 			for (let roleIdx = 0; roleIdx < risk.assigned_roles.length; ++roleIdx) {
-				if (this.stringSearch(risk.assigned_roles[roleIdx], filterText)) {
+				if (stringSearch(risk.assigned_roles[roleIdx], filterText)) {
 					return true;
 				}
 			}
