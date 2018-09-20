@@ -89,8 +89,6 @@ function groupsDeleted(emitter, account, model, ids) {
 // Viewpoints notifications
 
 function viewpointsCreated(emitter, account, model, data) {
-	console.log('VIEW CREATED')
-	// console.log("emitter from VIEW " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("view" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
@@ -98,7 +96,8 @@ function viewpointsChanged(emitter, account, model, data) {
 	return insertEventQueue("view" + eventTypes.UPDATED, emitter, account, model, null, data);
 }
 
-function viewpointsDeleted(emitter, account, model, ids) {	
+function viewpointsDeleted(emitter, account, model, ids) {
+	console.log('VIEW DELETED')	
 	return insertEventQueue("view" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 

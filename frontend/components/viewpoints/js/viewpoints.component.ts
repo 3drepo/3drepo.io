@@ -74,7 +74,6 @@ class ViewsController implements ng.IController {
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
 		this.watchers();
-		console.log("models " + this.model + "account " + this.account);
 		this.viewsNotifications = this.notificationsService.getChannel(this.account, this.model).views;
 		this.watchNotification();
 	}
@@ -140,15 +139,20 @@ class ViewsController implements ng.IController {
 	public watchNotification() {
 		this.viewsNotifications.subscribeToUpdated(this.updatedViewpoint, this);
 		this.viewsNotifications.subscribeToCreated(this.createdViewpoint, this);
+		// this.viewsNotifications.subscribeToDeleted(, this);
 	}
 
-	public updatedViewpoint(data) {
-		this.ViewpointsService.replaceStateViewpoint(data);
+	public updatedViewpoint(viewpoint) {
+		this.ViewpointsService.replaceStateViewpoint(viewpoint);
 	}
 
-	public createdViewpoint(data) {
-		console.log("viewpoint being created", data);
-		this.ViewpointsService.updatedCreatedViewpoint(data);
+	public createdViewpoint(viewpoint) {
+		console.log("viewpoint being created", viewpoint);
+		this.ViewpointsService.updatedCreatedViewpoint(viewpoint);
+	}
+
+	public deletedViewpoint(viewpoint) {
+	
 	}
 
 	public createViewpoint() {
