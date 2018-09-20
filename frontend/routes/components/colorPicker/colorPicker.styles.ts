@@ -54,6 +54,7 @@ export const StyledIconButton = styled(IconButton)`
 		width: 28px;
 		height: 28px;
 		margin-left: 5px;
+		padding: 0;
 	}
 `;
 
