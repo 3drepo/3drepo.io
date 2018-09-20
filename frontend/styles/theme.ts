@@ -16,6 +16,7 @@
  */
 
 import { createMuiTheme } from '@material-ui/core/styles';
+import { COLOR } from './colors';
 
 export const theme = createMuiTheme({
 	palette: {
@@ -41,6 +42,12 @@ export const theme = createMuiTheme({
 				'&:before': {
 					borderBottomColor: 'rgba(0, 0, 0, .12) !important'
 				}
+			}
+		},
+		MuiFormControlLabel: {
+			label: {
+				fontSize: '14px',
+				color: COLOR.BLACK_60
 			}
 		}
 	}
