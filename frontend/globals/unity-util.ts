@@ -611,12 +611,12 @@ export class UnityUtil {
 					database : account,
 					model,
 					ids : arr,
-					toggle : true,
+					toggle : toggleMode,
 					forceReHighlight,
 					color: color ? color : UnityUtil.defaultHighlightColor
 				};
 				UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-			}, 100);
+			}, i > 0 ? 100 : 0);
 		}
 
 	}
