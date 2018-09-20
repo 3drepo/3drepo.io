@@ -117,7 +117,7 @@ describe("Risks", function () {
 							expect(res.body.consequence).to.equal(risk.consequence);
 							expect(res.body.level_of_risk).to.equal(risk.level_of_risk);
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
-							expect(res.body.mitigation_desc).to.equal(risk.mitigation_descy);
+							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 
 							return done(err);
 						});
@@ -141,7 +141,7 @@ describe("Risks", function () {
 						expect(res.body.consequence).to.equal(risk.consequence);
 						expect(res.body.level_of_risk).to.equal(risk.level_of_risk);
 						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
-						expect(res.body.mitigation_desc).to.equal(risk.mitigation_descy);
+						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 
 						return done(err);
 					});
