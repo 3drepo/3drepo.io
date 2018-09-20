@@ -102,6 +102,7 @@ describe("Risks", function () {
 
 							riskId = res.body._id;
 
+							console.log(res.body);
 							expect(res.body.name).to.equal(risk.name);
 							expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
 							expect(res.body.associated_activity).to.equal(risk.associated_activity);
@@ -162,6 +163,7 @@ describe("Risks", function () {
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
+							console.log(err);
 							return done(err);
 						});
 				},
