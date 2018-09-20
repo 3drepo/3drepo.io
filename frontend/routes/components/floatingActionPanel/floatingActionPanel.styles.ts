@@ -21,11 +21,20 @@ import Popover from '@material-ui/core/Popover';
 
 export const Container = styled.div``;
 
-export const FloatingButton = styled(Button) `
-	&& {
-		position: absolute;
-		top: 166px;
-		right: 14px;
+export const FloatingButtonContainer = styled.div`
+	position: absolute;
+	top: 166px;
+	right: 14px;
+`;
+
+export const FloatingButton = styled(Button).attrs({
+	classes: {
+		disabled: 'button--disabled'
+	}
+})`
+	&&.button--disabled {
+		background: #d9d9d9;
+		color: #868686;
 	}
 `;
 

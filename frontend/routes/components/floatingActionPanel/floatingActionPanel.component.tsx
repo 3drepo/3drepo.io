@@ -19,14 +19,17 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button';
 
-import { Container, FloatingButton, Panel } from './floatingActionPanel.styles';
+import { Container, Panel, FloatingButtonContainer, FloatingButton } from './floatingActionPanel.styles';
 
 interface IProps {
 	render: (closePanel: any) => void;
 	container?: HTMLElement;
 	children?: any;
 	icon?: string;
+	buttonProps?: any;
 }
 
 interface IState {
@@ -62,21 +65,33 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderPanel() {
-		const { icon } = this.props;
+		const { icon, buttonProps = {} } = this.props;
 		const { anchorEl, open } = this.state;
 
 		const shouldOpen = open && Boolean(anchorEl);
+		const disabledTooltip = !buttonProps.label || !buttonProps.disabled;
+
 		return (
 			<Container>
-				<FloatingButton
-					variant="fab"
-					color="secondary"
-					aria-label="Toggle panel"
-					mini={true}
-					onClick={this.handleClick}
+				<Tooltip
+					title={buttonProps.label || ''}
+					disableFocusListener={disabledTooltip}
+					disableTouchListener={disabledTooltip}
+					disableHoverListener={disabledTooltip}
 				>
-					<Icon>{icon || 'add'}</Icon>
-				</FloatingButton>
+					<FloatingButtonContainer>
+						<FloatingButton
+							variant="fab"
+							color="secondary"
+							aria-label="Toggle panel"
+							mini={true}
+							onClick={this.handleClick}
+							disabled={buttonProps.disabled}
+						>
+							<Icon>{icon || 'add'}</Icon>
+						</FloatingButton>
+					</FloatingButtonContainer>
+				</Tooltip>
 				<Panel
 					open={shouldOpen}
 					anchorEl={anchorEl}
