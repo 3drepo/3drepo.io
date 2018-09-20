@@ -72,7 +72,9 @@ export class GroupsService {
 	public groupsFilterSearch(searchQuery: string): any[] {
 		return this.state.groups.filter((group) => {
 			// Remove group highlight.
-			this.unhighlightGroup(group);
+			if (!searchQuery) {
+				this.unhighlightGroup(group);
+			}
 
 			return this.stringSearch(group.name, searchQuery)
 			|| this.stringSearch(group.description, searchQuery)

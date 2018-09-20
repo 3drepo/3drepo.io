@@ -44,6 +44,7 @@ class ViewsController implements ng.IController {
 	private newView: any;
 	private editSelectedView: any;
 	private viewpointNameMaxlength: number;
+	private searchQuery: string;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -79,11 +80,14 @@ class ViewsController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
-			if (searchQuery !== undefined || searchQuery !== "") {
-				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(searchQuery);
-			} else {
+			this.searchQuery = searchQuery;
+			if (this.searchQuery !== undefined || this.searchQuery !== "") {
+				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.searchQuery);
+				this.deselectViewpoints(this.viewpointsToShow);
+			} else  {
 				this.viewpointsToShow = this.viewpoints.concat([]);
 			}
+
 		});
 
 		this.$scope.$watch(() => {
@@ -113,6 +117,21 @@ class ViewsController implements ng.IController {
 			}
 		});
 
+	}
+
+	public deselectViewpoints(deselected) {
+
+		const index = deselected.filter((item) =>  item.selected === true);
+		// console.log(index);
+
+		deselected.forEach((item) => {
+			if (!index) {
+				item.selected = false;
+				console.log("top", index);
+			} else {
+				console.log("bottom", index);
+			}
+		});
 	}
 
 	public selectView(view: any) {
