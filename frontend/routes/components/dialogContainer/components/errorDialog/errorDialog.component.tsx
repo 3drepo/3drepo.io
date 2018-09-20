@@ -39,7 +39,7 @@ export const ErrorDialog = (props: IProps) => {
 			</DialogContent>
 
 			<DialogActions>
-				<Button onClick={props.handleResolve} color="primary">Ok</Button>;
+				<Button onClick={props.handleResolve} variant="raised" color="secondary">Ok</Button>;
 			</DialogActions>
 		</>
 	);

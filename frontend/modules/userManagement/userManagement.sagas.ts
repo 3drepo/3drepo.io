@@ -64,7 +64,7 @@ export function* removeUser({ username }) {
 
 		if (errorData.status === 400 && errorData.value === responseCode) {
 			const config = {
-				title: 'Remove licence',
+				title: 'Remove User',
 				templateType: 'confirmUserRemove',
 				confirmText: 'Remove',
 				onConfirm: () => UserManagementActions.removeUserCascade(username),

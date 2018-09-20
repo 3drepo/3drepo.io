@@ -27,9 +27,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 
 import { theme } from '../../../styles';
-import { Container } from './dialogContainer.styles';
 import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
 import { ErrorDialog } from './components/errorDialog/errorDialog.component';
+import { Grow } from '@material-ui/core';
 
 interface IProps {
 	config: any;
@@ -75,7 +75,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 				<Dialog
 					open={this.props.isOpen}
 					onClose={this.handleClose}>
-					{title && <DialogTitle>{title}</DialogTitle>}
+					{title && <DialogTitle disableTypography>{title}</DialogTitle>}
 					{
 						content && !DialogTemplate && (
 							<DialogContent>

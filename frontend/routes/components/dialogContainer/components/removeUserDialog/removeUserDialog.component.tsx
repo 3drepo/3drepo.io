@@ -20,8 +20,8 @@ export const RemoveUserDialog = (props) => {
 
 	const description = `\
 		User ${props.username} has permissions assigned on the following items,\
-		they will be removed together with the license. \
-		Do you really want to remove this license?
+		they will be removed together with the user. \
+		Do you really want to remove this User?
 	`;
 
 	return (
@@ -44,8 +44,8 @@ export const RemoveUserDialog = (props) => {
 			</DialogContent>
 
 			<DialogActions>
-				<Button onClick={props.handleClose} color="primary">Cancel</Button>;
-				<Button onClick={props.handleResolve} color="primary">Remove</Button>;
+				<Button onClick={props.handleClose} color="secondary">Cancel</Button>;
+				<Button onClick={props.handleResolve} variant="raised" color="secondary">Remove</Button>;
 			</DialogActions>
 		</>
 	);

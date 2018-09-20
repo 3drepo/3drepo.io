@@ -24,13 +24,13 @@ export const theme = createMuiTheme({
 			main: '#0C2F54',
 			light: '#3c5876',
 			dark: '#08203a',
-			contrastText: '#fff'
+			contrastText: COLOR.WHITE
 		},
 		secondary: {
 			main: '#06563c',
 			light: '#377763',
 			dark: '#377763',
-			contrastText: '#fff'
+			contrastText: COLOR.WHITE
 		}
 	},
 	overrides: {
@@ -48,6 +48,24 @@ export const theme = createMuiTheme({
 			label: {
 				fontSize: '14px',
 				color: COLOR.BLACK_60
+			}
+		},
+		MuiDialogTitle: {
+			root: {
+				background: '#08203a',
+				padding: '15px 24px 15px',
+				color: COLOR.WHITE,
+				fontSize: '20px'
+			}
+		},
+		MuiDialogContent: {
+			root: {
+				padding: '24px'
+			}
+		},
+		MuiDialog: {
+			paper: {
+				background: '#fafafa'
 			}
 		}
 	}
