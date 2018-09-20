@@ -177,9 +177,7 @@ function listRisks(req, res, next) {
 
 	let findRisks;
 
-	if (req.query.shared_id) {
-		findRisks = Risk.findBySharedId(dbCol, req.query.shared_id, req.query.number);
-	} else if (req.params.rid) {
+	if (req.params.rid) {
 		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
 		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection);

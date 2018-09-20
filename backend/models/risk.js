@@ -276,9 +276,6 @@ risk.deleteRisks = function(dbCol, sessionId, ids) {
 	});
 };
 
-risk.findBySharedId = function() {
-};
-
 risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids) {
 	const account = dbCol.account;
 	const model = dbCol.model;
