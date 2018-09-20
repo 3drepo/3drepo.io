@@ -74,14 +74,6 @@ view.updateViewpoint = function (dbCol, sessionId, data, id) {
 	return this.updateAttrs(dbCol, id, data);
 }
 
-view.createdViewpointUpdate = function (dbCol, sessionId, data, id) {
-	ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)}, data));
-}
-
-view.deletedViewpointUpdate = function (dbCol, sessionId, data, id) {
-	ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
-}
-
 view.updateAttrs = function (dbCol, id, data) {
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
@@ -131,10 +123,7 @@ view.createViewpoint = function (dbCol,sessionId,data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
-				console.log("data object", data);
-				console.log("newViewpoint SCREENSHOT", newViewpoint);
-				console.log("Thumbnail URL", thumbnailUrl);
-				this.createdViewpointUpdate(dbCol, sessionId, Object.assign({thumbnailUrl:thumbnailUrl}, data), id);
+				ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)}, data));
 				return this.updateAttrs(dbCol, id, data).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {

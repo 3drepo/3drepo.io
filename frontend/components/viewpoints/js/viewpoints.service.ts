@@ -78,7 +78,6 @@ export class ViewpointsService {
 					viewpoint.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpoint.screenshot.thumbnail);
 				});
 				this.state.viewpoints = response.data;
-				console.log("Viewpoints b4", this.state.viewpoints[0]);
 			});
 
 	}
@@ -97,17 +96,7 @@ export class ViewpointsService {
 	}
 
 	public updatedCreatedViewpoint(view) {
-		if (!view.screenshot) {
-			view.screenshot = {};
-		}
-		// Object.defineProperty(view, "screenshot.thumbnailUrl", {
-		// 	value: view.thumbnailUrl,
-		// 	writable: true
-		// });
-		view.screenshot.thumbnailUrl = view.thumbnailUrl;
-		console.log("from service", view);
-		console.log("thumbnail from service", view.thumbnailUrl);
-		view.screenshot.thumbnailUrl = this.getThumbnailUrl(view.screenshot.thumbnailUrl);
+		view.screenshot.thumbnailUrl = this.getThumbnailUrl(view.screenshot.thumbnail);
 		this.state.viewpoints.push(view);
 	}
 

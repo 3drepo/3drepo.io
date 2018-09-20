@@ -81,8 +81,8 @@ class ViewsController implements ng.IController {
 	public $onDestroy() {
 		this.ViewpointsService.reset();
 		this.viewpoints = [];
+		this.viewsNotifications.unsubscribeFromUpdated(this.updatedViewpoint);
 		this.viewsNotifications.unsubscribeFromCreated(this.createdViewpoint);
-		this.viewsNotifications.unsubscribeFromUpdated(this.deleteViewpoint);
 		this.viewsNotifications.unsubscribeFromDeleted(this.deletedViewpoint);
 	}
 
@@ -118,7 +118,6 @@ class ViewsController implements ng.IController {
 	}
 
 	public selectView(view: any) {
-
 		if (view) {
 			if (this.editSelectedView && this.selectedView !== view) {
 				this.resetEditState();
@@ -142,17 +141,16 @@ class ViewsController implements ng.IController {
 		this.viewsNotifications.subscribeToDeleted(this.deletedViewpoint, this);
 	}
 
-	public updatedViewpoint(viewpoint) {
-		this.ViewpointsService.replaceStateViewpoint(viewpoint);
+	public updatedViewpoint(viewpointToUpdate) {
+		this.ViewpointsService.replaceStateViewpoint(viewpointToUpdate);
 	}
 
-	public createdViewpoint(viewpoint) {
-		console.log("viewpoint being created", viewpoint);
-		this.ViewpointsService.updatedCreatedViewpoint(viewpoint);
+	public createdViewpoint(viewpointCreated) {
+		this.ViewpointsService.updatedCreatedViewpoint(viewpointCreated);
 	}
 
-	public deletedViewpoint(viewpoint) {
-		this.ViewpointsService.updateDeletedViewpoint(viewpoint);
+	public deletedViewpoint(deletedViewpoint) {
+		this.ViewpointsService.updateDeletedViewpoint(deletedViewpoint);
 	}
 
 	public createViewpoint() {
