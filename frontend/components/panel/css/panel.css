@@ -224,16 +224,30 @@ panel-card-chips-filter md-chips.collapsed md-chips-wrap {
   overflow: hidden;
 }
 
-panel-card-chips-filter .copy-button {
-  top: -35px;
+panel-card-chips-filter .md-button.md-fab.md-mini.copy-button {
+  top: -50px;
   margin-left: 312px;
   position: relative;
   font-size: 14px;
-  color: #0c2f54;
+  width: 32px !important;
+  height: 32px;
+  background-color: rgba(0, 0, 0, 0.87) !important;
+  color: #eaeaea !important;
+  opacity: 0.4 !important;
+  font-size: 10px;
+  min-height: 0px;
 }
 
-panel-card-chips-filter a.copy-button:visited {
-  color: #0c2f54;
+panel-card-chips-filter button.md-button.md-fab.md-mini.copy-button:hover {
+  opacity: .54 !important;
+}
+
+panel-card-chips-filter .copy-button md-icon{
+  min-width: 10px;
+  min-height: 10px;
+  width: 16px;
+  height: 16px;
+  padding-left: 4px;
 }
 
 
