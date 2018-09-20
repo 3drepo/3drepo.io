@@ -111,6 +111,11 @@ export class ViewpointsService {
 		this.state.viewpoints.push(view);
 	}
 
+	public updateDeletedViewpoint(view) {
+		const viewToDelete = this.state.viewpoints.indexOf(view);
+		this.state.viewpoints.splice(viewToDelete, 1);
+	}
+
 	/**
 	 * Create a new view given a view name. Will create screenshot and viewpoint.
 	 * @param teamspace teamspace name

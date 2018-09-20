@@ -79,7 +79,7 @@ view.createdViewpointUpdate = function (dbCol, sessionId, data, id) {
 }
 
 view.deletedViewpointUpdate = function (dbCol, sessionId, data, id) {
-	ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+	ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
 }
 
 view.updateAttrs = function (dbCol, id, data) {
@@ -146,8 +146,7 @@ view.createViewpoint = function (dbCol,sessionId,data) {
 	});
 };
 
-view.deleteViewpoint = function (dbCol, id) {
-
+view.deleteViewpoint = function (dbCol ,id, sessionId) {
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
@@ -157,7 +156,7 @@ view.deleteViewpoint = function (dbCol, id) {
 			if (!deleteResponse.value) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
-
+			ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, id);
 		});
 	});
 };

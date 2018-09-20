@@ -98,8 +98,9 @@ function createViewpoint(req, res, next) {
 function deleteViewpoint(req, res, next) {
 
 	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid).then(() => {
+	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid, sessionId).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

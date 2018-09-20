@@ -83,7 +83,7 @@ class ViewsController implements ng.IController {
 		this.viewpoints = [];
 		this.viewsNotifications.unsubscribeFromCreated(this.createdViewpoint);
 		this.viewsNotifications.unsubscribeFromUpdated(this.deleteViewpoint);
-		this.viewsNotifications.unsubscribeFromDeleted(this.saveEditedView);
+		this.viewsNotifications.unsubscribeFromDeleted(this.deletedViewpoint);
 	}
 
 	public watchers() {
@@ -139,7 +139,7 @@ class ViewsController implements ng.IController {
 	public watchNotification() {
 		this.viewsNotifications.subscribeToUpdated(this.updatedViewpoint, this);
 		this.viewsNotifications.subscribeToCreated(this.createdViewpoint, this);
-		// this.viewsNotifications.subscribeToDeleted(, this);
+		this.viewsNotifications.subscribeToDeleted(this.deletedViewpoint, this);
 	}
 
 	public updatedViewpoint(viewpoint) {
@@ -152,7 +152,7 @@ class ViewsController implements ng.IController {
 	}
 
 	public deletedViewpoint(viewpoint) {
-	
+		this.ViewpointsService.updateDeletedViewpoint(viewpoint);
 	}
 
 	public createViewpoint() {

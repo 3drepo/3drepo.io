@@ -73,7 +73,6 @@ function newModel(emitter, account, data) {
 
 // Groups notifications
 function newGroups(emitter, account, model, data) {
-	console.log("GROUP CHANGED")
 	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("group" + eventTypes.CREATED, emitter, account, model, null, data);
 }
@@ -97,7 +96,6 @@ function viewpointsChanged(emitter, account, model, data) {
 }
 
 function viewpointsDeleted(emitter, account, model, ids) {
-	console.log('VIEW DELETED')	
 	return insertEventQueue("view" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
