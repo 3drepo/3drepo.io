@@ -206,10 +206,14 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		searchText: ''
 	};
 
-	public createSortHandler = (sortBy, searchBy = []) => () => {
+	public createSortHandler = (sortBy) => () => {
 		let order = SORT_ORDER_TYPES.ASCENDING;
 
 		if (this.state.order === order && this.state.sortBy === sortBy) {
+			order = SORT_ORDER_TYPES.DESCENDING;
+		}
+
+		if (this.state.sortBy !== sortBy) {
 			order = SORT_ORDER_TYPES.DESCENDING;
 		}
 
