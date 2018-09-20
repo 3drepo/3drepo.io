@@ -17,7 +17,7 @@
 
 "use strict";
 
-const _. = require("lodash");
+const _ = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");

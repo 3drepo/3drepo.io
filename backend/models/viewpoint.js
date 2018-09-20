@@ -71,7 +71,7 @@ view.getThumbnail = function (dbColOptions, uid) {
 view.updateViewpoint = function (dbCol, sessionId, data, id) {
 	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
 	return this.updateAttrs(dbCol, id, data);
-}
+};
 
 view.updateAttrs = function (dbCol, id, data) {
 	const toUpdate = {};
