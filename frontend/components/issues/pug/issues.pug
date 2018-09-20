@@ -8,7 +8,6 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-
 // Issues list
 issues-list(
 	ng-if="!vm.showProgress && vm.toShow === 'showIssues'"
@@ -17,6 +16,7 @@ issues-list(
 	model="vm.model"
 	revision="vm.revision"
 	filter-text="vm.filterText"
+	filter-chips="vm.filterChips"
 	import-bcf="vm.importBcf(file)"
 	on-edit-issue="vm.editIssue(issue)"
 	content-height="vm.setContentHeight(height)"
@@ -47,11 +47,11 @@ issue(
 	layout-margin)
 	div(
 		style="text-align: center;"
-		flex, 
+		flex,
 		layout-align="center center")
-		
+
 		div(layout="row" ng-if="vm.importingBCF" layout-align="center center")
-			span(flex="50").addHint Uploading BCF... 
+			span(flex="50").addHint Uploading BCF...
 			md-progress-circular.importBCFLoading(md-mode="indeterminate", md-diameter="15")
 
 		span.addHint(ng-if="!vm.canAddIssue") You don't have permission to add an issue
@@ -62,7 +62,7 @@ issue(
 		aria-label="Add"
 		ng-click="vm.editIssue()"
 		ng-disabled="!vm.canAddIssue || !vm.modelLoaded()")
-		
+
 		md-icon.angular-material-icons add
 
 

@@ -98,3 +98,85 @@ html, body {
 	display: block;
 	background-color: #4AD36B;
 }
+
+/* Material ui overrides */
+
+.threeDRepo md-chip-template   {
+	font-weight: 400;
+	font-size: 13px;
+}
+
+.threeDRepo  .md-chips.md-removable md-chip .md-chip-content{
+	padding-right: 8px;
+}
+
+.threeDRepo .md-chips md-chip .md-chip-remove md-icon {
+	min-width: 0px;
+	min-height: 0px;
+	width:14px;
+	height:14px;
+	color: #eaeaea;
+}
+
+.threeDRepo .md-chips md-chip .md-chip-remove {
+	background: rgba(0, 0, 0, 0.87);
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	opacity: .4;
+}
+
+.threeDRepo .md-chips md-chip .md-chip-remove:hover {
+	opacity: .54;
+}
+
+.threeDRepo .md-chips md-chip .md-chip-remove-container {
+	margin:9px;
+}
+
+
+.threeDRepo  md-menu-item ng-include>.md-button {
+    text-align: left;
+    display: inline-block;
+    border-radius: 0;
+    margin: auto 0;
+    font-size: 15px;
+    text-transform: none;
+    font-weight: 400;
+    height: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+	width: 100%;
+}
+
+.threeDRepo md-menu-item> ng-include {
+    width: 100%;
+    margin: auto 0;
+	padding: 0px;
+}
+
+.threeDRepo md-menu-item ng-include>.md-button md-icon {
+    margin: auto 16px auto 0;
+}
+
+
+.threeDRepo md-menu-item ng-include p {
+    display: inline-block;
+    margin: auto;
+    margin-top: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+}
+
+.threeDRepo md-menu-bar {
+	padding: 0px;
+}
+
+.threeDRepo md-menu-bar md-menu.md-open> .md-button {
+	background-color: #3171B6;
+}
+
+.threeDRepo md-menu-item p {
+	white-space: pre-wrap;
+}

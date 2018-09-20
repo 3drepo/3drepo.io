@@ -1,0 +1,15 @@
+.colorPicker
+	.colorPickerSelect(
+		flex
+		ng-click="vm.showPanel($event)"
+		layout-fill
+		layout="row"
+		layout-align="start center")
+		.colorPickerValue(
+			ng-if="vm.color"
+			ng-style="{'background-color': vm.ngModel}")
+
+		.colorPickerPlaceholder(ng-if="!vm.color")
+
+		.colorPickerIcon(flex="none")
+			md-icon.angular-material-icons arrow_drop_down

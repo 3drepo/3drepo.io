@@ -32,13 +32,13 @@ export class TreeService {
 	public visibilityUpdateTime;
 	public selectedIndex;
 	public treeReady;
+	public allNodes;
 
 	private state;
 	private treeMap = null;
 	private idToMeshes;
 	private baseURL;
 
-	private allNodes;
 	private nodesToShow;
 	private subTreesById;
 	private subModelIdToPath;
@@ -1218,7 +1218,7 @@ export class TreeService {
 	 * @param colour the colour to highlight
 	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
 	 */
-	public selectNodesBySharedIds(objects: any[],  colour: number[]) {
+	public selectNodesBySharedIds(objects: any[],  colour?: number[]) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {

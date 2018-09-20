@@ -28,8 +28,9 @@
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
 
 	router.get("/members", middlewares.loggedIn, getMemberList);
-	router.post("/members/:user", middlewares.isAccountAdmin, addTeamMember);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
+	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
+	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
 	function getQuotaInfo(req, res, next) {
 
@@ -48,14 +49,19 @@
 		}).then(quotaInfo => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, quotaInfo);
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
+	}
 
+	function findUsersWithoutMembership(req, res, next) {
+		User.findUsersWithoutMembership(req.params.account, req.params.searchString).then((notMembers) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, notMembers);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
 	}
 
 	function getMemberList(req, res, next) {
-
 		User.findByUserName(req.session.user.username).then(user => {
 
 			if(!user) {
@@ -63,8 +69,7 @@
 			}
 
 			if(user.isMemberOfTeamspace(req.params.account)) {
-				return User.getMembersAndJobs(req.params.account);
-
+				return User.getMembers(req.params.account);
 			} else {
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
@@ -74,23 +79,20 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-
 	}
 
 	function addTeamMember(req, res, next) {
-
 		const responsePlace = utils.APIInfo(req);
-
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				if(req.params.user) {
-					return dbUser.addTeamMember(req.params.user);
+				if(req.body.user) {
+					return dbUser.addTeamMember(req.body.user, req.body.job, req.body.permissions);
 				} else {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 			})
-			.then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
+			.then((user) => {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user);
 			})
 			.catch(err => {
 				responseCodes.respond(responsePlace, req, res, next,

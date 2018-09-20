@@ -14,57 +14,74 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { IMenuItem } from "./panel.service";
 
 class PanelCardOptionMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$timeout"
+		"$element"
 	];
 
 	public menu;
+	public buttonLabel: string = "";
 	public selectedMenuOption;
-	public sortIndex;
 
 	constructor(
-		private $timeout: ng.ITimeoutService
+		private $element: ng.IRootElementService
 	) {}
 
-	public $ngInit() {}
+	public addPreventCloseToDatepicker() {
+		const pickerButtons = this.$element[0].getElementsByClassName("md-datepicker button");
+		Array.from(pickerButtons).forEach((p) => p.setAttribute("md-prevent-menu-close", "true"));
+	}
 
-	// TODO: Not actually sure what's going on here?
-	public menuItemSelected(index: number) {
-
-		const menuItem = this.menu[index];
-
+	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem) {
 		if (menuItem.hasOwnProperty("toggle")) {
 			if (menuItem.toggle) {
 				menuItem.selected = !menuItem.selected;
-				this.selectedMenuOption = menuItem;
 			} else {
-				if (index !== this.sortIndex) {
-					this.sortIndex = index;
-				}
-				this.menu[this.sortIndex].firstSelected = !this.menu[this.sortIndex].firstSelected;
-				this.menu[this.sortIndex].secondSelected = !this.menu[this.sortIndex].secondSelected;
-				this.selectedMenuOption = this.menu[this.sortIndex];
+				// If its not a toogle type item then it switches between
+				// the two selected icons for the menu-item.
+				// Normally used for sorting type of menu-item.
+
+				menuItem.firstSelected = !menuItem.firstSelected;
+				menuItem.secondSelected = !menuItem.secondSelected;
 			}
-		} else {
-			this.selectedMenuOption = menuItem;
 		}
 
-		// TODO: What is this about? - James
-		// 'Reset' this.selectedMenuOption so that selecting the same option can be registered down the line
-		this.$timeout(() => {
-			this.selectedMenuOption = undefined;
-		});
+		menuItem = angular.copy(menuItem);
+
+		// If its a submenu item thats being clicked then
+		// pass on the parent and the item as a subitem
+		if (!!parentMenuItem) {
+			const subitem = menuItem;
+			menuItem = angular.copy(parentMenuItem);
+			menuItem.subItem = subitem;
+		}
+
+		this.selectedMenuOption = menuItem;
 	}
 
+	public onClickItem(menuItem: IMenuItem, parentMenuItem: IMenuItem = null) {
+		if (menuItem.date) {
+			return;
+		}
+		this.menuItemSelected(menuItem, parentMenuItem);
+	}
+
+	public onDateChanged(item: IMenuItem, parentMenuItem: IMenuItem,  menu) {
+		this.menuItemSelected(item, parentMenuItem);
+		if (!item.stopClose) {
+			menu.close(true, {closeAll: true});
+		}
+	}
 }
 
 export const PanelCardOptionMenuComponent: ng.IComponentOptions = {
 	bindings: {
 		menu: "=",
-		selectedMenuOption: "="
+		selectedMenuOption: "=",
+		buttonLabel: "&?"
 	},
 	controller: PanelCardOptionMenuController,
 	controllerAs: "vm",

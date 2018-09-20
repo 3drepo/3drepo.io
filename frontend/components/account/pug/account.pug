@@ -12,7 +12,7 @@ div#accountHolder(
 		layout="row"
 		layout-xs="column"
 		layout-sm="column")
-		
+
 		account-info(
 			flex-xs="85"
 			flex-sm="85"
@@ -53,11 +53,6 @@ div#accountHolder(
 				first-name="vm.firstName"
 				last-name="vm.lastName")
 
-			account-licenses(
-				ng-if="vm.username && vm.itemToShow === 'licenses'"
-				account="vm.account"
-				show-page="vm.showPage(page, callingPage, data)")
-
 			account-modelsetting(
 				ng-if="vm.username && vm.itemToShow === 'modelsetting'"
 				account="vm.account"
@@ -66,11 +61,10 @@ div#accountHolder(
 				data="vm.data"
 				show-page="vm.showPage(page, callingPage, data)")
 
-			account-assign(
-				ng-if="vm.username && vm.itemToShow === 'assign'"
-				account="vm.account"
-				model="vm.model"
-				data="vm.data"
+			account-user-management(
+				ng-if="vm.username && vm.itemToShow === 'userManagement'"
+				current-user="vm.account"
+				accounts="vm.accounts"
 				show-page="vm.showPage(page, callingPage, data)")
 
 div(ng-if="vm.state.model")
