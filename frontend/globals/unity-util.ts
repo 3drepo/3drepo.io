@@ -601,21 +601,24 @@ export class UnityUtil {
 	 * 					or when you want a specific set of objects to stay highlighted when toggle mode is on
 	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
-		const params: any = {
-			database : account,
-			model,
-			ids : idArr,
-			toggle : toggleMode,
-			forceReHighlight
-		};
 
-		if (color) {
-			params.color = color;
-		} else  {
-			params.color = UnityUtil.defaultHighlightColor;
+		const maxNodesPerReq = 20000;
+		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
+			setTimeout(() => {
+				const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
+				const arr = idArr.slice(i, endIdx);
+				const params: any = {
+					database : account,
+					model,
+					ids : arr,
+					toggle : true,
+					forceReHighlight,
+					color: color ? color : UnityUtil.defaultHighlightColor
+				};
+				UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			}, 100);
 		}
 
-		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
 	/**
