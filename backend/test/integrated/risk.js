@@ -58,9 +58,9 @@ describe("Risks", function () {
 		},
 		"assigned_roles":["jobB"],
 		"category":"other issue",
-		"likelihood":"low",
-		"consequence":"moderate",
-		"level_of_risk":"high",
+		"likelihood":"0",
+		"consequence":"0",
+		"level_of_risk":"0",
 		"mitigation_status":"proposed",
 		"mitigation_desc":"Task123"
 	};
