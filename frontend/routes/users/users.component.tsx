@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, get, values, isNumber } from 'lodash';
+import { pick, get, values, isNumber, cond, matches } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 
@@ -28,9 +28,7 @@ import { FloatingActionPanel } from '../components/floatingActionPanel/floatingA
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
 
-import { Container, Content, Footer, FloatingButton } from './users.styles';
-import { cond } from 'lodash';
-import { matches } from 'lodash';
+import { Container, Content, Footer } from './users.styles';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',

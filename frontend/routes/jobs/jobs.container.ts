@@ -15,30 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Button from '@material-ui/core/Button';
-import Popover from '@material-ui/core/Popover';
+import { connect } from '../../helpers/migration';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-export const Container = styled.div``;
+import { Jobs } from './jobs.component';
+import {
+	UserManagementActions,
+	selectJobsColors,
+	selectJobs
+} from '../../modules/userManagement';
 
-export const FloatingButton = styled(Button) `
-	&& {
-		position: absolute;
-		top: 166px;
-		right: 14px;
-	}
-`;
+const mapStateToProps = createStructuredSelector({
+	jobs: selectJobs,
+	colors: selectJobsColors
+});
 
-export const Panel = styled(Popover).attrs({
-	classes: {
-		paper: 'floating-panel'
-	}
-})`
-	.floating-panel {
-		margin-left: -15px;
-		margin-top: -20px;
-		padding: 16px;
-		font-size: 14px;
-		box-sizing: border-box;
-	}
-`;
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	updateColor: UserManagementActions.updateJobColor,
+	remove: UserManagementActions.removeJob,
+	create: UserManagementActions.createJob
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Jobs);

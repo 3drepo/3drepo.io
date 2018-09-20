@@ -27,15 +27,20 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
-	removeUserFailure: [],
 	setTeamspace: ['teamspace'],
 	updateJob: ['username', 'job'],
-	updateJobSuccess: ['username', 'job'],
+	updateUserJobSuccess: ['username', 'job'],
 	updatePermissions: ['permissions'],
 	updatePermissionsSuccess: ['permissions'],
 	getUsersSuggestions: ['searchText'],
 	getUsersSuggestionsSuccess: ['suggestions'],
-	clearUsersSuggestions: []
+	clearUsersSuggestions: [],
+	createJob: ['job'],
+	createJobSuccess: ['job'],
+	removeJob: ['jobId'],
+	removeJobSuccess: ['jobId'],
+	updateJobColor: ['job'],
+	updateJobSuccess: ['job']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -88,15 +93,11 @@ export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
 	return { ...state, users };
 };
 
-export const removeUserFailure = (state = INITIAL_STATE, action) => {
-	return state;
-};
-
 export const setTeamspace = (state = INITIAL_STATE, { teamspace }) => {
 	return { ...state, teamspace };
 };
 
-export const updateJobSuccess = (state = INITIAL_STATE, { username, job }) => {
+export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) => {
 	const users = [...state.users].map((userData) => {
 		if (userData.user === username) {
 			userData.job = job;
@@ -127,15 +128,51 @@ export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) =>
 	return { ...state, usersSuggestions: [] };
 };
 
+export const updateJobsColors = (state = INITIAL_STATE, { color }) => {
+	const jobsColors = [...state.jobsColors] as any;
+	if (color && !jobsColors.includes(color)) {
+		jobsColors.unshift(color);
+	}
+
+	return { ...state, jobsColors };
+};
+
+export const createJobSuccess = (state = INITIAL_STATE, { job }) => {
+	const jobs = [...state.jobs, job];
+	return updateJobsColors({ ...state, jobs }, job);
+};
+
+export const updateJobSuccess = (state = INITIAL_STATE, { job }) => {
+	const jobs = [...state.jobs].map((jobData) => {
+		if (jobData._id === job._id) {
+			return job;
+		}
+
+		return jobData;
+	});
+
+	return updateJobsColors({ ...state, jobs }, job);
+};
+
+export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
+	const jobs = [...state.jobs].filter(({_id}) => {
+		return _id !== jobId;
+	});
+
+	return { ...state, jobs };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
 	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
-	[UserManagementTypes.REMOVE_USER_FAILURE]: removeUserFailure,
 	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,
-	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
+	[UserManagementTypes.UPDATE_USER_JOB_SUCCESS]: updateUserJobSuccess,
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
-	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions
+	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
+	[UserManagementTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
+	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
+	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess
 });

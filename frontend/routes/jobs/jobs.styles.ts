@@ -16,29 +16,34 @@
  */
 
 import styled from 'styled-components';
-import Button from '@material-ui/core/Button';
-import Popover from '@material-ui/core/Popover';
+import Grid from '@material-ui/core/Grid';
 
-export const Container = styled.div``;
+import { COLOR } from '../../styles';
+import * as ColorPicker from '../components/colorPicker/colorPicker.styles';
 
-export const FloatingButton = styled(Button) `
-	&& {
-		position: absolute;
-		top: 166px;
-		right: 14px;
-	}
+const FOOTER_HEIGHT = 45;
+
+export const Container = styled(Grid)`
+  height: 100%;
+  overflow: hidden;
+
+  ${ColorPicker.ColorSelect} {
+    border: none;
+  }
 `;
 
-export const Panel = styled(Popover).attrs({
-	classes: {
-		paper: 'floating-panel'
-	}
-})`
-	.floating-panel {
-		margin-left: -15px;
-		margin-top: -20px;
-		padding: 16px;
-		font-size: 14px;
-		box-sizing: border-box;
-	}
+export const Content = styled(Grid)`
+  max-height: calc(100% - ${FOOTER_HEIGHT}px);
+  flex: 1;
+`;
+
+export const Footer = styled(Grid)`
+  padding: 16px 24px;
+  font-size: 14px;
+  color: ${COLOR.BLACK_30};
+  border-top: 1px solid ${COLOR.BLACK_6};
+  height: ${FOOTER_HEIGHT}px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 `;

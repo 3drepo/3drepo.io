@@ -51,10 +51,7 @@ export const SaveButton = styled(Button)`
 `;
 
 export const Container = styled.div`
-	padding: 16px;
 	width: 290px;
-	font-size: 14px;
-	box-sizing: border-box;
 
 	${StyledTextField},
 	${StyledSelect},

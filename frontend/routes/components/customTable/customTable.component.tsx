@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values } from 'lodash';
+import { matches, cond, orderBy, pick, values, stubTrue, first } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -26,14 +26,24 @@ import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 import { SORT_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
-
 import { UserItem } from '../userItem/userItem.component';
+import { Highlight } from '../highlight/highlight.component';
+import { ColorPicker } from '../colorPicker/colorPicker.component';
+
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 import { Container, Head, Row, SortLabel, Cell } from './customTable.styles';
 
-const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
-	return cell.name ? (
+const HeaderCell = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
+	if (!cell.name) {
+		return (<></>);
+	}
+
+	if (hideSortIcon) {
+		return (<>{cell.name}</>);
+	}
+
+	return (
 		<SortLabel
 			active={sortBy === cell.type}
 			direction={sortBy === cell.type ? order : SORT_ORDER_TYPES.ASCENDING}
@@ -41,7 +51,7 @@ const HeaderCell = ({cell, sortBy, order, onClick, onChange}) => {
 		>
 			{cell.name}
 		</SortLabel>
-	) : (<></>);
+	);
 };
 
 const RowCellButton = ({icon, onClick, disabled}) => {
@@ -60,27 +70,33 @@ export const CELL_TYPES = {
 	CHECKBOX: 5,
 	PERMISSIONS: 6,
 	ICON_BUTTON: 7,
-	EMPTY: 8
+	EMPTY: 8,
+	NAME: 9
 };
 
 const HEADER_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: CellUserSearch
+	[CELL_TYPES.USER]: CellUserSearch,
+	[CELL_TYPES.NAME]: CellUserSearch
 };
 
 const ROW_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: UserItem,
 	[CELL_TYPES.JOB]: CellSelect,
 	[CELL_TYPES.PERMISSIONS]: CellSelect,
-	[CELL_TYPES.ICON_BUTTON]: RowCellButton
+	[CELL_TYPES.ICON_BUTTON]: RowCellButton,
+	[CELL_TYPES.COLOR]: ColorPicker
 };
 
-const ROW_CELL_DEFAULT_PROPS = {
+const CELL_DEFAULT_PROPS = {
 	[CELL_TYPES.EMPTY]: {
 		flex: 100
 	},
 	[CELL_TYPES.JOB]: {
 		itemTemplate: JobItem,
 		flex: 25
+	},
+	[CELL_TYPES.NAME]: {
+		flex: 30
 	},
 	[CELL_TYPES.USER]: {
 		flex: 25
@@ -100,12 +116,18 @@ const ROW_CELL_DEFAULT_PROPS = {
  * @returns {Array}
  */
 const getSortedRows = (rows, type, order) => {
-	const { USER, JOB, PERMISSIONS } = CELL_TYPES;
+	const { USER, JOB, PERMISSIONS, NAME } = CELL_TYPES;
 	const sort = cond([
 		[matches({ type: USER }), sortByName.bind(null, rows)],
+		[matches({ type: NAME }), sortByName.bind(null, rows)],
 		[matches({ type: JOB }), sortByJob.bind(null, rows)],
 		[matches({ type: PERMISSIONS }), (options) => {
-			return orderBy(rows, ["isAdmin"], options.order);
+			return orderBy(rows, ['isAdmin'], options.order);
+		}],
+
+		// Default action
+		[stubTrue, (options) => {
+			return orderBy(rows, ['value'], options.order);
 		}]
 	]);
 
@@ -160,11 +182,15 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		const {sortBy, order, searchText} = prevState;
+		const initialSortBy = (first(nextProps.cells) || {type: CELL_TYPES.NAME} as any).type;
+		const newSortBy = !prevState.processedRows.length ? initialSortBy : sortBy;
+
 		return {
 			searchFields,
+			sortBy: newSortBy,
 			processedRows: getProcessedRows({
 				rows: nextProps.rows,
-				sortBy,
+				sortBy: newSortBy,
 				order,
 				searchFields,
 				searchText
@@ -231,7 +257,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		return cells.map((cell, index) => {
 			const CellComponent = HEADER_CELL_COMPONENTS[cell.type] || HeaderCell;
 			const cellData = {
-				...(ROW_CELL_DEFAULT_PROPS[cell.type] || {}),
+				...(CELL_DEFAULT_PROPS[cell.type] || {}),
 				...cell
 			};
 
@@ -244,6 +270,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 							order={order}
 							onClick={this.createSortHandler(cell.type)}
 							onChange={this.createSearchHandler()}
+							hideSortIcon={cellData.hideSortIcon}
 						/>
 					)}
 				</Cell>
@@ -261,18 +288,14 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{row.data.map((data, cellIndex) => {
 						const type = cells[cellIndex].type;
 						const CellComponent = ROW_CELL_COMPONENTS[type];
-						const cellProps = ROW_CELL_DEFAULT_PROPS[type];
-						const cellData = {
-							...data,
-							searchText: this.state.searchText
-						};
+						const cellProps = CELL_DEFAULT_PROPS[type];
 
 						return (
 							<Cell key={cellIndex} {...cellProps}>
 								{
 									CellComponent ?
-										(<CellComponent {...cellData} />) :
-										cellData.value
+										(<CellComponent {...data} searchText={this.state.searchText} />) :
+										(<Highlight text={data.value} search={this.state.searchText} />)
 								}
 							</Cell>
 						);
@@ -280,15 +303,6 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				</Row>
 			);
 		});
-	}
-
-	public renderThumb = ({ style, ...props }) => {
-		const thumbStyle = {
-			backgroundColor: `red`
-		};
-		return (
-			<div style={{ ...style, ...thumbStyle }} {...props} />
-		);
 	}
 
 	public render() {

@@ -97,7 +97,7 @@ export function* removeUserCascade({ username }) {
 	}
 }
 
-export function* updateJob({ username, job }) {
+export function* updateUserJob({ username, job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield (
@@ -105,7 +105,7 @@ export function* updateJob({ username, job }) {
 				API.updateUserJob(teamspace, job, username) :
 				API.removeUserJob(teamspace, username)
 		);
-		yield put(UserManagementActions.updateJobSuccess(username, job));
+		yield put(UserManagementActions.updateUserJobSuccess(username, job));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('assign', 'job', error.response));
 	}
@@ -131,12 +131,48 @@ export function* getUsersSuggestions({ searchText }) {
 	}
 }
 
+export function* updateJobColor({ job }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.updateJob(teamspace, job);
+
+		yield put(UserManagementActions.updateJobSuccess(job));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'job color', error.response));
+	}
+}
+
+export function* createJob({ job }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.createJob(teamspace, job);
+
+		yield put(UserManagementActions.createJobSuccess(job));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('create', 'job', error.response));
+	}
+}
+
+export function* removeJob({ jobId }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.deleteJob(teamspace, jobId);
+
+		yield put(UserManagementActions.removeJobSuccess(jobId));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'job', error.response));
+	}
+}
+
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
-	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateJob);
+	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
+	yield takeLatest(UserManagementTypes.CREATE_JOB, createJob);
+	yield takeLatest(UserManagementTypes.REMOVE_JOB, removeJob);
+	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
 }

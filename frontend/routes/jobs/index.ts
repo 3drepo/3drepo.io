@@ -15,30 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Button from '@material-ui/core/Button';
-import Popover from '@material-ui/core/Popover';
-
-export const Container = styled.div``;
-
-export const FloatingButton = styled(Button) `
-	&& {
-		position: absolute;
-		top: 166px;
-		right: 14px;
-	}
-`;
-
-export const Panel = styled(Popover).attrs({
-	classes: {
-		paper: 'floating-panel'
-	}
-})`
-	.floating-panel {
-		margin-left: -15px;
-		margin-top: -20px;
-		padding: 16px;
-		font-size: 14px;
-		box-sizing: border-box;
-	}
-`;
+export { default as Jobs } from './jobs.container';
