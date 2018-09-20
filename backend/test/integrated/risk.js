@@ -102,7 +102,6 @@ describe("Risks", function () {
 
 							riskId = res.body._id;
 
-							console.log(res.body);
 							expect(res.body.name).to.equal(risk.name);
 							expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
 							expect(res.body.associated_activity).to.equal(risk.associated_activity);
@@ -111,7 +110,7 @@ describe("Risks", function () {
 							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 							expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpointclippingPlanes);
+							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 							expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
 							expect(res.body.category).to.equal(risk.category);
 							expect(res.body.likelihood).to.equal(risk.likelihood);
@@ -135,7 +134,7 @@ describe("Risks", function () {
 						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
 						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpointclippingPlanes);
+						expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
 						expect(res.body.category).to.equal(risk.category);
 						expect(res.body.likelihood).to.equal(risk.likelihood);
@@ -163,7 +162,6 @@ describe("Risks", function () {
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
-							console.log(err);
 							return done(err);
 						});
 				},
