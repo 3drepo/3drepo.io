@@ -54,6 +54,7 @@ export class ViewpointsService {
 	public filterViewpoints(searchQuery: string): any[] {
 
 		return this.state.viewpoints.filter((view) => {
+			if (view.selected) { view.selected = false; }
 			return this.stringSearch(view.name, searchQuery);
 		});
 
