@@ -17,7 +17,6 @@
 
 "use strict";
 
-const _ = require("lodash");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
@@ -70,7 +69,7 @@ view.getThumbnail = function (dbColOptions, uid) {
 };
 
 view.updateViewpoint = function (dbCol, sessionId, data, id) {
-	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)} ,data));
+	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
 	return this.updateAttrs(dbCol, id, data);
 }
 
@@ -92,7 +91,7 @@ view.updateAttrs = function (dbCol, id, data) {
 	});
 };
 
-view.createViewpoint = function (dbCol,sessionId,data) {
+view.createViewpoint = function (dbCol, sessionId, data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -123,7 +122,7 @@ view.createViewpoint = function (dbCol,sessionId,data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
-				ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({_id:utils.uuidToString(id)}, data));
+				ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
 				return this.updateAttrs(dbCol, id, data).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {
@@ -135,7 +134,7 @@ view.createViewpoint = function (dbCol,sessionId,data) {
 	});
 };
 
-view.deleteViewpoint = function (dbCol ,id, sessionId) {
+view.deleteViewpoint = function (dbCol, id, sessionId) {
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
