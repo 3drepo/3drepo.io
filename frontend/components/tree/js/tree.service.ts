@@ -32,7 +32,7 @@ export class TreeService {
 	public visibilityUpdateTime;
 	public selectedIndex;
 	public treeReady;
-	public allNodes;
+	private allNodes;
 
 	private state;
 	private treeMap = null;
@@ -657,7 +657,7 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
-		this.updateModelVisibility(this.allNodes);
+		this.updateModelVisibility();
 	}
 
 	/**
@@ -666,7 +666,7 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
-		this.updateModelVisibility(this.allNodes);
+		this.updateModelVisibility();
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
@@ -722,7 +722,7 @@ export class TreeService {
 	public hideAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus(this.allNodes, this.VISIBILITY_STATES.invisible);
 		if (updateModel) {
-			this.updateModelVisibility(this.allNodes);
+			this.updateModelVisibility();
 		}
 	}
 
@@ -735,7 +735,7 @@ export class TreeService {
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
 		if (updateModel) {
-			this.updateModelVisibility(this.allNodes);
+			this.updateModelVisibility();
 		}
 	}
 
@@ -832,7 +832,7 @@ export class TreeService {
 	 * Apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public updateModelVisibility(node: any) {
+	public updateModelVisibility(node = this.allNodes) {
 
 		return this.onReady().then(() => {
 
