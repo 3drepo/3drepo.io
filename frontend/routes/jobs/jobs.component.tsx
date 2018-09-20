@@ -114,17 +114,14 @@ export class Jobs extends React.PureComponent<IProps, any> {
 			onSave: this.onSave
 		};
 
-		const panel = (
+		return (
 			<FloatingActionPanel
+				container={container}
 				key={this.state.panelKey}
 				render={({ closePanel }) => {
 					return <NewJobForm {...formProps} onCancel={closePanel} />;
 				}}
 			/>
-		);
-		return ReactDOM.createPortal(
-			panel,
-			container
 		);
 	}
 
