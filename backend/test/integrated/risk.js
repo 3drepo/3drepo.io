@@ -129,7 +129,7 @@ describe("Risks", function () {
 						expect(res.body.name).to.equal(risk.name);
 						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
 						expect(res.body.associated_activity).to.equal(risk.associated_activity);
-						expect(res.body.desc).to.equal(risk.associated_activity);
+						expect(res.body.desc).to.equal(risk.desc);
 						expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
 						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
 						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
