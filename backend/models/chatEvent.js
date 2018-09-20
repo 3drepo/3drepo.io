@@ -35,8 +35,6 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 		data
 	};
 
-	console.log(msg)
-
 	return Queue.insertEventMessage(msg);
 }
 
@@ -73,7 +71,6 @@ function newModel(emitter, account, data) {
 
 // Groups notifications
 function newGroups(emitter, account, model, data) {
-	console.log("emitter " + emitter, "account " + account, "model " + model,"data " + data);
 	return insertEventQueue("group" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 

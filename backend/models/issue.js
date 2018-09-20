@@ -509,8 +509,6 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean) {
 
 schema.statics.createIssue = function(dbColOptions, data) {
 
-	console.log("ISSUE OBJECT", data);
-
 	const objectId = data.object_id;
 
 	const promises = [];
