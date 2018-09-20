@@ -16,12 +16,15 @@
  */
 
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
 import Icon from '@material-ui/core/Icon';
 
 import { Container, FloatingButton, Panel } from './floatingActionPanel.styles';
 
 interface IProps {
 	render: (closePanel: any) => void;
+	container?: HTMLElement;
 	children?: any;
 	icon?: string;
 }
@@ -58,7 +61,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public render() {
+	public renderPanel() {
 		const { icon } = this.props;
 		const { anchorEl, open } = this.state;
 
@@ -94,6 +97,22 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 					}
 				</Panel>
 			</Container>
+		);
+	}
+
+	public renderInContainer(container) {
+		return ReactDOM.createPortal(
+			this.renderPanel(),
+			container
+		);
+	}
+
+	public render() {
+		const shouldUsePortal = Boolean(this.props.container);
+		return (
+			<>
+				{ shouldUsePortal ? this.renderInContainer(this.props.container) : this.renderPanel() }
+			</>
 		);
 	}
 }

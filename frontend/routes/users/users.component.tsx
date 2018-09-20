@@ -168,17 +168,14 @@ export class Users extends React.PureComponent<IProps, IState> {
 			getUsersSuggestions: this.props.onUsersSearch
 		};
 
-		const panel = (
+		return (
 			<FloatingActionPanel
+				container={container}
 				key={this.state.panelKey}
 				render={({closePanel}) => {
 					return <NewUserForm {...formProps} onCancel={closePanel} />;
 				}}
 			/>
-		);
-		return ReactDOM.createPortal(
-			panel,
-			container
 		);
 	}
 

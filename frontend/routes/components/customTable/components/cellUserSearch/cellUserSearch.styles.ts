@@ -22,49 +22,59 @@ import Icon from '@material-ui/core/Icon';
 import { FONT_WEIGHT, COLOR } from '../../../../../styles';
 
 export const SearchIcon = styled(Icon)`
-  && {
-    font-size: 14px;
-    font-weight: ${FONT_WEIGHT.SEMIBOLD};
-    color: ${COLOR.BLACK_60};
-    margin-right: 8px;
-  }
+	&& {
+		font-size: 14px;
+		font-weight: ${FONT_WEIGHT.SEMIBOLD};
+		color: ${COLOR.BLACK_60};
+		margin-right: 8px;
+	}
 `;
 
-export const SearchField = styled(TextField)`
-  && {
-    margin: 0;
-  }
+export const SearchField = styled(TextField).attrs({
+	InputLabelProps: {
+		classes: {
+			root: 'search-field__label'
+		}
+	}
+})`
+	&& {
+		margin: 0;
+	}
 
-  label, input {
-    font-size: 14px;
-    font-weight: ${FONT_WEIGHT.SEMIBOLD};
-    color: ${COLOR.BLACK_60};
-  }
+	label, input {
+		font-size: 14px;
+		font-weight: ${FONT_WEIGHT.SEMIBOLD};
+		color: ${COLOR.BLACK_60};
+	}
 
-  input {
-    padding: 3px 0;
-  }
+	input {
+		padding: 5px 0;
+	}
 
-  [class*='-formControl-'] {
-    margin-top: 3px;
-  }
+	.search-field__label {
+		margin-top: 3px;
+	}
 
-  label[data-shrink='false'] ~ [class*='-formControl-'] {
-    &:before, &:after {
-      opacity: 1;
-      transform: opacity 200ms ease-in-out;
-    }
+	.search-field__label ~ div {
+		margin-top: 5px;
+	}
 
-    &:not(:hover):before {
-      opacity: 0;
-    }
-  }
+	.search-field__label[data-shrink='false'] ~ div {
+		&:before, &:after {
+			opacity: 1;
+			transform: opacity 200ms ease-in-out;
+		}
 
-  label {
-    transform: translate(0, 5px) scale(1);
+		&:not(:hover):before {
+			opacity: 0;
+		}
+	}
 
-    &[data-shrink='true'] {
-      transform: translate(0, -12px) scale(0.75) !important;
-    }
-  }
+	.search-field__label {
+		transform: translate(0, 5px) scale(1);
+
+		&[data-shrink='true'] {
+			transform: translate(0, -8px) scale(0.75) !important;
+		}
+	}
 `;

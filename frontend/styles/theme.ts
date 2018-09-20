@@ -31,5 +31,17 @@ export const theme = createMuiTheme({
 			dark: '#377763',
 			contrastText: '#fff'
 		}
+	},
+	overrides: {
+		MuiInput: {
+			root: {
+				fontSize: '14px'
+			},
+			underline: {
+				'&:before': {
+					borderBottomColor: 'rgba(0, 0, 0, .12) !important'
+				}
+			}
+		}
 	}
 });
