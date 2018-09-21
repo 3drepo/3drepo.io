@@ -25,7 +25,7 @@ dry_run = True
 ##### Connect to the Database #####
 db = MongoClient(connString)
 for database in db.database_names():
-  if database != "admin" and database != "local" and database == "kierongibbons":
+  if database != "admin" and database != "local":
     db = MongoClient(connString)[database]
     print("--database:" + database)
 
