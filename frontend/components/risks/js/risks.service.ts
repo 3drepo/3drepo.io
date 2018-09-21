@@ -388,6 +388,15 @@ export class RisksService {
 
 	}
 
+	/**
+	 * Remove risk pin with given riskId from viewer.
+	 */
+	public removeRiskPin(riskId: string) {
+		if (riskId) {
+			this.viewerService.removePin({ id: riskId });
+		}
+	}
+
 	public setSelectedRisk(risk, isCorrectState, revision) {
 
 		if (this.state.selectedRisk) {
@@ -440,7 +449,11 @@ export class RisksService {
 	}
 
 	public deleteSelectedRisk(teamspace: string, model: string) {
-		return this.deleteRisks(teamspace, model, [this.state.selectedRisk]);
+		if (this.state.selectedRisk) {
+			return this.deleteRisks(teamspace, model, [this.state.selectedRisk]);
+		} else {
+			return Promise.resolve();
+		}
 	}
 
 	public deleteRisks(teamspace: string, model: string, risks: any) {
@@ -467,6 +480,8 @@ export class RisksService {
 		this.state.allRisks = this.state.allRisks.filter((r) => {
 			return risk._id !== r._id;
 		});
+
+		this.removeRiskPin(risk._id);
 	}
 
 	public populateRisk(risk) {
