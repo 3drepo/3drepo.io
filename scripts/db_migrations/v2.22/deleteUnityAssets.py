@@ -38,8 +38,8 @@ for database in db.database_names():
 			for asset_file in unity_asset_files:
 				rev_id = re.search(r"(?<=revision/).*?(?=/unityAssets\.json)", asset_file.filename).group(0)
 				col_name_check = model_id + ".stash.unity3d"
-				entry = db[col_name_check].find({"_id" : uuid.UUID(rev_id)})
-				if entry.count() > 0:
+				entry = db[col_name_check].find_one({"_id" : uuid.UUID(rev_id)})
+				if entry:
 ##### Delete unityAssets.json files #####
 					print "\t\tdeleting: " + asset_file.filename
 					if not dry_run:
