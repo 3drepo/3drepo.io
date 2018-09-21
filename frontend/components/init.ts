@@ -33,7 +33,12 @@ export const TDR = () => {
 		if (!maintenanceMode) {
 
 			if (angular) {
-				window.TDR = angular.module("3drepo", ["ui.router", "ngMaterial", "ngAnimate", "ngSanitize", "vcRecaptcha"]);
+				window.TDR = angular.module("3drepo", ["ui.router",
+														"ngMaterial",
+														"ngAnimate",
+														"ngSanitize",
+														"vcRecaptcha",
+														"ngclipboard"]);
 			}
 
 		}

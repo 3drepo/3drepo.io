@@ -166,6 +166,12 @@ class PanelCardController implements ng.IController {
 			});
 
 			addedChips.forEach((c) => {
+				if (Date.prototype.isPrototypeOf(c.value)) {
+					const types = c.type.split("_");
+					this.panelService.setDateValueFromMenu(this.contentData.type,  types[0], types[1], c.value);
+					return;
+				}
+
 				this.panelService.setSelectedFromMenu(this.contentData.type, c.type, c.value, true);
 			});
 

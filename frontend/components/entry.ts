@@ -26,6 +26,8 @@ window.TDR = TDR;
 // Initialise 3D Repo
 window.TDR();
 
+import "ngclipboard";
+
 // Register all the angularjs modules
 
 // Shared services
