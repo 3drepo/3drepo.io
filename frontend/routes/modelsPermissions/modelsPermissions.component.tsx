@@ -16,21 +16,30 @@
  */
 
 import * as React from 'react';
-import { pick } from 'lodash';
+import { pick, matches, isEqual, cond, get } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import Radio from '@material-ui/core/Radio';
+import SimpleBar from 'simplebar-react';
 
-import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { theme } from '../../styles';
-import { Container, ModelsContainer } from './modelsPermissions.styles';
+import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../constants/model-permissions';
+import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
+import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
+
+import { Container, ModelsContainer, PermissionsContainer } from './modelsPermissions.styles';
+
+const UNDEFINED_PERMISSIONS = 'undefined';
 
 const MODEL_TABLE_CELLS = [{
 	name: 'Model/federation',
 	type: CELL_TYPES.NAME,
 	HeadingComponent: CellUserSearch,
+	HeadingProps: {},
 	CellComponent: ModelItem,
+	CellProps: {},
 	searchBy: ['name']
 }];
 
@@ -48,14 +57,43 @@ const getModelsTableRows = (models = [], selectedModels = []): any[] => {
 	});
 };
 
+const PERMISSIONS_TABLE_CELLS = [{
+	name: 'User',
+	type: CELL_TYPES.USER,
+	HeadingComponent: CellUserSearch,
+	CellComponent: ModelItem,
+	searchBy: ['name']
+}];
+
+const getPermissionsTableRows = (users = [], selectedUsers = []): any[] => {
+	return users.map((model) => {
+		const data = [
+			{
+				name: model.name,
+				isFederation: model.federate
+			}
+		];
+
+		const selected = selectedUsers.some((selectedModel) => selectedModel.model === model.model);
+		return { ...model, data, selected };
+	});
+};
+
 interface IProps {
 	models: any[];
+	users: any[];
+	permissions: any[];
+	onSelectionChange?: ({selectedModels}) => void;
+	onPermissionsChange?: ({updatedPermissions}) => void;
 }
 
 interface IState {
 	modelRows: any[];
+	permissionsRows: any[];
+	permissionsCells: any[];
 	selectedModels: any[];
 	selectedUsers: any[];
+	selectedGlobalPermissions: string;
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
@@ -67,28 +105,96 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		modelRows: [],
+		permissionsRows: [],
+		permissionsCells: [],
 		selectedModels: [],
-		selectedUsers: []
+		selectedUsers: [],
+		selectedGlobalPermissions: UNDEFINED_PERMISSIONS
 	};
 
-	public handleModelsSelectionChange = (rows) => {
-		this.setState({selectedModels: rows});
+	public onGlobalPermissionsChange = (event, value) => {
+		this.setState({selectedGlobalPermissions: value});
+	}
+
+	public getPermissionsTableCells = () => {
+		const permissionsCells = MODEL_ROLES_LIST.map(({ label: name, tooltip: tooltipText, width, key: value }) => {
+			return {
+				name,
+				type: CELL_TYPES.RADIO_BUTTON,
+				HeadingComponent: TableHeadingRadio,
+				HeadingProps: {
+					name: 'permission',
+					tooltipText,
+					value,
+					onChange: this.onGlobalPermissionsChange,
+					checked: this.state.selectedGlobalPermissions === value
+				}
+				// CellComponent: Radio
+			};
+		});
+
+		return [
+			...PERMISSIONS_TABLE_CELLS,
+			...permissionsCells
+		];
+	}
+
+	public componentDidMount() {
+		this.setState({
+			permissionsCells: this.getPermissionsTableCells()
+		});
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		if (isEqual(prevState.selectedModels, this.state.selectedModels)) {
+
+		}
+
+		if (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) {
+			this.setState({
+				permissionsCells: this.getPermissionsTableCells()
+			});
+		}
+	}
+
+	public handlePermissionsChange = () => {
+
+	}
+
+	public handleSelectionChange = (field) => (rows) => {
+		const handleChange = cond([
+			[matches('selectedModels'), () => this.props.onSelectionChange(rows)]
+		])(field);
+
+		this.setState({[field]: rows});
 	}
 
 	public render() {
 		const {models} = this.props;
-		const {modelRows} = this.state;
+		const {modelRows, permissionsRows, permissionsCells} = this.state;
 
 		return (
 			<MuiThemeProvider theme={theme}>
-				<Container container>
+				<Container
+					container
+					direction="row"
+				>
 					<ModelsContainer item>
 						<CustomTable
 							cells={MODEL_TABLE_CELLS}
 							rows={modelRows}
-							onSelectionChange={this.handleModelsSelectionChange}
+							onSelectionChange={this.handleSelectionChange('selectedModels')}
 						/>
 					</ModelsContainer>
+					<PermissionsContainer item>
+						<SimpleBar>
+							<CustomTable
+								cells={permissionsCells}
+								rows={permissionsRows}
+								onSelectionChange={this.handleSelectionChange('selectedUsers')}
+							/>
+						</SimpleBar>
+					</PermissionsContainer>
 				</Container>
 			</MuiThemeProvider>
 		);

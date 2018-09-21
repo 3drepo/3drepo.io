@@ -17,24 +17,18 @@
 
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+import Radio from '@material-ui/core/Radio';
 
-import * as CustomTable from '../components/customTable/customTable.styles';
-import { COLOR } from '../../styles';
-
-export const Container = styled(Grid)``;
-
-export const ModelsContainer = styled(Grid)`
-	border-right: 1px solid ${COLOR.BLACK_6};
-	flex: 1 1 100%;
-	max-width: 30%;
-	min-width: 300px;
-
-	${CustomTable.Cell} {
-		max-width: calc(100% - 50px);
-	}
+export const RadioContainer = styled(Grid)`
+  && {
+    width: 70px;
+  }
 `;
 
-export const PermissionsContainer = styled(Grid)`
-	flex: 1;
-	overflow: scroll;
+export const RadioButton = styled(Radio)`
+  && {
+    height: 40px;
+    width: 40px;
+    box-sizing: border-box;
+  }
 `;

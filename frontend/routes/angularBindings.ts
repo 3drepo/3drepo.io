@@ -14,7 +14,9 @@ import ModelsPermissions from './modelsPermissions/modelsPermissions.container';
 angular
 	.module('3drepo')
 
-	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active', 'limit']))
+	.component('users', wrap(Users, ['users', 'jobs', 'active', 'limit']))
 	.component('jobs', wrap(Jobs, ['active']))
 	.component('dialogContainer', wrap(DialogContainer))
-	.component('modelsPermissions', wrap(ModelsPermissions, ['models']));
+	.component('modelsPermissions', wrap(ModelsPermissions, [
+		'models', 'permissions', 'onSelectionChange', 'onPermissionsChange'
+	]));

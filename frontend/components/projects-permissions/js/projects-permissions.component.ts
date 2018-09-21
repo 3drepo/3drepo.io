@@ -219,7 +219,7 @@ class ProjectsPermissionsController implements ng.IController {
 	 * Send updated data to the server
 	 * @param updatedPermissions
 	 */
-	public onPermissionsChange(updatedPermissions: any[]): void {
+	public onPermissionsChange = (updatedPermissions: any[]): void => {
 		if (this.currentView !== PERMISSIONS_VIEWS.MODELS) {
 			this.onProjectPermissionsChange(updatedPermissions);
 		} else {
@@ -363,7 +363,7 @@ class ProjectsPermissionsController implements ng.IController {
 		);
 	}
 
-	public onModelSelectionChange(selectedModels: any[]): void {
+	public onModelSelectionChange = (selectedModels: any[]): void => {
 		if (selectedModels.length) {
 			const requiredModels = selectedModels.map(({model}) => model);
 			this.ModelsService

@@ -3,7 +3,7 @@ export const MODEL_ROLES_TYPES = {
 	COLLABORATOR: "collaborator",
 	COMMENTER: "commenter",
 	VIEWER: "viewer",
-	UNASSIGNED: null,
+	UNASSIGNED: '',
 	NONE: "none"
 };
 

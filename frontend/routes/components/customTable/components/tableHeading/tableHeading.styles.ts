@@ -16,25 +16,36 @@
  */
 
 import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
-import * as CustomTable from '../components/customTable/customTable.styles';
-import { COLOR } from '../../styles';
-
-export const Container = styled(Grid)``;
-
-export const ModelsContainer = styled(Grid)`
-	border-right: 1px solid ${COLOR.BLACK_6};
-	flex: 1 1 100%;
-	max-width: 30%;
-	min-width: 300px;
-
-	${CustomTable.Cell} {
-		max-width: calc(100% - 50px);
+export const SortLabel = styled(TableSortLabel) `
+	&& {
+		flex-direction: row-reverse;
+		margin-left: ${({ active }) => active ? 0 : '-5px'};
+		color: ${COLOR.BLACK_60};
+		font-size: 14px;
+		font-weight: ${FONT_WEIGHT.SEMIBOLD}
 	}
-`;
 
-export const PermissionsContainer = styled(Grid)`
-	flex: 1;
-	overflow: scroll;
+	&::before {
+		width: 18px;
+		height: 18px;
+		left: -2px;
+		border-radius: 100%;
+		position: absolute;
+		top: -1px;
+		transition: 200ms ease-in-out;
+		content: '';
+		background: ${({ active }) => active ? '#15563c' : 'transparent'};
+	}
+
+	svg {
+		opacity: 1;
+		margin-left: 0;
+		margin-right: 10px;
+		width: 14px;
+		height: 14px;
+		fill: ${({ active }) => active ? COLOR.WHITE : COLOR.BLACK_60};
+	}
 `;

@@ -31,28 +31,10 @@ import { Highlight } from '../highlight/highlight.component';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
 
 import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
+import { TableHeading } from './components/tableHeading/tableHeading.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
-import { Container, Head, Row, SortLabel, Cell, CheckboxCell } from './customTable.styles';
 
-export const TableHeading = ({cell, sortBy, order, onClick, onChange, hideSortIcon}) => {
-	if (!cell.name) {
-		return (<></>);
-	}
-
-	if (hideSortIcon) {
-		return (<>{cell.name}</>);
-	}
-
-	return (
-		<SortLabel
-			active={sortBy === cell.type}
-			direction={sortBy === cell.type ? order : SORT_ORDER_TYPES.ASCENDING}
-			onClick={onClick}
-		>
-			{cell.name}
-		</SortLabel>
-	);
-};
+import { Container, Head, Row, Cell, CheckboxCell } from './customTable.styles';
 
 export const TableButton = ({icon, onClick, disabled}) => {
 	return (
@@ -329,14 +311,17 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				...cell
 			};
 
-			const HeadingComponent = <BasicHeadingComponent
-				cell={cellData}
-				sortBy={sortBy}
-				order={order}
-				onClick={this.createSortHandler(type)}
-				onChange={this.createSearchHandler()}
-				hideSortIcon={cellData.hideSortIcon}
-			/>;
+			const hasActiveSort = sortBy === cell.type;
+			const headingProps = {
+				onChange: this.createSearchHandler(),
+				...(cell.HeadingProps || {}),
+				onClick: this.createSortHandler(type),
+				activeSort: hasActiveSort,
+				sortOrder: hasActiveSort ? order : SORT_ORDER_TYPES.ASCENDING,
+				label: cell.name
+			};
+
+			const HeadingComponent = <BasicHeadingComponent {...headingProps} />;
 
 			return (
 				<Cell key={index} {...cellData}>

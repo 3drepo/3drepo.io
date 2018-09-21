@@ -38,9 +38,7 @@
 						jobs="vm.jobs"
 						limit="vm.licencesLimit"
 						active="vm.selectedTab === vm.TABS_TYPES.USERS"
-						ng-if="!vm.isLoadingTeamspace"
-						current-teamspace="vm.currentTeamspace"
-						on-change="vm.onMembersChange(updatedMembers)")
+						ng-if="!vm.isLoadingTeamspace")
 
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)

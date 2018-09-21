@@ -33,34 +33,6 @@ const flexMemoized = memoize(({flex}) => {
 	return flex ? `1 0 100%` : 'none';
 }, ({flex}) => flex);
 
-export const SortLabel = styled(TableSortLabel)`
-	&& {
-		flex-direction: row-reverse;
-		margin-left: ${({active}) => active ? 0 : '-5px'};
-	}
-
-	&::before {
-		width: 18px;
-		height: 18px;
-		left: -2px;
-		border-radius: 100%;
-		position: absolute;
-		top: -1px;
-		transition: 200ms ease-in-out;
-		content: '';
-		background: ${({active}) => active ? '#15563c' : 'transparent'};
-	}
-
-	svg {
-		opacity: 1;
-		margin-left: 0;
-		margin-right: 10px;
-		width: 14px;
-		height: 14px;
-		fill: ${({active}) => active ? COLOR.WHITE : COLOR.BLACK_60};
-	}
-`;
-
 export const Cell = styled.div`
 	overflow: hidden;
 	white-space: nowrap;
@@ -90,7 +62,6 @@ export const Container = styled.div`
 
 	${UserItem.Name},
 	${CellSelect.StyledSelect},
-	${SortLabel},
 	${Cell} {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
@@ -112,7 +83,6 @@ export const Row = styled.div`
 export const Head = styled(Row)`
 	flex: none;
 
-	${SortLabel},
 	${Cell} {
 		font-weight: ${FONT_WEIGHT.SEMIBOLD};
 	}

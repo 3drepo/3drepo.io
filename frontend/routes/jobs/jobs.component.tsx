@@ -34,7 +34,10 @@ const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
 	type: CELL_TYPES.NAME,
 	searchBy: ['name'],
-	HeadingComponent: CellUserSearch
+	HeadingComponent: CellUserSearch,
+	HeadingProps: {
+
+	}
 }, {
 	name: 'Colour',
 	type: CELL_TYPES.COLOR,

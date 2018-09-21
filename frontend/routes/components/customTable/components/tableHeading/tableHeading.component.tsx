@@ -15,26 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
+import * as React from 'react';
+import { SortLabel } from './tableHeading.styles';
 
-import * as CustomTable from '../components/customTable/customTable.styles';
-import { COLOR } from '../../styles';
-
-export const Container = styled(Grid)``;
-
-export const ModelsContainer = styled(Grid)`
-	border-right: 1px solid ${COLOR.BLACK_6};
-	flex: 1 1 100%;
-	max-width: 30%;
-	min-width: 300px;
-
-	${CustomTable.Cell} {
-		max-width: calc(100% - 50px);
+export const TableHeading = ({ label, activeSort, sortOrder, onClick, onChange, hideSortIcon }) => {
+	if (!label) {
+		return (<></>);
 	}
-`;
 
-export const PermissionsContainer = styled(Grid)`
-	flex: 1;
-	overflow: scroll;
-`;
+	if (hideSortIcon) {
+		return (<>{label}</>);
+	}
+
+	return (
+		<SortLabel
+			active={activeSort}
+			direction={sortOrder}
+			onClick={onClick}
+		>
+			{label}
+		</SortLabel>
+	);
+};
