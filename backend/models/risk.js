@@ -41,6 +41,7 @@ const C = require("../constants");
 const risk = {};
 
 risk.createRisk = function(dbCol, newRisk) {
+	const sessionId = newRisk.sessionId;
 	const riskAttributes = [
 		"_id",
 		"rev_id",
@@ -128,13 +129,6 @@ risk.createRisk = function(dbCol, newRisk) {
 				newRisk.viewpoint.shown_group_id = utils.stringToUUID(newRisk.viewpoint.shown_group_id);
 			}
 
-			if (newRisk.viewpoint.scribble) {
-				newRisk.viewpoint.scribble = {
-					content: new Buffer.from(newRisk.viewpoint.scribble, "base64"),
-					flag: 1
-				};
-			}
-
 			if (newRisk.viewpoint.screenshot) {
 				newRisk.viewpoint.screenshot = {
 					content: new Buffer.from(newRisk.viewpoint.screenshot, "base64"),
@@ -170,6 +164,7 @@ risk.createRisk = function(dbCol, newRisk) {
 
 		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 			return _dbCol.insert(newRisk).then(() => {
+				ChatEvent.newRisks(sessionId, dbCol.account, dbCol.model, [newRisk]);
 				return Promise.resolve(newRisk);
 			});
 		});
@@ -177,6 +172,8 @@ risk.createRisk = function(dbCol, newRisk) {
 };
 
 risk.updateAttrs = function(dbCol, uid, data) {
+
+	const sessionId = data.sessionId;
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
@@ -233,6 +230,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 							return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 								return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
+									ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, oldRisk);
 									return oldRisk;
 								});
 							});
