@@ -53,9 +53,6 @@ export class ViewpointsService {
 
 	public filterViewpoints(searchQuery: string): any[] {
 		return this.state.viewpoints.filter((view) => {
-			// if (!searchQuery && view.selected === true) {
-			// 	view.selected = false;
-			// }
 			return this.stringSearch(view.name, searchQuery);
 		});
 	}
