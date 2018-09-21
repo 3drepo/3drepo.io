@@ -212,15 +212,6 @@ export class RisksService {
 			filters.push((risk) => risk.model === model);
 		}
 
-		// if (criteria.date_from) {
-			// filters.push((issue) => issue.created >= criteria.date_from[0].getTime());
-		// }
-
-		// if (criteria.date_to) {
-			//  86399000 is 23:59:59 in milliseconds
-			// filters.push((issue) => issue.created <= criteria.date_to[0].getTime() + 86399000 );
-		// }
-
 		// It filters the risk list by applying every filter to it.
 		const filteredRisks = risks.filter((risk) => filters.every((f) => f(risk)));
 		return filteredRisks;

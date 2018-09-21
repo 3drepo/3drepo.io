@@ -47,59 +47,6 @@ router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middle
 
 router.delete("/risks/", middlewares.connectQueue, middlewares.issue.canCreate, deleteRisks);
 
-function clean(dbCol, risk) {
-	const keys = ["_id", "rev_id", "parent"];
-	const commentKeys = ["rev_id", "guid"];
-	const vpKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
-
-	risk.account = dbCol.account;
-	risk.model = (risk.origin_model) ? risk.origin_model : dbCol.model;
-
-	if (risk.scribble) {
-		risk.scribble = risk.scribble.toString("base64");
-	}
-
-	keys.concat(vpKeys).forEach((key) => {
-		if (risk[key]) {
-			risk[key] = utils.uuidToString(risk[key]);
-		}
-	});
-
-	if (risk.comments) {
-		risk.comments.forEach((comment, i) => {
-			commentKeys.forEach((key) => {
-				if (risk.comments[i] && risk.comments[i][key]) {
-					risk.comments[i][key] = utils.uuidToString(risk.comments[i][key]);
-				}
-			});
-		});
-	}
-
-	if (risk.viewpoints && risk.viewpoints.length > 0) {
-		risk.viewpoint = risk.viewpoints[0];
-		delete risk.viewpoints;
-	}
-
-	if (risk.viewpoint) {
-		vpKeys.forEach((key) => {
-			if (risk.viewpoint && risk.viewpoint[key]) {
-				risk.viewpoint[key] = utils.uuidToString(risk.viewpoint[key]);
-			}
-		});
-
-		if (risk.viewpoint.screenshot) {
-			risk.viewpoint.screenshot = risk.account + "/" + risk.model + "/risks/" + risk._id + "/screenshot.png";
-			risk.viewpoint.screenshotSmall = risk.account + "/" + risk.model + "/risks/" + risk._id + "/screenshotSmall.png";
-		}
-	}
-
-	if (risk.thumbnail && risk.thumbnail.flag) {
-		risk.thumbnail = risk.account + "/" + risk.model + "/risks/" + risk._id + "/thumbnail.png";
-	}
-
-	return risk;
-}
-
 function storeRisk(req, res, next) {
 
 	const place = utils.APIInfo(req);
@@ -111,8 +58,6 @@ function storeRisk(req, res, next) {
 	data.revId = req.params.rid;
 
 	Risk.createRisk(dbCol, data).then(risk => {
-		risk = clean(dbCol, risk);
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -133,8 +78,6 @@ function updateRisk(req, res, next) {
 	const riskId = req.params.riskId;
 
 	return Risk.updateAttrs(dbCol, riskId, data).then((risk) => {
-		risk = clean(dbCol, risk);
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 
 	}).catch((err) => {
@@ -184,8 +127,6 @@ function listRisks(req, res, next) {
 	}
 
 	findRisks.then(risks => {
-		risks = risks.map(risk => clean(dbCol, risk));
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -200,11 +141,7 @@ function findRiskById(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.findByUID(dbCol, params.uid).then(risk => {
-
-		risk = clean(dbCol, risk);
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -241,8 +178,6 @@ function renderRisksHTML(req, res, next) {
 	findRisk.then(risks => {
 		// Split risks by status
 		const splitRisks = {open : [], closed: []};
-
-		risks = risks.map(risk => clean(dbCol, risk));
 
 		for (let i = 0; i < risks.length; i++) {
 			if (risks[i].closed || risks[i].status === "closed") {

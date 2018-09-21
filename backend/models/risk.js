@@ -40,6 +40,40 @@ const C = require("../constants");
 
 const risk = {};
 
+function clean(dbCol, riskToClean) {
+	const keys = ["_id", "rev_id", "parent"];
+	const commentKeys = ["rev_id", "guid"];
+	const vpKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
+
+	riskToClean.account = dbCol.account;
+	riskToClean.model = (riskToClean.origin_model) ? riskToClean.origin_model : dbCol.model;
+
+	keys.concat(vpKeys).forEach((key) => {
+		if (riskToClean[key]) {
+			riskToClean[key] = utils.uuidToString(riskToClean[key]);
+		}
+	});
+
+	if (riskToClean.viewpoint) {
+		vpKeys.forEach((key) => {
+			if (riskToClean.viewpoint && riskToClean.viewpoint[key]) {
+				riskToClean.viewpoint[key] = utils.uuidToString(riskToClean.viewpoint[key]);
+			}
+		});
+
+		if (riskToClean.viewpoint.screenshot) {
+			riskToClean.viewpoint.screenshot = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/screenshot.png";
+			riskToClean.viewpoint.screenshotSmall = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/screenshotSmall.png";
+		}
+	}
+
+	if (riskToClean.thumbnail && riskToClean.thumbnail.flag) {
+		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
+	}
+
+	return riskToClean;
+}
+
 risk.createRisk = function(dbCol, newRisk) {
 	const sessionId = newRisk.sessionId;
 	const riskAttributes = [
@@ -164,7 +198,9 @@ risk.createRisk = function(dbCol, newRisk) {
 
 		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 			return _dbCol.insert(newRisk).then(() => {
+				newRisk = clean(dbCol, newRisk);
 				ChatEvent.newRisks(sessionId, dbCol.account, dbCol.model, [newRisk]);
+
 				return Promise.resolve(newRisk);
 			});
 		});
@@ -179,7 +215,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid).then((oldRisk) => {
+	return this.findByUID(dbCol, uid, {}, true).then((oldRisk) => {
 		if (oldRisk) {
 			return User.findByUserName(dbCol.account).then((dbUser) => {
 
@@ -230,6 +266,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 							return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
 								return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
+									oldRisk = clean(dbCol, oldRisk);
 									ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, oldRisk);
 									return oldRisk;
 								});
@@ -345,6 +382,8 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 								mainRisks = mainRisks.concat(subModelRisks);
 							});
 						}
+						mainRisks = mainRisks.map(r => clean(dbCol, r));
+
 						return mainRisks;
 					});
 				});
@@ -353,7 +392,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 	});
 };
 
-risk.findByUID = function(dbCol, uid, projection) {
+risk.findByUID = function(dbCol, uid, projection, noClean = false) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
@@ -364,6 +403,10 @@ risk.findByUID = function(dbCol, uid, projection) {
 
 			if (!foundRisk) {
 				return Promise.reject(responseCodes.RISK_NOT_FOUND);
+			}
+
+			if (!noClean) {
+				foundRisk = clean(dbCol, foundRisk);
 			}
 
 			return foundRisk;
@@ -377,7 +420,7 @@ risk.getScreenshot = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { "viewpoint.screenshot.content": 1 }).then((foundRisk) => {
+	return this.findByUID(dbCol, uid, { "viewpoint.screenshot.content": 1 }, true).then((foundRisk) => {
 		if (!_.get(foundRisk, "viewpoint.screenshot.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
@@ -392,7 +435,7 @@ risk.getSmallScreenshot = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { viewpoint: 1 })
+	return this.findByUID(dbCol, uid, { viewpoint: 1 }, true)
 		.then((foundRisk) => {
 			if (_.get(foundRisk, "viewpoint.screenshot.resizedContent.buffer")) {
 				return foundRisk.viewpoint.screenshot.resizedContent.buffer;
@@ -425,7 +468,7 @@ risk.getThumbnail = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { thumbnail: 1 }).then((foundRisk) => {
+	return this.findByUID(dbCol, uid, { thumbnail: 1 }, true).then((foundRisk) => {
 		if (!_.get(foundRisk, "thumbnail.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {

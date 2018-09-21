@@ -89,28 +89,6 @@ class RisksListController implements ng.IController {
 		});
 
 		this.$scope.$watchCollection("vm.filterChips", (chips: IChip[], oldChips: IChip[]) => {
-			/*const dateFromChip = chips.find((c) => c.type === "date_from");
-			const dateToChip = chips.find((c) => c.type === "date_to");
-
-			const oldDateFromChip = oldChips.find((c) => c.type === "date_from");
-			const oldDateToChip = oldChips.find((c) => c.type === "date_to");
-
-			if (!!dateFromChip && !!dateToChip) {
-				if (dateFromChip.value.getTime() > dateToChip.value.getTime()) {
-					if (!oldDateFromChip  || dateFromChip.value !== oldDateFromChip.value) {
-						this.issuesService.setToDateMenuValue(dateFromChip.value);
-						dateToChip.value = dateFromChip.value;
-						dateToChip.name = this.$filter("date")(dateToChip.value, "d/M/yyyy");
-					}
-
-					if (!oldDateToChip  || dateToChip.value !== oldDateToChip.value) {
-						this.issuesService.setFromDateMenuValue(dateToChip.value);
-						dateFromChip.value = dateToChip.value;
-						dateFromChip.name = this.$filter("date")(dateFromChip.value, "d/M/yyyy");
-					}
-				}
-			}*/
-
 			this.risksService.setupRisksToShow(this.model, chips);
 		});
 
