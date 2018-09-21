@@ -30,6 +30,7 @@ import { ModelItem } from '../components/modelItem/modelItem.component';
 import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 
 import { Container, ModelsContainer, PermissionsContainer } from './modelsPermissions.styles';
+import { UserItem } from '../components/userItem/userItem.component';
 
 const UNDEFINED_PERMISSIONS = 'undefined';
 
@@ -43,7 +44,7 @@ const MODEL_TABLE_CELLS = [{
 	searchBy: ['name']
 }];
 
-const getModelsTableRows = (models = [], selectedModels = []): any[] => {
+const getModelsTableRows = (models = [], selectedModels = []) => {
 	return models.map((model) => {
 		const data = [
 			{
@@ -61,21 +62,19 @@ const PERMISSIONS_TABLE_CELLS = [{
 	name: 'User',
 	type: CELL_TYPES.USER,
 	HeadingComponent: CellUserSearch,
-	CellComponent: ModelItem,
-	searchBy: ['name']
+	CellComponent: UserItem,
+	searchBy: ['firstName', 'lastName', 'user', 'company']
 }];
 
-const getPermissionsTableRows = (users = [], selectedUsers = []): any[] => {
-	return users.map((model) => {
+const getPermissionsTableRows = (permissions = [], selectedUsers = []) => {
+	return permissions.map((userPermissions) => {
 		const data = [
-			{
-				name: model.name,
-				isFederation: model.federate
-			}
+			pick(userPermissions, ['firstName', 'lastName', 'company', 'user'])
 		];
 
-		const selected = selectedUsers.some((selectedModel) => selectedModel.model === model.model);
-		return { ...model, data, selected };
+		const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
+
+		return { ...userPermissions, data, selected };
 	});
 };
 
@@ -99,7 +98,8 @@ interface IState {
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
 		return {
-			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels)
+			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels),
+			permissionsRows: getPermissionsTableRows(nextProps.permissions, prevState.selectedUsers)
 		};
 	}
 
