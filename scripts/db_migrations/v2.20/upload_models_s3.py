@@ -1,22 +1,27 @@
 import sys
+import gridfs
 import uuid
 from pymongo import MongoClient
 import boto3
 import re
 
-##### Connect to AWS S3 #####
-s3 = boto3.client(
-  's3',
-  aws_access_key_id='AKIAJIJNXOYFX5B6SHXA',
-  aws_secret_access_key='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',
-  region_name='eu-west-1',
-)
-bucket_name = '3d-models-test'
-
 mongoURL = sys.argv[1]
 mongoPort = sys.argv[2]
 userName = sys.argv[3]
 password = sys.argv[4]
+awsBucketName = sys.argv[5]
+awsRegionName = sys.argv[6]
+awsAccessKeyId = sys.argv[7]
+awsSecretAccessKey = sys.argv[8]
+
+##### Connect to AWS S3 #####
+s3 = boto3.client(
+  's3',
+  aws_access_key_id=awsAccessKeyId,
+  aws_secret_access_key=awsSecretAccessKey,
+  region_name=awsRegionName
+)
+
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
@@ -29,18 +34,15 @@ for database in db.database_names():
     db = MongoClient(connString)[database]
     print("--database:" + database)
 
-##### Get a model ID #####
+##### Get a model ID and find entries #####
     for setting in db.settings.find():
-      def upload(col_prefix):
+      for col_prefix in [".history",".stash.json_mpc", ".stash.unity3d" ]:
         model_id = setting.get('_id')
         col_name = model_id + col_prefix
         fs = gridfs.GridFS(db, col_name)
         for entry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
           filename = entry.filename
-##### Upload to S3 #####
           s3_ref = uuid.uuid4()
-          print "Uploading: " + filename
-          s3.upload_fileobj(entry, bucket_name, str(s3_ref))
 ##### Create Reference BSON #####
           bson_data = {}
           bson_data['_id'] = filename
@@ -50,9 +52,9 @@ for database in db.database_names():
           if dry_run:
             print "NOT Inserting bson for: " + filename
           else:
+##### Upload to S3 and insert BSON #####
+            print "Uploading: " + filename
+            s3.upload_fileobj(entry, awsBucketName, str(s3_ref))
             print "Inserting bson for: " + filename
             db[col_name].insert(bson_data)
-##### Calling function for each asset type
-      upload(".history")
-      upload(".stash.json_mpc")
-      upload(".stash.unity3d")
+
