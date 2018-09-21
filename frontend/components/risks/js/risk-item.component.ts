@@ -823,7 +823,7 @@ class RiskItemController implements ng.IController {
 	 */
 	public setContentHeight() {
 
-		const newRiskHeight = 305;
+		const newRiskHeight = 410;
 		const descriptionTextHeight = 80;
 		const additionalInfoHeight = 160;
 		const thumbnailHeight = 180;
