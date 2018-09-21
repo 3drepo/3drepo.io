@@ -34,7 +34,6 @@ class TreeController implements ng.IController {
 	private promise;
 	private highlightSelectedViewerObject: boolean;
 	private nodes; // in pug
-	private allNodes;
 	private nodesToShow; // in pug
 	private showTree; // in pug
 	private viewerSelectedObject;
@@ -81,7 +80,6 @@ class TreeController implements ng.IController {
 		this.progressInfo = "Loading full tree structure";
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
 		this.hideIfc = true;
-		this.allNodes = [];
 		this.initTreeOnReady();
 		this.watchers();
 	}
@@ -96,9 +94,7 @@ class TreeController implements ng.IController {
 		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
 
 			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				const nodes = [this.TreeService.getNodeById(event.value.id)];
-				this.TreeService.nodesClicked(nodes);
-
+				this.TreeService.nodesClickedByIds([event.value.id]);
 			} else if (event.type === this.EventService.EVENT.VIEWER.MULTI_OBJECTS_SELECTED) {
 				this.TreeService.nodesClickedBySharedIds(event.value.selectedNodes);
 			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
@@ -175,8 +171,6 @@ class TreeController implements ng.IController {
 
 	public initTreeOnReady() {
 		this.TreeService.onReady().then(() => {
-			this.allNodes = this.TreeService.getAllNodes();
-			this.nodes = this.allNodes;
 			this.showTree = true;
 			this.showProgress = false;
 			this.initNodesToShow();
@@ -214,9 +208,7 @@ class TreeController implements ng.IController {
 	 * Initialise the tree nodes to show to the first node
 	 */
 	public initNodesToShow() {
-		if (this.allNodes.length) {
-			this.TreeService.initNodesToShow([this.allNodes[0]]);
-		}
+		this.TreeService.initNodesToShow();
 	}
 
 	/**
