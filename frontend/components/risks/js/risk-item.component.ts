@@ -583,7 +583,7 @@ class RiskItemController implements ng.IController {
 					if (response) {
 						const updatedRisk = response.data;
 						this.risksService.populateRisk(updatedRisk);
-						this.riskData = updatedRisk;
+						this.data = updatedRisk;
 
 						// Update the actual data model
 						this.risksService.updateRisks(this.riskData);

@@ -42,7 +42,6 @@ const risk = {};
 
 function clean(dbCol, riskToClean) {
 	const keys = ["_id", "rev_id", "parent"];
-	const commentKeys = ["rev_id", "guid"];
 	const vpKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
 
 	riskToClean.account = dbCol.account;

@@ -828,23 +828,21 @@ export class RisksService {
 
 	public saveRisk(risk) {
 
-		// TODO save risk
-		let saveUrl;
 		const base = risk.account + "/" + risk.model;
+		let saveUrl;
+
 		if (risk.rev_id) {
 			saveUrl = base + "/revision/" + risk.rev_id + "/risks.json";
 		} else {
 			saveUrl = base + "/risks.json";
 		}
 
-		const config = {withCredentials: true};
-
 		if (risk.pickedPos !== null) {
 			risk.position = risk.pickedPos;
 			risk.norm = risk.pickedNorm;
 		}
 
-		return this.apiService.post(saveUrl, risk, config);
+		return this.apiService.post(saveUrl, risk);
 
 	}
 
@@ -855,28 +853,15 @@ export class RisksService {
 	 * @returns {*}
 	 */
 	public updateRisk(risk, riskData) {
-		return this.doPut(risk, riskData);
-	}
-
-	/**
-	 * Handle PUT requests
-	 * @param risk
-	 * @param putData
-	 * @returns {*}
-	 */
-	public doPut(risk, putData) {
-
 		let endpoint = risk.account + "/" + risk.model;
 
-		// TODO put risk
 		if (risk.rev_id) {
 			endpoint += "/revision/" + risk.rev_id + "/risks/" +  risk._id + ".json";
 		} else {
 			endpoint += "/risks/" + risk._id + ".json";
 		}
 
-		return this.apiService.put(endpoint, putData);
-
+		return this.apiService.put(endpoint, riskData);
 	}
 
 	public getJobColor(id) {
