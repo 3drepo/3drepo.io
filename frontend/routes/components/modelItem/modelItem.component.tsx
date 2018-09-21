@@ -17,19 +17,18 @@
 
 import * as React from 'react';
 
-import { Container } from './modelItem.styles';
+import { Container, Name, Detail } from './modelItem.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	name: string;
+	isFederation?: boolean;
 }
 
-export class ModelItem extends React.PureComponent<IProps, any> {
-
-	public render() {
-		return (
-			<Container>
-				ModelItem component
-			</Container>
-		);
-	}
-}
+export const ModelItem = ({name, isFederation}: IProps) => {
+	return (
+		<Container>
+			<Name>{name}</Name>
+			<Detail>{isFederation ? 'Federation' : 'Model'}</Detail>
+		</Container>
+	);
+};

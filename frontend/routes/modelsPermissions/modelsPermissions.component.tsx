@@ -24,19 +24,23 @@ import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.c
 import { theme } from '../../styles';
 import { Container, ModelsContainer } from './modelsPermissions.styles';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { ModelItem } from '../components/modelItem/modelItem.component';
 
 const MODEL_TABLE_CELLS = [{
 	name: 'Model/federation',
 	type: CELL_TYPES.NAME,
 	HeadingComponent: CellUserSearch,
-	CellComponent: (props) => (<div>{props.name}</div>),
+	CellComponent: ModelItem,
 	searchBy: ['name']
 }];
 
 const getModelsTableRows = (models = [], selectedModels = []): any[] => {
 	return models.map((model) => {
 		const data = [
-			pick(model, ['name'])
+			{
+				name: model.name,
+				isFederation: model.federate
+			}
 		];
 
 		const selected = selectedModels.some((selectedModel) => selectedModel.model === model.model);
@@ -66,15 +70,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		selectedModels: [],
 		selectedUsers: []
 	};
-
-	public getModelsTableRows = (models = []): any[] => {
-		return models.map((job) => {
-			const data = [
-				pick(job, ['name'])
-			];
-			return { ...job, data };
-		});
-	}
 
 	public handleModelsSelectionChange = (rows) => {
 		this.setState({selectedModels: rows});
