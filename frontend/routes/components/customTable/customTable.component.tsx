@@ -187,14 +187,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 		return {
 			searchFields,
-			sortBy: newSortBy,
-			processedRows: getProcessedRows({
-				rows: nextProps.rows,
-				sortBy: newSortBy,
-				order,
-				searchFields,
-				searchText
-			})
+			sortBy: newSortBy
 		};
 	}
 
@@ -205,6 +198,27 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		searchFields: {},
 		searchText: ''
 	};
+
+	public componentDidUpdate(prevProps, prevState) {
+		const stateChanges = {};
+
+		const isInitialProccessing = !this.state.processedRows.length && this.props.rows.length;
+		const rowsChanged = prevProps.rows.length !== this.props.rows.length;
+		const sortChanged = prevState.sortBy !== this.state.sortBy;
+
+		if (isInitialProccessing || rowsChanged || sortChanged) {
+			const {sortBy, order, searchFields, searchText} = this.state;
+			this.setState({
+				processedRows: getProcessedRows({
+					rows: this.props.rows,
+					sortBy,
+					order,
+					searchFields,
+					searchText
+				})
+			});
+		}
+	}
 
 	public createSortHandler = (sortBy) => () => {
 		let order = SORT_ORDER_TYPES.ASCENDING;

@@ -45,9 +45,16 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		selectedValue: ''
 	};
 
-	/**
-	 * Render items
-	 */
+	public componentDidUpdate(prevProps, prevState) {
+		if (prevProps.value !== this.props.value) {
+			this.setState({selectedValue: this.props.value});
+		}
+	}
+
+	public componentDidMount() {
+		this.setState({selectedValue: this.props.value});
+	}
+
 	public renderOptions = (items, TemplateComponent) => {
 		return items.map((item, index) => {
 			return (
@@ -69,7 +76,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	public handleChange = (event) => {
 		const selectedValue = event.target.value;
 
-		if (this.props.value !== selectedValue) {
+		if (this.state.selectedValue !== selectedValue) {
 			this.setState({selectedValue});
 			this.props.onChange(selectedValue);
 		}
@@ -96,7 +103,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
 				displayEmpty
-				value={selectedValue || value}
+				value={selectedValue}
 				onChange={this.handleChange}
 			>
 				{this.renderOptions(options, itemTemplate)}
