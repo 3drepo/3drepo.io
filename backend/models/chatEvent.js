@@ -105,6 +105,8 @@ module.exports = {
 	commentDeleted,
 	groupChanged,
 	groupsDeleted,
+	newRisks,
+	riskChanged,
 	risksDeleted,
 	modelStatusChanged,
 	issueChanged,
