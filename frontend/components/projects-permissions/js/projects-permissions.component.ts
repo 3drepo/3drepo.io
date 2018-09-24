@@ -31,6 +31,7 @@ class ProjectsPermissionsController implements ng.IController {
 		"$state",
 		"$mdDialog",
 		"$scope",
+		"$timeout",
 
 		"ModelsService",
 		"ProjectsService",
@@ -58,6 +59,7 @@ class ProjectsPermissionsController implements ng.IController {
 		private $state: any,
 		private $mdDialog: any,
 		private $scope: any,
+		private $timeout: any,
 
 		private ModelsService: any,
 		private ProjectsService: any,
@@ -135,9 +137,8 @@ class ProjectsPermissionsController implements ng.IController {
 				}
 
 				this.selectedModels = this.models.filter(({isSelected}) => isSelected);
-				if (modelInState) {
-					this.onModelSelectionChange(this.selectedModels);
-				}
+				this.onModelSelectionChange(this.selectedModels);
+
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
 			}).catch(identity)
 				.finally(() => {
@@ -371,7 +372,10 @@ class ProjectsPermissionsController implements ng.IController {
 				.then(({data: modelsWithPermissions}) => {
 					this.selectedModels = modelsWithPermissions;
 					const permissionsToShow = this.selectedModels.length === 1 ? this.selectedModels[0].permissions : [];
-					this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
+
+					this.$timeout(() => {
+						this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
+					});
 				});
 		} else {
 			this.selectedModels = [];

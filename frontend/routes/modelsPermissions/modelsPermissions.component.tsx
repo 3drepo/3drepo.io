@@ -117,6 +117,7 @@ interface IState {
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
+		debugger
 		const changes = {
 			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels)
 		} as any;
