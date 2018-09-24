@@ -41,6 +41,13 @@ export const RemoveUserDialog = (props) => {
 						{renderItems(props.models)}
 					</>
 				) : ''}
+
+				{props.teamspacePerms ? (
+					<>
+						<Headline>Teamspace: </Headline>
+						<p>{props.teamspacePerms}</p>
+					</>
+				) : ''}
 			</DialogContent>
 
 			<DialogActions>
