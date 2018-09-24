@@ -40,7 +40,7 @@ export const Cell = styled.div`
 	box-sizing: border-box;
 	justify-content: flex-start;
 	align-items: center;
-	padding: 0 24px;
+	padding: ${(props: any) => props.padding || '0 24px'};
 
 	flex: ${flexMemoized};
 	max-width: ${(props: any) => props.flex ? `${props.flex}%` : 'initial'};
@@ -85,5 +85,14 @@ export const Head = styled(Row)`
 
 	${Cell} {
 		font-weight: ${FONT_WEIGHT.SEMIBOLD};
+	}
+`;
+
+export const Body = styled.div`
+	height: 100%;
+	overflow: hidden;
+
+	[data-simplebar='init'] {
+		height: 100%;
 	}
 `;

@@ -16,19 +16,21 @@
  */
 
 import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
-import Radio from '@material-ui/core/Radio';
 
-export const RadioContainer = styled(Grid)`
-  && {
-    width: 100%;
-  }
-`;
-
-export const RadioButton = styled(Radio)`
-  && {
-    height: 40px;
-    width: 40px;
-    box-sizing: border-box;
-  }
+export const Container = styled.div`
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  z-index: 1;
+  color: rgba(155, 155, 155, 1);
+  background: rgba(250, 250, 250, 0.89);
+  line-height: 25px;
+  padding: 30px;
+  box-sizing: border-box;
+  text-align: center;
 `;

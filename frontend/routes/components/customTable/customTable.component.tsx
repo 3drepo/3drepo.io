@@ -34,7 +34,7 @@ import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.compo
 import { TableHeading } from './components/tableHeading/tableHeading.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 
-import { Container, Head, Row, Cell, CheckboxCell } from './customTable.styles';
+import { Container, Head, Body, Row, Cell, CheckboxCell } from './customTable.styles';
 
 export const TableButton = ({icon, onClick, disabled}) => {
 	return (
@@ -210,10 +210,22 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		selectedRows: []
 	};
 
+	public componentDidMount() {
+		const { sortBy, order, searchFields, searchText } = this.state;
+		this.setState({
+			processedRows: getProcessedRows({
+				rows: this.props.rows,
+				sortBy,
+				order,
+				searchFields,
+				searchText
+			})
+		});
+	}
+
 	public componentDidUpdate(prevProps, prevState) {
 		const stateChanges = {};
 
-		const isInitialProccessing = !this.state.processedRows.length && this.props.rows.length;
 		const rowsChanged = prevProps.rows.length !== this.props.rows.length || !isEqual(this.props.rows, prevProps.rows);
 		const sortChanged = prevState.sortBy !== this.state.sortBy;
 
@@ -306,28 +318,31 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		return cells.map((cell, index) => {
 			const type = cell.headerType || cell.type;
 			const BasicHeadingComponent = cell.HeadingComponent || TableHeading;
-			const cellData = {
-				...(CELL_DEFAULT_PROPS[type] || {}),
-				...cell
+
+			const {root = {}, component = {}} = cell.HeadingProps || {};
+
+			const cellRootProps = {
+				...CELL_DEFAULT_PROPS[type],
+				...root
 			};
 
 			const hasActiveSort = sortBy === cell.type;
-			const headingProps = {
+			const cellComponentProps = {
 				onChange: this.createSearchHandler(),
-				...(cell.HeadingProps || {}),
 				onClick: this.createSortHandler(type),
 				activeSort: hasActiveSort,
 				sortOrder: hasActiveSort ? order : SORT_ORDER_TYPES.ASCENDING,
-				label: cell.name
+				label: cell.name,
+				...component
 			};
 
-			const HeadingComponent = <BasicHeadingComponent {...headingProps} />;
+			const HeadingComponent = <BasicHeadingComponent {...cellComponentProps} />;
 
 			return (
-				<Cell key={index} {...cellData}>
+				<Cell key={index} {...cellRootProps}>
 					{
-						cellData.tooltipText ?
-							setTooltip(HeadingComponent, cellData.tooltipText) :
+						cellComponentProps.tooltipText ?
+							setTooltip(HeadingComponent, cellComponentProps.tooltipText) :
 							HeadingComponent
 					}
 				</Cell>
@@ -354,17 +369,26 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					}
 					{
 						row.data.map((cellData, cellIndex) => {
-							const cellConfig = cells[cellIndex];
-							const type = cellConfig.type;
-							const CellComponent = cellConfig.CellComponent;
-							const cellProps = CELL_DEFAULT_PROPS[type];
+							const {CellProps = {}, CellComponent, type} = (cells[cellIndex] || {}) as any;
+							const {root = {}, component = {}} = CellProps;
+
+							const cellRootProps = {
+								...CELL_DEFAULT_PROPS[type],
+								...root
+							};
+
+							const cellComponentProps = {
+								...cellData,
+								...component,
+								searchText: this.state.searchText
+							};
 
 							return (
-								<Cell key={cellIndex} {...cellProps}>
+								<Cell key={cellIndex} {...cellRootProps}>
 									{
 										CellComponent ?
-											(<CellComponent {...cellData} searchText={this.state.searchText} />) :
-											(<Highlight text={cellData.value} search={this.state.searchText} />)
+											(<CellComponent {...cellComponentProps} />) :
+											(<Highlight text={cellComponentProps.value} search={cellComponentProps.searchText} />)
 									}
 								</Cell>
 							);
@@ -400,9 +424,11 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					}
 					{this.renderHeader(cells)}
 				</Head>
-				<SimpleBar>
-					{this.renderRows(cells, processedRows, showCheckbox)}
-				</SimpleBar>
+				<Body>
+					<SimpleBar data-simplebar-x-hidden>
+						{this.renderRows(cells, processedRows, showCheckbox)}
+					</SimpleBar>
+				</Body>
 			</Container>
 		);
 	}

@@ -34,6 +34,7 @@ interface IProps {
 	checked?: boolean;
 	name?: string;
 	tooltipText?: string;
+	width?: string;
 	onChange?: (event, value) => void;
 	onClick?: () => void;
 }
@@ -48,15 +49,20 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const {label, name, disabled, checked, activeSort, sortOrder, onClick, onChange, tooltipText, value} = this.props;
+		const {
+			label, name, disabled, checked, activeSort, sortOrder, onClick, onChange, tooltipText, value, width
+		} = this.props;
+
+		const RadioContainerProps = { width };
 
 		return (
 			<Tooltip title={tooltipText}>
 				<RadioContainer
 					container
-					direction="row"
+					direction="column"
 					justify="center"
 					alignItems="center"
+					{...RadioContainerProps}
 				>
 					<Grid item>
 						<SortLabel

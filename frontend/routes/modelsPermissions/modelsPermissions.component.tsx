@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { pick, matches, isEqual, cond, get } from 'lodash';
+import { pick, matches, isEqual, cond, get, isEmpty } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
@@ -28,9 +28,26 @@ import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.c
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
 import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
-
-import { Container, ModelsContainer, PermissionsContainer } from './modelsPermissions.styles';
 import { UserItem } from '../components/userItem/userItem.component';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+
+import {
+	Container,
+	ModelsContainer,
+	PermissionsContainer,
+	PermissionsCellContainer
+} from './modelsPermissions.styles';
+
+const PermissionsCell = (props) => {
+	return (
+		<PermissionsCellContainer>
+			<Radio
+				checked={props.checked}
+				disabled={props.disabled}
+			/>
+		</PermissionsCellContainer>
+	);
+};
 
 const UNDEFINED_PERMISSIONS = 'undefined';
 
@@ -62,21 +79,23 @@ const PERMISSIONS_TABLE_CELLS = [{
 	name: 'User',
 	type: CELL_TYPES.USER,
 	HeadingComponent: CellUserSearch,
+	HeadingProps: {
+		root: {
+			width: '180px',
+			padding: '0 0 0 24px',
+			flex: null
+		}
+	},
 	CellComponent: UserItem,
+	CellProps: {
+		root: {
+			width: '180px',
+			padding: '0 0 0 24px',
+			flex: null
+		}
+	},
 	searchBy: ['firstName', 'lastName', 'user', 'company']
 }];
-
-const getPermissionsTableRows = (permissions = [], selectedUsers = []) => {
-	return permissions.map((userPermissions) => {
-		const data = [
-			pick(userPermissions, ['firstName', 'lastName', 'company', 'user'])
-		];
-
-		const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
-
-		return { ...userPermissions, data, selected };
-	});
-};
 
 interface IProps {
 	models: any[];
@@ -93,14 +112,19 @@ interface IState {
 	selectedModels: any[];
 	selectedUsers: any[];
 	selectedGlobalPermissions: string;
+	currentUser: any;
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
-		return {
-			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels),
-			permissionsRows: getPermissionsTableRows(nextProps.permissions, prevState.selectedUsers)
-		};
+		const changes = {
+			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels)
+		} as any;
+
+		if (nextProps.permissions) {
+			changes.currentUser = nextProps.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
+		}
+		return changes;
 	}
 
 	public state = {
@@ -109,7 +133,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		permissionsCells: [],
 		selectedModels: [],
 		selectedUsers: [],
-		selectedGlobalPermissions: UNDEFINED_PERMISSIONS
+		selectedGlobalPermissions: UNDEFINED_PERMISSIONS,
+		currentUser: {}
 	};
 
 	public onGlobalPermissionsChange = (event, value) => {
@@ -117,19 +142,32 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public getPermissionsTableCells = () => {
-		const permissionsCells = MODEL_ROLES_LIST.map(({ label: name, tooltip: tooltipText, width, key: value }) => {
+		const permissionCellProps = {
+			width: '110px',
+			flex: null,
+			padding: '0'
+		};
+
+		const permissionsCells = MODEL_ROLES_LIST.map(({ label: name, tooltip: tooltipText, key: value }) => {
 			return {
 				name,
 				type: CELL_TYPES.RADIO_BUTTON,
 				HeadingComponent: TableHeadingRadio,
 				HeadingProps: {
-					name: 'permission',
-					tooltipText,
-					value,
-					onChange: this.onGlobalPermissionsChange,
-					checked: this.state.selectedGlobalPermissions === value
+					root: permissionCellProps,
+					component: {
+						name: 'permission',
+						tooltipText,
+						value,
+						onChange: this.onGlobalPermissionsChange,
+						checked: this.state.selectedGlobalPermissions === value,
+						disabled: Boolean(this.state.selectedModels.length)
+					}
+				},
+				CellComponent: PermissionsCell,
+				CellProps: {
+					root: permissionCellProps
 				}
-				// CellComponent: Radio
 			};
 		});
 
@@ -139,26 +177,79 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		];
 	}
 
-	public componentDidMount() {
-		this.setState({
-			permissionsCells: this.getPermissionsTableCells()
+	public hasDisabledPermissions(row) {
+		const {currentUser, selectedModels} = this.state as IState;
+
+		const hasSelectedModels = selectedModels.length;
+		const passBaseValidation = !hasSelectedModels || row.isDisabled || row.isOwner || row.isAdmin || row.isCurrentUser;
+
+		if (passBaseValidation) {
+			return true;
+		}
+
+		if (!passBaseValidation) {
+			if (row.isProjectAdmin) {
+				return true;
+			}
+
+			if (row.isModelAdmin) {
+				return !(currentUser.isAdmin || currentUser.isOwner || currentUser.isProjectAdmin);
+			}
+		}
+	}
+
+	public getPermissionsTableRows = (permissions = [], selectedUsers = []) => {
+		return permissions.map((userPermissions) => {
+			const data = [
+				pick(userPermissions, ['firstName', 'lastName', 'company', 'user']),
+				...MODEL_ROLES_LIST.map(({key: requiredValue }) => {
+					return {
+						value: userPermissions.key,
+						checked: requiredValue === userPermissions.key,
+						disabled: this.hasDisabledPermissions(userPermissions),
+						onChange: this.createPermissionsChangeHandler(requiredValue)
+					};
+				})
+			];
+
+			const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
+			return { ...userPermissions, data, selected };
 		});
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
-		if (isEqual(prevState.selectedModels, this.state.selectedModels)) {
+	public componentDidMount() {
+		this.setState({
+			permissionsCells: this.getPermissionsTableCells(),
+			permissionsRows: this.getPermissionsTableRows(this.props.permissions, []),
+			modelRows: getModelsTableRows(this.props.models, this.state.selectedModels)
+		});
+		this.forceUpdate();
+	}
 
+	public componentDidUpdate(prevProps, prevState) {
+		const changes = {} as any;
+		if (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) {
+			changes.permissionsCells = this.getPermissionsTableCells();
 		}
 
-		if (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) {
-			this.setState({
-				permissionsCells: this.getPermissionsTableCells()
-			});
+		const rowsChanged = !isEqual(prevProps.permissions, this.props.permissions)
+			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
+
+		if (rowsChanged) {
+			changes.permissionsRows = this.getPermissionsTableRows(this.props.permissions, this.state.selectedUsers);
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
 	public handlePermissionsChange = () => {
 
+	}
+
+	public createPermissionsChangeHandler = (value) => {
+		this.state.permissionsRows;
 	}
 
 	public handleSelectionChange = (field) => (rows) => {
@@ -171,13 +262,14 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {models} = this.props;
-		const {modelRows, permissionsRows, permissionsCells} = this.state;
+		const {modelRows, permissionsRows, permissionsCells, selectedModels} = this.state;
 
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container
 					container
 					direction="row"
+					wrap="nowrap"
 				>
 					<ModelsContainer item>
 						<CustomTable
@@ -185,15 +277,23 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 							rows={modelRows}
 							onSelectionChange={this.handleSelectionChange('selectedModels')}
 						/>
+						{ !models.length ?
+								<TextOverlay content="Select a project to view the models' list" /> :
+								null
+						}
 					</ModelsContainer>
 					<PermissionsContainer item>
-						<SimpleBar>
+						<SimpleBar data-simplebar-y-hidden>
 							<CustomTable
 								cells={permissionsCells}
 								rows={permissionsRows}
 								onSelectionChange={this.handleSelectionChange('selectedUsers')}
 							/>
 						</SimpleBar>
+						{ !selectedModels.length ?
+								<TextOverlay content="Select a model to view the users' permissions" /> :
+								null
+						}
 					</PermissionsContainer>
 				</Container>
 			</MuiThemeProvider>

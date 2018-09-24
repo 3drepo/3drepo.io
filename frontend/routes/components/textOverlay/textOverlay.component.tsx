@@ -15,20 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
-import Radio from '@material-ui/core/Radio';
+import * as React from 'react';
 
-export const RadioContainer = styled(Grid)`
-  && {
-    width: 100%;
-  }
-`;
+import { Container } from './textOverlay.styles';
 
-export const RadioButton = styled(Radio)`
-  && {
-    height: 40px;
-    width: 40px;
-    box-sizing: border-box;
-  }
-`;
+interface IProps {
+	content: string;
+}
+
+export const TextOverlay = (props: IProps) => {
+	return <Container>{props.content}</Container>;
+};
