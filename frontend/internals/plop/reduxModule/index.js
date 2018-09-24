@@ -40,12 +40,12 @@ module.exports = (plop) => {
       type: 'modify',
       path: 'modules/sagas.ts',
       pattern: /(\/\/ <-- IMPORT MODULE SAGA -->)/g,
-      template: 'import {{ pascalCase name }}Saga from \'./{{ camelCase name }}/{{ camelCase name }}.sagas\';\n$1',
+      template: 'import {{ camelCase name }}Saga from \'./{{ camelCase name }}/{{ camelCase name }}.sagas\';\n$1',
     }, {
       type: 'modify',
       path: 'modules/sagas.ts',
       pattern: /(\/\/ <-- INJECT MODULE SAGA -->)/g,
-      template: ',\n		fork(watch{{ pascalCase name }})$1',
+      template: ',\n		fork({{ camelCase name }}Saga)$1',
     }],
   });
 };

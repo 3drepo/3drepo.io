@@ -1,13 +1,14 @@
-import { put, takeLatest, all } from 'redux-saga/effects';
+import { put, takeLatest, all, call } from 'redux-saga/effects';
 
-import api from '../../services/api';
+import * as API from '../../services/api';
 import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
 
-export function* fetchUser({username}) {
+export function* fetchUser({ username }) {
 	try {
 		yield put(TeamspaceActions.setPendingState(true));
 
-		const { data } = yield api.get(`${username}.json`);
+		const { data } = yield call(API.fetchTeamspace, [username]);
+
 		return yield all([
 			put(TeamspaceActions.fetchUserSuccess({...data, username})),
 			put(TeamspaceActions.setPendingState(false))
