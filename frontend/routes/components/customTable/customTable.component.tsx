@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values, stubTrue, first } from 'lodash';
+import { matches, cond, orderBy, pick, values, stubTrue, first, isEqual } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -203,10 +203,10 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const stateChanges = {};
 
 		const isInitialProccessing = !this.state.processedRows.length && this.props.rows.length;
-		const rowsChanged = prevProps.rows.length !== this.props.rows.length;
+		const rowsChanged = prevProps.rows.length !== this.props.rows.length || !isEqual(this.props.rows, prevProps.rows);
 		const sortChanged = prevState.sortBy !== this.state.sortBy;
 
-		if (isInitialProccessing || rowsChanged || sortChanged) {
+		if (rowsChanged || sortChanged) {
 			const {sortBy, order, searchFields, searchText} = this.state;
 			this.setState({
 				processedRows: getProcessedRows({
