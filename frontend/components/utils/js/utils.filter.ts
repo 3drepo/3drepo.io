@@ -102,7 +102,15 @@ function prettyDate() {
 			options.day =  "numeric";
 		}
 
-		return date.toLocaleDateString("en-GB", options).replace(",", "");
+		return date.toLocaleDateString("en-GB", options)
+			.replace(",", "")
+			.replace("Mon ", "")
+			.replace("Tue ", "")
+			.replace("Wed ", "")
+			.replace("Thu ", "")
+			.replace("Fri ", "")
+			.replace("Sat ", "")
+			.replace("Sun ", "");
 	};
 }
 

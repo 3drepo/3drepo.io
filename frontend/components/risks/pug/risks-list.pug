@@ -30,8 +30,9 @@
 									aria-label="Status Icon"
 									ng-style="{'color': risk.statusIcon.colour }") {{risk.statusIcon.icon}}
 
-								label(flex) {{risk.owner}}
-							label {{ risk.created | prettyDate }}
+							label(flex) {{risk.owner}}
+							#risksListItemDate
+								label {{ risk.created | prettyDate }}
 						#risksListItemDescription
 							label(ng-bind-html="risk.desc | linky:'_blank'") {{risk.desc}}
 

@@ -237,14 +237,19 @@ risks-list #risksListItemInfo {
 }
 
 risks-list #risksListItemInfo label,
+risks-list #risksListItemDate label,
 risks-list #risksListItemDescription label {
   color: rgba(0, 0, 0, 0.5);
   word-wrap: break-word;
 }
 
+risks-list #risksListItemDate label,
+risks-list #risksListItemDescription label {
+  font-size: 13px;
+}
+
 risks-list #risksListItemDescription {
   height: 60px;
-  font-size: 13px;
 }
 risks-list #risksListItemDescription label {
   overflow: hidden;
