@@ -17,9 +17,19 @@
 
 import {get, isNumber, uniq, compact} from "lodash";
 
-import {TEAMSPACE_PERMISSIONS} from "../../../constants/teamspace-permissions";
-import {PROJECT_ROLES_TYPES} from "../../../constants/project-permissions";
+import { TEAMSPACE_PERMISSIONS } from "../../../constants/teamspace-permissions";
+import { PROJECT_ROLES_TYPES } from "../../../constants/project-permissions";
 import { MODEL_ROLES_TYPES } from "../../../constants/model-permissions";
+
+import { subscribe, dispatch } from '../../../helpers/migration';
+import {
+	UserManagementActions,
+	selectUsers,
+	selectUsersLimit,
+	selectJobs,
+	selectJobsColors,
+	selectIsPending
+} from "../../../modules/userManagement";
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -58,7 +68,7 @@ class AccountUserManagementController implements ng.IController {
 	private currentUser;
 	private accounts;
 	private teamspaces = [];
-	private members;
+	private users;
 	private jobs;
 	private jobsColors;
 	private projects;
@@ -71,7 +81,6 @@ class AccountUserManagementController implements ng.IController {
 	private selectedTeamspace;
 	private selectedTab;
 	private selectedProject;
-	private showAddingPanel;
 	private selectedView;
 
 	constructor(
@@ -88,6 +97,28 @@ class AccountUserManagementController implements ng.IController {
 		if (teamspace) {
 			this.selectedTeamspace = teamspace;
 		}
+
+		subscribe(this, this.bindPropsToThis);
+	}
+
+	public bindPropsToThis = (state) => {
+		const currentTeamspace = this.teamspaces.find(({ account }) => account === this.selectedTeamspace);
+		const props = {
+			isLoadingTeamspace: selectIsPending(state)
+		};
+
+		return {
+			...props,
+			users: selectUsers(state),
+			licencesLimit: selectUsersLimit(state),
+			jobs: selectJobs(state),
+			jobsColors: selectJobsColors(state),
+			projects: currentTeamspace.projects.filter(({ permissions }) => {
+				return currentTeamspace.isAdmin || permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
+			}),
+			isTeamspaceAdmin: currentTeamspace.isAdmin,
+			currentTeamspace
+		};
 	}
 
 	public $onInit(): void {
@@ -122,29 +153,13 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	/**
-	 * Get teamspace details
+	 * Handle teamspace change
 	*/
 	public onTeamspaceChange = (): void => {
 		this.isLoadingTeamspace = true;
-		const currentTeamspace = this.teamspaces.find(({account}) => account === this.selectedTeamspace);
-		const membersPromise = this.getTeamspaceMembersData(currentTeamspace.account);
-		const jobsPromise = this.getTeamspaceJobsData(currentTeamspace.account);
 
+		dispatch(UserManagementActions.fetchTeamspaceDetails(this.selectedTeamspace));
 		this.$state.go(this.$state.$current.name, {teamspace: this.selectedTeamspace}, {notify: false});
-		this.isTeamspaceAdmin = currentTeamspace.isAdmin;
-
-		this.$q.all([membersPromise, jobsPromise]).then(([membersData, jobsData]) => {
-			this.currentTeamspace = currentTeamspace;
-			this.members = membersData.members;
-			this.licencesLimit = membersData.licencesLimit;
-			this.jobs = jobsData.jobs;
-			this.jobsColors = jobsData.colors;
-			this.licencesLabel = this.getLicencesLabel();
-			this.projects = this.currentTeamspace.projects.filter(({permissions}) => {
-					return this.currentTeamspace.isAdmin || permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
-				});
-			this.isLoadingTeamspace = false;
-		});
 	}
 
 	/**
@@ -160,40 +175,6 @@ class AccountUserManagementController implements ng.IController {
 	}
 
 	/**
-	 * Get teamspace users list
-	 * @param teamspaceName
-	 */
-	public getTeamspaceMembersData(teamspaceName: string): void {
-		const quotaInfoPromise = this.AccountService.getQuotaInfo(teamspaceName)
-			.catch(this.DialogService.showError.bind(null, "retrieve", "subscriptions"));
-
-		const memberListPromise = this.AccountService.getMembers(teamspaceName)
-			.catch(this.DialogService.showError.bind(null, "retrieve", "members"));
-
-		return this.$q.all([quotaInfoPromise, memberListPromise])
-			.then(([quotaInfoResponse, membersResponse]) => {
-				return {
-					licencesLimit: get(quotaInfoResponse, "data.collaboratorLimit", 0),
-					members: [...membersResponse.data.members.map(this.prepareMemberData.bind(null, teamspaceName))]
-				};
-			});
-	}
-
-	/**
-	 * Convert member data to proper format
-	 * @param member
-	 * @returns
-	 */
-	public prepareMemberData = (teamspaceName, member): object => {
-		return {
-			...member,
-			isAdmin: member.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-			isCurrentUser: this.currentUser === member.user,
-				isOwner: teamspaceName === member.user
-		};
-	}
-
-	/**
 	 * Get teamspace jobs list
 	 * @param teamspaceName
 	 */
@@ -203,31 +184,7 @@ class AccountUserManagementController implements ng.IController {
 			this.JobsService.getColors(teamspaceName)
 		];
 		return Promise.all(jobsPromises)
-			.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"))
-			.then(([jobsResponse, colorsResponse]) => {
-				const jobs = get(jobsResponse, "data", []);
-				const colors = get(colorsResponse, "data", []);
-
-				return {jobs, colors};
-			});
-	}
-
-	/**
-	 * Change panel visibility
-	 * @param forceHide
-	 */
-	public toggleNewDataPanel(forceHide = false): void {
-		if (!this.isAddButtonDisabled()) {
-			this.showAddingPanel = forceHide ? false : !this.showAddingPanel;
-		}
-	}
-
-	/**
-	 * Generate licences summary
-	 */
-	public getLicencesLabel(): string {
-		const limit = isNumber(this.licencesLimit) ? this.licencesLimit : "unlimited";
-		return `Assigned licences: ${this.members.length} out of ${limit}`;
+			.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"));
 	}
 
 	/**
@@ -235,43 +192,7 @@ class AccountUserManagementController implements ng.IController {
 	 * @param updatedMembers
 	 */
 	public onMembersChange(updatedMembers): void {
-		this.members = [...updatedMembers];
-		this.licencesLabel = this.getLicencesLabel();
-	}
-
-	/**
-	 * Add new member to local list of members
-	 * @param updatedMembers
-	 */
-	public onMemberSave = (newMember): void => {
-		this.members = [
-			...this.members,
-			this.prepareMemberData(this.currentTeamspace.account, newMember)
-		];
-		this.licencesLabel = this.getLicencesLabel();
-		this.showAddingPanel = false;
-	}
-
-	/**
-	 * Add new job to local list of jobs
-	 * @param updatedMembers
-	 */
-	public onJobSave(newJob): void {
-		this.jobs = [...this.jobs, newJob];
-
-		if (newJob.color && !this.jobsColors.includes(newJob.color)) {
-			this.jobsColors = [...this.jobsColors, newJob.color];
-		}
-		this.showAddingPanel = false;
-	}
-
-	public onJobsChange(updatedJobs): void {
-		this.jobs = [...updatedJobs];
-	}
-
-	public isAddButtonDisabled(): boolean {
-		return (this.members && this.members.length === this.licencesLimit && this.selectedTab === this.TABS_TYPES.USERS)
-			|| this.isLoadingTeamspace;
+		this.users = [...updatedMembers];
 	}
 }
 

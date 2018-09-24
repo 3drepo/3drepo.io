@@ -16,6 +16,7 @@
  */
 
 import { createMuiTheme } from '@material-ui/core/styles';
+import { COLOR } from './colors';
 
 export const theme = createMuiTheme({
 	palette: {
@@ -23,13 +24,49 @@ export const theme = createMuiTheme({
 			main: '#0C2F54',
 			light: '#3c5876',
 			dark: '#08203a',
-			contrastText: '#fff'
+			contrastText: COLOR.WHITE
 		},
 		secondary: {
 			main: '#06563c',
 			light: '#377763',
-			dark: '#043c2a',
-			contrastText: '#fff'
+			dark: '#377763',
+			contrastText: COLOR.WHITE
+		}
+	},
+	overrides: {
+		MuiInput: {
+			root: {
+				fontSize: '14px'
+			},
+			underline: {
+				'&:before': {
+					borderBottomColor: 'rgba(0, 0, 0, .12) !important'
+				}
+			}
+		},
+		MuiFormControlLabel: {
+			label: {
+				fontSize: '14px',
+				color: COLOR.BLACK_60
+			}
+		},
+		MuiDialogTitle: {
+			root: {
+				background: '#08203a',
+				padding: '15px 24px 15px',
+				color: COLOR.WHITE,
+				fontSize: '20px'
+			}
+		},
+		MuiDialogContent: {
+			root: {
+				padding: '24px'
+			}
+		},
+		MuiDialog: {
+			paper: {
+				background: '#fafafa'
+			}
 		}
 	}
 });

@@ -5,13 +5,14 @@
 import * as React from 'react';
 import { react2angular as wrap } from 'react2angular';
 
-// Components
-import { ReactButton } from './components/reactButton/reactButton.component';
-
 // Routes
-import ReactRoute from './reactRoute/reactRoute.container';
+import Users from './users/users.container';
+import DialogContainer from './components/dialogContainer/dialogContainer.container';
+import Jobs from './jobs/jobs.container';
 
 angular
-	.module("3drepo")
-	.component("reactButton", wrap(ReactButton))
-	.component("reactRoute", wrap(ReactRoute));
+	.module('3drepo')
+
+	.component('users', wrap(Users, ['users', 'jobs', 'onUsersChange', 'active', 'limit']))
+	.component('jobs', wrap(Jobs, ['active']))
+	.component('dialogContainer', wrap(DialogContainer));
