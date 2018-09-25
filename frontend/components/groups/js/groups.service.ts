@@ -71,14 +71,14 @@ export class GroupsService {
 	 */
 	public groupsFilterSearch(searchQuery: string): any[] {
 		return this.state.groups.filter((group) => {
-			// Remove group highlight.
-			if (!searchQuery) {
+			const toKeep = this.stringSearch(group.name, searchQuery)
+				|| this.stringSearch(group.description, searchQuery)
+				|| this.stringSearch(group.author, searchQuery);
+
+			if (!toKeep) {
 				this.unhighlightGroup(group);
 			}
-
-			return this.stringSearch(group.name, searchQuery)
-			|| this.stringSearch(group.description, searchQuery)
-			|| this.stringSearch(group.author, searchQuery);
+			return toKeep;
 		});
 	}
 	/**
