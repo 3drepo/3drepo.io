@@ -44,8 +44,6 @@ class ViewsController implements ng.IController {
 	private newView: any;
 	private editSelectedView: any;
 	private viewpointNameMaxlength: number;
-	private searchQuery: string;
-	private selectedItem: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -60,7 +58,6 @@ class ViewsController implements ng.IController {
 
 	public $onInit() {
 		this.newView = {};
-		this.selectedItem = {};
 		this.ViewpointsService.getViewpoints(this.account, this.model).then(() => {
 			this.loading = false;
 		});
@@ -82,12 +79,10 @@ class ViewsController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
-			this.searchQuery = searchQuery;
-			if (this.searchQuery !== undefined || this.searchQuery !== "") {
-				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.searchQuery);
-				if (this.viewpointsToShow.indexOf(this.selectedItem)) {
-					this.selectedItem.selected = false;
-				}
+			if (searchQuery !== undefined && searchQuery !== "") {
+				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(searchQuery);
+			} else {
+				this.viewpointsToShow = this.viewpoints;
 			}
 
 		});
@@ -122,9 +117,6 @@ class ViewsController implements ng.IController {
 	}
 
 	public selectView(view: any) {
-
-		this.selectedItem = view;
-
 		if (view) {
 			if (this.editSelectedView && this.selectedView !== view) {
 				this.resetEditState();

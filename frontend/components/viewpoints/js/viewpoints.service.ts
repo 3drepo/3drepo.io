@@ -53,7 +53,12 @@ export class ViewpointsService {
 
 	public filterViewpoints(searchQuery: string): any[] {
 		return this.state.viewpoints.filter((view) => {
-			return this.stringSearch(view.name, searchQuery);
+			const keep =  this.stringSearch(view.name, searchQuery);
+			if (!keep) {
+				view.selected = false;
+			}
+
+			return keep;
 		});
 	}
 

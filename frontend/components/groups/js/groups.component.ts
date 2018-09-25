@@ -60,7 +60,6 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
-	private searchQuery: any[];
 	private groupsNotifications: NotificationEvents;
 
 	constructor(
