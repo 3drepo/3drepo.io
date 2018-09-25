@@ -27,17 +27,13 @@
           md-icon.angular-material-icons keyboard_arrow_left
           span Projects permissions
 
-  permissions-list(
-    ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
+  projects-permissions(
     flex
-    layout="column"
-    data="vm.assignedProjectPermissions"
-    permissions="vm.PROJECT_ROLES_LIST"
-    current-teamspace="vm.currentTeamspace"
-    message-empty-list="Select a project to view the users' permissions"
-    on-change="vm.onPermissionsChange(updatedPermissions)"
-    mode="projects")
-
+    layout="row"
+    ng-if="vm.currentView !== vm.PERMISSIONS_VIEWS.MODELS"
+    permissions="vm.assignedProjectPermissions"
+    on-permissions-change="vm.onPermissionsChange"
+  )
 
   models-permissions(
     flex

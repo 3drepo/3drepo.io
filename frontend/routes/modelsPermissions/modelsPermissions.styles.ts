@@ -64,14 +64,3 @@ export const OverflowWrapper = styled.div`
 		}
 	}
 `;
-
-export const PermissionsCellContainer = styled.div`
-	flex: 1;
-	justify-content: center;
-	display: flex;
-`;
-
-export const DisabledCheckbox = styled.img`
-	margin-left: 13px;
-	opacity: .4;
-`;

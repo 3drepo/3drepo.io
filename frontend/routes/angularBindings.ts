@@ -10,6 +10,7 @@ import Users from './users/users.container';
 import DialogContainer from './components/dialogContainer/dialogContainer.container';
 import Jobs from './jobs/jobs.container';
 import ModelsPermissions from './modelsPermissions/modelsPermissions.container';
+import ProjectsPermissions from './projectsPermissions/projectsPermissions.container';
 
 angular
 	.module('3drepo')
@@ -19,4 +20,7 @@ angular
 	.component('dialogContainer', wrap(DialogContainer))
 	.component('modelsPermissions', wrap(ModelsPermissions, [
 		'models', 'permissions', 'onSelectionChange', 'onPermissionsChange'
+	]))
+	.component('projectsPermissions', wrap(ProjectsPermissions, [
+		'permissions', 'onSelectionChange', 'onPermissionsChange'
 	]));
