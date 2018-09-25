@@ -525,7 +525,7 @@ class IssueController implements ng.IController {
 			this.issuesService.updateIssue(this.issueData, statusChangeData)
 				.then((response) => {
 					if (response) {
-						const respData = response.data.issue;
+						const respData = response.data;
 						this.issuesService.populateIssue(respData);
 						this.issueData = respData;
 

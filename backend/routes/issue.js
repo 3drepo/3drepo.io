@@ -51,31 +51,27 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
-router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue);
-router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue);
+router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification, responseCodes.onSuccessfulOperation);
 
-router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue);
-router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue);
+router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
-
-	const place = utils.APIInfo(req);
 	const data = req.body;
 	data.owner = req.session.user.username;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-
 	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, model: req.params.model}, data).then(issue => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
+		req.dataModel =  issue;
+		next();
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.onError(req, res, err);
 	});
 }
 
 function updateIssue(req, res, next) {
-
-	const place = utils.APIInfo(req);
 	const data = req.body;
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
@@ -87,6 +83,7 @@ function updateIssue(req, res, next) {
 	let action;
 
 	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
+		req.oldDataModel = issue;
 
 		if(!issue) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -148,22 +145,10 @@ function updateIssue(req, res, next) {
 		return action;
 
 	}).then(issue => {
-		const resData = {
-			_id: issueId,
-			account: req.params.account,
-			model: req.params.model,
-			issue: issue,
-			issue_id : issueId,
-			number: issue.number,
-			owner: data.hasOwnProperty("comment") ?  data.owner : issue.owner,
-			created: issue.created
-		};
-
-		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
-
+		req.dataModel =  issue;
+		next();
 	}).catch(err => {
-
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.onError(req, res, err);
 	});
 }
 

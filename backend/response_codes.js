@@ -467,29 +467,14 @@
 		});
 	};
 
-	// On error respond with error code and errInfo (containing helpful information)
-	// On OK, response with OK status and extraInfo
-	/**
-	 *
-	 *
-	 * @param {any} place
-	 * @param {any} req
-	 * @param {any} res
-	 * @param {any} next
-	 * @param {any} err
-	 * @param {any} extraInfo
-	 * @param {any} errInfo
-	 */
-	responseCodes.onError = function (place, req, res, next, err, extraInfo, errInfo) {
-		if (!errInfo) {
-			errInfo = {};
-		}
+	responseCodes.onSuccessfulOperation = function(req, res) {
+		const currentUrl = utils.APIInfo(req);
+		responseCodes.respond(currentUrl, req, res, null, responseCodes.OK, req.dataModel);
+	};
 
-		if (err.value) {
-			responseCodes.respond(place, req, res, next, err, errInfo);
-		} else {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, extraInfo);
-		}
+	responseCodes.onError = function(req, res, err) {
+		const currentUrl = utils.APIInfo(req);
+		responseCodes.respond(currentUrl, req, res, null, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	};
 
 	module.exports = Object.freeze(responseCodes);

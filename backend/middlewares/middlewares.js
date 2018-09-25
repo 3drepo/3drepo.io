@@ -202,6 +202,7 @@
 		project: require("./project"),
 		job: require("./job"),
 		issue: require("./issue"),
+		notification: require("./notification"),
 
 		isHereEnabled: isHereEnabled,
 

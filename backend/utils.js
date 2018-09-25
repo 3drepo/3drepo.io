@@ -114,14 +114,10 @@ function Utils() {
 	 * Map http promise error to our defined error codes
 	 *
 	 * @param {Object} err object from mongoose
-	 * @param {number} channelsCount Number of channels, 1 for now
-	 * @param {boolean} isLittleEndian True or false
-	 * @return {Object} our defined response code
 	 */
 	this.mongoErrorToResCode = function(err) {
-
-		// let _ = require('lodash');
 		const responseCodes = require("./response_codes");
+
 		if(err.name === "ValidationError") {
 			return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
 		} else if(err.name === "MongoError") {
