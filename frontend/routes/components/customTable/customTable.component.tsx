@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values, stubTrue, first, isEqual, omit } from 'lodash';
+import { matches, cond, orderBy, pick, values, stubTrue, first, isEqual, omit, identity } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -44,7 +44,7 @@ export const TableButton = ({icon, onClick, disabled}) => {
 	);
 };
 
-const CheckboxField = (props) => {
+export const CheckboxField = (props) => {
 	return (
 		<Checkbox
 			{...props}
@@ -175,8 +175,9 @@ const getSearchFields = (cells) => {
 interface IProps {
 	cells: any[];
 	rows: any[];
-	onSelectionChange?: (selectedRows) => void;
 	defaultSort?: number;
+	onSelectionChange?: (selectedRows) => void;
+	renderCheckbox?: (props, data) => React.ReactChild;
 }
 
 interface IState {
@@ -350,6 +351,14 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public renderCheckbox({row = {}, ...props}): React.ReactChild {
+		if (this.props.renderCheckbox) {
+			return this.props.renderCheckbox(props, row);
+		}
+
+		return <CheckboxField {...props} />;
+	}
+
 	/**
 	 * Renders row for each user
 	 */
@@ -360,10 +369,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{
 						showCheckbox ? (
 							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
-								<CheckboxField
-									onChange={this.handleSelectionChange(row)}
-									checked={row.selected}
-								/>
+								{
+									this.renderCheckbox({
+										onChange: this.handleSelectionChange(row),
+										checked: row.selected,
+										row
+									})
+								}
 							</CheckboxCell>
 						) : null
 					}
@@ -414,11 +426,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{
 						showCheckbox ? (
 							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
-								<CheckboxField
-									onChange={this.handleSelectAll}
-									indeterminate={isIndeterminate}
-									checked={selectedAll || isIndeterminate}
-								/>
+								{
+									this.renderCheckbox({
+										onChange: this.handleSelectAll,
+										indeterminate: isIndeterminate,
+										checked: selectedAll || isIndeterminate
+									})
+								}
 							</CheckboxCell>
 						) : null
 					}

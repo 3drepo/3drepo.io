@@ -62,3 +62,8 @@ export const PermissionsCellContainer = styled.div`
 	justify-content: center;
 	display: flex;
 `;
+
+export const DisabledCheckbox = styled.img`
+	margin-left: 13px;
+	opacity: .4;
+`;

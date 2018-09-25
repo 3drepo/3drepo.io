@@ -16,26 +16,32 @@
  */
 
 import * as React from 'react';
-import { pick, matches, isEqual, cond, get, isEmpty } from 'lodash';
+import { pick, matches, isEqual, cond, get, isEmpty, memoize } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import SimpleBar from 'simplebar-react';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { theme } from '../../styles';
 import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../constants/model-permissions';
-import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
+import { CELL_TYPES, CustomTable, CheckboxField } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
 import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 
+import * as TestIconSrc from '../../icons/how_to_reg.svg';
+
 import {
 	Container,
 	ModelsContainer,
 	PermissionsContainer,
-	PermissionsCellContainer
+	PermissionsCellContainer,
+	DisabledCheckbox
 } from './modelsPermissions.styles';
 
 const PermissionsCell = (props) => {
@@ -46,6 +52,27 @@ const PermissionsCell = (props) => {
 				disabled={props.disabled}
 			/>
 		</PermissionsCellContainer>
+	);
+};
+
+const getAdminIconText = memoize((isTeamspaceAdmin, isProjectAdmin) => {
+	if (isTeamspaceAdmin) {
+		return 'Teamspace admin';
+	}
+
+	if (isProjectAdmin) {
+		return 'Project admin';
+	}
+
+	return 'Model admin';
+}, (...flags) => flags.join('.'));
+
+const AdminIcon = ({isTeamspaceAdmin, isProjectAdmin}) => {
+	const tooltipTitle = getAdminIconText(isTeamspaceAdmin, isProjectAdmin);
+	return (
+		<Tooltip title={tooltipTitle}>
+			<DisabledCheckbox src={TestIconSrc} />
+		</Tooltip>
 	);
 };
 
@@ -101,8 +128,8 @@ interface IProps {
 	models: any[];
 	users: any[];
 	permissions: any[];
-	onSelectionChange?: ({selectedModels}) => void;
-	onPermissionsChange?: ({updatedPermissions}) => void;
+	onSelectionChange?: (selectedModels) => void;
+	onPermissionsChange?: (updatedPermissions) => void;
 }
 
 interface IState {
@@ -117,7 +144,6 @@ interface IState {
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
-		debugger
 		const changes = {
 			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels)
 		} as any;
@@ -140,6 +166,18 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public onGlobalPermissionsChange = (event, value) => {
 		this.setState({selectedGlobalPermissions: value});
+
+		if (this.props.onPermissionsChange) {
+			const updatedPermissions = this.state.permissionsRows
+				.reduce((permissionsList, row) => {
+					if (row.selected && !row.disabled) {
+						permissionsList.push({ ...row, key: value });
+					}
+					return permissionsList;
+				}, []);
+
+			this.props.onPermissionsChange(updatedPermissions);
+		}
 	}
 
 	public getPermissionsTableCells = () => {
@@ -148,7 +186,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 			flex: null,
 			padding: '0'
 		};
-
+		console.log('getPermissionsTableCells', this.state.selectedUsers.length, !this.state.selectedUsers.length);
 		const permissionsCells = MODEL_ROLES_LIST.map(({ label: name, tooltip: tooltipText, key: value }) => {
 			return {
 				name,
@@ -162,7 +200,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 						value,
 						onChange: this.onGlobalPermissionsChange,
 						checked: this.state.selectedGlobalPermissions === value,
-						disabled: Boolean(this.state.selectedModels.length)
+						disabled: !this.state.selectedUsers.length
 					}
 				},
 				CellComponent: PermissionsCell,
@@ -224,19 +262,25 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 			permissionsRows: this.getPermissionsTableRows(this.props.permissions, []),
 			modelRows: getModelsTableRows(this.props.models, this.state.selectedModels)
 		});
-		this.forceUpdate();
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-		if (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) {
+
+		const selectedPermissionsChanged = (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) ||
+			prevState.selectedUsers.length !== this.state.selectedUsers.length;
+
+		if (selectedPermissionsChanged) {
+			console.log('permissionsCells did update')
 			changes.permissionsCells = this.getPermissionsTableCells();
 		}
 
-		const rowsChanged = !isEqual(prevProps.permissions, this.props.permissions)
+		const permissionsChanged = !isEqual(prevProps.permissions, this.props.permissions)
 			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
 
-		if (rowsChanged) {
+		if (permissionsChanged) {
+			console.log('permissionsRows did update')
+			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
 			changes.permissionsRows = this.getPermissionsTableRows(this.props.permissions, this.state.selectedUsers);
 		}
 
@@ -246,11 +290,11 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public handlePermissionsChange = () => {
-
+		debugger
 	}
 
-	public createPermissionsChangeHandler = (value) => {
-		this.state.permissionsRows;
+	public createPermissionsChangeHandler = (value) => () => {
+		console.log('permissions change', value, this.state.permissionsRows);
 	}
 
 	public handleSelectionChange = (field) => (rows) => {
@@ -259,6 +303,18 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		])(field);
 
 		this.setState({[field]: rows});
+	}
+
+	public renderCustomCheckbox = (props, row) => {
+		if (this.state.selectedModels.length && row.data && this.hasDisabledPermissions(row)) {
+			return (
+				<AdminIcon
+					isTeamspaceAdmin={row.isAdmin}
+					isProjectAdmin={row.isProjectAdmin}
+				/>
+			);
+		}
+		return <CheckboxField {...props} />;
 	}
 
 	public render() {
@@ -289,6 +345,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 								cells={permissionsCells}
 								rows={permissionsRows}
 								onSelectionChange={this.handleSelectionChange('selectedUsers')}
+								renderCheckbox={this.renderCustomCheckbox}
 							/>
 						</SimpleBar>
 						{ !selectedModels.length ?
