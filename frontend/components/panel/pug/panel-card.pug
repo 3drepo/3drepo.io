@@ -59,6 +59,8 @@ div(layout="column", class="md-whiteframe-1dp")
 				hide-item='vm.hideSelectedItem'
 				on-content-height-request='vm.onContentHeightRequest(height)'
 				model-settings='vm.modelSettings'
+				show-filter="vm.showFilter"
+				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
 
 			viewpoints(
@@ -70,7 +72,9 @@ div(layout="column", class="md-whiteframe-1dp")
 				on-hide-item='vm.hideItem()'
 				hide-item='vm.hideSelectedItem'
 				on-content-height-request='vm.onContentHeightRequest(height)'
-				model-settings='vm.modelSettings')
+				model-settings='vm.modelSettings'
+				show-filter="vm.showFilter"
+				filter-text='vm.filterText')
 
 			docs(
 				ng-if="vm.contentData.type === 'docs'"
