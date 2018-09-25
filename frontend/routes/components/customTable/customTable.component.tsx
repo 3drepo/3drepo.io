@@ -294,8 +294,10 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSelectionChange = (row) => (event, checked) => {
+		const fieldsToOmit = ['selected', 'data', 'disabled'];
+
 		const selectedRows = [...this.state.selectedRows]
-			.filter((selectedRow) => !isEqual(omit(selectedRow, 'selected'), omit(row, 'selected')));
+			.filter((selectedRow) => !isEqual(omit(selectedRow, fieldsToOmit), omit(row, fieldsToOmit)));
 
 		if (checked) {
 			selectedRows.push(row);

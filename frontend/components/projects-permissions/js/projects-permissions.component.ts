@@ -131,12 +131,13 @@ class ProjectsPermissionsController implements ng.IController {
 					this.models = this.models.map((model) => {
 						return {
 							...model,
-							isSelected: model.model === modelInState
+							selected: model.model === modelInState
 						};
 					});
 				}
 
-				this.selectedModels = this.models.filter(({isSelected}) => isSelected);
+				this.selectedModels = this.models.filter(({selected}) => selected);
+
 				this.onModelSelectionChange(this.selectedModels);
 
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
@@ -209,8 +210,8 @@ class ProjectsPermissionsController implements ng.IController {
 				...memberData,
 				permissions: get(memberModelPermissions, "permissions", []),
 				key: modelPermissionsKey,
-				isDisabled: !modelPermissions,
-				isSelected: get(memberModelPermissions, "isSelected", false),
+				disabled: !modelPermissions,
+				selected: get(memberModelPermissions, "selected", false),
 				isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
 			};
 		});
@@ -262,7 +263,7 @@ class ProjectsPermissionsController implements ng.IController {
 						if (memberPermission) {
 							return {
 								user: currentPermission.user,
-								isSelected: memberPermission.isSelected,
+								selected: memberPermission.selected,
 								permission: memberPermission.key
 							};
 						}
@@ -286,19 +287,19 @@ class ProjectsPermissionsController implements ng.IController {
 						});
 
 						const permissionsToShow = this.selectedModels[0].permissions.map(({user, permission}) => {
-							let isSelected = false;
+							let selected = false;
 							let updatedPermissionKey = this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS;
 
 							const updatedPermissionsData = updatedPermissions.find((userPermission) => userPermission.user === user);
 
 							if (updatedPermissionsData) {
-								isSelected = updatedPermissionsData.isSelected;
+								selected = updatedPermissionsData.selected;
 								updatedPermissionKey = updatedPermissionsData.key;
 							}
 
 							return {
 								user,
-								isSelected,
+								selected,
 								permission: updatedPermissionKey
 							};
 						});
@@ -373,9 +374,7 @@ class ProjectsPermissionsController implements ng.IController {
 					this.selectedModels = modelsWithPermissions;
 					const permissionsToShow = this.selectedModels.length === 1 ? this.selectedModels[0].permissions : [];
 
-					this.$timeout(() => {
-						this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
-					});
+					this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
 				});
 		} else {
 			this.selectedModels = [];

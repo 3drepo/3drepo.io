@@ -183,7 +183,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		const {currentUser, selectedModels} = this.state as IState;
 
 		const hasSelectedModels = selectedModels.length;
-		const passBaseValidation = !hasSelectedModels || row.isDisabled || row.isOwner || row.isAdmin || row.isCurrentUser;
+		const passBaseValidation = !hasSelectedModels || row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
 
 		if (passBaseValidation) {
 			return true;
@@ -215,7 +215,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 			flex: null,
 			padding: '0'
 		};
-		console.log('getPermissionsTableCells', this.state.selectedUsers.length, !this.state.selectedUsers.length);
 		const permissionsCells = MODEL_ROLES_LIST.map(({ label: name, tooltip: tooltipText, key: value }) => {
 			return {
 				name,
@@ -274,7 +273,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-		console.time('did update');
+
 		const selectedPermissionsChanged = (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) ||
 			prevState.selectedUsers.length !== this.state.selectedUsers.length;
 
@@ -285,7 +284,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		const permissionsChanged = !isEqual(prevProps.permissions, this.props.permissions)
 			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
 
-		if (permissionsChanged) {
+		if (selectedPermissionsChanged || permissionsChanged) {
 			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
 			changes.permissionsRows = this.getPermissionsTableRows(this.props.permissions, this.state.selectedUsers);
 		}
@@ -293,7 +292,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
-		console.timeEnd('did update');
 	}
 
 	public handleSelectionChange = (field) => (rows) => {

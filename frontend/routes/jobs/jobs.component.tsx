@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick } from 'lodash';
+import { pick, isEqual, isEmpty } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import { theme } from '../../styles';
@@ -67,24 +67,16 @@ export class Jobs extends React.PureComponent<IProps, any> {
 		}
 
 		return {
-			rows: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name})),
-			jobsSize: nextProps.jobs.length,
 			panelKey: nextProps.jobs.length !== prevState.rows.length ? Math.random() : prevState.panelKey
 		};
 	}
 
 	public state = {
 		rows: [],
-		jobsSize: 0,
 		containerElement: null,
 		active: true,
 		panelKey: Math.random()
 	};
-
-	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
-		this.setState({ containerElement });
-	}
 
 	public handleColorChange = (jobId) => (color) => {
 		this.props.updateColor({_id: jobId, color});
@@ -101,21 +93,46 @@ export class Jobs extends React.PureComponent<IProps, any> {
 	public getJobsTableRows = (jobs = [], colors = []): any[] => {
 		return jobs.map((job) => {
 			const data = [
-				pick(job, ['value']),
+				{
+					value: job._id
+				},
 				{
 					value: job.color,
 					predefinedColors: colors,
 					disableUnderline: true,
-					onChange: this.handleColorChange(job.name)
+					onChange: this.handleColorChange(job._id)
 				},
 				{},
 				{
 					icon: 'remove_circle',
-					onClick: this.onRemove.bind(null, job.name)
+					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
 			return { ...job, data };
 		});
+	}
+
+	public componentDidMount() {
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		this.setState({
+			containerElement,
+			rows: this.getJobsTableRows(this.props.jobs, this.props.colors)
+		});
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		const changes = {} as any;
+
+		const colorsChanged = !isEqual(prevProps.colors, this.props.colors);
+		const jobsChanged = !isEqual(prevProps.jobs, this.props.jobs);
+
+		if (jobsChanged || colorsChanged) {
+			changes.rows = this.getJobsTableRows(this.props.jobs, this.props.colors);
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
 	}
 
 	public renderNewJobForm = (container) => {
@@ -140,14 +157,13 @@ export class Jobs extends React.PureComponent<IProps, any> {
 		const { containerElement, active, rows } = this.state;
 		const { colors } = this.props;
 
-		const preparedRows = this.getJobsTableRows(rows, colors);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container>
 					<UserManagementTab footerLabel="Manage jobs">
 						<CustomTable
 							cells={JOBS_TABLE_CELLS}
-							rows={preparedRows}
+							rows={rows}
 						/>
 					</UserManagementTab>
 					{active && containerElement && this.renderNewJobForm(containerElement)}
