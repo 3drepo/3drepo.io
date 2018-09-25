@@ -182,7 +182,6 @@ interface IState {
 		type?: number;
 		order: string;
 	};
-	order: string;
 	processedRows: any;
 	searchFields: any;
 	searchText: string;

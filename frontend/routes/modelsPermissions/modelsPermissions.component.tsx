@@ -25,6 +25,9 @@ import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import Tooltip from '@material-ui/core/Tooltip';
 
+// @ts-ignore
+import * as AdminIconSrc from '../../icons/how_to_reg.svg';
+
 import { theme } from '../../styles';
 import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CELL_TYPES, CustomTable, CheckboxField } from '../components/customTable/customTable.component';
@@ -33,8 +36,6 @@ import { ModelItem } from '../components/modelItem/modelItem.component';
 import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
-
-import * as TestIconSrc from '../../icons/how_to_reg.svg';
 
 import {
 	Container,
@@ -72,7 +73,7 @@ const AdminIcon = ({isTeamspaceAdmin, isProjectAdmin}) => {
 	const tooltipTitle = getAdminIconText(isTeamspaceAdmin, isProjectAdmin);
 	return (
 		<Tooltip title={tooltipTitle}>
-			<DisabledCheckbox src={TestIconSrc} />
+			<DisabledCheckbox src={AdminIconSrc} />
 		</Tooltip>
 	);
 };
