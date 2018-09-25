@@ -122,23 +122,20 @@ export const TABLE_DATA_TYPES = {
  * @param options
  * @returns {Array}
  */
-const getSortedRows = (rows, type, order) => {
-	const { USER, JOB, PERMISSIONS, NAME } = CELL_TYPES;
+const getSortedRows = (rows, type, column, order) => {
+	const { USER, JOB, NAME } = CELL_TYPES;
 	const sort = cond([
 		[matches({ type: USER }), sortByName.bind(null, rows)],
 		[matches({ type: NAME }), sortByName.bind(null, rows)],
 		[matches({ type: JOB }), sortByJob.bind(null, rows)],
-		[matches({ type: PERMISSIONS }), (options) => {
-			return orderBy(rows, ['isAdmin'], options.order);
-		}],
 
 		// Default action
 		[stubTrue, (options) => {
-			return orderBy(rows, ['value'], options.order);
+			return orderBy(rows, ({data}) => data[options.column].value || null, options.order);
 		}]
 	]);
 
-	return sort({type, order});
+	return sort({type, order, column});
 };
 
 /**
@@ -161,14 +158,13 @@ const getFilteredRows = (rows = [], searchFields, searchText): object[] => {
 	});
 };
 
-const getProcessedRows = ({rows, sortBy, order, searchFields, searchText}) => {
+const getProcessedRows = ({rows, sortBy, sortColumn, order, searchFields, searchText}) => {
 	const filteredRows = getFilteredRows(rows, searchFields, searchText);
-	return getSortedRows(filteredRows, sortBy, order);
+	return getSortedRows(filteredRows, sortBy, sortColumn, order);
 };
 
 const getSearchFields = (cells) => {
 	const searchFields = cells.find(({searchBy}) => searchBy);
-
 	return searchFields ? searchFields.searchBy : [];
 };
 
@@ -181,7 +177,11 @@ interface IProps {
 }
 
 interface IState {
-	sortBy: number;
+	currentSort: {
+		activeIndex: number;
+		type?: number;
+		order: string;
+	};
 	order: string;
 	processedRows: any;
 	searchFields: any;
@@ -192,9 +192,9 @@ interface IState {
 export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
-		const {sortBy, order, searchText} = prevState;
-		const initialSortBy = nextProps.defaultSort || (first(nextProps.cells) || {type: CELL_TYPES.NAME} as any).type;
-		const newSortBy = !prevState.processedRows.length ? initialSortBy : sortBy;
+		const {currentSort, searchText} = prevState;
+		const initialSortBy = 0;
+		const newSortBy = !prevState.processedRows.length ? initialSortBy : currentSort.type;
 
 		return {
 			searchFields,
@@ -203,8 +203,11 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public state = {
-		sortBy: CELL_TYPES.USER,
-		order: SORT_ORDER_TYPES.ASCENDING,
+		currentSort: {
+			activeIndex: 0,
+			type: null,
+			order: SORT_ORDER_TYPES.ASCENDING
+		},
 		processedRows: [],
 		searchFields: {},
 		searchText: '',
@@ -212,12 +215,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { sortBy, order, searchFields, searchText } = this.state;
+		const { currentSort, searchFields, searchText } = this.state;
 		this.setState({
 			processedRows: getProcessedRows({
 				rows: this.props.rows,
-				sortBy,
-				order,
+				sortBy: currentSort.type,
+				sortColumn: currentSort.activeIndex,
+				order: currentSort.order,
 				searchFields,
 				searchText
 			})
@@ -228,15 +232,17 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const stateChanges = {};
 
 		const rowsChanged = prevProps.rows.length !== this.props.rows.length || !isEqual(this.props.rows, prevProps.rows);
-		const sortChanged = prevState.sortBy !== this.state.sortBy;
+		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
+		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
 
-		if (rowsChanged || sortChanged) {
-			const {sortBy, order, searchFields, searchText} = this.state;
+		if (rowsChanged || sortChanged || orderChanged) {
+			const {currentSort, searchFields, searchText} = this.state;
 			this.setState({
 				processedRows: getProcessedRows({
 					rows: this.props.rows,
-					sortBy,
-					order,
+					sortBy: currentSort.type,
+					sortColumn: currentSort.activeIndex,
+					order: currentSort.order,
 					searchFields,
 					searchText
 				})
@@ -244,38 +250,43 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public createSortHandler = (sortBy) => () => {
+	public createSortHandler = (activeSortIndex, type) => () => {
+		const {currentSort} = this.state;
 		let order = SORT_ORDER_TYPES.ASCENDING;
 
-		if (this.state.order === order && this.state.sortBy === sortBy) {
+		if (currentSort.order === order && currentSort.type === type) {
 			order = SORT_ORDER_TYPES.DESCENDING;
 		}
 
-		if (this.state.sortBy !== sortBy) {
+		if (currentSort.type !== type) {
 			order = SORT_ORDER_TYPES.DESCENDING;
 		}
 
 		const {searchFields, searchText} = this.state;
-
 		this.setState({
 			processedRows: getProcessedRows({
 				rows: this.props.rows,
-				sortBy,
+				sortBy: type,
+				sortColumn: activeSortIndex,
 				order,
 				searchFields,
 				searchText
 			}),
-			sortBy,
-			order
+			currentSort: {
+				activeIndex: activeSortIndex,
+				order,
+				type
+			}
 		});
 	}
 
 	public createSearchHandler = () => (searchText) => {
-		const {sortBy, order, searchFields} = this.state;
+		const {currentSort, searchFields} = this.state;
 		const processedRows = getProcessedRows({
 			rows: this.props.rows,
-			sortBy,
-			order,
+			sortBy: currentSort.type,
+			sortColumn: currentSort.activeIndex,
+			order: currentSort.order,
 			searchFields,
 			searchText
 		});
@@ -306,7 +317,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 * Renders row for each user
 	 */
 	public renderHeader = (cells) => {
-		const { sortBy, order } = this.state;
+		const {currentSort} = this.state;
 		const setTooltip = (Component, text) => (
 			<Tooltip
 				title={text}
@@ -322,28 +333,28 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 			const {root = {}, component = {}} = cell.HeadingProps || {};
 
-			const cellRootProps = {
+			const headingRootProps = {
 				...CELL_DEFAULT_PROPS[type],
 				...root
 			};
 
-			const hasActiveSort = sortBy === cell.type;
-			const cellComponentProps = {
+			const hasActiveSort = currentSort.activeIndex === index;
+			const headingComponentProps = {
 				onChange: this.createSearchHandler(),
-				onClick: this.createSortHandler(type),
+				onClick: this.createSortHandler(index, cell.type),
 				activeSort: hasActiveSort,
-				sortOrder: hasActiveSort ? order : SORT_ORDER_TYPES.ASCENDING,
+				sortOrder: hasActiveSort ? currentSort.order : SORT_ORDER_TYPES.ASCENDING,
 				label: cell.name,
 				...component
 			};
 
-			const HeadingComponent = <BasicHeadingComponent {...cellComponentProps} />;
+			const HeadingComponent = <BasicHeadingComponent {...headingComponentProps} />;
 
 			return (
-				<Cell key={index} {...cellRootProps}>
+				<Cell key={index} {...headingRootProps}>
 					{
-						cellComponentProps.tooltipText ?
-							setTooltip(HeadingComponent, cellComponentProps.tooltipText) :
+						headingComponentProps.tooltipText ?
+							setTooltip(HeadingComponent, headingComponentProps.tooltipText) :
 							HeadingComponent
 					}
 				</Cell>

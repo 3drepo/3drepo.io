@@ -66,7 +66,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 				>
 					<Grid item>
 						<SortLabel
-							active={!disabled && activeSort}
+							active={activeSort}
 							direction={sortOrder}
 							onClick={onClick}
 						>

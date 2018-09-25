@@ -82,9 +82,7 @@ const MODEL_TABLE_CELLS = [{
 	name: 'Model/federation',
 	type: CELL_TYPES.NAME,
 	HeadingComponent: CellUserSearch,
-	HeadingProps: {},
 	CellComponent: ModelItem,
-	CellProps: {},
 	searchBy: ['name']
 }];
 
