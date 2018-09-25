@@ -453,9 +453,9 @@ export class CompareService {
 	}
 
 	private changeModelVisibility(nodeName: string, visible: boolean) {
-		const nodes = this.TreeService.getAllNodes();
-		if (nodes.length && nodes[0].children) {
-			nodes[0].children.forEach((node) => {
+		const tree = this.TreeService.getAllNodes();
+		if (tree.children) {
+			tree.children.forEach((node) => {
 				if (node.name === nodeName) {
 					if (visible) {
 						this.TreeService.showTreeNodes([node]);

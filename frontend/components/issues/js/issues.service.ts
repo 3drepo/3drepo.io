@@ -663,11 +663,6 @@ export class IssuesService {
 			// This issue does not have a viewpoint, go to default viewpoint
 			this.viewerService.goToExtent();
 		}
-
-		this.treeService.onReady().then(() => {
-			this.treeService.updateModelVisibility(this.treeService.allNodes[0]);
-		});
-
 	}
 
 	public showMultiIds(issue, revision) {
