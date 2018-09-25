@@ -265,9 +265,9 @@ class RiskItemController implements ng.IController {
 
 		// This keeps the colours updated etc
 		this.$scope.$watch("vm.riskData", () => {
-			// if (this.riskData) {
-			// 	risksService.populateRisk(this.riskData);
-			// }
+			if (this.riskData) {
+				this.risksService.populateRisk(this.riskData);
+			}
 		}, true);
 
 		this.$scope.$watch("vm.riskData.level_of_risk", () => {
