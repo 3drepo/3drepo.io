@@ -18,8 +18,6 @@
 import styled from 'styled-components';
 import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
 
-
-
 export const Container = styled.div `
   height: 100%;
 

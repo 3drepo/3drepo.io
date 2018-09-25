@@ -44,12 +44,13 @@ import {
 	DisabledCheckbox
 } from './modelsPermissions.styles';
 
-const PermissionsCell = (props) => {
+const PermissionsCell = ({disabled, checked, onChange}) => {
 	return (
 		<PermissionsCellContainer>
 			<Radio
-				checked={props.checked}
-				disabled={props.disabled}
+				checked={checked}
+				disabled={disabled}
+				onChange={onChange}
 			/>
 		</PermissionsCellContainer>
 	);
@@ -178,6 +179,36 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public hasDisabledPermissions(row) {
+		const {currentUser, selectedModels} = this.state as IState;
+
+		const hasSelectedModels = selectedModels.length;
+		const passBaseValidation = !hasSelectedModels || row.isDisabled || row.isOwner || row.isAdmin || row.isCurrentUser;
+
+		if (passBaseValidation) {
+			return true;
+		}
+
+		if (!passBaseValidation) {
+			if (row.isProjectAdmin) {
+				return true;
+			}
+
+			if (row.isModelAdmin) {
+				return !(currentUser.isAdmin || currentUser.isOwner || currentUser.isProjectAdmin);
+			}
+		}
+	}
+
+	public createPermissionsChangeHandler = (permissions, value) => () => {
+		if (this.props.onPermissionsChange) {
+			this.props.onPermissionsChange([{
+				...permissions,
+				key: value
+			}]);
+		}
+	}
+
 	public getPermissionsTableCells = () => {
 		const permissionCellProps = {
 			width: '110px',
@@ -214,27 +245,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		];
 	}
 
-	public hasDisabledPermissions(row) {
-		const {currentUser, selectedModels} = this.state as IState;
-
-		const hasSelectedModels = selectedModels.length;
-		const passBaseValidation = !hasSelectedModels || row.isDisabled || row.isOwner || row.isAdmin || row.isCurrentUser;
-
-		if (passBaseValidation) {
-			return true;
-		}
-
-		if (!passBaseValidation) {
-			if (row.isProjectAdmin) {
-				return true;
-			}
-
-			if (row.isModelAdmin) {
-				return !(currentUser.isAdmin || currentUser.isOwner || currentUser.isProjectAdmin);
-			}
-		}
-	}
-
 	public getPermissionsTableRows = (permissions = [], selectedUsers = []) => {
 		return permissions.map((userPermissions) => {
 			const data = [
@@ -244,7 +254,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 						value: userPermissions.key,
 						checked: requiredValue === userPermissions.key,
 						disabled: this.hasDisabledPermissions(userPermissions),
-						onChange: this.createPermissionsChangeHandler(requiredValue)
+						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
 					};
 				})
 			];
@@ -264,12 +274,11 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-
+		console.time('did update');
 		const selectedPermissionsChanged = (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) ||
 			prevState.selectedUsers.length !== this.state.selectedUsers.length;
 
 		if (selectedPermissionsChanged) {
-			console.log('permissionsCells did update')
 			changes.permissionsCells = this.getPermissionsTableCells();
 		}
 
@@ -277,7 +286,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
 
 		if (permissionsChanged) {
-			console.log('permissionsRows did update')
 			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
 			changes.permissionsRows = this.getPermissionsTableRows(this.props.permissions, this.state.selectedUsers);
 		}
@@ -285,14 +293,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
-	}
-
-	public handlePermissionsChange = () => {
-		debugger
-	}
-
-	public createPermissionsChangeHandler = (value) => () => {
-		console.log('permissions change', value, this.state.permissionsRows);
+		console.timeEnd('did update');
 	}
 
 	public handleSelectionChange = (field) => (rows) => {
