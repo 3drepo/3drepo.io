@@ -405,4 +405,4 @@ export const ProjectsPermissionsComponent: ng.IComponentOptions = {
 
 export const ProjectsPermissionsComponentModule = angular
 	.module("3drepo")
-	.component("projects", ProjectsPermissionsComponent);
+	.component("projectsOld", ProjectsPermissionsComponent);
