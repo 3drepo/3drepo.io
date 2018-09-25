@@ -69,7 +69,7 @@ class IssuesListController implements ng.IController {
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
-		this.setupBcfImportInput();
+		this.setupBcfImportInput(); // Necessary since angularjs doesnt support ng-change with file typeinputs.
 		this.watchers();
 
 	}
@@ -143,33 +143,19 @@ class IssuesListController implements ng.IController {
 	}
 
 	public setupBcfImportInput() {
+		document.getElementById("bcfImportInput").addEventListener("change", this.onChangeBCFInput.bind(this));
+	}
 
-		if (this.bcfInputHandler) {
-			return;
+	public onChangeBCFInput(event: Event): void {
+		const input: HTMLInputElement = event.currentTarget as HTMLInputElement;
+
+		if (input.files) {
+			this.importBcf({file: input.files[0]});
+		} else {
+			console.error("No file selected");
 		}
 
-		const template = `<input
-							id='bcfImportInput'
-							type='file'
-							style='display: none;'
-							accept='.zip,.bcfzip,.bcf'>`;
-
-		const linkFn = this.$compile(template);
-		const content = linkFn(this.$scope);
-		this.$element.append(content);
-
-		this.$timeout(() => {
-			this.bcfInputHandler = document.getElementById("bcfImportInput");
-			this.bcfInputHandler.addEventListener("change", () => {
-				if (this.bcfInputHandler && this.bcfInputHandler.files) {
-					this.importBcf({file: this.bcfInputHandler.files[0]});
-				} else {
-					console.error("No file selected");
-				}
-				this.bcfInputHandler.value = null; // Reset the change watcher
-			});
-		});
-
+		input.value = null;
 	}
 
 	public handleMenuOptions() {
@@ -208,9 +194,7 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "importBCF":
-				this.$timeout(() => {
-					this.bcfInputHandler.click();
-				});
+				document.getElementById("bcfImportInput").click();
 				break;
 
 			case "filterRole":

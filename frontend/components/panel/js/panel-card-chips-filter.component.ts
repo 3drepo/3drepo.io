@@ -24,6 +24,7 @@ export interface IChip {
 
 class PanelCardChipsFilterController implements ng.IController {
 	public static $inject: string[] = [
+		"$mdDateLocale",
 		"$mdConstant",
 		"$scope",
 		"$element"
@@ -38,7 +39,7 @@ class PanelCardChipsFilterController implements ng.IController {
 	private chipSeparators: any[];
 	private placeHolder: string = "Search";
 
-	constructor(private $mdConstant: any, private $scope: ng.IScope, private $element: any) {
+	constructor(private $mdDateLocale: any, private $mdConstant: any, private $scope: ng.IScope, private $element: any) {
 		this.chipSeparators = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
 		this.watchers();
 	}
@@ -54,7 +55,6 @@ class PanelCardChipsFilterController implements ng.IController {
 				filterInput.value = "";
 
 				this.collapsed = false;
-
 			}
 		});
 	}
@@ -69,13 +69,51 @@ class PanelCardChipsFilterController implements ng.IController {
 		return { name: chip, value: chip, nameType: "", type: "" };
 	}
 
+	private formatChip(chip) {
+		return  chip.nameType + (chip.nameType === "" ? "" : ":" ) + chip.name;
+	}
+
+	private onPaste(event: ClipboardEvent) {
+		const pastedText = event.clipboardData.getData("text");
+		event.preventDefault();
+
+		const newchips = pastedText.split(",").map((c) => {
+			if (c.includes(":")) {
+				const suggestion = this.suggestions.find(this.equalChipLabel.bind(this , c));
+
+				if (suggestion) {
+					return suggestion;
+				}
+
+				// if its not a suggestion it tries to guess if its a date type
+				const name = c.split(":")[1];
+				const value: Date = this.$mdDateLocale.parseDate(name);
+
+				if (  !isNaN( value.getTime())) { // If is a date
+					const nameType = c.split(":")[0];
+					const type = this.snakeCase(nameType);
+					return  {name, nameType, type, value};
+				}
+				return null;
+			}
+
+			return this.transformChip(c);
+		}).filter((c) => c); // filters out the undefined
+
+		this.chips = newchips;
+	}
+
+	private snakeCase(pascalCase: string): string {
+		return pascalCase.replace(/[A-Z]/g, (x) => "_" + x.toLowerCase()).substring(1);
+	}
+
+	private equalChipLabel( label: string, chip: IChip): boolean {
+		return this.formatChip(chip) === label;
+	}
+
 	private querySearch(query: string): IChip[] {
 		const results = query ? (this.suggestions || []).filter( this.matchAutocomplete.bind(this, query)) : [];
 		return results;
-	}
-
-	private formatChip(chip) {
-		return  chip.nameType + (chip.nameType === "" ? "" : ":" ) + chip.name;
 	}
 
 	/**
