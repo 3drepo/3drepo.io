@@ -69,8 +69,9 @@ view.getThumbnail = function (dbColOptions, uid) {
 };
 
 view.updateViewpoint = function (dbCol, sessionId, data, id) {
-	return this.updateAttrs(dbCol, id, data).then(() => {
+	return this.updateAttrs(dbCol, id, data).then((result) => {
 		ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+		return result;
 	});
 };
 
@@ -123,8 +124,9 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
-				return this.updateAttrs(dbCol, id, data).then(() => {
+				return this.updateAttrs(dbCol, id, data).then((result) => {
 					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+					return result;
 				}).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {
