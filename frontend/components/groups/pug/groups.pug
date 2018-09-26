@@ -14,8 +14,9 @@ div.groupsContainer
             layout="column"
             ng-if="vm.groups.length > 0"
             ng-click="vm.selectGroup(group)"
+            filter-text="vm.filterText"
             style="background-color: {{group.highlighted ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
-            ng-repeat="group in vm.groups track by $index")
+            ng-repeat="group in vm.groupsToShow track by $index")
 
             div.groupDetails(layout="row")
                 div.groupMain(layout="row")

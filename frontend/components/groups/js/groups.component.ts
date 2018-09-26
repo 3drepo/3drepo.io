@@ -26,7 +26,6 @@ class GroupsController implements ng.IController {
 		"$scope",
 		"$timeout",
 		"$element",
-
 		"GroupsService",
 		"DialogService",
 		"TreeService",
@@ -38,6 +37,7 @@ class GroupsController implements ng.IController {
 
 	private onContentHeightRequest: any;
 	private groups: any;
+	private groupsToShow: any;
 	private selectedGroup: any;
 	private teamspace: string;
 	private model: string;
@@ -78,6 +78,9 @@ class GroupsController implements ng.IController {
 	public $onInit() {
 		this.customIcons = this.iconsConstant;
 
+		this.groups = [];
+		this.groupsToShow = [];
+
 		this.selectedNodes = [];
 		this.canAddGroup = false;
 		this.dialogThreshold = 0.5;
@@ -110,6 +113,13 @@ class GroupsController implements ng.IController {
 	}
 
 	public watchers() {
+		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
+			if (searchQuery !== undefined || searchQuery !== "") {
+				this.groupsToShow = this.groupsService.groupsFilterSearch(searchQuery);
+			} else {
+				this.groupsToShow = this.groups.concat([]);
+			}
+		});
 
 		this.$scope.$watch(() => {
 			return this.groupsService.state;
@@ -120,6 +130,7 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.groups", () => {
 			this.setContentHeight();
+			this.groupsToShow = this.groups.concat([]);
 		});
 
 		this.$scope.$watchCollection("vm.savedGroupData", () => {
@@ -317,7 +328,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public reselectGroup() {
-		this.groupsService.reselectGroup(this.selectedGroup);
+		this.groupsService.selectGroup(this.selectedGroup);
 	}
 
 	public getRGBA(color: any) {
@@ -495,6 +506,7 @@ export const GroupsComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
+		filterText: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
 		onHideItem: "&",

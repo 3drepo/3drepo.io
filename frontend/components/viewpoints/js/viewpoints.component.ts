@@ -38,6 +38,7 @@ class ViewsController implements ng.IController {
 	private model: string;
 	private onContentHeightRequest: any;
 	private viewpoints: any[];
+	private viewpointsToShow: any[];
 	private toShow: string;
 	private loading: boolean;
 	private selectedView: any;
@@ -59,7 +60,7 @@ class ViewsController implements ng.IController {
 		private ClientConfigService: any,
 		private ViewpointsService: any,
 		private notificationsService: NotificationService
-	) {}
+	) { }
 
 	public $onInit() {
 		this.newView = {};
@@ -71,6 +72,7 @@ class ViewsController implements ng.IController {
 		this.savingView = false;
 		this.canAddView = false;
 		this.viewpoints = [];
+		this.viewpointsToShow = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
 		this.watchers();
@@ -88,6 +90,15 @@ class ViewsController implements ng.IController {
 
 	public watchers() {
 
+		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
+			if (searchQuery !== undefined && searchQuery !== "") {
+				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(searchQuery);
+			} else {
+				this.viewpointsToShow = this.viewpoints;
+			}
+
+		});
+
 		this.$scope.$watch(() => {
 			return this.ViewpointsService.state;
 		}, (newState, oldState) => {
@@ -96,6 +107,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.viewpoints", () => {
 			this.setContentHeight();
+			this.viewpointsToShow = this.viewpoints.concat([]);
 		});
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
@@ -246,7 +258,7 @@ class ViewsController implements ng.IController {
 			contentHeight = (this.viewpoints.length * viewHeight) + actionBar;
 		}
 
-		this.onContentHeightRequest({height: Math.max(contentHeight, minContentHeight) });
+		this.onContentHeightRequest({ height: Math.max(contentHeight, minContentHeight) });
 
 	}
 
@@ -258,6 +270,7 @@ export const ViewpointsComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
+		filterText: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
 		onHideItem: "&",

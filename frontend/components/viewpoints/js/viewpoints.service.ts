@@ -24,7 +24,6 @@ export class ViewpointsService {
 	public static $inject: string[] = [
 		"$timeout",
 		"$q",
-
 		"APIService",
 		"ClipService",
 		"ViewerService"
@@ -48,8 +47,19 @@ export class ViewpointsService {
 	 */
 	public reset() {
 		this.state = {
-			viewpoints : []
+			viewpoints: []
 		};
+	}
+
+	public filterViewpoints(searchQuery: string): any[] {
+		return this.state.viewpoints.filter((view) => {
+			const keep =  this.stringSearch(view.name, searchQuery);
+			if (!keep) {
+				view.selected = false;
+			}
+
+			return keep;
+		});
 	}
 
 	/**
@@ -195,7 +205,7 @@ export class ViewpointsService {
 				viewpoint.viewpoint.view_dir = results[0].view_dir;
 				viewpoint.viewpoint.right = results[0].right;
 				viewpoint.screenshot = {
-					base64 : base64Screenshot
+					base64: base64Screenshot
 				};
 				return viewpoint;
 			});
@@ -227,6 +237,15 @@ export class ViewpointsService {
 				this.ClipService.updateClippingPlane(clipData);
 			}
 		}
+	}
+
+	// Helper  for searching strings
+	private stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 }
 
