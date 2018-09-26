@@ -17,18 +17,25 @@
 
 import * as React from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 import { theme } from '../../styles';
-import { Container } from './projects.styles';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { ProjectsPermissions } from '../projectsPermissions';
 import { ModelsPermissions } from '../modelsPermissions/modelsPermissions.component';
-import { PERMISSIONS_VIEWS } from '../../components/projects-permissions/js/projects-permissions.component';
+import { Container, Options, SelectContainer } from './projects.styles';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+
+export const PERMISSIONS_VIEWS = {
+	PROJECTS: 0,
+	MODELS: 1
+};
 
 interface IProps {
 	projects: any[];
 	users: any[];
-	active?: boolean;
+	onProjectChange?: (project) => void;
 }
 
 interface IState {
@@ -62,7 +69,26 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public onModelSelectionChange = () => {
+/* 		if (selectedModels.length) {
+			const requiredModels = selectedModels.map(({ model }) => model);
+			this.ModelsService
+				.getMulitpleModelsPermissions(this.currentTeamspace.account, requiredModels)
+				.then(({ data: modelsWithPermissions }) => {
+					this.selectedModels = modelsWithPermissions;
+					const permissionsToShow = this.selectedModels.length === 1 ? this.selectedModels[0].permissions : [];
 
+					this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
+				});
+		} else {
+			this.selectedModels = [];
+			this.assignedModelPermissions = this.getExtendedModelPermissions();
+		} */
+	}
+
+	public onProjectChange = (project) => {
+		if (this.props.onProjectChange) {
+			this.props.onProjectChange(project);
+		}
 	}
 
 	public getFooterLabel = (currentView) => {
@@ -71,13 +97,35 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {active} = this.props;
+		const {projects} = this.props;
 		const {currentView, models, modelsPermissions, projectsPermissions} = this.state;
 
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container>
+					<Options
+						container
+						direction="row"
+						justify="space-between"
+						alignContent="center"
+					>
+						<SelectContainer item>
+							<CellSelect
+								items={projects}
+								placeholder="Project"
+								onChange={this.onProjectChange}
+							/>
+						</SelectContainer>
+						<Grid item>
+							<Button
+								color="secondary"
+								onClick={this.handleViewChange}
+							>
+								{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
+							</Button>
+						</Grid>
+					</Options>
 					<UserManagementTab footerLabel={footerLabel}>
 						<>
 							{

@@ -24,4 +24,4 @@ angular
 	.component('projectsPermissions', wrap(ProjectsPermissions, [
 		'permissions', 'onSelectionChange', 'onPermissionsChange'
 	]))
-	.component('projects', wrap(Projects, []));
+	.component('projects', wrap(Projects, ['projects', 'users']));

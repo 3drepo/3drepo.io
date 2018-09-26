@@ -16,5 +16,38 @@
  */
 
 import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
 
-export const Container = styled.div``;
+import * as CellSelect from '../components/customTable/components/cellSelect/cellSelect.styles';
+import * as UserManagementTab from '../components/userManagementTab/userManagementTab.styles';
+
+const OPTIONS_HEIGHT = '100px';
+
+export const Container = styled.div`
+  width: 100%;
+  height: 100%;
+
+  ${UserManagementTab.Container} {
+    height: calc(100% - ${OPTIONS_HEIGHT});
+  }
+`;
+
+export const Options = styled(Grid)`
+  width: 100%;
+  padding: 0;
+  height: ${OPTIONS_HEIGHT};
+
+  & > * {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+  }
+
+  ${CellSelect.StyledSelect} {
+    width: 100%;
+  }
+`;
+
+export const SelectContainer = styled(Grid)`
+  width: 45%;
+`;

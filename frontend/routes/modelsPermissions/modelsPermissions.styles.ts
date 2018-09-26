@@ -23,6 +23,7 @@ import { COLOR, isWindows, isFirefox } from '../../styles';
 
 export const Container = styled(Grid)`
 	min-width: 0;
+	height: 100%;
 `;
 
 export const ModelsContainer = styled(Grid)`

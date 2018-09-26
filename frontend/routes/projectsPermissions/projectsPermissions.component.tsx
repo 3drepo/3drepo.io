@@ -31,6 +31,11 @@ interface IProps {
 	onPermissionsChange: (permissions) => void;
 }
 
+interface IState {
+	currentUser: any;
+	selectedUsers: any[];
+}
+
 export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 	public static getDerivedStateFromProps(nextProps) {
 		return {
@@ -38,8 +43,13 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 		};
 	}
 
+	public state = {
+		currentUser: {},
+		selectedUsers: []
+	};
+
 	public hasDisabledPermissions = (row) => {
-		const {currentUser} = this.state;
+		const {currentUser} = this.state as IState;
 		const passBaseValidation = row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
 
 		if (passBaseValidation) {
