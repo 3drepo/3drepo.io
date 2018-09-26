@@ -193,6 +193,7 @@ interface IState {
 }
 
 export class CustomTable extends React.PureComponent<IProps, IState> {
+
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		const {currentSort, searchText} = prevState;
@@ -215,6 +216,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		searchText: '',
 		selectedRows: []
 	};
+
+	private rowsContainerRef = React.createRef<HTMLElement>();
 
 	public componentDidMount() {
 		const { currentSort, searchFields, searchText } = this.state;
@@ -321,6 +324,12 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public handleSelectByRowClick = (row) => (event) => {
+		if (this.props.onSelectionChange && event.target.tagName !== 'INPUT') {
+			this.handleSelectionChange(row)(event, !row.selected);
+		}
+	}
+
 	/**
 	 * Renders row for each user
 	 */
@@ -383,8 +392,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 */
 	public renderRows = (cells = [], data = [], showCheckbox) => {
 		return data.map((row, index) => {
+			const rowProps = {key: index, clickable: Boolean(showCheckbox)};
 			return (
-				<Row key={index}>
+				<Row {...rowProps}>
 					{
 						showCheckbox ? (
 							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
@@ -415,7 +425,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 							};
 
 							return (
-								<Cell key={cellIndex} {...cellRootProps}>
+								<Cell key={cellIndex} {...cellRootProps} onClick={this.handleSelectByRowClick(row)}>
 									{
 										CellComponent ?
 											(<CellComponent {...cellComponentProps} />) :
@@ -457,7 +467,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					}
 					{this.renderHeader(cells)}
 				</Head>
-				<Body>
+				<Body innerRef={this.rowsContainerRef}>
 					<SimpleBar data-simplebar-x-hidden>
 						{this.renderRows(cells, processedRows, showCheckbox)}
 					</SimpleBar>

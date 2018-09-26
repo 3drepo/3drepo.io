@@ -78,6 +78,7 @@ export const Row = styled.div`
 	display: flex;
 	flex-direction: row;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
+	cursor: ${(props: any) => props.clickable ? 'pointer' : 'initial'};
 `;
 
 export const Head = styled(Row)`
