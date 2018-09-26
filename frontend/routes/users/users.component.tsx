@@ -96,7 +96,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		}
 
 		return {
-			panelKey: nextProps.users !== prevState.rows ? Math.random() : prevState.panelKey
+			panelKey: nextProps.users.length !== prevState.rows.length ? Math.random() : prevState.panelKey
 		};
 	}
 
