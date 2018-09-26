@@ -69,8 +69,9 @@ view.getThumbnail = function (dbColOptions, uid) {
 };
 
 view.updateViewpoint = function (dbCol, sessionId, data, id) {
-	ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
-	return this.updateAttrs(dbCol, id, data);
+	return this.updateAttrs(dbCol, id, data).then(() => {
+		ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+	});
 };
 
 view.updateAttrs = function (dbCol, id, data) {
@@ -122,8 +123,9 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
-				ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
-				return this.updateAttrs(dbCol, id, data).catch((err) => {
+				return this.updateAttrs(dbCol, id, data).then(() => {
+					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+				}).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {
 						return Promise.reject(err);
@@ -145,7 +147,9 @@ view.deleteViewpoint = function (dbCol, idStr, sessionId) {
 			if (!deleteResponse.value) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
-			ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, idStr);
+			if(sessionId) {
+				ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, idStr);
+			}
 		});
 	});
 };
