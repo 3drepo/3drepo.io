@@ -145,21 +145,24 @@ const getSortedRows = (rows, type, column, order) => {
  * @param searchText
  * @returns {Array}
  */
-const getFilteredRows = (rows = [], searchFields, searchText): object[] => {
+const getFilteredRows = ({rows = [], searchFields, searchText}): object[] => {
 	if (!searchText) {
 		return rows;
 	}
 
-	const lowerCasedSearchText = searchText.toLowerCase();
 	return rows.filter((row) => {
 		const requiredFields = pick(row, searchFields);
 		return values(requiredFields).join(' ').toLowerCase()
-			.includes(lowerCasedSearchText);
+			.includes(searchText);
 	});
 };
 
-const getProcessedRows = ({rows, sortBy, sortColumn, order, searchFields, searchText}) => {
-	const filteredRows = getFilteredRows(rows, searchFields, searchText);
+const getProcessedRows = ({rows, sortBy, sortColumn, order, searchFields, searchText, onSearch}) => {
+	const filteredRows = (onSearch || getFilteredRows)({
+		rows,
+		searchFields,
+		searchText: searchText.toLowerCase()
+	});
 	return getSortedRows(filteredRows, sortBy, sortColumn, order);
 };
 
@@ -174,6 +177,7 @@ interface IProps {
 	defaultSort?: number;
 	onSelectionChange?: (selectedRows) => void;
 	renderCheckbox?: (props, data) => React.ReactChild;
+	onSearch?: (props) => any[];
 }
 
 interface IState {
@@ -192,8 +196,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		const {currentSort, searchText} = prevState;
-		const initialSortBy = 0;
-		const newSortBy = !prevState.processedRows.length ? initialSortBy : currentSort.type;
+		const newSortBy = prevState.processedRows.length ? currentSort.type : 0;
 
 		return {
 			searchFields,
@@ -222,7 +225,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				sortColumn: currentSort.activeIndex,
 				order: currentSort.order,
 				searchFields,
-				searchText
+				searchText,
+				onSearch: this.props.onSearch
 			})
 		});
 	}
@@ -243,7 +247,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					sortColumn: currentSort.activeIndex,
 					order: currentSort.order,
 					searchFields,
-					searchText
+					searchText,
+					onSearch: this.props.onSearch
 				})
 			});
 		}
@@ -269,7 +274,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				sortColumn: activeSortIndex,
 				order,
 				searchFields,
-				searchText
+				searchText,
+				onSearch: this.props.onSearch
 			}),
 			currentSort: {
 				activeIndex: activeSortIndex,
@@ -287,7 +293,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 			sortColumn: currentSort.activeIndex,
 			order: currentSort.order,
 			searchFields,
-			searchText
+			searchText,
+			onSearch: this.props.onSearch
 		});
 		this.setState({processedRows, searchText});
 	}

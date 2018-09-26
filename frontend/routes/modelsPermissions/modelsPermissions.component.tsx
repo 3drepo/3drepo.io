@@ -303,6 +303,20 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		this.setState({[field]: rows});
 	}
 
+	public handleModelsSearch = ({rows, searchFields, searchText}) => {
+		if (!searchText) {
+			return rows;
+		}
+
+		const modelsRequired = 'model'.includes(searchText);
+		const federationsRequired = 'federation'.includes(searchText);
+		return rows.filter(({ name, federate }) => {
+			return name.toLowerCase().includes(searchText) ||
+				(modelsRequired && !federate) ||
+				(federationsRequired && federate);
+		});
+	}
+
 	public renderCustomCheckbox = (props, row) => {
 		if (this.state.selectedModels.length && row.data && this.hasDisabledPermissions(row)) {
 			return (
@@ -331,6 +345,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 							cells={MODEL_TABLE_CELLS}
 							rows={modelRows}
 							onSelectionChange={this.handleSelectionChange('selectedModels')}
+							onSearch={this.handleModelsSearch}
 						/>
 						{ !models.length ?
 								<TextOverlay content="Select a project to view the models' list" /> :
