@@ -47,6 +47,7 @@ class ViewsController implements ng.IController {
 	private modelSettings: any;
 	private newView: any;
 	private editSelectedView: any;
+	private filterText: string;
 	private viewpointNameMaxlength: number;
 	private viewsNotifications: NotificationEvents;
 
@@ -72,6 +73,7 @@ class ViewsController implements ng.IController {
 		this.savingView = false;
 		this.canAddView = false;
 		this.viewpoints = [];
+		this.filterText = "";
 		this.viewpointsToShow = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
@@ -91,11 +93,8 @@ class ViewsController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
-			if (searchQuery !== undefined && searchQuery !== "") {
-				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(searchQuery);
-			} else {
-				this.viewpointsToShow = this.viewpoints;
-			}
+			this.filterText = searchQuery;
+			this.filterViewpoints();
 
 		});
 
@@ -107,7 +106,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.viewpoints", () => {
 			this.setContentHeight();
-			this.viewpointsToShow = this.viewpoints.concat([]);
+			this.filterViewpoints();
 		});
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
@@ -260,6 +259,14 @@ class ViewsController implements ng.IController {
 
 		this.onContentHeightRequest({ height: Math.max(contentHeight, minContentHeight) });
 
+	}
+
+	private filterViewpoints() {
+		if (this.filterText !== undefined && this.filterText !== "") {
+			this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.filterText);
+		} else {
+			this.viewpointsToShow = this.viewpoints;
+		}
 	}
 
 }
