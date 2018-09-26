@@ -34,7 +34,7 @@ import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.compo
 import { TableHeading } from './components/tableHeading/tableHeading.component';
 import { CellSelect } from './components/cellSelect/cellSelect.component';
 
-import { Container, Head, Body, Row, Cell, CheckboxCell } from './customTable.styles';
+import { Container, Head, BodyWrapper, Body, Row, Cell, CheckboxCell } from './customTable.styles';
 
 export const TableButton = ({icon, onClick, disabled}) => {
 	return (
@@ -221,6 +221,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { currentSort, searchFields, searchText } = this.state;
+
 		this.setState({
 			processedRows: getProcessedRows({
 				rows: this.props.rows,
@@ -324,8 +325,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleSelectByRowClick = (row) => (event) => {
-		if (this.props.onSelectionChange && event.target.tagName !== 'INPUT') {
+	public handleSelectByRowClick = (row: any) => (event) => {
+		if (this.props.onSelectionChange && !row.disabled && event.target.tagName !== 'INPUT') {
 			this.handleSelectionChange(row)(event, !row.selected);
 		}
 	}
@@ -467,11 +468,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					}
 					{this.renderHeader(cells)}
 				</Head>
-				<Body innerRef={this.rowsContainerRef}>
-					<SimpleBar data-simplebar-x-hidden>
-						{this.renderRows(cells, processedRows, showCheckbox)}
-					</SimpleBar>
-				</Body>
+				<BodyWrapper>
+					<Body innerRef={this.rowsContainerRef}>
+						<SimpleBar data-simplebar-x-hidden>
+							{this.renderRows(cells, processedRows, showCheckbox)}
+						</SimpleBar>
+					</Body>
+				</BodyWrapper>
 			</Container>
 		);
 	}

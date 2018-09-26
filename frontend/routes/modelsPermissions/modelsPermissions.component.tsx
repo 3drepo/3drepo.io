@@ -42,7 +42,8 @@ import {
 	ModelsContainer,
 	PermissionsContainer,
 	PermissionsCellContainer,
-	DisabledCheckbox
+	DisabledCheckbox,
+	OverflowWrapper
 } from './modelsPermissions.styles';
 
 const PermissionsCell = ({disabled, checked, onChange}) => {
@@ -247,20 +248,21 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public getPermissionsTableRows = (permissions = [], selectedUsers = []) => {
 		return permissions.map((userPermissions) => {
+			const disabled = this.hasDisabledPermissions(userPermissions);
 			const data = [
 				pick(userPermissions, ['firstName', 'lastName', 'company', 'user']),
 				...MODEL_ROLES_LIST.map(({key: requiredValue }) => {
 					return {
 						value: userPermissions.key,
 						checked: requiredValue === userPermissions.key,
-						disabled: this.hasDisabledPermissions(userPermissions),
+						disabled,
 						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
 					};
 				})
 			];
 
 			const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
-			return { ...userPermissions, data, selected };
+			return { ...userPermissions, data, selected, disabled };
 		});
 	}
 
@@ -329,6 +331,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		return <CheckboxField {...props} />;
 	}
 
+	private SimpleBarRef = React.createRef<any>();
+
 	public render() {
 		const {models} = this.props;
 		const {modelRows, permissionsRows, permissionsCells, selectedModels} = this.state;
@@ -353,14 +357,16 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 						}
 					</ModelsContainer>
 					<PermissionsContainer item>
-						<SimpleBar data-simplebar-y-hidden>
-							<CustomTable
-								cells={permissionsCells}
-								rows={permissionsRows}
-								onSelectionChange={this.handleSelectionChange('selectedUsers')}
-								renderCheckbox={this.renderCustomCheckbox}
-							/>
-						</SimpleBar>
+						<OverflowWrapper innerRef={this.SimpleBarRef}>
+							<SimpleBar data-simplebar-y-hidden>
+								<CustomTable
+									cells={permissionsCells}
+									rows={permissionsRows}
+									onSelectionChange={this.handleSelectionChange('selectedUsers')}
+									renderCheckbox={this.renderCustomCheckbox}
+								/>
+							</SimpleBar>
+						</OverflowWrapper>
 						{ !selectedModels.length ?
 								<TextOverlay content="Select a model to view the users' permissions" /> :
 								null

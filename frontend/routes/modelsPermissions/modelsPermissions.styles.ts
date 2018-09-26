@@ -19,10 +19,10 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 
 import * as CustomTable from '../components/customTable/customTable.styles';
-import { COLOR } from '../../styles';
+import { COLOR, isWindows, isFirefox } from '../../styles';
 
 export const Container = styled(Grid)`
-	flex: 1;
+	min-width: 0;
 `;
 
 export const ModelsContainer = styled(Grid)`
@@ -42,18 +42,26 @@ export const PermissionsContainer = styled(Grid)`
 	overflow: hidden;
 	position: relative;
 
-	[data-simplebar=init] {
-		min-height: 100%;
-	}
-
 	${CustomTable.Container} {
 		min-width: 780px;
 	}
 
 	${CustomTable.Body} {
-		max-height: calc(28rem - 102px);
 		overflow: hidden;
 		flex: 1;
+	}
+`;
+
+export const OverflowWrapper = styled.div`
+	height: 100%;
+
+	& > [data-simplebar=init] {
+		min-height: 100%;
+		height: inherit !important;
+
+		& > .simplebar-scroll-content > .simplebar-content {
+			height: 100% !important;
+		}
 	}
 `;
 

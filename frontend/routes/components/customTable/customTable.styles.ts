@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { memoize } from 'lodash';
 
-import { COLOR, FONT_WEIGHT } from '../../../styles';
+import { COLOR, FONT_WEIGHT, isWindows, isFirefox } from '../../../styles';
 
 import * as JobItem from '../jobItem/jobItem.styles';
 import * as UserItem from '../userItem/userItem.styles';
@@ -90,10 +90,24 @@ export const Head = styled(Row)`
 `;
 
 export const Body = styled.div`
-	height: 100%;
+		height: inherit;
 	overflow: hidden;
+	position: absolute;
+	width: 100%;
 
 	[data-simplebar='init'] {
 		height: 100%;
 	}
+
+	${isWindows(isFirefox(`
+		.simplebar-content {
+			padding-bottom: 34px !important;
+		}
+	`))}
+`;
+
+export const BodyWrapper = styled.div`
+	width: 100%;
+	position: relative;
+	height: inherit;
 `;
