@@ -30,9 +30,11 @@ module.exports = (options) => {
           use: [{
             loader: 'file-loader',
             options: {
+              outputPath: '../images/',
+              publicPath: 'images/',
               name(file) {
                 if (options.mode === 'development') {
-                  return '[path][name].[ext]'
+                  return '[name].[ext]'
                 }
 
                 return '[hash].[ext]'

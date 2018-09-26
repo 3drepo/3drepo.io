@@ -17,18 +17,34 @@
 
 import * as React from 'react';
 
+import { Highlight } from '../highlight/highlight.component';
 import { Container, Name, Detail } from './modelItem.styles';
 
 interface IProps {
 	name: string;
 	isFederation?: boolean;
+	searchText?: string;
 }
 
-export const ModelItem = ({name, isFederation}: IProps) => {
+export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
+	const highlightProps = {
+		search: searchText || ''
+	};
+
 	return (
 		<Container>
-			<Name>{name}</Name>
-			<Detail>{isFederation ? 'Federation' : 'Model'}</Detail>
+			<Name>
+				<Highlight
+					search={searchText}
+					text={name}
+				/>
+			</Name>
+			<Detail>
+				<Highlight
+					search={searchText}
+					text={isFederation ? 'Federation' : 'Model'}
+				/>
+			</Detail>
 		</Container>
 	);
 };
