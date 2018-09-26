@@ -83,8 +83,8 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemTemplate, disabled, placeholder, value, readOnly } = this.props;
-		const { selectedValue } = this.state;
+		const {items, itemTemplate, disabled, placeholder, value, readOnly} = this.props;
+		const {selectedValue} = this.state;
 		const hasNoOptions = !items.length;
 
 		const options = [];

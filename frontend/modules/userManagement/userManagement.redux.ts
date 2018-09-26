@@ -172,6 +172,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
+	// Jobs
 	[UserManagementTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
 	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess

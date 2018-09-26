@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import {isEqual, isEmpty} from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -32,6 +33,8 @@ export const PERMISSIONS_VIEWS = {
 	MODELS: 1
 };
 
+const getProjectsItems = (projects) => projects.map(({name}) => ({value: name}));
+
 interface IProps {
 	projects: any[];
 	users: any[];
@@ -40,17 +43,21 @@ interface IProps {
 
 interface IState {
 	currentView?: number;
+	projectsItems: any[];
 	projectsPermissions: any[];
 	modelsPermissions: any[];
 	selectedModels: any[];
+	selectedProject: string;
 }
 
 export class Projects extends React.PureComponent<IProps, IState> {
 	public state = {
+		projectsItems: [],
 		projectsPermissions: [],
 		modelsPermissions: [],
 		models: [],
 		selectedModels: [],
+		selectedProject: '',
 		currentView: PERMISSIONS_VIEWS.PROJECTS
 	};
 
@@ -85,9 +92,10 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		} */
 	}
 
-	public onProjectChange = (project) => {
+	public onProjectChange = (projectName) => {
 		if (this.props.onProjectChange) {
-			this.props.onProjectChange(project);
+			this.setState({selectedProject: projectName});
+			this.props.onProjectChange(projectName);
 		}
 	}
 
@@ -96,9 +104,28 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		return `Assign ${type} permissions`;
 	}
 
+	public componentDidMount() {
+		this.setState({
+			projectsItems: getProjectsItems(this.props.projects)
+		});
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as IState;
+
+		const projectsChanged = !isEqual(prevProps.projects, this.props.projects);
+		if (projectsChanged) {
+			changes.projectsItems = getProjectsItems(this.props.projects);
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
 	public render() {
 		const {projects} = this.props;
-		const {currentView, models, modelsPermissions, projectsPermissions} = this.state;
+		const {currentView, models, modelsPermissions, projectsPermissions, selectedProject, projectsItems} = this.state;
 
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
@@ -112,7 +139,8 @@ export class Projects extends React.PureComponent<IProps, IState> {
 					>
 						<SelectContainer item>
 							<CellSelect
-								items={projects}
+								items={projectsItems}
+								value={selectedProject}
 								placeholder="Project"
 								onChange={this.onProjectChange}
 							/>
