@@ -656,6 +656,7 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be hidden.
 	 */
 	public hideTreeNodes(nodes: any[]) {
+		nodes = this.sanitiseNodeArray(nodes);
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
 		this.updateModelVisibility();
 	}
@@ -665,6 +666,7 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be shown.
 	 */
 	public showTreeNodes(nodes: any[]) {
+		nodes = this.sanitiseNodeArray(nodes);
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
 		this.updateModelVisibility();
 	}
@@ -986,7 +988,7 @@ export class TreeService {
 	 * @param nodes	Node to select.
 	 */
 	public deselectNodes(nodes: any[]) {
-
+		nodes = this.sanitiseNodeArray(nodes);
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 			this.setNodeSelection(node, this.SELECTION_STATES.unselected);
@@ -1028,7 +1030,9 @@ export class TreeService {
 		if (!nodes || nodes.length === 0) {
 			return Promise.resolve("No nodes specified");
 		}
-		const state = Date.now();
+
+		nodes = this.sanitiseNodeArray(nodes);
+
 		for (let i = 0; i < nodes.length; i++) {
 			this.setNodeSelection(nodes[i], this.SELECTION_STATES.selected);
 		}
@@ -1263,14 +1267,19 @@ export class TreeService {
 
 		while (processNodes.length > 0) {
 			const node = processNodes.pop();
+
 			this.idToNodeMap[node._id] = node;
+
 			if (node.toggleState === this.VISIBILITY_STATES.invisible) {
 				this.hiddenByDefaultNodes.push(node);
 			}
 			node.defaultState = node.toggleState;
-			if (node.children) {
+			if (node.children && node.children.length > 0) {
 				processNodes = processNodes.concat(node.children);
+			} else if (node.type === "mesh" && (!node.name || node.name === "")) {
+				node.ignore = true;
 			}
+
 		}
 	}
 
@@ -1287,7 +1296,6 @@ export class TreeService {
 	 * @param level the level to start expanding at (generally the root node)
 	 */
 	private expandToNode(nodeToExpand: any) {
-
 		const path = nodeToExpand ?  this.getPath(nodeToExpand._id) : undefined;
 
 		if (path) {
@@ -1382,6 +1390,27 @@ export class TreeService {
 			nodeToExpand.expanded = true;
 		}
 
+	}
+
+	/**
+	 *  Return the array, sanitised - switching any hidden children to
+	 *  it's parent node.
+	 *  @param an array of nodes
+	 *  @return an array of nodes where any hidden node would be replaced by its parents
+	 */
+	private sanitiseNodeArray(nodes: [any]) {
+		return nodes.map((node) => {
+			if (node) {
+				if (node.ignore) {
+					const path = node.path.split("__");
+					return this.getNodeById(path[path.length - 2]);
+
+				} else {
+					return node;
+				}
+			}
+
+		});
 	}
 
 	/**
