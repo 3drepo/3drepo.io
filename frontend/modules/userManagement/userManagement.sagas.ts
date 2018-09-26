@@ -22,6 +22,7 @@ import { UserManagementTypes, UserManagementActions } from './userManagement.red
 import { DialogActions } from '../dialog/dialog.redux';
 
 import { selectCurrentTeamspace } from './userManagement.selectors';
+import { fetchProject } from '../../services/api/projects';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
@@ -131,6 +132,8 @@ export function* getUsersSuggestions({ searchText }) {
 	}
 }
 
+// Jobs
+
 export function* updateJobColor({ job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
@@ -164,6 +167,58 @@ export function* removeJob({ jobId }) {
 	}
 }
 
+// Projects
+export function* fetchProject({ project }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.fetchProject(teamspace, project);
+		yield put(UserManagementActions.fetchProjectSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
+export function* updateProject({ project }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.updateProject(teamspace, project);
+		yield put(UserManagementActions.updateProjectSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
+// Models
+export function* fetchModelPermissions({ model }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.fetchModelPermissions(teamspace, model);
+		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
+export function* fetchMultipleModelsPermissions({ models }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.fetchMulitpleModelsPermissions(teamspace, models);
+		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
+export function* updateMulitpleModelsPermissions({ permissions }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const data = yield API.updateMulitpleModelsPermissions(teamspace, permissions);
+		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
@@ -175,4 +230,9 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
+	yield takeLatest(UserManagementTypes.FETCH_MODEL_PERMISSSIONS, fetchModelPermissions);
+	yield takeLatest(UserManagementTypes.FETCH_MULTIPLE_MODELS_PERMISSSIONS, fetchMultipleModelsPermissions);
+	yield takeLatest(UserManagementTypes.UPDATE_MULTIPLE_MODELS_PERMISSSIONS, updateMulitpleModelsPermissions);
+	yield takeLatest(UserManagementTypes.FETCH_PROJECT, fetchProject);
+	yield takeLatest(UserManagementTypes.UPDATAE_PROJECT, updateProject);
 }

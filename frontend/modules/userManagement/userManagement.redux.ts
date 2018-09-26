@@ -40,7 +40,12 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	removeJob: ['jobId'],
 	removeJobSuccess: ['jobId'],
 	updateJobColor: ['job'],
-	updateJobSuccess: ['job']
+	updateJobSuccess: ['job'],
+	fetchProject: ['project'],
+	updateProjectSuccess: ['project'],
+	fetchModelPermissions: ['model'],
+	fetchMultipleModelsPermissions: ['models'],
+	updateMulitpleModelsPermissions: ['permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -162,6 +167,31 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 	return { ...state, jobs };
 };
 
+export const createProjectSuccess = (state = INITIAL_STATE, { job }) => {
+	const jobs = [...state.jobs, job];
+	return updateJobsColors({ ...state, jobs }, job);
+};
+
+export const updateProjectSuccess = (state = INITIAL_STATE, { job }) => {
+	const jobs = [...state.jobs].map((jobData) => {
+		if (jobData._id === job._id) {
+			return job;
+		}
+
+		return jobData;
+	});
+
+	return updateJobsColors({ ...state, jobs }, job);
+};
+
+export const removeProjectSuccess = (state = INITIAL_STATE, { jobId }) => {
+	const jobs = [...state.jobs].filter(({ _id }) => {
+		return _id !== jobId;
+	});
+
+	return { ...state, jobs };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
 	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
@@ -172,8 +202,14 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
+
 	// Jobs
 	[UserManagementTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
-	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess
+	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
+
+	// Project
+	[UserManagementTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,
+	[UserManagementTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
+	[UserManagementTypes.REMOVE_PROJECT_SUCCESS]: removeProjectSuccess
 });

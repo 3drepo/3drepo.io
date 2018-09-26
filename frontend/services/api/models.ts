@@ -22,7 +22,7 @@ import api from './';
  * @param teamspace
  * @param model
  */
-export const fetchPermissions = (teamspace, model) => {
+export const fetchModelPermissions = (teamspace, model) => {
 	return api.get(`${teamspace}/${model}/permissions`);
 };
 

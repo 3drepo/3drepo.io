@@ -1,5 +1,3 @@
-
-
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -25,7 +23,7 @@ import api from './';
  * @param project
  * @param options
  */
-export const fetchProject = (teamspace, project, options) => {
+export const fetchProject = (teamspace, project, options = {}) => {
 	return api.get(`${teamspace}/projects/${project}`, options);
 };
 
