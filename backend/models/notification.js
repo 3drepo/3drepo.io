@@ -21,16 +21,26 @@ const utils = require("../utils");
 const uuid = require("node-uuid");
 
 module.exports = {
-	constants:{
+	types:{
 		ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
 		ISSUE_CREATED : "ISSUE_CREATED"
 	},
 
+	/**
+	 * Creates a notification in the database
+	 *
+	 * @param {string} username The username of the account thats's gonna receive the notification
+	 * @param {string} teamSpace The teamspace that is related to this notification
+	 * @param {string} modelId The modelId that is related to this notification
+	 * @param {string} type	The type of notification: should be one of the notifications that is in the types constants
+	 * @param {Object} data The particular data for notification. should be relevant data for the particular type of notification.
+	 * @returns {Promise} Returns a promise with the recently created notification
+	 */
 	createNotification(username, teamSpace, modelId, type, data) {
 		const _id = uuid.v1();
 
 		return db.getCollection("notifications", username).then((collection) => {
-			const notification = {teamSpace, modelId, type, data, _id:utils.stringToUUID(_id)};
+			const notification = {_id:utils.stringToUUID(_id), read:false, teamSpace, modelId, type, data };
 			return collection.insertOne(notification);
 		}).then((o) => Object.assign(o.ops[0], {_id}));
 	}

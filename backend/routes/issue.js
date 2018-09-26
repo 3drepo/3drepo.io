@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
-
+const _ = require("lodash");
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
@@ -52,10 +52,10 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
-router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification, responseCodes.onSuccessfulOperation);
+router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, responseCodes.onSuccessfulOperation);
 
 router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
-router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification, responseCodes.onSuccessfulOperation);
+router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
@@ -83,7 +83,7 @@ function updateIssue(req, res, next) {
 	let action;
 
 	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
-		req.oldDataModel = issue;
+		req.oldDataModel = _.cloneDeep(issue.toObject());
 
 		if(!issue) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });

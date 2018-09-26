@@ -100,6 +100,7 @@ function checkPermissions(permsRequest) {
 			const account = req.params.account;
 			const model = req.params.model;
 			const project = req.params.project;
+
 			return checkPermissionsHelper(username, account, project, model, permsRequest, getPermissionsAdapter).then((data) => {
 				if (data.userPermissions) {
 					req.session.user.permissions = data.userPermissions;
@@ -145,4 +146,38 @@ function checkMultiplePermissions(permsRequest) {
 			});
 	};
 }
-module.exports = { checkPermissions, checkPermissionsHelper, checkMultiplePermissions};
+
+function hasReadAccessToModelHelper(username, account, model) {
+	return checkPermissionsHelper(
+		username,
+		account,
+		"",
+		model,
+		[C.PERM_VIEW_MODEL],
+		getPermissionsAdapter
+	).then(data => data.granted);
+}
+
+function hasWriteAccessToModelHelper(username, account, model) {
+	return checkPermissionsHelper(
+		username,
+		account,
+		"",
+		model,
+		[C.PERM_CREATE_ISSUE],
+		getPermissionsAdapter
+	).then(data => data.granted);
+}
+
+function isAccountAdminHelper(username, account, model) {
+	return checkPermissionsHelper(
+		username,
+		account,
+		"",
+		model,
+		[C.PERM_TEAMSPACE_ADMIN],
+		getPermissionsAdapter
+	).then(data => data.granted);
+}
+
+module.exports = { checkPermissions, checkPermissionsHelper, checkMultiplePermissions, hasReadAccessToModelHelper, hasWriteAccessToModelHelper, isAccountAdminHelper};
