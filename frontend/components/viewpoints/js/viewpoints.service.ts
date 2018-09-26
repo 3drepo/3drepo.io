@@ -100,9 +100,13 @@ export class ViewpointsService {
 		this.state.viewpoints.push(view);
 	}
 
-	public updateDeletedViewpoint(view) {
-		const viewToDelete = this.state.viewpoints.indexOf(view);
-		this.state.viewpoints.splice(viewToDelete, 1);
+	public updateDeletedViewpoint(viewId) {
+		for (let i = 0; i < this.state.viewpoints.length; ++i) {
+			if (viewId === this.state.viewpoints[i]._id) {
+				this.state.viewpoints.splice(i, 1);
+				break;
+			}
+		}
 	}
 
 	/**
@@ -212,14 +216,16 @@ export class ViewpointsService {
 				this.ViewerService.setCamera(view.viewpoint);
 			}
 
-			const clipData = {
-				clippingPlanes: view.clippingPlanes,
-				fromClipPanel: false,
-				account: teamspace,
-				model
-			};
+			if (view.clippingPlanes) {
+				const clipData = {
+					clippingPlanes: view.clippingPlanes,
+					fromClipPanel: false,
+					account: teamspace,
+					model
+				};
 
-			this.ClipService.updateClippingPlane(clipData);
+				this.ClipService.updateClippingPlane(clipData);
+			}
 		}
 	}
 }

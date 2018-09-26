@@ -344,7 +344,7 @@ groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 	});
 };
 
-// Group Update with Event 
+// Group Update with Event
 groupSchema.methods.updateGroup = function (dbCol, sessionId, data) {
 	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
 	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));
@@ -420,11 +420,11 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 			return data;
 		}
 			, (err) => {
-				// remove the recently saved new group as update attributes failed
-				return Group.deleteGroup(dbCol, group._id).then(() => {
-					return Promise.reject(err);
-				});
+			// remove the recently saved new group as update attributes failed
+			return Group.deleteGroup(dbCol, group._id).then(() => {
+				return Promise.reject(err);
 			});
+		});
 	});
 };
 

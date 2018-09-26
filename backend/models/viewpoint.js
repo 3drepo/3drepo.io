@@ -134,7 +134,8 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 	});
 };
 
-view.deleteViewpoint = function (dbCol, id, sessionId) {
+view.deleteViewpoint = function (dbCol, idStr, sessionId) {
+	let id = idStr;
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
@@ -144,7 +145,7 @@ view.deleteViewpoint = function (dbCol, id, sessionId) {
 			if (!deleteResponse.value) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
 			}
-			ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, id);
+			ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, idStr);
 		});
 	});
 };
