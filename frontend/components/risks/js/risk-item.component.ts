@@ -242,7 +242,7 @@ class RiskItemController implements ng.IController {
 		window.removeEventListener("popstate", this.popStateHandler);
 		window.removeEventListener("beforeunload", this.refreshHandler);
 
-		this.viewerService.removeUnsavedPin();
+		this.risksService.removeUnsavedPin();
 
 		this.aboutToBeDestroyed = true;
 		if (this.comment) {
@@ -250,7 +250,7 @@ class RiskItemController implements ng.IController {
 		}
 		// Get out of pin drop mode
 
-		this.viewerService.pin.pinDropMode = null;
+		this.risksService.setPinDropMode(false);
 		this.measureService.setDisabled(false);
 		this.clearPin = true;
 
@@ -270,7 +270,8 @@ class RiskItemController implements ng.IController {
 			}
 		}, true);
 
-		this.$scope.$watch("vm.riskData.level_of_risk", () => {
+		this.$scope.$watch("vm.riskData.level_of_risk", (levelOfRisk) => {
+			this.risksService.setLevelOfRisk(levelOfRisk);
 			this.risksService.showRiskPins();
 		}, true);
 
@@ -476,11 +477,11 @@ class RiskItemController implements ng.IController {
 		case "pin":
 
 			if (selected) {
-				this.viewerService.pin.pinDropMode = "risk";
+				this.risksService.setPinDropMode(true);
 				this.measureService.deactivateMeasure();
 				this.measureService.setDisabled(true);
 			} else {
-				this.viewerService.pin.pinDropMode = null;
+				this.risksService.setPinDropMode(false);
 				this.measureService.setDisabled(false);
 			}
 			break;
@@ -735,7 +736,7 @@ class RiskItemController implements ng.IController {
 				this.risksService.setSelectedRisk(this.riskData, true, this.revision);
 
 				// Hide some actions
-				this.viewerService.pin.pinDropMode = null;
+				this.risksService.setPinDropMode(false);
 
 				this.submitDisabled = true;
 				this.setContentHeight();

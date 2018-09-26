@@ -33,17 +33,20 @@ export class RisksService {
 		"$timeout",
 		"$filter",
 
-		"ClientConfigService",
 		"APIService",
-		"TreeService",
 		"AuthService",
+		"ClientConfigService",
 		"ClipService",
-		"ViewerService",
-		"PanelService"
+		"PanelService",
+		"TreeService",
+		"ViewerService"
 	];
 
 	public state: any;
 	private groupsCache: any;
+	private levelOfRisk: number;
+	private pin: any;
+	private newPinId: string;
 
 	constructor(
 		private $q,
@@ -51,19 +54,57 @@ export class RisksService {
 		private $timeout,
 		private $filter,
 
-		private clientConfigService: any,
 		private apiService: APIService,
-		private treeService: TreeService,
 		private authService: AuthService,
+		private clientConfigService: any,
 		private clipService: ClipService,
-		private viewerService: ViewerService,
-		private panelService: PanelService
+		private panelService: PanelService,
+		private treeService: TreeService,
+		private viewerService: ViewerService
 	) {
 		this.reset();
+		this.pin = {
+			pinDropMode: null
+		};
+		this.newPinId = "newRiskPinId";
+	}
+
+	public handlePickPointEvent(event, account, model) {
+
+		if (
+			event.value.hasOwnProperty("id") &&
+			this.pin.pinDropMode
+		) {
+
+			this.removeUnsavedPin();
+
+			const trans = event.value.trans;
+			let position = event.value.position;
+			const normal = event.value.normal;
+
+			if (trans) {
+				position = trans.inverse().multMatrixPnt(position);
+			}
+
+			const data = {
+				account,
+				colours: this.getLevelOfRiskColor(this.levelOfRisk, true),
+				id: this.newPinId,
+				type: "risk",
+				model,
+				pickedNorm: normal,
+				pickedPos: position,
+				selectedObjectId: event.value.id
+			};
+
+			this.viewerService.addPin(data);
+			this.viewerService.setPin({data});
+		}
 	}
 
 	public reset() {
 		this.groupsCache = {};
+		this.levelOfRisk = 0;
 		this.state = {
 			heights : {
 				infoHeight : 135,
@@ -303,6 +344,13 @@ export class RisksService {
 		}
 	}
 
+	public setLevelOfRisk(levelOfRisk: any) {
+		this.levelOfRisk = parseInt(levelOfRisk);
+		if (!isNaN(this.levelOfRisk)) {
+			this.viewerService.changePinColours({ id: this.newPinId, colours: this.getLevelOfRiskColor(this.levelOfRisk, true) });
+		}
+	}
+
 	public calculateLevelOfRisk(likelihood: string, consequence: string): number {
 		let levelOfRisk = 0;
 
@@ -325,6 +373,35 @@ export class RisksService {
 		return levelOfRisk;
 	}
 
+	public getLevelOfRiskColor(levelOfRisk: number, selected: boolean = false) {
+		const levelOfRiskColors = {
+			4: {
+				pinColor: Pin.pinColours.maroon,
+				selectedColor: Pin.pinColours.red
+			},
+			3: {
+				pinColor: Pin.pinColours.darkOrange,
+				selectedColor: Pin.pinColours.orange
+			},
+			2: {
+				pinColor: Pin.pinColours.lemonChiffon,
+				selectedColor: Pin.pinColours.lightYellow
+			},
+			1: {
+				pinColor: Pin.pinColours.limeGreen,
+				selectedColor: Pin.pinColours.lightGreen
+			},
+			0: {
+				pinColor: Pin.pinColours.green,
+				selectedColor: Pin.pinColours.medSeaGreen
+			}
+		};
+
+		return (selected) ?
+			levelOfRiskColors[levelOfRisk].selectedColor :
+			levelOfRiskColors[levelOfRisk].pinColor;
+	}
+
 	public showRiskPins() {
 
 		// TODO: This is still inefficent and unclean
@@ -339,35 +416,10 @@ export class RisksService {
 			if (this.state.risksCardOptions.showPins && show !== undefined && pinPosition) {
 
 				const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
-				const levelOfRiskColors = {
-					4: {
-						pinColor: Pin.pinColours.maroon,
-						selectedColor: Pin.pinColours.red
-					},
-					3: {
-						pinColor: Pin.pinColours.darkOrange,
-						selectedColor: Pin.pinColours.orange
-					},
-					2: {
-						pinColor: Pin.pinColours.lemonChiffon,
-						selectedColor: Pin.pinColours.lightYellow
-					},
-					1: {
-						pinColor: Pin.pinColours.limeGreen,
-						selectedColor: Pin.pinColours.lightGreen
-					},
-					0: {
-						pinColor: Pin.pinColours.green,
-						selectedColor: Pin.pinColours.medSeaGreen
-					}
-				};
-
 				const isSelectedPin = this.state.selectedRisk &&
 									risk._id === this.state.selectedRisk._id;
 
-				const pinColor = (isSelectedPin) ?
-					levelOfRiskColors[levelOfRisk].selectedColor :
-					levelOfRiskColors[levelOfRisk].pinColor;
+				const pinColor = this.getLevelOfRiskColor(levelOfRisk, isSelectedPin);
 
 				this.viewerService.addPin({
 					id: risk._id,
@@ -942,8 +994,12 @@ export class RisksService {
 		return statusIcon;
 	}
 
+	public setPinDropMode(on: boolean) {
+		this.pin.pinDropMode = on;
+	}
+
 	public removeUnsavedPin() {
-		this.viewerService.removePin({id: this.viewerService.newPinId });
+		this.viewerService.removePin({id: this.newPinId });
 		this.viewerService.setPin({data: null});
 	}
 
