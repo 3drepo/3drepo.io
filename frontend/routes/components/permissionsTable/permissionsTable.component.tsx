@@ -192,20 +192,22 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 
 	public getTableRows = (permissions = [], roles = [], selectedUsers = []) => {
 		return permissions.map((userPermissions) => {
+			const disabled = this.hasDisabledPermissions(userPermissions);
+
 			const data = [
 				pick(userPermissions, ['firstName', 'lastName', 'company', 'user']),
 				...roles.map(({ key: requiredValue }) => {
 					return {
 						value: userPermissions.key,
 						checked: requiredValue === userPermissions.key,
-						disabled: this.hasDisabledPermissions(userPermissions),
+						disabled,
 						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
 					};
 				})
 			];
 
 			const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
-			return { ...userPermissions, data, selected };
+			return { ...userPermissions, data, selected, disabled };
 		});
 	}
 

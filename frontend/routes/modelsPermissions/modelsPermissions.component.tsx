@@ -42,7 +42,7 @@ import {
 	Container,
 	ModelsContainer,
 	PermissionsContainer,
-    OverflowWrapper
+	OverflowWrapper
 } from './modelsPermissions.styles';
 
 const MODEL_TABLE_CELLS = [{
@@ -152,18 +152,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderCustomCheckbox = (props, row) => {
-		if (this.state.selectedModels.length && row.data && this.hasDisabledPermissions(row)) {
-			return (
-				<AdminIcon
-					isTeamspaceAdmin={row.isAdmin}
-					isProjectAdmin={row.isProjectAdmin}
-				/>
-			);
-		}
-		return <CheckboxField {...props} />;
-	}
-
 	public render() {
 		const {models, permissions} = this.props;
 		const {modelRows, selectedModels} = this.state;
@@ -190,17 +178,17 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 					<PermissionsContainer item>
 						<OverflowWrapper>
 							<SimpleBar data-simplebar-y-hidden>
-                                <PermissionsTable
-                                    permissions={permissions}
-                                    roles={MODEL_ROLES_LIST}
-                                    onSelectionChange={this.handleSelectionChange('selectedUsers')}
-                                    onPermissionsChange={this.props.onPermissionsChange}
-                                    rowStateInterceptor={this.hasDisabledPermissions}
-                                />
-						</SimpleBar>
-                        </OverflowWrapper>
+								<PermissionsTable
+									permissions={permissions}
+									roles={MODEL_ROLES_LIST}
+									onSelectionChange={this.handleSelectionChange('selectedUsers')}
+									onPermissionsChange={this.props.onPermissionsChange}
+									rowStateInterceptor={this.hasDisabledPermissions}
+								/>
+							</SimpleBar>
+						</OverflowWrapper>
 						{
-						    !selectedModels.length ?
+							!selectedModels.length ?
 								<TextOverlay content="Select a model to view the users' permissions" /> :
 								null
 						}
