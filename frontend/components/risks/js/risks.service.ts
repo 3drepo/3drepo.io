@@ -986,10 +986,10 @@ export class RisksService {
 				statusIcon.icon = "lens";
 				break;
 			case "accepted":
-				statusIcon.icon = "adjust";
+				statusIcon.icon = "check_circle";
 				break;
 			case "":
-				statusIcon.icon = "check_circle";
+				statusIcon.icon = "adjust";
 				statusIcon.colour = "#0C2F54";
 				break;
 		}
