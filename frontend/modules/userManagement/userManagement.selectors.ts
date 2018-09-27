@@ -77,12 +77,12 @@ export const selectCurrentProject = createSelector(
 	selectUserManagementDomain, (state) => state.currentProject
 );
 
-export const selectModels = createSelector(
-	selectUserManagementDomain, (state) => state.models
-);
-
 export const selectExtendedProjectPermissions = createSelector(
 	selectUsers,
 	selectCurrentProject,
 	getExtendedProjectPermissions
+);
+
+export const selectModels = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject.models || []
 );

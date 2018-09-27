@@ -24,7 +24,7 @@ import Grid from '@material-ui/core/Grid';
 import { theme } from '../../styles';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { ProjectsPermissions } from '../projectsPermissions';
-import { ModelsPermissions } from '../modelsPermissions/modelsPermissions.component';
+import { ModelsPermissions } from '../modelsPermissions';
 import { Container, Options, SelectContainer } from './projects.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
@@ -169,7 +169,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 									<ModelsPermissions
 										onSelectionChange={this.onModelSelectionChange}
 										onPermissionsChange={this.onPermissionsChange}
-										models={models}
 										permissions={modelsPermissions}
 									/>
 								)

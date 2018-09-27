@@ -16,7 +16,7 @@
  */
 
 import {createActions, createReducer} from 'reduxsauce';
-import {pick, first} from 'lodash';
+import {pick, first, get} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
@@ -197,6 +197,8 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 };
 
 export const setProject = (state = INITIAL_STATE, { project }) => {
+	const models = get(state.projects.find(({_id}) => project._id === _id), 'models', []);
+	project.models = [...models];
 	return {...state, currentProject: project};
 };
 
