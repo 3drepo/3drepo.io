@@ -20,9 +20,19 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Projects } from './projects.component';
+import { selectCurrentUser } from '../../modules/teamspace';
+import {
+	UserManagementActions,
+	selectProjects
+} from '../../modules/userManagement';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	currentUser: selectCurrentUser,
+	projects: selectProjects
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Projects);

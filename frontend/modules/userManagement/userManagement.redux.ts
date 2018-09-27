@@ -42,10 +42,11 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJobColor: ['job'],
 	updateJobSuccess: ['job'],
 	fetchProject: ['project'],
+	updateProject: ['project'],
 	updateProjectSuccess: ['project'],
 	fetchModelPermissions: ['model'],
 	fetchMultipleModelsPermissions: ['models'],
-	updateMulitpleModelsPermissions: ['permissions']
+	updateMultipleModelsPermissions: ['permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -209,7 +210,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
 
 	// Project
-	[UserManagementTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,
-	[UserManagementTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
-	[UserManagementTypes.REMOVE_PROJECT_SUCCESS]: removeProjectSuccess
+	[UserManagementTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess
 });

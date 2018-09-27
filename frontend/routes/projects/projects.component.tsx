@@ -36,6 +36,7 @@ export const PERMISSIONS_VIEWS = {
 const getProjectsItems = (projects) => projects.map(({name}) => ({value: name}));
 
 interface IProps {
+	currentUser: any;
 	projects: any[];
 	users: any[];
 	onProjectChange?: (project) => void;
@@ -105,6 +106,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
+		debugger
 		this.setState({
 			projectsItems: getProjectsItems(this.props.projects)
 		});

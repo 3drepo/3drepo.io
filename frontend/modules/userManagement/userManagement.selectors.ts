@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
 
 export const selectUserManagementDomain = (state) => Object.assign({}, state.userManagement);
 
@@ -35,18 +36,28 @@ export const selectJobsColors = createSelector(
 	selectUserManagementDomain, (state) => state.jobsColors
 );
 
-export const selectProjects = createSelector(
-	selectUserManagementDomain, (state) => state.projects
-);
-
 export const selectIsPending = createSelector(
 	selectUserManagementDomain, (state) => state.isPending
 );
 
-export const selectCurrentTeamspace = createSelector(
+export const selectCurrentTeamspaceName = createSelector(
 	selectUserManagementDomain, (state) => state.teamspace
+);
+
+export const selectCurrentTeamspace = createSelector(
+	selectCurrentUserTeamspaces,
+	selectUserManagementDomain,
+	(teamspaces, state) => teamspaces.find(({account}) => account === state.selectedTeamspace)
+);
+
+export const selectProjects = createSelector(
+	selectUserManagementDomain, (state) => state.projects
 );
 
 export const selectUsersSuggestions = createSelector(
 	selectUserManagementDomain, (state) => state.usersSuggestions
+);
+
+export const selectModels = createSelector(
+	selectUserManagementDomain, (state) => state.models
 );

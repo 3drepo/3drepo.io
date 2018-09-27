@@ -26,10 +26,10 @@ export const fetchModelPermissions = (teamspace, model) => {
 	return api.get(`${teamspace}/${model}/permissions`);
 };
 
-export const fetchMulitpleModelsPermissions = (teamspace, models) => {
+export const fetchMultipleModelsPermissions = (teamspace, models) => {
 	return api.get(`${teamspace}/models/permissions?models=${models.join(',')}`);
 };
 
-export const updateMulitpleModelsPermissions = (teamspace, permissionsList) => {
+export const updateMultipleModelsPermissions = (teamspace, permissionsList) => {
 	return api.post(`${teamspace}/models/permissions`, permissionsList);
 };
