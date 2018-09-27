@@ -163,10 +163,7 @@ risk.createRisk = function(dbCol, newRisk) {
 			}
 
 			if (newRisk.viewpoint.screenshot) {
-				newRisk.viewpoint.screenshot = {
-					content: new Buffer.from(newRisk.viewpoint.screenshot, "base64"),
-					flag: 1
-				};
+				newRisk.viewpoint.screenshot = utils.createScreenshotEntry(newRisk.viewpoint.screenshot);
 
 				return utils.resizeAndCropScreenshot(newRisk.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
 					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
