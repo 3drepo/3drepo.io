@@ -60,6 +60,7 @@ class GroupsController implements ng.IController {
 	private customIcons: any;
 	private lastColorOverride: any;
 	private selectedNodes: any[];
+	private filterText: string;
 	private groupsNotifications: NotificationEvents;
 
 	constructor(
@@ -114,11 +115,8 @@ class GroupsController implements ng.IController {
 
 	public watchers() {
 		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
-			if (searchQuery !== undefined || searchQuery !== "") {
-				this.groupsToShow = this.groupsService.groupsFilterSearch(searchQuery);
-			} else {
-				this.groupsToShow = this.groups.concat([]);
-			}
+			this.filterText = searchQuery;
+			this.filterGroups();
 		});
 
 		this.$scope.$watch(() => {
@@ -130,7 +128,7 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.groups", () => {
 			this.setContentHeight();
-			this.groupsToShow = this.groups.concat([]);
+			this.filterGroups();
 		});
 
 		this.$scope.$watchCollection("vm.savedGroupData", () => {
@@ -496,7 +494,13 @@ class GroupsController implements ng.IController {
 		this.justUpdated = false;
 	}
 
-	/***/
+	private filterGroups() {
+		if (this.filterText !== undefined && this.filterText !== "") {
+			this.groupsToShow = this.groupsService.groupsFilterSearch(this.filterText);
+		} else {
+			this.groupsToShow = this.groups;
+		}
+	}
 }
 
 export const GroupsComponent: ng.IComponentOptions = {
