@@ -331,8 +331,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		return <CheckboxField {...props} />;
 	}
 
-	private SimpleBarRef = React.createRef<any>();
-
 	public render() {
 		const {models} = this.props;
 		const {modelRows, permissionsRows, permissionsCells, selectedModels} = this.state;
@@ -357,7 +355,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 						}
 					</ModelsContainer>
 					<PermissionsContainer item>
-						<OverflowWrapper innerRef={this.SimpleBarRef}>
+						<OverflowWrapper>
 							<SimpleBar data-simplebar-y-hidden>
 								<CustomTable
 									cells={permissionsCells}

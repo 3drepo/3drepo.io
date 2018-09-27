@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matches, cond, orderBy, pick, values, stubTrue, first, isEqual, omit, identity } from 'lodash';
+import { matchesProperty, cond, orderBy, pick, values, stubTrue, first, isEqual, omit, identity } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -125,9 +125,9 @@ export const TABLE_DATA_TYPES = {
 const getSortedRows = (rows, type, column, order) => {
 	const { USER, JOB, NAME } = CELL_TYPES;
 	const sort = cond([
-		[matches({ type: USER }), sortByName.bind(null, rows)],
-		[matches({ type: NAME }), sortByName.bind(null, rows)],
-		[matches({ type: JOB }), sortByJob.bind(null, rows)],
+		[matchesProperty('type', USER), sortByName.bind(null, rows)],
+		[matchesProperty('type', NAME), sortByName.bind(null, rows)],
+		[matchesProperty('type', JOB), sortByJob.bind(null, rows)],
 
 		// Default action
 		[stubTrue, (options) => {
@@ -157,7 +157,10 @@ const getFilteredRows = ({rows = [], searchFields, searchText}): object[] => {
 	});
 };
 
-const getProcessedRows = ({rows, sortBy, sortColumn, order, searchFields, searchText, onSearch}) => {
+const getProcessedRows = ({rows = [], sortBy, sortColumn, order, searchFields, searchText, onSearch}) => {
+	if (!rows.length) {
+		return [];
+	}
 	const filteredRows = (onSearch || getFilteredRows)({
 		rows,
 		searchFields,
@@ -197,11 +200,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		const {currentSort, searchText} = prevState;
-		const newSortBy = prevState.processedRows.length ? currentSort.type : 0;
 
 		return {
-			searchFields,
-			sortBy: newSortBy
+			searchFields
 		};
 	}
 
@@ -221,11 +222,16 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { currentSort, searchFields, searchText } = this.state;
+		const initialSortType = (this.props.cells[0] || {}).type;
 
 		this.setState({
+			currentSort: {
+				...this.state.currentSort,
+				type: initialSortType
+			},
 			processedRows: getProcessedRows({
 				rows: this.props.rows,
-				sortBy: currentSort.type,
+				sortBy: initialSortType,
 				sortColumn: currentSort.activeIndex,
 				order: currentSort.order,
 				searchFields,
@@ -236,8 +242,6 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const stateChanges = {};
-
 		const rowsChanged = prevProps.rows.length !== this.props.rows.length || !isEqual(this.props.rows, prevProps.rows);
 		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;

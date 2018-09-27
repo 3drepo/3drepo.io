@@ -108,7 +108,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
-			return { ...job, data };
+			return { ...job, name: job._id, data };
 		});
 	}
 
