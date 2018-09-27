@@ -238,15 +238,21 @@ issues-list #issuesListItemInfo {
 }
 
 issues-list #issuesListItemInfo label,
+issues-list #issuesListItemDate label,
 issues-list #issuesListItemDescription label {
   color: rgba(0, 0, 0, 0.5);
   word-wrap: break-word;
 }
 
+issues-list #issuesListItemDate label,
 issues-list #issuesListItemDescription {
-  height: 60px;
   font-size: 13px;
 }
+
+issues-list #issuesListItemDescription {
+  height: 60px;
+}
+
 issues-list #issuesListItemDescription label {
   overflow: hidden;
   display: -webkit-box;

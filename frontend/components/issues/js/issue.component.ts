@@ -209,7 +209,7 @@ class IssueController implements ng.IController {
 		window.removeEventListener("popstate", this.popStateHandler);
 		window.removeEventListener("beforeunload", this.refreshHandler);
 
-		this.viewerService.removeUnsavedPin();
+		this.issuesService.removeUnsavedPin();
 
 		this.aboutToBeDestroyed = true;
 		if (this.comment) {
@@ -221,7 +221,7 @@ class IssueController implements ng.IController {
 		}
 		// Get out of pin drop mode
 
-		this.viewerService.pin.pinDropMode = false;
+		this.issuesService.setPinDropMode(false);
 		this.measureService.setDisabled(false);
 		this.clearPin = true;
 
@@ -537,9 +537,6 @@ class IssueController implements ng.IController {
 							if (comment && comment.action && comment.action.property) {
 								this.issuesService.convertActionCommentToText(comment, this.topic_types);
 							}
-							if (comment && comment.created) {
-								comment.timeStamp = this.issuesService.getPrettyTime(comment.created);
-							}
 						});
 
 						// Update last but one comment in case it was "sealed"
@@ -667,11 +664,11 @@ class IssueController implements ng.IController {
 		case "pin":
 
 			if (selected) {
-				this.viewerService.pin.pinDropMode = true;
+				this.issuesService.setPinDropMode(true);
 				this.measureService.deactivateMeasure();
 				this.measureService.setDisabled(true);
 			} else {
-				this.viewerService.pin.pinDropMode = false;
+				this.issuesService.setPinDropMode(false);
 				this.measureService.setDisabled(false);
 			}
 			break;
@@ -1081,7 +1078,6 @@ class IssueController implements ng.IController {
 			guid: comment.guid,
 			comment: comment.comment,
 			owner: comment.owner,
-			timeStamp: this.issuesService.getPrettyTime(comment.created),
 			viewpoint: comment.viewpoint,
 			action: comment.action
 		});
@@ -1244,10 +1240,6 @@ class IssueController implements ng.IController {
 			if (!!c.action) {
 				this.issuesService.convertActionCommentToText(c, undefined);
 				issue.comments[index] = c;
-			}
-
-			if (c.hasOwnProperty("created")) {
-				c.timeStamp = this.issuesService.getPrettyTime(c.created);
 			}
 
 		});

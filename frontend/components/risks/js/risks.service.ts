@@ -999,6 +999,7 @@ export class RisksService {
 
 	public setPinDropMode(on: boolean) {
 		this.pin.pinDropMode = on;
+		this.viewerService.pin.pinDropMode = on;
 	}
 
 	public removeUnsavedPin() {

@@ -251,6 +251,7 @@ risks-list #risksListItemDescription label {
 risks-list #risksListItemDescription {
   height: 60px;
 }
+
 risks-list #risksListItemDescription label {
   overflow: hidden;
   display: -webkit-box;
