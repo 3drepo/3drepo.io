@@ -73,6 +73,7 @@ export class StateManagerService {
 			changing: true
 		};
 
+		console.log("!!! state manager init");
 		this.changedState = {};
 		this.structure  = ClientConfigService.structure;
 		this.changed = {};
@@ -318,7 +319,6 @@ export class StateManagerService {
 			delete this.state[letName];
 		} else {
 			if (this.state[letName] !== value) {
-				this.state.changing = true;
 				this.changedState[letName] = value;
 			}
 		}
@@ -360,6 +360,7 @@ export class StateManagerService {
 
 		// TODO: Do we have to use $timeout? :(
 		this.$timeout(() => {
+			console.log("!!!! Setting changing to false");
 			this.state.changing = false;
 		});
 	}

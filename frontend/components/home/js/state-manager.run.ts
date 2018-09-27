@@ -51,7 +51,7 @@ function StateManagerRun(
 	};
 
 	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
-
+		console.log("!!!! initiate change");
 		StateManager.state.changing = true;
 
 		for (let i = 0; i < StateManager.functions.length; i++) {
