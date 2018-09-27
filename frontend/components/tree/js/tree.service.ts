@@ -1409,7 +1409,7 @@ export class TreeService {
 	 *  @param an array of nodes
 	 *  @return an array of nodes where any hidden node would be replaced by its parents
 	 */
-	private sanitiseNodeArray(nodes: [any]) {
+	private sanitiseNodeArray(nodes: any[]) {
 		return nodes.map((node) => {
 			if (node) {
 				if (node.ignore) {
