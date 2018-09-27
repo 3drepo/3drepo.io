@@ -656,7 +656,6 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be hidden.
 	 */
 	public hideTreeNodes(nodes: any[]) {
-		nodes = this.sanitiseNodeArray(nodes);
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
 		this.updateModelVisibility();
 	}
@@ -666,7 +665,6 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be shown.
 	 */
 	public showTreeNodes(nodes: any[]) {
-		nodes = this.sanitiseNodeArray(nodes);
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
 		this.updateModelVisibility();
 	}
