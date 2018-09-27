@@ -82,6 +82,7 @@ class IssuesListController implements ng.IController {
 			},
 			() => {
 				this.allIssues = this.issuesService.state.allIssues;
+				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
 			},
 			true
 		);
