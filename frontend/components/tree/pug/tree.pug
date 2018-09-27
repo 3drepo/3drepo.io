@@ -21,21 +21,20 @@ tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 				md-button.md-icon-button.md-primary.expandButton.clickToExpand(
 					aria-label="Toggle Expand"
 					ng-click="vm.toggleNodeExpansion($event, item._id)"
-					ng-if="!item.status && !item.expanded && (item.children && item.children.length)")
+					ng-if="item.canExpand && !item.expanded")
 
 					md-icon.angular-material-icons add_box
 
 				md-button.md-icon-button.md-primary.expandButton.clickToCollapse(
 					aria-label="Toggle Expand"
 					ng-click="vm.toggleNodeExpansion($event, item._id)"
-					ng-if="!item.status && item.expanded")
+					ng-if="item.canExpand && item.expanded")
 
 					md-icon.angular-material-icons indeterminate_check_box
 
 				md-button.md-icon-button.md-primary.expandButton.clickNoEvent(
 					aria-label="Toggle Expand"
-					ng-click="vm.toggleNodeExpansion($event, item._id)"
-					ng-if="!item.status && !item.expanded && !(item.children && item.children.length)")
+					ng-if="!item.canExpand")
 
 					md-icon.angular-material-icons remove
 

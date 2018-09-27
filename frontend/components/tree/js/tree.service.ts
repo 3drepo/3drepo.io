@@ -1274,7 +1274,18 @@ export class TreeService {
 				this.hiddenByDefaultNodes.push(node);
 			}
 			node.defaultState = node.toggleState;
-			if (node.children && node.children.length > 0) {
+			node.canExpand = node.children && node.children.length > 0;
+			if (node.canExpand) {
+				node.canExpand = false;
+				for (let idx = 0; idx < node.children.length; ++idx) {
+					const child = node.children[idx];
+					if (!(child.type === "mesh" && (!child.name || child.name === ""))) {
+						// There is at least 1 child with name or not a mesh, allow expand
+						node.canExpand = true;
+						break;
+					}
+				}
+
 				processNodes = processNodes.concat(node.children);
 			} else if (node.type === "mesh" && (!node.name || node.name === "")) {
 				node.ignore = true;
