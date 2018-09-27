@@ -45,6 +45,7 @@ const groupSchema = Schema({
 		ifc_guids: [String]
 	}],
 	issue_id: Object,
+	risk_id: Object,
 	color: [Number]
 });
 
@@ -307,6 +308,12 @@ groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId) {
 	if (queryParams.noIssues) {
 		query.issue_id = { $exists: false };
 	}
+
+	// If we want groups that aren't from risks
+	if (queryParams.noRisks) {
+		query.risk_id = { $exists: false };
+	}
+
 	return this.find(dbCol, query).then(results => {
 		const sharedIdConversionPromises = [];
 
@@ -354,7 +361,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
-		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id"];
+		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id", "risk_id"];
 		const fieldTypes = {
 			"description" : "[object String]" ,
 			"name" : "[object String]",
@@ -364,7 +371,8 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 			"updatedAt" : "[object Number]",
 			"objects" :  "[object Array]",
 			"color" : "[object Array]",
-			"issue_id": "[object Object]"
+			"issue_id": "[object Object]",
+			"risk_id": "[object Object]"
 		};
 
 		let typeCorrect = true;
@@ -431,6 +439,7 @@ groupSchema.methods.clean = function() {
 	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
+	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
 
 	if (Date.prototype.isPrototypeOf(cleaned.createdAt)) {
 		cleaned.createdAt = cleaned.createdAt.getTime();

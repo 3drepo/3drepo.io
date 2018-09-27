@@ -31,7 +31,7 @@ const _ = require("lodash");
 const ChatEvent = require("./chatEvent");
 
 const systemLogger = require("../logger.js").systemLogger;
-// const Group = require("./group");
+const Group = require("./group");
 const User = require("./user");
 const Job = require("./job");
 const ModelHelper = require("./helper/model");
@@ -39,6 +39,27 @@ const ModelHelper = require("./helper/model");
 const C = require("../constants");
 
 const risk = {};
+
+const fieldTypes = {
+	"safetibase_id": "[object String]",
+	"associated_activity": "[object String]",
+	"desc": "[object String]",
+	"assigned_roles": "[object Array]",
+	"category": "[object String]",
+	"likelihood": "[object Number]",
+	"consequence": "[object Number]",
+	"level_of_risk": "[object Number]",
+	"mitigation_status": "[object String]",
+	"mitigation_desc": "[object String]",
+	"rev_id": "[object Object]",
+	"thumbnail": "[object Object]",
+	"creator_role": "[object String]",
+	"name": "[object String]",
+	"createdAt": "[object Number]",
+	"viewpoint": "[object Object]",
+	"position": "[object Array]",
+	"norm": "[object Array]"
+};
 
 function clean(dbCol, riskToClean) {
 	const keys = ["_id", "rev_id", "parent"];
@@ -71,6 +92,37 @@ function clean(dbCol, riskToClean) {
 	}
 
 	return riskToClean;
+}
+
+function setGroupRiskId(dbCol, data, riskId) {
+
+	const updateGroup = function(group_id) {
+		return Group.findByUID(dbCol, utils.uuidToString(group_id), null, utils.uuidToString(data.rev_id)).then((group) => {
+			const riskIdData = {
+				risk_id: riskId
+			};
+
+			return group.updateAttrs(dbCol, riskIdData);
+		});
+	};
+
+	const groupUpdatePromises = [];
+
+	if (data.viewpoint) {
+		if (data.viewpoint.highlighted_group_id) {
+			groupUpdatePromises.push(updateGroup(data.viewpoint.highlighted_group_id));
+		}
+
+		if (data.viewpoint.hidden_group_id) {
+			groupUpdatePromises.push(updateGroup(data.viewpoint.hidden_group_id));
+		}
+
+		if (data.viewpoint.shown_group_id) {
+			groupUpdatePromises.push(updateGroup(data.viewpoint.shown_group_id));
+		}
+	}
+
+	return Promise.all(groupUpdatePromises);
 }
 
 risk.createRisk = function(dbCol, newRisk) {
@@ -186,20 +238,31 @@ risk.createRisk = function(dbCol, newRisk) {
 			};
 		}
 
+		return setGroupRiskId(dbCol, newRisk, newRisk._id);
+	}).then(() => {
+		let typeCorrect = true;
 		Object.keys(newRisk).forEach((key) => {
-			if (!riskAttributes.includes(key)) {
+			if (riskAttributes.includes(key)) {
+				if (fieldTypes[key] && Object.prototype.toString.call(newRisk[key]) !== fieldTypes[key]) {
+					typeCorrect = false;
+				}
+			} else {
 				delete newRisk[key];
 			}
 		});
 
-		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-			return _dbCol.insert(newRisk).then(() => {
-				newRisk = clean(dbCol, newRisk);
-				ChatEvent.newRisks(sessionId, dbCol.account, dbCol.model, [newRisk]);
+		if (typeCorrect) {
+			return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+				return _dbCol.insert(newRisk).then(() => {
+					newRisk = clean(dbCol, newRisk);
+					ChatEvent.newRisks(sessionId, dbCol.account, dbCol.model, [newRisk]);
 
-				return Promise.resolve(newRisk);
+					return Promise.resolve(newRisk);
+				});
 			});
-		});
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
 	});
 };
 
@@ -253,20 +316,29 @@ risk.updateAttrs = function(dbCol, uid, data) {
 								"mitigation_desc"
 							];
 
+							let typeCorrect = true;
 							fieldsCanBeUpdated.forEach((key) => {
 								if (data[key]) {
-									toUpdate[key] = data[key];
-									oldRisk[key] = data[key];
+									if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+										toUpdate[key] = data[key];
+										oldRisk[key] = data[key];
+									} else {
+										typeCorrect = false;
+									}
 								}
 							});
 
-							return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-								return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-									oldRisk = clean(dbCol, oldRisk);
-									ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, oldRisk);
-									return oldRisk;
+							if (typeCorrect) {
+								return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+									return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
+										oldRisk = clean(dbCol, oldRisk);
+										ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, oldRisk);
+										return oldRisk;
+									});
 								});
-							});
+							} else {
+								return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+							}
 						} else {
 							return Promise.reject(responseCodes.RISK_UPDATE_PERMISSION_DECLINED);
 						}
