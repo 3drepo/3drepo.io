@@ -21,11 +21,14 @@ import * as API from '../../services/api';
 import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 import { DialogActions } from '../dialog/dialog.redux';
 
-import { selectCurrentTeamspaceName } from '../userManagement/userManagement.selectors';
+import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
+		const teamspaces = yield select(selectCurrentUserTeamspaces);
+		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 
 		const response = yield all([
 			API.fetchUsers(teamspace),
@@ -35,7 +38,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		]);
 
 		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
-			teamspace,
+			teamspaceDetails,
 			...response.map(({data}) => data)
 		));
 	} catch (error) {
@@ -45,7 +48,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 
 export function* addUser({ user }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const { data } = yield API.addUser(teamspace, user);
 		yield put(UserManagementActions.addUserSuccess(data));
 	} catch (error) {
@@ -55,7 +58,7 @@ export function* addUser({ user }) {
 
 export function* removeUser({ username }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.removeUser(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 	} catch (error) {
@@ -89,7 +92,7 @@ export function* removeUser({ username }) {
 
 export function* removeUserCascade({ username }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.removeUserCascade(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 	} catch (error) {
@@ -99,7 +102,7 @@ export function* removeUserCascade({ username }) {
 
 export function* updateUserJob({ username, job }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield (
 				job ?
 				API.updateUserJob(teamspace, job, username) :
@@ -113,7 +116,7 @@ export function* updateUserJob({ username, job }) {
 
 export function* updatePermissions({ permissions }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.setUserPermissions(teamspace, permissions);
 		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
 	} catch (error) {
@@ -123,7 +126,7 @@ export function* updatePermissions({ permissions }) {
 
 export function* getUsersSuggestions({ searchText }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const {data: suggestions} = yield API.findUsers(teamspace, searchText);
 		yield put(UserManagementActions.getUsersSuggestionsSuccess(suggestions));
 	} catch (error) {
@@ -135,7 +138,7 @@ export function* getUsersSuggestions({ searchText }) {
 
 export function* updateJobColor({ job }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.updateJob(teamspace, job);
 
 		yield put(UserManagementActions.updateJobSuccess(job));
@@ -146,7 +149,7 @@ export function* updateJobColor({ job }) {
 
 export function* createJob({ job }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.createJob(teamspace, job);
 
 		yield put(UserManagementActions.createJobSuccess(job));
@@ -157,7 +160,7 @@ export function* createJob({ job }) {
 
 export function* removeJob({ jobId }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.deleteJob(teamspace, jobId);
 
 		yield put(UserManagementActions.removeJobSuccess(jobId));
@@ -169,19 +172,10 @@ export function* removeJob({ jobId }) {
 // Projects
 export function* fetchProject({ project }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
-		const data = yield API.fetchProject(teamspace, project);
-		yield put(UserManagementActions.fetchProjectSuccess(data));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
-	}
-}
+		const teamspace = yield select(selectCurrentTeamspace);
+		const response = yield API.fetchProject(teamspace, project);
 
-export function* updateProject({ project }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
-		const data = yield API.updateProject(teamspace, project);
-		yield put(UserManagementActions.updateProjectSuccess(data));
+		yield put(UserManagementActions.setProject(response.data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
 	}
@@ -190,7 +184,7 @@ export function* updateProject({ project }) {
 // Models
 export function* fetchModelPermissions({ model }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.fetchModelPermissions(teamspace, model);
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
 	} catch (error) {
@@ -200,7 +194,7 @@ export function* fetchModelPermissions({ model }) {
 
 export function* fetchMultipleModelsPermissions({ models }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.fetchMultipleModelsPermissions(teamspace, models);
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
 	} catch (error) {
@@ -210,7 +204,7 @@ export function* fetchMultipleModelsPermissions({ models }) {
 
 export function* updateMultipleModelsPermissions({ permissions }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspaceName);
+		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.updateMultipleModelsPermissions(teamspace, permissions);
 		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
 	} catch (error) {
@@ -239,5 +233,4 @@ export default function* UserManagementSaga() {
 
 	// Projects
 	yield takeLatest(UserManagementTypes.FETCH_PROJECT, fetchProject);
-	yield takeLatest(UserManagementTypes.UPDATE_PROJECT, updateProject);
 }

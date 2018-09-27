@@ -16,7 +16,28 @@
  */
 
 import { createSelector } from 'reselect';
+import { first } from 'lodash';
 import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
+import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+
+const getExtendedProjectPermissions = (currentUsers = [], project = {permissions: []}) => {
+	return project.permissions.map(({ user, permissions = [], isSelected = false }) => {
+		const userData = currentUsers.find((userDetails) => userDetails.user === user) || {};
+		let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
+		if (userData.isAdmin) {
+			projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINISTRATOR;
+		} else {
+			projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
+		}
+
+		return {
+			...userData,
+			permissions,
+			key: projectPermissionsKey,
+			isSelected
+		};
+	});
+};
 
 export const selectUserManagementDomain = (state) => Object.assign({}, state.userManagement);
 
@@ -40,24 +61,28 @@ export const selectIsPending = createSelector(
 	selectUserManagementDomain, (state) => state.isPending
 );
 
-export const selectCurrentTeamspaceName = createSelector(
-	selectUserManagementDomain, (state) => state.teamspace
-);
-
 export const selectCurrentTeamspace = createSelector(
-	selectCurrentUserTeamspaces,
-	selectUserManagementDomain,
-	(teamspaces, state) => teamspaces.find(({account}) => account === state.selectedTeamspace)
-);
-
-export const selectProjects = createSelector(
-	selectUserManagementDomain, (state) => state.projects
+	selectUserManagementDomain, (state) => state.selectedTeamspace
 );
 
 export const selectUsersSuggestions = createSelector(
 	selectUserManagementDomain, (state) => state.usersSuggestions
 );
 
+export const selectProjects = createSelector(
+	selectUserManagementDomain, (state) => state.projects
+);
+
+export const selectCurrentProject = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject
+);
+
 export const selectModels = createSelector(
 	selectUserManagementDomain, (state) => state.models
+);
+
+export const selectExtendedProjectPermissions = createSelector(
+	selectUsers,
+	selectCurrentProject,
+	getExtendedProjectPermissions
 );

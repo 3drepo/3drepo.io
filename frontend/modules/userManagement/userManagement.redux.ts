@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
-import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
+import {createActions, createReducer} from 'reduxsauce';
+import {pick, first} from 'lodash';
+import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
+import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
@@ -42,19 +44,21 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJobColor: ['job'],
 	updateJobSuccess: ['job'],
 	fetchProject: ['project'],
-	updateProject: ['project'],
-	updateProjectSuccess: ['project'],
+	setProject: ['project'],
 	fetchModelPermissions: ['model'],
 	fetchMultipleModelsPermissions: ['models'],
 	updateMultipleModelsPermissions: ['permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
-	teamspace: null,
+	selectedTeamspace: null,
+	projects: [],
+	models: [],
+	permissions: [],
+	fedModels: [],
 	users: [],
 	jobs: [],
 	jobsColors: [],
-	projects: [],
 	collaboratorLimit: null,
 	isPending: false,
 	usersSuggestions: []
@@ -73,11 +77,35 @@ const prepareUserData = (teamspaceName, users): object => {
 	};
 };
 
+/**
+ * Bind to users proper permissions` values
+ * @param currentUsers
+ * @param projectPermissions
+ */
+export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
+	const usersWithPermissions = [...state.users].map((user) => {
+		const isProjectAdmin = projectPermissions.some(({ user: {user: username}, permissions }) => {
+			return permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR) && user === username;
+		});
+
+		return { ...user, isProjectAdmin };
+	});
+
+	return {...state, users: usersWithPermissions};
+};
+
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 	const { teamspace, quotaInfo = {}, jobs, jobsColors } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace));
-
-	return { ...state, ...quotaInfo, teamspace, users, jobs, jobsColors, isPending: false };
+	return {
+		...state,
+		...quotaInfo,
+		users,
+		isPending: false,
+		...pick(action, ['jobs', 'jobsColors']),
+		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
+		selectedTeamspace: teamspace.name
+	};
 };
 
 export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
@@ -87,7 +115,7 @@ export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
 export const addUserSuccess = (state = INITIAL_STATE, { user }) => {
 	const users = [
 		...state.users,
-		prepareUserData(state.teamspace, user)
+		prepareUserData(state.selectedTeamspace, user)
 	];
 	return { ...state, users };
 };
@@ -118,7 +146,7 @@ export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions })
 	const users = [...state.users].map((userData) => {
 		if (userData.user === permissions.user) {
 			const newUserData = {...userData, ...permissions};
-			return prepareUserData(state.teamspace, newUserData);
+			return prepareUserData(state.selectedTeamspace, newUserData);
 		}
 
 		return userData;
@@ -168,29 +196,8 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 	return { ...state, jobs };
 };
 
-export const createProjectSuccess = (state = INITIAL_STATE, { job }) => {
-	const jobs = [...state.jobs, job];
-	return updateJobsColors({ ...state, jobs }, job);
-};
-
-export const updateProjectSuccess = (state = INITIAL_STATE, { job }) => {
-	const jobs = [...state.jobs].map((jobData) => {
-		if (jobData._id === job._id) {
-			return job;
-		}
-
-		return jobData;
-	});
-
-	return updateJobsColors({ ...state, jobs }, job);
-};
-
-export const removeProjectSuccess = (state = INITIAL_STATE, { jobId }) => {
-	const jobs = [...state.jobs].filter(({ _id }) => {
-		return _id !== jobId;
-	});
-
-	return { ...state, jobs };
+export const setProject = (state = INITIAL_STATE, { project }) => {
+	return {...state, currentProject: project};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -210,5 +217,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
 
 	// Project
-	[UserManagementTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess
+	[UserManagementTypes.SET_PROJECT]: setProject
 });

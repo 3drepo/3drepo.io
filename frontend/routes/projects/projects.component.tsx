@@ -36,8 +36,8 @@ export const PERMISSIONS_VIEWS = {
 const getProjectsItems = (projects) => projects.map(({name}) => ({value: name}));
 
 interface IProps {
-	currentUser: any;
 	projects: any[];
+	currentProject: any;
 	users: any[];
 	onProjectChange?: (project) => void;
 }
@@ -106,7 +106,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		debugger
 		this.setState({
 			projectsItems: getProjectsItems(this.props.projects)
 		});
@@ -126,7 +125,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {projects} = this.props;
+		const {currentProject} = this.props;
 		const {currentView, models, modelsPermissions, projectsPermissions, selectedProject, projectsItems} = this.state;
 
 		const footerLabel = this.getFooterLabel(currentView);
@@ -162,7 +161,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 								currentView !== PERMISSIONS_VIEWS.MODELS && (
 									<ProjectsPermissions
 										onPermissionsChange={this.onPermissionsChange}
-										permissions={projectsPermissions}
 									/>
 								)
 							}

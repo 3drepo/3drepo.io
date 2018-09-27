@@ -26,16 +26,14 @@ const OPTIONS_HEIGHT = '100px';
 export const Container = styled.div`
   width: 100%;
   height: 100%;
-
-  ${UserManagementTab.Container} {
-    height: calc(100% - ${OPTIONS_HEIGHT});
-  }
+  display: flex;
+  flex-direction: column;
 `;
 
 export const Options = styled(Grid)`
   width: 100%;
   padding: 0;
-  height: ${OPTIONS_HEIGHT};
+  min-height: ${OPTIONS_HEIGHT};
 
   & > * {
     padding: 24px;

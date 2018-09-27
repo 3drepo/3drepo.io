@@ -148,44 +148,6 @@ class ProjectsPermissionsController implements ng.IController {
 	}
 
 	/**
-	 * Bind to members proper permissions` values
-	 * @param projectPermissions
-	 */
-	public setProperMembersPermissions(projectPermissions): void {
-		this.members = this.members.map((member) => {
-			const isProjectAdmin = projectPermissions.some(({ user, permissions }: { user: string, permissions: any }) => {
-				return permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR) && user === member.user;
-			});
-
-			return { ...member, isProjectAdmin };
-		});
-	}
-
-	/**
-	 * Bind project permissions with members data
-	 * @param projectPermissions
-	 */
-	public getExtendedProjectPermissions = (projectPermissions) => {
-		return projectPermissions
-			.map(({user, permissions = [], isSelected = false}: {user: string, permissions: string[], isSelected?: boolean}) => {
-				const memberData = this.members.find((member) => member.user === user) || {};
-				let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
-				if (memberData.isAdmin) {
-					projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINISTRATOR;
-				} else {
-					projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
-				}
-
-				return {
-					...memberData,
-					permissions,
-					key: projectPermissionsKey,
-					isSelected
-				};
-			});
-	}
-
-	/**
 	 * Bind model permissions with members data
 	 * @param modelPermissions
 	 */
