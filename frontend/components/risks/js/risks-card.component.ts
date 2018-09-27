@@ -181,7 +181,7 @@ class RisksCardController implements ng.IController {
 		this.$scope.$watch(this.eventService.currentEvent, (event) => {
 
 			// TODO Need to listen to a new type of event for Risks
-			switch(event.type) {
+			switch (event.type) {
 				case this.eventService.EVENT.VIEWER.CLICK_PIN:
 					for (let i = 0; i < this.allRisks.length; i++) {
 						if (this.allRisks[i]._id === event.value.id) {

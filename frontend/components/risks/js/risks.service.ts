@@ -345,9 +345,12 @@ export class RisksService {
 	}
 
 	public setLevelOfRisk(levelOfRisk: any) {
-		this.levelOfRisk = parseInt(levelOfRisk);
+		this.levelOfRisk = parseInt(levelOfRisk, 10);
 		if (!isNaN(this.levelOfRisk)) {
-			this.viewerService.changePinColours({ id: this.newPinId, colours: this.getLevelOfRiskColor(this.levelOfRisk, true) });
+			this.viewerService.changePinColours({
+				id: this.newPinId,
+				colours: this.getLevelOfRiskColor(this.levelOfRisk, true)
+			});
 		}
 	}
 
