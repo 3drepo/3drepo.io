@@ -184,7 +184,7 @@ function Utils() {
 			content: new Buffer.from(pngBuffer, "base64"),
 			flag: 1
 		};
-	}
+	};
 
 	/**
 	* Create a cropped version of a screen shot.
