@@ -167,10 +167,12 @@ export class StateManagerService {
 	}
 
 	public startStateChange(stateChangeObject) {
+		console.log("!!!!@startStateChange");
 		this.stateChangeQueue.push(stateChangeObject);
 	}
 
 	public handleStateChange(stateChangeObject) {
+		console.log("!!!!@handleStateChange", stateChangeObject);
 
 		let param;
 		const fromParams = stateChangeObject.fromParams;
@@ -359,10 +361,8 @@ export class StateManagerService {
 		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
 
 		// TODO: Do we have to use $timeout? :(
-		this.$timeout(() => {
-			console.log("!!!! Setting changing to false");
-			this.state.changing = false;
-		});
+		console.log("!!!! Setting changing to false");
+		this.state.changing = false;
 	}
 
 	public refreshHandler(event) {

@@ -77,10 +77,12 @@ class AccountController implements ng.IController {
 		* Get the account data
 		*/
 		this.$scope.$watch("vm.account", (oldValue, newValue) => {
+			console.log("!!!!@handleStateChange from vm.account change");
 			this.handleStateChange("account", oldValue, newValue);
 		}, true);
 
 		this.$scope.$watch("vm.query.page", (oldValue, newValue) => {
+			console.log("!!!!@handleStateChange from query.page change");
 			this.handleStateChange("page", oldValue, newValue);
 		}, true);
 

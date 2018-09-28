@@ -78,7 +78,7 @@ function StateManagerRun(
 			fromState,
 			fromParams
 		};
-
+		console.log("!!!!@stateChangeSuccess");
 		StateManager.handleStateChange(stateChangeObject);
 	});
 
