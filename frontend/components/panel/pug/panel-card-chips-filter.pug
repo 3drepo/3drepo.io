@@ -25,8 +25,8 @@ md-button.md-icon-button#additionalInfoButton(aria-label="Collapse Toggle" class
 	md-tooltip(ng-if="vm.collapsed") Expand
 	md-tooltip(ng-if="!vm.collapsed") Collapse
 
-input(id="clipboard-target" value="{{vm.chips.map(vm.formatChip).join(',')}}")
-button.md-button.md-mini.md-fab.copy-button(ngclipboard data-clipboard-target="#clipboard-target" ng-show="!vm.collapsed && vm.chips.length>0 " href="")
+input.clipboard-target(id="clipboard-target-{{vm.$scope.$id}}" value="{{vm.chips.map(vm.formatChip).join(',')}}")
+button.md-button.md-mini.md-fab.copy-button(ngclipboard data-clipboard-target="#clipboard-target-{{vm.$scope.$id}}" ng-show="!vm.collapsed && vm.chips.length>0 " href="")
 	md-icon.angular-material-icons(md-svg-src="icons/clippy.svg" alt="copy")
 	md-tooltip Copy
 
