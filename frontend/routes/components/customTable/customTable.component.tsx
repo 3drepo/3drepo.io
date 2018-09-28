@@ -419,7 +419,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 */
 	public renderRows = (cells = [], data = [], showCheckbox) => {
 		return data.map((row, index) => {
-			const rowProps = {key: index, clickable: Boolean(showCheckbox)};
+			const rowProps = {key: index, clickable: showCheckbox && !row.disabled};
 			return (
 				<Row {...rowProps}>
 					{

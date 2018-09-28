@@ -19,6 +19,8 @@ import * as React from 'react';
 import {isEqual, isEmpty} from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
 import { theme } from '../../styles';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
@@ -117,12 +119,19 @@ export class Projects extends React.PureComponent<IProps, IState> {
 						alignContent="center"
 					>
 						<SelectContainer item>
-							<CellSelect
-								items={projectsItems}
-								value={selectedProject}
-								placeholder="Project"
-								onChange={this.onProjectChange}
-							/>
+							<FormControl fullWidth={true}>
+								<InputLabel shrink htmlFor="project">
+										Project
+								</InputLabel>
+								<CellSelect
+									items={projectsItems}
+									value={selectedProject}
+									placeholder="Select a project"
+									disabledPlaceholder={true}
+									onChange={this.onProjectChange}
+									inputId="project"
+								/>
+							</FormControl>
 						</SelectContainer>
 						<Grid item>
 							<SwitchButton
