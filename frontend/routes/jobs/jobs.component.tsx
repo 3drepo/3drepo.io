@@ -18,9 +18,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { pick, isEqual, isEmpty } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 
-import { theme } from '../../styles';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { CELL_TYPES, CustomTable, TableButton } from '../components/customTable/customTable.component';
@@ -158,17 +156,15 @@ export class Jobs extends React.PureComponent<IProps, any> {
 		const { colors } = this.props;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container>
-					<UserManagementTab footerLabel="Manage jobs">
-						<CustomTable
-							cells={JOBS_TABLE_CELLS}
-							rows={rows}
-						/>
-					</UserManagementTab>
-					{active && containerElement && this.renderNewJobForm(containerElement)}
-				</Container>
-			</MuiThemeProvider>
+			<Container>
+				<UserManagementTab footerLabel="Manage jobs">
+					<CustomTable
+						cells={JOBS_TABLE_CELLS}
+						rows={rows}
+					/>
+				</UserManagementTab>
+				{active && containerElement && this.renderNewJobForm(containerElement)}
+			</Container>
 		);
 	}
 }

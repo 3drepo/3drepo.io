@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { pick, matches, isEqual, cond, get, isEmpty, memoize } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import SimpleBar from 'simplebar-react';
@@ -28,7 +27,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 // @ts-ignore
 import * as AdminIconSrc from '../../icons/how_to_reg.svg';
 
-import { theme } from '../../styles';
 import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CELL_TYPES, CustomTable, CheckboxField } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -163,43 +161,41 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		const {modelRows} = this.state;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container
-					container
-					direction="row"
-					wrap="nowrap"
-				>
-					<ModelsContainer item>
-						<CustomTable
-							cells={MODEL_TABLE_CELLS}
-							rows={modelRows}
-							onSelectionChange={this.props.onSelectionChange}
-							onSearch={this.handleModelsSearch}
-						/>
-						{ !models.length ?
-								<TextOverlay content="Select a project to view the models' list" /> :
-								null
-						}
-					</ModelsContainer>
-					<PermissionsContainer item>
-						<OverflowWrapper>
-							<SimpleBar data-simplebar-y-hidden>
-								<PermissionsTable
-									permissions={permissions}
-									roles={MODEL_ROLES_LIST}
-									onPermissionsChange={this.handlePermissionsChange}
-									rowStateInterceptor={this.hasDisabledPermissions}
-								/>
-							</SimpleBar>
-						</OverflowWrapper>
-						{
-							!selectedModels.length ?
-								<TextOverlay content="Select a model to view the users' permissions" /> :
-								null
-						}
-					</PermissionsContainer>
-				</Container>
-			</MuiThemeProvider>
+			<Container
+				container
+				direction="row"
+				wrap="nowrap"
+			>
+				<ModelsContainer item>
+					<CustomTable
+						cells={MODEL_TABLE_CELLS}
+						rows={modelRows}
+						onSelectionChange={this.props.onSelectionChange}
+						onSearch={this.handleModelsSearch}
+					/>
+					{ !models.length ?
+							<TextOverlay content="Select a project to view the models' list" /> :
+							null
+					}
+				</ModelsContainer>
+				<PermissionsContainer item>
+					<OverflowWrapper>
+						<SimpleBar data-simplebar-y-hidden>
+							<PermissionsTable
+								permissions={permissions}
+								roles={MODEL_ROLES_LIST}
+								onPermissionsChange={this.handlePermissionsChange}
+								rowStateInterceptor={this.hasDisabledPermissions}
+							/>
+						</SimpleBar>
+					</OverflowWrapper>
+					{
+						!selectedModels.length ?
+							<TextOverlay content="Select a model to view the users' permissions" /> :
+							null
+					}
+				</PermissionsContainer>
+			</Container>
 		);
 	}
 }

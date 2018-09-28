@@ -18,10 +18,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { pick, get, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 
-import { theme } from '../../styles';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
@@ -236,17 +234,15 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const { rows, licencesLabel, containerElement, active } = this.state;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<>
-					<UserManagementTab footerLabel={this.getFooterLabel()}>
-						<CustomTable
-							cells={USERS_TABLE_CELLS}
-							rows={rows}
-						/>
-					</UserManagementTab>
-					{active && containerElement && this.renderNewUserForm(containerElement)}
-				</>
-			</MuiThemeProvider>
+			<>
+				<UserManagementTab footerLabel={this.getFooterLabel()}>
+					<CustomTable
+						cells={USERS_TABLE_CELLS}
+						rows={rows}
+					/>
+				</UserManagementTab>
+				{active && containerElement && this.renderNewUserForm(containerElement)}
+			</>
 		);
 	}
 }

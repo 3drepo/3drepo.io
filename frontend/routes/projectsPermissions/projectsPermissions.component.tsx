@@ -16,15 +16,13 @@
  */
 
 import * as React from 'react';
+import { isEqual } from 'lodash';
 
-import { theme } from '../../styles';
 import { PROJECT_ROLES_LIST } from '../../constants/project-permissions';
 import { CELL_TYPES } from '../components/customTable/customTable.component';
 import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { Container } from './projectsPermissions.styles';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { isEqual } from 'lodash';
 
 interface IProps {
 	projectName: string;
@@ -85,21 +83,19 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 		const {permissions} = this.props;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container>
-					<PermissionsTable
-						permissions={permissions}
-						roles={PROJECT_ROLES_LIST}
-						onSelectionChange={this.handleSelectionChange}
-						onPermissionsChange={this.handlePermissionsChange}
-						rowStateInterceptor={this.hasDisabledPermissions}
-					/>
-					{!permissions.length ?
-						<TextOverlay content="Select a project to view the users' permissions" /> :
-						null
-					}
-				</Container>
-			</MuiThemeProvider>
+			<Container>
+				<PermissionsTable
+					permissions={permissions}
+					roles={PROJECT_ROLES_LIST}
+					onSelectionChange={this.handleSelectionChange}
+					onPermissionsChange={this.handlePermissionsChange}
+					rowStateInterceptor={this.hasDisabledPermissions}
+				/>
+				{!permissions.length ?
+					<TextOverlay content="Select a project to view the users' permissions" /> :
+					null
+				}
+			</Container>
 		);
 	}
 }
