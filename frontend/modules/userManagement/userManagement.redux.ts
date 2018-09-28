@@ -46,7 +46,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJobSuccess: ['job'],
 	fetchProject: ['project'],
 	setProject: ['project'],
-	fetchModelPermissionsSuccess: ['permissions'],
+	fetchModelPermissionsSuccess: ['selectedModels'],
 	fetchMultipleModelsPermissions: ['models'],
 	updateMultipleModelsPermissions: ['permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
@@ -207,7 +207,8 @@ export const setProject = (state = INITIAL_STATE, { project }) => {
 	return {...state, currentProject: project};
 };
 
-export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
+export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
+	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
 	const currentProject = Object.assign({}, state.currentProject, {modelsPermissions: permissions});
 	return {...state, currentProject};
 };
