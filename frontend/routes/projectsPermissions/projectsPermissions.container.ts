@@ -20,12 +20,14 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ProjectsPermissions } from './projectsPermissions.component';
-import { selectExtendedProjectPermissions } from '../../modules/userManagement';
+import { selectExtendedProjectPermissions, UserManagementActions } from '../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
 	permissions: selectExtendedProjectPermissions
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	onPermissionsChange: UserManagementActions.updateProjectPermissions
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProjectsPermissions);

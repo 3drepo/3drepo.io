@@ -140,13 +140,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 					</Options>
 					<UserManagementTab footerLabel={footerLabel}>
 						<>
-							{
-								currentView !== PERMISSIONS_VIEWS.MODELS && (
-									<ProjectsPermissions
-										onPermissionsChange={this.onPermissionsChange}
-									/>
-								)
-							}
+							{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
 							{
 								currentView === PERMISSIONS_VIEWS.MODELS && (
 									<ModelsPermissions

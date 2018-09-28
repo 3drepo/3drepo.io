@@ -46,6 +46,8 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJobSuccess: ['job'],
 	fetchProject: ['project'],
 	setProject: ['project'],
+	updateProjectPermissions: ['permissions'],
+	updateProjectPermissionsSuccess: ['permissions'],
 	fetchModelPermissionsSuccess: ['selectedModels'],
 	fetchMultipleModelsPermissions: ['models'],
 	updateMultipleModelsPermissions: ['permissions']
@@ -207,6 +209,24 @@ export const setProject = (state = INITIAL_STATE, { project }) => {
 	return {...state, currentProject: project};
 };
 
+export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
+	const currentProject = {...state.currentProject};
+
+	if (permissions.length) {
+		currentProject.permissions = [...currentProject.permissions].map((currentPermissions) => {
+			const updatedPermissions = permissions.find(({user}) => currentPermissions.user === user);
+			if (updatedPermissions) {
+				return updatedPermissions;
+			}
+			return currentPermissions;
+		});
+	} else {
+		currentProject.permissions = [];
+	}
+
+	return {...state, currentProject};
+};
+
 export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
 	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
 	const currentProject = Object.assign({}, state.currentProject, {modelsPermissions: permissions});
@@ -231,6 +251,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 
 	// Project
 	[UserManagementTypes.SET_PROJECT]: setProject,
+	[UserManagementTypes.UPDATE_PROJECT_PERMISSIONS_SUCCESS]: updateProjectPermissionsSuccess,
 
 	// Models
 	[UserManagementTypes.FETCH_MODEL_PERMISSIONS_SUCCESS]: fetchModelPermissionsSuccess

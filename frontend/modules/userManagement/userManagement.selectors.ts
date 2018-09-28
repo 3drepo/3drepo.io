@@ -22,7 +22,7 @@ import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 
 const getExtendedProjectPermissions = (currentUsers = [], project = {permissions: []}) => {
-	return project.permissions.map(({ user, permissions = [], isSelected = false }) => {
+	return project.permissions.map(({ user, permissions = [] }) => {
 		const userData = currentUsers.find((userDetails) => userDetails.user === user) || {};
 		let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
 		if (userData.isAdmin) {
@@ -34,8 +34,7 @@ const getExtendedProjectPermissions = (currentUsers = [], project = {permissions
 		return {
 			...userData,
 			permissions,
-			key: projectPermissionsKey,
-			isSelected
+			key: projectPermissionsKey
 		};
 	});
 };
@@ -59,10 +58,10 @@ const getExtendedModelPermissions = (currentUsers = [], modelPermissions?) => {
 
 		return {
 			...memberData,
-			permissions: get(memberModelPermissions, "permissions", []),
+			permissions: get(memberModelPermissions, 'permissions', []),
 			key: modelPermissionsKey,
 			disabled: !modelPermissions,
-			selected: get(memberModelPermissions, "selected", false),
+			selected: get(memberModelPermissions, 'selected', false),
 			isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
 		};
 	});

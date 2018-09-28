@@ -27,8 +27,9 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import { isEqual } from 'lodash';
 
 interface IProps {
+	projectName: string;
 	permissions: any[];
-	onPermissionsChange: (permissions) => void;
+	onPermissionsChange: (project) => void;
 }
 
 interface IState {
@@ -67,6 +68,19 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 		this.setState({selectedUsers});
 	}
 
+	public handlePermissionsChange = (permissions) => {
+		if (this.props.onPermissionsChange) {
+			const permissionsToSave = permissions.map(({user, key}) => {
+				return {
+					user,
+					permissions: key ? [key] : []
+				};
+			});
+
+			this.props.onPermissionsChange(permissionsToSave);
+		}
+	}
+
 	public render() {
 		const {permissions} = this.props;
 
@@ -77,7 +91,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 						permissions={permissions}
 						roles={PROJECT_ROLES_LIST}
 						onSelectionChange={this.handleSelectionChange}
-						onPermissionsChange={this.props.onPermissionsChange}
+						onPermissionsChange={this.handlePermissionsChange}
 						rowStateInterceptor={this.hasDisabledPermissions}
 					/>
 					{!permissions ?

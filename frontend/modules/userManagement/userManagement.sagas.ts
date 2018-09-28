@@ -21,7 +21,7 @@ import * as API from '../../services/api';
 import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 import { DialogActions } from '../dialog/dialog.redux';
 
-import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
 import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
@@ -177,7 +177,20 @@ export function* fetchProject({ project }) {
 
 		yield put(UserManagementActions.setProject(response.data));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+		yield put(DialogActions.showErrorDialog('get', 'project permissions', error.response));
+	}
+}
+
+export function* updateProjectPermissions({ permissions }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const {name} = yield select(selectCurrentProject);
+		const project = {name, permissions};
+		yield API.updateProject(teamspace, project);
+
+		yield put(UserManagementActions.updateProjectPermissionsSuccess(permissions));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'project permissions', error.response));
 	}
 }
 
@@ -195,7 +208,7 @@ export function* fetchMultipleModelsPermissions({ models }) {
 
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+		yield put(DialogActions.showErrorDialog('get', 'models/federations permissions', error.response));
 	}
 }
 
@@ -203,6 +216,7 @@ export function* updateMultipleModelsPermissions({ permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.updateMultipleModelsPermissions(teamspace, permissions);
+
 		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
@@ -229,4 +243,5 @@ export default function* UserManagementSaga() {
 
 	// Projects
 	yield takeLatest(UserManagementTypes.FETCH_PROJECT, fetchProject);
+	yield takeLatest(UserManagementTypes.UPDATE_PROJECT_PERMISSIONS, updateProjectPermissions);
 }
