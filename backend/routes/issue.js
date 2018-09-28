@@ -83,10 +83,11 @@ function updateIssue(req, res, next) {
 	let action;
 
 	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
-		req.oldDataModel = _.cloneDeep(issue.toObject());
 		if(!issue) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
 		}
+
+		req.oldDataModel = _.cloneDeep(issue.toObject());
 
 		if (data.hasOwnProperty("comment") && data.edit) {
 			action = issue.updateComment(data.commentIndex, data);

@@ -48,7 +48,7 @@ module.exports = {
 	insertNotification: function(username, teamSpace, modelId, type, data) {
 		return db.getCollection(types.NOTIFICATIONS_DB, username).then((collection) =>
 			collection.insertOne(generateNotification(teamSpace, modelId, type, data))
-		).then((o) => o.ops[0] = utils.changeObjectIdToString(o.ops[0]));
+		).then((o) => utils.changeObjectIdToString(o.ops[0]));
 	},
 
 	/**

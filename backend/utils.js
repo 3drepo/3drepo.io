@@ -16,6 +16,7 @@
  */
 
 "use strict";
+const _ = require("lodash");
 const sharp = require("sharp");
 const nodeuuid = require("node-uuid");
 const mongo = require("mongodb");
@@ -171,8 +172,7 @@ function Utils() {
 	};
 
 	this.changeObjectIdToString = function(obj) {
-		obj._id = this.uuidToString(obj._id);
-		return obj;
+		return Object.assign (_.cloneDeep(obj), {_id:this.uuidToString(obj._id)});
 	};
 
 	/**
