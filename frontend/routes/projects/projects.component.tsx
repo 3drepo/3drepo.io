@@ -112,40 +112,40 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container>
-					<Options
-						container
-						direction="row"
-						justify="space-between"
-						alignContent="center"
-					>
-						<SelectContainer item>
-							<FormControl fullWidth={true}>
-								<InputLabel shrink htmlFor="project">
-										Project
-								</InputLabel>
-								<CellSelect
-									items={projectsItems}
-									value={selectedProject}
-									placeholder="Select a project"
-									disabledPlaceholder={true}
-									onChange={this.onProjectChange}
-									inputId="project"
-								/>
-							</FormControl>
-						</SelectContainer>
-						<Grid item>
-							<SwitchButton
-								color="secondary"
-								onClick={this.handleViewChange}
-							>
-								{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
-								{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
-								{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
-							</SwitchButton>
-						</Grid>
-					</Options>
 					<UserManagementTab footerLabel={footerLabel}>
 						<>
+							<Options
+								container
+								direction="row"
+								justify="space-between"
+								alignContent="center"
+							>
+								<SelectContainer item>
+									<FormControl fullWidth={true}>
+										<InputLabel shrink htmlFor="project">
+												Project
+										</InputLabel>
+										<CellSelect
+											items={projectsItems}
+											value={selectedProject}
+											placeholder="Select a project"
+											disabledPlaceholder={true}
+											onChange={this.onProjectChange}
+											inputId="project"
+										/>
+									</FormControl>
+								</SelectContainer>
+								<Grid item>
+									<SwitchButton
+										color="secondary"
+										onClick={this.handleViewChange}
+									>
+										{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
+										{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
+										{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
+									</SwitchButton>
+								</Grid>
+							</Options>
 							{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
 							{currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions />}
 						</>

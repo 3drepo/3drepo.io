@@ -16,20 +16,82 @@
  */
 
 import * as React from 'react';
+import Paper from '@material-ui/core/Paper';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
-import { Container } from './userManagement.styles';
+import { theme } from '../../styles';
+import Users from '../users/users.container';
+import Jobs from '../jobs/jobs.container';
+import Projects from '../projects/projects.container';
+import { Container, Title, Content, Header, TabContent } from './userManagement.styles';
+
+export const TABS_TYPES = {
+	USERS: 0,
+	PROJECTS: 1,
+	JOBS: 2
+};
+
+const TABS = {
+	[TABS_TYPES.USERS]: {
+		id: TABS_TYPES.USERS,
+		label: "Users"
+	},
+	[TABS_TYPES.PROJECTS]: {
+		id: TABS_TYPES.PROJECTS,
+		label: "Projects"
+	},
+	[TABS_TYPES.JOBS]: {
+		id: TABS_TYPES.JOBS,
+		label: "Jobs"
+	}
+};
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	currentTeamspace: any;
+	teamspaces: any[];
+	isLoadingTeamspace: boolean;
 }
 
 export class UserManagement extends React.PureComponent<IProps, any> {
+	public state = {
+		isTeamspaceAdmin: true,
+		activeTab: 1
+	};
+
+	public handleChange = (event, value) => {
+		this.setState({activeTab: value});
+	}
 
 	public render() {
+		const {isLoadingTeamspace} = this.props;
+		const {isTeamspaceAdmin, activeTab} = this.state;
 		return (
-			<Container>
-				UserManagement component
-			</Container>
+			<MuiThemeProvider theme={theme}>
+				<Container>
+					<Title>User management</Title>
+					<Content>
+						<Header>
+							<Tabs
+								value={this.state.activeTab}
+								indicatorColor="primary"
+								textColor="primary"
+								onChange={this.handleChange}
+							>
+								<Tab label="Users" disabled={!isLoadingTeamspace && !isTeamspaceAdmin} />
+								<Tab label="Projects" />
+								<Tab label="Jobs" />
+							</Tabs>
+						</Header>
+						<TabContent>
+							{activeTab === TABS_TYPES.USERS && <Users />}
+							{activeTab === TABS_TYPES.PROJECTS && <Projects />}
+							{activeTab === TABS_TYPES.JOBS && <Jobs />}
+						</TabContent>
+					</Content>
+				</Container>
+			</MuiThemeProvider>
 		);
 	}
 }
