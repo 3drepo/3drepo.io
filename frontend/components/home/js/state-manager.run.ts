@@ -51,7 +51,6 @@ function StateManagerRun(
 	};
 
 	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
-		console.log("!!!! initiate change");
 		StateManager.state.changing = true;
 
 		for (let i = 0; i < StateManager.functions.length; i++) {
@@ -78,19 +77,6 @@ function StateManagerRun(
 			fromState,
 			fromParams
 		};
-		console.log("!!!!@stateChangeSuccess");
-		StateManager.handleStateChange(stateChangeObject);
-	});
-
-	$rootScope.$on("$stateChangeError", (event, toState, toParams, fromState, fromParams, err) => {
-
-		const stateChangeObject = {
-			toState,
-			toParams,
-			fromState,
-			fromParams
-		};
-		console.log("!!!!@stateChangeError", err);
 		StateManager.handleStateChange(stateChangeObject);
 	});
 

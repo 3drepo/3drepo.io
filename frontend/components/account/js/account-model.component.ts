@@ -210,6 +210,8 @@ class AccountModelController implements ng.IController {
 					console.warn("Incorrect permissions");
 				}
 			} else {
+				//FIXME: nullifying the query seems to causes UI to not load - ui router doesn't return success for some reason!
+				// this.$location.path("/" + this.account + "/" + this.model.model, "_self").search("page", null);
 				this.$location.path("/" + this.account + "/" + this.model.model, "_self").search("page", null);
 				this.analyticService.sendEvent({
 					eventCategory: "Model",

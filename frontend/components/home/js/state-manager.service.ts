@@ -73,7 +73,6 @@ export class StateManagerService {
 			changing: true
 		};
 
-		console.log("!!! state manager init");
 		this.changedState = {};
 		this.structure  = ClientConfigService.structure;
 		this.changed = {};
@@ -167,12 +166,10 @@ export class StateManagerService {
 	}
 
 	public startStateChange(stateChangeObject) {
-		console.log("!!!!@startStateChange");
 		this.stateChangeQueue.push(stateChangeObject);
 	}
 
 	public handleStateChange(stateChangeObject) {
-		console.log("!!!!@handleStateChange", stateChangeObject);
 
 		let param;
 		const fromParams = stateChangeObject.fromParams;
@@ -360,8 +357,6 @@ export class StateManagerService {
 		const updateLocation = !dontUpdateLocation ? true : false; // In case of null
 		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
 
-		// TODO: Do we have to use $timeout? :(
-		console.log("!!!! Setting changing to false");
 		this.state.changing = false;
 	}
 
