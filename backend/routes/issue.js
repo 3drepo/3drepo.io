@@ -84,7 +84,6 @@ function updateIssue(req, res, next) {
 
 	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
 		req.oldDataModel = _.cloneDeep(issue.toObject());
-
 		if(!issue) {
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
 		}
@@ -144,8 +143,8 @@ function updateIssue(req, res, next) {
 
 		return action;
 
-	}).then(issue => {
-		req.dataModel =  issue;
+	}).then(actionResult => {
+		req.dataModel =  actionResult;
 		next();
 	}).catch(err => {
 		responseCodes.onError(req, res, err);

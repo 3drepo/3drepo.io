@@ -170,6 +170,11 @@ function Utils() {
 		return this.resizeAndCropScreenshot(screenshotBuf, width, height, true);
 	};
 
+	this.changeObjectIdToString = function(obj) {
+		obj._id = this.uuidToString(obj._id);
+		return obj;
+	};
+
 	/**
 	* Create a screenshot entry from base64.
 	* @param {Object} pngBuffer

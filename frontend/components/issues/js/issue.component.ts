@@ -1008,7 +1008,7 @@ class IssueController implements ng.IController {
 				this.issuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
 						this.saving = false;
-						this.afterNewComment(response.data.issue, false);
+						this.afterNewComment(response.data, false);
 					})
 					.catch((error) => {
 						this.errorSavingComment(error);
