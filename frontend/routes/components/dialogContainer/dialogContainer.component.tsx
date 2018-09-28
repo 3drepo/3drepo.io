@@ -29,7 +29,8 @@ import Button from '@material-ui/core/Button';
 import { theme } from '../../../styles';
 import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
 import { ErrorDialog } from './components/errorDialog/errorDialog.component';
-import { Grow } from '@material-ui/core';
+import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
+import { DIALOG_TYPES } from '../../../modules/dialog/dialog.redux';
 
 interface IProps {
 	config: any;
@@ -39,8 +40,9 @@ interface IProps {
 }
 
 const DIALOG_TEMPLATES = {
-	confirmUserRemove: RemoveUserDialog,
-	error: ErrorDialog
+	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
+	[DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
+	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: ErrorDialog
 };
 
 export class DialogContainer extends React.PureComponent<IProps, any> {

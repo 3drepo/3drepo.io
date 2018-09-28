@@ -72,10 +72,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		this.setState({currentView: updatedView});
 	}
 
-	public onPermissionsChange = () => {
-
-	}
-
 	public onProjectChange = (projectName) => {
 		if (this.props.onProjectChange) {
 			this.setState({selectedProject: projectName});
@@ -141,14 +137,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 					<UserManagementTab footerLabel={footerLabel}>
 						<>
 							{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
-							{
-								currentView === PERMISSIONS_VIEWS.MODELS && (
-									<ModelsPermissions
-										onPermissionsChange={this.onPermissionsChange}
-										permissions={modelsPermissions}
-									/>
-								)
-							}
+							{currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions />}
 						</>
 					</UserManagementTab>
 				</Container>

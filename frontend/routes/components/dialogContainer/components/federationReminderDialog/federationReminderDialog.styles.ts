@@ -15,21 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import styled from 'styled-components';
+import { FONT_WEIGHT } from '../../../../../styles';
 
-/**
- * Return project details
- * @param teamspace
- * @param model
- */
-export const fetchModelPermissions = (teamspace, model) => {
-	return api.get(`${teamspace}/${model}/permissions`);
-};
+export const Container = styled.div``;
 
-export const fetchModelsPermissions = (teamspace, models) => {
-	return api.get(`${teamspace}/models/permissions?models=${models.join(',')}`);
-};
-
-export const updateModelsPermissions = (teamspace, permissionsList) => {
-	return api.post(`${teamspace}/models/permissions`, permissionsList);
-};
+export const Model = styled.div`
+  font-weight: ${FONT_WEIGHT.BOLD};
+`;

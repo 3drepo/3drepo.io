@@ -69,33 +69,33 @@ const getModelsTableRows = (models = [], selectedModels = []) => {
 
 interface IProps {
 	models: any[];
+	selectedModels: any[];
 	permissions: any[];
 	onSelectionChange: (selectedModels) => void;
-	onPermissionsChange: (updatedPermissions) => void;
+	onPermissionsChange: (modelsWithPermissions, updatedPermissions) => void;
 }
 
 interface IState {
 	modelRows: any[];
-	selectedModels: any[];
 	currentUser: any;
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
 		return {
-			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels),
+			modelRows: getModelsTableRows(nextProps.models, nextProps.selectedModels),
 			currentUser: (nextProps.permissions || []).find(({ isCurrentUser }) => isCurrentUser) || {}
 		};
 	}
 
 	public state = {
 		modelRows: [],
-		selectedModels: [],
 		currentUser: {}
 	};
 
 	public hasDisabledPermissions = (row) => {
-		const {currentUser, selectedModels} = this.state as IState;
+		const {currentUser} = this.state as IState;
+		const {selectedModels} = this.props;
 
 		const hasSelectedModels = selectedModels.length;
 		const passBaseValidation = !hasSelectedModels || row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
@@ -117,25 +117,10 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		return false;
 	}
 
-	public createPermissionsChangeHandler = (permissions, value) => () => {
-		this.props.onPermissionsChange([{
-			...permissions,
-			key: value
-		}]);
-	}
-
 	public componentDidMount() {
 		this.setState({
-			modelRows: getModelsTableRows(this.props.models, this.state.selectedModels)
+			modelRows: getModelsTableRows(this.props.models, this.props.selectedModels)
 		});
-	}
-
-	public handleSelectionChange = (field) => (rows) => {
-		const handleChange = cond([
-			[matches('selectedModels'), () => this.props.onSelectionChange(rows)]
-		])(field);
-
-		this.setState({[field]: rows});
 	}
 
 	public handleModelsSearch = ({rows, searchFields, searchText}) => {
@@ -152,9 +137,30 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public handlePermissionsChange = (permissions) => {
+		if (this.props.onPermissionsChange) {
+			const modelsWithPermissions = this.props.selectedModels.map((selectedModel) => {
+				const newPermissions = selectedModel.permissions.map((currentPermission) => {
+					const memberPermission = permissions.find(({user}) => user === currentPermission.user);
+					return {
+						user: currentPermission.user,
+						permission: memberPermission ? memberPermission.key : currentPermission.permission
+					};
+				}).filter(({ permission }) => permission);
+
+				return {
+					...pick(selectedModel, ['name', 'model', 'federate', 'subModels']),
+					permissions: newPermissions
+				};
+			});
+
+			this.props.onPermissionsChange(modelsWithPermissions, permissions);
+		}
+	}
+
 	public render() {
-		const {models, permissions} = this.props;
-		const {modelRows, selectedModels} = this.state;
+		const {models, permissions, selectedModels} = this.props;
+		const {modelRows} = this.state;
 
 		return (
 			<MuiThemeProvider theme={theme}>
@@ -167,7 +173,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 						<CustomTable
 							cells={MODEL_TABLE_CELLS}
 							rows={modelRows}
-							onSelectionChange={this.handleSelectionChange('selectedModels')}
+							onSelectionChange={this.props.onSelectionChange}
 							onSearch={this.handleModelsSearch}
 						/>
 						{ !models.length ?
@@ -181,8 +187,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 								<PermissionsTable
 									permissions={permissions}
 									roles={MODEL_ROLES_LIST}
-									onSelectionChange={this.handleSelectionChange('selectedUsers')}
-									onPermissionsChange={this.props.onPermissionsChange}
+									onPermissionsChange={this.handlePermissionsChange}
 									rowStateInterceptor={this.hasDisabledPermissions}
 								/>
 							</SimpleBar>

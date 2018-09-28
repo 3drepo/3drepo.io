@@ -48,9 +48,11 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	setProject: ['project'],
 	updateProjectPermissions: ['permissions'],
 	updateProjectPermissionsSuccess: ['permissions'],
+	fetchModelsPermissions: ['models'],
 	fetchModelPermissionsSuccess: ['selectedModels'],
-	fetchMultipleModelsPermissions: ['models'],
-	updateMultipleModelsPermissions: ['permissions']
+	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
+	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
+	updateModelPermissionsSuccess: ['modelsWithPermissions', 'permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -61,13 +63,15 @@ export const INITIAL_STATE = {
 	fedModels: [],
 	modelsPemissions: [],
 	users: [],
+	usersSuggestions: [],
+	usersPermissions: [],
 	jobs: [],
 	jobsColors: [],
 	collaboratorLimit: null,
 	isPending: false,
-	usersSuggestions: [],
 	currentProject: {
-		permissions: []
+		permissions: [],
+		modelsPermissions: []
 	}
 };
 
@@ -162,11 +166,11 @@ export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions })
 };
 
 export const getUsersSuggestionsSuccess = (state = INITIAL_STATE, { suggestions }) => {
-	return { ...state, usersSuggestions: suggestions };
+	return {...state, usersSuggestions: suggestions};
 };
 
 export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) => {
-	return { ...state, usersSuggestions: [] };
+	return {...state, usersSuggestions: []};
 };
 
 export const updateJobsColors = (state = INITIAL_STATE, { color }) => {
@@ -212,24 +216,46 @@ export const setProject = (state = INITIAL_STATE, { project }) => {
 export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
 	const currentProject = {...state.currentProject};
 
-	if (permissions.length) {
-		currentProject.permissions = [...currentProject.permissions].map((currentPermissions) => {
-			const updatedPermissions = permissions.find(({user}) => currentPermissions.user === user);
-			if (updatedPermissions) {
-				return updatedPermissions;
-			}
-			return currentPermissions;
-		});
-	} else {
-		currentProject.permissions = [];
-	}
+	currentProject.permissions = [...currentProject.permissions].map((currentPermissions) => {
+		const updatedPermissions = permissions.find(({user}) => currentPermissions.user === user);
+		if (updatedPermissions) {
+			return updatedPermissions;
+		}
+		return currentPermissions;
+	});
 
 	return {...state, currentProject};
 };
 
 export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
 	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
-	const currentProject = Object.assign({}, state.currentProject, {modelsPermissions: permissions});
+	const currentProject = Object.assign({}, state.currentProject, {
+		modelsPermissions: permissions,
+		currentModels: selectedModels
+	});
+	return {...state, currentProject};
+};
+
+export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { modelsWithPermissions, permissions }) => {
+	const currentProject = {...state.currentProject};
+	const onlyOneModelWasChanged = modelsWithPermissions.length === 1;
+
+	const modelPermissions = modelsWithPermissions[0].permissions.map(({ user, permission }) => {
+		let updatedPermissionKey = onlyOneModelWasChanged ? permission : 'undefined';
+		const updatedPermissionsData = permissions.find((userPermission) => userPermission.user === user);
+
+		if (updatedPermissionsData) {
+			updatedPermissionKey = updatedPermissionsData.key;
+		}
+
+		return {
+			user,
+			permission: updatedPermissionKey
+		};
+	});
+
+	currentProject.modelsPermissions = modelPermissions;
+
 	return {...state, currentProject};
 };
 
@@ -254,5 +280,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PROJECT_PERMISSIONS_SUCCESS]: updateProjectPermissionsSuccess,
 
 	// Models
-	[UserManagementTypes.FETCH_MODEL_PERMISSIONS_SUCCESS]: fetchModelPermissionsSuccess
+	[UserManagementTypes.FETCH_MODEL_PERMISSIONS_SUCCESS]: fetchModelPermissionsSuccess,
+	[UserManagementTypes.UPDATE_MODEL_PERMISSIONS_SUCCESS]: updateModelPermissionsSuccess
 });

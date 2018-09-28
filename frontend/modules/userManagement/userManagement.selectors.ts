@@ -33,6 +33,7 @@ const getExtendedProjectPermissions = (currentUsers = [], project = {permissions
 
 		return {
 			...userData,
+			isProjectAdmin: projectPermissionsKey === PROJECT_ROLES_TYPES.ADMINISTRATOR,
 			permissions,
 			key: projectPermissionsKey
 		};
@@ -43,15 +44,15 @@ const getExtendedProjectPermissions = (currentUsers = [], project = {permissions
  * Bind model permissions with members data
  * @param modelPermissions
  */
-const getExtendedModelPermissions = (currentUsers = [], modelPermissions?) => {
+const getExtendedModelPermissions = (currentUsers = [], modelPermissions = []) => {
 	return currentUsers.map((memberData) => {
-		const memberModelPermissions = (modelPermissions || []).find(({ user }) => user === memberData.user);
+		const memberModelPermissions = modelPermissions.find(({ user }) => user === memberData.user);
 		let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
 
 		if (memberData.isAdmin || memberData.isProjectAdmin) {
 			modelPermissionsKey = MODEL_ROLES_TYPES.ADMINISTRATOR;
 		} else if (memberModelPermissions) {
-			modelPermissionsKey = get(memberModelPermissions, "permission", MODEL_ROLES_TYPES.UNASSIGNED);
+			modelPermissionsKey = get(memberModelPermissions, 'permission', MODEL_ROLES_TYPES.UNASSIGNED);
 		} else {
 			modelPermissionsKey = 'undefined';
 		}
@@ -60,8 +61,6 @@ const getExtendedModelPermissions = (currentUsers = [], modelPermissions?) => {
 			...memberData,
 			permissions: get(memberModelPermissions, 'permissions', []),
 			key: modelPermissionsKey,
-			disabled: !modelPermissions,
-			selected: get(memberModelPermissions, 'selected', false),
 			isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
 		};
 	});
@@ -113,6 +112,10 @@ export const selectExtendedProjectPermissions = createSelector(
 
 export const selectModels = createSelector(
 	selectUserManagementDomain, (state) => state.currentProject.models || []
+);
+
+export const selectCurrentModels = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject.currentModels || []
 );
 
 export const selectModelsPermissions = createSelector(

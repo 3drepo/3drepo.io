@@ -23,6 +23,7 @@ import { DialogActions } from '../dialog/dialog.redux';
 
 import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
 import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
+import { DIALOG_TYPES } from '../dialog/dialog.redux';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
@@ -68,7 +69,7 @@ export function* removeUser({ username }) {
 		if (errorData.status === 400 && errorData.value === responseCode) {
 			const config = {
 				title: 'Remove User',
-				templateType: 'confirmUserRemove',
+				templateType: DIALOG_TYPES.CONFIRM_USER_REMOVE,
 				confirmText: 'Remove',
 				onConfirm: () => UserManagementActions.removeUserCascade(username),
 				data: {
@@ -195,14 +196,14 @@ export function* updateProjectPermissions({ permissions }) {
 }
 
 // Models
-export function* fetchMultipleModelsPermissions({ models }) {
+export function* fetchModelsPermissions({ models }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		let data = [];
 
 		if (models.length) {
 			const requiredModels = models.map(({ model }) => model);
-			const response = yield API.fetchMultipleModelsPermissions(teamspace, requiredModels);
+			const response = yield API.fetchModelsPermissions(teamspace, requiredModels);
 			data = response.data;
 		}
 
@@ -212,12 +213,51 @@ export function* fetchMultipleModelsPermissions({ models }) {
 	}
 }
 
-export function* updateMultipleModelsPermissions({ permissions }) {
+export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions }) {
+	try {
+		const currentProject = yield select(selectCurrentProject);
+		const permissionlessModels = [];
+		for (let index = 0; index < modelsWithPermissions.length; index++) {
+			const selectedModel = modelsWithPermissions[index];
+
+			if (selectedModel.federate && selectedModel.subModels) {
+				selectedModel.subModels.forEach((subModel) => {
+					Object.keys(currentProject.models).forEach((modelId) => {
+						const projectModel = currentProject.models[modelId];
+						if (subModel.model === projectModel.model) {
+							permissionlessModels.push(projectModel.name);
+						}
+					});
+				});
+			}
+		}
+
+		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissions);
+
+		if (permissionlessModels.length) {
+			const config = {
+				title: 'Reminder about Federation Permissions',
+				templateType: DIALOG_TYPES.FEDERATION_REMINDER_DIALOG,
+				onConfirm: () => resolveUpdate,
+				data: {
+					models: permissionlessModels
+				}
+			};
+
+			yield put(DialogActions.showDialog(config));
+		} else {
+			yield put(resolveUpdate);
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
+export function* updateModelsPermissions({ modelsWithPermissions, permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.updateMultipleModelsPermissions(teamspace, permissions);
-
-		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
+		const data = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
+		yield put(UserManagementActions.updateModelPermissionsSuccess(modelsWithPermissions, permissions));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
 	}
@@ -238,8 +278,9 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
 
 	// Models
-	yield takeLatest(UserManagementTypes.FETCH_MULTIPLE_MODELS_PERMISSIONS, fetchMultipleModelsPermissions);
-	yield takeLatest(UserManagementTypes.UPDATE_MULTIPLE_MODELS_PERMISSIONS, updateMultipleModelsPermissions);
+	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);
+	yield takeLatest(UserManagementTypes.UPDATE_MODELS_PERMISSIONS_PRE, updateModelsPermissionsPre);
+	yield takeLatest(UserManagementTypes.UPDATE_MODELS_PERMISSIONS, updateModelsPermissions);
 
 	// Projects
 	yield takeLatest(UserManagementTypes.FETCH_PROJECT, fetchProject);
