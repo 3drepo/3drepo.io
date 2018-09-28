@@ -357,7 +357,11 @@ export class StateManagerService {
 		const updateLocation = !dontUpdateLocation ? true : false; // In case of null
 		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
 
-		this.state.changing = false;
+		// This timeout is needed or changing revision doesn't work... for some reason.
+		this.$timeout(() => {
+			this.state.changing = false;
+		});
+
 	}
 
 	public refreshHandler(event) {
