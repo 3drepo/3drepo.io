@@ -18,14 +18,13 @@
 import * as React from 'react';
 import {isEqual, isEmpty} from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 import { theme } from '../../styles';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { ProjectsPermissions } from '../projectsPermissions';
 import { ModelsPermissions } from '../modelsPermissions';
-import { Container, Options, SelectContainer } from './projects.styles';
+import { Container, Options, SelectContainer, SwitchButton, IconLeft, IconRight } from './projects.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
 export const PERMISSIONS_VIEWS = {
@@ -126,12 +125,14 @@ export class Projects extends React.PureComponent<IProps, IState> {
 							/>
 						</SelectContainer>
 						<Grid item>
-							<Button
+							<SwitchButton
 								color="secondary"
 								onClick={this.handleViewChange}
 							>
+								{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
 								{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
-							</Button>
+								{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
+							</SwitchButton>
 						</Grid>
 					</Options>
 					<UserManagementTab footerLabel={footerLabel}>
