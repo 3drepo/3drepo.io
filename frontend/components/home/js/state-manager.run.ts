@@ -82,6 +82,18 @@ function StateManagerRun(
 		StateManager.handleStateChange(stateChangeObject);
 	});
 
+	$rootScope.$on("$stateChangeError", (event, toState, toParams, fromState, fromParams, err) => {
+
+		const stateChangeObject = {
+			toState,
+			toParams,
+			fromState,
+			fromParams
+		};
+		console.log("!!!!@stateChangeError", err);
+		StateManager.handleStateChange(stateChangeObject);
+	});
+
 	$rootScope.$on("$locationChangeSuccess", () => {
 
 		AnalyticService.sendPageView(location);
