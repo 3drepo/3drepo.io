@@ -20,12 +20,15 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { ModelsPermissions } from './modelsPermissions.component';
-import { selectModels } from '../../modules/userManagement/userManagement.selectors';
+import { UserManagementActions, selectModels, selectExtendedModelPermissions } from '../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
-	models: selectModels
+	models: selectModels,
+	permissions: selectExtendedModelPermissions
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	onSelectionChange: UserManagementActions.fetchMultipleModelsPermissions
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);

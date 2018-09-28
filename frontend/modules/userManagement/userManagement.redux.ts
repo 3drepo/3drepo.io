@@ -19,6 +19,7 @@ import {createActions, createReducer} from 'reduxsauce';
 import {pick, first, get} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
+import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
@@ -45,7 +46,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJobSuccess: ['job'],
 	fetchProject: ['project'],
 	setProject: ['project'],
-	fetchModelPermissions: ['model'],
+	fetchModelPermissionsSuccess: ['permissions'],
 	fetchMultipleModelsPermissions: ['models'],
 	updateMultipleModelsPermissions: ['permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
@@ -53,15 +54,19 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 export const INITIAL_STATE = {
 	selectedTeamspace: null,
 	projects: [],
-	models: [],
 	permissions: [],
+	models: [],
 	fedModels: [],
+	modelsPemissions: [],
 	users: [],
 	jobs: [],
 	jobsColors: [],
 	collaboratorLimit: null,
 	isPending: false,
-	usersSuggestions: []
+	usersSuggestions: [],
+	currentProject: {
+		permissions: []
+	}
 };
 
 /**
@@ -109,7 +114,7 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 };
 
 export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
-	return { ...state, isPending};
+	return {...state, isPending};
 };
 
 export const addUserSuccess = (state = INITIAL_STATE, { user }) => {
@@ -117,18 +122,18 @@ export const addUserSuccess = (state = INITIAL_STATE, { user }) => {
 		...state.users,
 		prepareUserData(state.selectedTeamspace, user)
 	];
-	return { ...state, users };
+	return {...state, users};
 };
 
 export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
 	const users = state.users.filter(({user}) => {
 		return user !== username;
 	});
-	return { ...state, users };
+	return {...state, users};
 };
 
 export const setTeamspace = (state = INITIAL_STATE, { teamspace }) => {
-	return { ...state, teamspace };
+	return {...state, teamspace};
 };
 
 export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) => {
@@ -139,7 +144,7 @@ export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) =
 
 		return userData;
 	});
-	return { ...state, users };
+	return {...state, users};
 };
 
 export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
@@ -151,7 +156,7 @@ export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions })
 
 		return userData;
 	});
-	return { ...state, users };
+	return {...state, users};
 };
 
 export const getUsersSuggestionsSuccess = (state = INITIAL_STATE, { suggestions }) => {
@@ -168,7 +173,7 @@ export const updateJobsColors = (state = INITIAL_STATE, { color }) => {
 		jobsColors.unshift(color);
 	}
 
-	return { ...state, jobsColors };
+	return {...state, jobsColors};
 };
 
 export const createJobSuccess = (state = INITIAL_STATE, { job }) => {
@@ -193,13 +198,18 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 		return _id !== jobId;
 	});
 
-	return { ...state, jobs };
+	return {...state, jobs};
 };
 
 export const setProject = (state = INITIAL_STATE, { project }) => {
 	const models = get(state.projects.find(({_id}) => project._id === _id), 'models', []);
 	project.models = [...models];
 	return {...state, currentProject: project};
+};
+
+export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
+	const currentProject = Object.assign({}, state.currentProject, {modelsPermissions: permissions});
+	return {...state, currentProject};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -219,5 +229,8 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
 
 	// Project
-	[UserManagementTypes.SET_PROJECT]: setProject
+	[UserManagementTypes.SET_PROJECT]: setProject,
+
+	// Models
+	[UserManagementTypes.FETCH_MODEL_PERMISSIONS_SUCCESS]: fetchModelPermissionsSuccess
 });

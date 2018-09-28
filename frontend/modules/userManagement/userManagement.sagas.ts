@@ -182,20 +182,17 @@ export function* fetchProject({ project }) {
 }
 
 // Models
-export function* fetchModelPermissions({ model }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.fetchModelPermissions(teamspace, model);
-		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
-	}
-}
-
 export function* fetchMultipleModelsPermissions({ models }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.fetchMultipleModelsPermissions(teamspace, models);
+		let data = [];
+
+		if (models.length) {
+			const requiredModels = models.map(({ model }) => model);
+			const response = yield API.fetchMultipleModelsPermissions(teamspace, requiredModels);
+			data = response.data;
+		}
+
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
@@ -227,7 +224,6 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
 
 	// Models
-	yield takeLatest(UserManagementTypes.FETCH_MODEL_PERMISSIONS, fetchModelPermissions);
 	yield takeLatest(UserManagementTypes.FETCH_MULTIPLE_MODELS_PERMISSIONS, fetchMultipleModelsPermissions);
 	yield takeLatest(UserManagementTypes.UPDATE_MULTIPLE_MODELS_PERMISSIONS, updateMultipleModelsPermissions);
 

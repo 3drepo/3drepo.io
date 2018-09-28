@@ -76,23 +76,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	}
 
-	public onModelSelectionChange = () => {
-/* 		if (selectedModels.length) {
-			const requiredModels = selectedModels.map(({ model }) => model);
-			this.ModelsService
-				.getMulitpleModelsPermissions(this.currentTeamspace.account, requiredModels)
-				.then(({ data: modelsWithPermissions }) => {
-					this.selectedModels = modelsWithPermissions;
-					const permissionsToShow = this.selectedModels.length === 1 ? this.selectedModels[0].permissions : [];
-
-					this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
-				});
-		} else {
-			this.selectedModels = [];
-			this.assignedModelPermissions = this.getExtendedModelPermissions();
-		} */
-	}
-
 	public onProjectChange = (projectName) => {
 		if (this.props.onProjectChange) {
 			this.setState({selectedProject: projectName});
@@ -167,7 +150,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 							{
 								currentView === PERMISSIONS_VIEWS.MODELS && (
 									<ModelsPermissions
-										onSelectionChange={this.onModelSelectionChange}
 										onPermissionsChange={this.onPermissionsChange}
 										permissions={modelsPermissions}
 									/>

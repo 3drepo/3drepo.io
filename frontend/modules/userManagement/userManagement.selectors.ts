@@ -16,9 +16,10 @@
  */
 
 import { createSelector } from 'reselect';
-import { first } from 'lodash';
+import { first, get } from 'lodash';
 import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 
 const getExtendedProjectPermissions = (currentUsers = [], project = {permissions: []}) => {
 	return project.permissions.map(({ user, permissions = [], isSelected = false }) => {
@@ -35,6 +36,34 @@ const getExtendedProjectPermissions = (currentUsers = [], project = {permissions
 			permissions,
 			key: projectPermissionsKey,
 			isSelected
+		};
+	});
+};
+
+/**
+ * Bind model permissions with members data
+ * @param modelPermissions
+ */
+const getExtendedModelPermissions = (currentUsers = [], modelPermissions?) => {
+	return currentUsers.map((memberData) => {
+		const memberModelPermissions = (modelPermissions || []).find(({ user }) => user === memberData.user);
+		let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
+
+		if (memberData.isAdmin || memberData.isProjectAdmin) {
+			modelPermissionsKey = MODEL_ROLES_TYPES.ADMINISTRATOR;
+		} else if (memberModelPermissions) {
+			modelPermissionsKey = get(memberModelPermissions, "permission", MODEL_ROLES_TYPES.UNASSIGNED);
+		} else {
+			modelPermissionsKey = 'undefined';
+		}
+
+		return {
+			...memberData,
+			permissions: get(memberModelPermissions, "permissions", []),
+			key: modelPermissionsKey,
+			disabled: !modelPermissions,
+			selected: get(memberModelPermissions, "selected", false),
+			isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
 		};
 	});
 };
@@ -85,4 +114,14 @@ export const selectExtendedProjectPermissions = createSelector(
 
 export const selectModels = createSelector(
 	selectUserManagementDomain, (state) => state.currentProject.models || []
+);
+
+export const selectModelsPermissions = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions || []
+);
+
+export const selectExtendedModelPermissions = createSelector(
+	selectExtendedProjectPermissions,
+	selectModelsPermissions,
+	getExtendedModelPermissions
 );
