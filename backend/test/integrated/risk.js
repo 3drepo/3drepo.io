@@ -58,9 +58,9 @@ describe("Risks", function () {
 		},
 		"assigned_roles":["jobB"],
 		"category":"other issue",
-		"likelihood":"0",
-		"consequence":"0",
-		"level_of_risk":"0",
+		"likelihood":0,
+		"consequence":0,
+		"level_of_risk":0,
 		"mitigation_status":"proposed",
 		"mitigation_desc":"Task123"
 	};
@@ -414,7 +414,7 @@ describe("Risks", function () {
 			const risk = Object.assign({"name":"Issue test"}, baseRisk);
 			let riskId;
 
-			const likelihood = { likelihood: "high" };
+			const likelihood = { likelihood: 0 };
 
 			async.series([
 				function(done) {
@@ -445,7 +445,7 @@ describe("Risks", function () {
 			const risk = Object.assign({"name":"Issue test"}, baseRisk);
 			let riskId;
 
-			const consequence = { consequence: "low" };
+			const consequence = { consequence: 0 };
 
 			async.series([
 				function(done) {
