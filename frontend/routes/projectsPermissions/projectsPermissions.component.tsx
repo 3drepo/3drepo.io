@@ -94,7 +94,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 						onPermissionsChange={this.handlePermissionsChange}
 						rowStateInterceptor={this.hasDisabledPermissions}
 					/>
-					{!permissions ?
+					{!permissions.length ?
 						<TextOverlay content="Select a project to view the users' permissions" /> :
 						null
 					}
