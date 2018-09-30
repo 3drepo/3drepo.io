@@ -25,6 +25,7 @@ import { theme } from '../../styles';
 import Users from '../users/users.container';
 import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { Container, Title, Content, Header, TabContent } from './userManagement.styles';
 
 export const TABS_TYPES = {
@@ -52,27 +53,47 @@ interface IProps {
 	currentTeamspace: any;
 	teamspaces: any[];
 	isLoadingTeamspace: boolean;
+	onTeamspaceChange: (teamspace) => void;
 }
 
 export class UserManagement extends React.PureComponent<IProps, any> {
 	public state = {
 		isTeamspaceAdmin: true,
-		activeTab: 1
+		activeTab: 1,
+		selectedTeamspace: ''
 	};
 
 	public handleChange = (event, value) => {
 		this.setState({activeTab: value});
 	}
 
+	public onTeamspaceChange = (teamspace) => {
+		this.setState({
+			selectedTeamspace: teamspace
+		});
+
+		if (this.props.onTeamspaceChange) {
+			this.props.onTeamspaceChange(teamspace);
+		}
+	}
+
 	public render() {
-		const {isLoadingTeamspace} = this.props;
-		const {isTeamspaceAdmin, activeTab} = this.state;
+		const {isLoadingTeamspace, teamspaces} = this.props;
+		const {isTeamspaceAdmin, activeTab, selectedTeamspace} = this.state;
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container>
 					<Title>User management</Title>
 					<Content>
 						<Header>
+							<CellSelect
+								items={teamspaces}
+								value={selectedTeamspace}
+								placeholder="Teamspace"
+								disabledPlaceholder={true}
+								onChange={this.onTeamspaceChange}
+								inputId="project"
+							/>
 							<Tabs
 								value={this.state.activeTab}
 								indicatorColor="primary"
