@@ -26,10 +26,14 @@ import {
 	UserManagementActions,
 	selectUsers,
 	selectUsersLimit,
-	selectJobs,
-	selectJobsColors,
 	selectIsPending
 } from "../../../modules/userManagement";
+
+import {
+	JobsActions,
+	selectJobs,
+	selectJobsColors
+} from "../../../modules/jobs";
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -174,27 +178,6 @@ class AccountUserManagementController implements ng.IController {
 			newParams.view = null;
 		}
 		this.$state.go(this.$state.$current.name, newParams, {notify: false});
-	}
-
-	/**
-	 * Get teamspace jobs list
-	 * @param teamspaceName
-	 */
-	public getTeamspaceJobsData(teamspaceName: string): Promise<any> {
-		const jobsPromises = [
-			this.JobsService.getList(teamspaceName),
-			this.JobsService.getColors(teamspaceName)
-		];
-		return Promise.all(jobsPromises)
-			.catch(this.DialogService.showError.bind(null, "retrieve", "jobs"));
-	}
-
-	/**
-	 * Update local list of members
-	 * @param updatedMembers
-	 */
-	public onMembersChange(updatedMembers): void {
-		this.users = [...updatedMembers];
 	}
 }
 

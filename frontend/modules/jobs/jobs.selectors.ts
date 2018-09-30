@@ -15,27 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../helpers/migration';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import { createSelector } from 'reselect';
 
-import { Jobs } from './jobs.component';
+export const selectJobsDomain = (state) => Object.assign({}, state.jobs);
 
-import {
-	JobsActions,
-	selectJobsColors,
-	selectJobs
-} from '../../modules/jobs';
+export const selectJobs = createSelector(
+	selectJobsDomain, (state) => state.jobs
+);
 
-const mapStateToProps = createStructuredSelector({
-	jobs: selectJobs,
-	colors: selectJobsColors
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	updateColor: JobsActions.updateJobColor,
-	remove: JobsActions.removeJob,
-	create: JobsActions.createJob
-}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(Jobs);
+export const selectJobsColors = createSelector(
+	selectJobsDomain, (state) => state.colors
+);

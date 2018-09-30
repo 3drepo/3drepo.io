@@ -75,14 +75,6 @@ export const selectUsersLimit = createSelector(
 	selectUserManagementDomain, (state) => state.collaboratorLimit || 0
 );
 
-export const selectJobs = createSelector(
-	selectUserManagementDomain, (state) => state.jobs
-);
-
-export const selectJobsColors = createSelector(
-	selectUserManagementDomain, (state) => state.jobsColors
-);
-
 export const selectIsPending = createSelector(
 	selectUserManagementDomain, (state) => state.isPending
 );

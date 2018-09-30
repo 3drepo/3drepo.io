@@ -135,41 +135,6 @@ export function* getUsersSuggestions({ searchText }) {
 	}
 }
 
-// Jobs
-
-export function* updateJobColor({ job }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.updateJob(teamspace, job);
-
-		yield put(UserManagementActions.updateJobSuccess(job));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'job color', error.response));
-	}
-}
-
-export function* createJob({ job }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.createJob(teamspace, job);
-
-		yield put(UserManagementActions.createJobSuccess(job));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('create', 'job', error.response));
-	}
-}
-
-export function* removeJob({ jobId }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.deleteJob(teamspace, jobId);
-
-		yield put(UserManagementActions.removeJobSuccess(jobId));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'job', error.response));
-	}
-}
-
 // Projects
 export function* fetchProject({ project }) {
 	try {
@@ -270,12 +235,7 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
-
-	// Jobs
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
-	yield takeLatest(UserManagementTypes.CREATE_JOB, createJob);
-	yield takeLatest(UserManagementTypes.REMOVE_JOB, removeJob);
-	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
 
 	// Models
 	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);
