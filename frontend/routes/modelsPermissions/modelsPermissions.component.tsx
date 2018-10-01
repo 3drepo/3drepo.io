@@ -230,7 +230,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 						value,
 						onChange: this.onGlobalPermissionsChange,
 						checked: this.state.selectedGlobalPermissions === value,
-						disabled: !this.state.selectedUsers.length
+						disabled: !this.state.selectedUsers.length || value === MODEL_ROLES_TYPES.ADMINISTRATOR
 					}
 				},
 				CellComponent: PermissionsCell,
@@ -255,7 +255,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 					return {
 						value: userPermissions.key,
 						checked: requiredValue === userPermissions.key,
-						disabled,
+						disabled: requiredValue === MODEL_ROLES_TYPES.ADMINISTRATOR || disabled,
 						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
 					};
 				})
