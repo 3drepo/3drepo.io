@@ -53,7 +53,6 @@ export const CheckboxField = (props) => {
 	);
 };
 
-
 export const CELL_TYPES = {
 	USER: 1,
 	JOB: 2,
