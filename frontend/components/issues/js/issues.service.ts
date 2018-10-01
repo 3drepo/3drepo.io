@@ -122,6 +122,7 @@ export class IssuesService {
 			allJobs: [],
 			modelUserJob: null
 		};
+		this.removeUnsavedPin();
 	}
 
 	public getIssuesAndJobs(account: string, model: string, revision: string) {

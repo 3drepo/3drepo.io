@@ -93,7 +93,7 @@ class RisksCardController implements ng.IController {
 
 	public $onInit() {
 
-		this.risksService.reset();
+		this.risksService.removeUnsavedPin();
 
 		this.showProgress = true;
 		this.progressInfo = "Loading risks";
@@ -208,6 +208,8 @@ class RisksCardController implements ng.IController {
 				if (this.risksService.state.selectedRisk && this.risksService.state.selectedRisk._id) {
 					risksListItemId = "risk" + this.risksService.state.selectedRisk._id;
 				}
+
+				this.risksService.state.displayRisk = null;
 
 				this.$state.go("home.account.model",
 					{
@@ -339,7 +341,7 @@ class RisksCardController implements ng.IController {
 
 			this.viewerService.highlightObjects([]);
 			// TODO Change state to risk
-			/*this.$state.go("home.account.model.risk",
+			this.$state.go("home.account.model.risk",
 				{
 					account: this.account,
 					model: this.model,
@@ -348,7 +350,7 @@ class RisksCardController implements ng.IController {
 					noSet: true
 				},
 				{notify: false}
-			);*/
+			);
 
 			this.risksService.setSelectedRisk(risk, true, this.revision);
 
@@ -423,4 +425,4 @@ export const RisksCardComponent: ng.IComponentOptions = {
 
 export const RisksCardComponentModule = angular
 	.module("3drepo")
-	.component("risksCard", RisksCardComponent);
+	.component("risks", RisksCardComponent);

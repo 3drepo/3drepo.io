@@ -110,6 +110,17 @@ class RisksListController implements ng.IController {
 
 		});
 
+		this.$scope.$watch(
+			() => {
+				return this.risksService.getDisplayRisk();
+			},
+			(riskToDisplay) => {
+				if (riskToDisplay) {
+					this.editRisk(riskToDisplay);
+				}
+			},
+			true
+		);
 	}
 
 	public handleMenuOptions() {

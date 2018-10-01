@@ -585,6 +585,18 @@ export class PanelService {
 		return panels;
 	}
 
+	public hidePanelsByType(panelCardType: string) {
+		this.getPanelsByType(panelCardType).forEach((panel) => {
+			panel.show = false;
+		});
+	}
+
+	public showPanelsByType(panelCardType: string) {
+		this.getPanelsByType(panelCardType).forEach((panel) => {
+			panel.show = true;
+		});
+	}
+
 	public hideSubModels(issuesCardIndex: number, hide: boolean) {
 
 		this.panelCards.left[issuesCardIndex].menu

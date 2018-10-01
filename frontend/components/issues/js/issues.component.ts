@@ -88,7 +88,7 @@ class IssuesController implements ng.IController {
 
 	public $onInit() {
 
-		this.issuesService.reset();
+		this.issuesService.removeUnsavedPin();
 
 		this.saveIssueDisabled = true;
 		this.allIssues = [];

@@ -1,80 +1,80 @@
 /** Risks ************************************************************************************************************/
 
-risks-card {
+risks {
   display: block;
   height: 100%;
   position: relative;
 }
 
-risks-card #risksAddContainer {
+risks #risksAddContainer {
   position: relative;
   margin: 15px;
 }
-risks-card #risksAddContainer .md-dialog-container {
+risks #risksAddContainer .md-dialog-container {
   top: 0 !important;
   height: 200px !important;
 }
-risks-card #risksAddContainer .md-dialog-backdrop {
+risks #risksAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
-risks-card #risksAddContainer md-input-container {
+risks #risksAddContainer md-input-container {
   margin-bottom: 0;
 }
-risks-card #risksAddContainer h4 {
+risks #risksAddContainer h4 {
   margin-left: 4px;
   color: rgba(0, 0, 0, 0.6);
 }
 
-risks-card .riskHeader {
+risks .riskHeader {
   position: relative;
 }
-risks-card .riskHeader:hover {
+risks .riskHeader:hover {
   background-color: #EEEEEE;
   cursor: pointer;
 }
 
-risks-card md-list {
+risks md-list {
   padding: 0;
 }
 
-risks-card .risksInfo {
+risks .risksInfo {
   text-align: center;
   padding: 15px;
   background: #E8EAF6;
   margin: 15px;
   border-radius: 4px;
 }
-risks-card .risksInfo p {
+risks .risksInfo p {
   margin: 0;
   color: rgba(0, 0, 0, 0.7);
 }
 
-risks-card #addAlert {
+risks #addAlert {
   position: absolute;
   top: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
 }
-risks-card #addAlert #addAlertBackground {
+risks #addAlert #addAlertBackground {
   background: rgba(0, 0, 0, 0.6);
   padding: 40px;
 }
-risks-card #addAlert #addAlertBackground #addAlertInfo {
+risks #addAlert #addAlertBackground #addAlertInfo {
   background: #FFFFFF;
   border-radius: 4px;
 }
-risks-card #addAlert #addAlertBackground #addAlertInfo .md-button {
+risks #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
 }
 
-risks-card span.addHint {
+risks span.addHint {
   color: grey;
   padding-right: 6px;
   font-size: 14px;
 }
 
-risks-card #risksAddButton {
+risks #risksAddButton {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -85,81 +85,81 @@ risks-card #risksAddButton {
   padding: 0;
 }
 
-/* risks-card #risksAddButton button {
+/* risks #risksAddButton button {
   float: right;
 } */
 
-risks-card #riskDescriptionContainer {
+risks #riskDescriptionContainer {
   margin-top: 0px;
 }
 
-risks-card #riskInformation {
+risks #riskInformation {
   display: block;
   overflow-y: scroll;
   position: relative;
   height: calc(100% - 75px);
 }
 
-risks-card .importBCFLoading {
+risks .importBCFLoading {
   margin: 10px auto;
 }
 
-risks-card #riskRoleIndicator {
+risks #riskRoleIndicator {
   width: 8px;
   border: 1px solid #DDDDDD;
   margin-right: 10px;
 }
 
 /** Risk *************************************************************************************************************/
-risk-item {
+risk {
   display: block;
   height: 100%;
   position: absolute;
   overflow: hidden;
 }
 
-risk-item md-list-item .md-button,
-risk-item md-list-item .md-button .md-ripple-container {
+risk md-list-item .md-button,
+risk md-list-item .md-button .md-ripple-container {
   border-radius: 0;
 }
 
-risk-item h3,
-risk-item h4 {
+risk h3,
+risk h4 {
   word-wrap: break-word;
   white-space: normal !important;
 }
 
-risk-item #descriptionText {
+risk #descriptionText {
   max-height: 100px;
 }
 
-risk-item #descriptionText textarea {
+risk #descriptionText textarea {
   max-height: 100px;
   height: 30px;
   overflow-y: auto;
 }
 
-risk-item .riskCommentsContainer {
+risk .riskCommentsContainer {
   padding: 0 15px 0 25px
 }
-risk-item .riskCommentsContainer md-list-item {
+risk .riskCommentsContainer md-list-item {
   padding: 0 !important;
 }
 
-risk-item .riskCommentsContainer md-list-item .commentModifyButton {
+risk .riskCommentsContainer md-list-item .commentModifyButton {
   width: 20px;
   height: 20px;
   font-size: 20px;
   margin: 0 0 0 20px;
   outline: none;
 }
-risk-item .riskCommentsContainer .riskCommentInfo {
+risk .riskCommentsContainer .riskCommentInfo {
   position: relative;
 }
-risk-item .riskCommentsContainer .riskCommentInfo p {
+risk .riskCommentsContainer .riskCommentInfo p {
   color: rgba(0,0,0,0.35) !important;
 }
-risk-item .riskCommentsContainer .riskCommentsFooter {
+risk .riskCommentsContainer .riskCommentsFooter {
   margin-top: -15px;
   padding-bottom: 10px;
   /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
@@ -175,22 +175,22 @@ md-list-item .riskAssignColourMarker {
   margin-right: 10px;
 }
 
-risk-item .riskOpenContainer {
+risk .riskOpenContainer {
   margin-top: 10px;
 }
 
-risk-item #riskDueDate .md-datepicker-button {
+risk #riskDueDate .md-datepicker-button {
   margin-left: 0px;
   margin-right: 0px;
   padding-left: 0px;
   padding-right: 0px;
 }
 
-risk-item #riskDueDate .md-datepicker-button md-icon {
+risk #riskDueDate .md-datepicker-button md-icon {
   margin-left: 0px;
 }
 
-risk-item #riskDueDate .md-datepicker-input-container {
+risk #riskDueDate .md-datepicker-input-container {
   margin: 0px;
   width: 167.5px;
 }
@@ -322,18 +322,18 @@ risks-list-item #riskListItemStatus {
 }
 
 /** Risk Comp ********************************************************************************************************/
-risk-item {
+risk {
   display: block;
   height: 100%;
   position: relative;
 }
 
-risk-item #riskAll {
+risk #riskAll {
   outline: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-risk-item #riskFooterButtons {
+risk #riskFooterButtons {
   background: white;
   width: 100%;
   z-index: 10;
@@ -342,7 +342,7 @@ risk-item #riskFooterButtons {
   position: absolute;
 }
 
-risk-item .riskItemContainer {
+risk .riskItemContainer {
   z-index: 10;
   padding: 10px;
   margin-top: 8px; 
@@ -350,55 +350,55 @@ risk-item .riskItemContainer {
   padding-bottom: 10px;
 }
 
-risk-item .riskItemContainer div {
+risk .riskItemContainer div {
   outline: none;
 }
 
-risk-item .riskItemContainer .md-errors-spacer {
+risk .riskItemContainer .md-errors-spacer {
   min-height: 0px !important;
   height: 0px;
 }
 
-risk-item #riskeArea {
+risk #riskeArea {
   padding-top: 15px;
   padding-bottom: 15px;
   outline: none;
 }
-risk-item .riskTitleArea:hover {
+risk .riskTitleArea:hover {
   background: rgba(250,250,250,1);
   cursor: pointer;
 }
-risk-item .riskTitleArea #riskTitle {
+risk .riskTitleArea #riskTitle {
   cursor: inherit;
 }
 
-risk-item #riskInfoArea {
+risk #riskInfoArea {
   padding-top: 5px;
   padding-bottom: 20px;
 }
 
-risk-item #riskTitleInput {
+risk #riskTitleInput {
   margin: 2px 0 0;
   height: 40px;
 }
 
-risk-item #riskTitle {
+risk #riskTitle {
   margin: 10px 0;
 }
 
-risk-item .riskItemStatus {
+risk .riskItemStatus {
   margin-right: 5px;
 }
 
-risk-item .heightFix {
+risk .heightFix {
   height: initial;
 }
 
-risk-item .fullHeight {
+risk .fullHeight {
   height: 100%;
 }
 
-risk-item .riskThumbnail {
+risk .riskThumbnail {
   position: relative;
   display: inline-block;
   padding: 0px;
@@ -410,45 +410,45 @@ risk-item .riskThumbnail {
   background-size: contain;
 }
 
-risk-item .riskThumbnailImage {
+risk .riskThumbnailImage {
   width: 100%;
   height: 100%;
 }
 
-risk-item .riskThumbnailImage:hover {
+risk .riskThumbnailImage:hover {
   cursor: pointer;
   opacity: 0.8;
 }
 
-risk-item .risksLabel {
+risk .risksLabel {
   padding-bottom: 10px;
 }
 
-risk-item .riskRiskOwner {
+risk .riskRiskOwner {
   margin-top: 0;
 }
 
-risk-item .riskAutoComment,
-risk-item .riskCommentOwner {
+risk .riskAutoComment,
+risk .riskCommentOwner {
   margin-bottom: 10px;
 }
 
-risk-item .riskRiskOwner label,
-risk-item .riskCommentOwner label {
+risk .riskRiskOwner label,
+risk .riskCommentOwner label {
   color: rgba(0, 0, 0, 0.5);
   font-size: 14px;
 }
 
-risk-item .riskCommentOwner .riskNotification {
+risk .riskCommentOwner .riskNotification {
   color: rgb(6, 86, 60);
 }
 
-risk-item .riskOrthogonalView {
+risk .riskOrthogonalView {
   color: #949494;
 }
 
 
-risk-item .riskOrthogonalViewRisk {
+risk .riskOrthogonalViewRisk {
   color: #949494;
   font-size: 14px;
   margin-top: 0px;
@@ -456,53 +456,53 @@ risk-item .riskOrthogonalViewRisk {
 }
 
 
-risk-item .riskAutoComment label {
+risk .riskAutoComment label {
   color: rgba(0, 0, 0, 0.5);
   /*font-style: italic;*/
   font-size: 14px;
 }
 
-risk-item .riskComment {
+risk .riskComment {
   margin: 0 0 5px;
 }
 
-risk-item .riskCommentTitle {
+risk .riskCommentTitle {
   margin: 10px 0;
   font-size: 14px;
 }
 
-risk-item .riskTextActions {
+risk .riskTextActions {
   z-index: 2;
 }
 
-risk-item #riskDescription {
+risk #riskDescription {
   outline: none;
   margin-bottom: 10px;
 }
-risk-item #riskDescription label {
+risk #riskDescription label {
   word-break: break-all;
 }
 
-risk-item .riskComment:hover,
-risk-item #riskDescription:hover {
+risk .riskComment:hover,
+risk #riskDescription:hover {
   background: rgba(250,250,250,1);
   cursor: pointer;
 }
-risk-item .riskComment *:hover,
-risk-item #riskDescription *:hover {
+risk .riskComment *:hover,
+risk #riskDescription *:hover {
   cursor: pointer;
 }
 
-risk-item #additionalInfoButton {
+risk #additionalInfoButton {
   margin: 0 5px 0 -8px;
 }
 
-risk-item #riskAdditional {
+risk #riskAdditional {
   margin: -10px 0;
   padding-top: 5px;
 }
 
-risk-item #riskNewComment {
+risk #riskNewComment {
   padding-top:  0px;
   padding-bottom: 0px;
   margin: 0px;
@@ -510,29 +510,29 @@ risk-item #riskNewComment {
   overflow-y: auto;
 }
 
-risk-item #riskNewComment textarea {
+risk #riskNewComment textarea {
   background-color: rgba(255, 255, 255, 0.3);
   border: 1px solid rgb(230, 230, 230);
   border-radius: 2px;
   color: black;
 }
 
-risk-item #riskNewComment md-input-container {
+risk #riskNewComment md-input-container {
   margin: 0px;
 }
 
-risk-item #riskAdditional md-input-container {
+risk #riskAdditional md-input-container {
   margin-top: 12px;
   margin-bottom: 8px;
   font-size: 14px;
 }
 
-risk-item #descriptionAndComments {
+risk #descriptionAndComments {
   overflow-y:auto;
   overflow-x:hidden;
 }
 
-risk-item #riskRoleIndicator {
+risk #riskRoleIndicator {
   margin-left: 7px;
   margin-top: 5px;
   height: 28px;

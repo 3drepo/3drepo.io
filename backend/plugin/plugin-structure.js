@@ -33,6 +33,9 @@ module.exports.DEFAULT_PLUGIN_STRUCTURE = {
 			"children":[{
 				"plugin": "issue",
 				"url": "/issues/:issue"
+			},{
+				"plugin": "risk",
+				"url": "/risks/:risk"
 			}],
 			"friends": [
 				"panel",
@@ -40,6 +43,7 @@ module.exports.DEFAULT_PLUGIN_STRUCTURE = {
 				"tree",
 				"viewpoints",
 				"issues",
+				"risks",
 				"clip",
 				"bottom-buttons",
 				"docs",

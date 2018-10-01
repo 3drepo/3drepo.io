@@ -113,6 +113,7 @@ export class RisksService {
 			selectedRisk: null,
 			allRisks: [],
 			risksToShow: [],
+			displayRisk: null,
 			risksCardOptions: {
 				showSubModelRisks: false,
 				showPins: true,
@@ -207,6 +208,22 @@ export class RisksService {
 			assigned_roles: [],
 			viewpoint: {}
 		};
+	}
+
+	/**
+	 * Used by state manager to open risk.
+	 */
+	public getDisplayRisk() {
+		if (this.state.displayRisk && this.state.allRisks.length > 0) {
+
+			const riskToDisplay = this.state.allRisks.find((risk) => {
+				return risk._id === this.state.displayRisk;
+			});
+
+			return riskToDisplay;
+
+		}
+		return false;
 	}
 
 	public setupRisksToShow(model: string, chips: IChip[]) {

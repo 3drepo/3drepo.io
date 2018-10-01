@@ -755,11 +755,11 @@ class RiskItemController implements ng.IController {
 				this.disabledReason = this.reasonCommentText;
 
 				// TOOD Change state to risk
-				/*this.$state.go(
+				this.$state.go(
 					"home.account.model.risk",
 					riskState,
 					{notify: false}
-				);*/
+				);
 
 				this.analyticService.sendEvent({
 					eventCategory: "Risk",
@@ -932,4 +932,4 @@ export const RiskItemComponent: ng.IComponentOptions = {
 
 export const RiskItemComponentModule = angular
 	.module("3drepo")
-	.component("riskItem", RiskItemComponent);
+	.component("risk", RiskItemComponent);
