@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { matchesProperty, cond, orderBy, pick, values, stubTrue, first, isEqual, omit, identity } from 'lodash';
+import { matchesProperty, cond, orderBy, pick, values, stubTrue, first, isEqual, identity } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -53,6 +53,7 @@ export const CheckboxField = (props) => {
 	);
 };
 
+
 export const CELL_TYPES = {
 	USER: 1,
 	JOB: 2,
@@ -64,6 +65,8 @@ export const CELL_TYPES = {
 	EMPTY: 8,
 	NAME: 9
 };
+
+const EQUALITY_CHECK_FIELDS = ['id', '_id', 'name', 'user', 'model'];
 
 const HEADER_CELL_COMPONENTS = {
 	[CELL_TYPES.USER]: CellUserSearch,
@@ -169,6 +172,19 @@ const getProcessedRows = ({rows = [], sortBy, sortColumn, order, searchFields, s
 	return getSortedRows(filteredRows, sortBy, sortColumn, order);
 };
 
+const updateProcessedRows = ({updatedRows = [], processedRows = []}) => {
+	return processedRows.map((processedRow) => {
+		const row = updatedRows.find((updatedRow) => {
+			return isEqual(
+				pick(updatedRow, EQUALITY_CHECK_FIELDS),
+				pick(processedRow, EQUALITY_CHECK_FIELDS)
+			);
+		});
+
+		return row || processedRow;
+	});
+};
+
 const getSearchFields = (cells) => {
 	const searchFields = cells.find(({searchBy}) => searchBy);
 	return searchFields ? searchFields.searchBy : [];
@@ -246,7 +262,14 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
 
-		if (rowsChanged || sortChanged || orderChanged) {
+		if (rowsChanged && prevState.processedRows.length && !sortChanged && !orderChanged) {
+			this.setState({
+				processedRows: updateProcessedRows({
+					updatedRows: this.props.rows,
+					processedRows: prevState.processedRows
+				})
+			});
+		} else if (rowsChanged || sortChanged || orderChanged) {
 			const {currentSort, searchFields, searchText} = this.state;
 			this.setState({
 				processedRows: getProcessedRows({
@@ -308,13 +331,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSelectionChange = (row) => (event, checked) => {
-		const fieldsToOmit = ['selected', 'data', 'disabled'];
+		const preparedRow = pick(row, EQUALITY_CHECK_FIELDS);
 
 		const selectedRows = [...this.state.selectedRows]
-			.filter((selectedRow) => !isEqual(omit(selectedRow, fieldsToOmit), omit(row, fieldsToOmit)));
+			.filter((selectedRow) => !isEqual(pick(selectedRow, EQUALITY_CHECK_FIELDS), preparedRow));
 
 		if (checked) {
-			selectedRows.push(row);
+			selectedRows.push(preparedRow);
 		}
 
 		this.setState({selectedRows}, () => {
