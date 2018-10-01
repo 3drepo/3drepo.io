@@ -211,14 +211,9 @@ interface IState {
 }
 
 export class CustomTable extends React.PureComponent<IProps, IState> {
-
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
-		const {currentSort, searchText} = prevState;
-
-		return {
-			searchFields
-		};
+		return {searchFields};
 	}
 
 	public state = {
@@ -257,11 +252,14 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const rowsChanged = prevProps.rows.length !== this.props.rows.length || !isEqual(this.props.rows, prevProps.rows);
+		const isNotSameRows = !isEqual(this.props.rows, prevProps.rows);
+		const rowsChanged = prevProps.rows.length !== this.props.rows.length || isNotSameRows;
+		const rowsValuesChanged = this.props.rows.length && prevProps.rows.length === this.props.rows.length && isNotSameRows;
+
 		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
 
-		if (rowsChanged && prevState.processedRows.length && !sortChanged && !orderChanged) {
+		if (rowsValuesChanged && !sortChanged && !orderChanged) {
 			this.setState({
 				processedRows: updateProcessedRows({
 					updatedRows: this.props.rows,
@@ -279,7 +277,13 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					searchFields,
 					searchText,
 					onSearch: this.props.onSearch
-				})
+				}),
+				selectedRows: this.props.rows.reduce((selectedRows, row) => {
+					if (row.selected) {
+						selectedRows.push(row);
+					}
+					return selectedRows;
+				}, [])
 			});
 		}
 	}
@@ -336,7 +340,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 			.filter((selectedRow) => !isEqual(pick(selectedRow, EQUALITY_CHECK_FIELDS), preparedRow));
 
 		if (checked) {
-			selectedRows.push(preparedRow);
+			selectedRows.push(row);
 		}
 
 		this.setState({selectedRows}, () => {

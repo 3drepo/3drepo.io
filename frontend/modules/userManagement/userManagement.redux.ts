@@ -20,6 +20,7 @@ import {pick, first, get} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
+import { omit } from 'lodash';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
@@ -71,7 +72,8 @@ export const INITIAL_STATE = {
 	isPending: false,
 	currentProject: {
 		permissions: [],
-		modelsPermissions: []
+		modelsPermissions: [],
+		currentModels: []
 	}
 };
 
@@ -108,15 +110,14 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 	const { teamspace, quotaInfo = {}, jobs, jobsColors } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace));
-	return {
-		...state,
+	return Object.assign({}, INITIAL_STATE, {
 		...quotaInfo,
 		users,
 		isPending: false,
 		...pick(action, ['jobs', 'jobsColors']),
 		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
 		selectedTeamspace: teamspace.name
-	};
+	});
 };
 
 export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
@@ -229,7 +230,7 @@ export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permiss
 
 export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
 	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
-	const currentProject = Object.assign({}, state.currentProject, {
+	const currentProject = Object.assign({}, omit(state.currentProject, ['currentModels']), {
 		modelsPermissions: permissions,
 		currentModels: selectedModels
 	});
@@ -240,7 +241,7 @@ export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { modelsWit
 	const currentProject = {...state.currentProject};
 	const onlyOneModelWasChanged = modelsWithPermissions.length === 1;
 
-	const modelPermissions = modelsWithPermissions[0].permissions.map(({ user, permission }) => {
+	const modelPermissions = currentProject.currentModels[0].permissions.map(({ user, permission }) => {
 		let updatedPermissionKey = onlyOneModelWasChanged ? permission : 'undefined';
 		const updatedPermissionsData = permissions.find((userPermission) => userPermission.user === user);
 

@@ -44,9 +44,9 @@ const getExtendedProjectPermissions = (currentUsers = [], project = {permissions
  * Bind model permissions with members data
  * @param modelPermissions
  */
-const getExtendedModelPermissions = (currentUsers = [], modelPermissions = []) => {
+const getExtendedModelPermissions = (currentUsers = [], modelPermissions?) => {
 	return currentUsers.map((memberData) => {
-		const memberModelPermissions = modelPermissions.find(({ user }) => user === memberData.user);
+		const memberModelPermissions = (modelPermissions || []).find(({ user }) => user === memberData.user);
 		let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
 
 		if (memberData.isAdmin || memberData.isProjectAdmin) {
@@ -119,7 +119,7 @@ export const selectCurrentModels = createSelector(
 );
 
 export const selectModelsPermissions = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions || []
+	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions
 );
 
 export const selectExtendedModelPermissions = createSelector(
