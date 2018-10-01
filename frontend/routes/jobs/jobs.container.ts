@@ -21,6 +21,7 @@ import { createStructuredSelector } from 'reselect';
 
 import { Jobs } from './jobs.component';
 
+import { selectCurrentTeamspace } from '../../modules/userManagement/userManagement.selectors';
 import {
 	JobsActions,
 	selectJobsColors,
@@ -28,6 +29,7 @@ import {
 } from '../../modules/jobs';
 
 const mapStateToProps = createStructuredSelector({
+	currentTeamspace: selectCurrentTeamspace,
 	jobs: selectJobs,
 	colors: selectJobsColors
 });

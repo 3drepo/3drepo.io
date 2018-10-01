@@ -27,8 +27,6 @@ import { CellUserSearch } from '../components/customTable/components/cellUserSea
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { Container } from './jobs.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { theme } from '../../styles/theme';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
@@ -52,20 +50,22 @@ const JOBS_TABLE_CELLS = [{
 }];
 
 interface IProps {
+	currentTeamspace: string;
 	jobs: any[];
 	colors: any[];
-	create: (job) => void;
-	remove: (jobId) => void;
-	updateColor: (job) => void;
-	active?: boolean;
+	create: (teamspace, job) => void;
+	remove: (teamspace, jobId) => void;
+	updateColor: (teamspace, job) => void;
 }
 
-export class Jobs extends React.PureComponent<IProps, any> {
-	public static getDerivedStateFromProps(nextProps: IProps, prevState) {
-		if (nextProps.active !== prevState.active) {
-			return { active: nextProps.active };
-		}
+interface IState {
+	rows: any[];
+	containerElement: Node;
+	panelKey: number;
+}
 
+export class Jobs extends React.PureComponent<IProps, IState> {
+	public static getDerivedStateFromProps(nextProps: IProps, prevState) {
 		return {
 			panelKey: nextProps.jobs.length !== prevState.rows.length ? Math.random() : prevState.panelKey
 		};
@@ -74,20 +74,19 @@ export class Jobs extends React.PureComponent<IProps, any> {
 	public state = {
 		rows: [],
 		containerElement: null,
-		active: true,
 		panelKey: Math.random()
 	};
 
 	public handleColorChange = (jobId) => (color) => {
-		this.props.updateColor({_id: jobId, color});
+		this.props.updateColor(this.props.currentTeamspace, {_id: jobId, color});
 	}
 
 	public onRemove = (jobId) => {
-		this.props.remove(jobId);
+		this.props.remove(this.props.currentTeamspace, jobId);
 	}
 
 	public onSave = ({name, color}) => {
-		this.props.create({ _id: name, color });
+		this.props.create(this.props.currentTeamspace, { _id: name, color });
 	}
 
 	public getJobsTableRows = (jobs = [], colors = []): any[] => {
@@ -105,7 +104,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 				{},
 				{
 					icon: 'remove_circle',
-					onClick: this.onRemove.bind(null, job._id)
+					onClick: this.onRemove.bind(null, this.props.currentTeamspace, job._id)
 				}
 			];
 			return { ...job, name: job._id, data };
@@ -113,7 +112,7 @@ export class Jobs extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
 		this.setState({
 			containerElement,
 			rows: this.getJobsTableRows(this.props.jobs, this.props.colors)
@@ -154,21 +153,19 @@ export class Jobs extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { containerElement, active, rows } = this.state;
+		const { containerElement, rows } = this.state;
 		const { colors } = this.props;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container>
-					<UserManagementTab footerLabel="Manage jobs">
-						<CustomTable
-							cells={JOBS_TABLE_CELLS}
-							rows={rows}
-						/>
-					</UserManagementTab>
-					{active && containerElement && this.renderNewJobForm(containerElement)}
-				</Container>
-			</MuiThemeProvider>
+            <Container>
+                <UserManagementTab footerLabel="Manage jobs">
+                    <CustomTable
+                        cells={JOBS_TABLE_CELLS}
+                        rows={rows}
+                    />
+                </UserManagementTab>
+                {containerElement && this.renderNewJobForm(containerElement)}
+            </Container>
 		);
 	}
 }

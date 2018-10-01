@@ -20,13 +20,16 @@ import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import { isEqual, isEmpty } from 'lodash';
 
 import { theme } from '../../styles';
 import Users from '../users/users.container';
 import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { Container, Title, Content, Header, TabContent } from './userManagement.styles';
+import { Container, Title, Content, Header, TabContent, TeamspaceSelectContainer } from './userManagement.styles';
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -50,17 +53,24 @@ const TABS = {
 };
 
 interface IProps {
-	currentTeamspace: any;
 	teamspaces: any[];
 	isLoadingTeamspace: boolean;
 	onTeamspaceChange: (teamspace) => void;
 }
 
-export class UserManagement extends React.PureComponent<IProps, any> {
+interface IState {
+	isTeamspaceAdmin: boolean;
+	activeTab: number;
+	selectedTeamspace: string;
+	teamspacesItems: any[];
+}
+
+export class UserManagement extends React.PureComponent<IProps, IState> {
 	public state = {
 		isTeamspaceAdmin: true,
 		activeTab: 1,
-		selectedTeamspace: ''
+		selectedTeamspace: '',
+		teamspacesItems: []
 	};
 
 	public handleChange = (event, value) => {
@@ -77,23 +87,48 @@ export class UserManagement extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	public componentDidMount() {
+		this.setState({
+			teamspacesItems: this.props.teamspaces.map(({ account }) => ({ value: account }))
+		});
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as IState;
+
+		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
+		if (teamspacesChanged) {
+			changes.teamspacesItems = this.props.teamspaces.map(({account}) => ({value: account}));
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
 	public render() {
 		const {isLoadingTeamspace, teamspaces} = this.props;
-		const {isTeamspaceAdmin, activeTab, selectedTeamspace} = this.state;
+		const {isTeamspaceAdmin, activeTab, selectedTeamspace, teamspacesItems} = this.state;
+
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container>
 					<Title>User management</Title>
 					<Content>
 						<Header>
-							<CellSelect
-								items={teamspaces}
-								value={selectedTeamspace}
-								placeholder="Teamspace"
-								disabledPlaceholder={true}
-								onChange={this.onTeamspaceChange}
-								inputId="project"
-							/>
+							<TeamspaceSelectContainer>
+								<FormControl fullWidth={true}>
+									<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+									<CellSelect
+										items={teamspacesItems}
+										value={selectedTeamspace}
+										placeholder="Select teamspace"
+										disabledPlaceholder={true}
+										onChange={this.onTeamspaceChange}
+										inputId="teamspace-select"
+									/>
+								</FormControl>
+							</TeamspaceSelectContainer>
 							<Tabs
 								value={this.state.activeTab}
 								indicatorColor="primary"

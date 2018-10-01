@@ -29,8 +29,6 @@ import { UserManagementTab } from '../components/userManagementTab/userManagemen
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { theme } from '../../styles/theme';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
@@ -63,7 +61,6 @@ interface IProps {
 	usersSuggestions: any[];
 	limit: any;
 	jobs: any[];
-	active?: boolean;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
@@ -76,8 +73,7 @@ interface IState {
 	rows: any[];
 	jobs: any[];
 	licencesLabel: string;
-	containerElement: Element;
-	active: boolean;
+	containerElement: Node;
 	panelKey: number;
 }
 
@@ -91,10 +87,6 @@ export class Users extends React.PureComponent<IProps, IState> {
 	};
 
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
-		if (nextProps.active !== prevState.active) {
-			return {active: nextProps.active};
-		}
-
 		return {
 			panelKey: nextProps.users.length !== prevState.rows.length ? Math.random() : prevState.panelKey
 		};
@@ -105,7 +97,6 @@ export class Users extends React.PureComponent<IProps, IState> {
 		jobs: [],
 		licencesLabel: '',
 		containerElement: null,
-		active: true,
 		panelKey: Math.random()
 	};
 
@@ -167,7 +158,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 		this.setState({
 			containerElement,
@@ -234,20 +225,18 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { rows, licencesLabel, containerElement, active } = this.state;
+		const { rows, licencesLabel, containerElement } = this.state;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<>
-					<UserManagementTab footerLabel={this.getFooterLabel()}>
-						<CustomTable
-							cells={USERS_TABLE_CELLS}
-							rows={rows}
-						/>
-					</UserManagementTab>
-					{active && containerElement && this.renderNewUserForm(containerElement)}
-				</>
-			</MuiThemeProvider>
+            <>
+                <UserManagementTab footerLabel={this.getFooterLabel()}>
+                    <CustomTable
+                        cells={USERS_TABLE_CELLS}
+                        rows={rows}
+                    />
+                </UserManagementTab>
+                {containerElement && this.renderNewUserForm(containerElement)}
+            </>
 		);
 	}
 }

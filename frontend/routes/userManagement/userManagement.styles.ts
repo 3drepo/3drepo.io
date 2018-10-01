@@ -50,9 +50,15 @@ export const Content = styled.div`
 
 export const Header = styled.div`
   background-color: ${COLOR.WHITE};
+  border-bottom: 1px solid ${COLOR.BLACK_6};
 `;
 
 export const TabContent = styled.div`
   background-color: ${COLOR.WHITE};
   flex: 1;
+  position: relative;
+`;
+
+export const TeamspaceSelectContainer = styled.div`
+  padding: 24px;
 `;

@@ -22,6 +22,26 @@ import { DialogActions } from '../dialog';
 import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
 import { JobsTypes, JobsActions } from './jobs.redux';
 
+export function* fetchJobs({ teamspace }) {
+	try {
+		const response = yield API.getJobs(teamspace);
+
+		yield put(JobsActions.fetchJobsSuccess(response.data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'jobs', error.response));
+	}
+}
+
+export function* fetchJobsColors({ teamspace }) {
+	try {
+		const response = yield API.getJobsColors(teamspace);
+
+		yield put(JobsActions.fetchJobsColorsSuccess(response.data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'jobs colors', error.response));
+	}
+}
+
 export function* updateJobColor({ job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
@@ -56,6 +76,8 @@ export function* removeJob({ jobId }) {
 }
 
 export default function* JobsSaga() {
+	yield takeLatest(JobsTypes.FETCH_JOBS, fetchJobs);
+	yield takeLatest(JobsTypes.FETCH_JOBS_COLORS, fetchJobsColors);
 	yield takeLatest(JobsTypes.CREATE_JOB, createJob);
 	yield takeLatest(JobsTypes.REMOVE_JOB, removeJob);
 	yield takeLatest(JobsTypes.UPDATE_JOB_COLOR, updateJobColor);

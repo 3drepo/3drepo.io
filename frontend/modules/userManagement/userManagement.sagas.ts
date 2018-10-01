@@ -24,6 +24,7 @@ import { DialogActions } from '../dialog/dialog.redux';
 import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
 import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
 import { DIALOG_TYPES } from '../dialog/dialog.redux';
+import { JobsActions } from '../jobs';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
@@ -31,17 +32,14 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		const teamspaces = yield select(selectCurrentUserTeamspaces);
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 
-		const response = yield all([
+		const [users, quota] = yield all([
 			API.fetchUsers(teamspace),
 			API.getQuotaInfo(teamspace),
-			API.getJobs(teamspace),
-			API.getJobsColors(teamspace)
+			put(JobsActions.fetchJobs(teamspace)),
+			put(JobsActions.fetchJobsColors(teamspace))
 		]);
 
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
-			teamspaceDetails,
-			...response.map(({data}) => data)
-		));
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(teamspaceDetails, users.data, quota.data));
 	} catch (error) {
 		yield put(UserManagementActions.setPendingState(false));
 	}

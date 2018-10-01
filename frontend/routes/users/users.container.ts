@@ -20,10 +20,18 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Users } from './users.component';
-import { UserManagementActions, selectUsersSuggestions } from '../../modules/userManagement';
+import {
+	UserManagementActions,
+	selectUsersSuggestions,
+	selectUsers,
+	selectUsersLimit
+} from '../../modules/userManagement';
+import { selectJobs } from '../../modules/jobs';
 
 const mapStateToProps = createStructuredSelector({
-	usersSuggestions: selectUsersSuggestions
+	usersSuggestions: selectUsersSuggestions,
+	users: selectUsers,
+	jobs: selectJobs
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

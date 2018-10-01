@@ -23,7 +23,7 @@ export const Container = styled.div``;
 
 export const FloatingButtonContainer = styled.div`
 	position: absolute;
-	top: 166px;
+	top: -22px;
 	right: 14px;
 `;
 

@@ -18,11 +18,15 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: JobsTypes, Creators: JobsActions } = createActions({
-	createJob: ['job'],
+	fetchJobs: ['teamspace'],
+	fetchJobsColors: ['teamspace'],
+	createJob: ['teamspace', 'job'],
 	createJobSuccess: ['job'],
-	removeJob: ['jobId'],
+	removeJob: ['teamspace', 'jobId'],
+	fetchJobsSuccess: ['jobs'],
+	fetchJobsColorsSuccess: ['colors'],
 	removeJobSuccess: ['jobId'],
-	updateJobColor: ['job'],
+	updateJobColor: ['teamspace', 'job'],
 	updateJobSuccess: ['job']
 }, { prefix: 'JOBS_' });
 
@@ -30,6 +34,9 @@ export const INITIAL_STATE = {
 	jobs: [],
 	colors: []
 };
+export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => ({ ...state, jobs });
+
+export const fetchJobsColorsSuccess = (state = INITIAL_STATE, { colors }) => ({ ...state, colors });
 
 export const updateColors = (state = INITIAL_STATE, { color }) => {
 	const colors = [...state.colors] as any;
@@ -66,6 +73,8 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[JobsTypes.FETCH_JOBS_SUCCESS]: fetchJobsSuccess,
+	[JobsTypes.FETCH_JOBS_COLORS_SUCCESS]: fetchJobsColorsSuccess,
 	[JobsTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[JobsTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
 	[JobsTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess
