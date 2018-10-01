@@ -174,7 +174,7 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 						value,
 						onChange: this.onGlobalPermissionsChange,
 						checked: this.state.selectedGlobalPermissions === value,
-						disabled: !this.state.selectedUsers.length
+						disabled: !this.state.selectedUsers.length || value === MODEL_ROLES_TYPES.ADMINISTRATOR
 					}
 				},
 				CellComponent: PermissionsCell,
@@ -200,7 +200,7 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 					return {
 						value: userPermissions.key,
 						checked: requiredValue === userPermissions.key,
-						disabled,
+						disabled: disabled || requiredValue === MODEL_ROLES_TYPES.ADMINISTRATOR,
 						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
 					};
 				})

@@ -29,6 +29,8 @@ import { UserManagementTab } from '../components/userManagementTab/userManagemen
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../styles/theme';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
@@ -234,15 +236,17 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const { rows, licencesLabel, containerElement, active } = this.state;
 
 		return (
-			<>
-				<UserManagementTab footerLabel={this.getFooterLabel()}>
-					<CustomTable
-						cells={USERS_TABLE_CELLS}
-						rows={rows}
-					/>
-				</UserManagementTab>
-				{active && containerElement && this.renderNewUserForm(containerElement)}
-			</>
+			<MuiThemeProvider theme={theme}>
+				<>
+					<UserManagementTab footerLabel={this.getFooterLabel()}>
+						<CustomTable
+							cells={USERS_TABLE_CELLS}
+							rows={rows}
+						/>
+					</UserManagementTab>
+					{active && containerElement && this.renderNewUserForm(containerElement)}
+				</>
+			</MuiThemeProvider>
 		);
 	}
 }

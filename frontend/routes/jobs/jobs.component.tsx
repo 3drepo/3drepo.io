@@ -27,6 +27,8 @@ import { CellUserSearch } from '../components/customTable/components/cellUserSea
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { Container } from './jobs.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../styles/theme';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
@@ -156,15 +158,17 @@ export class Jobs extends React.PureComponent<IProps, any> {
 		const { colors } = this.props;
 
 		return (
-			<Container>
-				<UserManagementTab footerLabel="Manage jobs">
-					<CustomTable
-						cells={JOBS_TABLE_CELLS}
-						rows={rows}
-					/>
-				</UserManagementTab>
-				{active && containerElement && this.renderNewJobForm(containerElement)}
-			</Container>
+			<MuiThemeProvider theme={theme}>
+				<Container>
+					<UserManagementTab footerLabel="Manage jobs">
+						<CustomTable
+							cells={JOBS_TABLE_CELLS}
+							rows={rows}
+						/>
+					</UserManagementTab>
+					{active && containerElement && this.renderNewJobForm(containerElement)}
+				</Container>
+			</MuiThemeProvider>
 		);
 	}
 }
