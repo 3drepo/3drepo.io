@@ -38,7 +38,7 @@ const groupSchema = Schema({
 	updatedAt: Date,
 	updatedBy: String,
 	objects: [{
-		_id : false,
+		_id: false,
 		account: String,
 		model: String,
 		shared_ids: [],
@@ -49,8 +49,8 @@ const groupSchema = Schema({
 	color: [Number]
 });
 
-groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch, revId) {
-	const query = { type: "meta", "metadata.IFC GUID": {$in: ifcGuids }};
+groupSchema.statics.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
+	const query = { type: "meta", "metadata.IFC GUID": { $in: ifcGuids } };
 	const project = { parents: 1, _id: 0 };
 
 	return db.getCollection(account, model + ".scene").then(dbCol => {
@@ -73,13 +73,13 @@ groupSchema.statics.ifcGuidsToUUIDs = function(account, model, ifcGuids, branch,
 
 };
 
-groupSchema.statics.uuidToIfcGuids = function(obj) {
+groupSchema.statics.uuidToIfcGuids = function (obj) {
 	const account = obj.account;
 	const model = obj.model;
-	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ?  utils.uuidToString(uid) :  obj.shared_id;
+	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ? utils.uuidToString(uid) : obj.shared_id;
 	const parent = utils.stringToUUID(uid);
 
-	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": {$exists: true} }, { "parents": 1, "metadata.IFC GUID": 1 })
+	return Meta.find({ account, model }, { type: "meta", parents: parent, "metadata.IFC GUID": { $exists: true } }, { "parents": 1, "metadata.IFC GUID": 1 })
 		.then(results => {
 			const ifcGuids = [];
 			results.forEach(res => {
@@ -92,8 +92,8 @@ groupSchema.statics.uuidToIfcGuids = function(obj) {
 };
 
 function uuidsToIfcGuids(account, model, ids) {
-	const query = { type: "meta", parents: {$in: ids}, "metadata.IFC GUID": {$exists: true} };
-	const project =  { "metadata.IFC GUID": 1 , parents: 1};
+	const query = { type: "meta", parents: { $in: ids }, "metadata.IFC GUID": { $exists: true } };
+	const project = { "metadata.IFC GUID": 1, parents: 1 };
 	return db.getCollection(account, model + ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
 			return results;
@@ -104,14 +104,14 @@ function uuidsToIfcGuids(account, model, ids) {
 /**
  * IFC Guid definition: [0-9,A-Z,a-z,_$]* (length = 22)
  */
-groupSchema.statics.isIfcGuid = function(value) {
+groupSchema.statics.isIfcGuid = function (value) {
 	return value && 22 === value.length;
 };
 
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsIfcGuids = function(data) {
+groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
 
 	const ifcGuidPromises = [];
 
@@ -187,7 +187,7 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function(data) {
 	});
 };
 
-groupSchema.statics.findIfcGroupByUID = function(dbCol, uid) {
+groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 
 	// Extract a unique list of IDs only
 	return this.findOne(dbCol, { _id: uid })
@@ -207,7 +207,7 @@ groupSchema.statics.findIfcGroupByUID = function(dbCol, uid) {
 /**
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, convertSharedIDsToString) {
+groupSchema.methods.getObjectsArrayAsSharedIDs = function (model, branch, revId, convertSharedIDsToString) {
 
 	const sharedIdPromises = [];
 
@@ -265,7 +265,7 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function(model, branch, revId, 
 	});
 };
 
-groupSchema.statics.findByUID = function(dbCol, uid, branch, revId) {
+groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -282,7 +282,7 @@ groupSchema.statics.findByUID = function(dbCol, uid, branch, revId) {
 
 };
 
-groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId) {
+groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -293,14 +293,14 @@ groupSchema.statics.findByUIDSerialised = function(dbCol, uid, branch, revId) {
 
 			return group.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, true).then((sharedIdObjects) => {
 
-				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color};
+				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color };
 				returnGroup.objects = sharedIdObjects;
 				return returnGroup;
 			});
 		});
 };
 
-groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId) {
+groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId) {
 
 	const query = {};
 
@@ -332,7 +332,7 @@ groupSchema.statics.listGroups = function(dbCol, queryParams, branch, revId) {
 	});
 };
 
-groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
+groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
@@ -351,26 +351,27 @@ groupSchema.statics.updateIssueId = function(dbCol, uid, issueId) {
 	});
 };
 
-groupSchema.methods.updateGroup = function(dbCol, sessionId, data) {
+// Group Update with Event
+groupSchema.methods.updateGroup = function (dbCol, sessionId, data) {
 	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
 	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));
 	return update;
 };
 
-groupSchema.methods.updateAttrs = function(dbCol, data) {
+groupSchema.methods.updateAttrs = function (dbCol, data) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id", "risk_id"];
 		const fieldTypes = {
-			"description" : "[object String]" ,
-			"name" : "[object String]",
-			"author" : "[object String]",
-			"createdAt" : "[object Number]",
-			"updatedBy" : "[object String]",
-			"updatedAt" : "[object Number]",
-			"objects" :  "[object Array]",
-			"color" : "[object Array]",
+			"description": "[object String]",
+			"name": "[object String]",
+			"author": "[object String]",
+			"createdAt": "[object Number]",
+			"updatedBy": "[object String]",
+			"updatedAt": "[object Number]",
+			"objects": "[object Array]",
+			"color": "[object Array]",
 			"issue_id": "[object Object]",
 			"risk_id": "[object Object]"
 		};
@@ -378,7 +379,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
-				if(Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
 						toUpdate.objects = convertedObjects;
 					} else if (key === "color") {
@@ -395,8 +396,8 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 
 		if (typeCorrect) {
 			return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-				return _dbCol.update({_id: this._id}, {$set: toUpdate}).then(() => {
-					return {_id: utils.uuidToString(this._id)};
+				return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
+					return { _id: utils.uuidToString(this._id) };
 				});
 			});
 		} else {
@@ -406,7 +407,7 @@ groupSchema.methods.updateAttrs = function(dbCol, data) {
 	});
 };
 
-groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
+groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	data = _.omit(data, ["focus", "highlighted"]);
 
 	const group = this.model("Group").createInstance({
@@ -417,16 +418,16 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 	const model = dbCol.model;
 
 	group._id = utils.stringToUUID(uuid.v1());
-	return group.save().then((savedGroup)=>{
+	return group.save().then((savedGroup) => {
 		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
 			data._id = utils.uuidToString(savedGroup._id);
 			if (!data.isIssueGroup) {
-				ChatEvent.newGroups(sessionId, dbCol.account , model,  data);
+				ChatEvent.newGroups(sessionId, dbCol.account, model, data);
 			}
 
 			return data;
 		}
-			,(err) => {
+			, (err) => {
 			// remove the recently saved new group as update attributes failed
 			return Group.deleteGroup(dbCol, group._id).then(() => {
 				return Promise.reject(err);
@@ -435,7 +436,7 @@ groupSchema.statics.createGroup = function(dbCol,sessionId , data) {
 	});
 };
 
-groupSchema.methods.clean = function() {
+groupSchema.methods.clean = function () {
 	const cleaned = this.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
@@ -452,15 +453,15 @@ groupSchema.methods.clean = function() {
 	return cleaned;
 };
 
-groupSchema.statics.deleteGroup = function(dbCol, id) {
+groupSchema.statics.deleteGroup = function (dbCol, id) {
 
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
 
-	return Group.findOneAndRemove(dbCol, { _id : id}).then(group => {
+	return Group.findOneAndRemove(dbCol, { _id: id }).then(group => {
 
-		if(!group) {
+		if (!group) {
 			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 		}
 
@@ -475,7 +476,7 @@ const Group = ModelFactory.createClass(
 	}
 );
 
-Group.deleteGroups = function(dbCol, sessionId, ids) {
+Group.deleteGroups = function (dbCol, sessionId, ids) {
 	const groupsIds = [].concat(ids);
 
 	for (let i = 0; i < ids.length; i++) {
@@ -485,13 +486,13 @@ Group.deleteGroups = function(dbCol, sessionId, ids) {
 	}
 
 	return db.getCollection(dbCol.account, dbCol.model + ".groups").then((_dbCol) => {
-		return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
+		return _dbCol.remove({ _id: { $in: ids } }).then((deleteResponse) => {
 			if (!deleteResponse.result.ok) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
 			// Success!
-			ChatEvent.groupsDeleted(sessionId, dbCol.account ,  dbCol.model, groupsIds);
+			ChatEvent.groupsDeleted(sessionId, dbCol.account, dbCol.model, groupsIds);
 		});
 	});
 };

@@ -132,6 +132,7 @@ html, body {
 
 .threeDRepo .md-chips md-chip .md-chip-remove-container {
 	margin:9px;
+	line-height: 0px;
 }
 
 

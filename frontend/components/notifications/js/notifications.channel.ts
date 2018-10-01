@@ -38,6 +38,11 @@ export class NotificationsChannel {
 	public groups: NotificationEvents;
 
 	/**
+	 * This property contains the object to suscribe to the views notification events
+	 */
+	public views: NotificationEvents;
+
+	/**
 	 * This property contains the object to suscribe to the general modem status notification events
 	 */
 	public model: NotificationModelEvents;
@@ -46,13 +51,14 @@ export class NotificationsChannel {
 	 * This dictionary holds the callbacks for every event in the channel .
 	 * When the last callback has been unsubscribed, the channel unsubscribe from the event completely.
 	 */
-	private subscriptions: { [event: string]: Array<{callback: (data: any) => void, context: object}> } = {};
+	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
 	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
 		this.groups = new NotificationEvents(this, "group");
 		this.issues = new NotificationIssuesEvents(this);
 		this.risks = new NotificationRisksEvents(this);
 		this.model = new NotificationModelEvents(this);
+		this.views = new NotificationEvents(this, "view");
 	}
 
 	/**
@@ -62,11 +68,11 @@ export class NotificationsChannel {
 	 * @param callback the callback that will be used when the event is remotely triggered
 	 * @param keys extra keys for suscribing to a particular entity events
 	 */
-	public subscribe(event: string, callback: (data: any) => void, context: any , keys = null) {
+	public subscribe(event: string, callback: (data: any) => void, context: any, keys = null) {
 		const eventFullName = this.notificationService.getEventName(this.account, this.modelStr, keys, event);
 		if (!this.hasSubscriptions(eventFullName)) {
 			this.notificationService.performSubscribe(this.account, this.modelStr, keys, event,
-													this.onEvent.bind(this, eventFullName));
+				this.onEvent.bind(this, eventFullName));
 		}
 
 		this.AddCallback(eventFullName, callback, context);
@@ -89,19 +95,19 @@ export class NotificationsChannel {
 	}
 
 	private onEvent(event: string, data: any) {
-		this.subscriptions[event].forEach( (cb) => cb.callback.call(cb.context, data) );
+		this.subscriptions[event].forEach((cb) => cb.callback.call(cb.context, data));
 	}
 
 	private AddCallback(event, callback, context): void {
-		if (! this.hasSubscriptions(event)) {
+		if (!this.hasSubscriptions(event)) {
 			this.subscriptions[event] = [];
 		}
 
-		this.subscriptions[event].push({ callback , context });
+		this.subscriptions[event].push({ callback, context });
 	}
 
 	private removeCallBack(event, callback): void {
-		if (! this.hasSubscriptions(event)) {
+		if (!this.hasSubscriptions(event)) {
 			return;
 		}
 

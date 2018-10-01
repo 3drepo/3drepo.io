@@ -153,8 +153,8 @@ class PanelCardController implements ng.IController {
 		});
 
 		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: IChip[], oldValue: IChip[]) => {
-			const deletedChips = oldValue.filter((ov) => newValue.map((nv) => nv.type).indexOf(ov.type) === -1);
-			const addedChips = newValue.filter((nv) => oldValue.map((ov) => ov.type).indexOf(nv.type) === -1);
+			const deletedChips = oldValue.filter((old) => newValue.indexOf(old) === -1);
+			const addedChips = newValue.filter((newV) => oldValue.indexOf(newV) === -1);
 
 			deletedChips.forEach((c) => {
 				if (Date.prototype.isPrototypeOf(c.value)) {

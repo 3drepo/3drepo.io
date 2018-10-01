@@ -34,7 +34,7 @@
 							#issuesListItemDate
 								label {{issue.created | prettyDate}}
 						#issuesListItemDescription
-							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
+							label(ng-bind-html="issue.desc | linky:'_blank':{rel: 'noopener'}") {{issue.desc}}
 
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed

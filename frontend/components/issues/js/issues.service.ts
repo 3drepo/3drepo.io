@@ -637,14 +637,17 @@ export class IssuesService {
 			this.treeService.setHideIfc(issue.viewpoint.hideIfc);
 		}
 
-		this.treeService.showAllTreeNodes(false);
+		const hasHiddenOrShownGroup = issue.viewpoint.hasOwnProperty("hidden_group_id") ||
+						issue.viewpoint.hasOwnProperty("shown_group_id") ;
+
+		this.treeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 
 		// Show multi objects
 		if ((issue.viewpoint && (issue.viewpoint.hasOwnProperty("highlighted_group_id") ||
-						issue.viewpoint.hasOwnProperty("hidden_group_id") ||
-						issue.viewpoint.hasOwnProperty("shown_group_id") ||
 						issue.viewpoint.hasOwnProperty("group_id"))) ||
-				issue.hasOwnProperty("group_id")) {
+						issue.hasOwnProperty("group_id") ||
+						hasHiddenOrShownGroup
+		) {
 
 			this.showMultiIds(issue, revision).then(() => {
 				this.handleShowIssue(issue);

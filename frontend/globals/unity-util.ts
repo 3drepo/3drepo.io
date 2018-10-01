@@ -792,7 +792,9 @@ export class UnityUtil {
 	 *  @param {Object} promise - promises where the viewpoint will be returned when the promise resolves
 	 */
 	public static requestViewpoint(account, model, promise) {
+		// console.log('requestViewPoint', account, model, promise );
 		if (UnityUtil.vpPromise != null) {
+			// console.log("unity no help", UnityUtil.vpPromise);
 			UnityUtil.vpPromise.then(UnityUtil._requestViewpoint(account, model, promise));
 		} else {
 			UnityUtil._requestViewpoint(account, model, promise);

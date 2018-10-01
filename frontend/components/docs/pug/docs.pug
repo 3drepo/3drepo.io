@@ -3,20 +3,20 @@ md-list.typesList
 		h3 Model has no metadata!
 
 	#docItem(ng-repeat="(key, value) in vm.docs")
-		
+
 		// Meta data
 		div(ng-if="key==='Meta Data'")
 			.dataItem(
 				ng-if="!vm.noMetadata"
 				ng-repeat="metadataItem in value.data", layout="column", flex)
-				
+
 				div(ng-repeat="(mKey, mValue) in metadataItem.metadata"
 					layout="row", layout-align="space-between start"
 					ng-class-odd="'docsListBackground1'"
 					ng-class-even="'docsListBackground2'")
 
 					p.metadataKey(flex="50") {{mKey}}
-					p.metadataValue(flex="45", ng-bind-html="mValue.toString() | linky:'_blank'") {{mValue}}
+					p.metadataValue(flex="45", ng-bind-html="mValue.toString() | linky:'_blank':{rel: 'noopener'}") {{mValue}}
 
 		// PDF
 		//div(ng-if="key==='PDF'")
