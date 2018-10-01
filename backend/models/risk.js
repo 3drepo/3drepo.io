@@ -274,8 +274,6 @@ risk.updateAttrs = function(dbCol, uid, data) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	console.log(data);
-
 	return this.findByUID(dbCol, uid, {}, true).then((oldRisk) => {
 		if (oldRisk) {
 			return User.findByUserName(dbCol.account).then((dbUser) => {
