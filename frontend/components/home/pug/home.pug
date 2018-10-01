@@ -19,7 +19,7 @@ div.homeContainer(
 	div.homeHolder(
 		layout="column"
 		flex="100"
-		ng-if="!vm.isLegalPage")
+		ng-if="!vm.state.changing && !vm.isLegalPage")
 
 		div.homeTopBar
 		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
@@ -45,7 +45,7 @@ div.homeContainer(
 		cookies#cookies(ng-if="vm.page === 'cookies'")
 
 	#homeLoggedOut(
-		ng-if="!vm.loggedIn && !vm.isLegalPage && !vm.state.model")
+		ng-if="!vm.state.changing && !vm.loggedIn && !vm.isLegalPage && !vm.state.model")
 
 		login(
 			login-message="vm.loginMessage"

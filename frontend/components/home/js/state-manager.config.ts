@@ -27,8 +27,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 				StateManager.state.authInitialized = false;
 				const finishedAuth = $q.defer();
 
-				StateManager.state.changing = true;
-
 				AuthService.init()
 					.then(() => {
 						StateManager.state.authInitialized = true;

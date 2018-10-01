@@ -115,14 +115,6 @@ export class ViewerService {
 					event.value.colours
 				);
 				break;
-
-			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.viewer.clearHighlights();
-				break;
-
-			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				break;
-
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
 				this.viewer.setCamera(
 					event.value.position,

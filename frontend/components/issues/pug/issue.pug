@@ -140,7 +140,7 @@ md-content#issueInformation(
 				div(layout='row', layout-align="space-between", flex)
 					label(
 						ng-if="!vm.editingDescription"
-						ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
+						ng-bind-html="vm.issueData.desc | linky:'_blank':{rel: 'noopener'}") {{vm.issueData.desc}}
 					md-input-container(flex, ng-if="vm.editingDescription")
 						textarea(
 							ng-model="vm.issueData.desc"
@@ -195,7 +195,7 @@ md-content#issueInformation(
 						label.issueCommentTitle(
 							flex
 							ng-if="!comment.editing && !comment.action"
-							ng-bind-html="comment.comment | linky:'_blank'")
+							ng-bind-html="comment.comment | linky:'_blank':{rel: 'noopener'}")
 							// Saved auto comment
 
 						// Editing normal comment
