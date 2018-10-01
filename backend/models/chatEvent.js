@@ -33,7 +33,6 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 		model,
 		extraKeys,
 		data
-
 	};
 
 	return Queue.insertEventMessage(msg);
@@ -47,7 +46,6 @@ function newIssues(emitter, account, model, data) {
 function issueChanged(emitter, account, model, issueId, data) {
 	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null, data);
 }
-// ---
 
 // comments notifications
 function newComment(emitter, account, model, issueId, data) {
@@ -84,6 +82,20 @@ function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
+// Viewpoints notifications
+
+function viewpointsCreated(emitter, account, model, data) {
+	return insertEventQueue("view" + eventTypes.CREATED, emitter, account, model, null, data);
+}
+
+function viewpointsChanged(emitter, account, model, data) {
+	return insertEventQueue("view" + eventTypes.UPDATED, emitter, account, model, null, data);
+}
+
+function viewpointsDeleted(emitter, account, model, ids) {
+	return insertEventQueue("view" + eventTypes.DELETED, emitter, account, model, null, ids);
+}
+
 module.exports = {
 	newIssues,
 	newComment,
@@ -92,6 +104,9 @@ module.exports = {
 	commentDeleted,
 	groupChanged,
 	groupsDeleted,
+	viewpointsChanged,
+	viewpointsCreated,
+	viewpointsDeleted,
 	modelStatusChanged,
 	issueChanged,
 	newModel,

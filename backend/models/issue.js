@@ -638,7 +638,6 @@ schema.statics.createIssue = function(dbColOptions, data) {
 		}).then(settings => {
 
 			const cleaned = issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
-
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.model, [cleaned]);
 
 			return Promise.resolve(cleaned);

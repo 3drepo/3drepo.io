@@ -165,8 +165,9 @@ class GroupsController implements ng.IController {
 					this.modelSettings.permissions
 				);
 
-				this.watchNotification();
 			}
+
+			this.watchNotification();
 
 		});
 
