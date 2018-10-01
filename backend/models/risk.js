@@ -274,6 +274,8 @@ risk.updateAttrs = function(dbCol, uid, data) {
 		uid = utils.stringToUUID(uid);
 	}
 
+	console.log(data);
+
 	return this.findByUID(dbCol, uid, {}, true).then((oldRisk) => {
 		if (oldRisk) {
 			return User.findByUserName(dbCol.account).then((dbUser) => {
@@ -318,7 +320,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 							let typeCorrect = true;
 							fieldsCanBeUpdated.forEach((key) => {
-								if (data[key]) {
+								if (data[key] !== undefined) {
 									if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 										toUpdate[key] = data[key];
 										oldRisk[key] = data[key];

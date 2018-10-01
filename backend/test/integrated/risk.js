@@ -418,7 +418,6 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					console.log("l-hood 1");
 					agent.post(`/${username}/${model}/risks.json`)
 						.send(risk)
 						.expect(200, function(err, res) {
@@ -427,13 +426,11 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					console.log("l-hood 2");
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
 						.send(likelihood)
 						.expect(200, done);
 				},
 				function(done) {
-					console.log("l-hood 3");
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
 							expect(res.body.likelihood).to.equal(likelihood.likelihood);
@@ -452,7 +449,6 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					console.log("conseq 1");
 					agent.post(`/${username}/${model}/risks.json`)
 						.send(risk)
 						.expect(200, function(err, res) {
@@ -461,13 +457,11 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					console.log("conseq 2");
 					agent.put(`/${username}/${model}/risks/${riskId}.json`)
 						.send(consequence)
 						.expect(200, done);
 				},
 				function(done) {
-					console.log("conseq 3");
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
 							expect(res.body.consequence).to.equal(consequence.consequence);
