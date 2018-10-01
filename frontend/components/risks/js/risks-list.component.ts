@@ -78,7 +78,7 @@ class RisksListController implements ng.IController {
 			},
 			() => {
 				this.allRisks = this.risksService.state.allRisks;
-
+				this.risksService.setupRisksToShow(this.model, this.filterChips);
 			},
 			true
 		);
