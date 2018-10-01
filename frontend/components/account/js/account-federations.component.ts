@@ -15,8 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {PERMISSIONS_VIEWS} from "../../projects-permissions/js/projects-permissions.component";
-import {TABS_TYPES} from "./account-user-management.component";
+import { TABS_TYPES } from "./account-user-management.component";
+import { PERMISSIONS_VIEWS } from '../../../routes/projects/projects.component';
 
 class AccountFederationsController implements ng.IController {
 
