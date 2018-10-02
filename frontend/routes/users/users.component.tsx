@@ -17,34 +17,45 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, get, values, isNumber, cond, matches } from 'lodash';
+import { pick, get, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 
 import { theme } from '../../styles';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
-import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
+import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
-
-import { Container, Content, Footer } from './users.styles';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { UserItem } from '../components/userItem/userItem.component';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
 	type: CELL_TYPES.USER,
+	HeadingComponent: CellUserSearch,
+	CellComponent: UserItem,
 	searchBy: ['firstName', 'lastName', 'user', 'company']
 }, {
 	name: 'Job',
+	CellComponent: CellSelect,
 	type: CELL_TYPES.JOB
 }, {
 	name: 'Permissions',
+	CellComponent: CellSelect,
 	type: CELL_TYPES.PERMISSIONS
 }, {
 	type: CELL_TYPES.EMPTY
 }, {
-	type: CELL_TYPES.ICON_BUTTON
+	type: CELL_TYPES.ICON_BUTTON,
+	CellComponent: TableButton
 }];
+
+const getPreparedJobs = (jobs) => {
+	return jobs.map(({ _id: name, color }) => ({ name, color, value: name }));
+};
 
 interface IProps {
 	currentTeamspace: string;
@@ -74,15 +85,18 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
 	.map(({label: name, isAdmin: value }: {label: string, isAdmin: boolean}) => ({ name, value }));
 
 export class Users extends React.PureComponent<IProps, IState> {
+	public static defaultProps = {
+		jobs: [],
+		users: []
+	};
+
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
 		if (nextProps.active !== prevState.active) {
 			return {active: nextProps.active};
 		}
 
 		return {
-			rows: nextProps.users,
-			jobs: nextProps.jobs.map(({_id: name, color}) => ({name, color, value: name})),
-			panelKey: nextProps.users !== prevState.rows ? Math.random() : prevState.panelKey
+			panelKey: nextProps.users.length !== prevState.rows.length ? Math.random() : prevState.panelKey
 		};
 	}
 
@@ -94,11 +108,6 @@ export class Users extends React.PureComponent<IProps, IState> {
 		active: true,
 		panelKey: Math.random()
 	};
-
-	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
-		this.setState({ containerElement });
-	}
 
 	public onPermissionsChange = (username, isAdmin) => {
 		const permissionData = {
@@ -156,6 +165,35 @@ export class Users extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public componentDidMount() {
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).closest('md-content');
+		const preparedJobs = getPreparedJobs(this.props.jobs);
+		this.setState({
+			containerElement,
+			jobs: preparedJobs,
+			rows: this.getUsersTableRows(this.props.users, preparedJobs)
+		});
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		const changes = {} as any;
+
+		const jobsChanged = !isEqual(prevProps.jobs, this.props.jobs);
+		if (jobsChanged) {
+			const preparedJobs = getPreparedJobs(this.props.jobs);
+			changes.jobs = preparedJobs;
+		}
+
+		const usersChanged = !isEqual(prevProps.users, this.props.users);
+		if (usersChanged || jobsChanged) {
+			changes.rows = this.getUsersTableRows(this.props.users, changes.jobs || this.state.jobs);
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
 	public renderNewUserForm = (container) => {
 		const formProps = {
 			title: this.getFooterLabel(),
@@ -169,7 +207,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		return (
 			<FloatingActionPanel
 				buttonProps={{
-					disabled: this.props.limit === this.props.users.length,
+					disabled: this.props.limit <= this.props.users.length,
 					label: 'All licenses assigned'
 				}}
 				container={container}
@@ -185,31 +223,27 @@ export class Users extends React.PureComponent<IProps, IState> {
 	 * Generate licences summary
 	 */
 	public getFooterLabel = () => {
-		const limit = isNumber(this.props.limit) ? this.props.limit : "unlimited";
-		return `Assigned licences: ${ this.props.users.length } out of ${ limit }`;
+		const {limit, users} = this.props;
+		if (!users) {
+			return '';
+		}
+
+		const limitValue = isNumber(limit) ? limit : 'unlimited';
+		return `Assigned licences: ${users.length} out of ${limitValue}`;
 	}
 
 	public render() {
-		const { rows, jobs, licencesLabel, containerElement, active } = this.state;
+		const { rows, licencesLabel, containerElement, active } = this.state;
 
-		const preparedRows = this.getUsersTableRows(rows, jobs);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<>
-					<Container
-						container
-						direction="column"
-						alignItems="stretch"
-						wrap="nowrap"
-					>
-						<Content item>
-							<CustomTable
-								cells={USERS_TABLE_CELLS}
-								rows={preparedRows}
-							/>
-						</Content>
-						{rows && (<Footer item>{this.getFooterLabel()}</Footer>)}
-					</Container>
+					<UserManagementTab footerLabel={this.getFooterLabel()}>
+						<CustomTable
+							cells={USERS_TABLE_CELLS}
+							rows={rows}
+						/>
+					</UserManagementTab>
 					{active && containerElement && this.renderNewUserForm(containerElement)}
 				</>
 			</MuiThemeProvider>

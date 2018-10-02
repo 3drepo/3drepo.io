@@ -30,6 +30,10 @@
   transition: opacity 150ms ease-in-out;
 }
 
+.permissionsListBody .simplebar-content {
+  padding-bottom: 0 !important;
+}
+
 .permissionsListRow {
   height: 62px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);

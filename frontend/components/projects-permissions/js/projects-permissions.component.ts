@@ -31,6 +31,7 @@ class ProjectsPermissionsController implements ng.IController {
 		"$state",
 		"$mdDialog",
 		"$scope",
+		"$timeout",
 
 		"ModelsService",
 		"ProjectsService",
@@ -58,6 +59,7 @@ class ProjectsPermissionsController implements ng.IController {
 		private $state: any,
 		private $mdDialog: any,
 		private $scope: any,
+		private $timeout: any,
 
 		private ModelsService: any,
 		private ProjectsService: any,
@@ -129,15 +131,15 @@ class ProjectsPermissionsController implements ng.IController {
 					this.models = this.models.map((model) => {
 						return {
 							...model,
-							isSelected: model.model === modelInState
+							selected: model.model === modelInState
 						};
 					});
 				}
 
-				this.selectedModels = this.models.filter(({isSelected}) => isSelected);
-				if (modelInState) {
-					this.onModelSelectionChange(this.selectedModels);
-				}
+				this.selectedModels = this.models.filter(({selected}) => selected);
+
+				this.onModelSelectionChange(this.selectedModels);
+
 				this.assignedProjectPermissions = this.getExtendedProjectPermissions(project.permissions);
 			}).catch(identity)
 				.finally(() => {
@@ -208,8 +210,8 @@ class ProjectsPermissionsController implements ng.IController {
 				...memberData,
 				permissions: get(memberModelPermissions, "permissions", []),
 				key: modelPermissionsKey,
-				isDisabled: !modelPermissions,
-				isSelected: get(memberModelPermissions, "isSelected", false),
+				disabled: !modelPermissions,
+				selected: get(memberModelPermissions, "selected", false),
 				isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
 			};
 		});
@@ -219,7 +221,7 @@ class ProjectsPermissionsController implements ng.IController {
 	 * Send updated data to the server
 	 * @param updatedPermissions
 	 */
-	public onPermissionsChange(updatedPermissions: any[]): void {
+	public onPermissionsChange = (updatedPermissions: any[]): void => {
 		if (this.currentView !== PERMISSIONS_VIEWS.MODELS) {
 			this.onProjectPermissionsChange(updatedPermissions);
 		} else {
@@ -261,7 +263,7 @@ class ProjectsPermissionsController implements ng.IController {
 						if (memberPermission) {
 							return {
 								user: currentPermission.user,
-								isSelected: memberPermission.isSelected,
+								selected: memberPermission.selected,
 								permission: memberPermission.key
 							};
 						}
@@ -285,19 +287,19 @@ class ProjectsPermissionsController implements ng.IController {
 						});
 
 						const permissionsToShow = this.selectedModels[0].permissions.map(({user, permission}) => {
-							let isSelected = false;
+							let selected = false;
 							let updatedPermissionKey = this.selectedModels.length === 1 ? permission : UNDEFINED_PERMISSIONS;
 
 							const updatedPermissionsData = updatedPermissions.find((userPermission) => userPermission.user === user);
 
 							if (updatedPermissionsData) {
-								isSelected = updatedPermissionsData.isSelected;
+								selected = updatedPermissionsData.selected;
 								updatedPermissionKey = updatedPermissionsData.key;
 							}
 
 							return {
 								user,
-								isSelected,
+								selected,
 								permission: updatedPermissionKey
 							};
 						});
@@ -363,7 +365,7 @@ class ProjectsPermissionsController implements ng.IController {
 		);
 	}
 
-	public onModelSelectionChange(selectedModels: any[]): void {
+	public onModelSelectionChange = (selectedModels: any[]): void => {
 		if (selectedModels.length) {
 			const requiredModels = selectedModels.map(({model}) => model);
 			this.ModelsService
@@ -371,6 +373,7 @@ class ProjectsPermissionsController implements ng.IController {
 				.then(({data: modelsWithPermissions}) => {
 					this.selectedModels = modelsWithPermissions;
 					const permissionsToShow = this.selectedModels.length === 1 ? this.selectedModels[0].permissions : [];
+
 					this.assignedModelPermissions = this.getExtendedModelPermissions(permissionsToShow);
 				});
 		} else {

@@ -24,6 +24,23 @@ module.exports = (options) => {
           loader: 'lodash-ts-imports-loader',
           exclude: /node_modules/,
           enforce: 'pre'
+        },
+        {
+          test: /\.(png|jpg|gif|svg)$/,
+          use: [{
+            loader: 'file-loader',
+            options: {
+              outputPath: '../images/',
+              publicPath: 'images/',
+              name(file) {
+                if (options.mode === 'development') {
+                  return '[name].[ext]'
+                }
+
+                return '[hash].[ext]'
+              }
+            }
+          }]
         }
       ]
     },

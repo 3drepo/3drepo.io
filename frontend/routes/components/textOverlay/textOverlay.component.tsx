@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import * as React from 'react';
 
-export const Container = styled.div `
-  height: 100%;
+import { Container } from './textOverlay.styles';
 
-	${ColorSelect} {
-    border: none;
-  }
-`;
+interface IProps {
+	content: string;
+}
+
+export const TextOverlay = (props: IProps) => {
+	return <Container>{props.content}</Container>;
+};
