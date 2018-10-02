@@ -33,7 +33,6 @@ class ModelController implements ng.IController {
 		"AuthService",
 		"IssuesService",
 		"RisksService",
-		"MultiSelectService",
 		"StateManager",
 		"PanelService",
 		"ViewerService"
@@ -71,7 +70,6 @@ class ModelController implements ng.IController {
 		private AuthService,
 		private IssuesService,
 		private RisksService,
-		private MultiSelectService,
 		private StateManager,
 		private PanelService,
 		private ViewerService

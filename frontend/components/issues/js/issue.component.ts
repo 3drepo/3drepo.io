@@ -920,7 +920,7 @@ class IssueController implements ng.IController {
 				this.issuesService.setSelectedIssue(this.issueData, true, this.revision);
 
 				// Hide some actions
-				this.viewerService.pin.pinDropMode = false;
+				this.issuesService.setPinDropMode(false);
 
 				this.submitDisabled = true;
 				this.setContentHeight();

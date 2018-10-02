@@ -724,14 +724,14 @@ class RiskItemController implements ng.IController {
 		return this.risksService.saveRisk(risk)
 			.then((response) => {
 				this.data = response.data; // So that new changes are registered as updates
-				const responseIssue = response.data;
+				const responseRisk = response.data;
 
 				// Hide the description input if no description
 				this.pinHidden = true;
 
 				// Notify parent of new risk
-				this.risksService.populateRisk(responseIssue);
-				this.riskData = responseIssue;
+				this.risksService.populateRisk(responseRisk);
+				this.riskData = responseRisk;
 				this.risksService.addRisk(this.riskData);
 				this.risksService.setSelectedRisk(this.riskData, true, this.revision);
 
@@ -754,7 +754,6 @@ class RiskItemController implements ng.IController {
 
 				this.disabledReason = this.reasonCommentText;
 
-				// TOOD Change state to risk
 				this.$state.go(
 					"home.account.model.risk",
 					riskState,
