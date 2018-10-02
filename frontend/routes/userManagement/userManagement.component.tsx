@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -41,15 +42,15 @@ export const TABS_TYPES = {
 const TABS = {
 	[TABS_TYPES.USERS]: {
 		id: TABS_TYPES.USERS,
-		label: "Users"
+		label: 'Users'
 	},
 	[TABS_TYPES.PROJECTS]: {
 		id: TABS_TYPES.PROJECTS,
-		label: "Projects"
+		label: 'Projects'
 	},
 	[TABS_TYPES.JOBS]: {
 		id: TABS_TYPES.JOBS,
-		label: "Jobs"
+		label: 'Jobs'
 	}
 };
 
@@ -145,7 +146,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 							{selectedTeamspace && activeTab === TABS_TYPES.USERS && <Users />}
 							{selectedTeamspace && activeTab === TABS_TYPES.PROJECTS && <Projects />}
 							{selectedTeamspace && activeTab === TABS_TYPES.JOBS && <Jobs />}
-							{!selectedTeamspace && <TextOverlay content="Select teamspace to unlock settings" />}
+							{!selectedTeamspace && <TextOverlay content="Select teamspace to enable settings" />}
 						</TabContent>
 					</Content>
 				</Container>
