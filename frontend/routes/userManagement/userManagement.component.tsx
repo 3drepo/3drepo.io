@@ -30,6 +30,7 @@ import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { Container, Title, Content, Header, TabContent, TeamspaceSelectContainer } from './userManagement.styles';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -135,15 +136,16 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 								textColor="primary"
 								onChange={this.handleChange}
 							>
-								<Tab label="Users" disabled={!isLoadingTeamspace && !isTeamspaceAdmin} />
-								<Tab label="Projects" />
-								<Tab label="Jobs" />
+								<Tab label="Users" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin}  *//>
+								<Tab label="Projects" /* disabled={!selectedTeamspace || !isLoadingTeamspace} */ />
+								<Tab label="Jobs" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
 							</Tabs>
 						</Header>
 						<TabContent>
-							{activeTab === TABS_TYPES.USERS && <Users />}
-							{activeTab === TABS_TYPES.PROJECTS && <Projects />}
-							{activeTab === TABS_TYPES.JOBS && <Jobs />}
+							{selectedTeamspace && activeTab === TABS_TYPES.USERS && <Users />}
+							{selectedTeamspace && activeTab === TABS_TYPES.PROJECTS && <Projects />}
+							{selectedTeamspace && activeTab === TABS_TYPES.JOBS && <Jobs />}
+							{!selectedTeamspace && <TextOverlay content="Select teamspace to unlock settings" />}
 						</TabContent>
 					</Content>
 				</Container>

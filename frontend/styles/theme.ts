@@ -73,6 +73,11 @@ export const theme = createMuiTheme({
 				fontSize: '14px',
 				color: COLOR.BLACK_60
 			}
+		},
+		MuiTab: {
+			root: {
+				minWidth: '0 !important'
+			}
 		}
 	}
 });
