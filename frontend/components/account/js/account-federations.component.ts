@@ -211,7 +211,9 @@ class AccountFederationsController implements ng.IController {
 			this.setupEditFederation(event, account, project, model);
 		} else {
 
-			this.$location.path(`/${account.name}/${model.model}`).search({});
+			// FIXME: clearing the query string causes the page to freeze for some reason.
+			// this.$location.path(`/${account.name}/${model.model}`).search({});
+			this.$location.path(`/${account.name}/${model.model}`);
 
 			this.AnalyticService.sendEvent({
 				eventCategory: "Model",
