@@ -138,8 +138,7 @@ class RisksListController implements ng.IController {
 				break;
 
 			case "showPins":
-				this.risksService.state.risksCardOptions.showPins =
-					!this.risksService.state.risksCardOptions.showPins;
+				this.risksService.state.risksCardOptions.showPins = this.menuOption.selected;
 				break;
 		}
 	}
