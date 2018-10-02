@@ -204,11 +204,11 @@ export class RisksService {
 			creator_role: creatorRole,
 			associated_activity: "",
 			category: "",
-			likelihood: "0",
-			consequence: "0",
-			level_of_risk: "0",
+			likelihood: 0,
+			consequence: 0,
+			level_of_risk: 0,
 			mitigation_status: "proposed",
-			assigned_roles: [],
+			assigned_roles: [ "Unassigned" ],
 			viewpoint: {}
 		};
 	}
@@ -505,7 +505,7 @@ export class RisksService {
 			const matches = oldRisk._id === risk._id;
 			if (matches) {
 
-				if (risk.status === "closed") {
+				if (risk.status === "accepted") {
 
 					this.state.allRisks[i].justClosed = true;
 
@@ -982,7 +982,7 @@ export class RisksService {
 
 		switch (risk.level_of_risk) {
 			case 0:
-				statusIcon.colour = "#dc143c";
+				statusIcon.colour = "#008000";
 				break;
 			case 1:
 				statusIcon.colour = "#32cd32";

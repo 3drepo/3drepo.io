@@ -75,6 +75,7 @@ class RiskItemController implements ng.IController {
 	private popStateHandler;
 	private refreshHandler;
 	private data;
+	private savedData;
 	private pinHidden;
 	private account;
 	private model;
@@ -263,13 +264,22 @@ class RiskItemController implements ng.IController {
 
 	public watchers() {
 
-		// This keeps the colours updated etc
-		this.$scope.$watch("vm.riskData", () => {
-			if (this.riskData) {
-				this.risksService.populateRisk(this.riskData);
+		this.$scope.$watchGroup([
+			"vm.riskData.safetibase_id",
+			"vm.riskData.associated_activity",
+			"vm.riskData.assigned_roles[0]",
+			"vm.riskData.category",
+			"vm.riskData.likelihood",
+			"vm.riskData.consequence",
+			"vm.riskData.level_of_risk",
+			"vm.riskData.mitigation_status"
+		], () => {
+			if (this.riskData && this.isRiskDataChanged()) {
+				this.updateRisk();
 			}
-		}, true);
+		});
 
+		// This keeps the colours updated etc
 		this.$scope.$watch("vm.riskData.level_of_risk", (levelOfRisk) => {
 			this.risksService.setLevelOfRisk(levelOfRisk);
 			this.risksService.showRiskPins();
@@ -354,6 +364,14 @@ class RiskItemController implements ng.IController {
 		this.risksService.populateRisk(this.riskData);
 		this.setContentHeight();
 
+		this.updateSavedRisk(this.riskData);
+	}
+
+	private updateSavedRisk(risk) {
+		if (risk) {
+			this.savedData = Object.assign({}, risk);
+			this.savedData.assigned_roles = Object.assign([], risk.assigned_roles);
+		}
 	}
 
 	public nameChange() {
@@ -584,7 +602,7 @@ class RiskItemController implements ng.IController {
 					if (response) {
 						const updatedRisk = response.data;
 						this.risksService.populateRisk(updatedRisk);
-						this.data = updatedRisk;
+						this.updateSavedRisk(updatedRisk);
 
 						// Update the actual data model
 						this.risksService.updateRisks(this.riskData);
@@ -724,6 +742,7 @@ class RiskItemController implements ng.IController {
 		return this.risksService.saveRisk(risk)
 			.then((response) => {
 				this.data = response.data; // So that new changes are registered as updates
+				this.updateSavedRisk(this.data);
 				const responseRisk = response.data;
 
 				// Hide the description input if no description
@@ -887,7 +906,7 @@ class RiskItemController implements ng.IController {
 	}
 
 	private isRiskDataChanged() {
-		let changed = !this.data;
+		let changed = !this.savedData;
 
 		if (this.riskData) {
 			const keys = Object.keys(this.riskData);
@@ -896,9 +915,9 @@ class RiskItemController implements ng.IController {
 			while (!changed && keyIdx < keys.length) {
 				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
 					changed = JSON.stringify(this.riskData[keys[keyIdx]]) !==
-						JSON.stringify(this.data[keys[keyIdx]]);
+						JSON.stringify(this.savedData[keys[keyIdx]]);
 				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
-					changed = this.riskData[keys[keyIdx]] !== this.data[keys[keyIdx]];
+					changed = this.riskData[keys[keyIdx]] !== this.savedData[keys[keyIdx]];
 				}
 				keyIdx++;
 			}
