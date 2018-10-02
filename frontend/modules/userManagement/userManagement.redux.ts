@@ -109,7 +109,7 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 	const { teamspace, quotaInfo = {}, jobs, jobsColors } = action;
-	const users = action.users.map(prepareUserData.bind(null, teamspace));
+	const users = action.users.map(prepareUserData.bind(null, teamspace.name));
 	return Object.assign({}, INITIAL_STATE, {
 		...quotaInfo,
 		users,

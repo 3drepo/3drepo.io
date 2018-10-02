@@ -152,7 +152,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 					value: user.isAdmin,
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
-					readOnly: user.isCurrentUser || user.isOwner
+					readOnly: user.isCurrentUser || user.isOwner,
+					disabled: user.isCurrentUser || user.isOwner
 				},
 				{},
 				{
