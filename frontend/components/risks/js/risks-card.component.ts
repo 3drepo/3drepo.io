@@ -74,6 +74,7 @@ class RisksCardController implements ng.IController {
 	private onShowItem: any;
 	private hideItem: boolean;
 	private filterChips: Array<{name: string, type: string}> = [];
+	private selectedMenuOption: any;
 
 	constructor(
 		private $scope,
@@ -210,6 +211,7 @@ class RisksCardController implements ng.IController {
 				}
 
 				this.risksService.state.displayRisk = null;
+				this.selectedMenuOption = null;
 
 				this.$state.go("home.account.model",
 					{

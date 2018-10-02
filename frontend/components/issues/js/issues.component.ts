@@ -70,6 +70,7 @@ class IssuesController implements ng.IController {
 	private modelSettings: any;
 	private canAddIssue: boolean;
 	private filterChips: Array<{name: string, type: string}> = [];
+	private selectedMenuOption: any;
 
 	constructor(
 		private $scope: any,
@@ -219,6 +220,7 @@ class IssuesController implements ng.IController {
 				}
 
 				this.issuesService.state.displayIssue = null;
+				this.selectedMenuOption = null;
 
 				this.$state.go("home.account.model",
 					{
