@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../helpers/migration';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { withRouter } from 'react-router';
+import { connect } from '../../helpers/migration';
 
 import { Users } from './users.component';
 import {
@@ -43,4 +44,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Users);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Users));

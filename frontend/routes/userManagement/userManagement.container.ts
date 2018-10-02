@@ -20,11 +20,13 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { UserManagement } from './userManagement.component';
-import { UserManagementActions } from '../../modules/userManagement';
+import { UserManagementActions, selectCurrentTeamspace, selectIsPending } from '../../modules/userManagement';
 import { selectCurrentUserTeamspaces } from '../../modules/teamspace';
 
 const mapStateToProps = createStructuredSelector({
-	teamspaces: selectCurrentUserTeamspaces
+	selectedTeamspace: selectCurrentTeamspace,
+	teamspaces: selectCurrentUserTeamspaces,
+	isLoadingTeamspace: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

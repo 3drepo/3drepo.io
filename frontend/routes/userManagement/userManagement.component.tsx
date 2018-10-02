@@ -16,7 +16,8 @@
  */
 
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import * as queryString from 'query-string';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -30,8 +31,17 @@ import Users from '../users/users.container';
 import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { Container, Title, Content, Header, TabContent, TeamspaceSelectContainer } from './userManagement.styles';
+import {
+	Container,
+	Title,
+	Content,
+	Header,
+	TabContent,
+	TeamspaceSelectContainer,
+	LoaderContainer
+} from './userManagement.styles';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+import { Loader } from '../components/loader/loader.component';
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -55,6 +65,8 @@ const TABS = {
 };
 
 interface IProps {
+	location: any;
+	history: any;
 	teamspaces: any[];
 	isLoadingTeamspace: boolean;
 	onTeamspaceChange: (teamspace) => void;
@@ -68,34 +80,56 @@ interface IState {
 }
 
 export class UserManagement extends React.PureComponent<IProps, IState> {
+	public static getDerivedStateFromProps = (nextProps, prevState) => {
+		const queryParams = queryString.parse(location.search);
+		return {
+			activeTab: Number(queryParams.tab || prevState.activeTab),
+			selectedTeamspace: queryParams.teamspace || prevState.selectedTeamspace
+		};
+	}
+
 	public state = {
 		isTeamspaceAdmin: true,
-		activeTab: 1,
+		activeTab: TABS_TYPES.USERS,
 		selectedTeamspace: '',
 		teamspacesItems: []
 	};
 
-	public handleChange = (event, value) => {
-		this.setState({activeTab: value});
+	public updateUrlParams = (params) => {
+		/*
+			TODO: location and history should be changed to equivalent objects in react's props,
+						if parent component is migrated
+		*/
+		const { pathname, search } = location;
+		const queryParams = Object.assign({}, queryString.parse(search), params);
+		const updatedQueryString = queryString.stringify(queryParams);
+		window.history.pushState({}, null, `${pathname}?${updatedQueryString}`);
+	}
+
+	public handleChange = (event, activeTab) => {
+		this.updateUrlParams({tab: activeTab});
+		this.setState({activeTab});
 	}
 
 	public onTeamspaceChange = (teamspace) => {
-		this.setState({
-			selectedTeamspace: teamspace
-		});
-
+		this.updateUrlParams({teamspace});
 		if (this.props.onTeamspaceChange) {
 			this.props.onTeamspaceChange(teamspace);
 		}
 	}
 
 	public componentDidMount() {
+		const selectedTeamspace = queryString.parse(location.search).teamspace;
 		this.setState({
 			teamspacesItems: this.props.teamspaces.map(({ account }) => ({ value: account }))
 		});
+
+		if (selectedTeamspace) {
+			this.onTeamspaceChange(selectedTeamspace);
+		}
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as IState;
 
 		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
@@ -108,49 +142,76 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderTabContent = (props) => {
+		const {isLoadingTeamspace} = this.props;
+		const {activeTab, selectedTeamspace} = this.state;
+
+		if (!selectedTeamspace) {
+			return <TextOverlay content="Select teamspace to enable settings" />;
+		}
+
+		if (isLoadingTeamspace) {
+			const content = `Loading "${selectedTeamspace}" data...`;
+			return (
+				<LoaderContainer>
+					<Loader content={content} />
+				</LoaderContainer>
+			);
+		}
+
+		return (
+			<>
+				{ activeTab === TABS_TYPES.USERS && <Users /> }
+				{ activeTab === TABS_TYPES.PROJECTS && <Projects /> }
+				{ activeTab === TABS_TYPES.JOBS && <Jobs /> }
+			</>
+		);
+	}
+
 	public render() {
 		const {isLoadingTeamspace, teamspaces} = this.props;
 		const {isTeamspaceAdmin, activeTab, selectedTeamspace, teamspacesItems} = this.state;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container>
-					<Title>User management</Title>
-					<Content>
-						<Header>
-							<TeamspaceSelectContainer>
-								<FormControl fullWidth={true}>
-									<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-									<CellSelect
-										items={teamspacesItems}
-										value={selectedTeamspace}
-										placeholder="Select teamspace"
-										disabledPlaceholder={true}
-										onChange={this.onTeamspaceChange}
-										inputId="teamspace-select"
-									/>
-								</FormControl>
-							</TeamspaceSelectContainer>
-							<Tabs
-								value={this.state.activeTab}
-								indicatorColor="primary"
-								textColor="primary"
-								onChange={this.handleChange}
-							>
-								<Tab label="Users" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin}  *//>
-								<Tab label="Projects" /* disabled={!selectedTeamspace || !isLoadingTeamspace} */ />
-								<Tab label="Jobs" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
-							</Tabs>
-						</Header>
-						<TabContent>
-							{selectedTeamspace && activeTab === TABS_TYPES.USERS && <Users />}
-							{selectedTeamspace && activeTab === TABS_TYPES.PROJECTS && <Projects />}
-							{selectedTeamspace && activeTab === TABS_TYPES.JOBS && <Jobs />}
-							{!selectedTeamspace && <TextOverlay content="Select teamspace to enable settings" />}
-						</TabContent>
-					</Content>
-				</Container>
-			</MuiThemeProvider>
+			<Router>
+				<MuiThemeProvider theme={theme}>
+					<Container>
+						<Title>User management</Title>
+						<Content>
+							<Header>
+								<TeamspaceSelectContainer>
+									<FormControl fullWidth={true}>
+										<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+										<CellSelect
+											items={teamspacesItems}
+											value={selectedTeamspace}
+											placeholder="Select teamspace"
+											disabledPlaceholder={true}
+											onChange={this.onTeamspaceChange}
+											inputId="teamspace-select"
+										/>
+									</FormControl>
+								</TeamspaceSelectContainer>
+								<Tabs
+									value={this.state.activeTab}
+									indicatorColor="primary"
+									textColor="primary"
+									onChange={this.handleChange}
+								>
+									<Tab label="Users" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
+									<Tab label="Projects" /* disabled={!selectedTeamspace || !isLoadingTeamspace} */ />
+									<Tab label="Jobs" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
+								</Tabs>
+							</Header>
+							<TabContent>
+								{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
+								<Route exact path="/:teamspace" render={this.renderTabContent} />
+							</TabContent>
+						</Content>
+					</Container>
+				</MuiThemeProvider>
+
+			</Router>
 		);
 	}
 }

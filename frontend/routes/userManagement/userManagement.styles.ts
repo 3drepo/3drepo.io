@@ -62,3 +62,17 @@ export const TabContent = styled.div`
 export const TeamspaceSelectContainer = styled.div`
   padding: 24px;
 `;
+
+export const LoaderContainer = styled.div`
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #fafafa;
+  color: ${COLOR.BLACK_40};
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 100px;
+  box-sizing: border-box;
+`;

@@ -61,7 +61,7 @@ export const INITIAL_STATE = {
 	jobs: [],
 	jobsColors: [],
 	collaboratorLimit: null,
-	isPending: false,
+	isPending: true,
 	currentProject: {
 		permissions: [],
 		modelsPermissions: [],
