@@ -16,12 +16,19 @@
  */
 
 import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import Grid from '@material-ui/core/Grid';
+import Radio from '@material-ui/core/Radio';
 
-export const Container = styled.div `
-  height: 100%;
+export const RadioContainer = styled(Grid)`
+  && {
+    width: 100%;
+  }
+`;
 
-	${ColorSelect} {
-    border: none;
+export const RadioButton = styled(Radio)`
+  && {
+    height: 40px;
+    width: 40px;
+    box-sizing: border-box;
   }
 `;

@@ -15,13 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import * as React from 'react';
+import { SortLabel } from './tableHeading.styles';
 
-export const Container = styled.div `
-  height: 100%;
+export const TableHeading = ({ label, activeSort, sortOrder, onClick, onChange, hideSortIcon }) => {
+	if (!label) {
+		return (<></>);
+	}
 
-	${ColorSelect} {
-    border: none;
-  }
-`;
+	if (hideSortIcon) {
+		return (<>{label}</>);
+	}
+
+	return (
+		<SortLabel
+			active={activeSort}
+			direction={sortOrder}
+			onClick={onClick}
+		>
+			{label}
+		</SortLabel>
+	);
+};

@@ -93,4 +93,3 @@ import "./member-card/js/member-card.component";
 import "./list-sort-button/js/list-sort-button.component";
 import "./projects-permissions/js/projects-permissions.component";
 import "./permissions-list/js/permissions-list.component";
-import "./models-list/js/models-list.component";

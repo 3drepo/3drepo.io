@@ -38,34 +38,16 @@
     on-change="vm.onPermissionsChange(updatedPermissions)"
     mode="projects")
 
-  .modelsPermissions(flex layout="row" ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS")
-    .modelsPermissionsPlaceholder(
-      layout="row"
-      layout-align="center center"
-      ng-if="!vm.currentProject")
-      p Select a project to view the models' list
 
-    models-list(
-      flex="30"
-      ng-disabled="!vm.models.length"
-      models="vm.models"
-      current-teamspace="vm.currentTeamspace"
-      on-change="vm.onModelSelectionChange(selectedModels)")
-
-    .modelsPermissionsWrapper(
-      flex="grow"
-      data-simplebar
-      ng-attr-data-simplebar-x-hidden="{{!vm.selectedModels.length || undefined}}"
-      data-simplebar-y-hidden)
-      permissions-list(
-        ng-disabled="!vm.selectedModels.length"
-        flex="grow"
-        data="vm.assignedModelPermissions"
-        permissions="vm.MODEL_ROLES_LIST"
-        current-teamspace="vm.currentTeamspace"
-        message-empty-list="Select a model to view the users' permissions"
-        on-change="vm.onPermissionsChange(updatedPermissions)"
-        mode="models")
+  models-permissions(
+    flex
+    layout="row"
+    ng-if="vm.currentView === vm.PERMISSIONS_VIEWS.MODELS"
+    models="vm.models"
+    permissions="vm.assignedModelPermissions"
+    on-selection-change="vm.onModelSelectionChange"
+    on-permissions-change="vm.onPermissionsChange"
+  )
 
   .projectsPermissionsFooter(
     layout="row"

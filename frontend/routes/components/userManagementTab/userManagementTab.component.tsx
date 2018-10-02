@@ -15,13 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import * as React from 'react';
 
-export const Container = styled.div `
-  height: 100%;
+import { Container, Content, Footer } from './userManagementTab.styles';
 
-	${ColorSelect} {
-    border: none;
-  }
-`;
+interface IProps {
+	children: React.ReactChild;
+	footerLabel?: string;
+}
+
+export const UserManagementTab = (props: IProps) => {
+	const {footerLabel, children} = props;
+	return (
+		<>
+			<Container
+				container
+				direction="column"
+				alignItems="stretch"
+				wrap="nowrap"
+			>
+				<Content item>{children}</Content>
+				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
+			</Container>
+		</>
+	);
+};

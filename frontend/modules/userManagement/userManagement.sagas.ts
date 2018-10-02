@@ -21,7 +21,7 @@ import * as API from '../../services/api';
 import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 import { DialogActions } from '../dialog/dialog.redux';
 
-import { selectCurrentTeamspace } from '../teamspace/teamspace.selectors';
+import { selectCurrentTeamspace } from './userManagement.selectors';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {

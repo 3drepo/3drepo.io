@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import * as React from 'react';
 
 import styled from 'styled-components';
 import Popover from '@material-ui/core/Popover';
@@ -34,8 +35,8 @@ export const Dot = styled(Grid)`
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
-	background-color: ${(props) => props.color || 'transparent'};
-	border: 2px dotted ${(props) => props.color ? 'transparent' : 'rgba(0, 0, 0, .38)'};
+	background-color: ${({color}) => color || 'transparent'};
+	border: 2px dotted ${({color}) => color ? 'transparent' : 'rgba(0, 0, 0, .38)'};
 `;
 
 export const Panel = styled(Popover).attrs({

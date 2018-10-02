@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import { connect } from '../../helpers/migration';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-export const Container = styled.div `
-  height: 100%;
+import { ModelsPermissions } from './modelsPermissions.component';
 
-	${ColorSelect} {
-    border: none;
-  }
-`;
+const mapStateToProps = createStructuredSelector({});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);

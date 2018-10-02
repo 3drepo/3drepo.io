@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { memoize } from 'lodash';
 
-import { COLOR, FONT_WEIGHT } from '../../../styles';
+import { COLOR, FONT_WEIGHT, isWindows, isFirefox } from '../../../styles';
 
 import * as JobItem from '../jobItem/jobItem.styles';
 import * as UserItem from '../userItem/userItem.styles';
@@ -33,34 +33,6 @@ const flexMemoized = memoize(({flex}) => {
 	return flex ? `1 0 100%` : 'none';
 }, ({flex}) => flex);
 
-export const SortLabel = styled(TableSortLabel)`
-	&& {
-		flex-direction: row-reverse;
-		margin-left: ${({active}) => active ? 0 : '-5px'};
-	}
-
-	&::before {
-		width: 18px;
-		height: 18px;
-		left: -2px;
-		border-radius: 100%;
-		position: absolute;
-		top: -1px;
-		transition: 200ms ease-in-out;
-		content: '';
-		background: ${({active}) => active ? '#15563c' : 'transparent'};
-	}
-
-	svg {
-		opacity: 1;
-		margin-left: 0;
-		margin-right: 10px;
-		width: 14px;
-		height: 14px;
-		fill: ${({active}) => active ? COLOR.WHITE : COLOR.BLACK_60};
-	}
-`;
-
 export const Cell = styled.div`
 	overflow: hidden;
 	white-space: nowrap;
@@ -68,11 +40,16 @@ export const Cell = styled.div`
 	box-sizing: border-box;
 	justify-content: flex-start;
 	align-items: center;
-	padding: 0 24px;
+	padding: ${(props: any) => props.padding || '0 24px'};
 
 	flex: ${flexMemoized};
 	max-width: ${(props: any) => props.flex ? `${props.flex}%` : 'initial'};
 	width: ${(props: any) => props.width || 'auto'};
+`;
+
+export const CheckboxCell = styled(Cell)`
+	overflow: visible;
+	padding: 0 0 0 12px;
 `;
 
 export const Container = styled.div`
@@ -85,7 +62,6 @@ export const Container = styled.div`
 
 	${UserItem.Name},
 	${CellSelect.StyledSelect},
-	${SortLabel},
 	${Cell} {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
@@ -102,13 +78,36 @@ export const Row = styled.div`
 	display: flex;
 	flex-direction: row;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
+	cursor: ${(props: any) => props.clickable ? 'pointer' : 'initial'};
 `;
 
 export const Head = styled(Row)`
 	flex: none;
 
-	${SortLabel},
 	${Cell} {
 		font-weight: ${FONT_WEIGHT.SEMIBOLD};
 	}
+`;
+
+export const Body = styled.div`
+		height: inherit;
+	overflow: hidden;
+	position: absolute;
+	width: 100%;
+
+	[data-simplebar='init'] {
+		height: 100%;
+	}
+
+	${isWindows(isFirefox(`
+		.simplebar-content {
+			padding-bottom: 34px !important;
+		}
+	`))}
+`;
+
+export const BodyWrapper = styled.div`
+	width: 100%;
+	position: relative;
+	height: inherit;
 `;

@@ -15,13 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ColorSelect } from '../components/colorPicker/colorPicker.styles';
+import * as React from 'react';
 
-export const Container = styled.div `
-  height: 100%;
+import { Highlight } from '../highlight/highlight.component';
+import { Container, Name, Detail } from './modelItem.styles';
 
-	${ColorSelect} {
-    border: none;
-  }
-`;
+interface IProps {
+	name: string;
+	isFederation?: boolean;
+	searchText?: string;
+}
+
+export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
+	const highlightProps = {
+		search: searchText || ''
+	};
+
+	return (
+		<Container>
+			<Name>
+				<Highlight
+					search={searchText}
+					text={name}
+				/>
+			</Name>
+			<Detail>
+				<Highlight
+					search={searchText}
+					text={isFederation ? 'Federation' : 'Model'}
+				/>
+			</Detail>
+		</Container>
+	);
+};

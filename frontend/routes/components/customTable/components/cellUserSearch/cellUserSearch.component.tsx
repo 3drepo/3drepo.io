@@ -20,13 +20,13 @@ import { debounce } from 'lodash';
 import Icon from '@material-ui/core/Icon';
 
 import { SearchField, SearchIcon } from './cellUserSearch.styles';
-import { SortLabel } from '../../customTable.styles';
 import { SORT_ORDER_TYPES } from '../../../../../constants/sorting';
+import { SortLabel } from '../tableHeading/tableHeading.styles';
 
 interface IProps {
-	cell: any;
-	sortBy: number;
-	order: any;
+	label: string;
+	activeSort: boolean;
+	sortOrder: 'asc' | 'desc';
 	onClick: () => void;
 	onChange: (searchText: string) => void;
 }
@@ -52,18 +52,18 @@ export class CellUserSearch extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {cell, sortBy, order, onClick} = this.props;
+		const {label, activeSort, sortOrder, onClick} = this.props;
 		const {searchText} = this.state;
 		return (
 			<>
 				<SortLabel
-					active={sortBy === cell.type}
-					direction={sortBy === cell.type ? order : SORT_ORDER_TYPES.ASCENDING}
+					active={activeSort}
+					direction={sortOrder}
 					onClick={onClick}
 				/>
 				<SearchIcon>search</SearchIcon>
 				<SearchField
-					label={cell.name}
+					label={label}
 					value={searchText}
 					onChange={this.handleChange}
 					InputProps={{
