@@ -76,7 +76,8 @@ function convertToErrorCode(bouncerErrorCode) {
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM,
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX,
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION,
-		responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED
+		responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED,
+		responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED
 
 	];
 
