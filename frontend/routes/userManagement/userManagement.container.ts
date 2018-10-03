@@ -23,7 +23,7 @@ import { connect, addRouting } from '../../helpers/migration';
 import { UserManagement } from './userManagement.component';
 import { UserManagementActions, selectCurrentTeamspace, selectIsPending } from '../../modules/userManagement';
 import {
-	selectCurrentUserTeamspaces,
+	selectTeamspacesWithAdminAccess,
 	selectCurrentUser,
 	selectCurrentTeamspace as selectDefaultTeamspace
 } from '../../modules/teamspace';
@@ -31,7 +31,7 @@ import {
 const mapStateToProps = createStructuredSelector({
 	defaultTeamspace: selectDefaultTeamspace,
 	selectedTeamspace: selectCurrentTeamspace,
-	teamspaces: selectCurrentUserTeamspaces,
+	teamspaces: selectTeamspacesWithAdminAccess,
 	isLoadingTeamspace: selectIsPending
 });
 

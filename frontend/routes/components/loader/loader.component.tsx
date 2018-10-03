@@ -27,7 +27,7 @@ interface IProps {
 export const Loader = (props: IProps) => {
 	return (
 		<Container>
-			<CircularProgress />
+			<CircularProgress size={30} />
 			<Content>
 				{props.content}
 			</Content>

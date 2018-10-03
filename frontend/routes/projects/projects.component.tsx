@@ -108,7 +108,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const {projects, location} = this.props;
 		const queryParams = queryString.parse(location.search);
-		debugger
 		this.setState({
 			projectsItems: getProjectsItems(this.props.projects)
 		});

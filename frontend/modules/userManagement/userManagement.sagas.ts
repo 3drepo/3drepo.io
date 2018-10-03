@@ -22,14 +22,14 @@ import { UserManagementTypes, UserManagementActions } from './userManagement.red
 import { DialogActions } from '../dialog/dialog.redux';
 
 import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
-import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
+import { selectTeamspaces } from '../teamspace/teamspace.selectors';
 import { DIALOG_TYPES } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
-		const teamspaces = yield select(selectCurrentUserTeamspaces);
+		const teamspaces = yield select(selectTeamspaces);
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 
 		const [users, quota] = yield all([

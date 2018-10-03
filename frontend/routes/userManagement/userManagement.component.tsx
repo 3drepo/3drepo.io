@@ -195,9 +195,9 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 								textColor="primary"
 								onChange={this.handleChange}
 							>
-								<Tab label="Users" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
-								<Tab label="Projects" /* disabled={!selectedTeamspace || !isLoadingTeamspace} */ />
-								<Tab label="Jobs" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
+								<Tab label="Users" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
+								<Tab label="Projects" disabled={!selectedTeamspace || isLoadingTeamspace} />
+								<Tab label="Jobs" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
 							</Tabs>
 						</Header>
 						<TabContent>
