@@ -95,6 +95,7 @@ class AccountUserManagementController implements ng.IController {
 		this.selectedTab = parseInt(tab, 10);
 
 		if (teamspace) {
+
 			this.selectedTeamspace = teamspace;
 		}
 
@@ -129,10 +130,6 @@ class AccountUserManagementController implements ng.IController {
 		const currentUserChanged = currentUser && currentUser.currentValue;
 		const accountsChanged = accounts && accounts.currentValue;
 
-		if (currentUserChanged && !this.selectedTeamspace) {
-			this.selectedTeamspace = currentUser.currentValue;
-		}
-
 		if (currentUserChanged && accountsChanged) {
 			this.teamspaces = accounts.currentValue.reduce((teamspaces, account) => {
 				const {isProjectAdmin, isModelAdmin} = account.projects.reduce((flags, { permissions, models }) => {
@@ -149,6 +146,11 @@ class AccountUserManagementController implements ng.IController {
 				}
 				return teamspaces;
 			}, []);
+		}
+
+		const hasProperTeamspace = this.teamspaces.find(({ account }) => account === this.selectedTeamspace);
+		if (!hasProperTeamspace || (currentUserChanged && !this.selectedTeamspace)) {
+			this.selectedTeamspace = currentUser.currentValue;
 		}
 	}
 
