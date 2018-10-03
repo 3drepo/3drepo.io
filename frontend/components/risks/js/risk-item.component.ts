@@ -162,24 +162,21 @@ class RiskItemController implements ng.IController {
 			{value: 1, label: "Low"},
 			{value: 2, label: "Moderate"},
 			{value: 3, label: "High"},
-			{value: 4, label: "Very High"},
-			{value: "", label: "UNSET"}
+			{value: 4, label: "Very High"}
 		];
 		this.consequences = [
 			{value: 0, label: "Very Low"},
 			{value: 1, label: "Low"},
 			{value: 2, label: "Moderate"},
 			{value: 3, label: "High"},
-			{value: 4, label: "Very High"},
-			{value: "", label: "UNSET"}
+			{value: 4, label: "Very High"}
 		];
 		this.levels = [
 			{value: 0, label: "Very Low"},
 			{value: 1, label: "Low"},
 			{value: 2, label: "Moderate"},
 			{value: 3, label: "High"},
-			{value: 4, label: "Very High"},
-			{value: "", label: "UNSET"}
+			{value: 4, label: "Very High"}
 		];
 		this.statuses = [
 			{value: "proposed", label: "Proposed"},
@@ -909,7 +906,8 @@ class RiskItemController implements ng.IController {
 				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
 					changed = JSON.stringify(this.riskData[keys[keyIdx]]) !==
 						JSON.stringify(this.savedData[keys[keyIdx]]);
-				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]]) ||
+					"[object Number]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
 					changed = this.riskData[keys[keyIdx]] !== this.savedData[keys[keyIdx]];
 				}
 				keyIdx++;

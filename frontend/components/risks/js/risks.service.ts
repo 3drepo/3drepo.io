@@ -208,7 +208,7 @@ export class RisksService {
 			consequence: 0,
 			level_of_risk: 0,
 			mitigation_status: "proposed",
-			assigned_roles: [ "Unassigned" ],
+			assigned_roles: [],
 			viewpoint: {}
 		};
 	}
@@ -571,8 +571,25 @@ export class RisksService {
 			if (risk.due_date) {
 				risk.due_date = new Date(risk.due_date);
 			}
+
 			if (risk.assigned_roles[0]) {
+				if (risk.assigned_roles.indexOf("Unassigned") !== -1) {
+					risk.assigned_roles = [];
+				}
+
 				risk.roleColor = this.getJobColor(risk.assigned_roles[0]);
+			}
+
+			if (risk.likelihood) {
+				risk.likelihood = parseInt(risk.likelihood, 10);
+			}
+
+			if (risk.consequence) {
+				risk.consequence = parseInt(risk.consequence, 10);
+			}
+
+			if (risk.level_of_risk) {
+				risk.level_of_risk = parseInt(risk.level_of_risk, 10);
 			}
 
 			if (!risk.descriptionThumbnail) {
