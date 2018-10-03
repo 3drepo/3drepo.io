@@ -155,6 +155,7 @@ account-dir .dataContainer {
 
 account-dir #account #accountItem {
   margin-right: 5%;
+  max-width: calc(100% - 300px);
 }
 
 account-dir #account #accountItem userContent {
@@ -170,6 +171,16 @@ account-dir #account #accountItem userContent {
     margin-bottom: 5%;
   }
 }
+
+@media (max-width:960px) {
+  account-dir #account #accountItem {
+    height: 100vh;
+    max-height: none !important;
+    max-width: calc(100vw - 10%);
+    overflow: visible;
+  }
+}
+
 
 @media (max-width: 767px) {
   account-dir #account #accountItem {
