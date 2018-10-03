@@ -379,7 +379,7 @@ risk.deleteRisks = function(dbCol, sessionId, ids) {
 	});
 };
 
-risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids) {
+risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false) {
 	const account = dbCol.account;
 	const model = dbCol.model;
 
@@ -433,7 +433,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 							model: ref.project
 						};
 						subModelsPromises.push(
-							this.findRisksByModelName(subDbCol, username, "master", null, projection).then((subRisks) => {
+							this.findRisksByModelName(subDbCol, username, "master", null, projection, null, true).then((subRisks) => {
 								subRisks.forEach((subRisk) => {
 									subRisk.origin_account = subDbCol.account;
 									subRisk.origin_model = subDbCol.model;
@@ -450,7 +450,9 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 								mainRisks = mainRisks.concat(subModelRisks);
 							});
 						}
-						mainRisks = mainRisks.map(r => clean(dbCol, r));
+						if (!noClean) {
+							mainRisks = mainRisks.map(r => clean(dbCol, r));
+						}
 
 						return mainRisks;
 					});
