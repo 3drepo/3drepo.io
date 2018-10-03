@@ -42,7 +42,7 @@ interface IProps {
 const DIALOG_TEMPLATES = {
 	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
 	[DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
-	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: ErrorDialog
+	[DIALOG_TYPES.ERROR]: ErrorDialog
 };
 
 export class DialogContainer extends React.PureComponent<IProps, any> {
