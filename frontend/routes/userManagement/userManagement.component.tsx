@@ -67,6 +67,7 @@ const TABS = {
 interface IProps {
 	location: any;
 	history: any;
+	defaultTeamspace: string;
 	teamspaces: any[];
 	isLoadingTeamspace: boolean;
 	onTeamspaceChange: (teamspace) => void;
@@ -119,14 +120,15 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
+		const {teamspaces, defaultTeamspace} = this.props;
 		const selectedTeamspace = queryString.parse(location.search).teamspace;
 		this.setState({
-			teamspacesItems: this.props.teamspaces.map(({ account }) => ({ value: account }))
+			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		});
 
-		if (selectedTeamspace) {
-			this.onTeamspaceChange(selectedTeamspace);
-		}
+		const hasProperTeamspace = teamspaces.find(({ account }) => account === selectedTeamspace);
+		const teamspace = hasProperTeamspace ? selectedTeamspace : defaultTeamspace;
+		this.onTeamspaceChange(teamspace);
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
