@@ -107,15 +107,20 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const {projects, location} = this.props;
+		const state = {
+			projectsItems: getProjectsItems(projects)
+		} as any;
 		const queryParams = queryString.parse(location.search);
-		this.setState({
-			projectsItems: getProjectsItems(this.props.projects)
-		});
 
 		const hasProperProject = projects.find(({ name }) => name === queryParams.project);
-		if (hasProperProject && this.state.selectedProject) {
-			this.onProjectChange(this.state.selectedProject);
+		if (hasProperProject) {
+			state.selectedProject = queryParams.project;
+			this.onProjectChange(queryParams.project);
+		} else {
+			state.selectedProject = '';
 		}
+
+		this.setState(state);
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
