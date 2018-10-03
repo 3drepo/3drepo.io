@@ -367,13 +367,6 @@ class RiskItemController implements ng.IController {
 		this.updateSavedRisk(this.riskData);
 	}
 
-	private updateSavedRisk(risk) {
-		if (risk) {
-			this.savedData = Object.assign({}, risk);
-			this.savedData.assigned_roles = Object.assign([], risk.assigned_roles);
-		}
-	}
-
 	public nameChange() {
 		this.submitDisabled = !this.riskData.name;
 		if (!this.submitDisabled) {
@@ -924,6 +917,13 @@ class RiskItemController implements ng.IController {
 		}
 
 		return changed;
+	}
+
+	private updateSavedRisk(risk) {
+		if (risk) {
+			this.savedData = Object.assign({}, risk);
+			this.savedData.assigned_roles = Object.assign([], risk.assigned_roles);
+		}
 	}
 
 }
