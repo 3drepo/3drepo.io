@@ -252,9 +252,10 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const isNotSameRows = !isEqual(this.props.rows, prevProps.rows);
-		const rowsChanged = prevProps.rows.length !== this.props.rows.length || isNotSameRows;
-		const rowsValuesChanged = this.props.rows.length && prevProps.rows.length === this.props.rows.length && isNotSameRows;
+		const areNotSameRows = !isEqual(this.props.rows, prevProps.rows);
+		const rowsChanged = prevProps.rows.length !== this.props.rows.length || areNotSameRows;
+		const rowsValuesChanged = this.props.rows.length &&
+			prevProps.rows.length === this.props.rows.length && areNotSameRows;
 
 		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
