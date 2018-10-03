@@ -124,7 +124,15 @@ account-dir #account {
   background-size: contain;
   position: absolute;
   width: 100%;
-  height: calc(100% - 15vh);
+  box-sizing: border-box;
+  justify-content: flex-start;
+  padding: 0 5% 5%;
+  height: 100%;
+}
+
+account-dir #account .accountSpace {  
+  width: 5%;
+  min-width: 5%;
 }
 
 account-dir #accountHolder {
@@ -154,8 +162,9 @@ account-dir .dataContainer {
 }
 
 account-dir #account #accountItem {
-  margin-right: 5%;
-  max-width: calc(100% - 300px);
+  width: 100%;
+  max-width: calc(100% - 300px - 5%);
+  box-sizing: border-box;
 }
 
 account-dir #account #accountItem userContent {
@@ -165,26 +174,16 @@ account-dir #account #accountItem userContent {
 
 @media (min-width:600px) and (max-width:960px) {
   account-dir #account #accountItem {
-    margin-left: 5%;
-    margin-right: 5%;
-    margin-top: 5%;
-    margin-bottom: 5%;
+    margin: 5% 0;
   }
 }
 
 @media (max-width:960px) {
   account-dir #account #accountItem {
-    height: 100vh;
+    height: calc(100vh - 190px);
     max-height: none !important;
     max-width: calc(100vw - 10%);
     overflow: visible;
-  }
-}
-
-
-@media (max-width: 767px) {
-  account-dir #account #accountItem {
-    margin-left: 5%;
   }
 }
 
@@ -283,11 +282,6 @@ account-items #newModelFileUploader {
   z-index: -1;
 }
 
-account-items .accountRight,
-account-items .modelRight {
-  /*margin-right: 10px !important;*/
-}
-
 account-items .md-whiteframe-1dp {
   border-radius: 4px;
   background: #FFF;
@@ -359,21 +353,18 @@ account-profile md-divider {
 }
 
 /** Account Info ******************************************************************************************************/
-account-info {
-   margin-left: 5%; 
-   /* min-width: 100%;  */
-   margin-right: 5%; 
-}
 
 @media (max-width: 767px) {
   account-info #accountInfoContent {
-     max-height: 100% !important;
+    max-height: 100% !important;
   }
 }
 
 @media (min-width: 960px) {
   account-info {
-     max-width: 300px !important;
+    flex: 1 0 100% !important;
+    width: 300px !important;
+    max-width: 300px !important;
   }
 }
 
@@ -531,10 +522,6 @@ account-menu #accountMenuContent md-menu-item > .md-button {
 /** Account Billing ***************************************************************************************************/
 account-billing md-input-container {
   margin-right: 10px;
-}
-
-account-billing md-tabs md-tab-content {
-  /* max-height: 574px; */
 }
 
 account-billing .accountBillingSave button {

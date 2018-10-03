@@ -28,6 +28,8 @@ div#accountHolder(
 			has-avatar="vm.hasAvatar"
 			item-to-show="vm.itemToShow")
 
+		.accountSpace
+
 		#accountItem(flex="100")
 
 			account-teamspaces(
@@ -64,8 +66,7 @@ div#accountHolder(
 			user-management(
 				ng-if="vm.username && vm.itemToShow === 'userManagement'"
 				current-user="vm.account"
-				teamspaces="vm.accounts"
-				show-page="vm.showPage(page, callingPage, data)")
+				teamspaces="vm.accounts")
 
 div(ng-if="vm.state.model")
 	model(

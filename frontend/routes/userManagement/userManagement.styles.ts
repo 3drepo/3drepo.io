@@ -26,6 +26,7 @@ export const Container = styled(Paper)`
     background: #fafafa;
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 `;
 
