@@ -4,6 +4,7 @@
 */
 import * as React from 'react';
 import { react2angular as wrap } from 'react2angular';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 // Routes
 import DialogContainer from './components/dialogContainer/dialogContainer.container';

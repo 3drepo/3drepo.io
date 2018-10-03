@@ -62,8 +62,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps, prevState) => {
 		const queryParams = queryString.parse(nextProps.location.search);
 		return {
-			currentView: Number(queryParams.view || PERMISSIONS_VIEWS.PROJECTS),
-			selectedProject: queryParams.project || prevState.selectedProject
+			currentView: Number(queryParams.view || PERMISSIONS_VIEWS.PROJECTS)
 		};
 	}
 
@@ -107,11 +106,15 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
+		const {projects, location} = this.props;
+		const queryParams = queryString.parse(location.search);
+		debugger
 		this.setState({
 			projectsItems: getProjectsItems(this.props.projects)
 		});
 
-		if (this.state.selectedProject) {
+		const hasProperProject = projects.find(({ name }) => name === queryParams.project);
+		if (hasProperProject && this.state.selectedProject) {
 			this.onProjectChange(this.state.selectedProject);
 		}
 	}

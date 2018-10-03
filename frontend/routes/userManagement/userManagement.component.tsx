@@ -97,14 +97,10 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	};
 
 	public updateUrlParams = (params) => {
-		/*
-			TODO: location and history should be changed to equivalent objects in react's props,
-						if parent component is migrated
-		*/
-		const { pathname, search } = location;
+		const { pathname, search } = this.props.location;
 		const queryParams = Object.assign({}, queryString.parse(search), params);
 		const updatedQueryString = queryString.stringify(queryParams);
-		window.history.pushState({}, null, `${pathname}?${updatedQueryString}`);
+		this.props.history.push(`${pathname}?${updatedQueryString}`);
 	}
 
 	public handleChange = (event, activeTab) => {
@@ -120,7 +116,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const {teamspaces, defaultTeamspace} = this.props;
+		const {teamspaces, defaultTeamspace, location} = this.props;
 		const selectedTeamspace = queryString.parse(location.search).teamspace;
 		this.setState({
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
@@ -175,45 +171,42 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const {isTeamspaceAdmin, activeTab, selectedTeamspace, teamspacesItems} = this.state;
 
 		return (
-			<Router>
-				<MuiThemeProvider theme={theme}>
-					<Container>
-						<Title>User management</Title>
-						<Content>
-							<Header>
-								<TeamspaceSelectContainer>
-									<FormControl fullWidth={true}>
-										<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-										<CellSelect
-											items={teamspacesItems}
-											value={selectedTeamspace}
-											placeholder="Select teamspace"
-											disabledPlaceholder={true}
-											onChange={this.onTeamspaceChange}
-											inputId="teamspace-select"
-										/>
-									</FormControl>
-								</TeamspaceSelectContainer>
-								<Tabs
-									value={this.state.activeTab}
-									indicatorColor="primary"
-									textColor="primary"
-									onChange={this.handleChange}
-								>
-									<Tab label="Users" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
-									<Tab label="Projects" /* disabled={!selectedTeamspace || !isLoadingTeamspace} */ />
-									<Tab label="Jobs" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
-								</Tabs>
-							</Header>
-							<TabContent>
-								{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-								<Route exact path="/:teamspace" render={this.renderTabContent} />
-							</TabContent>
-						</Content>
-					</Container>
-				</MuiThemeProvider>
-
-			</Router>
+			<MuiThemeProvider theme={theme}>
+				<Container>
+					<Title>User management</Title>
+					<Content>
+						<Header>
+							<TeamspaceSelectContainer>
+								<FormControl fullWidth={true}>
+									<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+									<CellSelect
+										items={teamspacesItems}
+										value={selectedTeamspace}
+										placeholder="Select teamspace"
+										disabledPlaceholder={true}
+										onChange={this.onTeamspaceChange}
+										inputId="teamspace-select"
+									/>
+								</FormControl>
+							</TeamspaceSelectContainer>
+							<Tabs
+								value={this.state.activeTab}
+								indicatorColor="primary"
+								textColor="primary"
+								onChange={this.handleChange}
+							>
+								<Tab label="Users" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
+								<Tab label="Projects" /* disabled={!selectedTeamspace || !isLoadingTeamspace} */ />
+								<Tab label="Jobs" /* disabled={!selectedTeamspace || !isLoadingTeamspace || !isTeamspaceAdmin} */ />
+							</Tabs>
+						</Header>
+						<TabContent>
+							{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
+							<Route exact path="/:teamspace" render={this.renderTabContent} />
+						</TabContent>
+					</Content>
+				</Container>
+			</MuiThemeProvider>
 		);
 	}
 }
