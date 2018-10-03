@@ -160,20 +160,21 @@ class ModelController implements ng.IController {
 
 		this.RevisionsService.listAll(this.account, this.model);
 
-		if (!this.ViewerService.currentModel.model) {
-			if (this.ViewerService.viewer) {
-				this.ViewerService.initViewer().then(() => {
-					this.loadModel();
-				}).catch((err) => {
-					console.error("Failed to load model: ", err);
-				});
+		this.loadModelSettings().then(() => {
+			if (!this.ViewerService.currentModel.model) {
+				if (this.ViewerService.viewer) {
+					this.ViewerService.initViewer().then(() => {
+						this.loadModel();
+					}).catch((err) => {
+						console.error("Failed to load model: ", err);
+					});
+				} else {
+					console.error("Failed to locate viewer");
+				}
 			} else {
-				this.loadModelSettings();
-				console.error("Failed to locate viewer");
+				this.loadModel();
 			}
-		} else {
-			this.loadModel();
-		}
+		});
 	}
 
 	public setSelectedObjects(selectedObjects) {
@@ -197,13 +198,12 @@ class ModelController implements ng.IController {
 		).then( () => {
 			// IMPORTANT: only load model settings after it has started loading the model
 			// loadViewerModel can cancel previous model loads which will kill off old unity promises
-			this.loadModelSettings();
+			this.ViewerService.updateViewerSettings(this.settings);
 		});
 	}
 
 	private setupViewer() {
 		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
-		this.ViewerService.updateViewerSettings(this.settings);
 		this.ClipService.initClip(this.settings.properties.unit);
 		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
 			.catch((error) => {
@@ -212,10 +212,11 @@ class ModelController implements ng.IController {
 	}
 
 	private loadModelSettings() {
-		this.ViewerService.getModelInfo(this.account, this.model)
+		return this.ViewerService.getModelInfo(this.account, this.model)
 			.then((response) => {
 				this.settings = response.data;
 				this.setupViewer();
+				return Promise.resolve();
 			})
 			.catch((error) => {
 				console.error(error);
@@ -224,6 +225,8 @@ class ModelController implements ng.IController {
 				if (error.data.message !== "You are not logged in") {
 					this.handleModelError();
 				}
+
+				return Promise.reject(error);
 			});
 	}
 }
