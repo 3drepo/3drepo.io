@@ -68,12 +68,21 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 
 	public handlePermissionsChange = (permissions) => {
 		if (this.props.onPermissionsChange) {
-			const permissionsToSave = permissions.map(({user, key}) => {
-				return {
-					user,
-					permissions: key ? [key] : []
-				};
-			});
+			const permissionsToSave = this.props.permissions.reduce((updatedUserPermissions, currentPermissions) => {
+				if (!currentPermissions.isAdmin) {
+					const updatedPermissions = permissions.find((userPermissions) => {
+						return userPermissions.user === currentPermissions.user;
+					});
+					const permissionsKey = updatedPermissions ? updatedPermissions.key : currentPermissions.key;
+
+					updatedUserPermissions.push({
+						user: currentPermissions.user,
+						permissions: permissionsKey ? [permissionsKey] : []
+					});
+				}
+
+				return updatedUserPermissions;
+			}, []);
 
 			this.props.onPermissionsChange(permissionsToSave);
 		}
