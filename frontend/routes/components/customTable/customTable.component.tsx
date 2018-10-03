@@ -16,7 +16,10 @@
  */
 
 import * as React from 'react';
-import { matchesProperty, cond, orderBy, pick, values, stubTrue, first, isEqual, identity } from 'lodash';
+import {
+	matchesProperty, cond, orderBy, pick, values,
+	stubTrue, first, isEqual, identity, isEmpty
+} from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -189,6 +192,8 @@ const getSearchFields = (cells) => {
 	return searchFields ? searchFields.searchBy : [];
 };
 
+const FIELDS_TO_OMIT = ['selected', 'data', 'disabled'];
+
 interface IProps {
 	cells: any[];
 	rows: any[];
@@ -252,6 +257,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
+        const changes = {} as any;
 		const areNotSameRows = !isEqual(this.props.rows, prevProps.rows);
 		const rowsChanged = prevProps.rows.length !== this.props.rows.length || areNotSameRows;
 		const rowsValuesChanged = this.props.rows.length &&
@@ -261,31 +267,35 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
 
 		if (rowsValuesChanged && !sortChanged && !orderChanged) {
-			this.setState({
-				processedRows: updateProcessedRows({
-					updatedRows: this.props.rows,
-					processedRows: prevState.processedRows
-				})
-			});
+            changes.processedRows = updateProcessedRows({
+                updatedRows: this.props.rows,
+                processedRows: prevState.processedRows
+            });
 		} else if (rowsChanged || sortChanged || orderChanged) {
 			const {currentSort, searchFields, searchText} = this.state;
-			this.setState({
-				processedRows: getProcessedRows({
-					rows: this.props.rows,
-					sortBy: currentSort.type,
-					sortColumn: currentSort.activeIndex,
-					order: currentSort.order,
-					searchFields,
-					searchText,
-					onSearch: this.props.onSearch
-				}),
-				selectedRows: this.props.rows.reduce((selectedRows, row) => {
+			changes.processedRows = getProcessedRows({
+                rows: this.props.rows,
+                sortBy: currentSort.type,
+                sortColumn: currentSort.activeIndex,
+                order: currentSort.order,
+                searchFields,
+                searchText,
+                onSearch: this.props.onSearch
+            });
+
+
+			if (rowsChanged) {
+				changes.selectedRows = changes.processedRows.reduce((selectedRows, row) => {
 					if (row.selected) {
-						selectedRows.push(row);
+						selectedRows.push(omit(row, FIELDS_TO_OMIT));
 					}
 					return selectedRows;
-				}, [])
-			});
+				}, []);
+			}
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 

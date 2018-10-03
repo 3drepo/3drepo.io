@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { connect } from '../../helpers/migration';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { connect } from '../../helpers/migration';
 
 import { ModelsPermissions } from './modelsPermissions.component';
 import {
@@ -38,4 +38,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onPermissionsChange: UserManagementActions.updateModelsPermissionsPre
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions));

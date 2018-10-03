@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import * as queryString from 'query-string';
 import { pick, matches, isEqual, cond, get, isEmpty, memoize } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
@@ -66,6 +67,7 @@ const getModelsTableRows = (models = [], selectedModels = []) => {
 };
 
 interface IProps {
+	location: any;
 	models: any[];
 	selectedModels: any[];
 	permissions: any[];
@@ -160,6 +162,16 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
+
+        if (prevProps.models.length !== this.props.models.length) {
+            const queryParams = queryString.parse(this.props.location.search);
+            if (queryParams.modelId) {
+                const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
+                if (selectedModel) {
+                    this.props.onSelectionChange([selectedModel]);
+                }
+            }
+        }
 
 		const modelsSelectionChanged = prevProps.selectedModels.length !== this.props.selectedModels.length;
 		if (modelsSelectionChanged) {
