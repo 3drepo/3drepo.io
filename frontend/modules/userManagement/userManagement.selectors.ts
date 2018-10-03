@@ -17,7 +17,6 @@
 
 import { createSelector } from 'reselect';
 import { first, get } from 'lodash';
-import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 

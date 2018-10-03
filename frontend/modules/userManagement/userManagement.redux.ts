@@ -53,7 +53,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	fetchModelPermissionsSuccess: ['selectedModels'],
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
-	updateModelPermissionsSuccess: ['modelsWithPermissions', 'permissions']
+	updateModelPermissionsSuccess: ['updatedModels', 'permissions']
 }, { prefix: 'USER_MANAGEMENT_' });
 
 export const INITIAL_STATE = {
@@ -62,7 +62,6 @@ export const INITIAL_STATE = {
 	permissions: [],
 	models: [],
 	fedModels: [],
-	modelsPemissions: [],
 	users: [],
 	usersSuggestions: [],
 	usersPermissions: [],
@@ -237,9 +236,12 @@ export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedMo
 	return {...state, currentProject};
 };
 
-export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { modelsWithPermissions, permissions }) => {
-	const currentProject = {...state.currentProject};
-	const onlyOneModelWasChanged = modelsWithPermissions.length === 1;
+export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels, permissions }) => {
+	const currentProject = {
+		...state.currentProject,
+		currentModels: updatedModels
+	};
+	const onlyOneModelWasChanged = updatedModels.length === 1;
 
 	const modelPermissions = currentProject.currentModels[0].permissions.map(({ user, permission }) => {
 		let updatedPermissionKey = onlyOneModelWasChanged ? permission : 'undefined';

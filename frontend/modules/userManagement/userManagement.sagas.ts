@@ -256,8 +256,8 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 export function* updateModelsPermissions({ modelsWithPermissions, permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
-		yield put(UserManagementActions.updateModelPermissionsSuccess(modelsWithPermissions, permissions));
+		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
+		yield put(UserManagementActions.updateModelPermissionsSuccess(response.data, permissions));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
 	}
