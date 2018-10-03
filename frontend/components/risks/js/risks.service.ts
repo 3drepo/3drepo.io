@@ -572,7 +572,7 @@ export class RisksService {
 				risk.due_date = new Date(risk.due_date);
 			}
 
-			if (risk.assigned_roles[0]) {
+			if (risk.assigned_roles) {
 				if (risk.assigned_roles.indexOf("Unassigned") !== -1) {
 					risk.assigned_roles = [];
 				}

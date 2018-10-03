@@ -904,8 +904,8 @@ class RiskItemController implements ng.IController {
 
 			while (!changed && keyIdx < keys.length) {
 				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
-					changed = JSON.stringify(this.riskData[keys[keyIdx]]) !==
-						JSON.stringify(this.savedData[keys[keyIdx]]);
+					changed = 0 !== this.riskData[keys[keyIdx]].length &&
+						JSON.stringify(this.riskData[keys[keyIdx]]) !== JSON.stringify(this.savedData[keys[keyIdx]]);
 				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]]) ||
 					"[object Number]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
 					changed = this.riskData[keys[keyIdx]] !== this.savedData[keys[keyIdx]];
