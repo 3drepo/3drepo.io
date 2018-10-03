@@ -654,14 +654,17 @@ export class RisksService {
 			this.treeService.setHideIfc(risk.viewpoint.hideIfc);
 		}
 
-		this.treeService.showAllTreeNodes(false);
+		const hasHiddenOrShownGroup = risk.viewpoint.hasOwnProperty("hidden_group_id") ||
+						risk.viewpoint.hasOwnProperty("shown_group_id") ;
+
+		this.treeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 
 		// Show multi objects
 		if ((risk.viewpoint && (risk.viewpoint.hasOwnProperty("highlighted_group_id") ||
-						risk.viewpoint.hasOwnProperty("hidden_group_id") ||
-						risk.viewpoint.hasOwnProperty("shown_group_id") ||
 						risk.viewpoint.hasOwnProperty("group_id"))) ||
-				risk.hasOwnProperty("group_id")) {
+						risk.hasOwnProperty("group_id") ||
+						hasHiddenOrShownGroup
+		) {
 
 			this.showMultiIds(risk, revision).then(() => {
 				this.handleShowRisk(risk);
