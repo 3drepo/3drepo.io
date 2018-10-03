@@ -84,6 +84,7 @@
 		FILE_IMPORT_UNKNOWN_ERR: { message: "Import failed: Unknown error", status: 500 },
 		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 400 },
 		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 400 },
+		FILE_IMPORT_STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Import failed: Failed to generate unity files", status: 500 },
 		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Import failed: Untriangulated meshes", status: 400 },
 		FILE_IMPORT_NO_MESHES: { message: "Import failed: Model does not have geometry", status: 400 },
@@ -141,7 +142,6 @@
 		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
 		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
 
-		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
