@@ -308,14 +308,20 @@ export class PanelService {
 							stopClose: true
 						}, {
 							hidden: false,
-							value: "approved",
-							label: "Approved",
+							value: "agreed_partial",
+							label: "Agreed (Partial)",
 							toggle: true,
 							stopClose: true
 						}, {
 							hidden: false,
-							value: "accepted",
-							label: "Accepted",
+							value: "agreed_fully",
+							label: "Agreed (Fully)",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: "rejected",
+							label: "Rejected",
 							toggle: true,
 							stopClose: true
 						}]

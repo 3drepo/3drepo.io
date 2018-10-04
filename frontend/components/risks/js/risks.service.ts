@@ -248,7 +248,7 @@ export class RisksService {
 
 		if (!criteria.mitigation_status) { // If there is no explicit filter for status dont show closed risks
 									// thats the general criteria for showing risks.
-			filters.push((risk) => risk.mitigation_status !== "accepted");
+			filters.push((risk) => risk.mitigation_status !== "agreed_fully");
 		}
 
 		filters = filters.concat(this.getOrClause(criteria[""], this.handleRiskFilter));
@@ -505,7 +505,7 @@ export class RisksService {
 			const matches = oldRisk._id === risk._id;
 			if (matches) {
 
-				if (risk.status === "accepted") {
+				if (risk.status === "agreed_fully") {
 
 					this.state.allRisks[i].justClosed = true;
 
@@ -590,6 +590,10 @@ export class RisksService {
 
 			if (risk.level_of_risk) {
 				risk.level_of_risk = parseInt(risk.level_of_risk, 10);
+			}
+
+			if (!risk.mitigation_status || "" === risk.mitigation_status) {
+				risk.mitigation_status = "proposed";
 			}
 
 			if (!risk.descriptionThumbnail) {
@@ -1022,15 +1026,14 @@ export class RisksService {
 			case "proposed":
 				statusIcon.icon = "panorama_fish_eye";
 				break;
-			case "approved":
+			case "agreed_partial":
 				statusIcon.icon = "lens";
 				break;
-			case "accepted":
+			case "agreed_fully":
 				statusIcon.icon = "check_circle";
 				break;
-			case "":
+			case "rejected":
 				statusIcon.icon = "adjust";
-				statusIcon.colour = "#0C2F54";
 				break;
 		}
 

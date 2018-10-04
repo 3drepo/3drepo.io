@@ -174,9 +174,9 @@ class RiskItemController implements ng.IController {
 		];
 		this.statuses = [
 			{value: "proposed", label: "Proposed"},
-			{value: "approved", label: "Approved"},
-			{value: "accepted", label: "Accepted"},
-			{value: "", label: "UNSET"}
+			{value: "agreed_partial", label: "Agreed (Partial)"},
+			{value: "agreed_fully", label: "Agreed (Fully)"},
+			{value: "rejected", label: "Rejected"}
 		];
 
 		this.actions = {
