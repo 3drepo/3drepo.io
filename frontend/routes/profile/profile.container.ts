@@ -17,12 +17,12 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect, addRouting } from '../../helpers/migration';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { Profile } from './profile.component';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Profile));

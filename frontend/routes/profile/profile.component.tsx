@@ -15,14 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import * as React from 'react';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { Container } from './profile.styles';
 
-const mapStateToProps = createStructuredSelector({});
+interface IProps {
+	noop: string; // TODO: Remove sample
+}
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export class Profile extends React.PureComponent<IProps, any> {
 
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+	public render() {
+		return (
+			<Container>
+				Profile component
+			</Container>
+		);
+	}
+}
