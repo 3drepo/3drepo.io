@@ -18,6 +18,12 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 
+export const DIALOG_TYPES = {
+	ERROR: 1,
+	CONFIRM_USER_REMOVE: 2,
+	FEDERATION_REMINDER_DIALOG: 3
+};
+
 interface IDialogConfig {
 	title: string;
 	templateType: 'error' | 'confirm' | 'default' | 'confirmUserRemove';
@@ -47,7 +53,7 @@ export const showDialog = (state = INITIAL_STATE, action) => {
 export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error} ) => {
 	const config = {
 		title: 'Error',
-		templateType: 'error',
+		templateType: DIALOG_TYPES.ERROR,
 		data: {
 			method,
 			dataType,

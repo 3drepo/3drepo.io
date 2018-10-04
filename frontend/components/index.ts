@@ -89,7 +89,3 @@ import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
 import "./viewpoints/js/viewpoints.component";
 import "./viewpoints/js/viewpoints.service";
-import "./member-card/js/member-card.component";
-import "./list-sort-button/js/list-sort-button.component";
-import "./projects-permissions/js/projects-permissions.component";
-import "./permissions-list/js/permissions-list.component";

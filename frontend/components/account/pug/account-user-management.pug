@@ -41,14 +41,12 @@
 
 			md-tab(label="Projects" md-on-select="vm.onTabChange()")
 				div(layout="column" layout-fill)
-					projects-permissions(
+					projects(
 						flex
 						ng-if="!vm.isLoadingTeamspace"
 						layout="row"
-						members="vm.users"
-						projects="vm.projects"
-						current-teamspace="vm.currentTeamspace"
-						on-change="vm.onJobsChange(updatedJobs)")
+						users="vm.users"
+					)
 
 			md-tab(
 				label="Jobs"

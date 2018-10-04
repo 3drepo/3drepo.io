@@ -18,9 +18,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { pick, isEqual, isEmpty } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 
-import { theme } from '../../styles';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { CELL_TYPES, CustomTable, TableButton } from '../components/customTable/customTable.component';
@@ -29,6 +27,8 @@ import { CellUserSearch } from '../components/customTable/components/cellUserSea
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { Container } from './jobs.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../styles/theme';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',

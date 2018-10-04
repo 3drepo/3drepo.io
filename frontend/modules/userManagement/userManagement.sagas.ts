@@ -21,11 +21,15 @@ import * as API from '../../services/api';
 import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 import { DialogActions } from '../dialog/dialog.redux';
 
-import { selectCurrentTeamspace } from './userManagement.selectors';
+import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
+import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
+import { DIALOG_TYPES } from '../dialog/dialog.redux';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
+		const teamspaces = yield select(selectCurrentUserTeamspaces);
+		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 
 		const response = yield all([
 			API.fetchUsers(teamspace),
@@ -35,7 +39,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		]);
 
 		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
-			teamspace,
+			teamspaceDetails,
 			...response.map(({data}) => data)
 		));
 	} catch (error) {
@@ -65,7 +69,7 @@ export function* removeUser({ username }) {
 		if (errorData.status === 400 && errorData.value === responseCode) {
 			const config = {
 				title: 'Remove User',
-				templateType: 'confirmUserRemove',
+				templateType: DIALOG_TYPES.CONFIRM_USER_REMOVE,
 				confirmText: 'Remove',
 				onConfirm: () => UserManagementActions.removeUserCascade(username),
 				data: {
@@ -131,6 +135,8 @@ export function* getUsersSuggestions({ searchText }) {
 	}
 }
 
+// Jobs
+
 export function* updateJobColor({ job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
@@ -164,15 +170,119 @@ export function* removeJob({ jobId }) {
 	}
 }
 
+// Projects
+export function* fetchProject({ project }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const response = yield API.fetchProject(teamspace, project);
+
+		yield put(UserManagementActions.setProject(response.data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'project permissions', error.response));
+	}
+}
+
+export function* updateProjectPermissions({ permissions }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const {name} = yield select(selectCurrentProject);
+		const project = {name, permissions};
+		yield API.updateProject(teamspace, project);
+
+		yield put(UserManagementActions.updateProjectPermissionsSuccess(permissions));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'project permissions', error.response));
+	}
+}
+
+// Models
+export function* fetchModelsPermissions({ models }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		let data = [];
+
+		if (models.length) {
+			const requiredModels = models.map(({ model }) => model);
+			const response = yield API.fetchModelsPermissions(teamspace, requiredModels);
+			data = response.data;
+		}
+
+		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'models/federations permissions', error.response));
+	}
+}
+
+export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions }) {
+	try {
+		const currentProject = yield select(selectCurrentProject);
+		const permissionlessModels = [];
+		for (let index = 0; index < modelsWithPermissions.length; index++) {
+			const selectedModel = modelsWithPermissions[index];
+
+			if (selectedModel.federate && selectedModel.subModels) {
+				selectedModel.subModels.forEach((subModel) => {
+					Object.keys(currentProject.models).forEach((modelId) => {
+						const projectModel = currentProject.models[modelId];
+						if (subModel.model === projectModel.model) {
+							permissionlessModels.push(projectModel.name);
+						}
+					});
+				});
+			}
+		}
+
+		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissions);
+
+		if (permissionlessModels.length) {
+			const config = {
+				title: 'Reminder about Federation Permissions',
+				templateType: DIALOG_TYPES.FEDERATION_REMINDER_DIALOG,
+				onConfirm: () => resolveUpdate,
+				data: {
+					models: permissionlessModels
+				}
+			};
+
+			yield put(DialogActions.showDialog(config));
+		} else {
+			yield put(resolveUpdate);
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
+export function* updateModelsPermissions({ modelsWithPermissions, permissions }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
+		yield put(UserManagementActions.updateModelPermissionsSuccess(response.data, permissions));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
+	}
+}
+
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_DETAILS, fetchTeamspaceDetails);
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
+	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
+	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
+
+	// Jobs
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
 	yield takeLatest(UserManagementTypes.CREATE_JOB, createJob);
 	yield takeLatest(UserManagementTypes.REMOVE_JOB, removeJob);
 	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
-	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
-	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
+
+	// Models
+	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);
+	yield takeLatest(UserManagementTypes.UPDATE_MODELS_PERMISSIONS_PRE, updateModelsPermissionsPre);
+	yield takeLatest(UserManagementTypes.UPDATE_MODELS_PERMISSIONS, updateModelsPermissions);
+
+	// Projects
+	yield takeLatest(UserManagementTypes.FETCH_PROJECT, fetchProject);
+	yield takeLatest(UserManagementTypes.UPDATE_PROJECT_PERMISSIONS, updateProjectPermissions);
 }

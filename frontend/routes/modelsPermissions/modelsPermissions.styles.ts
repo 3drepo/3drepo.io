@@ -23,6 +23,7 @@ import { COLOR, isWindows, isFirefox } from '../../styles';
 
 export const Container = styled(Grid)`
 	min-width: 0;
+	height: 100%;
 `;
 
 export const ModelsContainer = styled(Grid)`
@@ -63,15 +64,4 @@ export const OverflowWrapper = styled.div`
 			height: 100% !important;
 		}
 	}
-`;
-
-export const PermissionsCellContainer = styled.div`
-	flex: 1;
-	justify-content: center;
-	display: flex;
-`;
-
-export const DisabledCheckbox = styled.img`
-	margin-left: 13px;
-	opacity: .4;
 `;

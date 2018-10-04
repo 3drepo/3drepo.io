@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 
+import Input from '@material-ui/core/Input';
 import { Item, StyledSelect, EmptyValue } from './cellSelect.styles';
 
 interface IProps {
@@ -26,6 +27,8 @@ interface IProps {
 	value?: string;
 	itemTemplate?: React.Component;
 	disabled?: boolean;
+	disabledPlaceholder?: boolean;
+	inputId?: string;
 	onChange: (selectedValue: string) => void;
 }
 
@@ -38,7 +41,8 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		value: '',
 		items: [],
 		disabled: false,
-		readOnly: false
+		readOnly: false,
+		disabledPlaceholder: false
 	};
 
 	public state = {
@@ -83,8 +87,8 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemTemplate, disabled, placeholder, value, readOnly } = this.props;
-		const { selectedValue } = this.state;
+		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, value, readOnly, inputId} = this.props;
+		const {selectedValue} = this.state;
 		const hasNoOptions = !items.length;
 
 		const options = [];
@@ -92,7 +96,8 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		if (placeholder) {
 			const placeholderValue = {
 				name: placeholder,
-				value: ''
+				value: '',
+				disabled: disabledPlaceholder
 			};
 			options.push(placeholderValue);
 		}
@@ -103,6 +108,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
 				displayEmpty
+				input={<Input id={inputId} readOnly={readOnly} />}
 				value={selectedValue}
 				onChange={this.handleChange}
 			>

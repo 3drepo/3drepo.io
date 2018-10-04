@@ -18,10 +18,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { pick, get, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 
-import { theme } from '../../styles';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
@@ -31,6 +29,8 @@ import { UserManagementTab } from '../components/userManagementTab/userManagemen
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../styles/theme';
 
 const USERS_TABLE_CELLS = [{
 	name: 'User',
@@ -152,7 +152,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 					value: user.isAdmin,
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
-					readOnly: user.isCurrentUser || user.isOwner
+					readOnly: user.isCurrentUser || user.isOwner,
+					disabled: user.isCurrentUser || user.isOwner
 				},
 				{},
 				{
