@@ -21,14 +21,11 @@ import Paper from '@material-ui/core/Paper';
 import { FONT_WEIGHT } from '../../../styles';
 
 export const Container = styled(Paper)`
-  background: #fafafa;
-  display: flex;
-  flex-direction: column;
-
-  ${(props: any) => props.fill ? `
-    height: 100%;
-    width: 100%;
-  ` : ''}
+  && {
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+  }
 `;
 
 export const Title = styled.div`

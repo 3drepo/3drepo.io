@@ -16,9 +16,12 @@
  */
 
 import * as React from 'react';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 import { Panel } from '../components/panel/panel.component';
-import { Container } from './profile.styles';
+import { Headline, Form, StyledButton } from './profile.styles';
 
 interface IProps {
 	currentUser: any;
@@ -26,12 +29,112 @@ interface IProps {
 	onUserDataChange: (userData) => void;
 }
 
-export class Profile extends React.PureComponent<IProps, any> {
+interface IState {
+	profileData: {
+		firstName?: string;
+		lastName?: string;
+		email: string;
+	};
+	passwordData: {
+		current?: string;
+		new?: string;
+	};
+}
+
+export class Profile extends React.PureComponent<IProps, IState> {
+	public state = {
+		profileData: {
+			firstName: '',
+			lastName: '',
+			email: ''
+		},
+		passwordData: {
+			current: '',
+			new: ''
+		}
+	};
+
+	public handleProfileUpdate = () => {
+		console.log('Update profile');
+	}
+
+	public handlePasswordUpdate = () => {
+		console.log('Update profile');
+	}
 
 	public render() {
+		const { currentUser } = this.props;
+		const { profileData, passwordData } = this.state;
 		return (
 			<Panel title="Profile">
-				<>sasd</>
+				<Form container direction="column">
+					<Headline color="primary" variant="subheading">Basic info</Headline>
+					<Grid container wrap="nowrap">
+						<TextField
+							value={profileData.firstName}
+							label="First name"
+							margin="normal"
+						/>
+						<TextField
+							value={profileData.lastName}
+							label="Last name"
+							margin="normal"
+						/>
+					</Grid>
+					<Grid container wrap="nowrap">
+						<TextField
+							value={currentUser.name}
+							label="Username"
+							margin="normal"
+							inputProps={{
+								readOnly: true
+							}}
+						/>
+						<TextField
+							value={profileData.email}
+							label="Email"
+							margin="normal"
+							required
+						/>
+					</Grid>
+
+					<StyledButton
+						onClick={this.handleProfileUpdate}
+						color="secondary"
+						variant="raised"
+						disabled={!profileData.email}
+					>
+						Update profile
+					</StyledButton>
+				</Form>
+				<Form container direction="column">
+					<Headline color="primary" variant="subheading">Password settings</Headline>
+					<Grid container wrap="nowrap">
+						<TextField
+							label="Old password"
+							margin="normal"
+							required
+							type="password"
+						/>
+
+						<TextField
+							label="New password"
+							margin="normal"
+							helperText="Must be at least 8 characters"
+							required
+							type="password"
+						/>
+					</Grid>
+
+					<StyledButton
+						onClick={this.handlePasswordUpdate}
+						color="secondary"
+						variant="raised"
+						disabled={!passwordData.current || !passwordData.new}
+					>
+						Update password
+					</StyledButton>
+				</Form>
 			</Panel>
 		);
 	}

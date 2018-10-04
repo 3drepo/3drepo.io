@@ -16,5 +16,23 @@
  */
 
 import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 
-export const Container = styled.div``;
+import { Panel } from '../components/panel/panel.component';
+
+export const Headline = styled(Typography)`
+	&& {
+		margin-top: 24px;
+	}
+`;
+
+export const Form = styled(Grid)`
+	padding: 24px;
+	padding-top: 0;
+`;
+
+export const StyledButton = styled(Button)`
+	align-self: flex-end;
+`;
