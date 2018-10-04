@@ -20,8 +20,11 @@ import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { Profile } from './profile.component';
+import { selectCurrentUser } from '../../modules/teamspace';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	currentUser: selectCurrentUser
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 

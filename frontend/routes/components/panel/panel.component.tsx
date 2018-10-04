@@ -15,36 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import * as React from 'react';
 
-import { FONT_WEIGHT, COLOR } from '../../styles';
+import { PaperProps } from '@material-ui/core/Paper';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from '../../../styles';
+import { Container, Title, Content } from './panel.styles';
 
-export const Header = styled.div`
-	background-color: ${COLOR.WHITE};
-	border-bottom: 1px solid ${COLOR.BLACK_6};
-`;
+interface IProps {
+	title: string;
+	children: any;
+	paperProps?: any;
+}
 
-export const TabContent = styled.div`
-	background-color: ${COLOR.WHITE};
-	flex: 1;
-	position: relative;
-	height: calc(100% - 100px);
-`;
-
-export const TeamspaceSelectContainer = styled.div`
-	padding: 24px;
-`;
-
-export const LoaderContainer = styled.div`
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background: #fafafa;
-	color: ${COLOR.BLACK_40};
-	display: flex;
-	justify-content: center;
-	align-items: flex-start;
-	padding-top: 100px;
-	box-sizing: border-box;
-`;
+export const Panel = (props: IProps) => (
+	<MuiThemeProvider theme={theme}>
+		<Container {...props.paperProps}>
+			<Title>{props.title}</Title>
+			<Content>
+				{props.children}
+			</Content>
+		</Container>
+	</MuiThemeProvider>
+);

@@ -17,19 +17,22 @@
 
 import * as React from 'react';
 
+import { Panel } from '../components/panel/panel.component';
 import { Container } from './profile.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	currentUser: any;
+	onPasswordChange: (password) => void;
+	onUserDataChange: (userData) => void;
 }
 
 export class Profile extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container>
-				Profile component
-			</Container>
+			<Panel title="Profile">
+				<>sasd</>
+			</Panel>
 		);
 	}
 }
