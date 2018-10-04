@@ -67,6 +67,12 @@ export const theme = createMuiTheme({
 			paper: {
 				background: '#fafafa'
 			}
+		},
+		MuiSelect: {
+			root: {
+				fontSize: '14px',
+				color: COLOR.BLACK_60
+			}
 		}
 	}
 });

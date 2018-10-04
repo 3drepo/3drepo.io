@@ -14,28 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { connect } from '../../helpers/migration';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { ModelsPermissions } from './modelsPermissions.component';
+import { Projects } from './projects.component';
 import {
 	UserManagementActions,
-	selectModels,
-	selectCurrentModels,
-	selectExtendedModelPermissions
+	selectProjects,
+	selectCurrentProject
 } from '../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
-	models: selectModels,
-	selectedModels: selectCurrentModels,
-	permissions: selectExtendedModelPermissions
+	projects: selectProjects,
+	currentProject: selectCurrentProject
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onSelectionChange: UserManagementActions.fetchModelsPermissions,
-	onPermissionsChange: UserManagementActions.updateModelsPermissionsPre
+	onProjectChange: UserManagementActions.fetchProject
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);
+export default connect(mapStateToProps, mapDispatchToProps)(Projects);

@@ -16,6 +16,54 @@
  */
 
 import { createSelector } from 'reselect';
+import { first, get } from 'lodash';
+import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
+
+const getExtendedProjectPermissions = (currentUsers = [], project = {permissions: []}) => {
+	return project.permissions.map(({ user, permissions = [] }) => {
+		const userData = currentUsers.find((userDetails) => userDetails.user === user) || {};
+		let projectPermissionsKey = PROJECT_ROLES_TYPES.UNASSIGNED;
+		if (userData.isAdmin) {
+			projectPermissionsKey = PROJECT_ROLES_TYPES.ADMINISTRATOR;
+		} else {
+			projectPermissionsKey = first(permissions) || PROJECT_ROLES_TYPES.UNASSIGNED;
+		}
+
+		return {
+			...userData,
+			isProjectAdmin: projectPermissionsKey === PROJECT_ROLES_TYPES.ADMINISTRATOR,
+			permissions,
+			key: projectPermissionsKey
+		};
+	});
+};
+
+/**
+ * Bind model permissions with members data
+ * @param modelPermissions
+ */
+const getExtendedModelPermissions = (currentUsers = [], modelPermissions = []) => {
+	return currentUsers.map((memberData) => {
+		const memberModelPermissions = modelPermissions.find(({ user }) => user === memberData.user);
+		let modelPermissionsKey = MODEL_ROLES_TYPES.UNASSIGNED;
+
+		if (memberData.isAdmin || memberData.isProjectAdmin) {
+			modelPermissionsKey = MODEL_ROLES_TYPES.ADMINISTRATOR;
+		} else if (memberModelPermissions) {
+			modelPermissionsKey = get(memberModelPermissions, 'permission', MODEL_ROLES_TYPES.UNASSIGNED);
+		} else {
+			modelPermissionsKey = 'undefined';
+		}
+
+		return {
+			...memberData,
+			permissions: get(memberModelPermissions, 'permissions', []),
+			key: modelPermissionsKey,
+			isModelAdmin: modelPermissionsKey === MODEL_ROLES_TYPES.ADMINISTRATOR
+		};
+	});
+};
 
 export const selectUserManagementDomain = (state) => Object.assign({}, state.userManagement);
 
@@ -35,18 +83,46 @@ export const selectJobsColors = createSelector(
 	selectUserManagementDomain, (state) => state.jobsColors
 );
 
-export const selectProjects = createSelector(
-	selectUserManagementDomain, (state) => state.projects
-);
-
 export const selectIsPending = createSelector(
 	selectUserManagementDomain, (state) => state.isPending
 );
 
 export const selectCurrentTeamspace = createSelector(
-	selectUserManagementDomain, (state) => state.teamspace
+	selectUserManagementDomain, (state) => state.selectedTeamspace
 );
 
 export const selectUsersSuggestions = createSelector(
 	selectUserManagementDomain, (state) => state.usersSuggestions
+);
+
+export const selectProjects = createSelector(
+	selectUserManagementDomain, (state) => state.projects
+);
+
+export const selectCurrentProject = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject
+);
+
+export const selectExtendedProjectPermissions = createSelector(
+	selectUsers,
+	selectCurrentProject,
+	getExtendedProjectPermissions
+);
+
+export const selectModels = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject.models || []
+);
+
+export const selectCurrentModels = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject.currentModels || []
+);
+
+export const selectModelsPermissions = createSelector(
+	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions
+);
+
+export const selectExtendedModelPermissions = createSelector(
+	selectExtendedProjectPermissions,
+	selectModelsPermissions,
+	getExtendedModelPermissions
 );

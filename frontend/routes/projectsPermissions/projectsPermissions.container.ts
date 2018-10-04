@@ -19,23 +19,15 @@ import { connect } from '../../helpers/migration';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { ModelsPermissions } from './modelsPermissions.component';
-import {
-	UserManagementActions,
-	selectModels,
-	selectCurrentModels,
-	selectExtendedModelPermissions
-} from '../../modules/userManagement';
+import { ProjectsPermissions } from './projectsPermissions.component';
+import { selectExtendedProjectPermissions, UserManagementActions } from '../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
-	models: selectModels,
-	selectedModels: selectCurrentModels,
-	permissions: selectExtendedModelPermissions
+	permissions: selectExtendedProjectPermissions
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onSelectionChange: UserManagementActions.fetchModelsPermissions,
-	onPermissionsChange: UserManagementActions.updateModelsPermissionsPre
+	onPermissionsChange: UserManagementActions.updateProjectPermissions
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);
+export default connect(mapStateToProps, mapDispatchToProps)(ProjectsPermissions);

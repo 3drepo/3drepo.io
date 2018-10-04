@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { pick, matches, isEqual, cond, get, isEmpty, memoize } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import SimpleBar from 'simplebar-react';
@@ -28,7 +27,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 // @ts-ignore
 import * as AdminIconSrc from '../../icons/how_to_reg.svg';
 
-import { theme } from '../../styles';
 import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CELL_TYPES, CustomTable, CheckboxField } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -36,50 +34,14 @@ import { ModelItem } from '../components/modelItem/modelItem.component';
 import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
 
 import {
 	Container,
 	ModelsContainer,
 	PermissionsContainer,
-	PermissionsCellContainer,
-	DisabledCheckbox,
 	OverflowWrapper
 } from './modelsPermissions.styles';
-
-const PermissionsCell = ({disabled, checked, onChange}) => {
-	return (
-		<PermissionsCellContainer>
-			<Radio
-				checked={checked}
-				disabled={disabled}
-				onChange={onChange}
-			/>
-		</PermissionsCellContainer>
-	);
-};
-
-const getAdminIconText = memoize((isTeamspaceAdmin, isProjectAdmin) => {
-	if (isTeamspaceAdmin) {
-		return 'Teamspace admin';
-	}
-
-	if (isProjectAdmin) {
-		return 'Project admin';
-	}
-
-	return 'Model admin';
-}, (...flags) => flags.join('.'));
-
-const AdminIcon = ({isTeamspaceAdmin, isProjectAdmin}) => {
-	const tooltipTitle = getAdminIconText(isTeamspaceAdmin, isProjectAdmin);
-	return (
-		<Tooltip title={tooltipTitle}>
-			<DisabledCheckbox src={AdminIconSrc} />
-		</Tooltip>
-	);
-};
-
-const UNDEFINED_PERMISSIONS = 'undefined';
 
 const MODEL_TABLE_CELLS = [{
 	name: 'Model/federation',
@@ -103,86 +65,37 @@ const getModelsTableRows = (models = [], selectedModels = []) => {
 	});
 };
 
-const PERMISSIONS_TABLE_CELLS = [{
-	name: 'User',
-	type: CELL_TYPES.USER,
-	HeadingComponent: CellUserSearch,
-	HeadingProps: {
-		root: {
-			width: '180px',
-			padding: '0 0 0 24px',
-			flex: null
-		}
-	},
-	CellComponent: UserItem,
-	CellProps: {
-		root: {
-			width: '180px',
-			padding: '0 0 0 24px',
-			flex: null
-		}
-	},
-	searchBy: ['firstName', 'lastName', 'user', 'company']
-}];
-
 interface IProps {
 	models: any[];
-	users: any[];
+	selectedModels: any[];
 	permissions: any[];
-	onSelectionChange?: (selectedModels) => void;
-	onPermissionsChange?: (updatedPermissions) => void;
+	onSelectionChange: (selectedModels) => void;
+	onPermissionsChange: (modelsWithPermissions, updatedPermissions) => void;
 }
 
 interface IState {
 	modelRows: any[];
-	permissionsRows: any[];
-	permissionsCells: any[];
-	selectedModels: any[];
-	selectedUsers: any[];
-	selectedGlobalPermissions: string;
 	currentUser: any;
+	permissionsRevision: number;
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
-		const changes = {
-			modelRows: getModelsTableRows(nextProps.models, prevState.selectedModels)
-		} as any;
-
-		if (nextProps.permissions) {
-			changes.currentUser = nextProps.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
-		}
-		return changes;
+		return {
+			modelRows: getModelsTableRows(nextProps.models, nextProps.selectedModels),
+			currentUser: (nextProps.permissions || []).find(({ isCurrentUser }) => isCurrentUser) || {}
+		};
 	}
 
 	public state = {
 		modelRows: [],
-		permissionsRows: [],
-		permissionsCells: [],
-		selectedModels: [],
-		selectedUsers: [],
-		selectedGlobalPermissions: UNDEFINED_PERMISSIONS,
-		currentUser: {}
+		currentUser: {},
+		permissionsRevision: 0
 	};
 
-	public onGlobalPermissionsChange = (event, value) => {
-		this.setState({selectedGlobalPermissions: value});
-
-		if (this.props.onPermissionsChange) {
-			const updatedPermissions = this.state.permissionsRows
-				.reduce((permissionsList, row) => {
-					if (row.selected && !row.disabled) {
-						permissionsList.push({ ...row, key: value });
-					}
-					return permissionsList;
-				}, []);
-
-			this.props.onPermissionsChange(updatedPermissions);
-		}
-	}
-
-	public hasDisabledPermissions(row) {
-		const {currentUser, selectedModels} = this.state as IState;
+	public hasDisabledPermissions = (row) => {
+		const {currentUser} = this.state as IState;
+		const {selectedModels} = this.props;
 
 		const hasSelectedModels = selectedModels.length;
 		const passBaseValidation = !hasSelectedModels || row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
@@ -200,109 +113,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 				return !(currentUser.isAdmin || currentUser.isOwner || currentUser.isProjectAdmin);
 			}
 		}
-	}
 
-	public createPermissionsChangeHandler = (permissions, value) => () => {
-		if (this.props.onPermissionsChange) {
-			this.props.onPermissionsChange([{
-				...permissions,
-				key: value
-			}]);
-		}
-	}
-
-	public getPermissionsTableCells = () => {
-		const permissionCellProps = {
-			width: '110px',
-			flex: null,
-			padding: '0'
-		};
-		const permissionsCells = MODEL_ROLES_LIST.map(({ label: name, tooltip: tooltipText, key: value }) => {
-			return {
-				name,
-				type: CELL_TYPES.RADIO_BUTTON,
-				HeadingComponent: TableHeadingRadio,
-				HeadingProps: {
-					root: permissionCellProps,
-					component: {
-						name: 'permission',
-						tooltipText,
-						value,
-						onChange: this.onGlobalPermissionsChange,
-						checked: this.state.selectedGlobalPermissions === value,
-						disabled: !this.state.selectedUsers.length || value === MODEL_ROLES_TYPES.ADMINISTRATOR
-					}
-				},
-				CellComponent: PermissionsCell,
-				CellProps: {
-					root: permissionCellProps
-				}
-			};
-		});
-
-		return [
-			...PERMISSIONS_TABLE_CELLS,
-			...permissionsCells
-		];
-	}
-
-	public getPermissionsTableRows = (permissions = [], selectedUsers = []) => {
-		return permissions.map((userPermissions) => {
-			const disabled = this.hasDisabledPermissions(userPermissions);
-			const data = [
-				pick(userPermissions, ['firstName', 'lastName', 'company', 'user']),
-				...MODEL_ROLES_LIST.map(({key: requiredValue }) => {
-					return {
-						value: userPermissions.key,
-						checked: requiredValue === userPermissions.key,
-						disabled: requiredValue === MODEL_ROLES_TYPES.ADMINISTRATOR || disabled,
-						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
-					};
-				})
-			];
-
-			const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
-			return { ...userPermissions, data, selected, disabled };
-		});
-	}
-
-	public componentDidMount() {
-		this.setState({
-			permissionsCells: this.getPermissionsTableCells(),
-			permissionsRows: this.getPermissionsTableRows(this.props.permissions, []),
-			modelRows: getModelsTableRows(this.props.models, this.state.selectedModels)
-		});
-	}
-
-	public componentDidUpdate(prevProps, prevState) {
-		const changes = {} as any;
-
-		const selectedPermissionsChanged = (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) ||
-			prevState.selectedUsers.length !== this.state.selectedUsers.length;
-
-		if (selectedPermissionsChanged) {
-			changes.permissionsCells = this.getPermissionsTableCells();
-		}
-
-		const permissionsChanged = !isEqual(prevProps.permissions, this.props.permissions)
-			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
-
-		if (selectedPermissionsChanged || permissionsChanged) {
-			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
-			changes.permissionsRows = this.getPermissionsTableRows(this.props.permissions, this.state.selectedUsers);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
-	}
-
-	public handleSelectionChange = (field) => (rows) => {
-		const handleChange = cond([
-			[matches('selectedModels'), () => this.props.onSelectionChange(rows)]
-		])(field);
-
-		this.setState({[field]: rows});
+		return false;
 	}
 
 	public handleModelsSearch = ({rows, searchFields, searchText}) => {
@@ -319,59 +131,87 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderCustomCheckbox = (props, row) => {
-		if (this.state.selectedModels.length && row.data && this.hasDisabledPermissions(row)) {
-			return (
-				<AdminIcon
-					isTeamspaceAdmin={row.isAdmin}
-					isProjectAdmin={row.isProjectAdmin}
-				/>
-			);
+	public handlePermissionsChange = (permissions) => {
+		if (this.props.onPermissionsChange) {
+			const modelsWithPermissions = this.props.selectedModels.map((selectedModel) => {
+				const newPermissions = selectedModel.permissions.map((currentPermission) => {
+					const memberPermission = permissions.find(({user}) => user === currentPermission.user);
+					return {
+						user: currentPermission.user,
+						permission: memberPermission ? memberPermission.key : currentPermission.permission
+					};
+				}).filter(({ permission }) => permission);
+
+				return {
+					...pick(selectedModel, ['name', 'model', 'federate', 'subModels']),
+					permissions: newPermissions
+				};
+			});
+
+			this.props.onPermissionsChange(modelsWithPermissions, permissions);
 		}
-		return <CheckboxField {...props} />;
+	}
+
+	public componentDidMount() {
+		this.setState({
+			modelRows: getModelsTableRows(this.props.models, this.props.selectedModels)
+		});
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as IState;
+
+		const modelsSelectionChanged = prevProps.selectedModels.length !== this.props.selectedModels.length;
+		if (modelsSelectionChanged) {
+			changes.permissionsRevision = Math.random();
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
 	}
 
 	public render() {
-		const {models} = this.props;
-		const {modelRows, permissionsRows, permissionsCells, selectedModels} = this.state;
+		const {models, permissions, selectedModels} = this.props;
+		const {modelRows, permissionsRevision} = this.state;
 
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container
-					container
-					direction="row"
-					wrap="nowrap"
-				>
-					<ModelsContainer item>
-						<CustomTable
-							cells={MODEL_TABLE_CELLS}
-							rows={modelRows}
-							onSelectionChange={this.handleSelectionChange('selectedModels')}
-							onSearch={this.handleModelsSearch}
-						/>
-						{ !models.length ?
-								<TextOverlay content="Select a project to view the models' list" /> :
-								null
-						}
-					</ModelsContainer>
-					<PermissionsContainer item>
-						<OverflowWrapper>
-							<SimpleBar data-simplebar-y-hidden>
-								<CustomTable
-									cells={permissionsCells}
-									rows={permissionsRows}
-									onSelectionChange={this.handleSelectionChange('selectedUsers')}
-									renderCheckbox={this.renderCustomCheckbox}
-								/>
-							</SimpleBar>
-						</OverflowWrapper>
-						{ !selectedModels.length ?
-								<TextOverlay content="Select a model to view the users' permissions" /> :
-								null
-						}
-					</PermissionsContainer>
-				</Container>
-			</MuiThemeProvider>
+			<Container
+				container
+				direction="row"
+				wrap="nowrap"
+			>
+				<ModelsContainer item>
+					<CustomTable
+						cells={MODEL_TABLE_CELLS}
+						rows={modelRows}
+						onSelectionChange={this.props.onSelectionChange}
+						onSearch={this.handleModelsSearch}
+					/>
+					{ !models.length ?
+							<TextOverlay content="Select a project to view the models' list" /> :
+							null
+					}
+				</ModelsContainer>
+				<PermissionsContainer item>
+					<OverflowWrapper>
+						<SimpleBar data-simplebar-y-hidden>
+							<PermissionsTable
+								key={permissionsRevision}
+								permissions={permissions}
+								roles={MODEL_ROLES_LIST}
+								onPermissionsChange={this.handlePermissionsChange}
+								rowStateInterceptor={this.hasDisabledPermissions}
+							/>
+						</SimpleBar>
+					</OverflowWrapper>
+					{
+						!selectedModels.length ?
+							<TextOverlay content="Select a model to view the users' permissions" /> :
+							null
+					}
+				</PermissionsContainer>
+			</Container>
 		);
 	}
 }

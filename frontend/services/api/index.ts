@@ -16,5 +16,7 @@ export const getResponseCode = memoize((errorToFind) => {
 export * from './users';
 export * from './teamspace';
 export * from './jobs';
+export * from './projects';
+export * from './models';
 
 export default api;
