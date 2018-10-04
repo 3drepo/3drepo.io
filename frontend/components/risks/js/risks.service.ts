@@ -1020,13 +1020,13 @@ export class RisksService {
 
 		switch (risk.mitigation_status) {
 			case "":
-				statusIcon.icon = "error";
-				break;
-			case "proposed":
 				statusIcon.icon = "new_releases";
 				break;
+			case "proposed":
+				statusIcon.icon = "error_outline";
+				break;
 			case "agreed_partial":
-				statusIcon.icon = "lens";
+				statusIcon.icon = "error";
 				break;
 			case "agreed_fully":
 				statusIcon.icon = "check_circle";
