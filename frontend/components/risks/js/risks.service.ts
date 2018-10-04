@@ -1023,7 +1023,7 @@ export class RisksService {
 				statusIcon.icon = "error";
 				break;
 			case "proposed":
-				statusIcon.icon = "panorama_fish_eye";
+				statusIcon.icon = "new_releases";
 				break;
 			case "agreed_partial":
 				statusIcon.icon = "lens";
@@ -1032,7 +1032,7 @@ export class RisksService {
 				statusIcon.icon = "check_circle";
 				break;
 			case "rejected":
-				statusIcon.icon = "adjust";
+				statusIcon.icon = "sync_problem";
 				break;
 		}
 
