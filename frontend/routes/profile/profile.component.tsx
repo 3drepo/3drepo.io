@@ -16,12 +16,12 @@
  */
 
 import * as React from 'react';
-import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 import { Panel } from '../components/panel/panel.component';
-import { Headline, Form, StyledButton } from './profile.styles';
+import { Headline, Form, StyledButton, StyledTextField, FieldsRow } from './profile.styles';
+import { pick } from 'lodash';
 
 interface IProps {
 	currentUser: any;
@@ -54,13 +54,26 @@ export class Profile extends React.PureComponent<IProps, IState> {
 		}
 	};
 
-	public handleProfileUpdate = () => {
-		console.log('Update profile');
+	public componentDidMount() {
+		this.setState({
+			profileData: pick(this.props.currentUser, [
+				'firstName',
+				'lastName',
+				'email'
+			])
+		});
 	}
 
-	public handlePasswordUpdate = () => {
-		console.log('Update profile');
+	public createProfileDataHandler = (field) => (event) => {
+		this.setState({profileData: {
+			...this.state.profileData,
+			[field]: event.target.value
+		}});
 	}
+
+	public handleProfileUpdate = () => {};
+
+	public handlePasswordUpdate = () => {};
 
 	public render() {
 		const { currentUser } = this.props;
@@ -68,63 +81,64 @@ export class Profile extends React.PureComponent<IProps, IState> {
 		return (
 			<Panel title="Profile">
 				<Form container direction="column">
-					<Headline color="primary" variant="subheading">Basic info</Headline>
-					<Grid container wrap="nowrap">
-						<TextField
+					<Headline color="primary" variant="subheading">Basic information</Headline>
+					<FieldsRow container wrap="nowrap">
+						<StyledTextField
 							value={profileData.firstName}
 							label="First name"
 							margin="normal"
+							onChange={this.createProfileDataHandler('firstName')}
 						/>
-						<TextField
+						<StyledTextField
 							value={profileData.lastName}
 							label="Last name"
 							margin="normal"
+							onChange={this.createProfileDataHandler('lastName')}
 						/>
-					</Grid>
-					<Grid container wrap="nowrap">
-						<TextField
-							value={currentUser.name}
+					</FieldsRow>
+					<FieldsRow container wrap="nowrap">
+						<StyledTextField
+							value={currentUser.username}
 							label="Username"
 							margin="normal"
-							inputProps={{
-								readOnly: true
-							}}
+							disabled={true}
 						/>
-						<TextField
+						<StyledTextField
 							value={profileData.email}
 							label="Email"
 							margin="normal"
 							required
+							onChange={this.createProfileDataHandler('email')}
 						/>
-					</Grid>
+					</FieldsRow>
 
 					<StyledButton
 						onClick={this.handleProfileUpdate}
 						color="secondary"
 						variant="raised"
-						disabled={!profileData.email}
+						disabled={!profileData.email || profileData.email === currentUser.email}
 					>
 						Update profile
 					</StyledButton>
 				</Form>
 				<Form container direction="column">
 					<Headline color="primary" variant="subheading">Password settings</Headline>
-					<Grid container wrap="nowrap">
-						<TextField
+					<FieldsRow container wrap="nowrap">
+						<StyledTextField
 							label="Old password"
 							margin="normal"
 							required
 							type="password"
 						/>
 
-						<TextField
+						<StyledTextField
 							label="New password"
 							margin="normal"
 							helperText="Must be at least 8 characters"
 							required
 							type="password"
 						/>
-					</Grid>
+					</FieldsRow>
 
 					<StyledButton
 						onClick={this.handlePasswordUpdate}

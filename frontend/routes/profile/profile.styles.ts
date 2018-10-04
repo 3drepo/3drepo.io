@@ -19,20 +19,39 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 
 import { Panel } from '../components/panel/panel.component';
 
-export const Headline = styled(Typography)`
-	&& {
-		margin-top: 24px;
-	}
-`;
+export const Headline = styled(Typography)``;
 
 export const Form = styled(Grid)`
 	padding: 24px;
-	padding-top: 0;
+
+	&:not(:first-child) {
+		padding-top: 0;
+	}
 `;
 
 export const StyledButton = styled(Button)`
-	align-self: flex-end;
+	&& {
+		margin-top: 16px;
+		align-self: flex-end;
+	}
+`;
+
+export const StyledTextField = styled(TextField)``;
+
+export const FieldsRow = styled(Grid)`
+	${StyledTextField} {
+		width: 100%;
+	}
+
+	${StyledTextField}:nth-child(2n) {
+		margin-left: 12px;
+	}
+
+	${StyledTextField}:nth-child(2n + 1) {
+		margin-right: 12px;
+	}
 `;
