@@ -64,7 +64,6 @@ class RiskItemController implements ng.IController {
 	private pinDisabled: boolean;
 	private editingDescription: boolean;
 	private clearPin: boolean;
-	private activities: any[];
 	private categories: any[];
 	private likelihoods: any[];
 	private consequences: any[];
@@ -136,11 +135,6 @@ class RiskItemController implements ng.IController {
 		this.editingDescription = false;
 		this.clearPin = false;
 
-		this.activities = [
-			{value: "cleaning_and_maintenance", label: "Cleaning and maintenance"},
-			{value: "replacement", label: "Replacement"},
-			{value: "", label: "UNSET"}
-		];
 		this.categories = [
 			{value: "health_material_effect", label: "Health - Material effect"},
 			{value: "health_mechanical_effect", label: "Health - Mechanical effect"},

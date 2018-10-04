@@ -61,14 +61,10 @@ md-content#riskInformation(
 			
 			md-input-container.riskItemStatus(flex)
 				label Associated Activity
-				md-select(
+				textarea(
 					id="riskActivity"
 					ng-model="vm.riskData.associated_activity"
 					ng-disabled="!vm.canUpdateRisk()")
-
-					md-option(
-						ng-repeat="activity in vm.activities"
-						value="{{activity.value}}") {{activity.label}}
 
 	.riskItemContainer#riskDescriptionContainer(layout="column", layout-align="start", flex)
 		div(layout="column", layout-align="start", flex)
