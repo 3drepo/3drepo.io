@@ -76,6 +76,7 @@ interface IProps {
 interface IState {
 	modelRows: any[];
 	currentUser: any;
+	permissionsRevision: number;
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
@@ -88,7 +89,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		modelRows: [],
-		currentUser: {}
+		currentUser: {},
+		permissionsRevision: 0
 	};
 
 	public hasDisabledPermissions = (row) => {
@@ -113,12 +115,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		}
 
 		return false;
-	}
-
-	public componentDidMount() {
-		this.setState({
-			modelRows: getModelsTableRows(this.props.models, this.props.selectedModels)
-		});
 	}
 
 	public handleModelsSearch = ({rows, searchFields, searchText}) => {
@@ -156,9 +152,28 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public componentDidMount() {
+		this.setState({
+			modelRows: getModelsTableRows(this.props.models, this.props.selectedModels)
+		});
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as IState;
+
+		const modelsSelectionChanged = !isEqual(prevProps.selectedModels, this.props.selectedModels);
+		if (modelsSelectionChanged) {
+			changes.permissionsRevision = Math.random();
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
 	public render() {
 		const {models, permissions, selectedModels} = this.props;
-		const {modelRows} = this.state;
+		const {modelRows, permissionsRevision} = this.state;
 
 		return (
 			<Container
@@ -182,6 +197,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 					<OverflowWrapper>
 						<SimpleBar data-simplebar-y-hidden>
 							<PermissionsTable
+								key={permissionsRevision}
 								permissions={permissions}
 								roles={MODEL_ROLES_LIST}
 								onPermissionsChange={this.handlePermissionsChange}
