@@ -173,6 +173,7 @@ class RiskItemController implements ng.IController {
 			{value: 4, label: "Very High"}
 		];
 		this.statuses = [
+			{value: "", label: "Unmitigated"},
 			{value: "proposed", label: "Proposed"},
 			{value: "agreed_partial", label: "Agreed (Partial)"},
 			{value: "agreed_fully", label: "Agreed (Fully)"},

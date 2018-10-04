@@ -207,7 +207,7 @@ export class RisksService {
 			likelihood: 0,
 			consequence: 0,
 			level_of_risk: 0,
-			mitigation_status: "proposed",
+			mitigation_status: "",
 			assigned_roles: [],
 			viewpoint: {}
 		};
@@ -590,10 +590,6 @@ export class RisksService {
 
 			if (risk.level_of_risk) {
 				risk.level_of_risk = parseInt(risk.level_of_risk, 10);
-			}
-
-			if (!risk.mitigation_status || "" === risk.mitigation_status) {
-				risk.mitigation_status = "proposed";
 			}
 
 			if (!risk.descriptionThumbnail) {
@@ -1023,6 +1019,9 @@ export class RisksService {
 		}
 
 		switch (risk.mitigation_status) {
+			case "":
+				statusIcon.icon = "error";
+				break;
 			case "proposed":
 				statusIcon.icon = "panorama_fish_eye";
 				break;

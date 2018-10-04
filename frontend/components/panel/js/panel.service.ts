@@ -302,6 +302,12 @@ export class PanelService {
 					upperDivider: true,
 					menu: [{
 							hidden: false,
+							value: "",
+							label: "Unmitigated",
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
 							value: "proposed",
 							label: "Proposed",
 							toggle: true,
