@@ -282,7 +282,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				searchText,
 				onSearch: this.props.onSearch
 			});
+		}
 
+		if (areNotSameRows) {
 			changes.selectedRows = changes.processedRows.reduce((selectedRows, row) => {
 				if (row.selected) {
 					selectedRows.push(row);
