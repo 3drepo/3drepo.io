@@ -161,7 +161,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
-		const modelsSelectionChanged = !isEqual(prevProps.selectedModels, this.props.selectedModels);
+		const modelsSelectionChanged = prevProps.selectedModels.length !== this.props.selectedModels.length;
 		if (modelsSelectionChanged) {
 			changes.permissionsRevision = Math.random();
 		}
