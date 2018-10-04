@@ -25,7 +25,7 @@ import { NotificationService } from "../../notifications/js/notification.service
 import { RevisionsService } from "../../revisions/js/revisions.service";
 
 import { PERMISSIONS_VIEWS } from "../../../routes/projects/projects.component";
-import { TABS_TYPES } from "./account-user-management.component";
+import { TABS_TYPES } from "../../../routes/userManagement/userManagement.component";
 
 class AccountModelController implements ng.IController {
 
@@ -426,6 +426,7 @@ class AccountModelController implements ng.IController {
 			} else if (errorStatus) {
 				this.fileUploadInfo = "Failed to import model";
 			}
+
 		} else if (modelData.status === "queued") {
 
 			this.fileUploadInfo = "Queued...";

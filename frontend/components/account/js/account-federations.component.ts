@@ -14,8 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TABS_TYPES } from "./account-user-management.component";
 import { PERMISSIONS_VIEWS } from '../../../routes/projects/projects.component';
+import { TABS_TYPES } from '../../../routes/userManagement/userManagement.component';
 
 class AccountFederationsController implements ng.IController {
 
