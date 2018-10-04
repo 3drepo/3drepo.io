@@ -34,7 +34,8 @@ export class StateManagerService {
 		"PanelService",
 		"TreeService",
 		"ViewerService",
-		"IssuesService"
+		"IssuesService",
+		"RisksService"
 	];
 
 	private state: any;
@@ -63,7 +64,8 @@ export class StateManagerService {
 		private PanelService: any,
 		private TreeService: any,
 		private ViewerService: any,
-		private IssuesService: any
+		private IssuesService: any,
+		private RisksService: any
 	) {
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
@@ -97,6 +99,7 @@ export class StateManagerService {
 		this.TreeService.reset();
 		this.ViewerService.reset();
 		this.IssuesService.reset();
+		this.RisksService.reset();
 	}
 
 	public setupStateStack() {

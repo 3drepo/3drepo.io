@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,11 @@ import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { ClipService } from "../../clip/js/clip.service";
 import { IChip } from "../../panel/js/panel-card-chips-filter.component";
+import { MultiSelectService } from "../../viewer/js/multi-select.service";
 import { PanelService } from "../../panel/js/panel.service";
 import { TreeService } from "../../tree/js/tree.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
+import { stringSearch } from "../../../helpers/searching";
 
 declare const Pin;
 
@@ -31,17 +33,20 @@ export class IssuesService {
 		"$timeout",
 		"$filter",
 
-		"ClientConfigService",
 		"APIService",
-		"TreeService",
 		"AuthService",
+		"ClientConfigService",
 		"ClipService",
-		"ViewerService",
-		"PanelService"
+		"MultiSelectService",
+		"PanelService",
+		"TreeService",
+		"ViewerService"
 	];
 
 	public state: any;
 	private groupsCache: any;
+	private pin: any;
+	private newPinId: string;
 
 	constructor(
 		private $q,
@@ -49,15 +54,53 @@ export class IssuesService {
 		private $timeout,
 		private $filter,
 
-		private clientConfigService: any,
 		private apiService: APIService,
-		private treeService: TreeService,
 		private authService: AuthService,
+		private clientConfigService: any,
 		private clipService: ClipService,
-		private viewerService: ViewerService,
-		private panelService: PanelService
+		private multiSelectService: MultiSelectService,
+		private panelService: PanelService,
+		private treeService: TreeService,
+		private viewerService: ViewerService
 	) {
 		this.reset();
+		this.pin = {
+			pinDropMode: null
+		};
+		this.newPinId = "newPinId";
+	}
+
+	public handlePickPointEvent(event, account, model) {
+
+		if (
+			event.value.hasOwnProperty("id") &&
+			this.pin.pinDropMode
+		) {
+
+			this.removeUnsavedPin();
+
+			const trans = event.value.trans;
+			let position = event.value.position;
+			const normal = event.value.normal;
+
+			if (trans) {
+				position = trans.inverse().multMatrixPnt(position);
+			}
+
+			const data = {
+				account,
+				colours: event.value.selectColour,
+				id: this.newPinId,
+				type: "issue",
+				model,
+				pickedNorm: normal,
+				pickedPos: position,
+				selectedObjectId: event.value.id
+			};
+
+			this.viewerService.addPin(data);
+			this.viewerService.setPin({data});
+		}
 	}
 
 	public reset() {
@@ -82,6 +125,7 @@ export class IssuesService {
 			allJobs: [],
 			modelUserJob: null
 		};
+		this.removeUnsavedPin();
 	}
 
 	public getIssuesAndJobs(account: string, model: string, revision: string) {
@@ -144,7 +188,7 @@ export class IssuesService {
 		const newJobs = jobs.filter((r) => !this.state.allJobs.find( (j) => j._id === r._id ));
 		this.state.allJobs = this.state.allJobs.concat(newJobs).sort( (a, b) => a._id > b._id ? 1 : -1);
 
-		const menuChips =  this.state.allJobs.map((role ) => ({
+		const menuChips =  this.state.allJobs.map((role) => ({
 			value: role._id,
 			label: role._id
 		}));
@@ -204,15 +248,6 @@ export class IssuesService {
 
 	public setToDateMenuValue(date: Date) {
 		this.panelService.setDateValueFromMenu("issues", "date", "to", date);
-	}
-
-	// Helper  for searching strings
-	public stringSearch(superString, subString) {
-		if (!superString) {
-			return false;
-		}
-
-		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 
 	public setupIssuesToShow(model: string, chips: IChip[] ) {
@@ -322,16 +357,16 @@ export class IssuesService {
 
 		// Exit the function as soon as we found a match.
 
-		// Search the title, timestamp, type and owner
-		if ( this.stringSearch(issue.title, filterText) ||
-			this.stringSearch(issue.desc, filterText)) {
+		// Search the title and desc
+		if (stringSearch(issue.title, filterText) ||
+			stringSearch(issue.desc, filterText)) {
 			return true;
 		}
 
 		// Search the list of assigned issues
 		if (issue.hasOwnProperty("assigned_roles")) {
 			for (let roleIdx = 0; roleIdx < issue.assigned_roles.length; ++roleIdx) {
-				if (this.stringSearch(issue.assigned_roles[roleIdx], filterText)) {
+				if (stringSearch(issue.assigned_roles[roleIdx], filterText)) {
 					return true;
 				}
 			}
@@ -341,8 +376,8 @@ export class IssuesService {
 		if (issue.hasOwnProperty("comments")) {
 			for (let commentIdx = 0; commentIdx < issue.comments.length; ++commentIdx) {
 				if (!issue.comments[commentIdx].action &&  // skip any action comments (i.e system messages)
-					this.stringSearch(issue.comments[commentIdx].comment, filterText) ||
-					this.stringSearch(issue.comments[commentIdx].owner, filterText)) {
+					stringSearch(issue.comments[commentIdx].comment, filterText) ||
+					stringSearch(issue.comments[commentIdx].owner, filterText)) {
 					return true;
 				}
 			}
@@ -462,9 +497,6 @@ export class IssuesService {
 		if (issue) {
 			issue.title = this.generateTitle(issue);
 			issue.statusIcon = this.getStatusIcon(issue);
-			if (issue.created) {
-				issue.timeStamp = this.getPrettyTime(issue.created);
-			}
 
 			if (issue.thumbnail) {
 				issue.thumbnailPath = this.getThumbnailPath(issue.thumbnail);
@@ -839,46 +871,6 @@ export class IssuesService {
 
 	}
 
-	// TODO: Internationalise and make globally accessible
-	public getPrettyTime(time) {
-		const date = new Date(time);
-		const currentDate = new Date();
-		let	prettyTime;
-		let	postFix;
-		let	hours;
-
-		const	monthToText = [
-			"Jan", "Feb", "Mar", "Apr",
-			"May", "Jun", "Jul", "Aug",
-			"Sep", "Oct", "Nov", "Dec"
-		];
-
-		if ((date.getFullYear() === currentDate.getFullYear()) &&
-			(date.getMonth() === currentDate.getMonth()) &&
-			(date.getDate() === currentDate.getDate())) {
-			hours = date.getHours();
-			if (hours > 11) {
-				postFix = " PM";
-				if (hours > 12) {
-					hours -= 12;
-				}
-			} else {
-				postFix = " AM";
-				if (hours === 0) {
-					hours = 12;
-				}
-			}
-
-			prettyTime = hours + ":" + ("0" + date.getMinutes()).slice(-2) + postFix;
-		} else if (date.getFullYear() === currentDate.getFullYear()) {
-			prettyTime = date.getDate() + " " + monthToText[date.getMonth()];
-		} else {
-			prettyTime = monthToText[date.getMonth()] + " '" + (date.getFullYear()).toString().slice(-2);
-		}
-
-		return prettyTime;
-	}
-
 	public generateTitle(issue) {
 		if (issue.modelCode) {
 			return issue.modelCode + "." + issue.number + " " + issue.name;
@@ -1121,6 +1113,20 @@ export class IssuesService {
 		return statusIcon;
 	}
 
+	public setPinDropMode(on: boolean) {
+		this.pin.pinDropMode = on;
+		this.viewerService.pin.pinDropMode = on;
+
+		if (on) {
+			this.multiSelectService.toggleAreaSelect(false);
+		}
+	}
+
+	public removeUnsavedPin() {
+		this.viewerService.removePin({id: this.newPinId });
+		this.viewerService.setPin({data: null});
+	}
+
 	/**
 	* Import bcf
 	*/
@@ -1253,14 +1259,10 @@ export class IssuesService {
 	 */
 	public cleanIssue(issue: any) {
 
-		issue.timeStamp = this.getPrettyTime(issue.created);
 		issue.title = this.generateTitle(issue);
 
 		if (issue.hasOwnProperty("comments")) {
 			for (let j = 0, numComments = issue.comments.length; j < numComments; j++) {
-				if (issue.comments[j].hasOwnProperty("created")) {
-					issue.comments[j].timeStamp = this.getPrettyTime(issue.comments[j].created);
-				}
 				// Action comment text
 				if (issue.comments[j].action) {
 					issue.comments[j].comment = this.convertActionCommentToText(issue.comments[j], undefined);

@@ -639,14 +639,14 @@ export class Viewer {
 	 * Pins
 	 ****************************************************************************/
 
-	public addPin(account, model, id, position, norm, colours, viewpoint) {
+	public addPin(account, model, id, type, position, norm, colours, viewpoint) {
 
 		// TODO= Commented this out because it was causing error with reloading models
 		// is it needed for anything?
 		// if (this.pins.hasOwnProperty(id)) {
 		// 	errCallback(this.ERROR.PIN_ID_TAKEN);
 		// } else {
-		this.pins[id] = new Pin(id, position, norm, colours, viewpoint, account, model);
+		this.pins[id] = new Pin(id, type, position, norm, colours, viewpoint, account, model);
 		// }
 	}
 

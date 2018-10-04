@@ -509,13 +509,15 @@ export class UnityUtil {
 	/**
 	 * Add a pin
 	 * @param {string} id - Identifier for the pin
+	 * @param {string} type - Identifier for the pin type
 	 * @param {number[]} position - point in space where the pin should generate
 	 * @param {number[]} normal - normal vector for the pin (note: this is no longer used)
 	 * @param {number[]} colour - RGB value for the colour of the pin
 	 */
-	public static dropPin(id, position, normal, colour) {
+	public static dropPin(id, type, position, normal, colour) {
 		const params = {
 			id,
+			type,
 			position,
 			normal,
 			color : colour

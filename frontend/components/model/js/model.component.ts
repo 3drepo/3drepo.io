@@ -32,13 +32,14 @@ class ModelController implements ng.IController {
 		"RevisionsService",
 		"AuthService",
 		"IssuesService",
-		"MultiSelectService",
+		"RisksService",
 		"StateManager",
 		"PanelService",
 		"ViewerService"
 	];
 
 	private issuesCardIndex;
+	private risksCardIndex;
 	private pointerEvents;
 	private account;
 	private model;
@@ -48,6 +49,7 @@ class ModelController implements ng.IController {
 	private revision;
 	private settings;
 	private issueId;
+	private riskId;
 	private treeMap;
 	private selectedObjects;
 	private initialSelectedObjects;
@@ -67,7 +69,7 @@ class ModelController implements ng.IController {
 		private RevisionsService,
 		private AuthService,
 		private IssuesService,
-		private MultiSelectService,
+		private RisksService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -119,8 +121,18 @@ class ModelController implements ng.IController {
 		this.$scope.$watch("vm.issueId", () => {
 			if (this.issueId) {
 				// timeout to make sure event is sent after issue panel card is setup
+				// assume issue card shown by default
 				this.$timeout(() => {
 					this.IssuesService.state.displayIssue = this.issueId;
+				});
+			}
+		});
+
+		this.$scope.$watch("vm.riskId", () => {
+			if (this.riskId) {
+				// timeout to make sure event is sent after risk panel card is setup
+				this.$timeout(() => {
+					this.RisksService.state.displayRisk = this.riskId;
 				});
 			}
 		});
@@ -203,6 +215,17 @@ class ModelController implements ng.IController {
 	}
 
 	private setupViewer() {
+		if (this.riskId) {
+			// assume issue card shown by default
+			this.PanelService.hidePanelsByType("issues");
+			this.PanelService.showPanelsByType("risks");
+
+			// timeout to make sure event is sent after risk panel card is setup
+			this.$timeout(() => {
+				this.RisksService.state.displayRisk = this.riskId;
+			});
+		}
+
 		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
 		this.ClipService.initClip(this.settings.properties.unit);
 		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
@@ -236,6 +259,7 @@ export const ModelComponent: ng.IComponentOptions = {
 		account:  "=",
 		branch:   "=",
 		issueId: "=",
+		riskId: "=",
 		model:  "=",
 		revision: "=",
 		state:    "=",

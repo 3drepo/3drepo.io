@@ -150,11 +150,20 @@
 		ISSUE_COMMENT_SEALED: { message: "Can't edit a sealed comment or a comment in closed issue", status: 400 },
 		ISSUE_CLOSED_ALREADY: { message: "Issue closed already", status: 400 },
 		PROJECT_NOT_FOUND: { message: "Project not found", status: 404 },
+
+		RISK_NO_NAME: { message: "Create risk without name", status: 400 },
+		RISK_LIKELIHOOD_INVALID: { message: "Invalid risk likelihood", status: 400 },
+		RISK_CONSEQUENCE_INVALID: { message: "Invalid risk consequence", status: 400 },
+		RISK_LEVEL_READONLY: { message: "Level of risk cannot be changed", status: 400 },
+		RISK_NOT_FOUND: { message: "Risk not found", status: 404 },
+		RISK_UPDATE_FAILED: { message: "Failed updating risk", status: 500 },
+		RISK_UPDATE_PERMISSION_DECLINED: { message: "No permission to update risk", status: 400 },
+
+		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
-		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		EMAIL_EXISTS: { message: "Email already exists", status: 400 },
 		QUEUE_NO_LISTENER: { message: "There is currently no worker listening to the queue, you model import is delayed", status: 400 },
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },

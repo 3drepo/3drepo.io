@@ -31,7 +31,7 @@ export class RevisionsService {
 		private APIService,
 		private ClientConfigService
 	) {
-		this.revisionDateFilter = this.$filter("revisionDate");
+		this.revisionDateFilter = this.$filter("prettyDate");
 		this.status = {
 			data: {},
 			ready: false

@@ -82,6 +82,19 @@ function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
+// Risks notifications
+function newRisks(emitter, account, model, data) {
+	return insertEventQueue("risk" + eventTypes.CREATED, emitter, account, model, null, data);
+}
+
+function riskChanged(emitter, account, model, data) {
+	return insertEventQueue("risk" + eventTypes.UPDATED, emitter, account, model, null, data);
+}
+
+function risksDeleted(emitter, account, model, ids) {
+	return insertEventQueue("risk" + eventTypes.DELETED, emitter, account, model, null, ids);
+}
+
 // Viewpoints notifications
 
 function viewpointsCreated(emitter, account, model, data) {
@@ -104,6 +117,9 @@ module.exports = {
 	commentDeleted,
 	groupChanged,
 	groupsDeleted,
+	newRisks,
+	riskChanged,
+	risksDeleted,
 	viewpointsChanged,
 	viewpointsCreated,
 	viewpointsDeleted,
