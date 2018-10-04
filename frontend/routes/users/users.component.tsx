@@ -228,15 +228,15 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const { rows, licencesLabel, containerElement } = this.state;
 
 		return (
-            <>
-                <UserManagementTab footerLabel={this.getFooterLabel()}>
-                    <CustomTable
-                        cells={USERS_TABLE_CELLS}
-                        rows={rows}
-                    />
-                </UserManagementTab>
-                {containerElement && this.renderNewUserForm(containerElement)}
-            </>
+			<>
+					<UserManagementTab footerLabel={this.getFooterLabel()}>
+							<CustomTable
+									cells={USERS_TABLE_CELLS}
+									rows={rows}
+							/>
+					</UserManagementTab>
+					{containerElement && this.renderNewUserForm(containerElement)}
+			</>
 		);
 	}
 }

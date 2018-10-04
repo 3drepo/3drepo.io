@@ -163,15 +163,15 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
-        if (prevProps.models.length !== this.props.models.length) {
-            const queryParams = queryString.parse(this.props.location.search);
-            if (queryParams.modelId) {
-                const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
-                if (selectedModel) {
-                    this.props.onSelectionChange([selectedModel]);
-                }
-            }
-        }
+		if (prevProps.models.length !== this.props.models.length) {
+				const queryParams = queryString.parse(this.props.location.search);
+				if (queryParams.modelId) {
+						const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
+						if (selectedModel) {
+								this.props.onSelectionChange([selectedModel]);
+						}
+				}
+		}
 
 		const modelsSelectionChanged = prevProps.selectedModels.length !== this.props.selectedModels.length;
 		if (modelsSelectionChanged) {

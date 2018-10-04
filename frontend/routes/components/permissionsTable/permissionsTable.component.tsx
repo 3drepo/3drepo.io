@@ -266,12 +266,14 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 
 		return (
 			<>
-				{cells.length && (<CustomTable
-					cells={cells}
-					rows={rows}
-					onSelectionChange={this.handleSelectionChange}
-					renderCheckbox={this.renderCustomCheckbox}
-				/>)}
+				{cells.length ? (
+					<CustomTable
+						cells={cells}
+						rows={rows}
+						onSelectionChange={this.handleSelectionChange}
+						renderCheckbox={this.renderCustomCheckbox}
+					/>
+				) : null}
 			</>
 		);
 	}

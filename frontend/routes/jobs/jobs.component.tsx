@@ -157,15 +157,15 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 		const { colors } = this.props;
 
 		return (
-            <Container>
-                <UserManagementTab footerLabel="Manage jobs">
-                    <CustomTable
-                        cells={JOBS_TABLE_CELLS}
-                        rows={rows}
-                    />
-                </UserManagementTab>
-                {containerElement && this.renderNewJobForm(containerElement)}
-            </Container>
+			<Container>
+					<UserManagementTab footerLabel="Manage jobs">
+							<CustomTable
+									cells={JOBS_TABLE_CELLS}
+									rows={rows}
+							/>
+					</UserManagementTab>
+					{containerElement && this.renderNewJobForm(containerElement)}
+			</Container>
 		);
 	}
 }
