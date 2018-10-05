@@ -15,5 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ListSubheader, Toolbar } from '@material-ui/core';
+export {
+	NotificationsTypes,
+	NotificationsActions
+} from './notifications.redux';

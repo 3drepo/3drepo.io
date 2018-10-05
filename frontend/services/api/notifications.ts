@@ -15,5 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ListSubheader, Toolbar } from '@material-ui/core';
+import api from './';
+
+/**
+ * Get notifications list
+ *
+ * @param teamspace
+ * @returns {*|promise}
+ */
+export const getNotifications = (user): Promise<any> => {
+	return api.get(`${user}/notifications`);
+};

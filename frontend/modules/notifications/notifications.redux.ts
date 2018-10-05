@@ -15,5 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ListSubheader, Toolbar } from '@material-ui/core';
+import { createActions, createReducer } from 'reduxsauce';
+import { consolidateStreamedStyles } from 'styled-components';
+
+export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
+	fetchNotifications: ['username'],
+	fetchNotificationsSuccess: ['notifications']
+}, { prefix: 'NOTIFICATIONS_' });
+
+export const INITIAL_STATE = [];
+
+export const fetchNotificationsSuccess = (state = INITIAL_STATE, { notifications }) =>  state.concat(notifications) ;
+
+export const reducer = createReducer(INITIAL_STATE, {
+	[NotificationsTypes.FETCH_NOTIFICATIONS_SUCCESS]: fetchNotificationsSuccess
+});

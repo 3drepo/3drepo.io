@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,9 +20,15 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Notifications } from './notifications.component';
+import { NotificationsActions} from '../../modules/notifications';
+import { UserManagementActions, selectUsersSuggestions } from '../../modules/userManagement';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	notifications: (x) => x.notifications
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchNotifications: NotificationsActions.fetchNotifications
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Notifications);

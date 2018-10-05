@@ -84,5 +84,11 @@ module.exports = {
 					)
 				);
 			});
+	},
+
+	getNotifications: function(username) {
+		return db.getCollection(types.NOTIFICATIONS_DB, username).then((collection) => {
+			return collection.find().toArray();
+		});
 	}
 };

@@ -15,5 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ListSubheader, Toolbar } from '@material-ui/core';
+import { put, takeLatest, select} from 'redux-saga/effects';
+
+import api, * as API from '../../services/api';
+import { NotificationsTypes, NotificationsActions } from './notifications.redux';
+
+export function* fetchNotifications() {
+	const state = yield select();
+	const resp = yield API.getNotifications("sanmont");
+	console.log("TODO: change the api call to use the current user");
+	yield put(NotificationsActions.fetchNotificationsSuccess(resp.data));
+}
+
+export default function* NotificationsSaga() {
+	yield takeLatest(NotificationsTypes.FETCH_NOTIFICATIONS, fetchNotifications);
+}

@@ -16,4 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { ListSubheader, Toolbar } from '@material-ui/core';
+import { ListSubheader } from '@material-ui/core';
+
+export const ListSubheaderContainer = styled(ListSubheader)`
+&& {
+	padding: 0px;
+}`;

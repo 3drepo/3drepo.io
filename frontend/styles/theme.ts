@@ -107,6 +107,32 @@ export const MuiTheme = createMuiTheme({
 				fontSize: '14px',
 				color: theme.colors.BLACK_60
 			}
+		},
+		MuiTypography: {
+			title: {
+				fontSize: 20,
+				fontWeight: 400
+			}
+		},
+		MuiToolbar: {
+			root: {
+				backgroundColor: '#0c2f54',
+				color: 'rgba(255, 255, 255, 0.87)'
+			},
+			regular: {
+				/* tslint:disable */
+				height: 40,
+				minHeight: 40,
+				'@media (min-width: 600px)': {
+					minHeight: 0
+				}
+				/* tslint:enable */
+			}
+		},
+		MuiIconButton: {
+			root: {
+				color: 'rgba(255, 255, 255, 0.87)'
+			}
 		}
 	}
 });
