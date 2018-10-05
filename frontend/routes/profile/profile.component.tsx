@@ -113,7 +113,7 @@ export class Profile extends React.PureComponent<IProps, IState> {
 		return !isEqual(
 			pick(previousData, ['firstName', 'lastName', 'email']),
 			omit(newData, 'avatarUrl')
-		);
+		) && newData.email;
 	}
 
 	public render() {
@@ -199,6 +199,7 @@ export class Profile extends React.PureComponent<IProps, IState> {
 						<StyledTextField
 							label="New password"
 							margin="normal"
+							error={true}
 							helperText="Must be at least 8 characters"
 							required
 							type="password"
