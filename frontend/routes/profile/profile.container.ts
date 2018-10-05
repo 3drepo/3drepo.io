@@ -20,12 +20,15 @@ import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { Profile } from './profile.component';
-import { selectCurrentUser } from '../../modules/teamspace';
+import { TeamspaceActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/teamspace';
 
 const mapStateToProps = createStructuredSelector({
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	isAvatarPending: selectIsAvatarPending
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	onAvatarChange: TeamspaceActions.uploadAvatar
+}, dispatch);
 
 export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Profile));

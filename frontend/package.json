@@ -44,6 +44,7 @@
     "react": "16.4.2",
     "react-autosuggest": "^9.4.1",
     "react-dom": "16.4.2",
+    "react-dropzone": "^6.0.2",
     "react-highlight-words": "^0.14.0",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",

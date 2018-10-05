@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, call } from 'redux-saga/effects';
+import { put, takeLatest, all, call, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
+import { selectCurrentUser } from './teamspace.selectors';
+import { DialogActions } from '../dialog/dialog.redux';
 
 export function* fetchUser({ username }) {
 	try {
@@ -40,6 +42,31 @@ export function* fetchUser({ username }) {
 	}
 }
 
+export function* uploadAvatar({ file }) {
+	try {
+		yield put(TeamspaceActions.setAvatarPendingState(true));
+
+		const {username} = yield select(selectCurrentUser);
+
+		const formData = new FormData();
+		const size = file.size;
+		const maxSizeUser = '1 MB';
+		const maxSize = 1024 * 1024; // 1 MB
+		if (file.size < maxSize) {
+			formData.append('file', file);
+			yield API.uploadAvatar(username, formData);
+			yield put(TeamspaceActions.refreshAvatar());
+		} else {
+			const message = `File is too big! Must be smaller than ${maxSizeUser}.`;
+			throw {response: { data: { message }}};
+		}
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('upload', 'avatar', e.response));
+		yield put(TeamspaceActions.refreshAvatar());
+	}
+}
+
 export default function* teamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.FETCH_USER, fetchUser);
+	yield takeLatest(TeamspaceTypes.UPLOAD_AVATAR, uploadAvatar);
 }

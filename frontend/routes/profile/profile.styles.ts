@@ -16,10 +16,13 @@
  */
 
 import styled from 'styled-components';
+import Dropzone from 'react-dropzone';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import TouchRipple from '@material-ui/core/ButtonBase/TouchRipple';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Panel } from '../components/panel/panel.component';
 
@@ -53,5 +56,69 @@ export const FieldsRow = styled(Grid)`
 
 	${StyledTextField}:nth-child(2n + 1) {
 		margin-right: 12px;
+	}
+`;
+
+export const StyledDropzone = styled(Dropzone)`
+	&& {
+		min-width: 110px;
+    min-height: 110px;
+    margin-right: 24px;
+    height: 110px;
+    width: 110px;
+    margin-top: 24px;
+    box-sizing: border-box;
+		border: 1px solid #dcdcdc;
+    border-radius: 100%;
+		cursor: pointer;
+		overflow: hidden;
+	}
+`;
+
+export const DropzoneContent = styled.div`
+	width: 100%;
+	height: 100%;
+	position: relative;
+`;
+
+export const DropzoneMessage = styled.div`
+	font-size: 33px;
+	color: #4e4e4e;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding-bottom: 5px;
+	font-family: 'Material Icons';
+	box-sizing: border-box;
+`;
+
+export const DropzonePreview = styled.div`
+	background-image: ${(props: any) => props.src ? `url('${(props.src)}')` : 'transparent'};
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+	background-position: center;
+
+	& + ${DropzoneMessage} {
+		position: absolute;
+		z-index: 1;
+		opacity: 0;
+		transition: all 200ms ease-in-out;
+	}
+
+	& + ${DropzoneMessage}:hover {
+		background: rgba(220, 220, 220, 0.85);
+		opacity: 1;
+	}
+`;
+
+export const DropzoneProgress = styled(CircularProgress)`
+	&& {
+		position: absolute;
 	}
 `;
