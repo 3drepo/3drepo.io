@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { debounce } from 'lodash';
+import { debounce, mapValues } from 'lodash';
 import { subscribe } from '../../../helpers/migration';
 import {
 	selectCurrentUser,
@@ -41,7 +41,6 @@ class AccountController implements ng.IController {
 	private username;
 	private account;
 	private query;
-	private itemToShow;
 	private firstName;
 	private lastName;
 	private email;
@@ -55,6 +54,13 @@ class AccountController implements ng.IController {
 	private billingAddress;
 	private hasAvatar;
 	private showLiteModeButton;
+	private pageVisibility = {
+		teamspaces: true,
+		userManagement: false,
+		profile: false,
+		billing: false,
+		modelsetting: false
+	} as any;
 
 	constructor(
 		private $scope,
@@ -119,42 +125,24 @@ class AccountController implements ng.IController {
 		return this.getUserInfo();
 	}
 
-	/*
-	 * Init
-	 */
-	public initDirectiveData(directive) {
-
-		if (!this.accountInitialised) {
-			// TODO: This is also a mess
-			this.getUserInfo();
-
-		}
-	}
-
 	public capitalizeFirstLetter(str: string) {
 		return (str.toString()).charAt(0).toUpperCase() + str.slice(1);
 	}
 
-	public handleStateChange(type, oldValue, newValue) {
+	public setActivePage(page) {
+		const visiblePage = this.pageVisibility.hasOwnProperty(page) ? page : 'teamspaces';
+		const pageVisibility = mapValues({ ...this.pageVisibility }, (value, key) => key === visiblePage);
+		return pageVisibility;
+	}
 
-		// TODO: This is total mess... needs refactor!
-		// semes like page and this.itemToShow do similar things?
-
+	public handleStateChange = (type, oldValue, newValue) => {
 		if (this.account || this.query.page) {
 			// Go to the correct "page"
 			if (this.query.hasOwnProperty("page")) {
-				// Check that there is a directive for that "page"
-				const page = this.capitalizeFirstLetter(this.query.page);
-				const directiveExists = "account" + page + "Directive";
-
-				if (this.$injector.has(directiveExists)) {
-					this.itemToShow = this.query.page;
-				} else {
-					this.itemToShow = "teamspaces";
-				}
+				this.pageVisibility = this.setActivePage(this.query.page);
 
 				// Handle Billing Page
-				if (this.itemToShow === "billing") {
+				if (this.pageVisibility.billing) {
 					// Handle return back from PayPal
 					if (this.$location.search().hasOwnProperty("cancel")) {
 						// Cancelled
@@ -167,23 +155,8 @@ class AccountController implements ng.IController {
 						// Get initial user info, which may change if returning from PayPal
 						this.handlePayment();
 					}
-
 				}
-
-				// Initialise the account data if its
-				// an account change, and directive data for
-				// correct page
-
-				if (type === "page" && this.itemToShow) {
-					this.initDirectiveData(this.itemToShow);
-				} else if (type === "account" && newValue) {
-					this.initUserData();
-				}
-
-			} else {
-				this.itemToShow = "teamspaces";
 			}
-
 		} else {
 			this.username        = null;
 			this.firstName       = null;
@@ -192,11 +165,9 @@ class AccountController implements ng.IController {
 			this.modelsGrouped = null;
 			this.avatarUrl = null;
 		}
-
 	}
 
 	public handlePayment() {
-
 		const token = (this.$location.search()).token;
 		this.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 		this.closeDialogEnabled = false;
@@ -222,7 +193,7 @@ class AccountController implements ng.IController {
 	}
 
 	public showItem(item) {
-		this.itemToShow = item;
+		this.pageVisibility = this.setActivePage(item);
 	}
 
 	/**
@@ -232,7 +203,7 @@ class AccountController implements ng.IController {
 	 * @param callingPage
 	 */
 	public showPage(page, callingPage, data) {
-		this.itemToShow = page;
+		this.pageVisibility = this.setActivePage(page);
 		this.callingPage = callingPage;
 		this.data = data;
 	}
