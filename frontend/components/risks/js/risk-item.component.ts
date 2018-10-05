@@ -266,7 +266,7 @@ class RiskItemController implements ng.IController {
 			"vm.riskData.level_of_risk",
 			"vm.riskData.mitigation_status"
 		], () => {
-			if (this.riskData && this.isRiskDataChanged()) {
+			if (this.riskData && this.canSubmitUpdateRisk()) {
 				this.updateRisk();
 			}
 		});
@@ -377,7 +377,7 @@ class RiskItemController implements ng.IController {
 	public canSubmitUpdateRisk() {
 		return this.isRiskDataChanged() &&
 			this.risksService.canSubmitUpdateRisk(
-			this.riskData,
+			this.savedData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
