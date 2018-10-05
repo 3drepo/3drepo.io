@@ -45,5 +45,5 @@ export const selectIsPending = createSelector(
 );
 
 export const selectIsAvatarPending = createSelector(
-	selectTeamspaceDomain, (state) => state.isPending || state.isAvatarPending
+	selectTeamspaceDomain, (state) => state.isAvatarPending
 );

@@ -23,6 +23,9 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	fetchUser: ['username'],
 	fetchUserSuccess: ['userData'],
 	fetchUserError: ['error'],
+	updateUser: ['userData'],
+	updateUserSuccess: ['userData'],
+	updateUserPassword: ['passwords'],
 	setPendingState: ['pendingState'],
 	setAvatarPendingState: ['pendingState'],
 	updateButtonText: ['value'],
@@ -57,8 +60,9 @@ const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
 	};
 };
 
-const fetchUserError = (state = INITIAL_STATE, { error }) => {
-	console.error(error);
+const updateUserSuccess = (state = INITIAL_STATE, { userData }) => {
+	const currentUser = { ...state.currentUser, ...userData };
+	return { ...state, currentUser };
 };
 
 const refreshAvatar = (state = INITIAL_STATE) => {
@@ -76,7 +80,7 @@ const refreshAvatar = (state = INITIAL_STATE) => {
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
-	[TeamspaceTypes.FETCH_USER_ERROR]: fetchUserError,
+	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar
 });

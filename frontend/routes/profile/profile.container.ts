@@ -28,7 +28,9 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onAvatarChange: TeamspaceActions.uploadAvatar
+	onAvatarChange: TeamspaceActions.uploadAvatar,
+	onUserDataChange: TeamspaceActions.updateUser,
+	onPasswordChange: TeamspaceActions.updateUserPassword
 }, dispatch);
 
 export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Profile));

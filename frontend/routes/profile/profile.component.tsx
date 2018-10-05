@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { pick } from 'lodash';
+import { pick, omit, isEqual } from 'lodash';
 import Dropzone from 'react-dropzone';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -27,9 +27,9 @@ import { Headline, Form, StyledButton, StyledTextField, FieldsRow, StyledDropzon
 
 interface IProps {
 	currentUser: any;
-	onPasswordChange: (password) => void;
+	onPasswordChange: (passwords) => void;
 	onUserDataChange: (userData) => void;
-	onAvatarChange: (userData) => void;
+	onAvatarChange: (file) => void;
 	isAvatarPending: boolean;
 }
 
@@ -41,8 +41,8 @@ interface IState {
 		avatarUrl: string;
 	};
 	passwordData: {
-		current?: string;
-		new?: string;
+		oldPassword?: string;
+		newPassword?: string;
 	};
 	uploadedAvatar: any;
 }
@@ -56,8 +56,8 @@ export class Profile extends React.PureComponent<IProps, IState> {
 			avatarUrl: ''
 		},
 		passwordData: {
-			current: '',
-			new: ''
+			oldPassword: '',
+			newPassword: ''
 		},
 		uploadedAvatar: {}
 	};
@@ -85,9 +85,22 @@ export class Profile extends React.PureComponent<IProps, IState> {
 		}});
 	}
 
-	public handleProfileUpdate = () => {};
+	public createPasswordDataHandler = (field) => (event) => {
+		this.setState({
+			passwordData: {
+				...this.state.passwordData,
+				[field]: event.target.value
+			}
+		});
+	}
 
-	public handlePasswordUpdate = () => {};
+	public handleProfileUpdate = () => {
+		this.props.onUserDataChange(omit(this.state.profileData, 'avatarUrl'));
+	}
+
+	public handlePasswordUpdate = () => {
+		this.props.onPasswordChange(this.state.passwordData);
+	}
 
 	public handleAvatarUpdate = (acceptedFiles) => {
 		const uploadedAvatar = acceptedFiles[0] || {};
@@ -96,11 +109,25 @@ export class Profile extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public isUserDataValid(newData, previousData) {
+		return !isEqual(
+			pick(previousData, ['firstName', 'lastName', 'email']),
+			omit(newData, 'avatarUrl')
+		);
+	}
+
 	public render() {
 		const { currentUser, isAvatarPending } = this.props;
 		const { profileData, passwordData, uploadedAvatar } = this.state as IState;
 
 		const previewProps = { src: uploadedAvatar.preview || currentUser.avatarUrl } as any;
+
+		const isValidPassword = passwordData.oldPassword &&
+			passwordData.newPassword &&
+			passwordData.oldPassword !== passwordData.newPassword;
+
+		const isValidUserData = this.isUserDataValid(profileData, currentUser);
+
 		return (
 			<Panel title="Profile">
 				<Form container direction="column">
@@ -153,7 +180,7 @@ export class Profile extends React.PureComponent<IProps, IState> {
 						onClick={this.handleProfileUpdate}
 						color="secondary"
 						variant="raised"
-						disabled={!profileData.email || profileData.email === currentUser.email}
+						disabled={!isValidUserData}
 					>
 						Update profile
 					</StyledButton>
@@ -166,6 +193,7 @@ export class Profile extends React.PureComponent<IProps, IState> {
 							margin="normal"
 							required
 							type="password"
+							onChange={this.createPasswordDataHandler('oldPassword')}
 						/>
 
 						<StyledTextField
@@ -174,6 +202,7 @@ export class Profile extends React.PureComponent<IProps, IState> {
 							helperText="Must be at least 8 characters"
 							required
 							type="password"
+							onChange={this.createPasswordDataHandler('newPassword')}
 						/>
 					</FieldsRow>
 
@@ -181,7 +210,7 @@ export class Profile extends React.PureComponent<IProps, IState> {
 						onClick={this.handlePasswordUpdate}
 						color="secondary"
 						variant="raised"
-						disabled={!passwordData.current || !passwordData.new}
+						disabled={!isValidPassword}
 					>
 						Update password
 					</StyledButton>

@@ -16,6 +16,7 @@
  */
 
 import { put, takeLatest, all, call, select } from 'redux-saga/effects';
+import { get } from 'lodash';
 
 import * as API from '../../services/api';
 import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
@@ -25,6 +26,7 @@ import { DialogActions } from '../dialog/dialog.redux';
 export function* fetchUser({ username }) {
 	try {
 		yield put(TeamspaceActions.setPendingState(true));
+		yield put(TeamspaceActions.setAvatarPendingState(true));
 
 		const { data } = yield call(API.fetchTeamspace, [username]);
 
@@ -33,12 +35,36 @@ export function* fetchUser({ username }) {
 			put(TeamspaceActions.setPendingState(false))
 		]);
 	} catch (e) {
-		if (e.response) {
-			return yield all([
-				put(TeamspaceActions.fetchUserError(e.response.data)),
-				put(TeamspaceActions.setPendingState(false))
-			]);
+		yield put(DialogActions.showErrorDialog('fetch', 'user data', e.response));
+		yield put(TeamspaceActions.setPendingState(false));
+	}
+}
+
+export function* updateUser({ userData }) {
+	try {
+		yield put(TeamspaceActions.setPendingState(true));
+
+		const { username } = yield select(selectCurrentUser);
+		yield API.updateUser(username, userData);
+		yield put(TeamspaceActions.updateUserSuccess(userData));
+		yield put(TeamspaceActions.setPendingState(false));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('update', 'user', e.response));
+		yield put(TeamspaceActions.setPendingState(false));
+	}
+}
+export function* updateUserPassword({ passwords }) {
+	try {
+		const { username } = yield select(selectCurrentUser);
+		yield API.updateUser(username, passwords);
+	} catch (e) {
+		const code = get(e.response, 'data.code');
+
+		if (code === 'INCORRECT_USERNAME_OR_PASSWORD') {
+			e.response.data.message = 'Your old password was incorrect';
 		}
+
+		yield put(DialogActions.showErrorDialog('update', 'password', e.response));
 	}
 }
 
@@ -68,5 +94,7 @@ export function* uploadAvatar({ file }) {
 
 export default function* teamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.FETCH_USER, fetchUser);
+	yield takeLatest(TeamspaceTypes.UPDATE_USER, updateUser);
+	yield takeLatest(TeamspaceTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(TeamspaceTypes.UPLOAD_AVATAR, uploadAvatar);
 }
