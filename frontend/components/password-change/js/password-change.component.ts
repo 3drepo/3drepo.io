@@ -15,13 +15,15 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { evaluatePassword } from "../../../services/passwordValidation";
+
 class PasswordChangeController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"APIService",
 		"StateManager",
-		"PasswordService"
+		"$timeout"
 	];
 
 	private pageState;
@@ -46,7 +48,7 @@ class PasswordChangeController implements ng.IController {
 		private $scope: any,
 		private APIService: any,
 		private StateManager: any,
-		private PasswordService: any
+		private $timeout: any
 	) { }
 
 	public $onInit() {
@@ -64,11 +66,14 @@ class PasswordChangeController implements ng.IController {
 		this.$scope.$watch("vm.newPassword", () => {
 			this.message = "";
 			if (this.newPassword !== undefined) {
-				const result = this.PasswordService.evaluatePassword(this.newPassword);
-				this.newPasswordValid = result.validPassword;
-				this.passwordStrength = `(${result.comment})`;
-				this.checkPasswordMatches();
-				this.$scope.password.new.$setValidity("invalid", this.newPasswordValid);
+				const result = evaluatePassword(this.newPassword).then(({ validPassword, comment }) => {
+					this.$timeout(() => {
+						this.newPasswordValid = validPassword;
+						this.passwordStrength = `(${comment})`;
+						this.checkPasswordMatches();
+						this.$scope.password.new.$setValidity("invalid", this.newPasswordValid);
+					});
+				});
 			}
 		});
 

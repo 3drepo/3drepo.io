@@ -32,6 +32,8 @@ import {
 	StyledButton
 } from '../profile.styles';
 
+import { evaluatePassword } from '../../../services/passwordValidation';
+
 interface IProps {
 	onPasswordChange: (passwords) => void;
 }
@@ -39,14 +41,16 @@ interface IProps {
 interface IState {
 	oldPassword: string;
 	newPassword: string;
-	limitExceeded: boolean;
+	newPasswordValid: boolean;
+	newPasswordMessage: string;
 }
 
 export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		oldPassword: '',
 		newPassword: '',
-		limitExceeded: false
+		newPasswordValid: true,
+		newPasswordMessage: ''
 	};
 
 	public handlePasswordUpdate = () => {
@@ -54,24 +58,29 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public createDataHandler = (field) => (event) => {
-		const changes = { value: event.target.value } as any;
+		const value = event.target.value;
+		this.setState({ [field]: value });
 
 		if (field === 'newPassword') {
-			changes.limitExceeded = changes.value.length > 1 && changes.value.length < 8;
+			evaluatePassword(value).then(({ validPassword, comment }) => {
+				this.setState({
+					newPasswordMessage: comment,
+					newPasswordValid: value.length > 1 && validPassword
+				});
+			});
 		}
-
-		this.setState(changes);
 	}
 
 	public render() {
-		const { oldPassword, newPassword, limitExceeded } = this.state;
-		const isValidPassword = oldPassword && newPassword && oldPassword !== newPassword;
+		const { oldPassword, newPassword, newPasswordValid, newPasswordMessage} = this.state;
+		const isValidPassword = oldPassword && newPassword && oldPassword !== newPassword && newPasswordValid;
 
 		return (
 			<Form container direction="column">
 				<Headline color="primary" variant="subheading">Password settings</Headline>
 				<FieldsRow container wrap="nowrap">
 					<StyledTextField
+						value={oldPassword}
 						label="Old password"
 						margin="normal"
 						required
@@ -80,10 +89,11 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 					/>
 
 					<StyledTextField
+						value={newPassword}
 						label="New password"
 						margin="normal"
-						error={limitExceeded}
-						helperText={limitExceeded ? 'Must be at least 8 characters' : null}
+						error={!newPasswordValid}
+						helperText={newPasswordMessage || ''}
 						required
 						type="password"
 						onChange={this.createDataHandler('newPassword')}

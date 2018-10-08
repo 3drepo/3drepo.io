@@ -114,23 +114,6 @@ gulp.task('unity', function(done) {
         .on("end", done);
 });
 
-gulp.task("zxcvbn", function(done) {
-   const sourcemaps = require('gulp-sourcemaps');
-   const webpack = require('webpack-stream');
-   const localWebpack = require('webpack');
-   return gulp.src(['./zxcvbn-entry.js'])
-    .pipe(sourcemaps.init())
-    .pipe(webpack({
-      output: {
-        filename: 'zxcvbn.js',
-        libraryTarget: 'umd',
-        // library: 'strength'
-      },
-    }, localWebpack))
-    .pipe(gulp.dest("./../../public/dist/"))
-
- });
-
 gulp.task('custom', function(done) {
   return gulp.src("../custom/**")
         .on('error', swallowError)
