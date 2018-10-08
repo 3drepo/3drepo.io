@@ -13,6 +13,7 @@ import Billing from './billing/billing.container';
 
 import UserManagement from './userManagement/userManagement.container';
 import Profile from './profile/profile.container';
+import Teamspaces from './teamspaces/teamspaces.container';
 
 angular
 	.module('3drepo')
@@ -20,4 +21,5 @@ angular
 	.component('snackbarContainer', wrap(SnackbarContainer))
 	.component('userManagement', wrap(UserManagement, ['projects', 'users']))
 	.component('profile', wrap(Profile))
-	.component('billing', wrap(Billing));
+	.component('billing', wrap(Billing))
+	.component('teamspaces', wrap(Teamspaces));
