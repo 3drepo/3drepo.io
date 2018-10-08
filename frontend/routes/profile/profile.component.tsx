@@ -23,8 +23,8 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Panel } from '../components/panel/panel.component';
-import { Headline, Form, StyledButton, StyledTextField, FieldsRow } from './profile.styles';
 import { ProfileDataForm } from './components/profileDataForm.component';
+import { PasswordChangeForm } from './components/passwordChangeForm.component';
 
 interface IProps {
 	currentUser: any;
@@ -34,43 +34,10 @@ interface IProps {
 	isAvatarPending: boolean;
 }
 
-interface IState {
-	passwordData: {
-		oldPassword?: string;
-		newPassword?: string;
-	};
-	uploadedAvatar: any;
-}
-
 export class Profile extends React.PureComponent<IProps, IState> {
-	public state = {
-		passwordData: {
-			oldPassword: '',
-			newPassword: ''
-		},
-		uploadedAvatar: {}
-	};
-
-	public createPasswordDataHandler = (field) => (event) => {
-		this.setState({
-			passwordData: {
-				...this.state.passwordData,
-				[field]: event.target.value
-			}
-		});
-	}
-
-	public handlePasswordUpdate = () => {
-		this.props.onPasswordChange(this.state.passwordData);
-	}
 
 	public render() {
-		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending } = this.props;
-		const { passwordData } = this.state as IState;
-
-		const isValidPassword = passwordData.oldPassword &&
-			passwordData.newPassword &&
-			passwordData.oldPassword !== passwordData.newPassword;
+		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending, onPasswordChange } = this.props;
 
 		const profileDataFormProps = {
 			isAvatarPending,
@@ -79,40 +46,12 @@ export class Profile extends React.PureComponent<IProps, IState> {
 			...pick(currentUser, ['firstName', 'lastName', 'email', 'avatarUrl', 'username'])
 		} as any;
 
+		const passwordChangeFormProps = { onPasswordChange } as any;
+
 		return (
 			<Panel title="Profile">
 				{ currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null }
-				<Form container direction="column">
-					<Headline color="primary" variant="subheading">Password settings</Headline>
-					<FieldsRow container wrap="nowrap">
-						<StyledTextField
-							label="Old password"
-							margin="normal"
-							required
-							type="password"
-							onChange={this.createPasswordDataHandler('oldPassword')}
-						/>
-
-						<StyledTextField
-							label="New password"
-							margin="normal"
-							error={true}
-							helperText="Must be at least 8 characters"
-							required
-							type="password"
-							onChange={this.createPasswordDataHandler('newPassword')}
-						/>
-					</FieldsRow>
-
-					<StyledButton
-						onClick={this.handlePasswordUpdate}
-						color="secondary"
-						variant="raised"
-						disabled={!isValidPassword}
-					>
-						Update password
-					</StyledButton>
-				</Form>
+				<PasswordChangeForm {...passwordChangeFormProps} />
 			</Panel>
 		);
 	}

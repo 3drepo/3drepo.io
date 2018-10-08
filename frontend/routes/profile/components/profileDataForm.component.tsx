@@ -154,6 +154,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="raised"
 					disabled={!isValidUserData}
+					type="submit"
 				>
 					Update profile
 				</StyledButton>
