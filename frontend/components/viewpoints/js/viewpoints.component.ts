@@ -34,6 +34,7 @@ class ViewsController implements ng.IController {
 	private model: string;
 	private onContentHeightRequest: any;
 	private viewpoints: any[];
+	private viewpointsToShow: any[];
 	private toShow: string;
 	private loading: boolean;
 	private selectedView: any;
@@ -43,6 +44,7 @@ class ViewsController implements ng.IController {
 	private newView: any;
 	private editSelectedView: any;
 	private viewpointNameMaxlength: number;
+	private searchQuery: string;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -53,7 +55,7 @@ class ViewsController implements ng.IController {
 		private AuthService,
 		private ClientConfigService: any,
 		private ViewpointsService: any
-	) {}
+	) { }
 
 	public $onInit() {
 		this.newView = {};
@@ -65,6 +67,7 @@ class ViewsController implements ng.IController {
 		this.savingView = false;
 		this.canAddView = false;
 		this.viewpoints = [];
+		this.viewpointsToShow = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
 		this.watchers();
@@ -76,6 +79,17 @@ class ViewsController implements ng.IController {
 
 	public watchers() {
 
+		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
+			this.searchQuery = searchQuery;
+			if (this.searchQuery !== undefined || this.searchQuery !== "") {
+				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.searchQuery);
+				this.deselectViewpoints(this.viewpointsToShow);
+			} else  {
+				this.viewpointsToShow = this.viewpoints.concat([]);
+			}
+
+		});
+
 		this.$scope.$watch(() => {
 			return this.ViewpointsService.state;
 		}, (newState, oldState) => {
@@ -84,6 +98,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.viewpoints", () => {
 			this.setContentHeight();
+			this.viewpointsToShow = this.viewpoints.concat([]);
 		});
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
@@ -102,6 +117,21 @@ class ViewsController implements ng.IController {
 			}
 		});
 
+	}
+
+	public deselectViewpoints(deselected) {
+
+		const index = deselected.filter((item) =>  item.selected === true);
+		// console.log(index);
+
+		deselected.forEach((item) => {
+			if (!index) {
+				item.selected = false;
+				console.log("top", index);
+			} else {
+				console.log("bottom", index);
+			}
+		});
 	}
 
 	public selectView(view: any) {
@@ -215,7 +245,7 @@ class ViewsController implements ng.IController {
 			contentHeight = (this.viewpoints.length * viewHeight) + actionBar;
 		}
 
-		this.onContentHeightRequest({height: Math.max(contentHeight, minContentHeight) });
+		this.onContentHeightRequest({ height: Math.max(contentHeight, minContentHeight) });
 
 	}
 
@@ -227,6 +257,7 @@ export const ViewpointsComponent: ng.IComponentOptions = {
 		model: "<",
 		revision: "<",
 		modelSettings: "<",
+		filterText: "<",
 		onContentHeightRequest: "&",
 		onShowItem: "&",
 		onHideItem: "&",
