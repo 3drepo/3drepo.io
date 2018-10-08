@@ -32,6 +32,7 @@ div#accountHolder(
 		.accountSpace
 
 		#accountItem(flex="100")
+			teamspaces(ng-if="vm.pageVisibility.teamspaces")
 
 			account-teamspaces(
 				is-lite-mode="vm.isLiteMode"

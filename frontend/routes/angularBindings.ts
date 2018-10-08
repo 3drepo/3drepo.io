@@ -12,6 +12,7 @@ import Billing from './billing/billing.container';
 
 import UserManagement from './userManagement/userManagement.container';
 import Profile from './profile/profile.container';
+import Teamspaces from './teamspaces/teamspaces.container';
 import Notifications from './notifications/notifications.container';
 
 angular
@@ -21,4 +22,5 @@ angular
 	.component('userManagement', wrap(UserManagement, ['projects', 'users']))
 	.component('profile', wrap(Profile))
 	.component('billing', wrap(Billing))
+	.component('teamspaces', wrap(Teamspaces))
 	.component('notifications', wrap(Notifications, ['location', 'stateManager', 'chatService', 'userAccount']));
