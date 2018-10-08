@@ -26,9 +26,7 @@ div(
 					path(fill="none" ng-attr-d="{{vm.customIcons.hide1}}")
 					path(fill="#fff" ng-attr-d="{{vm.customIcons.hide2}}")
 		
-				svg(ng-if="button.label === 'Focus'"
-					width="24px" height="24px" viewBox="0 0 1024 1024")
-					path(fill="#ffffff" ng-attr-d="{{vm.customIcons.focus}}")
+				md-icon.angular-material-icons(ng-if="button.label === 'Focus'") fullscreen
 		
 				// HELICOPTER
 				svg(ng-if="vm.selectedMode === 'HELICOPTER' && button.isViewingOptionButton"

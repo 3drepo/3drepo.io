@@ -37,7 +37,7 @@ class RevisionsController implements ng.IController {
 			return this.RevisionsService.status.ready;
 		}, () => {
 
-			const revisionDate = this.$filter("revisionDate");
+			const revisionDate = this.$filter("prettyDate");
 
 			if (this.RevisionsService.status.ready === true) {
 
@@ -49,7 +49,7 @@ class RevisionsController implements ng.IController {
 				}
 
 				if (!this.revision) {
-					const filteredDate = revisionDate(this.revisions[0].timestamp);
+					const filteredDate = revisionDate(this.revisions[0].timestamp, true);
 					this.revName = this.revisions[0].tag || filteredDate;
 					this.revisions[0].current = true;
 
@@ -61,7 +61,7 @@ class RevisionsController implements ng.IController {
 							this.revName = this.revision;
 							this.revisions[i].current = true;
 						} else if (rev._id === this.revision) {
-							this.revName = revisionDate(rev.timestamp);
+							this.revName = revisionDate(rev.timestamp, true);
 							this.revisions[i].current = true;
 						}
 
@@ -91,7 +91,7 @@ class RevisionsController implements ng.IController {
 	}
 
 	public revisionTimestamp(timestamp: string) {
-		return this.RevisionsService.revisionDateFilter(timestamp);
+		return this.RevisionsService.revisionDateFilter(timestamp, true);
 	}
 
 	public goToRevision(revId) {

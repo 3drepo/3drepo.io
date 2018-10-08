@@ -61,7 +61,7 @@ export class ViewerService {
 		};
 
 		this.pin = {
-			pinDropMode : false
+			pinDropMode: false
 		};
 
 		this.initialised = $q.defer();
@@ -115,14 +115,6 @@ export class ViewerService {
 					event.value.colours
 				);
 				break;
-
-			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED:
-				this.viewer.clearHighlights();
-				break;
-
-			case this.EventService.EVENT.VIEWER.OBJECT_SELECTED:
-				break;
-
 			case this.EventService.EVENT.VIEWER.SET_CAMERA:
 				this.viewer.setCamera(
 					event.value.position,
@@ -134,38 +126,6 @@ export class ViewerService {
 					event.value.account,
 					event.value.model
 				);
-				break;
-
-			case this.EventService.EVENT.VIEWER.PICK_POINT:
-
-				if (
-					event.value.hasOwnProperty("id") &&
-					this.pin.pinDropMode
-				) {
-
-					this.removeUnsavedPin();
-
-					const trans = event.value.trans;
-					let position = event.value.position;
-					const normal = event.value.normal;
-
-					if (trans) {
-						position = trans.inverse().multMatrixPnt(position);
-					}
-
-					const data = {
-						account,
-						colours: event.value.selectColour,
-						id: this.newPinId,
-						model,
-						pickedNorm: normal,
-						pickedPos: position,
-						selectedObjectId: event.value.id
-					};
-
-					this.addPin(data);
-					this.setPin({data});
-				}
 				break;
 
 			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
@@ -238,6 +198,7 @@ export class ViewerService {
 				params.account,
 				params.model,
 				params.id,
+				params.type,
 				params.pickedPos,
 				params.pickedNorm,
 				params.colours,

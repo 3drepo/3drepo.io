@@ -127,7 +127,6 @@ function deleteGroup(req, res, next) {
 function deleteGroups(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
-	systemLogger.logError(JSON.stringify(req.query));
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");

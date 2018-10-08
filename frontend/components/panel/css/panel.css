@@ -251,7 +251,7 @@ panel-card-chips-filter .copy-button md-icon{
 }
 
 
-#clipboard-target {
+panel-card-chips-filter .clipboard-target {
   width: 1px;
   height: 1px;
   border: 0px transparent;

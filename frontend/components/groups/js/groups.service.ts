@@ -71,14 +71,14 @@ export class GroupsService {
 	 */
 	public groupsFilterSearch(searchQuery: string): any[] {
 		return this.state.groups.filter((group) => {
-			// Remove group highlight.
-			if (!searchQuery) {
+			const toKeep = this.stringSearch(group.name, searchQuery)
+				|| this.stringSearch(group.description, searchQuery)
+				|| this.stringSearch(group.author, searchQuery);
+
+			if (!toKeep) {
 				this.unhighlightGroup(group);
 			}
-
-			return this.stringSearch(group.name, searchQuery)
-			|| this.stringSearch(group.description, searchQuery)
-			|| this.stringSearch(group.author, searchQuery);
+			return toKeep;
 		});
 	}
 	/**
@@ -464,9 +464,9 @@ export class GroupsService {
 	public getGroups(teamspace: string, model: string, revision: string) {
 		let groupUrl;
 		if (revision) {
-			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
+			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true&noRisks=true`;
 		} else {
-			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true`;
+			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true&noRisks=true`;
 		}
 
 		return this.APIService.get(groupUrl)

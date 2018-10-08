@@ -21,37 +21,36 @@ tdr-progress(ng-show="vm.showProgress" info="vm.progressInfo")
 				md-button.md-icon-button.md-primary.expandButton.clickToExpand(
 					aria-label="Toggle Expand"
 					ng-click="vm.toggleNodeExpansion($event, item._id)"
-					ng-if="!item.status && !item.expanded && (item.children && item.children.length)")
+					ng-if="!item.status && item.canExpand && !item.expanded")
 
 					md-icon.angular-material-icons add_box
 
 				md-button.md-icon-button.md-primary.expandButton.clickToCollapse(
 					aria-label="Toggle Expand"
 					ng-click="vm.toggleNodeExpansion($event, item._id)"
-					ng-if="!item.status && item.expanded")
-					
+					ng-if="!item.status && item.canExpand && item.expanded")
+
 					md-icon.angular-material-icons indeterminate_check_box
 
 				md-button.md-icon-button.md-primary.expandButton.clickNoEvent(
 					aria-label="Toggle Expand"
-					ng-click="vm.toggleNodeExpansion($event, item._id)"
-					ng-if="!item.status && !item.expanded && !(item.children && item.children.length)")
+					ng-if="!item.status && !item.canExpand")
 
 					md-icon.angular-material-icons remove
 
 				md-button.md-icon-button.noAccessButton(aria-label="Status", ng-if="item.status")
 					md-icon.angular-material-icons(ng-if="item.status==='NO_ACCESS'") do_not_disturb
 					md-icon.angular-material-icons(ng-if="item.status==='NOT_FOUND'") error_outline
-				
+
 				// Name
-				div(flex, layout="row", 
+				div(flex, layout="row",
 					layout-align="start center"
 					ng-dblclick="vm.selectAndCentreNode(item)"
 					ng-click="vm.selectNode($event, item)")
 
 					p(ng-if="!item.status") {{item.name}}
 					p.noAccessName(ng-if="item.status") {{item.name}}
-				
+
 				// Toggle visibility
 				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode($event, item)", ng-if="!item.status")
 					md-icon.angular-material-icons.visible(ng-if="item.toggleState==='visible'") visibility
@@ -73,8 +72,8 @@ div(class="virtualRepeatInfiniteScroll" ng-if="!vm.showTree && vm.filterItemsFou
 			// Name
 			div(layout="row", layout-align="start center", flex)
 				div(
-					flex, 
-					layout="row", 
+					flex,
+					layout="row",
 					layout-align="start center"
 					ng-class="{treeNodeSelected: item.selected === 1, treeNodeParentOfUnselected: item.selected === 0 }"
 					ng-dblclick="vm.selectAndCentreNode($event, item)"

@@ -15,6 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NotificationEvents } from "../../notifications/js/notification.events";
+import { NotificationService } from "../../notifications/js/notification.service";
+
 class ViewsController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -25,7 +28,8 @@ class ViewsController implements ng.IController {
 		"DialogService",
 		"AuthService",
 		"ClientConfigService",
-		"ViewpointsService"
+		"ViewpointsService",
+		"NotificationService"
 	];
 
 	private onShowItem: any;
@@ -43,8 +47,9 @@ class ViewsController implements ng.IController {
 	private modelSettings: any;
 	private newView: any;
 	private editSelectedView: any;
+	private filterText: string;
 	private viewpointNameMaxlength: number;
-	private searchQuery: string;
+	private viewsNotifications: NotificationEvents;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -54,7 +59,8 @@ class ViewsController implements ng.IController {
 		private DialogService,
 		private AuthService,
 		private ClientConfigService: any,
-		private ViewpointsService: any
+		private ViewpointsService: any,
+		private notificationsService: NotificationService
 	) { }
 
 	public $onInit() {
@@ -67,26 +73,28 @@ class ViewsController implements ng.IController {
 		this.savingView = false;
 		this.canAddView = false;
 		this.viewpoints = [];
+		this.filterText = "";
 		this.viewpointsToShow = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
 		this.watchers();
+		this.viewsNotifications = this.notificationsService.getChannel(this.account, this.model).views;
+		this.watchNotification();
 	}
 
 	public $onDestroy() {
 		this.ViewpointsService.reset();
+		this.viewpoints = [];
+		this.viewsNotifications.unsubscribeFromUpdated(this.updatedViewpoint);
+		this.viewsNotifications.unsubscribeFromCreated(this.createdViewpoint);
+		this.viewsNotifications.unsubscribeFromDeleted(this.deletedViewpoint);
 	}
 
 	public watchers() {
 
 		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
-			this.searchQuery = searchQuery;
-			if (this.searchQuery !== undefined || this.searchQuery !== "") {
-				this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.searchQuery);
-				this.deselectViewpoints(this.viewpointsToShow);
-			} else  {
-				this.viewpointsToShow = this.viewpoints.concat([]);
-			}
+			this.filterText = searchQuery;
+			this.filterViewpoints();
 
 		});
 
@@ -98,7 +106,7 @@ class ViewsController implements ng.IController {
 
 		this.$scope.$watchCollection("vm.viewpoints", () => {
 			this.setContentHeight();
-			this.viewpointsToShow = this.viewpoints.concat([]);
+			this.filterViewpoints();
 		});
 
 		this.$scope.$watch("vm.hideItem", (newValue) => {
@@ -115,27 +123,12 @@ class ViewsController implements ng.IController {
 					this.modelSettings.permissions
 				);
 			}
+
 		});
 
-	}
-
-	public deselectViewpoints(deselected) {
-
-		const index = deselected.filter((item) =>  item.selected === true);
-		// console.log(index);
-
-		deselected.forEach((item) => {
-			if (!index) {
-				item.selected = false;
-				console.log("top", index);
-			} else {
-				console.log("bottom", index);
-			}
-		});
 	}
 
 	public selectView(view: any) {
-
 		if (view) {
 			if (this.editSelectedView && this.selectedView !== view) {
 				this.resetEditState();
@@ -150,6 +143,25 @@ class ViewsController implements ng.IController {
 			this.ViewpointsService.showViewpoint(this.account, this.model, view);
 		}
 
+	}
+
+	/*** Realtime sync  */
+	public watchNotification() {
+		this.viewsNotifications.subscribeToUpdated(this.updatedViewpoint, this);
+		this.viewsNotifications.subscribeToCreated(this.createdViewpoint, this);
+		this.viewsNotifications.subscribeToDeleted(this.deletedViewpoint, this);
+	}
+
+	public updatedViewpoint(viewpointToUpdate) {
+		this.ViewpointsService.replaceStateViewpoint(viewpointToUpdate);
+	}
+
+	public createdViewpoint(viewpointCreated) {
+		this.ViewpointsService.updatedCreatedViewpoint(viewpointCreated);
+	}
+
+	public deletedViewpoint(deletedViewpoint) {
+		this.ViewpointsService.updateDeletedViewpoint(deletedViewpoint);
 	}
 
 	public createViewpoint() {
@@ -247,6 +259,14 @@ class ViewsController implements ng.IController {
 
 		this.onContentHeightRequest({ height: Math.max(contentHeight, minContentHeight) });
 
+	}
+
+	private filterViewpoints() {
+		if (this.filterText !== undefined && this.filterText !== "") {
+			this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.filterText);
+		} else {
+			this.viewpointsToShow = this.viewpoints;
+		}
 	}
 
 }

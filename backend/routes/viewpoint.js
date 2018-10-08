@@ -83,8 +83,8 @@ function createViewpoint(req, res, next) {
 			Object.prototype.toString.call(req.body.screenshot) === "[object Object]" &&
 			(!req.body.clippingPlanes || Object.prototype.toString.call(req.body.clippingPlanes) === "[object Array]")) {
 		const place = utils.APIInfo(req);
-
-		Viewpoint.createViewpoint(getDbColOptions(req), req.body)
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		Viewpoint.createViewpoint(getDbColOptions(req), sessionId, req.body)
 			.then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
 			}).catch(err => {
@@ -98,8 +98,9 @@ function createViewpoint(req, res, next) {
 function deleteViewpoint(req, res, next) {
 
 	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid).then(() => {
+	Viewpoint.deleteViewpoint(getDbColOptions(req), req.params.uid, sessionId).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success"});
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -108,18 +109,18 @@ function deleteViewpoint(req, res, next) {
 }
 
 function updateViewpoint(req, res, next) {
-
 	if (Object.keys(req.body).length >= 1 &&
 			Object.prototype.toString.call(req.body.name) === "[object String]") {
 		const dbCol = getDbColOptions(req);
 		const place = utils.APIInfo(req);
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 		Viewpoint.findByUID(dbCol, req.params.uid)
 			.then(view => {
 				if(!view) {
 					return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 				} else {
-					return Viewpoint.updateAttrs(dbCol, utils.stringToUUID(req.params.uid), req.body);
+					return Viewpoint.updateViewpoint(dbCol, sessionId, req.body, utils.stringToUUID(req.params.uid));
 				}
 			}).then(view => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, view);
