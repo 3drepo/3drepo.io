@@ -95,7 +95,7 @@ function Utils() {
 	* @returns {Boolean}
 	*******************************************************************************/
 	this.isUUID = function(uuid) {
-		return uuid && Boolean(uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
+		return uuid && uuid.match && Boolean(uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
 	};
 
 	/** *****************************************************************************
@@ -172,7 +172,19 @@ function Utils() {
 	};
 
 	this.changeObjectIdToString = function(obj) {
-		return Object.assign (_.cloneDeep(obj), {_id:this.uuidToString(obj._id)});
+		if (obj instanceof mongo.Binary) {
+			return self.uuidToString(obj);
+		}
+
+		if (Object.keys(obj).length === 0 || _.isString(obj)) {
+			return obj;
+		}
+
+		if (Array.isArray(obj)) {
+			return obj.map(o=> self.changeObjectIdToString(o));
+		}
+
+		return  _.mapValues(obj, self.changeObjectIdToString);
 	};
 
 	/**
@@ -225,7 +237,6 @@ function Utils() {
 		});
 
 	};
-
 }
 
 module.exports = new Utils();

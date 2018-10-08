@@ -41,6 +41,7 @@ export class NotificationItem extends React.PureComponent<INotification, any> {
 		return (
 			<ListItem>
 					<Avatar>
+						<Icon>assignment</Icon>
 					</Avatar>
 					<ListItemText primary="Assigned Issue" secondary="you have 1 issue assigned" />
 			</ListItem>

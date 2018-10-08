@@ -33,7 +33,7 @@ module.exports = {
 		let oldIssue = null;
 		let issue = null;
 
-		const isCommentModification = req.dataModel.hasOwnProperty("comment");
+		const isCommentModification = req.dataModel.hasOwnProperty("comment"); // In case the update of the issue is for commenting
 
 		if (!isCommentModification) {
 			oldIssue = req.oldDataModel;

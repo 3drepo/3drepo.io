@@ -17,7 +17,6 @@
  */
 import * as React from "react";
 import Drawer from "@material-ui/core/Drawer";
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Icon from "@material-ui/core/Icon";
 import {INotification, NotificationItem} from "./notification.item";
@@ -26,8 +25,6 @@ import { MuiThemeProvider } from "@material-ui/core/styles";
 import { theme } from "../../styles";
 import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
 
-/**    background-color: rgb(12,47,84);
-    color: white; */
 
 interface IProps {
 	fetchNotifications: () => void ; // TODO: Remove sample
@@ -46,12 +43,10 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public getNotificationsHeader() {
 		return (<ListSubheaderToolbar rightContent={
-					<>
-						<IconButton aria-label="Close panel" onClick={this.toggleDrawer.bind(this)}>
-							<Icon>close</Icon>
-						</IconButton>
-					</>
-				}>
+					<IconButton aria-label="Close panel" onClick={this.toggleDrawer.bind(this)}>
+						<Icon>close</Icon>
+					</IconButton>
+					}>
 					<Typography variant={"title"} color={"inherit"} >
 						Notifications
 					</Typography>
@@ -61,23 +56,23 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<MuiThemeProvider theme={theme}>
-				<>
-					<Button
-						variant="fab"
-						color="secondary"
-						aria-label="Toggle panel"
-						mini={true}
-						onClick={this.toggleDrawer.bind(this)}
-					>
-						<Icon>notifications</Icon>
-					</Button>
-					<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer.bind(this)}
+				<Button
+					variant="fab"
+					color="secondary"
+					aria-label="Toggle panel"
+					mini={true}
+					onClick={this.toggleDrawer.bind(this)}
+				>
+					<Icon>notifications</Icon>
+				</Button>
+				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer.bind(this)}
 						SlideProps={{unmountOnExit: true}}>
-						<List subheader={this.getNotificationsHeader()}>
-							{this.props.notifications.map((notification) => <NotificationItem key={notification._id} {...notification}/>)}
-						</List>
-					</Drawer>
-				</>
+					<List subheader={this.getNotificationsHeader()}>
+						{this.props.notifications.map((notification) =>
+							<NotificationItem key={notification._id} {...notification}/>
+						)}
+					</List>
+				</Drawer>
 			</MuiThemeProvider>
 		);
 	}

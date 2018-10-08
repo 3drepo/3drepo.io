@@ -21,15 +21,42 @@ const job = require("../models/job");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const db = require("../db/db");
+const _ = require("lodash");
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
-	ISSUE_CREATED : "ISSUE_CREATED",
-	NOTIFICATIONS_DB : "notifications"
+	ISSUE_CREATED : "ISSUE_CREATED"
 };
+
+const NOTIFICATIONS_DB = "notifications";
+const MODELS_COLL = "settings";
 
 const generateNotification = function(teamSpace, modelId, type, data) {
 	return {_id:utils.stringToUUID(uuid.v1()), read:false, teamSpace, modelId, type, data };
+};
+
+/**
+ * Fills out the models name and extra data for the  modelids passed throigh parameter.
+ * It receives and object < string as teamspaceName : < string as modelId : Object > >
+ * Return an object with the format < string as teamspaceName : < string as modelId : <..., name:string> > >
+ * @param {Object} teamSpaces an object witch keys are teamspaces ids and values are an object witch keys are modelids
+ * @returns {Object} which contains the models data
+  */
+const getModelsData = function(teamSpaces) {
+	return Promise.all(
+		_.map(teamSpaces, (val, key) => {
+			const ACCOUNT_DB = key;
+			const modelsIds = _.chain(val).map("modelId").uniq().value();
+
+			return db.getCollection(ACCOUNT_DB, MODELS_COLL)
+				.then(collection => collection.find({_id: {$in:modelsIds}}).toArray())
+				.then(models => {
+					const obj = {};
+					obj[ACCOUNT_DB] =  _.chain(models).groupBy("_id").mapValues(v => v[0]).value();
+					return obj;
+				});
+		})
+	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing)
 };
 
 module.exports = {
@@ -46,7 +73,7 @@ module.exports = {
 	 * @returns {Promise} Returns a promise with the recently created notification
 	 */
 	insertNotification: function(username, teamSpace, modelId, type, data) {
-		return db.getCollection(types.NOTIFICATIONS_DB, username).then((collection) =>
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
 			collection.insertOne(generateNotification(teamSpace, modelId, type, data))
 		).then((o) => utils.changeObjectIdToString(o.ops[0]));
 	},
@@ -60,7 +87,7 @@ module.exports = {
 	 * @param {string} teamSpace The teamspace corresponding to the model of the issue
 	 * @param {string} modelId The model of the issue
 	 * @param {Issue} issue The issue in shich the assignation is happening
-	 * @returns {Promise} It contains the newly created notifications
+	 * @returns {Promise<Notification[]>} It contains the newly created notifications
 	 */
 	insertIssueAssignedNotifications : function(username, teamSpace, modelId, issue) {
 		const assignedRole = issue.assigned_roles[0];
@@ -86,9 +113,25 @@ module.exports = {
 			});
 	},
 
+	/**
+	 * This function is used for retrieving a list of notifications for a particular user
+	 *
+	 * @param {string} username The username of the user which the notificatons belongs to
+	 * @returns {Promise<Notification[]>} It contains the notifications for the user passed through parameter
+ 	 */
 	getNotifications: function(username) {
-		return db.getCollection(types.NOTIFICATIONS_DB, username).then((collection) => {
-			return collection.find().toArray();
-		});
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find().toArray())
+			.then((notifications) => {
+				const teamSpaces = _.groupBy(notifications, "teamSpace");
+
+				return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+					return _.map(notifications,(notification) => {
+						const teamSpace = (modelsData[notification.teamSpace] || {});
+						const modelName = (teamSpace[notification.modelId] || {}).name;
+
+						return Object.assign(notification, {modelName});
+					});
+				});
+			});
 	}
 };

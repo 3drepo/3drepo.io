@@ -20,9 +20,8 @@ import api from './';
 /**
  * Get notifications list
  *
- * @param teamspace
  * @returns {*|promise}
  */
-export const getNotifications = (user): Promise<any> => {
-	return api.get(`${user}/notifications`);
+export const getNotifications = (): Promise<any> => {
+	return api.get('me/notifications');
 };

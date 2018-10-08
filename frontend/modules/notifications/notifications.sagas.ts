@@ -21,9 +21,7 @@ import api, * as API from '../../services/api';
 import { NotificationsTypes, NotificationsActions } from './notifications.redux';
 
 export function* fetchNotifications() {
-	const state = yield select();
-	const resp = yield API.getNotifications("sanmont");
-	console.log("TODO: change the api call to use the current user");
+	const resp = yield API.getNotifications();
 	yield put(NotificationsActions.fetchNotificationsSuccess(resp.data));
 }
 

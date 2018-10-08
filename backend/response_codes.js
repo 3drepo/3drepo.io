@@ -469,7 +469,7 @@
 
 	responseCodes.onSuccessfulOperation = function(req, res) {
 		const currentUrl = utils.APIInfo(req);
-		responseCodes.respond(currentUrl, req, res, null, responseCodes.OK, req.dataModel);
+		responseCodes.respond(currentUrl, req, res, null, responseCodes.OK, utils.changeObjectIdToString(req.dataModel));
 	};
 
 	responseCodes.onError = function(req, res, err) {

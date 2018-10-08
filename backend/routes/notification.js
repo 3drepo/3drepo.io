@@ -22,17 +22,16 @@ const responseCodes = require("../response_codes");
 const middlewares = require("../middlewares/middlewares");
 const notification = require("../models/notification");
 
-router.get("/notifications", middlewares.isTeamspaceMember, getNotifications, responseCodes.onSuccessfulOperation);
+router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
 
+//
 function getNotifications(req, res, next) {
-	//const user = req.session.user.username;
-	//
+	const user = req.session.user.username;
 
-	const user = "carmen";
 	notification.getNotifications(user).then(notifications => {
 		req.dataModel = notifications;
 		next();
 	}).catch(err => responseCodes.onError(req, res, err));
-};
+}
 
 module.exports = router;
