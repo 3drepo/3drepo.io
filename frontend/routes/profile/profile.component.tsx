@@ -23,7 +23,8 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Panel } from '../components/panel/panel.component';
-import { Headline, Form, StyledButton, StyledTextField, FieldsRow, StyledDropzone, DropzonePreview, DropzoneMessage, DropzoneContent, DropzoneProgress } from './profile.styles';
+import { Headline, Form, StyledButton, StyledTextField, FieldsRow } from './profile.styles';
+import { ProfileDataForm } from './components/profileDataForm.component';
 
 interface IProps {
 	currentUser: any;
@@ -34,12 +35,6 @@ interface IProps {
 }
 
 interface IState {
-	profileData: {
-		firstName?: string;
-		lastName?: string;
-		email: string;
-		avatarUrl: string;
-	};
 	passwordData: {
 		oldPassword?: string;
 		newPassword?: string;
@@ -49,41 +44,12 @@ interface IState {
 
 export class Profile extends React.PureComponent<IProps, IState> {
 	public state = {
-		profileData: {
-			firstName: '',
-			lastName: '',
-			email: '',
-			avatarUrl: ''
-		},
 		passwordData: {
 			oldPassword: '',
 			newPassword: ''
 		},
 		uploadedAvatar: {}
 	};
-
-	public componentDidMount() {
-		this.setState({
-			profileData: pick(this.props.currentUser, [
-				'firstName',
-				'lastName',
-				'email',
-				'avatarUrl'
-			])
-		});
-	}
-	public componentDidUpdate(prevProps, prevState) {
-		if (this.props.currentUser.avatarUrl !== prevProps.currentUser.avatarUrl) {
-			this.setState({ uploadedAvatar: {}});
-		}
-	}
-
-	public createProfileDataHandler = (field) => (event) => {
-		this.setState({profileData: {
-			...this.state.profileData,
-			[field]: event.target.value
-		}});
-	}
 
 	public createPasswordDataHandler = (field) => (event) => {
 		this.setState({
@@ -94,97 +60,28 @@ export class Profile extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleProfileUpdate = () => {
-		this.props.onUserDataChange(omit(this.state.profileData, 'avatarUrl'));
-	}
-
 	public handlePasswordUpdate = () => {
 		this.props.onPasswordChange(this.state.passwordData);
 	}
 
-	public handleAvatarUpdate = (acceptedFiles) => {
-		const uploadedAvatar = acceptedFiles[0] || {};
-		this.setState({uploadedAvatar}, () => {
-			this.props.onAvatarChange(uploadedAvatar);
-		});
-	}
-
-	public isUserDataValid(newData, previousData) {
-		return !isEqual(
-			pick(previousData, ['firstName', 'lastName', 'email']),
-			omit(newData, 'avatarUrl')
-		) && newData.email;
-	}
-
 	public render() {
-		const { currentUser, isAvatarPending } = this.props;
-		const { profileData, passwordData, uploadedAvatar } = this.state as IState;
-
-		const previewProps = { src: uploadedAvatar.preview || currentUser.avatarUrl } as any;
+		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending } = this.props;
+		const { passwordData } = this.state as IState;
 
 		const isValidPassword = passwordData.oldPassword &&
 			passwordData.newPassword &&
 			passwordData.oldPassword !== passwordData.newPassword;
 
-		const isValidUserData = this.isUserDataValid(profileData, currentUser);
+		const profileDataFormProps = {
+			isAvatarPending,
+			onUserDataChange,
+			onAvatarChange,
+			...pick(currentUser, ['firstName', 'lastName', 'email', 'avatarUrl', 'username'])
+		} as any;
 
 		return (
 			<Panel title="Profile">
-				<Form container direction="column">
-					<Headline color="primary" variant="subheading">Basic information</Headline>
-					<Grid container direction="row" wrap="nowrap">
-						<StyledDropzone
-							disabled={isAvatarPending}
-							accept=".gif,.jpg,.png"
-							onDrop={this.handleAvatarUpdate}
-						>
-							<DropzoneContent>
-								{isAvatarPending ? <DropzoneProgress size={108} thickness={1} /> : null}
-								{previewProps.src ? <DropzonePreview {...previewProps} /> : null }
-								<DropzoneMessage>+</DropzoneMessage>
-							</DropzoneContent>
-						</StyledDropzone>
-						<Grid container direction="column">
-							<FieldsRow container wrap="nowrap">
-								<StyledTextField
-									value={profileData.firstName}
-									label="First name"
-									margin="normal"
-									onChange={this.createProfileDataHandler('firstName')}
-								/>
-								<StyledTextField
-									value={profileData.lastName}
-									label="Last name"
-									margin="normal"
-									onChange={this.createProfileDataHandler('lastName')}
-								/>
-							</FieldsRow>
-							<FieldsRow container wrap="nowrap">
-								<StyledTextField
-									value={currentUser.username}
-									label="Username"
-									margin="normal"
-									disabled={true}
-								/>
-								<StyledTextField
-									value={profileData.email}
-									label="Email"
-									margin="normal"
-									required
-									onChange={this.createProfileDataHandler('email')}
-								/>
-							</FieldsRow>
-						</Grid>
-					</Grid>
-					<StyledButton
-						onClick={this.handleProfileUpdate}
-						color="secondary"
-						variant="raised"
-						disabled={!isValidUserData}
-					>
-						Update profile
-					</StyledButton>
-				</Form>
+				{ currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null }
 				<Form container direction="column">
 					<Headline color="primary" variant="subheading">Password settings</Headline>
 					<FieldsRow container wrap="nowrap">
