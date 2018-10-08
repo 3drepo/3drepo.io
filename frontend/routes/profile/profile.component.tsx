@@ -34,7 +34,7 @@ interface IProps {
 	isAvatarPending: boolean;
 }
 
-export class Profile extends React.PureComponent<IProps, IState> {
+export class Profile extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending, onPasswordChange } = this.props;

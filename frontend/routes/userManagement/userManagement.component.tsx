@@ -162,8 +162,9 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const {isLoadingTeamspace, teamspaces, isTeamspaceAdmin} = this.props;
 		const {selectedTeamspace, teamspacesItems} = this.state;
 
+		const paperProps = { height: '100%' };
 		return (
-			<Panel title="User management">
+			<Panel title="User management" paperProps={paperProps}>
 				<Header>
 					<TeamspaceSelectContainer>
 						<FormControl fullWidth={true}>

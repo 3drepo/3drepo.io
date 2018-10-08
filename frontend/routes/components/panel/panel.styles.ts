@@ -23,6 +23,8 @@ import { FONT_WEIGHT } from '../../../styles';
 export const Container = styled(Paper)`
   && {
     background: #fafafa;
+    height: ${(props: any) => props.height || 'auto'};
+    width: ${(props: any) => props.width || 'auto'};
     display: flex;
     flex-direction: column;
   }
