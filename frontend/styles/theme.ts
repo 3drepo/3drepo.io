@@ -50,6 +50,12 @@ export const theme = createMuiTheme({
 				color: COLOR.BLACK_60
 			}
 		},
+		MuiFormLabel: {
+			root: {
+				fontSize: '14px',
+				color: COLOR.BLACK_60
+			}
+		},
 		MuiDialogTitle: {
 			root: {
 				background: '#08203a',
