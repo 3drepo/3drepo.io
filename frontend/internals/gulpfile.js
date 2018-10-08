@@ -230,8 +230,7 @@ gulp.task('build', gulp.series(
     'custom',
     'manifest-icons',
     'manifest-file',
-    'webpack-build',
-	 "zxcvbn"
+    'webpack-build'
   ),
   'service-workers'
   )

@@ -20,6 +20,21 @@ const getPasswordEvalMessage = (score: number) => {
 	return score >= scoreMapping.length ? 'Very Strong' : scoreMapping[score];
 };
 
+const loadPasswordLibrary = () => new Promise((resolve) => {
+	if (!window.zxcvbn) {
+		const ZXCVBN_SRC = "/dist/zxcvbn.js";
+		const script = document.createElement("script");
+		script.src = ZXCVBN_SRC;
+		script.type = "text/javascript";
+		script.async = true;
+		const first = document.getElementsByTagName("script")[0];
+		document.body.appendChild(script);
+		script.onload = () => resolve(window.zxcvbn);
+	} else {
+		resolve(window.zxcvbn);
+	}
+});
+
 export const evaluatePassword = (password: string) => new Promise((resolve) => {
 	if (password.length < 8) {
 		resolve({
@@ -28,7 +43,8 @@ export const evaluatePassword = (password: string) => new Promise((resolve) => {
 		});
 	}
 
-	import('zxcvbn').then((zxcvbn) => {
+	// TODO: Should be changed to dynamic import if app is fully migrated
+	loadPasswordLibrary().then((zxcvbn: any) => {
 		const strength = zxcvbn(password).score;
 		resolve({
 			validPassword: zxcvbn(password).score > 1,

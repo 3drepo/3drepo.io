@@ -75,6 +75,7 @@
     "@types/react-dom": "^16.0.7",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
+    "copy-webpack-plugin": "^4.5.2",
     "gulp": "gulpjs/gulp.git#4.0",
     "gulp-concat": "2.6.1",
     "gulp-cssnano": "2.1.3",
