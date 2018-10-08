@@ -20,11 +20,11 @@ import Drawer from "@material-ui/core/Drawer";
 import Typography from '@material-ui/core/Typography';
 import Icon from "@material-ui/core/Icon";
 import {INotification, NotificationItem} from "./notification.item";
-import { Button, List, ListSubheader, IconButton } from "@material-ui/core";
+import { Button, List, ListSubheader, IconButton, ListItem } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { theme } from "../../styles";
 import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
-
+import { NotificationEmptyItem } from "./notifications.emptyItem";
 
 interface IProps {
 	fetchNotifications: () => void ; // TODO: Remove sample
@@ -67,8 +67,10 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				</Button>
 				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer.bind(this)}
 						SlideProps={{unmountOnExit: true}}>
-					<List subheader={this.getNotificationsHeader()}>
-						{this.props.notifications.map((notification) =>
+					<List subheader={this.getNotificationsHeader()} style={{height: '100%'}} >
+						{this.props.notifications.length === 0 &&
+							<NotificationEmptyItem/>}
+						{this.props.notifications.length > 0 && this.props.notifications.map((notification) =>
 							<NotificationItem key={notification._id} {...notification}/>
 						)}
 					</List>

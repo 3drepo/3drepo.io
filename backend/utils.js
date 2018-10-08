@@ -172,12 +172,12 @@ function Utils() {
 	};
 
 	this.changeObjectIdToString = function(obj) {
-		if (obj instanceof mongo.Binary) {
-			return self.uuidToString(obj);
+		if (!obj || Object.keys(obj).length === 0 || _.isString(obj)) {
+			return obj;
 		}
 
-		if (Object.keys(obj).length === 0 || _.isString(obj)) {
-			return obj;
+		if (obj instanceof mongo.Binary) {
+			return self.uuidToString(obj);
 		}
 
 		if (Array.isArray(obj)) {

@@ -17,35 +17,24 @@
  */
 import * as React from "react";
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
+import { Icon } from "@material-ui/core";
 
-import Drawer from "@material-ui/core/Drawer";
-import Icon from "@material-ui/core/Icon";
-import { Button, Paper } from "@material-ui/core";
-import { MuiThemeProvider } from "@material-ui/core/styles";
-import { theme } from "../../styles";
-
-export interface INotification {
-	_id: string;
-	type: string;
-	read: boolean;
-	modelName: string;
-	data: { id?: string[] };
-}
-
-export class NotificationItem extends React.PureComponent<INotification, any> {
+export class NotificationEmptyItem extends React.PureComponent {
 	public render() {
 		return (
-			<ListItem>
-					<Avatar>
-						<Icon>assignment</Icon>
-					</Avatar>
-					<ListItemText
-						primary={`Assigned Issue from ${this.props.modelName}`}
-						secondary={ `you have ${this.props.data.id.length} issue assigned`}
-					/>
+			<ListItem style={{height: 'calc(100% - 64px)',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center' }}>
+				<div>
+					<h3 style={{ maxWidth: '142px', fontWeight: 'normal', color: 'rgba(0,0,0,0.54)' }}>
+						You have no new notifications.
+					</h3>
+				</div>
+				<div >
+					<Icon fontSize="large" color="disabled" >notifications</Icon>
+				</div>
 			</ListItem>
-		);
+			);
 	}
 }
