@@ -25,11 +25,11 @@ export const selectCurrentTeamspace = createSelector(
 );
 
 export const selectCurrentUser = createSelector(
-	selectTeamspaceDomain, (state) => state.currentUser
+	selectTeamspaceDomain, (state) => state.currentUser || {}
 );
 
 export const selectAvatar = createSelector(
-	selectCurrentUser, (state) => state.currentUser.avatar
+	selectCurrentUser, (state) => state.avatarUrl
 );
 
 export const selectTeamspaces = createSelector(
