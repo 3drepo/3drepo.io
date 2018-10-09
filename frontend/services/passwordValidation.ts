@@ -48,7 +48,8 @@ export const evaluatePassword = (password: string) => new Promise((resolve) => {
 		const strength = zxcvbn(password).score;
 		resolve({
 			validPassword: zxcvbn(password).score > 1,
-			comment: getPasswordEvalMessage(strength)
+			comment: getPasswordEvalMessage(strength),
+			strength
 		});
 	});
 });

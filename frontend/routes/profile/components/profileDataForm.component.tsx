@@ -121,11 +121,13 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 						<FieldsRow container wrap="nowrap">
 							<StyledTextField
 								value={firstName}
+								required
 								label="First name"
 								margin="normal"
 								onChange={this.createDataHandler('firstName')}
 							/>
 							<StyledTextField
+								required
 								value={lastName}
 								label="Last name"
 								margin="normal"

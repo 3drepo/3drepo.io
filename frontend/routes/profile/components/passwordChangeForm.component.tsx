@@ -72,7 +72,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { oldPassword, newPassword, newPasswordValid, newPasswordMessage} = this.state;
+		const { oldPassword, newPassword, newPasswordValid, newPasswordMessage } = this.state;
 		const isValidPassword = oldPassword && newPassword && oldPassword !== newPassword && newPasswordValid;
 
 		return (
@@ -90,7 +90,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 
 					<StyledTextField
 						value={newPassword}
-						label="New password"
+						label={`New password `}
 						margin="normal"
 						error={!newPasswordValid}
 						helperText={newPasswordMessage || ''}
