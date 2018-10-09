@@ -25,6 +25,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { Panel } from '../components/panel/panel.component';
 import { ProfileDataForm } from './components/profileDataForm.component';
 import { PasswordChangeForm } from './components/passwordChangeForm.component';
+import { Container } from './profile.styles';
 
 interface IProps {
 	currentUser: any;
@@ -50,8 +51,10 @@ export class Profile extends React.PureComponent<IProps, any> {
 
 		return (
 			<Panel title="Profile">
-				{ currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null }
-				<PasswordChangeForm {...passwordChangeFormProps} />
+				<Container>
+					{ currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null }
+					<PasswordChangeForm {...passwordChangeFormProps} />
+				</Container>
 			</Panel>
 		);
 	}

@@ -26,15 +26,20 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Panel } from '../components/panel/panel.component';
 
-export const Headline = styled(Typography)``;
-
 export const FormContainer = styled(Grid)`
 	padding: 24px;
+`;
 
-	&:not(:first-child) {
+export const Container = styled.div`
+	height: 100%;
+	width: 100%;
+
+	& > form:not(:first-child) ${FormContainer} {
 		padding-top: 0;
 	}
 `;
+
+export const Headline = styled(Typography)``;
 
 export const StyledButton = styled(Button)`
 	&& {
