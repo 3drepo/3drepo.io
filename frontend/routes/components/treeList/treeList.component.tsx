@@ -17,36 +17,64 @@
 
 import * as React from 'react';
 
-import { Container } from './treeList.styles';
+import { Container, Headline, Details } from './treeList.styles';
 
 interface IProps {
 	items: any[];
-	render: (props) => Element;
+	renderItem: (props) => Element;
 	renderRoot: (props) => Element;
+	itemHeight: number;
 }
 
-export class TreeList extends React.PureComponent<IProps, any> {
+interface IState {
+	active: boolean;
+}
+
+export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		items: [],
-		renderRoot: () => null
+		renderRoot: () => null,
+		itemHeight: 50
+	};
+
+	public state = {
+		active: false
 	};
 
 	public renderItems = () => {
 		return this.props.items.map((itemProps, index) => {
-			return this.props.render({
+			return this.props.renderItem({
 				key: index,
 				...itemProps
 			});
 		});
 	}
 
+	public toggleActive = () => {
+		this.setState({ active: !this.state.active });
+	}
+
 	public render() {
-		const { items } = this.props;
+		const { items, itemHeight } = this.props;
+
+		const containerProps = {
+			active: items.length && this.state.active,
+			disabled: items.length
+		};
+
+		const detailsProps = {
+			active: items.length && this.state.active,
+			maxHeight: `${items.length * itemHeight}px`
+		};
 
 		return (
-			<Container>
-				{ this.props.renderRoot() }
-				{ items.length ? this.renderItems() : null }
+			<Container {...containerProps}>
+				<Headline onClick={this.toggleActive}>
+					{ this.props.renderRoot() }
+				</Headline>
+				<Details {...detailsProps}>
+					{ items.length ? this.renderItems() : null }
+				</Details>
 			</Container>
 		);
 	}
