@@ -25,6 +25,7 @@ import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/
 import { selectTeamspacesWithAdminAccess } from '../teamspace/teamspace.selectors';
 import { DIALOG_TYPES } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
+import { SnackbarActions } from '../snackbar';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
@@ -51,6 +52,7 @@ export function* addUser({ user }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data } = yield API.addUser(teamspace, user);
 		yield put(UserManagementActions.addUserSuccess(data));
+		yield put(SnackbarActions.show('User added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('add', 'licence', error.response));
 	}
@@ -95,6 +97,7 @@ export function* removeUserCascade({ username }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.removeUserCascade(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
+		yield put(SnackbarActions.show('User removed'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'licence', error.response));
 	}
@@ -109,6 +112,7 @@ export function* updateUserJob({ username, job }) {
 				API.removeUserJob(teamspace, username)
 		);
 		yield put(UserManagementActions.updateUserJobSuccess(username, job));
+		yield put(SnackbarActions.show('User job updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('assign', 'job', error.response));
 	}
@@ -119,6 +123,7 @@ export function* updatePermissions({ permissions }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const data = yield API.setUserPermissions(teamspace, permissions);
 		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
+		yield put(SnackbarActions.show('Teamspace permissions updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'teamspace permissions', error.response));
 	}
@@ -154,6 +159,7 @@ export function* updateProjectPermissions({ permissions }) {
 		yield API.updateProject(teamspace, project);
 
 		yield put(UserManagementActions.updateProjectPermissionsSuccess(permissions));
+		yield put(SnackbarActions.show('Project permissions updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'project permissions', error.response));
 	}
@@ -222,6 +228,7 @@ export function* updateModelsPermissions({ modelsWithPermissions, permissions })
 		const teamspace = yield select(selectCurrentTeamspace);
 		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
 		yield put(UserManagementActions.updateModelPermissionsSuccess(response.data, permissions));
+		yield put(SnackbarActions.show('Models/federations permissions updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error.response));
 	}

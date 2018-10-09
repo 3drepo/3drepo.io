@@ -59,6 +59,7 @@ export function* updateUserPassword({ passwords }) {
 	try {
 		const { username } = yield select(selectCurrentUser);
 		yield API.updateUser(username, passwords);
+		yield put(SnackbarActions.show('Password updated'));
 	} catch (e) {
 		const code = get(e.response, 'data.code');
 
@@ -84,6 +85,7 @@ export function* uploadAvatar({ file }) {
 			formData.append('file', file);
 			yield API.uploadAvatar(username, formData);
 			yield put(TeamspaceActions.refreshAvatar());
+			yield put(SnackbarActions.show('Avatar updated'));
 		} else {
 			const message = `File is too big! Must be smaller than ${maxSizeUser}.`;
 			throw {response: { data: { message }}};

@@ -15,10 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-export const selectSnackbarDomain = (state) => Object.assign({}, state.snackbar);
-
-export const selectSnackConfig = createSelector(
-	selectSnackbarDomain, (state) => state.snackConfig
-);
+export const Container = styled.div``;

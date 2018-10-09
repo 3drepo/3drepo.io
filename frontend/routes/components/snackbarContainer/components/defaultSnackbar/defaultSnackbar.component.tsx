@@ -15,10 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import * as React from 'react';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
 
-export const selectSnackbarDomain = (state) => Object.assign({}, state.snackbar);
+import { Container } from './defaultSnackbar.styles';
 
-export const selectSnackConfig = createSelector(
-	selectSnackbarDomain, (state) => state.snackConfig
-);
+interface IProps {
+	message: string;
+	onClose: (event, reason?) => void;
+}
+
+export const DefaultSnackbar = (props: IProps) => {
+	return (
+		<SnackbarContent
+			message={props.message}
+			action={[
+				<IconButton
+					key="close"
+					aria-label="Close"
+					color="inherit"
+					onClick={props.onClose}
+				>
+					<Icon>close</Icon>
+				</IconButton>
+			]}
+		/>
+	);
+};

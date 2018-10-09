@@ -21,6 +21,7 @@ import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
 import { JobsTypes, JobsActions } from './jobs.redux';
+import { SnackbarActions } from '../snackbar';
 
 export function* fetchJobs({ teamspace }) {
 	try {
@@ -48,6 +49,7 @@ export function* updateJobColor({ job }) {
 		const data = yield API.updateJob(teamspace, job);
 
 		yield put(JobsActions.updateJobSuccess(job));
+		yield put(SnackbarActions.show('Job color updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'job color', error.response));
 	}
@@ -59,6 +61,7 @@ export function* createJob({ job }) {
 		const data = yield API.createJob(teamspace, job);
 
 		yield put(JobsActions.createJobSuccess(job));
+		yield put(SnackbarActions.show('Job created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('create', 'job', error.response));
 	}
@@ -70,6 +73,7 @@ export function* removeJob({ jobId }) {
 		const data = yield API.deleteJob(teamspace, jobId);
 
 		yield put(JobsActions.removeJobSuccess(jobId));
+		yield put(SnackbarActions.show('Job removed'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'job', error.response));
 	}

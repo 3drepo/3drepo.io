@@ -19,6 +19,7 @@ import * as React from 'react';
 
 import Snackbar from '@material-ui/core/Snackbar';
 import { Container } from './snackbarContainer.styles';
+import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 
 interface IProps {
 	snack: any;
@@ -69,7 +70,11 @@ export class SnackbarContainer extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleClose = () => {
+	public handleClose = (event, reason) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+
 		this.setState({
 			isOpen: false
 		}, this.props.close);
@@ -81,15 +86,21 @@ export class SnackbarContainer extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isOpen, snack} = this.state;
+		const {message, ...snackProps} = snack as any;
 		return (
 			<Snackbar
-				autoHideDuration={1000}
+				autoHideDuration={2000}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 				onClose={this.handleClose}
 				onExited={this.handleExited}
 				open={isOpen}
-				{...snack}
-			/>
+				{...snackProps}
+			>
+				<DefaultSnackbar
+					message={message}
+					onClose={this.handleClose}
+				/>
+			</Snackbar>
 		);
 	}
 }
