@@ -86,7 +86,7 @@ div.groupsContainer
             div.openedGroupColorBar(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
             div(layout="column" flex)
                 md-input-container
-                    label Group Name
+                    label(for="groupName") Group Name
                     input#groupName(
                         type="text"
                         ng-disabled="!vm.canAddGroup"
@@ -97,7 +97,8 @@ div.groupsContainer
             label Group Description
             textarea.groupDescriptionInput(
                 ng-disabled="!vm.canAddGroup"
-                ng-model="vm.selectedGroup.description")
+                ng-model="vm.selectedGroup.description"
+            title="groupDescriptionInput")
 
         md-container.groupObjectMetaContainer(
             layout="row"
@@ -170,8 +171,8 @@ div.groupsContainer
                                         style="background-color: {{vm.getRGBA(color)}};")
                         div(layout="column")
                             md-input-container.groupHexColorContainer(layout="column" layout-align="start center")
-                                label Hex Colour
-                                input.groupHexColor(ng-model="vm.hexColor")
+                                label(for="groupHexColor") Hex Colour
+                                input.groupHexColor(ng-model="vm.hexColor" title="groupHexColor")
                             div(layout-fill).groupCurrentColorHolder
                                 label.groupCurrentColor Current Colour
                                 div.groupCurrentColorBlock(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")

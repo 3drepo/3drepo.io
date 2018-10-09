@@ -19,14 +19,16 @@ div.viewpointsContainer
             ng-repeat="viewpoint in vm.viewpointsToShow track by $index")
 
             div.viewpointMain(layout="row")
-                img.viewpointThumbnail(ng-src="{{viewpoint.screenshot.thumbnailUrl}}")
+                img.viewpointThumbnail(ng-src="{{viewpoint.screenshot.thumbnailUrl}}" alt="")
                 div(flex, layout="column" layout-align="start")
                     div(
                         ng-if="vm.editSelectedView._id !== viewpoint._id").viewpointName {{viewpoint.name || "(Unnamed View)"}}
+                    label(style="visibility:hidden") Viewpoint Text
                     textarea.viewpointName(
                         ng-model="vm.editSelectedView.name"
                         maxlength="{{vm.viewpointNameMaxlength}}"
-                        ng-if="vm.editSelectedView._id === viewpoint._id")
+                        ng-if="vm.editSelectedView._id === viewpoint._id"
+                        title="Viewpoint Text")
 
             div.viewpointEnterHolder(
                 ng-click="vm.editView(viewpoint)"
@@ -75,7 +77,7 @@ div.viewpointsContainer
             div.openedViewColorBar(style="background-color: {{vm.getViewRGBAColor(vm.selectedView)}};")
             div(layout="column" flex)
                 md-input-container
-                    label View Name
+                    label(for="viewpointName") View Name
                     input#viewpointName(
                         type="text"
                         ng-required
