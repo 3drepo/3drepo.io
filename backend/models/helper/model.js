@@ -76,7 +76,8 @@ function convertToErrorCode(bouncerErrorCode) {
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM,
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX,
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION,
-		responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED
+		responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED,
+		responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED
 
 	];
 
@@ -1737,7 +1738,7 @@ const acceptedFormat = [
 	"bvh","irrmesh","irr","q3d","q3s","b3d",
 	"dae","ter","csm","3d","lws","xml","ogex",
 	"ms3d","cob","scn","blend","pk3","ndo",
-	"ifc","xgl","zgl","fbx","assbin", "bim"
+	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn"
 ];
 
 module.exports = {
