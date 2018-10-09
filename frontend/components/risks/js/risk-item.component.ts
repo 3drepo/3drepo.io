@@ -64,7 +64,6 @@ class RiskItemController implements ng.IController {
 	private pinDisabled: boolean;
 	private editingDescription: boolean;
 	private clearPin: boolean;
-	private activities: any[];
 	private categories: any[];
 	private likelihoods: any[];
 	private consequences: any[];
@@ -136,11 +135,6 @@ class RiskItemController implements ng.IController {
 		this.editingDescription = false;
 		this.clearPin = false;
 
-		this.activities = [
-			{value: "cleaning_and_maintenance", label: "Cleaning and maintenance"},
-			{value: "replacement", label: "Replacement"},
-			{value: "", label: "UNSET"}
-		];
 		this.categories = [
 			{value: "health_material_effect", label: "Health - Material effect"},
 			{value: "health_mechanical_effect", label: "Health - Mechanical effect"},
@@ -179,10 +173,11 @@ class RiskItemController implements ng.IController {
 			{value: 4, label: "Very High"}
 		];
 		this.statuses = [
+			{value: "", label: "Unmitigated"},
 			{value: "proposed", label: "Proposed"},
-			{value: "approved", label: "Approved"},
-			{value: "accepted", label: "Accepted"},
-			{value: "", label: "UNSET"}
+			{value: "agreed_partial", label: "Agreed (Partial)"},
+			{value: "agreed_fully", label: "Agreed (Fully)"},
+			{value: "rejected", label: "Rejected"}
 		];
 
 		this.actions = {
@@ -271,7 +266,7 @@ class RiskItemController implements ng.IController {
 			"vm.riskData.level_of_risk",
 			"vm.riskData.mitigation_status"
 		], () => {
-			if (this.riskData && this.isRiskDataChanged()) {
+			if (this.riskData && this.canSubmitUpdateRisk()) {
 				this.updateRisk();
 			}
 		});
@@ -382,7 +377,7 @@ class RiskItemController implements ng.IController {
 	public canSubmitUpdateRisk() {
 		return this.isRiskDataChanged() &&
 			this.risksService.canSubmitUpdateRisk(
-			this.riskData,
+			this.savedData,
 			this.userJob,
 			this.modelSettings.permissions
 		);
