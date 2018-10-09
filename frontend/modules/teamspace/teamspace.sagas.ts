@@ -21,7 +21,8 @@ import { get } from 'lodash';
 import * as API from '../../services/api';
 import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
 import { selectCurrentUser } from './teamspace.selectors';
-import { DialogActions } from '../dialog/dialog.redux';
+import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
 
 export function* fetchUser({ username }) {
 	try {
@@ -47,6 +48,7 @@ export function* updateUser({ userData }) {
 		const { username } = yield select(selectCurrentUser);
 		yield API.updateUser(username, userData);
 		yield put(TeamspaceActions.updateUserSuccess(userData));
+		yield put(SnackbarActions.show('Profile updated'));
 		yield put(TeamspaceActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'user', e.response));
