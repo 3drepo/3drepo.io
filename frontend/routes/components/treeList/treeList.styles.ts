@@ -16,5 +16,29 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+  overflow: hidden;
+  border-bottom: 1px solid ${COLOR.BLACK_6};
+  background: ${(props: any) => props.active ? 'transparent' : COLOR.WHITE};
+  transition: background 150ms ease-in-out;
+`;
+
+export const Headline = styled.div`
+  cursor: pointer;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 24px;
+
+  &:hover {
+    background: ${COLOR.WHITE};
+  }
+`;
+
+export const Details = styled.div`
+  transition: all 200ms ease-in-out;
+  height: ${(props: any) => props.active ? props.maxHeight : 0};
+`;
