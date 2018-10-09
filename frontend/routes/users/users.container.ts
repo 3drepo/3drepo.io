@@ -32,7 +32,8 @@ import { selectJobs } from '../../modules/jobs';
 const mapStateToProps = createStructuredSelector({
 	usersSuggestions: selectUsersSuggestions,
 	users: selectUsers,
-	jobs: selectJobs
+	jobs: selectJobs,
+	limit: selectUsersLimit
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
