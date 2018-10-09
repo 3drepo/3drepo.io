@@ -17,10 +17,12 @@
 
 import * as React from 'react';
 import { isEqual, pick, omit } from 'lodash';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
 
 import {
-	Form,
+	FormContainer,
 	Headline,
 	StyledDropzone,
 	DropzoneMessage,
@@ -32,7 +34,18 @@ import {
 	StyledButton
 } from '../profile.styles';
 
-import { evaluatePassword } from '../../../services/passwordValidation';
+import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../services/passwordValidation';
+import { memoize } from 'lodash';
+
+const PasswordChangeSchema = Yup.object().shape({
+	oldPassword: schema.password.min(0),
+	newPassword: schema.password
+		.differentThan(
+			Yup.ref('oldPassword'),
+			'New password should be different than old password'
+		)
+		.strength(1, 'This password is weak')
+});
 
 interface IProps {
 	onPasswordChange: (passwords) => void;
@@ -41,75 +54,81 @@ interface IProps {
 interface IState {
 	oldPassword: string;
 	newPassword: string;
-	newPasswordValid: boolean;
-	newPasswordMessage: string;
+	newPasswordStrengthMessage: string;
 }
 
 export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		oldPassword: '',
 		newPassword: '',
-		newPasswordValid: true,
-		newPasswordMessage: ''
+		newPasswordStrengthMessage: ''
 	};
 
 	public handlePasswordUpdate = () => {
 		this.props.onPasswordChange(this.state);
 	}
 
-	public createDataHandler = (field) => (event) => {
-		const value = event.target.value;
-		this.setState({ [field]: value });
-
-		if (field === 'newPassword') {
-			evaluatePassword(value).then(({ validPassword, comment }) => {
-				this.setState({
-					newPasswordMessage: comment,
-					newPasswordValid: value.length > 1 && validPassword
-				});
+	public handleNewPasswordChange = (onChange) => (event, ...params) => {
+		const password = event.target.value;
+		getPasswordStrength(password).then((strength) => {
+			this.setState({
+				newPasswordStrengthMessage: password.length > 7 ? ` (${getPasswordStrengthMessage(strength)})` : ''
 			});
-		}
+		});
+
+		onChange(event, ...params);
 	}
 
 	public render() {
-		const { oldPassword, newPassword, newPasswordValid, newPasswordMessage } = this.state;
-		const isValidPassword = oldPassword && newPassword && oldPassword !== newPassword && newPasswordValid;
-
 		return (
-			<Form container direction="column">
-				<Headline color="primary" variant="subheading">Password settings</Headline>
-				<FieldsRow container wrap="nowrap">
-					<StyledTextField
-						value={oldPassword}
-						label="Old password"
-						margin="normal"
-						required
-						type="password"
-						onChange={this.createDataHandler('oldPassword')}
-					/>
+			<Formik
+				initialValues={{oldPassword: '', newPassword: ''}}
+				validationSchema={PasswordChangeSchema}
+				onSubmit={this.handlePasswordUpdate}
+			>
+				<Form>
+					<FormContainer container direction="column">
+						<Headline color="primary" variant="subheading">Password settings</Headline>
+						<FieldsRow container wrap="nowrap">
+							<Field name="oldPassword" render={({ field, form }) => (
+								<StyledTextField
+									{...field}
+									error={Boolean(form.touched.oldPassword && form.errors.oldPassword)}
+									helperText={form.touched.oldPassword && (form.errors.oldPassword || '')}
+									label="Old password"
+									margin="normal"
+									required
+									type="password"
+								/>
+							)} />
 
-					<StyledTextField
-						value={newPassword}
-						label={`New password `}
-						margin="normal"
-						error={!newPasswordValid}
-						helperText={newPasswordMessage || ''}
-						required
-						type="password"
-						onChange={this.createDataHandler('newPassword')}
-					/>
-				</FieldsRow>
+							<Field name="newPassword" render={({ field, form }) => (
+								<StyledTextField
+									{...field}
+									error={Boolean(form.touched.newPassword && form.errors.newPassword)}
+									helperText={form.touched.newPassword && (form.errors.newPassword || '')}
+									label={`New password${this.state.newPasswordStrengthMessage}`}
+									margin="normal"
+									required
+									type="password"
+									onChange={this.handleNewPasswordChange(field.onChange)}
+								/>
+							)} />
+						</FieldsRow>
 
-				<StyledButton
-					onClick={this.handlePasswordUpdate}
-					color="secondary"
-					variant="raised"
-					disabled={!isValidPassword}
-					type="submit"
-				>
-					Update password
-					</StyledButton>
-			</Form>
+						<Field render={({ form }) => (
+							<StyledButton
+								color="secondary"
+								variant="raised"
+								disabled={!form.isValid || form.isValidating}
+								type="submit"
+							>
+								Update password
+							</StyledButton>
+						)} />
+					</FormContainer>
+				</Form>
+			</Formik>
 		);
 	}
 }

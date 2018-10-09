@@ -20,7 +20,7 @@ import { isEqual, pick, omit } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 
 import {
-	Form,
+	FormContainer,
 	Headline,
 	StyledDropzone,
 	DropzoneMessage,
@@ -103,7 +103,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		const isValidUserData = this.isUserDataValid(this.state, this.props);
 
 		return (
-			<Form container direction="column">
+			<FormContainer container direction="column">
 				<Headline color="primary" variant="subheading">Basic information</Headline>
 				<Grid container direction="row" wrap="nowrap">
 					<StyledDropzone
@@ -160,7 +160,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 				>
 					Update profile
 				</StyledButton>
-			</Form>
+			</FormContainer>
 		);
 	}
 }

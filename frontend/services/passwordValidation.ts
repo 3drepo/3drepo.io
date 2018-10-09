@@ -14,10 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import * as Yup from 'yup';
 
-const getPasswordEvalMessage = (score: number) => {
-	const scoreMapping = ['Very Weak', 'Weak', 'OK', 'Strong', 'Very Strong'];
-	return score >= scoreMapping.length ? 'Very Strong' : scoreMapping[score];
+const VALIDATIONS_MESSAGES = {
+	REQUIRED: 'This field is required',
+	TOO_SHORT_STRING: 'Must be at least ${min} characters',
+	TOO_LONG_STRING: 'Must be at most ${max} characters'
 };
 
 const loadPasswordLibrary = () => new Promise((resolve) => {
@@ -35,6 +37,73 @@ const loadPasswordLibrary = () => new Promise((resolve) => {
 	}
 });
 
+// TODO: Should be changed to dynamic import if app is fully migrated
+export const getPasswordStrength = (password) => loadPasswordLibrary().then((zxcvbn: any) => zxcvbn(password).score);
+
+/*
+	Custom validators
+*/
+function differentThan(ref: any, message: any) {
+	return this.test({
+		name: 'differentThan',
+		exclusive: false,
+		message: message || '${path} must be the different than ${reference}',
+		params: {
+			reference: ref.path
+		},
+		test(value: any) {
+			return value !== this.resolve(ref);
+		}
+	});
+}
+
+function strength(requiredValue: any, message: any) {
+	return this.test({
+		name: 'strength',
+		exclusive: false,
+		message: message || '${path} is too weak',
+		async test(value: any) {
+			// TODO: Should be changed to dynamic import if app is fully migrated
+			const result = await getPasswordStrength(value);
+			return result > requiredValue;
+		}
+	});
+}
+
+Yup.addMethod(Yup.string, 'differentThan', differentThan);
+Yup.addMethod(Yup.string, 'strength', strength);
+
+/*
+	Validation schemas
+*/
+export const schema = {
+	firstName: Yup.string()
+		.min(2, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
+		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
+	lastName: Yup.string().ensure()
+		.min(2, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
+		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
+	email: Yup.string().ensure()
+		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.email('Invalid email')
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
+	password: Yup.string()
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
+		.ensure()
+		.min(8, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
+		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+};
+
+export const getPasswordStrengthMessage = (score: number) => {
+	const scoreMapping = ['Very Weak', 'Weak', 'OK', 'Strong', 'Very Strong'];
+	return score >= scoreMapping.length ? 'Very Strong' : scoreMapping[score];
+};
+
 export const evaluatePassword = (password: string) => new Promise((resolve) => {
 	if (password.length < 8) {
 		resolve({
@@ -43,13 +112,11 @@ export const evaluatePassword = (password: string) => new Promise((resolve) => {
 		});
 	}
 
-	// TODO: Should be changed to dynamic import if app is fully migrated
-	loadPasswordLibrary().then((zxcvbn: any) => {
-		const strength = zxcvbn(password).score;
+	getPasswordStrength(password).then((strengthValue) => {
 		resolve({
-			validPassword: zxcvbn(password).score > 1,
-			comment: getPasswordEvalMessage(strength),
-			strength
+			validPassword: strengthValue > 1,
+			comment: getPasswordStrengthMessage(strengthValue),
+			strength: strengthValue
 		});
 	});
 });

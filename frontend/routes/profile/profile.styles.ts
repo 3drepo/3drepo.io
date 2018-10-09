@@ -28,7 +28,7 @@ import { Panel } from '../components/panel/panel.component';
 
 export const Headline = styled(Typography)``;
 
-export const Form = styled(Grid)`
+export const FormContainer = styled(Grid)`
 	padding: 24px;
 
 	&:not(:first-child) {
