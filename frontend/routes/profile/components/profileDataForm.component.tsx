@@ -57,8 +57,6 @@ const ProfileSchema = Yup.object().shape({
 	email: schema.email
 });
 
-const EDITABLE_FIELDS = ['firstName', 'lastName', 'email'];
-
 export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		uploadedAvatar: {}
@@ -71,8 +69,8 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleProfileUpdate = () => {
-		this.props.onUserDataChange(pick(this.state, EDITABLE_FIELDS));
+	public handleProfileUpdate = (values) => {
+		this.props.onUserDataChange(values);
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
