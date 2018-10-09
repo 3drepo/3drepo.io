@@ -64,7 +64,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 	private popperNode = null;
 
 	public handleChange = (field) => (event) => {
-		this.setState({[field]: event.target.value || ''});
+		this.setState({[field]: event.target.value || ''} as any);
 	}
 
 	public handlePermissionsChange = (event, isAdmin) => {

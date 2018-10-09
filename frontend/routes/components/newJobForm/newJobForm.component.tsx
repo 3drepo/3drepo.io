@@ -48,7 +48,7 @@ export class NewJobForm extends React.PureComponent<IProps, IState> {
 	};
 
 	public handleChange = (field) => (value) => {
-		this.setState({[field]: value});
+		this.setState({[field]: value} as any);
 	}
 
 	public handleSave = () => {

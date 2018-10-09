@@ -14,6 +14,17 @@ declare global {
 		requestIdleCallback: any;
 		__REDUX_DEVTOOLS_EXTENSION__: any;
 	}
-}
 
+	interface Document {
+		webkitCancelFullScreen: () => void;
+	}
+
+	interface Document {
+		webkitCancelFullScreen: () => void;
+	}
+
+	interface HTMLElement {
+		webkitRequestFullscreen: () => void;
+	}
+}
 export {};
