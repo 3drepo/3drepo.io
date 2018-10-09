@@ -64,17 +64,19 @@ const TABS = {
 	}
 };
 
+const ADMIN_TABS = [TABS_TYPES.USERS, TABS_TYPES.JOBS] as any;
+
 interface IProps {
 	location: any;
 	history: any;
 	defaultTeamspace: string;
 	teamspaces: any[];
 	isLoadingTeamspace: boolean;
+	isTeamspaceAdmin: boolean;
 	onTeamspaceChange: (teamspace) => void;
 }
 
 interface IState {
-	isTeamspaceAdmin: boolean;
 	activeTab: number;
 	selectedTeamspace: string;
 	teamspacesItems: any[];
@@ -83,14 +85,15 @@ interface IState {
 export class UserManagement extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps, prevState) => {
 		const queryParams = queryString.parse(location.search);
+		const activeTab = Number(queryParams.tab || prevState.activeTab);
+
 		return {
-			activeTab: Number(queryParams.tab || prevState.activeTab),
+			activeTab: nextProps.isTeamspaceAdmin ? activeTab : TABS_TYPES.PROJECTS,
 			selectedTeamspace: queryParams.teamspace || prevState.selectedTeamspace
 		};
 	}
 
 	public state = {
-		isTeamspaceAdmin: true,
 		activeTab: TABS_TYPES.USERS,
 		selectedTeamspace: '',
 		teamspacesItems: []
@@ -118,12 +121,14 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const {teamspaces, defaultTeamspace, location} = this.props;
 		const selectedTeamspace = queryString.parse(location.search).teamspace;
-		this.setState({
+		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
-		});
+		} as any;
 
-		const hasProperTeamspace = teamspaces.find(({ account }) => account === selectedTeamspace);
-		const teamspace = hasProperTeamspace ? selectedTeamspace : defaultTeamspace;
+		const teamspaceData = teamspaces.find(({ account }) => account === selectedTeamspace);
+		const teamspace = teamspaceData ? selectedTeamspace : defaultTeamspace;
+
+		this.setState(changes);
 		this.onTeamspaceChange(teamspace);
 	}
 
@@ -141,7 +146,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderTabContent = (props) => {
-		const {isLoadingTeamspace} = this.props;
+		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
 		const {activeTab, selectedTeamspace} = this.state;
 
 		if (!selectedTeamspace) {
@@ -157,6 +162,10 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			);
 		}
 
+		if (ADMIN_TABS.includes(activeTab) && !isTeamspaceAdmin) {
+			return <TextOverlay content="Not allowed to access this page" />;
+		}
+
 		return (
 			<>
 				{ activeTab === TABS_TYPES.USERS && <Users /> }
@@ -167,8 +176,8 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {isLoadingTeamspace, teamspaces} = this.props;
-		const {isTeamspaceAdmin, activeTab, selectedTeamspace, teamspacesItems} = this.state;
+		const {isLoadingTeamspace, teamspaces, isTeamspaceAdmin} = this.props;
+		const {activeTab, selectedTeamspace, teamspacesItems} = this.state;
 
 		return (
 			<MuiThemeProvider theme={theme}>

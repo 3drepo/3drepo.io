@@ -71,3 +71,7 @@ export const selectExtendedModelPermissions = createSelector(
 	selectModelsPermissions,
 	getExtendedModelPermissions
 );
+
+export const selectIsTeamspaceAdmin = createSelector(
+	selectUserManagementDomain, (state) => state.isTeamspaceAdmin
+);

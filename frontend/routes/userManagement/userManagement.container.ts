@@ -21,7 +21,13 @@ import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { UserManagement } from './userManagement.component';
-import { UserManagementActions, selectCurrentTeamspace, selectIsPending } from '../../modules/userManagement';
+import {
+	UserManagementActions,
+	selectCurrentTeamspace,
+	selectIsPending,
+	selectIsTeamspaceAdmin
+} from '../../modules/userManagement';
+
 import {
 	selectTeamspacesWithAdminAccess,
 	selectCurrentUser,
@@ -32,6 +38,7 @@ const mapStateToProps = createStructuredSelector({
 	defaultTeamspace: selectDefaultTeamspace,
 	selectedTeamspace: selectCurrentTeamspace,
 	teamspaces: selectTeamspacesWithAdminAccess,
+	isTeamspaceAdmin: selectIsTeamspaceAdmin,
 	isLoadingTeamspace: selectIsPending
 });
 
