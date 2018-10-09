@@ -58,8 +58,9 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 		newPasswordStrengthMessage: ''
 	};
 
-	public handlePasswordUpdate = () => {
-		this.props.onPasswordChange(this.state);
+	public handlePasswordUpdate = (values, { resetForm }) => {
+		this.props.onPasswordChange(values);
+		resetForm();
 	}
 
 	public handleNewPasswordChange = (onChange) => (event, ...params) => {

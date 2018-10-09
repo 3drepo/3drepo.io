@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { pick, omit, isEqual } from 'lodash';
+import { pick } from 'lodash';
 import Dropzone from 'react-dropzone';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
