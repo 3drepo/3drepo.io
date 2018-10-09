@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEqual, pick, omit } from 'lodash';
+import { pick } from 'lodash';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
@@ -75,19 +75,6 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		this.props.onUserDataChange(pick(this.state, EDITABLE_FIELDS));
 	}
 
-	public isUserDataValid(newData, previousData) {
-		return !isEqual(pick(newData, EDITABLE_FIELDS), pick(previousData, EDITABLE_FIELDS)) && newData.email;
-	}
-
-	public createDataHandler = (field) => (event) => {
-		this.setState({ [field]: event.target.value });
-	}
-
-	public componentDidMount() {
-		const userData = pick(this.props, [...EDITABLE_FIELDS, 'avatarUrl']) as IState;
-		this.setState(userData);
-	}
-
 	public componentDidUpdate(prevProps, prevState) {
 		if (this.props.avatarUrl !== prevProps.avatarUrl) {
 			this.setState({ uploadedAvatar: {} });
@@ -98,8 +85,6 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		const { firstName, lastName, email, username, avatarUrl, isAvatarPending } = this.props;
 		const { uploadedAvatar } = this.state as IState;
 		const previewProps = { src: uploadedAvatar.preview || avatarUrl } as any;
-
-		const isValidUserData = this.isUserDataValid(this.state, this.props);
 
 		return (
 			<Formik
