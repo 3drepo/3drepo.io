@@ -88,15 +88,16 @@ export const schema = {
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
 	email: Yup.string().ensure()
-		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
-		.email('Invalid email')
+		.min(3, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
+		.max(254, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.email('This email address is invalid')
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
 	password: Yup.string()
 		.required(VALIDATIONS_MESSAGES.REQUIRED)
 		.ensure()
 		.min(8, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
-		.max(50, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.max(128, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 };
 
 export const getPasswordStrengthMessage = (score: number) => {

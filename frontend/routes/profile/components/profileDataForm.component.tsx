@@ -17,7 +17,11 @@
 
 import * as React from 'react';
 import { isEqual, pick, omit } from 'lodash';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
+
+import { schema } from '../../../services/passwordValidation';
 
 import {
 	FormContainer,
@@ -41,27 +45,22 @@ interface IProps {
 	isAvatarPending: boolean;
 	onAvatarChange: (file) => void;
 	onUserDataChange: (userData) => void;
-	validationErrors: any;
 }
 
 interface IState {
-	firstName?: string;
-	lastName?: string;
-	avatarUrl?: string;
-	username: string;
-	email: string;
 	uploadedAvatar: any;
 }
+
+const ProfileSchema = Yup.object().shape({
+	firstName: schema.firstName,
+	lastName: schema.lastName,
+	email: schema.email
+});
 
 const EDITABLE_FIELDS = ['firstName', 'lastName', 'email'];
 
 export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 	public state = {
-		firstName: '',
-		lastName: '',
-		avatarUrl: '',
-		username: '',
-		email: '',
 		uploadedAvatar: {}
 	};
 
@@ -96,71 +95,89 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { username, avatarUrl, isAvatarPending } = this.props;
-		const { firstName, lastName, email, uploadedAvatar } = this.state as IState;
+		const { firstName, lastName, email, username, avatarUrl, isAvatarPending } = this.props;
+		const { uploadedAvatar } = this.state as IState;
 		const previewProps = { src: uploadedAvatar.preview || avatarUrl } as any;
 
 		const isValidUserData = this.isUserDataValid(this.state, this.props);
 
 		return (
-			<FormContainer container direction="column">
-				<Headline color="primary" variant="subheading">Basic information</Headline>
-				<Grid container direction="row" wrap="nowrap">
-					<StyledDropzone
-						disabled={isAvatarPending}
-						accept=".gif,.jpg,.png"
-						onDrop={this.handleAvatarUpdate}
-					>
-						<DropzoneContent>
-							{isAvatarPending ? <DropzoneProgress size={108} thickness={1} /> : null}
-							{previewProps.src ? <DropzonePreview {...previewProps} /> : null}
-							<DropzoneMessage>+</DropzoneMessage>
-						</DropzoneContent>
-					</StyledDropzone>
-					<Grid container direction="column">
-						<FieldsRow container wrap="nowrap">
-							<StyledTextField
-								value={firstName}
-								required
-								label="First name"
-								margin="normal"
-								onChange={this.createDataHandler('firstName')}
-							/>
-							<StyledTextField
-								required
-								value={lastName}
-								label="Last name"
-								margin="normal"
-								onChange={this.createDataHandler('lastName')}
-							/>
-						</FieldsRow>
-						<FieldsRow container wrap="nowrap">
-							<StyledTextField
-								value={username}
-								label="Username"
-								margin="normal"
-								disabled={true}
-							/>
-							<StyledTextField
-								value={email}
-								label="Email"
-								margin="normal"
-								required
-								onChange={this.createDataHandler('email')}
-							/>
-						</FieldsRow>
-					</Grid>
-				</Grid>
-				<StyledButton
-					onClick={this.handleProfileUpdate}
-					color="secondary"
-					variant="raised"
-					disabled={!isValidUserData}
-					type="submit"
-				>
-					Update profile
-				</StyledButton>
-			</FormContainer>
+			<Formik
+				initialValues={{firstName, lastName, email}}
+				validationSchema={ProfileSchema}
+				onSubmit={this.handleProfileUpdate}
+			>
+				<Form>
+					<FormContainer container direction="column">
+						<Headline color="primary" variant="subheading">Basic information</Headline>
+						<Grid container direction="row" wrap="nowrap">
+							<StyledDropzone
+								disabled={isAvatarPending}
+								accept=".gif,.jpg,.png"
+								onDrop={this.handleAvatarUpdate}
+							>
+								<DropzoneContent>
+									{isAvatarPending ? <DropzoneProgress size={108} thickness={1} /> : null}
+									{previewProps.src ? <DropzonePreview {...previewProps} /> : null}
+									<DropzoneMessage>+</DropzoneMessage>
+								</DropzoneContent>
+							</StyledDropzone>
+							<Grid container direction="column">
+								<FieldsRow container wrap="nowrap">
+									<Field name="firstName" render={({ field, form }) => (
+										<StyledTextField
+											{...field}
+											error={Boolean(form.errors.firstName)}
+											helperText={form.errors.firstName}
+											required
+											label="First name"
+											margin="normal"
+										/>
+									)} />
+									<Field name="lastName" render={({ field, form }) => (
+										<StyledTextField
+											{...field}
+											error={Boolean(form.errors.lastName)}
+											helperText={form.errors.lastName}
+											required
+											label="Last name"
+											margin="normal"
+										/>
+									)} />
+								</FieldsRow>
+								<FieldsRow container wrap="nowrap">
+									<StyledTextField
+										value={username}
+										label="Username"
+										margin="normal"
+										disabled={true}
+									/>
+									<Field name="email" render={({ field, form }) => (
+										<StyledTextField
+											{...field}
+											error={Boolean(form.errors.email)}
+											helperText={form.errors.email}
+											label="Email"
+											margin="normal"
+											required
+										/>
+									)} />
+								</FieldsRow>
+							</Grid>
+						</Grid>
+						<Field render={({ form }) => (
+							<StyledButton
+								color="secondary"
+								variant="raised"
+								disabled={!form.isValid || form.isValidating}
+								type="submit"
+							>
+								Update profile
+							</StyledButton>
+						)} />
+					</FormContainer>
+				</Form>
+			</Formik>
 		);
 	}
 }

@@ -35,7 +35,6 @@ import {
 } from '../profile.styles';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../services/passwordValidation';
-import { memoize } from 'lodash';
 
 const PasswordChangeSchema = Yup.object().shape({
 	oldPassword: schema.password.min(0),
@@ -52,15 +51,11 @@ interface IProps {
 }
 
 interface IState {
-	oldPassword: string;
-	newPassword: string;
 	newPasswordStrengthMessage: string;
 }
 
 export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	public state = {
-		oldPassword: '',
-		newPassword: '',
 		newPasswordStrengthMessage: ''
 	};
 
