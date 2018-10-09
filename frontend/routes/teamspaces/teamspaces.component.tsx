@@ -68,7 +68,7 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 				name={props.name}
 				items={[]}
 				renderRoot={() => (<TreeListItem name={props.name} />)}
-				render={this.renderModel}
+				renderItem={this.renderModel}
 			/>
 		);
 	}
@@ -86,31 +86,30 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 			<TreeList
 				key={props.key}
 				name={props.name}
-				items={items}
-				renderRoot={() => (<TreeListItem name={props.name} />)}
-				render={this.renderModel}
+				items={[]/*  items */}
+				renderRoot={() => (<TreeListItem name={`project: ${props.name}`} />)}
+				renderItem={this.renderModel}
 			/>
 		);
 	}
 
-	public renderTeamspace = (props) => {
-		return (
-			<TreeList
-				key={props.key}
-				items={props.projects}
-				renderRoot={() => (<TreeListItem name={props.name} />)}
-				render={this.renderProject}
-			/>
-		);
+	public renderTeamspaces = (teamspaces) => {
+		return teamspaces.map((teamspace, index) => {
+			return (
+				<TreeList
+					key={index}
+					items={teamspace.projects}
+					renderRoot={() => (<TreeListItem name={`teamspace: ${teamspace.account}`} />)}
+					renderItem={this.renderProject}
+				/>
+			);
+		});
 	}
 
 	public render() {
 		return (
 			<Panel {...PANEL_PROPS}>
-				<TreeList
-					items={this.props.teamspaces}
-					render={this.renderTeamspace}
-				/>
+				{this.renderTeamspaces(this.props.teamspaces)}
 			</Panel>
 		);
 	}
