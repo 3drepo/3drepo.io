@@ -31,32 +31,49 @@ const types = {
 const NOTIFICATIONS_DB = "notifications";
 const MODELS_COLL = "settings";
 
-const generateNotification = function(teamSpace, modelId, type, data) {
-	return {_id:utils.stringToUUID(uuid.v1()), read:false, teamSpace, modelId, type, data };
+const generateNotification = function(type, data) {
+	const timestamp = (new Date()).getTime();
+	return Object.assign({_id:utils.stringToUUID(uuid.v1()), read:false, type, timestamp}, data);
+};
+
+const uniqArrayMerger = function(objValue, srcValue) {
+	if (_.isArray(objValue)) {
+		return _.uniq(objValue.concat(srcValue));
+	}
 };
 
 /**
- * Fills out the models name and extra data for the  modelids passed throigh parameter.
- * It receives and object < string as teamspaceName : < string as modelId : Object > >
- * Return an object with the format < string as teamspaceName : < string as modelId : <..., name:string> > >
- * @param {Object} teamSpaces an object witch keys are teamspaces ids and values are an object witch keys are modelids
+ * Extract the teamspaceId/modelId info from an array of notifications
+ *
+ * @param {Notification[]} notifications The array of notifications which the data willl be extracted
+ * @returns {{keys..:Array<string>}} An object which keys are teamspaceId and an array of modelsIds as value
+ */
+const extractTeamSpaceInfo = function(notifications) {
+	return _.mapValues(_.groupBy(notifications, "teamSpace"), (notification) => _.map(notification, v => v.modelId));
+};
+
+/**
+ * Fills out the models name and extra data for the  modelids passed through parameter.
+ * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an object witch keys are modelids
  * @returns {Object} which contains the models data
   */
 const getModelsData = function(teamSpaces) {
 	return Promise.all(
-		_.map(teamSpaces, (val, key) => {
-			const ACCOUNT_DB = key;
-			const modelsIds = _.chain(val).map("modelId").uniq().value();
+		Object.keys(teamSpaces).map(ACCOUNT_DB => {
+			const modelsIds = teamSpaces[ACCOUNT_DB];
 
 			return db.getCollection(ACCOUNT_DB, MODELS_COLL)
 				.then(collection => collection.find({_id: {$in:modelsIds}}).toArray())
 				.then(models => {
-					const obj = {};
-					obj[ACCOUNT_DB] =  _.chain(models).groupBy("_id").mapValues(v => v[0]).value();
-					return obj;
+					const res = {};
+					const indexedModels = models.reduce((ac,c) => {
+						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+					} ,{});
+					res[ACCOUNT_DB] = indexedModels;
+					return res;
 				});
 		})
-	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing)
+	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
 };
 
 module.exports = {
@@ -66,22 +83,50 @@ module.exports = {
 	 * Creates a notification in the database
 	 *
 	 * @param {string} username The username of the account thats's gonna receive the notification
-	 * @param {string} teamSpace The teamspace that is related to this notification
-	 * @param {string} modelId The modelId that is related to this notification
 	 * @param {string} type	The type of notification: should be one of the notifications that is in the types constants
 	 * @param {Object} data The particular data for notification. should be relevant data for the particular type of notification.
 	 * @returns {Promise} Returns a promise with the recently created notification
 	 */
-	insertNotification: function(username, teamSpace, modelId, type, data) {
+	insertNotification: function(username, type, data) {
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
-			collection.insertOne(generateNotification(teamSpace, modelId, type, data))
+			collection.insertOne(generateNotification(type, data))
 		).then((o) => utils.changeObjectIdToString(o.ops[0]));
 	},
 
+	updateNotification: function(username, _id, data) {
+		const timestamp = (new Date()).getTime();
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
+			collection.update({ _id }, { $set: Object.assign(data,{read:false,timestamp})})
+		).then(() => timestamp);
+	},
+
+	upsertNotification: function(username, data, type, criteria) {
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
+			collection.find(Object.assign({type},  criteria)).toArray()
+		).then(notifications => {
+			if (notifications.length === 0) {
+				return this.insertNotification(username, type, Object.assign(criteria, data));
+			} else {
+				const n = notifications[0];
+				const mergedData = Object.assign(_.mergeWith(n, data, uniqArrayMerger));
+				return this.updateNotification(username, n._id, mergedData).then((timestamp) => {
+					const notification =  Object.assign(n, mergedData, {read:false,timestamp});
+					return utils.changeObjectIdToString(notification);
+				});
+			}
+		});
+	},
+
+	upsertIssueAssignedtNotification: function(username, teamSpace, modelId, issueId) {
+		const criteria = {teamSpace,  modelId};
+		const data = {issuesId: [issueId] };
+		return this.upsertNotification(username,data,types.ISSUE_ASSIGNED,criteria);
+	},
+
 	/**
-	 * This function is used for creating the assign issue notifications.
+	 * This function is used for upserting the assign issue notifications.
 	 * When someone (username) asigns an issue to a new role this function should be
-	 * called to create the new notifications for every user that has that role, except
+	 * called to create the new notification for every user that has that role or update the one that already exist, except
 	 * for the user that is assigning it
 	 * @param {string} username The username of the user that is actually asigning the issue
 	 * @param {string} teamSpace The teamspace corresponding to the model of the issue
@@ -89,7 +134,7 @@ module.exports = {
 	 * @param {Issue} issue The issue in shich the assignation is happening
 	 * @returns {Promise<Notification[]>} It contains the newly created notifications
 	 */
-	insertIssueAssignedNotifications : function(username, teamSpace, modelId, issue) {
+	upsertIssueAssignedNotifications : function(username, teamSpace, modelId, issue) {
 		const assignedRole = issue.assigned_roles[0];
 		return job.findByJob(teamSpace,assignedRole)
 			.then(rs => {
@@ -107,7 +152,7 @@ module.exports = {
 				const assignedUsers = users.filter(u => u.canWrite).map(u=> u.user);
 				return Promise.all(
 					assignedUsers.map(
-						u => this.insertNotification(u, teamSpace, modelId, this.types.ISSUE_ASSIGNED, {id:issue._id})
+						u => this.upsertIssueAssignedtNotification(u, teamSpace, modelId, issue._id)
 					)
 				);
 			});
@@ -122,10 +167,10 @@ module.exports = {
 	getNotifications: function(username) {
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find().toArray())
 			.then((notifications) => {
-				const teamSpaces = _.groupBy(notifications, "teamSpace");
-
+				const teamSpaces = extractTeamSpaceInfo(notifications);
 				return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
-					return _.map(notifications,(notification) => {
+
+					return notifications.map(notification => {
 						const teamSpace = (modelsData[notification.teamSpace] || {});
 						const modelName = (teamSpace[notification.modelId] || {}).name;
 

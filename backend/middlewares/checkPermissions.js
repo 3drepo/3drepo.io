@@ -56,7 +56,7 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 			}
 		);
 
-		userPermissions = _.unique(impliedPerms);
+		userPermissions = _.uniq(impliedPerms);
 
 		function hasRequiredPermissions(perms) {
 			return _.difference(perms, userPermissions).length === 0;

@@ -41,7 +41,7 @@ module.exports = {
 		}
 
 		if (!isCommentModification && isIssueAssignation(oldIssue, issue)) {
-			notification.insertIssueAssignedNotifications(username, teamspace, modelId, issue)
+			notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue)
 				.then(() => next());
 		} else {
 			next();

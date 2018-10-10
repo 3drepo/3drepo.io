@@ -31,7 +31,7 @@ export interface INotification {
 	type: string;
 	read: boolean;
 	modelName: string;
-	data: { id?: string[] };
+	issuesId: string[];
 }
 
 export class NotificationItem extends React.PureComponent<INotification, any> {
@@ -39,11 +39,11 @@ export class NotificationItem extends React.PureComponent<INotification, any> {
 		return (
 			<ListItem>
 					<Avatar>
-						<Icon>assignment</Icon>
+						<Icon>place</Icon>
 					</Avatar>
 					<ListItemText
-						primary={`Assigned Issue from ${this.props.modelName}`}
-						secondary={ `you have ${this.props.data.id.length} issue assigned`}
+						primary={`${this.props.issuesId.length} assigned issues `}
+						secondary={ `In ${this.props.modelName}`}
 					/>
 			</ListItem>
 		);
