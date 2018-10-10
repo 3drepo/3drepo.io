@@ -17,17 +17,9 @@
 
 import styled from 'styled-components';
 import Icon from '@material-ui/core/Icon';
+import Grid from '@material-ui/core/Grid';
 
 import { COLOR } from '../../../styles';
-
-export const Container = styled.div`
-  overflow: hidden;
-  border-bottom: 1px solid ${COLOR.BLACK_6};
-  background: ${(props: any) => props.active ? COLOR.WHITE : 'rgba(250, 250, 250)'};
-  pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
-  transition: background 150ms ease-in-out;
-  color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
-`;
 
 export const Headline = styled.div`
   cursor: pointer;
@@ -35,7 +27,7 @@ export const Headline = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 24px;
+  padding-left: 24px;
 
   &:hover {
     background: ${COLOR.WHITE};
@@ -46,6 +38,23 @@ export const Details = styled.div`
   transition: all 200ms ease-in-out;
   height: ${(props: any) => props.active ? 'auto' : 0};
   box-shadow: 0 12px 35px currentColor;
+`;
+
+export const Container = styled.div`
+  overflow: hidden;
+  border-bottom: 1px solid ${COLOR.BLACK_6};
+  background: ${(props: any) => props.active ? COLOR.WHITE : 'rgba(250, 250, 250)'};
+  pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
+  transition: background 150ms ease-in-out;
+  color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
+
+	& > ${Headline} {
+		padding-left: ${(props: any) => (props.level || 0) * 24}px;
+  }
+`;
+
+export const HeadlineContainer = styled(Grid)`
+  padding-left: 24px;
 `;
 
 export const Title = styled.div`

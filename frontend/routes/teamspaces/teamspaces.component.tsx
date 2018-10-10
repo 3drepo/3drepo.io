@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, groupBy } from 'lodash';
 
 import { Panel } from '../components/panel/panel.component';
 import { TreeList } from '../components/treeList/treeList.component';
@@ -54,35 +54,44 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 	}
 
 	public renderFederation = (props) => {
-		<div>federation</div>
+		return <div key={props.key}>{props.name}</div>;
 	}
 
 	public renderModel = (props) => {
+		return <div key={props.key}>{props.name}</div>;
+	}
+
+	public renderProjectItem = (props) => {
 		return (
 			<TreeList
 				key={props.key}
 				name={props.name}
-				items={[]}
+				level={3}
+				items={props.items}
 				renderItem={this.renderModel}
 			/>
 		);
 	}
 
 	public renderProject = (props) => {
+		const {federations = [], models } = groupBy(props.models, ({federate}) => {
+			return federate ? 'federations' : 'models';
+		});
 		const items = [{
 			name: 'Federations',
-			items: props.fedModels
+			items: federations
 		}, {
 			name: 'Models',
-			items: props.models
+			items: models
 		}];
 
 		return (
 			<TreeList
 				key={props.key}
 				name={props.name}
+				level={2}
 				items={items}
-				renderItem={this.renderModel}
+				renderItem={this.renderProjectItem}
 			/>
 		);
 	}
@@ -93,6 +102,7 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 				<TreeList
 					key={index}
 					name={teamspace.account}
+					level={1}
 					items={teamspace.projects}
 					renderItem={this.renderProject}
 				/>
@@ -103,7 +113,9 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Panel {...PANEL_PROPS}>
-				{this.renderTeamspaces(this.props.teamspaces)}
+				<Container>
+					{this.renderTeamspaces(this.props.teamspaces)}
+				</Container>
 			</Panel>
 		);
 	}
