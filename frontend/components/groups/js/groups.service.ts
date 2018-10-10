@@ -330,6 +330,16 @@ export class GroupsService {
 	}
 
 	/**
+	 * Deletes filtered groups in the current model
+	 * @param teamspace the teamspace name for the group
+	 * @param model the model id for the group
+	 */
+
+	public deleteFilteredGroups(teamspace: string, model: string, filteredGroups: any) {
+		return this.deleteGroups(teamspace, model, filteredGroups);
+	}
+
+	/**
 	 * Deletes all groups in the current model
 	 * @param teamspace the teamspace name for the group
 	 * @param model the model id for the group
