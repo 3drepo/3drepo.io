@@ -17,20 +17,28 @@
 
 import { createMuiTheme } from '@material-ui/core/styles';
 import { COLOR } from './colors';
+import { FONT_WEIGHT } from './fonts';
+import * as mixins from './mixins';
 
-export const theme = createMuiTheme({
+export const theme = {
+	colors: COLOR,
+	fontWeights: FONT_WEIGHT,
+	mixins
+};
+
+export const MuiTheme = createMuiTheme({
 	palette: {
 		primary: {
-			main: '#0C2F54',
-			light: '#3c5876',
-			dark: '#08203a',
-			contrastText: COLOR.WHITE
+			main: theme.colors.PRIMARY_MAIN,
+			light: theme.colors.PRIMARY_LIGHT,
+			dark: theme.colors.PRIMARY_DARK,
+			contrastText: theme.colors.WHITE
 		},
 		secondary: {
-			main: '#06563c',
-			light: '#377763',
-			dark: '#377763',
-			contrastText: COLOR.WHITE
+			main: theme.colors.SECONDARY_MAIN,
+			light: theme.colors.SECONDARY_LIGHT,
+			dark: theme.colors.SECONDARY_DARK,
+			contrastText: theme.colors.WHITE
 		}
 	},
 	overrides: {
@@ -47,20 +55,20 @@ export const theme = createMuiTheme({
 		MuiFormControlLabel: {
 			label: {
 				fontSize: '14px',
-				color: COLOR.BLACK_60
+				color: theme.colors.BLACK_60
 			}
 		},
 		MuiFormLabel: {
 			root: {
 				fontSize: '14px',
-				color: COLOR.BLACK_60
+				color: theme.colors.BLACK_60
 			}
 		},
 		MuiDialogTitle: {
 			root: {
 				background: '#08203a',
 				padding: '15px 24px 15px',
-				color: COLOR.WHITE,
+				color: theme.colors.WHITE,
 				fontSize: '20px'
 			}
 		},
@@ -77,12 +85,21 @@ export const theme = createMuiTheme({
 		MuiSelect: {
 			root: {
 				fontSize: '14px',
-				color: COLOR.BLACK_60
+				color: theme.colors.BLACK_60
 			}
 		},
 		MuiTab: {
 			root: {
 				minWidth: '0 !important'
+			}
+		},
+		MuiSnackbarContent: {
+			root: {
+				backgroundColor: theme.colors.PRIMARY_MAIN,
+				color: theme.colors.WHITE_87
+			},
+			action: {
+				marginRight: '-16px'
 			}
 		}
 	}

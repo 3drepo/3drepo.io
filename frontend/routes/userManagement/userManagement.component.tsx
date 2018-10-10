@@ -22,10 +22,10 @@ import { isEqual, isEmpty, isUndefined } from 'lodash';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 
-import { theme } from '../../styles';
 import Users from '../users/users.container';
 import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';

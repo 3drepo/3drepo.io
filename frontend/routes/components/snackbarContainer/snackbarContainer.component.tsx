@@ -16,8 +16,11 @@
  */
 
 import * as React from 'react';
-
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from 'styled-components';
 import Snackbar from '@material-ui/core/Snackbar';
+
+import { MuiTheme, theme } from '../../../styles';
 import { Container } from './snackbarContainer.styles';
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 
@@ -88,19 +91,23 @@ export class SnackbarContainer extends React.PureComponent<IProps, IState> {
 		const {isOpen, snack} = this.state;
 		const {message, ...snackProps} = snack as any;
 		return (
-			<Snackbar
-				autoHideDuration={2000}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-				onClose={this.handleClose}
-				onExited={this.handleExited}
-				open={isOpen}
-				{...snackProps}
-			>
-				<DefaultSnackbar
-					message={message}
-					onClose={this.handleClose}
-				/>
-			</Snackbar>
+			<ThemeProvider theme={theme}>
+				<MuiThemeProvider theme={MuiTheme}>
+					<Snackbar
+						autoHideDuration={2000}
+						anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+						onClose={this.handleClose}
+						onExited={this.handleExited}
+						open={isOpen}
+						{...snackProps}
+					>
+						<DefaultSnackbar
+							message={message}
+							onClose={this.handleClose}
+						/>
+					</Snackbar>
+				</MuiThemeProvider>
+			</ThemeProvider>
 		);
 	}
 }

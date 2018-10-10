@@ -19,6 +19,7 @@ import * as React from 'react';
 import { dispatch } from '../../../helpers/migration';
 import { invoke } from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -26,7 +27,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 
-import { theme } from '../../../styles';
+import { theme, MuiTheme } from '../../../styles';
 import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
 import { ErrorDialog } from './components/errorDialog/errorDialog.component';
 import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
@@ -73,7 +74,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		const DialogTemplate = DIALOG_TEMPLATES[templateType];
 
 		return (
-			<MuiThemeProvider theme={theme}>
+			<MuiThemeProvider theme={MuiTheme}>
 				<Dialog
 					open={this.props.isOpen}
 					onClose={this.handleClose}>
