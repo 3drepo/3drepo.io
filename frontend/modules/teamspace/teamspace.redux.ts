@@ -21,7 +21,6 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	fetchUser: ['username'],
 	fetchUserSuccess: ['userData'],
 	fetchUserError: ['error'],
-
 	setPendingState: ['pendingState'],
 	updateButtonText: ['value']
 }, { prefix: 'TEAMSPACE_' });
@@ -48,7 +47,7 @@ const fetchUserError = (state = INITIAL_STATE, { error }) => {
 	console.error(error);
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[TeamspaceTypes.FETCH_USER_ERROR]: fetchUserError,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState

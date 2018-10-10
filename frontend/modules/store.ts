@@ -17,7 +17,12 @@ export default function configureStore(initialState = {}) {
 	}
 
 	const store = createStore(
-		createReducer(),
+		(state, action) => {
+			if (action.type === 'RESET_APP') {
+				state = undefined;
+			}
+			return createReducer()(state as any, action);
+		},
 		initialState,
 		compose(
 			applyMiddleware(...middlewares),
