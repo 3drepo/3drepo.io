@@ -24,7 +24,7 @@ import Tab from '@material-ui/core/Tab';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, isUndefined } from 'lodash';
 
 import { theme } from '../../styles';
 import Users from '../users/users.container';
@@ -86,9 +86,9 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps, prevState) => {
 		const queryParams = queryString.parse(location.search);
 		const activeTab = Number(queryParams.tab || prevState.activeTab);
-
+		const initialTab = isUndefined(nextProps.isTeamspaceAdmin) ? TABS_TYPES.USERS : TABS_TYPES.PROJECTS;
 		return {
-			activeTab: nextProps.isTeamspaceAdmin ? activeTab : TABS_TYPES.PROJECTS,
+			activeTab: nextProps.isTeamspaceAdmin ? activeTab : initialTab,
 			selectedTeamspace: queryParams.teamspace || prevState.selectedTeamspace
 		};
 	}
