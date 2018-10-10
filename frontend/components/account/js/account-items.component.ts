@@ -122,15 +122,18 @@ class AccountItemsController implements ng.IController {
 		this.StateManager.hasBeenBackToTeamspace = true;
 
 		// SETUP FILE UPLOADERS
+		const acceptedCriteria = this.ClientConfigService.acceptedFormat.map((ext) => "." + ext).join(",");
 
 		// TODO: Stop accessing query selectors in controllers (I did not write this)
 		this.existingModelFileUploader = this.$element[0].querySelector("#existingModelFileUploader");
+		this.existingModelFileUploader.accept = acceptedCriteria;
 		this.existingModelFileUploader.addEventListener("change", (event) => {
 			this.modelToUpload = event.target.files[0];
 			this.$scope.$apply();
 		}, false);
 
 		this.newModelFileUploader = this.$element[0].querySelector("#newModelFileUploader");
+		this.newModelFileUploader.accept = acceptedCriteria;
 		this.newModelFileUploader.addEventListener("change", (event) =>  {
 			this.newModelFileToUpload = event.target.files[0];
 			this.$scope.$apply();

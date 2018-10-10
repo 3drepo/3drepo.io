@@ -57,18 +57,15 @@ md-content#riskInformation(
 				label SafetiBase ID
 				textarea(
 					id="riskSafetibaseId"
-					ng-model="vm.riskData.safetibase_id")
+					ng-model="vm.riskData.safetibase_id"
+					ng-disabled="!vm.canUpdateRisk()")
 			
 			md-input-container.riskItemStatus(flex)
 				label Associated Activity
-				md-select(
+				textarea(
 					id="riskActivity"
 					ng-model="vm.riskData.associated_activity"
 					ng-disabled="!vm.canUpdateRisk()")
-
-					md-option(
-						ng-repeat="activity in vm.activities"
-						value="{{activity.value}}") {{activity.label}}
 
 	.riskItemContainer#riskDescriptionContainer(layout="column", layout-align="start", flex)
 		div(layout="column", layout-align="start", flex)
@@ -78,7 +75,8 @@ md-content#riskInformation(
 					textarea(
 						ng-model="vm.riskData.desc"
 						ng-focus="vm.textInputHasFocus(true)"
-						ng-blur="vm.textInputHasFocus(false)")
+						ng-blur="vm.textInputHasFocus(false)"
+						ng-disabled="!vm.canUpdateRisk()")
 
 			.riskThumbnail(
 				ng-if="vm.riskData.descriptionThumbnail"
@@ -93,7 +91,8 @@ md-content#riskInformation(
 				label Risk Owner
 				md-select(
 					id="riskOwner"
-					ng-model="vm.riskData.assigned_roles[0]")
+					ng-model="vm.riskData.assigned_roles[0]"
+					ng-disabled="!vm.canUpdateRisk()")
 
 					md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
 
@@ -101,7 +100,8 @@ md-content#riskInformation(
 				label Category
 				md-select(
 					id="riskCategory"
-					ng-model="vm.riskData.category")
+					ng-model="vm.riskData.category"
+					ng-disabled="!vm.canUpdateRisk()")
 
 					md-option(
 						ng-repeat="category in vm.categories"
@@ -113,7 +113,8 @@ md-content#riskInformation(
 				md-select(
 					id="riskLikelihood"
 					ng-model="vm.riskData.likelihood"
-					ng-change="vm.setLevelOfRisk()")
+					ng-change="vm.setLevelOfRisk()"
+					ng-disabled="!vm.canUpdateRisk()")
 					
 					md-option(
 						ng-repeat="likelihood in vm.likelihoods"
@@ -124,7 +125,8 @@ md-content#riskInformation(
 				md-select(
 					id="riskConsequence"
 					ng-model="vm.riskData.consequence"
-					ng-change="vm.setLevelOfRisk()")
+					ng-change="vm.setLevelOfRisk()"
+					ng-disabled="!vm.canUpdateRisk()")
 
 					md-option(
 						ng-repeat="consequence in vm.consequences"
@@ -148,7 +150,8 @@ md-content#riskInformation(
 				label Mitigation Status
 				md-select(
 					id="riskMitigationStatus"
-					ng-model="vm.riskData.mitigation_status")
+					ng-model="vm.riskData.mitigation_status"
+					ng-disabled="!vm.canUpdateRisk()")
 
 					md-option(
 						ng-repeat="status in vm.statuses"
@@ -160,7 +163,8 @@ md-content#riskInformation(
 				textarea(
 					ng-model="vm.riskData.mitigation_desc"
 					ng-focus="vm.textInputHasFocus(true)"
-					ng-blur="vm.textInputHasFocus(false)")
+					ng-blur="vm.textInputHasFocus(false)"
+					ng-disabled="!vm.canUpdateRisk()")
 
 md-divider
 
