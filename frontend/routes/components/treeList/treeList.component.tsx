@@ -32,6 +32,8 @@ export const DefaultHeadline = (props) => (
 );
 
 interface IProps {
+	name: string;
+	level?: number;
 	items: any[];
 	renderItem: (props) => Element;
 	renderRoot: (props) => Element;
@@ -66,19 +68,17 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemHeight, ...props } = this.props;
+		const { items, itemHeight, level, ...props } = this.props;
 
 		const active = items.length && this.state.active;
 
 		const containerProps = {
 			active,
+			level,
 			disabled: !items.length
 		};
 
-		const detailsProps = {
-			active,
-			maxHeight: `${items.length * itemHeight}px`
-		};
+		const detailsProps = { active };
 
 		const headlineProps = {
 			...props,
