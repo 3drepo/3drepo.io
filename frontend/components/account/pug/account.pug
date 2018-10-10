@@ -43,6 +43,10 @@ div#accountHolder(
 
 			profile(ng-if="vm.username && vm.pageVisibility.profile")
 
+			billing(
+				ng-if="vm.username && vm.pageVisibility.billing"
+			)
+
 			account-billing(
 				ng-if="vm.username && vm.pageVisibility.billing"
 				account="vm.account"

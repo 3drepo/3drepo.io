@@ -17,7 +17,10 @@
 
 import * as React from 'react';
 
+import { Panel } from '../components/panel/panel.component';
 import { Container } from './billing.styles';
+
+
 
 interface IProps {
 	noop: string; // TODO: Remove sample
@@ -27,9 +30,9 @@ export class Billing extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container>
+			<Panel title="Billing">
 				Billing component
-			</Container>
+			</Panel>
 		);
 	}
 }
