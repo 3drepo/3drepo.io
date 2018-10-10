@@ -23,12 +23,12 @@ div.viewpointsContainer
                 div(flex, layout="column" layout-align="start")
                     div(
                         ng-if="vm.editSelectedView._id !== viewpoint._id").viewpointName {{viewpoint.name || "(Unnamed View)"}}
-                    label(style="visibility:hidden") Viewpoint Text
+                    label(style="visibility:hidden") Viewpoint Name
                     textarea.viewpointName(
                         ng-model="vm.editSelectedView.name"
                         maxlength="{{vm.viewpointNameMaxlength}}"
                         ng-if="vm.editSelectedView._id === viewpoint._id"
-                        title="Viewpoint Text")
+                        title="Viewpoint Name")
 
             div.viewpointEnterHolder(
                 ng-click="vm.editView(viewpoint)"
