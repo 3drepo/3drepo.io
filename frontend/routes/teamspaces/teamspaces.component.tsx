@@ -35,10 +35,6 @@ interface IProps {
 	isPending: boolean;
 }
 
-export const TreeListItem = (props) => {
-	return <div>{props.name}</div>;
-};
-
 export class Teamspaces extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
 		teamspaces: []
@@ -67,7 +63,6 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 				key={props.key}
 				name={props.name}
 				items={[]}
-				renderRoot={() => (<TreeListItem name={props.name} />)}
 				renderItem={this.renderModel}
 			/>
 		);
@@ -86,8 +81,7 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 			<TreeList
 				key={props.key}
 				name={props.name}
-				items={[]/*  items */}
-				renderRoot={() => (<TreeListItem name={`project: ${props.name}`} />)}
+				items={items}
 				renderItem={this.renderModel}
 			/>
 		);
@@ -98,8 +92,8 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 			return (
 				<TreeList
 					key={index}
+					name={teamspace.account}
 					items={teamspace.projects}
-					renderRoot={() => (<TreeListItem name={`teamspace: ${teamspace.account}`} />)}
 					renderItem={this.renderProject}
 				/>
 			);

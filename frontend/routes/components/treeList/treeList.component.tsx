@@ -16,8 +16,20 @@
  */
 
 import * as React from 'react';
+import Grid from '@material-ui/core/Grid';
 
-import { Container, Headline, Details } from './treeList.styles';
+import { Container, Headline, Details, Title, StyledIcon } from './treeList.styles';
+
+export const DefaultHeadline = (props) => (
+	<Grid
+		container
+		direction="row"
+		alignItems="center"
+		justify="flex-start">
+		<StyledIcon>{props.active ? 'folder_open' : 'folder'}</StyledIcon>
+		<Title>{props.name}</Title>
+	</Grid>
+);
 
 interface IProps {
 	items: any[];
@@ -33,7 +45,6 @@ interface IState {
 export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		items: [],
-		renderRoot: () => null,
 		itemHeight: 50
 	};
 
@@ -55,22 +66,33 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemHeight } = this.props;
+		const { items, itemHeight, ...props } = this.props;
+
+		const active = items.length && this.state.active;
 
 		const containerProps = {
-			active: items.length && this.state.active,
-			disabled: items.length
+			active,
+			disabled: !items.length
 		};
 
 		const detailsProps = {
-			active: items.length && this.state.active,
+			active,
 			maxHeight: `${items.length * itemHeight}px`
+		};
+
+		const headlineProps = {
+			...props,
+			active
 		};
 
 		return (
 			<Container {...containerProps}>
 				<Headline onClick={this.toggleActive}>
-					{ this.props.renderRoot() }
+					{
+						this.props.renderRoot ?
+							this.props.renderRoot(headlineProps) :
+							<DefaultHeadline {...headlineProps} />
+					}
 				</Headline>
 				<Details {...detailsProps}>
 					{ items.length ? this.renderItems() : null }

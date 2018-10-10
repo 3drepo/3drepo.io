@@ -16,13 +16,17 @@
  */
 
 import styled from 'styled-components';
+import Icon from '@material-ui/core/Icon';
+
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
   overflow: hidden;
   border-bottom: 1px solid ${COLOR.BLACK_6};
-  background: ${(props: any) => props.active ? 'transparent' : COLOR.WHITE};
+  background: ${(props: any) => props.active ? COLOR.WHITE : 'rgba(250, 250, 250)'};
+  pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
   transition: background 150ms ease-in-out;
+  color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
 `;
 
 export const Headline = styled.div`
@@ -40,5 +44,16 @@ export const Headline = styled.div`
 
 export const Details = styled.div`
   transition: all 200ms ease-in-out;
-  height: ${(props: any) => props.active ? props.maxHeight : 0};
+  height: ${(props: any) => props.active ? 'auto' : 0};
+  box-shadow: 0 12px 35px currentColor;
+`;
+
+export const Title = styled.div`
+  font-size: 14px;
+`;
+
+export const StyledIcon = styled(Icon)`
+  && {
+    margin-right: 16px;
+  }
 `;
