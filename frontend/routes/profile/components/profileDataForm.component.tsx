@@ -69,8 +69,9 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleProfileUpdate = (values) => {
+	public handleProfileUpdate = (values, { resetForm }) => {
 		this.props.onUserDataChange(values);
+		resetForm(values);
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
