@@ -72,7 +72,7 @@ home #homeLogo img {
     pointer-events: inherit;
     outline: none;
     user-select: none;
-	filter: drop-shadow(0px 0px 2px #00000044);
+	filter: drop-shadow(0px 0px 1px #00000080);
 }
 
 @media (max-width: 600px) {
