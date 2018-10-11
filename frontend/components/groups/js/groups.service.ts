@@ -340,15 +340,6 @@ export class GroupsService {
 	}
 
 	/**
-	 * Deletes all groups in the current model
-	 * @param teamspace the teamspace name for the group
-	 * @param model the model id for the group
-	 */
-	public deleteAllGroups(teamspace: string, model: string) {
-		return this.deleteGroups(teamspace, model, [].concat(this.state.groups));
-	}
-
-	/**
 	 * Deletes an array of groups in the backend
 	 * @param teamspace the teamspace name for the group
 	 * @param model the model id for the group

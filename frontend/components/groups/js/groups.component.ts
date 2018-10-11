@@ -61,7 +61,6 @@ class GroupsController implements ng.IController {
 	private lastColorOverride: any;
 	private selectedNodes: any[];
 	private filterText: string;
-	private filteredGroups: any;
 	private groupsNotifications: NotificationEvents;
 
 	constructor(
@@ -259,11 +258,7 @@ class GroupsController implements ng.IController {
 		const escapable = true;
 		this.dialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
 			.then(() => {
-				if (this.filterText) {
-					this.groupsService.deleteFilteredGroups(this.teamspace, this.model, this.filteredGroups);
-				} else {
-					this.groupsService.deleteAllGroups(this.teamspace, this.model);
-				}
+					this.groupsService.deleteGroups(this.teamspace, this.model, this.groupsToShow);
 			})
 			.catch(() => { });
 	}
@@ -503,7 +498,6 @@ class GroupsController implements ng.IController {
 	private filterGroups() {
 		if (this.filterText !== undefined && this.filterText !== "") {
 			this.groupsToShow = this.groupsService.groupsFilterSearch(this.filterText);
-			this.filteredGroups = this.groupsToShow;
 		} else {
 			this.groupsToShow = this.groups;
 		}
