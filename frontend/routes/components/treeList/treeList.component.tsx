@@ -29,6 +29,7 @@ export const DefaultHeadline = (props) => (
 		justify="flex-start">
 		<StyledIcon>{props.active ? 'folder_open' : 'folder'}</StyledIcon>
 		<Title>{props.name}</Title>
+		{props.renderActions && props.renderActions(props)}
 	</Grid>
 );
 
@@ -40,6 +41,7 @@ interface IProps {
 	disableShadow?: boolean;
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
+	renderActions?: (props) => JSX.Element;
 	onRootClick?: (state) => void;
 }
 
@@ -116,7 +118,10 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 					{
 						this.props.renderRoot ?
 							this.props.renderRoot(headlineProps) :
-							<DefaultHeadline {...headlineProps} />
+							<DefaultHeadline
+								{...headlineProps}
+								renderActions={this.props.renderActions}
+							/>
 					}
 				</Headline>
 				{ active ? <Details {...props}>{this.renderItems()}</Details> : null }

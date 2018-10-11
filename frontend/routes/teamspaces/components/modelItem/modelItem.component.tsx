@@ -19,6 +19,8 @@ import * as React from 'react';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
+import Popover from '@material-ui/core/Popover';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Container, SubmodelsList, Time } from './modelItem.styles';
@@ -29,11 +31,48 @@ interface IProps {
 	model: string;
 	subModels?: any[];
 	timestamp: string;
+	onUpload?: () => void;
+	onDownload?: () => void;
+	onDelete?: () => void;
+	onEdit?: () => void;
+	onRevisionsOpen?: () => void;
+	onSettingsOpen?: () => void;
 }
 
-export class ModelItem extends React.PureComponent<IProps, any> {
-	public openMenu = () => {
-		console.log('test')
+interface IState {
+	activeMenu: boolean;
+}
+
+export class ModelItem extends React.PureComponent<IProps, IState> {
+	public state = {
+		activeMenu: false
+	};
+
+	public buttonRef = React.createRef<HTMLElement>();
+
+	public menuActions = [{
+		label: 'Delete',
+		action: this.props.onDelete,
+		icon: 'remove'
+	}, {
+		label: 'Upload',
+		action: this.props.onUpload,
+		icon: 'cloud_upload'
+	}, {
+		label: 'Edit',
+		action: this.props.onEdit
+	}, {
+		label: 'Revisions',
+		action: this.props.onRevisionsOpen
+	}, {
+		label: 'Settings',
+		action: this.props.onSettingsOpen
+	}];
+
+	public toggleMenu = (forceHide) => {
+		this.setState({
+			activeMenu: forceHide ? false : !this.state.activeMenu
+		});
 	}
 
 	public renderSubModels = (subModels = []) => {
@@ -41,8 +80,22 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
 	}
 
+	public renderActions = () => {
+		return this.menuActions.map(({label, action, icon}, index) => {
+			return (
+				<Tooltip title={label} key={index}>
+					<IconButton aria-label={label} onClick={action}>
+						<Icon>{icon}</Icon>
+					</IconButton>
+				</Tooltip>
+			);
+		});
+	}
+
 	public render() {
 		const { name, subModels, timestamp } = this.props;
+		const { activeMenu } = this.state;
+
 		return (
 			<Container>
 				<Grid
@@ -60,12 +113,31 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 						justify="flex-end">
 						<Time>{timestamp ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
 						<IconButton
+							buttonRef={this.buttonRef}
 							aria-label="More"
 							aria-haspopup="true"
-							onClick={this.openMenu}
+							onClick={this.toggleMenu.bind(this, null)}
 						>
 							<Icon>more_vert</Icon>
 						</IconButton>
+						<Popover
+							open={activeMenu}
+							elevation={0}
+							anchorEl={this.buttonRef.current}
+							anchorOrigin={{
+								vertical: 'center',
+								horizontal: 'left'
+							}}
+							transformOrigin={{
+								vertical: 'center',
+								horizontal: 'right'
+							}}
+							onClose={this.toggleMenu.bind(this, false)}
+						>
+							<Grid container direction="row">
+								{this.renderActions()}
+							</Grid>
+						</Popover>
 					</Grid>
 				</Grid>
 				{this.renderSubModels(subModels)}
