@@ -172,7 +172,9 @@ class CompareController implements ng.IController {
 	}
 
 	public changeCompareState(compareState: string) {
-		this.CompareService.changeCompareState(compareState);
+		if (this.canChangeCompareState) {
+			this.CompareService.changeCompareState(compareState);
+		}
 	}
 
 	public compare() {
