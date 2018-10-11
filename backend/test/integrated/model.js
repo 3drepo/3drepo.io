@@ -260,31 +260,6 @@ describe("Model", function () {
 			});
 	});
 
-	C.REPO_BLACKLIST_MODEL.forEach(modelName => {
-
-		it(`should return error message if model name is blacklisted - ${modelName}`, function(done) {
-
-			if([
-				"database",
-				"verify",
-				"forgot-password",
-				"subscriptions",
-				"projects"
-			].indexOf(modelName) !== -1) {
-				// skip these model name because they are actually other APIs.
-				return done();
-			}
-
-			agent.post(`/${username}/model`)
-				.send({ desc, type, unit, modelName: modelName })
-				.expect(400, function(err ,res) {
-					expect(res.body.value).to.equal(responseCodes.BLACKLISTED_MODEL_NAME.value);
-					done(err);
-				});
-		});
-
-	});
-
 	it("should succeed if model name contains spaces", function(done) {
 
 		const spacedName = "you are genius";

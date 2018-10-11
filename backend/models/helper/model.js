@@ -225,148 +225,57 @@ function resetCorrelationId(account, model) {
 	});
 }
 
-function createAndAssignRole(modelName, account, username, data, toyFed) {
+function createNewModel(teamspace, modelName, data) {
+	// (if fed) launch fed
 
-	let project;
-	// generate model id
-	const model = utils.generateUUID({string: true});
-
-	if(!modelName.match(modelNameRegExp)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
+	if(!data.hasOwnProperty("project")) {
+		return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 	}
 
-	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
-	}
+	const projectName = data.project;
+	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
+		if(!project) {
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		}
 
-	if(!data.unit) {
-		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
-	}
-
-	if(C.REPO_BLACKLIST_MODEL.indexOf(modelName) !== -1) {
-		return Promise.reject({ resCode: responseCodes.BLACKLISTED_MODEL_NAME });
-	}
-
-	let promise = Promise.resolve();
-
-	if(data.project) {
-		promise = Project.findOne({account}, {name: data.project}).then(_project => {
-
-			if(!_project) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			} else {
-				project = _project;
+		// Check there's no other model within the same project with the model name
+		return ModelSetting.count({account: teamspace},
+			{name: modelName, _id: {"$in": project.models}}).then((count) => {
+			return count > 0;
+		}).then((modelNameExists) => {
+			if(modelNameExists) {
+				return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 			}
 
+			// Create a model setting
+			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
+				// Add model into project
+				project.models.push(settings._id);
+
+				return project.save().then(() => {
+					// call chat to indicate a new model has been created
+					const modelData = {
+						account: teamspace,
+						model:  settings._id,
+						name: modelName,
+						permissions: C.MODEL_PERM_LIST,
+						timestamp: undefined
+					};
+
+					ChatEvent.newModel(data.sessionId, teamspace, modelData);
+					return settings;
+				});
+			});
+
 		});
-	}
+	});
+}
 
-	return promise.then(() => {
-
-		const query =  {name: modelName};
-
-		if(data.project) {
-			query._id = { "$in" : project.models};
-		}
-
-		return ModelSetting.count({account, model}, query);
-
-	}).then(count => {
-
-		if(count) {
-			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
-		}
-
-		return (data.subModels ? createFederatedModel(account, model, data.subModels, toyFed) : Promise.resolve());
-
-	}).then(() => {
-
-		return ModelSetting.findById({account, model}, model);
-
-	}).then(setting => {
-		// FIXME: this should be inside modelSettings.js
-		setting = setting || ModelSetting.createInstance({
-			account: account,
-			model: model
+function createNewFederation(teamspace, modelName, data, toyFed) {
+	return createNewModel(teamspace, modelName, data).then((settings) => {
+		createFederatedModel(teamspace, modelName, data.subModels, toyFed).then(() => {
+			return settings;
 		});
-
-		setting._id = model;
-		setting.name = modelName;
-		setting.owner = username;
-		setting.desc = data.desc;
-		setting.type = data.type;
-
-		if(data.subModels) {
-			setting.federate = true;
-			setting.subModels = data.subModels;
-			setting.timestamp = new Date();
-		}
-
-		if(data.surveyPoints) {
-			setting.surveyPoints = data.surveyPoints;
-		}
-
-		if(data.angleFromNorth) {
-			setting.angleFromNorth = data.angleFromNorth;
-		}
-
-		if(data.elevation) {
-			setting.elevation = data.elevation;
-		}
-
-		setting.updateProperties({
-			unit: data.unit,
-			code: data.code
-		});
-
-		setting.properties.topicTypes = ModelSetting.defaultTopicTypes;
-
-		return setting.save();
-
-	}).then(setting => {
-
-		if(project) {
-			project.models.push(model);
-			return project.save().then(() => setting);
-		}
-
-		return setting;
-
-	}).then(setting => {
-
-		if(data.userPermissions &&
-			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 &&
-			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
-		) {
-
-			return setting.changePermissions([{
-				user: username,
-				permission: C.ADMIN_TEMPLATE
-			}]).then(() => setting);
-
-		}
-
-		return Promise.resolve(setting);
-
-	}).then(setting => {
-
-		const modelData = {
-			account,
-			model:  model.toString(),
-			name: modelName,
-			permissions: C.MODEL_PERM_LIST,
-			timestamp: setting.timestamp || undefined
-		};
-
-		ChatEvent.newModel(data.sessionId, account, modelData);
-
-		// this is true if only admin can create project
-		return {
-
-			setting,
-			model: modelData
-
-		};
 	});
 }
 
@@ -415,13 +324,9 @@ function importToyProject(account, username) {
 
 function importToyModel(account, username, modelName, modelDirName, project, subModels, skip) {
 
-	let model;
-	const desc = "";
-	const type = "sample";
-
 	const data = {
-		desc,
-		type,
+		desc : "",
+		type : "sample",
 		project,
 		unit: "mm",
 		subModels,
@@ -434,21 +339,27 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		angleFromNorth: 145
 	};
 
-	return createAndAssignRole(modelName, account, username, data, modelDirName).then(_data => {
-		return Promise.resolve(_data.setting);
-	}).then(setting => {
-		if(subModels) {
+	let createModelPromise;
+
+	const isFed = subModels && subModels.length;
+	if(isFed) {
+		createModelPromise = createNewFederation(account, modelName, data, modelDirName);
+	} else {
+		createModelPromise = createNewModel(account, modelName, data);
+	}
+
+	return createModelPromise.then(setting => {
+		if(isFed) {
 			return setting;
 		} else {
-			model = setting._id;
-			return importModel(account, model, username, setting, {type: "toy", modelDirName, skip });
+			return importModel(account, setting._id, username, setting, {type: "toy", modelDirName, skip });
 		}
 
 	}).catch(err => {
 
 		Mailer.sendImportError({
 			account,
-			model,
+			modelName,
 			username,
 			err: err.message,
 			corID: err.corID,
@@ -1730,7 +1641,6 @@ function isUserAdmin(account, model, user) {
 }
 
 const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
-const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
 	"x","obj","3ds","md3","md2","ply",
 	"mdl","ase","hmp","smd","mdc","md5",
@@ -1742,7 +1652,8 @@ const acceptedFormat = [
 ];
 
 module.exports = {
-	createAndAssignRole,
+	createNewModel,
+	createNewFederation,
 	importToyModel,
 	importToyProject,
 	isUserAdmin,
@@ -1759,7 +1670,6 @@ module.exports = {
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
-	modelNameRegExp,
 	acceptedFormat,
 	uploadFile,
 	importModel,

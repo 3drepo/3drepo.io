@@ -24,7 +24,6 @@ const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
-const createAndAssignRole = ModelHelpers.createAndAssignRole;
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -205,7 +204,6 @@ function createModel(req, res, next) {
 			(!req.body.project || Object.prototype.toString.call(req.body.project) === "[object String]")) {
 		const modelName = req.body.modelName;
 		const account = req.params.account;
-		const username = req.session.user.username;
 
 		const data = {
 			desc: req.body.desc,
@@ -219,7 +217,14 @@ function createModel(req, res, next) {
 		data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 		data.userPermissions = req.session.user.permissions;
 
-		createAndAssignRole(modelName, account, username, data).then(result => {
+		let createModelPromise;
+		if (req.body.subModels) {
+			createModelPromise = ModelHelpers.createNewFederation(account, modelName, data);
+		} else {
+			createModelPromise = ModelHelpers.createNewModel(account, modelName, data);
+		}
+
+		createModelPromise.then(result => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result.model);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
