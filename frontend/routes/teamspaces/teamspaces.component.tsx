@@ -36,17 +36,34 @@ interface IProps {
 	isPending: boolean;
 }
 
-export class Teamspaces extends React.PureComponent<IProps, any> {
+interface IState {
+	activeTeamspace: string;
+}
+
+export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
 	};
 
+	public state = {
+		activeTeamspace: ''
+	};
+
 	public componentDidUpdate(prevProps, prevState) {
-		const changes = {};
+		const changes = {} as IState;
+
+		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
+		if (currentTeamspaceChanged) {
+			changes.activeTeamspace = this.props.currentTeamspace;
+		}
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
+	}
+
+	public onTeamspaceClick = (teamspace, { active }) => {
+		this.setState({ activeTeamspace: teamspace.account });
 	}
 
 	public renderModel = (props) => {
@@ -56,11 +73,11 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 	public renderProjectItem = (props) => {
 		return (
 			<TreeList
-				key={props.key}
-				name={props.name}
+				{...props}
 				level={3}
-				items={props.items}
 				renderItem={this.renderModel}
+				active={true}
+				disableShadow={true}
 			/>
 		);
 	}
@@ -97,6 +114,8 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 					level={1}
 					items={teamspace.projects}
 					renderItem={this.renderProject}
+					onRootClick={this.onTeamspaceClick.bind(this, teamspace)}
+					active={teamspace.account === this.state.activeTeamspace}
 				/>
 			);
 		});
