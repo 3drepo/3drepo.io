@@ -52,7 +52,7 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 					justify="space-between"
 					wrap="nowrap"
 				>
-					<Grid>{name}</Grid>
+					<Grid container>{name}</Grid>
 					<Grid
 						container
 						direction="row"
