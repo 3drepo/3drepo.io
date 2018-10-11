@@ -188,8 +188,9 @@ function setStatus(account, model, status) {
  * Create correlation ID, store it in model setting, and return it
  * @param {account} account - User account
  * @param {model} model - Model
+ * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
-function createCorrelationId(account, model) {
+function createCorrelationId(account, model, addTimestamp = false) {
 	const correlationId = uuid.v1();
 
 	// store corID
@@ -201,6 +202,11 @@ function createCorrelationId(account, model) {
 
 		setting._id = model;
 		setting.corID = correlationId;
+		if (addTimestamp) {
+			// FIXME: This is a temporary workaround, needed because federation
+			// doesn't update it's own timestamp (and also not wired into the chat)
+			setting.timestamp = new Date();
+		}
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
 		return setting.save().then(() => {
 			return correlationId;
@@ -372,61 +378,55 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 
 function createFederatedModel(account, model, subModels, toyFed) {
 
-	return createCorrelationId(account, model).then(correlationId => {
+	const addSubModelsPromise = [];
+	const subModelArr = [];
 
-		const federatedJSON = {
-			database: account,
-			project: model,
-			subProjects: []
-		};
-		if(toyFed) {
-			federatedJSON.toyFed = toyFed;
+	if(subModels.length === 0) {
+		return Promise.resolve();
+	}
+
+	subModels.forEach(subModel => {
+
+		if(subModel.database !== account) {
+			return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
 		}
 
-		let error;
-
-		const addSubModels = [];
-
-		subModels.forEach(subModel => {
-
-			if(subModel.database !== account) {
-				error = responseCodes.FED_MODEL_IN_OTHER_DB;
+		addSubModelsPromise.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+			if(!setting) {
+				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			}
 
-			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-				if(setting && setting.federate) {
-					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+			if(setting.federate) {
+				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
-				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
-					federatedJSON.subProjects.push({
-						database: subModel.database,
-						project: subModel.model
-					});
-				}
-			}));
-
-		});
-
-		if (error) {
-			return Promise.reject(error);
-		}
-
-		if(subModels.length === 0) {
-			return Promise.resolve();
-		}
-
-		return Promise.all(addSubModels).then(() => {
-			importQueue.createFederatedModel(correlationId, account, federatedJSON);
-		}).catch(err => {
-			// catch here to provide custom error message
-			if(err.errCode) {
-				return Promise.reject(convertToErrorCode(err.errCode));
 			}
-			return Promise.reject(err);
 
-		});
+			if(!subModelArr.find(o => o.project === subModel.model)) {
+				subModelArr.push({
+					database: subModel.database,
+					project: subModel.model
+				});
+			}
+		}));
 
 	});
+
+	return Promise.all(addSubModelsPromise).then(() => {
+		return createCorrelationId(account, model, true).then(correlationId => {
+			const federatedJSON = {
+				database: account,
+				project: model,
+				subProjects: subModelArr
+			};
+
+			if(toyFed) {
+				federatedJSON.toyFed = toyFed;
+			}
+
+			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+		});
+	});
+
 }
 
 function getAllMeshes(account, model, branch, rev, username) {
