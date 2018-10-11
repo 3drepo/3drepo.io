@@ -21,6 +21,7 @@ import { isEqual, isEmpty, groupBy } from 'lodash';
 import { Panel } from '../components/panel/panel.component';
 import { TreeList } from '../components/treeList/treeList.component';
 import { Container } from './teamspaces.styles';
+import { ModelItem } from './components/modelItem/modelItem.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -42,23 +43,14 @@ export class Teamspaces extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {};
-		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
-
-/* 		if (teamspacesChanged) {
-			changes.
-		} */
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
 	}
 
-	public renderFederation = (props) => {
-		return <div key={props.key}>{props.name}</div>;
-	}
-
 	public renderModel = (props) => {
-		return <div key={props.key}>{props.name}</div>;
+		return <ModelItem {...props} />;
 	}
 
 	public renderProjectItem = (props) => {

@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 
-import { COLOR } from '../../../styles';
+import { COLOR, ellipsis } from '../../../styles';
 
 export const Headline = styled.div`
   cursor: pointer;
@@ -59,6 +59,8 @@ export const HeadlineContainer = styled(Grid)`
 
 export const Title = styled.div`
   font-size: 14px;
+  max-width: 90%;
+  ${ellipsis('100%')}
 `;
 
 export const StyledIcon = styled(Icon)`
