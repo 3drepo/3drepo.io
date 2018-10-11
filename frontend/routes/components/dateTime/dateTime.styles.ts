@@ -15,23 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import styled from 'styled-components';
 
-import { Teamspaces } from './teamspaces.component';
-import {
-	selectTeamspaces,
-	selectCurrentTeamspace,
-	selectIsPending
-} from '../../modules/teamspace';
-
-const mapStateToProps = createStructuredSelector({
-	currentTeamspace: selectCurrentTeamspace,
-	teamspaces: selectTeamspaces,
-	isPendig: selectIsPending
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
+export const Container = styled.div``;

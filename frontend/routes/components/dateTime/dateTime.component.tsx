@@ -15,23 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import * as React from 'react';
+import * as dayjs from 'dayjs';
 
-import { Teamspaces } from './teamspaces.component';
-import {
-	selectTeamspaces,
-	selectCurrentTeamspace,
-	selectIsPending
-} from '../../modules/teamspace';
+import { Container } from './dateTime.styles';
 
-const mapStateToProps = createStructuredSelector({
-	currentTeamspace: selectCurrentTeamspace,
-	teamspaces: selectTeamspaces,
-	isPendig: selectIsPending
-});
+interface IProps {
+	value: string;
+	format?: string;
+}
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
+export const DateTime = (props: IProps) => {
+	const formattedDateString = dayjs(props.value).format(props.format);
+	return <>{formattedDateString}</>;
+};

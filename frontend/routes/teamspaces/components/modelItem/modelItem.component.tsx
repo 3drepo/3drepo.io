@@ -20,7 +20,8 @@ import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 
-import { Container, SubmodelsList } from './modelItem.styles';
+import { DateTime } from '../../../components/dateTime/dateTime.component';
+import { Container, SubmodelsList, Time } from './modelItem.styles';
 
 interface IProps {
 	name: string;
@@ -41,7 +42,7 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { name, subModels } = this.props;
+		const { name, subModels, timestamp } = this.props;
 		return (
 			<Container>
 				<Grid
@@ -49,9 +50,15 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 					direction="row"
 					alignItems="center"
 					justify="space-between"
+					wrap="nowrap"
 				>
 					<Grid>{name}</Grid>
-					<Grid>
+					<Grid
+						container
+						direction="row"
+						alignItems="center"
+						justify="flex-end">
+						<Time>{timestamp ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
 						<IconButton
 							aria-label="More"
 							aria-haspopup="true"
