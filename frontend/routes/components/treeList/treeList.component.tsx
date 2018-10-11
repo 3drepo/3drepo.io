@@ -35,9 +35,8 @@ interface IProps {
 	name: string;
 	level?: number;
 	items: any[];
-	renderItem: (props) => Element;
-	renderRoot: (props) => Element;
-	itemHeight: number;
+	renderItem?: (props) => JSX.Element;
+	renderRoot?: (props) => JSX.Element;
 }
 
 interface IState {
@@ -46,8 +45,7 @@ interface IState {
 
 export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
-		items: [],
-		itemHeight: 50
+		items: []
 	};
 
 	public state = {
@@ -68,7 +66,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, itemHeight, level, ...props } = this.props;
+		const { items, level, ...props } = this.props;
 
 		const active = items.length && this.state.active;
 
