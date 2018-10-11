@@ -273,7 +273,7 @@ function createNewModel(teamspace, modelName, data) {
 
 function createNewFederation(teamspace, modelName, data, toyFed) {
 	return createNewModel(teamspace, modelName, data).then((modelData) => {
-		createFederatedModel(teamspace, modelName, data.subModels, toyFed).then(() => {
+		return createFederatedModel(teamspace, modelName, data.subModels, toyFed).then(() => {
 			return modelData;
 		});
 	});
