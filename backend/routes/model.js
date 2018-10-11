@@ -225,7 +225,7 @@ function createModel(req, res, next) {
 		}
 
 		createModelPromise.then(result => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result.model);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});

@@ -263,7 +263,7 @@ function createNewModel(teamspace, modelName, data) {
 					};
 
 					ChatEvent.newModel(data.sessionId, teamspace, modelData);
-					return settings;
+					return modelData;
 				});
 			});
 
@@ -272,9 +272,9 @@ function createNewModel(teamspace, modelName, data) {
 }
 
 function createNewFederation(teamspace, modelName, data, toyFed) {
-	return createNewModel(teamspace, modelName, data).then((settings) => {
+	return createNewModel(teamspace, modelName, data).then((modelData) => {
 		createFederatedModel(teamspace, modelName, data.subModels, toyFed).then(() => {
-			return settings;
+			return modelData;
 		});
 	});
 }
