@@ -22,6 +22,7 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
+import Button from "@material-ui/core/Button";
 
 export const Container = styled.div``;
 
@@ -35,6 +36,13 @@ export const StyledInputLabel = styled(InputLabel)``;
 
 export const StyledFormControl = styled(FormControl)`
   width: 100%;
+`;
+
+export const StyledButton = styled(Button)`
+  && {
+    margin-top: 16px;
+    align-self: flex-end;
+  }
 `;
 
 export const FormContainer = styled(Grid)`

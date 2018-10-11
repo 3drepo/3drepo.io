@@ -24,17 +24,24 @@ import {
   StyledSelectField,
   StyledSelectItem,
   StyledInputLabel,
-  StyledFormControl,
+	StyledFormControl,
+	StyledButton,
   FormContainer,
   FieldsRow,
 	FieldsColumn,
 } from "../subscription.styles";
 
 export class SubscriptionForm extends React.PureComponent<any, any> {
+	public handleConfirmSubsription = () => {
+		console.log('Confirm form');
+	}
 
 	public render() {
 		return (
-			<Formik>
+			<Formik
+				initialValues={{}}
+				onSubmit={this.handleConfirmSubscription}
+			>
 				<Form>
 					<FormContainer container direction="column">
 						<FieldsRow container wrap="nowrap">
@@ -155,11 +162,11 @@ export class SubscriptionForm extends React.PureComponent<any, any> {
 								)} />
 								<StyledFormControl>
 									<StyledInputLabel>Country</StyledInputLabel>
-									<Field name="country" component="select" render={({ field }) => (
+									<Field name="country" render={({ field }) => (
 										<StyledSelectField
 											{...field}
-											margin="normal"
 											type="text"
+											value="none"
 										>
 											<StyledSelectItem value="red">Red</StyledSelectItem>
 											<StyledSelectItem value="green">Green</StyledSelectItem>
@@ -169,6 +176,16 @@ export class SubscriptionForm extends React.PureComponent<any, any> {
 								</StyledFormControl>
 							</FieldsColumn>
 						</FieldsRow>
+						<Field render={({ form }) => (
+							<StyledButton
+								color="secondary"
+								variant="raised"
+								disabled={!form.isValid || form.isValidating}
+								type="submit"
+							>
+								Confirm
+							</StyledButton>
+						)} />
 					</FormContainer>
 				</Form>
 			</Formik>
