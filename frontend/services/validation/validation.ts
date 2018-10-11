@@ -18,7 +18,7 @@ import * as Yup from 'yup';
 import { strength, differentThan, equalTo } from './customValidators';
 import { getPasswordStrength } from './customValidators';
 
-const VALIDATIONS_MESSAGES = {
+export const VALIDATIONS_MESSAGES = {
 	REQUIRED: 'This field is required',
 	TOO_SHORT_STRING: 'Must be at least ${min} characters',
 	TOO_LONG_STRING: 'Must be at most ${max} characters'

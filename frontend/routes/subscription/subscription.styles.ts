@@ -24,6 +24,8 @@ import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Button from "@material-ui/core/Button";
 
+import { COLOR } from "../../styles";
+
 export const Container = styled.div``;
 
 export const StyledTextField = styled(TextField)``;
@@ -40,8 +42,7 @@ export const StyledFormControl = styled(FormControl)`
 
 export const StyledButton = styled(Button)`
   && {
-    margin-top: 16px;
-    align-self: flex-end;
+    margin-left: 14px;
   }
 `;
 
@@ -56,11 +57,39 @@ export const FieldsRow = styled(Grid)`
     width: 100%;
   }
 
+  > ${StyledTextField}:nth-child(1) {
+    margin-right: 12px;
+  }
+
   ${FieldsColumn}:nth-child(2n) {
-    margin-left: 12px;
+    margin-left: 6px;
   }
 
   ${FieldsColumn}:nth-child(2n + 1) {
-    margin-right: 12px;
+    margin-right: 6px;
   }
+`;
+
+export const FormFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+`;
+
+export const ConfirmContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const FormInfoContainer = styled.div``;
+
+export const FormInfo = styled.p`
+  margin: 0 0 5px;
+  font-size: 12px;
+  color: ${COLOR.BLACK_40};
+`;
+
+export const PayPalLogo = styled.img`
+  height: 20px;
 `;
