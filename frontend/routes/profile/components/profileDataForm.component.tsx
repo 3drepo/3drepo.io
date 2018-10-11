@@ -21,7 +21,7 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
 
-import { schema } from '../../../services/passwordValidation';
+import { schema } from '../../../services/validation';
 
 import {
 	FormContainer,

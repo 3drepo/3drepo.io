@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { evaluatePassword } from "../../../services/passwordValidation";
+import { evaluatePassword } from "../../../services/validation";
 
 class PasswordChangeController implements ng.IController {
 
@@ -66,7 +66,7 @@ class PasswordChangeController implements ng.IController {
 		this.$scope.$watch("vm.newPassword", () => {
 			this.message = "";
 			if (this.newPassword !== undefined) {
-				const result = evaluatePassword(this.newPassword).then(({ validPassword, comment }) => {
+				evaluatePassword(this.newPassword).then(({ validPassword, comment }) => {
 					this.$timeout(() => {
 						this.newPasswordValid = validPassword;
 						this.passwordStrength = `(${comment})`;

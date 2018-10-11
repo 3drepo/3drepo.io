@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as Yup from 'yup';
+import { strength, differentThan, equalTo } from './customValidators';
+import { getPasswordStrength } from './customValidators';
 
 const VALIDATIONS_MESSAGES = {
 	REQUIRED: 'This field is required',
@@ -22,56 +24,9 @@ const VALIDATIONS_MESSAGES = {
 	TOO_LONG_STRING: 'Must be at most ${max} characters'
 };
 
-const loadPasswordLibrary = () => new Promise((resolve) => {
-	if (!window.zxcvbn) {
-		const ZXCVBN_SRC = "/dist/zxcvbn.js";
-		const script = document.createElement("script");
-		script.src = ZXCVBN_SRC;
-		script.type = "text/javascript";
-		script.async = true;
-		const first = document.getElementsByTagName("script")[0];
-		document.body.appendChild(script);
-		script.onload = () => resolve(window.zxcvbn);
-	} else {
-		resolve(window.zxcvbn);
-	}
-});
-
-// TODO: Should be changed to dynamic import if app is fully migrated
-export const getPasswordStrength = (password) => loadPasswordLibrary().then((zxcvbn: any) => zxcvbn(password).score);
-
-/*
-	Custom validators
-*/
-function differentThan(ref: any, message: any) {
-	return this.test({
-		name: 'differentThan',
-		exclusive: false,
-		message: message || '${path} must be the different than ${reference}',
-		params: {
-			reference: ref.path
-		},
-		test(value: any) {
-			return value !== this.resolve(ref);
-		}
-	});
-}
-
-function strength(requiredValue: any, message: any) {
-	return this.test({
-		name: 'strength',
-		exclusive: false,
-		message: message || '${path} is too weak',
-		async test(value: any) {
-			// TODO: Should be changed to dynamic import if app is fully migrated
-			const result = await getPasswordStrength(value);
-			return result > requiredValue;
-		}
-	});
-}
-
-Yup.addMethod(Yup.string, 'differentThan', differentThan);
-Yup.addMethod(Yup.string, 'strength', strength);
+Yup.addMethod(Yup.string, 'differentThan', differentThan );
+Yup.addMethod(Yup.string, 'equalTo', equalTo);
+Yup.addMethod(Yup.string, 'strength', strength );
 
 /*
 	Validation schemas

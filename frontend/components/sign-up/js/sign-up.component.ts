@@ -16,7 +16,7 @@
  */
 declare const grecaptcha;
 
-import { evaluatePassword } from '../../../services/passwordValidation';
+import { evaluatePassword } from '../../../services/validation';
 
 class SignupController implements ng.IController {
 

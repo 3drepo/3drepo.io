@@ -18,22 +18,17 @@
 import * as React from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import Grid from '@material-ui/core/Grid';
+import { omit } from 'lodash';
 
 import {
 	FormContainer,
 	Headline,
-	StyledDropzone,
-	DropzoneMessage,
-	DropzoneProgress,
 	StyledTextField,
 	FieldsRow,
-	DropzoneContent,
-	DropzonePreview,
 	StyledButton
 } from '../profile.styles';
 
-import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../services/passwordValidation';
+import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../services/validation';
 
 const PasswordChangeSchema = Yup.object().shape({
 	oldPassword: schema.password.min(0),
@@ -42,7 +37,13 @@ const PasswordChangeSchema = Yup.object().shape({
 			Yup.ref('oldPassword'),
 			'New password should be different than old password'
 		)
-		.strength(1, 'This password is weak')
+		.strength(1, 'This password is weak'),
+	newPasswordConfirm: schema.password
+		.min(0)
+		.equalTo(
+			Yup.ref('newPassword'),
+			'Password confirmation must match new password'
+		)
 });
 
 interface IProps {
@@ -59,7 +60,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	};
 
 	public handlePasswordUpdate = (values, { resetForm }) => {
-		this.props.onPasswordChange(values);
+		this.props.onPasswordChange(omit(values, 'newPasswordConfirm'));
 		resetForm();
 		this.setState({
 			newPasswordStrengthMessage: ''
@@ -80,7 +81,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<Formik
-				initialValues={{oldPassword: '', newPassword: ''}}
+				initialValues={{oldPassword: '', newPassword: '', newPasswordConfirm: ''}}
 				validationSchema={PasswordChangeSchema}
 				onSubmit={this.handlePasswordUpdate}
 			>
@@ -90,7 +91,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 						<FieldsRow container wrap="nowrap">
 							<Field name="oldPassword" render={({ field, form }) => (
 								<StyledTextField
-									{...field}
+									{ ...field }
 									error={Boolean(form.touched.oldPassword && form.errors.oldPassword)}
 									helperText={form.touched.oldPassword && (form.errors.oldPassword || '')}
 									label="Old password"
@@ -102,10 +103,22 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 
 							<Field name="newPassword" render={({ field, form }) => (
 								<StyledTextField
-									{...field}
+									{ ...field }
 									error={Boolean(form.touched.newPassword && form.errors.newPassword)}
 									helperText={form.touched.newPassword && (form.errors.newPassword || '')}
 									label={`New password${this.state.newPasswordStrengthMessage}`}
+									margin="normal"
+									required
+									type="password"
+									onChange={this.handleNewPasswordChange(field.onChange)}
+								/>
+							)} />
+							<Field name="newPasswordConfirm" render={({ field, form }) => (
+								<StyledTextField
+									{ ...field }
+									error={Boolean(form.touched.newPasswordConfirm && form.errors.newPasswordConfirm)}
+									helperText={form.touched.newPasswordConfirm && (form.errors.newPasswordConfirm || '')}
+									label="New password confirmation"
 									margin="normal"
 									required
 									type="password"

@@ -53,6 +53,8 @@ export const StyledTextField = styled(TextField)``;
 export const FieldsRow = styled(Grid)`
 	${StyledTextField} {
 		width: 100%;
+		margin-left: 12px;
+		margin-right: 12px;
 	}
 
 	${StyledTextField}:nth-child(2n) {
@@ -60,7 +62,11 @@ export const FieldsRow = styled(Grid)`
 	}
 
 	${StyledTextField}:nth-child(2n + 1) {
-		margin-right: 12px;
+		margin-left: 0;
+	}
+
+	${StyledTextField}:last-child {
+		margin-right: 0;
 	}
 `;
 
