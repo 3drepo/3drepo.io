@@ -21,8 +21,8 @@ import * as queryString from 'query-string';
 import { Panel } from '../components/panel/panel.component';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Subscription from './../subscription/subscription.container';
 import History from './../history/history.container';
-import Subscription from "./../subscription/subscription.container";
 import { Header, TabContent } from './billing.styles';
 
 export const TABS_TYPES = {

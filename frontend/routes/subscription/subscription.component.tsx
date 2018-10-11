@@ -16,19 +16,16 @@
  */
 
 import * as React from 'react';
-
+import { SubscriptionForm } from './components/subscriptionForm.component';
 import { Container } from './subscription.styles';
 
-interface IProps {
-	noop: string; // TODO: Remove sample
-}
 
-export class Subscription extends React.PureComponent<IProps, any> {
+export class Subscription extends React.PureComponent<any, any> {
 
 	public render() {
 		return (
 			<Container>
-				Subscription component
+				<SubscriptionForm />
 			</Container>
 		);
 	}

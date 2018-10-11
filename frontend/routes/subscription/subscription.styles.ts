@@ -16,5 +16,43 @@
  */
 
 import styled from 'styled-components';
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
 
 export const Container = styled.div``;
+
+export const StyledTextField = styled(TextField)``;
+
+export const StyledSelectField = styled(Select)``;
+
+export const StyledSelectItem = styled(MenuItem)``;
+
+export const StyledInputLabel = styled(InputLabel)``;
+
+export const StyledFormControl = styled(FormControl)`
+  width: 100%;
+`;
+
+export const FormContainer = styled(Grid)`
+  padding: 24px;
+`;
+
+export const FieldsColumn = styled.div``;
+
+export const FieldsRow = styled(Grid)`
+  ${StyledTextField} {
+    width: 100%;
+  }
+
+  ${FieldsColumn}:nth-child(2n) {
+    margin-left: 12px;
+  }
+
+  ${FieldsColumn}:nth-child(2n + 1) {
+    margin-right: 12px;
+  }
+`;
