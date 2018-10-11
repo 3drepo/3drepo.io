@@ -21,6 +21,8 @@ import * as queryString from 'query-string';
 import { Panel } from '../components/panel/panel.component';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import History from './../history/history.container';
+import Subscription from "./../subscription/subscription.container";
 import { Header, TabContent } from './billing.styles';
 
 export const TABS_TYPES = {
@@ -70,8 +72,8 @@ export class Billing extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				{activeTab === TABS_TYPES.SUBSCRIPTION && <div>subscription</div>}
-				{activeTab === TABS_TYPES.HISTORY && <div>history</div>}
+				{ activeTab === TABS_TYPES.SUBSCRIPTION && <Subscription /> }
+				{ activeTab === TABS_TYPES.HISTORY && <History /> }
 			</>
 		);
 	}
