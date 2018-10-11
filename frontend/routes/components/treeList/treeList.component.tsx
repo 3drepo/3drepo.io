@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { isEmpty } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 
 import { Container, Headline, Details, Title, StyledIcon } from './treeList.styles';
@@ -33,10 +34,13 @@ export const DefaultHeadline = (props) => (
 
 interface IProps {
 	name: string;
-	level?: number;
 	items: any[];
+	level?: number;
+	active?: boolean;
+	disableShadow?: boolean;
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
+	onRootClick?: (state) => void;
 }
 
 interface IState {
@@ -45,7 +49,9 @@ interface IState {
 
 export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
-		items: []
+		items: [],
+		level: 1,
+		active: false
 	};
 
 	public state = {
@@ -61,12 +67,35 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public toggleActive = () => {
-		this.setState({ active: !this.state.active });
+	public handleRootClick = () => {
+		this.setState({ active: !this.state.active }, () => {
+			if (this.props.onRootClick) {
+				this.props.onRootClick(this.state);
+			}
+		});
+	}
+
+	public componentDidMount() {
+		if (this.props.active) {
+			this.setState({active: true});
+		}
+	}
+
+	public componentDidUpdate = (prevProps, prevState) => {
+		const changes = {} as IState;
+
+		const activeChanged = this.props.active !== prevProps.active;
+		if (activeChanged) {
+			changes.active = this.props.active;
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
 	}
 
 	public render() {
-		const { items, level, ...props } = this.props;
+		const { items, level, active: forceActive, ...props } = this.props;
 
 		const active = items.length && this.state.active;
 
@@ -76,8 +105,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			disabled: !items.length
 		};
 
-		const detailsProps = { active };
-
 		const headlineProps = {
 			...props,
 			active
@@ -85,16 +112,14 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container {...containerProps}>
-				<Headline onClick={this.toggleActive}>
+				<Headline onClick={this.handleRootClick}>
 					{
 						this.props.renderRoot ?
 							this.props.renderRoot(headlineProps) :
 							<DefaultHeadline {...headlineProps} />
 					}
 				</Headline>
-				<Details {...detailsProps}>
-					{ items.length ? this.renderItems() : null }
-				</Details>
+				{ active ? <Details {...props}>{this.renderItems()}</Details> : null }
 			</Container>
 		);
 	}

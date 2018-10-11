@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+
 import { FONT_WEIGHT, COLOR } from '../../../../styles';
 
 export const Container = styled.div`
@@ -32,6 +33,7 @@ export const SubmodelsList = styled.div`
   line-height: 25px;
   padding-bottom: 10px;
   font-size: 12px;
+  margin-top: -10px;
 `;
 
 export const Time = styled.div`
