@@ -143,6 +143,7 @@ export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) =
 
 		return userData;
 	});
+
 	return {...state, users};
 };
 
@@ -155,6 +156,7 @@ export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions })
 
 		return userData;
 	});
+
 	return {...state, users};
 };
 
