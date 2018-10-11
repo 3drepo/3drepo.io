@@ -181,6 +181,7 @@
 		job: require("./job"),
 		issue: require("./issue"),
 		notification: require("./notification"),
+		chat: require("./chat"),
 
 		isHereEnabled: isHereEnabled,
 

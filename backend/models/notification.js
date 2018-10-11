@@ -132,12 +132,17 @@ module.exports = {
 	 * @param {string} teamSpace The teamspace corresponding to the model of the issue
 	 * @param {string} modelId The model of the issue
 	 * @param {Issue} issue The issue in shich the assignation is happening
-	 * @returns {Promise<Notification[]>} It contains the newly created notifications
+	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
 	 */
 	upsertIssueAssignedNotifications : function(username, teamSpace, modelId, issue) {
 		const assignedRole = issue.assigned_roles[0];
+
 		return job.findByJob(teamSpace,assignedRole)
 			.then(rs => {
+				if (!rs || !rs.users) {
+					return [];
+				}
+
 				const users = rs.users.filter(m => m !== username); // Leave out the user that is assigning the issue
 
 				// For all the users with that assigned job we need
@@ -151,9 +156,7 @@ module.exports = {
 			.then((users) => {
 				const assignedUsers = users.filter(u => u.canWrite).map(u=> u.user);
 				return Promise.all(
-					assignedUsers.map(
-						u => this.upsertIssueAssignedtNotification(u, teamSpace, modelId, issue._id)
-					)
+					assignedUsers.map(u => this.upsertIssueAssignedtNotification(u, teamSpace, modelId, issue._id).then(n=>({username:u, notification:n})))
 				);
 			});
 	},

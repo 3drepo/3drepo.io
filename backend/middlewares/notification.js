@@ -16,14 +16,7 @@
  */
 "use strict";
 const notification = require("../models/notification");
-
-const isIssueAssignation = function(oldIssue, newIssue) {
-	if (!oldIssue) {
-		return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
-	}
-
-	return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
-};
+const issues = require("../models/issue");
 
 module.exports = {
 	onUpdateIssue: function(req, res, next) {
@@ -40,9 +33,12 @@ module.exports = {
 			issue = req.dataModel;
 		}
 
-		if (!isCommentModification && isIssueAssignation(oldIssue, issue)) {
+		if (!isCommentModification && issues.isIssueAssignation(oldIssue, issue)) {
 			notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue)
-				.then(() => next());
+				.then((notifications) => {
+					req.userNotifications = notifications;
+					next();
+				});
 		} else {
 			next();
 		}
