@@ -14,6 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { dispatch } from '../../../helpers/migration';
+import { NotificationsActions } from "../../../modules/notifications";
+import { NotificationService } from "../../notifications/js/notification.service";
 
 class HomeController implements ng.IController {
 
@@ -39,7 +42,8 @@ class HomeController implements ng.IController {
 		"AnalyticService",
 		"ViewerService",
 		"TemplateService",
-		"DialogService"
+		"DialogService",
+		"NotificationService"
 	];
 
 	private doNotLogout;
@@ -88,7 +92,8 @@ class HomeController implements ng.IController {
 		private AnalyticService,
 		private ViewerService,
 		private TemplateService,
-		private DialogService
+		private DialogService,
+		private notificationService: NotificationService
 	) {}
 
 	public $onInit() {
@@ -234,6 +239,13 @@ class HomeController implements ng.IController {
 			}
 		}, true);
 
+		this.$scope.$watch("vm.state.account", (oldAccount, account) => {
+			if (!account) {
+				return;
+			}
+
+			this.notificationService.getChannel(account).notifications.subscribeToUpsert(this.onNotificationUpsert, this);
+		});
 	}
 
 	public handleLoginStatus(currentData) {
@@ -304,6 +316,10 @@ class HomeController implements ng.IController {
 			}
 			break;
 		}
+	}
+
+	public onNotificationUpsert(notification: any): void {
+		dispatch(NotificationsActions.upsertNotification(notification));
 	}
 
 	public getLiteModeState() {

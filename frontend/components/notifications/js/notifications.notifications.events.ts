@@ -14,25 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-"use strict";
-const Queue = require("../services/queue");
-const C = require("../constants");
 
-const queueUpsertNotification = function(session, notification) {
-	const msg = {
-		event : notification.username + "::notificationUpsert",
-		channel : notification.username,
-		emitter : session,
-		data : notification.notification
-	};
+import { NotificationsChannel } from "./notifications.channel";
 
-	return Queue.insertEventMessage(msg);
-};
-
-module.exports = {
-	onNotification: function(req, res, next) {
-		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		(req.userNotifications  || []).forEach(queueUpsertNotification.bind(null,sessionId));
-		next();
+export class NotificationNotificationsEvents {
+	constructor(private channel: NotificationsChannel) {
 	}
-};
+
+	public subscribeToUpsert(callback: (data: any) => void, context: any) {
+		this.channel.subscribe("notificationUpsert", callback, context);
+	}
+
+	public unsubscribeFromUpsert(callback: (data: any) => void) {
+		this.channel.unsubscribe("notificationUpsert", callback);
+	}
+}

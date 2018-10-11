@@ -20,6 +20,7 @@ import { NotificationEvents } from "./notification.events";
 import { NotificationModelEvents } from "./notification.model.events";
 import { NotificationIssuesEvents } from "./notification.issues.events";
 import { NotificationRisksEvents } from "./notification.risks.events";
+import { NotificationNotificationsEvents } from "./notifications.notifications.events";
 
 export class NotificationsChannel {
 	/**
@@ -47,6 +48,8 @@ export class NotificationsChannel {
 	 */
 	public model: NotificationModelEvents;
 
+	public 	notifications: NotificationNotificationsEvents;
+
 	/**
 	 * This dictionary holds the callbacks for every event in the channel .
 	 * When the last callback has been unsubscribed, the channel unsubscribe from the event completely.
@@ -59,6 +62,7 @@ export class NotificationsChannel {
 		this.risks = new NotificationRisksEvents(this);
 		this.model = new NotificationModelEvents(this);
 		this.views = new NotificationEvents(this, "view");
+		this.notifications = new NotificationNotificationsEvents(this);
 	}
 
 	/**

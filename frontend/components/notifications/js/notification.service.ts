@@ -105,7 +105,6 @@ export class NotificationService {
 	}
 
 	public joinRoom(account: string, model: string) {
-
 		let modelNameSpace = "";
 
 		if (model) {
@@ -120,8 +119,8 @@ export class NotificationService {
 		}
 	}
 
-	public getChannel(account: string, model: string): NotificationsChannel {
-		const channelId: string = account + "::" + model;
+	public getChannel(account: string, model: string = ""): NotificationsChannel {
+		const channelId: string = account + model ? "::" + model : "";
 
 		if ( !this.channels[channelId] ) {
 			this.channels[channelId] = new NotificationsChannel(this, account, model);
@@ -130,7 +129,7 @@ export class NotificationService {
 		return this.channels[channelId];
 	}
 
-	public getEventName(account: string, model: string, keys: string, event): string {
+	public getEventName(account: string, model: string, keys: string, event: string): string {
 
 		let modelNameSpace = "";
 
