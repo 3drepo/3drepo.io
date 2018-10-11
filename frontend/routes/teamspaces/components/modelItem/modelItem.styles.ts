@@ -31,4 +31,12 @@ export const SubmodelsList = styled.div`
   padding-right: 30px;
   line-height: 25px;
   padding-bottom: 10px;
+  font-size: 12px;
+`;
+
+export const Time = styled.div`
+  color: ${COLOR.BLACK_30};
+  font-weight: ${FONT_WEIGHT.NORMAL};
+  margin-right: 8px;
+  font-size: 12px;
 `;
