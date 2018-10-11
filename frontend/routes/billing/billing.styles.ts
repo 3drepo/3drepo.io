@@ -16,5 +16,16 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from "../../styles";
 
-export const Container = styled.div``;
+export const Header = styled.div`
+  background-color: ${COLOR.WHITE};
+  border-bottom: 1px solid ${COLOR.BLACK_6};
+`;
+
+export const TabContent = styled.div`
+  background-color: ${COLOR.WHITE};
+  flex: 1;
+  position: relative;
+  height: calc(100% - 100px);
+`;

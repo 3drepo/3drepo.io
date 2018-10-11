@@ -16,23 +16,82 @@
  */
 
 import * as React from 'react';
-
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import * as queryString from 'query-string';
 import { Panel } from '../components/panel/panel.component';
-import { Container } from './billing.styles';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import { Header, TabContent } from './billing.styles';
 
+export const TABS_TYPES = {
+  SUBSCRIPTION: 0,
+  HISTORY: 1,
+};
 
+const TABS = {
+	[TABS_TYPES.SUBSCRIPTION]: {
+		id: TABS_TYPES.SUBSCRIPTION,
+    label: "Subscription"
+  },
+	[TABS_TYPES.HISTORY]: {
+		id: TABS_TYPES.HISTORY,
+    label: "History"
+  },
+};
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	location: any;
+	history: any;
 }
 
-export class Billing extends React.PureComponent<IProps, any> {
+interface IState {
+	activeTab: number;
+}
+
+export class Billing extends React.PureComponent<IProps, IState> {
+	public state = {
+		activeTab: TABS_TYPES.SUBSCRIPTION,
+	};
+
+	public updateUrlParams = (params) => {
+		const { pathname, search } = this.props.location;
+		const queryParams = Object.assign({}, queryString.parse(search), params);
+		const updatedQueryString = queryString.stringify(queryParams);
+		this.props.history.push(`${pathname}?${updatedQueryString}`);
+	}
+
+	public handleChange = (event, activeTab) => {
+		this.updateUrlParams({ tab: activeTab });
+		this.setState({ activeTab });
+	}
+
+	public renderTabContent = () => {
+		const { activeTab } = this.state;
+
+		return (
+			<>
+				{activeTab === TABS_TYPES.SUBSCRIPTION && <div>subscription</div>}
+				{activeTab === TABS_TYPES.HISTORY && <div>history</div>}
+			</>
+		);
+	}
 
 	public render() {
+		const { activeTab } = this.state;
+
 		return (
 			<Panel title="Billing">
-				Billing component
-			</Panel>
+        <Header>
+          <Tabs value={activeTab} indicatorColor="primary" textColor="primary" onChange={this.handleChange}>
+            <Tab label="Subscription" />
+            <Tab label="History" />
+          </Tabs>
+        </Header>
+        <TabContent>
+					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
+          <Route>{this.renderTabContent}</Route>
+        </TabContent>
+      </Panel>
 		);
 	}
 }

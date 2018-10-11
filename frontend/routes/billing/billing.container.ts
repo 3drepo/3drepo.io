@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect, addRouting } from "../../helpers/migration";
 
 import { Billing } from './billing.component';
 
@@ -25,4 +26,4 @@ const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Billing);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Billing)));
