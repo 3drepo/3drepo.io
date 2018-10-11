@@ -17,8 +17,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, get, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
-import Icon from '@material-ui/core/Icon';
+import { pick, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
@@ -229,13 +228,13 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-					<UserManagementTab footerLabel={this.getFooterLabel()}>
-							<CustomTable
-									cells={USERS_TABLE_CELLS}
-									rows={rows}
-							/>
-					</UserManagementTab>
-					{containerElement && this.renderNewUserForm(containerElement)}
+				<UserManagementTab footerLabel={this.getFooterLabel()}>
+					<CustomTable
+							cells={USERS_TABLE_CELLS}
+							rows={rows}
+					/>
+				</UserManagementTab>
+				{containerElement && this.renderNewUserForm(containerElement)}
 			</>
 		);
 	}

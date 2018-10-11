@@ -16,20 +16,21 @@
  */
 
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
-import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 
 export const extendTeamspacesInfo = (teamspaces = []) => teamspaces.reduce((teamspacesWithAdminAccess, account) => {
-	const { isProjectAdmin, isModelAdmin } = account.projects.reduce((flags, { permissions, models }) => {
-		flags.isProjectAdmin = permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
-		flags.isModelAdmin = models.some((model) => model.permissions.includes(MODEL_ROLES_TYPES.ADMINISTRATOR));
-		return flags;
-	}, {});
+	const projects = account.isAdmin ?
+		account.projects :
+		account.projects.reduce((projectsWithAdminAccess, project) => {
+			const hasAdminAccess = project.permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
+			if (hasAdminAccess) {
+				projectsWithAdminAccess.push(project);
+			}
+			return projectsWithAdminAccess;
+		}, []);
 
-	if (account.isAdmin || isProjectAdmin || isModelAdmin) {
-		teamspacesWithAdminAccess.push({
-			...account,
-			isProjectAdmin
-		});
+	const isProjectAdmin = Boolean(projects.length);
+	if (account.isAdmin || isProjectAdmin) {
+		teamspacesWithAdminAccess.push({...account, isProjectAdmin, projects});
 	}
 	return teamspacesWithAdminAccess;
 }, []);

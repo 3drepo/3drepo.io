@@ -30,7 +30,6 @@ import {
 
 import {
 	selectTeamspacesWithAdminAccess,
-	selectCurrentUser,
 	selectCurrentTeamspace as selectDefaultTeamspace
 } from '../../modules/teamspace';
 

@@ -107,7 +107,7 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 		users,
 		isPending: false,
 		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
-		selectedTeamspace: teamspace.name,
+		selectedTeamspace: teamspace.account,
 		isTeamspaceAdmin: teamspace.isAdmin
 	});
 };

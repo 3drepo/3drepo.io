@@ -16,9 +16,8 @@
  */
 
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import * as queryString from 'query-string';
-import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { MuiThemeProvider } from '@material-ui/core/styles';
@@ -47,21 +46,6 @@ export const TABS_TYPES = {
 	USERS: 0,
 	PROJECTS: 1,
 	JOBS: 2
-};
-
-const TABS = {
-	[TABS_TYPES.USERS]: {
-		id: TABS_TYPES.USERS,
-		label: 'Users'
-	},
-	[TABS_TYPES.PROJECTS]: {
-		id: TABS_TYPES.PROJECTS,
-		label: 'Projects'
-	},
-	[TABS_TYPES.JOBS]: {
-		id: TABS_TYPES.JOBS,
-		label: 'Jobs'
-	}
 };
 
 const ADMIN_TABS = [TABS_TYPES.USERS, TABS_TYPES.JOBS] as any;
@@ -177,7 +161,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isLoadingTeamspace, teamspaces, isTeamspaceAdmin} = this.props;
-		const {activeTab, selectedTeamspace, teamspacesItems} = this.state;
+		const {selectedTeamspace, teamspacesItems} = this.state;
 
 		return (
 			<MuiThemeProvider theme={theme}>
