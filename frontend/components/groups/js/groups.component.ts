@@ -172,10 +172,20 @@ class GroupsController implements ng.IController {
 		this.$scope.$watchCollection(() => {
 			return this.treeService.currentSelectedNodes;
 		}, () => {
-			this.groupsService.updateSelectedObjectsLen().then(() => {
-				this.groupsService.getSelectedObjects().then((currentHighlights) => {
-					this.selectedNodes = currentHighlights || [];
-					this.updateChangeStatus();
+			this.$timeout( () => {
+				/*
+				 *	Temporary fix: This timeout is required because
+				 * when currentSelectedNodes may be updated before unity
+				 * (where groups get the object count) so without the delay
+				 * it may have incorrect readings of how many objects are selected
+				 * Proper fix would be to investigate this stupid control flow
+				 * and make it work (and probably stop relaying on watches...)
+				 */
+				this.groupsService.updateSelectedObjectsLen().then(() => {
+					this.groupsService.getSelectedObjects().then((currentHighlights) => {
+						this.selectedNodes = currentHighlights || [];
+						this.updateChangeStatus();
+					});
 				});
 			});
 		});
@@ -399,7 +409,11 @@ class GroupsController implements ng.IController {
 		this.onContentHeightRequest({ height: 310 });
 		this.onShowItem();
 		this.focusGroupName();
-		this.groupsService.updateSelectedObjectsLen();
+		// FIXME: messy. savedGroupData should probably be tracked by service and whilst it
+		// initialises that it should setup these 2 values.
+		this.groupsService.updateSelectedObjectsLen().then( (totalMeshes) => {
+			this.selectedGroup.totalSavedMeshes = totalMeshes;
+		});
 	}
 
 	public cancelEdit() {
