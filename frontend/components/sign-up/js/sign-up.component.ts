@@ -305,6 +305,16 @@ class SignupController implements ng.IController {
 			return;
 		}
 
+		if (this.newUser.confirmPassword !== this.newUser.password) {
+			this.registerErrorMessage = "Password mismatched";
+			return;
+		}
+
+		if (this.newUser.confirmEmail !== this.newUser.email) {
+			this.registerErrorMessage = "Email mismatched";
+			return;
+		}
+
 		if (this.showLegalText) {
 			allowRegister = this.newUser.tcAgreed;
 		}
