@@ -175,6 +175,18 @@ function Utils() {
 	};
 
 	/**
+	* Create a screenshot entry from base64.
+	* @param {Object} pngBuffer
+	* @return {Object} JSON containing the screenshot entry
+	*/
+	this.createScreenshotEntry = function(pngBuffer) {
+		return {
+			content: new Buffer.from(pngBuffer, "base64"),
+			flag: 1
+		};
+	};
+
+	/**
 	* Create a cropped version of a screen shot.
 	* @param {Object} pngBuffer
 	* @param {Number} destWidth

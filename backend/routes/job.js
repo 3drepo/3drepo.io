@@ -32,6 +32,7 @@
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
+	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
 
 	function addUserToJob(req, res, next) {
 
@@ -121,7 +122,14 @@
 		Job.getAllJobs(req.params.account).then(jobs => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, jobs);
 		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
 
+	function listColors(req, res, next) {
+		Job.getAllColors(req.params.account).then(colors => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, colors);
+		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}

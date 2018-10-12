@@ -9,6 +9,7 @@ import "angular-sanitize";
 import "angular-aria";
 import "angular-recaptcha";
 import * as io from "socket.io-client";
+import "simplebar";
 
 // TypeScript compiled globals
 import { UnityUtil } from "../globals/unity-util";
@@ -25,14 +26,21 @@ window.TDR = TDR;
 // Initialise 3D Repo
 window.TDR();
 
+import "ngclipboard";
+
 // Register all the angularjs modules
-import "./account/js/account-assign.component";
+
+// Shared services
+import "../services/projects.service";
+import "../services/models.service";
+import "../services/jobs.service";
+
+// Components & services
 import "./account/js/account-billing.component";
 import "./account/js/account.component";
 import "./account/js/account-federations.component";
 import "./account/js/account-info.component";
 import "./account/js/account-items.component";
-import "./account/js/account-licenses.component";
 import "./account/js/account-menu.component";
 import "./account/js/account-model.component";
 import "./account/js/account-modelsetting.component";
@@ -40,6 +48,7 @@ import "./account/js/account-profile.component";
 import "./account/js/account.service";
 import "./account/js/account-teamspaces.component";
 import "./account/js/account-upload.service";
+import "./account/js/account-user-management.component";
 import "./bottom-buttons/js/bottom-buttons.component";
 import "./clip/js/clip.component";
 import "./clip/js/clip.service";
@@ -78,10 +87,12 @@ import "./model/js/model.component";
 import "./notifications/js/notification.service";
 import "./panel/js/panel-card.component";
 import "./panel/js/panel-card-filter.component";
+import "./panel/js/panel-card-chips-filter.component";
 import "./panel/js/panel-card-option-close.component";
 import "./panel/js/panel-card-option-filter.component";
 import "./panel/js/panel-card-option-menu.component";
 import "./panel/js/panel-card-option-visible.component";
+import "./panel/js/panel-card-option-chips-filter.component";
 import "./panel/js/panel.component";
 import "./panel/js/panel.service";
 import "./password-change/js/password-change.component";
@@ -94,6 +105,11 @@ import "./register-verify/js/register-verify.component";
 import "./revisions/js/revisions.component";
 import "./revisions/js/revisions.service";
 import "./right-panel/js/right-panel.component";
+import "./risks/js/risk-item.component";
+import "./risks/js/risks-card.component";
+import "./risks/js/risks-list.component";
+import "./risks/js/risks.service";
+import "./screenshot/js/screenshot.component";
 import "./sign-up/js/sign-up.component";
 import "./terms/js/terms.component";
 import "./tree/js/tree.component";
@@ -106,6 +122,16 @@ import "./viewer/js/viewer.component";
 import "./viewer/js/viewer.service";
 import "./viewpoints/js/viewpoints.component";
 import "./viewpoints/js/viewpoints.service";
+import "./member-card/js/member-card.component";
+import "./list-sort-button/js/list-sort-button.component";
+import "./new-member-form/js/new-member-form.component";
+import "./users-list/js/users-list.component";
+import "./projects-permissions/js/projects-permissions.component";
+import "./permissions-list/js/permissions-list.component";
+import "./models-list/js/models-list.component";
+import "./jobs-list/js/jobs-list.component";
+import "./new-job-form/js/new-job-form.component";
+import "./color-picker/js/color-picker.component";
 
 // Kickstart the application
 angular.bootstrap(document.body, ["3drepo"], { strictDi: true });

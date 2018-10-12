@@ -76,7 +76,6 @@ function storeIssue(req, res, next) {
 function updateIssue(req, res, next) {
 
 	const place = utils.APIInfo(req);
-	// let data = JSON.parse(req.body.data);
 	const data = req.body;
 	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;

@@ -24,7 +24,6 @@ export class ViewpointsService {
 	public static $inject: string[] = [
 		"$timeout",
 		"$q",
-
 		"APIService",
 		"ClipService",
 		"ViewerService"
@@ -48,8 +47,19 @@ export class ViewpointsService {
 	 */
 	public reset() {
 		this.state = {
-			viewpoints : []
+			viewpoints: []
 		};
+	}
+
+	public filterViewpoints(searchQuery: string): any[] {
+		return this.state.viewpoints.filter((view) => {
+			const keep =  this.stringSearch(view.name, searchQuery);
+			if (!keep) {
+				view.selected = false;
+			}
+
+			return keep;
+		});
 	}
 
 	/**
@@ -90,11 +100,23 @@ export class ViewpointsService {
 	 * @return promise
 	 */
 	public updateViewpoint(teamspace: string, model: string, view: any) {
-
 		const viewId = view._id;
 		const viewpointsUrl = `${teamspace}/${model}/viewpoints/${viewId}/`;
-
 		return this.APIService.put(viewpointsUrl, { name: view.name });
+	}
+
+	public updatedCreatedViewpoint(view) {
+		view.screenshot.thumbnailUrl = this.getThumbnailUrl(view.screenshot.thumbnail);
+		this.state.viewpoints.push(view);
+	}
+
+	public updateDeletedViewpoint(viewId) {
+		for (let i = 0; i < this.state.viewpoints.length; ++i) {
+			if (viewId === this.state.viewpoints[i]._id) {
+				this.state.viewpoints.splice(i, 1);
+				break;
+			}
+		}
 	}
 
 	/**
@@ -105,7 +127,6 @@ export class ViewpointsService {
 	 * @return promise
 	 */
 	public createViewpoint(teamspace: string, model: string, viewName: string) {
-
 		return this.generateViewpointObject(teamspace, model, viewName)
 			.then((view: any) => {
 				const viewpointsUrl = `${teamspace}/${model}/viewpoints/`;
@@ -164,7 +185,6 @@ export class ViewpointsService {
 	public generateViewpointObject(teamspace: string, model: string, viewName: string) {
 		const viewpointDefer = this.$q.defer();
 		const screenshotDefer = this.$q.defer();
-
 		this.ViewerService.getCurrentViewpoint({
 			promise: viewpointDefer,
 			account: teamspace,
@@ -185,7 +205,7 @@ export class ViewpointsService {
 				viewpoint.viewpoint.view_dir = results[0].view_dir;
 				viewpoint.viewpoint.right = results[0].right;
 				viewpoint.screenshot = {
-					base64 : base64Screenshot
+					base64: base64Screenshot
 				};
 				return viewpoint;
 			});
@@ -206,15 +226,26 @@ export class ViewpointsService {
 				this.ViewerService.setCamera(view.viewpoint);
 			}
 
-			const clipData = {
-				clippingPlanes: view.clippingPlanes,
-				fromClipPanel: false,
-				account: teamspace,
-				model
-			};
+			if (view.clippingPlanes) {
+				const clipData = {
+					clippingPlanes: view.clippingPlanes,
+					fromClipPanel: false,
+					account: teamspace,
+					model
+				};
 
-			this.ClipService.updateClippingPlane(clipData);
+				this.ClipService.updateClippingPlane(clipData);
+			}
 		}
+	}
+
+	// Helper  for searching strings
+	private stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 	}
 }
 

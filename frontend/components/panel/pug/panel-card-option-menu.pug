@@ -1,30 +1,26 @@
-md-menu(md-position-mode="target-right target", md-offset="2 14")
-	md-button.md-icon-button(
-		aria-label="Menu"
-		ng-click="$mdOpenMenu($event)")
-		md-icon.angular-material-icons more_vert
-	md-menu-content(width="4" style="max-height:none")
-		md-menu-item.menuHighlight(
-			ng-repeat="menuItem in vm.menu track by menuItem.label"
-			ng-if="!menuItem.hidden")
-			md-button(ng-click="vm.menuItemSelected($index)" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
-				div(layout="column" flex)
-					md-divider(ng-if="menuItem.upperDivider" flex)
-					div(layout="row" flex)
-						md-icon(md-font-icon="{{menuItem.icon}}", class="fa angular-material-icons ng-scope material-icons", ng-if="menuItem.noToggle && menuItem.icon !== 'fa-eye' && menuItem.icon !== 'fa-scissors' && menuItem.icon !== 'delete'")
-						md-icon(class="angular-material-icons ng-scope material-icons" role="img" aria-hidden="true", ng-if="menuItem.noToggle && menuItem.icon === 'delete'") {{menuItem.icon}}
-						md-icon(md-font-icon="{{menuItem.firstSelectedIcon}}", class="fa", ng-if="menuItem.firstSelected")
-						md-icon(md-font-icon="{{menuItem.secondSelectedIcon}}", class="fa", ng-if="menuItem.secondSelected")
-						md-icon(class="fa", ng-if="menuItem.icon === 'fa-eye' || menuItem.icon === 'fa-scissors'")
-							svg(ng-if="menuItem.icon === 'fa-eye'"
-								width="24px" height="24px" viewBox="0 0 24 24")
-								path(fill="rgba(0,0,0,0.54)" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z")
-							svg(ng-if="menuItem.icon === 'fa-scissors'"
-								width="24px" height="24px" viewBox="0 0 24 24")
-								path(fill="rgba(0,0,0,0.54)" d="M12,6.5A9.76,9.76,0,0,1,20.82,12,9.82,9.82,0,0,1,3.18,12,9.76,9.76,0,0,1,12,6.5m0-2A11.83,11.83,0,0,0,1,12a11.82,11.82,0,0,0,22,0A11.83,11.83,0,0,0,12,4.5Z")
-								path(fill="rgba(0,0,0,0.54)" d="M12,7a5,5,0,1,0,5,5A5,5,0,0,0,12,7Zm0,8a3,3,0,1,1,3-3A3,3,0,0,1,12,15Z")
-						md-icon(md-font-icon="fa-check", class="fa", ng-if="!menuItem.keepCheckSpace && menuItem.selected && !menuItem.noToggle")
-						md-icon(md-font-icon="fa-check", class="fa", ng-if="menuItem.keepCheckSpace" ng-style="{'visibility': menuItem.selected?'visible':'hidden'}")
-						p(flex="") {{menuItem.label}}
-						
-					md-divider(ng-if="menuItem.divider" flex)
+md-menu-bar
+	md-menu
+		md-button.md-icon-button(
+			aria-label="Menu"
+			ng-click="$mdMenu.open($event)")
+			md-icon.angular-material-icons(ng-if="vm.buttonLabel===''") more_vert
+			div(ng-if="vm.buttonLabel!==''") {{vm.buttonLabel}}
+
+		md-menu-content(width="4" style="max-height:none")
+			md-menu-item.menuHighlight(
+				ng-repeat="menuItem in vm.menu track by menuItem.label"
+				ng-if="!menuItem.hidden")
+
+				md-button(ng-click="vm.onClickItem(menuItem)" aria-label="{{menuItem.label}}"  ng-if="menuItem.menu===undefined" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
+					ng-include(src="'/templates/panel-card-option-menu-item.html'")
+
+				md-menu(ng-if="menuItem.menu!==undefined")
+					md-button( ng-click="$mdMenu.open($event)" aria-label="{{menuItem.label}}" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
+						ng-include(src="'templates/panel-card-option-menu-item.html'")
+
+					md-menu-content(width="4" style="max-height:none"  ng-init="parentItem = menuItem")
+						md-menu-item.menuHighlight(
+							ng-repeat="menuItem in menuItem.menu track by menuItem.label"
+							ng-if="!menuItem.hidden")
+							md-button(ng-click="vm.onClickItem(menuItem, parentItem)" aria-label="{{menuItem.label}}" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
+								ng-include(src="'/templates/panel-card-option-menu-item.html'")

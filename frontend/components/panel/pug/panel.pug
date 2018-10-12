@@ -26,7 +26,7 @@ div(ng-show="vm.showPanel")
 			ng-if="!vm.isLiteMode || contentItem.showLiteMode"
 			layout="column"
 			layout-align="start center")
-			
+
 			md-button.md-fab.md-primary.md-mini(
 				id="{{contentItem.type + 'LeftButton'}}"
 				ng-click="vm.togglePanel(contentItem.type)"

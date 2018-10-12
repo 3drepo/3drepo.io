@@ -45,8 +45,12 @@ function StateManagerRun(
 		return dateFilter(formatDate, "d/M/yyyy", timezone);
 	};
 
-	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
+	$mdDateLocale.parseDate = (dateString) => {
+		const dateArr = dateString.split("/").concat([1900, 1 , 1]);
+		return new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
+	};
 
+	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
 		StateManager.state.changing = true;
 
 		for (let i = 0; i < StateManager.functions.length; i++) {
@@ -73,7 +77,6 @@ function StateManagerRun(
 			fromState,
 			fromParams
 		};
-
 		StateManager.handleStateChange(stateChangeObject);
 	});
 

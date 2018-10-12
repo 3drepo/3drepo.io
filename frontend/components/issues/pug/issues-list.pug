@@ -1,9 +1,9 @@
 #issuesListContainer(
-	ng-switch="vm.toShow" 
+	ng-switch="vm.toShow"
 	tabindex="0"
 	tdr-focus="true"
 	ng-mousemove="vm.initSetFocus()")
-	
+
 	// List
 	div(ng-switch-when="list")
 		.issueListItem(
@@ -13,14 +13,14 @@
 			ng-click="vm.selectIssue(issue)")
 
 			#issuesListItemContent(layout='column')
-				
+
 				div(layout='row')
 					#issueRoleIndicator(ng-style="{backgroundColor: issue.issueRoleColor}")
 					.issueListItemThumbnail(layout="column", layout-align="center center")
 						img(ng-if="issue.thumbnail", ng-src="{{issue.thumbnailPath}}")
 						md-icon.angular-material-icons.issueListItemMissingThumbnail(
 							ng-if="!issue.thumbnail") insert_photo
-					
+
 					div(flex, layout="column")
 						label#issuesListItemTitle(flex="none") {{issue.title}}
 						#issuesListItemInfo(layout="row", layout-align="space-between center", flex="none")
@@ -30,10 +30,11 @@
 									aria-label="Status Icon"
 									ng-style="{'color': issue.statusIcon.colour }") {{issue.statusIcon.icon}}
 
-								label(flex) {{issue.owner}}
-							label {{issue.timeStamp}}
+							label(flex) {{issue.owner}}
+							#issuesListItemDate
+								label {{issue.created | prettyDate}}
 						#issuesListItemDescription
-							label(ng-bind-html="issue.desc | linky:'_blank'") {{issue.desc}}
+							label(ng-bind-html="issue.desc | linky:'_blank':{rel: 'noopener'}") {{issue.desc}}
 
 			.issueJustClosed(ng-if="issue.justClosed" flex="none")
 				.closedText This issue is now closed
@@ -45,10 +46,12 @@
 				ng-click="vm.editIssue(issue)"
 				layout="column"
 				layout-align="center center")
-				
+
 				md-icon.angular-material-icons arrow_forward
 
 
 	// Info
 	.cardInfo(ng-switch-when="info")
 		p {{vm.info}}
+
+	input(id="bcfImportInput" type="file" accept=".zip,.bcfzip,.bcf" style="display: none;")

@@ -16,7 +16,7 @@ md-content#issueInformation(
 			div(layout="row", flex, layout-align="space-between")
 				div(layout="row", flex)
 					#issueRoleIndicator(ng-style="{backgroundColor: vm.issueData.issueRoleColor}")
-					
+
 					div(ng-if="!vm.data"
 						layout="column"
 						flex)
@@ -57,7 +57,7 @@ md-content#issueInformation(
 
 		.issueIssueOwner(ng-if="vm.data", layout="row", layout-align="space-between", flex)
 			label {{vm.data.owner}}
-			label {{vm.data.timeStamp}}
+			label {{vm.data.created | prettyDate}}
 
 	// Status
 	.issueItemContainer#issueAdditional(layout="column", ng-if="vm.showAdditional")
@@ -69,9 +69,9 @@ md-content#issueInformation(
 					ng-model="vm.issueData.priority"
 					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangePriority()")
-			
+
 					md-option(ng-repeat="priority in vm.priorities", value="{{priority.value}}") {{priority.label}}
-			
+
 			md-input-container.issueItemStatus(flex)
 				label Status
 				md-select(
@@ -79,7 +79,7 @@ md-content#issueInformation(
 					ng-model="vm.issueData.status"
 					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangeStatus()")
-					
+
 					md-option(
 						ng-repeat="status in vm.statuses"
 						ng-disabled="vm.disableStatusOption(status)"
@@ -95,7 +95,7 @@ md-content#issueInformation(
 					ng-disabled="!vm.canChangeAssigned()")
 
 					md-option(ng-repeat="job in vm.modelJobs", value="{{job}}") {{job}}
-			
+
 			md-input-container(flex)
 				label Type
 				md-select(
@@ -103,7 +103,7 @@ md-content#issueInformation(
 					ng-model="vm.issueData.topic_type"
 					ng-change="vm.statusChange()"
 					ng-disabled="!vm.canChangeType()")
-					
+
 					md-option(ng-repeat="type in vm.topic_types", value="{{type.value}}") {{type.label}}
 
 		div(layout="row")
@@ -140,7 +140,7 @@ md-content#issueInformation(
 				div(layout='row', layout-align="space-between", flex)
 					label(
 						ng-if="!vm.editingDescription"
-						ng-bind-html="vm.issueData.desc | linky:'_blank'") {{vm.issueData.desc}}
+						ng-bind-html="vm.issueData.desc | linky:'_blank':{rel: 'noopener'}") {{vm.issueData.desc}}
 					md-input-container(flex, ng-if="vm.editingDescription")
 						textarea(
 							ng-model="vm.issueData.desc"
@@ -148,7 +148,7 @@ md-content#issueInformation(
 							tdr-focus="true"
 							ng-focus="vm.textInputHasFocus(true)"
 							ng-blur="vm.textInputHasFocus(false)")
-					
+
 					.issueTextActions(layout="row", ng-if="vm.canChangeDescription()")
 						md-button.md-icon-button.md-accent(
 							aria-label="Edit Description Toggle"
@@ -167,8 +167,8 @@ md-content#issueInformation(
 							md-icon.angular-material-icons(
 								ng-if="vm.editingDescription"
 								style="color:{{vm.editCommentColor}}") save
-							
-			
+
+
 			.issueThumbnail(
 				ng-if="vm.issueData.descriptionThumbnail"
 				ng-click="vm.showScreenShot($event, vm.issueData.viewpoint)")
@@ -195,7 +195,7 @@ md-content#issueInformation(
 						label.issueCommentTitle(
 							flex
 							ng-if="!comment.editing && !comment.action"
-							ng-bind-html="comment.comment | linky:'_blank'")
+							ng-bind-html="comment.comment | linky:'_blank':{rel: 'noopener'}")
 							// Saved auto comment
 
 						// Editing normal comment
@@ -232,14 +232,14 @@ md-content#issueInformation(
 						flex)
 
 						label {{comment.action.text}}
-						
+
 					.issueCommentOwner(
-						ng-if="comment.action" 
+						ng-if="comment.action"
 						layout="row"
 						layout-align="space-between"
 						flex)
 
-						label.issueNotification Notification 
+						label.issueNotification Notification
 						label {{comment.timeStamp}}
 
 					// Thumbnail
@@ -258,7 +258,7 @@ md-content#issueInformation(
 						p Comment saved with orthogonal view
 
 					md-divider
-					
+
 
 md-divider
 
@@ -273,7 +273,7 @@ md-divider
 		img.issueThumbnailImage(
 			id="commentThumbnail"
 			ng-src="{{vm.commentThumbnail}}")
-	
+
 	div(layout="row" flex="100")
 		// New comment
 		.issueItemContainer#issueNewComment(
@@ -281,7 +281,7 @@ md-divider
 			layout-align="start center"
 			flex="100"
 			ng-if="vm.data")
-			
+
 			textarea(
 				flex="100"
 				placeholder="{{vm.getCommentPlaceholderText()}}"
@@ -293,7 +293,7 @@ md-divider
 				ng-blur="vm.textInputHasFocus(false)"
 				ng-disabled="!vm.canComment() || vm.issueFailedToLoad"
 				ng-required="true")
-				
+
 		div(layout="row" layout-align="start center")
 			md-button.md-icon-button(
 
@@ -306,7 +306,7 @@ md-divider
 
 				md-tooltip(md-direction="bottom") {{actionData.label}}
 				md-icon.angular-material-icons(style="color:{{actionData.selected ? '#FF9800' : ''}}") {{actionData.icon}}
-		
+
 		div(flex="100" ng-if="!vm.data")
 
 		div(layout="row" layout-align="end center")
@@ -319,7 +319,7 @@ md-divider
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 			md-progress-circular(md-diameter="20px", md-mode="indeterminate" ng-if="vm.saving")
-		
+
 // Whilst issue is loading
 div.heightFix(
 	ng-if="!vm.modelSettings || !vm.issueData"
@@ -341,6 +341,6 @@ div.heightFix(
 
 	div(
 		layout="column"
-		flex 
+		flex
 		layout-align="center center")
 			h3 Issue Failed to Load

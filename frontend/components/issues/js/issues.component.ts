@@ -69,6 +69,8 @@ class IssuesController implements ng.IController {
 	private hideItem: boolean;
 	private modelSettings: any;
 	private canAddIssue: boolean;
+	private filterChips: Array<{name: string, type: string}> = [];
+	private selectedMenuOption: any;
 
 	constructor(
 		private $scope: any,
@@ -87,7 +89,7 @@ class IssuesController implements ng.IController {
 
 	public $onInit() {
 
-		this.viewerService.setPin({data: null});
+		this.issuesService.removeUnsavedPin();
 
 		this.saveIssueDisabled = true;
 		this.allIssues = [];
@@ -124,9 +126,7 @@ class IssuesController implements ng.IController {
 
 	public $onDestroy() {
 
-		this.allIssues = [];
-		this.issuesToShow = [];
-		this.removeUnsavedPin();
+		this.issuesService.reset();
 
 		let channel = this.notificationService.getChannel(this.account, this.model);
 
@@ -161,6 +161,7 @@ class IssuesController implements ng.IController {
 				this.subModels = this.modelSettings.subModels || [];
 				this.watchNotification();
 
+				this.issuesService.addToAllTypes((this.modelSettings.properties && this.modelSettings.properties.topicTypes || []));
 			}
 		});
 
@@ -177,7 +178,8 @@ class IssuesController implements ng.IController {
 		}, (state) => {
 
 			if (state) {
-				angular.extend(this, state);
+				angular.extend(this, state); // IMPORTANT: This little thing sets the state inside the issues service to
+				// this component. Including issuesToShow, allIssues, etc.
 			}
 
 		}, true);
@@ -187,16 +189,19 @@ class IssuesController implements ng.IController {
 		 */
 		this.$scope.$watch(this.eventService.currentEvent, (event) => {
 
-			if (event.type === this.eventService.EVENT.VIEWER.CLICK_PIN) {
-
-				for (let i = 0; i < this.issuesService.state.allIssues.length; i++) {
-					const iterIssue = this.issuesService.state.allIssues;
-					if (iterIssue[i]._id === event.value.id) {
-						this.editIssue(iterIssue[i]);
-						break;
+			switch (event.type) {
+				case this.eventService.EVENT.VIEWER.CLICK_PIN:
+					for (let i = 0; i < this.issuesService.state.allIssues.length; i++) {
+						const iterIssue = this.issuesService.state.allIssues;
+						if (iterIssue[i]._id === event.value.id) {
+							this.editIssue(iterIssue[i]);
+							break;
+						}
 					}
-				}
-
+					break;
+				case this.eventService.EVENT.VIEWER.PICK_POINT:
+					this.issuesService.handlePickPointEvent(event, this.account, this.model);
+					break;
 			}
 
 		});
@@ -215,6 +220,7 @@ class IssuesController implements ng.IController {
 				}
 
 				this.issuesService.state.displayIssue = null;
+				this.selectedMenuOption = null;
 
 				this.$state.go("home.account.model",
 					{
@@ -236,11 +242,9 @@ class IssuesController implements ng.IController {
 
 	}
 
-	public removeUnsavedPin() {
-		this.viewerService.removePin({id: this.viewerService.newPinId });
-		this.viewerService.setPin({data: null});
-	}
-
+	/**
+	 * Returns true if model loaded.
+	 */
 	public modelLoaded() {
 		return !!this.viewerService.currentModel.model;
 	}
@@ -277,7 +281,6 @@ class IssuesController implements ng.IController {
 	}
 
 	public onIssueCreated(issues) {
-		// TODO: fix submodel part;
 
 		issues.forEach((issue) => {
 			this.shouldShowIssue(issue);
@@ -422,7 +425,7 @@ export const IssuesComponent: ng.IComponentOptions = {
 		model: "=",
 		branch:  "=",
 		revision: "=",
-		filterText: "=",
+		filterChips: "=",
 		modelSettings: "=",
 		show: "=",
 		showAdd: "=",

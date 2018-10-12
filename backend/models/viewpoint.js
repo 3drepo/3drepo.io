@@ -21,10 +21,11 @@ const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
 const db = require("../db/db");
+const ChatEvent = require("./chatEvent");
 
 const view = {};
 
-view.findByUID = function(dbCol, uid, projection) {
+view.findByUID = function (dbCol, uid, projection) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
@@ -38,7 +39,7 @@ view.findByUID = function(dbCol, uid, projection) {
 	});
 };
 
-view.listViewpoints = function(dbCol) {
+view.listViewpoints = function (dbCol) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
@@ -54,7 +55,7 @@ view.listViewpoints = function(dbCol) {
 
 };
 
-view.getThumbnail = function(dbColOptions, uid) {
+view.getThumbnail = function (dbColOptions, uid) {
 
 	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {
 		if (!vp.screenshot) {
@@ -67,8 +68,14 @@ view.getThumbnail = function(dbColOptions, uid) {
 
 };
 
-view.updateAttrs = function(dbCol, id, data) {
+view.updateViewpoint = function (dbCol, sessionId, data, id) {
+	return this.updateAttrs(dbCol, id, data).then((result) => {
+		ChatEvent.viewpointsChanged(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+		return result;
+	});
+};
 
+view.updateAttrs = function (dbCol, id, data) {
 	const toUpdate = {};
 	const fieldsCanBeUpdated = ["name"];
 
@@ -80,13 +87,13 @@ view.updateAttrs = function(dbCol, id, data) {
 	});
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
-		return _dbCol.update({_id: id}, {$set: toUpdate}).then(() => {
-			return {_id: utils.uuidToString(id)};
+		return _dbCol.update({ _id: id }, { $set: toUpdate }).then(() => {
+			return { _id: utils.uuidToString(id) };
 		});
 	});
 };
 
-view.createViewpoint = function(dbCol, data) {
+view.createViewpoint = function (dbCol, sessionId, data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		let cropped;
 
@@ -103,7 +110,7 @@ view.createViewpoint = function(dbCol, data) {
 			const thumbnailUrl = `${dbCol.account}/${dbCol.model}/viewpoints/${utils.uuidToString(id)}/thumbnail.png`;
 
 			if (croppedScreenshot) {
-				// Remove the base64 version of the screenshot
+				// Remove the base64 version of the screenshotgetViewpointThumbnail
 				delete data.screenshot.base64;
 				data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
 				data.screenshot.thumbnail = thumbnailUrl;
@@ -117,7 +124,10 @@ view.createViewpoint = function(dbCol, data) {
 			};
 
 			return _dbCol.insert(newViewpoint).then(() => {
-				return this.updateAttrs(dbCol, id, data).catch((err) => {
+				return this.updateAttrs(dbCol, id, data).then((result) => {
+					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+					return result;
+				}).catch((err) => {
 					// remove the recently saved new view as update attributes failed
 					return this.deleteViewpoint(dbCol, id).then(() => {
 						return Promise.reject(err);
@@ -128,16 +138,19 @@ view.createViewpoint = function(dbCol, data) {
 	});
 };
 
-view.deleteViewpoint = function(dbCol, id) {
-
+view.deleteViewpoint = function (dbCol, idStr, sessionId) {
+	let id = idStr;
 	if ("[object String]" === Object.prototype.toString.call(id)) {
 		id = utils.stringToUUID(id);
 	}
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
-		return _dbCol.findOneAndDelete({ _id : id}).then((deleteResponse) => {
-			if(!deleteResponse.value) {
+		return _dbCol.findOneAndDelete({ _id: id }).then((deleteResponse) => {
+			if (!deleteResponse.value) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+			}
+			if(sessionId) {
+				ChatEvent.viewpointsDeleted(sessionId, dbCol.account, dbCol.model, idStr);
 			}
 		});
 	});

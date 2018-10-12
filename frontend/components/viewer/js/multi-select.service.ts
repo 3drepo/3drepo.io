@@ -59,10 +59,6 @@ export class MultiSelectService {
 	}
 
 	public handleKey(key: number, keyDown: boolean) {
-		if (this.ViewerService.pin.pinDropMode) {
-			return;
-		}
-
 		switch (key) {
 			case 16:
 				// Shift
@@ -93,6 +89,18 @@ export class MultiSelectService {
 
 	public isDecumMode() {
 		return this.decumMode;
+	}
+
+	public toggleAreaSelect(on: boolean) {
+		if (this.areaSelectMode !== on) {
+			this.areaSelectMode = on;
+			if (on) {
+				this.ViewerService.startAreaSelect();
+			} else {
+				this.ViewerService.stopAreaSelect();
+			}
+			this.determineCursorIcon();
+		}
 	}
 
 	private determineCursorIcon() {
@@ -141,18 +149,6 @@ export class MultiSelectService {
 		if (this.decumMode !== on) {
 			this.decumMode = on;
 			this.accumMode = on ? false : this.accumMode;
-			this.determineCursorIcon();
-		}
-	}
-
-	private toggleAreaSelect(on: boolean) {
-		if (this.areaSelectMode !== on) {
-			this.areaSelectMode = on;
-			if (on) {
-				this.ViewerService.startAreaSelect();
-			} else {
-				this.ViewerService.stopAreaSelect();
-			}
 			this.determineCursorIcon();
 		}
 	}

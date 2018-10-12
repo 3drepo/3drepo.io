@@ -34,7 +34,8 @@ export class StateManagerService {
 		"PanelService",
 		"TreeService",
 		"ViewerService",
-		"IssuesService"
+		"IssuesService",
+		"RisksService"
 	];
 
 	private state: any;
@@ -63,7 +64,8 @@ export class StateManagerService {
 		private PanelService: any,
 		private TreeService: any,
 		private ViewerService: any,
-		private IssuesService: any
+		private IssuesService: any,
+		private RisksService: any
 	) {
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
@@ -97,6 +99,7 @@ export class StateManagerService {
 		this.TreeService.reset();
 		this.ViewerService.reset();
 		this.IssuesService.reset();
+		this.RisksService.reset();
 	}
 
 	public setupStateStack() {
@@ -318,7 +321,6 @@ export class StateManagerService {
 			delete this.state[letName];
 		} else {
 			if (this.state[letName] !== value) {
-				this.state.changing = true;
 				this.changedState[letName] = value;
 			}
 		}
@@ -358,10 +360,11 @@ export class StateManagerService {
 		const updateLocation = !dontUpdateLocation ? true : false; // In case of null
 		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
 
-		// TODO: Do we have to use $timeout? :(
+		// This timeout is needed or changing revision doesn't work... for some reason.
 		this.$timeout(() => {
 			this.state.changing = false;
 		});
+
 	}
 
 	public refreshHandler(event) {

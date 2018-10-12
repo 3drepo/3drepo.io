@@ -21,13 +21,11 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state("home", {
 		name: "home",
-		url: "/",
+		url: "/?page&teamspace&tab&project&view&modelId",
 		resolve: {
 			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
 				StateManager.state.authInitialized = false;
 				const finishedAuth = $q.defer();
-
-				StateManager.state.changing = true;
 
 				AuthService.init()
 					.then(() => {

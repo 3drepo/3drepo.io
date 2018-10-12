@@ -647,22 +647,25 @@ describe("Enrolling to a subscription", function () {
 		describe("and then assigning it", function() {
 
 			it("to a non existing user should fail", function(done) {
-				agent.post(`/${username}/members/payment_non_existing`)
+				agent.post(`/${username}/members`)
+					.send({user: "payment_non_existing"})
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 						done(err);
 					});
 			});
 
-			it("to a existing user should succeed", function(done) {
-				agent.post(`/${username}/members/${username2}`)
+			it("to an existing user should succeed", function(done) {
+				agent.post(`/${username}/members`)
+					.send({user: username2})
 					.expect(200, function(err, res) {
 						done(err);
 					});
 			});
 
-			it("to a user assigned to another license should fail", function(done) {
-				agent.post(`/${username}/members/${username2}`)
+			it("to an user assigned to another license should fail", function(done) {
+				agent.post(`/${username}/members`)
+					.send({user: username2})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_ALREADY_ASSIGNED.value);
 						done(err);
@@ -670,14 +673,16 @@ describe("Enrolling to a subscription", function () {
 			});
 
 			it("to another (3rd) user should succeed", function(done) {
-				agent.post(`/${username}/members/${username3}`)
+				agent.post(`/${username}/members`)
+					.send({user: username3})
 					.expect(200, function(err, res) {
 						done(err);
 					});
 			});
 
 			it("to another (4th) user should fail", function(done) {
-				agent.post(`/${username}/members/${username4}`)
+				agent.post(`/${username}/members`)
+					.send({user: username4})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
 						done(err);

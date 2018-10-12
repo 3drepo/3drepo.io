@@ -509,13 +509,15 @@ export class UnityUtil {
 	/**
 	 * Add a pin
 	 * @param {string} id - Identifier for the pin
+	 * @param {string} type - Identifier for the pin type
 	 * @param {number[]} position - point in space where the pin should generate
 	 * @param {number[]} normal - normal vector for the pin (note: this is no longer used)
 	 * @param {number[]} colour - RGB value for the colour of the pin
 	 */
-	public static dropPin(id, position, normal, colour) {
+	public static dropPin(id, type, position, normal, colour) {
 		const params = {
 			id,
+			type,
 			position,
 			normal,
 			color : colour
@@ -601,21 +603,24 @@ export class UnityUtil {
 	 * 					or when you want a specific set of objects to stay highlighted when toggle mode is on
 	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
-		const params: any = {
-			database : account,
-			model,
-			ids : idArr,
-			toggle : toggleMode,
-			forceReHighlight
-		};
 
-		if (color) {
-			params.color = color;
-		} else  {
-			params.color = UnityUtil.defaultHighlightColor;
+		const maxNodesPerReq = 20000;
+		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
+			setTimeout(() => {
+				const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
+				const arr = idArr.slice(i, endIdx);
+				const params: any = {
+					database : account,
+					model,
+					ids : arr,
+					toggle : toggleMode,
+					forceReHighlight,
+					color: color ? color : UnityUtil.defaultHighlightColor
+				};
+				UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			}, i > 0 ? 100 : 0);
 		}
 
-		UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
 	/**
@@ -787,7 +792,9 @@ export class UnityUtil {
 	 *  @param {Object} promise - promises where the viewpoint will be returned when the promise resolves
 	 */
 	public static requestViewpoint(account, model, promise) {
+		// console.log('requestViewPoint', account, model, promise );
 		if (UnityUtil.vpPromise != null) {
+			// console.log("unity no help", UnityUtil.vpPromise);
 			UnityUtil.vpPromise.then(UnityUtil._requestViewpoint(account, model, promise));
 		} else {
 			UnityUtil._requestViewpoint(account, model, promise);

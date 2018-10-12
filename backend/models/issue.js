@@ -587,11 +587,8 @@ schema.statics.createIssue = function(dbColOptions, data) {
 				flag: 1
 			});
 
-			if(data.viewpoint.screenshot) {
-				data.viewpoint.screenshot = {
-					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
-					flag: 1
-				};
+			if (data.viewpoint.screenshot) {
+				data.viewpoint.screenshot = utils.createScreenshotEntry(data.viewpoint.screenshot);
 			}
 
 			issue.viewpoints.push(data.viewpoint);
@@ -638,7 +635,6 @@ schema.statics.createIssue = function(dbColOptions, data) {
 		}).then(settings => {
 
 			const cleaned = issue.clean(_.get(settings, "type", ""), _.get(settings, "properties.code", ""));
-
 			ChatEvent.newIssues(data.sessionId, dbColOptions.account, dbColOptions.model, [cleaned]);
 
 			return Promise.resolve(cleaned);
@@ -786,10 +782,9 @@ schema.methods.updateComment = function(commentIndex, data) {
 					data.viewpoint.shown_group_id = stringToUUID(data.viewpoint.shown_group_id);
 				}
 
-				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
-					content: new Buffer.from(data.viewpoint.screenshot, "base64"),
-					flag: 1
-				});
+				if (data.viewpoint.screenshot) {
+					data.viewpoint.screenshot = utils.createScreenshotEntry(data.viewpoint.screenshot);
+				}
 
 				data.viewpoint.scribble && (data.viewpoint.scribble = {
 					content: new Buffer.from(data.viewpoint.scribble, "base64"),

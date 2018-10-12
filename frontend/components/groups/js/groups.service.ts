@@ -20,7 +20,6 @@ export class GroupsService {
 	public static $inject: string[] = [
 		"$q",
 		"$timeout",
-
 		"APIService",
 		"TreeService",
 		"MultiSelectService",
@@ -50,7 +49,7 @@ export class GroupsService {
 			groups: [],
 			selectedGroup: {},
 			colorOverride: {},
-			totalSelectedMeshes : 0,
+			totalSelectedMeshes: 0,
 			multiSelectedGroups: [],
 			overrideAll: false
 		};
@@ -67,6 +66,21 @@ export class GroupsService {
 			});
 	}
 
+	/**
+	 * Filter groups using @param searchQuery
+	 */
+	public groupsFilterSearch(searchQuery: string): any[] {
+		return this.state.groups.filter((group) => {
+			const toKeep = this.stringSearch(group.name, searchQuery)
+				|| this.stringSearch(group.description, searchQuery)
+				|| this.stringSearch(group.author, searchQuery);
+
+			if (!toKeep) {
+				this.unhighlightGroup(group);
+			}
+			return toKeep;
+		});
+	}
 	/**
 	 * Check if a group is currently color overriden
 	 * @param group the group to check
@@ -311,7 +325,7 @@ export class GroupsService {
 	 * @param model the model id for the group
 	 */
 	public deleteHighlightedGroups(teamspace: string, model: string) {
-		const groupsToDelete = this.state.groups.filter( (g) => g.highlighted);
+		const groupsToDelete = this.state.groups.filter((g) => g.highlighted);
 		return this.deleteGroups(teamspace, model, groupsToDelete);
 	}
 
@@ -450,9 +464,9 @@ export class GroupsService {
 	public getGroups(teamspace: string, model: string, revision: string) {
 		let groupUrl;
 		if (revision) {
-			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true`;
+			groupUrl = `${teamspace}/${model}/groups/revision/${revision}/?noIssues=true&noRisks=true`;
 		} else {
-			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true`;
+			groupUrl = `${teamspace}/${model}/groups/revision/master/head/?noIssues=true&noRisks=true`;
 		}
 
 		return this.APIService.get(groupUrl)
@@ -528,7 +542,7 @@ export class GroupsService {
 		const groupsCount = this.state.groups.length;
 
 		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
-			const nextGroup = this.state.groups[ (groupIndex + 1) % groupsCount];
+			const nextGroup = this.state.groups[(groupIndex + 1) % groupsCount];
 			this.selectGroup(nextGroup);
 		}
 
@@ -542,7 +556,7 @@ export class GroupsService {
 	 * @param ids the ids of the groups to be deleted
 	 */
 	public deleteStateGroupsByIds(ids: string[]) {
-		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		const groups = this.state.groups.filter((f) => ids.indexOf(f._id) >= 0);
 		groups.forEach(this.deleteStateGroup.bind(this));
 	}
 
@@ -552,9 +566,9 @@ export class GroupsService {
 	 * @param ids the ids of the groups to be deleted
 	 */
 	public deleteStateGroupsByIdsDeferred(ids: string[]) {
-		const groups = this.state.groups.filter( (f) => ids.indexOf(f._id) >= 0);
+		const groups = this.state.groups.filter((f) => ids.indexOf(f._id) >= 0);
 		groups.forEach((g) => g.justBeenDeleted = true);
-		this.$timeout(this.deleteStateGroupsByIds.bind(this, ids) , 4000);
+		this.$timeout(this.deleteStateGroupsByIds.bind(this, ids), 4000);
 	}
 
 	/**
@@ -583,7 +597,7 @@ export class GroupsService {
 	 */
 	public areGroupsEqual(groupA: any, groupB: any): boolean {
 		const fields = ["_id", "__v", "name", "author", "description", "createdAt", "updatedBy", "updatedAt", "color"];
-		const areEqual = fields.every( (f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]) );
+		const areEqual = fields.every((f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]));
 
 		return areEqual;
 	}
@@ -597,20 +611,20 @@ export class GroupsService {
 		const objAIds = this.getFullIdsForNodes(objectsA);
 		const objBIds = this.getFullIdsForNodes(objectsB);
 		let areEqual = objAIds.length === objBIds.length;
-		areEqual =  areEqual && objAIds.every((i) => objBIds.indexOf(i) >=  0);
+		areEqual = areEqual && objAIds.every((i) => objBIds.indexOf(i) >= 0);
 		return areEqual;
 	}
 
 	private getFullIdsForNodes(nodes: any[]) {
 		return nodes.reduce((obj, currentVal) => {
-			const nsp = currentVal.account + "." + currentVal.model ;
-			let ids = obj.concat(currentVal.shared_ids.map( (id) => nsp + "." + id ));
+			const nsp = currentVal.account + "." + currentVal.model;
+			let ids = obj.concat(currentVal.shared_ids.map((id) => nsp + "." + id));
 			if (Array.isArray(currentVal.ifc_guids)) {
-				ids = ids.concat(currentVal.ifc_guids.map( (id) => nsp + "." + id ));
+				ids = ids.concat(currentVal.ifc_guids.map((id) => nsp + "." + id));
 			}
 
 			return ids;
-		} , []);
+		}, []);
 	}
 
 	/**
@@ -627,6 +641,15 @@ export class GroupsService {
 		this.state.selectedGroup.focus = true;
 	}
 
+	// Helper  for searching strings
+	private stringSearch(superString, subString) {
+		if (!superString) {
+			return false;
+		}
+
+		return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+	}
+
 	/**
 	 * Highlight the group. This updates the internal states and also
 	 * make calls to highlight the meshes
@@ -636,7 +659,7 @@ export class GroupsService {
 		group.highlighted = true;
 
 		const color = group.color ? group.color.map((c) => c / 255) :
-						this.ViewerService.getDefaultHighlightColor();
+			this.ViewerService.getDefaultHighlightColor();
 
 		if (!this.state.multiSelectedGroups.includes(group)) {
 			this.state.multiSelectedGroups.push(group);

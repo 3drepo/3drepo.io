@@ -15,64 +15,47 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 class PasswordChangeController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
-
 		"APIService",
 		"StateManager",
 		"PasswordService"
 	];
 
-	private promise;
-	private passwordChanged;
+	private pageState;
 	private showProgress;
-	private enterKey;
-	private messageColour;
-	private messageErrorColour;
-	private buttonDisabled;
-	private password;
+	private enterKey = 13;
+	private confirmPassword;
 	private message;
 	private newPassword;
 	private token;
-	private messageColor;
 	private username;
 	private passwordStrength;
+	private passwordConfirmMessage;
+	private newPasswordValid: boolean;
+
+	private PAGE_STATE = {
+		CHANGING: 0,
+		CHANGED: 1,
+		INVALID: 2
+	};
 
 	constructor(
-		private $scope: ng.IScope,
-
+		private $scope: any,
 		private APIService: any,
 		private StateManager: any,
 		private PasswordService: any
-	) {}
+	) { }
 
 	public $onInit() {
-		this.passwordChanged = false;
 		this.showProgress = false;
-		this.enterKey = 13;
-		this.messageColour = "rgba(0, 0, 0, 0.7)";
-		this.messageErrorColour = "#F44336";
-		this.buttonDisabled = true;
-		this.PasswordService.addPasswordStrengthLib();
+		if (this.token && this.username) {
+			this.pageState = this.PAGE_STATE.CHANGING;
+		} else {
+			this.pageState = this.PAGE_STATE.INVALID;
+		}
 		this.watchers();
 	}
 
@@ -82,61 +65,16 @@ class PasswordChangeController implements ng.IController {
 			this.message = "";
 			if (this.newPassword !== undefined) {
 				const result = this.PasswordService.evaluatePassword(this.newPassword);
-				this.passwordStrength = this.PasswordService.getPasswordStrength(this.newPassword, result.score);
-				this.checkInvalidPassword(result);
+				this.newPasswordValid = result.validPassword;
+				this.passwordStrength = `(${result.comment})`;
+				this.checkPasswordMatches();
+				this.$scope.password.new.$setValidity("invalid", this.newPasswordValid);
 			}
 		});
 
-		this.$scope.$watch("vm.token", () => {
-			if (!this.token) {
-				this.messageColor = this.messageErrorColour;
-				this.showProgress = false;
-				this.message = "Token is missing as URL parameter for password change!";
-			}
+		this.$scope.$watch("vm.confirmPassword", () => {
+			this.checkPasswordMatches();
 		});
-
-		this.$scope.$watch("vm.username", () => {
-			if (!this.username) {
-				this.messageColor = this.messageErrorColour;
-				this.showProgress = false;
-				this.message = "Username is missing as URL parameter for password change!";
-			}
-		});
-
-	}
-
-	public checkInvalidPassword(result) {
-		switch (result.score) {
-		case 0:
-			this.invalidatePassword(result);
-			break;
-		case 1:
-			this.invalidatePassword(result);
-			break;
-		case 2:
-			this.validatePassword();
-			break;
-		case 3:
-			this.validatePassword();
-			break;
-		case 4:
-			this.validatePassword();
-			break;
-		}
-	}
-
-	public invalidatePassword(result) {
-		// this.$scope.password.new.$setValidity("required", false);
-		this.buttonDisabled = true;
-		this.message = "Password is too weak; " + result.feedback.suggestions.join(" ");
-		this.messageColor = this.messageErrorColour;
-	}
-
-	public validatePassword() {
-		// this.$scope.password.new.$setValidity("required", true);
-		this.buttonDisabled = false;
-		this.message = "";
-		this.messageColor = this.messageColour;
 	}
 
 	public passwordChange(event) {
@@ -145,61 +83,45 @@ class PasswordChangeController implements ng.IController {
 				this.doPasswordChange();
 			}
 		} else {
+			// The user called this function via clicking the UI button
 			this.doPasswordChange();
 		}
+
 	}
 
 	public goToLoginPage() {
 		this.StateManager.goHome();
 	}
 
-	public doPasswordChange() {
-		if (this.username && this.token) {
-			if (this.newPassword && this.newPassword !== "") {
+	private checkPasswordMatches() {
+		const matched = this.confirmPassword === this.newPassword;
+		const showMessage = this.confirmPassword !== undefined &&
+									this.confirmPassword !== "" &&
+									!matched;
+		this.passwordConfirmMessage = showMessage ? "(Password Mismatched)" : "";
+		this.$scope.password.confirm.$setValidity("invalid", matched);
+	}
 
-				this.messageColor = this.messageColour;
-				this.message = "Please wait...";
-				this.showProgress = true;
-				this.buttonDisabled = true;
-				const url = this.username + "/password";
+	private doPasswordChange() {
+		const allowSubmission = this.newPasswordValid && this.newPassword === this.confirmPassword && !this.showProgress;
+		if (allowSubmission) {
+			this.message = "";
+			this.showProgress = true;
+			const url = this.username + "/password";
 
-				this.APIService.put(url, {
-					newPassword: this.newPassword,
-					token: this.token
-				})
-					.then((response) => {
+			this.APIService.put(url, {
+				newPassword: this.newPassword,
+				token: this.token
+			}).then((response) => {
 
-						this.showProgress = false;
-						if (response.status === 400) {
-							this.buttonDisabled = false;
-							this.messageColor = this.messageErrorColour;
-							this.message = "Error changing password: " + response.data.message;
-						} else {
-							this.buttonDisabled = true;
-							this.passwordChanged = true;
-							this.showProgress = false;
-							this.messageColor = this.messageColour;
-							this.message = "Your password has been reset. Please go to the login page.";
-						}
-					})
-					.catch((error) => {
-						this.buttonDisabled = false;
-						this.showProgress = false;
-						this.messageColor = this.messageErrorColour;
-						this.message = "Error changing password";
-						if (error.data.message) {
-							this.message += ": " + error.data.message;
-						}
-					});
-
-			} else {
-				this.messageColor = this.messageErrorColour;
-				this.message = "A new password must be entered";
-				this.buttonDisabled = true;
-			}
+				this.showProgress = false;
+				this.pageState = this.PAGE_STATE.CHANGED;
+			})
+			.catch((error) => {
+				this.showProgress = false;
+				this.message = `Failed: ${error.data.message}`;
+			});
 		}
-		this.buttonDisabled = true;
-		this.message = "Token or username is missing!";
 	}
 
 }

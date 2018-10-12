@@ -84,6 +84,7 @@
 		FILE_IMPORT_UNKNOWN_ERR: { message: "Import failed: Unknown error", status: 500 },
 		FILE_IMPORT_MISSING_TEXTURES: { message: "Imported but missing textures", status: 400 },
 		FILE_IMPORT_MISSING_NODES: { message: "Imported but missing nodes (corrupted file?)", status: 400 },
+		FILE_IMPORT_STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		FILE_IMPORT_BUNDLE_GEN_FAILED: { message: "Import failed: Failed to generate unity files", status: 500 },
 		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Import failed: Untriangulated meshes", status: 400 },
 		FILE_IMPORT_NO_MESHES: { message: "Import failed: Model does not have geometry", status: 400 },
@@ -92,6 +93,7 @@
 		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Import failed: Unsupported FBX version (Supported: 2011, 2012, 2013)", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
+		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN import is currently not supported", status: 400 },
 
 		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
 		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
@@ -141,7 +143,6 @@
 		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
 		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
 
-		STASH_GEN_FAILED: { message: "Failed to regenerate stash: Unknown error", status: 500 },
 		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
@@ -150,11 +151,20 @@
 		ISSUE_COMMENT_SEALED: { message: "Can't edit a sealed comment or a comment in closed issue", status: 400 },
 		ISSUE_CLOSED_ALREADY: { message: "Issue closed already", status: 400 },
 		PROJECT_NOT_FOUND: { message: "Project not found", status: 404 },
+
+		RISK_NO_NAME: { message: "Create risk without name", status: 400 },
+		RISK_LIKELIHOOD_INVALID: { message: "Invalid risk likelihood", status: 400 },
+		RISK_CONSEQUENCE_INVALID: { message: "Invalid risk consequence", status: 400 },
+		RISK_LEVEL_READONLY: { message: "Level of risk cannot be changed", status: 400 },
+		RISK_NOT_FOUND: { message: "Risk not found", status: 404 },
+		RISK_UPDATE_FAILED: { message: "Failed updating risk", status: 500 },
+		RISK_UPDATE_PERMISSION_DECLINED: { message: "No permission to update risk", status: 400 },
+
+		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
-		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		EMAIL_EXISTS: { message: "Email already exists", status: 400 },
 		QUEUE_NO_LISTENER: { message: "There is currently no worker listening to the queue, you model import is delayed", status: 400 },
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },

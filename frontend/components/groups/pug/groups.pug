@@ -7,15 +7,16 @@ div.groupsContainer
         h3 Loading groups...
 
     div.groupsList(
-        ng-show="vm.toShow === 'groups' && vm.groups.length > 0 || vm.loading"
+        ng-if="vm.toShow === 'groups' && vm.groupsToShow.length > 0 || vm.loading"
     )
 
         div.group(
             layout="column"
-            ng-if="vm.groups.length > 0"
+            ng-if="vm.groupsToShow.length > 0"
             ng-click="vm.selectGroup(group)"
+            filter-text="vm.filterText"
             style="background-color: {{group.highlighted ? ' rgba(186, 197, 225, 0.20)' : 'initial'}};"
-            ng-repeat="group in vm.groups track by $index")
+            ng-repeat="group in vm.groupsToShow track by $index")
 
             div.groupDetails(layout="row")
                 div.groupMain(layout="row")
@@ -67,9 +68,14 @@ div.groupsContainer
                 .message This group has been deleted
 
     .cardInfo(
-    	ng-show="vm.toShow === 'groups' && vm.groups.length === 0 && !vm.loading"
+    	ng-if="vm.toShow === 'groups' && vm.groups.length === 0 && !vm.loading"
         )
         p No groups have been created yet
+
+    .cardInfo(
+    	ng-if="vm.toShow === 'groups' && vm.groups.length > 0 && vm.groupsToShow.length === 0"
+        )
+        p No groups found
 
     div.groupContainer(
         layout="column"
@@ -80,7 +86,7 @@ div.groupsContainer
             div.openedGroupColorBar(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")
             div(layout="column" flex)
                 md-input-container
-                    label Group Name
+                    label(for="groupName") Group Name
                     input#groupName(
                         type="text"
                         ng-disabled="!vm.canAddGroup"
@@ -91,7 +97,8 @@ div.groupsContainer
             label Group Description
             textarea.groupDescriptionInput(
                 ng-disabled="!vm.canAddGroup"
-                ng-model="vm.selectedGroup.description")
+                ng-model="vm.selectedGroup.description"
+            title="groupDescriptionInput")
 
         md-container.groupObjectMetaContainer(
             layout="row"
@@ -131,7 +138,7 @@ div.groupsContainer
         div(flex="50" layout="row" layout-align="start center")
             button(class="md-icon-button md-button md-ink-ripple"
                 type="button"
-                ng-if="vm.groups.length > 0"
+                ng-if="vm.groupsToShow.length > 0"
                 aria-label="Delete"
                 ng-show="vm.toShow === 'groups'"
                 ng-click="vm.deleteHighlightedGroups()")
@@ -164,8 +171,8 @@ div.groupsContainer
                                         style="background-color: {{vm.getRGBA(color)}};")
                         div(layout="column")
                             md-input-container.groupHexColorContainer(layout="column" layout-align="start center")
-                                label Hex Colour
-                                input.groupHexColor(ng-model="vm.hexColor")
+                                label(for="groupHexColor") Hex Colour
+                                input.groupHexColor(ng-model="vm.hexColor" title="groupHexColor")
                             div(layout-fill).groupCurrentColorHolder
                                 label.groupCurrentColor Current Colour
                                 div.groupCurrentColorBlock(style="background-color: {{vm.getGroupRGBAColor(vm.selectedGroup)}};")

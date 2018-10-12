@@ -98,7 +98,6 @@ function sendResetPasswordEmail(to, data) {
 	if(!data.url) {
 		return rejectNoUrl("forgotPassword");
 	}
-
 	const template = require("./templates/forgotPassword");
 	return sendEmail(template, to, data);
 }

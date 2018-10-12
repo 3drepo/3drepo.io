@@ -17,6 +17,7 @@
 
 "use strict";
 
+const {map, compact, uniq} = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
@@ -117,7 +118,6 @@ schema.statics.addJob = function(teamspace, jobData) {
 			newJobEntry.color = jobData.color;
 		}
 		return newJobEntry.save();
-
 	});
 };
 
@@ -148,13 +148,16 @@ schema.statics.removeJob = function(teamspace, jobName) {
 
 schema.statics.getAllJobs = function(teamspace) {
 	return this.find({account: teamspace}).then(jobs => {
-		const jobList = [];
-		jobs.forEach(job => {
-			jobList.push({_id: job._id, color: job.color});
+		return jobs.map(({_id, color}) => {
+			return {_id, color};
 		});
-		return jobList;
 	});
+};
 
+schema.statics.getAllColors = function(teamspace) {
+	return Job.getAllJobs(teamspace).then((jobs) => {
+		return compact(uniq(map(jobs, "color")));
+	});
 };
 
 const Job = ModelFactory.createClass(

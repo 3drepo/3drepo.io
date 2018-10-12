@@ -19,11 +19,23 @@ declare const UnityUtil;
 export class Pin {
 
 	public static pinColours = {
-		blue : [12 / 255, 47 / 255, 84 / 255], // [0, 69/255, 148/255],
-		yellow : [255 / 255, 255 / 255, 54 / 255]
+		blue: [12 / 255, 47 / 255, 84 / 255], // "#oc2f54", // [0, 69/255, 148/255],
+		yellow: [255 / 255, 255 / 255, 54 / 255], // "#ffff36",
+		red: [220 / 255, 20 / 255, 60 / 255], // "#dc143c",
+		maroon: [128 / 255, 0, 0], // "#800000",
+		crimson: [220 / 255, 20 / 255, 60 / 255], // "#dc143c",
+		darkOrange: [255 / 255, 140 / 255, 0], // "#ff8c00",
+		orange: [255 / 255, 165 / 255, 0], // "#ffa500",
+		green: [0, 128 / 255, 0], // "#008000",
+		medSeaGreen: [60 / 255, 179 / 255, 113 / 255], // "#3cb371",
+		limeGreen: [50 / 255, 205 / 255, 50 / 255], // "#32cd32",
+		lightGreen: [144 / 255, 238 / 255, 144 / 255], // "#90ee90",
+		lemonChiffon: [255 / 255, 255 / 255, 0],
+		lightYellow: [255 / 255, 255 / 255, 100]
 	};
 
 	public id: number;
+	public type: string;
 	public position: string;
 	public highlighted: boolean;
 	public norm;
@@ -40,17 +52,18 @@ export class Pin {
 	public coneDepth;
 
 	constructor(
-		id: number, position: string, norm, colours, viewpoint,
+		id: number, type: string,  position: string, norm, colours, viewpoint,
 		account: string, model: string
 	) {
 
 		this.id = id;
+		this.type = type;
 
 		this.highlighted = false;
 		this.viewpoint = viewpoint;
 		this.account = account;
 		this.model = model;
-		UnityUtil.dropPin(id, position, norm, colours);
+		UnityUtil.dropPin(id, type, position, norm, colours);
 
 	}
 

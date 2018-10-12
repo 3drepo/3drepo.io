@@ -14,6 +14,9 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { APIService } from "../../home/js/api.service";
+import { IssuesService } from "./issues.service";
+import { IChip } from "../../panel/js/panel-card-chips-filter.component";
 
 class IssuesListController implements ng.IController {
 
@@ -23,6 +26,7 @@ class IssuesListController implements ng.IController {
 		"$timeout",
 		"$compile",
 		"$element",
+		"$filter",
 
 		"APIService",
 		"IssuesService",
@@ -44,6 +48,7 @@ class IssuesListController implements ng.IController {
 	private revision: string;
 	private filterText: string;
 	private bcfInputHandler: any;
+	private filterChips: IChip[];
 
 	constructor(
 		private $scope,
@@ -51,10 +56,11 @@ class IssuesListController implements ng.IController {
 		private $timeout,
 		private $compile,
 		private $element,
+		private $filter,
 
-		private APIService,
-		private IssuesService,
-		private ClientConfigService
+		private apiService: APIService,
+		private issuesService: IssuesService,
+		private clientConfigService: any
 	) {}
 
 	public $onInit() {
@@ -63,7 +69,7 @@ class IssuesListController implements ng.IController {
 		this.focusedIssueIndex = null;
 		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
-		this.setupBcfImportInput();
+		this.setupBcfImportInput(); // Necessary since angularjs doesnt support ng-change with file typeinputs.
 		this.watchers();
 
 	}
@@ -72,35 +78,44 @@ class IssuesListController implements ng.IController {
 
 		this.$scope.$watch(
 			() => {
-				return this.IssuesService.state.allIssues;
+				return this.issuesService.state.allIssues;
 			},
 			() => {
-
-				if (this.IssuesService.state.allIssues) {
-					if (this.IssuesService.state.allIssues.length > 0) {
-
-						this.toShow = "list";
-						this.setupIssuesToShow();
-						// this.checkShouldShowIssue();
-
-					} else {
-						this.toShow = "info";
-						this.info = "There are currently no open issues";
-						this.contentHeight({height: this.IssuesService.state.heights.infoHeight});
-					}
-				}
-
-				this.allIssues = this.IssuesService.state.allIssues;
-
+				this.allIssues = this.issuesService.state.allIssues;
+				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
 			},
 			true
 		);
 
-		this.$scope.$watch("vm.filterText", () => {
+		this.$scope.$watch("vm.issuesToShow", () => {
+			this.setContentAndSize();
+			this.issuesService.showIssuePins();
+		});
 
-			// Filter text
-			this.setupIssuesToShow();
+		this.$scope.$watchCollection("vm.filterChips", (chips: IChip[], oldChips: IChip[]) => {
+			const dateFromChip = chips.find((c) => c.type === "date_from");
+			const dateToChip = chips.find((c) => c.type === "date_to");
 
+			const oldDateFromChip = oldChips.find((c) => c.type === "date_from");
+			const oldDateToChip = oldChips.find((c) => c.type === "date_to");
+
+			if (!!dateFromChip && !!dateToChip) {
+				if (dateFromChip.value.getTime() > dateToChip.value.getTime()) {
+					if (!oldDateFromChip  || dateFromChip.value !== oldDateFromChip.value) {
+						this.issuesService.setToDateMenuValue(dateFromChip.value);
+						dateToChip.value = dateFromChip.value;
+						dateToChip.name = this.$filter("date")(dateToChip.value, "d/M/yyyy");
+					}
+
+					if (!oldDateToChip  || dateToChip.value !== oldDateToChip.value) {
+						this.issuesService.setFromDateMenuValue(dateToChip.value);
+						dateFromChip.value = dateToChip.value;
+						dateFromChip.name = this.$filter("date")(dateFromChip.value, "d/M/yyyy");
+					}
+				}
+			}
+
+			this.issuesService.setupIssuesToShow(this.model, chips);
 		});
 
 		this.$scope.$watch("vm.menuOption", () => {
@@ -109,14 +124,14 @@ class IssuesListController implements ng.IController {
 			if (this.menuOption && this.menuOption.value) {
 
 				this.handleMenuOptions();
-
+				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
 			}
 
 		});
 
 		this.$scope.$watch(
 			() => {
-				return this.IssuesService.getDisplayIssue();
+				return this.issuesService.getDisplayIssue();
 			},
 			(issueToDisplay) => {
 				if (issueToDisplay) {
@@ -129,121 +144,100 @@ class IssuesListController implements ng.IController {
 	}
 
 	public setupBcfImportInput() {
+		document.getElementById("bcfImportInput").addEventListener("change", this.onChangeBCFInput.bind(this));
+	}
 
-		if (this.bcfInputHandler) {
-			return;
+	public onChangeBCFInput(event: Event): void {
+		const input: HTMLInputElement = event.currentTarget as HTMLInputElement;
+
+		if (input.files) {
+			this.importBcf({file: input.files[0]});
+		} else {
+			console.error("No file selected");
 		}
 
-		const template = `<input
-							id='bcfImportInput'
-							type='file'
-							style='display: none;'
-							accept='.zip,.bcfzip,.bcf'>`;
-
-		const linkFn = this.$compile(template);
-		const content = linkFn(this.$scope);
-		this.$element.append(content);
-
-		this.$timeout(() => {
-			this.bcfInputHandler = document.getElementById("bcfImportInput");
-			this.bcfInputHandler.addEventListener("change", () => {
-				if (this.bcfInputHandler && this.bcfInputHandler.files) {
-					this.importBcf({file: this.bcfInputHandler.files[0]});
-				} else {
-					console.error("No file selected");
-				}
-				this.bcfInputHandler.value = null; // Reset the change watcher
-			});
-		});
-
+		input.value = null;
 	}
 
 	public handleMenuOptions() {
 		const ids = [];
-		this.IssuesService.state.issuesToShow.forEach((issue) => {
+		this.issuesService.state.issuesToShow.forEach((issue) => {
 			ids.push(issue._id);
 		});
 
 		switch (this.menuOption.value) {
 
 			case "sortByDate":
-				this.IssuesService.state.issueDisplay.sortOldestFirst =
-					!this.IssuesService.state.issueDisplay.sortOldestFirst;
+				this.issuesService.state.issueDisplay.sortOldestFirst =
+					!this.issuesService.state.issueDisplay.sortOldestFirst;
 				break;
 
 			case "showClosed":
-				this.IssuesService.state.issueDisplay.showClosed =
-					!this.IssuesService.state.issueDisplay.showClosed;
+				this.issuesService.state.issueDisplay.showClosed =
+					!this.issuesService.state.issueDisplay.showClosed;
 				break;
 
 			case "showSubModels":
-				this.IssuesService.state.issueDisplay.showSubModelIssues =
-					!this.IssuesService.state.issueDisplay.showSubModelIssues;
+				this.issuesService.state.issueDisplay.showSubModelIssues =
+					!this.issuesService.state.issueDisplay.showSubModelIssues;
 				break;
 
 			case "print":
 				const printEndpoint = this.account + "/" + this.model + "/issues.html?ids=" + ids.join(",");
-				const printUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, printEndpoint);
+				const printUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, printEndpoint);
 				this.$window.open(printUrl, "_blank");
 				break;
 
 			case "exportBCF":
 				const bcfEndpoint = this.account + "/" + this.model + "/issues.bcfzip?ids=" + ids.join(",");
-				const bcfUrl = this.ClientConfigService.apiUrl(this.ClientConfigService.GET_API, bcfEndpoint);
+				const bcfUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, bcfEndpoint);
 				this.$window.open(bcfUrl, "_blank");
 				break;
 
 			case "importBCF":
-				this.$timeout(() => {
-					this.bcfInputHandler.click();
-				});
+				document.getElementById("bcfImportInput").click();
 				break;
 
 			case "filterRole":
-				const roleIndex = this.IssuesService.state.issueDisplay.excludeRoles.indexOf(this.menuOption.role);
+				const roleIndex = this.issuesService.state.issueDisplay.excludeRoles.indexOf(this.menuOption.role);
 				if (this.menuOption.selected) {
 					if (roleIndex !== -1) {
-						this.IssuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
+						this.issuesService.state.issueDisplay.excludeRoles.splice(roleIndex, 1);
 					}
 				} else {
 					if (roleIndex === -1) {
-						this.IssuesService.state.issueDisplay.excludeRoles.push(this.menuOption.role);
+						this.issuesService.state.issueDisplay.excludeRoles.push(this.menuOption.role);
 					}
 				}
 				break;
 		}
 
-		this.setupIssuesToShow();
 	}
 
-	public setupIssuesToShow() {
-
-		this.IssuesService.setupIssuesToShow(this.model, this.filterText);
-
+	public setContentAndSize() {
 		// Setup what to show
-		if (this.IssuesService.state.issuesToShow.length > 0) {
+		if (this.issuesService.state.issuesToShow.length > 0) {
 			this.toShow = "list";
 			const buttonSpace = 70;
-			const numOfIssues = this.IssuesService.state.issuesToShow.length;
-			const heights = this.IssuesService.state.heights.issuesListItemHeight + buttonSpace;
+			const numOfIssues = this.issuesService.state.issuesToShow.length;
+			const heights = this.issuesService.state.heights.issuesListItemHeight + buttonSpace;
 			const issuesHeight = numOfIssues * heights;
 			this.contentHeight({height: issuesHeight });
 		} else {
 			this.toShow = "info";
-			this.info = "There are currently no open issues";
-			this.contentHeight({height: this.IssuesService.state.heights.infoHeight});
+			this.info = this.filterChips.length > 0 ? "No results found" : "There are currently no open issues";
+			this.contentHeight({height: this.issuesService.state.heights.infoHeight});
 		}
 
-		this.IssuesService.showIssuePins(this.account, this.model);
 	}
 
 	public selectIssue(issue) {
-		this.IssuesService.setSelectedIssue(issue, false, this.revision);
+		this.issuesService.setSelectedIssue(issue, false, this.revision);
 		angular.element(this.$window).triggerHandler("resize");
 	}
 
 	public isSelectedIssue(issue) {
-		return this.IssuesService.isSelectedIssue(issue);
+		return this.issuesService.isSelectedIssue(issue);
 	}
 
 	public editIssue(issue) {
@@ -259,6 +253,7 @@ export const IssuesListComponent: ng.IComponentOptions = {
 		revision: "<",
 		allIssues: "<",
 		issuesToShow: "<",
+		filterChips: "=",
 		filterText: "<",
 		onEditIssue: "&",
 		nonListSelect: "<",
