@@ -27,7 +27,7 @@ export const DefaultHeadline = (props) => (
 		direction="row"
 		alignItems="center"
 		justify="flex-start">
-		<StyledIcon>{props.active ? 'folder_open' : 'folder'}</StyledIcon>
+		<StyledIcon fontSize="small">{props.active ? 'folder_open' : 'folder'}</StyledIcon>
 		<Title>{props.name}</Title>
 		{props.renderActions && props.renderActions(props)}
 	</Grid>
@@ -83,7 +83,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentDidUpdate = (prevProps, prevState) => {
+	public componentDidUpdate = (prevProps) => {
 		const changes = {} as IState;
 
 		const activeChanged = this.props.active !== prevProps.active;

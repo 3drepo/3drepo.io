@@ -64,6 +64,6 @@ export const Title = styled.div`
 
 export const StyledIcon = styled(Icon)`
   && {
-    margin-right: 16px;
+    margin-right: 12px;
   }
 `;

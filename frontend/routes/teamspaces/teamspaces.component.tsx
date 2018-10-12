@@ -15,13 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { groupBy, isEmpty } from 'lodash';
 import * as React from 'react';
-import { isEmpty, groupBy } from 'lodash';
+import SimpleBar from 'simplebar-react';
+import MenuItem from '@material-ui/core/MenuItem';
+import Icon from '@material-ui/core/Icon';
 
+import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { TreeList } from '../components/treeList/treeList.component';
-import { Container } from './teamspaces.styles';
 import { ModelItem } from './components/modelItem/modelItem.component';
+import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
+import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -90,6 +95,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		action: this.props.onEditClick,
 		icon: 'edit'
 	}];
+
+	public componentDidMount() {
+		this.setState({
+			activeTeamspace: this.props.currentTeamspace
+		});
+	}
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -168,12 +179,67 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public renderMenuButton = (isPending, props) => (
+		<MenuButton
+			buttonRef={props.buttonRef}
+			variant="fab"
+			color="secondary"
+			aria-label="Toggle menu"
+			aria-haspopup="true"
+			mini={true}
+			onClick={props.onClick}
+			disabled={isPending}
+		>
+			<Icon>add</Icon>
+		</MenuButton>
+	)
+
+	public renderMenu = () => {
+		return (
+			<>
+				<MenuItem>Add project</MenuItem>
+				<MenuItem>Add model</MenuItem>
+				<MenuItem>Add federation</MenuItem>
+			</>
+		);
+	}
+
 	public render() {
+		const { isPending } = this.props;
+
 		return (
 			<Panel {...PANEL_PROPS}>
-				<Container>
-					{this.renderTeamspaces(this.props.teamspaces)}
-				</Container>
+				<Head>
+					3D MODELS & FEDERATIONS
+					<ButtonMenu
+						icon="add"
+						renderButton={this.renderMenuButton.bind(this, isPending)}
+						renderContent={this.renderMenu}
+						PopoverProps={{
+							anchorOrigin: {
+								vertical: 'center',
+								horizontal: 'left'
+							},
+							transformOrigin: {
+								vertical: 'top',
+								horizontal: 'right'
+							}
+						}}
+					/>
+				</Head>
+				<List>
+					{
+						isPending ? (
+							<LoaderContainer>
+								<Loader content="Loading teamspaces..." />
+							</LoaderContainer>
+						) : (
+							<SimpleBar>
+								{this.renderTeamspaces(this.props.teamspaces)}
+							</SimpleBar>
+						)
+					}
+				</List>
 			</Panel>
 		);
 	}
