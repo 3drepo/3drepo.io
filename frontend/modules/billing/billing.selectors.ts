@@ -18,3 +18,35 @@
 import { createSelector } from 'reselect';
 
 export const selectBillingDomain = state => Object.assign({}, state.billing);
+
+export const selectLicencesInfo = createSelector(
+  selectBillingDomain, (state) => {
+    let numLicences = 0;
+    let pricePerLicense = null;
+    let planId = null;
+
+    if (state.subscriptions.paypal && state.subscriptions.paypal.length > 0) {
+      numLicences = state.subscriptions.paypal.reduce((total, item) => {
+        return total + item.quantity;
+      }, 0);
+
+      planId = state.subscriptions.paypal[0].plan;
+      if (planId && state.plans[state.subscriptions.paypal[0].plan]) {
+        pricePerLicense = state.plans[state.subscriptions.paypal[0].plan].price;
+      }
+    }
+
+    if (!planId || !pricePerLicense) {
+      // Use the user's current plan if they already have a plan
+      // Otherwise use the first available plan
+      const availablePlansIdx = Object.keys(state.plans).filter((key) => state.plans[key].available);
+      pricePerLicense = availablePlansIdx.length ? state.plans[availablePlansIdx[0]].price : 0;
+      planId = availablePlansIdx[0];
+    }
+
+    return {
+      pricePerLicense,
+      numLicences
+    };
+  }
+);

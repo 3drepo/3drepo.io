@@ -18,10 +18,32 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: BillingTypes, Creators: BillingActions } = createActions({
-	fetch: [] // TODO: remove this action
+	fetchPlans: [],
+	fetchPlansSuccess: ['plans']
+	fetchInvoices: ['teamspace'],
+	fetchInvoicesSuccess: ['invoices']
+	fetchSubscriptions: ['teamspace'],
+	fetchSubscriptionsSuccess: ['subscriptions'],
+	fetchBillingData: ['teamspace'],
 }, { prefix: 'BILLING_' });
 
-export const INITIAL_STATE = {};
+export const INITIAL_STATE = {
+	invoices: [],
+	plans: [],
+	subscriptions: [],
+};
+
+const fetchPlansSuccess = (state = INITIAL_STATE, { plans }) =>
+	Object.assign({}, state, { plans });
+
+const fetchInvoicesSuccess = (state = INITIAL_STATE, { invoices }) =>
+	Object.assign({}, state, { invoices });
+
+const fetchSubscriptionsSuccess = (state = INITIAL_STATE, { subscriptions }) =>
+	Object.assign({}, state, { subscriptions });
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[BillingTypes.FETCH_PLANS_SUCCESS]: fetchPlansSuccess,
+	[BillingTypes.FETCH_INVOICES_SUCCESS]: fetchInvoicesSuccess,
+	[BillingTypes.FETCH_SUBSCRIPTIONS_SUCCESS]: fetchSubscriptionsSuccess,
 });

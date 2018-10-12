@@ -52,8 +52,8 @@ export const selectBillingInfo = createSelector(
 	selectCurrentUser, (state) => state.billingInfo
 );
 
-export const selectCollaboratorsLimit = createSelector(
-	selectTeamspaceDomain, (state) => state.collaboratorsLimit
+export const selectCollaboratorLimit = createSelector(
+	selectTeamspaceDomain, (state) => state.collaboratorLimit
 );
 
 export const selectSpaceInfo = createSelector(

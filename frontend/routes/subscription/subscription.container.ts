@@ -21,20 +21,23 @@ import { connect } from '../../helpers/migration';
 
 import { Subscription } from './subscription.component';
 import {
+  TeamspaceActions,
   selectBillingInfo,
   selectCurrentTeamspace,
   selectSpaceInfo
 } from '../../modules/teamspace';
-import { TeamspaceActions } from '../../modules/teamspace';
+import { BillingActions, selectLicencesInfo } from '../../modules/billing';
 
 const mapStateToProps = createStructuredSelector({
   billingInfo: selectBillingInfo,
   teamspace: selectCurrentTeamspace,
-  spaceInfo: selectSpaceInfo
+  spaceInfo: selectSpaceInfo,
+  licencesInfo: selectLicencesInfo,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-  fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo
+  fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo,
+  fetchBillingData: BillingActions.fetchBillingData
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Subscription);

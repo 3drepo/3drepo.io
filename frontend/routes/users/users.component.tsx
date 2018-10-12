@@ -76,6 +76,7 @@ interface IState {
 	licencesLabel: string;
 	containerElement: Node;
 	panelKey: number;
+	limit: any;
 }
 
 const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
@@ -99,6 +100,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		licencesLabel: '',
 		containerElement: null,
 		panelKey: Math.random(),
+		limit: 0
 	};
 
 	public onPermissionsChange = (username, isAdmin) => {
@@ -166,7 +168,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 		this.setState({
 			containerElement,
 			jobs: preparedJobs,
-			rows: this.getUsersTableRows(this.props.users, preparedJobs)
+			rows: this.getUsersTableRows(this.props.users, preparedJobs),
+			limit: this.props.limit
 		});
 	}
 
@@ -182,6 +185,11 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const usersChanged = !isEqual(prevProps.users, this.props.users);
 		if (usersChanged || jobsChanged) {
 			changes.rows = this.getUsersTableRows(this.props.users, changes.jobs || this.state.jobs);
+		}
+
+		const limitChanged = !isEqual(prevProps.limit, this.props.limit);
+		if (limitChanged) {
+			changes.limit = this.props.limit;
 		}
 
 		if (!isEmpty(changes)) {
@@ -202,8 +210,13 @@ export class Users extends React.PureComponent<IProps, IState> {
 		return (
 			<FloatingActionPanel
 				buttonProps={{
+<<<<<<< HEAD
 					disabled: this.props.limit <= this.props.users.length,
 					label: 'All licences assigned'
+=======
+					disabled: this.state.limit <= this.props.users.length,
+					label: 'All licenses assigned'
+>>>>>>> 5df709860... ISSUE #1185 - Get billing/payment data
 				}}
 				container={container}
 				key={this.state.panelKey}
@@ -217,8 +230,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	/**
 	 * Generate licences summary
 	 */
-	public getFooterLabel = () => {
-		const {limit, users} = this.props;
+	public getFooterLabel = (users, limit) => {
 		if (!users) {
 			return '';
 		}
@@ -228,18 +240,14 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { rows, licencesLabel, containerElement } = this.state;
+		const { rows, containerElement, limit } = this.state;
+		const { users } = this.props;
 
-		return (
-			<>
-				<UserManagementTab footerLabel={this.getFooterLabel()}>
-					<CustomTable
-							cells={USERS_TABLE_CELLS}
-							rows={rows}
-					/>
-				</UserManagementTab>
-				{containerElement && this.renderNewUserForm(containerElement)}
-			</>
-		);
+		return <>
+        <UserManagementTab footerLabel={this.getFooterLabel(users, limit)}>
+          <CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
+        </UserManagementTab>
+        {containerElement && this.renderNewUserForm(containerElement)}
+      </>;
 	}
 }

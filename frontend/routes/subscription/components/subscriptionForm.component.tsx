@@ -18,6 +18,8 @@
 import * as React from 'react';
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { isEmpty, isEqual } from 'lodash';
+
 import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
 import { formatBytesGB } from '../../../services/formatting/formatCapacity';
 
@@ -52,6 +54,7 @@ interface IProps {
 	billingInfo: any;
 	countries: any;
 	spaceInfo: any;
+	licencesInfo: any;
 }
 
 interface IState {
@@ -59,6 +62,9 @@ interface IState {
 		spaceUsed: Number,
 		spaceLimit: Number,
 	};
+	numLicences: Number,
+	pricePerLicense: Number,
+	payment: Number;
 }
 
 export class SubscriptionForm extends React.PureComponent<IProps, IState> {
@@ -66,18 +72,50 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 		spaceInfo: {
 			spaceUsed: 0,
 			spaceLimit: 0,
-		}
+		},
+		numLicences: 0,
+		pricePerLicense: 0,
+		payment: 0,
 	};
 
 	public handleConfirmSubsription = (data) => {
 		console.log('Confirm form', data);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
-		if (prevProps.spaceInfo !== this.props.spaceInfo && this.props.spaceInfo) {
-			this.setState({
-				spaceInfo: this.props.spaceInfo
-			});
+	public handleLicencesChange = (event) => {
+		this.setState({
+      numLicences: event.target.value,
+      payment: event.target.value * this.state.pricePerLicense
+    });
+	}
+
+	public componentDidMount() {
+		const { spaceInfo, licencesInfo: { numLicences, pricePerLicense } } = this.props;
+
+		this.setState({ spaceInfo, numLicences, pricePerLicense });
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as any;
+		const { spaceInfo, licencesInfo: { numLicences, pricePerLicense } } = this.props;
+
+		const spaceInfoChanged = !isEqual(prevProps.spaceInfo, spaceInfo);
+		if (spaceInfoChanged) {
+			changes.spaceInfo = spaceInfo;
+		}
+
+		const numLicencesChanged = !isEqual(prevProps.licencesInfo.numLicences, numLicences);
+		if (numLicencesChanged) {
+      changes.numLicences = numLicences;
+    }
+
+		const pricePerLicenseChanged = !isEqual(prevProps.licencesInfo.pricePerLicense, pricePerLicense);
+		if (pricePerLicenseChanged) {
+			changes.pricePerLicense = pricePerLicense;
+    }
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
@@ -107,14 +145,17 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
             <FieldsRow container wrap="nowrap">
               <FieldsColumn>
                 <FieldsRow container wrap="nowrap">
-                  <Field name="licenses" render={({ field }) =>
+                  <Field name="licences" render={({ field }) =>
 										<StyledTextField
 											{...field}
-											label="Licencses"
+											label="Licences"
 											margin="normal"
 											required
 											type="number"
-											value="0" />
+											inputProps={{ min: "0", max: "1000" }}
+											value={this.state.numLicences}
+											onChange={this.handleLicencesChange}
+										/>
 										} />
 									<Field name="payment" render={({ field }) =>
 										<StyledTextField
@@ -123,7 +164,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											margin="normal"
 											required
 											type="number"
-											value="0"
+											value={this.state.payment}
 											disabled />
 										} />
                 </FieldsRow>

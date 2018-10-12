@@ -29,7 +29,7 @@ import {
 
 import {
   TeamspaceActions,
-  selectCollaboratorsLimit,
+	selectCollaboratorLimit,
   selectCurrentTeamspace
 } from '../../modules/teamspace';
 
@@ -39,8 +39,8 @@ const mapStateToProps = createStructuredSelector({
   usersSuggestions: selectUsersSuggestions,
   users: selectUsers,
   jobs: selectJobs,
-	limit: selectCollaboratorsLimit,
-	teamspace: selectCurrentTeamspace
+  limit: selectCollaboratorLimit,
+  teamspace: selectCurrentTeamspace
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

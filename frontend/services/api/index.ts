@@ -18,5 +18,6 @@ export * from './teamspace';
 export * from './jobs';
 export * from './projects';
 export * from './models';
+export * from './billing';
 
 export default api;

@@ -24,23 +24,27 @@ interface IProps {
 	billingInfo: any;
 	teamspace: any;
 	spaceInfo: any;
+	licencesInfo: any;
 	fetchQuotaInfo: (teamspace) => void;
+	fetchBillingData: (teamspace) => void;
 }
 
 export class Subscription extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		this.props.fetchQuotaInfo(this.props.teamspace);
+		this.props.fetchBillingData(this.props.teamspace);
 	}
 
 	public render() {
-		const { billingInfo } = this.props;
+		const { billingInfo, spaceInfo, licencesInfo } = this.props;
 
 		return (
 			<Container>
 				<SubscriptionForm
 					billingInfo={billingInfo}
 					countries={clientConfigService.countries}
-					spaceInfo={this.props.spaceInfo}
+					spaceInfo={spaceInfo}
+					licencesInfo={licencesInfo}
 				/>
 			</Container>
 		);
