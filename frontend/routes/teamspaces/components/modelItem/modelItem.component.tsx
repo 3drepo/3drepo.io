@@ -25,18 +25,19 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Container, SubmodelsList, Time } from './modelItem.styles';
 
+interface IAction {
+	label: string;
+	icon: string;
+	action: () => void;
+	color?: string;
+}
 interface IProps {
 	name: string;
 	federate: boolean;
 	model: string;
 	subModels?: any[];
 	timestamp: string;
-	onUpload?: () => void;
-	onDownload?: () => void;
-	onDelete?: () => void;
-	onEdit?: () => void;
-	onRevisionsOpen?: () => void;
-	onSettingsOpen?: () => void;
+	actions: IAction[];
 }
 
 interface IState {
@@ -50,25 +51,6 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 	public buttonRef = React.createRef<HTMLElement>();
 
-	public menuActions = [{
-		label: 'Delete',
-		action: this.props.onDelete,
-		icon: 'remove'
-	}, {
-		label: 'Upload',
-		action: this.props.onUpload,
-		icon: 'cloud_upload'
-	}, {
-		label: 'Edit',
-		action: this.props.onEdit
-	}, {
-		label: 'Revisions',
-		action: this.props.onRevisionsOpen
-	}, {
-		label: 'Settings',
-		action: this.props.onSettingsOpen
-	}];
-
 	public toggleMenu = (forceHide) => {
 		this.setState({
 			activeMenu: forceHide ? false : !this.state.activeMenu
@@ -80,20 +62,21 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
 	}
 
-	public renderActions = () => {
-		return this.menuActions.map(({label, action, icon}, index) => {
+	public renderActions = (actions) => {
+		return actions ? actions.map(({label, action, icon, color}, index) => {
+			const iconProps = {color, fontSize: 'small'} as any;
 			return (
 				<Tooltip title={label} key={index}>
 					<IconButton aria-label={label} onClick={action}>
-						<Icon>{icon}</Icon>
+						<Icon {...iconProps}>{icon}</Icon>
 					</IconButton>
 				</Tooltip>
 			);
-		});
+		}) : null;
 	}
 
 	public render() {
-		const { name, subModels, timestamp } = this.props;
+		const { name, subModels, timestamp, actions } = this.props;
 		const { activeMenu } = this.state;
 
 		return (
@@ -118,7 +101,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 							aria-haspopup="true"
 							onClick={this.toggleMenu.bind(this, null)}
 						>
-							<Icon>more_vert</Icon>
+							<Icon fontSize="small">more_vert</Icon>
 						</IconButton>
 						<Popover
 							open={activeMenu}
@@ -135,7 +118,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 							onClose={this.toggleMenu.bind(this, false)}
 						>
 							<Grid container direction="row">
-								{this.renderActions()}
+								{this.renderActions(actions)}
 							</Grid>
 						</Popover>
 					</Grid>
