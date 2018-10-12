@@ -26,7 +26,8 @@ export const DefaultHeadline = (props) => (
 		container
 		direction="row"
 		alignItems="center"
-		justify="flex-start">
+		justify="flex-start"
+		wrap="nowrap">
 		<StyledIcon fontSize="small">{props.active ? 'folder_open' : 'folder'}</StyledIcon>
 		<Title>{props.name}</Title>
 		{props.renderActions && props.renderActions(props)}
@@ -109,7 +110,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 		const headlineProps = {
 			...props,
-			active
+			active,
+			onClick: this.handleRootClick
 		};
 
 		return (
