@@ -28,6 +28,7 @@ export const Headline = styled.div`
   align-items: center;
   justify-content: flex-start;
   padding-left: 24px;
+  padding-right: 10px;
 
   &:hover {
     background: ${COLOR.WHITE};
