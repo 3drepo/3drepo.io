@@ -22,23 +22,17 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
-const helpers = require("./helpers");
-const C = require("../../constants");
 const async = require("async");
 const ModelSetting = require("../../models/modelSetting");
 const User = require("../../models/user");
 describe("Model", function () {
-	const User = require("../../models/user");
 	let server;
 	let agent;
 	const username = "project_username";
 	const password = "project_username";
 	const model = "model12345";
 	let modelId;
-	const modelFed = "projectFed1";
 	const project = "projectgroup";
 	const desc = "desc";
 	const type = "type";
@@ -123,6 +117,65 @@ describe("Model", function () {
 		] , err => done(err));
 
 	});
+
+	describe("Model name tests ", function() {
+		const nameTest = function(modelName, expectSuccess) {
+			if(expectSuccess) {
+				agent.post(`/${username}/model`)
+					.send({ modelName, desc, type, unit, code, project })
+					.expect(200, function(err ,res) {
+						expect(res.body.name).to.equal(model);
+						callback(err);
+				});
+			} else {
+				agent.post(`/${username}/model`)
+					.send({ modelName, desc, type, unit, code, project })
+					.expect(responseCodes.INVALID_MODEL_NAME.status, function(err ,res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
+						callback(err);
+				});
+			}
+		};
+		it("blank test model name format should fail", function() {
+			expect(ModelHelper.modelNameRegExp.test("")).to.be.false;
+		});
+
+		it("plain test model name format should succeed", function() {
+			expect(ModelHelper.modelNameRegExp.test("a")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("ab")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("abc")).to.be.true;
+		});
+
+		it("hyphens dashes and underscores in test model name format should succeed", function() {
+			expect(ModelHelper.modelNameRegExp.test("123-4a")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("123_4a")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("123-_4A")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("aasa[")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("aasa/")).to.be.true;
+			expect(ModelHelper.modelNameRegExp.test("aasa%")).to.be.true;
+		});
+
+		it("non-ASCII characters should fail", function() {
+			expect(ModelHelper.modelNameRegExp.test("失败")).to.be.false;
+			expect(ModelHelper.modelNameRegExp.test("😕")).to.be.false;
+		});
+
+		it("long strings less than 120 characters in test model name format should succeed", function() {
+			expect(ModelHelper.modelNameRegExp.test("aaaaaaaaaaaaaaaaaaaaa")).to.be.true;
+		});
+
+		it("long strings more than 120 characters in test model name format should fail", function() {
+			expect(ModelHelper.modelNameRegExp.test(
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaa"
+			)).to.be.false;
+		});
+
+	});
+
 
 	it("model added to a project should be listed on top level models array", function(done) {
 
