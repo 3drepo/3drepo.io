@@ -25,7 +25,11 @@ export const selectCurrentTeamspace = createSelector(
 );
 
 export const selectCurrentUser = createSelector(
-	selectTeamspaceDomain, (state) => state.currentUser
+	selectTeamspaceDomain, (state) => state.currentUser || {}
+);
+
+export const selectAvatar = createSelector(
+	selectCurrentUser, (state) => state.avatarUrl
 );
 
 export const selectTeamspaces = createSelector(
@@ -38,4 +42,8 @@ export const selectTeamspacesWithAdminAccess = createSelector(
 
 export const selectIsPending = createSelector(
 	selectTeamspaceDomain, (state) => state.isPending
+);
+
+export const selectIsAvatarPending = createSelector(
+	selectTeamspaceDomain, (state) => state.isAvatarPending
 );

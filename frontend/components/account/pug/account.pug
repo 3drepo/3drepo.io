@@ -41,12 +41,7 @@ div#accountHolder(
 				on-show-page="vm.showPage(page, callingPage, data)"
 				selected-index="vm.data.tabIndex")
 
-			account-profile(
-				ng-if="vm.username && vm.pageVisibility.profile"
-				username="vm.username"
-				first-name="vm.firstName"
-				last-name="vm.lastName"
-				email="vm.email")
+			profile(ng-if="vm.username && vm.pageVisibility.profile")
 
 			account-billing(
 				ng-if="vm.username && vm.pageVisibility.billing"
@@ -80,3 +75,4 @@ div(ng-if="vm.state.model")
 		state="vm.state")
 
 dialog-container
+snackbar-container

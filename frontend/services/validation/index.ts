@@ -15,14 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
-
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
-
-const mapStateToProps = createStructuredSelector({});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export * from './validation';
+export * from './customValidators';

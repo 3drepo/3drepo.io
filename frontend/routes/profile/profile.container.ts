@@ -17,12 +17,20 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect, addRouting } from '../../helpers/migration';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { Profile } from './profile.component';
+import { TeamspaceActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/teamspace';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	currentUser: selectCurrentUser,
+	isAvatarPending: selectIsAvatarPending
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	onAvatarChange: TeamspaceActions.uploadAvatar,
+	onUserDataChange: TeamspaceActions.updateUser,
+	onPasswordChange: TeamspaceActions.updateUserPassword
+}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Profile));

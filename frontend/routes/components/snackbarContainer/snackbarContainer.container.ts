@@ -17,12 +17,18 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from '../../../helpers/migration';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { SnackbarContainer } from './snackbarContainer.component';
+import {
+	SnackbarActions,
+	selectSnackConfig
+} from '../../../modules/snackbar';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	snack: selectSnackConfig
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export default connect(mapStateToProps, mapDispatchToProps)(SnackbarContainer);

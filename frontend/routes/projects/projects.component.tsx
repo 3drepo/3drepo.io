@@ -19,12 +19,10 @@ import * as React from 'react';
 import * as queryString from 'query-string';
 import { Link, Route } from 'react-router-dom';
 import {isEqual, isEmpty} from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 
-import { theme } from '../../styles';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { ProjectsPermissions } from '../projectsPermissions';
 import { ModelsPermissions } from '../modelsPermissions';
@@ -157,47 +155,45 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container>
-					<UserManagementTab footerLabel={footerLabel}>
-						<>
-							<Options
-								container
-								direction="row"
-								justify="space-between"
-								alignContent="center"
-							>
-								<SelectContainer item>
-									<FormControl fullWidth={true}>
-										<InputLabel shrink htmlFor="project">
-												Project
-										</InputLabel>
-										<CellSelect
-											items={projectsItems}
-											value={selectedProject}
-											placeholder="Select a project"
-											disabledPlaceholder={true}
-											onChange={this.onProjectChange}
-											inputId="project"
-										/>
-									</FormControl>
-								</SelectContainer>
-								<Grid item>
-									<SwitchButton
-										color="secondary"
-										onClick={this.handleViewChange}
-									>
-										{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
-										{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
-										{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
-									</SwitchButton>
-								</Grid>
-							</Options>
-							<Route path={match.url} render={this.renderPermissionsView}/>
-						</>
-					</UserManagementTab>
-				</Container>
-			</MuiThemeProvider>
+			<Container>
+				<UserManagementTab footerLabel={footerLabel}>
+					<>
+						<Options
+							container
+							direction="row"
+							justify="space-between"
+							alignContent="center"
+						>
+							<SelectContainer item>
+								<FormControl fullWidth={true}>
+									<InputLabel shrink htmlFor="project">
+											Project
+									</InputLabel>
+									<CellSelect
+										items={projectsItems}
+										value={selectedProject}
+										placeholder="Select a project"
+										disabledPlaceholder={true}
+										onChange={this.onProjectChange}
+										inputId="project"
+									/>
+								</FormControl>
+							</SelectContainer>
+							<Grid item>
+								<SwitchButton
+									color="secondary"
+									onClick={this.handleViewChange}
+								>
+									{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
+									{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
+									{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
+								</SwitchButton>
+							</Grid>
+						</Options>
+						<Route path={match.url} render={this.renderPermissionsView}/>
+					</>
+				</UserManagementTab>
+			</Container>
 		);
 	}
 }

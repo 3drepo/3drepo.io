@@ -18,29 +18,28 @@
 import * as React from 'react';
 import { Route } from 'react-router-dom';
 import * as queryString from 'query-string';
+import { isEqual, isEmpty, isUndefined } from 'lodash';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import { isEqual, isEmpty, isUndefined } from 'lodash';
 
-import { theme } from '../../styles';
 import Users from '../users/users.container';
 import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+import { Loader } from '../components/loader/loader.component';
+import { Panel } from '../components/panel/panel.component';
+
 import {
-	Container,
-	Title,
-	Content,
 	Header,
 	TabContent,
 	TeamspaceSelectContainer,
 	LoaderContainer
 } from './userManagement.styles';
-import { TextOverlay } from '../components/textOverlay/textOverlay.component';
-import { Loader } from '../components/loader/loader.component';
 
 export const TABS_TYPES = {
 	USERS: 0,
@@ -163,43 +162,39 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const {isLoadingTeamspace, teamspaces, isTeamspaceAdmin} = this.props;
 		const {selectedTeamspace, teamspacesItems} = this.state;
 
+		const paperProps = { height: '100%' };
 		return (
-			<MuiThemeProvider theme={theme}>
-				<Container>
-					<Title>User management</Title>
-					<Content>
-						<Header>
-							<TeamspaceSelectContainer>
-								<FormControl fullWidth={true}>
-									<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-									<CellSelect
-										items={teamspacesItems}
-										value={selectedTeamspace}
-										placeholder="Select teamspace"
-										disabledPlaceholder={true}
-										onChange={this.onTeamspaceChange}
-										inputId="teamspace-select"
-									/>
-								</FormControl>
-							</TeamspaceSelectContainer>
-							<Tabs
-								value={this.state.activeTab}
-								indicatorColor="primary"
-								textColor="primary"
-								onChange={this.handleChange}
-							>
-								<Tab label="Users" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
-								<Tab label="Projects" disabled={!selectedTeamspace || isLoadingTeamspace} />
-								<Tab label="Jobs" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
-							</Tabs>
-						</Header>
-						<TabContent>
-							{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-							<Route exact path="/:teamspace" render={this.renderTabContent} />
-						</TabContent>
-					</Content>
-				</Container>
-			</MuiThemeProvider>
+			<Panel title="User management" paperProps={paperProps}>
+				<Header>
+					<TeamspaceSelectContainer>
+						<FormControl fullWidth={true}>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+							<CellSelect
+								items={teamspacesItems}
+								value={selectedTeamspace}
+								placeholder="Select teamspace"
+								disabledPlaceholder={true}
+								onChange={this.onTeamspaceChange}
+								inputId="teamspace-select"
+							/>
+						</FormControl>
+					</TeamspaceSelectContainer>
+					<Tabs
+						value={this.state.activeTab}
+						indicatorColor="primary"
+						textColor="primary"
+						onChange={this.handleChange}
+					>
+						<Tab label="Users" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
+						<Tab label="Projects" disabled={!selectedTeamspace || isLoadingTeamspace} />
+						<Tab label="Jobs" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
+					</Tabs>
+				</Header>
+				<TabContent>
+					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
+					<Route exact path="/:teamspace" render={this.renderTabContent} />
+				</TabContent>
+			</Panel>
 		);
 	}
 }

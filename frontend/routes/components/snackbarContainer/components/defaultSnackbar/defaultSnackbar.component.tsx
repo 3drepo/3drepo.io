@@ -15,14 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import * as React from 'react';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { Container } from './defaultSnackbar.styles';
 
-const mapStateToProps = createStructuredSelector({});
+interface IProps {
+	message: string;
+	onClose: (event, reason?) => void;
+}
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export const DefaultSnackbar = (props: IProps) => {
+	return (
+		<SnackbarContent
+			message={props.message}
+			action={[
+				<IconButton
+					key="close"
+					aria-label="Close"
+					color="inherit"
+					onClick={props.onClose}
+				>
+					<Icon>close</Icon>
+				</IconButton>
+			]}
+		/>
+	);
+};

@@ -92,3 +92,21 @@ export const setUserPermissions = (teamspace, permissionsData) => {
 export const addUser = (teamspace, user) => {
 	return api.post(`${teamspace}/members`, user);
 };
+
+/**
+ * Update user
+ * @param teamspace
+ * @param username
+ */
+export const updateUser = (teamspace, user) => {
+	return api.put(teamspace, user);
+};
+
+/**
+ * Upload avatar
+ * @param teamspace
+ * @param formData
+ */
+export const uploadAvatar = (teamspace, formData) => {
+	return api.post(`${teamspace}/avatar`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+};

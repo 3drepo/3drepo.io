@@ -15,14 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import * as React from 'react';
 
-import { {{ pascalCase name }} } from './{{ camelCase name }}.component';
+import { PaperProps } from '@material-ui/core/Paper';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from 'styled-components';
+import { MuiTheme, theme } from '../../../styles';
+import { Container, Title, Content } from './panel.styles';
 
-const mapStateToProps = createStructuredSelector({});
+interface IProps {
+	title: string;
+	children: any;
+	paperProps?: any;
+}
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)({{ pascalCase name }});
+export const Panel = (props: IProps) => (
+	<ThemeProvider theme={theme}>
+		<MuiThemeProvider theme={MuiTheme}>
+			<Container {...props.paperProps}>
+				<Title>{props.title}</Title>
+				<Content>
+					{props.children}
+				</Content>
+			</Container>
+		</MuiThemeProvider>
+	</ThemeProvider>
+);

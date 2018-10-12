@@ -1,4 +1,5 @@
 const {resolve} = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (options) => {
   const config = {
@@ -44,7 +45,11 @@ module.exports = (options) => {
         }
       ]
     },
-    plugins: [...(options.plugins || [])]
+    plugins: [...(options.plugins || [
+      new CopyWebpackPlugin([
+        { from: 'node_modules/zxcvbn/dist/zxcvbn.js' }
+      ], options)
+    ])]
   }
 
   return config;

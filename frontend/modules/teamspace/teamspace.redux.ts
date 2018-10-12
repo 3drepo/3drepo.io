@@ -17,38 +17,70 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 
+const getAvatartUrl = (username) => `/api/${username}/avatar?${Date.now()}`;
+
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
 	fetchUserSuccess: ['userData'],
 	fetchUserError: ['error'],
+	updateUser: ['userData'],
+	updateUserSuccess: ['userData'],
+	updateUserPassword: ['passwords'],
 	setPendingState: ['pendingState'],
-	updateButtonText: ['value']
+	setAvatarPendingState: ['pendingState'],
+	updateButtonText: ['value'],
+	uploadAvatar: ['file'],
+	refreshAvatar: []
 }, { prefix: 'TEAMSPACE_' });
 
 export const INITIAL_STATE = {
 	currentTeamspace: '',
-	currentUser: {},
-	isPending: true
+	currentUser: {
+		username: ''
+	},
+	isPending: true,
+	isAvatarPending: true
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return Object.assign({}, state, { isPending: pendingState });
 };
 
+const setAvatarPendingState = (state = INITIAL_STATE, { pendingState }) => {
+	return Object.assign({}, state, { isAvatarPending: pendingState });
+};
+
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
+	userData.avatarUrl = getAvatartUrl(userData.username);
 	return {
 		...state,
 		currentTeamspace: userData.username,
-		currentUser: userData
+		currentUser: userData,
+		isAvatarPending: false
 	};
 };
 
-const fetchUserError = (state = INITIAL_STATE, { error }) => {
-	console.error(error);
+const updateUserSuccess = (state = INITIAL_STATE, { userData }) => {
+	const currentUser = { ...state.currentUser, ...userData };
+	return { ...state, currentUser };
+};
+
+const refreshAvatar = (state = INITIAL_STATE) => {
+	const currentUser = {
+		...state.currentUser,
+		avatarUrl: getAvatartUrl(state.currentUser.username)
+	};
+
+	return {
+		...state,
+		currentUser,
+		isAvatarPending: false
+	};
 };
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
-	[TeamspaceTypes.FETCH_USER_ERROR]: fetchUserError,
-	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState
+	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
+	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
+	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar
 });
