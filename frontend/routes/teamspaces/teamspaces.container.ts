@@ -29,7 +29,7 @@ import {
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	teamspaces: selectTeamspaces,
-	isPendig: selectIsPending
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);

@@ -16,16 +16,5 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../styles';
 
-export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const Content = styled.div`
-  margin-top: 20px;
-  color: ${COLOR.BLACK_40};
-`;
+export const Container = styled.div``;
