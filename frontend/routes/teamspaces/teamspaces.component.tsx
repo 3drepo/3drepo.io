@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEqual, isEmpty, groupBy } from 'lodash';
+import { isEmpty, groupBy } from 'lodash';
 
 import { Panel } from '../components/panel/panel.component';
 import { TreeList } from '../components/treeList/treeList.component';
@@ -34,6 +34,13 @@ interface IProps {
 	currentTeamspace: string;
 	teamspaces: any[];
 	isPending: boolean;
+	onPermissionsClick: () => void;
+	onSettingsClick: () => void;
+	onDeleteClick: () => void;
+	onEditClick: () => void;
+	onRevisionsClick: () => void;
+	onDownloadClick: () => void;
+	onUploadClick: () => void;
 }
 
 interface IState {
@@ -49,7 +56,42 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		activeTeamspace: ''
 	};
 
-	public componentDidUpdate(prevProps, prevState) {
+	public sharedActions = [{
+		label: 'Permissions',
+		action: this.props.onPermissionsClick,
+		icon: 'people'
+	}, {
+		label: 'Settings',
+		action: this.props.onSettingsClick,
+		icon: 'settings'
+	}, {
+		label: 'Delete',
+		action: this.props.onDeleteClick,
+		icon: 'delete',
+		color: 'error'
+	}];
+
+	public modelActions = [{
+		label: 'Upload file',
+		action: this.props.onUploadClick,
+		icon: 'cloud_upload'
+	}, {
+		label: 'Revisions',
+		action: this.props.onRevisionsClick,
+		icon: 'settings_backup_restore'
+	}, {
+		label: 'Download',
+		action: this.props.onDownloadClick,
+		icon: 'cloud_download'
+	}];
+
+	public federationActions = [{
+		label: 'Edit',
+		action: this.props.onEditClick,
+		icon: 'edit'
+	}];
+
+	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
 		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
@@ -62,20 +104,25 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public onTeamspaceClick = (teamspace, { active }) => {
+	public onTeamspaceClick = (teamspace) => {
 		this.setState({ activeTeamspace: teamspace.account });
 	}
 
-	public renderModel = (props) => {
-		return <ModelItem {...props} />;
+	public renderModel = (actions, props) => {
+		return <ModelItem {...props} actions={actions} />;
 	}
 
 	public renderProjectItem = (props) => {
+		const actions = [
+			...(props.name === 'Federations' ? this.federationActions : this.modelActions),
+			...this.sharedActions
+		];
+
 		return (
 			<TreeList
 				{...props}
 				level={3}
-				renderItem={this.renderModel}
+				renderItem={this.renderModel.bind(this, actions)}
 				active={true}
 				disableShadow={true}
 			/>
