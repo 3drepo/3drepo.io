@@ -19,6 +19,7 @@ import * as React from 'react';
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
+import { formatBytesGB } from '../../../services/formatting/formatCapacity';
 
 import {
   StyledTextField,
@@ -37,23 +38,67 @@ import {
   PayPalLogo,
 } from "../subscription.styles";
 
+const REQUIRED_FIELD = Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED);
+
 const SubscriptionSchema = Yup.object().shape({
   firstName: schema.firstName,
   lastName: schema.lastName,
-  address: Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED),
-  city: Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED),
-  postalCode: Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED),
+  address: REQUIRED_FIELD,
+  city: REQUIRED_FIELD,
+  postalCode: REQUIRED_FIELD,
 });
 
-export class SubscriptionForm extends React.PureComponent<any, any> {
-	public handleConfirmSubsription = () => {
-		console.log('Confirm form');
+interface IProps {
+	billingInfo: any;
+	countries: any;
+	spaceInfo: any;
+}
+
+interface IState {
+	spaceInfo: {
+		spaceUsed: Number,
+		spaceLimit: Number,
+	};
+}
+
+export class SubscriptionForm extends React.PureComponent<IProps, IState> {
+	public state = {
+		spaceInfo: {
+			spaceUsed: 0,
+			spaceLimit: 0,
+		}
+	};
+
+	public handleConfirmSubsription = (data) => {
+		console.log('Confirm form', data);
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		if (prevProps.spaceInfo !== this.props.spaceInfo && this.props.spaceInfo) {
+			this.setState({
+				spaceInfo: this.props.spaceInfo
+			});
+		}
 	}
 
 	public render() {
+		const {	countries, billingInfo: { firstName, lastName, city, postalCode, company, line1, line2, countryCode } } = this.props;
+		const { spaceInfo: { spaceUsed, spaceLimit } } = this.state;
+
 		return (
 			<Formik
-				initialValues={{}}
+				initialValues={{
+					firstName,
+					lastName,
+					city,
+					businessName: company,
+					address: line1,
+					address2: line2,
+					postalCode,
+					country: countryCode,
+					quotaAvailable: spaceLimit,
+					quotaUsed: spaceUsed,
+				}}
 				onSubmit={this.handleConfirmSubsription}
 				validationSchema={SubscriptionSchema}
 			>
@@ -124,17 +169,18 @@ export class SubscriptionForm extends React.PureComponent<any, any> {
 											{...field}
 											label="Quota available"
 											margin="normal"
-											type="number"
-											value="0"
-											disabled />
+											type="text"
+											disabled
+											value={`${formatBytesGB(spaceLimit)}`}
+											/>
 										} />
                   <Field name="quotaUsed" render={({ field }) =>
 										<StyledTextField
 											{...field}
 											label="Quota used"
 											margin="normal"
-											type="number"
-											value="0"
+											type="text"
+											value={`${formatBytesGB(spaceUsed)}`}
 											disabled />
 										} />
                 </FieldsRow>
@@ -151,7 +197,7 @@ export class SubscriptionForm extends React.PureComponent<any, any> {
                 <Field name="vatNumber" render={({ field }) =>
 									<StyledTextField
 										{...field}
-										label="VAT Number"
+										label="VAT Number **"
 										margin="normal"
 										type="text" />
 									} />
@@ -177,17 +223,13 @@ export class SubscriptionForm extends React.PureComponent<any, any> {
                 <StyledFormControl>
                   <StyledInputLabel>Country</StyledInputLabel>
                   <Field name="country" render={({ field }) =>
-										<StyledSelectField {...field} type="text" value="none">
-											<StyledSelectItem value="red">
-												Red
-											</StyledSelectItem>
-											<StyledSelectItem value="green">
-												Green
-											</StyledSelectItem>
-											<StyledSelectItem value="blue">
-												Blue
-											</StyledSelectItem>
-										</StyledSelectField>} 
+										<StyledSelectField {...field} type="text">
+											{ countries.map(country => (
+												<StyledSelectItem key={country.code} value={country.code}>
+													{country.name}
+												</StyledSelectItem>
+											)	)}
+										</StyledSelectField>}
 									/>
                 </StyledFormControl>
               </FieldsColumn>

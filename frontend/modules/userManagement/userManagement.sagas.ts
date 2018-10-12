@@ -33,14 +33,13 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 
-		const [users, quota] = yield all([
+		const [users] = yield all([
 			API.fetchUsers(teamspace),
-			API.getQuotaInfo(teamspace),
 			put(JobsActions.fetchJobs(teamspace)),
 			put(JobsActions.fetchJobsColors(teamspace))
 		]);
 
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(teamspaceDetails, users.data, quota.data));
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(teamspaceDetails, users.data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'teamspace details', error.response));
 		yield put(UserManagementActions.setPendingState(false));

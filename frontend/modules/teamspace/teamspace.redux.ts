@@ -22,6 +22,8 @@ const getAvatartUrl = (username) => `/api/${username}/avatar?${Date.now()}`;
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
 	fetchUserSuccess: ['userData'],
+	fetchQuotaInfo: ['teamspace'],
+	fetchQuotaInfoSuccess: ['quota'],
 	fetchUserError: ['error'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
@@ -39,7 +41,8 @@ export const INITIAL_STATE = {
 		username: ''
 	},
 	isPending: true,
-	isAvatarPending: true
+	isAvatarPending: true,
+	collaboratorLimit: null,
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
@@ -48,6 +51,10 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 
 const setAvatarPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return Object.assign({}, state, { isAvatarPending: pendingState });
+};
+
+const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
+	return Object.assign({}, state, { ...quota });
 };
 
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
@@ -80,6 +87,7 @@ const refreshAvatar = (state = INITIAL_STATE) => {
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
+	[TeamspaceTypes.FETCH_QUOTA_INFO_SUCCESS]: fetchQuotaInfoSuccess,
 	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar

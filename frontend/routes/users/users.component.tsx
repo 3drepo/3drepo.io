@@ -60,12 +60,14 @@ interface IProps {
 	usersSuggestions: any[];
 	limit: any;
 	jobs: any[];
+	teamspace: any;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
+	fetchQuotaInfo: (teamspace) => void;
 }
 
 interface IState {
@@ -96,7 +98,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		jobs: [],
 		licencesLabel: '',
 		containerElement: null,
-		panelKey: Math.random()
+		panelKey: Math.random(),
 	};
 
 	public onPermissionsChange = (username, isAdmin) => {
@@ -159,6 +161,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
 		const preparedJobs = getPreparedJobs(this.props.jobs);
+		this.props.fetchQuotaInfo(this.props.teamspace);
+
 		this.setState({
 			containerElement,
 			jobs: preparedJobs,

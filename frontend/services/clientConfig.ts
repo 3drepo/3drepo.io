@@ -54,3 +54,5 @@ export class ClientConfigService {
 
 	}
 }
+
+export const clientConfigService = new ClientConfigService();

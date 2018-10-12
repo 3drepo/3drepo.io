@@ -20,9 +20,21 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
 import { Subscription } from './subscription.component';
+import {
+  selectBillingInfo,
+  selectCurrentTeamspace,
+  selectSpaceInfo
+} from '../../modules/teamspace';
+import { TeamspaceActions } from '../../modules/teamspace';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+  billingInfo: selectBillingInfo,
+  teamspace: selectCurrentTeamspace,
+  spaceInfo: selectSpaceInfo
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+  fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Subscription);

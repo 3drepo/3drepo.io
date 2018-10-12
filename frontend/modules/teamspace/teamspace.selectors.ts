@@ -47,3 +47,19 @@ export const selectIsPending = createSelector(
 export const selectIsAvatarPending = createSelector(
 	selectTeamspaceDomain, (state) => state.isAvatarPending
 );
+
+export const selectBillingInfo = createSelector(
+	selectCurrentUser, (state) => state.billingInfo
+);
+
+export const selectCollaboratorsLimit = createSelector(
+	selectTeamspaceDomain, (state) => state.collaboratorsLimit
+);
+
+export const selectSpaceInfo = createSelector(
+	selectTeamspaceDomain,
+	state => {
+		return { spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed };
+	}
+);
+

@@ -17,15 +17,31 @@
 
 import * as React from 'react';
 import { SubscriptionForm } from './components/subscriptionForm.component';
+import { clientConfigService } from './../../services/clientConfig';
 import { Container } from './subscription.styles';
 
+interface IProps {
+	billingInfo: any;
+	teamspace: any;
+	spaceInfo: any;
+	fetchQuotaInfo: (teamspace) => void;
+}
 
-export class Subscription extends React.PureComponent<any, any> {
+export class Subscription extends React.PureComponent<IProps, any> {
+	public componentDidMount() {
+		this.props.fetchQuotaInfo(this.props.teamspace);
+	}
 
 	public render() {
+		const { billingInfo } = this.props;
+
 		return (
 			<Container>
-				<SubscriptionForm />
+				<SubscriptionForm
+					billingInfo={billingInfo}
+					countries={clientConfigService.countries}
+					spaceInfo={this.props.spaceInfo}
+				/>
 			</Container>
 		);
 	}

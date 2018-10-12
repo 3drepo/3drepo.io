@@ -41,6 +41,16 @@ export function* fetchUser({ username }) {
 	}
 }
 
+export function* fetchQuotaInfo({ teamspace }) {
+	try {
+		const { data } = yield API.getQuotaInfo(teamspace);
+
+		return yield put(TeamspaceActions.fetchQuotaInfoSuccess({ ...data }));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('fetch', 'quota info', e.response));
+	}
+}
+
 export function* updateUser({ userData }) {
 	try {
 		yield put(TeamspaceActions.setPendingState(true));
@@ -55,6 +65,7 @@ export function* updateUser({ userData }) {
 		yield put(TeamspaceActions.setPendingState(false));
 	}
 }
+
 export function* updateUserPassword({ passwords }) {
 	try {
 		const { username } = yield select(selectCurrentUser);
@@ -98,6 +109,7 @@ export function* uploadAvatar({ file }) {
 
 export default function* teamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.FETCH_USER, fetchUser);
+	yield takeLatest(TeamspaceTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
 	yield takeLatest(TeamspaceTypes.UPDATE_USER, updateUser);
 	yield takeLatest(TeamspaceTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(TeamspaceTypes.UPLOAD_AVATAR, uploadAvatar);

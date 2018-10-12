@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { memoize } from 'lodash';
 
-import { ClientConfigService } from '../clientConfig';
-
-const clientConfigService = new ClientConfigService();
+import { clientConfigService } from "../clientConfig";
 
 axios.defaults.withCredentials = true;
 
