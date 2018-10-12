@@ -25,6 +25,7 @@ const FOOTER_HEIGHT = 45;
 export const Container = styled(Grid) `
 	height: 100%;
 	overflow: hidden;
+	background-color: rgba(250, 250, 250, .89);
 `;
 
 export const Content = styled(Grid) `

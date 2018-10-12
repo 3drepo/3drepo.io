@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { dispatch } from "../../../helpers/migration";
 
 export class AuthService {
 
@@ -163,6 +164,7 @@ export class AuthService {
 		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {});
 
 		this.authDefer.resolve(this.loggedIn);
+		dispatch({type: 'RESET_APP'});
 	}
 
 	public logoutFailure(reason) {

@@ -22,27 +22,26 @@ import { UserManagementTypes, UserManagementActions } from './userManagement.red
 import { DialogActions } from '../dialog/dialog.redux';
 
 import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
-import { selectCurrentUserTeamspaces } from '../teamspace/teamspace.selectors';
+import { selectTeamspacesWithAdminAccess } from '../teamspace/teamspace.selectors';
 import { DIALOG_TYPES } from '../dialog/dialog.redux';
+import { JobsActions } from '../jobs';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
-		const teamspaces = yield select(selectCurrentUserTeamspaces);
+		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 
-		const response = yield all([
+		const [users, quota] = yield all([
 			API.fetchUsers(teamspace),
 			API.getQuotaInfo(teamspace),
-			API.getJobs(teamspace),
-			API.getJobsColors(teamspace)
+			put(JobsActions.fetchJobs(teamspace)),
+			put(JobsActions.fetchJobsColors(teamspace))
 		]);
 
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
-			teamspaceDetails,
-			...response.map(({data}) => data)
-		));
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(teamspaceDetails, users.data, quota.data));
 	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'teamspace details', error.response));
 		yield put(UserManagementActions.setPendingState(false));
 	}
 }
@@ -132,41 +131,6 @@ export function* getUsersSuggestions({ searchText }) {
 		yield put(UserManagementActions.getUsersSuggestionsSuccess(suggestions));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('search', 'users', error.response));
-	}
-}
-
-// Jobs
-
-export function* updateJobColor({ job }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.updateJob(teamspace, job);
-
-		yield put(UserManagementActions.updateJobSuccess(job));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'job color', error.response));
-	}
-}
-
-export function* createJob({ job }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.createJob(teamspace, job);
-
-		yield put(UserManagementActions.createJobSuccess(job));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('create', 'job', error.response));
-	}
-}
-
-export function* removeJob({ jobId }) {
-	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.deleteJob(teamspace, jobId);
-
-		yield put(UserManagementActions.removeJobSuccess(jobId));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'job', error.response));
 	}
 }
 
@@ -270,12 +234,7 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
-
-	// Jobs
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
-	yield takeLatest(UserManagementTypes.CREATE_JOB, createJob);
-	yield takeLatest(UserManagementTypes.REMOVE_JOB, removeJob);
-	yield takeLatest(UserManagementTypes.UPDATE_JOB_COLOR, updateJobColor);
 
 	// Models
 	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);

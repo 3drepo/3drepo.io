@@ -30,6 +30,12 @@ export const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+
+  ${UserManagementTab.Content} {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
 `;
 
 export const Options = styled(Grid)`

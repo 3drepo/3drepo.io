@@ -16,6 +16,8 @@
  */
 
 import * as React from 'react';
+import * as queryString from 'query-string';
+import { Link, Route } from 'react-router-dom';
 import {isEqual, isEmpty} from 'lodash';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -37,6 +39,9 @@ export const PERMISSIONS_VIEWS = {
 const getProjectsItems = (projects) => projects.map(({name}) => ({value: name}));
 
 interface IProps {
+	match: any;
+	location: any;
+	history: any;
 	projects: any[];
 	currentProject: any;
 	users: any[];
@@ -53,6 +58,14 @@ interface IState {
 }
 
 export class Projects extends React.PureComponent<IProps, IState> {
+
+	public static getDerivedStateFromProps = (nextProps, prevState) => {
+		const queryParams = queryString.parse(nextProps.location.search);
+		return {
+			currentView: Number(queryParams.view || PERMISSIONS_VIEWS.PROJECTS)
+		};
+	}
+
 	public state = {
 		projectsItems: [],
 		projectsPermissions: [],
@@ -63,19 +76,26 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		currentView: PERMISSIONS_VIEWS.PROJECTS
 	};
 
-	public handleViewChange = () => {
-		let updatedView = PERMISSIONS_VIEWS.PROJECTS;
+	public updateUrlParams = (params) => {
+		const {location: {pathname, search}} = this.props;
+		const queryParams = Object.assign({}, queryString.parse(search), params);
+		const updatedQueryString = queryString.stringify(queryParams);
+		this.props.history.push(`${pathname}?${updatedQueryString}`);
+	}
 
-		if (this.state.currentView === updatedView) {
+	public handleViewChange = () => {
+		const {currentView} = this.state;
+		let updatedView = PERMISSIONS_VIEWS.PROJECTS;
+		if (currentView === updatedView) {
 			updatedView = PERMISSIONS_VIEWS.MODELS;
 		}
 
-		this.setState({currentView: updatedView});
+		this.updateUrlParams({view: updatedView});
 	}
 
 	public onProjectChange = (projectName) => {
+		this.updateUrlParams({project: projectName});
 		if (this.props.onProjectChange) {
-			this.setState({selectedProject: projectName});
 			this.props.onProjectChange(projectName);
 		}
 	}
@@ -86,12 +106,24 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.setState({
-			projectsItems: getProjectsItems(this.props.projects)
-		});
+		const {projects, location} = this.props;
+		const state = {
+			projectsItems: getProjectsItems(projects)
+		} as any;
+		const queryParams = queryString.parse(location.search);
+
+		const hasProperProject = projects.find(({ name }) => name === queryParams.project);
+		if (hasProperProject) {
+			state.selectedProject = queryParams.project;
+			this.onProjectChange(queryParams.project);
+		} else {
+			state.selectedProject = '';
+		}
+
+		this.setState(state);
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as IState;
 
 		const projectsChanged = !isEqual(prevProps.projects, this.props.projects);
@@ -99,55 +131,69 @@ export class Projects extends React.PureComponent<IProps, IState> {
 			changes.projectsItems = getProjectsItems(this.props.projects);
 		}
 
+		const selectedProjectChanged = this.state.selectedProject !== prevState.selectedProject;
+		if (selectedProjectChanged && this.props.onProjectChange) {
+			this.props.onProjectChange(this.state.selectedProject);
+		}
+
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
 	}
 
+	public renderPermissionsView = (props) => {
+		const {currentView} = this.state;
+		return (
+			<>
+				{ currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions /> }
+				{ currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions /> }
+			</>
+		);
+	}
+
 	public render() {
-		const {currentProject} = this.props;
+		const {currentProject, location, match} = this.props;
 		const {currentView, models, modelsPermissions, projectsPermissions, selectedProject, projectsItems} = this.state;
 
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Container>
-					<Options
-						container
-						direction="row"
-						justify="space-between"
-						alignContent="center"
-					>
-						<SelectContainer item>
-							<FormControl fullWidth={true}>
-								<InputLabel shrink htmlFor="project">
-										Project
-								</InputLabel>
-								<CellSelect
-									items={projectsItems}
-									value={selectedProject}
-									placeholder="Select a project"
-									disabledPlaceholder={true}
-									onChange={this.onProjectChange}
-									inputId="project"
-								/>
-							</FormControl>
-						</SelectContainer>
-						<Grid item>
-							<SwitchButton
-								color="secondary"
-								onClick={this.handleViewChange}
-							>
-								{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
-								{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
-								{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
-							</SwitchButton>
-						</Grid>
-					</Options>
 					<UserManagementTab footerLabel={footerLabel}>
 						<>
-							{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
-							{currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions />}
+							<Options
+								container
+								direction="row"
+								justify="space-between"
+								alignContent="center"
+							>
+								<SelectContainer item>
+									<FormControl fullWidth={true}>
+										<InputLabel shrink htmlFor="project">
+												Project
+										</InputLabel>
+										<CellSelect
+											items={projectsItems}
+											value={selectedProject}
+											placeholder="Select a project"
+											disabledPlaceholder={true}
+											onChange={this.onProjectChange}
+											inputId="project"
+										/>
+									</FormControl>
+								</SelectContainer>
+								<Grid item>
+									<SwitchButton
+										color="secondary"
+										onClick={this.handleViewChange}
+									>
+										{currentView === PERMISSIONS_VIEWS.MODELS && <IconLeft>keyboard_arrow_left</IconLeft>}
+										{currentView !== PERMISSIONS_VIEWS.MODELS ? 'Model & federation permissions' : 'Project permissions'}
+										{currentView !== PERMISSIONS_VIEWS.MODELS && <IconRight>keyboard_arrow_right</IconRight>}
+									</SwitchButton>
+								</Grid>
+							</Options>
+							<Route path={match.url} render={this.renderPermissionsView}/>
 						</>
 					</UserManagementTab>
 				</Container>

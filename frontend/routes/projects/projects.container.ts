@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { connect } from '../../helpers/migration';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { connect } from '../../helpers/migration';
+import { withRouter } from 'react-router';
 
 import { Projects } from './projects.component';
 import {
@@ -34,4 +35,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onProjectChange: UserManagementActions.fetchProject
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Projects);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Projects));

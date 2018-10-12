@@ -16,11 +16,10 @@
  */
 
 import {createActions, createReducer} from 'reduxsauce';
-import {pick, first, get} from 'lodash';
+import {pick, first, get, omit} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
-import { omit } from 'lodash';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
@@ -39,12 +38,6 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	getUsersSuggestions: ['searchText'],
 	getUsersSuggestionsSuccess: ['suggestions'],
 	clearUsersSuggestions: [],
-	createJob: ['job'],
-	createJobSuccess: ['job'],
-	removeJob: ['jobId'],
-	removeJobSuccess: ['jobId'],
-	updateJobColor: ['job'],
-	updateJobSuccess: ['job'],
 	fetchProject: ['project'],
 	setProject: ['project'],
 	updateProjectPermissions: ['permissions'],
@@ -68,7 +61,7 @@ export const INITIAL_STATE = {
 	jobs: [],
 	jobsColors: [],
 	collaboratorLimit: null,
-	isPending: false,
+	isPending: true,
 	currentProject: {
 		permissions: [],
 		modelsPermissions: [],
@@ -107,15 +100,15 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 };
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace, quotaInfo = {}, jobs, jobsColors } = action;
+	const { teamspace, quotaInfo = {} } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace.name));
 	return Object.assign({}, INITIAL_STATE, {
 		...quotaInfo,
 		users,
 		isPending: false,
-		...pick(action, ['jobs', 'jobsColors']),
 		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
-		selectedTeamspace: teamspace.name
+		selectedTeamspace: teamspace.account,
+		isTeamspaceAdmin: teamspace.isAdmin
 	});
 };
 
@@ -150,6 +143,7 @@ export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) =
 
 		return userData;
 	});
+
 	return {...state, users};
 };
 
@@ -162,6 +156,7 @@ export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions })
 
 		return userData;
 	});
+
 	return {...state, users};
 };
 
@@ -171,40 +166,6 @@ export const getUsersSuggestionsSuccess = (state = INITIAL_STATE, { suggestions 
 
 export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) => {
 	return {...state, usersSuggestions: []};
-};
-
-export const updateJobsColors = (state = INITIAL_STATE, { color }) => {
-	const jobsColors = [...state.jobsColors] as any;
-	if (color && !jobsColors.includes(color)) {
-		jobsColors.unshift(color);
-	}
-
-	return {...state, jobsColors};
-};
-
-export const createJobSuccess = (state = INITIAL_STATE, { job }) => {
-	const jobs = [...state.jobs, job];
-	return updateJobsColors({ ...state, jobs }, job);
-};
-
-export const updateJobSuccess = (state = INITIAL_STATE, { job }) => {
-	const jobs = [...state.jobs].map((jobData) => {
-		if (jobData._id === job._id) {
-			return job;
-		}
-
-		return jobData;
-	});
-
-	return updateJobsColors({ ...state, jobs }, job);
-};
-
-export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
-	const jobs = [...state.jobs].filter(({_id}) => {
-		return _id !== jobId;
-	});
-
-	return {...state, jobs};
 };
 
 export const setProject = (state = INITIAL_STATE, { project }) => {
@@ -272,11 +233,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
-
-	// Jobs
-	[UserManagementTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
-	[UserManagementTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
-	[UserManagementTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
 
 	// Project
 	[UserManagementTypes.SET_PROJECT]: setProject,

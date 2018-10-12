@@ -1,6 +1,7 @@
 import createConnect from 'redux-connect-standalone';
-import React from 'react';
+import * as React from 'react';
 import { render } from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { invoke } from 'lodash';
 import configureStore from '../modules/store';
 
@@ -46,4 +47,13 @@ export const subscribe = (context, selectors: any = {}) => {
 			Object.assign(context, dataToBind);
 		});
 	});
+};
+
+/* TODO: At the end Router should wrap whole app - not a specific component */
+export const addRouting = (Component) => {
+	return (props) => (
+		<Router>
+			<Component {...props} />
+		</Router>
+	);
 };

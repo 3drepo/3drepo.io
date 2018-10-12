@@ -1,7 +1,3 @@
-import "../services/projects.service";
-import "../services/models.service";
-import "../services/jobs.service";
-
 // Components & services
 import "./account/js/account-billing.component";
 import "./account/js/account.component";
@@ -15,7 +11,6 @@ import "./account/js/account-profile.component";
 import "./account/js/account.service";
 import "./account/js/account-teamspaces.component";
 import "./account/js/account-upload.service";
-import "./account/js/account-user-management.component";
 import "./bottom-buttons/js/bottom-buttons.component";
 import "./clip/js/clip.component";
 import "./clip/js/clip.service";

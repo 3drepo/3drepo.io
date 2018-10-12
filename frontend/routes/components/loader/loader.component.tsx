@@ -15,28 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class ProjectsService {
-	public static $inject: string[] = [
-		"APIService"
-	];
+import * as React from 'react';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-	constructor(private APIService) {}
+import { Container, Content } from './loader.styles';
 
-	/**
-	 * Return project details
-	 * @param teamspace
-	 * @param project
-	 * @returns {*|promise}
-	 */
-	public getProject = (teamspace, project, options): Promise<any> => {
-		return this.APIService.get(`${teamspace}/projects/${project}`, options);
-	}
-
-	public updateProject = (teamspace, project): Promise<any> => {
-		return this.APIService.put(`${teamspace}/projects/${project.name}`, project);
-	}
+interface IProps {
+	content?: string;
 }
 
-export const ProjectsServiceModule = angular
-	.module("3drepo")
-	.service("ProjectsService", ProjectsService);
+export const Loader = (props: IProps) => {
+	return (
+		<Container>
+			<CircularProgress size={30} />
+			<Content>
+				{props.content}
+			</Content>
+		</Container>
+	);
+};

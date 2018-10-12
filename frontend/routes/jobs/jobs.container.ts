@@ -20,21 +20,24 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Jobs } from './jobs.component';
+
+import { selectCurrentTeamspace } from '../../modules/userManagement/userManagement.selectors';
 import {
-	UserManagementActions,
+	JobsActions,
 	selectJobsColors,
 	selectJobs
-} from '../../modules/userManagement';
+} from '../../modules/jobs';
 
 const mapStateToProps = createStructuredSelector({
+	currentTeamspace: selectCurrentTeamspace,
 	jobs: selectJobs,
 	colors: selectJobsColors
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	updateColor: UserManagementActions.updateJobColor,
-	remove: UserManagementActions.removeJob,
-	create: UserManagementActions.createJob
+	updateColor: JobsActions.updateJobColor,
+	remove: JobsActions.removeJob,
+	create: JobsActions.createJob
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Jobs);
