@@ -20,6 +20,8 @@ import * as React from 'react';
 import SimpleBar from 'simplebar-react';
 import MenuItem from '@material-ui/core/MenuItem';
 import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
@@ -123,15 +125,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return <ModelItem {...props} actions={actions} />;
 	}
 
-	public renderProjectItem = (props) => {
-		const actions = [
-			...(props.name === 'Federations' ? this.federationActions : this.modelActions),
-			...this.sharedActions
-		];
-
+	public renderProjectItem = ({actions, ...props}) => {
 		return (
 			<TreeList
-				{...props}
+				{...(props as any)}
 				level={3}
 				renderItem={this.renderModel.bind(this, actions)}
 				active={true}
@@ -146,10 +143,18 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 		const items = [{
 			name: 'Federations',
-			items: federations
+			items: federations,
+			actions: [
+				...this.federationActions,
+				...this.sharedActions
+			]
 		}, {
 			name: 'Models',
-			items: models
+			items: models,
+			actions: [
+				...this.modelActions,
+				...this.sharedActions
+			]
 		}];
 
 		return (
@@ -171,9 +176,16 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					name={teamspace.account}
 					level={1}
 					items={teamspace.projects}
-					renderItem={this.renderProject}
 					onRootClick={this.onTeamspaceClick.bind(this, teamspace)}
 					active={teamspace.account === this.state.activeTeamspace}
+					renderItem={this.renderProject}
+					renderActions={() => (
+						<Tooltip title="Add new project">
+							<IconButton color="primary">
+								<Icon>add_circle</Icon>
+							</IconButton>
+						</Tooltip>
+					)}
 				/>
 			);
 		});
@@ -194,10 +206,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</MenuButton>
 	)
 
-	public renderMenu = () => {
+	public renderMenu = ({ close }) => {
 		return (
 			<>
-				<MenuItem>Add project</MenuItem>
+				<MenuItem onClick={close}>Add project</MenuItem>
 				<MenuItem>Add model</MenuItem>
 				<MenuItem>Add federation</MenuItem>
 			</>

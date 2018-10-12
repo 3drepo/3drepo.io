@@ -24,11 +24,12 @@ import { Container } from './buttonMenu.styles';
 
 interface IProps {
 	icon: string;
+	open?: boolean;
 	ButtonProps?: IconButtonProps;
 	IconProps?: IIconProps;
 	PopoverProps?: any;
 	renderButton?: (props) => JSX.Element;
-	renderContent?: () => JSX.Element;
+	renderContent?: (props) => JSX.Element;
 }
 
 interface IState {
@@ -56,6 +57,12 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 	};
 
 	public buttonRef = React.createRef<HTMLElement>();
+
+	public componentDidUpdate = (prevProps) => {
+		if (this.props.open !== prevProps) {
+
+		}
+	}
 
 	public toggleMenu = (forceHide) => () => {
 		this.setState({
@@ -85,7 +92,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
 				>
-					{renderContent()}
+					{renderContent({ close: this.toggleMenu(false) })}
 				</Popover>
 			</>
 		);
