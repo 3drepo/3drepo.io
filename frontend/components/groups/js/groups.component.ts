@@ -412,7 +412,7 @@ class GroupsController implements ng.IController {
 		// FIXME: messy. savedGroupData should probably be tracked by service and whilst it
 		// initialises that it should setup these 2 values.
 		this.groupsService.updateSelectedObjectsLen().then( (totalMeshes) => {
-			this.selectedGroup.totalSavedMeshes = totalMeshes;
+			this.selectedGroup.totalSavedMeshes = this.selectedGroup.new ? 0 : totalMeshes;
 		});
 	}
 
