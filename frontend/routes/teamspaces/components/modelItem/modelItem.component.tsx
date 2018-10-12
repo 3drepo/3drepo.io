@@ -19,11 +19,11 @@ import * as React from 'react';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
-import Popover from '@material-ui/core/Popover';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Container, SubmodelsList, Time } from './modelItem.styles';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 
 interface IAction {
 	label: string;
@@ -40,23 +40,7 @@ interface IProps {
 	actions: IAction[];
 }
 
-interface IState {
-	activeMenu: boolean;
-}
-
-export class ModelItem extends React.PureComponent<IProps, IState> {
-	public state = {
-		activeMenu: false
-	};
-
-	public buttonRef = React.createRef<HTMLElement>();
-
-	public toggleMenu = (forceHide) => {
-		this.setState({
-			activeMenu: forceHide ? false : !this.state.activeMenu
-		});
-	}
-
+export class ModelItem extends React.PureComponent<IProps, any> {
 	public renderSubModels = (subModels = []) => {
 		const submodelsAsString = subModels.map(({ name }) => name).join(', ');
 		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
@@ -77,7 +61,6 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { name, subModels, timestamp, actions } = this.props;
-		const { activeMenu } = this.state;
 
 		return (
 			<Container>
@@ -95,32 +78,29 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 						alignItems="center"
 						justify="flex-end">
 						<Time>{timestamp ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
-						<IconButton
-							buttonRef={this.buttonRef}
-							aria-label="More"
-							aria-haspopup="true"
-							onClick={this.toggleMenu.bind(this, null)}
-						>
-							<Icon fontSize="small">more_vert</Icon>
-						</IconButton>
-						<Popover
-							open={activeMenu}
-							elevation={0}
-							anchorEl={this.buttonRef.current}
-							anchorOrigin={{
-								vertical: 'center',
-								horizontal: 'left'
+
+						<ButtonMenu
+							icon="more_vert"
+							IconProps={{
+								fontSize: 'small'
 							}}
-							transformOrigin={{
-								vertical: 'center',
-								horizontal: 'right'
+							PopoverProps={{
+								elevation: 0,
+								anchorOrigin: {
+									vertical: 'center',
+									horizontal: 'left'
+								},
+								transformOrigin: {
+									vertical: 'center',
+									horizontal: 'right'
+								}
 							}}
-							onClose={this.toggleMenu.bind(this, false)}
-						>
-							<Grid container direction="row">
-								{this.renderActions(actions)}
-							</Grid>
-						</Popover>
+							renderContent={() => (
+								<Grid container direction="row">
+									{this.renderActions(actions)}
+								</Grid>
+							)}
+						/>
 					</Grid>
 				</Grid>
 				{this.renderSubModels(subModels)}
