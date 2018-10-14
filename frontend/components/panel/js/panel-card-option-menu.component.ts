@@ -19,20 +19,24 @@ import { IMenuItem } from "./panel.service";
 class PanelCardOptionMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$element"
+		"$element",
+		"$scope",
 	];
 
 	public menu;
 	public buttonLabel: string = "";
 	public selectedMenuOption;
+	private isOpen:boolean = false;
+	private elem;
 
 	constructor(
-		private $element: ng.IRootElementService
+		private $element: ng.IRootElementService,
+		private $scope
 	) {}
 
 	public addPreventCloseToDatepicker() {
 		const pickerButtons = this.$element[0].getElementsByClassName("md-datepicker button");
-		Array.from(pickerButtons).forEach((p) => p.setAttribute("md-prevent-menu-close", "true"));
+		Array.from(pickerButtons).forEach((p) => p.setAttribute("md-prevent-menu-close", "true"))
 	}
 
 	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem) {
@@ -63,6 +67,11 @@ class PanelCardOptionMenuController implements ng.IController {
 	}
 
 	public onClickItem(menuItem: IMenuItem, parentMenuItem: IMenuItem = null) {
+		console.log('menu method run');
+		const elem = document.querySelector('.datePicker');
+		// const elem = document.getElementsByTagName("md-datepicker");
+		console.log(elem);
+		this.isOpen = true;
 		if (menuItem.date) {
 			return;
 		}
