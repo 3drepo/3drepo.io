@@ -104,7 +104,7 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 				{},
 				{
 					icon: 'remove_circle',
-					onClick: this.onRemove.bind(null, this.props.currentTeamspace, job._id)
+					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
 			return { ...job, name: job._id, data };
@@ -154,7 +154,6 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { containerElement, rows } = this.state;
-		const { colors } = this.props;
 
 		return (
 			<Container>
