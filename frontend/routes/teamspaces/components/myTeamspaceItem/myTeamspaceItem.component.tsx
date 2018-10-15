@@ -15,31 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import * as React from 'react';
 
-import { FONT_WEIGHT, COLOR } from '../../../../styles';
+import { Container, Subtitle } from './myTeamspaceItem.styles';
+import { DefaultHeadline } from '../../../components/treeList/treeList.component';
 
-export const Container = styled.div`
-  padding-left: 112px;
-  padding-right: 13px;
-  font-size: 14px;
-  font-weight: ${FONT_WEIGHT.SEMIBOLD};
-  color: ${COLOR.BLACK_60};
-`;
-
-export const SubmodelsList = styled.div`
-  color: ${COLOR.BLACK_30};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  padding-right: 30px;
-  line-height: 25px;
-  padding-bottom: 10px;
-  font-size: 12px;
-  margin-top: -10px;
-`;
-
-export const Time = styled.div`
-  color: ${COLOR.BLACK_30};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  margin-right: 8px;
-  font-size: 12px;
-`;
+export const MyTeamspaceItem = (props) => (
+	<Container>
+		<Subtitle>My teamspace: </Subtitle>
+		<DefaultHeadline {...props} />
+	</Container>
+);

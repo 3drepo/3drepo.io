@@ -16,30 +16,14 @@
  */
 
 import styled from 'styled-components';
-
-import { FONT_WEIGHT, COLOR } from '../../../../styles';
+import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
-  padding-left: 112px;
-  padding-right: 13px;
-  font-size: 14px;
-  font-weight: ${FONT_WEIGHT.SEMIBOLD};
-  color: ${COLOR.BLACK_60};
+  width: 100%;
+  padding-top: 13px;
 `;
 
-export const SubmodelsList = styled.div`
-  color: ${COLOR.BLACK_30};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  padding-right: 30px;
-  line-height: 25px;
-  padding-bottom: 10px;
+export const Subtitle = styled.div`
   font-size: 12px;
-  margin-top: -10px;
-`;
-
-export const Time = styled.div`
   color: ${COLOR.BLACK_30};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  margin-right: 8px;
-  font-size: 12px;
 `;

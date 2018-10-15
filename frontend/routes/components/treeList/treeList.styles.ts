@@ -23,7 +23,7 @@ import { COLOR, ellipsis } from '../../../styles';
 
 export const Headline = styled.div`
   cursor: pointer;
-  height: 50px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -44,9 +44,9 @@ export const Container = styled.div`
   overflow: hidden;
   border-bottom: 1px solid ${COLOR.BLACK_6};
   background: ${(props: any) => props.active ? COLOR.WHITE : 'rgba(250, 250, 250)'};
-  pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
   transition: background 150ms ease-in-out;
   color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
+  user-select: none;
 
 	& > ${Headline} {
 		padding-left: ${(props: any) => (props.level || 0) * 24}px;
