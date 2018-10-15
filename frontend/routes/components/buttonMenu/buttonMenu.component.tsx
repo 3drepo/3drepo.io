@@ -18,9 +18,8 @@
 import * as React from 'react';
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
 import Icon, { IconProps as IIconProps } from '@material-ui/core/Icon';
-import Popover, { PopoverProps as IPopoverProps } from '@material-ui/core/Popover';
 
-import { Container } from './buttonMenu.styles';
+import { StyledPopover } from './buttonMenu.styles';
 
 interface IProps {
 	icon: string;
@@ -30,6 +29,7 @@ interface IProps {
 	PopoverProps?: any;
 	renderButton?: (props) => JSX.Element;
 	renderContent?: (props) => JSX.Element;
+	container?: any;
 }
 
 interface IState {
@@ -58,16 +58,20 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 
 	public buttonRef = React.createRef<HTMLElement>();
 
-	public componentDidUpdate = (prevProps) => {
-		if (this.props.open !== prevProps) {
+	public toggleMenu = (forceHide) => (event) => {
+		event.stopPropagation();
 
-		}
-	}
-
-	public toggleMenu = (forceHide) => () => {
 		this.setState({
 			activeMenu: forceHide ? false : !this.state.activeMenu
 		});
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.open !== prevProps.open) {
+			this.setState({
+				activeMenu: this.props.open
+			});
+		}
 	}
 
 	public render() {
@@ -86,14 +90,15 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 		return (
 			<>
 				{renderButton(buttonProps)}
-				<Popover
+				<StyledPopover
 					{...popoverProps}
 					open={activeMenu}
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
+					disableRestoreFocus
 				>
 					{renderContent({ close: this.toggleMenu(false) })}
-				</Popover>
+				</StyledPopover>
 			</>
 		);
 	}

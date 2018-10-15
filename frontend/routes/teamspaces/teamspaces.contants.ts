@@ -15,22 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Popover from '@material-ui/core/Popover';
-
-export const Container = styled.div``;
-
-export const StyledPopover = styled(Popover).attrs({
-	classes: {
-		paper: 'button-menu__container'
+export const ROW_ACTIONS = {
+	PERMISSIONS: {
+		label: 'Permissions',
+		icon: 'people'
+	},
+	SETTINGS: {
+		label: 'Settings',
+		icon: 'settings'
+	},
+	DELETE: {
+		label: 'Delete',
+		icon: 'delete',
+		color: 'error'
+	},
+	UPLOAD_FILE: {
+		label: 'Upload file',
+		icon: 'cloud_upload'
+	},
+	REVISIONS: {
+		label: 'Revisions',
+		icon: 'settings_backup_restore'
+	},
+	DOWNLOAD: {
+		label: 'Download',
+		icon: 'cloud_download'
+	},
+	ADD_NEW: {
+		label: 'Add new item',
+		icon: 'add_circle'
+	},
+	EDIT: {
+		label: 'Edit',
+		icon: 'edit'
 	}
-})`
-	&& {
-		pointer-events: none;
-	}
-
-	.button-menu__container {
-		pointer-events: all;
-		${(props: any) => props.background ? `background: ${props.background};` : ''}
-	}
-`;
+};

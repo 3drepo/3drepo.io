@@ -16,21 +16,17 @@
  */
 
 import styled from 'styled-components';
-import Popover from '@material-ui/core/Popover';
+import Grid from '@material-ui/core/Grid';
+import Grow from '@material-ui/core/Grow';
 
-export const Container = styled.div``;
+export const StyledGrid = styled(Grid)`
+  && {
+    width: auto;
+  }
+`;
 
-export const StyledPopover = styled(Popover).attrs({
-	classes: {
-		paper: 'button-menu__container'
-	}
-})`
-	&& {
-		pointer-events: none;
-	}
-
-	.button-menu__container {
-		pointer-events: all;
-		${(props: any) => props.background ? `background: ${props.background};` : ''}
-	}
+export const StyledGrow = styled(Grow)`
+  && {
+    transform-origin: right;
+  }
 `;

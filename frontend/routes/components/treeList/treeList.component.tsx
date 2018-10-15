@@ -21,7 +21,7 @@ import Grid from '@material-ui/core/Grid';
 
 import { Container, Headline, Details, Title, StyledIcon } from './treeList.styles';
 
-export const DefaultHeadline = (props) => (
+export const DefaultHeadline = ({renderActions, ...props}) => (
 	<Grid
 		container
 		direction="row"
@@ -30,7 +30,7 @@ export const DefaultHeadline = (props) => (
 		wrap="nowrap">
 		<StyledIcon fontSize="small">{props.active ? 'folder_open' : 'folder'}</StyledIcon>
 		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
-		{props.renderActions && props.renderActions(props)}
+		{renderActions && renderActions(props)}
 	</Grid>
 );
 
@@ -49,6 +49,7 @@ interface IProps {
 interface IState {
 	active: boolean;
 	disabled: boolean;
+	hovered: boolean;
 }
 
 export class TreeList extends React.PureComponent<IProps, IState> {
@@ -60,7 +61,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		active: false,
-		disabled: false
+		disabled: false,
+		hovered: false
 	};
 
 	public renderItems = () => {
@@ -117,25 +119,38 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public render() {
-		const { items, level, ...props } = this.props;
-		const { active, disabled } = this.state;
+	public createHoverHandler = (hovered) => () => {
+		this.setState({ hovered });
+	}
 
-		const containerProps = { active, level, disabled };
+	public render() {
+		const { items, level, renderRoot, ...props } = this.props;
+		const { active, disabled, hovered } = this.state;
+
+		const containerProps = { active, level, disabled, hovered };
+
+		const innerRef = React.createRef();
 
 		const headlineProps = {
 			...props,
 			active,
 			disabled,
-			renderActions: this.props.renderActions
+			hovered,
+			renderActions: this.props.renderActions,
+			refToHeadline: innerRef
 		};
 
 		return (
 			<Container {...containerProps}>
-				<Headline onClick={this.handleRootClick}>
+				<Headline
+					onClick={this.handleRootClick}
+					onMouseOver={this.createHoverHandler(true)}
+					onMouseOut={this.createHoverHandler(false)}
+					onBlur={this.createHoverHandler(false)}
+				>
 					{
-						this.props.renderRoot
-							? this.props.renderRoot(headlineProps)
+						renderRoot
+							? renderRoot(headlineProps)
 							: <DefaultHeadline {...headlineProps}/>
 					}
 				</Headline>
