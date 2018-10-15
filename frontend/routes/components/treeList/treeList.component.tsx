@@ -70,7 +70,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleRootClick = () => {
+	public handleRootClick = (event) => {
+		debugger
 		this.setState({ active: !this.state.active }, () => {
 			if (this.props.onRootClick) {
 				this.props.onRootClick(this.state);
@@ -111,19 +112,17 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		const headlineProps = {
 			...props,
 			active,
-			onClick: this.handleRootClick
+			onClick: this.handleRootClick,
+			renderActions: this.props.renderActions
 		};
 
 		return (
 			<Container {...containerProps}>
 				<Headline onClick={this.handleRootClick}>
 					{
-						this.props.renderRoot ?
-							this.props.renderRoot(headlineProps) :
-							<DefaultHeadline
-								{...headlineProps}
-								renderActions={this.props.renderActions}
-							/>
+						this.props.renderRoot
+							? this.props.renderRoot(headlineProps)
+							: <DefaultHeadline {...headlineProps}/>
 					}
 				</Headline>
 				{ active ? <Details {...props}>{this.renderItems()}</Details> : null }
