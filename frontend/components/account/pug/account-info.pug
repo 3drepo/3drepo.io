@@ -22,14 +22,12 @@
 						md-diameter="55")
 
 				#noAvatarIcon(
-					ng-if="!vm.uploadingAvatar && (!vm.avatarUrl || !vm.imageLoaded)"
+					ng-show="!vm.uploadingAvatar && (!vm.avatarUrl || !vm.imageLoaded)"
 					layout-align="center center"
 					flex
 					layout="row")
 				
-					div.avatar-upload(
-						ng-if="!vm.hasAvatar || !vm.imageLoaded"
-						ng-click="vm.uploadAvatar()") 
+					div.avatar-upload(ng-show="!vm.hasAvatar || !vm.imageLoaded") 
 						svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="150")
 							path(
 								fill="#0c2f54" 
