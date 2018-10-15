@@ -15,21 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupBy, isEmpty } from 'lodash';
 import * as React from 'react';
 import SimpleBar from 'simplebar-react';
-import MenuItem from '@material-ui/core/MenuItem';
+import { groupBy, isEmpty } from 'lodash';
+import Grid from '@material-ui/core/Grid';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
+import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 
+import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { TreeList } from '../components/treeList/treeList.component';
 import { ModelItem } from './components/modelItem/modelItem.component';
-import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { MyTeamspaceItem } from './components/myTeamspaceItem/myTeamspaceItem.component';
+import { ROW_ACTIONS } from './teamspaces.contants';
+import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
+import { RowMenu } from './components/rowMenu/rowMenu.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -38,13 +41,16 @@ const PANEL_PROPS = {
 	}
 };
 
-const TooltipButton = (props) => (
-	<Tooltip title={props.title}>
-		<IconButton onClick={props.onClick}>
-			<Icon>add_circle</Icon>
-		</IconButton>
-	</Tooltip>
-);
+const TooltipButton = ({ label, action = null, icon, color = 'inherit' }) => {
+	const iconProps = { color, fontSize: 'small' } as any;
+	return (
+		<Tooltip title={label}>
+			<IconButton aria-label={label} onClick={action}>
+				<Icon {...iconProps}>{icon}</Icon>
+			</IconButton>
+		</Tooltip>
+	);
+};
 
 interface IProps {
 	currentTeamspace: string;
@@ -146,6 +152,45 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public renderProjectActions = ({hovered, active, refToHeadline}) => (
+		<RowMenu open={hovered}>
+			<TooltipButton
+				{...ROW_ACTIONS.EDIT}
+				action={close}
+			/>
+			<TooltipButton
+				{...ROW_ACTIONS.PERMISSIONS}
+				action={close}
+			/>
+			<TooltipButton
+				{...ROW_ACTIONS.DELETE}
+				action={close}
+			/>
+		</RowMenu>
+/* 		<ButtonMenu
+			icon="more_vert"
+			open={hovered}
+			renderContent={({close}) => (
+			)}
+			IconProps={{
+				fontSize: 'small'
+			}}
+			PopoverProps={{
+				elevation: 0,
+				container: refToHeadline.current,
+				background: !hovered ? 'transparent' : null,
+				anchorOrigin: {
+					vertical: 'center',
+					horizontal: 'left'
+				},
+				transformOrigin: {
+					vertical: 'center',
+					horizontal: 'right'
+				}
+			}}
+		/>*/
+	)
+
 	public renderProject = (props) => {
 		const {federations = [], models } = groupBy(props.models, ({federate}) => {
 			return federate ? 'federations' : 'models';
@@ -159,8 +204,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			],
 			renderActions: () => (
 				<TooltipButton
-					title="Add new federation"
-					onClick={this.handleAddProject}
+					{...ROW_ACTIONS.ADD_NEW}
+					label="Add new federation"
+					action={this.handleAddProject}
 				/>
 			)
 		}, {
@@ -172,8 +218,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			],
 			renderActions: () => (
 				<TooltipButton
-					title="Add new model"
-					onClick={this.handleAddProject}
+					{...ROW_ACTIONS.ADD_NEW}
+					label="Add new model"
+					action={this.handleAddProject}
 				/>
 			)
 		}];
@@ -185,6 +232,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				level={2}
 				items={items}
 				renderItem={this.renderProjectItem}
+				renderActions={this.renderProjectActions}
 			/>
 		);
 	}
@@ -207,8 +255,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					renderRoot={index === 0 ? MyTeamspaceItem : null}
 					renderActions={() => (
 						<TooltipButton
-							title="Add new project"
-							onClick={this.handleAddProject}
+							{...ROW_ACTIONS.ADD_NEW}
+							label="Add new project"
+							action={this.handleAddProject}
 						/>
 					)}
 				/>
