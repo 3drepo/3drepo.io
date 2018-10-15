@@ -21,11 +21,19 @@ export class NotificationNotificationsEvents {
 	constructor(private channel: NotificationsChannel) {
 	}
 
-	public subscribeToUpsert(callback: (data: any) => void, context: any) {
-		this.channel.subscribe("notificationUpsert", callback, context);
+	public subscribeToUpserted(callback: (data: any) => void, context: any) {
+		this.channel.subscribe("notificationUpserted", callback, context);
 	}
 
-	public unsubscribeFromUpsert(callback: (data: any) => void) {
-		this.channel.unsubscribe("notificationUpsert", callback);
+	public unsubscribeFromUpserted(callback: (data: any) => void) {
+		this.channel.unsubscribe("notificationUpserted", callback);
+	}
+
+	public subscribeToDeleted(callback: (data: any) => void, context: any) {
+		this.channel.subscribe("notificationDeleted", callback, context);
+	}
+
+	public unsubscribeFromDeleted(callback: (data: any) => void) {
+		this.channel.unsubscribe("notificationDeleted", callback);
 	}
 }

@@ -20,7 +20,7 @@ const C = require("../constants");
 
 const queueUpsertNotification = function(session, notification) {
 	const msg = {
-		event : notification.username + "::notificationUpsert",
+		event : notification.username + "::notificationUpserted",
 		channel : notification.username,
 		emitter : session,
 		data : notification.notification
@@ -29,10 +29,27 @@ const queueUpsertNotification = function(session, notification) {
 	return Queue.insertEventMessage(msg);
 };
 
+const queueDeleteNotification = function(session, notification) {
+	const msg = {
+		event : notification.username + "::notificationDeleted",
+		channel : notification.username,
+		emitter : session,
+		data : {_id:notification.notification._id}
+	};
+
+	return Queue.insertEventMessage(msg);
+};
+
 module.exports = {
 	onNotification: function(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		(req.userNotifications  || []).forEach(queueUpsertNotification.bind(null,sessionId));
+		const notifications = (req.userNotifications  || []);
+
+		const deletedNotifications = notifications.filter(n => n.deleted);
+		const upsertedNotifications = notifications.filter(n => !n.deleted);
+
+		deletedNotifications.forEach(queueDeleteNotification.bind(null,sessionId));
+		upsertedNotifications.forEach(queueUpsertNotification.bind(null,sessionId));
 		next();
 	}
 };

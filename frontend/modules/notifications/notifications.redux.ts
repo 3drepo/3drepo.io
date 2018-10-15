@@ -21,7 +21,8 @@ import { consolidateStreamedStyles } from 'styled-components';
 export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
 	fetchNotifications: ['username'],
 	fetchNotificationsSuccess: ['notifications'],
-	upsertNotification: ['notification']
+	upsertNotification: ['notification'],
+	deleteNotification: ['notification']
 }, { prefix: 'NOTIFICATIONS_' });
 
 export const INITIAL_STATE = [];
@@ -32,10 +33,18 @@ export const upsertNotification = (state = INITIAL_STATE, { notification }) =>  
 	const index = state.findIndex((n) => n._id === notification._id);
 	const newState = state.concat([]);
 	newState.splice(index, (index >= 0 ? 1 : 0), notification);
-	return newState;
+	return newState.sort((a, b) => b.timestamp - a.timestamp);
+};
+
+export const deleteNotification = (state = INITIAL_STATE, { notification }) =>  {
+	const index = state.findIndex((n) => n._id === notification._id);
+	const newState = state.concat([]);
+	newState.splice(index, (index >= 0 ? 1 : 0));
+	return newState.sort((a, b) => b.timestamp - a.timestamp);
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[NotificationsTypes.FETCH_NOTIFICATIONS_SUCCESS]: fetchNotificationsSuccess,
-	[NotificationsTypes.UPSERT_NOTIFICATION]: upsertNotification
+	[NotificationsTypes.UPSERT_NOTIFICATION]: upsertNotification,
+	[NotificationsTypes.DELETE_NOTIFICATION]: deleteNotification
 });

@@ -244,7 +244,8 @@ class HomeController implements ng.IController {
 				return;
 			}
 
-			this.notificationService.getChannel(account).notifications.subscribeToUpsert(this.onNotificationUpsert, this);
+			this.notificationService.getChannel(account).notifications.subscribeToUpserted(this.onNotificationUpserted, this);
+			this.notificationService.getChannel(account).notifications.subscribeToDeleted(this.onNotificationDeleted, this);
 		});
 	}
 
@@ -318,8 +319,12 @@ class HomeController implements ng.IController {
 		}
 	}
 
-	public onNotificationUpsert(notification: any): void {
+	public onNotificationUpserted(notification: any): void {
 		dispatch(NotificationsActions.upsertNotification(notification));
+	}
+
+	public onNotificationDeleted(notification: any): void {
+		dispatch(NotificationsActions.deleteNotification(notification));
 	}
 
 	public getLiteModeState() {

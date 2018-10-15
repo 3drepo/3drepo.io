@@ -120,7 +120,7 @@ export class NotificationService {
 	}
 
 	public getChannel(account: string, model: string = ""): NotificationsChannel {
-		const channelId: string = account + model ? "::" + model : "";
+		const channelId: string = account + (model ? "::" + model : "");
 
 		if ( !this.channels[channelId] ) {
 			this.channels[channelId] = new NotificationsChannel(this, account, model);

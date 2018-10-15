@@ -36,7 +36,7 @@ const generateNotification = function(type, data) {
 	return Object.assign({_id:utils.stringToUUID(uuid.v1()), read:false, type, timestamp}, data);
 };
 
-const uniqArrayMerger = function(objValue, srcValue) {
+const unionArrayMerger = function(objValue, srcValue) {
 	if (_.isArray(objValue)) {
 		return _.uniq(objValue.concat(srcValue));
 	}
@@ -76,6 +76,21 @@ const getModelsData = function(teamSpaces) {
 	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
 };
 
+const fillModelNames = function(notifications) {
+	const teamSpaces = extractTeamSpaceInfo(notifications);
+	return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+		return notifications.map(notification => {
+			const teamSpace = (modelsData[notification.teamSpace] || {});
+			const modelName = (teamSpace[notification.modelId] || {}).name;
+			return Object.assign(notification, {modelName});
+		});
+	});
+};
+
+const getNotification = (username, type, criteria) =>
+	db.getCollection(NOTIFICATIONS_DB, username)
+		.then((collection) => collection.find(Object.assign({type},  criteria)).toArray());
+
 module.exports = {
 	types,
 
@@ -94,23 +109,21 @@ module.exports = {
 	},
 
 	updateNotification: function(username, _id, data) {
-		const timestamp = (new Date()).getTime();
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
-			collection.update({ _id }, { $set: Object.assign(data,{read:false,timestamp})})
-		).then(() => timestamp);
+			collection.update({_id }, { $set: data })
+		);
 	},
 
 	upsertNotification: function(username, data, type, criteria) {
-		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
-			collection.find(Object.assign({type},  criteria)).toArray()
-		).then(notifications => {
+		return getNotification(username, type, criteria).then(notifications => {
 			if (notifications.length === 0) {
 				return this.insertNotification(username, type, Object.assign(criteria, data));
 			} else {
 				const n = notifications[0];
-				const mergedData = Object.assign(_.mergeWith(n, data, uniqArrayMerger));
-				return this.updateNotification(username, n._id, mergedData).then((timestamp) => {
-					const notification =  Object.assign(n, mergedData, {read:false,timestamp});
+				const timestamp = (new Date()).getTime();
+				const mergedData = Object.assign(_.mergeWith(n, data, unionArrayMerger), {read:false,timestamp});
+				return this.updateNotification(username, n._id, mergedData).then(() => {
+					const notification =  Object.assign(n, mergedData);
 					return utils.changeObjectIdToString(notification);
 				});
 			}
@@ -121,6 +134,30 @@ module.exports = {
 		const criteria = {teamSpace,  modelId};
 		const data = {issuesId: [issueId] };
 		return this.upsertNotification(username,data,types.ISSUE_ASSIGNED,criteria);
+	},
+
+	removeIssueAssignedNotification:function(username, teamSpace, modelId, issueId) {
+		const criteria = {teamSpace,  modelId, issuesId:{$in: [issueId]}};
+
+		return getNotification(username, types.ISSUE_ASSIGNED, criteria).then(notifications => {
+			if (notifications.length === 0) {
+				return null;
+			} else {
+				const n = notifications[0];
+				const index = n.issuesId.findIndex(i => i === issueId);
+				n.issuesId.splice(index, 1);
+				const data = {issuesId : n.issuesId};
+
+				if (data.issuesId.length === 0) {
+					return db.getCollection(NOTIFICATIONS_DB, username)
+						.then(c => c.deleteOne(Object.assign({type: types.ISSUE_ASSIGNED}, criteria)))
+						.then(() => ({deleted:true , notification: {_id: utils.changeObjectIdToString(n._id) }}));
+				}
+				return this.updateNotification(username, n._id, data).then(() => {
+					return {deleted:false , notification: utils.changeObjectIdToString(n)};
+				});
+			}
+		});
 	},
 
 	/**
@@ -157,7 +194,31 @@ module.exports = {
 				const assignedUsers = users.filter(u => u.canWrite).map(u=> u.user);
 				return Promise.all(
 					assignedUsers.map(u => this.upsertIssueAssignedtNotification(u, teamSpace, modelId, issue._id).then(n=>({username:u, notification:n})))
-				);
+				).then(usersNotifications => {
+					return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
+				});
+			});
+	},
+
+	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {
+		const assignedRole = issue.assigned_roles[0];
+
+		return job.findByJob(teamSpace,assignedRole)
+			.then(rs => {
+				if (!rs || !rs.users) {
+					return [];
+				}
+
+				return rs.users.filter(m => m !== username); // Leave out the user that is assigning the issue
+			})
+			.then((users) => {
+				return Promise.all(
+					users.map(u => this.removeIssueAssignedNotification(u, teamSpace, modelId, utils.changeObjectIdToString(issue._id)).then(n =>
+						Object.assign({username:u}, n))))
+					.then(notifications => notifications.reduce((a,c) => ! c.notification ? a : a.concat(c), []))
+					.then(usersNotifications => {
+						return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
+					});
 			});
 	},
 
@@ -168,18 +229,7 @@ module.exports = {
 	 * @returns {Promise<Notification[]>} It contains the notifications for the user passed through parameter
  	 */
 	getNotifications: function(username) {
-		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find().toArray())
-			.then((notifications) => {
-				const teamSpaces = extractTeamSpaceInfo(notifications);
-				return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
-
-					return notifications.map(notification => {
-						const teamSpace = (modelsData[notification.teamSpace] || {});
-						const modelName = (teamSpace[notification.modelId] || {}).name;
-
-						return Object.assign(notification, {modelName});
-					});
-				});
-			});
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find({}, {sort: {timestamp: -1}}).toArray())
+			.then(fillModelNames);
 	}
 };

@@ -17,6 +17,7 @@
 "use strict";
 const notification = require("../models/notification");
 const issues = require("../models/issue");
+const _ = require("lodash");
 
 module.exports = {
 	onUpdateIssue: function(req, res, next) {
@@ -34,11 +35,15 @@ module.exports = {
 		}
 
 		if (!isCommentModification && issues.isIssueAssignation(oldIssue, issue)) {
-			notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue)
-				.then((notifications) => {
-					req.userNotifications = notifications;
-					next();
-				});
+			Promise.all([
+				notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue),
+				notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue)
+			]).then((notifications) => {
+				notifications = _.flatten(notifications);
+				req.userNotifications = notifications;
+				next();
+			});
+
 		} else {
 			next();
 		}
