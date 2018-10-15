@@ -386,9 +386,10 @@ function createFederatedModel(account, model, subModels, toyFed) {
 	}
 
 	subModels.forEach(subModel => {
-
 		if(subModel.database !== account) {
-			return Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB);
+
+			addSubModelsPromise.push(Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB));
+			return;
 		}
 
 		addSubModelsPromise.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {

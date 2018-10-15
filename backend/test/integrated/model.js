@@ -137,41 +137,41 @@ describe("Model", function () {
 			}
 		};
 		it("blank test model name format should fail", function() {
-			expect(ModelHelper.modelNameRegExp.test("")).to.be.false;
+			nameTest("", false);
 		});
 
 		it("plain test model name format should succeed", function() {
-			expect(ModelHelper.modelNameRegExp.test("a")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("ab")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("abc")).to.be.true;
+			nameTest("a", true);
+			nameTest("ab", true);
+			nameTest("abc", true);
 		});
 
 		it("hyphens dashes and underscores in test model name format should succeed", function() {
-			expect(ModelHelper.modelNameRegExp.test("123-4a")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("123_4a")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("123-_4A")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("aasa[")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("aasa/")).to.be.true;
-			expect(ModelHelper.modelNameRegExp.test("aasa%")).to.be.true;
+			nameTest("123-4a",true);
+			nameTest("123_4a",true);
+			nameTest("123-_4A",true);
+			nameTest("aasa[",true);
+			nameTest("aasa/",true);
+			nameTest("aasa%",true);
 		});
 
 		it("non-ASCII characters should fail", function() {
-			expect(ModelHelper.modelNameRegExp.test("失败")).to.be.false;
-			expect(ModelHelper.modelNameRegExp.test("😕")).to.be.false;
+			nameTest("失败",false);
+			nameTest("😕",false);
 		});
 
 		it("long strings less than 120 characters in test model name format should succeed", function() {
-			expect(ModelHelper.modelNameRegExp.test("aaaaaaaaaaaaaaaaaaaaa")).to.be.true;
+			nameTest("aaaaaaaaaaaaaaaaaaaaa",true);
 		});
 
 		it("long strings more than 120 characters in test model name format should fail", function() {
-			expect(ModelHelper.modelNameRegExp.test(
+			nameTest(
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaa"
-			)).to.be.false;
+			,false);
 		});
 
 	});
@@ -209,7 +209,7 @@ describe("Model", function () {
 	it("should fail if no unit specified", function(done) {
 
 		agent.post(`/${username}/model`)
-			.send({ desc, type, modelName: "model3" })
+			.send({ desc, type, project, modelName: "model3" })
 			.expect(400, function(err ,res) {
 
 				expect(res.body.value).to.equal(responseCodes.MODEL_NO_UNIT.value);
@@ -306,7 +306,7 @@ describe("Model", function () {
 		const model = "project7";
 
 		agent.post(`/${username}/model`)
-			.send({ desc, type, unit, modelName: model })
+			.send({ desc, type, unit, project, modelName: model })
 			.expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 				done(err);
@@ -317,7 +317,7 @@ describe("Model", function () {
 
 		const spacedName = "you are genius";
 		agent.post(`/${username}/model`)
-			.send({ desc, type, unit, modelName: spacedName })
+			.send({ desc, type, project, unit, modelName: spacedName })
 			.expect(200, function(err ,res) {
 				expect(res.body.name).to.equal(spacedName);
 				done(err);
@@ -327,7 +327,7 @@ describe("Model", function () {
 	it("should return error if creating a model in a database that doesn't exists or not authorized for", function(done) {
 
 		agent.post(`/${username}_someonelese/model`)
-			.send({ modelName: "testmodel", desc, type, unit })
+			.send({ modelName: "testmodel", desc, type, unit, project })
 			.expect(401, function(err ,res) {
 				done(err);
 			});

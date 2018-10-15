@@ -44,6 +44,7 @@ describe("Federated Model", function () {
 	const desc = "desc";
 	const type = "type";
 	const fedModelName = "fedproj";
+	const project = "project1";
 	let fedModelId;
 
 	before(function(done) {
@@ -92,6 +93,7 @@ describe("Federated Model", function () {
 				desc,
 				type,
 				unit,
+				project,
 				subModels:[{
 					"database": username,
 					"model": subModels[0]
@@ -119,7 +121,8 @@ describe("Federated Model", function () {
 						agent.get(`/${username}.json`)
 							.expect(200, function(err, res) {
 								const account = res.body.accounts.find(a => a.account === username);
-								const fed = account.fedModels.find(m => m.model === fedModelId);
+								const proj = account.projects.find(p => p.name === project);
+								const fed = proj.models.find(m => m.model === fedModelId);
 								expect(fed.federate).to.equal(true);
 								done(err);
 							});
@@ -142,6 +145,7 @@ describe("Federated Model", function () {
 				desc,
 				type,
 				unit,
+				project,
 				subModels:[]
 			})
 			.expect(200, function(err ,res) {
@@ -166,7 +170,8 @@ describe("Federated Model", function () {
 						agent.get(`/${username}.json`)
 							.expect(200, function(err, res) {
 								const account = res.body.accounts.find(a => a.account === username);
-								const fed = account.fedModels.find(p => p.model === emptyFedId);
+								const proj = account.projects.find(p => p.name === project);
+								const fed = proj.models.find(m => m.model === fedModelId);
 								expect(fed.federate).to.equal(true);
 								done(err);
 							});
@@ -186,13 +191,13 @@ describe("Federated Model", function () {
 				desc,
 				type,
 				unit,
+				project,
 				subModels:[{
 					"database": username,
 					"model": subModels[0]
 				}]
 			})
 			.expect(400, function(err ,res) {
-
 				expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 				done(err);
 
@@ -206,6 +211,7 @@ describe("Federated Model", function () {
 				modelName: "错误",
 				desc,
 				type,
+				project,
 				subModels:[{
 					"database": "testing",
 					"model": "testproject"
@@ -227,13 +233,13 @@ describe("Federated Model", function () {
 				desc,
 				type,
 				unit,
+				project,
 				subModels:[{
 					"database": "testing",
 					"model": "testproject"
 				}]
 			})
 			.expect(400, function(err ,res) {
-
 				expect(res.body.value).to.equal(responseCodes.FED_MODEL_IN_OTHER_DB.value);
 				done(err);
 
@@ -256,6 +262,7 @@ describe("Federated Model", function () {
 					desc,
 					type,
 					unit,
+					project,
 					subModels:[{
 						"database": username,
 						"model": subModels[0]
@@ -265,7 +272,6 @@ describe("Federated Model", function () {
 					}]
 				})
 				.expect(200, function(err ,res) {
-					console;
 					done(err);
 				});
 		});
@@ -279,6 +285,7 @@ describe("Federated Model", function () {
 				desc,
 				type,
 				unit,
+				project,
 				subModels:[{
 					"database": username,
 					"model": fedModelId
