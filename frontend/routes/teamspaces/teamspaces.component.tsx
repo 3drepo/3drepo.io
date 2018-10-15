@@ -37,6 +37,17 @@ const PANEL_PROPS = {
 	}
 };
 
+const TooltipButton = (props) => (
+	<Tooltip title={props.title}>
+		<IconButton
+			color="primary"
+			onClick={props.onClick}
+		>
+			<Icon>add_circle</Icon>
+		</IconButton>
+	</Tooltip>
+);
+
 interface IProps {
 	currentTeamspace: string;
 	teamspaces: any[];
@@ -168,6 +179,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public handleAddProject = (event) => {
+		event.stopPropagation();	
+	}
+
 	public renderTeamspaces = (teamspaces) => {
 		return teamspaces.map((teamspace, index) => {
 			return (
@@ -180,11 +195,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					active={teamspace.account === this.state.activeTeamspace}
 					renderItem={this.renderProject}
 					renderActions={() => (
-						<Tooltip title="Add new project">
-							<IconButton color="primary">
-								<Icon>add_circle</Icon>
-							</IconButton>
-						</Tooltip>
+						<TooltipButton
+							title="Add new project"
+							onClick={this.handleAddProject}
+						/>
 					)}
 				/>
 			);
