@@ -37,7 +37,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
   fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo,
-  fetchBillingData: BillingActions.fetchBillingData
+  fetchBillingData: BillingActions.fetchBillingData,
+  changeSubscription: BillingActions.changeSubscription
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Subscription);

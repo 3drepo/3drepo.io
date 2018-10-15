@@ -20,6 +20,8 @@ import { put, takeLatest, all } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { BillingTypes, BillingActions } from './billing.redux';
 import { DialogActions } from "../dialog";
+import { SnackbarActions } from "../snackbar";
+
 
 export function* fetchPlans() {
   try {
@@ -63,9 +65,21 @@ export function* fetchBillingData({ teamspace }) {
 	}
 }
 
+export function* changeSubscription({ teamspace, subscriptionData }) {
+	try {
+		const response = yield API.changeSubscription(teamspace, subscriptionData);
+
+    yield put(SnackbarActions.show("Subscription changed"));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
+	}
+}
+
+
 export default function* BillingSaga() {
 	yield takeLatest(BillingTypes.FETCH_PLANS, fetchPlans);
 	yield takeLatest(BillingTypes.FETCH_INVOICES, fetchInvoices);
 	yield takeLatest(BillingTypes.FETCH_SUBSCRIPTIONS, fetchSubscriptions);
 	yield takeLatest(BillingTypes.FETCH_BILLING_DATA, fetchBillingData);
+	yield takeLatest(BillingTypes.CHANGE_SUBSCRIPTION, changeSubscription);
 }

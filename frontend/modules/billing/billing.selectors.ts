@@ -37,14 +37,13 @@ export const selectLicencesInfo = createSelector(
     }
 
     if (!planId || !pricePerLicense) {
-      // Use the user's current plan if they already have a plan
-      // Otherwise use the first available plan
       const availablePlansIdx = Object.keys(state.plans).filter((key) => state.plans[key].available);
       pricePerLicense = availablePlansIdx.length ? state.plans[availablePlansIdx[0]].price : 0;
       planId = availablePlansIdx[0];
     }
 
     return {
+      planId,
       pricePerLicense,
       numLicences
     };

@@ -101,6 +101,12 @@ export const MuiTheme = createMuiTheme({
 			action: {
 				marginRight: '-16px'
 			}
+		},
+		MuiMenuItem: {
+			root: {
+				fontSize: '14px',
+				color: theme.colors.BLACK_60
+			},
 		}
 	}
 });

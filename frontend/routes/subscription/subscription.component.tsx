@@ -27,6 +27,7 @@ interface IProps {
 	licencesInfo: any;
 	fetchQuotaInfo: (teamspace) => void;
 	fetchBillingData: (teamspace) => void;
+	changeSubscription: (teamspace, subscriptionData) => void;
 }
 
 export class Subscription extends React.PureComponent<IProps, any> {
@@ -36,7 +37,7 @@ export class Subscription extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { billingInfo, spaceInfo, licencesInfo } = this.props;
+		const { billingInfo, spaceInfo, licencesInfo, changeSubscription, teamspace } = this.props;
 
 		return (
 			<Container>
@@ -45,6 +46,8 @@ export class Subscription extends React.PureComponent<IProps, any> {
 					countries={clientConfigService.countries}
 					spaceInfo={spaceInfo}
 					licencesInfo={licencesInfo}
+					teamspace={teamspace}
+					changeSubscription={changeSubscription}
 				/>
 			</Container>
 		);

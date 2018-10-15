@@ -39,3 +39,11 @@ export const getSubscriptions = (teamspace) => {
 export const getInvoices = (teamspace) => {
   return api.get(`${teamspace}/invoices`);
 };
+
+/**
+ * Post subscription
+ * @param subscriptionData
+ */
+export const changeSubscription = (teamspace, subscriptionData) => {
+  return api.post(`${teamspace}/subscriptions`, subscriptionData);
+};

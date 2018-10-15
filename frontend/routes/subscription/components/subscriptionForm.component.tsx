@@ -45,9 +45,10 @@ const REQUIRED_FIELD = Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED);
 const SubscriptionSchema = Yup.object().shape({
   firstName: schema.firstName,
   lastName: schema.lastName,
-  address: REQUIRED_FIELD,
+  line1: REQUIRED_FIELD,
   city: REQUIRED_FIELD,
   postalCode: REQUIRED_FIELD,
+	licences: REQUIRED_FIELD,
 });
 
 interface IProps {
@@ -55,6 +56,8 @@ interface IProps {
 	countries: any;
 	spaceInfo: any;
 	licencesInfo: any;
+	teamspace: any;
+	changeSubscription: (teamspace, subscriptionData) => void
 }
 
 interface IState {
@@ -78,15 +81,28 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 		payment: 0,
 	};
 
-	public handleConfirmSubsription = (data) => {
-		console.log('Confirm form', data);
+	public handleConfirmSubsription = (addressData) => {
+		const { licencesInfo: { planId }, teamspace, changeSubscription } = this.props;
+		const subscriptionData = {
+			billingAddress: { ...addressData },
+			plans: [ {
+					plan: planId,
+					quantity: this.state.numLicences
+			} ]
+		}
+
+		changeSubscription(teamspace, subscriptionData);
 	}
 
-	public handleLicencesChange = (event) => {
-		this.setState({
-      numLicences: event.target.value,
-      payment: event.target.value * this.state.pricePerLicense
-    });
+	public handleLicencesChange = (onChange) => (event, ...params) => {
+		const licences = Number(event.target.value);
+
+		this.setState(() => ({
+			numLicences: licences,
+			payment: licences* this.state.pricePerLicense
+		}));
+
+		onChange(event, ...params);
 	}
 
 	public componentDidMount() {
@@ -120,23 +136,12 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {	countries, billingInfo: { firstName, lastName, city, postalCode, company, line1, line2, countryCode } } = this.props;
-		const { spaceInfo: { spaceUsed, spaceLimit } } = this.state;
+		const { countries, billingInfo: { firstName, lastName, vat, city, postalCode, company, line1, line2, countryCode } } = this.props;
+		const { spaceInfo: { spaceUsed, spaceLimit }, numLicences } = this.state;
 
 		return (
 			<Formik
-				initialValues={{
-					firstName,
-					lastName,
-					city,
-					businessName: company,
-					address: line1,
-					address2: line2,
-					postalCode,
-					country: countryCode,
-					quotaAvailable: spaceLimit,
-					quotaUsed: spaceUsed,
-				}}
+				initialValues={{ firstName, lastName, vat, city, company, line1, line2, postalCode, countryCode }}
 				onSubmit={this.handleConfirmSubsription}
 				validationSchema={SubscriptionSchema}
 			>
@@ -152,9 +157,9 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											margin="normal"
 											required
 											type="number"
+											value={numLicences}
 											inputProps={{ min: "0", max: "1000" }}
-											value={this.state.numLicences}
-											onChange={this.handleLicencesChange}
+											onChange={this.handleLicencesChange(field.onChange)}
 										/>
 										} />
 									<Field name="payment" render={({ field }) =>
@@ -178,14 +183,14 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 										required
 										type="text" />
 								}	/>
-                <Field name="businessName" render={({ field, form }) =>
+                <Field name="company" render={({ field }) =>
 									<StyledTextField
 										{...field}
 										label="Business Name"
 										margin="normal"
 										type="text" />
 									} />
-                <Field name="address" render={({ field, form }) =>
+                <Field name="line1" render={({ field, form }) =>
 									<StyledTextField
 										{...field}
 										error={Boolean(form.errors.address)}
@@ -195,7 +200,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 										required
 										type="text" />
 									} />
-                <Field name="address2" render={({ field }) =>
+                <Field name="line2" render={({ field }) =>
 									<StyledTextField
 										{...field}
 										label="Address 2"
@@ -235,7 +240,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 										required
 										type="text"	/>
 								} />
-                <Field name="vatNumber" render={({ field }) =>
+                <Field name="vat" render={({ field }) =>
 									<StyledTextField
 										{...field}
 										label="VAT Number **"
@@ -263,7 +268,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 									} />
                 <StyledFormControl>
                   <StyledInputLabel>Country</StyledInputLabel>
-                  <Field name="country" render={({ field }) =>
+									<Field name="countryCode" render={({ field }) =>
 										<StyledSelectField {...field} type="text">
 											{ countries.map(country => (
 												<StyledSelectItem key={country.code} value={country.code}>
@@ -286,7 +291,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
               </FormInfoContainer>
               <ConfirmContainer>
                 <PayPalLogo src="/images/paypal.png" />
-                <Field render={({ form }) =>
+								<Field render={({ form }) =>
 									<StyledButton
 										color="secondary"
 										variant="raised"
