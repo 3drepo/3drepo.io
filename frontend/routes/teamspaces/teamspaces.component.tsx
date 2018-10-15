@@ -29,6 +29,7 @@ import { TreeList } from '../components/treeList/treeList.component';
 import { ModelItem } from './components/modelItem/modelItem.component';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import { MyTeamspaceItem } from './components/myTeamspaceItem/myTeamspaceItem.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -39,10 +40,7 @@ const PANEL_PROPS = {
 
 const TooltipButton = (props) => (
 	<Tooltip title={props.title}>
-		<IconButton
-			color="primary"
-			onClick={props.onClick}
-		>
+		<IconButton onClick={props.onClick}>
 			<Icon>add_circle</Icon>
 		</IconButton>
 	</Tooltip>
@@ -158,14 +156,26 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			actions: [
 				...this.federationActions,
 				...this.sharedActions
-			]
+			],
+			renderActions: () => (
+				<TooltipButton
+					title="Add new federation"
+					onClick={this.handleAddProject}
+				/>
+			)
 		}, {
 			name: 'Models',
 			items: models,
 			actions: [
 				...this.modelActions,
 				...this.sharedActions
-			]
+			],
+			renderActions: () => (
+				<TooltipButton
+					title="Add new model"
+					onClick={this.handleAddProject}
+				/>
+			)
 		}];
 
 		return (
@@ -180,12 +190,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleAddProject = (event) => {
-		event.stopPropagation();	
+		event.stopPropagation();
 	}
 
 	public renderTeamspaces = (teamspaces) => {
 		return teamspaces.map((teamspace, index) => {
-			return (
+			const TeamspaceItem = (
 				<TreeList
 					key={index}
 					name={teamspace.account}
@@ -194,6 +204,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					onRootClick={this.onTeamspaceClick.bind(this, teamspace)}
 					active={teamspace.account === this.state.activeTeamspace}
 					renderItem={this.renderProject}
+					renderRoot={index === 0 ? MyTeamspaceItem : null}
 					renderActions={() => (
 						<TooltipButton
 							title="Add new project"
@@ -202,6 +213,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					)}
 				/>
 			);
+
+			return TeamspaceItem;
 		});
 	}
 

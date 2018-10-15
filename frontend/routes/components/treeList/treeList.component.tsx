@@ -29,7 +29,7 @@ export const DefaultHeadline = (props) => (
 		justify="flex-start"
 		wrap="nowrap">
 		<StyledIcon fontSize="small">{props.active ? 'folder_open' : 'folder'}</StyledIcon>
-		<Title>{props.name}</Title>
+		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
 		{props.renderActions && props.renderActions(props)}
 	</Grid>
 );
@@ -48,6 +48,7 @@ interface IProps {
 
 interface IState {
 	active: boolean;
+	disabled: boolean;
 }
 
 export class TreeList extends React.PureComponent<IProps, IState> {
@@ -58,7 +59,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	};
 
 	public state = {
-		active: false
+		active: false,
+		disabled: false
 	};
 
 	public renderItems = () => {
@@ -70,27 +72,44 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleRootClick = (event) => {
-		debugger
-		this.setState({ active: !this.state.active }, () => {
-			if (this.props.onRootClick) {
-				this.props.onRootClick(this.state);
-			}
-		});
+	public handleRootClick = () => {
+		const { disabled, active } = this.state;
+		if (!disabled) {
+			this.setState({ active: !active }, () => {
+				if (this.props.onRootClick) {
+					this.props.onRootClick(this.state);
+				}
+			});
+		}
 	}
 
 	public componentDidMount() {
+		const changes = {} as IState;
+
 		if (this.props.active) {
-			this.setState({active: true});
+			changes.active = true;
+		}
+
+		if (!this.props.items.length) {
+			changes.disabled = true;
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
 	public componentDidUpdate = (prevProps) => {
 		const changes = {} as IState;
 
+		const itemsChanged = this.props.items.length !== prevProps.items.length;
+		if (itemsChanged) {
+			changes.disabled = Boolean(this.props.items.length);
+		}
+
 		const activeChanged = this.props.active !== prevProps.active;
 		if (activeChanged) {
-			changes.active = this.props.active;
+			changes.active = this.props.active && !changes.disabled;
 		}
 
 		if (!isEmpty(changes)) {
@@ -99,20 +118,15 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, level, active: forceActive, ...props } = this.props;
+		const { items, level, ...props } = this.props;
+		const { active, disabled } = this.state;
 
-		const active = items.length && this.state.active;
-
-		const containerProps = {
-			active,
-			level,
-			disabled: !items.length
-		};
+		const containerProps = { active, level, disabled };
 
 		const headlineProps = {
 			...props,
 			active,
-			onClick: this.handleRootClick,
+			disabled,
 			renderActions: this.props.renderActions
 		};
 

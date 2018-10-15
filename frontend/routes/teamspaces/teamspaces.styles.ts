@@ -18,6 +18,7 @@
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
+import { TreeList } from '../components/treeList/treeList.component';
 
 export const Head = styled.div`
 	font-size: 14px;
@@ -63,4 +64,8 @@ export const MenuButton = styled(Button).attrs({
 		bottom: -22px;
 		right: 14px;
 	}
+`;
+
+export const MyTeamspace = styled.div`
+
 `;
