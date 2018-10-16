@@ -73,55 +73,57 @@ interface IState {
 }
 
 export class History extends React.PureComponent<IProps, IState> {
-         public state = { invoices: [], rows: [] };
+	public state = { invoices: [], rows: [] };
 
-         public componentDidMount() {
-           this.props.fetchInvoices(this.props.teamspace);
+	public componentDidMount() {
+		this.props.fetchInvoices(this.props.teamspace);
 
-           this.setState({
-             rows: this.getInvoicesTableRows(this.props.invoices)
-           });
-         }
+		this.setState({
+			rows: this.getInvoicesTableRows(this.props.invoices)
+		});
+	}
 
-         public componentDidUpdate(prevProps) {
-           const changes = {} as any;
-           const { invoices } = this.props;
+	public componentDidUpdate(prevProps) {
+		const changes = {} as any;
+		const { invoices } = this.props;
 
-           const invoicesChanged = !isEqual(prevProps.invoices, invoices);
+		const invoicesChanged = !isEqual(prevProps.invoices, invoices);
 
-           if (invoicesChanged) {
-             changes.invoices = invoices;
-             changes.rows = this.getInvoicesTableRows(invoices);
-           }
+		if (invoicesChanged) {
+			changes.invoices = invoices;
+			changes.rows = this.getInvoicesTableRows(invoices);
+		}
 
-           if (!isEmpty(changes)) {
-             this.setState(changes);
-           }
-         }
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
 
-         public onDownload = (teamspace, invoiceNo) => {
-					 this.props.downloadInvoice("subscriptionTest", invoiceNo);
-         };
+	public onDownload = (teamspace, invoiceNo) =>
+		this.props.downloadInvoice(teamspace, invoiceNo);
 
-         public getInvoicesTableRows = (invoices = []): any[] => {
-           return invoices.map(invoice => {
-             const data = [
-							 { value: invoice.invoiceNo },
-							 { value: invoice.createdAtDate },
-							 { value: invoice.type === "refund" ? "Completed" : invoice.pending ? "Pending" : "Paid" },
-							 { value: invoice.type === "refund" ? "Refund" : invoice.items[0].description },
-							 { value: invoice.gateway },
-							 { value: invoice.nextPaymentAmount.toFixed(2) },
-							 { icon: "cloud_download", onClick: this.onDownload.bind(null, this.props.teamspace, invoice.invoiceNo) }];
+	public getInvoicesTableRows = (invoices = []): any[] => {
+		return invoices.map(invoice => {
+			const data = [
+				{ value: invoice.invoiceNo },
+				{ value: invoice.createdAtDate },
+				{ value: invoice.type === "refund" ? "Completed" : invoice.pending ? "Pending" : "Paid" },
+				{ value: invoice.type === "refund" ? "Refund" : invoice.items[0].description },
+				{ value: invoice.gateway },
+				{ value: invoice.nextPaymentAmount.toFixed(1) },
+				{ icon: "cloud_download", onClick: this.onDownload.bind(null, this.props.teamspace, invoice.invoiceNo) }];
 
-             return { ...invoice, data };
-           });
-         };
+			return { ...invoice, data };
+		});
+	};
 
-         public render() {
-           const { rows } = this.state;
-           return <Container>
-               <CustomTable cells={INVOICES_TABLE_CELLS} rows={rows} />
-             </Container>;
-         }
-       }
+	public render() {
+		const { rows } = this.state;
+
+		return (
+			<Container>
+				<CustomTable cells={INVOICES_TABLE_CELLS} rows={rows} />
+			</Container>
+		);
+	}
+}

@@ -465,7 +465,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 								...component,
 								searchText: this.state.searchText
 							};
-							
+
 							return (
 								<Cell key={cellIndex} {...cellRootProps} onClick={this.handleSelectByRowClick(row)}>
 									{
