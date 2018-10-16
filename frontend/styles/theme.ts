@@ -108,10 +108,9 @@ export const MuiTheme = createMuiTheme({
 				marginRight: '-16px'
 			}
 		},
-		MuiMenuItem: {
+		MuiDialogActions: {
 			root: {
-				fontSize: '14px',
-				color: theme.colors.BLACK_60
+				margin: '0 24px 15px 24px'
 			}
 		}
 	}

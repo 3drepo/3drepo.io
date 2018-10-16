@@ -16,32 +16,98 @@
  */
 
 import * as React from 'react';
-
+import * as Yup from 'yup';
+import { Formik, Form, Field } from 'formik';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+
+import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../../services/validation';
+import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Container } from './projectDialog.styles';
 
+const ProjectSchema = Yup.object().shape({
+	name: schema.firstName.min(0),
+	teamspace: schema.firstName.min(1)
+});
+
 interface IProps {
-	noop: string; // TODO: Remove sample
+	name?: string;
+	teamspace?: string;
+	teamspaces: any[];
+	handleResolve: (project) => void;
 }
 
 export class ProjectDialog extends React.PureComponent<IProps, any> {
+	public static defaultProps = {
+		name: '',
+		teamspace: ''
+	};
+
+	public componentDidMount() {
+
+	}
+
+	public handleProjectSave = (values, { resetForm }) => {
+		this.props.handleResolve(values);
+	}
 
 	public render() {
-		const { handleResolve } = this.props;
+		const { name, teamspace, teamspaces } = this.props;
+		const isNewProject = Boolean(name.length);
 
 		return (
-			<>
-				<DialogContent>
-					
-					Project dialog
-				</DialogContent>
+			<Formik
+				initialValues={{name, teamspace}}
+				validationSchema={ProjectSchema}
+				onSubmit={this.handleProjectSave}
+			>
+				<Form>
+					<DialogContent>
+						<FormControl fullWidth={true} required={true}>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+							<Field name="teamspace" render={({ field, form }) => (
+								<CellSelect
+									{...field}
+									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
+									helperText={form.touched.teamspace && (form.errors.teamspace || '')}
+									items={teamspaces}
+									placeholder="Select teamspace"
+									disabledPlaceholder={true}
+									inputId="teamspace-select"
+								/>
+							)} />
+						</FormControl>
+						<Field name="name" render={({ field, form }) => (
+							<TextField
+								{...field}
+								error={Boolean(form.touched.name && form.errors.name)}
+								helperText={form.touched.name && (form.errors.name || '')}
+								label="Name"
+								margin="normal"
+								required
+								fullWidth={true}
+							/>
+						)} />
+					</DialogContent>
 
-				<DialogActions>
-					<Button onClick={handleResolve} variant="raised" color="secondary">Ok</Button>
-				</DialogActions>
-			</>
+					<DialogActions>
+						<Field render={({ form }) => (
+							<Button
+								type="submit"
+								variant="raised"
+								color="secondary"
+								disabled={!form.isValid || form.isValidating}
+							>
+								Save
+							</Button>
+						)} />
+					</DialogActions>
+				</Form>
+			</Formik>
 		);
 	}
 }
