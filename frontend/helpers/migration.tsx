@@ -49,6 +49,11 @@ export const subscribe = (context, selectors: any = {}) => {
 	});
 };
 
+export const runAngularTimeout = (callback, context?) => {
+	const $timeout = getAngularService('$timeout', context) as (callback) => void;
+	return $timeout(callback);
+};
+
 /* TODO: At the end Router should wrap whole app - not a specific component */
 export const addRouting = (Component) => {
 	return (props) => (
