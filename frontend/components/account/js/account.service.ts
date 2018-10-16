@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dispatch } from '../../../helpers/migration';
+import { TeamspaceActions } from '../../../modules/teamspace';
+
 export class AccountService {
 
 	public static $inject: string[] = [
@@ -243,10 +246,8 @@ export class AccountService {
 	 * @param username
 	 * @returns {*|promise}
 	 */
-	public getUserInfo(username): Promise<any> {
-		const currentAccount = this.APIService.get(`${username}.json`);
-		this.accountDefer.resolve(currentAccount);
-		return currentAccount;
+	public getUserInfo(username): void {
+		dispatch(TeamspaceActions.fetchUser(username));
 	}
 
 	/**

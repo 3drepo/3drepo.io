@@ -417,10 +417,7 @@ export class GroupsService {
 
 	public setTotalSavedMeshes(group) {
 		this.getTotalMeshes().then((totalMeshes) => {
-			// If we haven't saved don't update saved meshes
-			if (!group.new) {
-				group.totalSavedMeshes = totalMeshes;
-			}
+			group.totalSavedMeshes = totalMeshes;
 		});
 	}
 
@@ -494,7 +491,6 @@ export class GroupsService {
 
 			return this.APIService.put(groupUrl, group)
 				.then((response) => {
-					this.replaceStateGroup(group);
 					this.selectGroup(group);
 					return group;
 				});
@@ -670,9 +666,7 @@ export class GroupsService {
 				return this.TreeService.selectNodesBySharedIds(
 					group.objects,
 					color
-				).then((meshes) => {
-					this.setTotalSavedMeshes(group);
-				});
+				);
 			});
 		}
 	}
