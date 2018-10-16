@@ -27,12 +27,16 @@ import {
 	selectIsPending
 } from '../../modules/teamspace';
 
+import { DialogActions } from '../../modules/dialog';
+
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	teamspaces: selectTeamspaces,
 	isPending: selectIsPending
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showDialog: DialogActions.showDialog
+}, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces)));
