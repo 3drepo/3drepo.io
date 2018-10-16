@@ -66,10 +66,10 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { content, title, isOpen, templateType } = this.props.config;
+		const { content, title, templateType, template } = this.props.config;
 		const data = this.props.data || {};
 
-		const DialogTemplate = DIALOG_TEMPLATES[templateType];
+		const DialogTemplate = DIALOG_TEMPLATES[templateType] || template;
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>

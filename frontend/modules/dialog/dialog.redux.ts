@@ -27,7 +27,8 @@ export const DIALOG_TYPES = {
 
 interface IDialogConfig {
 	title: string;
-	templateType: 'error' | 'confirm' | 'default' | 'confirmUserRemove';
+	templateType?: 'error' | 'confirm' | 'default' | 'confirmUserRemove';
+	template?: JSX.Element;
 	content?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
@@ -47,8 +48,7 @@ export const INITIAL_STATE = {
 };
 
 export const showDialog = (state = INITIAL_STATE, action) => {
-	const config = omit(action.config, 'data');
-
+	const config = omit(action.config, 'data') as IDialogConfig;
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
