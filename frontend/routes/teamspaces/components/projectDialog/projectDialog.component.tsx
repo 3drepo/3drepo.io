@@ -30,8 +30,8 @@ import { CellSelect } from '../../../components/customTable/components/cellSelec
 import { Container } from './projectDialog.styles';
 
 const ProjectSchema = Yup.object().shape({
-	name: schema.firstName.min(0),
-	teamspace: schema.firstName.min(1)
+	name: schema.firstName.max(120),
+	teamspace: Yup.string().required()
 });
 
 interface IProps {
@@ -39,6 +39,7 @@ interface IProps {
 	teamspace?: string;
 	teamspaces: any[];
 	handleResolve: (project) => void;
+	handleClose: () => void;
 }
 
 export class ProjectDialog extends React.PureComponent<IProps, any> {
@@ -47,17 +48,12 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 		teamspace: ''
 	};
 
-	public componentDidMount() {
-
-	}
-
-	public handleProjectSave = (values, { resetForm }) => {
+	public handleProjectSave = (values) => {
 		this.props.handleResolve(values);
 	}
 
 	public render() {
-		const { name, teamspace, teamspaces } = this.props;
-		const isNewProject = Boolean(name.length);
+		const { name, teamspace, teamspaces, handleClose } = this.props;
 
 		return (
 			<Formik
@@ -76,6 +72,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 									helperText={form.touched.teamspace && (form.errors.teamspace || '')}
 									items={teamspaces}
 									placeholder="Select teamspace"
+									disabled={Boolean(this.props.name)}
 									disabledPlaceholder={true}
 									inputId="teamspace-select"
 								/>
@@ -95,6 +92,12 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 					</DialogContent>
 
 					<DialogActions>
+						<Button
+							onClick={handleClose}
+							color="primary"
+						>
+							Cancel
+						</Button>
 						<Field render={({ form }) => (
 							<Button
 								type="submit"
