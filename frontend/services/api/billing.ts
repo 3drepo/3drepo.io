@@ -47,3 +47,11 @@ export const getInvoices = (teamspace) => {
 export const changeSubscription = (teamspace, subscriptionData) => {
   return api.post(`${teamspace}/subscriptions`, subscriptionData);
 };
+
+/**
+ * Get invoice
+ * @param subscriptionData
+ */
+export const getInvoiceDocument = (teamspace, billingId) => {
+  return api.get(`subscriptionTest/invoices/${billingId}.pdf`);
+};

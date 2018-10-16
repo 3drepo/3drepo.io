@@ -80,9 +80,10 @@ export class Billing extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { activeTab } = this.state;
+		const paperProps = { height: "100%" };
 
 		return (
-			<Panel title="Billing">
+			<Panel title="Billing" paperProps={paperProps}>
         <Header>
           <Tabs value={activeTab} indicatorColor="primary" textColor="primary" onChange={this.handleChange}>
             <Tab label="Subscription" />

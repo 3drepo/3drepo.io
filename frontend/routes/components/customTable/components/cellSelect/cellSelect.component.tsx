@@ -91,6 +91,8 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		const {selectedValue} = this.state;
 		const hasNoOptions = !items.length;
 
+		console.log('render')
+
 		const options = [];
 
 		if (placeholder) {

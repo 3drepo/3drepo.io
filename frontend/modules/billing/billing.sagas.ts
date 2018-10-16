@@ -21,6 +21,7 @@ import * as API from '../../services/api';
 import { BillingTypes, BillingActions } from './billing.redux';
 import { DialogActions } from "../dialog";
 import { SnackbarActions } from "../snackbar";
+import { clientConfigService } from '../../services/clientConfig';
 
 
 export function* fetchPlans() {
@@ -47,7 +48,7 @@ export function* fetchInvoices({ teamspace }) {
   try {
 		const { data: invoices } = yield API.getInvoices(teamspace);
 
-		return yield put(BillingActions.fetchInvoicesSuccess({ ...invoices }));
+		return yield put(BillingActions.fetchInvoicesSuccess(invoices));
   } catch (e) {
     yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
   }
@@ -57,7 +58,6 @@ export function* fetchBillingData({ teamspace }) {
 	try {
 		return yield all([
       put(BillingActions.fetchPlans()),
-			put(BillingActions.fetchInvoices(teamspace)),
 			put(BillingActions.fetchSubscriptions(teamspace))
     ]);
 	} catch (e) {
@@ -68,10 +68,20 @@ export function* fetchBillingData({ teamspace }) {
 export function* changeSubscription({ teamspace, subscriptionData }) {
 	try {
 		const response = yield API.changeSubscription(teamspace, subscriptionData);
-
     yield put(SnackbarActions.show("Subscription changed"));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
+	}
+}
+
+
+export function* downloadInvoice({ teamspace, invoiceNo }) {
+	try {
+		const endpoint = `${teamspace}/invoices/${invoiceNo}.pdf`;
+		const url = yield clientConfigService.apiUrl(clientConfigService.GET_API, endpoint);
+		window.open(url, "_blank");
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog("download", "invoice", e.response));
 	}
 }
 
@@ -82,4 +92,5 @@ export default function* BillingSaga() {
 	yield takeLatest(BillingTypes.FETCH_SUBSCRIPTIONS, fetchSubscriptions);
 	yield takeLatest(BillingTypes.FETCH_BILLING_DATA, fetchBillingData);
 	yield takeLatest(BillingTypes.CHANGE_SUBSCRIPTION, changeSubscription);
+	yield takeLatest(BillingTypes.DOWNLOAD_INVOICE, downloadInvoice);
 }

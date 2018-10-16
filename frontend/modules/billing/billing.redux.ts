@@ -26,6 +26,7 @@ export const { Types: BillingTypes, Creators: BillingActions } = createActions({
 	fetchSubscriptionsSuccess: ['subscriptions'],
 	fetchBillingData: ['teamspace'],
 	changeSubscription: ['teamspace', 'subscriptionData'],
+	downloadInvoice: ['teamspace', 'invoiceNo'],
 }, { prefix: 'BILLING_' });
 
 export const INITIAL_STATE = {
