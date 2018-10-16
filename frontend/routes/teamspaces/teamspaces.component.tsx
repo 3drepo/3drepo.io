@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import SimpleBar from 'simplebar-react';
+import * as queryString from 'query-string';
 import { groupBy, isEmpty } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 import Icon from '@material-ui/core/Icon';
@@ -33,6 +34,8 @@ import { MyTeamspaceItem } from './components/myTeamspaceItem/myTeamspaceItem.co
 import { ROW_ACTIONS } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { RowMenu } from './components/rowMenu/rowMenu.component';
+import { TABS_TYPES } from '../userManagement/userManagement.component';
+import { runAngularTimeout } from '../../helpers/migration';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -53,6 +56,7 @@ const TooltipButton = ({ label, action = null, icon, color = 'inherit' }) => {
 };
 
 interface IProps {
+	history: any;
 	currentTeamspace: string;
 	teamspaces: any[];
 	isPending: boolean;
@@ -78,39 +82,38 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		activeTeamspace: ''
 	};
 
-	public sharedActions = [{
-		label: 'Permissions',
-		action: this.props.onPermissionsClick,
-		icon: 'people'
-	}, {
-		label: 'Settings',
-		action: this.props.onSettingsClick,
-		icon: 'settings'
-	}, {
-		label: 'Delete',
-		action: this.props.onDeleteClick,
-		icon: 'delete',
-		color: 'error'
-	}];
-
 	public modelActions = [{
-		label: 'Upload file',
-		action: this.props.onUploadClick,
-		icon: 'cloud_upload'
+		...ROW_ACTIONS.UPLOAD_FILE,
+		action: this.props.onUploadClick
 	}, {
-		label: 'Revisions',
-		action: this.props.onRevisionsClick,
-		icon: 'settings_backup_restore'
+		...ROW_ACTIONS.REVISIONS,
+		action: this.props.onRevisionsClick
 	}, {
-		label: 'Download',
-		action: this.props.onDownloadClick,
-		icon: 'cloud_download'
+		...ROW_ACTIONS.DOWNLOAD,
+		action: this.props.onDownloadClick
+	}, {
+		...ROW_ACTIONS.SETTINGS,
+		action: this.props.onSettingsClick
+	}, {
+		...ROW_ACTIONS.PERMISSIONS,
+		action: this.props.onPermissionsClick
+	}, {
+		...ROW_ACTIONS.DELETE,
+		action: this.props.onDeleteClick
 	}];
 
 	public federationActions = [{
-		label: 'Edit',
-		action: this.props.onEditClick,
-		icon: 'edit'
+		...ROW_ACTIONS.EDIT,
+		action: this.props.onEditClick
+	}, {
+		...ROW_ACTIONS.SETTINGS,
+		action: this.props.onSettingsClick
+	}, {
+		...ROW_ACTIONS.PERMISSIONS,
+		action: this.props.onPermissionsClick
+	}, {
+		...ROW_ACTIONS.DELETE,
+		action: this.props.onDeleteClick
 	}];
 
 	public componentDidMount() {
@@ -130,6 +133,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
+	}
+
+	public createRouteHandler = (pathname, params = {}) => () => {
+		// TODO: Remove `runAngularTimeout` after migration of old routing
+		runAngularTimeout(() => {
+			this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
+		});
 	}
 
 	public onTeamspaceClick = (teamspace) => {
@@ -152,43 +162,26 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderProjectActions = ({hovered, active, refToHeadline}) => (
+	public renderProjectActions = ({name, hovered}) => (
 		<RowMenu open={hovered}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
-				action={close}
+				// action={close}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.PERMISSIONS}
-				action={close}
+				action={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
+					page: 'userManagement',
+					teamspace: this.state.activeTeamspace,
+					project: name,
+					tab: TABS_TYPES.PROJECTS
+				})}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.DELETE}
-				action={close}
+				// action={close}
 			/>
 		</RowMenu>
-/* 		<ButtonMenu
-			icon="more_vert"
-			open={hovered}
-			renderContent={({close}) => (
-			)}
-			IconProps={{
-				fontSize: 'small'
-			}}
-			PopoverProps={{
-				elevation: 0,
-				container: refToHeadline.current,
-				background: !hovered ? 'transparent' : null,
-				anchorOrigin: {
-					vertical: 'center',
-					horizontal: 'left'
-				},
-				transformOrigin: {
-					vertical: 'center',
-					horizontal: 'right'
-				}
-			}}
-		/>*/
 	)
 
 	public renderProject = (props) => {
@@ -198,10 +191,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const items = [{
 			name: 'Federations',
 			items: federations,
-			actions: [
-				...this.federationActions,
-				...this.sharedActions
-			],
+			actions: this.federationActions,
 			renderActions: () => (
 				<TooltipButton
 					{...ROW_ACTIONS.ADD_NEW}
@@ -212,10 +202,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		}, {
 			name: 'Models',
 			items: models,
-			actions: [
-				...this.modelActions,
-				...this.sharedActions
-			],
+			actions: this.modelActions,
 			renderActions: () => (
 				<TooltipButton
 					{...ROW_ACTIONS.ADD_NEW}

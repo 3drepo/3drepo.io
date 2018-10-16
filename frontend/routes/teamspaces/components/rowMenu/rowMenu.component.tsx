@@ -24,18 +24,19 @@ import { StyledGrid, StyledGrow } from './rowMenu.styles';
 
 interface IProps {
 	open?: boolean;
-	onClick: () => void;
 }
 
 interface IState {
 	open: boolean;
 	forceOpen: boolean;
+	pointerEvents: boolean;
 }
 
 export class RowMenu extends React.PureComponent<IProps, IState> {
 	public state = {
 		open: false,
-		forceOpen: false
+		forceOpen: false,
+		pointerEvents: false
 	};
 
 	public componentDidUpdate(prevProps: IProps) {
@@ -50,9 +51,29 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public toggleForceOpen = (event) => {
+		event.stopPropagation();
+		this.setState({forceOpen: !this.state.forceOpen});
+	}
+
+	public onMenuEnter = () => {
+		this.setState({pointerEvents: false});
+	}
+
+	public onMenuEntered = () => {
+		this.setState({pointerEvents: true});
+	}
+
 	public render() {
-		const { children, onClick } = this.props;
-		const { open } = this.state;
+		const { children } = this.props;
+		const { open, forceOpen } = this.state;
+
+		const growProps = {
+			in: open || forceOpen,
+			onEnter: this.onMenuEnter,
+			onEntered: this.onMenuEntered,
+			timeout: 300
+		};
 
 		return (
 			<StyledGrid
@@ -62,7 +83,10 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				justify="flex-start"
 			>
-				<StyledGrow in={open}>
+				<StyledGrow
+					appear
+					{...growProps}
+				>
 					<StyledGrid
 						container
 						wrap="nowrap"
@@ -73,7 +97,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					{children}
 					</StyledGrid>
 				</StyledGrow>
-				<IconButton aria-label="Toggle menu" onClick={onClick}>
+				<IconButton aria-label="Toggle menu" onClick={this.toggleForceOpen}>
 					<Icon fontSize="small">more_vert</Icon>
 				</IconButton>
 			</StyledGrid>
