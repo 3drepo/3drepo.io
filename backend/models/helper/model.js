@@ -190,17 +190,10 @@ function setStatus(account, model, status) {
  * @param {model} model - Model
  * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
-function createCorrelationId(account, model, addTimestamp = false) {
+function createCorrelationId(setting, addTimestamp = false) {
 	const correlationId = uuid.v1();
 
-	// store corID
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		setting = setting || ModelSetting.createInstance({
-			account: account,
-			model: model
-		});
-
-		setting._id = model;
+	if(setting) {
 		setting.corID = correlationId;
 		if (addTimestamp) {
 			// FIXME: This is a temporary workaround, needed because federation
@@ -208,12 +201,13 @@ function createCorrelationId(account, model, addTimestamp = false) {
 			setting.timestamp = new Date();
 		}
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
+
 		return setting.save().then(() => {
 			return correlationId;
 		});
-	}).catch(err => {
-		systemLogger.logError("Failed to createCorrelationId:", err);
-	});
+	}
+
+	return Promise.reject("setting is undefined");
 }
 
 /**
@@ -277,7 +271,7 @@ function createNewModel(teamspace, modelName, data) {
 
 function createNewFederation(teamspace, modelName, data, toyFed) {
 	return createNewModel(teamspace, modelName, data).then((modelInfo) => {
-		return createFederatedModel(teamspace, modelName, data.subModels, toyFed).then(() => {
+		return createFederatedModel(teamspace, modelName, data.subModels, modelInfo.settings, toyFed).then(() => {
 			return modelInfo;
 		});
 	});
@@ -374,7 +368,7 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	});
 }
 
-function createFederatedModel(account, model, subModels, toyFed) {
+function createFederatedModel(account, model, subModels, modelSettings, toyFed) {
 
 	const addSubModelsPromise = [];
 	const subModelArr = [];
@@ -410,20 +404,26 @@ function createFederatedModel(account, model, subModels, toyFed) {
 
 	});
 
+	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
+		: ModelSetting.findById({account}, model);
+
 	return Promise.all(addSubModelsPromise).then(() => {
-		return createCorrelationId(account, model, true).then(correlationId => {
-			const federatedJSON = {
-				database: account,
-				project: model,
-				subProjects: subModelArr
-			};
+		return fedSettings.then((settings) => {
+			return createCorrelationId(settings, true).then(correlationId => {
+				const federatedJSON = {
+					database: account,
+					project: model,
+					subProjects: subModelArr
+				};
 
-			if(toyFed) {
-				federatedJSON.toyFed = toyFed;
-			}
+				if(toyFed) {
+					federatedJSON.toyFed = toyFed;
+				}
 
-			return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+				return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			});
 		});
+
 	});
 
 }
@@ -1368,7 +1368,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 	}
 
 	return modelSetting.save().then(() => {
-		return createCorrelationId(account, model).then(correlationId => {
+		return createCorrelationId(modelSetting).then(correlationId => {
 			return setStatus(account, model, "queued").then(setting => {
 
 				modelSetting = setting;
