@@ -16,6 +16,7 @@
  */
 
 import { bindActionCreators } from 'redux';
+import { withRouter } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../helpers/migration';
 
@@ -34,4 +35,4 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces)));

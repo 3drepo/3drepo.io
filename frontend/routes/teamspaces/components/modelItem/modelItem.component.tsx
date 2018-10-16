@@ -23,7 +23,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Container, SubmodelsList, Time } from './modelItem.styles';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import { RowMenu } from '../rowMenu/rowMenu.component';
 
 interface IAction {
 	label: string;
@@ -40,7 +40,15 @@ interface IProps {
 	actions: IAction[];
 }
 
-export class ModelItem extends React.PureComponent<IProps, any> {
+interface IState {
+	hovered: boolean;
+}
+
+export class ModelItem extends React.PureComponent<IProps, IState> {
+	public state = {
+		hovered: false
+	};
+
 	public renderSubModels = (subModels = []) => {
 		const submodelsAsString = subModels.map(({ name }) => name).join(', ');
 		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
@@ -59,11 +67,19 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 		}) : null;
 	}
 
+	public createHoverHandler = (hovered) => () => {
+		this.setState({ hovered });
+	}
+
 	public render() {
 		const { name, subModels, timestamp, actions } = this.props;
+		const { hovered } = this.state;
 
 		return (
-			<Container>
+			<Container
+				onMouseOver={this.createHoverHandler(true)}
+				onMouseOut={this.createHoverHandler(false)}
+			>
 				<Grid
 					container
 					direction="row"
@@ -74,33 +90,14 @@ export class ModelItem extends React.PureComponent<IProps, any> {
 					<Grid container>{name}</Grid>
 					<Grid
 						container
+						wrap="nowrap"
 						direction="row"
 						alignItems="center"
 						justify="flex-end">
 						<Time>{timestamp ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
-
-						<ButtonMenu
-							icon="more_vert"
-							IconProps={{
-								fontSize: 'small'
-							}}
-							PopoverProps={{
-								elevation: 0,
-								anchorOrigin: {
-									vertical: 'center',
-									horizontal: 'left'
-								},
-								transformOrigin: {
-									vertical: 'center',
-									horizontal: 'right'
-								}
-							}}
-							renderContent={() => (
-								<Grid container direction="row">
-									{this.renderActions(actions)}
-								</Grid>
-							)}
-						/>
+						<RowMenu open={hovered}>
+							{this.renderActions(actions)}
+						</RowMenu>
 					</Grid>
 				</Grid>
 				{this.renderSubModels(subModels)}

@@ -33,4 +33,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onPasswordChange: TeamspaceActions.updateUserPassword
 }, dispatch);
 
-export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Profile));
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);

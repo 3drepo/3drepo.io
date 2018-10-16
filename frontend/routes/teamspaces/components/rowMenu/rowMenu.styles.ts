@@ -22,6 +22,7 @@ import Grow from '@material-ui/core/Grow';
 export const StyledGrid = styled(Grid)`
   && {
     width: auto;
+    position: relative;
   }
 `;
 
