@@ -10,10 +10,10 @@ interface IProps {
 	projects: any[];
 	username: string;
 	teamspacePerms: string;
-	handleResolve: () => string;
-	handleCancel: () => string;
+	handleResolve: () => void;
+	handleClose: () => void;
 }
-export const RemoveUserDialog = (props) => {
+export const RemoveUserDialog = (props: IProps) => {
 	const renderItems = (items) => {
 		return items.map((item, index) => (<p key={index}>{item.model || item}</p>));
 	};

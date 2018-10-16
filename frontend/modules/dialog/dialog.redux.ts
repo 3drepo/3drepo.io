@@ -39,11 +39,13 @@ interface IDialogConfig {
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showErrorDialog: ['method', 'dataType', 'error'],
-	hideDialog: []
+	hideDialog: [],
+	setPendingState: ['isPending']
 }, { prefix: 'DIALOG_' });
 
 export const INITIAL_STATE = {
 	isOpen: false,
+	isPending: false,
 	config: {},
 	data: null
 };
@@ -68,12 +70,17 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error
 	return showDialog(state, {config});
 };
 
-export const hideDialog = (state = INITIAL_STATE, action) => {
-	return { ...state, isOpen: false };
+export const hideDialog = () => {
+	return INITIAL_STATE;
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const setPendingState = (state = INITIAL_STATE, {isPending}) => {
+	return { ...state, isPending };
+};
+
+export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
-	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog
+	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
+	[DialogTypes.SET_PENDING_STATE]: setPendingState
 });
