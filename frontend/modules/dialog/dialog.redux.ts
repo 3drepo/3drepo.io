@@ -21,7 +21,8 @@ import { get, omit } from 'lodash';
 export const DIALOG_TYPES = {
 	ERROR: 1,
 	CONFIRM_USER_REMOVE: 2,
-	FEDERATION_REMINDER_DIALOG: 3
+	FEDERATION_REMINDER_DIALOG: 3,
+	LOADING: 4,
 };
 
 interface IDialogConfig {
@@ -47,10 +48,11 @@ export const INITIAL_STATE = {
 
 export const showDialog = (state = INITIAL_STATE, action) => {
 	const config = omit(action.config, 'data');
+
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
-export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error} ) => {
+export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error } ) => {
 	const config = {
 		title: 'Error',
 		templateType: DIALOG_TYPES.ERROR,

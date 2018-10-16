@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all } from 'redux-saga/effects';
+import { put, takeLatest, all, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { BillingTypes, BillingActions } from './billing.redux';
-import { DialogActions } from "../dialog";
-import { SnackbarActions } from "../snackbar";
+import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from "./index";
+import { DialogActions } from '../dialog';
+import { DIALOG_TYPES } from '../dialog/dialog.redux';
+import { SnackbarActions } from '../snackbar';
 import { clientConfigService } from '../../services/clientConfig';
-
 
 export function* fetchPlans() {
   try {
@@ -30,7 +30,7 @@ export function* fetchPlans() {
 
 		return yield put(BillingActions.fetchPlansSuccess({ ...plans }));
   } catch (e) {
-		yield put(DialogActions.showErrorDialog("fetch", "plans", e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'plans', e.response));
   }
 }
 
@@ -40,7 +40,7 @@ export function* fetchSubscriptions({ teamspace }) {
 
 		return yield put(BillingActions.fetchSubscriptionsSuccess({ ...subscriptions }));
   } catch (e) {
-		yield put(DialogActions.showErrorDialog("fetch", "subscriptions", e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'subscriptions', e.response));
   }
 }
 
@@ -50,7 +50,7 @@ export function* fetchInvoices({ teamspace }) {
 
 		return yield put(BillingActions.fetchInvoicesSuccess(invoices));
   } catch (e) {
-    yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
+    yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
   }
 }
 
@@ -61,27 +61,50 @@ export function* fetchBillingData({ teamspace }) {
 			put(BillingActions.fetchSubscriptions(teamspace))
     ]);
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
 	}
 }
 
 export function* changeSubscription({ teamspace, subscriptionData }) {
 	try {
+		const licencesInfo = yield select(selectLicencesInfo);
+		const oldLicencesNum = subscriptionData.billingAddress.licences;
+		const newLicencesNum = licencesInfo.numLicences;
+		const licencesNumChanged = oldLicencesNum !== newLicencesNum;
+
+		const config = {
+			title: dialogMessages.DIALOG_TITLE,
+			templateType: DIALOG_TYPES.LOADING,
+			data: {
+				content: licencesNumChanged ? dialogMessages.LICENCE_COUNT_CHANGED_INFO : dialogMessages.LICENCE_COUNT_NOT_CHANGED_INFO
+			}
+		};
+
+		yield put(DialogActions.showDialog(config));
+
 		const response = yield API.changeSubscription(teamspace, subscriptionData);
-    yield put(SnackbarActions.show("Subscription changed"));
+
+		if (response.status === 200) {
+			if (licencesNumChanged) {
+				window.location.href = response.data.url;
+			} else {
+				yield put(SnackbarActions.show(dialogMessages.UPDATED_INFO));
+			}
+		} else {
+			yield put(DialogActions.showErrorDialog("post", "subscription", dialogMessages.PAYPAL_ERROR));
+		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
+		yield put(DialogActions.showErrorDialog('post', 'subscription', e.response));
 	}
 }
-
 
 export function* downloadInvoice({ teamspace, invoiceNo }) {
 	try {
 		const endpoint = `${teamspace}/invoices/${invoiceNo}.pdf`;
 		const url = yield clientConfigService.apiUrl(clientConfigService.GET_API, endpoint);
-		window.open(url, "_blank");
+		window.open(url, '_blank');
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog("download", "invoice", e.response));
+		yield put(DialogActions.showErrorDialog('download', 'invoice', e.response));
 	}
 }
 

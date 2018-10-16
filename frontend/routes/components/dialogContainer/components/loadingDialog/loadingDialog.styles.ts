@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	BillingTypes,
-	BillingActions
-} from './billing.redux';
+import styled from 'styled-components';
+import CircularProgress from "@material-ui/core/CircularProgress";
 
-export * from './billing.selectors';
-export * from './billing.constants';
+export const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+`;
+
+export const Loader = styled(CircularProgress)``;
