@@ -18,7 +18,7 @@
 import * as React from 'react';
 
 import Input from '@material-ui/core/Input';
-import { Item, StyledSelect, EmptyValue } from './cellSelect.styles';
+import { Item, StyledSelect } from './cellSelect.styles';
 
 interface IProps {
 	items: any[];
@@ -30,6 +30,7 @@ interface IProps {
 	disabledPlaceholder?: boolean;
 	inputId?: string;
 	onChange: (selectedValue: string) => void;
+	SelectProps: any;
 }
 
 interface IState {
@@ -87,7 +88,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, value, readOnly, inputId} = this.props;
+		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, SelectProps} = this.props;
 		const {selectedValue} = this.state;
 		const hasNoOptions = !items.length;
 		const options = [];
@@ -104,6 +105,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 
 		return (
 			<StyledSelect
+				{...SelectProps}
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
 				displayEmpty
