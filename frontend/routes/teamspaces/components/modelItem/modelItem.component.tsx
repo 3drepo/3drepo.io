@@ -77,8 +77,8 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container
-				onMouseOver={this.createHoverHandler(true)}
-				onMouseOut={this.createHoverHandler(false)}
+				onMouseEnter={this.createHoverHandler(true)}
+				onMouseLeave={this.createHoverHandler(false)}
 			>
 				<Grid
 					container
