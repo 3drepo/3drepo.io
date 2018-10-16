@@ -136,8 +136,8 @@ groups .group:hover {
 
 groups .group {
     border-bottom: solid gainsboro 1px;
-    min-height: 95px;
-    max-height: 95px;
+    min-height: 120px;
+    max-height: 120px;
     height: 100%;
 }
 
