@@ -232,8 +232,6 @@ function resetCorrelationId(account, model) {
 }
 
 function createNewModel(teamspace, modelName, data) {
-	// (if fed) launch fed
-
 	if(!data.hasOwnProperty("project")) {
 		return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 	}
@@ -269,7 +267,7 @@ function createNewModel(teamspace, modelName, data) {
 					};
 
 					ChatEvent.newModel(data.sessionId, teamspace, modelData);
-					return modelData;
+					return {modelData, settings};
 				});
 			});
 
@@ -278,9 +276,9 @@ function createNewModel(teamspace, modelName, data) {
 }
 
 function createNewFederation(teamspace, modelName, data, toyFed) {
-	return createNewModel(teamspace, modelName, data).then((modelData) => {
+	return createNewModel(teamspace, modelName, data).then((modelInfo) => {
 		return createFederatedModel(teamspace, modelName, data.subModels, toyFed).then(() => {
-			return modelData;
+			return modelInfo.modelData;
 		});
 	});
 }
@@ -354,11 +352,11 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		createModelPromise = createNewModel(account, modelName, data);
 	}
 
-	return createModelPromise.then(setting => {
+	return createModelPromise.then((modelInfo) => {
 		if(isFed) {
-			return setting;
+			return modelInfo.settings;
 		} else {
-			return importModel(account, setting._id, username, setting, {type: "toy", modelDirName, skip });
+			return importModel(account, setting._id, username, modelInfo.settings, {type: "toy", modelDirName, skip });
 		}
 
 	}).catch(err => {
