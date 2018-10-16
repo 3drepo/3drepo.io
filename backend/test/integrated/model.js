@@ -119,7 +119,7 @@ describe("Model", function () {
 	});
 
 	describe("Model name tests ", function() {
-		const nameTest = function(modelName, expectSuccess) {
+		const nameTest = function(modelName, expectSuccess, callback) {
 			if(expectSuccess) {
 				agent.post(`/${username}/model`)
 					.send({ modelName, desc, type, unit, code, project })
@@ -136,42 +136,42 @@ describe("Model", function () {
 				});
 			}
 		};
-		it("blank test model name format should fail", function() {
-			nameTest("", false);
+		it("blank test model name format should fail", function(done) {
+			nameTest("", false, done);
 		});
 
-		it("plain test model name format should succeed", function() {
-			nameTest("a", true);
-			nameTest("ab", true);
-			nameTest("abc", true);
+		it("plain test model name format should succeed", function(done) {
+			nameTest("a", true, done);
+			nameTest("ab", true, done);
+			nameTest("abc", true, done);
 		});
 
-		it("hyphens dashes and underscores in test model name format should succeed", function() {
-			nameTest("123-4a",true);
-			nameTest("123_4a",true);
-			nameTest("123-_4A",true);
-			nameTest("aasa[",true);
-			nameTest("aasa/",true);
-			nameTest("aasa%",true);
+		it("hyphens dashes and underscores in test model name format should succeed", function(done) {
+			nameTest("123-4a",true, done);
+			nameTest("123_4a",true, done);
+			nameTest("123-_4A",true, done);
+			nameTest("aasa[",true, done);
+			nameTest("aasa/",true, done);
+			nameTest("aasa%",true, done);
 		});
 
-		it("non-ASCII characters should fail", function() {
-			nameTest("失败",false);
-			nameTest("😕",false);
+		it("non-ASCII characters should fail", function(done) {
+			nameTest("失败",false, done);
+			nameTest("😕",false, done);
 		});
 
-		it("long strings less than 120 characters in test model name format should succeed", function() {
-			nameTest("aaaaaaaaaaaaaaaaaaaaa",true);
+		it("long strings less than 120 characters in test model name format should succeed", function(done) {
+			nameTest("aaaaaaaaaaaaaaaaaaaaa",true, done);
 		});
 
-		it("long strings more than 120 characters in test model name format should fail", function() {
+		it("long strings more than 120 characters in test model name format should fail", function(done) {
 			nameTest(
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
 				"aaaaaaaaaaaaaaaaa"
-			,false);
+			,false, done);
 		});
 
 	});
