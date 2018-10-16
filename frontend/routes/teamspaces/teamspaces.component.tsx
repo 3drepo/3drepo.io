@@ -36,6 +36,7 @@ import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { RowMenu } from './components/rowMenu/rowMenu.component';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
+import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -60,6 +61,7 @@ interface IProps {
 	currentTeamspace: string;
 	teamspaces: any[];
 	isPending: boolean;
+	showDialog: (config) => void;
 	onPermissionsClick: () => void;
 	onSettingsClick: () => void;
 	onDeleteClick: () => void;
@@ -146,6 +148,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		this.setState({ activeTeamspace: teamspace.account });
 	}
 
+	/**
+	 * Dialog handlers
+	 */
+
+	public openProjectDialog = (event, project: any = {}) => {
+		event.stopPropagation();
+		this.props.showDialog({
+			title: project.name ? 'Edit project' : 'New project',
+			template: ProjectDialog,
+			data: { project }
+		});
+	}
+
+	/**
+	 * Render methods
+	 */
+
 	public renderModel = (actions, props) => {
 		return <ModelItem {...props} actions={actions} />;
 	}
@@ -166,7 +185,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		<RowMenu open={hovered}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
-				// action={close}
+				action={this.openProjectDialog}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.PERMISSIONS}
@@ -244,7 +263,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						<TooltipButton
 							{...ROW_ACTIONS.ADD_NEW}
 							label="Add new project"
-							action={this.handleAddProject}
+							action={this.openProjectDialog}
 						/>
 					)}
 				/>
