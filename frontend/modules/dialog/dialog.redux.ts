@@ -70,8 +70,8 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error
 	return showDialog(state, {config});
 };
 
-export const hideDialog = () => {
-	return INITIAL_STATE;
+export const hideDialog = (state = INITIAL_STATE) => {
+	return { ...state, isOpen: false, isPending: false };
 };
 
 export const setPendingState = (state = INITIAL_STATE, {isPending}) => {
