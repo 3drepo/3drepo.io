@@ -21,11 +21,12 @@ import { connect } from '../../helpers/migration';
 
 import { History } from './history.component';
 import { selectCurrentTeamspace } from './../../modules/teamspace';
-import { BillingActions, selectInvoices } from './../../modules/billing';
+import { BillingActions, selectInvoices, selectIsPending } from './../../modules/billing';
 
 const mapStateToProps = createStructuredSelector({
   teamspace: selectCurrentTeamspace,
   invoices: selectInvoices,
+  isLoadingBilling: selectIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -25,7 +25,6 @@ interface IProps {
 }
 
 export const LoadingDialog = (props: IProps) => {
-	console.log('dialog', props)
 	return (
 		<>
 			<DialogContent>

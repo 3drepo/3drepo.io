@@ -27,24 +27,30 @@ export const { Types: BillingTypes, Creators: BillingActions } = createActions({
 	fetchBillingData: ['teamspace'],
 	changeSubscription: ['teamspace', 'subscriptionData'],
 	downloadInvoice: ['teamspace', 'invoiceNo'],
+	setPendingState: ['isPending'],
 }, { prefix: 'BILLING_' });
 
 export const INITIAL_STATE = {
 	invoices: [],
 	plans: [],
 	subscriptions: [],
+	isPending: true,
 };
 
 const fetchPlansSuccess = (state = INITIAL_STATE, { plans }) =>
 	Object.assign({}, state, { plans });
 
 const fetchInvoicesSuccess = (state = INITIAL_STATE, { invoices }) =>
-	Object.assign({}, state, { invoices });
+	Object.assign({}, state, { invoices, isPending: false });
 
 const fetchSubscriptionsSuccess = (state = INITIAL_STATE, { subscriptions }) =>
-	Object.assign({}, state, { subscriptions });
+	Object.assign({}, state, { subscriptions, isPending: false });
+
+export const setPendingState = (state = INITIAL_STATE, { isPending }) =>
+	Object.assign({}, state, { isPending });
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[BillingTypes.SET_PENDING_STATE]: setPendingState,
 	[BillingTypes.FETCH_PLANS_SUCCESS]: fetchPlansSuccess,
 	[BillingTypes.FETCH_INVOICES_SUCCESS]: fetchInvoicesSuccess,
 	[BillingTypes.FETCH_SUBSCRIPTIONS_SUCCESS]: fetchSubscriptionsSuccess,

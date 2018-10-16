@@ -20,19 +20,15 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
 import { Subscription } from './subscription.component';
-import {
-  TeamspaceActions,
-  selectBillingInfo,
-  selectCurrentTeamspace,
-  selectSpaceInfo
-} from '../../modules/teamspace';
-import { BillingActions, selectLicencesInfo } from '../../modules/billing';
+import { TeamspaceActions, selectBillingInfo, selectCurrentTeamspace, selectSpaceInfo } from '../../modules/teamspace';
+import { BillingActions, selectLicencesInfo, selectIsPending } from '../../modules/billing';
 
 const mapStateToProps = createStructuredSelector({
   billingInfo: selectBillingInfo,
   teamspace: selectCurrentTeamspace,
   spaceInfo: selectSpaceInfo,
   licencesInfo: selectLicencesInfo,
+  isLoadingBilling: selectIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

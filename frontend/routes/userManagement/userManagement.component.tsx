@@ -129,6 +129,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	public renderTabContent = () => {
 		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
 		const {activeTab, selectedTeamspace} = this.state;
+		console.log("Render UM", this.props.isLoadingTeamspace);
 
 		if (!selectedTeamspace) {
 			return <TextOverlay content="Select teamspace to enable settings" />;

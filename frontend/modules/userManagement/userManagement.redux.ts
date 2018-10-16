@@ -16,10 +16,9 @@
  */
 
 import {createActions, createReducer} from 'reduxsauce';
-import {pick, first, get, omit} from 'lodash';
+import {pick, get, omit} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
-import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],

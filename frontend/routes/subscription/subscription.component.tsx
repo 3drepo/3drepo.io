@@ -19,12 +19,15 @@ import * as React from 'react';
 import { SubscriptionForm } from './components/subscriptionForm.component';
 import { clientConfigService } from './../../services/clientConfig';
 import { Container } from './subscription.styles';
+import { Loader } from '../components/loader/loader.component';
+import { LoaderContainer } from '../billing/billing.styles';
 
 interface IProps {
 	billingInfo: any;
 	teamspace: any;
 	spaceInfo: any;
 	licencesInfo: any;
+	isLoadingBilling: boolean;
 	fetchQuotaInfo: (teamspace) => void;
 	fetchBillingData: (teamspace) => void;
 	changeSubscription: (teamspace, subscriptionData) => void;
@@ -38,6 +41,16 @@ export class Subscription extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { billingInfo, spaceInfo, licencesInfo, changeSubscription, teamspace } = this.props;
+
+		if (this.props.isLoadingBilling) {
+			const content = `Loading subscription data...`;
+
+			return (
+				<LoaderContainer>
+					<Loader content={content} />
+				</LoaderContainer>
+			);
+		}
 
 		return (
 			<Container>

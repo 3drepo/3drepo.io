@@ -16,17 +16,20 @@
  */
 
 import styled from 'styled-components';
-import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
-import Button from "@material-ui/core/Button";
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Button from '@material-ui/core/Button';
+import { Form } from 'formik';
 
-import { COLOR } from "../../styles";
+import { COLOR } from '../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+  height: 100%;
+`;
 
 export const StyledTextField = styled(TextField)``;
 
@@ -38,6 +41,11 @@ export const StyledInputLabel = styled(InputLabel)``;
 
 export const StyledFormControl = styled(FormControl)`
   width: 100%;
+
+  && {
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
 `;
 
 export const StyledButton = styled(Button)`
@@ -48,6 +56,9 @@ export const StyledButton = styled(Button)`
 
 export const FormContainer = styled(Grid)`
   padding: 24px;
+  background-color: rgb(250, 250, 250);
+  height: 100%;
+  justify-content: space-between;
 `;
 
 export const FieldsColumn = styled.div``;
@@ -92,4 +103,8 @@ export const FormInfo = styled.p`
 
 export const PayPalLogo = styled.img`
   height: 20px;
+`;
+
+export const StyledForm = styled(Form)`
+  height: 100%;
 `;

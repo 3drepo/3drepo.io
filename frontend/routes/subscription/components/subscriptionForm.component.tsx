@@ -16,8 +16,8 @@
  */
 
 import * as React from 'react';
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+import { Formik, Field } from 'formik';
+import * as Yup from 'yup';
 import { isEmpty, isEqual } from 'lodash';
 
 import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
@@ -38,7 +38,8 @@ import {
   ConfirmContainer,
   FormInfo,
   PayPalLogo,
-} from "../subscription.styles";
+  StyledForm
+} from '../subscription.styles';
 
 const REQUIRED_FIELD = Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED);
 
@@ -145,131 +146,131 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handleConfirmSubsription}
 				validationSchema={SubscriptionSchema}
 			>
-        <Form>
-          <FormContainer container direction="column">
-            <FieldsRow container wrap="nowrap">
+        <StyledForm>
+          <FormContainer container direction='column'>
+            <FieldsRow container wrap='nowrap'>
               <FieldsColumn>
-                <FieldsRow container wrap="nowrap">
-                  <Field name="licences" render={({ field }) =>
+                <FieldsRow container wrap='nowrap'>
+                  <Field name='licences' render={({ field }) =>
 										<StyledTextField
 											{...field}
-											label="Licences"
-											margin="normal"
+											label='Licences'
+											margin='normal'
 											required
-											type="number"
+											type='number'
 											value={numLicences}
-											inputProps={{ min: "0", max: "1000" }}
+											inputProps={{ min: '0', max: '1000' }}
 											onChange={this.handleLicencesChange(field.onChange)}
 										/>
 										} />
-									<Field name="payment" render={({ field }) =>
+									<Field name='payment' render={({ field }) =>
 										<StyledTextField
 											{...field}
-											label="Payment (£ / month)"
-											margin="normal"
+											label='Payment (£ / month)'
+											margin='normal'
 											required
-											type="number"
+											type='number'
 											value={this.state.payment}
 											disabled />
 										} />
                 </FieldsRow>
-                <Field name="firstName" render={({ field, form }) =>
+                <Field name='firstName' render={({ field, form }) =>
 									<StyledTextField
 										{...field}
 										error={Boolean(form.errors.firstName)}
 										helperText={form.errors.firstName}
-										label="First Name"
-										margin="normal"
+										label='First Name'
+										margin='normal'
 										required
-										type="text" />
+										type='text' />
 								}	/>
-                <Field name="company" render={({ field }) =>
+                <Field name='company' render={({ field }) =>
 									<StyledTextField
 										{...field}
-										label="Business Name"
-										margin="normal"
-										type="text" />
+										label='Business Name'
+										margin='normal'
+										type='text' />
 									} />
-                <Field name="line1" render={({ field, form }) =>
+                <Field name='line1' render={({ field, form }) =>
 									<StyledTextField
 										{...field}
 										error={Boolean(form.errors.address)}
 										helperText={form.errors.address}
-										label="Address"
-										margin="normal"
+										label='Address'
+										margin='normal'
 										required
-										type="text" />
+										type='text' />
 									} />
-                <Field name="line2" render={({ field }) =>
+                <Field name='line2' render={({ field }) =>
 									<StyledTextField
 										{...field}
-										label="Address 2"
-										margin="normal"
-										type="text" />
+										label='Address 2'
+										margin='normal'
+										type='text' />
 									} />
               </FieldsColumn>
               <FieldsColumn>
-                <FieldsRow container wrap="nowrap">
-                  <Field name="quotaAvailable" render={({ field }) =>
+                <FieldsRow container wrap='nowrap'>
+                  <Field name='quotaAvailable' render={({ field }) =>
 										<StyledTextField
 											{...field}
-											label="Quota available"
-											margin="normal"
-											type="text"
+											label='Quota available'
+											margin='normal'
+											type='text'
 											disabled
 											value={`${formatBytesGB(spaceLimit)}`}
 											/>
 										} />
-                  <Field name="quotaUsed" render={({ field }) =>
+                  <Field name='quotaUsed' render={({ field }) =>
 										<StyledTextField
 											{...field}
-											label="Quota used"
-											margin="normal"
-											type="text"
+											label='Quota used'
+											margin='normal'
+											type='text'
 											value={`${formatBytesGB(spaceUsed)}`}
 											disabled />
 										} />
                 </FieldsRow>
-                <Field name="lastName" render={({ field, form }) =>
+                <Field name='lastName' render={({ field, form }) =>
 									<StyledTextField
 										{...field}
 										error={Boolean(form.errors.lastName)}
 										helperText={form.errors.lastName}
-										label="Last name"
-										margin="normal"
+										label='Last name'
+										margin='normal'
 										required
-										type="text"	/>
+										type='text'	/>
 								} />
-                <Field name="vat" render={({ field }) =>
+                <Field name='vat' render={({ field }) =>
 									<StyledTextField
 										{...field}
-										label="VAT Number **"
-										margin="normal"
-										type="text" />
+										label='VAT Number **'
+										margin='normal'
+										type='text' />
 									} />
-                <Field name="city" render={({ field, form }) =>
+                <Field name='city' render={({ field, form }) =>
 									<StyledTextField
-										{...field} label="City"
+										{...field} label='City'
 										error={Boolean(form.errors.city)}
 										helperText={form.errors.city}
-										margin="normal"
+										margin='normal'
 										required
-										type="text" />
+										type='text' />
 									} />
-                <Field name="postalCode" render={({ field, form }) =>
+                <Field name='postalCode' render={({ field, form }) =>
 									<StyledTextField
 										{...field}
 										error={Boolean(form.errors.postalCode)}
 										helperText={form.errors.postalCode}
-										label="Postal code"
-										margin="normal"
+										label='Postal code'
+										margin='normal'
 										required
-										type="text" />
+										type='text' />
 									} />
                 <StyledFormControl>
                   <StyledInputLabel>Country</StyledInputLabel>
-									<Field name="countryCode" render={({ field }) =>
-										<StyledSelectField {...field} type="text">
+									<Field name='countryCode' render={({ field }) =>
+										<StyledSelectField {...field} type='text'>
 											{ countries.map(country => (
 												<StyledSelectItem key={country.code} value={country.code}>
 													{country.name}
@@ -290,18 +291,18 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
                 <FormInfo>** Subject to VAT where applicable</FormInfo>
               </FormInfoContainer>
               <ConfirmContainer>
-                <PayPalLogo src="/images/paypal.png" />
+                <PayPalLogo src='/images/paypal.png' />
 								<Field render={({ form }) =>
 									<StyledButton
-										color="secondary"
-										variant="raised"
+										color='secondary'
+										variant='raised'
 										disabled={!form.isValid || form.isValidating}
-										type="submit">Confirm</StyledButton>
+										type='submit'>Confirm</StyledButton>
 									} />
               </ConfirmContainer>
             </FormFooter>
           </FormContainer>
-        </Form>
+        </StyledForm>
 			</Formik>
 		);
 	}

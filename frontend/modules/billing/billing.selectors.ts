@@ -19,6 +19,10 @@ import { createSelector } from 'reselect';
 
 export const selectBillingDomain = state => Object.assign({}, state.billing);
 
+export const selectIsPending = createSelector(
+  selectBillingDomain, (state) => state.isPending
+)
+
 export const selectInvoices = createSelector(
   selectBillingDomain, (state) => state.invoices
 )

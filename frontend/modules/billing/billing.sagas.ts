@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, select } from 'redux-saga/effects';
+import { put, takeLatest, all, select, take } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from "./index";
@@ -46,21 +46,26 @@ export function* fetchSubscriptions({ teamspace }) {
 
 export function* fetchInvoices({ teamspace }) {
   try {
+		yield put(BillingActions.setPendingState(true));
 		const { data: invoices } = yield API.getInvoices(teamspace);
 
-		return yield put(BillingActions.fetchInvoicesSuccess(invoices));
+		yield put(BillingActions.fetchInvoicesSuccess(invoices));
   } catch (e) {
+		yield put(BillingActions.setPendingState(false));
     yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
   }
 }
 
 export function* fetchBillingData({ teamspace }) {
 	try {
-		return yield all([
+		yield put(BillingActions.setPendingState(true));
+
+		yield all([
       put(BillingActions.fetchPlans()),
-			put(BillingActions.fetchSubscriptions(teamspace))
-    ]);
+      put(BillingActions.fetchSubscriptions(teamspace))
+		]);
 	} catch (e) {
+		yield put(BillingActions.setPendingState(false));
 		yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
 	}
 }

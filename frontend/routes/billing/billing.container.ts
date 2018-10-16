@@ -18,7 +18,8 @@
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from "../../helpers/migration";
+import { connect, addRouting } from '../../helpers/migration';
+import { selectIsPending } from './../../modules/billing/billing.selectors';
 
 import { Billing } from './billing.component';
 

@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import { pick } from 'lodash';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';

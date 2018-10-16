@@ -86,13 +86,13 @@ export class Billing extends React.PureComponent<IProps, IState> {
 			<Panel title="Billing" paperProps={paperProps}>
         <Header>
           <Tabs value={activeTab} indicatorColor="primary" textColor="primary" onChange={this.handleChange}>
-            <Tab label="Subscription" />
-            <Tab label="History" />
+						<Tab label="Subscription" />
+						<Tab label="History" />
           </Tabs>
         </Header>
         <TabContent>
 					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-          <Route>{this.renderTabContent}</Route>
+					<Route render={this.renderTabContent}></Route>
         </TabContent>
       </Panel>
 		);
