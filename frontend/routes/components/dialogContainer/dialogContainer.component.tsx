@@ -49,19 +49,27 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		isOpen: false
 	};
 
-	public handleClose = () => {
-		this.props.hide();
+	public handleCallback = (callback) => {
+		const action = callback();
 
-		if (this.props.config.onCancel) {
-			dispatch(this.props.config.onCancel());
+		if (action) {
+			dispatch(action);
 		}
 	}
 
-	public handleResolve = () => {
+	public handleClose = (...args) => {
+		this.props.hide();
+
+		if (this.props.config.onCancel) {
+			this.handleCallback(this.props.config.onCancel.bind(null, ...args));
+		}
+	}
+
+	public handleResolve = (...args) => {
 		this.props.hide();
 
 		if (this.props.config.onConfirm) {
-			dispatch(this.props.config.onConfirm());
+			this.handleCallback(this.props.config.onConfirm.bind(null, ...args))
 		}
 	}
 

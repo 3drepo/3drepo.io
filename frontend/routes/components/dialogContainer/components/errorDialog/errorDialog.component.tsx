@@ -11,10 +11,6 @@ interface IProps {
 	handleResolve: () => string;
 }
 export const ErrorDialog = (props: IProps) => {
-	const renderItems = (items) => {
-		return items.map((item) => (<p>item</p>));
-	};
-
 	const { method, dataType, message, status } = props;
 	return (
 		<>

@@ -18,8 +18,7 @@
 import * as React from 'react';
 import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
-import { groupBy, isEmpty } from 'lodash';
-import Grid from '@material-ui/core/Grid';
+import { groupBy, isEmpty, isEqual } from 'lodash';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -62,6 +61,10 @@ interface IProps {
 	teamspaces: any[];
 	isPending: boolean;
 	showDialog: (config) => void;
+	saveProject: (teamspace, project) => void;
+	updateProject: (teamspace, project) => void;
+	removeProject: (teamspace, project) => void;
+
 	onPermissionsClick: () => void;
 	onSettingsClick: () => void;
 	onDeleteClick: () => void;
@@ -73,6 +76,7 @@ interface IProps {
 
 interface IState {
 	activeTeamspace: string;
+	teamspacesItems: any[];
 }
 
 export class Teamspaces extends React.PureComponent<IProps, IState> {
@@ -81,7 +85,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public state = {
-		activeTeamspace: ''
+		activeTeamspace: '',
+		teamspacesItems: []
 	};
 
 	public modelActions = [{
@@ -118,9 +123,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		action: this.props.onDeleteClick
 	}];
 
+	public getTeamspacesItems = (teamspaces) => teamspaces.map(({account}) => ({value: account}));
+
 	public componentDidMount() {
 		this.setState({
-			activeTeamspace: this.props.currentTeamspace
+			activeTeamspace: this.props.currentTeamspace,
+			teamspacesItems: this.getTeamspacesItems(this.props.teamspaces)
 		});
 	}
 
@@ -130,6 +138,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
 		if (currentTeamspaceChanged) {
 			changes.activeTeamspace = this.props.currentTeamspace;
+		}
+
+		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
+		if (teamspacesChanged) {
+			changes.teamspacesItems = this.getTeamspacesItems(this.props.teamspaces);
 		}
 
 		if (!isEmpty(changes)) {
@@ -152,12 +165,26 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 * Dialog handlers
 	 */
 
-	public openProjectDialog = (event, project: any = {}) => {
+	public openProjectDialog = (event, teamspaceName = '', projectName = '') => {
 		event.stopPropagation();
+		const { teamspacesItems } = this.state as IState;
+
+		const isNewProject = Boolean(projectName.length);
 		this.props.showDialog({
-			title: project.name ? 'Edit project' : 'New project',
+			title: projectName ? 'Edit project' : 'New project',
 			template: ProjectDialog,
-			data: { project }
+			data: {
+				name: projectName,
+				teamspace: teamspaceName,
+				teamspaces: teamspacesItems
+			},
+			onConfirm: ({teamspace, ...project}) => {
+				if (isNewProject) {
+					this.props.saveProject(teamspace, project);
+				} else {
+					this.props.updateProject(teamspace, project);
+				}
+			}
 		});
 	}
 
@@ -185,7 +212,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		<RowMenu open={hovered}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
-				action={this.openProjectDialog}
+				action={(event) => this.openProjectDialog(event, this.state.activeTeamspace, name)}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.PERMISSIONS}
@@ -198,7 +225,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.DELETE}
-				// action={close}
+				action={() => this.props.removeProject(this.state.activeTeamspace, name)}
 			/>
 		</RowMenu>
 	)
@@ -243,10 +270,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public handleAddProject = (event) => {
-		event.stopPropagation();
-	}
-
 	public renderTeamspaces = (teamspaces) => {
 		return teamspaces.map((teamspace, index) => {
 			const TeamspaceItem = (
@@ -263,7 +286,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						<TooltipButton
 							{...ROW_ACTIONS.ADD_NEW}
 							label="Add new project"
-							action={this.openProjectDialog}
+							action={(event) => this.openProjectDialog(event, teamspace.account)}
 						/>
 					)}
 				/>
