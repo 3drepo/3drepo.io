@@ -239,14 +239,6 @@ class HomeController implements ng.IController {
 			}
 		}, true);
 
-		this.$scope.$watch("vm.state.account", (oldAccount, account) => {
-			if (!account) {
-				return;
-			}
-
-			this.notificationService.getChannel(account).notifications.subscribeToUpserted(this.onNotificationUpserted, this);
-			this.notificationService.getChannel(account).notifications.subscribeToDeleted(this.onNotificationDeleted, this);
-		});
 	}
 
 	public handleLoginStatus(currentData) {
@@ -260,6 +252,11 @@ class HomeController implements ng.IController {
 		case this.AuthService.events.USER_LOGGED_IN:
 
 			if (!currentData.error) {
+				this.notificationService.getChannel(this.AuthService.getUsername())
+					.notifications.subscribeToUpserted(this.onNotificationUpserted, this);
+				this.notificationService.getChannel(this.AuthService.getUsername())
+					.notifications.subscribeToDeleted(this.onNotificationDeleted, this);
+
 				if (!currentData.initialiser) {
 					if (!this.state.returnUrl) {
 						this.StateManager.updateState(true);

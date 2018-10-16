@@ -22,7 +22,7 @@ import Icon from "@material-ui/core/Icon";
 import {INotification, NotificationItem} from "./notification.item";
 import { Button, List, ListSubheader, IconButton, ListItem } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
-import { theme } from "../../styles";
+import { MuiTheme } from "../../styles";
 import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 
@@ -55,7 +55,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<MuiThemeProvider theme={theme}>
+			<MuiThemeProvider theme={MuiTheme}>
 				<Button
 					variant="fab"
 					color="secondary"
