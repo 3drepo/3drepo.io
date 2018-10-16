@@ -144,8 +144,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			<Container {...containerProps}>
 				<Headline
 					onClick={this.handleRootClick}
-					onMouseOver={this.createHoverHandler(true)}
-					onMouseOut={this.createHoverHandler(false)}
+					onMouseEnter={this.createHoverHandler(true)}
+					onMouseLeave={this.createHoverHandler(false)}
 				>
 					{
 						renderRoot
