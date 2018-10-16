@@ -5,6 +5,8 @@ import { ClientConfigService } from '../clientConfig';
 
 const clientConfigService = new ClientConfigService();
 
+axios.defaults.withCredentials = true;
+
 const api = axios.create({
 	baseURL: ClientConfig.apiUrls.all[0]
 });
