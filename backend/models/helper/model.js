@@ -356,7 +356,7 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		if(isFed) {
 			return modelInfo.settings;
 		} else {
-			return importModel(account, setting._id, username, modelInfo.settings, {type: "toy", modelDirName, skip });
+			return importModel(account, modelInfo.settings._id, username, modelInfo.settings, {type: "toy", modelDirName, skip });
 		}
 
 	}).catch(err => {
