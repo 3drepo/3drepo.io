@@ -36,6 +36,7 @@ import { RowMenu } from './components/rowMenu/rowMenu.component';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
+import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -55,17 +56,26 @@ const TooltipButton = ({ label, action = null, icon, color = 'inherit' }) => {
 	);
 };
 
+/**
+ * Render methods
+ */
+const renderModel = (actions, props) => {
+	return <ModelItem {...props} actions={actions} />;
+};
+
 interface IProps {
 	history: any;
 	currentTeamspace: string;
 	teamspaces: any[];
 	isPending: boolean;
 	showDialog: (config) => void;
-	saveProject: (teamspace, project) => void;
-	updateProject: (teamspace, project) => void;
-	removeProject: (teamspace, project) => void;
+	showConfirmDialog: (config) => void;
 
-	onPermissionsClick: () => void;
+	createProject: (teamspace, projectData) => void;
+	updateProject: (teamspace, projectName, projectData) => void;
+	removeProject: (teamspace, projectName) => void;
+
+	onModelUpload: () => void;
 	onSettingsClick: () => void;
 	onDeleteClick: () => void;
 	onEditClick: () => void;
@@ -89,39 +99,57 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		teamspacesItems: []
 	};
 
-	public modelActions = [{
-		...ROW_ACTIONS.UPLOAD_FILE,
-		action: this.props.onUploadClick
-	}, {
-		...ROW_ACTIONS.REVISIONS,
-		action: this.props.onRevisionsClick
-	}, {
-		...ROW_ACTIONS.DOWNLOAD,
-		action: this.props.onDownloadClick
-	}, {
-		...ROW_ACTIONS.SETTINGS,
-		action: this.props.onSettingsClick
-	}, {
-		...ROW_ACTIONS.PERMISSIONS,
-		action: this.props.onPermissionsClick
-	}, {
-		...ROW_ACTIONS.DELETE,
-		action: this.props.onDeleteClick
-	}];
+	private modelActions: any[];
+	private federationActions: any[];
 
-	public federationActions = [{
-		...ROW_ACTIONS.EDIT,
-		action: this.props.onEditClick
-	}, {
-		...ROW_ACTIONS.SETTINGS,
-		action: this.props.onSettingsClick
-	}, {
-		...ROW_ACTIONS.PERMISSIONS,
-		action: this.props.onPermissionsClick
-	}, {
-		...ROW_ACTIONS.DELETE,
-		action: this.props.onDeleteClick
-	}];
+	constructor(props) {
+		super(props);
+
+		this.modelActions = [{
+			...ROW_ACTIONS.UPLOAD_FILE,
+			action: this.props.onModelUpload
+		}, {
+			...ROW_ACTIONS.REVISIONS,
+			action: this.props.onRevisionsClick
+		}, {
+			...ROW_ACTIONS.DOWNLOAD,
+			action: this.props.onDownloadClick
+		}, {
+			...ROW_ACTIONS.SETTINGS,
+			action: this.props.onSettingsClick
+		}, {
+			...ROW_ACTIONS.PERMISSIONS,
+			action: () => {}
+		}, {
+			...ROW_ACTIONS.DELETE,
+			action: this.props.onDeleteClick
+		}];
+
+		this.federationActions = [{
+			...ROW_ACTIONS.EDIT,
+			action: this.props.onEditClick
+		}, {
+			...ROW_ACTIONS.SETTINGS,
+			action: this.props.onSettingsClick
+		}, {
+			...ROW_ACTIONS.PERMISSIONS,
+			action: () => {}
+		}, {
+			...ROW_ACTIONS.DELETE,
+			action: this.props.onDeleteClick
+		}];
+	}
+
+	public createRouteHandler = (pathname, params = {}) => () => {
+		// TODO: Remove `runAngularTimeout` after migration of old routing
+		runAngularTimeout(() => {
+			this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
+		});
+	}
+
+	public onTeamspaceClick = (teamspace) => {
+		this.setState({ activeTeamspace: teamspace.account });
+	}
 
 	public getTeamspacesItems = (teamspaces) => teamspaces.map(({account}) => ({value: account}));
 
@@ -150,26 +178,14 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public createRouteHandler = (pathname, params = {}) => () => {
-		// TODO: Remove `runAngularTimeout` after migration of old routing
-		runAngularTimeout(() => {
-			this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
-		});
-	}
-
-	public onTeamspaceClick = (teamspace) => {
-		this.setState({ activeTeamspace: teamspace.account });
-	}
-
 	/**
 	 * Dialog handlers
 	 */
-
 	public openProjectDialog = (event, teamspaceName = '', projectName = '') => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 
-		const isNewProject = Boolean(projectName.length);
+		const isNewProject = !projectName.length;
 		this.props.showDialog({
 			title: projectName ? 'Edit project' : 'New project',
 			template: ProjectDialog,
@@ -178,11 +194,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				teamspace: teamspaceName,
 				teamspaces: teamspacesItems
 			},
-			onConfirm: ({teamspace, ...project}) => {
+			onConfirm: ({teamspace, ...projectData}) => {
 				if (isNewProject) {
-					this.props.saveProject(teamspace, project);
+					this.props.createProject(teamspace, projectData);
 				} else {
-					this.props.updateProject(teamspace, project);
+					this.props.updateProject(teamspace, projectName, projectData);
 				}
 			}
 		});
@@ -191,17 +207,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	/**
 	 * Render methods
 	 */
-
-	public renderModel = (actions, props) => {
-		return <ModelItem {...props} actions={actions} />;
-	}
-
 	public renderProjectItem = ({actions, ...props}) => {
 		return (
 			<TreeList
 				{...(props as any)}
 				level={3}
-				renderItem={this.renderModel.bind(this, actions)}
+				renderItem={renderModel.bind(this, actions)}
 				active={true}
 				disableShadow={true}
 			/>
@@ -225,7 +236,20 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.DELETE}
-				action={() => this.props.removeProject(this.state.activeTeamspace, name)}
+				action={(event) => {
+					event.stopPropagation();
+					this.props.showConfirmDialog({
+						title: 'Delete project',
+						content: `
+							Do you really want to delete project <b>${name}</b>? <br /><br />
+							This will remove the project from your teamspace,\
+							deleting all the models inside of it!
+						`,
+						onConfirm: () => {
+							this.props.removeProject(this.state.activeTeamspace, name);
+						}
+					});
+				}}
 			/>
 		</RowMenu>
 	)

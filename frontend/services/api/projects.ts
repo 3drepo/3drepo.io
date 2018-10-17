@@ -32,8 +32,8 @@ export const fetchProject = (teamspace, projectName, options = {}) => {
  * @param teamspace
  * @param project
  */
-export const createProject = (teamspace, project) => {
-	return api.put(`${teamspace}/projects`, project);
+export const createProject = (teamspace, projectData) => {
+	return api.post(`${teamspace}/projects`, projectData);
 };
 
 /**
@@ -41,8 +41,8 @@ export const createProject = (teamspace, project) => {
  * @param teamspace
  * @param project
  */
-export const updateProject = (teamspace, project) => {
-	return api.put(`${teamspace}/projects/${project.name}`, project);
+export const updateProject = (teamspace, projectName, projectData) => {
+	return api.put(`${teamspace}/projects/${projectName}`, projectData);
 };
 
 /**

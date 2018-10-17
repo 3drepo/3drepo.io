@@ -25,7 +25,7 @@ import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 
-import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../../services/validation';
+import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Container } from './projectDialog.styles';
 
@@ -65,12 +65,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 					<DialogContent>
 						<FormControl fullWidth={true} required={true}>
 							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<Field name="teamspace" render={({ field, form }) => {
-							/* 	field;
-								form;
-								debugger */
-								return (
-
+							<Field name="teamspace" render={({ field, form }) => (
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
@@ -81,7 +76,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 									disabledPlaceholder={true}
 									inputId="teamspace-select"
 								/>
-							)}} />
+							)} />
 						</FormControl>
 						<Field name="name" render={({ field, form }) => (
 							<TextField
