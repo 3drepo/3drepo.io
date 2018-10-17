@@ -26,6 +26,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { MuiTheme } from '../../../styles';
 import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
 import { ErrorDialog } from './components/errorDialog/errorDialog.component';
+import { ConfirmDialog } from './components/confirmDialog/confirmDialog.component';
+
 import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
 import { LoadingDialog } from './components/loadingDialog/loadingDialog.component';
 import { DIALOG_TYPES } from '../../../modules/dialog/dialog.redux';
@@ -41,7 +43,8 @@ const DIALOG_TEMPLATES = {
 	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
 	[DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
 	[DIALOG_TYPES.ERROR]: ErrorDialog,
-	[DIALOG_TYPES.LOADING]: LoadingDialog
+	[DIALOG_TYPES.LOADING]: LoadingDialog,
+	[DIALOG_TYPES.CONFIRM]: ConfirmDialog
 };
 
 export class DialogContainer extends React.PureComponent<IProps, any> {
@@ -75,7 +78,10 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { content, title, templateType, template } = this.props.config;
-		const data = this.props.data || {};
+		const data = {
+			content,
+			...(this.props.data || {})
+		};
 
 		const DialogTemplate = DIALOG_TEMPLATES[templateType] || template;
 

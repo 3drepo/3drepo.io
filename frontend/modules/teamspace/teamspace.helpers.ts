@@ -34,3 +34,11 @@ export const extendTeamspacesInfo = (teamspaces = []) => teamspaces.reduce((team
 	}
 	return teamspacesWithAdminAccess;
 }, []);
+
+export const removeProjectFromTeamspace = (teamspaces, teamspaceName, projectName) => {
+	const updatedTeamspaces = {...teamspaces};
+	const teamspace = { ...updatedTeamspaces[teamspaceName] };
+	teamspace.projects = teamspace.projects.filter(({name}) => name !== projectName);
+	updatedTeamspaces[teamspaceName] = teamspace;
+	return updatedTeamspaces;
+};

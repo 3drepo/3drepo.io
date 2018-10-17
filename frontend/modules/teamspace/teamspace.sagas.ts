@@ -115,29 +115,29 @@ export function* uploadAvatar({ file }) {
 	}
 }
 
-export function* createProject({ teamspace, project }) {
+export function* createProject({ teamspace, projectData }) {
 	try {
-		const response = yield API.createProject(teamspace, project);
-		debugger
-		yield put(TeamspaceActions.createSuccess(project));
+		yield API.createProject(teamspace, projectData);
+		yield put(TeamspaceActions.createProjectSuccess(teamspace, projectData));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('create', 'project', e.response));
 	}
 }
 
-export function* updateProject({ teamspace, project }) {
+export function* updateProject({ teamspace, projectName, projectData }) {
 	try {
-		yield API.updateProject(teamspace, project);
-		yield put(TeamspaceActions.updateSuccess(project));
+		yield API.updateProject(teamspace, projectName, projectData);
+		yield put(TeamspaceActions.updateProjectSuccess(teamspace, projectName, projectData));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('update', 'project', e.response));
 	}
 }
 
-export function* removeProject({ teamspace, project }) {
+export function* removeProject({ teamspace, projectName }) {
 	try {
-		yield API.removeProject(teamspace, project);
-		yield put(TeamspaceActions.removeSuccess(project));
+		yield API.removeProject(teamspace, projectName);
+
+		yield put(TeamspaceActions.removeProjectSuccess(teamspace, projectName));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('remove', 'project', e.response));
 	}

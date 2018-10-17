@@ -17,17 +17,19 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
+import { ErrorDialog } from '../../routes/components/dialogContainer/components/errorDialog/errorDialog.component';
+import { ConfirmDialog } from '../../routes/components/dialogContainer/components/confirmDialog/confirmDialog.component';
 
 export const DIALOG_TYPES = {
 	ERROR: 1,
 	CONFIRM_USER_REMOVE: 2,
 	FEDERATION_REMINDER_DIALOG: 3,
-	LOADING: 4
+	LOADING: 4,
+	CONFIRM: 4
 };
 
 interface IDialogConfig {
 	title: string;
-	templateType?: 'error' | 'confirm' | 'default' | 'confirmUserRemove';
 	template?: JSX.Element;
 	content?: string;
 	onConfirm?: () => void;
@@ -38,6 +40,7 @@ interface IDialogConfig {
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showErrorDialog: ['method', 'dataType', 'error'],
+	showConfirmDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending']
 }, { prefix: 'DIALOG_' });
@@ -57,7 +60,7 @@ export const showDialog = (state = INITIAL_STATE, action) => {
 export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error } ) => {
 	const config = {
 		title: 'Error',
-		templateType: DIALOG_TYPES.ERROR,
+		template: ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -67,6 +70,11 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error
 	};
 
 	return showDialog(state, {config});
+};
+
+export const showConfirmDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
+	return showDialog(state, { config });
 };
 
 export const hideDialog = (state = INITIAL_STATE) => {
@@ -81,5 +89,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
+	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState
 });
