@@ -39,6 +39,8 @@ import { ProjectDialog } from './components/projectDialog/projectDialog.componen
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { TooltipButton } from './components/tooltipButton/tooltipButton.component';
+import { ProjectItem } from './components/projectItem/projectItem.component';
+import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -47,12 +49,7 @@ const PANEL_PROPS = {
 	}
 };
 
-/**
- * Render methods
- */
-const renderModel = (actions, props) => {
-	return <ModelItem {...props} actions={actions} />;
-};
+const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account }) => ({ value: account }));
 
 interface IProps {
 	history: any;
@@ -90,65 +87,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		teamspacesItems: []
 	};
 
-	private modelActions: any[];
-	private federationActions: any[];
-
-	constructor(props) {
-		super(props);
-
-		this.modelActions = [{
-			...ROW_ACTIONS.UPLOAD_FILE,
-			action: this.props.onModelUpload
-		}, {
-			...ROW_ACTIONS.REVISIONS,
-			action: this.props.onRevisionsClick
-		}, {
-			...ROW_ACTIONS.DOWNLOAD,
-			action: this.props.onDownloadClick
-		}, {
-			...ROW_ACTIONS.SETTINGS,
-			action: this.props.onSettingsClick
-		}, {
-			...ROW_ACTIONS.PERMISSIONS,
-			action: () => {}
-		}, {
-			...ROW_ACTIONS.DELETE,
-			action: this.props.onDeleteClick
-		}];
-
-		this.federationActions = [{
-			...ROW_ACTIONS.EDIT,
-			action: this.props.onEditClick
-		}, {
-			...ROW_ACTIONS.SETTINGS,
-			action: this.props.onSettingsClick
-		}, {
-			...ROW_ACTIONS.PERMISSIONS,
-			action: () => {}
-		}, {
-			...ROW_ACTIONS.DELETE,
-			action: this.props.onDeleteClick
-		}];
-	}
-
-	public createRouteHandler = (pathname, params = {}) => () => {
-		// TODO: Remove `runAngularTimeout` after migration of old routing
-		runAngularTimeout(() => {
-			this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
-		});
-	}
-
-	public onTeamspaceClick = (teamspace) => {
-		debugger
-		this.setState({ activeTeamspace: teamspace.account });
-	}
-
-	public getTeamspacesItems = (teamspaces) => teamspaces.map(({account}) => ({value: account}));
-
 	public componentDidMount() {
 		this.setState({
 			activeTeamspace: this.props.currentTeamspace,
-			teamspacesItems: this.getTeamspacesItems(this.props.teamspaces)
+			teamspacesItems: getTeamspacesItems(this.props.teamspaces)
 		});
 	}
 
@@ -162,12 +104,25 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
 		if (teamspacesChanged) {
-			changes.teamspacesItems = this.getTeamspacesItems(this.props.teamspaces);
+			changes.teamspacesItems = getTeamspacesItems(this.props.teamspaces);
 		}
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
+	}
+
+	public createRouteHandler = (pathname, params = {}) => (event) => {
+		event.stopPropagation();
+
+		// TODO: Remove `runAngularTimeout` after migration of old routing
+		runAngularTimeout(() => {
+			this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
+		});
+	}
+
+	public onTeamspaceClick = (teamspace) => {
+		this.setState({ activeTeamspace: teamspace.account });
 	}
 
 	/**
@@ -196,106 +151,66 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public createRemoveProjectHandler = (projectName) => (event) => {
+		event.stopPropagation();
+		this.props.showConfirmDialog({
+			title: 'Delete project',
+			content: `
+				Do you really want to delete project <b>${projectName}</b>? <br /><br />
+				This will remove the project from your teamspace,
+				deleting all the models inside of it!
+			`,
+			onConfirm: () => {
+				this.props.removeProject(this.state.activeTeamspace, projectName);
+			}
+		});
+	}
+
+	public openModelDialog = (event) => {
+		event.stopPropagation();
+		console.log('Model directory was clicked!');
+	}
+
 	/**
 	 * Render methods
 	 */
-	public renderProjectItem = ({actions, ...props}) => {
-		return (
-			<TreeList
-				{...(props as any)}
-				level={3}
-				renderItem={renderModel.bind(this, actions)}
-				active={true}
-				disableShadow={true}
-			/>
-		);
+	public renderModel = (props) => {
+		return <ModelItem {...props} actions={[]} />;
 	}
 
-	public renderProjectActions = ({name, hovered}) => (
-		<RowMenu open={hovered}>
-			<TooltipButton
-				{...ROW_ACTIONS.EDIT}
-				action={(event) => this.openProjectDialog(event, this.state.activeTeamspace, name)}
-			/>
-			<TooltipButton
-				{...ROW_ACTIONS.PERMISSIONS}
-				action={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
-					page: 'userManagement',
-					teamspace: this.state.activeTeamspace,
-					project: name,
-					tab: TABS_TYPES.PROJECTS
-				})}
-			/>
-			<TooltipButton
-				{...ROW_ACTIONS.DELETE}
-				action={(event) => {
-					event.stopPropagation();
-					this.props.showConfirmDialog({
-						title: 'Delete project',
-						content: `
-							Do you really want to delete project <b>${name}</b>? <br /><br />
-							This will remove the project from your teamspace,\
-							deleting all the models inside of it!
-						`,
-						onConfirm: () => {
-							this.props.removeProject(this.state.activeTeamspace, name);
-						}
-					});
-				}}
-			/>
-		</RowMenu>
+	public renderModelDirectory = (props) => (
+		<ModelDirectoryItem
+			{...props}
+			renderChildItem={this.renderModel}
+			onAddClick={this.openModelDialog}
+		/>
 	)
 
-	public renderProject = (props) => {
-		const {federations = [], models } = groupBy(props.models, ({federate}) => {
-			return federate ? 'federations' : 'models';
-		});
-		const items = [{
-			name: 'Federations',
-			items: federations,
-			actions: this.federationActions,
-			renderActions: () => (
-				<TooltipButton
-					{...ROW_ACTIONS.ADD_NEW}
-					label="Add new federation"
-					action={this.handleAddProject}
-				/>
-			)
-		}, {
-			name: 'Models',
-			items: models,
-			actions: this.modelActions,
-			renderActions: () => (
-				<TooltipButton
-					{...ROW_ACTIONS.ADD_NEW}
-					label="Add new model"
-					action={this.handleAddProject}
-				/>
-			)
-		}];
-
-		return (
-			<TreeList
-				key={props.key}
-				name={props.name}
-				level={2}
-				items={items}
-				renderItem={this.renderProjectItem}
-				renderActions={this.renderProjectActions}
-			/>
-		);
-	}
+	public renderProject = (props) => (
+		<ProjectItem
+			{...props}
+			renderChildItem={this.renderModelDirectory}
+			onEditClick={(event) => this.openProjectDialog(event, this.state.activeTeamspace, props.name)}
+			onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
+				page: 'userManagement',
+				teamspace: this.state.activeTeamspace,
+				project: props.name,
+				tab: TABS_TYPES.PROJECTS
+			})}
+			onRemoveClick={this.createRemoveProjectHandler(props.name)}
+		/>
+	)
 
 	public renderTeamspaces = (teamspaces) => {
 		return teamspaces.map((teamspace, index) => (
 			<TeamspaceItem
+				{...teamspace}
 				key={index}
 				active={teamspace.account === this.state.activeTeamspace}
 				isMyTeamspace={index === 0}
 				renderChildItem={this.renderProject}
 				onToggle={this.onTeamspaceClick.bind(this, teamspace)}
 				onAddProject={(event) => this.openProjectDialog(event, teamspace.account)}
-				{ ...teamspace }
 			/>
 		));
 	}
