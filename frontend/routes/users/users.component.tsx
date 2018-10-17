@@ -134,7 +134,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		this.props.updatePermissions(permissionData);
 	}
 
-	public handleChange = (user, field) => (value) => cond([
+	public handleChange = (user, field) => (event, value) => cond([
 		[matches('job'), () => this.props.updateJob(user.user, value)],
 		[matches('permissions'), () => this.onPermissionsChange(user.user, value)]
 	])(field)

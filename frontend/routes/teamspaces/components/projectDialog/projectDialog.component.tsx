@@ -65,7 +65,12 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 					<DialogContent>
 						<FormControl fullWidth={true} required={true}>
 							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<Field name="teamspace" render={({ field, form }) => (
+							<Field name="teamspace" render={({ field, form }) => {
+							/* 	field;
+								form;
+								debugger */
+								return (
+
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
@@ -76,7 +81,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 									disabledPlaceholder={true}
 									inputId="teamspace-select"
 								/>
-							)} />
+							)}} />
 						</FormControl>
 						<Field name="name" render={({ field, form }) => (
 							<TextField
