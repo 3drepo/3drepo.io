@@ -17,16 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
-import { ErrorDialog } from '../../routes/components/dialogContainer/components/errorDialog/errorDialog.component';
-import { ConfirmDialog } from '../../routes/components/dialogContainer/components/confirmDialog/confirmDialog.component';
-
-export const DIALOG_TYPES = {
-	ERROR: 1,
-	CONFIRM_USER_REMOVE: 2,
-	FEDERATION_REMINDER_DIALOG: 3,
-	LOADING: 4,
-	CONFIRM: 4
-};
+import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;

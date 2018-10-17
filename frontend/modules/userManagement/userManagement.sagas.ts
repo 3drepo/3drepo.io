@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, call, takeLatest, all, select } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 import { DialogActions } from '../dialog/dialog.redux';
-
-import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
-import { selectTeamspacesWithAdminAccess } from '../teamspace/teamspace.selectors';
-import { DIALOG_TYPES } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
+import { selectTeamspacesWithAdminAccess } from '../teamspace/teamspace.selectors';
+import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
+import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
+import {
+	FederationReminderDialog
+} from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
@@ -60,7 +62,7 @@ export function* addUser({ user }) {
 export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.removeUser(teamspace, username);
+		yield API.removeUser(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 	} catch (error) {
 		const responseCode = API.getResponseCode('USER_IN_COLLABORATOR_LIST');
@@ -69,7 +71,7 @@ export function* removeUser({ username }) {
 		if (errorData.status === 400 && errorData.value === responseCode) {
 			const config = {
 				title: 'Remove User',
-				templateType: DIALOG_TYPES.CONFIRM_USER_REMOVE,
+				template: RemoveUserDialog,
 				confirmText: 'Remove',
 				onConfirm: () => UserManagementActions.removeUserCascade(username),
 				data: {
@@ -155,7 +157,7 @@ export function* updateProjectPermissions({ permissions }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const {name} = yield select(selectCurrentProject);
 		const project = {name, permissions};
-		yield API.updateProject(teamspace, project);
+		yield API.updateProject(teamspace, project.name, project);
 
 		yield put(UserManagementActions.updateProjectPermissionsSuccess(permissions));
 		yield put(SnackbarActions.show('Project permissions updated'));
@@ -206,7 +208,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 		if (permissionlessModels.length) {
 			const config = {
 				title: 'Reminder about Federation Permissions',
-				templateType: DIALOG_TYPES.FEDERATION_REMINDER_DIALOG,
+				template: FederationReminderDialog,
 				onConfirm: () => resolveUpdate,
 				data: {
 					models: permissionlessModels
