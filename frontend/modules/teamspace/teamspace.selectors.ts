@@ -38,7 +38,7 @@ export const selectTeamspaces = createSelector(
 );
 
 export const selectTeamspacesWithAdminAccess = createSelector(
-	selectTeamspaces, (accounts) => extendTeamspacesInfo(accounts)
+	selectTeamspaces, (teamspaces) => extendTeamspacesInfo(teamspaces)
 );
 
 export const selectIsPending = createSelector(

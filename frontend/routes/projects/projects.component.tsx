@@ -91,7 +91,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		this.updateUrlParams({view: updatedView});
 	}
 
-	public onProjectChange = (projectName) => {
+	public onProjectChange = (event, projectName) => {
 		this.updateUrlParams({project: projectName});
 		if (this.props.onProjectChange) {
 			this.props.onProjectChange(projectName);

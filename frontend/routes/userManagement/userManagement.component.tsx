@@ -93,7 +93,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		this.setState({activeTab});
 	}
 
-	public onTeamspaceChange = (teamspace) => {
+	public onTeamspaceChange = (event, teamspace) => {
 		this.updateUrlParams({teamspace});
 		if (this.props.onTeamspaceChange) {
 			this.props.onTeamspaceChange(teamspace);
@@ -111,7 +111,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const teamspace = teamspaceData ? selectedTeamspace : defaultTeamspace;
 
 		this.setState(changes);
-		this.onTeamspaceChange(teamspace);
+		this.onTeamspaceChange(null, teamspace);
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
