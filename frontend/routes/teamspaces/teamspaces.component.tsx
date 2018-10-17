@@ -168,6 +168,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public openModelDialog = (event) => {
 		event.stopPropagation();
+		// tslint:disable-next-line
 		console.log('Model directory was clicked!');
 	}
 
