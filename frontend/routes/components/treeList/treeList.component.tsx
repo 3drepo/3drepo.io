@@ -103,7 +103,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 		const activeChanged = active !== prevProps.active;
 		if (activeChanged) {
-			changes.active = active && !items.length;
+			changes.active = active && Boolean(items.length);
 		}
 
 		if (!isEmpty(changes)) {

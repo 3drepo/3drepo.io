@@ -37,23 +37,14 @@ import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
+import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
+import { TooltipButton } from './components/tooltipButton/tooltipButton.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
 	paperProps: {
 		height: '100%'
 	}
-};
-
-const TooltipButton = ({ label, action = null, icon, color = 'inherit' }) => {
-	const iconProps = { color, fontSize: 'small' } as any;
-	return (
-		<Tooltip title={label}>
-			<IconButton aria-label={label} onClick={action}>
-				<Icon {...iconProps}>{icon}</Icon>
-			</IconButton>
-		</Tooltip>
-	);
 };
 
 /**
@@ -148,6 +139,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public onTeamspaceClick = (teamspace) => {
+		debugger
 		this.setState({ activeTeamspace: teamspace.account });
 	}
 
@@ -295,29 +287,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderTeamspaces = (teamspaces) => {
-		return teamspaces.map((teamspace, index) => {
-			const TeamspaceItem = (
-				<TreeList
-					key={index}
-					name={teamspace.account}
-					level={1}
-					items={teamspace.projects}
-					onRootClick={this.onTeamspaceClick.bind(this, teamspace)}
-					active={teamspace.account === this.state.activeTeamspace}
-					renderItem={this.renderProject}
-					renderRoot={index === 0 ? MyTeamspaceItem : null}
-					renderActions={() => (
-						<TooltipButton
-							{...ROW_ACTIONS.ADD_NEW}
-							label="Add new project"
-							action={(event) => this.openProjectDialog(event, teamspace.account)}
-						/>
-					)}
-				/>
-			);
-
-			return TeamspaceItem;
-		});
+		return teamspaces.map((teamspace, index) => (
+			<TeamspaceItem
+				key={index}
+				active={teamspace.account === this.state.activeTeamspace}
+				isMyTeamspace={index === 0}
+				renderChildItem={this.renderProject}
+				onToggle={this.onTeamspaceClick.bind(this, teamspace)}
+				onAddProject={(event) => this.openProjectDialog(event, teamspace.account)}
+				{ ...teamspace }
+			/>
+		));
 	}
 
 	public renderMenuButton = (isPending, props) => (
