@@ -16,36 +16,13 @@
  */
 
 import styled from 'styled-components';
-import Paper from '@material-ui/core/Paper';
+import List from "@material-ui/core/List";
 
-import { FONT_WEIGHT } from '../../../styles';
+export const Container = styled.div``;
 
-export const Container = styled(Paper)`
+export const StyledList = styled(List)`
   && {
-    background: #fafafa;
-    height: ${(props: any) => props.height || 'auto'};
-    width: ${(props: any) => props.width || 'auto'};
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
   }
-`;
-
-export const Title = styled.div`
-  font-size: 20px;
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  height: 40px;
-  border-radius: 4px 4px 0 0;
-  background-color: rgb(12,47,84);
-  color: rgba(255,255,255,0.87);
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0 16px;
-`;
-
-export const Content = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 `;

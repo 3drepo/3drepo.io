@@ -9,19 +9,22 @@ import { BrowserRouter as Router } from 'react-router-dom';
 // Routes
 import DialogContainer from './components/dialogContainer/dialogContainer.container';
 import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
-import Billing from './billing/billing.container';
 
 import UserManagement from './userManagement/userManagement.container';
 import Profile from './profile/profile.container';
-import Teamspaces from './teamspaces/teamspaces.container';
+
+// Components
+import UserInfo from "./components/userInfo/userInfo.component";
 import ModelSettings from './modelSettings/modelSettings.container';
 
 angular
-	.module('3drepo')
-	.component('dialogContainer', wrap(DialogContainer))
-	.component('snackbarContainer', wrap(SnackbarContainer))
-	.component('userManagement', wrap(UserManagement, ['projects', 'users']))
-	.component('profile', wrap(Profile))
-	.component('billing', wrap(Billing))
-	.component('teamspaces', wrap(Teamspaces))
+  .module("3drepo")
+  .component("dialogContainer", wrap(DialogContainer))
+  .component("snackbarContainer", wrap(SnackbarContainer))
+  .component("userManagement", wrap(UserManagement, ["projects", "users"]))
+  .component("profile", wrap(Profile))
+  .component('billing', wrap(Billing))
+	.component("userInfo", wrap(UserInfo,
+    ["loading", "account", "hasAvatar", "itemToShow", "username", "firstName", "lastName", "email"]
+  ))
 	.component('modelSettings', wrap(ModelSettings));

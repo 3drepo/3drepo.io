@@ -16,36 +16,20 @@
  */
 
 import styled from 'styled-components';
-import Paper from '@material-ui/core/Paper';
+import { Link } from "react-router-dom";
 
-import { FONT_WEIGHT } from '../../../styles';
+export const ListItemContainer = styled.li`
+  height: 72px;
+  display: flex;
+  border-top: 1px solid #dcdcdc;
+  background-color: rgb(250,250,250);
+  transition: background-color .4s cubic-bezier(.25,.8,.25,1);
 
-export const Container = styled(Paper)`
-  && {
-    background: #fafafa;
-    height: ${(props: any) => props.height || 'auto'};
-    width: ${(props: any) => props.width || 'auto'};
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  &:hover {
+    background-color: rgba(158,158,158,0.2);;
   }
 `;
 
-export const Title = styled.div`
-  font-size: 20px;
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  height: 40px;
-  border-radius: 4px 4px 0 0;
-  background-color: rgb(12,47,84);
-  color: rgba(255,255,255,0.87);
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0 16px;
-`;
-
-export const Content = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+export const StyledLink = styled(Link)`
+  color: rgba(0, 0, 0, 0.87);
 `;

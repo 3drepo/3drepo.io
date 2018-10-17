@@ -28,6 +28,16 @@ div#accountHolder(
 			has-avatar="vm.hasAvatar"
 			item-to-show="vm.itemToShow")
 
+		user-info(
+			loading="vm.loadingAccount"
+			has-avatar="vm.hasAvatar"
+			item-to-show="vm.itemToShow"
+			username="vm.username"
+			first-name="vm.firstName"
+			last-name="vm.lastName"
+			email="vm.email"
+		)
+
 		.accountSpace
 
 		#accountItem(flex="100")
