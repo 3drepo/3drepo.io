@@ -210,13 +210,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 		return (
 			<FloatingActionPanel
 				buttonProps={{
-<<<<<<< HEAD
 					disabled: this.props.limit <= this.props.users.length,
 					label: 'All licences assigned'
-=======
-					disabled: this.state.limit <= this.props.users.length,
-					label: 'All licenses assigned'
->>>>>>> 5df709860... ISSUE #1185 - Get billing/payment data
 				}}
 				container={container}
 				key={this.state.panelKey}
