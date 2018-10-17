@@ -95,8 +95,10 @@ class CompareController implements ng.IController {
 		});
 
 		this.$scope.$watchCollection("vm.baseModels", (s) => {
+			const modelHeight = 81;
+			const cardHeight = 184;
 			const modelCount = (s || []).length;
-			this.onContentHeightRequest({height: (modelCount * 80 ) + 184});
+			this.onContentHeightRequest({height: (modelCount * modelHeight) + cardHeight});
 		});
 	}
 
