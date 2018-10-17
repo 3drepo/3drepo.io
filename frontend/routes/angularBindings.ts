@@ -23,8 +23,7 @@ angular
   .component("snackbarContainer", wrap(SnackbarContainer))
   .component("userManagement", wrap(UserManagement, ["projects", "users"]))
   .component("profile", wrap(Profile))
-  .component('billing', wrap(Billing))
-	.component("userInfo", wrap(UserInfo,
-    ["loading", "account", "hasAvatar", "itemToShow", "username", "firstName", "lastName", "email"]
+    .component("userInfo", wrap(UserInfo,
+    ["loading", "hasAvatar", "avatarUrl", "itemToShow", "username", "firstName", "lastName", "email"]
   ))
 	.component('modelSettings', wrap(ModelSettings));

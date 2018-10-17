@@ -17,12 +17,10 @@
 
 import * as React from 'react';
 import { BrowserRouter as Router } from "react-router-dom";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-
 import { ListItemLink } './components/listItemLink/listItemLink.component';
+import { Avatar } './components/avatar/avatar.component';
 
-import { StyledList } from './userInfo.styles';
+import { Container, UserContainer, UserData, UserName, UserEmail, StyledList, LoadingText } from './userInfo.styles';
 import { Panel } from '../panel/panel.component';
 
 const MENU_ITEMS = [
@@ -47,32 +45,40 @@ const MENU_ITEMS = [
 interface IProps {
 	loading: boolean;
 	hasAvatar: boolean;
-	account: any;
 	itemToShow: any;
 	firstName: string;
 	lastName: string;
 	username: string;
 	email: string;
+	avatarUrl: string;
 }
 
-const UserInfo = ({ loading, account, hasAvatar, itemToShow, firstName, lastName, username, email }: IProps) => {
+const UserInfo = ({ loading, hasAvatar, firstName, lastName, username, email, avatarUrl }: IProps) => {
 	const renderItems = items =>
-		items.map(item => <ListItemLink to={`${username}/page=${item.link}`} key={item.title} title={item.title} />);
+		items.map(item => <ListItemLink to={`${username}?page=${item.link}`} key={item.title} title={item.title} />);
 
-	return <>
+	return (
+		<Container>
       <Panel title={username}>
-        {loading && "Loading..."}
 				<Router>
 					<StyledList>
-						<ListItem>
-							{!loading && `${firstName} ${lastName}`}
-							{!loading && email}
-						</ListItem>
+						<UserContainer>
+							<Avatar url={avatarUrl} altText={username} hasAvatar={hasAvatar} loading={loading} />
+							{ loading ?
+								<LoadingText>Loading...</LoadingText>
+								:
+								<UserData>
+									<UserName>{firstName} {lastName}</UserName>
+									<UserEmail>{email}</UserEmail>
+								</UserData>
+							}
+						</UserContainer>
 						{renderItems(MENU_ITEMS)}
 					</StyledList>
 				</Router>
       </Panel>
-    </>;
+		</Container>
+	);
 };
 
 export default UserInfo;

@@ -16,51 +16,48 @@
  */
 
 import styled from 'styled-components';
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
+import Avatar from "@material-ui/core/Avatar";
+import SvgIcon from "@material-ui/core/SvgIcon";
 
 export const Container = styled.div`
-  width: 300px;
+  margin: 0.5rem 0;
+  text-align: left;
+  align-self: flex-start;
+  position: relative;
+  height: 50px;
+  width: 50px;
 `;
 
-export const StyledList = styled(List)`
+export const AvatarImage = styled(Avatar)`
   && {
-    padding-top: 0;
-    padding-bottom: 0;
+    background: #e8eaf6;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
   }
 `;
 
-export const UserContainer = styled(ListItem)`
-  display: flex;
-  flex-direction: column;
-  display: flex;
-  flex-direction: row;
+export const StyledSvg = styled(SvgIcon)`
+  && {
+    width: 1.5em;
+    height: 1.5em;
+  }
 `;
 
-export const UserData = styled.div`
+export const AvatarPlaceholder = styled.div`
+  background: #e8eaf6;
   display: flex;
-  flex-direction: column;
-  align-self: center;
-  margin-left: 12px;
-`;
-
-export const UserName = styled.h3`
-  font-size: 16px;
-  font-weight: 400;
-  margin: 0;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
 `;
 
-export const UserEmail = styled.p`
-  color: rgba(0,0,0,0.54);
-  font-size: 14px;
-  font-weight: 500;
-  margin: 0;
-`;
-
-export const LoadingText = styled.div`
-  align-self: center;
-  margin-left: 12px;
-`;

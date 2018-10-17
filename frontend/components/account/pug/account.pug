@@ -13,21 +13,6 @@ div#accountHolder(
 		layout-xs="column"
 		layout-sm="column")
 
-		account-info(
-			flex-xs="85"
-			flex-sm="85"
-			flex-md="25"
-			flex-lg="30"
-			flex-xl="25"
-
-			loading="vm.loadingAccount"
-			username="vm.username"
-			first-name="vm.firstName"
-			last-name="vm.lastName"
-			email="vm.email"
-			has-avatar="vm.hasAvatar"
-			item-to-show="vm.itemToShow")
-
 		user-info(
 			loading="vm.loadingAccount"
 			has-avatar="vm.hasAvatar"
@@ -36,6 +21,7 @@ div#accountHolder(
 			first-name="vm.firstName"
 			last-name="vm.lastName"
 			email="vm.email"
+			avatar-url="vm.avatarUrl"
 		)
 
 		.accountSpace
