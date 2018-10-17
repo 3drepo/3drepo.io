@@ -30,7 +30,8 @@ import {
 
 import {
 	selectTeamspacesWithAdminAccess,
-	selectCurrentTeamspace as selectDefaultTeamspace
+	selectCurrentTeamspace as selectDefaultTeamspace,
+	selectCurrentUser
 } from '../../modules/teamspace';
 
 const mapStateToProps = createStructuredSelector({
@@ -38,7 +39,8 @@ const mapStateToProps = createStructuredSelector({
 	selectedTeamspace: selectCurrentTeamspace,
 	teamspaces: selectTeamspacesWithAdminAccess,
 	isTeamspaceAdmin: selectIsTeamspaceAdmin,
-	isLoadingTeamspace: selectIsPending
+	isLoadingTeamspace: selectIsPending,
+	currentUser: selectCurrentUser
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

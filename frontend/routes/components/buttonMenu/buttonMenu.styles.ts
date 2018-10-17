@@ -20,17 +20,4 @@ import Popover from '@material-ui/core/Popover';
 
 export const Container = styled.div``;
 
-export const StyledPopover = styled(Popover).attrs({
-	classes: {
-		paper: 'button-menu__container'
-	}
-})`
-	&& {
-		pointer-events: none;
-	}
-
-	.button-menu__container {
-		pointer-events: all;
-		${(props: any) => props.background ? `background: ${props.background};` : ''}
-	}
-`;
+export const StyledPopover = styled(Popover)``;

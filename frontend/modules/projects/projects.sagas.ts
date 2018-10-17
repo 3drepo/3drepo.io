@@ -19,7 +19,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { ProjectsTypes, ProjectsActions } from './projects.redux';
-import { DialogActions, showErrorDialog } from '../dialog/';
+import { DialogActions } from '../dialog/';
 
 export function* create({teamspace, project}) {
 	try {
