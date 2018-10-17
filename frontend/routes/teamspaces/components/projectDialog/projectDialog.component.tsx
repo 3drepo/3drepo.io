@@ -94,7 +94,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 					<DialogActions>
 						<Button
 							onClick={handleClose}
-							color="primary"
+							color="secondary"
 						>
 							Cancel
 						</Button>
