@@ -56,8 +56,7 @@ interface IState {
 }
 
 export class Projects extends React.PureComponent<IProps, IState> {
-
-	public static getDerivedStateFromProps = (nextProps, prevState) => {
+	public static getDerivedStateFromProps = (nextProps) => {
 		const queryParams = queryString.parse(nextProps.location.search);
 		return {
 			currentView: Number(queryParams.view || PERMISSIONS_VIEWS.PROJECTS)
@@ -113,7 +112,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		const hasProperProject = projects.find(({ name }) => name === queryParams.project);
 		if (hasProperProject) {
 			state.selectedProject = queryParams.project;
-			this.onProjectChange(queryParams.project);
+			this.onProjectChange(null, queryParams.project);
 		} else {
 			state.selectedProject = '';
 		}
