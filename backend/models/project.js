@@ -231,20 +231,6 @@
 		return project;
 	};
 
-	schema.statics.projectContainsModelName = function(teamspace, projectName, modelName) {
-		return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
-			if(!project) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			}
-
-			return ModelSetting.count({account: teamspace},
-				{name: modelName, _id: {"$in": project.models}}).then((count) => {
-				return count > 0;
-			});
-
-		});
-	};
-
 	schema.methods.findPermsByUser = function(username) {
 		return this.permissions.find(perm => perm.user === username);
 	};
