@@ -462,7 +462,7 @@ export class PanelService {
 			show: false,
 			help: "Show clashes and differences between models",
 			icon: "compare",
-			minHeight: 80,
+			minHeight: 265,
 			fixedHeight: false,
 			options: []
 		});
