@@ -17,23 +17,13 @@
 
 import * as React from 'react';
 import * as queryString from 'query-string';
-import { pick, matches, isEqual, cond, get, isEmpty, memoize } from 'lodash';
-import Grid from '@material-ui/core/Grid';
-import Radio from '@material-ui/core/Radio';
+import { pick, isEmpty } from 'lodash';
 import SimpleBar from 'simplebar-react';
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
-import Tooltip from '@material-ui/core/Tooltip';
 
-// @ts-ignore
-import * as AdminIconSrc from '../../icons/how_to_reg.svg';
-
-import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../constants/model-permissions';
-import { CELL_TYPES, CustomTable, CheckboxField } from '../components/customTable/customTable.component';
+import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
+import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
-import { TableHeadingRadio } from '../components/customTable/components/tableHeadingRadio/tableHeadingRadio.component';
-import { UserItem } from '../components/userItem/userItem.component';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
 
@@ -82,7 +72,7 @@ interface IState {
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
+	public static getDerivedStateFromProps(nextProps: IProps) {
 		return {
 			modelRows: getModelsTableRows(nextProps.models, nextProps.selectedModels),
 			currentUser: (nextProps.permissions || []).find(({ isCurrentUser }) => isCurrentUser) || {}

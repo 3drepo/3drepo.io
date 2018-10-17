@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FONT_WEIGHT } from '../../../../../styles';
+import { FONT_WEIGHT } from '../../../../styles';
 
 export const Headline = styled.div`
   font-weight: ${FONT_WEIGHT.SEMIBOLD};

@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { FONT_WEIGHT } from '../../../../../styles';
+import { FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div``;
 
