@@ -48,7 +48,6 @@ interface IProps {
 
 interface IState {
 	active: boolean;
-	disabled: boolean;
 	hovered: boolean;
 }
 
@@ -61,7 +60,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		active: false,
-		disabled: false,
 		hovered: false
 	};
 
@@ -75,8 +73,10 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRootClick = () => {
-		const { disabled, active } = this.state;
-		if (!disabled) {
+		const { active } = this.state;
+		const { items } = this.props;
+
+		if (items.length) {
 			this.setState({ active: !active }, () => {
 				if (this.props.onRootClick) {
 					this.props.onRootClick(this.state);
@@ -92,10 +92,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			changes.active = true;
 		}
 
-		if (!this.props.items.length) {
-			changes.disabled = true;
-		}
-
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
@@ -103,15 +99,11 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate = (prevProps) => {
 		const changes = {} as IState;
+		const { active, items } = this.props;
 
-		const itemsChanged = this.props.items.length !== prevProps.items.length;
-		if (itemsChanged) {
-			changes.disabled = Boolean(this.props.items.length);
-		}
-
-		const activeChanged = this.props.active !== prevProps.active;
+		const activeChanged = active !== prevProps.active;
 		if (activeChanged) {
-			changes.active = this.props.active && !changes.disabled;
+			changes.active = active && !items.length;
 		}
 
 		if (!isEmpty(changes)) {
@@ -125,19 +117,17 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { items, level, renderRoot, ...props } = this.props;
-		const { active, disabled, hovered } = this.state;
+		const { active, hovered } = this.state;
+		const disabled = !items.length;
 
 		const containerProps = { active, level, disabled, hovered };
-
-		const innerRef = React.createRef();
 
 		const headlineProps = {
 			...props,
 			active,
 			disabled,
 			hovered,
-			renderActions: this.props.renderActions,
-			refToHeadline: innerRef
+			renderActions: this.props.renderActions
 		};
 
 		return (
