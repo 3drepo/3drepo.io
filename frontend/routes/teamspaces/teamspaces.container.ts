@@ -21,12 +21,8 @@ import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { Teamspaces } from './teamspaces.component';
-import {
-	TeamspaceActions,
-	selectTeamspaces,
-	selectCurrentTeamspace,
-	selectIsPending
-} from '../../modules/teamspace';
+import { selectCurrentTeamspace, selectIsPending } from '../../modules/teamspace';
+import { selectTeamspaces, TeamspacesActions } from '../../modules/teamspaces';
 
 import { DialogActions } from '../../modules/dialog';
 
@@ -39,9 +35,9 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
-	createProject: TeamspaceActions.createProject,
-	updateProject: TeamspaceActions.updateProject,
-	removeProject: TeamspaceActions.removeProject
+	createProject: TeamspacesActions.createProject,
+	updateProject: TeamspacesActions.updateProject,
+	removeProject: TeamspacesActions.removeProject
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces)));

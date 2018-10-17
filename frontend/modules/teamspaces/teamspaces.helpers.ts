@@ -30,15 +30,7 @@ export const extendTeamspacesInfo = (teamspaces = []) => teamspaces.reduce((team
 
 	const isProjectAdmin = Boolean(projects.length);
 	if (account.isAdmin || isProjectAdmin) {
-		teamspacesWithAdminAccess.push({...account, isProjectAdmin, projects});
+		teamspacesWithAdminAccess.push({ ...account, isProjectAdmin, projects });
 	}
 	return teamspacesWithAdminAccess;
 }, []);
-
-export const removeProjectFromTeamspace = (teamspaces, teamspaceName, projectName) => {
-	const updatedTeamspaces = {...teamspaces};
-	const teamspace = { ...updatedTeamspaces[teamspaceName] };
-	teamspace.projects = teamspace.projects.filter(({name}) => name !== projectName);
-	updatedTeamspaces[teamspaceName] = teamspace;
-	return updatedTeamspaces;
-};

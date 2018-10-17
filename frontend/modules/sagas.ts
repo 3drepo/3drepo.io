@@ -3,7 +3,7 @@ import teamspaceSaga from './teamspace/teamspace.sagas';
 import userManagementSaga from './userManagement/userManagement.sagas';
 import jobsSaga from './jobs/jobs.sagas';
 import billingSaga from './billing/billing.sagas';
-import projectsSaga from './projects/projects.sagas';
+import teamspacesSaga from './teamspaces/teamspaces.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -12,6 +12,6 @@ export default function* rootSaga() {
 		fork(userManagementSaga),
 		fork(jobsSaga),
 		fork(billingSaga),
-		fork(projectsSaga)// <-- INJECT MODULE SAGA -->
+		fork(teamspacesSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

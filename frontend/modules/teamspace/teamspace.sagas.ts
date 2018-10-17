@@ -23,6 +23,7 @@ import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
 import { selectCurrentUser } from './teamspace.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { TeamspacesActions } from '../teamspaces';
 
 const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
 
@@ -31,14 +32,15 @@ export function* fetchUser({ username }) {
 		yield put(TeamspaceActions.setPendingState(true));
 		yield put(TeamspaceActions.setAvatarPendingState(true));
 
-		const { data } = yield call(API.fetchTeamspace, [username]);
+		const { data: { accounts, ...currentUser } } = yield call(API.fetchTeamspace, [username]);
 
-		yield all([
+		return yield all([
 			put(TeamspaceActions.fetchUserSuccess({
-				...data,
+				...currentUser, 
 				username,
 				avatarUrl: getAvatarUrl(username)
 			})),
+			put(TeamspacesActions.setTeamspaces(accounts)),
 			put(TeamspaceActions.setPendingState(false))
 		]);
 	} catch (e) {
@@ -115,48 +117,10 @@ export function* uploadAvatar({ file }) {
 	}
 }
 
-export function* createProject({ teamspace, projectData }) {
-	try {
-		yield API.createProject(teamspace, projectData);
-
-		yield put(SnackbarActions.show('Project created'));
-		yield put(TeamspaceActions.createProjectSuccess(teamspace, projectData));
-	} catch (e) {
-		put(DialogActions.showErrorDialog('create', 'project', e.response));
-	}
-}
-
-export function* updateProject({ teamspace, projectName, projectData }) {
-	try {
-		yield API.updateProject(teamspace, projectName, projectData);
-
-		yield put(SnackbarActions.show('Project updated'));
-		yield put(TeamspaceActions.updateProjectSuccess(teamspace, projectName, projectData));
-	} catch (e) {
-		put(DialogActions.showErrorDialog('update', 'project', e.response));
-	}
-}
-
-export function* removeProject({ teamspace, projectName }) {
-	try {
-		yield API.removeProject(teamspace, projectName);
-
-		yield put(SnackbarActions.show('Project removed'));
-		yield put(TeamspaceActions.removeProjectSuccess(teamspace, projectName));
-	} catch (e) {
-		put(DialogActions.showErrorDialog('remove', 'project', e.response));
-	}
-}
-
 export default function* teamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.FETCH_USER, fetchUser);
 	yield takeLatest(TeamspaceTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
 	yield takeLatest(TeamspaceTypes.UPDATE_USER, updateUser);
 	yield takeLatest(TeamspaceTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(TeamspaceTypes.UPLOAD_AVATAR, uploadAvatar);
-
-	// Projects
-	yield takeLatest(TeamspaceTypes.CREATE_PROJECT, createProject);
-	yield takeLatest(TeamspaceTypes.UPDATE_PROJECT, updateProject);
-	yield takeLatest(TeamspaceTypes.REMOVE_PROJECT, removeProject);
 }

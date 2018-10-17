@@ -6,7 +6,7 @@ import { reducer as dialogReducer } from './dialog/dialog.redux';
 import { reducer as jobsReducer } from './jobs/jobs.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
-import { reducer as projectsReducer } from './projects/projects.redux';
+import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -17,6 +17,6 @@ export default function createReducer() {
 		jobs: jobsReducer,
 		snackbar: snackbarReducer,
 		billing: billingReducer,
-		projects: projectsReducer// <-- INJECT MODULE REDUCER -->
+		teamspaces: teamspacesReducer// <-- INJECT MODULE REDUCER -->
 	});
 }
