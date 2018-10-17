@@ -18,7 +18,7 @@
 import * as React from 'react';
 import {
 	matchesProperty, cond, orderBy, pick, values,
-	stubTrue, first, isEqual, identity, isEmpty, omit
+	stubTrue, isEqual, isEmpty
 } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -29,13 +29,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
-import { UserItem } from '../userItem/userItem.component';
 import { Highlight } from '../highlight/highlight.component';
-import { ColorPicker } from '../colorPicker/colorPicker.component';
-
-import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { TableHeading } from './components/tableHeading/tableHeading.component';
-import { CellSelect } from './components/cellSelect/cellSelect.component';
 
 import { Container, Head, BodyWrapper, Body, Row, Cell, CheckboxCell } from './customTable.styles';
 
@@ -69,19 +64,6 @@ export const CELL_TYPES = {
 };
 
 const EQUALITY_CHECK_FIELDS = ['id', '_id', 'name', 'user', 'model'];
-
-const HEADER_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: CellUserSearch,
-	[CELL_TYPES.NAME]: CellUserSearch
-};
-
-const ROW_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: UserItem,
-	[CELL_TYPES.JOB]: CellSelect,
-	[CELL_TYPES.PERMISSIONS]: CellSelect,
-	[CELL_TYPES.ICON_BUTTON]: TableButton,
-	[CELL_TYPES.COLOR]: ColorPicker
-};
 
 const CELL_DEFAULT_PROPS = {
 	[CELL_TYPES.EMPTY]: {

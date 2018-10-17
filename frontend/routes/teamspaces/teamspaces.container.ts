@@ -22,6 +22,7 @@ import { connect, addRouting } from '../../helpers/migration';
 
 import { Teamspaces } from './teamspaces.component';
 import {
+	TeamspaceActions,
 	selectTeamspaces,
 	selectCurrentTeamspace,
 	selectIsPending
@@ -36,7 +37,10 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	showDialog: DialogActions.showDialog
+	showDialog: DialogActions.showDialog,
+	createProject: TeamspaceActions.createProject,
+	updateProject: TeamspaceActions.updateProject,
+	removeProject: TeamspaceActions.removeProject
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces)));
