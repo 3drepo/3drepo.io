@@ -118,6 +118,8 @@ export function* uploadAvatar({ file }) {
 export function* createProject({ teamspace, projectData }) {
 	try {
 		yield API.createProject(teamspace, projectData);
+
+		yield put(SnackbarActions.show('Project created'));
 		yield put(TeamspaceActions.createProjectSuccess(teamspace, projectData));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('create', 'project', e.response));
@@ -127,6 +129,8 @@ export function* createProject({ teamspace, projectData }) {
 export function* updateProject({ teamspace, projectName, projectData }) {
 	try {
 		yield API.updateProject(teamspace, projectName, projectData);
+
+		yield put(SnackbarActions.show('Project updated'));
 		yield put(TeamspaceActions.updateProjectSuccess(teamspace, projectName, projectData));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('update', 'project', e.response));
@@ -137,6 +141,7 @@ export function* removeProject({ teamspace, projectName }) {
 	try {
 		yield API.removeProject(teamspace, projectName);
 
+		yield put(SnackbarActions.show('Project removed'));
 		yield put(TeamspaceActions.removeProjectSuccess(teamspace, projectName));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('remove', 'project', e.response));
