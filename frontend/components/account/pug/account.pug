@@ -55,10 +55,7 @@ div#accountHolder(
 				data="vm.data"
 				show-page="vm.showPage(page, callingPage, data)")
 
-			user-management(
-				ng-if="vm.username && vm.pageVisibility.userManagement"
-				current-user="vm.account"
-				teamspaces="vm.accounts")
+			user-management(ng-if="vm.username && vm.pageVisibility.userManagement")
 
 div(ng-if="vm.state.model")
 	model(

@@ -314,7 +314,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderMenu = ({ close }) => {
 		return (
 			<>
-				<MenuItem onClick={close}>Add project</MenuItem>
+				<MenuItem onClick={(event) => {
+					this.openProjectDialog(event);
+					close(event);
+				}}>
+					Add project
+				</MenuItem>
 				<MenuItem>Add model</MenuItem>
 				<MenuItem>Add federation</MenuItem>
 			</>

@@ -19,7 +19,8 @@ import { debounce, mapValues } from 'lodash';
 import { subscribe } from '../../../helpers/migration';
 import {
 	selectCurrentUser,
-	selectIsPending
+	selectIsPending,
+	selectTeamspaces
 } from '../../../modules/teamspace';
 
 class AccountController implements ng.IController {
@@ -76,6 +77,8 @@ class AccountController implements ng.IController {
 
 		subscribe(this, (state) => {
 			const currentUser = selectCurrentUser(state);
+			const teamspaces = selectTeamspaces(state);
+
 			const isPending = selectIsPending(state);
 
 			// Pre-populate billing name if it doesn't exist with profile name
@@ -90,6 +93,7 @@ class AccountController implements ng.IController {
 
 			return {
 				...currentUser,
+				accounts: teamspaces,
 				billingAddress,
 				loadingAccount: isPending
 			};
