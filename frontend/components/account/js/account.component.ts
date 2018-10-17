@@ -17,11 +17,8 @@
 
 import { debounce, mapValues } from 'lodash';
 import { subscribe } from '../../../helpers/migration';
-import {
-	selectCurrentUser,
-	selectIsPending,
-	selectTeamspaces
-} from '../../../modules/teamspace';
+import { selectCurrentUser, selectIsPending } from '../../../modules/teamspace';
+import { selectTeamspaces } from '../../../modules/teamspaces';
 
 class AccountController implements ng.IController {
 
