@@ -16,8 +16,6 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { omit, keyBy } from 'lodash';
-import { removeProjectFromTeamspace } from './teamspace.helpers';
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
@@ -40,7 +38,6 @@ export const INITIAL_STATE = {
 	currentUser: {
 		username: ''
 	},
-	teamspaces: [],
 	isPending: true,
 	isAvatarPending: true,
 	collaboratorLimit: null
@@ -59,14 +56,10 @@ const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
 };
 
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
-	const currentUser = omit(userData, ['accounts']);
-	const teamspaces = keyBy(userData.accounts, 'account');
-
 	return {
 		...state,
 		currentTeamspace: userData.username,
-		currentUser,
-		teamspaces,
+		currentUser: userData,
 		isAvatarPending: false
 	};
 };
@@ -86,45 +79,11 @@ const refreshAvatar = (state = INITIAL_STATE, { avatarUrl }) => {
 	};
 };
 
-// Projects
-const updateProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
-		if (project.name === action.projectName) {
-			return { ...project, ...action.projectData };
-		}
-		return project;
-	});
-	teamspaces[action.teamspace].projects = projects;
-
-	return { ...state, teamspaces };
-};
-
-const createProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	teamspaces[action.teamspace].projects.push(action.projectData);
-	return { ...state, teamspaces };
-};
-
-const removeProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	const projects = [...state.teamspaces[action.teamspace].projects]
-		.filter(({ name }) => name !== action.projectName);
-	teamspaces[action.teamspace].projects = projects;
-
-	return { ...state, teamspaces };
-};
-
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[TeamspaceTypes.FETCH_QUOTA_INFO_SUCCESS]: fetchQuotaInfoSuccess,
 	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.SET_AVATAR_PENDING_STATE]: setAvatarPendingState,
-	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar,
-
-	// Projects
-	[TeamspaceTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
-	[TeamspaceTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,
-	[TeamspaceTypes.REMOVE_PROJECT_SUCCESS]: removeProjectSuccess
+	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar
 });

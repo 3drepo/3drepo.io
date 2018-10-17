@@ -21,7 +21,7 @@ import * as API from '../../services/api';
 import { DialogActions } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { selectTeamspacesWithAdminAccess } from '../teamspace/teamspace.selectors';
+import { selectTeamspacesWithAdminAccess } from '../teamspaces/teamspaces.selectors';
 import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
 import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
 import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';

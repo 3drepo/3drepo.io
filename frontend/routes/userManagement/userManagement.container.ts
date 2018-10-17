@@ -28,8 +28,9 @@ import {
 	selectIsTeamspaceAdmin
 } from '../../modules/userManagement';
 
+import { selectTeamspacesWithAdminAccess } from '../../modules/teamspaces/teamspaces.selectors';
+
 import {
-	selectTeamspacesWithAdminAccess,
 	selectCurrentTeamspace as selectDefaultTeamspace,
 	selectCurrentUser
 } from '../../modules/teamspace';
