@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { values } from 'lodash';
 import { extendTeamspacesInfo } from './teamspace.helpers';
 
 const selectTeamspaceDomain = (state) => Object.assign({}, state.teamspace);
@@ -33,7 +34,7 @@ export const selectAvatar = createSelector(
 );
 
 export const selectTeamspaces = createSelector(
-	selectCurrentUser, (state) => state.accounts
+	selectTeamspaceDomain, (state) => values(state.teamspaces)
 );
 
 export const selectTeamspacesWithAdminAccess = createSelector(

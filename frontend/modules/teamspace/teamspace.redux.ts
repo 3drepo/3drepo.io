@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { omit, keyBy } from 'lodash';
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
@@ -38,6 +39,7 @@ export const INITIAL_STATE = {
 	currentUser: {
 		username: ''
 	},
+	teamspaces: [],
 	isPending: true,
 	isAvatarPending: true,
 	collaboratorLimit: null
@@ -56,10 +58,14 @@ const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
 };
 
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
+	const currentUser = omit(userData, ['accounts']);
+	const teamspaces = keyBy(userData.accounts, 'account');
+
 	return {
 		...state,
 		currentTeamspace: userData.username,
-		currentUser: userData,
+		currentUser,
+		teamspaces,
 		isAvatarPending: false
 	};
 };
@@ -84,5 +90,6 @@ export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_QUOTA_INFO_SUCCESS]: fetchQuotaInfoSuccess,
 	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
+	[TeamspaceTypes.SET_AVATAR_PENDING_STATE]: setAvatarPendingState,
 	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar
 });
