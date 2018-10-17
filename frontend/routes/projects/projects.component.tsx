@@ -150,8 +150,8 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {currentProject, location, match} = this.props;
-		const {currentView, models, modelsPermissions, projectsPermissions, selectedProject, projectsItems} = this.state;
+		const {match} = this.props;
+		const {currentView, selectedProject, projectsItems} = this.state;
 
 		const footerLabel = this.getFooterLabel(currentView);
 		return (

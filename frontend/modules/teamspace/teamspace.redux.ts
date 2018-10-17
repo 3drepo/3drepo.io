@@ -17,6 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { omit, keyBy } from 'lodash';
+import { removeProjectFromTeamspace } from './teamspace.helpers';
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
@@ -87,15 +88,31 @@ const refreshAvatar = (state = INITIAL_STATE, { avatarUrl }) => {
 
 // Projects
 const updateProjectSuccess = (state = INITIAL_STATE, action) => {
-	return state;
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
+		if (project.name === action.projectName) {
+			return { ...project, ...action.projectData };
+		}
+		return project;
+	});
+	teamspaces[action.teamspace].projects = projects;
+
+	return { ...state, teamspaces };
 };
 
 const createProjectSuccess = (state = INITIAL_STATE, action) => {
-	return state;
+	const teamspaces = { ...state.teamspaces };
+	teamspaces[action.teamspace].projects.push(action.projectData);
+	return { ...state, teamspaces };
 };
 
 const removeProjectSuccess = (state = INITIAL_STATE, action) => {
-	return state;
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[action.teamspace].projects]
+		.filter(({ name }) => name !== action.projectName);
+	teamspaces[action.teamspace].projects = projects;
+
+	return { ...state, teamspaces };
 };
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
