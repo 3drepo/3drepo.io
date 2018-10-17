@@ -24,6 +24,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Container, SubmodelsList, Time } from './modelItem.styles';
 import { RowMenu } from '../rowMenu/rowMenu.component';
+import { ROW_ACTIONS } from '../../teamspaces.contants';
 
 interface IAction {
 	label: string;
@@ -37,7 +38,11 @@ interface IProps {
 	model: string;
 	subModels?: any[];
 	timestamp: string;
-	actions: IAction[];
+	onModelUpload: (event) => void;
+	onRevisionsClick: (event) => void;
+	onDownloadClick: (event) => void;
+	onSettingsClick: (event) => void;
+	onPermissionsClick: (event) => void;
 }
 
 interface IState {
@@ -48,6 +53,40 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {
 		hovered: false
 	};
+
+	private modelActions: IAction[] = [];
+	private federationActions: IAction[] = [];
+
+	constructor(props) {
+		super(props);
+
+		const sharedActions = [{
+			...ROW_ACTIONS.SETTINGS,
+			action: props.onSettingsClick
+		}, {
+			...ROW_ACTIONS.PERMISSIONS,
+			action: props.onPermissionsClick
+		}, {
+			...ROW_ACTIONS.DELETE,
+			action: props.onDeleteClick
+		}];
+
+		this.modelActions = [{
+			...ROW_ACTIONS.UPLOAD_FILE,
+			action: props.onModelUpload
+		}, {
+			...ROW_ACTIONS.REVISIONS,
+			action: props.onRevisionsClick
+		}, {
+			...ROW_ACTIONS.DOWNLOAD,
+			action: props.onDownloadClick
+		}, ...sharedActions];
+
+		this.federationActions = [{
+			...ROW_ACTIONS.EDIT,
+			action: props.onEditClick
+		}, ...sharedActions];
+	}
 
 	public renderSubModels = (subModels = []) => {
 		const submodelsAsString = subModels.map(({ name }) => name).join(', ');
@@ -72,8 +111,10 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, subModels, timestamp, actions } = this.props;
+		const { name, subModels, timestamp } = this.props;
 		const { hovered } = this.state;
+		const isFederation = Boolean(subModels);
+		const actions = isFederation ? this.federationActions : this.modelActions;
 
 		return (
 			<Container
