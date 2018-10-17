@@ -14,7 +14,7 @@ import UserManagement from './userManagement/userManagement.container';
 import Profile from './profile/profile.container';
 
 // Components
-import UserInfo from "./components/userInfo/userInfo.component";
+import { UserInfo } from "./components/userInfo/userInfo.component";
 import ModelSettings from './modelSettings/modelSettings.container';
 
 angular
@@ -23,7 +23,6 @@ angular
   .component("snackbarContainer", wrap(SnackbarContainer))
   .component("userManagement", wrap(UserManagement, ["projects", "users"]))
   .component("profile", wrap(Profile))
-    .component("userInfo", wrap(UserInfo,
+  .component("userInfo", wrap(UserInfo,
     ["loading", "hasAvatar", "avatarUrl", "itemToShow", "username", "firstName", "lastName", "email"]
-  ))
-	.component('modelSettings', wrap(ModelSettings));
+  )).component('modelSettings', wrap(ModelSettings));

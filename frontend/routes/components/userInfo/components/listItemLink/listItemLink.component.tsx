@@ -27,11 +27,11 @@ interface IProps {
 }
 
 export const ListItemLink = ({ to, title }: IProps) => {
-	const renderLink = itemProps => <StyledLink to={to} {...itemProps} />;
+	const renderLink = (itemProps) => <StyledLink to={to} {...itemProps} />;
 
 	return (
 		<ListItemContainer>
-      <ListItem component={renderLink}>{title}</ListItem>
-    </ListItemContainer>
-	)
-}
+			<ListItem component={renderLink}>{title}</ListItem>
+		</ListItemContainer>
+	);
+};

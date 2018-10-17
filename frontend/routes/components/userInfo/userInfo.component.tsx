@@ -16,36 +16,35 @@
  */
 
 import * as React from 'react';
-import { BrowserRouter as Router } from "react-router-dom";
-import { ListItemLink } './components/listItemLink/listItemLink.component';
-import { Avatar } './components/avatar/avatar.component';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ListItemLink } from './components/listItemLink/listItemLink.component';
+import { Avatar } from './components/avatar/avatar.component';
 
 import { Container, UserContainer, UserData, UserName, UserEmail, StyledList, LoadingText } from './userInfo.styles';
 import { Panel } from '../panel/panel.component';
 
 const MENU_ITEMS = [
-  {
-    title: "Teamspaces",
-    link: "teamspaces"
-  },
-  {
-    title: "User Management",
-    link: "user-management"
-  },
-  {
-    title: "Profile",
-    link: "profile"
-  },
-  {
-    title: "Billing",
-    link: "billing"
-  }
+	{
+		title: 'Teamspaces',
+		link: 'teamspaces'
+	},
+	{
+		title: 'User Management',
+		link: 'user-management'
+	},
+	{
+		title: 'Profile',
+		link: 'profile'
+	},
+	{
+		title: 'Billing',
+		link: 'billing'
+	}
 ];
 
 interface IProps {
 	loading: boolean;
 	hasAvatar: boolean;
-	itemToShow: any;
 	firstName: string;
 	lastName: string;
 	username: string;
@@ -53,32 +52,36 @@ interface IProps {
 	avatarUrl: string;
 }
 
-const UserInfo = ({ loading, hasAvatar, firstName, lastName, username, email, avatarUrl }: IProps) => {
-	const renderItems = items =>
-		items.map(item => <ListItemLink to={`${username}?page=${item.link}`} key={item.title} title={item.title} />);
+export const UserInfo = (props: IProps) => {
+	const { loading, hasAvatar, firstName, lastName, username, email, avatarUrl } = props;
+	const renderItems = (items) => items.map((item) => (
+		<ListItemLink
+			to={`${username}?page=${item.link}`}
+			key={item.title}
+			title={item.title}
+		/>
+	));
 
 	return (
-		<Container>
-      <Panel title={username}>
-				<Router>
-					<StyledList>
-						<UserContainer>
-							<Avatar url={avatarUrl} altText={username} hasAvatar={hasAvatar} loading={loading} />
-							{ loading ?
-								<LoadingText>Loading...</LoadingText>
-								:
-								<UserData>
-									<UserName>{firstName} {lastName}</UserName>
-									<UserEmail>{email}</UserEmail>
-								</UserData>
-							}
-						</UserContainer>
-						{renderItems(MENU_ITEMS)}
-					</StyledList>
-				</Router>
-      </Panel>
-		</Container>
+		<Router>
+			<Container>
+				<Panel title={username}>
+						<StyledList>
+							<UserContainer>
+								<Avatar url={avatarUrl} altText={username} hasAvatar={hasAvatar} loading={loading} />
+								{ loading ?
+									<LoadingText>Loading...</LoadingText>
+									:
+									<UserData>
+										<UserName>{firstName} {lastName}</UserName>
+										<UserEmail>{email}</UserEmail>
+									</UserData>
+								}
+							</UserContainer>
+							{renderItems(MENU_ITEMS)}
+						</StyledList>
+				</Panel>
+			</Container>
+		</Router>
 	);
 };
-
-export default UserInfo;

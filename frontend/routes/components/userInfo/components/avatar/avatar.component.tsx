@@ -33,17 +33,19 @@ interface IState {
 export class Avatar extends React.PureComponent<IProps, IState> {
 	public state = {
 		avatarLoaded: false
-	}
+	};
 
 	public renderPlaceholderSvgPath = () => (
 		<path
 			fill="#0c2f54"
-			d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM12 14c-2.67 0-8 1.34-8 4v2h16v-2c+0-2.66-5.33-4-8-4z" />);
+			d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM12 14c-2.67 0-8 1.34-8 4v2h16v-2c+0-2.66-5.33-4-8-4z"
+		/>
+	)
 
 	public handleImageLoaded = () => {
 		this.setState({
 			avatarLoaded: true
-		})
+		});
 	}
 
 	public renderAvatarPlaceholder = () => (
@@ -52,7 +54,7 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 		</AvatarPlaceholder>
 	)
 
-	render() {
+	public render() {
 		const { url, altText, loading, hasAvatar } = this.props;
 		const { avatarLoaded } = this.state;
 
