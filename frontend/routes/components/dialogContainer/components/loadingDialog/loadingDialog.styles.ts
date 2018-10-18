@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 export const LoaderContainer = styled.div`
   display: flex;

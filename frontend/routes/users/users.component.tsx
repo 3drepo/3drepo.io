@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import {
 	pick,
 	values,
@@ -25,37 +25,37 @@ import {
 	matches,
 	isEqual,
 	isEmpty
-} from "lodash";
+} from 'lodash';
 
-import { TEAMSPACE_PERMISSIONS } from "../../constants/teamspace-permissions";
+import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import {
 	CustomTable,
 	CELL_TYPES,
 	TableButton
-} from "../components/customTable/customTable.component";
-import { FloatingActionPanel } from "../components/floatingActionPanel/floatingActionPanel.component";
-import { NewUserForm } from "../components/newUserForm/newUserForm.component";
-import { JobItem } from "../components/jobItem/jobItem.component";
-import { UserManagementTab } from "../components/userManagementTab/userManagementTab.component";
-import { CellUserSearch } from "../components/customTable/components/cellUserSearch/cellUserSearch.component";
-import { UserItem } from "../components/userItem/userItem.component";
-import { CellSelect } from "../components/customTable/components/cellSelect/cellSelect.component";
+} from '../components/customTable/customTable.component';
+import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import { NewUserForm } from '../components/newUserForm/newUserForm.component';
+import { JobItem } from '../components/jobItem/jobItem.component';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { UserItem } from '../components/userItem/userItem.component';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
 const USERS_TABLE_CELLS = [
 	{
-		name: "User",
+		name: 'User',
 		type: CELL_TYPES.USER,
 		HeadingComponent: CellUserSearch,
 		CellComponent: UserItem,
-		searchBy: ["firstName", "lastName", "user", "company"]
+		searchBy: ['firstName', 'lastName', 'user', 'company']
 	},
 	{
-		name: "Job",
+		name: 'Job',
 		CellComponent: CellSelect,
 		type: CELL_TYPES.JOB
 	},
 	{
-		name: "Permissions",
+		name: 'Permissions',
 		CellComponent: CellSelect,
 		type: CELL_TYPES.PERMISSIONS
 	},
@@ -122,7 +122,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	public state = {
 		rows: [],
 		jobs: [],
-		licencesLabel: "",
+		licencesLabel: '',
 		containerElement: null,
 		panelKey: Math.random(),
 		limit: 0
@@ -139,8 +139,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public handleChange = (user, field) => (value) =>
 		cond([
-			[matches("job"), () => this.props.updateJob(user.user, value)],
-			[matches("permissions"), () => this.onPermissionsChange(user.user, value)]
+			[matches('job'), () => this.props.updateJob(user.user, value)],
+			[matches('permissions'), () => this.onPermissionsChange(user.user, value)]
 		])(field)
 
 	public onRemove = (username) => {
@@ -160,24 +160,24 @@ export class Users extends React.PureComponent<IProps, IState> {
 	public getUsersTableRows = (users = [], jobs = []): any[] => {
 		return users.map((user) => {
 			const data = [
-				pick(user, ["firstName", "lastName", "company", "user"]),
+				pick(user, ['firstName', 'lastName', 'company', 'user']),
 				{
 					value: user.job,
 					items: jobs,
 					itemTemplate: JobItem,
-					placeholder: "Unassigned",
-					onChange: this.handleChange(user, "job")
+					placeholder: 'Unassigned',
+					onChange: this.handleChange(user, 'job')
 				},
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
-					onChange: this.handleChange(user, "permissions"),
+					onChange: this.handleChange(user, 'permissions'),
 					readOnly: user.isCurrentUser || user.isOwner,
 					disabled: user.isCurrentUser || user.isOwner
 				},
 				{},
 				{
-					icon: "remove_circle",
+					icon: 'remove_circle',
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
 				}
@@ -241,7 +241,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 			<FloatingActionPanel
 				buttonProps={{
 					disabled: this.props.limit <= this.props.users.length,
-					label: "All licences assigned"
+					label: 'All licences assigned'
 				}}
 				container={container}
 				key={this.state.panelKey}
@@ -257,10 +257,10 @@ export class Users extends React.PureComponent<IProps, IState> {
 	 */
 	public getFooterLabel = (users, limit) => {
 		if (!users) {
-			return "";
+			return '';
 		}
 
-		const limitValue = isNumber(limit) ? limit : "unlimited";
+		const limitValue = isNumber(limit) ? limit : 'unlimited';
 		return `Assigned licences: ${users.length} out of ${limitValue}`;
 	}
 

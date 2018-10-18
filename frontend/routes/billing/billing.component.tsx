@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from "react";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import * as queryString from "query-string";
-import { Panel } from "../components/panel/panel.component";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Subscription from "./../subscription/subscription.container";
-import History from "./../history/history.container";
-import { Header, TabContent } from "./billing.styles";
+import * as React from 'react';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import * as queryString from 'query-string';
+import { Panel } from '../components/panel/panel.component';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Subscription from './../subscription/subscription.container';
+import History from './../history/history.container';
+import { Header, TabContent } from './billing.styles';
 
 export const TABS_TYPES = {
 	SUBSCRIPTION: 0,
@@ -33,11 +33,11 @@ export const TABS_TYPES = {
 const TABS = {
 	[TABS_TYPES.SUBSCRIPTION]: {
 		id: TABS_TYPES.SUBSCRIPTION,
-		label: "Subscription"
+		label: 'Subscription'
 	},
 	[TABS_TYPES.HISTORY]: {
 		id: TABS_TYPES.HISTORY,
-		label: "History"
+		label: 'History'
 	}
 };
 
@@ -80,19 +80,19 @@ export class Billing extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { activeTab } = this.state;
-		const paperProps = { height: "100%" };
+		const paperProps = { height: '100%' };
 
 		return (
-			<Panel title="Billing" paperProps={paperProps}>
+			<Panel title='Billing' paperProps={paperProps}>
 				<Header>
 					<Tabs
 						value={activeTab}
-						indicatorColor="primary"
-						textColor="primary"
+						indicatorColor='primary'
+						textColor='primary'
 						onChange={this.handleChange}
 					>
-						<Tab label="Subscription" />
-						<Tab label="History" />
+						<Tab label='Subscription' />
+						<Tab label='History' />
 					</Tabs>
 				</Header>
 				<TabContent>

@@ -15,45 +15,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from "react";
-import { isEqual, isEmpty } from "lodash";
+import * as React from 'react';
+import { isEqual, isEmpty } from 'lodash';
 import {
 	CustomTable,
 	CELL_TYPES,
 	TableButton
-} from "../components/customTable/customTable.component";
-import { Loader } from "../components/loader/loader.component";
-import { LoaderContainer } from "../billing/billing.styles";
-import { Container } from "./history.styles";
+} from '../components/customTable/customTable.component';
+import { Loader } from '../components/loader/loader.component';
+import { LoaderContainer } from '../billing/billing.styles';
+import { Container } from './history.styles';
 
 const INVOICES_TABLE_CELLS = [
 	{
-		name: "Number",
+		name: 'Number',
 		HeadingProps: { root: { flex: 10 } },
 		CellProps: { root: { flex: 10 } }
 	},
 	{
-		name: "Date",
+		name: 'Date',
 		HeadingProps: { root: { flex: 15 } },
 		CellProps: { root: { flex: 15 } }
 	},
 	{
-		name: "Status",
+		name: 'Status',
 		HeadingProps: { root: { flex: 10 } },
 		CellProps: { root: { flex: 10 } }
 	},
 	{
-		name: "Description",
+		name: 'Description',
 		HeadingProps: { root: { flex: 25 } },
 		CellProps: { root: { flex: 25 } }
 	},
 	{
-		name: "Payment",
+		name: 'Payment',
 		HeadingProps: { root: { flex: 10 } },
 		CellProps: { root: { flex: 10 } }
 	},
 	{
-		name: "Amount (£)",
+		name: 'Amount (£)',
 		HeadingProps: { root: { flex: 15 } },
 		CellProps: { root: { flex: 15 } }
 	},
@@ -114,20 +114,20 @@ export class History extends React.PureComponent<IProps, IState> {
 				{ value: invoice.createdAtDate },
 				{
 					value:
-						invoice.type === "refund"
-							? "Completed"
+						invoice.type === 'refund'
+							? 'Completed'
 							: invoice.pending
-								? "Pending"
-								: "Paid"
+								? 'Pending'
+								: 'Paid'
 				},
 				{
 					value:
-						invoice.type === "refund" ? "Refund" : invoice.items[0].description
+						invoice.type === 'refund' ? 'Refund' : invoice.items[0].description
 				},
 				{ value: invoice.gateway },
 				{ value: invoice.nextPaymentAmount.toFixed(1) },
 				{
-					icon: "cloud_download",
+					icon: 'cloud_download',
 					onClick: this.onDownload.bind(
 						null,
 						this.props.teamspace,

@@ -15,25 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from "redux";
-import { createStructuredSelector } from "reselect";
-import { withRouter } from "react-router";
-import { connect } from "../../helpers/migration";
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { withRouter } from 'react-router';
+import { connect } from '../../helpers/migration';
 
-import { Users } from "./users.component";
+import { Users } from './users.component';
 import {
 	UserManagementActions,
 	selectUsersSuggestions,
 	selectUsers
-} from "../../modules/userManagement";
+} from '../../modules/userManagement';
 
 import {
 	TeamspaceActions,
 	selectCollaboratorLimit,
 	selectCurrentTeamspace
-} from "../../modules/teamspace";
+} from '../../modules/teamspace';
 
-import { selectJobs } from "../../modules/jobs";
+import { selectJobs } from '../../modules/jobs';
 
 const mapStateToProps = createStructuredSelector({
 	usersSuggestions: selectUsersSuggestions,

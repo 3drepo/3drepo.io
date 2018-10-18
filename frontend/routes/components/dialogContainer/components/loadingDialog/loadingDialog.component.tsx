@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 
-import DialogContent from "@material-ui/core/DialogContent";
+import DialogContent from '@material-ui/core/DialogContent';
 import { Loader, LoaderContainer } from './loadingDialog.styles';
 
 interface IProps {

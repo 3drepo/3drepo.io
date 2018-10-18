@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from "redux";
-import { createStructuredSelector } from "reselect";
-import { connect } from "../../helpers/migration";
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../helpers/migration';
 
-import { Subscription } from "./subscription.component";
+import { Subscription } from './subscription.component';
 import {
 	TeamspaceActions,
 	selectBillingInfo,
 	selectCurrentTeamspace,
 	selectSpaceInfo
-} from "../../modules/teamspace";
+} from '../../modules/teamspace';
 import {
 	BillingActions,
 	selectLicencesInfo,
 	selectIsPending
-} from "../../modules/billing";
+} from '../../modules/billing';
 
 const mapStateToProps = createStructuredSelector({
 	billingInfo: selectBillingInfo,

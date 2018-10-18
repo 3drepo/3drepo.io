@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from "react";
-import { dispatch } from "../../../helpers/migration";
-import { MuiThemeProvider } from "@material-ui/core/styles";
+import * as React from 'react';
+import { dispatch } from '../../../helpers/migration';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
 
-import { MuiTheme } from "../../../styles";
-import { RemoveUserDialog } from "./components/removeUserDialog/removeUserDialog.component";
-import { ErrorDialog } from "./components/errorDialog/errorDialog.component";
-import { FederationReminderDialog } from "./components/federationReminderDialog/federationReminderDialog.component";
-import { LoadingDialog } from "./components/loadingDialog/loadingDialog.component";
-import { DIALOG_TYPES } from "../../../modules/dialog/dialog.redux";
+import { MuiTheme } from '../../../styles';
+import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
+import { ErrorDialog } from './components/errorDialog/errorDialog.component';
+import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
+import { LoadingDialog } from './components/loadingDialog/loadingDialog.component';
+import { DIALOG_TYPES } from '../../../modules/dialog/dialog.redux';
 
 interface IProps {
 	config: any;
