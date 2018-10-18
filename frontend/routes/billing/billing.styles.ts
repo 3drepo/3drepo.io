@@ -19,19 +19,19 @@ import styled from 'styled-components';
 import { COLOR } from '../../styles';
 
 export const Header = styled.div`
-  background-color: ${COLOR.WHITE};
-  border-bottom: 1px solid ${COLOR.BLACK_6};
+	background-color: ${COLOR.WHITE};
+	border-bottom: 1px solid ${COLOR.BLACK_6};
 `;
 
 export const TabContent = styled.div`
-  background-color: ${COLOR.WHITE};
-  flex: 1;
-  position: relative;
-  height: calc(100% - 100px);
+	background-color: ${COLOR.WHITE};
+	flex: 1;
+	position: relative;
+	height: calc(100% - 100px);
 `;
 
 export const LoaderContainer = styled.div`
-  position: absolute;
+	position: absolute;
 	top: 0;
 	width: 100%;
 	height: 100%;

@@ -51,7 +51,7 @@ export const CheckboxField = (props) => {
 	return (
 		<Checkbox
 			{...props}
-			color='secondary'
+			color="secondary"
 		/>
 	);
 };
@@ -379,7 +379,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const setTooltip = (Component, text) => (
 			<Tooltip
 				title={text}
-				placement='bottom-end'
+				placement="bottom-end"
 			>
 				{Component}
 			</Tooltip>

@@ -112,10 +112,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
 		return {
-			panelKey:
-				nextProps.users.length !== prevState.rows.length
-					? Math.random()
-					: prevState.panelKey
+			panelKey: nextProps.users.length !== prevState.rows.length ? Math.random() : prevState.panelKey
 		};
 	}
 
@@ -211,10 +208,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 		const usersChanged = !isEqual(prevProps.users, this.props.users);
 		if (usersChanged || jobsChanged) {
-			changes.rows = this.getUsersTableRows(
-				this.props.users,
-				changes.jobs || this.state.jobs
-			);
+			changes.rows = this.getUsersTableRows(this.props.users, changes.jobs || this.state.jobs);
 		}
 
 		const limitChanged = !isEqual(prevProps.limit, this.props.limit);

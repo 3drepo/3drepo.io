@@ -20,7 +20,7 @@ import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
 import { isEmpty, isEqual } from 'lodash';
 
-import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
+import { schema } from '../../../services/validation';
 import { formatBytesGB } from '../../../services/formatting/formatCapacity';
 
 import {
@@ -41,20 +41,18 @@ import {
 	StyledForm
 } from '../subscription.styles';
 
-const REQUIRED_FIELD = Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED);
-
 const SubscriptionSchema = Yup.object().shape({
 	firstName: schema.firstName,
 	lastName: schema.lastName,
-	line1: REQUIRED_FIELD,
-	city: REQUIRED_FIELD,
-	postalCode: REQUIRED_FIELD,
-	licences: REQUIRED_FIELD
+	line1: schema.required,
+	city: schema.required,
+	postalCode: schema.required,
+	licences: schema.required
 });
 
 interface IProps {
 	billingInfo: any;
-	countries: any;
+	countries: any[];
 	spaceInfo: any;
 	licencesInfo: any;
 	teamspace: any;
@@ -109,6 +107,9 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 			payment: licences * this.state.pricePerLicense
 		}));
 
+		console.log('licences', licences);
+		console.log(' this.state.pricePerLicense', this.state.pricePerLicense);
+
 		onChange(event, ...params);
 	}
 
@@ -117,8 +118,9 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 			spaceInfo,
 			licencesInfo: { numLicences, pricePerLicense }
 		} = this.props;
+		const payment = numLicences * pricePerLicense;
 
-		this.setState({ spaceInfo, numLicences, pricePerLicense });
+		this.setState({ spaceInfo, numLicences, pricePerLicense, payment });
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -155,38 +157,12 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {
-			countries,
-			billingInfo: {
-				firstName,
-				lastName,
-				vat,
-				city,
-				postalCode,
-				company,
-				line1,
-				line2,
-				countryCode
-			}
-		} = this.props;
-		const {
-			spaceInfo: { spaceUsed, spaceLimit },
-			numLicences
-		} = this.state;
+		const { countries, billingInfo } = this.props;
+		const { spaceInfo: { spaceUsed, spaceLimit }, numLicences } = this.state;
 
 		return (
 			<Formik
-				initialValues={{
-					firstName,
-					lastName,
-					vat,
-					city,
-					company,
-					line1,
-					line2,
-					postalCode,
-					countryCode
-				}}
+				initialValues={billingInfo}
 				onSubmit={this.handleConfirmSubsription}
 				validationSchema={SubscriptionSchema}
 			>
@@ -389,8 +365,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 							</FormInfoContainer>
 							<ConfirmContainer>
 								<PayPalLogo src='/images/paypal.png' />
-								<Field
-									render={({ form }) => (
+								<Field render={({ form }) => (
 										<StyledButton
 											color='secondary'
 											variant='raised'

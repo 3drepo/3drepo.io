@@ -106,7 +106,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									{ ...field }
 									error={Boolean(form.touched.newPassword && form.errors.newPassword)}
 									helperText={form.touched.newPassword && (form.errors.newPassword || '')}
-									label={`New passwordOf${this.state.newPasswordStrengthMessage}`}
+									label={`New password${this.state.newPasswordStrengthMessage}`}
 									margin="normal"
 									required
 									type="password"

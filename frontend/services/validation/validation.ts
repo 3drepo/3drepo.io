@@ -52,7 +52,10 @@ export const schema = {
 		.required(VALIDATIONS_MESSAGES.REQUIRED)
 		.ensure()
 		.min(8, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
-		.max(128, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.max(128, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+
+	required: Yup.string()
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
 };
 
 export const getPasswordStrengthMessage = (score: number) => {

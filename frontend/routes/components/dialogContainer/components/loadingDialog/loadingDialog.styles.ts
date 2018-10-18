@@ -24,4 +24,4 @@ export const LoaderContainer = styled.div`
   padding: 2rem 0;
 `;
 
-export const Loader = styled(CircularProgress)``;
+export const Loader = CircularProgress;

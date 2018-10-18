@@ -17,52 +17,28 @@
 
 import * as React from 'react';
 import { isEqual, isEmpty } from 'lodash';
-import {
-	CustomTable,
-	CELL_TYPES,
-	TableButton
-} from '../components/customTable/customTable.component';
+import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { Loader } from '../components/loader/loader.component';
 import { LoaderContainer } from '../billing/billing.styles';
 import { Container } from './history.styles';
 
+const INVOICE_REFUND_STATUS = 'Refund';
+const INVOICE_COMPLETED_STATUS = 'Completed';
+const INVOICE_PAID_STATUS = 'Paid';
+const INVOICE_PENDING_STATUS = 'Pending';
+
+const CELL_WIDTH_10 = { HeadingProps: { root: { flex: 10 } }, CellProps: { root: { flex: 10 } } };
+const CELL_WIDTH_15 = { HeadingProps: { root: { flex: 15 } }, CellProps: { root: { flex: 15 } } };
+const CELL_WIDTH_25 = { HeadingProps: { root: { flex: 25 } }, CellProps: { root: { flex: 25 } } };
+
 const INVOICES_TABLE_CELLS = [
-	{
-		name: 'Number',
-		HeadingProps: { root: { flex: 10 } },
-		CellProps: { root: { flex: 10 } }
-	},
-	{
-		name: 'Date',
-		HeadingProps: { root: { flex: 15 } },
-		CellProps: { root: { flex: 15 } }
-	},
-	{
-		name: 'Status',
-		HeadingProps: { root: { flex: 10 } },
-		CellProps: { root: { flex: 10 } }
-	},
-	{
-		name: 'Description',
-		HeadingProps: { root: { flex: 25 } },
-		CellProps: { root: { flex: 25 } }
-	},
-	{
-		name: 'Payment',
-		HeadingProps: { root: { flex: 10 } },
-		CellProps: { root: { flex: 10 } }
-	},
-	{
-		name: 'Amount (£)',
-		HeadingProps: { root: { flex: 15 } },
-		CellProps: { root: { flex: 15 } }
-	},
-	{
-		HeadingProps: { root: { flex: 15 } },
-		CellProps: { root: { flex: 15 } },
-		type: CELL_TYPES.ICON_BUTTON,
-		CellComponent: TableButton
-	}
+	{ name: 'Number', ...CELL_WIDTH_10 },
+	{ name: 'Date', ...CELL_WIDTH_15 },
+	{ name: 'Status', ...CELL_WIDTH_10 },
+	{ name: 'Description', ...CELL_WIDTH_25 },
+	{ name: 'Payment', ...CELL_WIDTH_10 },
+	{ name: 'Amount (£)', ...CELL_WIDTH_15 },
+	{ type: CELL_TYPES.ICON_BUTTON, CellComponent: TableButton, ...CELL_WIDTH_15 }
 ];
 
 interface IProps {
@@ -110,31 +86,19 @@ export class History extends React.PureComponent<IProps, IState> {
 
 	public getInvoicesTableRows = (invoices = []): any[] => {
 		return invoices.map((invoice) => {
+			const isInvoiceRefund = invoice.type === 'refund';
+			const isInvoicePending = invoice.pending;
+
 			const data = [
 				{ value: invoice.invoiceNo },
 				{ value: invoice.createdAtDate },
-				{
-					value:
-						invoice.type === 'refund'
-							? 'Completed'
-							: invoice.pending
-								? 'Pending'
-								: 'Paid'
-				},
-				{
-					value:
-						invoice.type === 'refund' ? 'Refund' : invoice.items[0].description
-				},
+				{ value: isInvoiceRefund ?
+					INVOICE_COMPLETED_STATUS : isInvoicePending ? INVOICE_PENDING_STATUS : INVOICE_PAID_STATUS },
+				{ value: isInvoiceRefund ?
+					INVOICE_REFUND_STATUS : invoice.items[0].description },
 				{ value: invoice.gateway },
 				{ value: invoice.nextPaymentAmount.toFixed(1) },
-				{
-					icon: 'cloud_download',
-					onClick: this.onDownload.bind(
-						null,
-						this.props.teamspace,
-						invoice.invoiceNo
-					)
-				}
+				{ icon: 'cloud_download', onClick: this.onDownload.bind( null, this.props.teamspace, invoice.invoiceNo) }
 			];
 
 			return { ...invoice, data };

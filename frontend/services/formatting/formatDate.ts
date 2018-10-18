@@ -25,8 +25,7 @@ export const prettyDate = (input, showFullDateTime) => {
 	const today: Date = new Date();
 	const options: any = {};
 
-	if (
-		showFullDateTime ||
+	if (showFullDateTime ||
 		(today.getFullYear() === date.getFullYear() &&
 			today.getMonth() === date.getMonth() &&
 			today.getDate() === date.getDate())

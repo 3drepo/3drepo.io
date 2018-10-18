@@ -32,7 +32,7 @@ export function* fetchPlans() {
 	try {
 		const { data: plans } = yield API.getPlans();
 
-		return yield put(BillingActions.fetchPlansSuccess({ ...plans }));
+		return yield put(BillingActions.fetchPlansSuccess(plans));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'plans', e.response));
 	}
@@ -41,9 +41,8 @@ export function* fetchPlans() {
 export function* fetchSubscriptions({ teamspace }) {
 	try {
 		const { data: subscriptions } = yield API.getSubscriptions(teamspace);
-
 		return yield put(
-			BillingActions.fetchSubscriptionsSuccess({ ...subscriptions })
+			BillingActions.fetchSubscriptionsSuccess(subscriptions)
 		);
 	} catch (e) {
 		yield put(
@@ -107,11 +106,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 			}
 		} else {
 			yield put(
-				DialogActions.showErrorDialog(
-					'post',
-					'subscription',
-					dialogMessages.PAYPAL_ERROR
-				)
+				DialogActions.showErrorDialog('post', 'subscription', dialogMessages.PAYPAL_ERROR)
 			);
 		}
 	} catch (e) {

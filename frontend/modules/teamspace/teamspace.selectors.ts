@@ -58,7 +58,5 @@ export const selectCollaboratorLimit = createSelector(
 
 export const selectSpaceInfo = createSelector(
 	selectTeamspaceDomain,
-	(state) => {
-		return { spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed };
-	}
+	(state) => ({ spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed })
 );
