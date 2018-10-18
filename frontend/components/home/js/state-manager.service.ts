@@ -351,19 +351,19 @@ export class StateManagerService {
 	}
 
 	public updateState(dontUpdateLocation) {
-		const newStateName = this.genStateName();
+		// const newStateName = this.genStateName();
 
-		if (Object.keys(this.changedState).length) {
-			this.changedState = {};
-		}
+		// if (Object.keys(this.changedState).length) {
+		// 	this.changedState = {};
+		// }
 
-		const updateLocation = !dontUpdateLocation ? true : false; // In case of null
-		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
+		// const updateLocation = !dontUpdateLocation ? true : false; // In case of null
+		// this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
 
-		// This timeout is needed or changing revision doesn't work... for some reason.
-		this.$timeout(() => {
-			this.state.changing = false;
-		});
+		// // This timeout is needed or changing revision doesn't work... for some reason.
+		// this.$timeout(() => {
+		// 	this.state.changing = false;
+		// });
 
 	}
 

@@ -16,12 +16,11 @@
  */
 
 function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
-
 	$locationProvider.html5Mode(true);
 
-	$stateProvider.state("home", {
-		name: "home",
-		url: "/?page&teamspace&tab&project&view&modelId",
+	$stateProvider.state("app", {
+		url: "",
+		template: '<home flex layout="column"></home>',
 		resolve: {
 			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
 				StateManager.state.authInitialized = false;
@@ -42,9 +41,23 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
+	$stateProvider.state("app.viewer", {
+		url: "/viewer/:modelId"
+	});
+
+	$stateProvider.state("app.dashboard", {
+		url: "/dashboard",
+		template: "<dashboard />",
+		resolve: {
+			test: () => {
+				console.log('dashboard')
+			}
+		}
+	});
+
 	$httpProvider.interceptors.push("AuthInterceptor");
 
-	// Convert blah_test to blahTest
+/* 	// Convert blah_test to blahTest
 	const camelCase = (name) => {
 		return name.replace(/-([a-z])/g, (g) => {
 			return g[1].toUpperCase();
@@ -89,6 +102,8 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	};
 
 	// TODO: We need to find a way to make ClientConfig come from the service
+
+	debugger
 	const stateStack       = [window.ClientConfig.structure];
 	const stateNameStack   = ["home"];
 
@@ -124,7 +139,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		stateStack.splice(0, 1);
 		stateNameStack.splice(0, 1);
 	}
-
+ */
 	$urlRouterProvider.otherwise("");
 }
 

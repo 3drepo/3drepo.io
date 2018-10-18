@@ -50,7 +50,7 @@ function StateManagerRun(
 		return new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
 	};
 
-	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
+/* 	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
 		StateManager.state.changing = true;
 
 		for (let i = 0; i < StateManager.functions.length; i++) {
@@ -67,9 +67,9 @@ function StateManagerRun(
 		};
 
 		StateManager.startStateChange(stateChangeObject);
-	});
+	}); */
 
-	$rootScope.$on("$stateChangeSuccess", (event, toState, toParams, fromState, fromParams) => {
+/* 	$rootScope.$on("$stateChangeSuccess", (event, toState, toParams, fromState, fromParams) => {
 
 		const stateChangeObject = {
 			toState,
@@ -78,19 +78,19 @@ function StateManagerRun(
 			fromParams
 		};
 		StateManager.handleStateChange(stateChangeObject);
-	});
+	}); */
 
 	$rootScope.$on("$locationChangeSuccess", () => {
 
 		AnalyticService.sendPageView(location);
 
-		const queryParams = $location.search();
+/* 		const queryParams = $location.search();
 
 		if (Object.keys(queryParams).length === 0) {
 			StateManager.clearQuery();
 		} else {
 			StateManager.setQuery(queryParams);
-		}
+		} */
 
 	});
 
