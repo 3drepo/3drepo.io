@@ -20,7 +20,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state("app", {
 		url: "",
-		template: '<home flex layout="column"></home>',
+		template: "<home flex layout='column'></home>",
 		resolve: {
 			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
 				StateManager.state.authInitialized = false;
@@ -42,66 +42,28 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.viewer", {
-		url: "/viewer/:modelId"
+		url: "/viewer/:modelId",
+		resolve: {
+			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
+				StateManager.setState($stateParams);
+			}]
+		}
 	});
 
 	$stateProvider.state("app.dashboard", {
-		url: "/dashboard",
-		template: "<dashboard />",
+		url: "/dashboard/*path",
+		template: "<dashboard flex/>",
 		resolve: {
-			test: () => {
-				console.log('dashboard')
-			}
+			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
+				StateManager.setState($stateParams);
+			}]
 		}
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
+	$urlRouterProvider.otherwise("/dashboard");
 
-/* 	// Convert blah_test to blahTest
-	const camelCase = (name) => {
-		return name.replace(/-([a-z])/g, (g) => {
-			return g[1].toUpperCase();
-		});
-	};
-
-	const handleFunctions = (childFunction, childFunctionKebabCase, childFunctionName) => {
-		$stateProvider.state(childFunctionName, {
-			name: childFunction,
-			url: childFunction,
-			resolve: {
-				init: [
-					"StateManager",
-					"$location",
-					"$stateParams",
-					(StateManager, $location, $stateParams) => {
-					$stateParams[childFunctionKebabCase] = true;
-
-					StateManager.setState($stateParams);
-				}]
-			}
-		});
-	};
-
-	const handleChildState = (childState, childStateName, parentState, parentStateName, i) => {
-		$stateProvider.state(childStateName, {
-			name: parentState.children[i].plugin,
-			params: childState.params,
-			url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
-			reloadOnSearch : false,
-			resolve: {
-				init: [
-					"StateManager",
-					"$location",
-					"$stateParams",
-					(StateManager, $location, $stateParams) => {
-						StateManager.setState($stateParams);
-					}
-				]
-			}
-		});
-	};
-
-	// TODO: We need to find a way to make ClientConfig come from the service
+/* 
 
 	debugger
 	const stateStack       = [window.ClientConfig.structure];
@@ -140,7 +102,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		stateNameStack.splice(0, 1);
 	}
  */
-	$urlRouterProvider.otherwise("");
 }
 
 export const StateManagerConfigModule = angular

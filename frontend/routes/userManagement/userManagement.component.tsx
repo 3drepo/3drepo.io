@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch, Link } from 'react-router-dom';
 import * as queryString from 'query-string';
 import { isEqual, isEmpty, isUndefined } from 'lodash';
 import Tabs from '@material-ui/core/Tabs';
@@ -45,9 +45,27 @@ export const TABS_TYPES = {
 	JOBS: 2
 };
 
-const ADMIN_TABS = [TABS_TYPES.USERS, TABS_TYPES.JOBS] as any;
+const TABS_ROUTES = [{
+	label: 'Users',
+	path: '/users',
+	isAdminOnly: true,
+	component: Users
+},
+{
+	label: 'Projects',
+	path: '/projects',
+	component: Projects,
+	isAdminOnly: false
+},
+{
+	label: 'Jobs',
+	path: '/jobs',
+	isAdminOnly: true,
+	component: Jobs
+}];
 
 interface IProps {
+	match: any;
 	location: any;
 	history: any;
 	defaultTeamspace: string;
@@ -70,7 +88,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const initialTab = isUndefined(nextProps.isTeamspaceAdmin) ? TABS_TYPES.USERS : TABS_TYPES.PROJECTS;
 		return {
 			activeTab: nextProps.isTeamspaceAdmin ? activeTab : initialTab,
-			selectedTeamspace: queryParams.teamspace || prevState.selectedTeamspace
+			selectedTeamspace: nextProps.match.params.teamspace || prevState.selectedTeamspace
 		};
 	}
 
@@ -89,20 +107,22 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleChange = (event, activeTab) => {
-		this.updateUrlParams({tab: activeTab});
 		this.setState({activeTab});
 	}
 
 	public onTeamspaceChange = (event, teamspace) => {
-		this.updateUrlParams({teamspace});
-		if (this.props.onTeamspaceChange) {
-			this.props.onTeamspaceChange(teamspace);
+		const { match, location, onTeamspaceChange } = this.props;
+		const newRoute = location.pathname.replace(match.params.teamspace, teamspace);
+
+		this.props.history.push(newRoute);
+		if (onTeamspaceChange) {
+			onTeamspaceChange(teamspace);
 		}
 	}
 
 	public componentDidMount() {
-		const {teamspaces, defaultTeamspace, location} = this.props;
-		const selectedTeamspace = queryString.parse(location.search).teamspace;
+		const {teamspaces, defaultTeamspace, match} = this.props;
+		const selectedTeamspace = match.params.teamspace;
 		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		} as any;
@@ -114,7 +134,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		this.onTeamspaceChange(null, teamspace);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
 		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
@@ -128,7 +148,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderTabContent = () => {
-		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
+		const {isLoadingTeamspace, isTeamspaceAdmin, match} = this.props;
 		const {activeTab, selectedTeamspace} = this.state;
 
 		if (!selectedTeamspace) {
@@ -144,24 +164,26 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			);
 		}
 
-		if (ADMIN_TABS.includes(activeTab) && !isTeamspaceAdmin) {
+/* 		if (ADMIN_TABS.includes(activeTab) && !isTeamspaceAdmin) {
 			return <TextOverlay content="Not allowed to access this page" />;
-		}
+		} */
 
 		return (
-			<>
-				{ activeTab === TABS_TYPES.USERS && <Users /> }
-				{ activeTab === TABS_TYPES.PROJECTS && <Projects /> }
-				{ activeTab === TABS_TYPES.JOBS && <Jobs /> }
-			</>
+			<Switch>
+				{TABS_ROUTES.map(({path, component: Component}, index) => (
+					<Route key={index} exact path={`${match.path}${path}`} component={Component} />
+				))}
+			</Switch>
 		);
 	}
 
 	public render() {
-		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
-		const {activeTab, selectedTeamspace, teamspacesItems} = this.state;
+		const {match, location, isLoadingTeamspace, isTeamspaceAdmin} = this.props;
+		const {teamspacesItems} = this.state;
 
+		const selectedTeamspace = match.params.teamspace;
 		const paperProps = { height: '100%' };
+		const isTabDisabled = Boolean(!selectedTeamspace || isLoadingTeamspace);
 
 		return (
 			<Panel title="User management" paperProps={paperProps}>
@@ -180,19 +202,33 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 						</FormControl>
 					</TeamspaceSelectContainer>
 					<Tabs
-						value={activeTab}
+						value={location.pathname}
 						indicatorColor="primary"
 						textColor="primary"
 						onChange={this.handleChange}
 					>
-						<Tab label="Users" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
-						<Tab label="Projects" disabled={!selectedTeamspace || isLoadingTeamspace} />
-						<Tab label="Jobs" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
+						{
+							TABS_ROUTES.map(({ label, path, isAdminOnly }, index) => {
+								const props = {
+									label,
+									to: `${match.url}${path}`,
+									disabled: isTabDisabled || (isAdminOnly && !isTeamspaceAdmin)
+								};
+
+								return (
+									<Tab
+										{...props}
+										key={index}
+										value={props.to}
+										component={Link}
+									/>
+								);
+							})
+						}
 					</Tabs>
 				</Header>
 				<TabContent>
-					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-					<Route exact path="/:teamspace" render={this.renderTabContent} />
+					{this.renderTabContent()}
 				</TabContent>
 			</Panel>
 		);

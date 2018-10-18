@@ -16,5 +16,23 @@
  */
 
 import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
 
-export const Container = styled.div``;
+export const Container = styled(Grid)`
+  && {
+    padding: 30px 50px 100px 50px;
+    min-height: 100%;
+  }
+`;
+
+export const Sidebar = styled(Grid)`
+  && {
+    margin-right: 50px;
+  }
+`;
+
+export const Content = styled(Grid)`
+  && {
+    flex: 1;
+  }
+`;

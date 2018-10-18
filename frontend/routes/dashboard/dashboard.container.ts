@@ -21,9 +21,15 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { Dashboard } from './dashboard.component';
+import { selectCurrentUser, selectIsPending, TeamspaceActions } from '../../modules/teamspace';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	currentUser: selectCurrentUser,
+	isPending: selectIsPending
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchUser: TeamspaceActions.fetchUser
+}, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Dashboard)));

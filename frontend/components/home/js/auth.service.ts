@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { dispatch } from "../../../helpers/migration";
+import { TeamspaceActions } from "../../../modules/teamspace";
 
 export class AuthService {
 
@@ -108,7 +109,7 @@ export class AuthService {
 		return this.loggedIn;
 	}
 
-	public  initAutoLogout() {
+	public initAutoLogout() {
 		// Check for mismatch
 		const checkLoginMismatch = this.ClientConfigService.login_check_interval || 4; // Seconds
 
@@ -119,7 +120,6 @@ export class AuthService {
 	}
 
 	public loginSuccess(response: any) {
-
 		this.loggedIn = true;
 		this.username = response.data.username;
 
@@ -132,10 +132,12 @@ export class AuthService {
 			initialiser: response.data.initialiser,
 			flags: response.data.flags
 		});
-
 		this.AnalyticService.setUserId(this.username);
-
 		this.authDefer.resolve(this.loggedIn);
+
+		dispatch(TeamspaceActions.fetchUserSuccess({
+			username: response.data.username
+		}));
 	}
 
 	public loginFailure(response) {
