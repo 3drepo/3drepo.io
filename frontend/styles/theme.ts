@@ -106,7 +106,7 @@ export const MuiTheme = createMuiTheme({
 			root: {
 				fontSize: '14px',
 				color: theme.colors.BLACK_60
-			},
+			}
 		}
 	}
 });

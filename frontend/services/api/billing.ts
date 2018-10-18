@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import api from "./";
 
 /**
  * Get plans
  */
 export const getPlans = () => {
-  return api.get('plans');
+	return api.get("plans");
 };
 
 /**
@@ -29,7 +29,7 @@ export const getPlans = () => {
  * @param teamspace
  */
 export const getSubscriptions = (teamspace) => {
-  return api.get(`${teamspace}/subscriptions`);
+	return api.get(`${teamspace}/subscriptions`);
 };
 
 /**
@@ -37,7 +37,7 @@ export const getSubscriptions = (teamspace) => {
  * @param teamspace
  */
 export const getInvoices = (teamspace) => {
-  return api.get(`${teamspace}/invoices`);
+	return api.get(`${teamspace}/invoices`);
 };
 
 /**
@@ -45,7 +45,7 @@ export const getInvoices = (teamspace) => {
  * @param subscriptionData
  */
 export const changeSubscription = (teamspace, subscriptionData) => {
-  return api.post(`${teamspace}/subscriptions`, subscriptionData);
+	return api.post(`${teamspace}/subscriptions`, subscriptionData);
 };
 
 /**
@@ -53,5 +53,5 @@ export const changeSubscription = (teamspace, subscriptionData) => {
  * @param subscriptionData
  */
 export const getInvoiceDocument = (teamspace, billingId) => {
-  return api.get(`subscriptionTest/invoices/${billingId}.pdf`);
+	return api.get(`${teamspace}/invoices/${billingId}.pdf`);
 };

@@ -15,42 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router';
-import { connect } from '../../helpers/migration';
+import { bindActionCreators } from "redux";
+import { createStructuredSelector } from "reselect";
+import { withRouter } from "react-router";
+import { connect } from "../../helpers/migration";
 
-import { Users } from './users.component';
+import { Users } from "./users.component";
 import {
 	UserManagementActions,
 	selectUsersSuggestions,
-	selectUsers,
-} from '../../modules/userManagement';
+	selectUsers
+} from "../../modules/userManagement";
 
 import {
-  TeamspaceActions,
+	TeamspaceActions,
 	selectCollaboratorLimit,
-  selectCurrentTeamspace
-} from '../../modules/teamspace';
+	selectCurrentTeamspace
+} from "../../modules/teamspace";
 
-import { selectJobs } from '../../modules/jobs';
+import { selectJobs } from "../../modules/jobs";
 
 const mapStateToProps = createStructuredSelector({
-  usersSuggestions: selectUsersSuggestions,
-  users: selectUsers,
-  jobs: selectJobs,
-  limit: selectCollaboratorLimit,
-  teamspace: selectCurrentTeamspace
+	usersSuggestions: selectUsersSuggestions,
+	users: selectUsers,
+	jobs: selectJobs,
+	limit: selectCollaboratorLimit,
+	teamspace: selectCurrentTeamspace
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	addUser: UserManagementActions.addUser,
-	removeUser: UserManagementActions.removeUser,
-	updateJob: UserManagementActions.updateJob,
-	updatePermissions: UserManagementActions.updatePermissions,
-	onUsersSearch: UserManagementActions.getUsersSuggestions,
-	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
-	fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo
-}, dispatch);
+export const mapDispatchToProps = (dispatch) =>
+	bindActionCreators(
+		{
+			addUser: UserManagementActions.addUser,
+			removeUser: UserManagementActions.removeUser,
+			updateJob: UserManagementActions.updateJob,
+			updatePermissions: UserManagementActions.updatePermissions,
+			onUsersSearch: UserManagementActions.getUsersSuggestions,
+			clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
+			fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo
+		},
+		dispatch
+	);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Users));
+export default withRouter(
+	connect(
+		mapStateToProps,
+		mapDispatchToProps
+	)(Users)
+);

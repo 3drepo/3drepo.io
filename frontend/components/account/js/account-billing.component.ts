@@ -252,13 +252,11 @@ class AccountBillingController implements ng.IController {
 			.then((response) => {
 				if (response.status === 200) {
 					if (!licenceCountChanged) {
-						this.payPalInfo = "Billing information updated."; //snackbar
+						this.payPalInfo = "Billing information updated.";
 						this.$timeout(() => {
 							this.DialogService.closeDialog();
 						}, 2000);
 					} else {
-						console.log("response.data.url", response.data.url);
-						debugger;
 						location.href = response.data.url;
 					}
 				} else {

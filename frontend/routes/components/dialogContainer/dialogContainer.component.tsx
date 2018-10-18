@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { dispatch } from '../../../helpers/migration';
-import { invoke } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import * as React from "react";
+import { dispatch } from "../../../helpers/migration";
+import { MuiThemeProvider } from "@material-ui/core/styles";
 
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
 
-import { theme, MuiTheme } from '../../../styles';
-import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
-import { ErrorDialog } from './components/errorDialog/errorDialog.component';
-import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
+import { MuiTheme } from "../../../styles";
+import { RemoveUserDialog } from "./components/removeUserDialog/removeUserDialog.component";
+import { ErrorDialog } from "./components/errorDialog/errorDialog.component";
+import { FederationReminderDialog } from "./components/federationReminderDialog/federationReminderDialog.component";
 import { LoadingDialog } from "./components/loadingDialog/loadingDialog.component";
-import { DIALOG_TYPES } from '../../../modules/dialog/dialog.redux';
+import { DIALOG_TYPES } from "../../../modules/dialog/dialog.redux";
 
 interface IProps {
 	config: any;
@@ -42,10 +38,10 @@ interface IProps {
 }
 
 const DIALOG_TEMPLATES = {
-  [DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
-  [DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
-  [DIALOG_TYPES.ERROR]: ErrorDialog,
-  [DIALOG_TYPES.LOADING]: LoadingDialog
+	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
+	[DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
+	[DIALOG_TYPES.ERROR]: ErrorDialog,
+	[DIALOG_TYPES.LOADING]: LoadingDialog
 };
 
 export class DialogContainer extends React.PureComponent<IProps, any> {
@@ -77,26 +73,21 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
-				<Dialog
-					open={this.props.isOpen}
-					onClose={this.handleClose}>
+				<Dialog open={this.props.isOpen} onClose={this.handleClose}>
 					{title && <DialogTitle disableTypography>{title}</DialogTitle>}
-					{
-						content && !DialogTemplate && (
+					{content &&
+						!DialogTemplate && (
 							<DialogContent>
-								<div dangerouslySetInnerHTML={{ __html: content }}></div>
+								<div dangerouslySetInnerHTML={{ __html: content }} />
 							</DialogContent>
-						)
-					}
-					{
-						DialogTemplate && (
-							<DialogTemplate
-								{...data}
-								handleResolve={this.handleResolve}
-								handleClose={this.handleClose}
-							/>
-						)
-					}
+						)}
+					{DialogTemplate && (
+						<DialogTemplate
+							{...data}
+							handleResolve={this.handleResolve}
+							handleClose={this.handleClose}
+						/>
+					)}
 				</Dialog>
 			</MuiThemeProvider>
 		);

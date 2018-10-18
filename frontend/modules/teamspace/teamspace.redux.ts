@@ -42,7 +42,7 @@ export const INITIAL_STATE = {
 	},
 	isPending: true,
 	isAvatarPending: true,
-	collaboratorLimit: null,
+	collaboratorLimit: null
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {

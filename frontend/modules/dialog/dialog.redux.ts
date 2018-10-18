@@ -22,7 +22,7 @@ export const DIALOG_TYPES = {
 	ERROR: 1,
 	CONFIRM_USER_REMOVE: 2,
 	FEDERATION_REMINDER_DIALOG: 3,
-	LOADING: 4,
+	LOADING: 4
 };
 
 interface IDialogConfig {

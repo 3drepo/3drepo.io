@@ -15,40 +15,58 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { pick, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import {
+	pick,
+	values,
+	isNumber,
+	cond,
+	matches,
+	isEqual,
+	isEmpty
+} from "lodash";
 
-import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
-import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
-import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
-import { NewUserForm } from '../components/newUserForm/newUserForm.component';
-import { JobItem } from '../components/jobItem/jobItem.component';
-import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
-import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
-import { UserItem } from '../components/userItem/userItem.component';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { TEAMSPACE_PERMISSIONS } from "../../constants/teamspace-permissions";
+import {
+	CustomTable,
+	CELL_TYPES,
+	TableButton
+} from "../components/customTable/customTable.component";
+import { FloatingActionPanel } from "../components/floatingActionPanel/floatingActionPanel.component";
+import { NewUserForm } from "../components/newUserForm/newUserForm.component";
+import { JobItem } from "../components/jobItem/jobItem.component";
+import { UserManagementTab } from "../components/userManagementTab/userManagementTab.component";
+import { CellUserSearch } from "../components/customTable/components/cellUserSearch/cellUserSearch.component";
+import { UserItem } from "../components/userItem/userItem.component";
+import { CellSelect } from "../components/customTable/components/cellSelect/cellSelect.component";
 
-const USERS_TABLE_CELLS = [{
-	name: 'User',
-	type: CELL_TYPES.USER,
-	HeadingComponent: CellUserSearch,
-	CellComponent: UserItem,
-	searchBy: ['firstName', 'lastName', 'user', 'company']
-}, {
-	name: 'Job',
-	CellComponent: CellSelect,
-	type: CELL_TYPES.JOB
-}, {
-	name: 'Permissions',
-	CellComponent: CellSelect,
-	type: CELL_TYPES.PERMISSIONS
-}, {
-	type: CELL_TYPES.EMPTY
-}, {
-	type: CELL_TYPES.ICON_BUTTON,
-	CellComponent: TableButton
-}];
+const USERS_TABLE_CELLS = [
+	{
+		name: "User",
+		type: CELL_TYPES.USER,
+		HeadingComponent: CellUserSearch,
+		CellComponent: UserItem,
+		searchBy: ["firstName", "lastName", "user", "company"]
+	},
+	{
+		name: "Job",
+		CellComponent: CellSelect,
+		type: CELL_TYPES.JOB
+	},
+	{
+		name: "Permissions",
+		CellComponent: CellSelect,
+		type: CELL_TYPES.PERMISSIONS
+	},
+	{
+		type: CELL_TYPES.EMPTY
+	},
+	{
+		type: CELL_TYPES.ICON_BUTTON,
+		CellComponent: TableButton
+	}
+];
 
 const getPreparedJobs = (jobs) => {
 	return jobs.map(({ _id: name, color }) => ({ name, color, value: name }));
@@ -79,8 +97,12 @@ interface IState {
 	limit: any;
 }
 
-const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
-	.map(({label: name, isAdmin: value }: {label: string, isAdmin: boolean}) => ({ name, value }));
+const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
+	({ label: name, isAdmin: value }: { label: string; isAdmin: boolean }) => ({
+		name,
+		value
+	})
+);
 
 export class Users extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
@@ -90,14 +112,17 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
 		return {
-			panelKey: nextProps.users.length !== prevState.rows.length ? Math.random() : prevState.panelKey
+			panelKey:
+				nextProps.users.length !== prevState.rows.length
+					? Math.random()
+					: prevState.panelKey
 		};
 	}
 
 	public state = {
 		rows: [],
 		jobs: [],
-		licencesLabel: '',
+		licencesLabel: "",
 		containerElement: null,
 		panelKey: Math.random(),
 		limit: 0
@@ -112,16 +137,17 @@ export class Users extends React.PureComponent<IProps, IState> {
 		this.props.updatePermissions(permissionData);
 	}
 
-	public handleChange = (user, field) => (value) => cond([
-		[matches('job'), () => this.props.updateJob(user.user, value)],
-		[matches('permissions'), () => this.onPermissionsChange(user.user, value)]
-	])(field)
+	public handleChange = (user, field) => (value) =>
+		cond([
+			[matches("job"), () => this.props.updateJob(user.user, value)],
+			[matches("permissions"), () => this.onPermissionsChange(user.user, value)]
+		])(field)
 
 	public onRemove = (username) => {
 		this.props.removeUser(username);
 	}
 
-	public onSave = ({name, job, isAdmin = false}) => {
+	public onSave = ({ name, job, isAdmin = false }) => {
 		const user = {
 			job,
 			user: name,
@@ -134,24 +160,24 @@ export class Users extends React.PureComponent<IProps, IState> {
 	public getUsersTableRows = (users = [], jobs = []): any[] => {
 		return users.map((user) => {
 			const data = [
-				pick(user, ['firstName', 'lastName', 'company', 'user']),
+				pick(user, ["firstName", "lastName", "company", "user"]),
 				{
 					value: user.job,
 					items: jobs,
 					itemTemplate: JobItem,
-					placeholder: 'Unassigned',
-					onChange: this.handleChange(user, 'job')
+					placeholder: "Unassigned",
+					onChange: this.handleChange(user, "job")
 				},
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
-					onChange: this.handleChange(user, 'permissions'),
+					onChange: this.handleChange(user, "permissions"),
 					readOnly: user.isCurrentUser || user.isOwner,
 					disabled: user.isCurrentUser || user.isOwner
 				},
 				{},
 				{
-					icon: 'remove_circle',
+					icon: "remove_circle",
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
 				}
@@ -161,7 +187,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement)
+			.parentNode;
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 		this.props.fetchQuotaInfo(this.props.teamspace);
 
@@ -184,7 +211,10 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 		const usersChanged = !isEqual(prevProps.users, this.props.users);
 		if (usersChanged || jobsChanged) {
-			changes.rows = this.getUsersTableRows(this.props.users, changes.jobs || this.state.jobs);
+			changes.rows = this.getUsersTableRows(
+				this.props.users,
+				changes.jobs || this.state.jobs
+			);
 		}
 
 		const limitChanged = !isEqual(prevProps.limit, this.props.limit);
@@ -211,11 +241,11 @@ export class Users extends React.PureComponent<IProps, IState> {
 			<FloatingActionPanel
 				buttonProps={{
 					disabled: this.props.limit <= this.props.users.length,
-					label: 'All licences assigned'
+					label: "All licences assigned"
 				}}
 				container={container}
 				key={this.state.panelKey}
-				render={({closePanel}) => {
+				render={({ closePanel }) => {
 					return <NewUserForm {...formProps} onCancel={closePanel} />;
 				}}
 			/>
@@ -227,10 +257,10 @@ export class Users extends React.PureComponent<IProps, IState> {
 	 */
 	public getFooterLabel = (users, limit) => {
 		if (!users) {
-			return '';
+			return "";
 		}
 
-		const limitValue = isNumber(limit) ? limit : 'unlimited';
+		const limitValue = isNumber(limit) ? limit : "unlimited";
 		return `Assigned licences: ${users.length} out of ${limitValue}`;
 	}
 
@@ -238,11 +268,13 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const { rows, containerElement, limit } = this.state;
 		const { users } = this.props;
 
-		return <>
-        <UserManagementTab footerLabel={this.getFooterLabel(users, limit)}>
-          <CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
-        </UserManagementTab>
-        {containerElement && this.renderNewUserForm(containerElement)}
-      </>;
+		return (
+			<>
+				<UserManagementTab footerLabel={this.getFooterLabel(users, limit)}>
+					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
+				</UserManagementTab>
+				{containerElement && this.renderNewUserForm(containerElement)}
+			</>
+		);
 	}
 }

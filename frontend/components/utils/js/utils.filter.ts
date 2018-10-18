@@ -18,7 +18,6 @@
 import { formatBytes, formatBytesGB } from '../../../services/formatting/formatCapacity';
 import { invoiceDate, prettyDate } from '../../../services/formatting/formatDate';
 
-
 export const FormatBytesGBModule = angular
 	.module("3drepo")
 	.filter("formatBytesGB", () => formatBytesGB);

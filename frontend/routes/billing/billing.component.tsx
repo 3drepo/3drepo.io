@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import * as queryString from 'query-string';
-import { Panel } from '../components/panel/panel.component';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Subscription from './../subscription/subscription.container';
-import History from './../history/history.container';
-import { Header, TabContent } from './billing.styles';
+import * as React from "react";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import * as queryString from "query-string";
+import { Panel } from "../components/panel/panel.component";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Subscription from "./../subscription/subscription.container";
+import History from "./../history/history.container";
+import { Header, TabContent } from "./billing.styles";
 
 export const TABS_TYPES = {
-  SUBSCRIPTION: 0,
-  HISTORY: 1,
+	SUBSCRIPTION: 0,
+	HISTORY: 1
 };
 
 const TABS = {
 	[TABS_TYPES.SUBSCRIPTION]: {
 		id: TABS_TYPES.SUBSCRIPTION,
-    label: "Subscription"
-  },
+		label: "Subscription"
+	},
 	[TABS_TYPES.HISTORY]: {
 		id: TABS_TYPES.HISTORY,
-    label: "History"
-  },
+		label: "History"
+	}
 };
 
 interface IProps {
@@ -52,7 +52,7 @@ interface IState {
 
 export class Billing extends React.PureComponent<IProps, IState> {
 	public state = {
-		activeTab: TABS_TYPES.SUBSCRIPTION,
+		activeTab: TABS_TYPES.SUBSCRIPTION
 	};
 
 	public updateUrlParams = (params) => {
@@ -72,8 +72,8 @@ export class Billing extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				{ activeTab === TABS_TYPES.SUBSCRIPTION && <Subscription /> }
-				{ activeTab === TABS_TYPES.HISTORY && <History /> }
+				{activeTab === TABS_TYPES.SUBSCRIPTION && <Subscription />}
+				{activeTab === TABS_TYPES.HISTORY && <History />}
 			</>
 		);
 	}
@@ -84,17 +84,22 @@ export class Billing extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Panel title="Billing" paperProps={paperProps}>
-        <Header>
-          <Tabs value={activeTab} indicatorColor="primary" textColor="primary" onChange={this.handleChange}>
+				<Header>
+					<Tabs
+						value={activeTab}
+						indicatorColor="primary"
+						textColor="primary"
+						onChange={this.handleChange}
+					>
 						<Tab label="Subscription" />
 						<Tab label="History" />
-          </Tabs>
-        </Header>
-        <TabContent>
+					</Tabs>
+				</Header>
+				<TabContent>
 					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-					<Route render={this.renderTabContent}></Route>
-        </TabContent>
-      </Panel>
+					<Route render={this.renderTabContent} />
+				</TabContent>
+			</Panel>
 		);
 	}
 }

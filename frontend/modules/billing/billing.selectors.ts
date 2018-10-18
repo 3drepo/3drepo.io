@@ -15,45 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from "reselect";
 
-export const selectBillingDomain = state => Object.assign({}, state.billing);
+export const selectBillingDomain = (state) => Object.assign({}, state.billing);
 
 export const selectIsPending = createSelector(
-  selectBillingDomain, (state) => state.isPending
-)
+	selectBillingDomain,
+	(state) => state.isPending
+);
 
 export const selectInvoices = createSelector(
-  selectBillingDomain, (state) => state.invoices
-)
-
-export const selectLicencesInfo = createSelector(
-  selectBillingDomain, (state) => {
-    let numLicences = 0;
-    let pricePerLicense = null;
-    let planId = null;
-
-    if (state.subscriptions.paypal && state.subscriptions.paypal.length > 0) {
-      numLicences = state.subscriptions.paypal.reduce((total, item) => {
-        return total + item.quantity;
-      }, 0);
-
-      planId = state.subscriptions.paypal[0].plan;
-      if (planId && state.plans[state.subscriptions.paypal[0].plan]) {
-        pricePerLicense = state.plans[state.subscriptions.paypal[0].plan].price;
-      }
-    }
-
-    if (!planId || !pricePerLicense) {
-      const availablePlansIdx = Object.keys(state.plans).filter((key) => state.plans[key].available);
-      pricePerLicense = availablePlansIdx.length ? state.plans[availablePlansIdx[0]].price : 0;
-      planId = availablePlansIdx[0];
-    }
-
-    return {
-      planId,
-      pricePerLicense,
-      numLicences
-    };
-  }
+	selectBillingDomain,
+	(state) => state.invoices
 );
+
+export const selectLicencesInfo = createSelector(selectBillingDomain, (state) => {
+	let numLicences = 0;
+	let pricePerLicense = null;
+	let planId = null;
+
+	if (state.subscriptions.paypal && state.subscriptions.paypal.length > 0) {
+		numLicences = state.subscriptions.paypal.reduce((total, item) => {
+			return total + item.quantity;
+		}, 0);
+
+		planId = state.subscriptions.paypal[0].plan;
+		if (planId && state.plans[state.subscriptions.paypal[0].plan]) {
+			pricePerLicense = state.plans[state.subscriptions.paypal[0].plan].price;
+		}
+	}
+
+	if (!planId || !pricePerLicense) {
+		const availablePlansIdx = Object.keys(state.plans).filter(
+			(key) => state.plans[key].available
+		);
+		pricePerLicense = availablePlansIdx.length
+			? state.plans[availablePlansIdx[0]].price
+			: 0;
+		planId = availablePlansIdx[0];
+	}
+
+	return {
+		planId,
+		pricePerLicense,
+		numLicences
+	};
+});

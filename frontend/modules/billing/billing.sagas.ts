@@ -15,45 +15,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, select, take } from 'redux-saga/effects';
+import { put, takeLatest, all, select, take } from "redux-saga/effects";
 
-import * as API from '../../services/api';
-import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from "./index";
-import { DialogActions } from '../dialog';
-import { DIALOG_TYPES } from '../dialog/dialog.redux';
-import { SnackbarActions } from '../snackbar';
-import { clientConfigService } from '../../services/clientConfig';
+import * as API from "../../services/api";
+import {
+	BillingTypes,
+	BillingActions,
+	selectLicencesInfo,
+	dialogMessages
+} from "./index";
+import { DialogActions } from "../dialog";
+import { DIALOG_TYPES } from "../dialog/dialog.redux";
+import { SnackbarActions } from "../snackbar";
+import { clientConfigService } from "../../services/clientConfig";
 
 export function* fetchPlans() {
-  try {
+	try {
 		const { data: plans } = yield API.getPlans();
 
 		return yield put(BillingActions.fetchPlansSuccess({ ...plans }));
-  } catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'plans', e.response));
-  }
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog("fetch", "plans", e.response));
+	}
 }
 
 export function* fetchSubscriptions({ teamspace }) {
-  try {
+	try {
 		const { data: subscriptions } = yield API.getSubscriptions(teamspace);
 
-		return yield put(BillingActions.fetchSubscriptionsSuccess({ ...subscriptions }));
-  } catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'subscriptions', e.response));
-  }
+		return yield put(
+			BillingActions.fetchSubscriptionsSuccess({ ...subscriptions })
+		);
+	} catch (e) {
+		yield put(
+			DialogActions.showErrorDialog("fetch", "subscriptions", e.response)
+		);
+	}
 }
 
 export function* fetchInvoices({ teamspace }) {
-  try {
+	try {
 		yield put(BillingActions.setPendingState(true));
 		const { data: invoices } = yield API.getInvoices(teamspace);
 
 		yield put(BillingActions.fetchInvoicesSuccess(invoices));
-  } catch (e) {
+	} catch (e) {
 		yield put(BillingActions.setPendingState(false));
-    yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
-  }
+		yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
+	}
 }
 
 export function* fetchBillingData({ teamspace }) {
@@ -61,12 +70,12 @@ export function* fetchBillingData({ teamspace }) {
 		yield put(BillingActions.setPendingState(true));
 
 		yield all([
-      put(BillingActions.fetchPlans()),
-      put(BillingActions.fetchSubscriptions(teamspace))
+			put(BillingActions.fetchPlans()),
+			put(BillingActions.fetchSubscriptions(teamspace))
 		]);
 	} catch (e) {
 		yield put(BillingActions.setPendingState(false));
-		yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
+		yield put(DialogActions.showErrorDialog("fetch", "invoices", e.response));
 	}
 }
 
@@ -81,7 +90,9 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 			title: dialogMessages.DIALOG_TITLE,
 			templateType: DIALOG_TYPES.LOADING,
 			data: {
-				content: licencesNumChanged ? dialogMessages.LICENCE_COUNT_CHANGED_INFO : dialogMessages.LICENCE_COUNT_NOT_CHANGED_INFO
+				content: licencesNumChanged
+					? dialogMessages.LICENCE_COUNT_CHANGED_INFO
+					: dialogMessages.LICENCE_COUNT_NOT_CHANGED_INFO
 			}
 		};
 
@@ -96,23 +107,33 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 				yield put(SnackbarActions.show(dialogMessages.UPDATED_INFO));
 			}
 		} else {
-			yield put(DialogActions.showErrorDialog("post", "subscription", dialogMessages.PAYPAL_ERROR));
+			yield put(
+				DialogActions.showErrorDialog(
+					"post",
+					"subscription",
+					dialogMessages.PAYPAL_ERROR
+				)
+			);
 		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('post', 'subscription', e.response));
+		yield put(
+			DialogActions.showErrorDialog("post", "subscription", e.response)
+		);
 	}
 }
 
 export function* downloadInvoice({ teamspace, invoiceNo }) {
 	try {
 		const endpoint = `${teamspace}/invoices/${invoiceNo}.pdf`;
-		const url = yield clientConfigService.apiUrl(clientConfigService.GET_API, endpoint);
-		window.open(url, '_blank');
+		const url = yield clientConfigService.apiUrl(
+			clientConfigService.GET_API,
+			endpoint
+		);
+		window.open(url, "_blank");
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('download', 'invoice', e.response));
+		yield put(DialogActions.showErrorDialog("download", "invoice", e.response));
 	}
 }
-
 
 export default function* BillingSaga() {
 	yield takeLatest(BillingTypes.FETCH_PLANS, fetchPlans);
