@@ -25,3 +25,12 @@ import api from './';
 export const getNotifications = (): Promise<any> => {
 	return api.get('me/notifications');
 };
+
+/**
+ * Get notifications list
+ *
+ * @returns {*|promise}
+ */
+export const patchNotification = (id, data): Promise<any> => {
+	return api.patch(`me/notifications/${id}`, data);
+};

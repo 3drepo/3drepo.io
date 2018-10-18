@@ -19,12 +19,23 @@ import { put, takeLatest, select} from 'redux-saga/effects';
 
 import api, * as API from '../../services/api';
 import { NotificationsTypes, NotificationsActions } from './notifications.redux';
+import { DialogActions } from '../dialog';
 
 export function* fetchNotifications() {
 	const resp = yield API.getNotifications();
 	yield put(NotificationsActions.fetchNotificationsSuccess(resp.data));
 }
 
+export function* markNotificationAsRead({ notificationId }) {
+	try {
+		const resp = yield API.patchNotification(notificationId, {read: true});
+		yield put(NotificationsActions.patchNotification(resp.data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'notification', error.response));
+	}
+}
+
 export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.FETCH_NOTIFICATIONS, fetchNotifications);
+	yield takeLatest(NotificationsTypes.MARK_NOTIFICATION_AS_READ, markNotificationAsRead);
 }

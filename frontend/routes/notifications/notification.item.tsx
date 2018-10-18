@@ -34,10 +34,19 @@ export interface INotification {
 	issuesId: string[];
 }
 
-export class NotificationItem extends React.PureComponent<INotification, any> {
+interface IProps extends INotification {
+	markNotificationAsRead: (id: string) => void ;
+}
+
+export class NotificationItem extends React.PureComponent<IProps, any> {
+	public markAsRead() {
+
+		this.props.markNotificationAsRead(this.props._id);
+	}
+
 	public render() {
 		return (
-			<ListItem>
+			<ListItem onClick={this.markAsRead.bind(this)}>
 					<Avatar>
 						<Icon>place</Icon>
 					</Avatar>

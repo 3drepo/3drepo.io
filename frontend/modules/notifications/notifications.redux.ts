@@ -20,14 +20,16 @@ import { consolidateStreamedStyles } from 'styled-components';
 
 export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
 	fetchNotifications: ['username'],
+	markNotificationAsRead: ['notificationId'],
 	fetchNotificationsSuccess: ['notifications'],
 	upsertNotification: ['notification'],
-	deleteNotification: ['notification']
+	deleteNotification: ['notification'],
+	patchNotification: ['data']
 }, { prefix: 'NOTIFICATIONS_' });
 
 export const INITIAL_STATE = [];
 
-export const fetchNotificationsSuccess = (state = INITIAL_STATE, { notifications }) =>  state.concat(notifications) ;
+export const fetchNotificationsSuccess = (state = INITIAL_STATE, { notifications }) =>  (notifications) ;
 
 export const upsertNotification = (state = INITIAL_STATE, { notification }) =>  {
 	const index = state.findIndex((n) => n._id === notification._id);
@@ -43,8 +45,21 @@ export const deleteNotification = (state = INITIAL_STATE, { notification }) =>  
 	return newState.sort((a, b) => b.timestamp - a.timestamp);
 };
 
+export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) =>  {
+	const index = state.findIndex((n) => n._id === notificationPatch._id);
+	const newState = state.concat([]);
+	if (index === -1) {
+		return newState;
+	}
+
+	const notification = Object.assign(state[index], notificationPatch);
+	newState.splice(index, (index >= 0 ? 1 : 0), notification);
+	return newState.sort((a, b) => b.timestamp - a.timestamp);
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[NotificationsTypes.FETCH_NOTIFICATIONS_SUCCESS]: fetchNotificationsSuccess,
 	[NotificationsTypes.UPSERT_NOTIFICATION]: upsertNotification,
-	[NotificationsTypes.DELETE_NOTIFICATION]: deleteNotification
+	[NotificationsTypes.DELETE_NOTIFICATION]: deleteNotification,
+	[NotificationsTypes.PATCH_NOTIFICATION]: patchNotification
 });

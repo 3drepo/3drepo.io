@@ -23,15 +23,27 @@ const middlewares = require("../middlewares/middlewares");
 const notification = require("../models/notification");
 
 router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
+router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
 
 //
 function getNotifications(req, res, next) {
-	const user = req.session.user.username;
+	const username = req.session.user.username;
 
-	notification.getNotifications(user).then(notifications => {
+	notification.getNotifications(username).then(notifications => {
 		req.dataModel = notifications;
 		next();
 	}).catch(err => responseCodes.onError(req, res, err));
+}
+
+function patchNotification(req, res, next) {
+	const username = req.session.user.username;
+	const _id = req.params.id;
+	const data = req.body;
+	notification.updateNotification(username, _id, data).then(()=> {
+		req.dataModel = Object.assign({_id}, data);
+		next();
+	})
+		.catch(err => responseCodes.onError(req, res, err));
 }
 
 module.exports = router;

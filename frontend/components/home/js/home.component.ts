@@ -69,6 +69,7 @@ class HomeController implements ng.IController {
 	private showMemorySelected;
 	private isLiteMode;
 	private deviceMemory;
+	private subscribedToNotifications = false;
 
 	constructor(
 		private $scope,
@@ -252,11 +253,13 @@ class HomeController implements ng.IController {
 		case this.AuthService.events.USER_LOGGED_IN:
 
 			if (!currentData.error) {
-				this.notificationService.getChannel(this.AuthService.getUsername())
-					.notifications.subscribeToUpserted(this.onNotificationUpserted, this);
-				this.notificationService.getChannel(this.AuthService.getUsername())
-					.notifications.subscribeToDeleted(this.onNotificationDeleted, this);
-
+				if (!this.subscribedToNotifications) {
+					this.notificationService.getChannel(this.AuthService.getUsername())
+						.notifications.subscribeToUpserted(this.onNotificationUpserted, this);
+					this.notificationService.getChannel(this.AuthService.getUsername())
+						.notifications.subscribeToDeleted(this.onNotificationDeleted, this);
+					this.subscribedToNotifications = true;
+				}
 				if (!currentData.initialiser) {
 					if (!this.state.returnUrl) {
 						this.StateManager.updateState(true);

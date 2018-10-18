@@ -109,8 +109,9 @@ module.exports = {
 	},
 
 	updateNotification: function(username, _id, data) {
+		_id = _.isString(_id) ? utils.stringToUUID(_id) : _id;
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
-			collection.update({_id }, { $set: data })
+			collection.update({_id}, { $set: data })
 		);
 	},
 

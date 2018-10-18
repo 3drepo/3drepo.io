@@ -27,7 +27,8 @@ import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSub
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 
 interface IProps {
-	fetchNotifications: () => void ; // TODO: Remove sample
+	fetchNotifications: () => void ;
+	markNotificationAsRead: (id: string) => void;
 	notifications: INotification[];
 }
 
@@ -39,6 +40,15 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		// This will download notifications from the server and save to the store on init
 		this.props.fetchNotifications();
+	}
+
+	public toggleDrawer(e: React.SyntheticEvent) {
+		e.preventDefault();
+		e.nativeEvent.stopImmediatePropagation();
+		e.nativeEvent.preventDefault();
+
+		this.setState(Object.assign({open: !this.state.open }));
+		return false;
 	}
 
 	public getNotificationsHeader() {
@@ -71,20 +81,12 @@ export class Notifications extends React.PureComponent<IProps, any> {
 						{this.props.notifications.length === 0 &&
 							<NotificationEmptyItem/>}
 						{this.props.notifications.length > 0 && this.props.notifications.map((notification) =>
-							<NotificationItem key={notification._id} {...notification}/>
+							<NotificationItem key={notification._id}
+								{...{...notification, markNotificationAsRead: this.props.markNotificationAsRead }}/>
 						)}
 					</List>
 				</Drawer>
 			</MuiThemeProvider>
 		);
-	}
-
-	public toggleDrawer(e: React.SyntheticEvent) {
-		e.preventDefault();
-		e.nativeEvent.stopImmediatePropagation();
-		e.nativeEvent.preventDefault();
-
-		this.setState(Object.assign({open: !this.state.open }));
-		return false;
 	}
 }
