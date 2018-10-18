@@ -107,9 +107,6 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 			payment: licences * this.state.pricePerLicense
 		}));
 
-		console.log('licences', licences);
-		console.log(' this.state.pricePerLicense', this.state.pricePerLicense);
-
 		onChange(event, ...params);
 	}
 
