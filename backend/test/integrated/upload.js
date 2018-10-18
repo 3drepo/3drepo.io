@@ -41,6 +41,7 @@ describe("Uploading a model", function () {
 	const desc = "desc";
 	const type = "type";
 	const unit = "meter";
+	const project = "sample";
 
 	before(function(done) {
 
@@ -61,7 +62,7 @@ describe("Uploading a model", function () {
 				function(done) {
 					// create a model
 					agent.post(`/${username}/model`)
-						.send({ type, desc, unit, modelName: model })
+						.send({ type, desc, unit, modelName: model, project })
 						.expect(200, function(err, res) {
 							modelId = res.body.model;
 							done(err);

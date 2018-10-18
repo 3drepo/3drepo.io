@@ -204,18 +204,6 @@ describe("Project Permissions::", function () {
 			});
 	});
 
-	it("non teamspace admin users have access to the model created by themselves", function(done) {
-		agentCanCreateModel
-			.get(`/${teamspace}/${modelId}/permissions`)
-			.expect(200, function(err, res) {
-				expect(err).to.be.null;
-				const perm = res.body.find(p => p.user === userCanCreateModel.username);
-				expect(perm).to.exist;
-				expect(perm.permission).to.equal("admin");
-				done();
-			});
-	});
-
 	it("user with create_model permission on a project cannot create fed model", function(done) {
 
 		const modelName = "fedmodel001";
