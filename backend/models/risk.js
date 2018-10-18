@@ -440,6 +440,13 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 								});
 
 								return subRisks;
+							}).catch((err) => {
+								// Skip sub-model errors to allow working sub-models to load
+								systemLogger.logError("Error while retrieving sub-model risks",
+									{
+										subDbCol,
+										err: err
+									});
 							})
 						);
 					});
@@ -447,7 +454,11 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 					return Promise.all(subModelsPromises).then((subModelsRisks) => {
 						if (subModelsRisks) {
 							subModelsRisks.forEach((subModelRisks) => {
-								mainRisks = mainRisks.concat(subModelRisks);
+								if (subModelRisks) {
+									// Skip concat of undefined subModelRisks
+									//  e.g. from error loading sub-model risk
+									mainRisks = mainRisks.concat(subModelRisks);
+								}
 							});
 						}
 						if (!noClean) {
