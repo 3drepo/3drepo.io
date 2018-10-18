@@ -27,7 +27,6 @@ import {
 import { DialogActions } from '../dialog';
 import { DIALOG_TYPES } from '../dialog/dialog.redux';
 import { SnackbarActions } from '../snackbar';
-import { clientConfigService } from '../../services/clientConfig';
 
 export function* fetchPlans() {
 	try {
@@ -124,11 +123,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 
 export function* downloadInvoice({ teamspace, invoiceNo }) {
 	try {
-		const endpoint = `${teamspace}/invoices/${invoiceNo}.pdf`;
-		const url = yield clientConfigService.apiUrl(
-			clientConfigService.GET_API,
-			endpoint
-		);
+		const url = `${ClientConfig.apiUrls.all[0]}/${teamspace}/invoices/${invoiceNo}.pdf`;
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('download', 'invoice', e.response));

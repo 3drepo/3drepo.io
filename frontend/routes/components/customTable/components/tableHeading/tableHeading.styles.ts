@@ -20,6 +20,8 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
 export const SortLabel = styled(TableSortLabel) `
+	height: 18px;
+
 	&& {
 		flex-direction: row-reverse;
 		margin-left: ${({ active }) => active ? 0 : '-5px'};
@@ -34,7 +36,7 @@ export const SortLabel = styled(TableSortLabel) `
 		left: -2px;
 		border-radius: 100%;
 		position: absolute;
-		top: -1px;
+		top: 0;
 		transition: 200ms ease-in-out;
 		content: '';
 		background: ${({ active }) => active ? '#15563c' : 'transparent'};

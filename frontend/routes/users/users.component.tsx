@@ -255,7 +255,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	/**
 	 * Generate licences summary
 	 */
-	public getFooterLabel = (users, limit) => {
+	public getFooterLabel = (users = [], limit = 0) => {
 		if (!users) {
 			return '';
 		}

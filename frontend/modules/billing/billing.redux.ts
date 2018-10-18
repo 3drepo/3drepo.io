@@ -19,9 +19,9 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: BillingTypes, Creators: BillingActions } = createActions({
 	fetchPlans: [],
-	fetchPlansSuccess: ['plans']
+	fetchPlansSuccess: ['plans'],
 	fetchInvoices: ['teamspace'],
-	fetchInvoicesSuccess: ['invoices']
+	fetchInvoicesSuccess: ['invoices'],
 	fetchSubscriptions: ['teamspace'],
 	fetchSubscriptionsSuccess: ['subscriptions'],
 	fetchBillingData: ['teamspace'],

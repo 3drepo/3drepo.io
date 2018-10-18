@@ -58,8 +58,8 @@ const INVOICES_TABLE_CELLS = [
 		CellProps: { root: { flex: 15 } }
 	},
 	{
-		HeadingProps: { root: { flex: 7 } },
-		CellProps: { root: { flex: 7 } },
+		HeadingProps: { root: { flex: 15 } },
+		CellProps: { root: { flex: 15 } },
 		type: CELL_TYPES.ICON_BUTTON,
 		CellComponent: TableButton
 	}
@@ -68,6 +68,7 @@ const INVOICES_TABLE_CELLS = [
 interface IProps {
 	teamspace: any;
 	invoices: any[];
+	isLoadingBilling: boolean;
 	fetchInvoices: (teamspace) => void;
 	downloadInvoice: (teamspace, index) => void;
 }

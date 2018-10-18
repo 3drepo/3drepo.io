@@ -1,5 +1,6 @@
 export class ClientConfigService {
 	public responseCodes;
+	public countries;
 	private apiUrls;
 	private apiUrl;
 	private apiAlgorithm;
