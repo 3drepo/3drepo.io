@@ -39,7 +39,7 @@ import {
 	FormInfo,
 	PayPalLogo,
 	StyledForm
-} from '../subscription.styles';
+} from "../subscription.styles";
 
 const SubscriptionSchema = Yup.object().shape({
 	firstName: schema.firstName,
@@ -81,19 +81,10 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 	};
 
 	public handleConfirmSubsription = (addressData) => {
-		const {
-			licencesInfo: { planId },
-			teamspace,
-			changeSubscription
-		} = this.props;
+		const { licencesInfo: { planId }, teamspace, changeSubscription } = this.props;
 		const subscriptionData = {
 			billingAddress: { ...addressData },
-			plans: [
-				{
-					plan: planId,
-					quantity: this.state.numLicences
-				}
-			]
+			plans: [ { plan: planId, quantity: this.state.numLicences } ]
 		};
 
 		changeSubscription(teamspace, subscriptionData);
@@ -122,10 +113,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
-		const {
-			spaceInfo,
-			licencesInfo: { numLicences, pricePerLicense }
-		} = this.props;
+		const { spaceInfo, licencesInfo: { numLicences, pricePerLicense } } = this.props;
 
 		const spaceInfoChanged = !isEqual(prevProps.spaceInfo, spaceInfo);
 		if (spaceInfoChanged) {
@@ -159,39 +147,39 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Formik
-				initialValues={billingInfo}
+				initialValues={{...billingInfo, licences: numLicences}}
 				onSubmit={this.handleConfirmSubsription}
 				validationSchema={SubscriptionSchema}
 			>
 				<StyledForm>
-					<FormContainer container direction='column'>
-						<FieldsRow container wrap='nowrap'>
+					<FormContainer container direction="column">
+						<FieldsRow container wrap="nowrap">
 							<FieldsColumn>
-								<FieldsRow container wrap='nowrap'>
+								<FieldsRow container wrap="nowrap">
 									<Field
-										name='licences'
+										name="licences"
 										render={({ field }) => (
 											<StyledTextField
 												{...field}
-												label='Licences'
-												margin='normal'
+												label="Licences"
+												margin="normal"
 												required
-												type='number'
+												type="number"
 												value={numLicences}
-												inputProps={{ min: '0', max: '1000' }}
+												inputProps={{ min: "0", max: "1000" }}
 												onChange={this.handleLicencesChange(field.onChange)}
 											/>
 										)}
 									/>
 									<Field
-										name='payment'
+										name="payment"
 										render={({ field }) => (
 											<StyledTextField
 												{...field}
-												label='Payment (£ / month)'
-												margin='normal'
+												label="Payment (£ / month)"
+												margin="normal"
 												required
-												type='number'
+												type="number"
 												value={this.state.payment}
 												disabled
 											/>
@@ -199,79 +187,79 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 									/>
 								</FieldsRow>
 								<Field
-									name='firstName'
+									name="firstName"
 									render={({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.firstName)}
 											helperText={form.errors.firstName}
-											label='First Name'
-											margin='normal'
+											label="First Name"
+											margin="normal"
 											required
-											type='text'
+											type="text"
 										/>
 									)}
 								/>
 								<Field
-									name='company'
+									name="company"
 									render={({ field }) => (
 										<StyledTextField
 											{...field}
-											label='Business Name'
-											margin='normal'
-											type='text'
+											label="Business Name"
+											margin="normal"
+											type="text"
 										/>
 									)}
 								/>
 								<Field
-									name='line1'
+									name="line1"
 									render={({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.address)}
 											helperText={form.errors.address}
-											label='Address'
-											margin='normal'
+											label="Address"
+											margin="normal"
 											required
-											type='text'
+											type="text"
 										/>
 									)}
 								/>
 								<Field
-									name='line2'
+									name="line2"
 									render={({ field }) => (
 										<StyledTextField
 											{...field}
-											label='Address 2'
-											margin='normal'
-											type='text'
+											label="Address 2"
+											margin="normal"
+											type="text"
 										/>
 									)}
 								/>
 							</FieldsColumn>
 							<FieldsColumn>
-								<FieldsRow container wrap='nowrap'>
+								<FieldsRow container wrap="nowrap">
 									<Field
-										name='quotaAvailable'
+										name="quotaAvailable"
 										render={({ field }) => (
 											<StyledTextField
 												{...field}
-												label='Quota available'
-												margin='normal'
-												type='text'
+												label="Quota available"
+												margin="normal"
+												type="text"
 												disabled
 												value={`${formatBytesGB(spaceLimit)}`}
 											/>
 										)}
 									/>
 									<Field
-										name='quotaUsed'
+										name="quotaUsed"
 										render={({ field }) => (
 											<StyledTextField
 												{...field}
-												label='Quota used'
-												margin='normal'
-												type='text'
+												label="Quota used"
+												margin="normal"
+												type="text"
 												value={`${formatBytesGB(spaceUsed)}`}
 												disabled
 											/>
@@ -279,64 +267,64 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 									/>
 								</FieldsRow>
 								<Field
-									name='lastName'
+									name="lastName"
 									render={({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.lastName)}
 											helperText={form.errors.lastName}
-											label='Last name'
-											margin='normal'
+											label="Last name"
+											margin="normal"
 											required
-											type='text'
+											type="text"
 										/>
 									)}
 								/>
 								<Field
-									name='vat'
+									name="vat"
 									render={({ field }) => (
 										<StyledTextField
 											{...field}
-											label='VAT Number **'
-											margin='normal'
-											type='text'
+											label="VAT Number **"
+											margin="normal"
+											type="text"
 										/>
 									)}
 								/>
 								<Field
-									name='city'
+									name="city"
 									render={({ field, form }) => (
 										<StyledTextField
 											{...field}
-											label='City'
+											label="City"
 											error={Boolean(form.errors.city)}
 											helperText={form.errors.city}
-											margin='normal'
+											margin="normal"
 											required
-											type='text'
+											type="text"
 										/>
 									)}
 								/>
 								<Field
-									name='postalCode'
+									name="postalCode"
 									render={({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.postalCode)}
 											helperText={form.errors.postalCode}
-											label='Postal code'
-											margin='normal'
+											label="Postal code"
+											margin="normal"
 											required
-											type='text'
+											type="text"
 										/>
 									)}
 								/>
 								<StyledFormControl>
 									<StyledInputLabel>Country</StyledInputLabel>
 									<Field
-										name='countryCode'
+										name="countryCode"
 										render={({ field }) => (
-											<StyledSelectField {...field} type='text' disabled>
+											<StyledSelectField {...field} type="text" disabled>
 												{countries.map((country) => (
 													<StyledSelectItem
 														key={country.code}
@@ -361,17 +349,16 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 								<FormInfo>** Subject to VAT where applicable</FormInfo>
 							</FormInfoContainer>
 							<ConfirmContainer>
-								<PayPalLogo src='/images/paypal.png' />
-								<Field render={({ form }) => (
+								<PayPalLogo src="/images/paypal.png" />
+								<Field render={({ form }) =>
 										<StyledButton
-											color='secondary'
-											variant='raised'
-											disabled={!form.isValid || form.isValidating}
-											type='submit'
-										>
+											color="secondary"
+											variant="raised"
+											disabled={!form.isValid || form.isValidating || !form.dirty}
+											type="submit">
 											Confirm
 										</StyledButton>
-									)}
+									}
 								/>
 							</ConfirmContainer>
 						</FormFooter>
