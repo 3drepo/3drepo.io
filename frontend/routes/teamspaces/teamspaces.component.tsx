@@ -36,11 +36,13 @@ import { RowMenu } from './components/rowMenu/rowMenu.component';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
+import { ModelDialog } from './components/modelDialog/modelDialog.component';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { TooltipButton } from './components/tooltipButton/tooltipButton.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
+import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -49,7 +51,7 @@ const PANEL_PROPS = {
 	}
 };
 
-const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account }) => ({ value: account }));
+const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account, projects }) => ({ value: account, projects }));
 
 interface IProps {
 	history: any;
@@ -62,6 +64,10 @@ interface IProps {
 	createProject: (teamspace, projectData) => void;
 	updateProject: (teamspace, projectName, projectData) => void;
 	removeProject: (teamspace, projectName) => void;
+
+	createModel: (teamspace, modelData, type) => void;
+	updateModel: (teamspace, modelName, modelData, type) => void;
+	removeModel: (teamspace, modelName, type) => void;
 
 	onModelUpload: () => void;
 	onSettingsClick: () => void;
@@ -166,10 +172,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openModelDialog = (event) => {
+	public openModelDialog = (event, type = MODEL_TYPE, teamspaceName = '', modelName = '') => {
 		event.stopPropagation();
-		// tslint:disable-next-line
-		console.log('Model directory was clicked!');
+		const { teamspacesItems } = this.state as IState;
+
+		this.props.showDialog({
+			title: modelName ? `Edit ${type}` : `New ${type}`,
+			template: ModelDialog,
+			data: {
+				name: modelName,
+				teamspace: teamspaceName,
+				teamspaces: teamspacesItems,
+				type
+			},
+			onConfirm: ({ teamspace, ...modelData }) => {
+				console.log('confirm', modelData);
+			}
+		});
 	}
 
 	/**
@@ -234,14 +253,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderMenu = ({ close }) => {
 		return (
 			<>
-				<MenuItem onClick={(event) => {
-					this.openProjectDialog(event);
-					close(event);
-				}}>
-					Add project
-				</MenuItem>
-				<MenuItem>Add model</MenuItem>
-				<MenuItem>Add federation</MenuItem>
+				<MenuItem onClick={(event) => { this.openProjectDialog(event); close(event); }}> Add project </MenuItem>
+				<MenuItem onClick={(event) => { this.openModelDialog(event, MODEL_TYPE); close(event); }}>Add model</MenuItem>
+				<MenuItem onClick={(event) => { this.openModelDialog(event, FEDERATION_TYPE); close(event); }}>Add federation</MenuItem>
 			</>
 		);
 	}
