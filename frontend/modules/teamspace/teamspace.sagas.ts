@@ -36,7 +36,7 @@ export function* fetchUser({ username }) {
 
 		return yield all([
 			put(TeamspaceActions.fetchUserSuccess({
-				...currentUser, 
+				...currentUser,
 				username,
 				avatarUrl: getAvatarUrl(username)
 			})),

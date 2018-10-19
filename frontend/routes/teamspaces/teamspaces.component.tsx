@@ -176,6 +176,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 
+		const isNewModel = !modelName.length;
+
 		this.props.showDialog({
 			title: modelName ? `Edit ${type}` : `New ${type}`,
 			template: ModelDialog,
@@ -186,7 +188,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				type
 			},
 			onConfirm: ({ teamspace, ...modelData }) => {
-				console.log('confirm', modelData);
+				if (isNewModel) {
+					this.props.createModel(teamspace, modelData);
+				} else {
+					this.props.updateModel(teamspace, modelName, modelData);
+				}
 			}
 		});
 	}

@@ -37,7 +37,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	createProject: TeamspacesActions.createProject,
 	updateProject: TeamspacesActions.updateProject,
-	removeProject: TeamspacesActions.removeProject
+	removeProject: TeamspacesActions.removeProject,
+	createModel: TeamspacesActions.createModel,
+	updateModel: TeamspacesActions.updateModel,
+	removeModel: TeamspacesActions.removeModel
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces)));
