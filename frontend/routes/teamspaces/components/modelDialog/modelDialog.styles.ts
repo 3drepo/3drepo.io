@@ -15,41 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const ROW_ACTIONS = {
-	PERMISSIONS: {
-		label: 'Permissions',
-		icon: 'people'
-	},
-	SETTINGS: {
-		label: 'Settings',
-		icon: 'settings'
-	},
-	DELETE: {
-		label: 'Delete',
-		icon: 'delete',
-		color: 'error'
-	},
-	UPLOAD_FILE: {
-		label: 'Upload file',
-		icon: 'cloud_upload'
-	},
-	REVISIONS: {
-		label: 'Revisions',
-		icon: 'settings_backup_restore'
-	},
-	DOWNLOAD: {
-		label: 'Download',
-		icon: 'cloud_download'
-	},
-	ADD_NEW: {
-		label: 'Add new item',
-		icon: 'add_circle'
-	},
-	EDIT: {
-		label: 'Edit',
-		icon: 'edit'
-	}
-};
+import styled from 'styled-components';
 
-export const MODEL_TYPE = 'model';
-export const FEDERATION_TYPE = 'federation';
+export const Container = styled.div``;
