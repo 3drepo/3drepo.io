@@ -272,6 +272,8 @@ export class IssuesService {
 			filters.push((issue) => issue.status !== "closed");
 		}
 
+		filters = filters.concat(this.getOrClause(criteria["notification"], this.filterNotification));
+
 		filters = filters.concat(this.getOrClause(criteria[""], this.handleIssueFilter));
 
 		filters = filters.concat(this.createFilterByField(criteria, "priority"));
@@ -349,6 +351,10 @@ export class IssuesService {
 			return issue.assigned_roles.length === 0;
 		}
 		return this.filterByField("assigned_roles", issue, tag);
+	}
+
+	public filterNotification(issue: any, issuesIds: []) {
+		return issuesIds.some((i) => i === issue._id);
 	}
 
 	public handleIssueFilter(issue: any, filterText: string) {

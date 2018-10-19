@@ -23,6 +23,7 @@ const middlewares = require("../middlewares/middlewares");
 const notification = require("../models/notification");
 
 router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
+router.get("/notifications/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
 router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
 
 //
@@ -31,6 +32,16 @@ function getNotifications(req, res, next) {
 
 	notification.getNotifications(username).then(notifications => {
 		req.dataModel = notifications;
+		next();
+	}).catch(err => responseCodes.onError(req, res, err));
+}
+
+function getNotification(req, res, next) {
+	const _id = req.params.id;
+	const username = req.session.user.username;
+
+	notification.getNotifications(username, {_id : _id}).then(notifications => {
+		req.dataModel = notifications[0];
 		next();
 	}).catch(err => responseCodes.onError(req, res, err));
 }

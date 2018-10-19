@@ -229,8 +229,12 @@ module.exports = {
 	 * @param {string} username The username of the user which the notificatons belongs to
 	 * @returns {Promise<Notification[]>} It contains the notifications for the user passed through parameter
  	 */
-	getNotifications: function(username) {
-		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find({}, {sort: {timestamp: -1}}).toArray())
+	getNotifications: function(username, criteria = {}) {
+		if (criteria._id && _.isString(criteria._id)) {
+			criteria._id = utils.stringToUUID(criteria._id);
+		}
+
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find(criteria, {sort: {timestamp: -1}}).toArray())
 			.then(fillModelNames);
 	}
 };

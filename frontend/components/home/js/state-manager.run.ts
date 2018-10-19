@@ -57,14 +57,20 @@ function StateManagerRun(
 			StateManager.setStateVar(StateManager.functions[i], false);
 		}
 
-		StateManager.clearQuery();
-
 		const stateChangeObject = {
 			toState,
 			toParams,
 			fromState,
 			fromParams
 		};
+
+		const queryParams = $location.search();
+
+		if (Object.keys(queryParams).length === 0) {
+			StateManager.clearQuery();
+		} else {
+			StateManager.setQuery(queryParams);
+		}
 
 		StateManager.startStateChange(stateChangeObject);
 	});
@@ -81,17 +87,7 @@ function StateManagerRun(
 	});
 
 	$rootScope.$on("$locationChangeSuccess", () => {
-
 		AnalyticService.sendPageView(location);
-
-		const queryParams = $location.search();
-
-		if (Object.keys(queryParams).length === 0) {
-			StateManager.clearQuery();
-		} else {
-			StateManager.setQuery(queryParams);
-		}
-
 	});
 
 }

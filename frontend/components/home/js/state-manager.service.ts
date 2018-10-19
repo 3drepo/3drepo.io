@@ -38,11 +38,11 @@ export class StateManagerService {
 		"RisksService"
 	];
 
+	public query: any;
 	private state: any;
 	private changedState: any;
 	private structure: any;
 	private changed: any;
-	private query: any;
 	private functions: any[];
 	private stateChangeQueue: any[];
 	private stateVars: any;
@@ -252,7 +252,7 @@ export class StateManagerService {
 		}
 	}
 
-	public clearQuery(state) {
+	public clearQuery() {
 		for (const param in this.query) {
 			if (this.query.hasOwnProperty(param)) {
 				delete this.query[param];

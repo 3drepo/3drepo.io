@@ -14,9 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import * as API from "../../../services/api";
 import { APIService } from "../../home/js/api.service";
-import { IssuesService } from "./issues.service";
+import { dispatch } from "../../../helpers/migration";
 import { IChip } from "../../panel/js/panel-card-chips-filter.component";
+import { IssuesService } from "./issues.service";
+import { NotificationsActions } from "../../../modules/notifications";
+import { StateManagerService } from "../../home/js/state-manager.service";
 
 class IssuesListController implements ng.IController {
 
@@ -30,7 +34,8 @@ class IssuesListController implements ng.IController {
 
 		"APIService",
 		"IssuesService",
-		"ClientConfigService"
+		"ClientConfigService",
+		"StateManager"
 	];
 
 	private toShow: string;
@@ -60,18 +65,17 @@ class IssuesListController implements ng.IController {
 
 		private apiService: APIService,
 		private issuesService: IssuesService,
-		private clientConfigService: any
+		private clientConfigService: any,
+		private stateManager: StateManagerService
+
 	) {}
 
 	public $onInit() {
-
 		this.toShow = "list";
 		this.focusedIssueIndex = null;
-		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
 		this.setupBcfImportInput(); // Necessary since angularjs doesnt support ng-change with file typeinputs.
 		this.watchers();
-
 	}
 
 	public watchers() {
@@ -83,6 +87,22 @@ class IssuesListController implements ng.IController {
 			() => {
 				this.allIssues = this.issuesService.state.allIssues;
 				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
+
+				if (this.stateManager.query.notificationId) {
+					const notificationId = this.stateManager.query.notificationId;
+					this.stateManager.clearQuery();
+
+					dispatch(NotificationsActions.markNotificationAsRead(notificationId));
+					API.getNotification(notificationId)
+					.then((n) => {
+						const chip: IChip = {name: "assignedIssues",
+							nameType: "Notification",
+							value: n.data.issuesId,
+							type: "notification"};
+
+						this.filterChips = [chip];
+					});
+				}
 			},
 			true
 		);

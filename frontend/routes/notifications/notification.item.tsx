@@ -30,23 +30,20 @@ export interface INotification {
 	_id: string;
 	type: string;
 	read: boolean;
+	modelId: string;
+	teamSpace: string;
 	modelName: string;
 	issuesId: string[];
 }
 
-interface IProps extends INotification {
-	markNotificationAsRead: (id: string) => void ;
-}
-
-export class NotificationItem extends React.PureComponent<IProps, any> {
-	public markAsRead() {
-
-		this.props.markNotificationAsRead(this.props._id);
+export class NotificationItem extends React.PureComponent<INotification, any> {
+	public notificationViewLink() {
+		return `${this.props.teamSpace}/${this.props.modelId}?notificationId=${this.props._id}`;
 	}
 
 	public render() {
 		return (
-			<ListItem onClick={this.markAsRead.bind(this)}>
+			<ListItem>
 					<Avatar>
 						<Icon>place</Icon>
 					</Avatar>
@@ -54,6 +51,7 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 						primary={`${this.props.issuesId.length} assigned issues `}
 						secondary={ `In ${this.props.modelName}`}
 					/>
+					<a href={this.notificationViewLink()}>View</a>
 			</ListItem>
 		);
 	}

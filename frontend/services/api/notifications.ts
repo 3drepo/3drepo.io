@@ -27,10 +27,19 @@ export const getNotifications = (): Promise<any> => {
 };
 
 /**
- * Get notifications list
+ * Patch a notification
  *
  * @returns {*|promise}
  */
 export const patchNotification = (id, data): Promise<any> => {
 	return api.patch(`me/notifications/${id}`, data);
+};
+
+/**
+ * Get a particular notification
+ *
+ * @returns {*|promise}
+ */
+export const getNotification = (id): Promise<any> => {
+	return api.get(`me/notifications/${id}`);
 };

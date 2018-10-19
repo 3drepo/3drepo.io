@@ -193,7 +193,6 @@ class IssueController implements ng.IController {
 		this.refreshHandler = (event) => {
 			return this.stateManager.refreshHandler(event);
 		};
-
 		// listen for user clicking the back button
 		window.addEventListener("popstate", this.popStateHandler);
 		window.addEventListener("beforeunload", this.refreshHandler);
