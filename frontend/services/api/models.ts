@@ -33,3 +33,30 @@ export const fetchModelsPermissions = (teamspace, models) => {
 export const updateModelsPermissions = (teamspace, permissionsList) => {
 	return api.post(`${teamspace}/models/permissions`, permissionsList);
 };
+
+/**
+ * Create new model
+ * @param teamspace
+ * @param model
+ */
+export const createModel = (teamspace, modelData) => {
+	return api.post(`${teamspace}/models`, modelData);
+};
+
+/**
+ * Update model
+ * @param teamspace
+ * @param model
+ */
+export const updateModel = (teamspace, modelName, modelData) => {
+	return api.put(`${teamspace}/models/${modelName}`, modelData);
+};
+
+/**
+ * Remove model
+ * @param teamspace
+ * @param model
+ */
+export const removeModel = (teamspace, modelName) => {
+	return api.delete(`${teamspace}/models/${modelName}`);
+};

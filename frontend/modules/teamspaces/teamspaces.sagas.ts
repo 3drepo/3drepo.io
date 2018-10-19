@@ -22,6 +22,7 @@ import { TeamspacesTypes, TeamspacesActions } from './teamspaces.redux';
 import { SnackbarActions } from '../snackbar';
 import { DialogActions } from '../dialog';
 
+// Projects
 export function* createProject({ teamspace, projectData }) {
 	try {
 		yield API.createProject(teamspace, projectData);
@@ -55,9 +56,47 @@ export function* removeProject({ teamspace, projectName }) {
 	}
 }
 
+// Models
+export function* createModel({ teamspace, modelData }) {
+	try {
+		yield API.createModel(teamspace, modelData);
+
+		yield put(SnackbarActions.show('Model created'));
+		yield put(TeamspacesActions.createModelSuccess(teamspace, modelData));
+	} catch (e) {
+		put(DialogActions.showErrorDialog('create', 'model', e.response));
+	}
+}
+
+export function* updateModel({ teamspace, modelName, modelData }) {
+	try {
+		yield API.updateModel(teamspace, modelName, modelData);
+
+		yield put(SnackbarActions.show('Model updated'));
+		yield put(TeamspacesActions.updateModelSuccess(teamspace, modelName, modelData));
+	} catch (e) {
+		put(DialogActions.showErrorDialog('update', 'model', e.response));
+	}
+}
+
+export function* removeModel({ teamspace, modelName }) {
+	try {
+		yield API.removeModel(teamspace, modelName);
+
+		yield put(SnackbarActions.show('Model removed'));
+		yield put(TeamspacesActions.removeModelSuccess(teamspace, modelName));
+	} catch (e) {
+		put(DialogActions.showErrorDialog('remove', 'model', e.response));
+	}
+}
+
 export default function* TeamspacesSaga() {
 	// Projects
 	yield takeLatest(TeamspacesTypes.CREATE_PROJECT, createProject);
 	yield takeLatest(TeamspacesTypes.UPDATE_PROJECT, updateProject);
 	yield takeLatest(TeamspacesTypes.REMOVE_PROJECT, removeProject);
+	// Models
+	yield takeLatest(TeamspacesTypes.CREATE_MODEL, createModel);
+	yield takeLatest(TeamspacesTypes.UPDATE_MODEL, updateModel);
+	yield takeLatest(TeamspacesTypes.REMOVE_MODEL, removeModel);
 }

@@ -26,6 +26,7 @@ import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 
+import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Container } from './modelDialog.styles';
@@ -62,6 +63,14 @@ const dataByType = {
 	}
 };
 
+const modelTypes = [
+	{ value: "Architectural" },
+	{ value: "Structural" },
+	{ value: "Mechanical" },
+	{ value: "GIS" },
+	{ value: "Other"}
+];
+
 interface IProps {
 	name?: string;
 	teamspace?: string;
@@ -92,7 +101,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	};
 
 	public handleModelSave = (values) => {
-		// this.props.handleResolve(values);
+		this.props.handleResolve(values);
 	}
 
 	public handleTeamspaceChange = (onChange) => (event, teamspaceName) => {
@@ -125,6 +134,49 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					<TextField
 						{...field}
 						label={`Model Code (optional)`}
+						margin="normal"
+						fullWidth={true}
+					/>
+				)} />
+
+				<FormControl fullWidth={true} required={true}>
+					<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
+					<Field name="type" render={({ field, form }) => (
+						<CellSelect
+							{...field}
+							items={modelTypes}
+							inputId="type-select"
+							// value={modelTypes[0].value}
+						/>
+					)} />
+				</FormControl>
+
+				<FormControl fullWidth={true} required={true}>
+					<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
+					<Field name="unit" render={({ field, form }) => (
+						<CellSelect
+							{...field}
+							items={clientConfigService.units}
+							inputId="unit-select"
+							// value={clientConfigService.units[1].value}
+						/>
+					)} />
+				</FormControl>
+
+				<Field name="revisionName" render={({ field, form }) => (
+					<TextField
+						{...field}
+						label="Revision name (optional)"
+						margin="normal"
+						helperText="Letters, numbers and underscore only"
+						fullWidth={true}
+					/>
+				)} />
+
+				<Field name="revisionDescription" render={({ field, form }) => (
+					<TextField
+						{...field}
+						label="Revision description (optional)"
 						margin="normal"
 						fullWidth={true}
 					/>
