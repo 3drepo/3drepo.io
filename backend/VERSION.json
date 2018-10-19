@@ -4,8 +4,8 @@
 	"supported": []
   },
   "navis" :{
-	"current" : "2.8.0",
-	"supported": []
+	"current" : "2.16.0",
+	"supported": ["2.8.0"]
   },
   "unitydll" : {
 	"current": "2.8.0",
