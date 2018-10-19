@@ -20,16 +20,25 @@ import { keyBy } from 'lodash';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	setTeamspaces: ['teamspaces'],
+	// Projects
 	createProject: ['teamspace', 'projectData'],
 	updateProject: ['teamspace', 'projectName', 'projectData'],
 	removeProject: ['teamspace', 'projectName'],
 	createProjectSuccess: ['teamspace', 'projectData'],
 	updateProjectSuccess: ['teamspace', 'projectName', 'projectData'],
-	removeProjectSuccess: ['teamspace', 'projectName']
+	removeProjectSuccess: ['teamspace', 'projectName'],
+	// Models
+	createModel: ['teamspace', 'modelData'],
+	updateModel: ['teamspace', 'modelName', 'modelData'],
+	removeModel: ['teamspace', 'modelName'],
+	createModelSuccess: ['teamspace', 'modelData'],
+	updateModelSuccess: ['teamspace', 'modelName', 'modelData'],
+	removeModelSuccess: ['teamspace', 'modelName']
 }, { prefix: 'TEAMSPACES_' });
 
 export const INITIAL_STATE = {
-	teamspaces: []
+	teamspaces: [],
+	models: []
 };
 
 const setTeamspaces = (state = INITIAL_STATE, action) => {
@@ -66,10 +75,27 @@ const removeProjectSuccess = (state = INITIAL_STATE, action) => {
 	return { ...state, teamspaces };
 };
 
+// Models
+const updateModelSuccess = (state = INITIAL_STATE, action) => {
+	return { ...state };
+};
+
+const createModelSuccess = (state = INITIAL_STATE, action) => {
+	return { ...state };
+};
+
+const removeModelSuccess = (state = INITIAL_STATE, action) => {
+	return { ...state };
+};
+
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspacesTypes.SET_TEAMSPACES]: setTeamspaces,
 	// Projects
 	[TeamspacesTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[TeamspacesTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,
-	[TeamspacesTypes.REMOVE_PROJECT_SUCCESS]: removeProjectSuccess
+	[TeamspacesTypes.REMOVE_PROJECT_SUCCESS]: removeProjectSuccess,
+	// Models
+	[TeamspacesTypes.UPDATE_MODEL_SUCCESS]: updateModelSuccess,
+	[TeamspacesTypes.CREATE_MODEL_SUCCESS]: createModelSuccess,
+	[TeamspacesTypes.REMOVE_MODEL_SUCCESS]: removeModelSuccess
 });
