@@ -97,8 +97,8 @@ export class History extends React.PureComponent<IProps, IState> {
 				{ value: isInvoiceRefund ?
 					INVOICE_REFUND_STATUS : invoice.items[0].description },
 				{ value: invoice.gateway },
-				{ value: invoice.nextPaymentAmount.toFixed(1) },
-				{ icon: 'cloud_download', onClick: this.onDownload.bind( null, this.props.teamspace, invoice.invoiceNo) }
+				{ value: invoice.amount ? invoice.amount.toFixed(1) : '0' },
+				{ icon: 'cloud_download', onClick: this.onDownload.bind(null, this.props.teamspace, invoice.invoiceNo) }
 			];
 
 			return { ...invoice, data };

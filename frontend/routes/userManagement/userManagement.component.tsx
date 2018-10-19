@@ -84,6 +84,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const { pathname, search } = this.props.location;
 		const queryParams = Object.assign({}, queryString.parse(search), params);
 		const updatedQueryString = queryString.stringify(queryParams);
+
 		this.props.history.push(`${pathname}?${updatedQueryString}`);
 	}
 

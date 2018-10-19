@@ -51,6 +51,12 @@ interface IState {
 }
 
 export class Billing extends React.PureComponent<IProps, IState> {
+	public static getDerivedStateFromProps = (nextProps, prevState) => {
+		const queryParams = queryString.parse(location.search);
+		const activeTab = Number(queryParams.tab || prevState.activeTab);
+		return { activeTab };
+	}
+
 	public state = {
 		activeTab: TABS_TYPES.SUBSCRIPTION
 	};
@@ -59,6 +65,7 @@ export class Billing extends React.PureComponent<IProps, IState> {
 		const { pathname, search } = this.props.location;
 		const queryParams = Object.assign({}, queryString.parse(search), params);
 		const updatedQueryString = queryString.stringify(queryParams);
+
 		this.props.history.push(`${pathname}?${updatedQueryString}`);
 	}
 

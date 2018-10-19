@@ -336,7 +336,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 									<Field
 										name='countryCode'
 										render={({ field }) => (
-											<StyledSelectField {...field} type='text'>
+											<StyledSelectField {...field} type='text' disabled>
 												{countries.map((country) => (
 													<StyledSelectItem
 														key={country.code}
