@@ -16,5 +16,55 @@
  */
 
 import styled from 'styled-components';
+import { Field } from 'formik';
+import { CustomTable } from '../../../components/customTable/customTable.component';
 
-export const Container = styled.div``;
+import FormControl from '@material-ui/core/FormControl';
+
+export const StyledField = styled(Field)`
+  margin-right: 10px;
+`;
+
+export const SelectWrapper = styled(FormControl)`
+  && {
+    margin-top: 15px;
+  }
+`;
+
+export const FieldWrapper = styled(FormControl)``;
+
+export const StyledCustomTable = styled(CustomTable)`
+	width: 100%;
+`;
+
+export const Row = styled.div`
+	display: flex;
+	flex-direction: row;
+	min-width: 480px;
+
+	${FieldWrapper} {
+    margin-right: 10px;
+    width: 100%;
+	}
+
+	${SelectWrapper} {
+		margin-left: 10px;
+	}
+`;
+
+export const ModelsTableContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	height: 220px;
+
+	> div {
+		width: 100%;
+		border-bottom: 1px solid rgba(0,0,0,.06);
+
+		&:first-child {
+			&:first-child {
+				border-right: 1px solid rgba(0,0,0,.06);
+			}
+		}
+	}
+`;
