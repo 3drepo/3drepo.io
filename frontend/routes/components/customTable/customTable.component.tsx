@@ -183,6 +183,7 @@ interface IProps {
 	onSelectionChange?: (selectedRows) => void;
 	renderCheckbox?: (props, data) => React.ReactChild;
 	onSearch?: (props) => any[];
+	rowStyle?: any;
 }
 
 interface IState {
@@ -415,8 +416,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 */
 	public renderRows = (cells = [], data = [], showCheckbox) => {
 		return data.map((row, index) => {
-			const rowProps = {key: index, clickable: showCheckbox && !row.disabled};
-
+			const rowProps = {key: index, clickable: showCheckbox && !row.disabled, style: this.props.rowStyle};
 			return (
 				<Row {...rowProps}>
 					{
@@ -468,7 +468,6 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const { cells, onSelectionChange, rows } = this.props;
 		const { processedRows } = this.state;
 		const showCheckbox = Boolean(onSelectionChange);
-
 		const numberOfSelectedRows = processedRows.filter(({selected}) => selected).length;
 		const selectedAll = numberOfSelectedRows && numberOfSelectedRows === rows.length;
 		const isIndeterminate = Boolean(numberOfSelectedRows && !selectedAll);

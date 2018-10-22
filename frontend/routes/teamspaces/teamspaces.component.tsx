@@ -175,7 +175,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public openModelDialog = (event, type = MODEL_TYPE, teamspaceName = '', modelName = '') => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
-
 		const isNewModel = !modelName.length;
 
 		this.props.showDialog({
