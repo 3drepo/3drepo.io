@@ -351,7 +351,6 @@ class HomeController implements ng.IController {
 	}
 
 	public setLoginPage() {
-
 		if (this.ClientConfigService.customLogins !== undefined) {
 
 			const sub = this.getSubdomain();

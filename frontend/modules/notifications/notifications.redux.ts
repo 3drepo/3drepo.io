@@ -24,7 +24,7 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	fetchNotificationsSuccess: ['notifications'],
 	upsertNotification: ['notification'],
 	deleteNotification: ['notification'],
-	patchNotification: ['data']
+	patchNotification: ['notificationPatch']
 }, { prefix: 'NOTIFICATIONS_' });
 
 export const INITIAL_STATE = [];
