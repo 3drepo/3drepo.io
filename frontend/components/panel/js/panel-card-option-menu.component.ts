@@ -29,7 +29,7 @@ class PanelCardOptionMenuController implements ng.IController {
 	constructor(
 		private $element: ng.IRootElementService,
 		private $scope
-	) {}
+	) { }
 
 	public addPreventCloseToDatepicker() {
 		const pickerButtons = this.$element[0].getElementsByClassName("md-datepicker button");
@@ -63,21 +63,17 @@ class PanelCardOptionMenuController implements ng.IController {
 		this.selectedMenuOption = menuItem;
 	}
 
-	public onClickItem(menuItem: clIMenuItem, parentMenuItem: IMenuItem = null) {
-		console.log('menu method run');
-		const elem = document.querySelector(".datePicker");
-		elem.setAttribute("md-is-open", "true");
-		// elem.classList.add("md-datepicker-calendar-pane.md-pane-open");
+	public onClickItem(menuItem: IMenuItem, parentMenuItem: IMenuItem = null) {
 		if (menuItem.date) {
 			return;
 		}
 		this.menuItemSelected(menuItem, parentMenuItem);
 	}
 
-	public onDateChanged(item: IMenuItem, parentMenuItem: IMenuItem,  menu) {
+	public onDateChanged(item: IMenuItem, parentMenuItem: IMenuItem, menu) {
 		this.menuItemSelected(item, parentMenuItem);
 		if (!item.stopClose) {
-			menu.close(true, {closeAll: true});
+			menu.close(true, { closeAll: true });
 		}
 	}
 }
