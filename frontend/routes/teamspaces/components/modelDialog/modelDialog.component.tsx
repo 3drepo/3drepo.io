@@ -18,9 +18,10 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { upperFirst } from 'lodash';
+import { upperFirst, pick } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -29,9 +30,14 @@ import FormControl from '@material-ui/core/FormControl';
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Container } from './modelDialog.styles';
+import {
+	StyledField, Row, SelectWrapper, FieldWrapper, ModelsTableContainer, StyledCustomTable
+} from './modelDialog.styles';
+import { CELL_TYPES, CustomTable, CheckboxField } from '../../../components/customTable/customTable.component';
+
 
 import { MODEL_TYPE, FEDERATION_TYPE } from './../../teamspaces.contants';
+import { FEDERATION_TYPE } from '../../teamspaces.contants';
 
 const ModelSchema = Yup.object().shape({
 	name: schema.firstName.max(120),
@@ -85,6 +91,12 @@ interface IState {
 	selectedProject: string;
 	projectsItems: any[];
 	name: string;
+	availableSubModels: any[];
+	federatedSubModels: any[];
+	availableSubModelsRows: any[];
+	federatedSubModelsRows: any[];
+	selectedAvailableSubModels: any[];
+	selectedFederatedSubModels: any[];
 }
 
 export class ModelDialog extends React.PureComponent<IProps, IState> {
@@ -97,7 +109,13 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		selectedTeamspace: '',
 		projectsItems: [],
 		selectedProject: '',
-		name: ''
+		name: '',
+		availableSubModels: [],
+		federatedSubModels: [],
+		availableSubModelsRows: [],
+		federatedSubModelsRows: [],
+		selectedAvailableSubModels: [],
+		selectedFederatedSubModels: []
 	};
 
 	public handleModelSave = (values) => {
@@ -114,6 +132,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 
 	public handleProjectChange = (onChange) => (event, projectName) => {
 		this.setState({ selectedProject: projectName });
+		if (this.props.type === FEDERATION_TYPE) {
+			const availableSubModels = this.getAvailableSubModels(projectName);
+			console.log('availableSubModels', availableSubModels);
+			this.setState({
+				availableSubModels,
+				availableSubModelsRows: this.getModelsTableRows(availableSubModels)
+			});
+		}
 		onChange(event, projectName);
 	}
 
@@ -124,73 +150,78 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 
 	public getTeamspaceProjects = (teamspaceName) => {
 		const selectedTeamspace = this.props.teamspaces.find((teamspace) => teamspace.value === teamspaceName);
-		return selectedTeamspace.projects.map(({ name }) => ({ value: name }));
+		return selectedTeamspace.projects.map(({ name, models }) => ({
+			value: name,
+			models
+		}));
 	}
 
-	public renderModelFields = () => {
-		return (
-			<>
-				<Field name="code" render={({ field, form }) => (
-					<TextField
-						{...field}
-						label={`Model Code (optional)`}
-						margin="normal"
-						fullWidth={true}
-					/>
-				)} />
+	public getAvailableSubModels = (projectName) => {
+		const selectedProject = this.state.projectsItems.find(project => project.value === projectName);
 
-				<FormControl fullWidth={true} required={true}>
-					<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
-					<Field name="type" render={({ field, form }) => (
-						<CellSelect
-							{...field}
-							items={modelTypes}
-							inputId="type-select"
-							// value={modelTypes[0].value}
-						/>
-					)} />
-				</FormControl>
+		console.log('selectedProject', selectedProject)
+		return selectedProject.models.filter(model => model.federate).map(({ name, subModels }) => ({
+			name, subModels
+		}));
+	}
 
-				<FormControl fullWidth={true} required={true}>
-					<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-					<Field name="unit" render={({ field, form }) => (
-						<CellSelect
-							{...field}
-							items={clientConfigService.units}
-							inputId="unit-select"
-							// value={clientConfigService.units[1].value}
-						/>
-					)} />
-				</FormControl>
+	public addToAvailableSubModels = (name) => {
+	}
 
-				<Field name="revisionName" render={({ field, form }) => (
-					<TextField
-						{...field}
-						label="Revision name (optional)"
-						margin="normal"
-						helperText="Letters, numbers and underscore only"
-						fullWidth={true}
-					/>
-				)} />
+	public addToFederatedSubModels = (name) => {
+	}
 
-				<Field name="revisionDescription" render={({ field, form }) => (
-					<TextField
-						{...field}
-						label="Revision description (optional)"
-						margin="normal"
-						fullWidth={true}
-					/>
-				)} />
-			</>
-		);
+	public handleAvailableSelectionChange = (availableSubModelsRows) => {
+		this.setState({ selectedAvailableSubModels: availableSubModelsRows });
+	}
+
+	public renderCustomCheckbox = (props, row) => {
+		return <CheckboxField {...props} />;
+	}
+
+	public getModelsTableRows = (models = [], selectedModels = []) => {
+
+		return [];
 	}
 
 	public renderFederationFields = () => {
+		const availableRows = [
+			{ data: [ {value: 'a'}]},
+			{ data: [ {value: 'b'}]},
+			{ data: [ {value: 'c'}]},
+			{ data: [ {value: 'd'}]},
+			{ data: [ {value: 'e'}]}
+		];
+		const federatedRows = [
+			{ data: [ {value: 'e'}]},
+			{ data: [ {value: 'f'}]},
+			{ data: [ {value: 'g'}]},
+			{ data: [ {value: 'h'}]},
+			{ data: [ {value: 'i'}]}
+		];
+
 		return (
-			<>
-				federation fields
-			</>
-		)
+			<ModelsTableContainer>
+				<StyledCustomTable
+					cells={[{
+						name: 'Available', HeadingProps: { component: { hideSortIcon: true } }}]
+					}
+					rows={availableRows}
+					onSelectionChange={this.handleAvailableSelectionChange}
+					renderCheckbox={this.renderCustomCheckbox}
+					rowStyle={{ border: 'none', height: '36px' }}
+				/>
+				<StyledCustomTable
+					cells={[{
+						name: 'Federated', HeadingProps: { component: { hideSortIcon: true } }}]
+					}
+					rows={federatedRows}
+					onSelectionChange={this.handleAvailableSelectionChange}
+					renderCheckbox={this.renderCustomCheckbox}
+					rowStyle={{ border: 'none', height: '36px' }}
+				/>
+			</ModelsTableContainer>
+		);
 	}
 
 	public renderOtherFields = (type) => {
@@ -199,6 +230,36 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		} else if (type === MODEL_TYPE) {
 			return this.renderModelFields();
 		}
+	}
+
+	public renderModelFields = () => {
+		return (
+			<>
+				<Row>
+					<FieldWrapper>
+						<Field name="code" render={({ field, form }) => (
+							<TextField
+								{...field}
+								label={`Model Code (optional)`}
+								margin="normal"
+								fullWidth={true}
+							/>
+						)} />
+					</FieldWrapper>
+
+					<SelectWrapper fullWidth={true} required={true}>
+						<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
+						<Field name="type" render={({ field, form }) => (
+							<CellSelect
+								{...field}
+								items={modelTypes}
+								inputId="type-select"
+							/>
+						)} />
+					</SelectWrapper>
+				</Row>
+			</>
+		);
 	}
 
 	public render() {
@@ -213,7 +274,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<DialogContent>
-						<FormControl fullWidth={true} required={true}>
+						<SelectWrapper fullWidth={true} required={true}>
 							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<Field name="teamspace" render={({ field, form }) => (
 								<CellSelect
@@ -228,11 +289,11 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									onChange={this.handleTeamspaceChange(field.onChange)}
 								/>
 							)} />
-						</FormControl>
+						</SelectWrapper>
 
 						{
-							this.state.selectedTeamspace &&
-								<FormControl fullWidth={true} required={true}>
+							// this.state.selectedTeamspace &&
+								<SelectWrapper fullWidth={true} required={true}>
 									<InputLabel shrink htmlFor="project-select">Project</InputLabel>
 									<Field name="project" render={({ field, form }) => (
 										<CellSelect
@@ -247,25 +308,43 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 											onChange={this.handleProjectChange(field.onChange)}
 										/>
 									)} />
-								</FormControl>
+								</SelectWrapper>
 						}
 
 						{
-							this.state.selectedProject &&
+							// this.state.selectedProject &&
 								<>
-									<Field name="name" render={({ field, form }) => (
-										<TextField
-											{...field}
-											error={Boolean(form.touched.name && form.errors.name)}
-											helperText={form.touched.name && (form.errors.name || '')}
-											label={`${upperFirst(type)} Name`}
-											margin="normal"
-											required
-											fullWidth={true}
-											onChange={this.handleNameChange(field.onChange)}
-										/>
-									)} />
-									{ typedName && this.renderOtherFields(type)}
+									<Row>
+										<FieldWrapper>
+											<Field name="name" render={({ field, form }) => (
+												<TextField
+													{...field}
+													error={Boolean(form.touched.name && form.errors.name)}
+													helperText={form.touched.name && (form.errors.name || '')}
+													label={`${upperFirst(type)} Name`}
+													margin="normal"
+													required
+													fullWidth={true}
+													onChange={this.handleNameChange(field.onChange)}
+												/>
+											)} />
+										</FieldWrapper>
+										<SelectWrapper fullWidth={true} required={true}>
+											<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
+											<Field name="unit" render={({ field, form }) => (
+												<CellSelect
+													{...field}
+													items={clientConfigService.units}
+													inputId="unit-select"
+												// value={clientConfigService.units[1].value}
+												/>
+											)} />
+										</SelectWrapper>
+									</Row>
+									{
+										// typedName &&
+										this.renderOtherFields(type)
+									}
 								</>
 						}
 
@@ -283,7 +362,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 								>
 									Save
 							</Button>
-							)
+							);
 						}} />
 					</DialogActions>
 				</Form>

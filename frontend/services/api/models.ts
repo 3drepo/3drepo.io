@@ -40,7 +40,7 @@ export const updateModelsPermissions = (teamspace, permissionsList) => {
  * @param model
  */
 export const createModel = (teamspace, modelData) => {
-	return api.post(`${teamspace}/models`, modelData);
+	return api.post(`${teamspace}/model`, modelData);
 };
 
 /**
@@ -49,7 +49,7 @@ export const createModel = (teamspace, modelData) => {
  * @param model
  */
 export const updateModel = (teamspace, modelName, modelData) => {
-	return api.put(`${teamspace}/models/${modelName}`, modelData);
+	return api.put(`${teamspace}/model/${modelName}`, modelData);
 };
 
 /**
@@ -58,5 +58,5 @@ export const updateModel = (teamspace, modelName, modelData) => {
  * @param model
  */
 export const removeModel = (teamspace, modelName) => {
-	return api.delete(`${teamspace}/models/${modelName}`);
+	return api.delete(`${teamspace}/model/${modelName}`);
 };
