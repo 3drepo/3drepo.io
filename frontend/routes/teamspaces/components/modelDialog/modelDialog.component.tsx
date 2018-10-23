@@ -158,7 +158,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 
 			this.setState({
 				available,
-				availableRows: this.getModelsTableRows(available),
+				availableRows: this.getModelsTableRows(available, this.state.selectedAvailable),
 				federated
 			});
 		}
@@ -194,12 +194,13 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		}));
 	}
 
-	public handleAvailableSelectionChange = (availableRows) => {
-		this.setState({ selectedAvailable: availableRows });
-	}
+	// todo: napisac funkjce ktora umozliwi to \/ dla available i federated
 
-	public renderCustomCheckbox = (props) => {
-		return <CheckboxField {...props} disabled={!this.state.selectedProject} />;
+	public handleAvailableSelectionChange = (selectedRows) => {
+		this.setState({
+			selectedAvailable: selectedRows,
+			availableRows: this.getModelsTableRows(this.getAvailable(this.state.selectedProject), selectedRows)
+		});
 	}
 
 	public getModelsTableRows = (models = [], selectedModels = []) => {
@@ -208,43 +209,45 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 				{ value: model.name }
 			];
 
-			return { data, ...model };
+			const selected = selectedModels.some((selectedModel) => model.name === selectedModel.name);
+
+			return { data, name: model.name, selected };
 		});
 	}
 
 	public getModelCells = (name, icon) => {
 		return [
 			{
-				name, HeadingProps: { component: { hideSortIcon: true } }
+				name, HeadingProps: { component: { hideSortIcon: true, disabled: false } }
 			},
 			{
 				type: CELL_TYPES.ICON_BUTTON,
 				HeadingComponent: StyledTableButton,
 				HeadingProps: {
-					component: { hideSortIcon: true, icon },
-					onClick: {},
-					disabled: true
+					component: {
+						hideSortIcon: true,
+						icon,
+						onClick: () => console.log('handle click')
+					},
+					disabled: false
 				}
 			}
 		];
 	}
 
 	public renderFederationFields = () => {
-
 		return (
 			<ModelsTableContainer>
 				<CustomTable
 					cells={this.getModelCells('Available', 'arrow_forward')}
 					rows={this.state.availableRows}
 					onSelectionChange={this.handleAvailableSelectionChange}
-					renderCheckbox={this.renderCustomCheckbox}
 					rowStyle={{ border: 'none', height: '36px' }}
 				/>
 				<CustomTable
 					cells={this.getModelCells('Federated', 'arrow_back')}
 					rows={this.state.federatedRows}
 					onSelectionChange={this.handleAvailableSelectionChange}
-					renderCheckbox={this.renderCustomCheckbox}
 					rowStyle={{ border: 'none', height: '36px' }}
 				/>
 			</ModelsTableContainer>
