@@ -218,7 +218,6 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 		});
 	}
 
-
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
 
@@ -237,8 +236,6 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 			changes.rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
 			changes.currentUser = this.props.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
 		}
-		console.log('sdfsdfsdfsfd', this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers));
-
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
@@ -246,8 +243,6 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 	}
 
 	public handleSelectionChange = (rows) => {
-		console.log('handle selection change', rows);
-
 		if (this.props.onSelectionChange) {
 			this.props.onSelectionChange(rows);
 		}
@@ -263,14 +258,13 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 				/>
 			);
 		}
-		console.log(props)
+
 		return <CheckboxField {...props} />;
 	}
 
 	public render() {
-		const {rows, cells } = this.state;
-		console.log('rows', rows);
-		console.log('cells', cells);
+		const { rows, cells } = this.state;
+
 		return (
 			<>
 				{cells.length ? (

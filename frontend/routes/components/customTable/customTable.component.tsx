@@ -16,10 +16,7 @@
  */
 
 import * as React from 'react';
-import {
-	matchesProperty, cond, orderBy, pick, values,
-	stubTrue, isEqual, isEmpty
-} from 'lodash';
+import { matchesProperty, cond, orderBy, pick, values, stubTrue, isEqual, isEmpty } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -343,6 +340,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 	public handleSelectAll = (event, checked) => {
 		const selectedRows = checked ? [...this.state.processedRows] : [];
+
 		this.setState({selectedRows}, () => {
 			this.props.onSelectionChange(selectedRows);
 		});
@@ -360,10 +358,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public renderHeader = (cells) => {
 		const {currentSort} = this.state;
 		const setTooltip = (Component, text) => (
-			<Tooltip
-				title={text}
-				placement="bottom-end"
-			>
+			<Tooltip title={text} placement="bottom-end">
 				{Component}
 			</Tooltip>
 		);
@@ -408,7 +403,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 			return this.props.renderCheckbox(props, row);
 		}
 
-		return <CheckboxField {...props} />;
+		return <CheckboxField {...props} disabled />;
 	}
 
 	/**

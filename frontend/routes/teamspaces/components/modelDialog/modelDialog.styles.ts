@@ -18,7 +18,8 @@
 import styled from 'styled-components';
 import { Field } from 'formik';
 import { CustomTable } from '../../../components/customTable/customTable.component';
-
+import Icon from '@material-ui/core/Icon';
+import { TableButton } from '../../../components/customTable/customTable.component';
 import FormControl from '@material-ui/core/FormControl';
 
 export const StyledField = styled(Field)`
@@ -67,4 +68,8 @@ export const ModelsTableContainer = styled.div`
 			}
 		}
 	}
+`;
+
+export const StyledTableButton = styled(TableButton)`
+	&& {}
 `;
