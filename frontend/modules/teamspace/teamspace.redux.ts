@@ -16,9 +16,6 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { getAPIUrl } from '../../services/api';
-
-const getAvatartUrl = (username) => getAPIUrl(`${username}/avatar?${Date.now()}`);
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
@@ -33,7 +30,7 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	setAvatarPendingState: ['pendingState'],
 	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
-	refreshAvatar: []
+	refreshAvatar: ['avatarUrl']
 }, { prefix: 'TEAMSPACE_' });
 
 export const INITIAL_STATE = {
@@ -59,7 +56,6 @@ const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
 };
 
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
-	userData.avatarUrl = getAvatartUrl(userData.username);
 	return {
 		...state,
 		currentTeamspace: userData.username,
@@ -73,11 +69,8 @@ const updateUserSuccess = (state = INITIAL_STATE, { userData }) => {
 	return { ...state, currentUser };
 };
 
-const refreshAvatar = (state = INITIAL_STATE) => {
-	const currentUser = {
-		...state.currentUser,
-		avatarUrl: getAvatartUrl(state.currentUser.username)
-	};
+const refreshAvatar = (state = INITIAL_STATE, { avatarUrl }) => {
+	const currentUser = { ...state.currentUser, avatarUrl };
 
 	return {
 		...state,

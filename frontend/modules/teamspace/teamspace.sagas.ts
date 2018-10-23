@@ -24,6 +24,8 @@ import { selectCurrentUser } from './teamspace.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 
+const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
+
 export function* fetchUser({ username }) {
 	try {
 		yield put(TeamspaceActions.setPendingState(true));
@@ -31,8 +33,12 @@ export function* fetchUser({ username }) {
 
 		const { data } = yield call(API.fetchTeamspace, [username]);
 
-		return yield all([
-			put(TeamspaceActions.fetchUserSuccess({...data, username})),
+		yield all([
+			put(TeamspaceActions.fetchUserSuccess({
+				...data,
+				username,
+				avatarUrl: getAvatarUrl(username)
+			})),
 			put(TeamspaceActions.setPendingState(false))
 		]);
 	} catch (e) {
@@ -45,7 +51,7 @@ export function* fetchQuotaInfo({ teamspace }) {
 	try {
 		const { data } = yield API.getQuotaInfo(teamspace);
 
-		return yield put(TeamspaceActions.fetchQuotaInfoSuccess({ ...data }));
+		yield put(TeamspaceActions.fetchQuotaInfoSuccess({ ...data }));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'quota info', e.response));
 	}
@@ -57,9 +63,9 @@ export function* updateUser({ userData }) {
 
 		const { username } = yield select(selectCurrentUser);
 		yield API.updateUser(username, userData);
-		yield put(TeamspaceActions.updateUserSuccess(userData));
 		yield put(SnackbarActions.show('Profile updated'));
 		yield put(TeamspaceActions.setPendingState(false));
+		yield put(TeamspaceActions.updateUserSuccess(userData));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'user', e.response));
 		yield put(TeamspaceActions.setPendingState(false));
@@ -95,7 +101,9 @@ export function* uploadAvatar({ file }) {
 		if (file.size < maxSize) {
 			formData.append('file', file);
 			yield API.uploadAvatar(username, formData);
-			yield put(TeamspaceActions.refreshAvatar());
+
+			const avatarUrl = getAvatarUrl(username);
+			yield put(TeamspaceActions.refreshAvatar(avatarUrl));
 			yield put(SnackbarActions.show('Avatar updated'));
 		} else {
 			const message = `File is too big! Must be smaller than ${maxSizeUser}.`;
