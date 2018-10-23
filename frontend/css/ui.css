@@ -28,8 +28,8 @@
 	url('../fonts/MaterialIcons-Regular.ttf') format('truetype');
 }
 
-.angular-material-icons,
-.material-icons {
+.angular-material-icons {
+
 	font-family: 'Material Icons';
 	font-weight: normal;
 	font-style: normal;
@@ -73,20 +73,20 @@ html, body {
 	border-radius: 30px;
 	background: rgb(6,86,60);
 	top: 0;
-	right: 0;
+	right: 0px;
 	cursor: pointer;
 	display: none;
 }
 
 .connection {
 	position: absolute;
-	left: 0;
-	bottom: 0;
-	background: #848484;
-	color: white;
+    left: 0px;
+    bottom: 0px;
+    background: #848484;
+    color: white;
 	padding: 4px;
 	display: none;
-	border-top-right-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
 .offline {

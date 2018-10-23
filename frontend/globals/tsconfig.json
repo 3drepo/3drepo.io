@@ -1,9 +1,10 @@
 {
-  "compilerOptions": {
-    "lib": [
-      "es5",
-      "es6",
-      "dom",
-    ],
-  }
+    "compilerOptions": {
+      "lib": [
+        "es5",
+        "es6",
+        "dom",
+      ],
+    }
+    
 }

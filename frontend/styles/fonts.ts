@@ -1,8 +1,0 @@
-export const FONT_WEIGHT = {
-	LIGHTER: 100,
-	LIGHT: 300,
-	NORMAL: 400,
-	SEMIBOLD: 500,
-	BOLD: 600,
-	BOLDER: 700
-};

@@ -5,6 +5,7 @@
 
 [data-simplebar=init][data-simplebar-x-hidden] > .simplebar-scroll-content > .simplebar-content {
   overflow-x: hidden;
+  padding-bottom: 0 !important
 }
 
 [data-simplebar=init][data-simplebar-x-hidden] > .simplebar-track.horizontal{
@@ -13,6 +14,7 @@
 
 [data-simplebar=init][data-simplebar-y-hidden] > .simplebar-scroll-content > .simplebar-content {
   overflow-y: hidden !important;
+  padding-bottom: 0 !important;
 }
 
 [data-simplebar=init][data-simplebar-y-hidden] > .simplebar-track.vertical {

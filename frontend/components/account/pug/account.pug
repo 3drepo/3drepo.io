@@ -28,40 +28,44 @@ div#accountHolder(
 			has-avatar="vm.hasAvatar"
 			item-to-show="vm.itemToShow")
 
-		.accountSpace
-
 		#accountItem(flex="100")
 
 			account-teamspaces(
 				is-lite-mode="vm.isLiteMode"
 				loading="vm.loadingAccount"
-				ng-show="vm.pageVisibility.teamspaces"
+				ng-show="vm.itemToShow === 'teamspaces'"
 				account="vm.account"
 				accounts="vm.accounts"
 				on-show-page="vm.showPage(page, callingPage, data)"
 				selected-index="vm.data.tabIndex")
 
-			profile(ng-if="vm.username && vm.pageVisibility.profile")
+			account-profile(
+				ng-if="vm.username && vm.itemToShow === 'profile'"
+				username="vm.username"
+				first-name="vm.firstName"
+				last-name="vm.lastName"
+				email="vm.email")
 
 			account-billing(
-				ng-if="vm.username && vm.pageVisibility.billing"
+				ng-if="vm.username && vm.itemToShow === 'billing'"
 				account="vm.account"
 				billing-address="vm.billingAddress"
 				first-name="vm.firstName"
 				last-name="vm.lastName")
 
 			account-modelsetting(
-				ng-if="vm.username && vm.pageVisibility.modelsetting"
+				ng-if="vm.username && vm.itemToShow === 'modelsetting'"
 				account="vm.account"
 				accounts="vm.accounts"
 				model="vm.model"
 				data="vm.data"
 				show-page="vm.showPage(page, callingPage, data)")
 
-			user-management(
-				ng-if="vm.username && vm.pageVisibility.userManagement"
+			account-user-management(
+				ng-if="vm.username && vm.itemToShow === 'userManagement'"
 				current-user="vm.account"
-				teamspaces="vm.accounts")
+				accounts="vm.accounts"
+				show-page="vm.showPage(page, callingPage, data)")
 
 div(ng-if="vm.state.model")
 	model(
@@ -73,6 +77,3 @@ div(ng-if="vm.state.model")
 		issue-id="vm.state.issue"
 		risk-id="vm.state.risk"
 		state="vm.state")
-
-dialog-container
-snackbar-container

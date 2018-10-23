@@ -63,14 +63,11 @@ groups .groupMetaData {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100px;
-    margin:2px;
 }
 
 groups .groupColorBar {
     width: 15px;
     margin: 10px;
-    min-height: 75px;
-    max-height: 75px;
 }
 
 groups .groupColorHolder {
@@ -92,10 +89,6 @@ groups .groupObjectMetaContainer {
 
 }
 
-.metaGroup.layout-row.flex-100 {
-    margin-top: 10px;
-}
-
 groups .groupObjectMeta {
     font-size: 14px;
     margin-right: 10px;
@@ -114,12 +107,7 @@ groups .groupName {
     font-weight: bold;
     font-size: 14px;
     margin-bottom: 0px;
-    margin-top:15px;
     height: 100%;
-}
-
-.metaGroup.layout-row.flex-100 {
-    margin-top: 3px;
 }
 
 groups .groupEnterHolder {

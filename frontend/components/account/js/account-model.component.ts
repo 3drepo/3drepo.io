@@ -24,8 +24,8 @@ import { NotificationModelEvents } from "../../notifications/js/notification.mod
 import { NotificationService } from "../../notifications/js/notification.service";
 import { RevisionsService } from "../../revisions/js/revisions.service";
 
-import { PERMISSIONS_VIEWS } from "../../../routes/projects/projects.component";
-import { TABS_TYPES } from "../../../routes/userManagement/userManagement.component";
+import {PERMISSIONS_VIEWS} from "../../projects-permissions/js/projects-permissions.component";
+import {TABS_TYPES} from "./account-user-management.component";
 
 class AccountModelController implements ng.IController {
 

@@ -15,9 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 declare const grecaptcha;
-
-import { evaluatePassword } from '../../../services/validation';
-
+declare let zxcvbn;
 class SignupController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -25,11 +23,11 @@ class SignupController implements ng.IController {
 		"$mdDialog",
 		"$location",
 		"$window",
-		"$timeout",
 
 		"ClientConfigService",
 		"APIService",
-		"AuthService"
+		"AuthService",
+		"PasswordService"
 	];
 
 	private reCaptchaResponse;
@@ -64,12 +62,14 @@ class SignupController implements ng.IController {
 		private $mdDialog,
 		private $location,
 		private $window,
-		private $timeout,
 
 		private ClientConfigService,
 		private APIService,
-		private AuthService
-	) {}
+		private AuthService,
+		private PasswordService
+	) {
+
+	}
 
 	public $onInit() {
 
@@ -166,14 +166,11 @@ class SignupController implements ng.IController {
 			if (this.isDefined(newValue)) {
 				this.registerErrorMessage = "";
 			}
-			if (this.newUser.password !== undefined) {
-				evaluatePassword(this.newUser.password).then(({ validPassword, comment }) => {
-					this.$timeout(() => {
-						this.passwordResult = validPassword;
-						this.passwordStrength = comment;
-						this.$scope.signup.password.$setValidity("required", this.passwordResult);
-					});
-				});
+			if (this.newUser.password !== undefined && this.PasswordService.passwordLibraryAvailable()) {
+				const result = this.PasswordService.evaluatePassword(this.newUser.password);
+				this.passwordResult = result.validPassword;
+				this.passwordStrength = result.comment;
+				this.$scope.signup.password.$setValidity("required", this.passwordResult);
 			}
 		}, true);
 
