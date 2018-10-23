@@ -16,12 +16,12 @@
  */
 
 import styled from 'styled-components';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { COLOR } from '../../../../../styles';
 
 export const LoaderContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 2rem 0;
+  background: #fafafa;
+	color: ${COLOR.BLACK_40};
 `;
-
-export const Loader = CircularProgress;

@@ -18,20 +18,19 @@
 import * as React from 'react';
 
 import DialogContent from '@material-ui/core/DialogContent';
-import { Loader, LoaderContainer } from './loadingDialog.styles';
+import { LoaderContainer } from './loadingDialog.styles';
+import { Loader } from '../../../loader/loader.component';
 
 interface IProps {
-	content: any[];
+	content: string;
 }
 
 export const LoadingDialog = (props: IProps) => {
 	return (
 		<>
 			<DialogContent>
-				{props.content}
-
 				<LoaderContainer>
-					<Loader />
+					<Loader content={props.content} />
 				</LoaderContainer>
 			</DialogContent>
 		</>

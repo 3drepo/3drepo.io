@@ -39,17 +39,19 @@ export class Subscription extends React.PureComponent<IProps, any> {
 		this.props.fetchBillingData(this.props.teamspace);
 	}
 
+	public renderLoader(content) {
+		return (
+			<LoaderContainer>
+				<Loader content={content} />
+			</LoaderContainer>
+		);
+	}
+
 	public render() {
 		const { billingInfo, spaceInfo, licencesInfo, changeSubscription, teamspace } = this.props;
 
 		if (this.props.isLoadingBilling) {
-			const content = `Loading subscription data...`;
-
-			return (
-				<LoaderContainer>
-					<Loader content={content} />
-				</LoaderContainer>
-			);
+			return this.renderLoader(`Loading subscription data...`);
 		}
 
 		return (
