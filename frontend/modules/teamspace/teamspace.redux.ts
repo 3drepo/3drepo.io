@@ -17,7 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 
-const getAvatartUrl = (username) => `/api/${username}/avatar?${Date.now()}`;
+const getAvatartUrl = (username) => `${ClientConfig.apiUrls.all[0]}/${username}/avatar?${Date.now()}`;
 
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
