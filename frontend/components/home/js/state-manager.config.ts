@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
+function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $provide) {
 	$locationProvider.html5Mode(true);
 
 	$stateProvider.state("app", {
@@ -25,6 +25,8 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
 				StateManager.state.authInitialized = false;
 				const finishedAuth = $q.defer();
+
+				console.log('init app');
 
 				AuthService.init()
 					.then(() => {
@@ -51,7 +53,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.dashboard", {
-		url: "/dashboard/*path",
+		url: "/dashboard",
 		template: "<dashboard flex/>",
 		resolve: {
 			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
@@ -60,12 +62,14 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
+	$stateProvider.state("app.dashboard.pages", {
+		url: "/*page"
+	});
+
 	$httpProvider.interceptors.push("AuthInterceptor");
 	$urlRouterProvider.otherwise("/dashboard");
-
 /* 
 
-	debugger
 	const stateStack       = [window.ClientConfig.structure];
 	const stateNameStack   = ["home"];
 
@@ -111,5 +115,6 @@ export const StateManagerConfigModule = angular
 		"$urlRouterProvider",
 		"$locationProvider",
 		"$httpProvider",
+		"$provide",
 		StateManagerConfig
 	]);

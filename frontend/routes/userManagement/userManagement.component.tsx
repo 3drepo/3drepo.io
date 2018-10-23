@@ -45,24 +45,32 @@ export const TABS_TYPES = {
 	JOBS: 2
 };
 
-const TABS_ROUTES = [{
+export const USERS_TAB = {
 	label: 'Users',
 	path: '/users',
 	isAdminOnly: true,
 	component: Users
-},
-{
+};
+
+export const PROJECTS_TAB = {
 	label: 'Projects',
 	path: '/projects',
 	component: Projects,
 	isAdminOnly: false
-},
-{
+};
+
+export const JOBS_TAB = {
 	label: 'Jobs',
 	path: '/jobs',
 	isAdminOnly: true,
 	component: Jobs
-}];
+};
+
+const TABS_ROUTES = [
+	USERS_TAB,
+	PROJECTS_TAB,
+	JOBS_TAB
+];
 
 interface IProps {
 	match: any;
@@ -83,11 +91,7 @@ interface IState {
 
 export class UserManagement extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps, prevState) => {
-		const queryParams = queryString.parse(location.search);
-		const activeTab = Number(queryParams.tab || prevState.activeTab);
-		const initialTab = isUndefined(nextProps.isTeamspaceAdmin) ? TABS_TYPES.USERS : TABS_TYPES.PROJECTS;
 		return {
-			activeTab: nextProps.isTeamspaceAdmin ? activeTab : initialTab,
 			selectedTeamspace: nextProps.match.params.teamspace || prevState.selectedTeamspace
 		};
 	}
@@ -97,14 +101,6 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		selectedTeamspace: '',
 		teamspacesItems: []
 	};
-
-	public updateUrlParams = (params) => {
-		const { pathname, search } = this.props.location;
-		const queryParams = Object.assign({}, queryString.parse(search), params);
-		const updatedQueryString = queryString.stringify(queryParams);
-
-		this.props.history.push(`${pathname}?${updatedQueryString}`);
-	}
 
 	public handleChange = (event, activeTab) => {
 		this.setState({activeTab});
@@ -130,8 +126,8 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const teamspaceData = teamspaces.find(({ account }) => account === selectedTeamspace);
 		const teamspace = teamspaceData ? selectedTeamspace : defaultTeamspace;
 
+		this.props.onTeamspaceChange(teamspace);
 		this.setState(changes);
-		this.onTeamspaceChange(null, teamspace);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -149,7 +145,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 
 	public renderTabContent = () => {
 		const {isLoadingTeamspace, isTeamspaceAdmin, match} = this.props;
-		const {activeTab, selectedTeamspace} = this.state;
+		const {selectedTeamspace} = this.state;
 
 		if (!selectedTeamspace) {
 			return <TextOverlay content="Select teamspace to enable settings" />;

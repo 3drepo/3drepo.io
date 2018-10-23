@@ -100,6 +100,7 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 	const { teamspace } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace.name));
+
 	return Object.assign({}, INITIAL_STATE, {
 		users,
 		isPending: false,

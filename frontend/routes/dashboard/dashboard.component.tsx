@@ -54,9 +54,24 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 		this.props.fetchUser(this.props.currentUser.username);
 	}
 
+	public renderRoutes = (match, currentUser) => {
+		return (
+			<Switch>
+				{/* <Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} /> */}
+				<Route path={`${match.url}dashboard/user-management/:teamspace`} component={UserManagement} />
+				<Route exact path={`${match.url}dashboard/profile`} component={Profile} />
+				{/* <Route path={`${match.url}dashboard/billing`} component={Billing} /> */}
+				<Redirect exact from={`${match.url}dashboard`} to={`${match.url}dashboard/teamspaces`} />
+				<Redirect
+					from={`${match.url}dashboard/user-management/:teamspace?`}
+					to={`${match.url}dashboard/user-management/${currentUser.username}/users`}
+				/>
+			</Switch>
+		);
+	}
+
 	public render() {
 		const { match, currentUser, isPending } = this.props;
-
 		return (
 			<Container
 				container
@@ -74,19 +89,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 					/>
 				</Sidebar>
 				<Content>
-					<Switch>
-						{/* <Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} /> */}
-						<Route path={`${match.url}dashboard/user-management/:teamspace`} component={UserManagement} />
-						<Route exact path={`${match.url}dashboard/:teamspace/profile`} component={Profile} />
-						{/* <Route path={`${match.url}dashboard/billing`} component={Billing} /> */}
-						<Redirect exact from={`${match.url}dashboard`} to="/dashboard/teamspaces" />
-						<Redirect
-							exact
-							from={`${match.url}dashboard/user-management`}
-							to={`${match.url}dashboard/user-management/${currentUser.username}`}
-						/>
-
-					</Switch>
+					{!isPending && this.renderRoutes(match, currentUser)}
 				</Content>
 			</Container>
 		);

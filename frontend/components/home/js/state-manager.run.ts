@@ -1,3 +1,5 @@
+import { history } from "../../../helpers/migration";
+
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -25,7 +27,8 @@ function StateManagerRun(
 
 	StateManager,
 	AuthService,
-	AnalyticService
+	AnalyticService,
+	$urlRouter
 ) {
 
 	const dateFilter = $filter("date");
@@ -80,20 +83,26 @@ function StateManagerRun(
 		StateManager.handleStateChange(stateChangeObject);
 	}); */
 
-	$rootScope.$on("$locationChangeSuccess", () => {
+	$rootScope.$on('$locationChangeSuccess', (e, newUrl, oldUrl) => {
+		e.preventDefault();
+
+		if ($state.current.name !== 'app.dashboard.pages') {
+			$urlRouter.sync();
+		} else if (newUrl !== oldUrl) {
+			history.push(location.pathname + location.search);
+		}
 
 		AnalyticService.sendPageView(location);
 
-/* 		const queryParams = $location.search();
-
-		if (Object.keys(queryParams).length === 0) {
+		const queryParams = $location.search();
+		if (Object.keys(queryParams).length) {
 			StateManager.clearQuery();
 		} else {
 			StateManager.setQuery(queryParams);
-		} */
-
+		}
 	});
 
+	$urlRouter.listen();
 }
 
 export const StateManagerRunModule = angular
@@ -109,5 +118,6 @@ export const StateManagerRunModule = angular
 		"StateManager",
 		"AuthService",
 		"AnalyticService",
+		"$urlRouter",
 		StateManagerRun
 	]);
