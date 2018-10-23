@@ -21,7 +21,7 @@ describe("Implied permission::", function () {
 		"desc": "this is a model",
 		"type": "Structural",
 		"code": "00123",
-		"unit": "m"
+		"unit": "m",
 	};
 	const q = require("../../services/queue");
 
@@ -158,7 +158,10 @@ describe("Implied permission::", function () {
 			const modelName = "model123";
 			agent
 				.post(`/${sharedTeamspace}/model`)
-				.send(Object.assign({modelName: modelName}, model))
+				.send(Object.assign({
+					modelName: modelName,
+					"project": "Sample_Project"
+				}, model))
 				.expect(200, done);
 		});
 
@@ -171,6 +174,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName: modelName,
+					"project": "Sample_Project",
 					subModels:[{
 						"database": sharedTeamspace,
 						"model": modelId
@@ -406,7 +410,7 @@ describe("Implied permission::", function () {
 			const modelName = "model123";
 			agent
 				.post(`/${sharedTeamspace}/model`)
-				.send(Object.assign({modelName: modelName}, model))
+				.send(Object.assign({modelName: modelName, project: "Sample_Project"}, model))
 				.expect(401, done);
 		});
 
@@ -426,6 +430,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({
 					modelName : modelName,
+					project: "Sample_Project",
 					subModels:[{
 						"database": sharedTeamspace,
 						"model": modelId
@@ -487,7 +492,6 @@ describe("Implied permission::", function () {
 		it("cannot upload model", function(done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(401, done);
 		});
 
@@ -780,7 +784,6 @@ describe("Implied permission::", function () {
 		it("cannot upload other model", function(done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(401, done);
 		});
 
@@ -1060,14 +1063,12 @@ describe("Implied permission::", function () {
 		it("cannot upload model", function(done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(401, done);
 		});
 
 		it("cannot upload other model in other project as well", function(done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(401, done);
 		});
 
@@ -1344,7 +1345,6 @@ describe("Implied permission::", function () {
 		it("cannot upload other model in other project as well", function(done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
 				.expect(401, done);
 		});
 
