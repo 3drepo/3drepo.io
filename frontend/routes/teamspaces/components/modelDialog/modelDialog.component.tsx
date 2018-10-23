@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { upperFirst, pick } from 'lodash';
+import { upperFirst, pick, isEmpty } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -31,9 +31,11 @@ import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import {
-	StyledField, Row, SelectWrapper, FieldWrapper, ModelsTableContainer, StyledCustomTable
+	StyledField, Row, SelectWrapper, FieldWrapper, ModelsTableContainer, StyledTableButton
 } from './modelDialog.styles';
-import { CELL_TYPES, CustomTable, CheckboxField } from '../../../components/customTable/customTable.component';
+import {
+	CELL_TYPES, CustomTable, CheckboxField, TableButton
+} from '../../../components/customTable/customTable.component';
 
 
 import { MODEL_TYPE, FEDERATION_TYPE } from './../../teamspaces.contants';
@@ -91,12 +93,12 @@ interface IState {
 	selectedProject: string;
 	projectsItems: any[];
 	name: string;
-	availableSubModels: any[];
-	federatedSubModels: any[];
-	availableSubModelsRows: any[];
-	federatedSubModelsRows: any[];
-	selectedAvailableSubModels: any[];
-	selectedFederatedSubModels: any[];
+	available: any[];
+	federated: any[];
+	availableRows: any[];
+	federatedRows: any[];
+	selectedAvailable: any[];
+	selectedFederated: any[];
 }
 
 export class ModelDialog extends React.PureComponent<IProps, IState> {
@@ -110,13 +112,31 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		projectsItems: [],
 		selectedProject: '',
 		name: '',
-		availableSubModels: [],
-		federatedSubModels: [],
-		availableSubModelsRows: [],
-		federatedSubModelsRows: [],
-		selectedAvailableSubModels: [],
-		selectedFederatedSubModels: []
+		available: [],
+		federated: [],
+		availableRows: [],
+		federatedRows: [],
+		selectedAvailable: [],
+		selectedFederated: []
 	};
+
+	public componentDidUpdate(prevProps, prevState) {
+		// const changes = {} as any;
+
+		// const selectedAvailableChanged = prevState.selectedAvailable.length !== this.state.selectedAvailable.length;
+		// if (selectedAvailableChanged) {
+		// 	changes.availableRows = this.getModelsTableRows(this.state.available, this.state.selectedAvailable);
+		// }
+
+		// const selectedFederatedChanged = prevState.selectedFederated.length !== this.state.selectedFederated.length;
+		// if (selectedFederatedChanged) {
+		// 	changes.federatedRows = this.getModelsTableRows(this.state.federated, this.state.selectedFederated);
+		// }
+
+		// if (!isEmpty(changes)) {
+		// 	this.setState(changes);
+		// }
+	}
 
 	public handleModelSave = (values) => {
 		this.props.handleResolve(values);
@@ -133,11 +153,13 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	public handleProjectChange = (onChange) => (event, projectName) => {
 		this.setState({ selectedProject: projectName });
 		if (this.props.type === FEDERATION_TYPE) {
-			const availableSubModels = this.getAvailableSubModels(projectName);
-			console.log('availableSubModels', availableSubModels);
+			const available = this.getAvailable(projectName);
+			const federated = this.getFederated(projectName);
+
 			this.setState({
-				availableSubModels,
-				availableSubModelsRows: this.getModelsTableRows(availableSubModels)
+				available,
+				availableRows: this.getModelsTableRows(available),
+				federated
 			});
 		}
 		onChange(event, projectName);
@@ -156,66 +178,71 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		}));
 	}
 
-	public getAvailableSubModels = (projectName) => {
+	public getAvailable = (projectName) => {
 		const selectedProject = this.state.projectsItems.find(project => project.value === projectName);
 
-		console.log('selectedProject', selectedProject)
-		return selectedProject.models.filter(model => model.federate).map(({ name, subModels }) => ({
-			name, subModels
+		return selectedProject.models.filter(model => !model.federate).map(({ name }) => ({
+			name
 		}));
 	}
 
-	public addToAvailableSubModels = (name) => {
+	public getFederated = (projectName) => {
+		const selectedProject = this.state.projectsItems.find(project => project.value === projectName);
+
+		return selectedProject.models.filter(model => model.federate).map(({ name }) => ({
+			name
+		}));
 	}
 
-	public addToFederatedSubModels = (name) => {
+	public handleAvailableSelectionChange = (availableRows) => {
+		this.setState({ selectedAvailable: availableRows });
 	}
 
-	public handleAvailableSelectionChange = (availableSubModelsRows) => {
-		this.setState({ selectedAvailableSubModels: availableSubModelsRows });
-	}
-
-	public renderCustomCheckbox = (props, row) => {
-		return <CheckboxField {...props} />;
+	public renderCustomCheckbox = (props) => {
+		return <CheckboxField {...props} disabled={!this.state.selectedProject} />;
 	}
 
 	public getModelsTableRows = (models = [], selectedModels = []) => {
+		return models.map((model) => {
+			const data = [
+				{ value: model.name }
+			];
 
-		return [];
+			return { data, ...model };
+		});
+	}
+
+	public getModelCells = (name, icon) => {
+		return [
+			{
+				name, HeadingProps: { component: { hideSortIcon: true } }
+			},
+			{
+				type: CELL_TYPES.ICON_BUTTON,
+				HeadingComponent: StyledTableButton,
+				HeadingProps: {
+					component: { hideSortIcon: true, icon },
+					onClick: {},
+					disabled: true
+				}
+			}
+		];
 	}
 
 	public renderFederationFields = () => {
-		const availableRows = [
-			{ data: [ {value: 'a'}]},
-			{ data: [ {value: 'b'}]},
-			{ data: [ {value: 'c'}]},
-			{ data: [ {value: 'd'}]},
-			{ data: [ {value: 'e'}]}
-		];
-		const federatedRows = [
-			{ data: [ {value: 'e'}]},
-			{ data: [ {value: 'f'}]},
-			{ data: [ {value: 'g'}]},
-			{ data: [ {value: 'h'}]},
-			{ data: [ {value: 'i'}]}
-		];
 
 		return (
 			<ModelsTableContainer>
-				<StyledCustomTable
-					cells={[{
-						name: 'Available', HeadingProps: { component: { hideSortIcon: true } }}]
-					}
-					rows={availableRows}
+				<CustomTable
+					cells={this.getModelCells('Available', 'arrow_forward')}
+					rows={this.state.availableRows}
 					onSelectionChange={this.handleAvailableSelectionChange}
 					renderCheckbox={this.renderCustomCheckbox}
 					rowStyle={{ border: 'none', height: '36px' }}
 				/>
-				<StyledCustomTable
-					cells={[{
-						name: 'Federated', HeadingProps: { component: { hideSortIcon: true } }}]
-					}
-					rows={federatedRows}
+				<CustomTable
+					cells={this.getModelCells('Federated', 'arrow_back')}
+					rows={this.state.federatedRows}
 					onSelectionChange={this.handleAvailableSelectionChange}
 					renderCheckbox={this.renderCustomCheckbox}
 					rowStyle={{ border: 'none', height: '36px' }}
