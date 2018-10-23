@@ -21,11 +21,17 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { Dashboard } from './dashboard.component';
-import { selectCurrentUser, selectIsPending, TeamspaceActions } from '../../modules/teamspace';
+import {
+	selectCurrentUser,
+	selectIsPending,
+	selectIsAvatarPending,
+	TeamspaceActions
+} from '../../modules/teamspace';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	isAvatarPending: selectIsAvatarPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

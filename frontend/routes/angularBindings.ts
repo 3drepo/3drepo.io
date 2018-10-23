@@ -10,15 +10,18 @@ import SnackbarContainer from './components/snackbarContainer/snackbarContainer.
 import Dashboard from './dashboard/dashboard.container';
 
 // Components
-import { UserInfo } from "./components/userInfo/userInfo.component";
+import { UserInfo } from './components/userInfo/userInfo.component';
+import { TopMenu } from './components/topMenu/topMenu.component';
 import ModelSettings from './modelSettings/modelSettings.container';
 
 angular
-	.module("3drepo")
-	.component("dialogContainer", wrap(DialogContainer))
-	.component("snackbarContainer", wrap(SnackbarContainer))
-	.component("dashboard", wrap(Dashboard))
-	.component("userInfo", wrap(
+	.module('3drepo')
+	.component('dialogContainer', wrap(DialogContainer))
+	.component('snackbarContainer', wrap(SnackbarContainer))
+	.component('dashboard', wrap(Dashboard))
+	.component('userInfo', wrap(
 		UserInfo,
-		["loading", "hasAvatar", "avatarUrl", "username", "firstName", "lastName", "email"]
-	)).component('modelSettings', wrap(ModelSettings));
+		['loading', 'hasAvatar', 'avatarUrl', 'username', 'firstName', 'lastName', 'email']
+	))
+	.component('topMenu', wrap(TopMenu, ['currentUser', 'isLiteMode']))
+	.component('modelSettings', wrap(ModelSettings));

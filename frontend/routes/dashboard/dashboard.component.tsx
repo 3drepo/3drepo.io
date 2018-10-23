@@ -45,6 +45,7 @@ const MENU_ITEMS = [
 interface IProps {
 	match: any;
 	isPending: boolean;
+	isAvatarPending: boolean;
 	currentUser: any;
 	fetchUser: (username) => void;
 }
@@ -71,7 +72,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { match, currentUser, isPending } = this.props;
+		const { match, currentUser, isPending, isAvatarPending } = this.props;
 		return (
 			<Container
 				container
@@ -81,10 +82,8 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 			>
 				<Sidebar>
 					<UserInfo
-						loading={isPending}
-						// TODO: Handle this prop
-						hasAvatar={true}
 						{...currentUser}
+						loading={isPending || isAvatarPending}
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>

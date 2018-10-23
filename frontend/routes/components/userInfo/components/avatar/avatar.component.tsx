@@ -18,12 +18,12 @@
 import * as React from 'react';
 
 import { Container, AvatarImage, AvatarPlaceholder, StyledSvg } from "./avatar.styles";
+import { COLOR } from '../../../../../styles';
 
 interface IProps {
 	url: string;
 	altText: string;
 	loading: boolean;
-	hasAvatar: boolean;
 }
 
 interface IState {
@@ -37,7 +37,7 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 
 	public renderPlaceholderSvgPath = () => (
 		<path
-			fill="#0c2f54"
+			fill={COLOR.PRIMARY_MAIN}
 			d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM12 14c-2.67 0-8 1.34-8 4v2h16v-2c+0-2.66-5.33-4-8-4z"
 		/>
 	)
@@ -55,13 +55,13 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { url, altText, loading, hasAvatar } = this.props;
+		const { url, altText, loading } = this.props;
 		const { avatarLoaded } = this.state;
 
 		return (
 			<Container>
-				{	(loading || !hasAvatar || !avatarLoaded) && this.renderAvatarPlaceholder() }
-				{ hasAvatar && <AvatarImage src={url} alt={altText} onLoad={this.handleImageLoaded} /> }
+				{	(loading || !url || !avatarLoaded) && this.renderAvatarPlaceholder() }
+				{ url && <AvatarImage src={url} alt={altText} onLoad={this.handleImageLoaded} /> }
 			</Container>
 		);
 	}

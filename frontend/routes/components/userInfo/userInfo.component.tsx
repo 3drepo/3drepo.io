@@ -32,7 +32,6 @@ interface IProps {
 	match: any;
 	items: IMenuItem[];
 	loading: boolean;
-	hasAvatar: boolean;
 	firstName: string;
 	lastName: string;
 	username: string;
@@ -49,7 +48,7 @@ const renderItems = (items, match) => items.map((item) => (
 ));
 
 const UserInfoComponent = (props: IProps) => {
-	const { match, items, loading, hasAvatar, firstName, lastName, username, email, avatarUrl } = props;
+	const { match, items, loading, firstName, lastName, username, email, avatarUrl } = props;
 
 	return (
 		<Router>
@@ -60,7 +59,6 @@ const UserInfoComponent = (props: IProps) => {
 								<Avatar
 									url={avatarUrl}
 									altText={username}
-									hasAvatar={hasAvatar}
 									loading={loading}
 								/>
 								{ loading
