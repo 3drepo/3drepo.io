@@ -22,6 +22,7 @@ import { Container, Sidebar, Content } from './dashboard.styles';
 import { UserInfo } from '../components/userInfo/userInfo.component';
 import UserManagement from '../userManagement/userManagement.container';
 import Profile from '../profile/profile.container';
+import { Teamspaces } from '../teamspaces/teamspaces.component';
 
 const MENU_ITEMS = [
 	{
@@ -58,7 +59,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 	public renderRoutes = (match, currentUser) => {
 		return (
 			<Switch>
-				{/* <Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} /> */}
+				{<Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} />}
 				<Route path={`${match.url}dashboard/user-management/:teamspace`} component={UserManagement} />
 				<Route exact path={`${match.url}dashboard/profile`} component={Profile} />
 				{/* <Route path={`${match.url}dashboard/billing`} component={Billing} /> */}

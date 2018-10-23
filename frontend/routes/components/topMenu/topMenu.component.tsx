@@ -18,7 +18,7 @@
 import * as React from 'react';
 
 import { Container } from './topMenu.styles';
-import { Grid } from '@material-ui/core/Grid';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 
 interface IProps {
 	currentUser: any;
@@ -29,6 +29,22 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Container>
+				<ButtonMenu
+					icon="account_circle"
+					IconProps={{
+						fontSize: 'large'
+					}}
+					PopoverProps={{
+						anchorOrigin: {
+							vertical: 'center',
+							horizontal: 'left'
+						},
+						transformOrigin: {
+							vertical: 'top',
+							horizontal: 'right'
+						}
+					}}
+				/>
 			</Container>
 		);
 	}
