@@ -9,12 +9,12 @@ export const sortByName = (data = [], options: {order: any}) => {
 };
 
 export const sortByJob = (data = [], options: {order: any}) => {
-	return orderBy(data, ["job"], options.order);
+	return orderBy(data, ['job'], options.order);
 };
 
 export const sortByField = (data = [], options: {order: any, config: any}) => {
 	if (!options.config && !options.config.field) {
-		throw new Error("This sorting method requires field name");
+		throw new Error('This sorting method requires field name');
 	}
 
 	return orderBy(

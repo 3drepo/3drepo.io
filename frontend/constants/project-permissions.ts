@@ -1,6 +1,6 @@
 export const PROJECT_ROLES_TYPES = {
 	ADMINISTRATOR: "admin_project",
-	UNASSIGNED: null
+	UNASSIGNED: ""
 };
 
 export const PROJECT_ROLES_DESC = {

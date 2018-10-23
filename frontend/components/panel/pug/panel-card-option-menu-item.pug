@@ -1,5 +1,4 @@
-div(layout="column" flex
-)
+div(layout="column" flex)
 	md-divider(ng-if="menuItem.upperDivider" flex)
 	div(layout="row" flex)
 		md-icon(md-font-icon="{{menuItem.icon}}", class="fa angular-material-icons ng-scope material-icons", ng-if="menuItem.noToggle && menuItem.icon !== 'fa-eye' && menuItem.icon !== 'fa-scissors' && menuItem.icon !== 'delete'")
@@ -18,4 +17,5 @@ div(layout="column" flex
 		md-icon(md-font-icon="fa-check", class="fa", ng-if="menuItem.keepCheckSpace" ng-style="{'visibility': menuItem.selected?'visible':'hidden'}")
 		p(flex="") {{menuItem.label}}
 			md-datepicker(ng-if="menuItem.date" ng-model="menuItem.dateValue" ng-change="vm.onDateChanged(menuItem, parentItem, $mdMenu)" ng-init="vm.addPreventCloseToDatepicker()")
+
 	md-divider(ng-if="menuItem.divider" flex)
