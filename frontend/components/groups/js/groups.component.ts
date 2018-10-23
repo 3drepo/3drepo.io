@@ -268,7 +268,7 @@ class GroupsController implements ng.IController {
 		const escapable = true;
 		this.dialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
 			.then(() => {
-				this.groupsService.deleteAllGroups(this.teamspace, this.model);
+					this.groupsService.deleteGroups(this.teamspace, this.model, this.groupsToShow);
 			})
 			.catch(() => { });
 	}
