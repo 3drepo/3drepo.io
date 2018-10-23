@@ -403,7 +403,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 			return this.props.renderCheckbox(props, row);
 		}
 
-		return <CheckboxField {...props} disabled />;
+		return <CheckboxField {...props} />;
 	}
 
 	/**
