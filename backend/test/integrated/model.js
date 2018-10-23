@@ -22,23 +22,17 @@ const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
 );
-const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
-const helpers = require("./helpers");
-const C = require("../../constants");
 const async = require("async");
 const ModelSetting = require("../../models/modelSetting");
 const User = require("../../models/user");
 describe("Model", function () {
-	const User = require("../../models/user");
 	let server;
 	let agent;
 	const username = "project_username";
 	const password = "project_username";
 	const model = "model12345";
 	let modelId;
-	const modelFed = "projectFed1";
 	const project = "projectgroup";
 	const desc = "desc";
 	const type = "type";
@@ -124,6 +118,57 @@ describe("Model", function () {
 
 	});
 
+	describe("Model name tests ", function() {
+		const nameTest = function(modelName, expectSuccess, callback) {
+			if(expectSuccess) {
+				agent.post(`/${username}/model`)
+					.send({ modelName, desc, type, unit, code, project })
+					.expect(200, function(err ,res) {
+						expect(res.body.name).to.equal(modelName);
+						callback(err);
+				});
+			} else {
+				agent.post(`/${username}/model`)
+					.send({ modelName, desc, type, unit, code, project })
+					.expect(responseCodes.INVALID_MODEL_NAME.status, function(err ,res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_NAME.value);
+						callback(err);
+				});
+			}
+		};
+		it("blank test model name format should fail", function(done) {
+			nameTest("", false, done);
+		});
+
+		it("plain test model name format should succeed", function(done) {
+			nameTest("abc", true, done);
+		});
+
+		it("hyphens dashes and underscores in test model name format should succeed", function(done) {
+			nameTest("123-_[/%4a",true, done);
+		});
+
+		it("non-ASCII characters should fail", function(done) {
+			nameTest("失败",false, done);
+		});
+
+		it("long strings less than 120 characters in test model name format should succeed", function(done) {
+			nameTest("aaaaaaaaaaaaaaaaaaaaa",true, done);
+		});
+
+		it("long strings more than 120 characters in test model name format should fail", function(done) {
+			nameTest(
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+				"aaaaaaaaaaaaaaaaa"
+			,false, done);
+		});
+
+	});
+
+
 	it("model added to a project should be listed on top level models array", function(done) {
 
 		agent.get(`/${username}.json`)
@@ -156,7 +201,7 @@ describe("Model", function () {
 	it("should fail if no unit specified", function(done) {
 
 		agent.post(`/${username}/model`)
-			.send({ desc, type, modelName: "model3" })
+			.send({ desc, type, project, modelName: "model3" })
 			.expect(400, function(err ,res) {
 
 				expect(res.body.value).to.equal(responseCodes.MODEL_NO_UNIT.value);
@@ -253,43 +298,18 @@ describe("Model", function () {
 		const model = "project7";
 
 		agent.post(`/${username}/model`)
-			.send({ desc, type, unit, modelName: model })
+			.send({ desc, type, unit, project, modelName: model })
 			.expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.MODEL_EXIST.value);
 				done(err);
 			});
 	});
 
-	C.REPO_BLACKLIST_MODEL.forEach(modelName => {
-
-		it(`should return error message if model name is blacklisted - ${modelName}`, function(done) {
-
-			if([
-				"database",
-				"verify",
-				"forgot-password",
-				"subscriptions",
-				"projects"
-			].indexOf(modelName) !== -1) {
-				// skip these model name because they are actually other APIs.
-				return done();
-			}
-
-			agent.post(`/${username}/model`)
-				.send({ desc, type, unit, modelName: modelName })
-				.expect(400, function(err ,res) {
-					expect(res.body.value).to.equal(responseCodes.BLACKLISTED_MODEL_NAME.value);
-					done(err);
-				});
-		});
-
-	});
-
 	it("should succeed if model name contains spaces", function(done) {
 
 		const spacedName = "you are genius";
 		agent.post(`/${username}/model`)
-			.send({ desc, type, unit, modelName: spacedName })
+			.send({ desc, type, project, unit, modelName: spacedName })
 			.expect(200, function(err ,res) {
 				expect(res.body.name).to.equal(spacedName);
 				done(err);
@@ -299,7 +319,7 @@ describe("Model", function () {
 	it("should return error if creating a model in a database that doesn't exists or not authorized for", function(done) {
 
 		agent.post(`/${username}_someonelese/model`)
-			.send({ modelName: "testmodel", desc, type, unit })
+			.send({ modelName: "testmodel", desc, type, unit, project })
 			.expect(401, function(err ,res) {
 				done(err);
 			});

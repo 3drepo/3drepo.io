@@ -11,6 +11,7 @@
         "ordered-imports": false,
         "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
         "forin": false,
-        "no-bitwise": false
+        "no-bitwise": false,
+        "quotemark": false
     }
 }

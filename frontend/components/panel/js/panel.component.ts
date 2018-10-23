@@ -230,7 +230,7 @@ class PanelController implements ng.IController {
 		orderedContentItems.forEach( (c) => {
 			spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
 			itemsLeftToCalculateSpace--;
-			c.height = Math.max( Math.min( c.requestedHeight, spaceDivisions - c.panelTakenHeight ) , c.minHeight);
+			c.height = Math.max(Math.min((c.requestedHeight || c.minHeight), spaceDivisions - c.panelTakenHeight ), c.minHeight);
 			availableHeight -= c.height + c.panelTakenHeight;
 		});
 	}

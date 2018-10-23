@@ -138,7 +138,6 @@
 		INVALID_MODEL_NAME: { message: "Invalid model name", status: 400 },
 		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
-		BLACKLISTED_MODEL_NAME: { message: "Model name reserved", status: 400 },
 
 		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
 		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
