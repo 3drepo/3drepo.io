@@ -15,22 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import styled from 'styled-components';
+import Icon from '@material-ui/core/Icon';
+import { COLOR } from '../../../../../styles';
 
-import { Container } from './topMenu.styles';
-import { UserMenu } from './components/userMenu/userMenu.component';
-
-interface IProps {
-	currentUser: any;
-	isLiteMode?: boolean;
-}
-
-export class TopMenu extends React.PureComponent<IProps, any> {
-	public render() {
-		return (
-			<Container>
-				<UserMenu {...this.props} />
-			</Container>
-		);
-	}
-}
+export const UserIcon = styled(Icon)`
+  && {
+    color: ${COLOR.WHITE};
+    font-size: 45px;
+    text-shadow: 0 0 2px ${COLOR.BLACK_40};
+  }
+`;

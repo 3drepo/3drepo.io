@@ -21,6 +21,8 @@ div.homeContainer(
 		revision = "vm.state.revision"
 		style="pointer-events:none")
 
+	top-menu(current-user="vm.account" is-lite-mode="vm.isLiteMode")
+
 	div.homeHolder(
 		layout="column"
 		flex
@@ -29,7 +31,6 @@ div.homeContainer(
 		#homeLogo(style="pointer-events:{{vm.pointerEvents}}" aria-label="Home")
 			img(ng-src="{{vm.topLogo}}" alt="3D Repo" longdesc="3DRepoBuildingInformationModellingSoftware" ng-click="vm.home()")
 
-		top-menu(current-user="vm.account" is-lite-mode="vm.isLiteMode")
 		div(ui-view="" flex="grow" layout="column")
 
 		//- To jest account.pug. Przenieś na Reacta i obsłuz prawidłowo routing w zagniezdzonych komponentach:
