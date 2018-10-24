@@ -67,6 +67,16 @@ const dataByType = {
 	}
 };
 
+const availableModels = (project) => project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
+const getProject = (projectItems, projectName) => projectItems.find((project) => project.value === projectName);
+const getModelsRows = (models = [], selectedModels = []) => {
+	return models.map((model) => {
+		const data = [ { value: model.name } ];
+		const selected = selectedModels.some((selectedModel) => model.name === selectedModel.name);
+		return { data, name: model.name, selected };
+	});
+};
+
 interface IProps {
 	name?: string;
 	teamspace?: string;
@@ -98,11 +108,17 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		project: ''
 	};
 
-	public static getDerivedStateFromProps(nextProps: IProps, prevState) {
-		if (Boolean(nextProps.project)) {
+	public static getDerivedStateFromProps(nextProps: IProps) {
+		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
+			const selectedProject = getProject(nextProps.projects, nextProps.project);
+			const models = availableModels(selectedProject);
+			const rows = getModelsRows(models);
+
 			return {
-				selectedProject: nextProps.project ? nextProps.project : '',
-				projectsItems: nextProps.projects ? nextProps.projects : []
+				selectedProject: nextProps.project,
+				projectsItems: nextProps.projects,
+				available: models,
+				availableRows: rows
 			};
 		}
 		return {};
@@ -137,12 +153,12 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		this.setState({ selectedProject: projectName });
 
 		if (this.props.type === FEDERATION_TYPE) {
-			const selectedProject = this.state.projectsItems.find((project) => project.value === projectName);
-			const availableModels = selectedProject.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
+			const selectedProject = getProject(this.state.projectsItems, projectName);
+			const models = availableModels(selectedProject);
 
 			this.setState({
-				available: availableModels,
-				availableRows: this.getModelsTableRows(availableModels, this.state.selectedAvailable)
+				available: models,
+				availableRows: getModelsRows(models, this.state.selectedAvailable)
 			});
 		}
 		onChange(event, projectName);
@@ -158,20 +174,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		return selectedTeamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
-	public getModelsTableRows = (models = [], selectedModels = []) => {
-		return models.map((model) => {
-			const data = [
-				{ value: model.name }
-			];
-
-			const selected = selectedModels.some((selectedModel) => model.name === selectedModel.name);
-			return { data, name: model.name, selected };
-		});
-	}
-
 	public moveToFederated = () => {
 		const deselectedAvailableRows = this.state.availableRows.filter((row) => !row.selected);
-
 		this.setState({
 			federatedRows: this.state.selectedAvailable,
 			selectedAvailable: [],
@@ -209,7 +213,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	public handleAvailableSelectionChange = (selectedRows) => {
 		this.setState({
 			selectedAvailable: selectedRows,
-			availableRows: this.getModelsTableRows(this.state.available, selectedRows),
+			availableRows: getModelsRows(this.state.available, selectedRows)
 		});
 	}
 
