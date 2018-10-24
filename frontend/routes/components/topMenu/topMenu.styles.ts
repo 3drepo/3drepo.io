@@ -16,8 +16,36 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
   display: flex;
   justify-content: flex-end;
+  position: relative;
+  z-index: 2;
+  padding-top: 5px;
+  padding-right: 5px;
+`;
+
+export const Logo = styled.img`
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+	pointer-events: inherit;
+	outline: none;
+	user-select: none;
+  filter: drop-shadow(0px 0px 1px ${COLOR.BLACK_50});
+
+  &:hover {
+    cursor: pointer;
+	  user-select: none;
+  }
+
+  @media (max-width: 767px) {
+    & {
+      display: none;
+    }
+  }
 `;

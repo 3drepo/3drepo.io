@@ -23,5 +23,5 @@ angular
 		UserInfo,
 		['loading', 'hasAvatar', 'avatarUrl', 'username', 'firstName', 'lastName', 'email']
 	))
-	.component('topMenu', wrap(TopMenu, ['currentUser', 'isLiteMode']))
+	.component('topMenu', wrap(TopMenu, ['currentUser', 'isLiteMode', 'logoUrl']))
 	.component('modelSettings', wrap(ModelSettings));

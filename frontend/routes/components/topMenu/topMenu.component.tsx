@@ -17,18 +17,33 @@
 
 import * as React from 'react';
 
-import { Container } from './topMenu.styles';
+import { Container, Logo } from './topMenu.styles';
 import { UserMenu } from './components/userMenu/userMenu.component';
 
 interface IProps {
 	currentUser: any;
 	isLiteMode?: boolean;
+	logoUrl?: string;
+	onLiteModeChange?: () => void;
+	onLogout?: () => void;
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
+	public goToHome() {
+		
+	}
+
 	public render() {
+		const logoProps = {
+			src: this.props.logoUrl,
+			alt: '3D Repo',
+			longdesc: '3DRepoBuildingInformationModellingSoftware',
+			onClick: this.goToHome
+		};
+
 		return (
 			<Container>
+				<Logo {...logoProps} />
 				<UserMenu {...this.props} />
 			</Container>
 		);
