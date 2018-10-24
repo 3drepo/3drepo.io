@@ -70,7 +70,7 @@ export const MenuText = styled(ListItemText).attrs({
 export const MenuSwitch = styled(Switch)`
 	&& {
 		margin-left: -21px;
-    margin-right: -13px;
+    margin-right: -15px;
 	}
 `;
 

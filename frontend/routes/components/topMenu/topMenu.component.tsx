@@ -16,7 +16,9 @@
  */
 
 import * as React from 'react';
+import { MuiThemeProvider } from '@material-ui/core';
 
+import { MuiTheme } from '../../../styles';
 import { Container, Logo } from './topMenu.styles';
 import { UserMenu } from './components/userMenu/userMenu.component';
 
@@ -40,13 +42,16 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 			onClick: onLogoClick
 		};
 
-		debugger
-
 		return (
-			<Container>
-				<Logo {...logoProps} />
-				<UserMenu {...userMenuProps} />
-			</Container>
+			<MuiThemeProvider theme={MuiTheme}>
+				<Container>
+					<Logo {...logoProps} />
+					<UserMenu
+						{...userMenuProps}
+						onTeamspacesClick={this.props.onLogoClick}
+					/>
+				</Container>
+			</MuiThemeProvider>
 		);
 	}
 }

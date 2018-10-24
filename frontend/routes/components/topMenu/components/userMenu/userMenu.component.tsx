@@ -46,7 +46,7 @@ const UserButton = ({ IconProps, icon, ...props }) => {
 
 const UserMenuButton = (props) => {
 	return (
-		<MenuItem button>
+		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
 				<Icon>{props.icon}</Icon>
 			</MenuIcon>
@@ -56,6 +56,8 @@ const UserMenuButton = (props) => {
 };
 
 const UserMenuContent = (props) => {
+	const hasMemorySettings = Boolean(localStorage.getItem('deviceMemory'));
+
 	return (
 		<MenuContent component="nav">
 			<MenuUser>
@@ -66,20 +68,36 @@ const UserMenuContent = (props) => {
 				<MenuText primary={props.currentUser.username} />
 			</MenuUser>
 			<Divider />
-			<UserMenuButton icon="view_list" label="Teamspaces" />
-			<UserMenuButton icon="description" label="User manual" />
+			<UserMenuButton
+				icon="view_list"
+				label="Teamspaces"
+				onButtonClick={props.onTeamspacesClick}
+			/>
+			<UserMenuButton
+				icon="description"
+				label="User manual"
+				onButtonClick={props.openUserManual}
+			/>
 			<MenuItem>
 				<MenuSwitch
 					checked={props.isLiteMode}
 					onChange={props.onLiteModeChange}
 					color="secondary"
+					inputProps={{
+						'aria-label': 'Lite mode'
+					}}
 				/>
 				<MenuText primary="Lite mode" />
 			</MenuItem>
+			{hasMemorySettings && <UserMenuButton
+				icon="restore"
+				label="Reset Settings"
+				onButtonClick={props.resetMemorySettings}
+			/>}
 			<UserMenuButton
 				icon="exit_to_app"
 				label="Logout"
-				onClick={props.onLogout}
+				onButtonClick={props.onLogout}
 			/>
 		</MenuContent>
 	);
@@ -90,14 +108,29 @@ interface IProps {
 	isLiteMode?: boolean;
 	onLiteModeChange?: () => void;
 	onLogout?: () => void;
+	onTeamspacesClick?: () => void;
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
+	public resetMemorySettings() {
+		localStorage.removeItem('deviceMemory');
+	}
+
+	public openUserManual() {
+		window.open('http://3drepo.org/models/3drepo-io-user-manual/', '_blank');
+	}
+
 	public render() {
+		const menuContentProps = {
+			...this.props,
+			openUserManual: this.openUserManual,
+			resetMemorySettings: this.resetMemorySettings
+		};
+
 		return (
 			<ButtonMenu
 				renderButton={UserButton}
-				renderContent={() => <UserMenuContent {...this.props} />}
+				renderContent={() => <UserMenuContent {...menuContentProps} />}
 				icon="account_circle"
 				PopoverProps={{
 					anchorOrigin: {

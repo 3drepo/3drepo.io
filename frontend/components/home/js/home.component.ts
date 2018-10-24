@@ -514,6 +514,13 @@ class HomeController implements ng.IController {
 	public legalDisplay(event, display) {
 		this.$window.open("/" + display.value);
 	}
+
+	public onLiteModeChange = () => {
+		this.$timeout(() => {
+			this.setLiteMode(!this.isLiteMode);
+			location.reload();
+		});
+	}
 }
 
 export const HomeComponent: ng.IComponentOptions = {
