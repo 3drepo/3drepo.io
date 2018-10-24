@@ -53,36 +53,6 @@ function StateManagerRun(
 		return new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
 	};
 
-/* 	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
-		StateManager.state.changing = true;
-
-		for (let i = 0; i < StateManager.functions.length; i++) {
-			StateManager.setStateVar(StateManager.functions[i], false);
-		}
-
-		StateManager.clearQuery();
-
-		const stateChangeObject = {
-			toState,
-			toParams,
-			fromState,
-			fromParams
-		};
-
-		StateManager.startStateChange(stateChangeObject);
-	}); */
-
-/* 	$rootScope.$on("$stateChangeSuccess", (event, toState, toParams, fromState, fromParams) => {
-
-		const stateChangeObject = {
-			toState,
-			toParams,
-			fromState,
-			fromParams
-		};
-		StateManager.handleStateChange(stateChangeObject);
-	}); */
-
 	$rootScope.$on('$locationChangeSuccess', (e, newUrl, oldUrl) => {
 		e.preventDefault();
 

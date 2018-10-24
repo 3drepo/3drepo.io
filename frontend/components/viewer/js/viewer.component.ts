@@ -90,6 +90,7 @@ class ViewerController implements ng.IController {
 			const validEvent = event !== undefined && event.type !== undefined;
 
 			if (validEvent && this.ViewerService.initialised) {
+				debugger
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}
 		});

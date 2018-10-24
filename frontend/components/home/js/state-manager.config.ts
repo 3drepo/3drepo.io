@@ -15,14 +15,16 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $provide) {
+function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$locationProvider.html5Mode(true);
 
 	$stateProvider.state("app", {
 		url: "",
+		abstract: true,
 		template: "<home flex layout='column'></home>",
 		resolve: {
-			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
+			auth: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
+				debugger
 				StateManager.state.authInitialized = false;
 				const finishedAuth = $q.defer();
 
@@ -41,12 +43,57 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
+/* 	$stateProvider.state("app", {
+		url: "/",
+		abstract: true,
+		template: "<home flex layout='column'></home>",
+		resolve: {
+			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
+				StateManager.state.authInitialized = false;
+				const finishedAuth = $q.defer();
+
+				AuthService.init()
+					.then(() => {
+						StateManager.state.authInitialized = true;
+						finishedAuth.resolve();
+					})
+					.catch((error) => {
+						console.error("Error initialising auth from state manager: ", error);
+						finishedAuth.reject();
+					});
+
+				return finishedAuth.promise;
+			}]
+		},
+		data: {
+			sessionRequired: true
+		}
+	}); */
+
 	$stateProvider.state("app.viewer", {
 		url: "/viewer/:modelId",
+		template: `
+			<viewer
+				id="viewer"
+				flex="none"
+				ng-if="!vm.isLiteMode && !vm.isLegalPage"
+				device-memory="vm.deviceMemory"
+				node="node"
+				account="vm.state.account"
+				model="vm.state.model"
+				branch="vm.state.revision"
+				revision = "vm.state.revision"
+				style="pointer-events:none")"
+			/>
+		`,
 		resolve: {
 			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
 				StateManager.setState($stateParams);
+				console.log('test')
 			}]
+		},
+		data: {
+			sessionRequired: true
 		}
 	});
 
@@ -57,6 +104,9 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
 				StateManager.setState($stateParams);
 			}]
+		},
+		data: {
+			sessionRequired: true
 		}
 	});
 
@@ -66,7 +116,45 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
 				StateManager.setState($stateParams);
 			}]
+		},
+		data: {
+			sessionRequired: true
 		}
+	});
+
+	$stateProvider.state("app.login", {
+		url: "/login",
+		template: '<login login-message="vm.loginMessage"/>'
+	});
+
+	$stateProvider.state("app.signUp", {
+		url: "/sign-up",
+		template: "<sign-up />"
+	});
+
+	$stateProvider.state("app.passwordForgot", {
+		url: "/password-forgot",
+		template: "<password-forgot />"
+	});
+
+	$stateProvider.state("app.passwordChange", {
+		url: "/password-change?token&username",
+		template: `
+			<password-change
+				token="vm.query.token"
+				username="vm.query.username"
+			/>
+		`
+	});
+
+	$stateProvider.state("app.registerRequest", {
+		url: "/register-request",
+		template: "<register-request />"
+	});
+
+	$stateProvider.state("app.registerVerify", {
+		url: "/register-verify",
+		template: "<register-verify />"
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
@@ -80,6 +168,5 @@ export const StateManagerConfigModule = angular
 		"$urlRouterProvider",
 		"$locationProvider",
 		"$httpProvider",
-		"$provide",
 		StateManagerConfig
 	]);

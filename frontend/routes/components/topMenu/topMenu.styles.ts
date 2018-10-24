@@ -21,10 +21,11 @@ import { COLOR } from '../../../styles';
 export const Container = styled.div`
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   position: relative;
   z-index: 2;
-  padding-top: 5px;
   padding-right: 5px;
+  height: 80px;
 `;
 
 export const Logo = styled.img`

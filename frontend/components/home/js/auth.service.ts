@@ -16,6 +16,7 @@
  */
 import { dispatch } from "../../../helpers/migration";
 import { TeamspaceActions } from "../../../modules/teamspace";
+import { history } from '../../../helpers/migration';
 
 export class AuthService {
 
@@ -26,6 +27,7 @@ export class AuthService {
 		"$location",
 		"$window",
 		"$mdDialog",
+		"$timeout",
 
 		"ClientConfigService",
 		"AnalyticService",
@@ -51,6 +53,7 @@ export class AuthService {
 		private $location,
 		private $window,
 		private $mdDialog,
+		private $timeout,
 
 		private ClientConfigService: any,
 		private AnalyticService: any,
@@ -135,6 +138,10 @@ export class AuthService {
 		this.AnalyticService.setUserId(this.username);
 		this.authDefer.resolve(this.loggedIn);
 
+		this.$timeout(() => {
+			history.push('/dashboard');
+		});
+
 		dispatch(TeamspaceActions.fetchUserSuccess({
 			username: response.data.username
 		}));
@@ -155,6 +162,7 @@ export class AuthService {
 			error: response.data
 		});
 
+		history.push('/login');
 		this.authDefer.resolve(response.data);
 	}
 
@@ -166,6 +174,8 @@ export class AuthService {
 		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {});
 
 		this.authDefer.resolve(this.loggedIn);
+
+		history.push('/login');
 		dispatch({type: 'RESET_APP'});
 	}
 

@@ -1,4 +1,5 @@
 /**
+import { history } from '../../../helpers/migration';
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
