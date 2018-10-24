@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { upperFirst, pick, isEmpty } from 'lodash';
+import { upperFirst, pick, isEmpty, merge, mapValues, keyBy, map } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -37,19 +37,15 @@ import {
 	CELL_TYPES, CustomTable, CheckboxField, TableButton
 } from '../../../components/customTable/customTable.component';
 
-
-import { MODEL_TYPE, FEDERATION_TYPE } from './../../teamspaces.contants';
-import { FEDERATION_TYPE } from '../../teamspaces.contants';
+import { MODEL_TYPE, FEDERATION_TYPE, MODEL_SUBTYPES } from './../../teamspaces.contants';
 
 const ModelSchema = Yup.object().shape({
 	name: schema.firstName.max(120),
-	teamspace: Yup.string().required()
+	teamspace: Yup.string().required(),
+	project: Yup.string().required()
 });
 
 const commonInitialValues = {
-	name: '',
-	teamspace: '',
-	project: '',
 	unit: ''
 };
 
@@ -71,18 +67,12 @@ const dataByType = {
 	}
 };
 
-const modelTypes = [
-	{ value: "Architectural" },
-	{ value: "Structural" },
-	{ value: "Mechanical" },
-	{ value: "GIS" },
-	{ value: "Other"}
-];
-
 interface IProps {
 	name?: string;
 	teamspace?: string;
+	project?: string;
 	teamspaces: any[];
+	projects?: any[];
 	handleResolve: (model) => void;
 	handleClose: () => void;
 	type: string;
@@ -94,7 +84,7 @@ interface IState {
 	projectsItems: any[];
 	name: string;
 	available: any[];
-	federated: any[];
+	federated: any;
 	availableRows: any[];
 	federatedRows: any[];
 	selectedAvailable: any[];
@@ -104,8 +94,19 @@ interface IState {
 export class ModelDialog extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		name: '',
-		teamspace: ''
+		teamspace: '',
+		project: ''
 	};
+
+	public static getDerivedStateFromProps(nextProps: IProps, prevState) {
+		if (Boolean(nextProps.project)) {
+			return {
+				selectedProject: nextProps.project ? nextProps.project : '',
+				projectsItems: nextProps.projects ? nextProps.projects : []
+			};
+		}
+		return {};
+	}
 
 	public state = {
 		selectedTeamspace: '',
@@ -113,30 +114,12 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		selectedProject: '',
 		name: '',
 		available: [],
-		federated: [],
+		federated: {},
 		availableRows: [],
 		federatedRows: [],
 		selectedAvailable: [],
 		selectedFederated: []
 	};
-
-	public componentDidUpdate(prevProps, prevState) {
-		// const changes = {} as any;
-
-		// const selectedAvailableChanged = prevState.selectedAvailable.length !== this.state.selectedAvailable.length;
-		// if (selectedAvailableChanged) {
-		// 	changes.availableRows = this.getModelsTableRows(this.state.available, this.state.selectedAvailable);
-		// }
-
-		// const selectedFederatedChanged = prevState.selectedFederated.length !== this.state.selectedFederated.length;
-		// if (selectedFederatedChanged) {
-		// 	changes.federatedRows = this.getModelsTableRows(this.state.federated, this.state.selectedFederated);
-		// }
-
-		// if (!isEmpty(changes)) {
-		// 	this.setState(changes);
-		// }
-	}
 
 	public handleModelSave = (values) => {
 		this.props.handleResolve(values);
@@ -152,14 +135,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 
 	public handleProjectChange = (onChange) => (event, projectName) => {
 		this.setState({ selectedProject: projectName });
+
 		if (this.props.type === FEDERATION_TYPE) {
-			const available = this.getAvailable(projectName);
-			const federated = this.getFederated(projectName);
+			const selectedProject = this.state.projectsItems.find((project) => project.value === projectName);
+			const availableModels = selectedProject.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
 
 			this.setState({
-				available,
-				availableRows: this.getModelsTableRows(available, this.state.selectedAvailable),
-				federated
+				available: availableModels,
+				availableRows: this.getModelsTableRows(availableModels, this.state.selectedAvailable)
 			});
 		}
 		onChange(event, projectName);
@@ -172,35 +155,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 
 	public getTeamspaceProjects = (teamspaceName) => {
 		const selectedTeamspace = this.props.teamspaces.find((teamspace) => teamspace.value === teamspaceName);
-		return selectedTeamspace.projects.map(({ name, models }) => ({
-			value: name,
-			models
-		}));
-	}
-
-	public getAvailable = (projectName) => {
-		const selectedProject = this.state.projectsItems.find(project => project.value === projectName);
-
-		return selectedProject.models.filter(model => !model.federate).map(({ name }) => ({
-			name
-		}));
-	}
-
-	public getFederated = (projectName) => {
-		const selectedProject = this.state.projectsItems.find(project => project.value === projectName);
-
-		return selectedProject.models.filter(model => model.federate).map(({ name }) => ({
-			name
-		}));
-	}
-
-	// todo: napisac funkjce ktora umozliwi to \/ dla available i federated
-
-	public handleAvailableSelectionChange = (selectedRows) => {
-		this.setState({
-			selectedAvailable: selectedRows,
-			availableRows: this.getModelsTableRows(this.getAvailable(this.state.selectedProject), selectedRows)
-		});
+		return selectedTeamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
 	public getModelsTableRows = (models = [], selectedModels = []) => {
@@ -210,15 +165,31 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 			];
 
 			const selected = selectedModels.some((selectedModel) => model.name === selectedModel.name);
-
 			return { data, name: model.name, selected };
 		});
 	}
 
-	public getModelCells = (name, icon) => {
+	public moveToFederated = () => {
+		const deselectedAvailableRows = this.state.availableRows.filter((row) => !row.selected);
+
+		this.setState({
+			federatedRows: this.state.selectedAvailable,
+			selectedAvailable: [],
+			availableRows: deselectedAvailableRows
+		});
+	}
+
+	public moveToAvailable = () => {};
+
+	public getModelCells = (name, icon, onClickHandler) => {
 		return [
 			{
-				name, HeadingProps: { component: { hideSortIcon: true, disabled: false } }
+				name,
+				HeadingProps: {
+					component: {
+						hideSortIcon: true
+					}
+				}
 			},
 			{
 				type: CELL_TYPES.ICON_BUTTON,
@@ -227,7 +198,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					component: {
 						hideSortIcon: true,
 						icon,
-						onClick: () => console.log('handle click')
+						onClick: onClickHandler
 					},
 					disabled: false
 				}
@@ -235,20 +206,35 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		];
 	}
 
+	public handleAvailableSelectionChange = (selectedRows) => {
+		this.setState({
+			selectedAvailable: selectedRows,
+			availableRows: this.getModelsTableRows(this.state.available, selectedRows),
+		});
+	}
+
+	public handleFederatedSelectionChange = (selectedRows) => {
+		this.setState({
+			selectedFederated: selectedRows
+		});
+	}
+
 	public renderFederationFields = () => {
 		return (
 			<ModelsTableContainer>
 				<CustomTable
-					cells={this.getModelCells('Available', 'arrow_forward')}
+					cells={this.getModelCells('Available', 'arrow_forward', this.moveToFederated)}
 					rows={this.state.availableRows}
 					onSelectionChange={this.handleAvailableSelectionChange}
 					rowStyle={{ border: 'none', height: '36px' }}
+					checkboxDisabled={!this.state.selectedProject}
 				/>
 				<CustomTable
-					cells={this.getModelCells('Federated', 'arrow_back')}
+					cells={this.getModelCells('Federated', 'arrow_back', this.moveToAvailable)}
 					rows={this.state.federatedRows}
-					onSelectionChange={this.handleAvailableSelectionChange}
+					onSelectionChange={this.handleFederatedSelectionChange}
 					rowStyle={{ border: 'none', height: '36px' }}
+					checkboxDisabled={!this.state.selectedProject}
 				/>
 			</ModelsTableContainer>
 		);
@@ -282,7 +268,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 						<Field name="type" render={({ field, form }) => (
 							<CellSelect
 								{...field}
-								items={modelTypes}
+								items={MODEL_SUBTYPES}
 								inputId="type-select"
 							/>
 						)} />
@@ -293,12 +279,20 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, teamspace, teamspaces, handleClose, type } = this.props;
-		const { projectsItems, name: typedName } = this.state;
+		const { name, teamspace, project, teamspaces, handleClose, type, projects } = this.props;
+		const { projectsItems, name: typedName, selectedTeamspace, selectedProject } = this.state;
 
 		return (
 			<Formik
-				initialValues={ { ...commonInitialValues, ...dataByType[type].initialValues } }
+				initialValues={
+					{
+						teamspace: teamspace ? teamspace : selectedTeamspace,
+						project: project ? project : selectedProject,
+						name,
+						...commonInitialValues,
+						...dataByType[type].initialValues
+					}
+				}
 				validationSchema={ModelSchema}
 				onSubmit={this.handleModelSave}
 			>
@@ -313,73 +307,59 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									helperText={form.touched.teamspace && (form.errors.teamspace || '')}
 									items={teamspaces}
 									placeholder="Select teamspace"
-									disabled={Boolean(this.props.name)}
+									disabled={Boolean(teamspace)}
 									disabledPlaceholder={true}
 									inputId="teamspace-select"
 									onChange={this.handleTeamspaceChange(field.onChange)}
 								/>
 							)} />
 						</SelectWrapper>
-
-						{
-							// this.state.selectedTeamspace &&
+						<SelectWrapper fullWidth={true} required={true}>
+							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
+							<Field name="project" render={({ field, form }) => (
+								<CellSelect
+									{...field}
+									error={Boolean(form.touched.project && form.errors.project)}
+									helperText={form.touched.project && (form.errors.project || '')}
+									items={projectsItems}
+									placeholder="Select project"
+									disabled={Boolean(project)}
+									disabledPlaceholder={true}
+									inputId="project-select"
+									onChange={this.handleProjectChange(field.onChange)}
+								/>
+							)} />
+						</SelectWrapper>
+						<>
+							<Row>
+								<FieldWrapper>
+									<Field name="name" render={({ field, form }) => (
+										<TextField
+											{...field}
+											error={Boolean(form.touched.name && form.errors.name)}
+											helperText={form.touched.name && (form.errors.name || '')}
+											label={`${upperFirst(type)} Name`}
+											margin="normal"
+											required
+											fullWidth={true}
+											onChange={this.handleNameChange(field.onChange)}
+										/>
+									)} />
+								</FieldWrapper>
 								<SelectWrapper fullWidth={true} required={true}>
-									<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-									<Field name="project" render={({ field, form }) => (
+									<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
+									<Field name="unit" render={({ field, form }) => (
 										<CellSelect
 											{...field}
-											error={Boolean(form.touched.project && form.errors.project)}
-											helperText={form.touched.project && (form.errors.project || '')}
-											items={projectsItems}
-											placeholder="Select project"
-											disabled={Boolean(this.props.name)}
-											disabledPlaceholder={true}
-											inputId="project-select"
-											onChange={this.handleProjectChange(field.onChange)}
+											items={clientConfigService.units}
+											inputId="unit-select"
 										/>
 									)} />
 								</SelectWrapper>
-						}
-
-						{
-							// this.state.selectedProject &&
-								<>
-									<Row>
-										<FieldWrapper>
-											<Field name="name" render={({ field, form }) => (
-												<TextField
-													{...field}
-													error={Boolean(form.touched.name && form.errors.name)}
-													helperText={form.touched.name && (form.errors.name || '')}
-													label={`${upperFirst(type)} Name`}
-													margin="normal"
-													required
-													fullWidth={true}
-													onChange={this.handleNameChange(field.onChange)}
-												/>
-											)} />
-										</FieldWrapper>
-										<SelectWrapper fullWidth={true} required={true}>
-											<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-											<Field name="unit" render={({ field, form }) => (
-												<CellSelect
-													{...field}
-													items={clientConfigService.units}
-													inputId="unit-select"
-												// value={clientConfigService.units[1].value}
-												/>
-											)} />
-										</SelectWrapper>
-									</Row>
-									{
-										// typedName &&
-										this.renderOtherFields(type)
-									}
-								</>
-						}
-
+							</Row>
+							{ this.renderOtherFields(type) }
+						</>
 					</DialogContent>
-
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
 						<Field render={({ form }) => {
