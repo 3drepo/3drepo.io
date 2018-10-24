@@ -27,7 +27,7 @@ class PanelCardOptionMenuController implements ng.IController {
 	public selectedMenuOption;
 
 	constructor(
-		private $element: ng.IRootElementService,
+		private $element: ng.IRootElementService
 	) { }
 
 	public addPreventCloseToDatepicker() {
