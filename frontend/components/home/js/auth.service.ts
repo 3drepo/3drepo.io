@@ -28,6 +28,7 @@ export class AuthService {
 		"$window",
 		"$mdDialog",
 		"$timeout",
+		"$state",
 
 		"ClientConfigService",
 		"AnalyticService",
@@ -54,6 +55,7 @@ export class AuthService {
 		private $window,
 		private $mdDialog,
 		private $timeout,
+		private $state,
 
 		private ClientConfigService: any,
 		private AnalyticService: any,

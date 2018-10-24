@@ -17,6 +17,7 @@
 declare const grecaptcha;
 
 import { evaluatePassword } from '../../../services/validation';
+import { history } from '../../../helpers/migration';
 
 class SignupController implements ng.IController {
 
@@ -26,6 +27,7 @@ class SignupController implements ng.IController {
 		"$location",
 		"$window",
 		"$timeout",
+		"$state",
 
 		"ClientConfigService",
 		"APIService",
@@ -65,6 +67,7 @@ class SignupController implements ng.IController {
 		private $location,
 		private $window,
 		private $timeout,
+		private $state,
 
 		private ClientConfigService,
 		private APIService,
@@ -226,7 +229,7 @@ class SignupController implements ng.IController {
 	}
 
 	public goToLoginPage() {
-		this.$window.location.href = "/";
+		this.$state.go('app.login');
 	}
 
 	public register(event: any) {
