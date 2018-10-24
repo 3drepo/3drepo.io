@@ -65,9 +65,9 @@ interface IProps {
 	updateProject: (teamspace, projectName, projectData) => void;
 	removeProject: (teamspace, projectName) => void;
 
-	createModel: (teamspace, modelData, type) => void;
-	updateModel: (teamspace, modelName, modelData, type) => void;
-	removeModel: (teamspace, modelName, type) => void;
+	createModel: (teamspace, modelData) => void;
+	updateModel: (teamspace, modelName, modelData) => void;
+	removeModel: (teamspace, modelName) => void;
 
 	onModelUpload: () => void;
 	onSettingsClick: () => void;
@@ -118,6 +118,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public getTeamspaceProjects = (teamspaceName) => {
+		const teamspace = this.props.teamspaces.find((teamspaceItem) => teamspaceItem.name === teamspaceName);
+		return teamspace.projects.map(({ name, models }) => ({ value: name, models }));
+	}
+
 	public createRouteHandler = (pathname, params = {}) => (event) => {
 		event.stopPropagation();
 
@@ -147,7 +152,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				teamspace: teamspaceName,
 				teamspaces: teamspacesItems
 			},
-			onConfirm: ({teamspace, ...projectData}) => {
+			onConfirm: ({ teamspace, ...projectData }) => {
 				if (isNewProject) {
 					this.props.createProject(teamspace, projectData);
 				} else {
@@ -172,7 +177,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openModelDialog = (event, type = MODEL_TYPE, teamspaceName = '', modelName = '') => {
+	public openModelDialog = (event, type = MODEL_TYPE, teamspaceName = '', projectName = '', modelName = '') => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 		const isNewModel = !modelName.length;
@@ -184,6 +189,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				name: modelName,
 				teamspace: teamspaceName,
 				teamspaces: teamspacesItems,
+				project: teamspaceName ? projectName : '',
+				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
 				type
 			},
 			onConfirm: ({ teamspace, ...modelData }) => {
@@ -203,28 +210,34 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return <ModelItem {...props} actions={[]} />;
 	}
 
-	public renderModelDirectory = (props) => (
-		<ModelDirectoryItem
-			{...props}
-			renderChildItem={this.renderModel}
-			onAddClick={this.openModelDialog}
-		/>
-	)
+	public renderModelDirectory = (props) => {
+		return(
+			<ModelDirectoryItem
+				{...props}
+				renderChildItem={this.renderModel}
+				onAddClick={
+					(event) => this.openModelDialog(event, props.type, this.state.activeTeamspace, props.projectName)
+				}
+			/>
+		);
+	}
 
-	public renderProject = (props) => (
-		<ProjectItem
-			{...props}
-			renderChildItem={this.renderModelDirectory}
-			onEditClick={(event) => this.openProjectDialog(event, this.state.activeTeamspace, props.name)}
-			onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
-				page: 'userManagement',
-				teamspace: this.state.activeTeamspace,
-				project: props.name,
-				tab: TABS_TYPES.PROJECTS
-			})}
-			onRemoveClick={this.createRemoveProjectHandler(props.name)}
-		/>
-	)
+	public renderProject = (props) => {
+		return (
+			<ProjectItem
+				{...props}
+				renderChildItem={this.renderModelDirectory}
+				onEditClick={(event) => this.openProjectDialog(event, this.state.activeTeamspace, props.name)}
+				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
+					page: 'userManagement',
+					teamspace: this.state.activeTeamspace,
+					project: props.name,
+					tab: TABS_TYPES.PROJECTS
+				})}
+				onRemoveClick={this.createRemoveProjectHandler(props.name)}
+			/>
+		);
+	}
 
 	public renderTeamspaces = (teamspaces) => {
 		return teamspaces.map((teamspace, index) => (
@@ -259,8 +272,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return (
 			<>
 				<MenuItem onClick={(event) => { this.openProjectDialog(event); close(event); }}> Add project </MenuItem>
-				<MenuItem onClick={(event) => { this.openModelDialog(event, MODEL_TYPE); close(event); }}>Add model</MenuItem>
-				<MenuItem onClick={(event) => { this.openModelDialog(event, FEDERATION_TYPE); close(event); }}>Add federation</MenuItem>
+				<MenuItem onClick={(event) => { this.openModelDialog(event, MODEL_TYPE); close(event); }}>
+					Add model
+				</MenuItem>
+				<MenuItem onClick={(event) => { this.openModelDialog(event, FEDERATION_TYPE); close(event); }}>
+					Add federation
+				</MenuItem>
 			</>
 		);
 	}

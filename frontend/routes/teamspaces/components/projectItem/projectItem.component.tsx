@@ -20,7 +20,7 @@ import { groupBy, isEmpty, isEqual } from 'lodash';
 
 import { TreeList } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
-import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { ROW_ACTIONS, MODEL_TYPE, FEDERATION_TYPE  } from '../../teamspaces.contants';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 
 interface IProps {
@@ -44,15 +44,19 @@ const splitModels = (modelsList = []) => {
 	return { federations, models };
 };
 
-const getProjectItems = (modelsList) => {
+const getProjectItems = (modelsList, projectName) => {
 	const { federations = [], models = [] } = splitModels(modelsList);
 
 	return [{
 		name: 'Federations',
-		items: federations
+		items: federations,
+		type: FEDERATION_TYPE,
+		projectName
 	}, {
 		name: 'Models',
-		items: models
+		items: models,
+		type: MODEL_TYPE,
+		projectName
 	}];
 };
 
@@ -63,7 +67,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.setState({
-			items: getProjectItems(this.props.models)
+			items: getProjectItems(this.props.models, this.props.name)
 		});
 	}
 
@@ -72,7 +76,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 
 		const modelsChanged = !isEqual(this.props.models, prevProps.models);
 		if (modelsChanged) {
-			changes.items = getProjectItems(this.props.models);
+			changes.items = getProjectItems(this.props.models, this.props.name);
 		}
 
 		if (!isEmpty(changes)) {
