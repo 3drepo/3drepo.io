@@ -17,12 +17,67 @@
 
 import styled from 'styled-components';
 import Icon from '@material-ui/core/Icon';
+import List from '@material-ui/core/List';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Switch from '@material-ui/core/Switch';
+import Avatar from '@material-ui/core/Avatar';
+
 import { COLOR } from '../../../../../styles';
 
 export const UserIcon = styled(Icon)`
-  && {
-    color: ${COLOR.WHITE};
-    font-size: 45px;
-    text-shadow: 0 0 2px ${COLOR.BLACK_40};
-  }
+	&& {
+		color: ${COLOR.WHITE};
+		font-size: 45px;
+		text-shadow: 0 0 2px ${COLOR.BLACK_40};
+	}
+`;
+
+export const MenuContent = styled(List)`
+	&& {
+		padding-top: 0;
+	}
+`;
+
+export const MenuIcon = styled(ListItemIcon)`
+	&& {
+		margin-right: 2px;
+	}
+`;
+
+export const MenuItem = styled(ListItem)`
+	&& {
+		height: 48px;
+	}
+`;
+
+export const MenuUser = styled(ListItem)`
+	&& {
+		height: 58px;
+	}
+`;
+
+export const MenuText = styled(ListItemText).attrs({
+	disableTypography: true
+})`
+	&& {
+		color: ${COLOR.BLACK_60};
+		font-size: 14px;
+	}
+`;
+
+export const MenuSwitch = styled(Switch)`
+	&& {
+		margin-left: -21px;
+    margin-right: -13px;
+	}
+`;
+
+export const MenuAvatar = styled(Avatar)`
+	&& {
+		width: 30px;
+    height: 30px;
+    margin-left: -3px;
+	}
 `;

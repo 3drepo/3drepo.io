@@ -26,25 +26,26 @@ interface IProps {
 	logoUrl?: string;
 	onLiteModeChange?: () => void;
 	onLogout?: () => void;
+	onLogoClick?: () => void;
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
-	public goToHome() {
-		
-	}
-
 	public render() {
+		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
+
 		const logoProps = {
-			src: this.props.logoUrl,
+			src: logoUrl,
 			alt: '3D Repo',
 			longdesc: '3DRepoBuildingInformationModellingSoftware',
-			onClick: this.goToHome
+			onClick: onLogoClick
 		};
+
+		debugger
 
 		return (
 			<Container>
 				<Logo {...logoProps} />
-				<UserMenu {...this.props} />
+				<UserMenu {...userMenuProps} />
 			</Container>
 		);
 	}

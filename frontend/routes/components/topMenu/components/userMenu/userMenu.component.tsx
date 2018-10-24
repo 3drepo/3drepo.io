@@ -16,26 +16,21 @@
  */
 
 import * as React from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
 import Icon from '@material-ui/core/Icon';
-import ListItem from '@material-ui/core/ListItem';
-import Avatar from '@material-ui/core/Avatar';
-import Switch from '@material-ui/core/Switch';
+import IconButton from '@material-ui/core/IconButton';
 
-import { UserIcon } from './userMenu.styles';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
-
-interface IProps {
-	currentUser: any;
-	isLiteMode: boolean;
-	onLiteModeChange?: () => void;
-	onLogout?: () => void;
-}
+import {
+	MenuAvatar,
+	MenuContent,
+	MenuIcon,
+	MenuItem,
+	MenuSwitch,
+	MenuText,
+	MenuUser,
+	UserIcon
+} from './userMenu.styles';
 
 const UserButton = ({ IconProps, icon, ...props }) => {
 	return (
@@ -49,43 +44,53 @@ const UserButton = ({ IconProps, icon, ...props }) => {
 	);
 };
 
-const UserMenuContent = (props) => {
+const UserMenuButton = (props) => {
 	return (
-		<List component="nav">
-			<ListItem>
-				<Avatar alt={props.currentUser} src="/static/images/remy.jpg" />
-				<ListItemText primary={props.currentUser} />
-			</ListItem>
-			<Divider />
-			<ListItem button>
-				<ListItemIcon>
-					<Icon>view_list</Icon>
-				</ListItemIcon>
-				<ListItemText primary="Teamspaces" />
-			</ListItem>
-			<ListItem button>
-				<ListItemIcon>
-					<Icon>description</Icon>
-				</ListItemIcon>
-				<ListItemText primary="User manual" />
-			</ListItem>
-			<ListItem>
-				<Switch
-					/* checked={this.state.checkedB} */
-					onChange={() => { }}
-					color="secondary"
-				/>
-				<ListItemText primary="Lite mode" />
-			</ListItem>
-			<ListItem button>
-				<ListItemIcon>
-					<Icon>exit_to_app</Icon>
-				</ListItemIcon>
-				<ListItemText primary="Logout" />
-			</ListItem>
-		</List >
+		<MenuItem button>
+			<MenuIcon>
+				<Icon>{props.icon}</Icon>
+			</MenuIcon>
+			<MenuText primary={props.label} />
+		</MenuItem>
 	);
 };
+
+const UserMenuContent = (props) => {
+	return (
+		<MenuContent component="nav">
+			<MenuUser>
+				<MenuAvatar
+					alt={props.currentUser.username}
+					src={props.currentUser.avatarUrl}
+				/>
+				<MenuText primary={props.currentUser.username} />
+			</MenuUser>
+			<Divider />
+			<UserMenuButton icon="view_list" label="Teamspaces" />
+			<UserMenuButton icon="description" label="User manual" />
+			<MenuItem>
+				<MenuSwitch
+					checked={props.isLiteMode}
+					onChange={props.onLiteModeChange}
+					color="secondary"
+				/>
+				<MenuText primary="Lite mode" />
+			</MenuItem>
+			<UserMenuButton
+				icon="exit_to_app"
+				label="Logout"
+				onClick={props.onLogout}
+			/>
+		</MenuContent>
+	);
+};
+
+interface IProps {
+	currentUser: any;
+	isLiteMode?: boolean;
+	onLiteModeChange?: () => void;
+	onLogout?: () => void;
+}
 
 export class UserMenu extends React.PureComponent<IProps, any> {
 	public render() {

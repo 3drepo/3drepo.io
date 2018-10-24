@@ -501,12 +501,12 @@ class HomeController implements ng.IController {
 		this.$location.path(minusSlash);
 	}
 
-	public logout() {
+	public logout = () => {
 		this.StateManager.resetServiceStates();
 		this.AuthService.logout();
 	}
 
-	public home() {
+	public home = () => {
 		this.StateManager.resetServiceStates();
 		this.StateManager.goHome();
 	}
@@ -514,7 +514,6 @@ class HomeController implements ng.IController {
 	public legalDisplay(event, display) {
 		this.$window.open("/" + display.value);
 	}
-
 }
 
 export const HomeComponent: ng.IComponentOptions = {

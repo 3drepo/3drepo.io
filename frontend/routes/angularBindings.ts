@@ -6,10 +6,10 @@ import { react2angular as wrap } from 'react2angular';
 
 // Routes
 import DialogContainer from './components/dialogContainer/dialogContainer.container';
-import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
-import Dashboard from './dashboard/dashboard.container';
 
 // Components
+import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
+import Dashboard from './dashboard/dashboard.container';
 import { UserInfo } from './components/userInfo/userInfo.component';
 import { TopMenu } from './components/topMenu/topMenu.component';
 import ModelSettings from './modelSettings/modelSettings.container';
@@ -23,5 +23,5 @@ angular
 		UserInfo,
 		['loading', 'hasAvatar', 'avatarUrl', 'username', 'firstName', 'lastName', 'email']
 	))
-	.component('topMenu', wrap(TopMenu, ['currentUser', 'isLiteMode', 'logoUrl']))
+	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogout', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings));

@@ -15,6 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { history } from '../../../helpers/migration';
+
 export class StateManagerService {
 
 	public static $inject: string[] = [
@@ -137,15 +139,13 @@ export class StateManagerService {
 	}
 
 	public goHome() {
-
-		// TODO: Do this properly using state manager
 		let path = "/";
 
 		if (this.AuthService.isLoggedIn() && this.AuthService.getUsername()) {
-			path = "/" + this.AuthService.getUsername();
+			path = "/dashboard";
 		}
 
-		this.$location.path(path);
+		history.push(path);
 	}
 
 	public destroy()  {
