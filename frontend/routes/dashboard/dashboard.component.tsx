@@ -65,8 +65,9 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				{/* <Route path={`${match.url}dashboard/billing`} component={Billing} /> */}
 				<Redirect exact from={`${match.url}dashboard`} to={`${match.url}dashboard/teamspaces`} />
 				<Redirect
-					from={`${match.url}dashboard/user-management/:teamspace?`}
-					to={`${match.url}dashboard/user-management/${currentUser.username}/users`}
+					exact
+					from={`${match.url}dashboard/user-management`}
+					to={`${match.url}dashboard/user-management/${currentUser.username}`}
 				/>
 			</Switch>
 		);
