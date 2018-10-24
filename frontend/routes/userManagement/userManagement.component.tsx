@@ -72,6 +72,8 @@ const TABS_ROUTES = [
 	JOBS_TAB
 ];
 
+const ADMIN_TABS = [USERS_TAB.path, JOBS_TAB.path] as any;
+
 interface IProps {
 	match: any;
 	location: any;
@@ -160,9 +162,10 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			);
 		}
 
-/* 		if (ADMIN_TABS.includes(activeTab) && !isTeamspaceAdmin) {
+		const activeTab = location.pathname.replace(match.url, '');
+		if (ADMIN_TABS.includes(activeTab) && !isTeamspaceAdmin) {
 			return <TextOverlay content="Not allowed to access this page" />;
-		} */
+		}
 
 		return (
 			<Switch>

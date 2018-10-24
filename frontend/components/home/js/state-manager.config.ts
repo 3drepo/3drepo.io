@@ -26,8 +26,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 				StateManager.state.authInitialized = false;
 				const finishedAuth = $q.defer();
 
-				console.log('init app');
-
 				AuthService.init()
 					.then(() => {
 						StateManager.state.authInitialized = true;
@@ -63,49 +61,16 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.dashboard.pages", {
-		url: "/*page"
+		url: "/*page",
+		resolve: {
+			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
+				StateManager.setState($stateParams);
+			}]
+		}
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
 	$urlRouterProvider.otherwise("/dashboard");
-/* 
-
-	const stateStack       = [window.ClientConfig.structure];
-	const stateNameStack   = ["home"];
-
-	while (stateStack.length > 0) {
-		const stackLength = stateStack.length;
-		const parentState = stateStack[0];
-		const parentStateName = stateNameStack[0];
-
-		// First loop through the list of functions as these are
-		// more specific than the
-		if (parentState.functions) {
-			for (let i = 0; i < parentState.functions.length; i++) {
-				const childFunctionKebabCase = parentState.functions[i];
-				const childFunction	= camelCase(childFunctionKebabCase);
-				const childFunctionName = parentStateName + "." + childFunctionKebabCase;
-
-				handleFunctions(childFunction, childFunctionKebabCase, childFunctionName);
-			}
-		}
-
-		if (parentState.children) {
-			for (let i = 0; i < parentState.children.length; i++) {
-				const childState     = parentState.children[i];
-				const childStateName = parentStateName + "." + childState.plugin;
-
-				stateNameStack.push(childStateName);
-				stateStack.push(parentState.children[i]);
-
-				handleChildState(childState, childStateName, parentState, parentStateName, i);
-			}
-		}
-
-		stateStack.splice(0, 1);
-		stateNameStack.splice(0, 1);
-	}
- */
 }
 
 export const StateManagerConfigModule = angular
