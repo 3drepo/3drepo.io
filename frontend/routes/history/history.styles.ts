@@ -16,38 +16,8 @@
  */
 
 import styled from 'styled-components';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
-export const SortLabel = styled(TableSortLabel) `
-	height: 18px;
-
-	&& {
-		flex-direction: row-reverse;
-		margin-left: ${({ active }) => active ? 0 : '-5px'};
-		color: ${COLOR.BLACK_60};
-		font-size: 14px;
-		font-weight: ${FONT_WEIGHT.SEMIBOLD}
-	}
-
-	&::before {
-		width: 18px;
-		height: 18px;
-		left: -2px;
-		border-radius: 100%;
-		position: absolute;
-		top: 0;
-		transition: 200ms ease-in-out;
-		content: '';
-		background: ${({ active }) => active ? '#15563c' : 'transparent'};
-	}
-
-	svg {
-		opacity: 1;
-		margin-left: 0;
-		margin-right: 10px;
-		width: 14px;
-		height: 14px;
-		fill: ${({ active }) => active ? COLOR.WHITE : COLOR.BLACK_60};
-	}
+export const Container = styled.div`
+  height: 100%;
+  background-color: rgb(250, 250, 250);
 `;

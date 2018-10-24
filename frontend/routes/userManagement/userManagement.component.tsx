@@ -21,8 +21,6 @@ import * as queryString from 'query-string';
 import { isEqual, isEmpty, isUndefined } from 'lodash';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 
@@ -86,6 +84,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const { pathname, search } = this.props.location;
 		const queryParams = Object.assign({}, queryString.parse(search), params);
 		const updatedQueryString = queryString.stringify(queryParams);
+
 		this.props.history.push(`${pathname}?${updatedQueryString}`);
 	}
 
@@ -128,7 +127,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderTabContent = (props) => {
+	public renderTabContent = () => {
 		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
 		const {activeTab, selectedTeamspace} = this.state;
 
@@ -159,10 +158,11 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {isLoadingTeamspace, teamspaces, isTeamspaceAdmin} = this.props;
-		const {selectedTeamspace, teamspacesItems} = this.state;
+		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
+		const {activeTab, selectedTeamspace, teamspacesItems} = this.state;
 
 		const paperProps = { height: '100%' };
+
 		return (
 			<Panel title="User management" paperProps={paperProps}>
 				<Header>
@@ -180,7 +180,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 						</FormControl>
 					</TeamspaceSelectContainer>
 					<Tabs
-						value={this.state.activeTab}
+						value={activeTab}
 						indicatorColor="primary"
 						textColor="primary"
 						onChange={this.handleChange}

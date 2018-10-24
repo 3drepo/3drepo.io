@@ -17,36 +17,22 @@
 
 import * as React from 'react';
 
-import { Model } from './federationReminderDialog.styles';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
+import { LoaderContainer } from './loadingDialog.styles';
+import { Loader } from '../../../loader/loader.component';
 
 interface IProps {
-	models: any[];
-	handleResolve: () => string;
+	content: string;
 }
 
-export const FederationReminderDialog = (props: IProps) => {
-	const renderModels = (models = []) => {
-		return models.map((model, index) => {
-			return <Model key={index}>{model}</Model>;
-		});
-	};
-
+export const LoadingDialog = (props: IProps) => {
 	return (
 		<>
 			<DialogContent>
-				Just to let you know, the assigned users(s) will need permissions on submodels also to see them.
-				<br /><br />
-				These are the models in question:
-				<br /><br />
-				{renderModels(props.models)}
+				<LoaderContainer>
+					<Loader content={props.content} />
+				</LoaderContainer>
 			</DialogContent>
-
-			<DialogActions>
-				<Button onClick={props.handleResolve} variant="raised" color="secondary">Ok</Button>;
-			</DialogActions>
 		</>
 	);
 };

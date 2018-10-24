@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatBytes, formatBytesGB } from '../../../services/formatting/formatCapacity';
-import { invoiceDate, prettyDate } from '../../../services/formatting/formatDate';
+import { withRouter } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect, addRouting } from '../../helpers/migration';
+import { selectIsPending } from './../../modules/billing/billing.selectors';
 
-export const FormatBytesGBModule = angular
-	.module("3drepo")
-	.filter("formatBytesGB", () => formatBytesGB);
+import { Billing } from './billing.component';
 
-export const FormatBytesModule = angular
-	.module("3drepo")
-	.filter("formatBytes", () => formatBytes);
+const mapStateToProps = createStructuredSelector({});
 
-export const InvoiceDateModule = angular
-	.module("3drepo")
-	.filter("invoiceDate", () => invoiceDate);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export const PrettyDateModule = angular
-	.module("3drepo")
-	.filter("prettyDate", () => prettyDate);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Billing)));

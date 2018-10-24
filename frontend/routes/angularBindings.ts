@@ -9,6 +9,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 // Routes
 import DialogContainer from './components/dialogContainer/dialogContainer.container';
 import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
+import Billing from './billing/billing.container';
 
 import UserManagement from './userManagement/userManagement.container';
 import Profile from './profile/profile.container';
@@ -18,4 +19,5 @@ angular
 	.component('dialogContainer', wrap(DialogContainer))
 	.component('snackbarContainer', wrap(SnackbarContainer))
 	.component('userManagement', wrap(UserManagement, ['projects', 'users']))
-	.component('profile', wrap(Profile));
+	.component('profile', wrap(Profile))
+	.component('billing', wrap(Billing));

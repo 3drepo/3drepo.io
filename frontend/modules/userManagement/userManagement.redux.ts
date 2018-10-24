@@ -16,14 +16,13 @@
  */
 
 import {createActions, createReducer} from 'reduxsauce';
-import {pick, first, get, omit} from 'lodash';
+import {pick, get, omit} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
-import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'quotaInfo', 'jobs', 'jobsColors'],
+	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'jobs', 'jobsColors'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user'],
@@ -60,7 +59,6 @@ export const INITIAL_STATE = {
 	usersPermissions: [],
 	jobs: [],
 	jobsColors: [],
-	collaboratorLimit: null,
 	isPending: true,
 	currentProject: {
 		permissions: [],
@@ -100,10 +98,9 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 };
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace, quotaInfo = {} } = action;
+	const { teamspace } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace.name));
 	return Object.assign({}, INITIAL_STATE, {
-		...quotaInfo,
 		users,
 		isPending: false,
 		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
