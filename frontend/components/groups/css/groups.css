@@ -63,11 +63,14 @@ groups .groupMetaData {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100px;
+    margin:10px 5px;
 }
 
 groups .groupColorBar {
     width: 15px;
     margin: 10px;
+    min-height: 75px;
+    max-height: 75px;
 }
 
 groups .groupColorHolder {
