@@ -17,49 +17,40 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router';
 import { connect } from '../../helpers/migration';
 
-import { Users } from './users.component';
-import {
-	UserManagementActions,
-	selectUsersSuggestions,
-	selectUsers
-} from '../../modules/userManagement';
-
+import { Subscription } from './subscription.component';
 import {
 	TeamspaceActions,
-	selectCollaboratorLimit,
-	selectCurrentTeamspace
+	selectBillingInfo,
+	selectCurrentTeamspace,
+	selectSpaceInfo
 } from '../../modules/teamspace';
-
-import { selectJobs } from '../../modules/jobs';
+import {
+	BillingActions,
+	selectLicencesInfo,
+	selectIsPending
+} from '../../modules/billing';
 
 const mapStateToProps = createStructuredSelector({
-	usersSuggestions: selectUsersSuggestions,
-	users: selectUsers,
-	jobs: selectJobs,
-	limit: selectCollaboratorLimit,
-	teamspace: selectCurrentTeamspace
+	billingInfo: selectBillingInfo,
+	teamspace: selectCurrentTeamspace,
+	spaceInfo: selectSpaceInfo,
+	licencesInfo: selectLicencesInfo,
+	isLoadingBilling: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) =>
 	bindActionCreators(
 		{
-			addUser: UserManagementActions.addUser,
-			removeUser: UserManagementActions.removeUser,
-			updateJob: UserManagementActions.updateJob,
-			updatePermissions: UserManagementActions.updatePermissions,
-			onUsersSearch: UserManagementActions.getUsersSuggestions,
-			clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
-			fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo
+			fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo,
+			fetchBillingData: BillingActions.fetchBillingData,
+			changeSubscription: BillingActions.changeSubscription
 		},
 		dispatch
 	);
 
-export default withRouter(
-	connect(
-		mapStateToProps,
-		mapDispatchToProps
-	)(Users)
-);
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(Subscription);

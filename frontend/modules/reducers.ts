@@ -5,6 +5,7 @@ import { reducer as userManagementReducer } from './userManagement/userManagemen
 import { reducer as dialogReducer } from './dialog/dialog.redux';
 import { reducer as jobsReducer } from './jobs/jobs.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
+import { reducer as billingReducer } from './billing/billing.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -13,6 +14,7 @@ export default function createReducer() {
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,
 		jobs: jobsReducer,
-		snackbar: snackbarReducer// <-- INJECT MODULE REDUCER -->
+		snackbar: snackbarReducer,
+		billing: billingReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

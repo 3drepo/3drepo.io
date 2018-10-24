@@ -1,10 +1,11 @@
 export class ClientConfigService {
 	public responseCodes;
+	public countries;
+	public apiUrl;
+	public GET_API;
+	public POST_API;
 	private apiUrls;
-	private apiUrl;
 	private apiAlgorithm;
-	private GET_API;
-	private POST_API;
 	private MAP_API;
 	private C;
 
@@ -54,3 +55,5 @@ export class ClientConfigService {
 
 	}
 }
+
+export const clientConfigService = new ClientConfigService();

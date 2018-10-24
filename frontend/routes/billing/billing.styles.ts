@@ -16,38 +16,30 @@
  */
 
 import styled from 'styled-components';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { COLOR, FONT_WEIGHT } from '../../../../../styles';
+import { COLOR } from '../../styles';
 
-export const SortLabel = styled(TableSortLabel) `
-	height: 18px;
+export const Header = styled.div`
+	background-color: ${COLOR.WHITE};
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+`;
 
-	&& {
-		flex-direction: row-reverse;
-		margin-left: ${({ active }) => active ? 0 : '-5px'};
-		color: ${COLOR.BLACK_60};
-		font-size: 14px;
-		font-weight: ${FONT_WEIGHT.SEMIBOLD}
-	}
+export const TabContent = styled.div`
+	background-color: ${COLOR.WHITE};
+	flex: 1;
+	position: relative;
+	height: calc(100% - 100px);
+`;
 
-	&::before {
-		width: 18px;
-		height: 18px;
-		left: -2px;
-		border-radius: 100%;
-		position: absolute;
-		top: 0;
-		transition: 200ms ease-in-out;
-		content: '';
-		background: ${({ active }) => active ? '#15563c' : 'transparent'};
-	}
-
-	svg {
-		opacity: 1;
-		margin-left: 0;
-		margin-right: 10px;
-		width: 14px;
-		height: 14px;
-		fill: ${({ active }) => active ? COLOR.WHITE : COLOR.BLACK_60};
-	}
+export const LoaderContainer = styled.div`
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: #fafafa;
+	color: ${COLOR.BLACK_40};
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	padding-top: 100px;
+	box-sizing: border-box;
 `;

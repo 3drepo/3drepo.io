@@ -17,10 +17,22 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, values, isNumber, cond, matches, isEqual, isEmpty } from 'lodash';
+import {
+	pick,
+	values,
+	isNumber,
+	cond,
+	matches,
+	isEqual,
+	isEmpty
+} from 'lodash';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
-import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
+import {
+	CustomTable,
+	CELL_TYPES,
+	TableButton
+} from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
@@ -29,26 +41,32 @@ import { CellUserSearch } from '../components/customTable/components/cellUserSea
 import { UserItem } from '../components/userItem/userItem.component';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
-const USERS_TABLE_CELLS = [{
-	name: 'User',
-	type: CELL_TYPES.USER,
-	HeadingComponent: CellUserSearch,
-	CellComponent: UserItem,
-	searchBy: ['firstName', 'lastName', 'user', 'company']
-}, {
-	name: 'Job',
-	CellComponent: CellSelect,
-	type: CELL_TYPES.JOB
-}, {
-	name: 'Permissions',
-	CellComponent: CellSelect,
-	type: CELL_TYPES.PERMISSIONS
-}, {
-	type: CELL_TYPES.EMPTY
-}, {
-	type: CELL_TYPES.ICON_BUTTON,
-	CellComponent: TableButton
-}];
+const USERS_TABLE_CELLS = [
+	{
+		name: 'User',
+		type: CELL_TYPES.USER,
+		HeadingComponent: CellUserSearch,
+		CellComponent: UserItem,
+		searchBy: ['firstName', 'lastName', 'user', 'company']
+	},
+	{
+		name: 'Job',
+		CellComponent: CellSelect,
+		type: CELL_TYPES.JOB
+	},
+	{
+		name: 'Permissions',
+		CellComponent: CellSelect,
+		type: CELL_TYPES.PERMISSIONS
+	},
+	{
+		type: CELL_TYPES.EMPTY
+	},
+	{
+		type: CELL_TYPES.ICON_BUTTON,
+		CellComponent: TableButton
+	}
+];
 
 const getPreparedJobs = (jobs) => {
 	return jobs.map(({ _id: name, color }) => ({ name, color, value: name }));
@@ -60,12 +78,14 @@ interface IProps {
 	usersSuggestions: any[];
 	limit: any;
 	jobs: any[];
+	teamspace: any;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
+	fetchQuotaInfo: (teamspace) => void;
 }
 
 interface IState {
@@ -74,10 +94,15 @@ interface IState {
 	licencesLabel: string;
 	containerElement: Node;
 	panelKey: number;
+	limit: any;
 }
 
-const teamspacePermissions = values(TEAMSPACE_PERMISSIONS)
-	.map(({label: name, isAdmin: value }: {label: string, isAdmin: boolean}) => ({ name, value }));
+const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
+	({ label: name, isAdmin: value }: { label: string; isAdmin: boolean }) => ({
+		name,
+		value
+	})
+);
 
 export class Users extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
@@ -96,7 +121,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 		jobs: [],
 		licencesLabel: '',
 		containerElement: null,
-		panelKey: Math.random()
+		panelKey: Math.random(),
+		limit: 0
 	};
 
 	public onPermissionsChange = (username, isAdmin) => {
@@ -117,7 +143,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		this.props.removeUser(username);
 	}
 
-	public onSave = ({name, job, isAdmin = false}) => {
+	public onSave = ({ name, job, isAdmin = false }) => {
 		const user = {
 			job,
 			user: name,
@@ -157,12 +183,16 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement)
+			.parentNode;
 		const preparedJobs = getPreparedJobs(this.props.jobs);
+		this.props.fetchQuotaInfo(this.props.teamspace);
+
 		this.setState({
 			containerElement,
 			jobs: preparedJobs,
-			rows: this.getUsersTableRows(this.props.users, preparedJobs)
+			rows: this.getUsersTableRows(this.props.users, preparedJobs),
+			limit: this.props.limit
 		});
 	}
 
@@ -178,6 +208,11 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const usersChanged = !isEqual(prevProps.users, this.props.users);
 		if (usersChanged || jobsChanged) {
 			changes.rows = this.getUsersTableRows(this.props.users, changes.jobs || this.state.jobs);
+		}
+
+		const limitChanged = !isEqual(prevProps.limit, this.props.limit);
+		if (limitChanged) {
+			changes.limit = this.props.limit;
 		}
 
 		if (!isEmpty(changes)) {
@@ -203,7 +238,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 				}}
 				container={container}
 				key={this.state.panelKey}
-				render={({closePanel}) => {
+				render={({ closePanel }) => {
 					return <NewUserForm {...formProps} onCancel={closePanel} />;
 				}}
 			/>
@@ -213,8 +248,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	/**
 	 * Generate licences summary
 	 */
-	public getFooterLabel = () => {
-		const {limit, users} = this.props;
+	public getFooterLabel = (users = [], limit = 0) => {
 		if (!users) {
 			return '';
 		}
@@ -224,15 +258,13 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { rows, licencesLabel, containerElement } = this.state;
+		const { rows, containerElement, limit } = this.state;
+		const { users } = this.props;
 
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel()}>
-					<CustomTable
-							cells={USERS_TABLE_CELLS}
-							rows={rows}
-					/>
+				<UserManagementTab footerLabel={this.getFooterLabel(users, limit)}>
+					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
 			</>

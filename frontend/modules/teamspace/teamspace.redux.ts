@@ -17,11 +17,11 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 
-const getAvatartUrl = (username) => `/api/${username}/avatar?${Date.now()}`;
-
 export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActions({
 	fetchUser: ['username'],
 	fetchUserSuccess: ['userData'],
+	fetchQuotaInfo: ['teamspace'],
+	fetchQuotaInfoSuccess: ['quota'],
 	fetchUserError: ['error'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
@@ -30,7 +30,7 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	setAvatarPendingState: ['pendingState'],
 	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
-	refreshAvatar: []
+	refreshAvatar: ['avatarUrl']
 }, { prefix: 'TEAMSPACE_' });
 
 export const INITIAL_STATE = {
@@ -39,7 +39,8 @@ export const INITIAL_STATE = {
 		username: ''
 	},
 	isPending: true,
-	isAvatarPending: true
+	isAvatarPending: true,
+	collaboratorLimit: null
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
@@ -50,8 +51,11 @@ const setAvatarPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return Object.assign({}, state, { isAvatarPending: pendingState });
 };
 
+const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
+	return Object.assign({}, state, { ...quota });
+};
+
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
-	userData.avatarUrl = getAvatartUrl(userData.username);
 	return {
 		...state,
 		currentTeamspace: userData.username,
@@ -65,11 +69,8 @@ const updateUserSuccess = (state = INITIAL_STATE, { userData }) => {
 	return { ...state, currentUser };
 };
 
-const refreshAvatar = (state = INITIAL_STATE) => {
-	const currentUser = {
-		...state.currentUser,
-		avatarUrl: getAvatartUrl(state.currentUser.username)
-	};
+const refreshAvatar = (state = INITIAL_STATE, { avatarUrl }) => {
+	const currentUser = { ...state.currentUser, avatarUrl };
 
 	return {
 		...state,
@@ -80,6 +81,7 @@ const refreshAvatar = (state = INITIAL_STATE) => {
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
+	[TeamspaceTypes.FETCH_QUOTA_INFO_SUCCESS]: fetchQuotaInfoSuccess,
 	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar
