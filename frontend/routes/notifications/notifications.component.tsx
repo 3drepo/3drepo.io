@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -19,12 +18,14 @@ import * as React from "react";
 import Drawer from "@material-ui/core/Drawer";
 import Typography from '@material-ui/core/Typography';
 import Icon from "@material-ui/core/Icon";
-import {INotification, NotificationItem} from "./notification.item";
-import { Button, List, ListSubheader, IconButton, ListItem } from "@material-ui/core";
+import {INotification} from "./notification.item";
+import { Button, List, IconButton} from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { MuiTheme } from "../../styles";
 import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
 import { NotificationEmptyItem } from "./notifications.emptyItem";
+import { NotificationsPanel } from "./notifications.panel";
+import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
 
 interface IProps {
 	fetchNotifications: () => void ;
@@ -51,7 +52,23 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		return false;
 	}
 
-	public getNotificationsHeader() {
+	public thisWeeksNotifications() {
+		const lastSunday = getSunday().getTime();
+		return this.props.notifications.filter((n) => n.timestamp > lastSunday);
+	}
+
+	public lastWeeksNotifications() {
+		const lastSunday = getSunday().getTime();
+		const prevSunday = getSunday(-1).getTime();
+		return this.props.notifications.filter((n) => n.timestamp > prevSunday && n.timestamp < lastSunday );
+	}
+
+	public moreThanTwoWeeksAgoNotifications() {
+		const prevSunday = getSunday(-1).getTime();
+		return this.props.notifications.filter((n) => n.timestamp < prevSunday );
+	}
+
+	public renderNotificationsHeader() {
 		return (<ListSubheaderToolbar rightContent={
 					<IconButton aria-label="Close panel" onClick={this.toggleDrawer.bind(this)}>
 						<Icon>close</Icon>
@@ -77,13 +94,25 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				</Button>
 				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer.bind(this)}
 						SlideProps={{unmountOnExit: true}}>
-					<List subheader={this.getNotificationsHeader()} style={{height: '100%'}} >
+					<List subheader={this.renderNotificationsHeader()} style={{height: '100%'}} >
 						{this.props.notifications.length === 0 &&
 							<NotificationEmptyItem/>}
-						{this.props.notifications.length > 0 && this.props.notifications.map((notification) =>
-							<NotificationItem key={notification._id}
-								{...{...notification, markNotificationAsRead: this.props.markNotificationAsRead }}/>
-						)}
+						{this.props.notifications.length > 0 &&
+							<>
+							<NotificationsPanel
+								labelLeft={simpleDate(new Date())} labelRight="this week"
+								notifications={this.thisWeeksNotifications()}
+								markNotificationAsRead={this.props.markNotificationAsRead}/>
+							<NotificationsPanel
+								labelRight="last week"
+								notifications={this.lastWeeksNotifications() }
+								markNotificationAsRead={this.props.markNotificationAsRead}/>
+							<NotificationsPanel
+								labelRight="more than two weeks ago"
+								notifications={this.moreThanTwoWeeksAgoNotifications() }
+								markNotificationAsRead={this.props.markNotificationAsRead}/>
+							</>
+						}
 					</List>
 				</Drawer>
 			</MuiThemeProvider>

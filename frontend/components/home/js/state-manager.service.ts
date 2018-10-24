@@ -39,7 +39,7 @@ export class StateManagerService {
 	];
 
 	public query: any;
-	private state: any;
+	public state: any;
 	private changedState: any;
 	private structure: any;
 	private changed: any;

@@ -34,6 +34,7 @@ export interface INotification {
 	teamSpace: string;
 	modelName: string;
 	issuesId: string[];
+	timestamp: number;
 }
 
 export class NotificationItem extends React.PureComponent<INotification, any> {

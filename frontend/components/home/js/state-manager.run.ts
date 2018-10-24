@@ -64,14 +64,6 @@ function StateManagerRun(
 			fromParams
 		};
 
-		const queryParams = $location.search();
-
-		if (Object.keys(queryParams).length === 0) {
-			StateManager.clearQuery();
-		} else {
-			StateManager.setQuery(queryParams);
-		}
-
 		StateManager.startStateChange(stateChangeObject);
 	});
 
@@ -88,6 +80,22 @@ function StateManagerRun(
 
 	$rootScope.$on("$locationChangeSuccess", () => {
 		AnalyticService.sendPageView(location);
+		const queryParams = $location.search();
+
+		/** Hack: query strings are working erratically with the statemanager
+		 * hacking a solution for passing the notificationId
+		*/
+		if (queryParams.notificationId)	{
+			StateManager.state.notificationId =  queryParams.notificationId;
+			delete queryParams.notificationId;
+		}
+
+		if (Object.keys(queryParams).length === 0) {
+			StateManager.state.changing = false;
+			StateManager.clearQuery();
+		} else {
+			StateManager.setQuery(queryParams);
+		}
 	});
 
 }

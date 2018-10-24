@@ -19,6 +19,8 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { COLOR } from './colors';
 import { FONT_WEIGHT } from './fonts';
 import * as mixins from './mixins';
+import { reducer } from '../modules/teamspace/teamspace.redux';
+import color from '@material-ui/core/colors/amber';
 
 export const theme = {
 	colors: COLOR,
@@ -132,6 +134,11 @@ export const MuiTheme = createMuiTheme({
 		MuiIconButton: {
 			root: {
 				color: 'rgba(255, 255, 255, 0.87)'
+			}
+		},
+		MuiDrawer: {
+			paper: {
+				backgroundColor: 'rgb(250,250,250)'
 			}
 		}
 	}

@@ -1,3 +1,5 @@
+import { number } from "prop-types";
+
 /**
  *  Copyright (C) 2016 3D Repo Ltd
  *
@@ -17,6 +19,11 @@
 
 import { formatBytes, formatBytesGB } from '../../../services/formatting/formatCapacity';
 import { invoiceDate, prettyDate } from '../../../services/formatting/formatDate';
+
+export const simpleDate = (input) => {
+	const date: Date = new Date(input);
+	return date.toLocaleDateString("en-GB", {day: "numeric", month: "short", year: "numeric"});
+}
 
 export const FormatBytesGBModule = angular
 	.module("3drepo")

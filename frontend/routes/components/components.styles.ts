@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,4 +16,22 @@
  */
 
 import styled from 'styled-components';
-import { List, Toolbar } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
+import { COLOR } from '../../styles';
+
+const BaseStyles = styled(Grid)`
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+export const ItemLabel = styled(BaseStyles)`
+  font-size: 14px;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const ItemLabelDetail = styled(BaseStyles)`
+  font-size: 10px;
+  color: ${COLOR.BLACK_40};
+  line-height: 13px;
+`;

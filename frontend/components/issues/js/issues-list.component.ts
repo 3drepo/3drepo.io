@@ -88,9 +88,9 @@ class IssuesListController implements ng.IController {
 				this.allIssues = this.issuesService.state.allIssues;
 				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
 
-				if (this.stateManager.query.notificationId) {
-					const notificationId = this.stateManager.query.notificationId;
-					this.stateManager.clearQuery();
+				if (this.stateManager.state.notificationId) {
+					const notificationId = this.stateManager.state.notificationId;
+					this.stateManager.state.notificationId = null;
 
 					dispatch(NotificationsActions.markNotificationAsRead(notificationId));
 					API.getNotification(notificationId)
