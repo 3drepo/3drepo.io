@@ -1,5 +1,4 @@
 /**
-import { history } from '../../../helpers/migration';
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -16,11 +15,14 @@ import { history } from '../../../helpers/migration';
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { history } from '../../../helpers/migration';
+
 class LoginController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"$location",
+		"$timeout",
 
 		"AuthService",
 		"EventService",
@@ -38,6 +40,7 @@ class LoginController implements ng.IController {
 	constructor(
 		private $scope,
 		private $location,
+		private $timeout,
 
 		private AuthService,
 		private EventService,
@@ -84,6 +87,9 @@ class LoginController implements ng.IController {
 		this.loggingIn = true;
 		this.AuthService.login(this.user.username, this.user.password)
 			.then(() => {
+				this.$timeout(() => {
+					history.push('/dashboard');
+				});
 				this.loggingIn = false;
 			})
 			.catch(() => {

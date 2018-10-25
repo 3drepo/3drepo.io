@@ -27,17 +27,15 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state("app.viewer", {
 		url: "/viewer/:modelId",
 		template: `
-			<viewer
-				id="viewer"
-				flex="none"
-				ng-if="!vm.isLiteMode && !vm.isLegalPage"
-				device-memory="vm.deviceMemory"
-				node="node"
+			<model
+				is-lite-mode="vm.isLiteMode"
 				account="vm.state.account"
 				model="vm.state.model"
-				branch="vm.state.revision"
-				revision = "vm.state.revision"
-				style="pointer-events:none"
+				branch="vm.state.branch"
+				revision="vm.state.revision"
+				issue-id="vm.state.issue"
+				risk-id="vm.state.risk"
+				state="vm.state"
 			/>
 		`,
 		data: {

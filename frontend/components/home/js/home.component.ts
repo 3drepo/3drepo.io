@@ -160,6 +160,7 @@ class HomeController implements ng.IController {
 		// TODO: This feels like a bit of a hack. Let's come up with
 		// a better way!
 		this.$scope.$watch(() => this.AuthService.state.currentData, (currentData) => {
+			debugger
 			this.handleLoginStatus(currentData);
 		}, true);
 

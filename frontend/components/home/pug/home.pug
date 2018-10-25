@@ -6,7 +6,18 @@ div.homeContainer(
 	ng-keyup="vm.keyAction($event)")
 	
 	.homeHolder(layout="column" flex ng-if="!vm.isLegalPage")
-
+		viewer(
+			id="viewer"
+			flex="none"
+			ng-if="!vm.isLiteMode && !vm.isLegalPage"
+			device-memory="vm.deviceMemory"
+			node="node"
+			account="vm.state.account"
+			model="vm.state.model"
+			branch="vm.state.revision"
+			revision = "vm.state.revision"
+			style="pointer-events:none"
+		)
 		top-menu(
 			is-lite-mode="vm.isLiteMode"
 			logo-url="vm.topLogo"
@@ -22,8 +33,6 @@ div.homeContainer(
 
 	#homeLegalContainer( flex="100" layout="column" ng-if="vm.isLegalPage")
 		div(ui-view="")
-
-
 
 	#legalLinks
 		a(

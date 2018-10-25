@@ -142,7 +142,7 @@ export class StateManagerService {
 		let path = "/";
 
 		if (this.AuthService.isLoggedIn() && this.AuthService.getUsername()) {
-			path = "/dashboard";
+			path = "/dashboard/teamspaces";
 		}
 
 		this.$timeout(() => {

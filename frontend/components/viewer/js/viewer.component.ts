@@ -65,6 +65,7 @@ class ViewerController implements ng.IController {
 		}
 
 		this.viewer = this.ViewerService.getViewer();
+		debugger
 
 		this.watchers();
 
@@ -88,7 +89,7 @@ class ViewerController implements ng.IController {
 
 		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 			const validEvent = event !== undefined && event.type !== undefined;
-
+			debugger
 			if (validEvent && this.ViewerService.initialised) {
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}

@@ -24,7 +24,7 @@ home {
 }
 
 home [ui-view] {
-	position: relative;
+	/* position: relative; */
 }
 
 home .homeContainer {

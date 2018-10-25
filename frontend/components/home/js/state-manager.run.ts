@@ -1,6 +1,3 @@
-import { history } from "../../../helpers/migration";
-import { get } from 'lodash';
-
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -17,6 +14,9 @@ import { get } from 'lodash';
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { history } from "../../../helpers/migration";
+import { get } from 'lodash';
 
 function StateManagerRun(
 	$location,
@@ -75,7 +75,7 @@ function StateManagerRun(
 		}
 	});
 
-	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
+	$rootScope.$on('$stateChangeStart', (event, toState, toParams, fromState, fromParams) => {
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
 
 		if (isLoginRequired && !AuthService.isLoggedIn()) {
@@ -85,7 +85,13 @@ function StateManagerRun(
 			AuthService.init().then(() => {
 				StateManager.state.authInitialized = true;
 				$timeout(() => {
-					$state.go(toState, toParams);
+					if (toState.name.includes('app.dashboard')) {
+						history.push(location.pathname);
+						$rootScope.$broadcast('$stateChangeSuccess', toState, toParams, fromState, fromParams);
+						$urlRouter.update();
+					} else {
+						$state.go(toState, toParams);
+					}
 				});
 			})
 			.catch((error) => {

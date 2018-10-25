@@ -124,10 +124,6 @@ export class AuthService {
 		this.AnalyticService.setUserId(this.username);
 		this.authDefer.resolve(this.loggedIn);
 
-		this.$timeout(() => {
-			history.push('/dashboard');
-		});
-
 		dispatch(TeamspaceActions.fetchUserSuccess({
 			username: response.data.username
 		}));
