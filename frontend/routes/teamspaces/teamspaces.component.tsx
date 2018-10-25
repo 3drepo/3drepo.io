@@ -16,33 +16,27 @@
  */
 
 import * as React from 'react';
+import { Route } from 'react-router-dom';
 import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
-import { groupBy, isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
-import Tooltip from '@material-ui/core/Tooltip';
 
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import { TreeList } from '../components/treeList/treeList.component';
 import { ModelItem } from './components/modelItem/modelItem.component';
-import { MyTeamspaceItem } from './components/myTeamspaceItem/myTeamspaceItem.component';
-import { ROW_ACTIONS } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { RowMenu } from './components/rowMenu/rowMenu.component';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
-import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
-import { TooltipButton } from './components/tooltipButton/tooltipButton.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
+import ModelSettings from '../modelSettings/modelSettings.container';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -54,6 +48,8 @@ const PANEL_PROPS = {
 const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account, projects }) => ({ value: account, projects }));
 
 interface IProps {
+	match: any;
+	location: any;
 	history: any;
 	currentTeamspace: string;
 	teamspaces: any[];
@@ -207,7 +203,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 * Render methods
 	 */
 	public renderModel = (props) => {
-		return <ModelItem {...props} actions={[]} />;
+		return (
+			<ModelItem
+				{...props}
+				actions={[]}
+				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
+					page: 'userManagement',
+					teamspace: this.state.activeTeamspace,
+					project: props.name,
+					tab: TABS_TYPES.PROJECTS
+				})}
+				onSettingsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
+					page: 'modelsetting',
+					modelId: props.model
+				})}
+			/>
+		);
 	}
 
 	public renderModelDirectory = (props) => {
@@ -280,6 +291,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				</MenuItem>
 			</>
 		);
+	}
+
+	public renderSettings = () => {
+		console.log('renderSettings');
 	}
 
 	public render() {

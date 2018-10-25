@@ -51,3 +51,7 @@ export const selectSpaceInfo = createSelector(
 	selectTeamspaceDomain,
 	(state) => ({ spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed })
 );
+
+export const selectModelSettings = createSelector(
+	selectTeamspaceDomain, (state) => state.modelSettings
+);

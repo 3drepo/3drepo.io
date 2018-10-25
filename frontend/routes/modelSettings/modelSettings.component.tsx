@@ -16,8 +16,11 @@
  */
 
 import * as React from 'react';
+import { Route } from 'react-router-dom';
+import * as queryString from 'query-string';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
+import { snakeCase } from 'lodash';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -41,8 +44,6 @@ import {
 	GridColumn
 } from './modelSettings.styles';
 
-import { COLOR } from '../../styles';
-
 const PANEL_PROPS = {
 	title: 'Model Settings',
 	paperProps: {
@@ -50,36 +51,53 @@ const PANEL_PROPS = {
 	}
 };
 
+const ENTER_KEY = 'Enter';
+
 interface IState {
-	types: any[];
+	topicTypes: any[];
 }
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	location: any;
+	fetchModelSettings: (teamspace, modelId) => void;
+	modelSettings: any;
 }
 
 export class ModelSettings extends React.PureComponent<IProps, IState> {
 	public state = {
-		types: ['hello', 'tydas', 'im typo']
+		topicTypes: []
 	};
 
-	public componentDidUpdate(prevProps, prevState, snapshot) {
-		console.log(prevProps, prevState, snapshot);
+	public componentDidMount() {
+		const queryParams = queryString.parse(this.props.location.search);
+		const teamspace = this.props.location.pathname.replace(/\//g, '');
+		const { modelId } = queryParams;
+
+		this.props.fetchModelSettings(teamspace, modelId);
 	}
 
-	public addTopicType = () => {};
+	public componentDidUpdate(prevProps, prevState) {
+		const topicTypes = this.props.modelSettings.properties.topicTypes;
+
+		if (topicTypes && !prevProps.modelSettings.properties && topicTypes.length !== prevState.length) {
+			this.setState({
+				topicTypes
+			});
+		}
+	}
 
 	public deleteTopicType = (name) => {
 		this.setState({
-			types: this.state.types.filter((typeName) => typeName !== name)
+			topicTypes: this.state.topicTypes.filter((typeName) => typeName !== name)
 		});
 	}
 
 	public handleNewTopicSubmit = (event) => {
-		if (event.key === 'Enter') {
-
+		if (event.key === ENTER_KEY) {
 			this.setState({
-				types: [...this.state.types, event.target.value]
+				topicTypes: [...this.state.topicTypes, {
+					label: event.target.value, value: snakeCase(event.target.value)
+				}]
 			});
 
 			event.target.value = '';
@@ -88,9 +106,22 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		const { id, name, type, surveyPoints } = this.props.modelSettings;
+
+		if (!id) {
+			return null;
+		}
+		const [ { latLong, position } ] = surveyPoints;
+
 		return (
 			<Panel {...PANEL_PROPS}>
-				<Formik>
+				<Formik
+					initialValues={{
+						id, name, type,
+						latitude: latLong[0], longitude: latLong[1],
+						axisX: position[0], axisY: position[1], axisZ: position[2]
+					}}
+					>
 					<StyledForm>
 						<Headline color="primary" variant="subheading">Model Information</Headline>
 						<Grid>
@@ -156,9 +187,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							</FieldsRow>
 							<TypesGrid container direction="column">
 								<TopicTypesContainer>
-									{this.state.types.map(
+									{this.state.topicTypes.map(
 										(type, index) => (
-											<StyledChip key={index} label={type} onDelete={() => this.deleteTopicType(type)} />
+											<StyledChip key={index} label={type.label} onDelete={() => this.deleteTopicType(type)} />
 										)
 									)}
 								</TopicTypesContainer>
