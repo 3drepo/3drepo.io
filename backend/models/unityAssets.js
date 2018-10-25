@@ -40,7 +40,7 @@ function getAssetListFromRef(ref, username) {
 			const revId = utils.uuidToString(ref._rid);
 			const getRevIdPromise = revId === C.MASTER_BRANCH ?
 				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
-				{_id : ref._rid};
+				Promise.resolve({_id : ref._rid});
 
 			return getRevIdPromise.then((revInfo) => {
 				return getAssetListEntry(ref.owner, ref.project, revInfo._id);
