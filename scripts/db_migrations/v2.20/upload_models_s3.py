@@ -56,7 +56,7 @@ for database in db.database_names():
 					bson_data['_id'] = filename
 					bson_data['link'] = str(s3_ref)
 					bson_data['type'] = "s3"
-                                        bson_data['size'] = entry.length
+					bson_data['size'] = entry.length
 					if dry_run:
 						print "\t\t Writing: " + str(bson_data)
 					else:
