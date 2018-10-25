@@ -75,6 +75,7 @@ export class MultiSelectService {
 				this.setDecumMode(keyDown);
 				break;
 			case 91:
+			case 224:
 				// Command key(Mac)
 				if (this.isMac) {
 					this.setAccumMode(keyDown);
