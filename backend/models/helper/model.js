@@ -858,90 +858,6 @@ function getTreePath(account, model, branch, rev, username) {
 	});
 }
 
-function getUnityAssets(account, model, branch, rev, username) {
-
-	let subAssets;
-	let revId, assetsFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			revId = utils.uuidToString(history._id);
-			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getUnityProps = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getUnityProps.push(
-				getUnityAssets(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						models: obj.models,
-						owner: ref.owner,
-						model: ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(getUnityProps);
-
-	}).then(_subAssets => {
-
-		subAssets = _subAssets;
-		return stash.findStashByFilename({ account, model }, "json_mpc", assetsFileName);
-
-	}).then(buf => {
-		let models = [];
-
-		if(buf) {
-			const modelAssets = JSON.parse(buf);
-			if(modelAssets !== null) {
-				models.push(modelAssets);
-			}
-
-		}
-
-		subAssets.forEach(subAsset => {
-			if (subAsset && subAsset.models) {
-				models = models.concat(subAsset.models);
-			}
-		});
-
-		return Promise.resolve({models, status});
-
-	});
-}
-
 function getJsonMpc(account, model, uid) {
 
 	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
@@ -1664,7 +1580,6 @@ module.exports = {
 	getModelProperties,
 	getTreePath,
 	getJsonMpc,
-	getUnityAssets,
 	getUnityBundle,
 	searchTree,
 	downloadLatest,

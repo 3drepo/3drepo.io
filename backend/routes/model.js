@@ -24,6 +24,7 @@ const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
+const UnityAssets = require("../models/unityAssets");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -612,7 +613,7 @@ function getUnityAssets(req, res, next) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.getUnityAssets(account, model, branch, req.params.rev, username).then(obj => {
+	UnityAssets.getUnityAssets(account, model, branch, req.params.rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
