@@ -46,6 +46,9 @@ div#accountHolder(
 
 			billing(ng-if="vm.username && vm.pageVisibility.billing")
 
+			model-settings(
+				ng-if="vm.username && vm.pageVisibility.modelsetting"
+			)
 			account-modelsetting(
 				ng-if="vm.username && vm.pageVisibility.modelsetting"
 				account="vm.account"
