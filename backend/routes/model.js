@@ -613,7 +613,7 @@ function getUnityAssets(req, res, next) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	UnityAssets.getUnityAssets(account, model, branch, req.params.rev, username).then(obj => {
+	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

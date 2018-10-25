@@ -31,48 +31,42 @@ function getSubModelRefs(account, model, currentIds) {
 		type: "ref",
 		_id: { $in: currentIds }
 	};
-	console.log("trying to find ref records from ", account, model);
 	return Ref.find({ account, model }, filter);
 }
 
-function getUnityAssetsFromRef(ref, username) {
+function getAssetListFromRef(ref, username) {
 	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
 		if(granted) {
 			const revId = utils.uuidToString(ref._rid);
 			const getRevIdPromise = revId === C.MASTER_BRANCH ?
 				History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}) :
-				Promise.resolve({_id : ref._rid});
+				{_id : ref._rid};
 
 			return getRevIdPromise.then((revInfo) => {
-				return getUnityAssetsEntry(ref.owner, ref.project, revInfo._id);
+				return getAssetListEntry(ref.owner, ref.project, revInfo._id);
 			});
-
-		} else {
-			// It is not expected to be an error if the submodel
-			// doesn't exist or if the user doesn't have access to it.
-			return Promise.resolve();
 		}
 	});
 }
 
-function getUnityAssetsEntry(account, model, revId) {
+function getAssetListEntry(account, model, revId) {
 	return db.getCollection(account, model + ".stash.unity3d").then(dbCol => {
 		return dbCol.findOne({_id: revId});
 	});
 }
 
-UnityAssets.getUnityAssets = function(account, model, branch, rev, username) {
+UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
 		return getSubModelRefs(account, model, history.current).then((subModelRefs) => {
 			const fetchPromise = [];
 			if(subModelRefs.length) {
 				// This is a federation, get asset lists from subModels and merge them
 				subModelRefs.forEach((ref) => {
-					fetchPromise.push(getUnityAssetsFromRef(ref, username));
+					fetchPromise.push(getAssetListFromRef(ref, username));
 				});
 			} else {
 				// Not a federation, get it's own assetList.
-				fetchPromise.push(getUnityAssetsEntry(account, model, history._id));
+				fetchPromise.push(getAssetListEntry(account, model, history._id));
 			}
 
 			return Promise.all(fetchPromise).then((assetLists) => {
