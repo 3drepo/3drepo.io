@@ -366,18 +366,16 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={({ form }) => {
-							return (
-								<Button
-									type="submit"
-									variant="raised"
-									color="secondary"
-									disabled={!form.isValid || form.isValidating}
-								>
-									Save
+						<Field render={({ form }) => (
+							<Button
+								type="submit"
+								variant="raised"
+								color="secondary"
+								disabled={!form.isValid || form.isValidating}
+							>
+								Save
 							</Button>
-							);
-						}} />
+						)} />
 					</DialogActions>
 				</Form>
 			</Formik>
