@@ -59,7 +59,6 @@ export const HeadlineContainer = styled(Grid)`
 
 export const Title = styled.div`
   font-size: 14px;
-  max-width: 90%;
   ${ellipsis('100%')}
 `;
 
