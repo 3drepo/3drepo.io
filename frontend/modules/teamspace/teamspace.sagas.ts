@@ -117,10 +117,21 @@ export function* uploadAvatar({ file }) {
 	}
 }
 
+
+export function* fetchModelSettings({ teamspace, modelId }) {
+	try {
+		const { data: settings } = yield API.getModelSettings(teamspace, `${modelId}.json`);
+		yield put(TeamspaceActions.fetchModelSettingsSuccess(settings));
+	} catch (e) {
+		put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
+	}
+}
+
 export default function* teamspaceSaga() {
 	yield takeLatest(TeamspaceTypes.FETCH_USER, fetchUser);
 	yield takeLatest(TeamspaceTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
 	yield takeLatest(TeamspaceTypes.UPDATE_USER, updateUser);
 	yield takeLatest(TeamspaceTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(TeamspaceTypes.UPLOAD_AVATAR, uploadAvatar);
+	yield takeLatest(TeamspaceTypes.FETCH_MODEL_SETTINGS, fetchModelSettings);
 }

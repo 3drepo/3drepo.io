@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
-
+import { connect, addRouting } from '../../helpers/migration';
+import { TeamspaceActions, selectModelSettings } from './../../modules/teamspace';
 import { ModelSettings } from './modelSettings.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+  modelSettings: selectModelSettings
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+  fetchModelSettings: TeamspaceActions.fetchModelSettings
+}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelSettings);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelSettings)));
