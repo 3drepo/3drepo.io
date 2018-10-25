@@ -76,7 +76,6 @@ class ModelController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
 		this.pointerEvents = "inherit";
 

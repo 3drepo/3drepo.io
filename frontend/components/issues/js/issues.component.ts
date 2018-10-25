@@ -222,7 +222,7 @@ class IssuesController implements ng.IController {
 				this.issuesService.state.displayIssue = null;
 				this.selectedMenuOption = null;
 
-				this.$state.go("home.account.model",
+				this.$state.go("app.viewer",
 					{
 						account: this.account,
 						model: this.model,
@@ -385,7 +385,7 @@ class IssuesController implements ng.IController {
 		if (issue) {
 
 			this.viewerService.highlightObjects([]);
-			this.$state.go("home.account.model.issue",
+			this.$state.go("app.viewer",
 				{
 					account: this.account,
 					model: this.model,

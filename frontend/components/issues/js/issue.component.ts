@@ -939,7 +939,7 @@ class IssueController implements ng.IController {
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"home.account.model.issue",
+					"app.viewer",
 					issueState,
 					{notify: false}
 				);

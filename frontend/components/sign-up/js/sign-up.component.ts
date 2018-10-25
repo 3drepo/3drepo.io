@@ -243,7 +243,7 @@ class SignupController implements ng.IController {
 	}
 
 	public showPage() {
-		this.$location.path("/registerRequest");
+		this.$location.path("/register-request");
 	}
 
 	/**

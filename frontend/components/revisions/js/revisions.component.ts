@@ -95,10 +95,11 @@ class RevisionsController implements ng.IController {
 	}
 
 	public goToRevision(revId) {
-
 		this.revision = revId;
 		this.DialogService.closeDialog();
-		this.$location.path(`/${this.account}/${this.model}/${revId}`);
+
+		debugger
+		this.$location.path(`/viewer/${this.model}/${revId}`);
 
 	}
 

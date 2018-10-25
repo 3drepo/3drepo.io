@@ -25,12 +25,12 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.viewer", {
-		url: "/viewer/:modelId",
+		url: "/viewer/:modelId/:revision",
 		template: `
 			<model
 				is-lite-mode="vm.isLiteMode"
 				account="vm.state.account"
-				model="vm.state.model"
+				model="vm.state.modelId"
 				branch="vm.state.branch"
 				revision="vm.state.revision"
 				issue-id="vm.state.issue"
@@ -38,6 +38,10 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 				state="vm.state"
 			/>
 		`,
+		params: {
+			modelId: { squash: true, value: null },
+			revision: { squash: true, value: null }
+		},
 		data: {
 			isLoginRequired: true
 		}

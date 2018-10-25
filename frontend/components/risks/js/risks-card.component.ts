@@ -213,7 +213,7 @@ class RisksCardController implements ng.IController {
 				this.risksService.state.displayRisk = null;
 				this.selectedMenuOption = null;
 
-				this.$state.go("home.account.model",
+				this.$state.go("app.viewer",
 					{
 						account: this.account,
 						model: this.model,
@@ -343,7 +343,7 @@ class RisksCardController implements ng.IController {
 
 			this.viewerService.highlightObjects([]);
 			// TODO Change state to risk
-			this.$state.go("home.account.model.risk",
+			this.$state.go("app.viewer",
 				{
 					account: this.account,
 					model: this.model,
