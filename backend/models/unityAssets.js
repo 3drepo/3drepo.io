@@ -23,23 +23,8 @@ const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
 const db = require("../db/db");
-const ModelSettings = require("./modelSetting");
 
 const UnityAssets = {};
-
-function getSubModelRefs(account, model, currentIds) {
-	return ModelSettings.findById({account}, model).then((settings) => {
-		if(settings.federate) {
-			const filter = {
-				type: "ref",
-				_id: { $in: currentIds }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-		return [];
-	});
-
-}
 
 function getAssetListFromRef(ref, username) {
 	return middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
@@ -64,7 +49,7 @@ function getAssetListEntry(account, model, revId) {
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
-		return getSubModelRefs(account, model, history.current).then((subModelRefs) => {
+		return Ref.getRefNodes(account, model, history.current).then((subModelRefs) => {
 			const fetchPromise = [];
 			if(subModelRefs.length) {
 				// This is a federation, get asset lists from subModels and merge them
