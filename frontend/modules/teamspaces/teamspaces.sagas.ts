@@ -60,12 +60,10 @@ export function* removeProject({ teamspace, projectName }) {
 export function* createModel({ teamspace, modelData }) {
 	try {
 		yield API.createModel(teamspace, modelData);
-		console.log('create model');
 
 		yield put(SnackbarActions.show('Model created'));
 		yield put(TeamspacesActions.createModelSuccess(teamspace, modelData));
 	} catch (e) {
-		console.log('Error', e);
 		put(DialogActions.showErrorDialog('create', 'model', e.response));
 	}
 }

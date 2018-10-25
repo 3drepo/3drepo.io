@@ -58,6 +58,7 @@ export const TopicTypesContainer = styled.div`
 
 export const StyledChip = styled(Chip)`
 	margin-right: 10px;
+	margin-bottom: 10px;
 `;
 
 export const GridColumn = styled(Grid)`
