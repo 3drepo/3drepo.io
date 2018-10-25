@@ -90,9 +90,13 @@ function StateManagerRun(
 			})
 			.catch((error) => {
 				$state.go('app.login');
-				console.error("Error initialising auth from state manager: ", error);
+				console.error('Error initialising auth from state manager: ', error);
 			});
 		}
+	});
+
+	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
+		StateManager.setState(toParams);
 	});
 
 	$urlRouter.listen();

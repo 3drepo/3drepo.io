@@ -29,6 +29,7 @@ class HomeController implements ng.IController {
 		"$window",
 		"$location",
 		"$document",
+		"$state",
 
 		"AuthService",
 		"StateManager",
@@ -44,7 +45,7 @@ class HomeController implements ng.IController {
 
 	private doNotLogout;
 	private legalPages;
-	private loggedOutPages;
+	private loggedOutStates;
 	private loggedIn;
 	private loginPage;
 	private isLoggedOutPage;
@@ -78,6 +79,7 @@ class HomeController implements ng.IController {
 		private $window,
 		private $location,
 		private $document,
+		private $state,
 
 		private AuthService,
 		private StateManager,
@@ -106,7 +108,7 @@ class HomeController implements ng.IController {
 
 		this.doNotLogout = this.AuthService.doNotLogout;
 		this.legalPages = this.AuthService.legalPages;
-		this.loggedOutPages = this.AuthService.loggedOutPages;
+		this.loggedOutStates = this.AuthService.loggedOutStates;
 
 		this.loggedIn = false;
 		this.loginPage = true;
@@ -178,28 +180,16 @@ class HomeController implements ng.IController {
 			if ( (newState && change) || (newState && this.firstState)) {
 
 				// If it's a legal page
-				const legal = this.pageCheck(newState, this.legalPages);
-				const loggedOutPage = this.pageCheck(newState, this.loggedOutPages);
+				const legal = this.$state.current.name.includes('app.static');
+				const loggedOutPage = this.pageCheck(this.$state.current.name, this.loggedOutStates);
 
 				if (legal) {
-
 					this.isLegalPage = true;
 					this.isLoggedOutPage = false;
-
-					this.legalPages.forEach((page) => {
-						this.setPage(newState, page);
-					});
-
 				} else if (loggedOutPage && !newState.loggedIn) {
-
 					// If its a logged out page which isnt login
-
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
-					this.loggedOutPages.forEach((page) => {
-						this.setPage(newState, page);
-					});
-
 				} else if (
 					this.AuthService.getUsername() &&
 					newState.account !== this.AuthService.getUsername() &&
@@ -208,10 +198,9 @@ class HomeController implements ng.IController {
 					// If it's some other random page that doesn't match
 					// anything sensible like legal, logged out pages, or account
 					this.isLoggedOutPage = false;
-					this.page = "";
 					this.$location.search({}); // Reset query parameters
 
-					let url = "/" + this.AuthService.getUsername();
+					let url = "/dasboard/teamspaces";
 
 					if (this.state.returnUrl) {
 						url = this.state.returnUrl;
@@ -228,7 +217,6 @@ class HomeController implements ng.IController {
 					// Login page or none existant page
 
 					this.isLoggedOutPage = false;
-					this.page = "";
 				}
 
 			}
@@ -398,15 +386,9 @@ class HomeController implements ng.IController {
 	}
 
 	public pageCheck(state, pages) {
-		return pages.filter((page) => {
+		return pages.some((page) => {
 			return state[page] === true;
-		}).length;
-	}
-
-	public setPage(state, page) {
-		if (state[page] === true) {
-			this.page = page;
-		}
+		});
 	}
 
 	public precacheTeamspaceTemplate() {

@@ -38,9 +38,7 @@ export class AuthService {
 	public authDefer;
 
 	private doNotLogout;
-	private legalPages;
-	private loggedOutPages;
-	private loggedOutPagesCamel;
+	private loggedOutStates;
 	private username;
 	private loggedIn;
 	private state;
@@ -74,26 +72,12 @@ export class AuthService {
 			"/registerVerify"
 		];
 
-		this.legalPages = [
-			"terms",
-			"privacy",
-			"cookies"
-		];
-
-		this.loggedOutPages = [
-			"sign-up",
-			"password-forgot",
-			"register-request",
-			"register-verify",
-			"password-change"
-		];
-
-		this.loggedOutPagesCamel = [
-			"signUp",
-			"passwordForgot",
-			"registerRequest",
-			"registerVerify",
-			"passwordChange"
+		this.loggedOutStates = [
+			"app.signUp",
+			"app.passwordForgot",
+			"app.registerRequest",
+			"app.registerVerify",
+			"app.passwordChange"
 		];
 
 		// TODO: null means it"s the first login,
@@ -209,7 +193,6 @@ export class AuthService {
 	}
 
 	public shouldAutoLogout() {
-
 		const sessionLogin = this.localStorageLoggedIn();
 
 		// We are logged in on another tab but not this OR
@@ -219,21 +202,21 @@ export class AuthService {
 
 		// Check if we're on a logged out page i.e. registerVerify
 		const isLoggedOutPage = this.loggedOutPage();
+		const isStatic = this.$state.current.name.includes('app.static');
 
-		if (loginStateMismatch && !isLoggedOutPage) {
+		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
 			this.$window.location.reload();
 		} else if (loginStateMismatch && isLoggedOutPage) {
 			this.$location.path("/");
 		}
-
 	}
 
 	public loggedOutPage() {
-		const path = this.$location.path();
-		const isLoggedOutPage = this.loggedOutPagesCamel.filter((page) => {
-			return path.indexOf(page) !== -1;
-		}).length > 0;
-		return isLoggedOutPage;
+		const state = this.$state.current.name;
+
+		return this.loggedOutStates.some((page) => {
+			return state.indexOf(page) !== -1;
+		});
 	}
 
 	// TODO: This needs tidying up. Probably lots of irrelvant logic in this now
@@ -246,7 +229,6 @@ export class AuthService {
 		// are or not
 		if (this.loggedIn === null) {
 			// Initialize
-
 			this.sendLoginRequest()
 				.then((data) => {
 

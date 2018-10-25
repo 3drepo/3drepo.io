@@ -2,8 +2,6 @@
 import "./account/js/account-billing.component";
 import "./account/js/account.component";
 import "./account/js/account-federations.component";
-import "./account/js/account-info.component";
-import "./account/js/account-menu.component";
 import "./account/js/account-model.component";
 import "./account/js/account-modelsetting.component";
 import "./account/js/account.service";

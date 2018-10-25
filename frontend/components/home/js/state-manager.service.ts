@@ -145,7 +145,9 @@ export class StateManagerService {
 			path = "/dashboard";
 		}
 
-		history.push(path);
+		this.$timeout(() => {
+			history.push(path);
+		});
 	}
 
 	public destroy()  {

@@ -5,10 +5,7 @@ div.homeContainer(
 	ng-keydown="vm.keyAction($event)"
 	ng-keyup="vm.keyAction($event)")
 	
-	div.homeHolder(
-		layout="column"
-		flex
-		ng-if="!vm.state.changing && !vm.isLegalPage")
+	.homeHolder(layout="column" flex ng-if="!vm.isLegalPage")
 
 		top-menu(
 			is-lite-mode="vm.isLiteMode"
@@ -22,6 +19,11 @@ div.homeContainer(
 			flex="grow"
 			layout="column"
 		)
+
+	#homeLegalContainer( flex="100" layout="column" ng-if="vm.isLegalPage")
+		div(ui-view="")
+
+
 
 	#legalLinks
 		a(

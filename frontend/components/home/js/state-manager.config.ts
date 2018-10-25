@@ -37,15 +37,9 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 				model="vm.state.model"
 				branch="vm.state.revision"
 				revision = "vm.state.revision"
-				style="pointer-events:none")"
+				style="pointer-events:none"
 			/>
 		`,
-		resolve: {
-			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
-				StateManager.setState($stateParams);
-				console.log('test')
-			}]
-		},
 		data: {
 			isLoginRequired: true
 		}
@@ -54,13 +48,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state("app.dashboard", {
 		url: "/dashboard",
 		template: "<dashboard flex/>",
-		resolve: {
-			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
-				StateManager.setState($stateParams);
-				console.log('dashboard')
-
-			}]
-		},
 		data: {
 			isLoginRequired: true
 		}
@@ -68,11 +55,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state("app.dashboard.pages", {
 		url: "/*page",
-		resolve: {
-			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
-				StateManager.setState($stateParams);
-			}]
-		},
 		data: {
 			isLoginRequired: true
 		}
@@ -116,7 +98,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	// Static pages
 	$stateProvider.state("app.static", {
 		url: "",
-		template: "<home flex layout='column'></home>"
+		template: "<ui-view />"
 	});
 
 	$stateProvider.state("app.static.privacy", {
