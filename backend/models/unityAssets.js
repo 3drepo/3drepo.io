@@ -23,15 +23,22 @@ const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
 const db = require("../db/db");
+const ModelSettings = require("./modelSetting");
 
 const UnityAssets = {};
 
 function getSubModelRefs(account, model, currentIds) {
-	const filter = {
-		type: "ref",
-		_id: { $in: currentIds }
-	};
-	return Ref.find({ account, model }, filter);
+	return ModelSettings.findById({account}, model).then((settings) => {
+		if(settings.federate) {
+			const filter = {
+				type: "ref",
+				_id: { $in: currentIds }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+		return [];
+	});
+
 }
 
 function getAssetListFromRef(ref, username) {
