@@ -1,4 +1,5 @@
 import { history } from "../../../helpers/migration";
+import { get } from 'lodash';
 
 /**
  *	Copyright (C) 2014 3D Repo Ltd
@@ -59,7 +60,9 @@ function StateManagerRun(
 		if ($state.current.name !== 'app.dashboard.pages') {
 			$urlRouter.sync();
 		} else if (newUrl !== oldUrl) {
-			history.push(location.pathname + location.search);
+			$timeout(() => {
+				history.push(location.pathname + location.search);
+			});
 		}
 
 		AnalyticService.sendPageView(location);
@@ -69,6 +72,26 @@ function StateManagerRun(
 			StateManager.clearQuery();
 		} else {
 			StateManager.setQuery(queryParams);
+		}
+	});
+
+	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
+		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
+
+		if (isLoginRequired && !AuthService.isLoggedIn()) {
+			event.preventDefault();
+			StateManager.state.authInitialized = false;
+
+			AuthService.init().then(() => {
+				StateManager.state.authInitialized = true;
+				$timeout(() => {
+					$state.go(toState, toParams);
+				});
+			})
+			.catch((error) => {
+				$state.go('app.login');
+				console.error("Error initialising auth from state manager: ", error);
+			});
 		}
 	});
 

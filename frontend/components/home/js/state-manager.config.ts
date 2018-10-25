@@ -21,54 +21,8 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state("app", {
 		url: "",
 		abstract: true,
-		template: "<home flex layout='column'></home>",
-		resolve: {
-			auth: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
-				debugger
-				StateManager.state.authInitialized = false;
-				const finishedAuth = $q.defer();
-
-				AuthService.init()
-					.then(() => {
-						StateManager.state.authInitialized = true;
-						finishedAuth.resolve();
-					})
-					.catch((error) => {
-						console.error("Error initialising auth from state manager: ", error);
-						finishedAuth.reject();
-					});
-
-				return finishedAuth.promise;
-			}]
-		}
+		template: "<home flex layout='column'></home>"
 	});
-
-/* 	$stateProvider.state("app", {
-		url: "/",
-		abstract: true,
-		template: "<home flex layout='column'></home>",
-		resolve: {
-			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
-				StateManager.state.authInitialized = false;
-				const finishedAuth = $q.defer();
-
-				AuthService.init()
-					.then(() => {
-						StateManager.state.authInitialized = true;
-						finishedAuth.resolve();
-					})
-					.catch((error) => {
-						console.error("Error initialising auth from state manager: ", error);
-						finishedAuth.reject();
-					});
-
-				return finishedAuth.promise;
-			}]
-		},
-		data: {
-			sessionRequired: true
-		}
-	}); */
 
 	$stateProvider.state("app.viewer", {
 		url: "/viewer/:modelId",
@@ -93,7 +47,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 			}]
 		},
 		data: {
-			sessionRequired: true
+			isLoginRequired: true
 		}
 	});
 
@@ -103,10 +57,12 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		resolve: {
 			init: ["StateManager", "$stateParams", (StateManager, $stateParams) => {
 				StateManager.setState($stateParams);
+				console.log('dashboard')
+
 			}]
 		},
 		data: {
-			sessionRequired: true
+			isLoginRequired: true
 		}
 	});
 
@@ -118,7 +74,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 			}]
 		},
 		data: {
-			sessionRequired: true
+			isLoginRequired: true
 		}
 	});
 
@@ -155,6 +111,27 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state("app.registerVerify", {
 		url: "/register-verify",
 		template: "<register-verify />"
+	});
+
+	// Static pages
+	$stateProvider.state("app.static", {
+		url: "",
+		template: "<home flex layout='column'></home>"
+	});
+
+	$stateProvider.state("app.static.privacy", {
+		url: "/privacy",
+		template: '<privacy id="privacy" />'
+	});
+
+	$stateProvider.state("app.static.terms", {
+		url: "/terms",
+		template: '<terms id="terms" />'
+	});
+
+	$stateProvider.state("app.static.cookies", {
+		url: "/cookies",
+		template: '<cookies id="cookies" />'
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
