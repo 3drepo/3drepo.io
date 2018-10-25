@@ -36,8 +36,7 @@ dry_run = True
 ##### Connect to the Database #####
 db = MongoClient(connString)
 for database in db.database_names():
-#	if database != "admin" and database != "local":
-	if database == "james":
+	if database != "admin" and database != "local":
 		db = MongoClient(connString)[database]
 		print("--database:" + database)
 
@@ -57,6 +56,7 @@ for database in db.database_names():
 					bson_data['_id'] = filename
 					bson_data['link'] = str(s3_ref)
 					bson_data['type'] = "s3"
+                                        bson_data['size'] = entry.length
 					if dry_run:
 						print "\t\t Writing: " + str(bson_data)
 					else:
