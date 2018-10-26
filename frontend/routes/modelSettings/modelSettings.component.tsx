@@ -19,8 +19,8 @@ import * as React from 'react';
 import { Route } from 'react-router-dom';
 import * as queryString from 'query-string';
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
-import { snakeCase } from 'lodash';
+import { Formik, Form, Field, setFie } from 'formik';
+import { snakeCase, values } from 'lodash';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -45,45 +45,131 @@ import {
 } from './modelSettings.styles';
 
 const PANEL_PROPS = {
-	title: 'Model Settings',
-	paperProps: {
-		height: '100%'
-	}
+	title: 'Model Settings'
+	// paperProps: {
+	// 	height: '100%'
+	// }
 };
 
 const ENTER_KEY = 'Enter';
 
+const unitsMap = {
+	ft: "Feet and inches",
+	mm: "Millimetres",
+	cm: "Centimetres",
+	dm: "Decimetres",
+	m: "Metres"
+};
+
 interface IState {
-	topicTypes: any[];
+	topicTypes?: any[];
+	latitude?: number;
+	longitude?: number;
+	axisX?: number;
+	axisY?: number;
+	axisZ?: number;
+	elevation?: number;
+	angleFromNorth?: number;
+	code?: string;
+	unit?: string;
 }
 
 interface IProps {
 	location: any;
 	fetchModelSettings: (teamspace, modelId) => void;
+	updateModelSettings: (teamspace, modelId, settings) => void;
 	modelSettings: any;
+	currentTeamspace: string;
 }
 
 export class ModelSettings extends React.PureComponent<IProps, IState> {
 	public state = {
-		topicTypes: []
+		topicTypes: [],
+		latitude: 0,
+		longitude: 0,
+		axisX: 0,
+		axisY: 0,
+		axisZ: 0,
+		elevation: 0,
+		angleFromNorth: 0
 	};
 
 	public componentDidMount() {
 		const queryParams = queryString.parse(this.props.location.search);
-		const teamspace = this.props.location.pathname.replace(/\//g, '');
-		const { modelId } = queryParams;
+		const { modelId, targetAcct } = queryParams; // TODO: change targetAcct name
 
-		this.props.fetchModelSettings(teamspace, modelId);
+		this.props.fetchModelSettings(targetAcct, modelId);
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const topicTypes = this.props.modelSettings.properties.topicTypes;
+		const properties = this.props.modelSettings.properties;
+		const topicTypes = properties.topicTypes;
+		const surveyPoints = this.props.modelSettings.surveyPoints;
+		const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
+		const elevation = this.props.modelSettings.elevation;
+		const angleFromNorth = this.props.modelSettings.angleFromNorth;
 
-		if (topicTypes && !prevProps.modelSettings.properties && topicTypes.length !== prevState.length) {
-			this.setState({
-				topicTypes
-			});
+		if (!prevProps.modelSettings.properties && properties) {
+			if (topicTypes && topicTypes.length !== prevState.topicTypes.length) {
+				this.setState({ topicTypes });
+			}
 		}
+
+		if (elevation && prevProps.modelSettings.elevation !== elevation) {
+			this.setState({ elevation });
+		}
+
+		if (angleFromNorth && prevProps.modelSettings.angleFromNorth !== angleFromNorth) {
+			this.setState({ angleFromNorth });
+		}
+
+		if (prevSurveyPoints !== surveyPoints && surveyPoints.length) {
+			const [ { latLong, position } ] = surveyPoints;
+			if (this.state.axisX !== position[0]) {
+				this.setState({ axisX: position[0] });
+			}
+
+			if (this.state.axisY !== position[1]) {
+				this.setState({ axisY: position[1] });
+			}
+
+			if (this.state.axisZ !== position[2]) {
+				this.setState({ axisZ: position[2] });
+			}
+
+			if (this.state.latitude !== latLong[0]) {
+				this.setState({ latitude: latLong[0] });
+			}
+
+			if (this.state.longitude !== latLong[1]) {
+				this.setState({ longitude: latLong[1] });
+			}
+		}
+	}
+
+	public handleUpdateSettings = (data) => {
+		const queryParams = queryString.parse(this.props.location.search);
+		const { modelId, targetAcct } = queryParams;
+		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag } = data;
+		const { topicTypes, axisX, axisY, axisZ, latitude, longitude } = this.state;
+		const types = topicTypes.map((type) => type.label);
+
+		const settings = {
+			name,
+			unit,
+			angleFromNorth,
+			code,
+			elevation,
+			type,
+			fourDSequenceTag,
+			surveyPoints: [{
+				position: [ axisX, axisY, axisZ ],
+				latLong: [ latitude, longitude ]
+			}],
+			topicTypes: types
+		};
+
+		this.props.updateModelSettings(targetAcct, modelId, settings);
 	}
 
 	public deleteTopicType = (name) => {
@@ -105,22 +191,30 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public render() {
-		const { id, name, type, surveyPoints } = this.props.modelSettings;
+	public handlePointChange = (onChange, name) => (event, ...params) => {
+		this.setState({
+			[name]: Number(event.target.value)
+		});
 
-		if (!id) {
+		onChange(event, ...params);
+	}
+
+	public render() {
+		const { id, name, type, fourDSequenceTag, properties } = this.props.modelSettings;
+		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation } = this.state;
+
+		if (!id || !properties) {
 			return null;
 		}
-		const [ { latLong, position } ] = surveyPoints;
 
 		return (
 			<Panel {...PANEL_PROPS}>
 				<Formik
 					initialValues={{
-						id, name, type,
-						latitude: latLong[0], longitude: latLong[1],
-						axisX: position[0], axisY: position[1], axisZ: position[2]
+						id, name, type, code: properties.code, unit: properties.unit, fourDSequenceTag,
+						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth
 					}}
+					onSubmit={this.handleUpdateSettings}
 					>
 					<StyledForm>
 						<Headline color="primary" variant="subheading">Model Information</Headline>
@@ -129,7 +223,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="id" render={({ field, form }) => (
 									<StyledTextField
 										{...field}
-										required
 										label="Model ID"
 										margin="normal"
 										disabled
@@ -140,7 +233,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										{...field}
 										error={Boolean(form.errors.name)}
 										helperText={form.errors.name}
-										required
 										label="Model name"
 										margin="normal"
 									/>
@@ -150,7 +242,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="type" render={({ field, form }) => (
 									<StyledTextField
 										{...field}
-										required
 										label="Model type"
 										margin="normal"
 										disabled
@@ -159,17 +250,15 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="code" render={({ field, form }) => (
 									<StyledTextField
 										{...field}
-										required
 										label="Model code"
 										margin="normal"
 									/>
 								)} />
 							</FieldsRow>
 							<FieldsRow container wrap="nowrap">
-								<Field name="sequenceTag" render={({ field, form }) => (
+								<Field name="fourDSequenceTag" render={({ field, form }) => (
 									<StyledTextField
 										{...field}
-										required
 										label="4D Sequence Tag"
 										margin="normal"
 									/>
@@ -210,6 +299,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											type="number"
 											label="Latitude (Decimal)"
 											margin="normal"
+											value={latitude}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
 									<Field name="longitude" render={({ field, form }) => (
@@ -218,6 +309,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											type="number"
 											label="Longitude"
 											margin="normal"
+											value={longitude}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
 									<Field name="elevation" render={({ field, form }) => (
@@ -226,14 +319,18 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											type="number"
 											label="Elevation"
 											margin="normal"
+											value={elevation}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
-									<Field name="angle" render={({ field, form }) => (
+									<Field name="angleFromNorth" render={({ field, form }) => (
 										<StyledTextField
 											{...field}
 											type="number"
 											label="Angle from North (Clockwise Degrees)"
 											margin="normal"
+											value={angleFromNorth}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
 								</GridColumn>
@@ -245,6 +342,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											type="number"
 											label="x (mm)"
 											margin="normal"
+											value={axisX}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
 									<Field name="axisY" render={({ field, form }) => (
@@ -253,6 +352,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											type="number"
 											label="y (mm)"
 											margin="normal"
+											value={axisY}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
 									<Field name="axisZ" render={({ field, form }) => (
@@ -261,22 +362,30 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											type="number"
 											label="z (mm)"
 											margin="normal"
+											value={axisZ}
+											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
 								</GridColumn>
 							</Grid>
 						</Grid>
 						<Grid container direction="column" alignItems="flex-end">
-							<Field render={({ form }) => (
-								<Button
-									type="submit"
-									variant="raised"
-									color="secondary"
-									disabled={!form.isValid || form.isValidating}
-								>
-									Save
+							<Field render={({ form }) => {
+								console.log('form', form)
+								return (
+									<Button
+										type="submit"
+										variant="raised"
+										color="secondary"
+										disabled={
+											!form.isValid ||
+											form.isValidating
+										}
+									>
+										Save
 								</Button>
-							)} />
+								)
+							}} />
 						</Grid>
 					</StyledForm>
 				</Formik>

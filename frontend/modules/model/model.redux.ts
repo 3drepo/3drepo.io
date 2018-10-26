@@ -15,39 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import { createActions, createReducer } from 'reduxsauce';
 
-/**
- * Get users
- * @param teamspace
- * @param searchText
- */
-export const fetchTeamspace = (teamspace) => {
-	return api.get(`${teamspace}.json`);
+export const { Types: ModelTypes, Creators: ModelActions } = createActions({
+	fetchSettings: ['teamspace', 'modelId'],
+	fetchSettingsSuccess: ['settings'],
+	updateSettings: ['teamspace', 'modelId', 'settings']
+}, { prefix: 'MODEL_' });
+
+export const INITIAL_STATE = {
+	settings: {}
 };
 
-/**
- * Get quota info
- * @param teamspace
- */
-export const getQuotaInfo = (teamspace) => {
-	return api.get(`${teamspace}/quota`);
+const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
+	return { ...state, settings };
 };
 
-/**
- * Get model settings
- * @param teamspace
- * @param modelId
- */
-export const getModelSettings = (teamspace, modelId) => {
-	return api.get(`${teamspace}/${modelId}.json`);
-};
-
-/**
- * Edit model settings
- * @param teamspace
- * @param modelId
- */
-export const editModelSettings = (teamspace, modelId, settings) => {
-	return api.put(`${teamspace}/${modelId}/settings`, settings);
-};
+export const reducer = createReducer(INITIAL_STATE, {
+	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess
+});

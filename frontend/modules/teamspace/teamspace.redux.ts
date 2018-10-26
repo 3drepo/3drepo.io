@@ -30,9 +30,7 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 	setAvatarPendingState: ['pendingState'],
 	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
-	refreshAvatar: ['avatarUrl'],
-	fetchModelSettings: ['teamspace', 'modelId'],
-	fetchModelSettingsSuccess: ['modelSettings']
+	refreshAvatar: ['avatarUrl']
 }, { prefix: 'TEAMSPACE_' });
 
 export const INITIAL_STATE = {
@@ -42,8 +40,7 @@ export const INITIAL_STATE = {
 	},
 	isPending: true,
 	isAvatarPending: true,
-	collaboratorLimit: null,
-	modelSettings: {}
+	collaboratorLimit: null
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
@@ -82,16 +79,11 @@ const refreshAvatar = (state = INITIAL_STATE, { avatarUrl }) => {
 	};
 };
 
-const fetchModelSettingsSuccess = (state = INITIAL_STATE, { modelSettings }) => {
-	return { ...state, modelSettings };
-};
-
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspaceTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[TeamspaceTypes.FETCH_QUOTA_INFO_SUCCESS]: fetchQuotaInfoSuccess,
 	[TeamspaceTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 	[TeamspaceTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspaceTypes.SET_AVATAR_PENDING_STATE]: setAvatarPendingState,
-	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar,
-	[TeamspaceTypes.FETCH_MODEL_SETTINGS_SUCCESS]: fetchModelSettingsSuccess
+	[TeamspaceTypes.REFRESH_AVATAR]: refreshAvatar
 });
