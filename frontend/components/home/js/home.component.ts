@@ -379,6 +379,7 @@ class HomeController implements ng.IController {
 				this.AuthService.loggedOutPage() &&
 				this.AuthService.getUsername()
 			) {
+				debugger
 				this.$location.path("/dashboard/teamspaces");
 			}
 		});

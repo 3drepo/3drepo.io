@@ -124,3 +124,4 @@ export const StateManagerRunModule = angular
 		"$urlRouter",
 		StateManagerRun
 	]);
+	

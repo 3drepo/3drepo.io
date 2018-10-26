@@ -33,4 +33,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateModelSettings: ModelActions.updateSettings
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelSettings));
+export default connect(mapStateToProps, mapDispatchToProps)(ModelSettings);

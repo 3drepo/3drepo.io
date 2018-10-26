@@ -260,7 +260,7 @@ export class AuthService {
 	public sendLoginRequest() {
 		if (!this.loginRequestPromise) {
 			this.loginRequestPromise =  this.APIService.get("login").then((response) => {
-				this.loginRequestPromise = null
+				this.loginRequestPromise = null;
 				return response;
 			});
 		}
