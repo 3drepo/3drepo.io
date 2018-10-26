@@ -16,9 +16,8 @@
  */
 
 import { bindActionCreators } from 'redux';
-import { withRouter } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
 import { Teamspaces } from './teamspaces.component';
 import { selectCurrentTeamspace, selectIsPending } from '../../modules/teamspace';
@@ -45,4 +44,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadModel: ModelActions.downloadModel
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces)));
+export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);

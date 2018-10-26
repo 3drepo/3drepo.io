@@ -73,11 +73,11 @@ export const FieldsRow = styled(Grid)`
   }
 
   ${FieldsColumn}:nth-child(2n) {
-    margin-left: 6px;
+    margin-left: 12px;
   }
 
   ${FieldsColumn}:nth-child(2n + 1) {
-    margin-right: 6px;
+    margin-right: 12px;
   }
 `;
 

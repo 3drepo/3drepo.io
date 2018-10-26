@@ -18,11 +18,13 @@
 import * as React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
-import { Container, Sidebar, Content } from './dashboard.styles';
-import { UserInfo } from '../components/userInfo/userInfo.component';
+import Teamspaces from '../teamspaces/teamspaces.container';
+import ModelSettings from '../modelSettings/modelSettings.container';
 import UserManagement from '../userManagement/userManagement.container';
 import Profile from '../profile/profile.container';
-import { Teamspaces } from '../teamspaces/teamspaces.component';
+import Billing from '../billing/billing.container';
+import { Container, Sidebar, Content } from './dashboard.styles';
+import { UserInfo } from '../components/userInfo/userInfo.component';
 
 const MENU_ITEMS = [
 	{
@@ -59,10 +61,11 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 	public renderRoutes = (match, currentUser) => {
 		return (
 			<Switch>
-				{<Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} />}
+				<Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} />
+				<Route exact path={`${match.url}dashboard/teamspaces/:teamspace/models/:modelId`} component={ModelSettings} />
 				<Route path={`${match.url}dashboard/user-management/:teamspace`} component={UserManagement} />
 				<Route exact path={`${match.url}dashboard/profile`} component={Profile} />
-				{/* <Route path={`${match.url}dashboard/billing`} component={Billing} /> */}
+				<Route path={`${match.url}dashboard/billing`} component={Billing} />
 				<Redirect exact from={`${match.url}dashboard`} to={`${match.url}dashboard/teamspaces`} />
 				<Redirect
 					exact

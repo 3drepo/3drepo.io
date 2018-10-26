@@ -6,6 +6,7 @@ export class ClientConfigService {
 	public apiUrl;
 	public GET_API;
 	public POST_API;
+	public units;
 	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;

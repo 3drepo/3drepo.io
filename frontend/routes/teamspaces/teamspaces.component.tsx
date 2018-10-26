@@ -27,7 +27,6 @@ import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import ModelItem from './components/modelItem/modelItem.container';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { getAngularService, runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
@@ -38,6 +37,7 @@ import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.componen
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
+import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -125,10 +125,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public createRouteHandler = (pathname, params = {}) => (event) => {
 		event.stopPropagation();
 
-		// TODO: Remove `runAngularTimeout` after migration of old routing
-		runAngularTimeout(() => {
-			this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
-		});
+		this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
 	}
 
 	public onTeamspaceClick = (teamspace) => {
@@ -291,25 +288,18 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 */
 	public renderModel = (props) => {
 		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
+        const { activeTeamspace } = this.state;
 
 		return (
 			<ModelItem
 				{...props}
 				actions={[]}
-				onModelItemClick={(event) => this.createModelItemClickHandler(event, props.model, props)}
-				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
-					page: 'userManagement',
-					teamspace: this.state.activeTeamspace,
-					project: props.projectName,
-					tab: TABS_TYPES.PROJECTS,
-					modelId: props.model,
-					view: 1
+				onModelItemClick={() => this.createModelItemClickHandler(props.model)}
+				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+					project: projectName,
+					view: PERMISSIONS_VIEWS.MODELS
 				})}
-				onSettingsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
-					page: 'modelsetting',
-					modelId: props.model,
-					targetAcct: this.state.activeTeamspace // TODO: change param name
-				})}
+                onSettingsClick={this.createRouteHandler(`/dashboard/teamspaces/${activeTeamspace}/models/${props.model}`)}
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
 				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
@@ -337,17 +327,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderProject = (props) => {
+		const { activeTeamspace } = this.state;
 		return (
 			<ProjectItem
 				{...props}
 				renderChildItem={this.renderModelDirectory}
-				onEditClick={(event) => this.openProjectDialog(event, this.state.activeTeamspace, props.name)}
-				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
-					page: 'userManagement',
-					teamspace: this.state.activeTeamspace,
-					project: props.name,
-					tab: TABS_TYPES.PROJECTS
-				})}
+				onEditClick={(event) => this.openProjectDialog(event, activeTeamspace, props.name)}
+				onPermissionsClick={
+					this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+						project: props.name
+					})
+				}
 				onRemoveClick={this.createRemoveProjectHandler(props.name)}
 			/>
 		);
@@ -385,9 +375,21 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderMenu = ({ close }) => {
 		return (
 			<>
-				<MenuItem onClick={(event) => { this.openProjectDialog(event); close(event); }}> Add project </MenuItem>
-				<MenuItem onClick={(event) => { this.openModelDialog(event); close(event); }}>Add model</MenuItem>
-				<MenuItem onClick={(event) => { this.openFederationDialog(event); close(event); }}>Add federation</MenuItem>
+				<MenuItem onClick={(event) => {
+					this.openProjectDialog(event); close(event);
+				}}>
+					Add project
+				</MenuItem>
+				<MenuItem onClick={(event) => {
+					this.openModelDialog(event); close(event);
+				}}>
+					Add model
+				</MenuItem>
+				<MenuItem onClick={(event) => {
+					this.openFederationDialog(event); close(event);
+				}}>
+					Add federation
+				</MenuItem>
 			</>
 		);
 	}

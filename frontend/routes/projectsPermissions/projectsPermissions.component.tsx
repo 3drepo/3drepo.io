@@ -23,7 +23,6 @@ import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { Container } from './projectsPermissions.styles';
 
 interface IProps {
-	currentUser
 	projectName: string;
 	permissions: any[];
 	onPermissionsChange: (project) => void;

@@ -11,7 +11,7 @@ import DialogContainer from './components/dialogContainer/dialogContainer.contai
 import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
 import Dashboard from './dashboard/dashboard.container';
 import { UserInfo } from './components/userInfo/userInfo.component';
-import { TopMenu } from './components/topMenu/topMenu.component';
+import TopMenu from './components/topMenu/topMenu.container';
 import ModelSettings from './modelSettings/modelSettings.container';
 
 angular
