@@ -89,9 +89,9 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>
-				<Content>
-					{!isPending && this.renderRoutes(match, currentUser)}
-				</Content>
+				{!isPending && <Content>
+					{this.renderRoutes(match, currentUser)}
+				</Content>}
 			</Container>
 		);
 	}

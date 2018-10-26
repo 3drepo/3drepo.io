@@ -127,6 +127,8 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(activeTab)) {
 			changes.activeTab = PROJECTS_TAB.path;
 			history.push(`${match.url}/${PROJECTS_TAB.path}`);
+		} else {
+			changes.activeTab = location.pathname.replace(`${match.url}/`, '');
 		}
 
 		this.props.onTeamspaceChange(teamspace);

@@ -9,7 +9,7 @@ div.homeContainer(
 		viewer(
 			id="viewer"
 			flex="none"
-			ng-if="!vm.isLiteMode && !vm.isLegalPage"
+			ng-if="!vm.isLiteMode && vm.state.modelId"
 			device-memory="vm.deviceMemory"
 			node="node"
 			account="vm.state.account"
@@ -18,19 +18,16 @@ div.homeContainer(
 			revision="vm.state.revision"
 			style="pointer-events:none"
 		)
+
 		top-menu(
 			is-lite-mode="vm.isLiteMode"
 			logo-url="vm.topLogo"
 			on-lite-mode-change="vm.onLiteModeChange"
 			on-logout="vm.logout"
 			on-logo-click="vm.home"
-			is-user-menu-visible="!vm.isLegalPage"
 		)
-		div(
-			ui-view=""
-			flex="grow"
-			layout="column"
-		)
+
+		div(ui-view="" flex="grow" layout="column")
 
 	#homeLegalContainer( flex="100" layout="column" ng-if="vm.isLegalPage")
 		div(ui-view="")
