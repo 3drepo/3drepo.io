@@ -36,7 +36,6 @@ import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.componen
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
-import ModelSettings from '../modelSettings/modelSettings.container';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -215,7 +214,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				})}
 				onSettingsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
 					page: 'modelsetting',
-					modelId: props.model
+					modelId: props.model,
+					targetAcct: this.state.activeTeamspace // TODO: change param name
 				})}
 			/>
 		);

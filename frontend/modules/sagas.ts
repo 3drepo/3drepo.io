@@ -4,6 +4,7 @@ import userManagementSaga from './userManagement/userManagement.sagas';
 import jobsSaga from './jobs/jobs.sagas';
 import billingSaga from './billing/billing.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
+import modelSaga from './model/model.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -12,6 +13,7 @@ export default function* rootSaga() {
 		fork(userManagementSaga),
 		fork(jobsSaga),
 		fork(billingSaga),
-		fork(teamspacesSaga)// <-- INJECT MODULE SAGA -->
+		fork(teamspacesSaga),
+		fork(modelSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }
