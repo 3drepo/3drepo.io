@@ -15,39 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+export {
+	ModelTypes,
+	ModelActions
+} from './model.redux';
 
-/**
- * Get users
- * @param teamspace
- * @param searchText
- */
-export const fetchTeamspace = (teamspace) => {
-	return api.get(`${teamspace}.json`);
-};
-
-/**
- * Get quota info
- * @param teamspace
- */
-export const getQuotaInfo = (teamspace) => {
-	return api.get(`${teamspace}/quota`);
-};
-
-/**
- * Get model settings
- * @param teamspace
- * @param modelId
- */
-export const getModelSettings = (teamspace, modelId) => {
-	return api.get(`${teamspace}/${modelId}.json`);
-};
-
-/**
- * Edit model settings
- * @param teamspace
- * @param modelId
- */
-export const editModelSettings = (teamspace, modelId, settings) => {
-	return api.put(`${teamspace}/${modelId}/settings`, settings);
-};
+export * from './model.selectors';

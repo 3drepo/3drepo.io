@@ -4,6 +4,7 @@ import userManagementSaga from './userManagement/userManagement.sagas';
 import jobsSaga from './jobs/jobs.sagas';
 import billingSaga from './billing/billing.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
+import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 // <-- IMPORT MODULE SAGA -->
 
@@ -14,6 +15,7 @@ export default function* rootSaga() {
 		fork(jobsSaga),
 		fork(billingSaga),
 		fork(teamspacesSaga),
+		fork(modelSaga),
 		fork(notificationsSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

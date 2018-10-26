@@ -7,6 +7,7 @@ import { reducer as jobsReducer } from './jobs/jobs.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
+import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
 // <-- IMPORT MODULE REDUCER -->
 
@@ -19,6 +20,7 @@ export default function createReducer() {
 		snackbar: snackbarReducer,
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
+		model: modelReducer,
 		notifications: notificationsReducer// <-- INJECT MODULE REDUCER -->
 	});
 }
