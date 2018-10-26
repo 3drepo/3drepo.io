@@ -40,7 +40,11 @@ export interface INotification {
 	timestamp: number;
 }
 
-export class NotificationItem extends React.PureComponent<INotification, any> {
+interface IProps extends INotification {
+	markNotificationAsRead: (id) => void;
+}
+
+export class NotificationItem extends React.PureComponent<IProps, any> {
 	public gotoNotification(e: React.SyntheticEvent) {
 		const { teamSpace , modelId, _id} = this.props;
 		location.href =  `${teamSpace}/${modelId}?notificationId=${_id}`;
@@ -53,7 +57,7 @@ export class NotificationItem extends React.PureComponent<INotification, any> {
 
 	public markAsRead(e: React.SyntheticEvent) {
 		e.stopPropagation();
-		alert("markAsRead , mate");
+		this.props.markNotificationAsRead(this.props._id);
 	}
 
 	public render() {

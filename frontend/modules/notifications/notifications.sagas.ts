@@ -21,6 +21,10 @@ import api, * as API from '../../services/api';
 import { NotificationsTypes, NotificationsActions } from './notifications.redux';
 import { DialogActions } from '../dialog';
 
+function selectNotification(id, state) {
+	return state.notifications.find((n) => n._id === id );
+}
+
 export function* fetchNotifications() {
 	const resp = yield API.getNotifications();
 	yield put(NotificationsActions.fetchNotificationsSuccess(resp.data));
@@ -28,9 +32,14 @@ export function* fetchNotifications() {
 
 export function* markNotificationAsRead({ notificationId }) {
 	try {
+		const notification = yield select(selectNotification.bind(null, notificationId));
+		if (notification.read) {
+			return;
+		}
+		yield put(NotificationsActions.patchNotification({_id: notificationId, read: true}));
 		const resp = yield API.patchNotification(notificationId, {read: true});
-		yield put(NotificationsActions.patchNotification(resp.data));
 	} catch (error) {
+		yield put(NotificationsActions.patchNotification({_id: notificationId, read: true}));
 		yield put(DialogActions.showErrorDialog('update', 'notification', error.response));
 	}
 }

@@ -28,7 +28,7 @@ import { NotificationsPanel } from "./notifications.panel";
 import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
 import { BarIconButton } from "../components/components.styles";
 
-// Props bound in notifications.container
+// Props bound in "./notifications.container.ts"
 interface IProps {
 	fetchNotifications: () => void ; // Bound to redux action fetchNotifications
 	markNotificationAsRead: (id: string) => void; // Bound to redux saga markNotificationAsRead
