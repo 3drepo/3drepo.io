@@ -78,6 +78,7 @@ class PanelCardChipsFilterController implements ng.IController {
 		event.preventDefault();
 
 		const newchips = pastedText.split(",").map((c) => {
+			console.dir("pasted value", c.replace(/\s+/g, ''));
 			if (c.includes(":")) {
 				const suggestion = this.suggestions.find(this.equalChipLabel.bind(this , c));
 
@@ -89,8 +90,11 @@ class PanelCardChipsFilterController implements ng.IController {
 				const name = c.split(":")[1];
 				const value: Date = this.$mdDateLocale.parseDate(name);
 
-				if (  !isNaN( value.getTime())) { // If is a date
+				if (  !isNaN( value.getTime())) { // If it is a date
 					const nameType = c.split(":")[0];
+					const testTrim = nameType.trim();
+					console.log("nameType", nameType);
+					console.log("trim", testTrim);
 					const type = this.snakeCase(nameType);
 					return  {name, nameType, type, value};
 				}
