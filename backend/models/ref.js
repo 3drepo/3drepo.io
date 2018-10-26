@@ -20,6 +20,7 @@ const _ = require("lodash");
 const repoBase = require("./base/repo");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
+const ModelSettings = require("./modelSetting");
 
 const Schema = mongoose.Schema;
 
@@ -36,7 +37,19 @@ const refSchema = Schema(
 	})
 );
 
-refSchema.statics = {};
+refSchema.statics.getRefNodes = function(account, model, ids) {
+	return ModelSettings.findById({account}, model).then((settings) => {
+		if(settings.federate) {
+			const filter = {
+				type: "ref",
+				_id: { $in: ids }
+			};
+			return Ref.find({ account, model }, filter);
+		}
+		return [];
+	});
+};
+
 refSchema.methods = {};
 
 const Ref = ModelFactory.createClass(
