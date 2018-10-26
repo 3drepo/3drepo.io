@@ -35,6 +35,7 @@ interface IState {
 
 export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 	public static getDerivedStateFromProps(nextProps) {
+		debugger
 		return {
 			currentUser: (nextProps.permissions || []).find(({isCurrentUser}) => isCurrentUser)
 		};
@@ -46,7 +47,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 	};
 
 	public hasDisabledPermissions = (row) => {
-		const {currentUser = {}} = this.state as IState;
+		const {currentUser} = this.state as IState;
 		const passBaseValidation = row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
 
 		if (passBaseValidation) {

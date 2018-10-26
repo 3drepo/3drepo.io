@@ -22,7 +22,7 @@ import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'jobs', 'jobsColors'],
+	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'currentUser'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user'],
@@ -72,11 +72,12 @@ export const INITIAL_STATE = {
  * @param users
  * @returns
  */
-const prepareUserData = (teamspaceName, users): object => {
+const prepareUserData = (teamspaceName, currentUser, users): object => {
 	return {
 		...users,
 		isAdmin: users.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-		isOwner: teamspaceName === users.user
+		isOwner: teamspaceName === users.user,
+		isCurrentUser: currentUser === users.user
 	};
 };
 
@@ -98,8 +99,8 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 };
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace } = action;
-	const users = action.users.map(prepareUserData.bind(null, teamspace.name));
+	const { teamspace, currentUser } = action;
+	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
 
 	return Object.assign({}, INITIAL_STATE, {
 		users,

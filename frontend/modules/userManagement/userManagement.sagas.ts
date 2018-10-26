@@ -23,6 +23,8 @@ import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
 import { selectTeamspacesWithAdminAccess } from '../teamspaces/teamspaces.selectors';
 import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { selectCurrentUser } from '../teamspace';
+
 import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
 import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
 import {
@@ -34,6 +36,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		yield put(UserManagementActions.setPendingState(true));
 		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
+		const currentUser = yield select(selectCurrentUser);
 
 		const [users] = yield all([
 			API.fetchUsers(teamspace),
@@ -41,7 +44,11 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 			put(JobsActions.fetchJobsColors(teamspace))
 		]);
 
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(teamspaceDetails, users.data));
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
+			teamspaceDetails,
+			users.data,
+			currentUser.username
+		));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'teamspace details', error.response));
 		yield put(UserManagementActions.setPendingState(false));
