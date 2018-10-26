@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PERMISSIONS_VIEWS } from '../../../routes/projects/projects.component';
-import { TABS_TYPES } from '../../../routes/userManagement/userManagement.component';
+import { history } from '../../../helpers/migration';
 
 class AccountFederationsController implements ng.IController {
 
@@ -354,7 +354,6 @@ class AccountFederationsController implements ng.IController {
 			project: project.name,
 			teamspace: account,
 			modelId: model.model,
-			tab: TABS_TYPES.PROJECTS,
 			view: PERMISSIONS_VIEWS.MODELS
 		}, { notify: false });
 	}

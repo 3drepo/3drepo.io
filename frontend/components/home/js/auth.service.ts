@@ -44,6 +44,7 @@ export class AuthService {
 	private state;
 	private events;
 	private initPromise;
+	private loginRequestPromise;
 
 	constructor(
 		private $injector,
@@ -257,11 +258,18 @@ export class AuthService {
 	}
 
 	public sendLoginRequest() {
-		return this.APIService.get("login");
+		if (!this.loginRequestPromise) {
+			this.loginRequestPromise =  this.APIService.get("login").then((response) => {
+				this.loginRequestPromise = null
+				return response;
+			});
+		}
+		return this.loginRequestPromise;
 	}
 
 	public login(loginUsername, password) {
 		this.authDefer = this.$q.defer();
+
 		this.clearCurrentEvent();
 
 		const postData = {username: loginUsername, password};

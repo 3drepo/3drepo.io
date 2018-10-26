@@ -97,8 +97,6 @@ class RevisionsController implements ng.IController {
 	public goToRevision(revId) {
 		this.revision = revId;
 		this.DialogService.closeDialog();
-
-		debugger
 		this.$location.path(`/viewer/${this.model}/${revId}`);
 
 	}
