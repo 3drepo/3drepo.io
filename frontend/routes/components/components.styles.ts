@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import { COLOR } from '../../styles';
+import { IconButton } from '@material-ui/core';
 
 const BaseStyles = styled(Grid)`
   white-space: nowrap;
@@ -35,3 +36,13 @@ export const ItemLabelDetail = styled(BaseStyles)`
   color: ${COLOR.BLACK_40};
   line-height: 13px;
 `;
+
+export const BarIconButton = styled(IconButton)`
+  && {
+    color: rgba(255, 255, 255, 0.87)
+  }
+
+	&:hover {
+		background-color: white
+	}
+  `;

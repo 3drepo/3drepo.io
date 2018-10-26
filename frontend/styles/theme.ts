@@ -131,14 +131,25 @@ export const MuiTheme = createMuiTheme({
 				/* tslint:enable */
 			}
 		},
-		MuiIconButton: {
-			root: {
-				color: 'rgba(255, 255, 255, 0.87)'
-			}
-		},
 		MuiDrawer: {
 			paper: {
-				backgroundColor: 'rgb(250,250,250)'
+				backgroundColor: 'rgb(250,250,250)',
+				boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.2)'
+			}
+		},
+		MuiListItemText: {
+			root: {
+				minWidth: 10
+			},
+			primary: {
+				overflow: 'hidden',
+				textOverflow: 'ellipsis',
+				whiteSpace: 'nowrap'
+			},
+			secondary: {
+				overflow: 'hidden',
+				textOverflow: 'ellipsis',
+				whiteSpace: 'nowrap'
 			}
 		}
 	}

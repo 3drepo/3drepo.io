@@ -16,4 +16,28 @@
  */
 
 import styled from 'styled-components';
-import { List, Toolbar } from '@material-ui/core';
+import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText } from '@material-ui/core';
+
+export const NotificationListItem = styled(ListItem)`
+	&& {
+		padding: 9px;
+	}
+`;
+
+export const NotificationListItemText = styled(ListItemText)`
+	${NotificationListItem}:hover & {
+		width:  0px;
+	}
+`;
+
+export const NotificationListItemSecondaryAction = styled.div`
+	visibility: hidden;
+	width:0px;
+	height:40px;
+	overflow:hidden;
+
+	${NotificationListItem}:hover & {
+		visibility: inherit ;
+		width:75px;
+	}
+`;

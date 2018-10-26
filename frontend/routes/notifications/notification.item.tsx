@@ -22,9 +22,12 @@ import Avatar from '@material-ui/core/Avatar';
 
 import Drawer from "@material-ui/core/Drawer";
 import Icon from "@material-ui/core/Icon";
-import { Button, Paper } from "@material-ui/core";
-import { MuiThemeProvider } from "@material-ui/core/styles";
+import { Button, Paper, ListItemSecondaryAction, IconButton, Tooltip } from "@material-ui/core";
+
 import { theme } from "../../styles";
+import { NotificationListItemSecondaryAction,
+		NotificationListItem,
+		NotificationListItemText } from "./notifications.styles";
 
 export interface INotification {
 	_id: string;
@@ -38,22 +41,74 @@ export interface INotification {
 }
 
 export class NotificationItem extends React.PureComponent<INotification, any> {
-	public notificationViewLink() {
-		return `${this.props.teamSpace}/${this.props.modelId}?notificationId=${this.props._id}`;
+	public gotoNotification(e: React.SyntheticEvent) {
+		const { teamSpace , modelId, _id} = this.props;
+		location.href =  `${teamSpace}/${modelId}?notificationId=${_id}`;
+	}
+
+	public delete(e: React.SyntheticEvent) {
+		e.stopPropagation();
+		alert("deleting stuff , mate");
+	}
+
+	public markAsRead(e: React.SyntheticEvent) {
+		e.stopPropagation();
+		alert("markAsRead , mate");
 	}
 
 	public render() {
+		const backgroundColor = this.props.read ? "transparent" : "white";
+		const fontWeight =  this.props.read ? 400 : 600;
+		const color =  this.props.read ? "rgba(0, 0, 0, 0.54)" : "rgba(0, 0, 0, 0.87)";
+		const secColor =  this.props.read ? "rgba(0, 0, 0, 0.24)" : "rgba(0, 0, 0, 0.54)";
+
+		const primaryStyle =  Object.assign({color}, {fontWeight});
+		const secondaryStyle =  Object.assign( {color: secColor},  {fontWeight});
+
 		return (
-			<ListItem>
+			<Paper  style={ Object.assign({backgroundColor}, {margin: 5})}
+							onClick={this.gotoNotification.bind(this)}>
+			<NotificationListItem button >
 					<Avatar>
 						<Icon>place</Icon>
 					</Avatar>
-					<ListItemText
+					<NotificationListItemText style={{padding: 9 }}
+						primaryTypographyProps= { {style: primaryStyle}}
+						secondaryTypographyProps= { {style: secondaryStyle}}
+
 						primary={`${this.props.issuesId.length} assigned issues `}
 						secondary={ `In ${this.props.modelName}`}
 					/>
-					<a href={this.notificationViewLink()}>View</a>
-			</ListItem>
+					<NotificationListItemSecondaryAction>
+						{!this.props.read  &&
+						<Tooltip title="Mark as read">
+							<IconButton style={{width: 10, height: 10}}  component="span"
+								aria-label="Mark as read"
+								onClick={this.markAsRead.bind(this)}>
+								<Icon>drafts</Icon>
+							</IconButton>
+						</Tooltip>
+						}
+						{this.props.read  &&
+						<Tooltip title="Mark as unread">
+							<IconButton style={{width: 10, height: 10}}  component="span"
+								aria-label="Mark as unread"
+								onClick={this.markAsRead.bind(this)}>
+								<Icon>markunread</Icon>
+							</IconButton>
+						</Tooltip>
+						}
+
+						<Tooltip title="Delete">
+							<IconButton style={{width: 10, height: 10}} component="span"
+								aria-label="Delete"
+								onClick={this.delete.bind(this)}>
+								<Icon>delete</Icon>
+							</IconButton>
+						</Tooltip>
+					</NotificationListItemSecondaryAction>
+			</NotificationListItem>
+			</Paper>
 		);
 	}
 }

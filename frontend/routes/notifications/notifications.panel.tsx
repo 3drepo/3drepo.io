@@ -29,6 +29,13 @@ interface IProps {
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
+	public notificationViewLink(notification: INotification) {
+		return `${notification.teamSpace}/${notification.modelId}?notificationId=${notification._id}`;
+	}
+
+	public gotoNotification(notification: INotification) {
+		location.href =  this.notificationViewLink(notification);
+	}
 
 	public render() {
 		const {notifications, labelLeft, labelRight} = this.props;
@@ -37,23 +44,21 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 			return (<></>);
 		}
 
-		return (<ListItem style={{paddingLeft: 10, paddingRight: 10}}>
-					<div>
-					<div style={{display: 'flex', justifyContent: 'space-between', paddingLeft: 5, paddingRight: 5}}>
-						<ItemLabel>
-							{labelLeft}
-						</ItemLabel>
-						<ItemLabel>
-							{labelRight}
-						</ItemLabel>
-					</div>
-					<List> {notifications.map((notification) =>
-						<Paper style={{margin: 5}}  key={notification._id + labelRight}>
-							<NotificationItem
-							{...{...notification, markNotificationAsRead: this.props.markNotificationAsRead }}/>
-						</Paper>
-						)}
-					</List>
+		return (<ListItem style={{paddingLeft: 10, paddingRight: 10, paddingTop: 0, paddingBottom: 0}}>
+					<div style={{width: '100%', marginTop: 15}}>
+						<div style={{display: 'flex', justifyContent: 'space-between', paddingLeft: 5, paddingRight: 5}}>
+							<ItemLabel>
+								{labelLeft}
+							</ItemLabel>
+							<ItemLabel>
+								{labelRight}
+							</ItemLabel>
+						</div>
+						<List style={{paddingBottom: 0}} > {notifications.map((notification) =>
+								<NotificationItem key={notification._id}
+								{...{...notification, markNotificationAsRead: this.props.markNotificationAsRead }}/>
+							)}
+						</List>
 					</div>
 				</ListItem>);
 	}

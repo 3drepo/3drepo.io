@@ -26,11 +26,13 @@ import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSub
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 import { NotificationsPanel } from "./notifications.panel";
 import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
+import { BarIconButton } from "../components/components.styles";
 
+// Props bound in notifications.container
 interface IProps {
-	fetchNotifications: () => void ;
-	markNotificationAsRead: (id: string) => void;
-	notifications: INotification[];
+	fetchNotifications: () => void ; // Bound to redux action fetchNotifications
+	markNotificationAsRead: (id: string) => void; // Bound to redux saga markNotificationAsRead
+	notifications: INotification[]; // Bound to store state notifications
 }
 
 export class Notifications extends React.PureComponent<IProps, any> {
@@ -70,9 +72,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public renderNotificationsHeader() {
 		return (<ListSubheaderToolbar rightContent={
-					<IconButton aria-label="Close panel" onClick={this.toggleDrawer.bind(this)}>
+					<BarIconButton aria-label="Close panel" onClick={this.toggleDrawer.bind(this)}>
 						<Icon>close</Icon>
-					</IconButton>
+					</BarIconButton>
 					}>
 					<Typography variant={"title"} color={"inherit"} >
 						Notifications
@@ -94,7 +96,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				</Button>
 				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer.bind(this)}
 						SlideProps={{unmountOnExit: true}}>
-					<List subheader={this.renderNotificationsHeader()} style={{height: '100%'}} >
+					<List subheader={this.renderNotificationsHeader()} style={{height: '100%', width: 300 }} >
 						{this.props.notifications.length === 0 &&
 							<NotificationEmptyItem/>}
 						{this.props.notifications.length > 0 &&
