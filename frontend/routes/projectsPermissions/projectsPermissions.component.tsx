@@ -23,6 +23,7 @@ import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { Container } from './projectsPermissions.styles';
 
 interface IProps {
+	currentUser
 	projectName: string;
 	permissions: any[];
 	onPermissionsChange: (project) => void;
@@ -35,7 +36,6 @@ interface IState {
 
 export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 	public static getDerivedStateFromProps(nextProps) {
-		debugger
 		return {
 			currentUser: (nextProps.permissions || []).find(({isCurrentUser}) => isCurrentUser)
 		};

@@ -86,7 +86,7 @@ function StateManagerRun(
 				StateManager.state.authInitialized = true;
 				$timeout(() => {
 					if (toState.name.includes('app.dashboard')) {
-						history.push(location.pathname);
+						history.push(`${location.pathname}${location.search}`);
 						$rootScope.$broadcast('$stateChangeSuccess', toState, toParams, fromState, fromParams);
 						$urlRouter.update();
 					} else {
