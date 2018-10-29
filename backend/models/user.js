@@ -965,7 +965,7 @@ schema.methods.updateSubscriptions = function (plans, billingUser, billingAddres
 };
 
 function updateUser(username, update) {
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol.update({ user: username }, update);
 	});
 
