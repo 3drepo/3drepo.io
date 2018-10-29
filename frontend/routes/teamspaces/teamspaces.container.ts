@@ -23,6 +23,7 @@ import { connect, addRouting } from '../../helpers/migration';
 import { Teamspaces } from './teamspaces.component';
 import { selectCurrentTeamspace, selectIsPending } from '../../modules/teamspace';
 import { selectTeamspaces, TeamspacesActions } from '../../modules/teamspaces';
+import { ModelActions, selectRevisions } from './../../modules/model';
 
 import { DialogActions } from '../../modules/dialog';
 

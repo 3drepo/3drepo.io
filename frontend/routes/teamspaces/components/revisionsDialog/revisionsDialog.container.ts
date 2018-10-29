@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { withRouter } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
+import { connect, addRouting } from '../../../../helpers/migration';
+import { createStructuredSelector } from 'reselect';
+import { ModelActions, selectRevisions } from './../../../../modules/model';
+import { RevisionsDialog } from './revisionsDialog.component';
 
-export const selectModelDomain = (state) => Object.assign({}, state.model);
+const mapStateToProps = createStructuredSelector({
+  revisions: selectRevisions
+});
 
-export const selectSettings = createSelector(
-  selectModelDomain, (state) => state.settings
-);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+  fetchModelRevisions: ModelActions.fetchRevisions
+}, dispatch);
 
-export const selectRevisions = createSelector(
-  selectModelDomain, (state) => state.revisions
-);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog)));

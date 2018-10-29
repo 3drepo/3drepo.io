@@ -15,14 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import ListItem from '@material-ui/core/ListItem';
 
-export const selectModelDomain = (state) => Object.assign({}, state.model);
+export const Item = styled(ListItem)`
+  display: flex;
+  flex-direction: row;
 
-export const selectSettings = createSelector(
-  selectModelDomain, (state) => state.settings
-);
+  && {
+    justify-content: space-between;
+  }
+`;
 
-export const selectRevisions = createSelector(
-  selectModelDomain, (state) => state.revisions
-);
+export const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  &:first-of-type {
+    margin-right: 12px;
+  }
+
+  &:last-of-type {
+    margin-left: 12px;
+  }
+`;
+
+export const Property = styled.div``;
