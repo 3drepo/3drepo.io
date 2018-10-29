@@ -46,14 +46,11 @@ import {
 
 const PANEL_PROPS = {
 	title: 'Model Settings'
-	// paperProps: {
-	// 	height: '100%'
-	// }
 };
 
 const ENTER_KEY = 'Enter';
 
-const unitsMap = {
+export const unitsMap = {
 	ft: "Feet and inches",
 	mm: "Millimetres",
 	cm: "Centimetres",
@@ -370,10 +367,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							</Grid>
 						</Grid>
 						<Grid container direction="column" alignItems="flex-end">
-							<Field render={({ form }) => {
-								console.log('form', form);
-								return (
-									<Button
+							<Field render={({ form }) =>
+								<Button
 										type="submit"
 										variant="raised"
 										color="secondary"
@@ -384,8 +379,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									>
 										Save
 								</Button>
-								)
-							}} />
+							} />
 						</Grid>
 					</StyledForm>
 				</Formik>

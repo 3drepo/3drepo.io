@@ -32,6 +32,7 @@ import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
+import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
@@ -214,7 +215,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public openUploadModelFileDialog = (event, teamspaceName = '', modelProps) => {
+		event.stopPropagation();
+
+		this.props.showDialog({
+			title: `Upload Model`,
+			template: UploadModelFileDialog,
+			data: {
+				teamspaceName,
+				modelName: modelProps.name,
+				modelId: modelProps.model,
+				canUpload: modelProps.canUpload
+			}
+		});
+	}
+
 	public openModelRevisionsDialog = (event, props) => {
+		console.log('open revision')
 		event.stopPropagation();
 
 		this.props.showDialog({
@@ -258,7 +275,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, type)}
 				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
-				onUploadClick={this.openModelUploadDialog}
+				onModelUpload={(event) => this.openUploadModelFileDialog(event, this.state.activeTeamspace, props)}
 				onEditClick={(event) => this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName)}
 			/>
 		);
