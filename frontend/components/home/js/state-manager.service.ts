@@ -140,7 +140,6 @@ export class StateManagerService {
 
 	public goHome() {
 		let path = "/";
-
 		if (this.AuthService.isLoggedIn() && this.AuthService.getUsername()) {
 			path = "/dashboard/teamspaces";
 		}

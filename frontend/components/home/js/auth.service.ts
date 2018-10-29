@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { dispatch } from "../../../helpers/migration";
+import { dispatch, history } from "../../../helpers/migration";
 import { TeamspaceActions } from "../../../modules/teamspace";
-import { history } from '../../../helpers/migration';
+import { getAvatarUrl } from "../../../modules/teamspace/teamspace.sagas";
 
 export class AuthService {
 
@@ -126,7 +126,8 @@ export class AuthService {
 		this.authDefer.resolve(this.loggedIn);
 
 		dispatch(TeamspaceActions.fetchUserSuccess({
-			username: response.data.username
+			username: response.data.username,
+			avatarUrl: getAvatarUrl(response.data.username)
 		}));
 	}
 
@@ -218,7 +219,6 @@ export class AuthService {
 
 	// TODO: This needs tidying up. Probably lots of irrelvant logic in this now
 	public init() {
-
 		this.initPromise = this.$q.defer();
 
 		// If we are not logged in, check
@@ -226,28 +226,21 @@ export class AuthService {
 		// are or not
 		if (this.loggedIn === null) {
 			// Initialize
-			this.sendLoginRequest()
-				.then((data) => {
 
+			return this.sendLoginRequest()
+				.then((data) => {
+					this.initPromise.resolve(this.loggedIn);
 					data.initialiser = true;
 					this.loginSuccess(data);
 
 				})
 				.catch((reason) => {
 					if (this.loggedIn === null) {
-
+						this.initPromise.reject(reason);
 						reason.initialiser = true;
 						this.loginFailure(reason);
-
 					}
 				});
-
-			this.authDefer.promise.then(() => {
-				this.initPromise.resolve(this.loggedIn);
-			}).catch((error) => {
-				this.initPromise.reject(error);
-			});
-
 		}
 
 		return this.initPromise.promise;

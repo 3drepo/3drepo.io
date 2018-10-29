@@ -61,7 +61,7 @@ function StateManagerRun(
 			$urlRouter.sync();
 		} else if (newUrl !== oldUrl) {
 			$timeout(() => {
-				history.push(location.pathname + location.search);
+				history.push(`${location.pathname}${location.search}`);
 			});
 		}
 
@@ -75,7 +75,7 @@ function StateManagerRun(
 		}
 	});
 
-	$rootScope.$on('$stateChangeStart', (event, toState, toParams, fromState, fromParams) => {
+	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
 
 		if (isLoginRequired && !AuthService.isLoggedIn()) {
@@ -87,7 +87,6 @@ function StateManagerRun(
 				$timeout(() => {
 					if (toState.name.includes('app.dashboard')) {
 						history.push(`${location.pathname}${location.search}`);
-						$rootScope.$broadcast('$stateChangeSuccess', toState, toParams, fromState, fromParams);
 						$urlRouter.update();
 					} else {
 						$state.go(toState, toParams);
@@ -99,9 +98,7 @@ function StateManagerRun(
 				console.error('Error initialising auth from state manager: ', error);
 			});
 		}
-	});
 
-	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
 		StateManager.setState(toParams);
 	});
 
@@ -124,4 +121,3 @@ export const StateManagerRunModule = angular
 		"$urlRouter",
 		StateManagerRun
 	]);
-	

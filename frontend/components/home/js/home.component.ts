@@ -191,31 +191,10 @@ class HomeController implements ng.IController {
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
 				} else if (
-					this.AuthService.getUsername() &&
-					newState.account !== this.AuthService.getUsername() &&
-					!newState.model
-				) {
-					// If it's some other random page that doesn't match
-					// anything sensible like legal, logged out pages, or account
-					this.isLoggedOutPage = false;
-					this.$location.search({}); // Reset query parameters
-
-					let url = "/dasboard/teamspaces";
-
-					if (this.state.returnUrl) {
-						url = this.state.returnUrl;
-						this.state.returnUrl = null;
-					}
-
-					this.$location.path(url);
-				} else if (
 					!this.AuthService.getUsername() &&
 					!legal &&
 					!loggedOutPage
 				) {
-
-					// Login page or none existant page
-
 					this.isLoggedOutPage = false;
 				}
 
@@ -375,11 +354,7 @@ class HomeController implements ng.IController {
 		// If it's a logged in page just redirect to the
 		// users teamspace page
 		this.AuthService.authDefer.promise.then(() => {
-			if (
-				this.AuthService.loggedOutPage() &&
-				this.AuthService.getUsername()
-			) {
-				debugger
+			if (this.AuthService.loggedOutPage() && this.AuthService.getUsername()) {
 				this.$location.path("/dashboard/teamspaces");
 			}
 		});

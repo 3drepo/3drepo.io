@@ -56,7 +56,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.dashboard.pages", {
-		url: "/*page",
+		url: "/*page?project&view",
 		data: {
 			isLoginRequired: true
 		}
