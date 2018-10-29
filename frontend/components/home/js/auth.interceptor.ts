@@ -28,7 +28,7 @@ export class AuthInterceptor {
 	) {
 	}
 
-	public responseError(response) {
+	public responseError = (response) => {
 
 		const notLogin = response.data.place !== "GET /login";
 

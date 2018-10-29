@@ -68,17 +68,26 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state("app.login", {
 		url: "/login",
-		template: '<login login-message="vm.loginMessage"/>'
+		template: '<login login-message="vm.loginMessage"/>',
+		data: {
+			isLogoutRequired: true
+		}
 	});
 
 	$stateProvider.state("app.signUp", {
 		url: "/sign-up",
-		template: "<sign-up />"
+		template: "<sign-up />",
+		data: {
+			isLogoutRequired: true
+		}
 	});
 
 	$stateProvider.state("app.passwordForgot", {
 		url: "/password-forgot",
-		template: "<password-forgot />"
+		template: "<password-forgot />",
+		data: {
+			isLogoutRequired: true
+		}
 	});
 
 	$stateProvider.state("app.passwordChange", {
@@ -88,7 +97,10 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 				token="vm.query.token"
 				username="vm.query.username"
 			/>
-		`
+		`,
+		data: {
+			isLogoutRequired: true
+		}
 	});
 
 	$stateProvider.state("app.registerRequest", {
@@ -98,7 +110,10 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state("app.registerVerify", {
 		url: "/register-verify",
-		template: "<register-verify />"
+		template: "<register-verify />",
+		data: {
+			isLogoutRequired: true
+		}
 	});
 
 	// Static pages
@@ -123,7 +138,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
-	$urlRouterProvider.otherwise("/dashboard");
+	$urlRouterProvider.otherwise("/login");
 }
 
 export const StateManagerConfigModule = angular

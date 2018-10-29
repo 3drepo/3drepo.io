@@ -69,10 +69,6 @@ export class StateManagerService {
 		private IssuesService: any,
 		private RisksService: any
 	) {
-		// Stores the state, required as ui-router does not allow inherited
-		// stateParams, and we need to dynamically generate state diagram.
-		// One day this might change.
-		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 		this.state = {
 			changing: true
 		};

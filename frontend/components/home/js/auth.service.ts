@@ -74,6 +74,7 @@ export class AuthService {
 		];
 
 		this.loggedOutStates = [
+			"app.login",
 			"app.signUp",
 			"app.passwordForgot",
 			"app.registerRequest",
@@ -159,6 +160,7 @@ export class AuthService {
 
 		this.authDefer.resolve(this.loggedIn);
 
+
 		history.push('/login');
 		dispatch({type: 'RESET_APP'});
 	}
@@ -184,10 +186,7 @@ export class AuthService {
 	}
 
 	public localStorageLoggedIn() {
-		if (localStorage.getItem("loggedIn") === "true") {
-			return true;
-		}
-		return false;
+		return localStorage.getItem("loggedIn") === "true";
 	}
 
 	public shouldAutoLogout() {
@@ -205,7 +204,11 @@ export class AuthService {
 		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
 			this.$window.location.reload();
 		} else if (loginStateMismatch && isLoggedOutPage) {
-			this.$location.path("/");
+			if (sessionLogin) {
+				this.APIService.post("logout");
+				localStorage.setItem("loggedIn", "false");
+				dispatch({ type: 'RESET_APP' });
+			}
 		}
 	}
 
