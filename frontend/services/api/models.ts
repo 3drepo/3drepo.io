@@ -55,8 +55,8 @@ export const updateModel = (teamspace, modelName, modelData) => {
 /**
  * Remove model
  * @param teamspace
- * @param model
+ * @param modelId
  */
-export const removeModel = (teamspace, modelName) => {
-	return api.delete(`${teamspace}/model/${modelName}`);
+export const removeModel = (teamspace, modelId) => {
+	return api.delete(`${teamspace}/${modelId}`);
 };

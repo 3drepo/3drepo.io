@@ -63,7 +63,7 @@ interface IProps {
 
 	createModel: (teamspace, modelData) => void;
 	updateModel: (teamspace, modelName, modelData) => void;
-	removeModel: (teamspace, modelName) => void;
+	removeModel: (teamspace, modelId) => void;
 
 	onModelUpload: () => void;
 	onSettingsClick: () => void;
@@ -173,6 +173,20 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public createRemoveModelHandler = (modelName, modelId, type) => (event) => {
+		event.stopPropagation();
+		this.props.showConfirmDialog({
+			title: `Delete ${type}`,
+			content: `
+				Do you really want to delete ${type} <b>${modelName}</b>? <br /><br />
+				Your data will be lost permanently and will not be recoverable.
+			`,
+			onConfirm: () => {
+				this.props.removeModel(this.state.activeTeamspace, modelId);
+			}
+		});
+	}
+
 	public openModelDialog = (event, type = MODEL_TYPE, teamspaceName = '', projectName = '', modelName = '') => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
@@ -212,22 +226,19 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openModelDeleteDialog = () => {
-		console.log('delete dialog')
-	}
-
 	public openModelDownloadDialog = () => {
-		console.log('download dialog')
+		console.log('download dialog');
 	}
 
 	public openModelUploadDialog = () => {
-		console.log('upload dialog')
+		console.log('upload dialog');
 	}
 
 	/**
 	 * Render methods
 	 */
 	public renderModel = (props) => {
+		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
 		return (
 			<ModelItem
 				{...props}
@@ -243,11 +254,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					modelId: props.model,
 					targetAcct: this.state.activeTeamspace // TODO: change param name
 				})}
-				onDeleteClick={this.openModelDeleteDialog}
+				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, type)}
 				onDownloadClick={this.openModelDownloadDialog}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
 				onUploadClick={this.openModelUploadDialog}
-				onEditClick={(event) => this.openModelDialog(event, props.type, this.state.activeTeamspace, props.projectName)}
+				onEditClick={(event) => this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName)}
 			/>
 		);
 	}
