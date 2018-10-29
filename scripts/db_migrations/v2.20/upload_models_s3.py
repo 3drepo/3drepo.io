@@ -63,5 +63,5 @@ for database in db.database_names():
 ##### Upload to S3 and insert BSON #####
 						s3.upload_fileobj(entry, awsBucketName, str(s3_ref))
 						target_col = col_name + ".ref"
-						db[target_col].insert(bson_data)
+						db[target_col].save(bson_data)
 
