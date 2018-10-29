@@ -32,6 +32,7 @@ import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
+import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
@@ -198,6 +199,31 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public openModelRevisionsDialog = (event, props) => {
+		event.stopPropagation();
+
+		this.props.showDialog({
+			title: 'Revisions',
+			template: RevisionsDialog,
+			data: {
+				teamspace: this.state.activeTeamspace,
+				modelId: props.model
+			}
+		});
+	}
+
+	public openModelDeleteDialog = () => {
+		console.log('delete dialog')
+	}
+
+	public openModelDownloadDialog = () => {
+		console.log('download dialog')
+	}
+
+	public openModelUploadDialog = () => {
+		console.log('upload dialog')
+	}
+
 	/**
 	 * Render methods
 	 */
@@ -217,6 +243,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					modelId: props.model,
 					targetAcct: this.state.activeTeamspace // TODO: change param name
 				})}
+				onDeleteClick={this.openModelDeleteDialog}
+				onDownloadClick={this.openModelDownloadDialog}
+				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
+				onUploadClick={this.openModelUploadDialog}
+				onEditClick={(event) => this.openModelDialog(event, props.type, this.state.activeTeamspace, props.projectName)}
 			/>
 		);
 	}
@@ -291,10 +322,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				</MenuItem>
 			</>
 		);
-	}
-
-	public renderSettings = () => {
-		console.log('renderSettings');
 	}
 
 	public render() {

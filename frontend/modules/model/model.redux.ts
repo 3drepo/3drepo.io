@@ -20,17 +20,25 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettings: ['teamspace', 'modelId'],
 	fetchSettingsSuccess: ['settings'],
-	updateSettings: ['teamspace', 'modelId', 'settings']
+	updateSettings: ['teamspace', 'modelId', 'settings'],
+	fetchRevisions: ['teamspace', 'modelId'],
+	fetchRevisionsSuccess: ['revisions']
 }, { prefix: 'MODEL_' });
 
 export const INITIAL_STATE = {
-	settings: {}
+	settings: {},
+	revisions: []
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	return { ...state, settings };
 };
 
+const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {
+	return { ...state, revisions };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
-	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess
+	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
+	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess
 });

@@ -51,7 +51,21 @@ export function* updateSettings({ teamspace, modelId, settings }) {
 	}
 }
 
+export function* fetchRevisions({ teamspace, modelId }) {
+	try {
+		const { data: revisions } = yield API.getModelRevisions(
+			teamspace,
+			modelId
+		);
+
+		yield put(ModelActions.fetchRevisionsSuccess(revisions));
+	} catch (e) {
+		put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
+	}
+}
+
 export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS, fetchSettings);
 	yield takeLatest(ModelTypes.UPDATE_SETTINGS, updateSettings);
+	yield takeLatest(ModelTypes.FETCH_REVISIONS, fetchRevisions);
 }
