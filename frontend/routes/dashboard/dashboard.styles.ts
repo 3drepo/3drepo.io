@@ -20,8 +20,9 @@ import Grid from '@material-ui/core/Grid';
 
 export const Container = styled(Grid)`
   && {
-    padding: 30px 50px 100px 50px;
-    min-height: 100%;
+    padding: 30px 50px 60px 50px;
+    height: 100%;
+    overflow: hidden;
   }
 `;
 

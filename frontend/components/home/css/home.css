@@ -23,10 +23,6 @@ home {
 	overflow: hidden;
 }
 
-home [ui-view] {
-	/* position: relative; */
-}
-
 home .homeContainer {
 	height: 100%;
 	overflow: hidden;

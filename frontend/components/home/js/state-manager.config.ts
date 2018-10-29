@@ -21,7 +21,11 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state("app", {
 		url: "",
 		abstract: true,
-		template: "<home flex layout='column'></home>"
+		views: {
+			'main@': {
+				template: "<home flex layout='column'></home>"
+			}
+		}
 	});
 
 	$stateProvider.state("app.viewer", {
