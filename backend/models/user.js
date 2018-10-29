@@ -1,4 +1,5 @@
 /**
+ *
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,7 +21,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
-const DB = require("../db/db");
+const DB = require("../handler/db");
 const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
@@ -40,7 +41,6 @@ const Project = require("./project");
 const schema = mongoose.Schema({
 	_id: String,
 	user: String,
-	// db: String,
 	customData: {
 		firstName: String,
 		lastName: String,
@@ -138,17 +138,12 @@ schema.statics.authenticate = function (logger, username, password) {
 	});
 };
 
-// schema.statics.filterRoles = function(roles, database){
-// 	return  database ? _.filter(users, { 'db': database }) : roles;
-// };
-
 schema.statics.findByUserName = function (user) {
 	return this.findOne({ account: "admin" }, { user });
 };
 
 schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
 			.find({
 				$and: [{
@@ -480,8 +475,7 @@ schema.methods.updateInfo = function (updateObj) {
 };
 
 schema.statics.findUsernameOrEmail = function (userNameOrEmail) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
 			.findOne({
 				$or: [
@@ -971,7 +965,6 @@ schema.methods.updateSubscriptions = function (plans, billingUser, billingAddres
 };
 
 function updateUser(username, update) {
-	const db = require("../db/db");
 	return db.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol.update({ user: username }, update);
 	});
@@ -1182,8 +1175,7 @@ schema.statics.isHereEnabled = function (username) {
 };
 
 function _isHereEnabled(username) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol.findOne({ user: username }, { _id: 0, "customData.hereEnabled": 1 })
 			.then((isHereEnabledResult) => {
 				return isHereEnabledResult.customData.hereEnabled;

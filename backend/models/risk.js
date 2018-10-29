@@ -19,7 +19,7 @@
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
-const db = require("../db/db");
+const db = require("../handler/db");
 
 const ModelSetting = require("./modelSetting");
 const History = require("./history");

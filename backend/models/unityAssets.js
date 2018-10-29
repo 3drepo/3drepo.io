@@ -22,7 +22,7 @@ const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
 const Ref = require("./ref");
 const C = require("../constants");
-const db = require("../db/db");
+const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 
 const UnityAssets = {};
