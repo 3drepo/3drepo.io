@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import { ellipsis, FONT_WEIGHT } from '../../../styles';
 
 export const Container = styled.div`
   width: 300px;
@@ -42,22 +43,22 @@ export const UserData = styled.div`
   flex-direction: column;
   align-self: center;
   margin-left: 12px;
+  overflow: hidden;
 `;
 
 export const UserName = styled.h3`
   font-size: 16px;
-  font-weight: 400;
+  font-weight: ${FONT_WEIGHT.NORMAL};
   margin: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  ${ellipsis('100%')}
 `;
 
 export const UserEmail = styled.p`
   color: rgba(0,0,0,0.54);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: ${FONT_WEIGHT.SEMIBOLD};
   margin: 0;
+  ${ellipsis('100%')}
 `;
 
 export const LoadingText = styled.div`

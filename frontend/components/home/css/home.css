@@ -45,9 +45,11 @@ home #homeBackground {
 	home #homeLogo {
 		display: none;
 	}
+
+	home .homeContainer [ui-view] {
+		overflow: auto;
+	}
 }
-
-
 
 home #homeLogo {
 	padding-bottom: 20px;
@@ -156,7 +158,7 @@ home #legalLinks {
 	margin-right: 0;
 	text-align: center;
 	background: #0c2f54;
-  }
+}
 
 home #legalLinks a {
 	font-size: 11px !important;
@@ -164,10 +166,6 @@ home #legalLinks a {
   }
 
 }
-
-/* home #homeLegalContainer {
-	overflow: hidden !important;
-} */
 
 home #homeLoggedOut {
 	top: 80px;

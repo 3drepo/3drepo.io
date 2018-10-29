@@ -14,36 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { css } from 'styled-components';
 
-import styled from 'styled-components';
-import { COLOR } from '../../styles';
+const breakpoints = {
+	large: 1170,
+	desktop: 960,
+	tablet: 768,
+	phone: 600
+};
 
-export const Header = styled.div`
-	background-color: ${COLOR.WHITE};
-	border-bottom: 1px solid ${COLOR.BLACK_6};
-`;
+interface IMedia {
+	large: any;
+	desktop: any;
+	tablet: any;
+	phone: any;
+}
 
-export const TabContent = styled.div`
-	background-color: ${COLOR.WHITE};
-	flex: 1;
-	position: relative;
-	/* height: calc(100% - 100px); */
+export const media = Object.keys(breakpoints).reduce((accumulator, label) => {
+	const emSize = breakpoints[label] / 16;
+	debugger
+	accumulator[label] = (...args: any) => css`
+		@media (max-width: ${emSize}em) {
+			${css(...args)};
+		}
+	`;
 
-	@media (max-width: 767px) {
-		height: 500px;
-	}
-`;
-
-export const LoaderContainer = styled.div`
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background: #fafafa;
-	color: ${COLOR.BLACK_40};
-	display: flex;
-	justify-content: center;
-	align-items: flex-start;
-	padding-top: 100px;
-	box-sizing: border-box;
-`;
+	return accumulator;
+}, {}) as IMedia;

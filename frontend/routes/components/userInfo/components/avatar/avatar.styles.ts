@@ -26,6 +26,7 @@ export const Container = styled.div`
   position: relative;
   height: 50px;
   width: 50px;
+  min-width: 50px;
 `;
 
 export const AvatarImage = styled(Avatar)`

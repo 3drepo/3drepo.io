@@ -18,18 +18,34 @@
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import * as PanelStyles from '../components/panel/panel.styles';
+import { media } from '../../styles';
 
 export const Container = styled(Grid)`
   && {
     padding: 30px 50px 60px 50px;
     height: 100%;
     overflow: hidden;
+
+    ${media.tablet`
+      height: auto;
+      padding: 30px 30px 60px 30px;
+      flex-direction: column;
+    `}
   }
 `;
 
 export const Sidebar = styled(Grid)`
   && {
     margin-right: 50px;
+
+    ${media.tablet`
+      margin-right: 0;
+      margin-bottom: 30px;
+
+      & > * {
+        width: 100%;
+      }
+    `}
   }
 `;
 
