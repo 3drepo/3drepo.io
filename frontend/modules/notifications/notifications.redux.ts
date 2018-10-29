@@ -19,7 +19,9 @@ import { createActions, createReducer } from 'reduxsauce';
 import { consolidateStreamedStyles } from 'styled-components';
 
 export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
-	sendGetNotifications: ['username'],
+	sendGetNotifications: [],
+	sendDeleteAllNotifications: [],
+	confirmSendDeleteAllNotifications: [],
 	sendUpdateNotificationRead: ['notificationId', 'read'],
 	sendDeleteNotification: ['notificationId'],
 	setNotifications: ['notifications'],

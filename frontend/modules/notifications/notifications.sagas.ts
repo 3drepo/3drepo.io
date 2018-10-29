@@ -20,6 +20,11 @@ import { put, takeLatest, select} from 'redux-saga/effects';
 import api, * as API from '../../services/api';
 import { NotificationsTypes, NotificationsActions } from './notifications.redux';
 import { DialogActions } from '../dialog';
+import { DIALOG_TYPES } from '../dialog/dialog.redux';
+
+function selectNotifications(state) {
+	return state.notifications;
+}
 
 function selectNotification(id, state) {
 	return state.notifications.find((n) => n._id === id );
@@ -51,7 +56,6 @@ export function* sendDeleteNotification({ notificationId }) {
 	}
 
 	try {
-
 		yield put(NotificationsActions.deleteNotification(notification));
 		const resp = yield API.deleteNotification(notificationId);
 	} catch (error) {
@@ -60,8 +64,33 @@ export function* sendDeleteNotification({ notificationId }) {
 	}
 }
 
+export function* sendDeleteAllNotifications() {
+	const notifications = yield select(selectNotifications);
+
+	try {
+		yield put(NotificationsActions.setNotifications([]));
+		const resp = yield API.deleteAllNotifications();
+	} catch (error) {
+		yield put(NotificationsActions.setNotifications(notifications));
+		yield put(DialogActions.showErrorDialog('delete', 'notification', error.response));
+	}
+}
+
+export function* confirmSendDeleteAllNotifications() {
+	const config = {
+		title: 'Delete All Notifications',
+		templateType: DIALOG_TYPES.CONFIRM_DELETE_ALL_NOTIFICATIONS ,
+		confirmText: 'Delete',
+		onConfirm: NotificationsActions.sendDeleteAllNotifications
+	};
+
+	yield put(DialogActions.showDialog(config));
+}
+
 export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.SEND_GET_NOTIFICATIONS, sendGetNotifications);
 	yield takeLatest(NotificationsTypes.SEND_UPDATE_NOTIFICATION_READ, sendUpdateNotificationRead);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_NOTIFICATION, sendDeleteNotification);
+	yield takeLatest(NotificationsTypes.SEND_DELETE_ALL_NOTIFICATIONS, sendDeleteAllNotifications);
+	yield takeLatest(NotificationsTypes.CONFIRM_SEND_DELETE_ALL_NOTIFICATIONS, confirmSendDeleteAllNotifications);
 }

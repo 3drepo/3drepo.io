@@ -25,8 +25,8 @@ const notification = require("../models/notification");
 router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
 router.get("/notifications/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
 router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
+router.delete("/notifications", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
 router.delete("/notifications/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
-
 //
 function getNotifications(req, res, next) {
 	const username = req.session.user.username;
@@ -66,4 +66,11 @@ function deleteNotification(req, res, next) {
 	}).catch(err => responseCodes.onError(req, res, err));
 }
 
+function deleteAllNotifications(req, res, next) {
+	const username = req.session.user.username;
+	notification.deleteAllNotifications(username).then(()=> {
+		req.dataModel = {};
+		next();
+	}).catch(err => responseCodes.onError(req, res, err));
+}
 module.exports = router;

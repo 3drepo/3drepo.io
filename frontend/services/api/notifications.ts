@@ -52,3 +52,12 @@ export const getNotification = (id): Promise<any> => {
 export const deleteNotification = (id): Promise<any> => {
 	return api.delete(`me/notifications/${id}`);
 };
+
+/**
+ * Delete all notifications
+ *
+ * @returns {*|promise}
+ */
+export const deleteAllNotifications = (): Promise<any> => {
+	return api.delete(`me/notifications`);
+};

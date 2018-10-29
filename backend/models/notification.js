@@ -171,6 +171,11 @@ module.exports = {
 			.then(c => c.deleteOne({_id}));
 	},
 
+	deleteAllNotifications: function(username) {
+		return db.getCollection(NOTIFICATIONS_DB, username)
+			.then(c => c.deleteMany({}));
+	},
+
 	/**
 	 * This function is used for upserting the assign issue notifications.
 	 * When someone (username) asigns an issue to a new role this function should be
