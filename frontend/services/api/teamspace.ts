@@ -51,3 +51,12 @@ export const getModelSettings = (teamspace, modelId) => {
 export const editModelSettings = (teamspace, modelId, settings) => {
 	return api.put(`${teamspace}/${modelId}/settings`, settings);
 };
+
+/**
+ * Get model revisions
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelRevisions = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/revisions.json`);
+};

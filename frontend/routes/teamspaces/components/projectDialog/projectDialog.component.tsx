@@ -27,7 +27,6 @@ import FormControl from '@material-ui/core/FormControl';
 
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Container } from './projectDialog.styles';
 
 const ProjectSchema = Yup.object().shape({
 	name: schema.firstName.max(120),
