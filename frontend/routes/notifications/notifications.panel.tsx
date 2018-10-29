@@ -25,7 +25,7 @@ interface IProps {
 	labelLeft?: string;
 	labelRight?: string;
 	notifications: INotification[];
-	markNotificationAsRead: (id: string) => void;
+	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
@@ -56,7 +56,7 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 						</div>
 						<List style={{paddingBottom: 0}} > {notifications.map((notification) =>
 								<NotificationItem key={notification._id}
-								{...{...notification, markNotificationAsRead: this.props.markNotificationAsRead }}/>
+								{...{...notification, sendUpdateNotificationRead: this.props.sendUpdateNotificationRead }}/>
 							)}
 						</List>
 					</div>

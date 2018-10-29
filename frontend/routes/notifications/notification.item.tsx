@@ -41,7 +41,7 @@ export interface INotification {
 }
 
 interface IProps extends INotification {
-	markNotificationAsRead: (id) => void;
+	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 }
 
 export class NotificationItem extends React.PureComponent<IProps, any> {
@@ -57,7 +57,12 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 
 	public markAsRead(e: React.SyntheticEvent) {
 		e.stopPropagation();
-		this.props.markNotificationAsRead(this.props._id);
+		this.props.sendUpdateNotificationRead(this.props._id, true);
+	}
+
+	public markAsUnread(e: React.SyntheticEvent) {
+		e.stopPropagation();
+		this.props.sendUpdateNotificationRead(this.props._id, false);
 	}
 
 	public render() {
@@ -97,7 +102,7 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 						<Tooltip title="Mark as unread">
 							<IconButton style={{width: 10, height: 10}}  component="span"
 								aria-label="Mark as unread"
-								onClick={this.markAsRead.bind(this)}>
+								onClick={this.markAsUnread.bind(this)}>
 								<Icon>markunread</Icon>
 							</IconButton>
 						</Tooltip>

@@ -28,10 +28,10 @@ import { NotificationsPanel } from "./notifications.panel";
 import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
 import { BarIconButton } from "../components/components.styles";
 
-// Props bound in "./notifications.container.ts"
+// Props bound in <file://./notifications.container.ts>
 interface IProps {
-	fetchNotifications: () => void ; // Bound to redux action fetchNotifications
-	markNotificationAsRead: (id: string) => void; // Bound to redux saga markNotificationAsRead
+	sendGetNotifications: () => void ; // Bound to redux action sendGetNotifications
+	sendUpdateNotificationRead: (id: string, read: boolean) => void; // Bound to redux saga sendUpdateNotificationReadxx`
 	notifications: INotification[]; // Bound to store state notifications
 }
 
@@ -42,7 +42,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		// This will download notifications from the server and save to the store on init
-		this.props.fetchNotifications();
+		this.props.sendGetNotifications();
 	}
 
 	public toggleDrawer(e: React.SyntheticEvent) {
@@ -104,15 +104,15 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							<NotificationsPanel
 								labelLeft={simpleDate(new Date())} labelRight="this week"
 								notifications={this.thisWeeksNotifications()}
-								markNotificationAsRead={this.props.markNotificationAsRead}/>
+								sendUpdateNotificationRead={this.props.sendUpdateNotificationRead}/>
 							<NotificationsPanel
 								labelRight="last week"
 								notifications={this.lastWeeksNotifications() }
-								markNotificationAsRead={this.props.markNotificationAsRead}/>
+								sendUpdateNotificationRead={this.props.sendUpdateNotificationRead}/>
 							<NotificationsPanel
 								labelRight="more than two weeks ago"
 								notifications={this.moreThanTwoWeeksAgoNotifications() }
-								markNotificationAsRead={this.props.markNotificationAsRead}/>
+								sendUpdateNotificationRead={this.props.sendUpdateNotificationRead}/>
 							</>
 						}
 					</List>

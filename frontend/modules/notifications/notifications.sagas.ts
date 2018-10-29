@@ -25,26 +25,26 @@ function selectNotification(id, state) {
 	return state.notifications.find((n) => n._id === id );
 }
 
-export function* fetchNotifications() {
+export function* sendGetNotifications() {
 	const resp = yield API.getNotifications();
-	yield put(NotificationsActions.fetchNotificationsSuccess(resp.data));
+	yield put(NotificationsActions.setNotifications(resp.data));
 }
 
-export function* markNotificationAsRead({ notificationId }) {
+export function* sendUpdateNotificationRead({ notificationId, read }) {
 	try {
 		const notification = yield select(selectNotification.bind(null, notificationId));
-		if (notification.read) {
+		if (notification.read === read) {
 			return;
 		}
-		yield put(NotificationsActions.patchNotification({_id: notificationId, read: true}));
-		const resp = yield API.patchNotification(notificationId, {read: true});
+		yield put(NotificationsActions.patchNotification({_id: notificationId, read}));
+		const resp = yield API.patchNotification(notificationId, {read});
 	} catch (error) {
-		yield put(NotificationsActions.patchNotification({_id: notificationId, read: true}));
+		yield put(NotificationsActions.patchNotification({_id: notificationId, read: !read}));
 		yield put(DialogActions.showErrorDialog('update', 'notification', error.response));
 	}
 }
 
 export default function* NotificationsSaga() {
-	yield takeLatest(NotificationsTypes.FETCH_NOTIFICATIONS, fetchNotifications);
-	yield takeLatest(NotificationsTypes.MARK_NOTIFICATION_AS_READ, markNotificationAsRead);
+	yield takeLatest(NotificationsTypes.SEND_GET_NOTIFICATIONS, sendGetNotifications);
+	yield takeLatest(NotificationsTypes.SEND_UPDATE_NOTIFICATION_READ, sendUpdateNotificationRead);
 }

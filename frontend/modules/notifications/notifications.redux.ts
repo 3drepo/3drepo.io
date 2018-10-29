@@ -19,9 +19,9 @@ import { createActions, createReducer } from 'reduxsauce';
 import { consolidateStreamedStyles } from 'styled-components';
 
 export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
-	fetchNotifications: ['username'],
-	markNotificationAsRead: ['notificationId'],
-	fetchNotificationsSuccess: ['notifications'],
+	sendGetNotifications: ['username'],
+	sendUpdateNotificationRead: ['notificationId', 'read'],
+	setNotifications: ['notifications'],
 	upsertNotification: ['notification'],
 	deleteNotification: ['notification'],
 	patchNotification: ['notificationPatch']
@@ -29,7 +29,7 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 
 export const INITIAL_STATE = [];
 
-export const fetchNotificationsSuccess = (state = INITIAL_STATE, { notifications }) =>  (notifications) ;
+export const setNotifications = (state = INITIAL_STATE, { notifications }) =>  (notifications) ;
 
 export const upsertNotification = (state = INITIAL_STATE, { notification }) =>  {
 	const index = state.findIndex((n) => n._id === notification._id);
@@ -58,7 +58,7 @@ export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) 
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[NotificationsTypes.FETCH_NOTIFICATIONS_SUCCESS]: fetchNotificationsSuccess,
+	[NotificationsTypes.SET_NOTIFICATIONS]: setNotifications,
 	[NotificationsTypes.UPSERT_NOTIFICATION]: upsertNotification,
 	[NotificationsTypes.DELETE_NOTIFICATION]: deleteNotification,
 	[NotificationsTypes.PATCH_NOTIFICATION]: patchNotification
