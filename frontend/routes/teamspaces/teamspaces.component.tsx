@@ -64,6 +64,7 @@ interface IProps {
 	createModel: (teamspace, modelData) => void;
 	updateModel: (teamspace, modelName, modelData) => void;
 	removeModel: (teamspace, modelId) => void;
+	downloadModel: (teamspace, modelId) => void;
 
 	onModelUpload: () => void;
 	onSettingsClick: () => void;
@@ -255,7 +256,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					targetAcct: this.state.activeTeamspace // TODO: change param name
 				})}
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, type)}
-				onDownloadClick={this.openModelDownloadDialog}
+				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
 				onUploadClick={this.openModelUploadDialog}
 				onEditClick={(event) => this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName)}
