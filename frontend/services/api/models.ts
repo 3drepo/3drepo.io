@@ -60,3 +60,13 @@ export const updateModel = (teamspace, modelName, modelData) => {
 export const removeModel = (teamspace, modelId) => {
 	return api.delete(`${teamspace}/${modelId}`);
 };
+
+/**
+ * Upload model file
+ * @param teamspace
+ * @param modelId
+ * @param fileData
+ */
+export const uploadModelFile = (teamspace, modelId, fileData) => {
+	return api.delete(`${teamspace}/${modelId}/upload`, fileData);
+};
