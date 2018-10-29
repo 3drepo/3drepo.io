@@ -20,10 +20,8 @@ import { put, takeLatest, all, select, take } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from './index';
 import { DialogActions } from '../dialog';
-import {
-	LoadingDialog
-} from '../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
 import { SnackbarActions } from '../snackbar';
+import { LoadingDialog } from '../../routes/components/dialogContainer/components';
 
 export function* fetchPlans() {
 	try {

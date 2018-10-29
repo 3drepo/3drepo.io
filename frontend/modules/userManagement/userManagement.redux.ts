@@ -72,12 +72,12 @@ export const INITIAL_STATE = {
  * @param users
  * @returns
  */
-const prepareUserData = (teamspaceName, currentUser, users): object => {
+const prepareUserData = (teamspaceName, currentUser, userData): object => {
 	return {
-		...users,
-		isAdmin: users.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-		isOwner: teamspaceName === users.user,
-		isCurrentUser: currentUser === users.user
+		...userData,
+		isAdmin: userData.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
+		isOwner: teamspaceName === userData.user,
+		isCurrentUser: currentUser === userData.user
 	};
 };
 
