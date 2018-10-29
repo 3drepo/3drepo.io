@@ -59,7 +59,9 @@ export function* addUser({ user }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data } = yield API.addUser(teamspace, user);
-		yield put(UserManagementActions.addUserSuccess(data));
+		const currentUser = yield select(selectCurrentUser);
+
+		yield put(UserManagementActions.addUserSuccess(data, currentUser.username));
 		yield put(SnackbarActions.show('User added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('add', 'licence', error.response));
@@ -103,7 +105,7 @@ export function* removeUser({ username }) {
 export function* removeUserCascade({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.removeUserCascade(teamspace, username);
+		yield API.removeUserCascade(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 		yield put(SnackbarActions.show('User removed'));
 	} catch (error) {
@@ -114,7 +116,7 @@ export function* removeUserCascade({ username }) {
 export function* updateUserJob({ username, job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield (
+		yield (
 				job ?
 				API.updateUserJob(teamspace, job, username) :
 				API.removeUserJob(teamspace, username)
@@ -129,8 +131,10 @@ export function* updateUserJob({ username, job }) {
 export function* updatePermissions({ permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.setUserPermissions(teamspace, permissions);
-		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
+		const currentUser = yield select(selectCurrentUser);
+
+		yield API.setUserPermissions(teamspace, permissions);
+		yield put(UserManagementActions.updatePermissionsSuccess(permissions, currentUser));
 		yield put(SnackbarActions.show('Teamspace permissions updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'teamspace permissions', error.response));

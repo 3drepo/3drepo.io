@@ -160,7 +160,6 @@ export class AuthService {
 
 		this.authDefer.resolve(this.loggedIn);
 
-
 		history.push('/login');
 		dispatch({type: 'RESET_APP'});
 	}

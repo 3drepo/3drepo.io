@@ -82,7 +82,6 @@ export class UnityUtil {
 	}
 
 	public static loadUnity(divId: any, unityJsonPath?: string) {
-		debugger
 		unityJsonPath = unityJsonPath || "unity/Build/unity.json";
 
 		const unitySettings: any = {

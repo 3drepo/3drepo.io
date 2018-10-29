@@ -78,13 +78,12 @@ home #homeLogo img {
 @media (max-width: 600px) {
 	home .homeUserContent {
 		margin-bottom: 80px;
-		margin-top: 0px !important;
+		margin-top: 0 !important;
 	}
 }
 
 home .homeUserContent {
 	margin-top: 80px;
-	/* margin-bottom: 80px; */
 }
 
 home .homeUserContent .md-whiteframe-1dp,
