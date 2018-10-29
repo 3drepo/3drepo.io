@@ -43,3 +43,12 @@ export const patchNotification = (id, data): Promise<any> => {
 export const getNotification = (id): Promise<any> => {
 	return api.get(`me/notifications/${id}`);
 };
+
+/**
+ * Delete a particular notification
+ *
+ * @returns {*|promise}
+ */
+export const deleteNotification = (id): Promise<any> => {
+	return api.delete(`me/notifications/${id}`);
+};

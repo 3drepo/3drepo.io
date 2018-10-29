@@ -29,7 +29,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	sendGetNotifications: NotificationsActions.sendGetNotifications,
-	sendUpdateNotificationRead: NotificationsActions.sendUpdateNotificationRead
+	sendUpdateNotificationRead: NotificationsActions.sendUpdateNotificationRead,
+	sendDeleteNotification: NotificationsActions.sendDeleteNotification
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Notifications);

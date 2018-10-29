@@ -44,7 +44,24 @@ export function* sendUpdateNotificationRead({ notificationId, read }) {
 	}
 }
 
+export function* sendDeleteNotification({ notificationId }) {
+	const notification = yield select(selectNotification.bind(null, notificationId));
+	if (!notification) {
+		return;
+	}
+
+	try {
+
+		yield put(NotificationsActions.deleteNotification(notification));
+		const resp = yield API.deleteNotification(notificationId);
+	} catch (error) {
+		yield put(NotificationsActions.upsertNotification(notification));
+		yield put(DialogActions.showErrorDialog('delete', 'notification', error.response));
+	}
+}
+
 export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.SEND_GET_NOTIFICATIONS, sendGetNotifications);
 	yield takeLatest(NotificationsTypes.SEND_UPDATE_NOTIFICATION_READ, sendUpdateNotificationRead);
+	yield takeLatest(NotificationsTypes.SEND_DELETE_NOTIFICATION, sendDeleteNotification);
 }

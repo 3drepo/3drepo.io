@@ -42,6 +42,7 @@ export interface INotification {
 
 interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
+	sendDeleteNotification: (id: string) => void;
 }
 
 export class NotificationItem extends React.PureComponent<IProps, any> {
@@ -52,7 +53,7 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 
 	public delete(e: React.SyntheticEvent) {
 		e.stopPropagation();
-		alert("deleting stuff , mate");
+		this.props.sendDeleteNotification(this.props._id);
 	}
 
 	public markAsRead(e: React.SyntheticEvent) {

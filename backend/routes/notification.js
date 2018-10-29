@@ -25,6 +25,7 @@ const notification = require("../models/notification");
 router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
 router.get("/notifications/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
 router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
+router.delete("/notifications/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
 
 //
 function getNotifications(req, res, next) {
@@ -53,8 +54,16 @@ function patchNotification(req, res, next) {
 	notification.updateNotification(username, _id, data).then(()=> {
 		req.dataModel = Object.assign({_id}, data);
 		next();
-	})
-		.catch(err => responseCodes.onError(req, res, err));
+	}).catch(err => responseCodes.onError(req, res, err));
+}
+
+function deleteNotification(req, res, next) {
+	const username = req.session.user.username;
+	const _id = req.params.id;
+	notification.deleteNotification(username, _id).then(()=> {
+		req.dataModel = Object.assign({_id});
+		next();
+	}).catch(err => responseCodes.onError(req, res, err));
 }
 
 module.exports = router;

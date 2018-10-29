@@ -31,7 +31,8 @@ import { BarIconButton } from "../components/components.styles";
 // Props bound in <file://./notifications.container.ts>
 interface IProps {
 	sendGetNotifications: () => void ; // Bound to redux action sendGetNotifications
-	sendUpdateNotificationRead: (id: string, read: boolean) => void; // Bound to redux saga sendUpdateNotificationReadxx`
+	sendUpdateNotificationRead: (id: string, read: boolean) => void; // Bound to redux saga sendUpdateNotificationRead
+	sendDeleteNotification: (id: string) => void; // Bound to redux saga sendDeleteNotification
 	notifications: INotification[]; // Bound to store state notifications
 }
 
@@ -83,6 +84,10 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
+		const actions = {
+							sendUpdateNotificationRead: this.props.sendUpdateNotificationRead ,
+							sendDeleteNotification: this.props.sendDeleteNotification
+						};
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Button
@@ -104,15 +109,16 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							<NotificationsPanel
 								labelLeft={simpleDate(new Date())} labelRight="this week"
 								notifications={this.thisWeeksNotifications()}
-								sendUpdateNotificationRead={this.props.sendUpdateNotificationRead}/>
+								{...actions}
+								/>
 							<NotificationsPanel
 								labelRight="last week"
 								notifications={this.lastWeeksNotifications() }
-								sendUpdateNotificationRead={this.props.sendUpdateNotificationRead}/>
+								{...actions}/>
 							<NotificationsPanel
 								labelRight="more than two weeks ago"
 								notifications={this.moreThanTwoWeeksAgoNotifications() }
-								sendUpdateNotificationRead={this.props.sendUpdateNotificationRead}/>
+								{...actions}/>
 							</>
 						}
 					</List>

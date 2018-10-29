@@ -91,6 +91,10 @@ const getNotification = (username, type, criteria) =>
 	db.getCollection(NOTIFICATIONS_DB, username)
 		.then((collection) => collection.find(Object.assign({type},  criteria)).toArray());
 
+const convertIfNecessary = function(_id) {
+	return _.isString(_id) ? utils.stringToUUID(_id) : _id;
+};
+
 module.exports = {
 	types,
 
@@ -109,7 +113,7 @@ module.exports = {
 	},
 
 	updateNotification: function(username, _id, data) {
-		_id = _.isString(_id) ? utils.stringToUUID(_id) : _id;
+		_id = convertIfNecessary(_id);
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
 			collection.update({_id}, { $set: data })
 		);
@@ -150,8 +154,7 @@ module.exports = {
 				const data = {issuesId : n.issuesId};
 
 				if (data.issuesId.length === 0) {
-					return db.getCollection(NOTIFICATIONS_DB, username)
-						.then(c => c.deleteOne(Object.assign({type: types.ISSUE_ASSIGNED}, criteria)))
+					return this.deleteNotification(username, n._id)
 						.then(() => ({deleted:true , notification: {_id: utils.changeObjectIdToString(n._id) }}));
 				}
 				return this.updateNotification(username, n._id, data).then(() => {
@@ -159,6 +162,13 @@ module.exports = {
 				});
 			}
 		});
+	},
+
+	deleteNotification: function(username, _id) {
+		_id = convertIfNecessary(_id);
+
+		return db.getCollection(NOTIFICATIONS_DB, username)
+			.then(c => c.deleteOne({_id}));
 	},
 
 	/**

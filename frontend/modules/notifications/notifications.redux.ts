@@ -21,6 +21,7 @@ import { consolidateStreamedStyles } from 'styled-components';
 export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
 	sendGetNotifications: ['username'],
 	sendUpdateNotificationRead: ['notificationId', 'read'],
+	sendDeleteNotification: ['notificationId'],
 	setNotifications: ['notifications'],
 	upsertNotification: ['notification'],
 	deleteNotification: ['notification'],
