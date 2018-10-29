@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { upperFirst } from 'lodash';
+import { upperFirst, mapValues, keyBy } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
@@ -40,28 +40,47 @@ const ModelSchema = Yup.object().shape({
 });
 
 const commonInitialValues = {
-	unit: ''
+	modelName: '',
+	unit: '',
+	project: '',
+	desc: '',
+	type: ''
 };
 
 const dataByType = {
 	[MODEL_TYPE]: {
 		initialValues: {
-			code: '',
-			type: '',
-			revisionName: '',
-			revisionDescription: '',
-			file: ''
+			code: ''
 		}
 	},
 	[FEDERATION_TYPE]: {
 		initialValues: {
-			availableModels: [],
-			federatedModels: []
+			name: '',
+			teamspace: '',
+			subModels: []
 		}
 	}
 };
 
-const getAvailableModels = (project) => project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
+const getAvailableModels = (project) =>
+	project.models.filter((model) => !model.federate)
+	.map(({ name }) => ({ name }));
+
+const getModelsMap = (project) => {
+	const availableModels = project.models.filter((model) => !model.federate)
+	.map((model, index) => {
+		model.index = index;
+		return model;
+	});
+
+	return mapValues(keyBy(availableModels, 'name'), (model) => {
+		return {
+			id: model.model,
+			index: model.index
+		};
+	});
+};
+
 const getProject = (projectItems, projectName) => projectItems.find((project) => project.value === projectName);
 
 interface IProps {
@@ -84,6 +103,7 @@ interface IState {
 	availableModels: any [];
 	selectedFederatedModels: any[];
 	selectedAvailableModels: any[];
+	availableMap: any;
 }
 
 export class ModelDialog extends React.PureComponent<IProps, IState> {
@@ -97,6 +117,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
 			const selectedProject = getProject(nextProps.projects, nextProps.project);
 			const availableModels = getAvailableModels(selectedProject);
+			const availableMap = getModelsMap(selectedProject);
 
 			return {
 				selectedProject: nextProps.project,
@@ -104,7 +125,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 				availableModels,
 				federatedModels: [],
 				selectedAvailableModels: [],
-				selectedFederatedModels: []
+				selectedFederatedModels: [],
+				availableMap
 			};
 		}
 		return {};
@@ -118,11 +140,32 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		federatedModels: [],
 		availableModels: [],
 		selectedFederatedModels: [],
-		selectedAvailableModels: []
+		selectedAvailableModels: [],
+		availableMap: {}
 	};
 
 	public handleModelSave = (values) => {
-		this.props.handleResolve(values);
+		if (this.props.type === FEDERATION_TYPE) {
+			const subModels = this.state.federatedModels.map((model) => {
+				return {
+					name: model.name,
+					database: this.state.selectedTeamspace,
+					modelIndex: this.state.availableMap[model.name].index,
+					model: this.state.availableMap[model.name].id
+				};
+			});
+
+			const federationValues = {
+				...values,
+				project: this.state.selectedProject,
+				teamspace: this.state.selectedTeamspace,
+				subModels
+			};
+
+			this.props.handleResolve(federationValues);
+		} else {
+			this.props.handleResolve(values);
+		}
 	}
 
 	public handleTeamspaceChange = (onChange) => (event, teamspaceName) => {
@@ -141,12 +184,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		if (this.props.type === FEDERATION_TYPE) {
 			const selectedProject = getProject(this.state.projectsItems, projectName);
 			const availableModels = getAvailableModels(selectedProject);
+			const availableMap = getModelsMap(selectedProject);
 
 			this.setState({
 				availableModels,
 				federatedModels: [],
 				selectedAvailableModels: [],
-				selectedFederatedModels: []
+				selectedFederatedModels: [],
+				availableMap
 			});
 		}
 		onChange(event, projectName);
@@ -210,7 +255,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		this.setState({
 			selectedAvailableModels: []
 		});
-	};
+	}
 
 	public handleSelectAllFederatedClick = (event) => {
 		if (event.target.checked) {
@@ -221,7 +266,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		this.setState({
 			selectedFederatedModels: []
 		});
-	};
+	}
 
 	public getNewSelectedModels = (selectedModels, name) => {
 		const selectedIndex = selectedModels.indexOf(name);
@@ -318,8 +363,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, teamspace, project, teamspaces, handleClose, type, projects } = this.props;
-		const { projectsItems, name: typedName, selectedTeamspace, selectedProject } = this.state;
+		const { name, teamspace, project, teamspaces, handleClose, type } = this.props;
+		const { projectsItems, selectedTeamspace, selectedProject } = this.state;
 
 		return (
 			<Formik
