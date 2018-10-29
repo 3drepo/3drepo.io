@@ -21,6 +21,7 @@ import { CustomTable } from '../../../components/customTable/customTable.compone
 import Icon from '@material-ui/core/Icon';
 import { TableButton } from '../../../components/customTable/customTable.component';
 import FormControl from '@material-ui/core/FormControl';
+import TableCell from '@material-ui/core/TableCell';
 
 export const StyledField = styled(Field)`
   margin-right: 10px;
@@ -72,4 +73,18 @@ export const ModelsTableContainer = styled.div`
 
 export const StyledTableButton = styled(TableButton)`
 	&& {}
+`;
+
+export const HeaderCheckboxWrapper = styled.div`
+	display: flex;
+	align-items: center;
+`;
+
+export const HeaderCell = styled(TableCell)`
+	&& {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+	}
 `;

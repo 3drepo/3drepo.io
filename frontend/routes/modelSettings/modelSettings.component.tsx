@@ -371,7 +371,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 						</Grid>
 						<Grid container direction="column" alignItems="flex-end">
 							<Field render={({ form }) => {
-								console.log('form', form)
+								console.log('form', form);
 								return (
 									<Button
 										type="submit"
