@@ -64,8 +64,18 @@ export function* fetchRevisions({ teamspace, modelId }) {
 	}
 }
 
+export function* downloadModel({ teamspace, modelId }) {
+	try {
+		const url = `${ClientConfig.apiUrls.all[0]}/${teamspace}/${modelId}/download/latest`;
+		window.open(url, '_blank');
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
+	}
+}
+
 export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS, fetchSettings);
 	yield takeLatest(ModelTypes.UPDATE_SETTINGS, updateSettings);
 	yield takeLatest(ModelTypes.FETCH_REVISIONS, fetchRevisions);
+	yield takeLatest(ModelTypes.DOWNLOAD_MODEL, downloadModel);
 }

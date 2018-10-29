@@ -22,7 +22,8 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettingsSuccess: ['settings'],
 	updateSettings: ['teamspace', 'modelId', 'settings'],
 	fetchRevisions: ['teamspace', 'modelId'],
-	fetchRevisionsSuccess: ['revisions']
+	fetchRevisionsSuccess: ['revisions'],
+	downloadModel: ['teamspace', 'modelId']
 }, { prefix: 'MODEL_' });
 
 export const INITIAL_STATE = {
