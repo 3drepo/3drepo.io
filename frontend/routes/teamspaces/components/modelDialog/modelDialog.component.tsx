@@ -18,24 +18,18 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { upperFirst, pick, isEmpty, merge, mapValues, keyBy, map } from 'lodash';
+import { upperFirst } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import {
-	StyledField, Row, SelectWrapper, FieldWrapper, ModelsTableContainer, StyledTableButton
-} from './modelDialog.styles';
-import {
-	CELL_TYPES, CustomTable, CheckboxField, TableButton
-} from '../../../components/customTable/customTable.component';
+import { Row, SelectWrapper,	FieldWrapper,	ModelsTableContainer } from './modelDialog.styles';
+
+import { SubModelsTable } from '../../components/subModelsTable/subModelsTable.component';
 
 import { MODEL_TYPE, FEDERATION_TYPE, MODEL_SUBTYPES } from './../../teamspaces.contants';
 
@@ -67,15 +61,8 @@ const dataByType = {
 	}
 };
 
-const availableModels = (project) => project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
+const getAvailableModels = (project) => project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
 const getProject = (projectItems, projectName) => projectItems.find((project) => project.value === projectName);
-const getModelsRows = (models = [], selectedModels = []) => {
-	return models.map((model) => {
-		const data = [ { value: model.name } ];
-		const selected = selectedModels.some((selectedModel) => model.name === selectedModel.name);
-		return { data, name: model.name, selected };
-	});
-};
 
 interface IProps {
 	name?: string;
@@ -93,12 +80,10 @@ interface IState {
 	selectedProject: string;
 	projectsItems: any[];
 	name: string;
-	available: any[];
-	federated: any;
-	availableRows: any[];
-	federatedRows: any[];
-	selectedAvailable: any[];
-	selectedFederated: any[];
+	federatedModels: any[];
+	availableModels: any [];
+	selectedFederatedModels: any[];
+	selectedAvailableModels: any[];
 }
 
 export class ModelDialog extends React.PureComponent<IProps, IState> {
@@ -111,14 +96,15 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps) {
 		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
 			const selectedProject = getProject(nextProps.projects, nextProps.project);
-			const models = availableModels(selectedProject);
-			const rows = getModelsRows(models);
+			const availableModels = getAvailableModels(selectedProject);
 
 			return {
 				selectedProject: nextProps.project,
 				projectsItems: nextProps.projects,
-				available: models,
-				availableRows: rows
+				availableModels,
+				federatedModels: [],
+				selectedAvailableModels: [],
+				selectedFederatedModels: []
 			};
 		}
 		return {};
@@ -129,12 +115,10 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		projectsItems: [],
 		selectedProject: '',
 		name: '',
-		available: [],
-		federated: {},
-		availableRows: [],
-		federatedRows: [],
-		selectedAvailable: [],
-		selectedFederated: []
+		federatedModels: [],
+		availableModels: [],
+		selectedFederatedModels: [],
+		selectedAvailableModels: []
 	};
 
 	public handleModelSave = (values) => {
@@ -150,15 +134,19 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleProjectChange = (onChange) => (event, projectName) => {
-		this.setState({ selectedProject: projectName });
+		this.setState({
+			selectedProject: projectName
+		});
 
 		if (this.props.type === FEDERATION_TYPE) {
 			const selectedProject = getProject(this.state.projectsItems, projectName);
-			const models = availableModels(selectedProject);
+			const availableModels = getAvailableModels(selectedProject);
 
 			this.setState({
-				available: models,
-				availableRows: getModelsRows(models, this.state.selectedAvailable)
+				availableModels,
+				federatedModels: [],
+				selectedAvailableModels: [],
+				selectedFederatedModels: []
 			});
 		}
 		onChange(event, projectName);
@@ -174,70 +162,29 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		return selectedTeamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
-	public moveToFederated = () => {
-		const deselectedAvailableRows = this.state.availableRows.filter((row) => !row.selected);
-		this.setState({
-			federatedRows: this.state.selectedAvailable,
-			selectedAvailable: [],
-			availableRows: deselectedAvailableRows
-		});
-	}
-
-	public moveToAvailable = () => {};
-
-	public getModelCells = (name, icon, onClickHandler) => {
-		return [
-			{
-				name,
-				HeadingProps: {
-					component: {
-						hideSortIcon: true
-					}
-				}
-			},
-			{
-				type: CELL_TYPES.ICON_BUTTON,
-				HeadingComponent: StyledTableButton,
-				HeadingProps: {
-					component: {
-						hideSortIcon: true,
-						icon,
-						onClick: onClickHandler
-					},
-					disabled: false
-				}
-			}
-		];
-	}
-
-	public handleAvailableSelectionChange = (selectedRows) => {
-		this.setState({
-			selectedAvailable: selectedRows,
-			availableRows: getModelsRows(this.state.available, selectedRows)
-		});
-	}
-
-	public handleFederatedSelectionChange = (selectedRows) => {
-		this.setState({
-			selectedFederated: selectedRows
-		});
-	}
-
 	public renderFederationFields = () => {
+		const { availableModels, federatedModels, selectedFederatedModels, selectedAvailableModels } = this.state;
+
 		return (
 			<ModelsTableContainer>
-				<CustomTable
-					cells={this.getModelCells('Available', 'arrow_forward', this.moveToFederated)}
-					rows={this.state.availableRows}
-					onSelectionChange={this.handleAvailableSelectionChange}
-					rowStyle={{ border: 'none', height: '36px' }}
+				<SubModelsTable
+					title={'Available'}
+					models={availableModels}
+					selectedModels={selectedAvailableModels}
+					handleIconClick={this.moveToFederated}
+					icon={'arrow_forward'}
+					handleAllClick={this.handleSelectAllAvailableClick}
+					handleItemClick={this.handleSelectAvailableItemClick}
 					checkboxDisabled={!this.state.selectedProject}
 				/>
-				<CustomTable
-					cells={this.getModelCells('Federated', 'arrow_back', this.moveToAvailable)}
-					rows={this.state.federatedRows}
-					onSelectionChange={this.handleFederatedSelectionChange}
-					rowStyle={{ border: 'none', height: '36px' }}
+				<SubModelsTable
+					title={'Federated'}
+					models={federatedModels}
+					selectedModels={selectedFederatedModels}
+					handleIconClick={this.moveToAvailable}
+					icon={'arrow_back'}
+					handleAllClick={this.handleSelectAllFederatedClick}
+					handleItemClick={this.handleSelectFederatedItemClick}
 					checkboxDisabled={!this.state.selectedProject}
 				/>
 			</ModelsTableContainer>
@@ -250,6 +197,94 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		} else if (type === MODEL_TYPE) {
 			return this.renderModelFields();
 		}
+	}
+
+	public isSelected = (list, name) => list.indexOf(name) !== -1;
+
+	public handleSelectAllAvailableClick = (event) => {
+		if (event.target.checked) {
+			this.setState((state) =>
+				({ selectedAvailableModels: state.availableModels.map((model) => model.name) }));
+			return;
+		}
+		this.setState({
+			selectedAvailableModels: []
+		});
+	};
+
+	public handleSelectAllFederatedClick = (event) => {
+		if (event.target.checked) {
+			this.setState((state) =>
+				({ selectedFederatedModels: state.federatedModels.map((model) => model.name) }));
+			return;
+		}
+		this.setState({
+			selectedFederatedModels: []
+		});
+	};
+
+	public getNewSelectedModels = (selectedModels, name) => {
+		const selectedIndex = selectedModels.indexOf(name);
+		let newSelected = [];
+
+		if (selectedIndex === -1) {
+			newSelected = newSelected.concat(selectedModels, name);
+		} else if (selectedIndex === 0) {
+			newSelected = newSelected.concat(selectedModels.slice(1));
+		} else if (selectedIndex === selectedModels.length - 1) {
+			newSelected = newSelected.concat(selectedModels.slice(0, -1));
+		} else if (selectedIndex > 0) {
+			newSelected = newSelected.concat(
+				selectedModels.slice(0, selectedIndex),
+				selectedModels.slice(selectedIndex + 1),
+			);
+		}
+
+		return newSelected;
+	}
+
+	public moveToFederated = () => {
+		const federatedModels = this.state.selectedAvailableModels.map((modelName) => {
+			return { name: modelName };
+		});
+
+		const availableModels = this.state.availableModels.filter((model) =>
+			!this.state.selectedAvailableModels.includes(model.name)
+		);
+
+		this.setState({
+			federatedModels: this.state.federatedModels.concat(federatedModels),
+			selectedAvailableModels: [],
+			selectedFederatedModels: [],
+			availableModels
+		});
+	}
+
+	public moveToAvailable = () => {
+		const availableModels = this.state.selectedFederatedModels.map((modelName) => {
+			return { name: modelName };
+		});
+
+		const federatedModels = this.state.federatedModels.filter((model) =>
+			!this.state.selectedFederatedModels.includes(model.name)
+		);
+
+		this.setState({
+			availableModels: this.state.availableModels.concat(availableModels),
+			selectedFederatedModels: [],
+			selectedAvailableModels: [],
+			federatedModels
+		});
+	}
+
+	public handleSelectAvailableItemClick = (event, name) => {
+		const newSelected = this.getNewSelectedModels(this.state.selectedAvailableModels, name);
+		this.setState({ selectedAvailableModels: newSelected });
+	}
+
+	public handleSelectFederatedItemClick = (event, name) => {
+		const newSelected = this.getNewSelectedModels(this.state.selectedFederatedModels, name);
+		this.setState({ selectedFederatedModels: newSelected });
 	}
 
 	public renderModelFields = () => {
