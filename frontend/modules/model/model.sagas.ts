@@ -73,9 +73,25 @@ export function* downloadModel({ teamspace, modelId }) {
 	}
 }
 
+export function* uploadModelFile({ teamspace, modelId, fileData }) {
+	try {
+		const response = yield API.uploadModelFile(
+			teamspace,
+			modelId,
+			fileData
+		);
+
+		console.log('response', response);
+
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
+	}
+}
+
 export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS, fetchSettings);
 	yield takeLatest(ModelTypes.UPDATE_SETTINGS, updateSettings);
 	yield takeLatest(ModelTypes.FETCH_REVISIONS, fetchRevisions);
 	yield takeLatest(ModelTypes.DOWNLOAD_MODEL, downloadModel);
+	yield takeLatest(ModelTypes.UPLOAD_MODEL_FILE, uploadModelFile);
 }
