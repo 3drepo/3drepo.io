@@ -258,7 +258,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										margin="normal"
 									/>
 								)} />
-								<SelectWrapper fullWidth={true} required={true}>
+								<SelectWrapper fullWidth={true}>
 									<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
 									<Field name="unit" render={({ field, form }) => (
 										<CellSelect

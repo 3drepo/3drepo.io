@@ -26,7 +26,13 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 
-import { HeaderCell, HeaderCheckboxWrapper } from './subModelsTable.styles';
+import {
+	HeaderCell,
+	HeaderCheckboxWrapper,
+	StyledCheckbox,
+	StyledTable,
+	StyledTableHead
+} from './subModelsTable.styles';
 
 interface IProps {
 	title: string;
@@ -54,12 +60,12 @@ export const SubModelsTable = (props: IProps) => {
 	} = props;
 
 	return (
-		<Table>
-			<TableHead>
+		<StyledTable>
+			<StyledTableHead>
 				<TableRow>
 					<HeaderCell padding="none">
 						<HeaderCheckboxWrapper>
-							<Checkbox
+							<StyledCheckbox
 								indeterminate={selectedModels.length > 0 && selectedModels.length < models.length}
 								checked={Boolean(models.length) && models.length === selectedModels.length}
 								onChange={handleAllClick}
@@ -72,23 +78,23 @@ export const SubModelsTable = (props: IProps) => {
 						</IconButton>
 					</HeaderCell>
 				</TableRow>
-			</TableHead>
+			</StyledTableHead>
 			<TableBody>
 				{models
 					.map((model) => {
 						const isModelSelected = isSelected(selectedModels, model.name);
 						return (
 							<TableRow
-								key={model.name} role="checkbox" selected={isModelSelected}
+								key={model.name} role="checkbox"
 								onClick={(event) => handleItemClick(event, model.name)}
 							>
 								<TableCell padding="none">
-									<Checkbox checked={isModelSelected} /> {model.name}
+									<StyledCheckbox checked={isModelSelected} /> {model.name}
 								</TableCell>
 							</TableRow>
 						);
 					})}
 			</TableBody>
-		</Table>
+		</StyledTable>
 	);
 };

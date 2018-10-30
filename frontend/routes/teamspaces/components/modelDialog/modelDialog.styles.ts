@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Field } from 'formik';
 import { CustomTable } from '../../../components/customTable/customTable.component';
-import Icon from '@material-ui/core/Icon';
 import { TableButton } from '../../../components/customTable/customTable.component';
 import FormControl from '@material-ui/core/FormControl';
 import TableCell from '@material-ui/core/TableCell';
@@ -57,7 +56,7 @@ export const Row = styled.div`
 export const ModelsTableContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	height: 220px;
+	margin-top: 15px;
 
 	> div {
 		width: 100%;
@@ -71,9 +70,7 @@ export const ModelsTableContainer = styled.div`
 	}
 `;
 
-export const StyledTableButton = styled(TableButton)`
-	&& {}
-`;
+export const StyledTableButton = styled(TableButton)``;
 
 export const HeaderCheckboxWrapper = styled.div`
 	display: flex;

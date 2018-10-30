@@ -16,7 +16,12 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
+
 import TableCell from '@material-ui/core/TableCell';
+import Checkbox from '@material-ui/core/Checkbox';
+import Table from '@material-ui/core/Table';
+import TableHead from '@material-ui/core/TableHead';
 
 export const Container = styled.div``;
 
@@ -31,5 +36,35 @@ export const HeaderCell = styled(TableCell)`
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
+		height: auto;
+	}
+`;
+
+export const StyledCheckbox = styled(Checkbox)`
+	&& {
+		padding: 0 12px 0 0;
+	}
+`;
+
+export const StyledTable = styled(Table)`
+	td {
+		border-bottom: none;
+	}
+
+	&:first-of-type {
+		tbody {
+			border-right: 1px solid ${COLOR.BLACK_20}
+		}
+	}
+	&:last-of-type {
+		${StyledCheckbox} {
+			padding: 0 12px;
+		}
+	}
+`;
+
+export const StyledTableHead = styled(TableHead)`
+	tr {
+		height: auto;
 	}
 `;

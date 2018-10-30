@@ -40,11 +40,11 @@ const ModelSchema = Yup.object().shape({
 });
 
 const commonInitialValues = {
-	modelName: '',
 	unit: '',
 	project: '',
 	desc: '',
-	type: ''
+	type: '',
+	modelName: ''
 };
 
 const dataByType = {
@@ -159,12 +159,17 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 				...values,
 				project: this.state.selectedProject,
 				teamspace: this.state.selectedTeamspace,
-				subModels
+				subModels,
+				modelName: values.name
 			};
 
 			this.props.handleResolve(federationValues);
 		} else {
-			this.props.handleResolve(values);
+			const modelValues = {
+				...values,
+				modelName: values.name
+			};
+			this.props.handleResolve(modelValues);
 		}
 	}
 
@@ -352,6 +357,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 						<Field name="type" render={({ field, form }) => (
 							<CellSelect
 								{...field}
+								placeholder="Select model type"
+								disabledPlaceholder={true}
 								items={MODEL_SUBTYPES}
 								inputId="type-select"
 							/>
@@ -365,7 +372,6 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { name, teamspace, project, teamspaces, handleClose, type } = this.props;
 		const { projectsItems, selectedTeamspace, selectedProject } = this.state;
-
 		return (
 			<Formik
 				initialValues={
@@ -435,6 +441,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									<Field name="unit" render={({ field, form }) => (
 										<CellSelect
 											{...field}
+											placeholder="Select unit"
+											disabledPlaceholder={true}
 											items={clientConfigService.units}
 											inputId="unit-select"
 										/>

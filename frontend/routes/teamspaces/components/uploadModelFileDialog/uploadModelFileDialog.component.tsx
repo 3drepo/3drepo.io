@@ -20,14 +20,19 @@ import * as dayjs from 'dayjs';
 import { Formik, Form, Field } from 'formik';
 
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import { Loader } from './../../../components/loader/loader.component';
 import { unitsMap } from './../../../modelSettings/modelSettings.component';
 
-import { ModelName, ModelInfo, HiddenFileInput, FileLabel } from './uploadModelFileDialog.styles';
+import {
+	ModelName,
+	ModelInfo,
+	HiddenFileInput,
+	FileLabel,
+	StyledDialogActions
+} from './uploadModelFileDialog.styles';
 
 const acceptedFormat = [
 	"x", "obj", "3ds", "md3", "md2", "ply",
@@ -90,15 +95,14 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 	public renderRevisionInfo = (revisions) => {
 		const lastRevision = revisions[revisions.length - 1];
-		let info = `Revision ${revisions.length}:`;
+		const info = `Revision ${revisions.length}`;
+		const formatedDate = dayjs(lastRevision.timestamp).format('DD MMM YYYY');
 
 		if (lastRevision.tag) {
-			info += ` ${lastRevision.tag} - ${dayjs(lastRevision.timestamp).format('DD MMM YYYY')}`;
-		} else {
-			info += ` ${dayjs(lastRevision.timestamp).format('DD MMM YYYY')}`;
+			return `${info}: ${ lastRevision.tag } - ${ formatedDate }`;
 		}
 
-		return info;
+		return `${info}: ${formatedDate}`;
 	}
 
 	public render() {
@@ -123,7 +127,6 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									{...field}
 									label="Name"
 									margin="normal"
-									required
 									fullWidth={true}
 								/>
 							}
@@ -146,9 +149,9 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 							</ModelInfo>
 						}
 
-						{ this.state.file && <ModelInfo> { this.state.file } </ModelInfo> }
+						{ this.state.file && <ModelInfo>File name: { this.state.file } </ModelInfo> }
 
-						<DialogActions>
+						<StyledDialogActions>
 							<HiddenFileInput
 								accept={this.getAcceptedFormats()}
 								id="flat-button-file"
@@ -164,11 +167,11 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									type="submit"
 									variant="raised"
 									color="secondary"
-									disabled={!form.isValid || form.isValidating || !this.inputFileRef.current.files.length}>
+									disabled={!this.state.file}>
 										Upload
 									</Button>}
 								/>
-						</DialogActions>
+						</StyledDialogActions>
 					</DialogContent>
 				</Form>
 		</Formik>
