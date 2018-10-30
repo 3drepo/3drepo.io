@@ -43,7 +43,10 @@ import {
 } from './modelSettings.styles';
 
 const PANEL_PROPS = {
-	title: 'Model Settings'
+	title: 'Model Settings',
+	paperProps: {
+		height: '100%'
+	}
 };
 
 const ENTER_KEY = 'Enter';
