@@ -81,7 +81,6 @@ function StateManagerRun(
 		if (isLoginRequired && !AuthService.isLoggedIn()) {
 			event.preventDefault();
 			StateManager.state.authInitialized = false;
-
 			AuthService.init().then(() => {
 				StateManager.state.authInitialized = true;
 				$timeout(() => {
