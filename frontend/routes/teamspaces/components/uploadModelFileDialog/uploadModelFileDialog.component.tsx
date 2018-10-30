@@ -60,7 +60,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		file: ''
 	};
 
-	public inputFileRef = React.createRef<HTMLElement>();
+	public inputFileRef = React.createRef<HTMLInputElement>();
 
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
@@ -109,7 +109,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<Formik onSubmit={this.handleFileUpload}>
+			<Formik onSubmit={this.handleFileUpload} initialValues={{}}>
 				<Form>
 					<DialogContent>
 						<ModelName>{modelName}</ModelName>

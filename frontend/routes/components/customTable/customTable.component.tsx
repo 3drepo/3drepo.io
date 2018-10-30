@@ -171,8 +171,6 @@ const getSearchFields = (cells) => {
 	return searchFields ? searchFields.searchBy : [];
 };
 
-const FIELDS_TO_OMIT = ['selected', 'data', 'disabled'];
-
 interface IProps {
 	cells: any[];
 	rows: any[];
@@ -181,7 +179,7 @@ interface IProps {
 	renderCheckbox?: (props, data) => React.ReactChild;
 	onSearch?: (props) => any[];
 	rowStyle?: any;
-	checkboxDisabled: boolean;
+	checkboxDisabled?: boolean;
 }
 
 interface IState {
