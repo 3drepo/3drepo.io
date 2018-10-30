@@ -38,6 +38,7 @@ interface IProps {
 	model: string;
 	subModels?: any[];
 	timestamp: string;
+	onModelItemClick: (event) => void;
 	onModelUpload: (event) => void;
 	onRevisionsClick: (event) => void;
 	onDownloadClick: (event) => void;
@@ -111,7 +112,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, subModels, timestamp } = this.props;
+		const { name, subModels, timestamp, onModelItemClick } = this.props;
 		const { hovered } = this.state;
 		const isFederation = Boolean(subModels);
 		const actions = isFederation ? this.federationActions : this.modelActions;
@@ -127,6 +128,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 					alignItems="center"
 					justify="space-between"
 					wrap="nowrap"
+					onClick={onModelItemClick}
 				>
 					<Grid container>{name}</Grid>
 					<Grid

@@ -16,25 +16,19 @@
  */
 
 import styled from 'styled-components';
-import DialogActions from '@material-ui/core/DialogActions';
+import { COLOR } from '../../../styles';
 
-import { COLOR } from '../../../../styles';
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+`;
 
-export const ModelName = styled.h3``;
-
-export const ModelInfo = styled.p`
+export const Name = styled.div`
+  font-size: 10px;
   color: ${COLOR.BLACK_40};
-  font-size: 14px;
 `;
 
-export const HiddenFileInput = styled.input`
-  visibility: hidden;
-`;
-
-export const FileLabel = styled.label``;
-
-export const StyledDialogActions = styled(DialogActions)`
-  && {
-    margin: 0;
-  }
+export const Value = styled.div`
+  font-size: 16px;
 `;

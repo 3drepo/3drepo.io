@@ -18,8 +18,11 @@
 import * as React from 'react';
 import DialogContent from '@material-ui/core/DialogContent';
 import List from '@material-ui/core/List';
+import Button from '@material-ui/core/Button';
+
 import { DateTime } from './../../../components/dateTime/dateTime.component';
-import { Item, Column, Property } from './revisionsDialog.styles';
+import { Property } from './../../../components/property/property.component';
+import { Item, Column, Message, StyledDialogActions } from './revisionsDialog.styles';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -45,28 +48,42 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<DialogContent>
-				<List>
-					{this.props.revisions && this.props.revisions.map((revision) => {
-						return(
-							<Item button key={revision._id}
-								onClick={(event) => this.revisionClickHandler(event, revision.tag)}>
-								<Column>
-									<Property>
-										{revision.tag
-											? revision.tag
-											: <DateTime value={revision.timestamp} format={'D MMM'} /> }
-									</Property>
-									<Property>{revision.author}</Property>
-								</Column>
-								<Column>
-									<Property>
-										<DateTime value={revision.timestamp} format={'D MMM'} />
-									</Property>
-									<Property>ID: {revision._id}</Property>
-								</Column>
-							</Item>);
-						})}
-				</List>
+				{ !this.props.revisions.length ?
+					<Message>No Revisions Present</Message>
+					:
+					<>
+						<List>
+							{this.props.revisions && this.props.revisions.map((revision) => {
+								return (
+									<Item button key={revision._id}
+										onClick={(event) => this.revisionClickHandler(event, revision.tag)}>
+										<Column>
+											<Property name="Tag">
+												{revision.tag
+													? revision.tag
+													: <DateTime value={revision.timestamp} format={'D MMM'} />}
+											</Property>
+
+											<Property name="Author">
+												{revision.author}
+											</Property>
+										</Column>
+										<Column>
+											<Property name="Date">
+												<DateTime value={revision.timestamp} format={'D MMM'} />
+											</Property>
+											<Property name="ID">{revision._id}</Property>
+										</Column>
+									</Item>);
+							})}
+						</List>
+						<StyledDialogActions>
+							<Button variant="raised" color="secondary">
+								Cancel
+							</Button>
+						</StyledDialogActions>
+					</>
+				}
 			</DialogContent>
 		);
 	}

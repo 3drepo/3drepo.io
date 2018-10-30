@@ -242,6 +242,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			}
 		});
 	}
+	public createModelItemClickHandler = (modelId) =>
+		this.props.history.push(`${this.state.activeTeamspace}/${modelId}`)
 
 	/**
 	 * Render methods
@@ -252,6 +254,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			<ModelItem
 				{...props}
 				actions={[]}
+				onModelItemClick={() => this.createModelItemClickHandler(props.model)}
 				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
 					page: 'userManagement',
 					teamspace: this.state.activeTeamspace,
