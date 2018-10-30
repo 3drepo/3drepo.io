@@ -67,18 +67,22 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		return this.props.notifications.filter((n) => n.timestamp > lastSunday);
 	}
 
-	public lastWeeksNotifications() {
+	public lastWeeksNotifications = () => {
 		const lastSunday = getSunday().getTime();
 		const prevSunday = getSunday(-1).getTime();
 		return this.props.notifications.filter((n) => n.timestamp > prevSunday && n.timestamp < lastSunday );
 	}
 
-	public moreThanTwoWeeksAgoNotifications() {
+	public moreThanTwoWeeksAgoNotifications = () => {
 		const prevSunday = getSunday(-1).getTime();
 		return this.props.notifications.filter((n) => n.timestamp < prevSunday );
 	}
 
-	public renderNotificationsHeader() {
+	public hasNotifications = () => {
+		return this.props.notifications.length > 0;
+	}
+
+	public renderNotificationsHeader = () => {
 		return (<ListSubheaderToolbar rightContent={
 					<>
 					<BarIconButton aria-label="Menu" style={{marginRight: -18}} onClick={this.toggleMenu}>
@@ -88,7 +92,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							open={!!this.state.menuElement}
 							onClose={this.toggleMenu}
 							>
-								<MenuItem onClick={this.deleteAllNotifications}>Delete all</MenuItem>
+								<MenuItem onClick={this.deleteAllNotifications} disabled={!this.hasNotifications()}>Delete all</MenuItem>
 							</Menu>
 					</BarIconButton>
 					<BarIconButton aria-label="Close panel" onClick={this.toggleDrawer}>
@@ -121,9 +125,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer}
 						SlideProps={{unmountOnExit: true}}>
 					<List subheader={this.renderNotificationsHeader()} style={{height: '100%', width: 300 }} >
-						{this.props.notifications.length === 0 &&
+						{!this.hasNotifications() &&
 							<NotificationEmptyItem/>}
-						{this.props.notifications.length > 0 &&
+						{this.hasNotifications() &&
 							<>
 							<NotificationsPanel
 								labelLeft={simpleDate(new Date())} labelRight="this week"
