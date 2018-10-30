@@ -33,15 +33,6 @@ div#accountHolder(
 		#accountItem(flex="100")
 			teamspaces(ng-if="vm.pageVisibility.teamspaces")
 
-			account-teamspaces(
-				is-lite-mode="vm.isLiteMode"
-				loading="vm.loadingAccount"
-				ng-show="vm.pageVisibility.teamspaces"
-				account="vm.account"
-				accounts="vm.accounts"
-				on-show-page="vm.showPage(page, callingPage, data)"
-				selected-index="vm.data.tabIndex")
-
 			profile(ng-if="vm.username && vm.pageVisibility.profile")
 
 			billing(ng-if="vm.username && vm.pageVisibility.billing")
@@ -49,13 +40,6 @@ div#accountHolder(
 			model-settings(
 				ng-if="vm.username && vm.pageVisibility.modelsetting"
 			)
-			account-modelsetting(
-				ng-if="vm.username && vm.pageVisibility.modelsetting"
-				account="vm.account"
-				accounts="vm.accounts"
-				model="vm.model"
-				data="vm.data"
-				show-page="vm.showPage(page, callingPage, data)")
 
 			user-management(ng-if="vm.username && vm.pageVisibility.userManagement")
 

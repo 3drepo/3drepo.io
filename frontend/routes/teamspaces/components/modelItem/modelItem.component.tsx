@@ -128,9 +128,8 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 					alignItems="center"
 					justify="space-between"
 					wrap="nowrap"
-					onClick={onModelItemClick}
 				>
-					<Grid container>{name}</Grid>
+					<Grid container onClick={onModelItemClick}>{name}</Grid>
 					<Grid
 						container
 						wrap="nowrap"
