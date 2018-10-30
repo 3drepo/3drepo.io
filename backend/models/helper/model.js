@@ -40,6 +40,7 @@ const Project = require("../project");
 const stream = require("stream");
 const _ = require("lodash");
 const uuid = require("node-uuid");
+const FileRef = require("../fileRef");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -1114,30 +1115,23 @@ function listSubModels(account, model, branch) {
 }
 
 function downloadLatest(account, model) {
+	return History.findLatest({account, model}, {rFile: 1}).then((fileEntry) => {
+		if(!fileEntry || !fileEntry.rFile || !fileEntry.rFile.length) {
+			return Promise.reject(responseCodes.NO_FILE_FOUND);
+		}
 
-	return stash.getGridFSBucket(account, `${model}.history`).then(bucket => {
+		// We currently only support single file fetches
+		const fileName = fileEntry.rFile[0];
+		const filePromise = FileRef.getOriginalFile(account, model, fileName);
 
-		return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
+		const fileNameArr = fileName.split("_");
+		const ext = fileNameArr.length > 1 ? "." + fileNameArr.pop() : "";
 
-			if(!file) {
-				return Promise.reject(responseCodes.NO_FILE_FOUND);
-			}
+		const fileNameFormatted = fileNameArr.join("_").substr(36) + ext;
 
-			// change file name
-			const filename = file.filename.split("_");
-			let ext = "";
-
-			if (filename.length > 1) {
-				ext = "." + filename.pop();
-			}
-
-			file.filename = filename.join("_").substr(36) + ext;
-
-			return Promise.resolve({
-				readStream: bucket.openDownloadStream(file._id),
-				meta: file
-			});
-
+		return filePromise.then((file) => {
+			file.fileName = fileNameFormatted;
+			return file;
 		});
 	});
 }

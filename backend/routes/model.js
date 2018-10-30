@@ -439,13 +439,9 @@ function downloadLatest(req, res, next) {
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
 		const headers = {
-			"Content-Length": file.meta.length,
-			"Content-Disposition": "attachment;filename=" + file.meta.filename
+			"Content-Length": file.size,
+			"Content-Disposition": "attachment;filename=" + file.fileName
 		};
-
-		if (file.meta.contentType) {
-			headers["Content-Type"] = "application/json";
-		}
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
