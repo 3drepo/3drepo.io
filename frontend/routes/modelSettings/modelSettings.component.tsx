@@ -16,11 +16,9 @@
  */
 
 import * as React from 'react';
-import { Route } from 'react-router-dom';
 import * as queryString from 'query-string';
-import * as Yup from 'yup';
-import { Formik, Form, Field, setFie } from 'formik';
-import { snakeCase, values } from 'lodash';
+import { Formik, Field } from 'formik';
+import { snakeCase } from 'lodash';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -149,7 +147,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const { modelId, targetAcct } = queryParams;
 		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag } = data;
 		const { topicTypes, axisX, axisY, axisZ, latitude, longitude } = this.state;
-		const types = topicTypes.map((type) => type.label);
+		const types = topicTypes.map((topicType) => topicType.label);
 
 		const settings = {
 			name,
@@ -274,8 +272,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							<TypesGrid container direction="column">
 								<TopicTypesContainer>
 									{this.state.topicTypes.map(
-										(type, index) => (
-											<StyledChip key={index} label={type.label} onDelete={() => this.deleteTopicType(type)} />
+										(topicType, index) => (
+											<StyledChip key={index} label={topicType.label} onDelete={() => this.deleteTopicType(topicType)} />
 										)
 									)}
 								</TopicTypesContainer>

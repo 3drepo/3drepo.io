@@ -281,7 +281,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		} else if (selectedIndex > 0) {
 			newSelected = newSelected.concat(
 				selectedModels.slice(0, selectedIndex),
-				selectedModels.slice(selectedIndex + 1),
+				selectedModels.slice(selectedIndex + 1)
 			);
 		}
 

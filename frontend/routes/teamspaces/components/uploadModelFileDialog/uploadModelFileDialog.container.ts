@@ -28,9 +28,9 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-  fetchModelSettings: ModelActions.fetchSettings,
-  uploadModelFile: ModelActions.uploadModelFile,
-  fetchRevisions: ModelActions.fetchRevisions
+	fetchModelSettings: ModelActions.fetchSettings,
+	uploadModelFile: ModelActions.uploadModelFile,
+	fetchRevisions: ModelActions.fetchRevisions
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(UploadModelFileDialog)));

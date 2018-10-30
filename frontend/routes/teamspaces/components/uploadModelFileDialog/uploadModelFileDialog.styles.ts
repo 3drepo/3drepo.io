@@ -16,10 +16,14 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
 
 export const ModelName = styled.h3``;
 
-export const ModelInfo = styled.div``;
+export const ModelInfo = styled.p`
+  color: ${COLOR.BLACK_40};
+  font-size: 14px;
+`;
 
 export const HiddenFileInput = styled.input`
   visibility: hidden;

@@ -18,12 +18,7 @@
 import { put, takeLatest, all, select, take } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import {
-	BillingTypes,
-	BillingActions,
-	selectLicencesInfo,
-	dialogMessages
-} from './index';
+import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from './index';
 import { DialogActions } from '../dialog';
 import { DIALOG_TYPES } from '../dialog/dialog.redux';
 import { SnackbarActions } from '../snackbar';
