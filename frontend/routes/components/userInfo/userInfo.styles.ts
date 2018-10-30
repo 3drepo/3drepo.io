@@ -19,9 +19,15 @@ import styled from 'styled-components';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import { ellipsis, FONT_WEIGHT } from '../../../styles';
+import * as AvatarStyles from '../avatar/avatar.styles';
 
 export const Container = styled.div`
   width: 300px;
+
+  ${AvatarStyles.Container} {
+    margin: 8px;
+    margin-left: -4px;
+  }
 `;
 
 export const StyledList = styled(List)`

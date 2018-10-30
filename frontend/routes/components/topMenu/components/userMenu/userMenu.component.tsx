@@ -22,7 +22,6 @@ import IconButton from '@material-ui/core/IconButton';
 
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import {
-	MenuAvatar,
 	MenuContent,
 	MenuIcon,
 	MenuItem,
@@ -31,6 +30,7 @@ import {
 	MenuUser,
 	UserIcon
 } from './userMenu.styles';
+import { Avatar } from '../../../avatar/avatar.component';
 
 const UserButton = ({ IconProps, icon, ...props }) => {
 	return (
@@ -57,15 +57,23 @@ const UserMenuButton = (props) => {
 
 const UserMenuContent = (props) => {
 	const hasMemorySettings = Boolean(localStorage.getItem('deviceMemory'));
+	const { currentUser: { username, avatarUrl, firstName, lastName }} = props;
+	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 
 	return (
 		<MenuContent component="nav">
 			<MenuUser>
-				<MenuAvatar
-					alt={props.currentUser.username}
-					src={props.currentUser.avatarUrl}
+				<Avatar
+					name={name}
+					size={30}
+					url={avatarUrl}
+					fontSize={12}
 				/>
-				<MenuText primary={props.currentUser.username} />
+{/* 				<MenuAvatar
+					alt={username}
+					src={avatarUrl}
+				/> */}
+				<MenuText primary={username} />
 			</MenuUser>
 			<Divider />
 			<UserMenuButton

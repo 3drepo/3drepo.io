@@ -19,45 +19,46 @@ import styled from 'styled-components';
 import Avatar from "@material-ui/core/Avatar";
 import SvgIcon from "@material-ui/core/SvgIcon";
 
+import { COLOR } from '../../../styles';
+import Icon from '@material-ui/core/Icon';
+
+const DEFAULT_SIZE = 50;
+const DEFAULT_FONT_SIZE = 20;
+
+const getSize = ({ size = DEFAULT_SIZE }) => size;
+
+export const StyledIcon = styled(Icon)``;
+
 export const Container = styled.div`
-  margin: 0.5rem 0;
-  text-align: left;
-  align-self: flex-start;
-  position: relative;
-  height: 50px;
-  width: 50px;
-  min-width: 50px;
+	position: relative;
+	width: ${getSize}px;
+	height: ${getSize}px;
+	min-width: ${getSize}px;
+	font-size: ${(props: any) => props.fontSize || DEFAULT_FONT_SIZE}px;
+
+	${StyledIcon} {
+		font-size: ${(props: any) => getSize(props) * 0.6}px;
+	}
 `;
 
-export const AvatarImage = styled(Avatar)`
-  && {
-    background: #e8eaf6;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-  }
+export const StyledAvatar = styled(Avatar)`
+	&& {
+		width: 100%;
+		height: 100%;
+		background: #e8eaf6;
+		color: ${COLOR.PRIMARY_MAIN};
+		border: 1px solid #e8eaf6;
+		font-size: inherit;
+	}
 `;
 
-export const StyledSvg = styled(SvgIcon)`
-  && {
-    width: 1.5em;
-    height: 1.5em;
-  }
-`;
-
-export const AvatarPlaceholder = styled.div`
-  background: #e8eaf6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 100%;
-  overflow: hidden;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  height: 100%;
-  width: 100%;
+export const AvatarPlaceholder = styled(StyledAvatar)`
+	&& {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		height: calc(100% + 2px);
+		width: calc(100% + 1px);
+	}
 `;

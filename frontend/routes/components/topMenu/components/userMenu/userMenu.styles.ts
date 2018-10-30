@@ -22,9 +22,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Switch from '@material-ui/core/Switch';
-import Avatar from '@material-ui/core/Avatar';
 
 import { COLOR } from '../../../../../styles';
+import * as AvatarStyles from '../../../avatar/avatar.styles';
 
 export const UserIcon = styled(Icon)`
 	&& {
@@ -37,6 +37,10 @@ export const UserIcon = styled(Icon)`
 export const MenuContent = styled(List)`
 	&& {
 		padding-top: 0;
+	}
+
+	${AvatarStyles.Container} {
+		margin-left: -3px;
 	}
 `;
 
@@ -71,13 +75,5 @@ export const MenuSwitch = styled(Switch)`
 	&& {
 		margin-left: -21px;
     margin-right: -15px;
-	}
-`;
-
-export const MenuAvatar = styled(Avatar)`
-	&& {
-		width: 30px;
-    height: 30px;
-    margin-left: -3px;
 	}
 `;

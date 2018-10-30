@@ -19,9 +19,9 @@ import * as React from 'react';
 import { BrowserRouter as Router, withRouter } from 'react-router-dom';
 
 import { ListItemLink } from './components/listItemLink/listItemLink.component';
-import { Avatar } from './components/avatar/avatar.component';
 import { Container, UserContainer, UserData, UserName, UserEmail, StyledList, LoadingText } from './userInfo.styles';
 import { Panel } from '../panel/panel.component';
+import { Avatar } from '../avatar/avatar.component';
 
 interface IMenuItem {
 	title: string;
@@ -49,6 +49,7 @@ const renderItems = (items, match) => items.map((item) => (
 
 const UserInfoComponent = (props: IProps) => {
 	const { match, items, loading, firstName, lastName, username, email, avatarUrl } = props;
+	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 
 	return (
 		<Router>
@@ -57,8 +58,8 @@ const UserInfoComponent = (props: IProps) => {
 						<StyledList>
 							<UserContainer>
 								<Avatar
+									name={name}
 									url={avatarUrl}
-									altText={username}
 									loading={loading}
 								/>
 								{ loading
