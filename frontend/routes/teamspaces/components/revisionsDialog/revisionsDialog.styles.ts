@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import ListItem from '@material-ui/core/ListItem';
+import DialogActions from '@material-ui/core/DialogActions';
 
 export const Item = styled(ListItem)`
   display: flex;
@@ -41,3 +42,14 @@ export const Column = styled.div`
 `;
 
 export const Property = styled.div``;
+
+export const Message = styled.p`
+  width: 100%;
+  text-align: center;
+`;
+
+export const StyledDialogActions = styled(DialogActions)`
+	&& {
+		margin: 0;
+	}
+`;

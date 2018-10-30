@@ -15,26 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import DialogActions from '@material-ui/core/DialogActions';
+import * as React from 'react';
 
-import { COLOR } from '../../../../styles';
+import { Name, Value, Wrapper } from './property.styles';
 
-export const ModelName = styled.h3``;
+interface IProps {
+	name: string;
+	children: React.ReactChild;
+}
 
-export const ModelInfo = styled.p`
-  color: ${COLOR.BLACK_40};
-  font-size: 14px;
-`;
+export class Property extends React.PureComponent<IProps, any> {
+	public render() {
+		const { name, children } = this.props;
 
-export const HiddenFileInput = styled.input`
-  visibility: hidden;
-`;
-
-export const FileLabel = styled.label``;
-
-export const StyledDialogActions = styled(DialogActions)`
-  && {
-    margin: 0;
-  }
-`;
+		return (
+			<Wrapper>
+				<Name>{name}</Name>
+				<Value>{children}</Value>
+			</Wrapper>
+		);
+	}
+}
