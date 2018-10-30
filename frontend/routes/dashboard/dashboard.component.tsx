@@ -60,16 +60,16 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public renderRoutes = (match, currentUser) => (
 		<Switch>
-			<Route exact path={`${match.url}dashboard/teamspaces`} component={Teamspaces} />
-			<Route exact path={`${match.url}dashboard/teamspaces/:teamspace/models/:modelId`} component={ModelSettings} />
-			<Route path={`${match.url}dashboard/user-management/:teamspace`} component={UserManagement} />
-			<Route exact path={`${match.url}dashboard/profile`} component={Profile} />
-			<Route path={`${match.url}dashboard/billing`} component={Billing} />
-			<Redirect exact from={`${match.url}dashboard`} to={`${match.url}dashboard/teamspaces`} />
+			<Route exact path={`${match.url}/teamspaces`} component={Teamspaces} />
+			<Route exact path={`${match.url}/teamspaces/:teamspace/models/:modelId`} component={ModelSettings} />
+			<Route path={`${match.url}/user-management/:teamspace`} component={UserManagement} />
+			<Route exact path={`${match.url}/profile`} component={Profile} />
+			<Route path={`${match.url}/billing`} component={Billing} />
+			<Redirect exact from={match.url} to={`${match.url}/teamspaces`} />
 			<Redirect
 				exact
-				from={`${match.url}dashboard/user-management`}
-				to={`${match.url}dashboard/user-management/${currentUser.username}`}
+				from={`${match.url}/user-management`}
+				to={`${match.url}/user-management/${currentUser.username}`}
 			/>
 		</Switch>
 	)
@@ -90,9 +90,13 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>
-				{!isPending && <Content>
-					{this.renderRoutes(match, currentUser)}
-				</Content>}
+				<Route path={`${match.url}dashboard`} render={({match: matchDashboard}) => (
+					<>
+						{!isPending && <Content>
+							{this.renderRoutes(matchDashboard, currentUser)}
+						</Content>}
+					</>
+				)} />
 			</Container>
 		);
 	}
