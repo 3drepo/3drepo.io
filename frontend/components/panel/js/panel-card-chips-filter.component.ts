@@ -78,7 +78,7 @@ class PanelCardChipsFilterController implements ng.IController {
 		event.preventDefault();
 
 		const newchips = pastedText.split(",").map((c) => {
-			console.dir("pasted value", c.replace(/\s+/g, ''));
+			console.dir("pasted value", c);
 			if (c.includes(":")) {
 				const suggestion = this.suggestions.find(this.equalChipLabel.bind(this , c));
 
