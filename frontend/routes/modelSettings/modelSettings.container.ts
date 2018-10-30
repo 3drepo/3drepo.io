@@ -23,7 +23,7 @@ import { ModelSettings } from './modelSettings.component';
 import { selectCurrentTeamspace } from './../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
-    currentTeamspace: selectCurrentTeamspace,
+  currentTeamspace: selectCurrentTeamspace,
     modelSettings: selectSettings,
     isSettingsLoading: selectIsPending
 });
