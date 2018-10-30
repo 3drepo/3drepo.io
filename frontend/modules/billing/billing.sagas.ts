@@ -20,7 +20,9 @@ import { put, takeLatest, all, select, take } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from './index';
 import { DialogActions } from '../dialog';
-import { DIALOG_TYPES } from '../dialog/dialog.redux';
+import {
+	LoadingDialog
+} from './../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
 import { SnackbarActions } from '../snackbar';
 
 export function* fetchPlans() {
@@ -81,7 +83,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 
 		const config = {
 			title: dialogMessages.DIALOG_TITLE,
-			templateType: DIALOG_TYPES.LOADING,
+			template: LoadingDialog,
 			data: {
 				content: licencesNumChanged
 					? dialogMessages.LICENCE_COUNT_CHANGED_INFO
