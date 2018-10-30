@@ -23,11 +23,11 @@ import { ModelActions, selectRevisions } from './../../../../modules/model';
 import { RevisionsDialog } from './revisionsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-  revisions: selectRevisions
+	revisions: selectRevisions
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-  fetchModelRevisions: ModelActions.fetchRevisions
+	fetchModelRevisions: ModelActions.fetchRevisions
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog)));

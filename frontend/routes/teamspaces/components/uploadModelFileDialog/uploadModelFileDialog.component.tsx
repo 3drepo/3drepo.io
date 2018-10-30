@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import * as dayjs from 'dayjs';
 import { Formik, Form, Field } from 'formik';
 
 import DialogContent from '@material-ui/core/DialogContent';
@@ -25,7 +26,18 @@ import TextField from '@material-ui/core/TextField';
 
 import { Loader } from './../../../components/loader/loader.component';
 import { unitsMap } from './../../../modelSettings/modelSettings.component';
+
 import { ModelName, ModelInfo, HiddenFileInput, FileLabel } from './uploadModelFileDialog.styles';
+
+const acceptedFormat = [
+	"x", "obj", "3ds", "md3", "md2", "ply",
+	"mdl", "ase", "hmp", "smd", "mdc", "md5",
+	"stl", "lxo", "nff", "raw", "off", "ac",
+	"bvh", "irrmesh", "irr", "q3d", "q3s", "b3d",
+	"dae", "ter", "csm", "3d", "lws", "xml", "ogex",
+	"ms3d", "cob", "scn", "blend", "pk3", "ndo",
+	"ifc", "xgl", "zgl", "fbx", "assbin", "bim", "dgn"
+];
 
 interface IProps {
 	uploadModelFile: (teamspace, modelId, fileData) => void;
@@ -48,7 +60,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		file: ''
 	};
 
-	public inputFileRef = React.createRef();
+	public inputFileRef = React.createRef<HTMLElement>();
 
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
@@ -64,15 +76,29 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			tag: values.revisionName,
 			desc: values.revisionDesc
 		};
-
 		uploadModelFile(teamspaceName, modelId, fileData);
-	  handleClose();
+		handleClose();
 	}
 
 	public onInputChange = (event) => {
 		this.setState({
 			file: this.inputFileRef.current.files[0].name
 		});
+	}
+
+	public getAcceptedFormats = () => acceptedFormat.map((format) => `.${format}`).toString();
+
+	public renderRevisionInfo = (revisions) => {
+		const lastRevision = revisions[revisions.length - 1];
+		let info = `Revision ${revisions.length}:`;
+
+		if (lastRevision.tag) {
+			info += ` ${lastRevision.tag} - ${dayjs(lastRevision.timestamp).format('DD MMM YYYY')}`;
+		} else {
+			info += ` ${dayjs(lastRevision.timestamp).format('DD MMM YYYY')}`;
+		}
+
+		return info;
 	}
 
 	public render() {
@@ -82,15 +108,13 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			return <Loader />;
 		}
 
-		const lastRevision = revisions[revisions.length - 1];
-
-		return <Formik onSubmit={this.handleFileUpload}>
+		return (
+			<Formik onSubmit={this.handleFileUpload}>
 				<Form>
 					<DialogContent>
 						<ModelName>{modelName}</ModelName>
 						<ModelInfo>
-							{`Revision ${revisions.length}: ${lastRevision.tag &&
-								lastRevision.tag} - ${lastRevision.timestamp}`}
+							{ revisions && this.renderRevisionInfo(revisions)	}
 						</ModelInfo>
 						<Field
 							name="revisionName"
@@ -115,16 +139,18 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								/>
 							}
 						/>
-						<ModelInfo>
-							{modelSettings.properties &&
-								`Model units: ${unitsMap[modelSettings.properties.unit]}`}
-						</ModelInfo>
 
-						{this.state.file && <ModelInfo> {this.state.file} </ModelInfo> }
+						{ modelSettings.properties &&
+							<ModelInfo>
+								{ `Model units: ${unitsMap[modelSettings.properties.unit]}` }
+							</ModelInfo>
+						}
+
+						{ this.state.file && <ModelInfo> { this.state.file } </ModelInfo> }
 
 						<DialogActions>
 							<HiddenFileInput
-								accept="image/*"
+								accept={this.getAcceptedFormats()}
 								id="flat-button-file"
 								type="file"
 								innerRef={this.inputFileRef}
@@ -133,18 +159,19 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 							<FileLabel htmlFor="flat-button-file">
 								<Button component="span">Select</Button>
 							</FileLabel>
-							<Field render={({ form }) => 
-								<Button 
-									type="submit" 
-									variant="raised" 
-									color="secondary" 
+							<Field render={({ form }) =>
+								<Button
+									type="submit"
+									variant="raised"
+									color="secondary"
 									disabled={!form.isValid || form.isValidating || !this.inputFileRef.current.files.length}>
 										Upload
-									</Button>} 
+									</Button>}
 								/>
 						</DialogActions>
 					</DialogContent>
 				</Form>
-			</Formik>;
+		</Formik>
+		);
 	}
 }

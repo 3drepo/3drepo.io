@@ -20,9 +20,9 @@ import { createSelector } from 'reselect';
 export const selectModelDomain = (state) => Object.assign({}, state.model);
 
 export const selectSettings = createSelector(
-  selectModelDomain, (state) => state.settings
+	selectModelDomain, (state) => state.settings
 );
 
 export const selectRevisions = createSelector(
-  selectModelDomain, (state) => state.revisions
+	selectModelDomain, (state) => state.revisions
 );
