@@ -26,7 +26,7 @@ import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSub
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 import { NotificationsPanel } from "./notifications.panel";
 import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
-import { BarIconButton } from "../components/components.styles";
+import { BarIconButton, UserActionButton } from "../components/components.styles";
 
 // Props bound in <file://./notifications.container.ts>
 interface IProps {
@@ -113,15 +113,14 @@ export class Notifications extends React.PureComponent<IProps, any> {
 						};
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
-				<Button
-					variant="fab"
-					color="secondary"
+				<UserActionButton
+					variant="flat"
 					aria-label="Toggle panel"
 					mini={true}
 					onClick={this.toggleDrawer}
 				>
 					<Icon>notifications</Icon>
-				</Button>
+				</UserActionButton>
 				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer}
 						SlideProps={{unmountOnExit: true}}>
 					<List subheader={this.renderNotificationsHeader()} style={{height: '100%', width: 300 }} >

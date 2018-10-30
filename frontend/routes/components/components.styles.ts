@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import { COLOR } from '../../styles';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Button } from '@material-ui/core';
 
 const BaseStyles = styled(Grid)`
   white-space: nowrap;
@@ -46,3 +46,16 @@ export const BarIconButton = styled(IconButton)`
 		background-color: white
 	}
   `;
+
+export const UserActionButton = styled(Button)`
+  && {
+    color: white;
+    text-shadow: 0px 0px 3px rgba(0,0,0,0.2);
+
+  }
+
+  &&:hover {
+    background-color: transparent;
+  }
+
+`;

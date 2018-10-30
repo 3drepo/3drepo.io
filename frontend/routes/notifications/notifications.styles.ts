@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText } from '@material-ui/core';
+import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText, Button } from '@material-ui/core';
 
 export const NotificationListItem = styled(ListItem)`
 	&& {
