@@ -274,7 +274,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public createModelItemClickHandler = (event, modelId, props) => {
 		if (props.timestamp) {
-			this.props.history.push(`${this.state.activeTeamspace}/${modelId}`);
+            this.createRouteHandler(`/viewer/${modelId}`)();
 			const analyticService = getAngularService('AnalyticService') as any;
 
 			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
@@ -288,18 +288,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 */
 	public renderModel = (props) => {
 		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
-        const { activeTeamspace } = this.state;
-
+        const { activeTeamspace } = this.state;const { match } = this.props;
 		return (
 			<ModelItem
 				{...props}
 				actions={[]}
-				onModelItemClick={() => this.createModelItemClickHandler(props.model)}
+				onModelItemClick={this.createRouteHandler(`/viewer/${props.model}`)}
 				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
-					project: projectName,
+					project: props.projectName,
 					view: PERMISSIONS_VIEWS.MODELS
 				})}
-                onSettingsClick={this.createRouteHandler(`/dashboard/teamspaces/${activeTeamspace}/models/${props.model}`)}
+				onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`)}
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
 				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}

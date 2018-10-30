@@ -73,6 +73,7 @@ interface IState {
 
 interface IProps {
 	match: any;
+	location: any;
 	history: any;
 	fetchModelSettings: (teamspace, modelId) => void;
 	updateModelSettings: (teamspace, modelId, settings) => void;
@@ -94,7 +95,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-        const { modelSettings: { properties }, match, location, fetchModelSettings } = this.props;
+        const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
 		const { teamspace, modelId } = match.params;
 
 		const topicTypes = properties && properties.topicTypes ? properties.topicTypes : [];
