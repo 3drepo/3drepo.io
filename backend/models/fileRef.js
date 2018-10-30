@@ -45,13 +45,17 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 
 FileRef.getTotalOrgFileSize = function(account, model) {
 	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
+		let totalSize = 0;
 		if(col) {
-			col.aggregate({ "$match": {}}, { "$group": { _id : null, sum : { "$sum": "$size" } } }).then((res) => {
-				return res.sum;
+			return col.find({},{size : 1}).toArray().then((res) => {
+				if (res && res.length) {
+					totalSize =  res.reduce((total, current) => total + current.size, 0);
+				}
+				return totalSize;
 			});
 		}
 
-		return 0;
+		return totalSize;
 	});
 };
 
