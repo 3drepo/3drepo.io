@@ -81,8 +81,9 @@ export function* uploadModelFile({ teamspace, modelId, fileData }) {
 			fileData
 		);
 
-		console.log('response', response);
-
+		if (response.status === 200) {
+			yield put(SnackbarActions.show("Model uploaded succesfully"));
+		}
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
 	}

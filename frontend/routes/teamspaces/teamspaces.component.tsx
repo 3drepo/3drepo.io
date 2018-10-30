@@ -231,7 +231,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public openModelRevisionsDialog = (event, props) => {
-		console.log('open revision')
 		event.stopPropagation();
 
 		this.props.showDialog({
@@ -242,14 +241,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				modelId: props.model
 			}
 		});
-	}
-
-	public openModelDownloadDialog = () => {
-		console.log('download dialog');
-	}
-
-	public openModelUploadDialog = () => {
-		console.log('upload dialog');
 	}
 
 	/**
@@ -276,7 +267,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
 				onModelUpload={(event) => this.openUploadModelFileDialog(event, this.state.activeTeamspace, props)}
-				onEditClick={(event) => this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName)}
+				onEditClick={
+					(event) => this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName, props.name)
+				}
 			/>
 		);
 	}
@@ -285,7 +278,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return(
 			<ModelDirectoryItem
 				{...props}
-				renderChildItem={this.renderModel}
+				renderChildItem={(modelProps) => this.renderModel({ ...modelProps, projectName: props.projectName })}
 				onAddClick={
 					(event) => this.openModelDialog(event, props.type, this.state.activeTeamspace, props.projectName)
 				}

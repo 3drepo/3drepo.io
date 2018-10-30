@@ -24,13 +24,13 @@ import { ModelSettings } from './modelSettings.component';
 import { selectCurrentTeamspace } from './../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
-  currentTeamspace: selectCurrentTeamspace,
+	currentTeamspace: selectCurrentTeamspace,
 	modelSettings: selectSettings
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-  fetchModelSettings: ModelActions.fetchSettings,
-  updateModelSettings: ModelActions.updateSettings
+	fetchModelSettings: ModelActions.fetchSettings,
+	updateModelSettings: ModelActions.updateSettings
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelSettings)));
