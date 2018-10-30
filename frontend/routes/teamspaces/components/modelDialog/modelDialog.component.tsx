@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { upperFirst, mapValues, keyBy } from 'lodash';
+import { upperFirst, mapValues, keyBy, includes } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
@@ -294,7 +294,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		});
 
 		const availableModels = this.state.availableModels.filter((model) =>
-			!this.state.selectedAvailableModels.includes(model.name)
+			!includes(this.state.selectedAvailableModels, model.name)
 		);
 
 		this.setState({
@@ -311,7 +311,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		});
 
 		const federatedModels = this.state.federatedModels.filter((model) =>
-			!this.state.selectedFederatedModels.includes(model.name)
+			!includes(this.state.selectedFederatedModels, model.name)
 		);
 
 		this.setState({
