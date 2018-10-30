@@ -43,4 +43,16 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFile(account, model + ORIGINAL_FILE_REF_EXT, fileName);
 };
 
+FileRef.getTotalOrgFileSize = function(account, model) {
+	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
+		if(col) {
+			col.aggregate({ "$match": {}}, { "$group": { _id : null, sum : { "$sum": "$size" } } }).then((res) => {
+				return res.sum;
+			});
+		}
+
+		return 0;
+	});
+};
+
 module.exports = FileRef;

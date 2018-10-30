@@ -37,6 +37,7 @@ const userBilling = require("./userBilling");
 const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
 const Project = require("./project");
+const FileRef = require("./fileRef");
 
 const schema = mongoose.Schema({
 	_id: String,
@@ -89,21 +90,19 @@ const schema = mongoose.Schema({
 	roles: [{}]
 });
 
-schema.statics.historyChunksStats = function (dbName) {
+schema.statics.getTeamspaceSpaceUsed = function (dbName) {
+	return DB.getCollection(dbName, "settings").then((col) => {
+		return col.find({}, {_id: 1}).toArray().then((settings) => {
+			const spaceUsedProm = [];
+			settings.forEach((setting) => {
+				spaceUsedProm.push(FileRef.getTotalOrgFileSize(dbName, setting._id));
+			});
 
-	return ModelFactory.dbManager.listCollections(dbName).then(collections => {
-
-		const historyChunks = _.filter(collections, collection => collection.name.endsWith(".history.chunks"));
-		const promises = [];
-
-		historyChunks.forEach(collection => {
-			promises.push(ModelFactory.dbManager.getCollectionStats(dbName, collection.name));
+			return Promise.all(spaceUsedProm).then((spacePerModel) => {
+				return spacePerModel.reduce((total, value) => total + value);
+			});
 		});
-
-		return Promise.all(promises);
-
 	});
-
 };
 
 schema.statics.authenticate = function (logger, username, password) {
@@ -686,15 +685,10 @@ function _findModelDetails(dbUserCache, username, model) {
 function _calSpace(user) {
 
 	const quota = user.customData.billing.getSubscriptionLimits();
-	return User.historyChunksStats(user.user).then(stats => {
+	return User.getTeamspaceSpaceUsed(user.user).then(sizeInBytes => {
 
-		if (stats && quota.spaceLimit > 0) {
-			let totalSize = 0;
-			stats.forEach(stat => {
-				totalSize += stat.size;
-			});
-
-			quota.spaceUsed = totalSize / (1024 * 1024); // In MiB
+		if (quota.spaceLimit > 0) {
+			quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
 		} else if (quota) {
 			quota.spaceUsed = 0;
 		}
