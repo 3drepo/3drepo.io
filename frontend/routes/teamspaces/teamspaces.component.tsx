@@ -64,7 +64,7 @@ interface IProps {
 
 	createModel: (teamspace, modelData) => void;
 	updateModel: (teamspace, modelName, modelData) => void;
-	removeModel: (teamspace, modelId) => void;
+	removeModel: (teamspace, modelData) => void;
 	downloadModel: (teamspace, modelId) => void;
 
 	onModelUpload: () => void;
@@ -117,7 +117,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public getTeamspaceProjects = (teamspaceName) => {
-		const teamspace = this.props.teamspaces.find((teamspaceItem) => teamspaceItem.name === teamspaceName);
+		const teamspace = this.props.teamspaces.find((teamspaceItem) => teamspaceItem.account === teamspaceName);
 		return teamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
@@ -175,7 +175,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public createRemoveModelHandler = (modelName, modelId, type) => (event) => {
+	public createRemoveModelHandler = (modelName, modelId, projectName, type) => (event) => {
 		event.stopPropagation();
 		this.props.showConfirmDialog({
 			title: `Delete ${type}`,
@@ -184,7 +184,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				Your data will be lost permanently and will not be recoverable.
 			`,
 			onConfirm: () => {
-				this.props.removeModel(this.state.activeTeamspace, modelId);
+				this.props.removeModel(this.state.activeTeamspace, {
+					id: modelId, name: modelName, project: projectName
+				});
 			}
 		});
 	}
@@ -199,6 +201,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			template: ModelDialog,
 			data: {
 				name: modelName,
+				modelName,
 				teamspace: teamspaceName,
 				teamspaces: teamspacesItems,
 				project: teamspaceName ? projectName : '',
@@ -266,7 +269,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					modelId: props.model,
 					targetAcct: this.state.activeTeamspace // TODO: change param name
 				})}
-				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, type)}
+				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
 				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
 				onModelUpload={(event) => this.openUploadModelFileDialog(event, this.state.activeTeamspace, props)}

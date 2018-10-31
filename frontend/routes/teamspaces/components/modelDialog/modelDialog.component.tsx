@@ -36,7 +36,9 @@ import { MODEL_TYPE, FEDERATION_TYPE, MODEL_SUBTYPES } from './../../teamspaces.
 const ModelSchema = Yup.object().shape({
 	name: schema.firstName.max(120),
 	teamspace: Yup.string().required(),
-	project: Yup.string().required()
+	project: Yup.string().required(),
+	unit: Yup.string().required(),
+	type: Yup.string().required()
 });
 
 const commonInitialValues = {
@@ -44,7 +46,8 @@ const commonInitialValues = {
 	project: '',
 	desc: '',
 	type: '',
-	modelName: ''
+	modelName: '',
+	teamspace: ''
 };
 
 const dataByType = {
@@ -56,7 +59,6 @@ const dataByType = {
 	[FEDERATION_TYPE]: {
 		initialValues: {
 			name: '',
-			teamspace: '',
 			subModels: []
 		}
 	}
@@ -85,6 +87,7 @@ const getProject = (projectItems, projectName) => projectItems.find((project) =>
 
 interface IProps {
 	name?: string;
+	modelName?: string;
 	teamspace?: string;
 	project?: string;
 	teamspaces: any[];
@@ -143,6 +146,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		selectedAvailableModels: [],
 		availableMap: {}
 	};
+
+	public componentDidMount() {
+		if (this.props.name.length) {
+			this.setState({
+				name: this.props.name
+			});
+		}
+	}
 
 	public handleModelSave = (values) => {
 		if (this.props.type === FEDERATION_TYPE) {
@@ -203,7 +214,9 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNameChange = (onChange) => (event) => {
-		this.setState({ name: event.currentTarget.value });
+		this.setState({
+			name: event.currentTarget.value
+		});
 		onChange(event);
 	}
 
@@ -360,6 +373,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 								placeholder="Select model type"
 								disabledPlaceholder={true}
 								items={MODEL_SUBTYPES}
+								required
 								inputId="type-select"
 							/>
 						)} />
@@ -370,8 +384,9 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, teamspace, project, teamspaces, handleClose, type } = this.props;
+		const { name, modelName, teamspace, project, teamspaces, handleClose, type } = this.props;
 		const { projectsItems, selectedTeamspace, selectedProject } = this.state;
+
 		return (
 			<Formik
 				initialValues={
@@ -379,6 +394,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 						teamspace: teamspace ? teamspace : selectedTeamspace,
 						project: project ? project : selectedProject,
 						name,
+						modelName,
 						...commonInitialValues,
 						...dataByType[type].initialValues
 					}
@@ -400,6 +416,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									disabled={Boolean(teamspace)}
 									disabledPlaceholder={true}
 									inputId="teamspace-select"
+									value={teamspace}
 									onChange={this.handleTeamspaceChange(field.onChange)}
 								/>
 							)} />
@@ -416,6 +433,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									disabled={Boolean(project)}
 									disabledPlaceholder={true}
 									inputId="project-select"
+									value={project}
 									onChange={this.handleProjectChange(field.onChange)}
 								/>
 							)} />
@@ -432,6 +450,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 											margin="normal"
 											required
 											fullWidth={true}
+											value={this.state.name}
 											onChange={this.handleNameChange(field.onChange)}
 										/>
 									)} />
@@ -443,6 +462,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 											{...field}
 											placeholder="Select unit"
 											disabledPlaceholder={true}
+											required
 											items={clientConfigService.units}
 											inputId="unit-select"
 										/>

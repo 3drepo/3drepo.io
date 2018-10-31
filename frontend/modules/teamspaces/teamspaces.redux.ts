@@ -30,15 +30,14 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	// Models
 	createModel: ['teamspace', 'modelData'],
 	updateModel: ['teamspace', 'modelName', 'modelData'],
-	removeModel: ['teamspace', 'modelName'],
+	removeModel: ['teamspace', 'modelData'],
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelName', 'modelData'],
-	removeModelSuccess: ['teamspace', 'modelName']
+	removeModelSuccess: ['teamspace', 'modelData']
 }, { prefix: 'TEAMSPACES_' });
 
 export const INITIAL_STATE = {
-	teamspaces: [],
-	models: []
+	teamspaces: []
 };
 
 const setTeamspaces = (state = INITIAL_STATE, action) => {
@@ -77,15 +76,37 @@ const removeProjectSuccess = (state = INITIAL_STATE, action) => {
 
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, action) => {
-	return { ...state };
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[action.teamspace].projects];
+	const findedProject = projects.find((project) => project.name === action.modelData.projectName);
+	const projectIndex = projects.indexOf(findedProject);
+	const findedModel = findedProject.models.find((model) => model.name === action.modelData.name);
+	const modelIndex = findedProject.models.indexOf(findedModel);
+
+	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex] = action.modelData;
+
+	return { ...state, teamspaces };
 };
 
 const createModelSuccess = (state = INITIAL_STATE, action) => {
-	return { ...state };
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[action.teamspace].projects];
+	const findedProject = projects.find((project) => project.name === action.modelData.projectName);
+	const projectIndex = projects.indexOf(findedProject);
+	const targetModels = teamspaces[action.teamspace].projects[projectIndex].models;
+	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, action.modelData];
+	return { ...state, teamspaces };
 };
 
 const removeModelSuccess = (state = INITIAL_STATE, action) => {
-	return { ...state };
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[action.teamspace].projects];
+	const findedProject = projects.find((project) => project.name === action.modelData.projectName);
+	const projectIndex = projects.indexOf(findedProject);
+	const updatedModels = findedProject.models.filter((model) => model.name !== action.modelData.name);
+	teamspaces[action.teamspace].projects[projectIndex].models = updatedModels;
+
+	return { ...state, teamspaces };
 };
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
