@@ -26,6 +26,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Input from '@material-ui/core/Input';
 
 import { clientConfigService } from '../../services/clientConfig';
+import {} from '../../constants/model-parameters';
 
 import { Panel } from '../components/panel/panel.component';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
@@ -50,14 +51,6 @@ const PANEL_PROPS = {
 };
 
 const ENTER_KEY = 'Enter';
-
-export const unitsMap = {
-	ft: "Feet and inches",
-	mm: "Millimetres",
-	cm: "Centimetres",
-	dm: "Decimetres",
-	m: "Metres"
-};
 
 interface IState {
 	topicTypes?: any[];
