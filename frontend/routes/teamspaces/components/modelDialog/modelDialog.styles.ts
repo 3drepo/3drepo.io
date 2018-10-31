@@ -18,8 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from './../../../../styles/colors';
 import { Field } from 'formik';
-import { CustomTable } from '../../../components/customTable/customTable.component';
-import { TableButton } from '../../../components/customTable/customTable.component';
+import { CustomTable, TableButton } from '../../../components/customTable/customTable.component';
 import FormControl from '@material-ui/core/FormControl';
 import TableCell from '@material-ui/core/TableCell';
 
@@ -45,7 +44,7 @@ export const Row = styled.div`
 	min-width: 480px;
 
 	${FieldWrapper} {
-    margin-right: 10px;
+		margin-right: 10px;
     width: 100%;
 	}
 

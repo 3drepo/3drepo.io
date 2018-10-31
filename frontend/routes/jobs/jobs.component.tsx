@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';

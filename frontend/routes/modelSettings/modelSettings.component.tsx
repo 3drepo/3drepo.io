@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import * as queryString from 'query-string';
+import { isEqual, isEmpty } from 'lodash';
 import { Formik, Field } from 'formik';
 import { snakeCase } from 'lodash';
 
@@ -26,7 +27,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Input from '@material-ui/core/Input';
 
 import { clientConfigService } from '../../services/clientConfig';
-import {} from '../../constants/model-parameters';
+import { ENTER_KEY } from '../../constants/keys';
 
 import { Panel } from '../components/panel/panel.component';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
@@ -49,8 +50,6 @@ const PANEL_PROPS = {
 		height: '100%'
 	}
 };
-
-const ENTER_KEY = 'Enter';
 
 interface IState {
 	topicTypes?: any[];
@@ -93,48 +92,52 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const properties = this.props.modelSettings.properties;
+		const changes = {} as any;
+
+		const { properties, surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
+		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
 		const topicTypes = properties.topicTypes;
-		const surveyPoints = this.props.modelSettings.surveyPoints;
 		const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
-		const elevation = this.props.modelSettings.elevation;
-		const angleFromNorth = this.props.modelSettings.angleFromNorth;
 
 		if (!prevProps.modelSettings.properties && properties) {
 			if (topicTypes && topicTypes.length !== prevState.topicTypes.length) {
-				this.setState({ topicTypes });
+				changes.topicTypes = topicTypes;
 			}
 		}
 
 		if (elevation && prevProps.modelSettings.elevation !== elevation) {
-			this.setState({ elevation });
+			changes.elevation = elevation;
 		}
 
 		if (angleFromNorth && prevProps.modelSettings.angleFromNorth !== angleFromNorth) {
-			this.setState({ angleFromNorth });
+			changes.angleFromNorth = angleFromNorth;
 		}
 
 		if (prevSurveyPoints !== surveyPoints && surveyPoints.length) {
 			const [ { latLong, position } ] = surveyPoints;
-			if (this.state.axisX !== position[0]) {
-				this.setState({ axisX: position[0] });
+			if (axisX !== position[0]) {
+				changes.axisX = position[0];
 			}
 
-			if (this.state.axisY !== position[1]) {
-				this.setState({ axisY: position[1] });
+			if (axisY !== position[1]) {
+				changes.axisY = position[1];
 			}
 
-			if (this.state.axisZ !== position[2]) {
-				this.setState({ axisZ: position[2] });
+			if (axisZ !== position[2]) {
+				changes.axisZ = position[2];
 			}
 
-			if (this.state.latitude !== latLong[0]) {
-				this.setState({ latitude: latLong[0] });
+			if (latitude !== latLong[0]) {
+				changes.latitude = latLong[0];
 			}
 
-			if (this.state.longitude !== latLong[1]) {
-				this.setState({ longitude: latLong[1] });
+			if (longitude !== latLong[1]) {
+				changes.longitude = latLong[1];
 			}
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
@@ -211,7 +214,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 						<Headline color="primary" variant="subheading">Model Information</Headline>
 						<Grid>
 							<FieldsRow container wrap="nowrap">
-								<Field name="id" render={({ field, form }) => (
+								<Field name="id" render={({ field }) => (
 									<StyledTextField
 										{...field}
 										label="Model ID"
@@ -230,7 +233,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								)} />
 							</FieldsRow>
 							<FieldsRow container wrap="nowrap">
-								<Field name="type" render={({ field, form }) => (
+								<Field name="type" render={({ field }) => (
 									<StyledTextField
 										{...field}
 										label="Model type"
@@ -238,7 +241,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										disabled
 									/>
 								)} />
-								<Field name="code" render={({ field, form }) => (
+								<Field name="code" render={({ field }) => (
 									<StyledTextField
 										{...field}
 										label="Model code"
@@ -247,7 +250,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								)} />
 							</FieldsRow>
 							<FieldsRow container wrap="nowrap">
-								<Field name="fourDSequenceTag" render={({ field, form }) => (
+								<Field name="fourDSequenceTag" render={({ field }) => (
 									<StyledTextField
 										{...field}
 										label="4D Sequence Tag"
@@ -256,7 +259,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								)} />
 								<SelectWrapper fullWidth={true}>
 									<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-									<Field name="unit" render={({ field, form }) => (
+									<Field name="unit" render={({ field }) => (
 										<CellSelect
 											{...field}
 											items={clientConfigService.units}
@@ -284,7 +287,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							<Grid container direction="row" wrap="nowrap">
 								<GridColumn container direction="column" wrap="nowrap">
 									<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
-									<Field name="latitude" render={({ field, form }) => (
+									<Field name="latitude" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
@@ -294,7 +297,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
-									<Field name="longitude" render={({ field, form }) => (
+									<Field name="longitude" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
@@ -304,7 +307,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
-									<Field name="elevation" render={({ field, form }) => (
+									<Field name="elevation" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
@@ -314,7 +317,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
-									<Field name="angleFromNorth" render={({ field, form }) => (
+									<Field name="angleFromNorth" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
@@ -327,7 +330,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								</GridColumn>
 								<GridColumn container direction="column" wrap="nowrap">
 									<Headline color="textPrimary" variant="subheading">Project Point</Headline>
-									<Field name="axisX" render={({ field, form }) => (
+									<Field name="axisX" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
@@ -337,7 +340,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
-									<Field name="axisY" render={({ field, form }) => (
+									<Field name="axisY" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
@@ -347,7 +350,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 											onChange={this.handlePointChange(field.onChange, field.name)}
 										/>
 									)} />
-									<Field name="axisZ" render={({ field, form }) => (
+									<Field name="axisZ" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											type="number"
