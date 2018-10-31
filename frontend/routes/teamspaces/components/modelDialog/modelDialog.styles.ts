@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from './../../../../styles/colors';
 import { Field } from 'formik';
 import { CustomTable } from '../../../components/customTable/customTable.component';
 import { TableButton } from '../../../components/customTable/customTable.component';
@@ -60,11 +61,11 @@ export const ModelsTableContainer = styled.div`
 
 	> div {
 		width: 100%;
-		border-bottom: 1px solid rgba(0,0,0,.06);
+		border-bottom: 1px solid ${COLOR.BLACK_6};
 
 		&:first-child {
 			&:first-child {
-				border-right: 1px solid rgba(0,0,0,.06);
+				border-right: 1px solid ${COLOR.BLACK_6};
 			}
 		}
 	}
