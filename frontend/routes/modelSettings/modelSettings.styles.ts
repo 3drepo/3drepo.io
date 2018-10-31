@@ -16,12 +16,15 @@
  */
 
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import { COLOR } from '../../styles/colors';
 import { Form } from 'formik';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import Chip from '@material-ui/core/Chip';
+import Icon from '@material-ui/core/Icon';
 
 export const StyledTextField = styled(TextField)``;
 
@@ -83,4 +86,17 @@ export const Headline = styled(Typography)``;
 
 export const TypesGrid = styled(Grid)`
 	margin-bottom: 30px;
+`;
+
+export const StyledIcon = styled(Icon)`
+	color: ${COLOR.WHITE};
+`;
+
+export const StyledLink = styled(Link)`
+	color: green;
+	color: ${COLOR.WHITE};
+	margin-right: 15px;
+	display: flex;
+	text-decoration: none;
+	line-height: 1;
 `;

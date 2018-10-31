@@ -37,9 +37,7 @@ div#accountHolder(
 
 			billing(ng-if="vm.username && vm.pageVisibility.billing")
 
-			model-settings(
-				ng-if="vm.username && vm.pageVisibility.modelsetting"
-			)
+			model-settings(ng-if="vm.username && vm.pageVisibility.modelsetting")
 
 			user-management(ng-if="vm.username && vm.pageVisibility.userManagement")
 

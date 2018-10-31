@@ -52,3 +52,7 @@ export const Time = styled.div`
   margin-right: 8px;
   font-size: 12px;
 `;
+
+export const LinkedName = styled.span`
+  cursor: pointer;
+`;
