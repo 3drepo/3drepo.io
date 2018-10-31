@@ -254,7 +254,10 @@ class GroupsController implements ng.IController {
 	}
 
 	public confirmDeleteAllDialog() {
-		const content = `Delete all groups?`;
+
+		let content = "";
+		this.filterText ? content = `Delete displayed groups?` : content = `Delete all groups?`;
+
 		const escapable = true;
 		this.dialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
 			.then(() => {
