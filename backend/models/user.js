@@ -99,7 +99,7 @@ schema.statics.getTeamspaceSpaceUsed = function (dbName) {
 			});
 
 			return Promise.all(spaceUsedProm).then((spacePerModel) => {
-				return spacePerModel.reduce((total, value) => total + value);
+				return spacePerModel.reduce((total, value) => total + value, 0);
 			});
 		});
 	});
