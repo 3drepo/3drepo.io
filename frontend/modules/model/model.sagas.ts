@@ -35,10 +35,7 @@ export function* updateSettings({ teamspace, modelId, settings }) {
 	try {
 		const response = yield API.editModelSettings(teamspace, modelId, settings);
 
-		if (response.status === 200) {
-			yield put(SnackbarActions.show("Updated model settings"));
-		}
-
+		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('update', 'model settings', e.response));
 	}
@@ -67,9 +64,7 @@ export function* uploadModelFile({ teamspace, modelId, fileData }) {
 	try {
 		const response = yield API.uploadModelFile(teamspace, modelId, fileData);
 
-		if (response.status === 200) {
-			yield put(SnackbarActions.show("Model uploaded succesfully"));
-		}
+		yield put(SnackbarActions.show('Model uploaded succesfully'));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
 	}
