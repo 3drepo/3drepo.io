@@ -70,7 +70,7 @@ export class GroupsService {
 	/**
 	 * Filter groups using @param searchQuery
 	 */
-	public groupsFilterSearch(searchQuery: string): any[] {
+	public groupsFilterSearch(searchQuery: string) {
 		searchQuery = !searchQuery ? "" : searchQuery;
 
 		this.state.groupsToShow = this.state.groups.filter((group) => this.stringSearch(group.name, searchQuery)
@@ -525,7 +525,11 @@ export class GroupsService {
 
 	}
 
-	// groups or firstgroup, lastgroup
+	/**
+	 * Highlight next group when deleting filtered groups.
+	 * @param groups
+	 */
+
 	public highlightNextgroup(groups: any[]) {
 		this.TreeService.clearCurrentlySelected();
 
