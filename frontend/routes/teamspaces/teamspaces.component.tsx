@@ -31,9 +31,9 @@ import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
-import { ModelDialog } from './components/modelDialog/modelDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
+import ModelDialog from './components/modelDialog/modelDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
@@ -191,7 +191,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openModelDialog = (event, type = MODEL_TYPE, teamspaceName = '', projectName = '', modelName = '') => {
+	public openModelDialog =
+		(event, type = MODEL_TYPE, teamspaceName = '', projectName = '', modelName = '', modelId = '') => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 		const isNewModel = !modelName.length;
@@ -206,7 +207,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				teamspaces: teamspacesItems,
 				project: teamspaceName ? projectName : '',
 				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-				type
+				type,
+				editMode: !!modelName,
+				modelId
 			},
 			onConfirm: ({ teamspace, ...modelData }) => {
 				if (isNewModel) {
@@ -274,7 +277,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
 				onModelUpload={(event) => this.openUploadModelFileDialog(event, this.state.activeTeamspace, props)}
 				onEditClick={
-					(event) => this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName, props.name)
+					(event) =>
+						this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName, props.name, props.model)
 				}
 			/>
 		);
