@@ -25,6 +25,7 @@ const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
+const JSONAssets = require("../models/jsonAssets");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -621,8 +622,12 @@ function getJsonMpc(req, res, next) {
 	const account = req.params.account;
 	const id = req.params.uid;
 
-	ModelHelpers.getJsonMpc(account, model, id).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
+		const headers = {
+			"Content-Length": file.size,
+			"Content-Disposition": "attachment;filename=" + file.fileName
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

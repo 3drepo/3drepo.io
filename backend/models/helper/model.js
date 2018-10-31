@@ -859,19 +859,6 @@ function getTreePath(account, model, branch, rev, username) {
 	});
 }
 
-function getJsonMpc(account, model, uid) {
-
-	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
-
-	return stash.findStashByFilename({ account, model }, "json_mpc", bundleFileName).then(buf => {
-		if(!buf) {
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
-		} else {
-			return Promise.resolve(buf);
-		}
-	});
-}
-
 // return main tree and urls of sub trees only and let frontend to do the remaining work :)
 // returning a readstream for piping and a promise for error catching while streaming
 function getFullTree_noSubTree(account, model, branch, rev) {
@@ -1560,7 +1547,6 @@ module.exports = {
 	getIdToMeshes,
 	getModelProperties,
 	getTreePath,
-	getJsonMpc,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
