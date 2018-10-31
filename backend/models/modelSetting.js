@@ -21,6 +21,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
+const utils = require("../utils");
 
 const schema = mongoose.Schema({
 	_id : String,
@@ -64,7 +65,7 @@ const schema = mongoose.Schema({
 	heliSpeed: Number
 });
 
-schema.statics.defaultTopicTypes = [
+const defaultTopicTypes = [
 	{value: "clash", label: "Clash"},
 	{value: "diff", label: "Diff"},
 	{value: "rfi", label: "RFI"},
@@ -215,6 +216,66 @@ schema.statics.populateUsers = function(account, permissions) {
 
 		return permissions;
 	});
+};
+
+schema.statics.createNewSetting = function(teamspace, modelName, data) {
+	const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
+	if(!modelName.match(modelNameRegExp)) {
+		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
+	}
+
+	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)) {
+		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
+	}
+
+	if(!data.unit) {
+		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
+	}
+
+	const modelID = utils.generateUUID({string: true});
+
+	const setting = ModelSetting.createInstance({
+		account: teamspace
+	});
+
+	setting._id = modelID;
+	setting.name = modelName;
+	setting.desc = data.desc;
+	setting.type = data.type;
+
+	if(data.subModels) {
+		setting.federate = true;
+		setting.subModels = data.subModels;
+	}
+
+	if(data.surveyPoints) {
+		setting.surveyPoints = data.surveyPoints;
+	}
+
+	if(data.angleFromNorth) {
+		setting.angleFromNorth = data.angleFromNorth;
+	}
+
+	if(data.elevation) {
+		setting.elevation = data.elevation;
+	}
+
+	setting.properties = {topicTypes: defaultTopicTypes};
+
+	if(data.code) {
+		if (!schema.statics.modelCodeRegExp.test(data.code)) {
+			return Promise.reject(responseCodes.INVALID_MODEL_CODE);
+		}
+		setting.properties.code = data.code;
+	}
+
+	if (Object.prototype.toString.call(data.unit) === "[object String]") {
+		setting.properties.unit = data.unit;
+	} else {
+		return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+	}
+
+	return setting.save();
 };
 
 schema.statics.populateUsersForMultiplePermissions = function (account, permissionsList) {

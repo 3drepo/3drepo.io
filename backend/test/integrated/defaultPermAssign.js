@@ -87,7 +87,8 @@ describe("Default permission assignment", function () {
 		agent.post(`/${username}/model`)
 			.send({
 				modelName: "model1",
-				unit: "m"
+				unit: "m",
+				project: "project1"
 			})
 			.expect(200, function(err, res) {
 				modelId = res.body.model;
@@ -102,7 +103,9 @@ describe("Default permission assignment", function () {
 				const account = res.body.accounts.find(account => account.account === username);
 				expect(account).to.exist;
 
-				const model = account.models.find(model => model.model === modelId);
+				const project = account.projects.find(project => project.name === "project1");
+				expect(project).to.exist;
+				const model = project.models.find(model => model.model === modelId);
 				expect(model).to.exist;
 				expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 				done(err);

@@ -63,7 +63,6 @@
 
 	function getMemberList(req, res, next) {
 		User.findByUserName(req.session.user.username).then(user => {
-
 			if(!user) {
 				return Promise.reject(responseCodes.USER_NOT_FOUND);
 			}
@@ -74,9 +73,12 @@
 				return Promise.reject(responseCodes.NOT_AUTHORIZED);
 			}
 		}).then(memArray => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {members: memArray});
+			const members = memArray.map((userData) => {
+				userData.isCurrentUser = req.session.user.username === userData.user;
+				return userData;
+			});
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {members});
 		}).catch(err => {
-
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
 	}

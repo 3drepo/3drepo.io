@@ -466,17 +466,6 @@
 		"root"
 	]);
 
-	define("REPO_BLACKLIST_MODEL", [
-		"database",
-		"verify",
-		"forgot-password",
-		"password",
-		"subscriptions",
-		"billings",
-		"projects",
-		"system"
-	]);
-
 	// -----------------------------------------------------------------------------
 	//
 	// Regular expressions

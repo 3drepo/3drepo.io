@@ -3,7 +3,7 @@ export const MODEL_ROLES_TYPES = {
 	COLLABORATOR: "collaborator",
 	COMMENTER: "commenter",
 	VIEWER: "viewer",
-	UNASSIGNED: null,
+	UNASSIGNED: '',
 	NONE: "none"
 };
 
@@ -19,31 +19,26 @@ export const MODEL_ROLES_LIST = [
 	{
 		key: MODEL_ROLES_TYPES.UNASSIGNED,
 		label: "Unassigned",
-		width: "100px",
 		tooltip: MODEL_ROLES_DESC.UNASSIGNED
 	},
 	{
 		key: MODEL_ROLES_TYPES.VIEWER,
 		label: "Viewer",
-		width: "100px",
 		tooltip: MODEL_ROLES_DESC.VIEWER
 	},
 	{
 		key: MODEL_ROLES_TYPES.COMMENTER,
 		label: "Commenter",
-		width: "100px",
 		tooltip: MODEL_ROLES_DESC.COMMENTER
 	},
 	{
 		key: MODEL_ROLES_TYPES.COLLABORATOR,
 		label: "Collaborator",
-		width: "100px",
 		tooltip: MODEL_ROLES_DESC.COLLABORATOR
 	},
 	{
 		key: MODEL_ROLES_TYPES.ADMINISTRATOR,
 		label: "Admin",
-		width: "100px",
 		tooltip: MODEL_ROLES_DESC.ADMINISTRATOR
 	}
 ];

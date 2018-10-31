@@ -1,5 +1,5 @@
 div(
-	layout="column" 
+	layout="column"
 	layout-fill)
 
 	div.topContainer(
@@ -52,17 +52,17 @@ div(
 								layout-fill)
 
 						div(ng-if="!vm.loadingComparison && model"
-							ng-repeat="model in vm[vm.modelType + 'Models'] track by $index") 
+							ng-repeat="model in vm[vm.modelType + 'Models'] track by $index")
 
 							div.md-padding.compareModel(layout="row", layout-align="start center")
-								
+
 								md-button.modelSides.compareVisibility(
 									ng-if="vm.isFederation()"
 									ng-click="vm.toggleModelVisibility(model)")
 
 									md-icon.angular-material-icons.visible(ng-if="model.visible") check_box
 									md-icon.angular-material-icons.invisible(ng-if="!model.visible") check_box_outline_blank
-								
+
 								md-button.modelSides.compareVisibility(
 									ng-if="!vm.isFederation()")
 									md-icon.angular-material-icons() check_box
@@ -71,11 +71,11 @@ div(
 								div(ng-if="vm.modelType === 'base'" flex layout="column")
 									h5.modelText {{model.name}}
 									span.revisionText(ng-if="vm.modelType === 'base'")  {{model.baseRevisionTag}}
-								
+
 								md-menu(
 									flex
 									md-offset="300 20"
-									layout="column" 
+									layout="column"
 									ng-if="vm.modelType === 'target'")
 
 									div(flex ng-click="$mdOpenMenu($event)" layout="row")
@@ -91,12 +91,12 @@ div(
 
 											md-button(
 												ng-click="vm.setTargetRevision(model, revision)")
-												span(ng-if="revision.name !== model.targetRevision[vm.mode].name") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
-												span.selectedRev(ng-if="revision.name === model.targetRevision[vm.mode].name") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}} 
+												span(ng-if="revision.name !== model.targetRevision[vm.mode].name") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}}
+												span.selectedRev(ng-if="revision.name === model.targetRevision[vm.mode].name") {{revision.tag || vm.revisionTimestamp(revision.timestamp)}}
 												span
 												span.authorDate ({{revision.author}})
 							md-divider
-								
+
 
 		div.bottomContainer(
 			md-padding)
@@ -108,22 +108,22 @@ div(
 					layout-align="center center")
 
 					md-radio-button(
-						value="base" 
-						ng-click="vm.changeCompareState('base')" 
+						value="base"
+						ng-click="vm.changeCompareState('base')"
 						ng-disabled="!vm.canChangeCompareState") Base {{ vm.isFed ? Federation : Model }}
-					
-					
+
+
 					md-radio-button(
-						value="compare" 
-						ng-click="vm.changeCompareState('compare')" 
+						value="compare"
+						ng-click="vm.changeCompareState('compare')"
 						ng-disabled="!vm.canChangeCompareState") Compare
-					
-					
+
+
 					md-radio-button(
 						value="target"
 						ng-click="vm.changeCompareState('target')"
 						ng-disabled="!vm.canChangeCompareState") Target {{ vm.isFed ? Federation : Model }}
-					
+
 				md-button.md-fab.md-mini.md-icon-button.md-accent.compareButton(
 					style="background-color: {{vm.getButtonColor()}}"
 					ng-disabled="!vm.canCompare()"
@@ -131,4 +131,4 @@ div(
 					md-icon.angular-material-icons compare
 					md-tooltip(ng-if="!vm.compareEnabled" md-direction="top") Compare with {{vm.compareTypes[vm.mode].label}}
 					md-tooltip(ng-if="vm.compareEnabled" md-direction="top") Disable {{vm.compareTypes[vm.mode].label}}
-	
+

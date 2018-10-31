@@ -43,6 +43,7 @@ class CompareController implements ng.IController {
 	private canChangeCompareState: boolean;
 	private models: any[];
 	private modelsReady;
+	private onContentHeightRequest;
 	private baseModels: any[];
 
 	constructor(
@@ -93,6 +94,12 @@ class CompareController implements ng.IController {
 			}
 		});
 
+		this.$scope.$watchCollection("vm.baseModels", (s) => {
+			const modelHeight = 81;
+			const cardHeight = 184;
+			const modelCount = (s || []).length;
+			this.onContentHeightRequest({height: (modelCount * modelHeight) + cardHeight});
+		});
 	}
 
 	public updateModels() {
@@ -128,6 +135,7 @@ class CompareController implements ng.IController {
 			));
 
 		}
+
 		return Promise.all(modelsReady);
 	}
 
@@ -172,7 +180,9 @@ class CompareController implements ng.IController {
 	}
 
 	public changeCompareState(compareState: string) {
-		this.CompareService.changeCompareState(compareState);
+		if (this.canChangeCompareState) {
+			this.CompareService.changeCompareState(compareState);
+		}
 	}
 
 	public compare() {
@@ -186,7 +196,8 @@ export const CompareComponent: ng.IComponentOptions = {
 		account: "<",
 		model: "<",
 		revision: "<",
-		modelSettings: "<"
+		modelSettings: "<",
+		onContentHeightRequest: "&"
 	},
 	controller: CompareController,
 	controllerAs: "vm",

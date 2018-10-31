@@ -24,7 +24,7 @@ const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
-const createAndAssignRole = ModelHelpers.createAndAssignRole;
+const UnityAssets = require("../models/unityAssets");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -205,7 +205,6 @@ function createModel(req, res, next) {
 			(!req.body.project || Object.prototype.toString.call(req.body.project) === "[object String]")) {
 		const modelName = req.body.modelName;
 		const account = req.params.account;
-		const username = req.session.user.username;
 
 		const data = {
 			desc: req.body.desc,
@@ -219,8 +218,15 @@ function createModel(req, res, next) {
 		data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 		data.userPermissions = req.session.user.permissions;
 
-		createAndAssignRole(modelName, account, username, data).then(result => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result.model);
+		let createModelPromise;
+		if (req.body.subModels) {
+			createModelPromise = ModelHelpers.createNewFederation(account, modelName, data);
+		} else {
+			createModelPromise = ModelHelpers.createNewModel(account, modelName, data);
+		}
+
+		createModelPromise.then(result => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, result.modelData);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
@@ -607,7 +613,7 @@ function getUnityAssets(req, res, next) {
 		branch = C.MASTER_BRANCH_NAME;
 	}
 
-	ModelHelpers.getUnityAssets(account, model, branch, req.params.rev, username).then(obj => {
+	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

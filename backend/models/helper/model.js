@@ -188,26 +188,26 @@ function setStatus(account, model, status) {
  * Create correlation ID, store it in model setting, and return it
  * @param {account} account - User account
  * @param {model} model - Model
+ * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
-function createCorrelationId(account, model) {
+function createCorrelationId(setting, addTimestamp = false) {
 	const correlationId = uuid.v1();
 
-	// store corID
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		setting = setting || ModelSetting.createInstance({
-			account: account,
-			model: model
-		});
-
-		setting._id = model;
+	if(setting) {
 		setting.corID = correlationId;
+		if (addTimestamp) {
+			// FIXME: This is a temporary workaround, needed because federation
+			// doesn't update it's own timestamp (and also not wired into the chat)
+			setting.timestamp = new Date();
+		}
 		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
+
 		return setting.save().then(() => {
 			return correlationId;
 		});
-	}).catch(err => {
-		systemLogger.logError("Failed to createCorrelationId:", err);
-	});
+	}
+
+	return Promise.reject("setting is undefined");
 }
 
 /**
@@ -225,148 +225,55 @@ function resetCorrelationId(account, model) {
 	});
 }
 
-function createAndAssignRole(modelName, account, username, data, toyFed) {
-
-	let project;
-	// generate model id
-	const model = utils.generateUUID({string: true});
-
-	if(!modelName.match(modelNameRegExp)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_NAME });
+function createNewModel(teamspace, modelName, data) {
+	if(!data.hasOwnProperty("project")) {
+		return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 	}
 
-	if(data.code && !ModelSetting.modelCodeRegExp.test(data.code)) {
-		return Promise.reject({ resCode: responseCodes.INVALID_MODEL_CODE });
-	}
+	const projectName = data.project;
+	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
+		if(!project) {
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		}
 
-	if(!data.unit) {
-		return Promise.reject({ resCode: responseCodes.MODEL_NO_UNIT });
-	}
-
-	if(C.REPO_BLACKLIST_MODEL.indexOf(modelName) !== -1) {
-		return Promise.reject({ resCode: responseCodes.BLACKLISTED_MODEL_NAME });
-	}
-
-	let promise = Promise.resolve();
-
-	if(data.project) {
-		promise = Project.findOne({account}, {name: data.project}).then(_project => {
-
-			if(!_project) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			} else {
-				project = _project;
+		// Check there's no other model within the same project with the model name
+		return ModelSetting.count({account: teamspace},
+			{name: modelName, _id: {"$in": project.models}}).then((count) => {
+			return count > 0;
+		}).then((modelNameExists) => {
+			if(modelNameExists) {
+				return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 			}
 
+			// Create a model setting
+			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
+				// Add model into project
+				project.models.push(settings._id);
+
+				return project.save().then(() => {
+					// call chat to indicate a new model has been created
+					const modelData = {
+						account: teamspace,
+						model:  settings._id,
+						name: modelName,
+						permissions: C.MODEL_PERM_LIST,
+						timestamp: undefined
+					};
+
+					ChatEvent.newModel(data.sessionId, teamspace, modelData);
+					return {modelData, settings};
+				});
+			});
+
 		});
-	}
+	});
+}
 
-	return promise.then(() => {
-
-		const query =  {name: modelName};
-
-		if(data.project) {
-			query._id = { "$in" : project.models};
-		}
-
-		return ModelSetting.count({account, model}, query);
-
-	}).then(count => {
-
-		if(count) {
-			return Promise.reject({resCode: responseCodes.MODEL_EXIST});
-		}
-
-		return (data.subModels ? createFederatedModel(account, model, data.subModels, toyFed) : Promise.resolve());
-
-	}).then(() => {
-
-		return ModelSetting.findById({account, model}, model);
-
-	}).then(setting => {
-		// FIXME: this should be inside modelSettings.js
-		setting = setting || ModelSetting.createInstance({
-			account: account,
-			model: model
+function createNewFederation(teamspace, modelName, data, toyFed) {
+	return createNewModel(teamspace, modelName, data).then((modelInfo) => {
+		return createFederatedModel(teamspace, modelInfo.settings._id, data.subModels, modelInfo.settings, toyFed).then(() => {
+			return modelInfo;
 		});
-
-		setting._id = model;
-		setting.name = modelName;
-		setting.owner = username;
-		setting.desc = data.desc;
-		setting.type = data.type;
-
-		if(data.subModels) {
-			setting.federate = true;
-			setting.subModels = data.subModels;
-			setting.timestamp = new Date();
-		}
-
-		if(data.surveyPoints) {
-			setting.surveyPoints = data.surveyPoints;
-		}
-
-		if(data.angleFromNorth) {
-			setting.angleFromNorth = data.angleFromNorth;
-		}
-
-		if(data.elevation) {
-			setting.elevation = data.elevation;
-		}
-
-		setting.updateProperties({
-			unit: data.unit,
-			code: data.code
-		});
-
-		setting.properties.topicTypes = ModelSetting.defaultTopicTypes;
-
-		return setting.save();
-
-	}).then(setting => {
-
-		if(project) {
-			project.models.push(model);
-			return project.save().then(() => setting);
-		}
-
-		return setting;
-
-	}).then(setting => {
-
-		if(data.userPermissions &&
-			data.userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1 &&
-			data.userPermissions.indexOf(C.PERM_PROJECT_ADMIN) === -1
-		) {
-
-			return setting.changePermissions([{
-				user: username,
-				permission: C.ADMIN_TEMPLATE
-			}]).then(() => setting);
-
-		}
-
-		return Promise.resolve(setting);
-
-	}).then(setting => {
-
-		const modelData = {
-			account,
-			model:  model.toString(),
-			name: modelName,
-			permissions: C.MODEL_PERM_LIST,
-			timestamp: setting.timestamp || undefined
-		};
-
-		ChatEvent.newModel(data.sessionId, account, modelData);
-
-		// this is true if only admin can create project
-		return {
-
-			setting,
-			model: modelData
-
-		};
 	});
 }
 
@@ -415,13 +322,9 @@ function importToyProject(account, username) {
 
 function importToyModel(account, username, modelName, modelDirName, project, subModels, skip) {
 
-	let model;
-	const desc = "";
-	const type = "sample";
-
 	const data = {
-		desc,
-		type,
+		desc : "",
+		type : "sample",
 		project,
 		unit: "mm",
 		subModels,
@@ -434,21 +337,27 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 		angleFromNorth: 145
 	};
 
-	return createAndAssignRole(modelName, account, username, data, modelDirName).then(_data => {
-		return Promise.resolve(_data.setting);
-	}).then(setting => {
-		if(subModels) {
-			return setting;
+	let createModelPromise;
+
+	const isFed = subModels && subModels.length;
+	if(isFed) {
+		createModelPromise = createNewFederation(account, modelName, data, modelDirName);
+	} else {
+		createModelPromise = createNewModel(account, modelName, data);
+	}
+
+	return createModelPromise.then((modelInfo) => {
+		if(isFed) {
+			return modelInfo.settings;
 		} else {
-			model = setting._id;
-			return importModel(account, model, username, setting, {type: "toy", modelDirName, skip });
+			return importModel(account, modelInfo.settings._id, username, modelInfo.settings, {type: "toy", modelDirName, skip });
 		}
 
 	}).catch(err => {
 
 		Mailer.sendImportError({
 			account,
-			model,
+			modelName,
 			username,
 			err: err.message,
 			corID: err.corID,
@@ -459,63 +368,64 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	});
 }
 
-function createFederatedModel(account, model, subModels, toyFed) {
+function createFederatedModel(account, model, subModels, modelSettings, toyFed) {
 
-	return createCorrelationId(account, model).then(correlationId => {
+	const addSubModelsPromise = [];
+	const subModelArr = [];
 
-		const federatedJSON = {
-			database: account,
-			project: model,
-			subProjects: []
-		};
-		if(toyFed) {
-			federatedJSON.toyFed = toyFed;
+	if(subModels.length === 0) {
+		return Promise.resolve();
+	}
+
+	subModels.forEach(subModel => {
+		if(subModel.database !== account) {
+
+			addSubModelsPromise.push(Promise.reject(responseCodes.FED_MODEL_IN_OTHER_DB));
+			return;
 		}
 
-		let error;
-
-		const addSubModels = [];
-
-		subModels.forEach(subModel => {
-
-			if(subModel.database !== account) {
-				error = responseCodes.FED_MODEL_IN_OTHER_DB;
+		addSubModelsPromise.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+			if(!setting) {
+				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			}
 
-			addSubModels.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
-				if(setting && setting.federate) {
-					return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+			if(setting.federate) {
+				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
-				} else if(!federatedJSON.subProjects.find(o => o.database === subModel.database && o.project === subModel.model)) {
-					federatedJSON.subProjects.push({
-						database: subModel.database,
-						project: subModel.model
-					});
+			}
+
+			if(!subModelArr.find(o => o.project === subModel.model)) {
+				subModelArr.push({
+					database: subModel.database,
+					project: subModel.model
+				});
+			}
+		}));
+
+	});
+
+	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
+		: ModelSetting.findById({account}, model);
+
+	return Promise.all(addSubModelsPromise).then(() => {
+		return fedSettings.then((settings) => {
+			return createCorrelationId(settings, true).then(correlationId => {
+				const federatedJSON = {
+					database: account,
+					project: model,
+					subProjects: subModelArr
+				};
+
+				if(toyFed) {
+					federatedJSON.toyFed = toyFed;
 				}
-			}));
 
-		});
-
-		if (error) {
-			return Promise.reject(error);
-		}
-
-		if(subModels.length === 0) {
-			return Promise.resolve();
-		}
-
-		return Promise.all(addSubModels).then(() => {
-			importQueue.createFederatedModel(correlationId, account, federatedJSON);
-		}).catch(err => {
-			// catch here to provide custom error message
-			if(err.errCode) {
-				return Promise.reject(convertToErrorCode(err.errCode));
-			}
-			return Promise.reject(err);
-
+				return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+			});
 		});
 
 	});
+
 }
 
 function getAllMeshes(account, model, branch, rev, username) {
@@ -948,90 +858,6 @@ function getTreePath(account, model, branch, rev, username) {
 	});
 }
 
-function getUnityAssets(account, model, branch, rev, username) {
-
-	let subAssets;
-	let revId, assetsFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			revId = utils.uuidToString(history._id);
-			assetsFileName = `/${account}/${model}/revision/${revId}/unityAssets.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getUnityProps = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getUnityProps.push(
-				getUnityAssets(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						models: obj.models,
-						owner: ref.owner,
-						model: ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(getUnityProps);
-
-	}).then(_subAssets => {
-
-		subAssets = _subAssets;
-		return stash.findStashByFilename({ account, model }, "json_mpc", assetsFileName);
-
-	}).then(buf => {
-		let models = [];
-
-		if(buf) {
-			const modelAssets = JSON.parse(buf);
-			if(modelAssets !== null) {
-				models.push(modelAssets);
-			}
-
-		}
-
-		subAssets.forEach(subAsset => {
-			if (subAsset && subAsset.models) {
-				models = models.concat(subAsset.models);
-			}
-		});
-
-		return Promise.resolve({models, status});
-
-	});
-}
-
 function getJsonMpc(account, model, uid) {
 
 	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
@@ -1458,7 +1284,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 	}
 
 	return modelSetting.save().then(() => {
-		return createCorrelationId(account, model).then(correlationId => {
+		return createCorrelationId(modelSetting).then(correlationId => {
 			return setStatus(account, model, "queued").then(setting => {
 
 				modelSetting = setting;
@@ -1730,7 +1556,6 @@ function isUserAdmin(account, model, user) {
 }
 
 const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
-const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 const acceptedFormat = [
 	"x","obj","3ds","md3","md2","ply",
 	"mdl","ase","hmp","smd","mdc","md5",
@@ -1742,7 +1567,8 @@ const acceptedFormat = [
 ];
 
 module.exports = {
-	createAndAssignRole,
+	createNewModel,
+	createNewFederation,
 	importToyModel,
 	importToyProject,
 	isUserAdmin,
@@ -1754,12 +1580,10 @@ module.exports = {
 	getModelProperties,
 	getTreePath,
 	getJsonMpc,
-	getUnityAssets,
 	getUnityBundle,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
-	modelNameRegExp,
 	acceptedFormat,
 	uploadFile,
 	importModel,
