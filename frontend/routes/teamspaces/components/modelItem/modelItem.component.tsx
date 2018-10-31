@@ -22,7 +22,7 @@ import Icon from '@material-ui/core/Icon';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
-import { Container, SubmodelsList, Time } from './modelItem.styles';
+import { Container, SubmodelsList, Time, LinkedName } from './modelItem.styles';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 
@@ -129,7 +129,9 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 					justify="space-between"
 					wrap="nowrap"
 				>
-					<Grid container onClick={onModelItemClick}>{name}</Grid>
+					<Grid container>
+						<LinkedName onClick={onModelItemClick}>{name}</LinkedName>
+					</Grid>
 					<Grid
 						container
 						wrap="nowrap"

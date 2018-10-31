@@ -24,16 +24,19 @@ import { MuiTheme, theme } from '../../../styles';
 import { Container, Title, Content } from './panel.styles';
 
 interface IProps {
-	title: string;
+	title?: string;
 	children: any;
 	paperProps?: any;
+	renderCustomTitle?: any;
 }
 
 export const Panel = (props: IProps) => (
 	<ThemeProvider theme={theme}>
 		<MuiThemeProvider theme={MuiTheme}>
 			<Container {...props.paperProps}>
-				<Title>{props.title}</Title>
+				<Title>
+					{ props.renderCustomTitle ? props.renderCustomTitle(props.title) : props.title }
+				</Title>
 				<Content>
 					{props.children}
 				</Content>
