@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
+import { isEmpty } from 'lodash';
 import { Formik, Form, Field } from 'formik';
 import { upperFirst, mapValues, keyBy, includes } from 'lodash';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -33,19 +34,26 @@ import { SubModelsTable } from '../../components/subModelsTable/subModelsTable.c
 
 import { MODEL_TYPE, FEDERATION_TYPE, MODEL_SUBTYPES } from './../../teamspaces.contants';
 
-const ModelSchema = Yup.object().shape({
-	name: schema.firstName.max(120),
+const commonSchemaValues = {
+	name: schema.firstName.max(120).required(),
 	teamspace: Yup.string().required(),
 	project: Yup.string().required(),
-	unit: Yup.string().required(),
+	unit: Yup.string().required()
+};
+
+const ModelSchema = Yup.object().shape({
+	...commonSchemaValues,
 	type: Yup.string().required()
+});
+
+const FederationSchema = Yup.object().shape({
+	...commonSchemaValues
 });
 
 const commonInitialValues = {
 	unit: '',
 	project: '',
 	desc: '',
-	type: '',
 	modelName: '',
 	teamspace: ''
 };
@@ -53,7 +61,8 @@ const commonInitialValues = {
 const dataByType = {
 	[MODEL_TYPE]: {
 		initialValues: {
-			code: ''
+			code: '',
+			type: ''
 		}
 	},
 	[FEDERATION_TYPE]: {
@@ -65,8 +74,10 @@ const dataByType = {
 };
 
 const getAvailableModels = (project) =>
-	project.models.filter((model) => !model.federate)
-	.map(({ name }) => ({ name }));
+	project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
+
+const getFederatedModels = (project) =>
+	project.models.filter((model) => model.federate).map(({ name }) => ({ name }));
 
 const getModelsMap = (project) => {
 	const availableModels = project.models.filter((model) => !model.federate)
@@ -76,6 +87,21 @@ const getModelsMap = (project) => {
 	});
 
 	return mapValues(keyBy(availableModels, 'name'), (model) => {
+		return {
+			id: model.model,
+			index: model.index
+		};
+	});
+};
+
+const getFederatedModelsMap = (project) => {
+	const federatedModels = project.models.filter((model) => model.federate)
+	.map((model, index) => {
+		model.index = index;
+		return model;
+	});
+
+	return mapValues(keyBy(federatedModels, 'name'), (model) => {
 		return {
 			id: model.model,
 			index: model.index
@@ -95,6 +121,10 @@ interface IProps {
 	handleResolve: (model) => void;
 	handleClose: () => void;
 	type: string;
+	settings: any;
+	fetchModelSettings: (teamspace, modelId) => void;
+	editMode: boolean;
+	modelId: string;
 }
 
 interface IState {
@@ -102,6 +132,7 @@ interface IState {
 	selectedProject: string;
 	projectsItems: any[];
 	name: string;
+	unit: string;
 	federatedModels: any[];
 	availableModels: any [];
 	selectedFederatedModels: any[];
@@ -117,22 +148,18 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	};
 
 	public static getDerivedStateFromProps(nextProps: IProps) {
-		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
-			const selectedProject = getProject(nextProps.projects, nextProps.project);
-			const availableModels = getAvailableModels(selectedProject);
-			const availableMap = getModelsMap(selectedProject);
+		const newState = {} as any;
 
-			return {
-				selectedProject: nextProps.project,
-				projectsItems: nextProps.projects,
-				availableModels,
-				federatedModels: [],
-				selectedAvailableModels: [],
-				selectedFederatedModels: [],
-				availableMap
-			};
+		if (Boolean(nextProps.teamspace)) {
+			newState.selectedTeamspace = nextProps.teamspace;
 		}
-		return {};
+
+		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
+			newState.selectedProject = nextProps.project;
+			newState.projectsItems = nextProps.projects;
+		}
+
+		return newState;
 	}
 
 	public state = {
@@ -140,6 +167,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		projectsItems: [],
 		selectedProject: '',
 		name: '',
+		unit: '',
 		federatedModels: [],
 		availableModels: [],
 		selectedFederatedModels: [],
@@ -152,6 +180,32 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 			this.setState({
 				name: this.props.name
 			});
+		}
+
+		if (this.props.editMode) {
+			this.props.fetchModelSettings(this.props.teamspace, this.props.modelId);
+		}
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		const changes = {} as any;
+		const { editMode, settings, type } = this.props;
+
+		if ((editMode && settings && prevProps.settings !== settings)) {
+			changes.unit = this.props.settings.properties.unit;
+		}
+
+		if (editMode && type === FEDERATION_TYPE && !prevState.federatedModels.length && !prevState.availableModels.length) {
+			const selectedProject = getProject(this.props.projects, this.props.project);
+			const federatedModels = getFederatedModels(selectedProject);
+			const availableMap = getFederatedModelsMap(selectedProject);
+
+			changes.federatedModels = federatedModels;
+			changes.availableMap = availableMap;
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
@@ -190,6 +244,11 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 			projectsItems: this.getTeamspaceProjects(teamspaceName)
 		});
 		onChange(event, teamspaceName);
+	}
+
+	public handleUnitChange = (onChange) => (event, unit) => {
+		this.setState({ unit });
+		onChange(event);
 	}
 
 	public handleProjectChange = (onChange) => (event, projectName) => {
@@ -384,8 +443,12 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, modelName, teamspace, project, teamspaces, handleClose, type } = this.props;
-		const { projectsItems, selectedTeamspace, selectedProject } = this.state;
+		const { modelName, teamspace, project, teamspaces, handleClose, type, editMode } = this.props;
+		const { name, projectsItems, selectedTeamspace, selectedProject, unit, federatedModels } = this.state;
+
+		if (editMode && !teamspace) {
+			return null;
+		}
 
 		return (
 			<Formik
@@ -399,7 +462,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 						...dataByType[type].initialValues
 					}
 				}
-				validationSchema={ModelSchema}
+				validationSchema={this.props.type === FEDERATION_TYPE ? FederationSchema : ModelSchema}
 				onSubmit={this.handleModelSave}
 			>
 				<Form>
@@ -464,6 +527,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 											disabledPlaceholder={true}
 											required
 											items={clientConfigService.units}
+											value={unit}
+											onChange={this.handleUnitChange(field.onChange)}
 											inputId="unit-select"
 										/>
 									)} />
@@ -474,16 +539,19 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={({ form }) => (
+						<Field render={({ form }) =>
 							<Button
 								type="submit"
 								variant="raised"
 								color="secondary"
-								disabled={!form.isValid || form.isValidating}
+								disabled={
+									(!form.isValid || form.isValidating) && !editMode || !form.dirty ||
+									(editMode && !(Boolean(name) || Boolean(federatedModels.length)))
+								}
 							>
 								Save
 							</Button>
-						)} />
+						} />
 					</DialogActions>
 				</Form>
 			</Formik>
