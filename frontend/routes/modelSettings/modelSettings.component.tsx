@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as queryString from 'query-string';
-import { isEqual, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Formik, Field } from 'formik';
 import { snakeCase } from 'lodash';
 
@@ -41,7 +41,9 @@ import {
 	StyledForm,
 	Headline,
 	TypesGrid,
-	GridColumn
+	GridColumn,
+	StyledIcon,
+	StyledLink
 } from './modelSettings.styles';
 
 const PANEL_PROPS = {
@@ -66,6 +68,7 @@ interface IState {
 
 interface IProps {
 	location: any;
+	history: any;
 	fetchModelSettings: (teamspace, modelId) => void;
 	updateModelSettings: (teamspace, modelId, settings) => void;
 	modelSettings: any;
@@ -193,6 +196,15 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
+	public renderTitleWithBackLink = (title) => (
+		<>
+			<StyledLink to={this.props.location.pathname}>
+				<StyledIcon>arrow_back</StyledIcon>
+			</StyledLink>
+			{ title }
+		</>
+	)
+
 	public render() {
 		const { id, name, type, fourDSequenceTag, properties } = this.props.modelSettings;
 		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation } = this.state;
@@ -202,7 +214,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<Panel {...PANEL_PROPS}>
+			<Panel {...PANEL_PROPS} renderCustomTitle={this.renderTitleWithBackLink}>
 				<Formik
 					initialValues={{
 						id, name, type, code: properties.code, unit: properties.unit, fourDSequenceTag,
