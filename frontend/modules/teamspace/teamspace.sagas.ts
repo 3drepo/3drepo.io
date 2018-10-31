@@ -34,7 +34,7 @@ export function* fetchUser({ username }) {
 
 		const { data: { accounts, ...currentUser } } = yield call(API.fetchTeamspace, [username]);
 
-		return yield all([
+		yield all([
 			put(TeamspaceActions.fetchUserSuccess({
 				...currentUser,
 				username,

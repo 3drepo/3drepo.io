@@ -59,10 +59,14 @@ export function* removeProject({ teamspace, projectName }) {
 // Models
 export function* createModel({ teamspace, modelData }) {
 	try {
-		yield API.createModel(teamspace, modelData);
+		const response = yield API.createModel(teamspace, modelData);
+		const createdModel = {
+			...response.data,
+			projectName: modelData.project
+		};
 
 		yield put(SnackbarActions.show('Model created'));
-		yield put(TeamspacesActions.createModelSuccess(teamspace, modelData));
+		yield put(TeamspacesActions.createModelSuccess(teamspace, createdModel));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('create', 'model', e.response));
 	}
@@ -79,12 +83,15 @@ export function* updateModel({ teamspace, modelName, modelData }) {
 	}
 }
 
-export function* removeModel({ teamspace, modelName }) {
+export function* removeModel({ teamspace, modelData }) {
 	try {
-		yield API.removeModel(teamspace, modelName);
+		const response = yield API.removeModel(teamspace, modelData.id);
+		const removedModel = response.data;
 
 		yield put(SnackbarActions.show('Model removed'));
-		yield put(TeamspacesActions.removeModelSuccess(teamspace, modelName));
+		yield put(TeamspacesActions.removeModelSuccess(
+			teamspace, { ...removedModel, projectName: modelData.project, name: modelData.name })
+		);
 	} catch (e) {
 		put(DialogActions.showErrorDialog('remove', 'model', e.response));
 	}
