@@ -21,10 +21,11 @@ const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
+const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 
 function getRefEntry(account, collection, fileName) {
 	return DB.getCollection(account, collection).then((col) => {
-		return col.findOne({_id: fileName});
+		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
 	});
 }
 
@@ -57,6 +58,10 @@ FileRef.getTotalOrgFileSize = function(account, model) {
 
 		return totalSize;
 	});
+};
+
+FileRef.getUnityBundle = function(account, model, fileName) {
+	return fetchFile(account, model + UNITY_BUNDLE_REF_EXT, fileName);
 };
 
 module.exports = FileRef;

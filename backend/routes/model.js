@@ -634,9 +634,12 @@ function getUnityBundle(req, res, next) {
 	const account = req.params.account;
 	const id = req.params.uid;
 
-	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
-		req.params.format = "unity3d";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	UnityAssets.getUnityBundle(account, model, id).then(file => {
+		const headers = {
+			"Content-Length": file.size,
+			"Content-Disposition": "attachment;filename=" + file.fileName
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

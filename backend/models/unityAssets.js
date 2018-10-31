@@ -24,6 +24,7 @@ const Ref = require("./ref");
 const C = require("../constants");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
+const FileRef = require("./fileRef");
 
 const UnityAssets = {};
 
@@ -72,6 +73,14 @@ UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		}
 
+	});
+};
+
+UnityAssets.getUnityBundle = function(account, model, id) {
+	const bundleFileName = `${id}.unity3d`;
+	return FileRef.getUnityBundle(account, model, bundleFileName).then((file) => {
+		file.fileName = bundleFileName;
+		return file;
 	});
 };
 
