@@ -113,7 +113,7 @@ class AccountItemsController implements ng.IController {
 		this.ViewerService.reset();
 
 		this.showProgress = true;
-		this.modelTypes = ["Structural", "Mechanical", "GIS", "Other"];
+		this.modelTypes = ['Architectural', 'Structural', 'Mechanical', 'GIS', 'Other'];
 		this.units = this.ClientConfigService.units;
 		this.modelRegExp = this.ClientConfigService.modelNameRegExp;
 		this.defaults = {};

@@ -70,3 +70,30 @@ export const removeModel = (teamspace, modelId) => {
 export const uploadModelFile = (teamspace, modelId, fileData) => {
 	return api.delete(`${teamspace}/${modelId}/upload`, fileData);
 };
+
+/**
+ * Get model settings
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelSettings = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}.json`);
+};
+
+/**
+ * Edit model settings
+ * @param teamspace
+ * @param modelId
+ */
+export const editModelSettings = (teamspace, modelId, settings) => {
+	return api.put(`${teamspace}/${modelId}/settings`, settings);
+};
+
+/**
+ * Get model revisions
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelRevisions = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/revisions.json`);
+};

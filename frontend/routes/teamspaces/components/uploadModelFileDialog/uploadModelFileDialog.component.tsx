@@ -24,7 +24,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import { Loader } from './../../../components/loader/loader.component';
-import { unitsMap } from './../../../modelSettings/modelSettings.component';
+import { acceptedFileFormats, unitsMap } from '../../../../constants/model-parameters';
 
 import {
 	ModelName,
@@ -33,16 +33,6 @@ import {
 	FileLabel,
 	StyledDialogActions
 } from './uploadModelFileDialog.styles';
-
-const acceptedFormat = [
-	"x", "obj", "3ds", "md3", "md2", "ply",
-	"mdl", "ase", "hmp", "smd", "mdc", "md5",
-	"stl", "lxo", "nff", "raw", "off", "ac",
-	"bvh", "irrmesh", "irr", "q3d", "q3s", "b3d",
-	"dae", "ter", "csm", "3d", "lws", "xml", "ogex",
-	"ms3d", "cob", "scn", "blend", "pk3", "ndo",
-	"ifc", "xgl", "zgl", "fbx", "assbin", "bim", "dgn"
-];
 
 interface IProps {
 	uploadModelFile: (teamspace, modelId, fileData) => void;
@@ -57,12 +47,12 @@ interface IProps {
 }
 
 interface IState {
-	file: string;
+	fileName: string;
 }
 
 export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public state = {
-		file: ''
+		fileName: ''
 	};
 
 	public inputFileRef = React.createRef<HTMLInputElement>();
@@ -87,11 +77,11 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 	public onInputChange = (event) => {
 		this.setState({
-			file: this.inputFileRef.current.files[0].name
+			fileName: event.target.files[0].name
 		});
 	}
 
-	public getAcceptedFormats = () => acceptedFormat.map((format) => `.${format}`).toString();
+	public getAcceptedFormats = () => acceptedFileFormats.map((format) => `.${format}`).toString();
 
 	public renderRevisionInfo = (revisions) => {
 		const lastRevision = revisions[revisions.length - 1];
@@ -149,7 +139,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 							</ModelInfo>
 						}
 
-						{ this.state.file && <ModelInfo>File name: { this.state.file } </ModelInfo> }
+						{ this.state.fileName && <ModelInfo>File name: { this.state.fileName } </ModelInfo> }
 
 						<StyledDialogActions>
 							<HiddenFileInput
@@ -167,7 +157,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									type="submit"
 									variant="raised"
 									color="secondary"
-									disabled={!this.state.file}>
+									disabled={!this.state.fileName}>
 										Upload
 									</Button>}
 								/>

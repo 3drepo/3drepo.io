@@ -24,10 +24,7 @@ import { SnackbarActions } from './../snackbar';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
-		const { data: settings } = yield API.getModelSettings(
-			teamspace,
-			modelId
-		);
+		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 	} catch (e) {
 		put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
@@ -36,11 +33,7 @@ export function* fetchSettings({ teamspace, modelId }) {
 
 export function* updateSettings({ teamspace, modelId, settings }) {
 	try {
-		const response = yield API.editModelSettings(
-			teamspace,
-			modelId,
-			settings
-		);
+		const response = yield API.editModelSettings(teamspace, modelId, settings);
 
 		if (response.status === 200) {
 			yield put(SnackbarActions.show("Updated model settings"));
@@ -53,10 +46,7 @@ export function* updateSettings({ teamspace, modelId, settings }) {
 
 export function* fetchRevisions({ teamspace, modelId }) {
 	try {
-		const { data: revisions } = yield API.getModelRevisions(
-			teamspace,
-			modelId
-		);
+		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId);
 
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 	} catch (e) {
@@ -66,7 +56,7 @@ export function* fetchRevisions({ teamspace, modelId }) {
 
 export function* downloadModel({ teamspace, modelId }) {
 	try {
-		const url = `${ClientConfig.apiUrls.all[0]}/${teamspace}/${modelId}/download/latest`;
+		const url = API.getAPIUrl(`${teamspace}/${modelId}/download/latest`);
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
@@ -75,11 +65,7 @@ export function* downloadModel({ teamspace, modelId }) {
 
 export function* uploadModelFile({ teamspace, modelId, fileData }) {
 	try {
-		const response = yield API.uploadModelFile(
-			teamspace,
-			modelId,
-			fileData
-		);
+		const response = yield API.uploadModelFile(teamspace, modelId, fileData);
 
 		if (response.status === 200) {
 			yield put(SnackbarActions.show("Model uploaded succesfully"));
