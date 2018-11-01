@@ -232,7 +232,7 @@ export class PanelService {
 						{
 							hidden: false,
 							value: "to",
-							label: "To     ",
+							label: "To",
 							stopClose: true,
 							toggleFilterChips: true,
 							date: true
