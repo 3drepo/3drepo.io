@@ -82,12 +82,11 @@ function StateManagerRun(
 		AnalyticService.sendPageView(location);
 		const queryParams = $location.search();
 
-		/** Hack: query strings are working erratically with the statemanager
-		 * hacking a solution for passing the notificationId
-		*/
+		// /** Hack: query strings are working erratically with the statemanager
+		//  * hacking a solution for passing the notificationId
+		// */
 		if (queryParams.notificationId)	{
 			StateManager.state.notificationId =  queryParams.notificationId;
-			delete queryParams.notificationId;
 		}
 
 		if (Object.keys(queryParams).length === 0) {

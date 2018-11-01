@@ -92,7 +92,7 @@ class IssuesListController implements ng.IController {
 					const notificationId = this.stateManager.state.notificationId;
 					this.stateManager.state.notificationId = null;
 
-					dispatch(NotificationsActions.markNotificationAsRead(notificationId));
+					dispatch(NotificationsActions.sendUpdateNotificationRead(notificationId, true));
 					API.getNotification(notificationId)
 					.then((n) => {
 						const chip: IChip = {name: "assignedIssues",
