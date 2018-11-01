@@ -15,18 +15,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from "react";
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
+import { Paper } from "@material-ui/core";
 import Avatar from '@material-ui/core/Avatar';
-
-import Drawer from "@material-ui/core/Drawer";
 import Icon from "@material-ui/core/Icon";
-import { Button, Paper, ListItemSecondaryAction, IconButton, Tooltip } from "@material-ui/core";
-
-import { theme } from "../../styles";
-import { NotificationListItemSecondaryAction,
-		NotificationListItem,
+import * as React from "react";
+import { SmallIconButton } from "../components/smallIconButon/smallIconButton.component";
+import { NotificationListItem,
+		NotificationListItemSecondaryAction,
 		NotificationListItemText } from "./notifications.styles";
 
 export interface INotification {
@@ -45,35 +40,46 @@ interface IProps extends INotification {
 	sendDeleteNotification: (id: string) => void;
 }
 
+const NotificationItemText = (props) => {
+	const fontWeight = props.fontWeight;
+	const color =  props.primaryColor;
+	const secColor = props.secondaryColor;
+
+	const primaryStyle =  Object.assign({color}, {fontWeight});
+	const secondaryStyle =  Object.assign( {color: secColor},  {fontWeight});
+
+	return (<NotificationListItemText
+		primaryTypographyProps = { {style: primaryStyle} }
+		secondaryTypographyProps = { {style: secondaryStyle} }
+		primary={props.primary}
+		secondary={props.secondary }/>);
+};
+
 export class NotificationItem extends React.PureComponent<IProps, any> {
-	public gotoNotification(e: React.SyntheticEvent) {
+	public gotoNotification = (e: React.SyntheticEvent) => {
 		const { teamSpace , modelId, _id} = this.props;
 		location.href =  `${teamSpace}/${modelId}?notificationId=${_id}`;
 	}
 
-	public delete(e: React.SyntheticEvent) {
+	public delete = (e: React.SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.sendDeleteNotification(this.props._id);
 	}
 
-	public markAsRead(e: React.SyntheticEvent) {
+	public markAsRead = (e: React.SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.sendUpdateNotificationRead(this.props._id, true);
 	}
 
-	public markAsUnread(e: React.SyntheticEvent) {
+	public markAsUnread = (e: React.SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.sendUpdateNotificationRead(this.props._id, false);
 	}
 
-	public render() {
+	public render = () => {
 		const backgroundColor = this.props.read ? "transparent" : "white";
-		const fontWeight =  this.props.read ? 400 : 600;
-		const color =  this.props.read ? "rgba(0, 0, 0, 0.54)" : "rgba(0, 0, 0, 0.87)";
-		const secColor =  this.props.read ? "rgba(0, 0, 0, 0.24)" : "rgba(0, 0, 0, 0.54)";
-
-		const primaryStyle =  Object.assign({color}, {fontWeight});
-		const secondaryStyle =  Object.assign( {color: secColor},  {fontWeight});
+		const assignedIssuesText = `${this.props.issuesId.length} assigned issues `;
+		const modelText = `In ${this.props.modelName}`;
 
 		return (
 			<Paper  style={ Object.assign({backgroundColor}, {margin: 5})}
@@ -82,41 +88,36 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 					<Avatar>
 						<Icon>place</Icon>
 					</Avatar>
-					<NotificationListItemText style={{padding: 9 }}
-						primaryTypographyProps= { {style: primaryStyle}}
-						secondaryTypographyProps= { {style: secondaryStyle}}
 
-						primary={`${this.props.issuesId.length} assigned issues `}
-						secondary={ `In ${this.props.modelName}`}
-					/>
+					{this.props.read &&
+						<NotificationItemText
+							primaryColor="rgba(0, 0, 0, 0.54)" secondaryColor="rgba(0, 0, 0, 0.24)" fontWeight="400"
+							primary={assignedIssuesText} secondary={modelText}
+							/>
+					}
+					{!this.props.read &&
+						<NotificationItemText
+							primaryColor="rgba(0, 0, 0, 0.87)" secondaryColor="rgba(0, 0, 0, 0.54)" fontWeight="600"
+							primary={assignedIssuesText} secondary={modelText}
+							/>
+					}
+
 					<NotificationListItemSecondaryAction>
 						{!this.props.read  &&
-						<Tooltip title="Mark as read">
-							<IconButton style={{width: 10, height: 10}}  component="span"
-								aria-label="Mark as read"
-								onClick={this.markAsRead.bind(this)}>
-								<Icon>drafts</Icon>
-							</IconButton>
-						</Tooltip>
+						<SmallIconButton tooltip="Mark as read" onClick={this.markAsRead}>
+							drafts
+						</SmallIconButton>
 						}
 						{this.props.read  &&
-						<Tooltip title="Mark as unread">
-							<IconButton style={{width: 10, height: 10}}  component="span"
-								aria-label="Mark as unread"
-								onClick={this.markAsUnread.bind(this)}>
-								<Icon>markunread</Icon>
-							</IconButton>
-						</Tooltip>
+						<SmallIconButton tooltip="Mark as unread" onClick={this.markAsUnread}>
+							markunread
+						</SmallIconButton>
 						}
-
-						<Tooltip title="Delete">
-							<IconButton style={{width: 10, height: 10}} component="span"
-								aria-label="Delete"
-								onClick={this.delete.bind(this)}>
-								<Icon>delete</Icon>
-							</IconButton>
-						</Tooltip>
+						<SmallIconButton tooltip="Delete" onClick={this.delete}>
+							delete
+						</SmallIconButton>
 					</NotificationListItemSecondaryAction>
+
 			</NotificationListItem>
 			</Paper>
 		);

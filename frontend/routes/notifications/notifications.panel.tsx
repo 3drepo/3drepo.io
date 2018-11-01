@@ -18,8 +18,9 @@
 
 import * as React from "react";
 import {INotification, NotificationItem} from "./notification.item";
-import { ListItem, List, Paper } from "@material-ui/core";
+import { List } from "@material-ui/core";
 import { ItemLabel } from "../components/components.styles";
+import { NotificationsPanelItem, NotificationsPanelHeader } from "./notifications.panel.styles";
 
 interface IProps {
 	labelLeft?: string;
@@ -30,15 +31,15 @@ interface IProps {
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
-	public notificationViewLink(notification: INotification) {
+	public notificationViewLink = (notification: INotification) => {
 		return `${notification.teamSpace}/${notification.modelId}?notificationId=${notification._id}`;
 	}
 
-	public gotoNotification(notification: INotification) {
+	public gotoNotification = (notification: INotification) => {
 		location.href =  this.notificationViewLink(notification);
 	}
 
-	public render() {
+	public render = () => {
 		const {notifications, labelLeft, labelRight} = this.props;
 
 		if (this.props.notifications.length === 0) {
@@ -50,22 +51,20 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 			sendDeleteNotification: this.props.sendDeleteNotification
 		};
 
-		return (<ListItem style={{paddingLeft: 10, paddingRight: 10, paddingTop: 0, paddingBottom: 0}}>
-					<div style={{width: '100%', marginTop: 15}}>
-						<div style={{display: 'flex', justifyContent: 'space-between', paddingLeft: 5, paddingRight: 5}}>
+		return (<NotificationsPanelItem>
+						<NotificationsPanelHeader>
 							<ItemLabel>
 								{labelLeft}
 							</ItemLabel>
 							<ItemLabel>
 								{labelRight}
 							</ItemLabel>
-						</div>
+						</NotificationsPanelHeader>
 						<List style={{paddingBottom: 0}} > {notifications.map((notification) =>
 								<NotificationItem key={notification._id}
 								{...notification} {...actions }/>
 							)}
 						</List>
-					</div>
-				</ListItem>);
+				</NotificationsPanelItem>);
 	}
 }

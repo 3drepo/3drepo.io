@@ -14,34 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
-import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText, Button } from '@material-ui/core';
+import { ListItem } from '@material-ui/core';
 
-export const NotificationListItem = styled(ListItem)`
-	&& {
-		padding: 9px;
+export const EmptyItem = styled(ListItem)`
+	&&& {
+		height: calc(100% - 64px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 `;
 
-export const NotificationListItemText = styled(ListItemText)`
-	&& {
-		padding: 9px;
-	}
-
-	${NotificationListItem}:hover & {
-		width:  0px;
-	}
-`;
-
-export const NotificationListItemSecondaryAction = styled.div`
-	visibility: hidden;
-	width:0px;
-	height:40px;
-	overflow:hidden;
-
-	${NotificationListItem}:hover & {
-		visibility: inherit ;
-		width:75px;
-	}
+export const EmptyItemText = styled.h3`
+	max-width: 142px;
+	font-weight: normal;
+	color: rgba(0,0,0,0.54);
 `;

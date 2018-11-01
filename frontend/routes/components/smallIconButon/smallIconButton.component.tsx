@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,33 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText, Button } from '@material-ui/core';
+import { Icon, Tooltip } from '@material-ui/core';
+import * as React from 'react';
+import { SmallIconButtonStyled } from './smallIconButton.styles';
 
-export const NotificationListItem = styled(ListItem)`
-	&& {
-		padding: 9px;
+interface IProps {
+	onClick?: (event: React.SyntheticEvent) => void;
+	tooltip: string;
+}
+
+export class SmallIconButton extends React.PureComponent<IProps, any> {
+	public state = {
+
+	};
+
+	public render = () => {
+
+		return (
+			<Tooltip title={this.props.tooltip}>
+			<SmallIconButtonStyled component="span"
+				aria-label={this.props.tooltip}
+				onClick={this.props.onClick}>
+				<Icon>{this.props.children}</Icon>
+			</SmallIconButtonStyled>
+		</Tooltip>
+		);
 	}
-`;
-
-export const NotificationListItemText = styled(ListItemText)`
-	&& {
-		padding: 9px;
-	}
-
-	${NotificationListItem}:hover & {
-		width:  0px;
-	}
-`;
-
-export const NotificationListItemSecondaryAction = styled.div`
-	visibility: hidden;
-	width:0px;
-	height:40px;
-	overflow:hidden;
-
-	${NotificationListItem}:hover & {
-		visibility: inherit ;
-		width:75px;
-	}
-`;
+}

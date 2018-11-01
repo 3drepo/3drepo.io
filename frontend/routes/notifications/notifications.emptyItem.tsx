@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -15,26 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import * as React from "react";
-import ListItem from '@material-ui/core/ListItem';
 import { Icon } from "@material-ui/core";
+import { EmptyItem, EmptyItemText } from "./notifications.emptyIem.styles";
 
 export class NotificationEmptyItem extends React.PureComponent {
-	public render() {
+	public render = () => {
 		return (
-			<ListItem style={{height: 'calc(100% - 64px)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center' }}>
+			<EmptyItem>
 				<div>
-					<h3 style={{ maxWidth: '142px', fontWeight: 'normal', color: 'rgba(0,0,0,0.54)' }}>
+					<EmptyItemText>
 						You have no new notifications.
-					</h3>
+					</EmptyItemText>
 				</div>
 				<div >
 					<Icon fontSize="large" color="disabled" >notifications</Icon>
 				</div>
-			</ListItem>
+			</EmptyItem>
 			);
 	}
 }

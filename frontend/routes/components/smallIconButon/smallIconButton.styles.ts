@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,32 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText, Button } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 
-export const NotificationListItem = styled(ListItem)`
+export const SmallIconButtonStyled = styled(IconButton)`
 	&& {
-		padding: 9px;
-	}
-`;
-
-export const NotificationListItemText = styled(ListItemText)`
-	&& {
-		padding: 9px;
-	}
-
-	${NotificationListItem}:hover & {
-		width:  0px;
-	}
-`;
-
-export const NotificationListItemSecondaryAction = styled.div`
-	visibility: hidden;
-	width:0px;
-	height:40px;
-	overflow:hidden;
-
-	${NotificationListItem}:hover & {
-		visibility: inherit ;
-		width:75px;
-	}
-`;
+	width: 10px;
+	height: 10px;
+}`;

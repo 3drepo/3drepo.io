@@ -43,7 +43,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		menuElement: null
 	};
 
-	public componentDidMount() {
+	public componentDidMount = () => {
 		// This will download notifications from the server and save to the store on init
 		this.props.sendGetNotifications();
 	}
@@ -106,7 +106,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				</ListSubheaderToolbar>);
 	}
 
-	public render() {
+	public render = () => {
 		const count =  this.props.notifications.filter((n) => !n.read).length;
 		const badgeColor = count > 0 ? "primary" : "secondary"; // Secondary color is used to make the badge disappear
 
