@@ -72,7 +72,6 @@ export class GroupsService {
 	 */
 	public groupsFilterSearch(searchQuery: string) {
 		searchQuery = !searchQuery ? "" : searchQuery;
-
 		this.state.groupsToShow = this.state.groups.filter((group) => this.stringSearch(group.name, searchQuery)
 				|| this.stringSearch(group.description, searchQuery)
 				|| this.stringSearch(group.author, searchQuery)
@@ -340,10 +339,6 @@ export class GroupsService {
 					this.highlightNextgroup(groups);
 					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
-				}).catch((err) => {
-					if (!groups) {
-						Promise.reject(err);
-					}
 				});
 		} else {
 			return Promise.resolve();
@@ -522,36 +517,11 @@ export class GroupsService {
 	}
 
 	/**
-	 * Highlight next group when deleting filtered groups.
-	 * @param groups
-	 */
-
-	public highlightNextgroup(groups: any[]) {
-		this.TreeService.clearCurrentlySelected();
-
-		const firstGroup =  groups[0];
-		const lastGroup = groups[groups.length - 1];
-
-		const firstIndex =  this.state.groupsToShow.indexOf( firstGroup);
-		const lastIndex =  this.state.groupsToShow.indexOf( lastGroup);
-
-		if (firstIndex === 0 && lastIndex === this.state.groupsToShow.length - 1) {
-			return;
-		}
-
-		if (lastIndex === this.state.groupsToShow.length - 1) {
-			this.selectGroup(this.state.groupsToShow[0]);
-			return;
-		}
-
-		this.selectGroup(this.state.groupsToShow[lastIndex + 1]);
-	}
-
-	/**
 	 * Remove a group from the data model
 	 * @param group the group to delete
 	 */
 	public deleteStateGroup(group: any) {
+		this.removeColorOverride(group._id);
 		this.state.groups = this.state.groups.filter((g) => {
 			return group._id !== g._id;
 		});
@@ -624,6 +594,37 @@ export class GroupsService {
 		let areEqual = objAIds.length === objBIds.length;
 		areEqual = areEqual && objAIds.every((i) => objBIds.indexOf(i) >= 0);
 		return areEqual;
+	}
+
+	/**
+	 * Highlight next group when deleting filtered groups.
+	 * @param groups
+	 */
+
+	private highlightNextgroup(groups: any[]) {
+		this.TreeService.clearCurrentlySelected();
+
+		const firstGroup =  groups[0];
+		const lastGroup = groups[groups.length - 1];
+
+		const firstIndex =  this.state.groupsToShow.indexOf( firstGroup);
+		const lastIndex =  this.state.groupsToShow.indexOf( lastGroup);
+
+		if (firstIndex === 0 && lastIndex === this.state.groupsToShow.length - 1) {
+			return;
+		}
+
+		// if (lastIndex === this.state.groupsToShow.length - 1) {
+		// 	this.selectGroup(this.state.groupsToShow[0]);
+		// 	return;
+		// }
+
+		if (groups.length !== this.state.groupsToShow.length) {
+			const nextGroupIdx =  lastIndex + 1;
+			this.selectGroup = (this.state.groupsToShow[nextGroupIdx === this.state.groupsToShow.length ? 0 : nextGroupIdx]);
+		}
+
+		this.selectGroup(this.state.groupsToShow[lastIndex + 1]);
 	}
 
 	private getFullIdsForNodes(nodes: any[]) {
