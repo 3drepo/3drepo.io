@@ -151,6 +151,26 @@ export const MuiTheme = createMuiTheme({
 				textOverflow: 'ellipsis',
 				whiteSpace: 'nowrap'
 			}
+		},
+		MuiBadge: {
+			badge: {
+				width: 20,
+				height: 20,
+				top: 1,
+				right: -4
+			},
+			colorPrimary: {
+				backgroundColor: '#e8004e'
+			},
+			colorSecondary: { // Secondary color is used to make the badge disappear
+				backgroundColor: 'transparent',
+				color: 'transparent'
+			}
+		},
+		MuiIcon: {
+			fontSizeLarge: {
+				fontSize: 35
+			}
 		}
 	}
 });

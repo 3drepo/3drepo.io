@@ -19,7 +19,7 @@ import Drawer from "@material-ui/core/Drawer";
 import Typography from '@material-ui/core/Typography';
 import Icon from "@material-ui/core/Icon";
 import {INotification} from "./notification.item";
-import { Button, List, IconButton, Menu, MenuItem} from "@material-ui/core";
+import { Button, List, IconButton, Menu, MenuItem, Badge} from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { MuiTheme } from "../../styles";
 import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
@@ -107,20 +107,24 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
+		const count =  this.props.notifications.filter((n) => !n.read).length;
+		const badgeColor = count > 0 ? "primary" : "secondary"; // Secondary color is used to make the badge disappear
+
 		const actions = {
 							sendUpdateNotificationRead: this.props.sendUpdateNotificationRead ,
 							sendDeleteNotification: this.props.sendDeleteNotification
 						};
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
-				<UserActionButton
-					variant="flat"
-					aria-label="Toggle panel"
-					mini={true}
-					onClick={this.toggleDrawer}
-				>
-					<Icon>notifications</Icon>
-				</UserActionButton>
+				<Badge badgeContent={count} color={badgeColor} style={ {marginRight: 10, marginTop: 2}}>
+					<UserActionButton
+						variant="flat"
+						aria-label="Toggle panel"
+						onClick={this.toggleDrawer}
+					>
+						<Icon fontSize="large">notifications</Icon>
+					</UserActionButton>
+				</Badge>
 				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer}
 						SlideProps={{unmountOnExit: true}}>
 					<List subheader={this.renderNotificationsHeader()} style={{height: '100%', width: 300 }} >
