@@ -272,7 +272,7 @@ export class IssuesService {
 			filters.push((issue) => issue.status !== "closed");
 		}
 
-		filters = filters.concat(this.getOrClause(criteria["notification"], this.filterNotification));
+		filters = filters.concat(this.getOrClause(criteria.notification, this.filterNotification));
 
 		filters = filters.concat(this.getOrClause(criteria[""], this.handleIssueFilter));
 

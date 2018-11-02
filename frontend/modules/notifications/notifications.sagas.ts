@@ -37,10 +37,12 @@ export function* sendGetNotifications() {
 
 export function* sendUpdateNotificationRead({ notificationId, read }) {
 	try {
+
 		const notification = yield select(selectNotification.bind(null, notificationId));
 		if (notification.read === read) {
 			return;
 		}
+
 		yield put(NotificationsActions.patchNotification({_id: notificationId, read}));
 		const resp = yield API.patchNotification(notificationId, {read});
 	} catch (error) {
