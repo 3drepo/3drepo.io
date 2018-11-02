@@ -23,7 +23,6 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
-import Chip from '@material-ui/core/Chip';
 import Icon from '@material-ui/core/Icon';
 
 export const StyledTextField = styled(TextField)``;
@@ -57,11 +56,6 @@ export const SelectWrapper = styled(FormControl)`
 
 export const TopicTypesContainer = styled.div`
 	margin: 30px 0 15px;
-`;
-
-export const StyledChip = styled(Chip)`
-	margin-right: 10px;
-	margin-bottom: 10px;
 `;
 
 export const GridColumn = styled(Grid)`

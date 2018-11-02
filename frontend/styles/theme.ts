@@ -114,6 +114,12 @@ export const MuiTheme = createMuiTheme({
 				margin: '0 24px 15px 24px'
 			}
 		},
+		MuiChip: {
+			root: {
+				marginRight: '10px',
+				marginBottom: '10px'
+			}
+		},
 		MuiTypography: {
 			title: {
 				fontSize: 20,
