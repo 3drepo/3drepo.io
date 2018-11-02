@@ -35,7 +35,7 @@ const staticPages = [
 		contentFile: CookiesPageContent
 	},
 	{
-		title: 'Terms',
+		title: 'Terms & Conditions',
 		route: 'terms',
 		contentFile: TermsPageContent
 	},

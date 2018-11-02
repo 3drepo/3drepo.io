@@ -114,26 +114,17 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.static.privacy', {
 		url: '/privacy',
-		template: '<privacy id="privacy" />',
-		data: {
-			isLegal: true
-		}
+		template: '<static-page />'
 	});
 
 	$stateProvider.state('app.static.terms', {
 		url: '/terms',
-		template: '<terms id="terms" />',
-		data: {
-			isLegal: true
-		}
+		template: '<static-page />'
 	});
 
 	$stateProvider.state('app.static.cookies', {
 		url: '/cookies',
-		template: '<cookies id="cookies" />',
-		data: {
-			isLegal: true
-		}
+		template: '<static-page />'
 	});
 
 	$httpProvider.interceptors.push('AuthInterceptor');
