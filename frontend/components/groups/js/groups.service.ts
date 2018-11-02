@@ -47,7 +47,6 @@ export class GroupsService {
 	public reset() {
 		this.state = {
 			groups: [],
-			groupsToShow: [],
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes: 0,
@@ -70,12 +69,23 @@ export class GroupsService {
 	/**
 	 * Filter groups using @param searchQuery
 	 */
+<<<<<<< HEAD
 	public groupsFilterSearch(searchQuery: string) {
 		searchQuery = !searchQuery ? "" : searchQuery;
 		this.state.groupsToShow = this.state.groups.filter((group) => this.stringSearch(group.name, searchQuery)
+=======
+	public groupsFilterSearch(searchQuery: string): any[] {
+		return this.state.groups.filter((group) => {
+			const toKeep = this.stringSearch(group.name, searchQuery)
+>>>>>>> parent of 5e44c49... ISSUE #1158 - Working solution
 				|| this.stringSearch(group.description, searchQuery)
-				|| this.stringSearch(group.author, searchQuery)
-			);
+				|| this.stringSearch(group.author, searchQuery);
+
+			if (!toKeep) {
+				this.unhighlightGroup(group);
+			}
+			return toKeep;
+		});
 	}
 	/**
 	 * Check if a group is currently color overriden
@@ -336,9 +346,15 @@ export class GroupsService {
 			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
-					this.highlightNextgroup(groups);
 					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
+<<<<<<< HEAD
+=======
+				}).catch(err => {
+					if(!groups){
+						Promise.reject(err);
+					}
+>>>>>>> parent of 5e44c49... ISSUE #1158 - Working solution
 				});
 		} else {
 			return Promise.resolve();
@@ -360,7 +376,6 @@ export class GroupsService {
 	 * @param group the group to select
 	 */
 	public selectGroup(group: any) {
-
 		const addGroup = this.MultiSelectService.isAccumMode();
 		const removeGroup = this.MultiSelectService.isDecumMode();
 		const multiSelect = addGroup || removeGroup;
@@ -521,12 +536,24 @@ export class GroupsService {
 	 * @param group the group to delete
 	 */
 	public deleteStateGroup(group: any) {
+<<<<<<< HEAD
 		this.removeColorOverride(group._id);
 		this.state.groups = this.state.groups.filter((g) => {
 			return group._id !== g._id;
 		});
+=======
+		this.deselectObjectsFromGroup(group);
+		this.removeColorOverride(group._id);
+		const groupIndex = this.state.groups.indexOf(group);
+		const groupsCount = this.state.groups.length;
 
-		this.state.groupsToShow = this.state.groupsToShow.filter((g) => {
+		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
+			const nextGroup = this.state.groups[(groupIndex + 1) % groupsCount];
+			this.selectGroup(nextGroup);
+		}
+>>>>>>> parent of 5e44c49... ISSUE #1158 - Working solution
+
+		this.state.groups = this.state.groups.filter((g) => {
 			return group._id !== g._id;
 		});
 	}
@@ -538,7 +565,6 @@ export class GroupsService {
 	public deleteStateGroupsByIds(ids: string[]) {
 		const groups = this.state.groups.filter((f) => ids.indexOf(f._id) >= 0);
 		groups.forEach(this.deleteStateGroup.bind(this));
-		this.highlightNextgroup(groups);
 	}
 
 	/**

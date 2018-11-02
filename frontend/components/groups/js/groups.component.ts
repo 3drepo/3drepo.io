@@ -511,7 +511,11 @@ class GroupsController implements ng.IController {
 	}
 
 	private filterGroups() {
-		this.groupsService.groupsFilterSearch(this.filterText);
+		if (this.filterText !== undefined && this.filterText !== "") {
+			this.groupsToShow = this.groupsService.groupsFilterSearch(this.filterText);
+		} else {
+			this.groupsToShow = this.groups;
+		}
 	}
 }
 
