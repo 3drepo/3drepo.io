@@ -80,7 +80,6 @@ class GroupsController implements ng.IController {
 		this.customIcons = this.iconsConstant;
 
 		this.groups = [];
-		this.groupsToShow = [];
 
 		this.selectedNodes = [];
 		this.canAddGroup = false;
@@ -511,11 +510,7 @@ class GroupsController implements ng.IController {
 	}
 
 	private filterGroups() {
-		if (this.filterText !== undefined && this.filterText !== "") {
-			this.groupsToShow = this.groupsService.groupsFilterSearch(this.filterText);
-		} else {
-			this.groupsToShow = this.groups;
-		}
+			this.groupsService.groupsFilterSearch(this.filterText);
 	}
 }
 

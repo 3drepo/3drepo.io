@@ -47,6 +47,7 @@ export class GroupsService {
 	public reset() {
 		this.state = {
 			groups: [],
+			groupsToShow: [],
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes: 0,
@@ -69,20 +70,17 @@ export class GroupsService {
 	/**
 	 * Filter groups using @param searchQuery
 	 */
-<<<<<<< HEAD
 	public groupsFilterSearch(searchQuery: string) {
+
 		searchQuery = !searchQuery ? "" : searchQuery;
-		this.state.groupsToShow = this.state.groups.filter((group) => this.stringSearch(group.name, searchQuery)
-=======
-	public groupsFilterSearch(searchQuery: string): any[] {
-		return this.state.groups.filter((group) => {
+
+		this.state.groupsToShow = this.state.groups.filter((group) => {
 			const toKeep = this.stringSearch(group.name, searchQuery)
->>>>>>> parent of 5e44c49... ISSUE #1158 - Working solution
 				|| this.stringSearch(group.description, searchQuery)
 				|| this.stringSearch(group.author, searchQuery);
 
 			if (!toKeep) {
-				this.unhighlightGroup(group);
+				this.removeColorOverride(group._id);
 			}
 			return toKeep;
 		});
@@ -348,13 +346,10 @@ export class GroupsService {
 				.then((response) => {
 					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
-<<<<<<< HEAD
-=======
-				}).catch(err => {
-					if(!groups){
+				}).catch((err) => {
+					if (!groups) {
 						Promise.reject(err);
 					}
->>>>>>> parent of 5e44c49... ISSUE #1158 - Working solution
 				});
 		} else {
 			return Promise.resolve();
@@ -536,22 +531,15 @@ export class GroupsService {
 	 * @param group the group to delete
 	 */
 	public deleteStateGroup(group: any) {
-<<<<<<< HEAD
-		this.removeColorOverride(group._id);
-		this.state.groups = this.state.groups.filter((g) => {
-			return group._id !== g._id;
-		});
-=======
 		this.deselectObjectsFromGroup(group);
 		this.removeColorOverride(group._id);
-		const groupIndex = this.state.groups.indexOf(group);
-		const groupsCount = this.state.groups.length;
+		const groupIndex = this.state.groupsToShow.indexOf(group);
+		const groupsCount = this.state.groupsToShow.length;
 
 		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
-			const nextGroup = this.state.groups[(groupIndex + 1) % groupsCount];
+			const nextGroup = this.state.groupsToShow[(groupIndex + 1) % groupsCount];
 			this.selectGroup(nextGroup);
 		}
->>>>>>> parent of 5e44c49... ISSUE #1158 - Working solution
 
 		this.state.groups = this.state.groups.filter((g) => {
 			return group._id !== g._id;
