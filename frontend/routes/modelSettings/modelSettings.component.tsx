@@ -25,6 +25,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
 import Input from '@material-ui/core/Input';
+import Chip from '@material-ui/core/Chip';
 
 import { clientConfigService } from '../../services/clientConfig';
 import { ENTER_KEY } from '../../constants/keys';
@@ -36,7 +37,6 @@ import {
 	FieldsRow,
 	StyledTextField,
 	SelectWrapper,
-	StyledChip,
 	TopicTypesContainer,
 	StyledForm,
 	Headline,
@@ -47,7 +47,6 @@ import {
 } from './modelSettings.styles';
 
 const PANEL_PROPS = {
-	title: 'Model Settings',
 	paperProps: {
 		height: '100%'
 	}
@@ -196,12 +195,12 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
-	public renderTitleWithBackLink = (title) => (
+	public renderTitleWithBackLink = () => (
 		<>
 			<StyledLink to={this.props.location.pathname}>
 				<StyledIcon>arrow_back</StyledIcon>
 			</StyledLink>
-			{ title }
+			Model Settings
 		</>
 	)
 
@@ -214,7 +213,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<Panel {...PANEL_PROPS} renderCustomTitle={this.renderTitleWithBackLink}>
+			<Panel {...PANEL_PROPS} title={this.renderTitleWithBackLink()}>
 				<Formik
 					initialValues={{
 						id, name, type, code: properties.code, unit: properties.unit, fourDSequenceTag,
@@ -284,7 +283,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<TopicTypesContainer>
 									{this.state.topicTypes.map(
 										(topicType, index) => (
-											<StyledChip key={index} label={topicType.label} onDelete={() => this.deleteTopicType(topicType)} />
+											<Chip key={index} label={topicType.label} onDelete={() => this.deleteTopicType(topicType)} />
 										)
 									)}
 								</TopicTypesContainer>

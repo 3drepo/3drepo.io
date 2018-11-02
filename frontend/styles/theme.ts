@@ -113,6 +113,12 @@ export const MuiTheme = createMuiTheme({
 			root: {
 				margin: '0 24px 15px 24px'
 			}
+		},
+		MuiChip: {
+			root: {
+				marginRight: '10px',
+				marginBottom: '10px'
+			}
 		}
 	}
 });
