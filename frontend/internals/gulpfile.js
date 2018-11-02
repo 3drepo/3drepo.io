@@ -184,7 +184,7 @@ gulp.task("reload", function() {
 
 
 gulp.task('webpack-build', function (cb) {
-  exec('webpack --config ./webpack/webpack.prod.config.js', function (err, stdout, stderr) {
+  exec('webpack --config --./webpack/webpack.prod.config.js --progress', function (err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     cb(err);
