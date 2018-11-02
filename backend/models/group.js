@@ -50,11 +50,18 @@ const groupSchema = Schema({
 });
 
 groupSchema.statics.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch, revId) {
-	const query = { type: "meta", "metadata.IFC GUID": { $in: ifcGuids } };
+	if(!ifcGuids || ifcGuids.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	const query = {"metadata.IFC GUID": { $in: ifcGuids } };
 	const project = { parents: 1, _id: 0 };
 
 	return db.getCollection(account, model + ".scene").then(dbCol => {
 		return dbCol.find(query, project).toArray().then(results => {
+			if(results.length === 0) {
+				return [];
+			}
 			return History.getHistory({ account, model }, branch, revId).then(history => {
 				if (!history) {
 					return Promise.reject(responseCodes.INVALID_TAG_NAME);
