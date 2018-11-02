@@ -37,7 +37,6 @@ const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const Project = require("../project");
-const stream = require("stream");
 const _ = require("lodash");
 const uuid = require("node-uuid");
 const FileRef = require("../fileRef");
@@ -859,118 +858,6 @@ function getTreePath(account, model, branch, rev, username) {
 	});
 }
 
-// return main tree and urls of sub trees only and let frontend to do the remaining work :)
-// returning a readstream for piping and a promise for error catching while streaming
-function getFullTree_noSubTree(account, model, branch, rev) {
-
-	let history;
-	let stashRs;
-
-	const readStreamPromise = History.getHistory({ account, model }, branch, rev).then(_history => {
-
-		history = _history;
-
-		if(!history) {
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		}
-
-		const revId = utils.uuidToString(history._id);
-		const treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
-
-		// return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-		return stash.findStashByFilename({ account, model }, "json_mpc", treeFileName, true);
-
-	}).then(rs => {
-
-		// trees.mainTree = buf.toString();
-		if(!rs) {
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		}
-
-		stashRs = rs;
-
-		return stream.PassThrough();
-
-	});
-
-	let pass;
-
-	const outputingPromise = readStreamPromise.then(_pass => {
-
-		pass = _pass;
-
-		return new Promise(function(resolve, reject) {
-
-			pass.write("{\"mainTree\": ");
-
-			stashRs.on("data", d => pass.write(d));
-			stashRs.on("end", ()=> resolve());
-			stashRs.on("error", err => reject(err));
-
-		});
-
-	}).then(() => {
-
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		return Ref.find({ account, model }, filter);
-
-	}).then(refs => {
-
-		pass.write(", \"subTrees\":[");
-
-		return new Promise((resolve) => {
-
-			function eachRef(refIndex) {
-
-				const ref = refs[refIndex];
-
-				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
-
-				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH) {
-					url = `/${ref.owner}/${ref.project}/revision/${ref._rid}/fulltree.json`;
-				}
-
-				if(refIndex > 0) {
-					pass.write(",");
-				}
-
-				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
-
-				if(refIndex + 1 < refs.length) {
-					eachRef(refIndex + 1);
-				} else {
-					resolve();
-				}
-
-			}
-
-			if(refs.length) {
-				eachRef(0);
-			} else {
-				resolve();
-			}
-		});
-
-	}).then(() => {
-
-		pass.write("]");
-		pass.write("}");
-		pass.end();
-
-	}).catch(err => {
-
-		pass && pass.end();
-		return Promise.reject(err);
-
-	});
-
-	return {readStreamPromise, outputingPromise};
-}
-
 function searchTree(account, model, branch, rev, searchString, username) {
 
 	const search = (history) => {
@@ -1556,7 +1443,6 @@ module.exports = {
 	removeModel,
 	getModelPermission,
 	getMetadata,
-	getFullTree_noSubTree,
 	resetCorrelationId,
 	getAllMetadata,
 	getAllIdsWith4DSequenceTag,

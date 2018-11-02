@@ -468,7 +468,7 @@
 		}).on("end", () => {
 			res.end();
 			req[C.REQ_REPO].logger.logInfo("Responded with " + response.status, {
-				httpCode: responseCodes.status,
+				httpCode: response.status,
 				contentLength: length
 			});
 		});

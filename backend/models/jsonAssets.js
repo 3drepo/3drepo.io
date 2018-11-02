@@ -18,6 +18,12 @@
 "use strict";
 
 const FileRef = require("./fileRef");
+const History = require("./history");
+const utils = require("../utils");
+const Ref = require("./ref");
+const C = require("../constants");
+const ResponseCodes = require("../response_codes");
+const Stream = require("stream");
 
 const JSONAssets = {};
 
@@ -26,6 +32,68 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 	return FileRef.getJSONFile(account, model, name).then((file) => {
 		file.fileName = name;
 		return file;
+	});
+};
+
+function getSubTreeInfo(account, model, currentIds) {
+	return Ref.getRefNodes(account, model, currentIds).then((subModelRefs) => {
+		const subTreeInfo = [];
+		subModelRefs.forEach((ref) => {
+			const url = utils.uuidToString(ref._rid) !== C.MASTER_BRANCH ?
+				`/${ref.owner}/${ref.project}/revision/${ref._rid}/fulltree.json` :
+				`/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
+			subTreeInfo.push({
+				_id: utils.uuidToString(ref._id),
+				url,
+				model: ref.project});
+		});
+		return subTreeInfo;
+	});
+}
+
+JSONAssets.getTree = function(account, model, branch, rev) {
+	return History.getHistory({ account, model }, branch, rev).then((history) => {
+		if(history) {
+			const revId = utils.uuidToString(history._id);
+			const treeFileName = `${revId}/fulltree.json`;
+			const mainTreePromise = FileRef.getJSONFile(account, model, treeFileName);
+			const subTreesPromise = getSubTreeInfo(account, model, history.current);
+
+			return mainTreePromise.then((file) => {
+				const outStream = Stream.PassThrough();
+				const readStream = file.readStream;
+				file.readStream = outStream;
+				delete file.size;
+				new Promise(function(resolve) {
+					outStream.write("{\"mainTree\": ");
+					readStream.on("data", d => outStream.write(d));
+					readStream.on("end", ()=> resolve());
+					readStream.on("error", err => outStream.emit("error", err));
+				}).then(() => {
+					return subTreesPromise.then((subTreeInfo) => {
+						outStream.write(", \"subTrees\":[");
+						for(let i = 0; i < subTreeInfo.length; ++i) {
+							if(subTreeInfo[i]) {
+								if(i > 0) {
+									outStream.write(",");
+								}
+								outStream.write(JSON.stringify(subTreeInfo[i]));
+							}
+						}
+						outStream.write("]}");
+						outStream.end();
+					});
+
+				}).catch((err) => {
+					outStream.emit("error", err);
+					outStream.end();
+				});
+				return file;
+
+			});
+		} else {
+			return Promise.reject(ResponseCodes.INVALID_TAG_NAME);
+		}
 	});
 };
 

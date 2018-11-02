@@ -348,32 +348,20 @@ function getIdToMeshes(req, res, next) {
 }
 
 function getModelTree(req, res, next) {
+	JSONAssets.getTree(
+		req.params.account,
+		req.params.model,
+		req.params.rev ? undefined : C.MASTER_BRANCH_NAME,
+		req.param.rev
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
-
-	data.readStreamPromise.then(readStream => {
 		const headers = {
 			"Content-Type" : "application/json"
 		};
-		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || err, err.resCode ? {} : err);
-	});
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
-	// There may be some errors generated during the streaming process but it is to late and unable to return to client anymore
-	data.outputingPromise.catch(err => {
-		// log error
-		req[C.REQ_REPO].logger.logError(JSON.stringify(err));
-		req[C.REQ_REPO].logger.logError(err.stack);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
