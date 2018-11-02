@@ -17,17 +17,15 @@
 
 import * as React from 'react';
 
-import { PaperProps } from '@material-ui/core/Paper';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { ThemeProvider } from 'styled-components';
 import { MuiTheme, theme } from '../../../styles';
 import { Container, Title, Content } from './panel.styles';
 
 interface IProps {
-	title?: string;
+	title: string | JSX.Element;
 	children: any;
 	paperProps?: any;
-	renderCustomTitle?: any;
 }
 
 export const Panel = (props: IProps) => (
@@ -35,10 +33,10 @@ export const Panel = (props: IProps) => (
 		<MuiThemeProvider theme={MuiTheme}>
 			<Container {...props.paperProps}>
 				<Title>
-					{ props.renderCustomTitle ? props.renderCustomTitle(props.title) : props.title }
+					{ props.title }
 				</Title>
 				<Content>
-					{props.children}
+					{ props.children }
 				</Content>
 			</Container>
 		</MuiThemeProvider>
