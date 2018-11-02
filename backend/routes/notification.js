@@ -27,7 +27,11 @@ router.get("/notifications/:id", middlewares.loggedIn, getNotification, response
 router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
 router.delete("/notifications", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
 router.delete("/notifications/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
-//
+
+/**
+ * Gets all notifications for the user.
+ * Uses logged username as the collection name.
+ */
 function getNotifications(req, res, next) {
 	const username = req.session.user.username;
 
@@ -37,6 +41,11 @@ function getNotifications(req, res, next) {
 	}).catch(err => responseCodes.onError(req, res, err));
 }
 
+/**
+ * Gets a particular notification.
+ * Uses /:id as query param.
+ * Uses logged username as the collection name.
+ */
 function getNotification(req, res, next) {
 	const _id = req.params.id;
 	const username = req.session.user.username;
@@ -47,6 +56,12 @@ function getNotification(req, res, next) {
 	}).catch(err => responseCodes.onError(req, res, err));
 }
 
+/**
+ * Patches a particular notification.
+ * Uses /:id as search param.
+ * Uses logged username as the collection name.
+ * Uses req.body as the partial notification
+ */
 function patchNotification(req, res, next) {
 	const username = req.session.user.username;
 	const _id = req.params.id;
@@ -57,6 +72,11 @@ function patchNotification(req, res, next) {
 	}).catch(err => responseCodes.onError(req, res, err));
 }
 
+/**
+ * Deletes a particular notification
+ * Uses /:id
+ * Uses logged username as the collection name.
+ */
 function deleteNotification(req, res, next) {
 	const username = req.session.user.username;
 	const _id = req.params.id;
@@ -66,6 +86,10 @@ function deleteNotification(req, res, next) {
 	}).catch(err => responseCodes.onError(req, res, err));
 }
 
+/**
+ * Deletes all notifications for a user
+ * Uses logged username as the collection name.
+ */
 function deleteAllNotifications(req, res, next) {
 	const username = req.session.user.username;
 	notification.deleteAllNotifications(username).then(()=> {

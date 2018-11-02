@@ -34,6 +34,15 @@ module.exports = {
 			issue = req.dataModel;
 		}
 
+		if (issues.isIssueBeingClosed(oldIssue, issue)) {
+			notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue).
+				then((notifications) => {
+					req.userNotifications = notifications;
+					next();
+				});
+			return;
+		}
+
 		if (!isCommentModification && issues.isIssueAssignation(oldIssue, issue)) {
 			Promise.all([
 				notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue),

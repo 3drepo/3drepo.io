@@ -1165,6 +1165,14 @@ schema.statics.isIssueAssignation = function(oldIssue, newIssue) {
 	return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
 };
 
+schema.statics.isIssueBeingClosed = function(oldIssue, newIssue) {
+	if (!oldIssue) {
+		return false;
+	}
+
+	return oldIssue.status !== "closed" &&  newIssue.status === "closed";
+};
+
 schema.methods.getBCFMarkup = function(account, model, unit) {
 	this.generateCommentsGUID();
 	this.save();
