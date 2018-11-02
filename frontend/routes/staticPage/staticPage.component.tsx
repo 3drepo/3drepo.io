@@ -17,60 +17,45 @@
 
 import * as React from 'react';
 import { Route } from 'react-router-dom';
-import CookiesTemplate from './pages/cookies.html';
+
 import { PageTemplate } from './components/pageTemplate/pageTemplate.component';
+
+import CookiesPageContent = require('./../../staticPages/cookies.html');
+import TermsPageContent = require('./../../staticPages/terms.html');
+import PrivacyPageContent = require('./../../staticPages/privacy.html');
 
 interface IProps {
 	match: any;
 }
 
-export class StaticPage extends React.PureComponent<IProps, any> {
-
-	public componentDidMount() {
-		console.log('componentDidMount');
+const staticPages = [
+	{
+		title: 'Cookies',
+		route: 'cookies',
+		contentFile: CookiesPageContent
+	},
+	{
+		title: 'Terms',
+		route: 'terms',
+		contentFile: TermsPageContent
+	},
+	{
+		title: 'Privacy',
+		route: 'privacy',
+		contentFile: PrivacyPageContent
 	}
+];
 
+export class StaticPage extends React.PureComponent<IProps, any> {
 	public render() {
 		const { match } = this.props;
-		console.log('CookiesTemplate', CookiesTemplate);
-		return (
-			<>
-				<Route path={`${match.url}cookies`} render={() =>
-					<PageTemplate title="Cookies">
-						{`
-							<div id="legalText">
-								<div>
-									<p>Hello html cookies in react!</p>
-									<span>cookies span</span>
-								</div>
-							</div>
-						`}
-					</PageTemplate>}
-				/>
-				<Route path={`${match.url}terms`} render={() =>
-					<PageTemplate title="Terms">
-						{`
-							<div id="legalText">
-								<div>
-									<p>Hello html terms in react!</p>
-									<span>terms span</span>
-								</div>
-							</div>
-						`}
-					</PageTemplate>}
-				/>
-				<Route path={`${match.url}privacy`} render={() =>
-					<PageTemplate title="Privacy">
-						{`
-							<div id="legalText">
-								<div>
-									<p>Hello html privacy in react!</p>
-									<span>privacy span</span>
-								</div>
-							</div>
-						`}
-					</PageTemplate>}
-				/>
-			</>);
+
+		return staticPages.map((page) => (
+			<Route path={`${match.url}${page.route}`} key={page.route} render={() =>
+				<PageTemplate title={ page.title }>
+					{ page.contentFile }
+				</PageTemplate>}
+			/>
+		));
 	}
 }
