@@ -18,8 +18,6 @@
 import * as React from 'react';
 import * as dayjs from 'dayjs';
 
-import { Container } from './dateTime.styles';
-
 interface IProps {
 	value: string;
 	format?: string;
