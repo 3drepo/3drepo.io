@@ -26,7 +26,9 @@ import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSub
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 import { NotificationsPanel } from "./notifications.panel";
 import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
-import { BarIconButton, UserActionButton } from "../components/components.styles";
+import { BarIconButton, UserActionButton, ItemLabel } from "../components/components.styles";
+import {toArray, groupBy, sortBy } from "lodash";
+import { NotificationsPanelItem, NotificationsPanelHeader } from "./notifications.panel.styles";
 
 // Props bound in <file://./notifications.container.ts>
 interface IProps {
@@ -36,6 +38,16 @@ interface IProps {
 	sendDeleteNotification: (id: string) => void; // Bound to redux saga sendDeleteNotification
 	notifications: INotification[]; // Bound to store state notifications
 }
+
+const NotificationsDate = () =>
+	(<NotificationsPanelItem>
+			<NotificationsPanelHeader>
+				<ItemLabel>
+					{simpleDate(new Date())}
+				</ItemLabel>
+				<ItemLabel/>
+			</NotificationsPanelHeader>
+	</NotificationsPanelItem>);
 
 export class Notifications extends React.PureComponent<IProps, any> {
 	public state = {
@@ -62,20 +74,20 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		this.props.confirmSendDeleteAllNotifications();
 	}
 
-	public thisWeeksNotifications = () => {
+	public thisWeeksNotifications = (notifications) => {
 		const lastSunday = getSunday().getTime();
-		return this.props.notifications.filter((n) => n.timestamp > lastSunday);
+		return notifications.filter((n) => n.timestamp > lastSunday);
 	}
 
-	public lastWeeksNotifications = () => {
+	public lastWeeksNotifications = (notifications) => {
 		const lastSunday = getSunday().getTime();
 		const prevSunday = getSunday(-1).getTime();
-		return this.props.notifications.filter((n) => n.timestamp > prevSunday && n.timestamp < lastSunday );
+		return notifications.filter((n) => n.timestamp > prevSunday && n.timestamp < lastSunday );
 	}
 
-	public moreThanTwoWeeksAgoNotifications = () => {
+	public moreThanTwoWeeksAgoNotifications = (notifications) => {
 		const prevSunday = getSunday(-1).getTime();
-		return this.props.notifications.filter((n) => n.timestamp < prevSunday );
+		return notifications.filter((n) => n.timestamp < prevSunday );
 	}
 
 	public hasNotifications = () => {
@@ -114,6 +126,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							sendUpdateNotificationRead: this.props.sendUpdateNotificationRead ,
 							sendDeleteNotification: this.props.sendDeleteNotification
 						};
+
+		const groupedByTeamspace = toArray(groupBy(sortBy(this.props.notifications, "teamSpace"), "teamSpace"));
+
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Badge badgeContent={count} color={badgeColor} style={ {marginRight: 10, marginTop: 2}}>
@@ -132,19 +147,28 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							<NotificationEmptyItem/>}
 						{this.hasNotifications() &&
 							<>
-							<NotificationsPanel
-								labelLeft={simpleDate(new Date())} labelRight="this week"
-								notifications={this.thisWeeksNotifications()}
-								{...actions}
-								/>
-							<NotificationsPanel
-								labelRight="last week"
-								notifications={this.lastWeeksNotifications() }
-								{...actions}/>
-							<NotificationsPanel
-								labelRight="more than two weeks ago"
-								notifications={this.moreThanTwoWeeksAgoNotifications() }
-								{...actions}/>
+							<NotificationsDate/>
+							{groupedByTeamspace.map((notifications) =>
+								(<NotificationsPanel
+									labelLeft={"In " + notifications[0].teamSpace} labelRight="this week"
+									notifications={this.thisWeeksNotifications(notifications)}
+									{...actions}
+									/>)
+							)}
+							{groupedByTeamspace.map((notifications) =>
+								(<NotificationsPanel
+									labelLeft={"In " + notifications[0].teamSpace}
+									labelRight="last week"
+									notifications={this.lastWeeksNotifications(notifications) }
+									{...actions}/>)
+							)}
+							{groupedByTeamspace.map((notifications) =>
+								(<NotificationsPanel
+									labelLeft={"In " + notifications[0].teamSpace}
+									labelRight="more than two weeks ago"
+									notifications={this.moreThanTwoWeeksAgoNotifications(notifications) }
+									{...actions}/>)
+							)}
 							</>
 						}
 					</List>

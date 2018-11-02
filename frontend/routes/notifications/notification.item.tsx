@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Paper } from "@material-ui/core";
+import { Paper, Tooltip } from "@material-ui/core";
 import Avatar from '@material-ui/core/Avatar';
 import Icon from "@material-ui/core/Icon";
 import * as React from "react";
@@ -77,9 +77,11 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 	}
 
 	public render = () => {
-		const backgroundColor = this.props.read ? "transparent" : "white";
-		const assignedIssuesText = `${this.props.issuesId.length} assigned issues `;
-		const modelText = `In ${this.props.modelName}`;
+		const {issuesId , teamSpace, modelName, read} =  this.props;
+
+		const backgroundColor = read ? "transparent" : "white";
+		const assignedIssuesText = `${issuesId.length} assigned issues `;
+		const modelText = `In ${modelName}`;
 
 		return (
 			<Paper  style={ Object.assign({backgroundColor}, {margin: 5})}
@@ -89,13 +91,13 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 						<Icon>place</Icon>
 					</Avatar>
 
-					{this.props.read &&
+					{read &&
 						<NotificationItemText
 							primaryColor="rgba(0, 0, 0, 0.54)" secondaryColor="rgba(0, 0, 0, 0.24)" fontWeight="400"
 							primary={assignedIssuesText} secondary={modelText}
 							/>
 					}
-					{!this.props.read &&
+					{!read &&
 						<NotificationItemText
 							primaryColor="rgba(0, 0, 0, 0.87)" secondaryColor="rgba(0, 0, 0, 0.54)" fontWeight="600"
 							primary={assignedIssuesText} secondary={modelText}
@@ -103,12 +105,12 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 					}
 
 					<NotificationListItemSecondaryAction>
-						{!this.props.read  &&
+						{!read  &&
 						<SmallIconButton tooltip="Mark as read" onClick={this.markAsRead}>
 							drafts
 						</SmallIconButton>
 						}
-						{this.props.read  &&
+						{read  &&
 						<SmallIconButton tooltip="Mark as unread" onClick={this.markAsUnread}>
 							markunread
 						</SmallIconButton>
