@@ -20,9 +20,9 @@ import { Route } from 'react-router-dom';
 
 import { PageTemplate } from './components/pageTemplate/pageTemplate.component';
 
-import CookiesPageContent = require('./../../staticPages/cookies.html');
-import TermsPageContent = require('./../../staticPages/terms.html');
-import PrivacyPageContent = require('./../../staticPages/privacy.html');
+import * as CookiesPageContent from './../../staticPages/cookies.html';
+import * as TermsPageContent from './../../staticPages/terms.html';
+import * as PrivacyPageContent from './../../staticPages/privacy.html';
 
 interface IProps {
 	match: any;
@@ -51,10 +51,14 @@ export class StaticPage extends React.PureComponent<IProps, any> {
 		const { match } = this.props;
 
 		return staticPages.map((page) => (
-			<Route path={`${match.url}${page.route}`} key={page.route} render={() =>
-				<PageTemplate title={ page.title }>
-					{ page.contentFile }
-				</PageTemplate>}
+			<Route
+				key={page.route}
+				path={`${match.url}${page.route}`}
+				render={() =>
+					<PageTemplate title={ page.title }>
+						{ page.contentFile }
+					</PageTemplate>
+				}
 			/>
 		));
 	}
