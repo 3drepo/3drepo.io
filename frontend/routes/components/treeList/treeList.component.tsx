@@ -40,6 +40,7 @@ interface IProps {
 	level?: number;
 	active?: boolean;
 	disableShadow?: boolean;
+	forceActive?: boolean;
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => JSX.Element;
@@ -116,11 +117,11 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, level, renderRoot, ...props } = this.props;
+		const { items, level, renderRoot, forceActive, ...props } = this.props;
 		const { active, hovered } = this.state;
 		const disabled = !items.length;
 
-		const containerProps = { active, level, disabled, hovered };
+		const containerProps = { active, level, disabled, hovered, forceActive };
 
 		const headlineProps = {
 			...props,
