@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { ListItem, Toolbar, ListItemSecondaryAction, Avatar, ListItemText, Button } from '@material-ui/core';
+import { NotificationsPanelHeader } from './notifications.panel.header';
 
 export const NotificationListItem = styled(ListItem)`
 	&& {
@@ -45,3 +46,12 @@ export const NotificationListItemSecondaryAction = styled.div`
 		width:75px;
 	}
 `;
+
+// export const NotificationWeekHeader = styled(NotificationsPanelHeader)`
+// 	&& {
+// 		padding-top: 15px;
+// 		padding-left: 15px;
+// 		padding-right: 15px;
+// 		margin-bottom: -15px;
+// 	}
+// `;

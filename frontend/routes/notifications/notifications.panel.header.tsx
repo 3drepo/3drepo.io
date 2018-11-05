@@ -14,25 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { ListItem } from '@material-ui/core';
+import { ItemLabel } from "../components/components.styles";
+import { NotificationsPanelHeaderContainer } from "./notifications.panel.styles";
+import * as React from "react";
 
-export const NotificationsPanelItem = styled(ListItem)`
-&& {
-	padding-left: 10px;
-	padding-right: 10px;
-	padding-top: 15px;
-	padding-bottom: 0;
-	width: 100%;
-	display: block;
+export class NotificationsPanelHeader extends React.PureComponent<any, any> {
+	public render = () => {
+		const { labelLeft, labelRight } = this.props;
+		return (<NotificationsPanelHeaderContainer style={this.props.style}>
+					<ItemLabel>
+						{labelLeft}
+					</ItemLabel>
+					<ItemLabel>
+						{labelRight}
+					</ItemLabel>
+				</NotificationsPanelHeaderContainer>);
+	}
 }
-`;
-
-export const NotificationsPanelHeaderContainer = styled.div`
-&& {
-	display: flex;
-	justify-content: space-between;
-	padding-left: 5px;
-	padding-right: 5px;
-}
-`;

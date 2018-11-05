@@ -57,6 +57,8 @@ function StateManagerRun(
 			StateManager.setStateVar(StateManager.functions[i], false);
 		}
 
+		StateManager.clearQuery();
+
 		const stateChangeObject = {
 			toState,
 			toParams,
@@ -79,7 +81,9 @@ function StateManagerRun(
 	});
 
 	$rootScope.$on("$locationChangeSuccess", () => {
+
 		AnalyticService.sendPageView(location);
+
 		const queryParams = $location.search();
 
 		// /** Hack: query strings are working erratically with the statemanager
@@ -90,11 +94,11 @@ function StateManagerRun(
 		}
 
 		if (Object.keys(queryParams).length === 0) {
-			StateManager.state.changing = false;
 			StateManager.clearQuery();
 		} else {
 			StateManager.setQuery(queryParams);
 		}
+
 	});
 
 }

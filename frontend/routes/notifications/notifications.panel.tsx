@@ -20,7 +20,8 @@ import * as React from "react";
 import {INotification, NotificationItem} from "./notification.item";
 import { List } from "@material-ui/core";
 import { ItemLabel } from "../components/components.styles";
-import { NotificationsPanelItem, NotificationsPanelHeader } from "./notifications.panel.styles";
+import { NotificationsPanelItem, NotificationsPanelHeaderContainer } from "./notifications.panel.styles";
+import { NotificationsPanelHeader } from "./notifications.panel.header";
 
 interface IProps {
 	labelLeft?: string;
@@ -52,14 +53,7 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 		};
 
 		return (<NotificationsPanelItem>
-						<NotificationsPanelHeader>
-							<ItemLabel>
-								{labelLeft}
-							</ItemLabel>
-							<ItemLabel>
-								{labelRight}
-							</ItemLabel>
-						</NotificationsPanelHeader>
+						<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
 						<List style={{paddingBottom: 0}} > {notifications.map((notification) =>
 								<NotificationItem key={notification._id}
 								{...notification} {...actions }/>

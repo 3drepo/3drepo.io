@@ -26,9 +26,9 @@ import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSub
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 import { NotificationsPanel } from "./notifications.panel";
 import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
-import { BarIconButton, UserActionButton, ItemLabel } from "../components/components.styles";
+import { BarIconButton, UserActionButton } from "../components/components.styles";
 import {toArray, groupBy, sortBy } from "lodash";
-import { NotificationsPanelItem, NotificationsPanelHeader } from "./notifications.panel.styles";
+import { NotificationsPanelHeader } from "./notifications.panel.header";
 
 // Props bound in <file://./notifications.container.ts>
 interface IProps {
@@ -39,15 +39,10 @@ interface IProps {
 	notifications: INotification[]; // Bound to store state notifications
 }
 
-const NotificationsDate = () =>
-	(<NotificationsPanelItem>
-			<NotificationsPanelHeader>
-				<ItemLabel>
-					{simpleDate(new Date())}
-				</ItemLabel>
-				<ItemLabel/>
-			</NotificationsPanelHeader>
-	</NotificationsPanelItem>);
+// Note: tried to use styled components and didnt worked.
+const NotificationWeekHeader = (props) =>
+	(<NotificationsPanelHeader {...props} 
+		style={{marginBottom: -15, paddingLeft: 15, paddingRight: 15, marginTop: 15 }}/>);
 
 export class Notifications extends React.PureComponent<IProps, any> {
 	public state = {
@@ -147,25 +142,37 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							<NotificationEmptyItem/>}
 						{this.hasNotifications() &&
 							<>
-							<NotificationsDate/>
+							{this.thisWeeksNotifications(this.props.notifications).length > 0 &&
+								<NotificationWeekHeader labelLeft="This week"
+										labelRight={simpleDate(new Date())}/>
+							}
+
 							{groupedByTeamspace.map((notifications) =>
 								(<NotificationsPanel
-									labelLeft={"In " + notifications[0].teamSpace} labelRight="this week"
+									key={`${notifications[0].teamSpace}-thisweek`}
+									labelLeft={"In " + notifications[0].teamSpace}
 									notifications={this.thisWeeksNotifications(notifications)}
 									{...actions}
 									/>)
 							)}
+							{this.lastWeeksNotifications(this.props.notifications).length > 0 &&
+								<NotificationWeekHeader labelLeft="Last week"/>
+							}
 							{groupedByTeamspace.map((notifications) =>
 								(<NotificationsPanel
+									key={`${notifications[0].teamSpace}-lastweek`}
 									labelLeft={"In " + notifications[0].teamSpace}
-									labelRight="last week"
 									notifications={this.lastWeeksNotifications(notifications) }
 									{...actions}/>)
 							)}
+
+							{this.moreThanTwoWeeksAgoNotifications(this.props.notifications).length > 0 &&
+								<NotificationWeekHeader labelLeft="more than two weeks ago"/>
+							}
 							{groupedByTeamspace.map((notifications) =>
 								(<NotificationsPanel
+									key={`${notifications[0].teamSpace}-older`}
 									labelLeft={"In " + notifications[0].teamSpace}
-									labelRight="more than two weeks ago"
 									notifications={this.moreThanTwoWeeksAgoNotifications(notifications) }
 									{...actions}/>)
 							)}
