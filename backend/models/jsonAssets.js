@@ -90,7 +90,6 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 };
 
 JSONAssets.getTree = function(account, model, branch, rev) {
-	console.log(account, model, branch, rev);
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
 		if(history) {
 			const revId = utils.uuidToString(history._id);
