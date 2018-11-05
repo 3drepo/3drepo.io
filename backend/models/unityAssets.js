@@ -37,7 +37,9 @@ function getAssetListFromRef(ref, username) {
 				Promise.resolve({_id : ref._rid});
 
 			return getRevIdPromise.then((revInfo) => {
-				return getAssetListEntry(ref.owner, ref.project, revInfo._id);
+				if (revInfo) {
+					return getAssetListEntry(ref.owner, ref.project, revInfo._id);
+				}
 			});
 		}
 	});
@@ -65,7 +67,7 @@ UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 				}
 
 				return Promise.all(fetchPromise).then((assetLists) => {
-					return {models: assetLists};
+					return {models: assetLists.filter((list) => list)};
 				});
 
 			});

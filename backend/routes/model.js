@@ -348,11 +348,12 @@ function getIdToMeshes(req, res, next) {
 }
 
 function getModelTree(req, res, next) {
+	const revId = req.params.rev;
 	JSONAssets.getTree(
 		req.params.account,
 		req.params.model,
-		req.params.rev ? undefined : C.MASTER_BRANCH_NAME,
-		req.param.rev
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId
 	).then(file => {
 
 		const headers = {
@@ -384,18 +385,18 @@ function getModelProperties(req, res, next) {
 }
 
 function getTreePath(req, res, next) {
+	JSONAssets.getTreePath(
+		req.params.account,
+		req.params.model,
+		req.params.rev ? undefined : C.MASTER_BRANCH_NAME,
+		req.param.rev,
+		req.session.user.username
+	).then(file => {
 
-	const model = req.params.model;
-	const account = req.params.account;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getTreePath(account, model, branch, req.params.rev, username).then(treePath => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, treePath);
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
