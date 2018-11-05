@@ -12,5 +12,6 @@ export const COLOR = {
 	BLACK_30: 'rgba(0, 0, 0, .3)',
 	BLACK_40: 'rgba(0, 0, 0, .4)',
 	BLACK_60: 'rgba(0, 0, 0, .6)',
-	BLACK_6: 'rgba(0, 0, 0, .06)'
+	BLACK_6: 'rgba(0, 0, 0, .06)',
+	GRAY: '#f0f0f0'
 };
