@@ -20,19 +20,28 @@ import styled from 'styled-components';
 import { FONT_WEIGHT, COLOR } from '../../../../styles';
 import * as RowMenu from '../rowMenu/rowMenu.styles';
 
+const MODEL_HOVER_COLOR = COLOR.GRAY;
+
 export const Container = styled.div`
   padding-left: 112px;
   padding-right: 13px;
   font-size: 14px;
   font-weight: ${FONT_WEIGHT.SEMIBOLD};
   color: ${COLOR.BLACK_60};
+  transition: background 200ms ease-in-out;
 
   ${RowMenu.StyledGrow} {
     position: absolute;
-    background: ${COLOR.WHITE};
-    box-shadow: -10px 0px 26px -6px ${COLOR.WHITE};
+    box-shadow: -10px 0px 26px -6px transparent;
     right: 45px;
     width: auto;
+    transition: background 200ms ease-in-out;
+  }
+
+  &:hover,
+  &:hover ${RowMenu.StyledGrow} {
+    background: ${MODEL_HOVER_COLOR};
+    box-shadow: -10px 0px 20px -6px ${MODEL_HOVER_COLOR};
   }
 `;
 
