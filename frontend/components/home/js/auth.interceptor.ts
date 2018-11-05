@@ -16,7 +16,6 @@
  */
 
 export class AuthInterceptor {
-
 	public static $inject: string[] = [
 		"$injector"
 	];
@@ -44,19 +43,19 @@ export class AuthInterceptor {
 
 	}
 
-	public request(config) {
+	public request = (config) => {
 		return config;
 	}
 
-	public requestError(config) {
+	public requestError = (config) => {
 		return config;
 	}
 
-	public response(res) {
+	public response = (res) => {
 		return res;
 	}
 
-	public sessionExpired() {
+	public sessionExpired = () => {
 
 		const DialogService = this.$injector.get("DialogService");
 		const AuthService = this.$injector.get("AuthService");
