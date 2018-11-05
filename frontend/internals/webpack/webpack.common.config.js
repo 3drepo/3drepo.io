@@ -18,10 +18,7 @@ module.exports = (options) => {
         {
           test: /\.(ts|tsx)$/,
           loader: 'ts-loader',
-          exclude: /node_modules/,
-          options: {
-            transpileOnly: true
-          }
+          exclude: /node_modules/
         },
         {
           test: /\.(ts|tsx)$/,
@@ -36,7 +33,7 @@ module.exports = (options) => {
             options: {
               outputPath: '../images/',
               publicPath: 'images/',
-              name(file) {
+              name() {
                 if (options.mode === 'development') {
                   return '[name].[ext]'
                 }
@@ -48,11 +45,12 @@ module.exports = (options) => {
         }
       ]
     },
-    plugins: [...(options.plugins || [
+    plugins: [
       new CopyWebpackPlugin([
         { from: 'node_modules/zxcvbn/dist/zxcvbn.js' }
-      ], options)
-    ])]
+      ], options),
+      ...(options.plugins || [])
+    ]
   }
 
   return config;

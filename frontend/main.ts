@@ -1,7 +1,5 @@
 // This file acts a way for Webpack to get all the required dependencies in one place
 // then compile everything down to one file that the browser can understand
-require('angular');
-
 import 'angular';
 import 'angular-ui-router';
 import 'angular-material';
