@@ -55,4 +55,8 @@ export const Time = styled.div`
 
 export const LinkedName = styled.span`
   cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
