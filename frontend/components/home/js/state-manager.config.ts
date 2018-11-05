@@ -123,7 +123,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.registerVerify", {
-		url: "/register-verify?token&username",
+		url: "/register-verify?token&username?pay",
 		template: "<register-verify />",
 		data: {
 			isLogoutRequired: true
