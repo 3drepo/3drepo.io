@@ -109,8 +109,9 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		} as any;
 		const queryParams = queryString.parse(location.search);
 
-		const hasProperProject = projects.find(({ name }) => name === queryParams.project);
-		if (hasProperProject) {
+		const project = projects.find(({ name }) => name === queryParams.project);
+
+		if (project) {
 			state.selectedProject = queryParams.project;
 			this.onProjectChange(null, queryParams.project);
 		} else {
@@ -138,8 +139,9 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderPermissionsView = (props) => {
-		const {currentView} = this.state;
+	public renderPermissionsView = () => {
+		const { currentView } = this.state;
+
 		return (
 			<>
 				{ currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions /> }
@@ -151,7 +153,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	public render() {
 		const {match} = this.props;
 		const {currentView, selectedProject, projectsItems} = this.state;
-
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>

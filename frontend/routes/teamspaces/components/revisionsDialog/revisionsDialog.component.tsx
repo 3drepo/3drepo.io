@@ -46,14 +46,16 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
+		const { handleClose, revisions } = this.props;
+
 		return (
 			<DialogContent>
-				{ !this.props.revisions.length ?
+				{ !revisions.length ?
 					<Message>No Revisions Present</Message>
 					:
 					<>
 						<List>
-							{this.props.revisions && this.props.revisions.map((revision) => {
+							{revisions && revisions.map((revision) => {
 								return (
 									<Item button key={revision._id}
 										onClick={(event) => this.revisionClickHandler(event, revision.tag)}>
@@ -78,7 +80,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 							})}
 						</List>
 						<StyledDialogActions>
-							<Button variant="raised" color="secondary">
+							<Button variant="raised" color="secondary" onClick={handleClose}>
 								Cancel
 							</Button>
 						</StyledDialogActions>

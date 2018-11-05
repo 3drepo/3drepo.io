@@ -256,6 +256,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 */
 	public renderModel = (props) => {
 		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
+
 		return (
 			<ModelItem
 				{...props}
@@ -264,8 +265,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
 					page: 'userManagement',
 					teamspace: this.state.activeTeamspace,
-					project: props.name,
-					tab: TABS_TYPES.PROJECTS
+					project: props.projectName,
+					tab: TABS_TYPES.PROJECTS,
+					modelId: props.model,
+					view: 1
 				})}
 				onSettingsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
 					page: 'modelsetting',
