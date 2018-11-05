@@ -769,95 +769,6 @@ function getModelProperties(account, model, branch, rev, username) {
 	});
 }
 
-function getTreePath(account, model, branch, rev, username) {
-	let subTreePaths;
-	let revId, treePathsFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			revId = utils.uuidToString(history._id);
-			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getTreePaths = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getTreePaths.push(
-				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						idToPath: obj.treePaths.idToPath,
-						owner: ref.owner,
-						model: ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(getTreePaths);
-
-	}).then(_subTreePaths => {
-
-		subTreePaths = _subTreePaths;
-		return stash.findStashByFilename({ account, model }, "json_mpc", treePathsFileName);
-
-	}).then(buf => {
-		let treePaths = {};
-
-		if(buf) {
-			treePaths = JSON.parse(buf);
-		}
-
-		if (!treePaths.idToPath) {
-			treePaths.idToPath = [];
-		}
-
-		if(subTreePaths.length > 0) {
-			treePaths.subModels = [];
-		}
-		subTreePaths.forEach(subTreePath => {
-			// Model properties hidden nodes
-			// For a federation concatenate all together in a
-			// single array
-			if (subTreePath && subTreePath.idToPath) {
-				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
-			}
-		});
-
-		return Promise.resolve({treePaths, status});
-
-	});
-}
-
 function searchTree(account, model, branch, rev, searchString, username) {
 
 	const search = (history) => {
@@ -1433,7 +1344,6 @@ module.exports = {
 	getIdMap,
 	getIdToMeshes,
 	getModelProperties,
-	getTreePath,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
