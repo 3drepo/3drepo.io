@@ -23,7 +23,7 @@ export const Container = styled.div`
   justify-content: flex-end;
   align-items: center;
   position: relative;
-  z-index: 2;
+  z-index: 1;
   padding-right: 5px;
   height: 80px;
 `;

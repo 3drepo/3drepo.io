@@ -213,21 +213,19 @@ class RisksCardController implements ng.IController {
 				this.risksService.state.displayRisk = null;
 				this.selectedMenuOption = null;
 
-				this.$state.go("app.viewer",
-					{
-						account: this.account,
-						model: this.model,
-						revision: this.revision,
-						noSet: true
-					},
-					{notify: false}
-				).then(() => {
+				if (!newValue) {
 					const element = document.getElementById(risksListItemId);
 					if (element && element.scrollIntoView) {
 						element.scrollIntoView();
 					}
-				});
-
+				} else {
+					this.risksService.state.displayRisk = null;
+					this.risksService.resetSelectedRisk();
+					this.$state.go('app.viewer', {
+						modelId: this.model,
+						revision: this.revision
+					});
+				}
 			}
 		});
 
@@ -340,15 +338,14 @@ class RisksCardController implements ng.IController {
 		}
 
 		if (risk) {
-
 			this.viewerService.highlightObjects([]);
-			// TODO Change state to risk
-			this.$state.go("app.viewer",
+
+			this.$state.go("app.viewer.risks",
 				{
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					risk: risk._id,
+					riskId: risk._id,
 					noSet: true
 				},
 				{notify: false}

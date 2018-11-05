@@ -88,7 +88,6 @@ class IssuesController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.issuesService.removeUnsavedPin();
 
 		this.saveIssueDisabled = true;
@@ -107,6 +106,9 @@ class IssuesController implements ng.IController {
 		this.issuesReady = this.issuesService.getIssuesAndJobs(this.account, this.model, this.revision)
 			.then(() => {
 				this.$timeout(() => {
+					if (this.$state.params.issueId) {
+						this.issuesService.state.displayIssue = this.$state.params.issueId;
+					}
 					this.toShow = "showIssues";
 					this.showAddButton = true;
 					this.showProgress = false;
@@ -135,7 +137,7 @@ class IssuesController implements ng.IController {
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
-				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel = this.notificationService.getChannel(subModel.database, subModel.model);
 				channel.issues.unsubscribeFromCreated(this.onIssueCreated);
 				channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
 		});
@@ -219,24 +221,22 @@ class IssuesController implements ng.IController {
 					issueListItemId = "issue" + this.issuesService.state.selectedIssue._id;
 				}
 
-				this.issuesService.state.displayIssue = null;
-				this.selectedMenuOption = null;
+				if (!newValue) {
+					this.issuesService.state.displayIssue = null;
+					this.selectedMenuOption = null;
 
-				this.$state.go("app.viewer",
-					{
-						account: this.account,
-						model: this.model,
-						revision: this.revision,
-						noSet: true
-					},
-					{notify: false}
-				).then(() => {
 					const element = document.getElementById(issueListItemId);
 					if (element && element.scrollIntoView) {
 						element.scrollIntoView();
 					}
-				});
-
+				} else {
+					this.issuesService.state.displayIssue = null;
+					this.issuesService.resetSelectedIssue();
+					this.$state.go('app.viewer', {
+						modelId: this.model,
+						revision: this.revision
+					});
+				}
 			}
 		});
 
@@ -383,14 +383,14 @@ class IssuesController implements ng.IController {
 		}
 
 		if (issue) {
-
 			this.viewerService.highlightObjects([]);
-			this.$state.go("app.viewer",
+
+			this.$state.go("app.viewer.issues",
 				{
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					issue: issue._id,
+					issueId: issue._id,
 					noSet: true
 				},
 				{notify: false}

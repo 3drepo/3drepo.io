@@ -41,6 +41,10 @@ home #homeBackground {
 	top: 0;
 }
 
+home [ui-view] > * {
+	z-index: 1;
+}
+
 @media (max-width: 767px) {
 	home #homeLogo {
 		display: none;

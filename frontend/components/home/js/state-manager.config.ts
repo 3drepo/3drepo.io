@@ -37,15 +37,29 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 				model="vm.state.modelId"
 				branch="vm.state.branch"
 				revision="vm.state.revision"
-				issue-id="vm.state.issue"
-				risk-id="vm.state.risk"
+				issue-id="vm.state.issueId"
+				risk-id="vm.state.riskId"
 				state="vm.state"
 			/>
 		`,
+		data: {
+			isLoginRequired: true
+		},
 		params: {
 			modelId: { squash: true, value: null },
 			revision: { squash: true, value: null }
-		},
+		}
+	});
+
+	$stateProvider.state("app.viewer.issues", {
+		url: "/issues/:issueId",
+		data: {
+			isLoginRequired: true
+		}
+	});
+
+	$stateProvider.state("app.viewer.risks", {
+		url: "/risks/:riskId",
 		data: {
 			isLoginRequired: true
 		}

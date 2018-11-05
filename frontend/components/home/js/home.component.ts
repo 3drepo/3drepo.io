@@ -212,13 +212,8 @@ class HomeController implements ng.IController {
 
 		switch (event) {
 		case this.AuthService.events.USER_LOGGED_IN:
-
 			if (!currentData.error) {
 				if (!currentData.initialiser) {
-					if (!this.state.returnUrl) {
-						this.StateManager.updateState(true);
-					}
-
 					if (!this.state.account) {
 						const username = this.AuthService.getUsername();
 						if (!username) {
@@ -373,7 +368,6 @@ class HomeController implements ng.IController {
 		// we can improve the percieved performance for the user
 
 		const preCacheTemplates = [
-			"templates/account-info.html",
 			"templates/sign-up.html",
 			"templates/register-request.html"
 		];

@@ -61,6 +61,8 @@ export interface IMenuItem {
 export class PanelService {
 
 	public static $inject: string[] = [
+		"$state",
+
 		"EventService",
 		"TreeService"
 	];
@@ -69,6 +71,8 @@ export class PanelService {
 	private templatepanelCards: IPanelCards;
 
 	constructor(
+		private $state: any,
+
 		private EventService: any,
 		private TreeService: any
 	) {
@@ -76,6 +80,7 @@ export class PanelService {
 	}
 
 	public reset() {
+		const { issueId, riskId } = this.$state.params;
 		this.panelCards = {
 			left: [],
 			right: []
@@ -85,7 +90,7 @@ export class PanelService {
 			type: "issues",
 			title: "Issues",
 			showLiteMode: true,
-			show: true,
+			show: issueId || !riskId,
 			help: "List current issues",
 			icon: "place",
 			menu: [
@@ -266,7 +271,7 @@ export class PanelService {
 			type: "risks",
 			title: "SafetiBase",
 			showLiteMode: true,
-			show: false,
+			show: Boolean(riskId),
 			help: "Risk register",
 			icon: "report_problem",
 			minHeight: 260,

@@ -60,6 +60,11 @@ const UserMenuContent = (props) => {
 	const { currentUser: { username, avatarUrl, firstName, lastName }} = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 
+	const invokeAndClose = (callback) => (...args) => {
+		callback(...args);
+		props.close(...args);
+	};
+
 	return (
 		<MenuContent component="nav">
 			<MenuUser>
@@ -69,27 +74,23 @@ const UserMenuContent = (props) => {
 					url={avatarUrl}
 					fontSize={12}
 				/>
-{/* 				<MenuAvatar
-					alt={username}
-					src={avatarUrl}
-				/> */}
 				<MenuText primary={username} />
 			</MenuUser>
 			<Divider />
 			<UserMenuButton
 				icon="view_list"
 				label="Teamspaces"
-				onButtonClick={props.onTeamspacesClick}
+				onButtonClick={invokeAndClose(props.onTeamspacesClick)}
 			/>
 			<UserMenuButton
 				icon="description"
 				label="User manual"
-				onButtonClick={props.openUserManual}
+				onButtonClick={invokeAndClose(props.openUserManual)}
 			/>
 			<MenuItem>
 				<MenuSwitch
 					checked={props.isLiteMode}
-					onChange={props.onLiteModeChange}
+					onChange={invokeAndClose(props.onLiteModeChange)}
 					color="secondary"
 					inputProps={{
 						'aria-label': 'Lite mode'
@@ -100,12 +101,12 @@ const UserMenuContent = (props) => {
 			{hasMemorySettings && <UserMenuButton
 				icon="restore"
 				label="Reset Settings"
-				onButtonClick={props.resetMemorySettings}
+				onButtonClick={invokeAndClose(props.resetMemorySettings)}
 			/>}
 			<UserMenuButton
 				icon="exit_to_app"
 				label="Logout"
-				onButtonClick={props.onLogout}
+				onButtonClick={invokeAndClose(props.onLogout)}
 			/>
 		</MenuContent>
 	);
@@ -138,7 +139,7 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 		return (
 			<ButtonMenu
 				renderButton={UserButton}
-				renderContent={() => <UserMenuContent {...menuContentProps} />}
+				renderContent={(props) => <UserMenuContent {...props} {...menuContentProps} />}
 				icon="account_circle"
 				PopoverProps={{
 					anchorOrigin: {

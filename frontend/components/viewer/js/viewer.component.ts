@@ -49,7 +49,6 @@ class ViewerController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
 
@@ -90,9 +89,7 @@ class ViewerController implements ng.IController {
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}
 		});
-
 	}
-
 }
 
 export const ViewerComponent: ng.IComponentOptions = {
