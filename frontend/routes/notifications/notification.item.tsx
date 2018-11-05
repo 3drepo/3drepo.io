@@ -48,11 +48,12 @@ const NotificationItemText = (props) => {
 	const primaryStyle =  Object.assign({color}, {fontWeight});
 	const secondaryStyle =  Object.assign( {color: secColor},  {fontWeight});
 
-	return (<NotificationListItemText
-		primaryTypographyProps = { {style: primaryStyle} }
-		secondaryTypographyProps = { {style: secondaryStyle} }
-		primary={props.primary}
-		secondary={props.secondary }/>);
+	return (
+		<NotificationListItemText
+			primaryTypographyProps = { {style: primaryStyle} }
+			secondaryTypographyProps = { {style: secondaryStyle} }
+			primary={props.primary}
+			secondary={ <Tooltip title={props.secondary} placement="bottom-start"><span>{props.secondary}</span></Tooltip>}/>);
 };
 
 export class NotificationItem extends React.PureComponent<IProps, any> {

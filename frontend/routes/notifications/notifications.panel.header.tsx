@@ -21,8 +21,7 @@ import * as React from "react";
 export class NotificationsPanelHeader extends React.PureComponent<any, any> {
 	public render = () => {
 		const { labelLeft, labelRight, style } = this.props;
-		return (
-			<NotificationsPanelItem style={style}>
+		return (<NotificationsPanelItem style={style}>
 				<NotificationsPanelHeaderContainer>
 							<ItemLabel>
 								{labelLeft}
