@@ -237,7 +237,7 @@ export class TreeService {
 
 							subTrees.forEach((subtree) => {
 
-								const subtreeIdToPath = idToPath.treePaths.subModels.find((submodel) => {
+								const subtreeIdToPath = idToPath.subModels.find((submodel) => {
 									return subtree.model === submodel.model;
 								});
 

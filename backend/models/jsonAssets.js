@@ -33,7 +33,8 @@ function getSubTreeInfo(account, model, currentIds) {
 		const subTreeInfo = [];
 		subModelRefs.forEach((ref) => {
 			subTreeInfo.push({
-				_id: utils.uuidToString(ref._rid),
+				_id: utils.uuidToString(ref._id),
+				rid: utils.uuidToString(ref._rid),
 				teamspace:ref.owner,
 				model: ref.project});
 		});
@@ -115,8 +116,8 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 								if(i > 0) {
 									outStream.write(",");
 								}
-								const url = subTreeInfo[i]._id !== C.MASTER_BRANCH ?
-									`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i]._id}/fulltree.json` :
+								const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
+									`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
 									`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
 								subTreeInfo[i].url = url;
 								outStream.write(JSON.stringify(subTreeInfo[i]));
