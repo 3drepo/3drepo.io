@@ -329,7 +329,7 @@ export class GroupsService {
 	 * @param model the model id for the group
 	 */
 	public deleteHighlightedGroups(teamspace: string, model: string) {
-		const groupsToDelete = this.state.groups.filter((g) => g.highlighted);
+		const groupsToDelete = this.state.groupsToShow.filter((g) => g.highlighted);
 		return this.deleteGroups(teamspace, model, groupsToDelete);
 	}
 
