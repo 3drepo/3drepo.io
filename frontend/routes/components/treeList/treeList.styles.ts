@@ -21,6 +21,8 @@ import Grid from '@material-ui/core/Grid';
 
 import { COLOR, ellipsis } from '../../../styles';
 
+const isActive = (props) => props.forceActive && props.active && !props.disabled;
+
 export const Headline = styled.div`
   cursor: pointer;
   min-height: 50px;
@@ -37,19 +39,22 @@ export const Headline = styled.div`
 
 export const Details = styled.div`
   transition: all 200ms ease-in-out;
+  background: ${(props: any) => props.active ? COLOR.WHITE : 'transparent'};
+
   box-shadow: 0 12px 30px ${(props: any) => props.disableShadow ? 'none' : 'currentColor'};
 `;
 
 export const Container = styled.div`
   overflow: hidden;
   border-bottom: 1px solid ${COLOR.BLACK_6};
-  background: ${(props: any) => props.active ? COLOR.WHITE : 'rgba(250, 250, 250)'};
+  background: ${(props: any) => props.active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
   transition: background 150ms ease-in-out;
   color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
   user-select: none;
 
 	& > ${Headline} {
-		padding-left: ${(props: any) => (props.level || 0) * 24}px;
+    padding-left: ${(props: any) => (props.level || 0) * 24}px;
+    background: ${(props: any) => isActive(props) ? COLOR.WHITE : 'transparent'};
   }
 `;
 

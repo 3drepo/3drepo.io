@@ -38,6 +38,7 @@ export const ModelDirectoryItem = (props: IProps) => {
 			renderItem={renderChildItem}
 			active={true}
 			disableShadow={true}
+			forceActive={true}
 			renderActions={() => (
 				<TooltipButton
 					{...ROW_ACTIONS.ADD_NEW}
