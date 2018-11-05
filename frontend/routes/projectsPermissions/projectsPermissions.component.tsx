@@ -16,10 +16,9 @@
  */
 
 import * as React from 'react';
-import { isEqual } from 'lodash';
+import * as queryString from 'query-string';
 
 import { PROJECT_ROLES_LIST } from '../../constants/project-permissions';
-import { CELL_TYPES } from '../components/customTable/customTable.component';
 import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
 import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { Container } from './projectsPermissions.styles';
@@ -46,7 +45,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 		currentUser: {},
 		selectedUsers: []
 	};
-
+	
 	public hasDisabledPermissions = (row) => {
 		const {currentUser} = this.state as IState;
 		const passBaseValidation = row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
@@ -89,7 +88,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const {permissions} = this.props;
+		const { permissions } = this.props;
 
 		return (
 			<Container>

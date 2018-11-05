@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
 
 import { COLOR } from '../../../../styles';
 
@@ -29,12 +30,23 @@ export const ModelInfo = styled.p`
 
 export const HiddenFileInput = styled.input`
   visibility: hidden;
+  width: 0;
 `;
 
-export const FileLabel = styled.label``;
+export const FileLabel = styled.label`
+ && {
+    margin: 0 4px 0 0;
+  }
+`;
 
 export const StyledDialogActions = styled(DialogActions)`
   && {
     margin: 0;
+  }
+`;
+
+export const CancelButton = styled(Button)`
+  && {
+    margin: 0 4px 0 0;
   }
 `;

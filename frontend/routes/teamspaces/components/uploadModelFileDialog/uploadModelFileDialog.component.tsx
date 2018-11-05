@@ -31,7 +31,8 @@ import {
 	ModelInfo,
 	HiddenFileInput,
 	FileLabel,
-	StyledDialogActions
+	StyledDialogActions,
+	CancelButton
 } from './uploadModelFileDialog.styles';
 
 interface IProps {
@@ -96,7 +97,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { modelSettings, revisions, modelName } = this.props;
+		const { modelSettings, revisions, modelName, handleClose } = this.props;
 
 		if (!modelSettings || !revisions.length ) {
 			return <Loader />;
@@ -150,9 +151,16 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								onChange={this.onInputChange}
 							/>
 							<FileLabel htmlFor="flat-button-file">
-								<Button component="span">Select</Button>
+								<Button component="span">Select file</Button>
 							</FileLabel>
-							<Field render={({ form }) =>
+							<Field render={() =>
+								<CancelButton
+									onClick={handleClose}
+									color="secondary">
+									Cancel
+									</CancelButton>}
+							/>
+							<Field render={() =>
 								<Button
 									type="submit"
 									variant="raised"
