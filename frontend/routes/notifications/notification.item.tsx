@@ -84,7 +84,7 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 		const modelText = `In ${modelName}`;
 
 		return (
-			<Paper  style={ Object.assign({backgroundColor}, {margin: 5})}
+			<Paper  style={ Object.assign({backgroundColor}, {margin: 3})}
 							onClick={this.gotoNotification.bind(this)}>
 			<NotificationListItem button >
 					<Avatar>

@@ -32,14 +32,6 @@ interface IProps {
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
-	public notificationViewLink = (notification: INotification) => {
-		return `${notification.teamSpace}/${notification.modelId}?notificationId=${notification._id}`;
-	}
-
-	public gotoNotification = (notification: INotification) => {
-		location.href =  this.notificationViewLink(notification);
-	}
-
 	public render = () => {
 		const {notifications, labelLeft, labelRight} = this.props;
 
@@ -52,13 +44,16 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 			sendDeleteNotification: this.props.sendDeleteNotification
 		};
 
-		return (<NotificationsPanelItem>
-						<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
-						<List style={{paddingBottom: 0}} > {notifications.map((notification) =>
-								<NotificationItem key={notification._id}
-								{...notification} {...actions }/>
-							)}
-						</List>
-				</NotificationsPanelItem>);
+		return (<>
+					<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
+					<NotificationsPanelItem>
+							<List style={{paddingBottom: 0, paddingTop: 0}} >
+								{notifications.map((notification) =>
+									<NotificationItem key={notification._id}
+									{...notification} {...actions }/>
+								)}
+							</List>
+					</NotificationsPanelItem>
+				</>);
 	}
 }

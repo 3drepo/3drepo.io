@@ -41,8 +41,8 @@ interface IProps {
 
 // Note: tried to use styled components and didnt worked.
 const NotificationWeekHeader = (props) =>
-	(<NotificationsPanelHeader {...props} 
-		style={{marginBottom: -15, paddingLeft: 15, paddingRight: 15, marginTop: 15 }}/>);
+	(<NotificationsPanelHeader {...props}
+		style={{paddingBottom: 0 }}/>);
 
 export class Notifications extends React.PureComponent<IProps, any> {
 	public state = {
@@ -142,6 +142,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							<NotificationEmptyItem/>}
 						{this.hasNotifications() &&
 							<>
+							<NotificationsPanelHeader/>
 							{this.thisWeeksNotifications(this.props.notifications).length > 0 &&
 								<NotificationWeekHeader labelLeft="This week"
 										labelRight={simpleDate(new Date())}/>

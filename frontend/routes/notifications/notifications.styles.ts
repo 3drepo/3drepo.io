@@ -21,13 +21,14 @@ import { NotificationsPanelHeader } from './notifications.panel.header';
 
 export const NotificationListItem = styled(ListItem)`
 	&& {
-		padding: 9px;
+		padding: 6px;
 	}
 `;
 
 export const NotificationListItemText = styled(ListItemText)`
 	&& {
-		padding: 9px;
+		padding: 0px;
+		margin-left: 9px;
 	}
 
 	${NotificationListItem}:hover & {

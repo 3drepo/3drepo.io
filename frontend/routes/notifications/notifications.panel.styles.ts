@@ -19,10 +19,10 @@ import { ListItem } from '@material-ui/core';
 
 export const NotificationsPanelItem = styled(ListItem)`
 && {
-	padding-left: 10px;
-	padding-right: 10px;
-	padding-top: 15px;
-	padding-bottom: 0;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 5px;
+	padding-top: 0px;
 	width: 100%;
 	display: block;
 }
@@ -32,7 +32,7 @@ export const NotificationsPanelHeaderContainer = styled.div`
 && {
 	display: flex;
 	justify-content: space-between;
-	padding-left: 5px;
-	padding-right: 5px;
+	padding-left: 2px;
+	padding-right: 2px;
 }
 `;
