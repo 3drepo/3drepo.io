@@ -138,7 +138,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 						direction="row"
 						alignItems="center"
 						justify="flex-end">
-						<Time>{timestamp ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
+						<Time>{timestamp && !hovered ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
 						<RowMenu open={hovered}>
 							{this.renderActions(actions)}
 						</RowMenu>

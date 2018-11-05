@@ -54,6 +54,9 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 	public toggleForceOpen = (event) => {
 		event.stopPropagation();
 		this.setState({forceOpen: !this.state.forceOpen});
+		if (this.props.onMenuLock) {
+			this.props.onMenuLock(!this.state.forceOpen);
+		}
 	}
 
 	public onMenuEnter = () => {
