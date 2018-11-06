@@ -37,7 +37,7 @@ export const Headline = styled.h3`
   font-weight: ${FONT_WEIGHT.NORMAL};
 `;
 
-export const StyledButton = styled(Button)`
+export const StyledButton: any = styled(Button)`
   && {
     padding: 0 5px;
     margin: 0;

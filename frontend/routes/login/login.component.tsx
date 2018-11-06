@@ -61,7 +61,13 @@ export class Login extends React.PureComponent<IProps, IState> {
 
 	public renderLoginButtons = () => (
 		<LoginButtons container alignItems="center" justify="space-between">
-			<StyledButton color="secondary">Forgot password?</StyledButton>
+			<StyledButton
+				color="secondary"
+				component={Link}
+				to="/password-forgot"
+			>
+				Forgot password?
+			</StyledButton>
 
 			<Field render={({ form }) => (
 				<Button
@@ -69,7 +75,9 @@ export class Login extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="raised"
 					disabled={!form.isValid || form.isValidating}
-				>Log in</Button>
+				>
+					Log in
+				</Button>
 			)} />
 		</LoginButtons>
 	)
