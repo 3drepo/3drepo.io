@@ -72,18 +72,20 @@ export class GroupsService {
 	 */
 	public groupsFilterSearch(searchQuery: string) {
 
-		searchQuery = !searchQuery ? "" : searchQuery;
+		if (searchQuery === undefined || searchQuery === "") {
+			this.state.groupsToShow = this.state.groups.slice();
+		} else {
+			this.state.groupsToShow = this.state.groups.filter((group) => {
+				const toKeep = this.stringSearch(group.name, searchQuery)
+					|| this.stringSearch(group.description, searchQuery)
+					|| this.stringSearch(group.author, searchQuery);
 
-		this.state.groupsToShow = this.state.groups.filter((group) => {
-			const toKeep = this.stringSearch(group.name, searchQuery)
-				|| this.stringSearch(group.description, searchQuery)
-				|| this.stringSearch(group.author, searchQuery);
-
-			if (!toKeep) {
-				this.removeColorOverride(group._id);
-			}
-			return toKeep;
-		});
+				if (!toKeep) {
+					this.unhighlightGroup(group);
+				}
+				return toKeep;
+			});
+		}
 	}
 	/**
 	 * Check if a group is currently color overriden
@@ -340,16 +342,14 @@ export class GroupsService {
 	 * @param groups the groups array to delete
 	 */
 	public deleteGroups(teamspace: string, model: string, groups: any) {
-		if (groups.length > 0) {
+		if (groups && groups.length > 0) {
 			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
 					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
 				}).catch((err) => {
-					if (!groups) {
-						Promise.reject(err);
-					}
+					Promise.reject(err);
 				});
 		} else {
 			return Promise.resolve();
@@ -608,37 +608,6 @@ export class GroupsService {
 		let areEqual = objAIds.length === objBIds.length;
 		areEqual = areEqual && objAIds.every((i) => objBIds.indexOf(i) >= 0);
 		return areEqual;
-	}
-
-	/**
-	 * Highlight next group when deleting filtered groups.
-	 * @param groups
-	 */
-
-	private highlightNextgroup(groups: any[]) {
-		this.TreeService.clearCurrentlySelected();
-
-		const firstGroup =  groups[0];
-		const lastGroup = groups[groups.length - 1];
-
-		const firstIndex =  this.state.groupsToShow.indexOf( firstGroup);
-		const lastIndex =  this.state.groupsToShow.indexOf( lastGroup);
-
-		if (firstIndex === 0 && lastIndex === this.state.groupsToShow.length - 1) {
-			return;
-		}
-
-		// if (lastIndex === this.state.groupsToShow.length - 1) {
-		// 	this.selectGroup(this.state.groupsToShow[0]);
-		// 	return;
-		// }
-
-		if (groups.length !== this.state.groupsToShow.length) {
-			const nextGroupIdx =  lastIndex + 1;
-			this.selectGroup = (this.state.groupsToShow[nextGroupIdx === this.state.groupsToShow.length ? 0 : nextGroupIdx]);
-		}
-
-		this.selectGroup(this.state.groupsToShow[lastIndex + 1]);
 	}
 
 	private getFullIdsForNodes(nodes: any[]) {
