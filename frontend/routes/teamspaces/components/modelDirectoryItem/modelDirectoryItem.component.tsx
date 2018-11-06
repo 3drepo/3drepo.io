@@ -16,6 +16,8 @@
  */
 
 import * as React from 'react';
+import Bookmarks from '@material-ui/icons/Bookmarks';
+import BookmarksOutlined from '@material-ui/icons/BookmarksOutlined';
 
 import { TreeList } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
@@ -39,6 +41,10 @@ export const ModelDirectoryItem = (props: IProps) => {
 			active={true}
 			disableShadow={true}
 			forceActive={true}
+			IconProps={{
+				IconOpened: BookmarksOutlined,
+				IconClosed: Bookmarks
+			}}
 			renderActions={() => (
 				<TooltipButton
 					{...ROW_ACTIONS.ADD_NEW}

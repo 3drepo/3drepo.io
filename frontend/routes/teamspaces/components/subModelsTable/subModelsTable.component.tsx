@@ -16,15 +16,11 @@
  */
 
 import * as React from 'react';
-import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Checkbox from '@material-ui/core/Checkbox';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 
 import {
 	HeaderCell,
@@ -38,7 +34,7 @@ interface IProps {
 	title: string;
 	models: any[];
 	selectedModels: any[];
-	icon: string;
+	Icon: React.ComponentType;
 	handleAllClick: (event) => void;
 	handleIconClick: () => void;
 	handleItemClick: (event, modelName) => void;
@@ -49,7 +45,7 @@ const isSelected = (list, name) => list.indexOf(name) !== -1;
 
 export const SubModelsTable = (props: IProps) => {
 	const {
-		icon,
+		Icon,
 		title,
 		models,
 		selectedModels,
@@ -74,7 +70,7 @@ export const SubModelsTable = (props: IProps) => {
 							<Typography>{title}</Typography>
 						</HeaderCheckboxWrapper>
 						<IconButton onClick={handleIconClick} disabled={checkboxDisabled || !selectedModels.length}>
-							<Icon>{icon}</Icon>
+							<Icon />
 						</IconButton>
 					</HeaderCell>
 				</TableRow>

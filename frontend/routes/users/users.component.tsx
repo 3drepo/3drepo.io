@@ -26,6 +26,7 @@ import {
 	isEqual,
 	isEmpty
 } from 'lodash';
+import RemoveCircle from '@material-ui/icons/RemoveCircle';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import {
@@ -173,7 +174,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					icon: 'remove_circle',
+					Icon: RemoveCircle,
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
 				}

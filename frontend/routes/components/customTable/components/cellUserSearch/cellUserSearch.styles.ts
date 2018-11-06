@@ -17,11 +17,11 @@
 
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
-import Icon from '@material-ui/core/Icon';
+import Search from '@material-ui/icons/Search';
 
 import { FONT_WEIGHT, COLOR } from '../../../../../styles';
 
-export const SearchIcon = styled(Icon)`
+export const SearchIcon = styled(Search)`
 	&& {
 		font-size: 14px;
 		font-weight: ${FONT_WEIGHT.SEMIBOLD};

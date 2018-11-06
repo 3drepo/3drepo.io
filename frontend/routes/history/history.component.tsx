@@ -17,6 +17,8 @@
 
 import * as React from 'react';
 import { isEqual, isEmpty } from 'lodash';
+import CloudDownload from '@material-ui/icons/CloudDownload';
+
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { Loader } from '../components/loader/loader.component';
 import { LoaderContainer } from '../billing/billing.styles';
@@ -98,7 +100,7 @@ export class History extends React.PureComponent<IProps, IState> {
 					INVOICE_REFUND_STATUS : invoice.items[0].description },
 				{ value: invoice.gateway },
 				{ value: invoice.amount ? invoice.amount.toFixed(1) : '0' },
-				{ icon: 'cloud_download', onClick: this.onDownload.bind(null, this.props.teamspace, invoice.invoiceNo) }
+				{ Icon: CloudDownload, onClick: this.onDownload.bind(null, this.props.teamspace, invoice.invoiceNo) }
 			];
 
 			return { ...invoice, data };

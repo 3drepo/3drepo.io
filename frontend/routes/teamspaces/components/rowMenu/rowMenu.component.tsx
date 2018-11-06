@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { isEmpty } from 'lodash';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
+import MoreVert from '@material-ui/icons/MoreVert';
 
 import { StyledGrid, StyledGrow } from './rowMenu.styles';
 
@@ -54,9 +54,6 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 	public toggleForceOpen = (event) => {
 		event.stopPropagation();
 		this.setState({forceOpen: !this.state.forceOpen});
-		if (this.props.onMenuLock) {
-			this.props.onMenuLock(!this.state.forceOpen);
-		}
 	}
 
 	public onMenuEnter = () => {
@@ -101,7 +98,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					</StyledGrid>
 				</StyledGrow>
 				<IconButton aria-label="Toggle menu" onClick={this.toggleForceOpen}>
-					<Icon fontSize="small">more_vert</Icon>
+					<MoreVert fontSize="small" />
 				</IconButton>
 			</StyledGrid>
 		);

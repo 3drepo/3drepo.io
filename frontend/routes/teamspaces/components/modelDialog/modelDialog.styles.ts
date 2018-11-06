@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from './../../../../styles/colors';
 import { Field } from 'formik';
-import { CustomTable, TableButton } from '../../../components/customTable/customTable.component';
+import { CustomTable } from '../../../components/customTable/customTable.component';
 import FormControl from '@material-ui/core/FormControl';
 import TableCell from '@material-ui/core/TableCell';
 
@@ -69,8 +69,6 @@ export const ModelsTableContainer = styled.div`
 		}
 	}
 `;
-
-export const StyledTableButton = styled(TableButton)``;
 
 export const HeaderCheckboxWrapper = styled.div`
 	display: flex;
