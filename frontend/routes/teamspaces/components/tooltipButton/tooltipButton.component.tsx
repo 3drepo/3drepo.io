@@ -18,23 +18,22 @@
 import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 
 interface IProps {
 	label: string;
-	icon: string;
+	Icon: React.ComponentType;
 	color?: string;
 	action?: (event) => void;
 }
 
 export const TooltipButton = (props: IProps) => {
-	const { label, action = null, icon, color = 'inherit' } = props;
+	const { label, action = null, Icon, color = 'inherit' } = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
 		<Tooltip title={label}>
 			<IconButton aria-label={label} onClick={action}>
-				<Icon {...iconProps}>{icon}</Icon>
+				<Icon {...iconProps} />
 			</IconButton>
 		</Tooltip>
 	);

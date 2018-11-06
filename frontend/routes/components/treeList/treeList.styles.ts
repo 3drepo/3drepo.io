@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 
 import { COLOR, ellipsis } from '../../../styles';
@@ -67,8 +66,7 @@ export const Title = styled.div`
   ${ellipsis('100%')}
 `;
 
-export const StyledIcon = styled(Icon)`
-  && {
-    margin-right: 12px;
-  }
+export const IconContainer = styled.div`
+  margin-right: 12px;
+  display: flex;
 `;

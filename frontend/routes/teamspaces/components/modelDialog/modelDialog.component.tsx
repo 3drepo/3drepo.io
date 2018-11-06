@@ -25,6 +25,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
+import ArrowForward from '@material-ui/icons/ArrowForward';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
@@ -74,10 +77,8 @@ const getAvailableModels = (project) =>
 	project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
 
 const getFederatedModels = (project, name) =>
-	project.models.find(model => model.name === name).subModels.map(subModel => {
-		return {
-			name: subModel.name
-		}
+	project.models.find((model) => model.name === name).subModels.map((subModel) => {
+		return { name: subModel.name };
 	});
 
 const getModelsMap = (project) => {
@@ -291,7 +292,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					models={availableModels}
 					selectedModels={selectedAvailableModels}
 					handleIconClick={this.moveToFederated}
-					icon={'arrow_forward'}
+					Icon={ArrowForward}
 					handleAllClick={this.handleSelectAllAvailableClick}
 					handleItemClick={this.handleSelectAvailableItemClick}
 					checkboxDisabled={!this.state.selectedProject}
@@ -301,7 +302,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					models={federatedModels}
 					selectedModels={selectedFederatedModels}
 					handleIconClick={this.moveToAvailable}
-					icon={'arrow_back'}
+					Icon={ArrowBack}
 					handleAllClick={this.handleSelectAllFederatedClick}
 					handleItemClick={this.handleSelectFederatedItemClick}
 					checkboxDisabled={!this.state.selectedProject}

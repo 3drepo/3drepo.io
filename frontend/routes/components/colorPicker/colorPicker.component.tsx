@@ -17,12 +17,10 @@
 
 import * as React from 'react';
 import { memoize, identity } from 'lodash';
-import Popover from '@material-ui/core/Popover';
 import RootRef from '@material-ui/core/RootRef';
-import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 
 import {
 	Panel,
@@ -333,7 +331,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						<Dot item color={value}></Dot>
 						<Grid item>
 							<StyledIconButton aria-label="Toggle picker">
-								<Icon>arrow_drop_down</Icon>
+								<ArrowDropDown />
 							</StyledIconButton>
 						</Grid>
 					</ColorSelect>

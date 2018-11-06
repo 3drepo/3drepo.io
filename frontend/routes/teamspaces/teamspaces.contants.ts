@@ -15,39 +15,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import People from '@material-ui/icons/People';
+import Settings from '@material-ui/icons/Settings';
+import Delete from '@material-ui/icons/Delete';
+import CloudUpload from '@material-ui/icons/CloudUpload';
+import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
+import CloudDownload from '@material-ui/icons/CloudDownload';
+import AddCircle from '@material-ui/icons/AddCircle';
+import Edit from '@material-ui/icons/Edit';
+
 export const ROW_ACTIONS = {
 	PERMISSIONS: {
 		label: 'Permissions',
-		icon: 'people'
+		Icon: People
 	},
 	SETTINGS: {
 		label: 'Settings',
-		icon: 'settings'
+		Icon: Settings
 	},
 	DELETE: {
 		label: 'Delete',
-		icon: 'delete',
+		Icon: Delete,
 		color: 'error'
 	},
 	UPLOAD_FILE: {
 		label: 'Upload file',
-		icon: 'cloud_upload'
+		Icon: CloudUpload
 	},
 	REVISIONS: {
 		label: 'Revisions',
-		icon: 'settings_backup_restore'
+		Icon: SettingsBackupRestore
 	},
 	DOWNLOAD: {
 		label: 'Download',
-		icon: 'cloud_download'
+		Icon: CloudDownload
 	},
 	ADD_NEW: {
 		label: 'Add new item',
-		icon: 'add_circle'
+		Icon: AddCircle
 	},
 	EDIT: {
 		label: 'Edit',
-		icon: 'edit'
+		Icon: Edit
 	}
 };
 

@@ -17,10 +17,8 @@
 
 import * as React from 'react';
 import { debounce } from 'lodash';
-import Icon from '@material-ui/core/Icon';
 
 import { SearchField, SearchIcon } from './cellUserSearch.styles';
-import { SORT_ORDER_TYPES } from '../../../../../constants/sorting';
 import { SortLabel } from '../tableHeading/tableHeading.styles';
 
 interface IProps {
@@ -61,7 +59,7 @@ export class CellUserSearch extends React.PureComponent<IProps, IState> {
 					direction={sortOrder}
 					onClick={onClick}
 				/>
-				<SearchIcon>search</SearchIcon>
+				<SearchIcon />
 				<SearchField
 					label={label}
 					value={searchText}

@@ -18,7 +18,6 @@
 import * as React from 'react';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
@@ -28,7 +27,7 @@ import { ROW_ACTIONS } from '../../teamspaces.contants';
 
 interface IAction {
 	label: string;
-	icon: string;
+	Icon: React.ComponentType;
 	action: () => void;
 	color?: string;
 }
@@ -95,12 +94,12 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderActions = (actions) => {
-		return actions ? actions.map(({label, action, icon, color}, index) => {
+		return actions ? actions.map(({label, action, Icon, color}, index) => {
 			const iconProps = {color, fontSize: 'small'} as any;
 			return (
 				<Tooltip title={label} key={index}>
 					<IconButton aria-label={label} onClick={action}>
-						<Icon {...iconProps}>{icon}</Icon>
+						<Icon {...iconProps} />
 					</IconButton>
 				</Tooltip>
 			);

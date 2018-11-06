@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import * as queryString from 'query-string';
 
 import { PROJECT_ROLES_LIST } from '../../constants/project-permissions';
 import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
@@ -45,7 +44,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, any> {
 		currentUser: {},
 		selectedUsers: []
 	};
-	
+
 	public hasDisabledPermissions = (row) => {
 		const {currentUser} = this.state as IState;
 		const passBaseValidation = row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;

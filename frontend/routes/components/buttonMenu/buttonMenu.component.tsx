@@ -17,12 +17,12 @@
 
 import * as React from 'react';
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
-import Icon, { IconProps as IIconProps } from '@material-ui/core/Icon';
+import { IconProps as IIconProps } from '@material-ui/core/Icon';
 
 import { StyledPopover } from './buttonMenu.styles';
 
 interface IProps {
-	icon: string;
+	Icon: React.ComponentType;
 	open?: boolean;
 	ButtonProps?: IconButtonProps;
 	IconProps?: IIconProps;
@@ -36,13 +36,13 @@ interface IState {
 	activeMenu: boolean;
 }
 
-const DefaultButton = ({IconProps, icon, ...props}) => (
+const DefaultButton = ({IconProps, Icon, ...props}) => (
 	<IconButton
 		{...props}
 		aria-label="Toggle menu"
 		aria-haspopup="true"
 	>
-		<Icon {...IconProps}>{icon}</Icon>
+		<Icon {...IconProps} />
 	</IconButton>
 );
 
@@ -75,13 +75,13 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { icon, renderButton, renderContent, ButtonProps, PopoverProps, IconProps } = this.props;
+		const { Icon, renderButton, renderContent, ButtonProps, PopoverProps, IconProps } = this.props;
 		const { activeMenu } = this.state;
 
 		const buttonProps = {
 			...ButtonProps,
 			IconProps,
-			icon,
+			Icon,
 			onClick: this.toggleMenu(null),
 			buttonRef: this.buttonRef
 		};
