@@ -38,6 +38,8 @@ export interface INotification {
 interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	location: any;
+	stateManager: any;
 }
 
 const NotificationItemText = (props) => {
@@ -59,7 +61,8 @@ const NotificationItemText = (props) => {
 export class NotificationItem extends React.PureComponent<IProps, any> {
 	public gotoNotification = (e: React.SyntheticEvent) => {
 		const { teamSpace , modelId, _id} = this.props;
-		location.href =  `${teamSpace}/${modelId}?notificationId=${_id}`;
+		this.props.location.path(`${teamSpace}/${modelId}`);
+		this.props.stateManager.state.notificationId =  _id;
 	}
 
 	public delete = (e: React.SyntheticEvent) => {

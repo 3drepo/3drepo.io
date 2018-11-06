@@ -29,6 +29,8 @@ interface IProps {
 	notifications: INotification[];
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	location: any;
+	stateManager: any;
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
@@ -39,18 +41,13 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 			return (<></>);
 		}
 
-		const actions = {
-			sendUpdateNotificationRead: this.props.sendUpdateNotificationRead ,
-			sendDeleteNotification: this.props.sendDeleteNotification
-		};
-
 		return (<>
 					<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
 					<NotificationsPanelItem>
 							<List style={{paddingBottom: 0, paddingTop: 0}} >
 								{notifications.map((notification) =>
 									<NotificationItem key={notification._id}
-									{...notification} {...actions }/>
+									{...notification} {...this.props }/>
 								)}
 							</List>
 					</NotificationsPanelItem>

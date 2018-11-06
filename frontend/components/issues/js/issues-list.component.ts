@@ -87,25 +87,11 @@ class IssuesListController implements ng.IController {
 			() => {
 				this.allIssues = this.issuesService.state.allIssues;
 				this.issuesService.setupIssuesToShow(this.model, this.filterChips);
-
-				if (this.stateManager.state.notificationId) {
-					const notificationId = this.stateManager.state.notificationId;
-					this.stateManager.state.notificationId = null;
-
-					dispatch(NotificationsActions.sendUpdateNotificationRead(notificationId, true));
-					API.getNotification(notificationId)
-					.then((n) => {
-						const chip: IChip = {name: "assignedIssues",
-							nameType: "Notification",
-							value: n.data.issuesId,
-							type: "notification"};
-
-						this.filterChips = [chip];
-					});
-				}
 			},
 			true
 		);
+
+		this.$scope.$watch("vm.stateManager.state.notificationId", this.filterByNotification.bind(this));
 
 		this.$scope.$watch("vm.issuesToShow", () => {
 			this.setContentAndSize();
@@ -118,6 +104,10 @@ class IssuesListController implements ng.IController {
 
 			const oldDateFromChip = oldChips.find((c) => c.type === "date_from");
 			const oldDateToChip = oldChips.find((c) => c.type === "date_to");
+
+			if (this.stateManager.state.notificationId && chips.length === 0) {
+				this.stateManager.state.notificationId = null;
+			}
 
 			if (!!dateFromChip && !!dateToChip) {
 				if (dateFromChip.value.getTime() > dateToChip.value.getTime()) {
@@ -160,7 +150,28 @@ class IssuesListController implements ng.IController {
 			},
 			true
 		);
+	}
 
+	public filterByNotification(notificationId) {
+		if (notificationId) {
+			let chip: IChip = {name: "assignedIssues",
+			nameType: "Notification",
+			value: [],
+			type: "notification"};
+
+			this.filterChips = [chip];
+
+			dispatch(NotificationsActions.sendUpdateNotificationRead(notificationId, true));
+			API.getNotification(notificationId)
+			.then((n) => {
+				chip = {name: "assignedIssues",
+					nameType: "Notification",
+					value: n.data.issuesId,
+					type: "notification"};
+
+				this.filterChips = [chip];
+			});
+		}
 	}
 
 	public setupBcfImportInput() {

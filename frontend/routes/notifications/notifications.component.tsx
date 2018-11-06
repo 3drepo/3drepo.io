@@ -14,29 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from "react";
+import { Badge, List, Menu, MenuItem } from "@material-ui/core";
 import Drawer from "@material-ui/core/Drawer";
-import Typography from '@material-ui/core/Typography';
 import Icon from "@material-ui/core/Icon";
-import {INotification} from "./notification.item";
-import { Button, List, IconButton, Menu, MenuItem, Badge} from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
+import Typography from '@material-ui/core/Typography';
+import { groupBy, sortBy, toArray } from "lodash";
+import * as React from "react";
+import { getSunday, simpleDate } from "../../components/utils/js/utils.filter";
 import { MuiTheme } from "../../styles";
+import { BarIconButton, UserActionButton } from "../components/components.styles";
 import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
+import { INotification } from "./notification.item";
 import { NotificationEmptyItem } from "./notifications.emptyItem";
 import { NotificationsPanel } from "./notifications.panel";
-import { simpleDate, getSunday } from "../../components/utils/js/utils.filter";
-import { BarIconButton, UserActionButton } from "../components/components.styles";
-import {toArray, groupBy, sortBy } from "lodash";
 import { NotificationsPanelHeader } from "./notifications.panel.header";
 
 // Props bound in <file://./notifications.container.ts>
+
 interface IProps {
 	sendGetNotifications: () => void ; // Bound to redux action sendGetNotifications
 	confirmSendDeleteAllNotifications: () => void ; // Bound to redux saga action confirmSendDeleteAllNotifications
 	sendUpdateNotificationRead: (id: string, read: boolean) => void; // Bound to redux saga sendUpdateNotificationRead
 	sendDeleteNotification: (id: string) => void; // Bound to redux saga sendDeleteNotification
 	notifications: INotification[]; // Bound to store state notifications
+
+	// Bound to angular in <file://../angularBindings.ts> and <file://../../components/account/pug/account-menu.pug>
+	location: any;
+	stateManager: any;
 }
 
 // Note: tried to use styled components and didnt worked.
@@ -116,12 +121,6 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	public render = () => {
 		const count =  this.props.notifications.filter((n) => !n.read).length;
 		const badgeColor = count > 0 ? "primary" : "secondary"; // Secondary color is used to make the badge disappear
-
-		const actions = {
-							sendUpdateNotificationRead: this.props.sendUpdateNotificationRead ,
-							sendDeleteNotification: this.props.sendDeleteNotification
-						};
-
 		const groupedByTeamspace = toArray(groupBy(sortBy(this.props.notifications, "teamSpace"), "teamSpace"));
 
 		return (
@@ -152,8 +151,8 @@ export class Notifications extends React.PureComponent<IProps, any> {
 								(<NotificationsPanel
 									key={`${notifications[0].teamSpace}-thisweek`}
 									labelLeft={"In " + notifications[0].teamSpace}
+									{...this.props}
 									notifications={this.thisWeeksNotifications(notifications)}
-									{...actions}
 									/>)
 							)}
 							{this.lastWeeksNotifications(this.props.notifications).length > 0 &&
@@ -163,8 +162,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 								(<NotificationsPanel
 									key={`${notifications[0].teamSpace}-lastweek`}
 									labelLeft={"In " + notifications[0].teamSpace}
+									{...this.props}
 									notifications={this.lastWeeksNotifications(notifications) }
-									{...actions}/>)
+									/>)
 							)}
 
 							{this.moreThanTwoWeeksAgoNotifications(this.props.notifications).length > 0 &&
@@ -174,8 +174,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 								(<NotificationsPanel
 									key={`${notifications[0].teamSpace}-older`}
 									labelLeft={"In " + notifications[0].teamSpace}
+									{...this.props}
 									notifications={this.moreThanTwoWeeksAgoNotifications(notifications) }
-									{...actions}/>)
+									/>)
 							)}
 							</>
 						}

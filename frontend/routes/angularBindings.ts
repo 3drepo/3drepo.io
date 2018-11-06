@@ -21,4 +21,4 @@ angular
 	.component('userManagement', wrap(UserManagement, ['projects', 'users']))
 	.component('profile', wrap(Profile))
 	.component('billing', wrap(Billing))
-	.component('notifications', wrap(Notifications));
+	.component('notifications', wrap(Notifications, ['location', 'stateManager']));
