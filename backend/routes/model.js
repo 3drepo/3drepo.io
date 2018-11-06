@@ -385,11 +385,12 @@ function getModelProperties(req, res, next) {
 }
 
 function getTreePath(req, res, next) {
+	const revId = req.params.rev;
 	JSONAssets.getTreePath(
 		req.params.account,
 		req.params.model,
-		req.params.rev ? undefined : C.MASTER_BRANCH_NAME,
-		req.param.rev,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
 		req.session.user.username
 	).then(file => {
 
