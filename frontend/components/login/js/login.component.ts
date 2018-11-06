@@ -133,5 +133,5 @@ export const LoginComponent: ng.IComponentOptions = {
 };
 
 export const LoginComponentModule = angular
-	.module('3drepo')
-	.component('login', LoginComponent);
+	.module("3drepo")
+	.component("loginOld", LoginComponent);

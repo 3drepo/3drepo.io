@@ -72,7 +72,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.login', {
 		url: '/login',
-		template: '<login login-message="vm.loginMessage"/>',
+		template: '<login-old login-message="vm.loginMessage"/>',
 		data: {
 			isLogoutRequired: true
 		},
