@@ -24,12 +24,18 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
 	downloadModel: ['teamspace', 'modelId'],
-	uploadModelFile: ['teamspace', 'modelId', 'fileData']
+	uploadModelFile: ['teamspace', 'modelId', 'fileData'],
+	setPendingState: ['pendingState']
 }, { prefix: 'MODEL_' });
 
 export const INITIAL_STATE = {
 	settings: {},
-	revisions: []
+	revisions: [],
+	isPending: true
+};
+
+const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
+	return Object.assign({}, state, { isPending: pendingState });
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
@@ -42,5 +48,6 @@ const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
-	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess
+	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
+	[ModelTypes.SET_PENDING_STATE]: setPendingState
 });

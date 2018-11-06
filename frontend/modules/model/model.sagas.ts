@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
@@ -24,8 +24,14 @@ import { SnackbarActions } from './../snackbar';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
+		yield put(ModelActions.setPendingState(true));
+
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
-		yield put(ModelActions.fetchSettingsSuccess(settings));
+
+		yield all([
+			put(ModelActions.fetchSettingsSuccess(settings)),
+			put(ModelActions.setPendingState(false))
+		]);
 	} catch (e) {
 		put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
 	}
@@ -43,9 +49,14 @@ export function* updateSettings({ teamspace, modelId, settings }) {
 
 export function* fetchRevisions({ teamspace, modelId }) {
 	try {
+		yield put(ModelActions.setPendingState(true));
+
 		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId);
 
-		yield put(ModelActions.fetchRevisionsSuccess(revisions));
+		yield all([
+			put(ModelActions.fetchRevisionsSuccess(revisions)),
+			put(ModelActions.setPendingState(false))
+		]);
 	} catch (e) {
 		put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
 	}
