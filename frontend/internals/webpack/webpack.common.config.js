@@ -1,9 +1,14 @@
 const {resolve} = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const MODES = {
+  DEVELOPMENT: 'development',
+  PRODUCTION: 'production'
+};
+
 module.exports = (options) => {
   const config = {
-    mode: options.mode || 'development',
+    mode: options.mode || MODES.DEVELOPMENT,
     context: resolve(__dirname, '../../'),
     entry: options.entry || './main.ts',
     output: Object.assign({
@@ -18,7 +23,10 @@ module.exports = (options) => {
         {
           test: /\.(ts|tsx)$/,
           loader: 'ts-loader',
-          exclude: /node_modules/
+          exclude: /node_modules/,
+          options: {
+            transpileOnly: options.mode !== MODES.PRODUCTION
+          }
         },
         {
           test: /\.(ts|tsx)$/,
