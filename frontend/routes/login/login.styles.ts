@@ -17,5 +17,64 @@
 
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
-export const Container = styled(Grid)``;
+import { COLOR, FONT_WEIGHT } from '../../styles';
+import * as PanelStyles from '../components/panel/panel.styles';
+
+const CONTENT_PADDING = 20;
+
+export const Container = styled(Grid)`
+  ${PanelStyles.Content} {
+    padding: ${CONTENT_PADDING}px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+`;
+
+export const Headline = styled.h3`
+  color: ${COLOR.BLACK_60};
+  font-weight: ${FONT_WEIGHT.NORMAL};
+`;
+
+export const StyledButton = styled(Button)`
+  && {
+    padding: 0 5px;
+    margin: 0;
+    min-width: auto;
+  }
+`;
+
+export const LoginButtons = styled(Grid)`
+  && {
+    padding: 10px 0;
+    padding-bottom: 25px;
+  }
+
+  ${StyledButton} {
+    margin-left: -5px;
+  }
+`;
+
+export const Footer = styled(Grid)`
+  && {
+    border-top: 1px solid ${COLOR.BLACK_6};
+    margin-left: -${CONTENT_PADDING}px;
+    width: calc(100% + ${CONTENT_PADDING * 2}px);
+    padding: ${(CONTENT_PADDING / 2)}px ${CONTENT_PADDING}px;
+    padding-right: ${CONTENT_PADDING - 5}px;
+    margin-bottom: -${CONTENT_PADDING}px;
+    font-size: 14px;
+
+    ${StyledButton} {
+      margin-left: 5px;
+      color: ${COLOR.BLACK_60};
+    }
+  }
+`;
+
+export const Version = styled(Grid)`
+  &&, && ${StyledButton} {
+    color: ${COLOR.BLACK_30};
+  }
+`;

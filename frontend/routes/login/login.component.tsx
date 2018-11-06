@@ -16,24 +16,119 @@
  */
 
 import * as React from 'react';
+import * as Yup from 'yup';
+import { Formik, Field } from 'formik';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 
-import { Container } from './login.styles';
+import { schema } from '../../services/validation';
+import { clientConfigService } from '../../services/clientConfig';
 import { Panel } from '../components/panel/panel.component';
-import { Grid } from '@material-ui/core';
+import { Container, Headline, LoginButtons, StyledButton, Version, Footer } from './login.styles';
+
+const LoginSchema = Yup.object().shape({
+	login: schema.required,
+	password: schema.password.min(0)
+});
+
+const DEFAULT_INPUT_PROPS = {
+	margin: 'normal',
+	required: true,
+	fullWidth: true,
+	InputLabelProps: {
+		shrink: true
+	}
+};
 
 interface IProps {}
 
-export class Login extends React.PureComponent<IProps, any> {
+interface IState {
+	login: string;
+	password: string;
+}
+
+const APP_VERSION = clientConfigService.VERSION;
+
+export class Login extends React.PureComponent<IProps, IState> {
+	public state = {
+		login: '',
+		password: ''
+	};
+
+	public handleSubmit = () => {}
+
+	public renderFooter = () => (
+		<Footer container alignItems="center" justify="space-between">
+			<Version flex-direction="row">
+				Version:
+				<Tooltip title="Release notes">
+					<StyledButton>
+						{APP_VERSION}
+					</StyledButton>
+				</Tooltip>
+			</Version>
+			<Grid>
+				<StyledButton>Sign up</StyledButton>
+				<StyledButton>Pricing</StyledButton>
+			</Grid>
+		</Footer>
+	)
+
+	public renderLoginButtons = () => (
+		<LoginButtons container alignItems="center" justify="space-between">
+			<StyledButton color="secondary">Forgot password?</StyledButton>
+
+			<Field render={({ form }) => (
+				<Button
+					type="submit"
+					color="secondary"
+					variant="raised"
+					disabled={!form.isValid || form.isValidating}
+				>Log in</Button>
+			)} />
+		</LoginButtons>
+	)
+
 	public render() {
+		const { login, password } = this.state;
 		return (
-			<Grid
-				container
-				flex-direction="row"
-				justify="center"
-			>
+			<Grid container flex-direction="row" justify="center">
 				<Container item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in">
-						Login component
+						<Headline>Welcome to 3D Repo!</Headline>
+
+						<Formik
+							initialValues={{ login, password }}
+							onSubmit={this.handleSubmit}
+							validationSchema={LoginSchema}
+						>
+							<form>
+								<Field name="login" render={({ field }) => (
+									<TextField
+										{...DEFAULT_INPUT_PROPS}
+										{...field}
+										label="Username"
+										placeholder="Type username..."
+										autoComplete="login"
+									/>
+								)} />
+								<Field name="password" render={({ field }) => (
+									<TextField
+										{...DEFAULT_INPUT_PROPS}
+										{...field}
+										label="Password"
+										type="password"
+										placeholder="Type password..."
+										autoComplete="password"
+									/>
+								)} />
+
+								{this.renderLoginButtons()}
+								{this.renderFooter()}
+							</form>
+						</Formik>
 					</Panel>
 				</Container>
 			</Grid>
