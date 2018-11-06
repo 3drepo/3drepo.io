@@ -8,6 +8,7 @@ import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as modelReducer } from './model/model.redux';
+import { reducer as authReducer } from './auth/auth.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -19,6 +20,7 @@ export default function createReducer() {
 		snackbar: snackbarReducer,
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
-		model: modelReducer// <-- INJECT MODULE REDUCER -->
+		model: modelReducer,
+		auth: authReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

@@ -15,17 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { createActions, createReducer } from 'reduxsauce';
 
-import { Login } from './login.component';
-import { AuthActions } from '../../modules/auth';
+export const { Types: AuthTypes, Creators: AuthActions } = createActions({
+	login: ['username', 'password'],
+	authenticate: []
+}, { prefix: 'AUTH_' });
 
-const mapStateToProps = createStructuredSelector({});
+export const INITIAL_STATE = {
+	isLoggedIn: false
+};
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogin: AuthActions.login
-}, dispatch);
-
-export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Login));
+export const reducer = createReducer(INITIAL_STATE, {
+});

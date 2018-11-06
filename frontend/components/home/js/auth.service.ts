@@ -17,6 +17,7 @@
 import { dispatch, history } from "../../../helpers/migration";
 import { CurrentUserActions } from "../../../modules/currentUser";
 import { getAvatarUrl } from "../../../modules/currentUser/currentUser.sagas";
+import { AuthActions } from "../../../modules/auth";
 
 export class AuthService {
 
@@ -239,12 +240,14 @@ export class AuthService {
 		if (this.loggedIn === null) {
 			// Initialize
 
+			dispatch(AuthActions.authenticate());
+
 			return this.sendLoginRequest()
 				.then((data) => {
 					this.initPromise.resolve(this.loggedIn);
 					data.initialiser = true;
-					this.loginSuccess(data);
 
+					this.loginSuccess(data);
 				})
 				.catch((reason) => {
 					if (this.loggedIn === null) {

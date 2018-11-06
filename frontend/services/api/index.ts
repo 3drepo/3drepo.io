@@ -1,6 +1,7 @@
 import { API } from './default';
 export { getAPIUrl, getResponseCode } from './default';
 
+export * from './auth';
 export * from './users';
 export * from './teamspace';
 export * from './jobs';

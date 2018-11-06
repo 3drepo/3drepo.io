@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
-import { Formik, Field } from 'formik';
+import { Formik, Field, Form } from 'formik';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -44,6 +44,7 @@ const DEFAULT_INPUT_PROPS = {
 
 interface IProps {
 	headlineText?: string;
+	onLogin: (login, password) => void;
 }
 
 interface IState {
@@ -57,7 +58,10 @@ export class Login extends React.PureComponent<IProps, IState> {
 		password: ''
 	};
 
-	public handleSubmit = () => {}
+	public handleSubmit = (data, form) => {
+		this.props.onLogin(data.login, data.password);
+		form.resetForm();
+	}
 
 	public renderLoginButtons = () => (
 		<LoginButtons container alignItems="center" justify="space-between">
@@ -96,7 +100,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 							onSubmit={this.handleSubmit}
 							validationSchema={LoginSchema}
 						>
-							<form>
+							<Form>
 								<Field name="login" render={({ field }) => (
 									<TextField
 										{...DEFAULT_INPUT_PROPS}
@@ -118,7 +122,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 								)} />
 
 								{ this.renderLoginButtons() }
-							</form>
+							</Form>
 						</Formik>
 						<Footer />
 					</Panel>

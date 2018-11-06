@@ -15,17 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+export {
+	AuthTypes,
+	AuthActions
+} from './auth.redux';
 
-import { Login } from './login.component';
-import { AuthActions } from '../../modules/auth';
-
-const mapStateToProps = createStructuredSelector({});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogin: AuthActions.login
-}, dispatch);
-
-export default addRouting(connect(mapStateToProps, mapDispatchToProps)(Login));
+export * from './auth.selectors';

@@ -17,6 +17,7 @@
 
 import { history } from '../../../helpers/migration';
 import { get } from 'lodash';
+import * as API from "../../../services/api";
 
 function StateManagerRun(
 	$location,
@@ -108,7 +109,7 @@ function StateManagerRun(
 		if (isLoginRequired && !isAuthenticated) {
 			event.preventDefault();
 			StateManager.state.authInitialized = false;
-			AuthService.init().then(() => {
+			API.authenticate().then(() => {
 				StateManager.state.authInitialized = true;
 				$timeout(() => {
 					if (toState.name.includes('app.dashboard')) {
