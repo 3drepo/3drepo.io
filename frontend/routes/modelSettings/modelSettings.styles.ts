@@ -82,13 +82,14 @@ export const StyledIcon = styled(ArrowBack)`
 	color: ${COLOR.WHITE};
 `;
 
-export const StyledLink = styled(Link)`
+export const BackButton = styled.span`
 	color: green;
 	color: ${COLOR.WHITE};
 	margin-right: 15px;
 	display: flex;
 	text-decoration: none;
 	line-height: 1;
+	cursor: pointer;
 `;
 
 export const LoaderContainer = styled.div`
