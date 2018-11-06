@@ -26,6 +26,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 
 import { Loader } from '../components/loader/loader.component';
 
+import { runAngularTimeout } from '../../helpers/migration';
 import { clientConfigService } from '../../services/clientConfig';
 
 import { Panel } from '../components/panel/panel.component';
@@ -40,7 +41,7 @@ import {
 	Headline,
 	GridColumn,
 	StyledIcon,
-	StyledLink,
+	BackButton,
 	LoaderContainer
 } from './modelSettings.styles';
 
@@ -182,11 +183,19 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
+	public handleBackLink = () => {
+		const { history } = this.props;
+
+		runAngularTimeout(() => {
+			history.goBack();
+		});
+	}
+
 	public renderTitleWithBackLink = () => (
 		<>
-			<StyledLink to={this.props.location.pathname}>
+			<BackButton onClick={this.handleBackLink}>
 				<StyledIcon />
-			</StyledLink>
+			</BackButton>
 			Model Settings
 		</>
 	)
@@ -376,7 +385,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { isSettingsLoading } = this.props;
-		
+
 		return (
 			<Panel {...PANEL_PROPS} title={this.renderTitleWithBackLink()}>
 				{ isSettingsLoading ? this.renderLoader('Loading model settings data...') : this.renderForm() }
