@@ -19,8 +19,8 @@ import { put, takeLatest, all, call, select } from 'redux-saga/effects';
 import { get } from 'lodash';
 
 import * as API from '../../services/api';
-import { TeamspaceTypes, TeamspaceActions } from './teamspace.redux';
-import { selectCurrentUser } from './teamspace.selectors';
+import { CurrentUserTypes, CurrentUserActions } from './currentUser.redux';
+import { selectCurrentUser } from './currentUser.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TeamspacesActions } from '../teamspaces';
@@ -29,23 +29,23 @@ export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Da
 
 export function* fetchUser({ username }) {
 	try {
-		yield put(TeamspaceActions.setPendingState(true));
-		yield put(TeamspaceActions.setAvatarPendingState(true));
+		yield put(CurrentUserActions.setPendingState(true));
+		yield put(CurrentUserActions.setAvatarPendingState(true));
 
 		const { data: { accounts, ...currentUser } } = yield call(API.fetchTeamspace, [username]);
 
 		yield all([
-			put(TeamspaceActions.fetchUserSuccess({
+			put(CurrentUserActions.fetchUserSuccess({
 				...currentUser,
 				username,
 				avatarUrl: getAvatarUrl(username)
 			})),
 			put(TeamspacesActions.setTeamspaces(accounts)),
-			put(TeamspaceActions.setPendingState(false))
+			put(CurrentUserActions.setPendingState(false))
 		]);
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'user data', e.response));
-		yield put(TeamspaceActions.setPendingState(false));
+		yield put(CurrentUserActions.setPendingState(false));
 	}
 }
 
@@ -53,7 +53,7 @@ export function* fetchQuotaInfo({ teamspace }) {
 	try {
 		const { data } = yield API.getQuotaInfo(teamspace);
 
-		yield put(TeamspaceActions.fetchQuotaInfoSuccess({ ...data }));
+		yield put(CurrentUserActions.fetchQuotaInfoSuccess({ ...data }));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'quota info', e.response));
 	}
@@ -61,16 +61,16 @@ export function* fetchQuotaInfo({ teamspace }) {
 
 export function* updateUser({ userData }) {
 	try {
-		yield put(TeamspaceActions.setPendingState(true));
+		yield put(CurrentUserActions.setPendingState(true));
 
 		const { username } = yield select(selectCurrentUser);
 		yield API.updateUser(username, userData);
 		yield put(SnackbarActions.show('Profile updated'));
-		yield put(TeamspaceActions.setPendingState(false));
-		yield put(TeamspaceActions.updateUserSuccess(userData));
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess(userData));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'user', e.response));
-		yield put(TeamspaceActions.setPendingState(false));
+		yield put(CurrentUserActions.setPendingState(false));
 	}
 }
 
@@ -92,7 +92,7 @@ export function* updateUserPassword({ passwords }) {
 
 export function* uploadAvatar({ file }) {
 	try {
-		yield put(TeamspaceActions.setAvatarPendingState(true));
+		yield put(CurrentUserActions.setAvatarPendingState(true));
 
 		const {username} = yield select(selectCurrentUser);
 
@@ -105,7 +105,7 @@ export function* uploadAvatar({ file }) {
 			yield API.uploadAvatar(username, formData);
 
 			const avatarUrl = getAvatarUrl(username);
-			yield put(TeamspaceActions.refreshAvatar(avatarUrl));
+			yield put(CurrentUserActions.refreshAvatar(avatarUrl));
 			yield put(SnackbarActions.show('Avatar updated'));
 		} else {
 			const message = `File is too big! Must be smaller than ${maxSizeUser}.`;
@@ -113,14 +113,14 @@ export function* uploadAvatar({ file }) {
 		}
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('upload', 'avatar', e.response));
-		yield put(TeamspaceActions.refreshAvatar());
+		yield put(CurrentUserActions.refreshAvatar());
 	}
 }
 
 export default function* teamspaceSaga() {
-	yield takeLatest(TeamspaceTypes.FETCH_USER, fetchUser);
-	yield takeLatest(TeamspaceTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
-	yield takeLatest(TeamspaceTypes.UPDATE_USER, updateUser);
-	yield takeLatest(TeamspaceTypes.UPDATE_USER_PASSWORD, updateUserPassword);
-	yield takeLatest(TeamspaceTypes.UPLOAD_AVATAR, uploadAvatar);
+	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
+	yield takeLatest(CurrentUserTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
+	yield takeLatest(CurrentUserTypes.UPDATE_USER, updateUser);
+	yield takeLatest(CurrentUserTypes.UPDATE_USER_PASSWORD, updateUserPassword);
+	yield takeLatest(CurrentUserTypes.UPLOAD_AVATAR, uploadAvatar);
 }

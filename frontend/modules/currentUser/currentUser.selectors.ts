@@ -17,14 +17,14 @@
 
 import { createSelector } from 'reselect';
 
-const selectTeamspaceDomain = (state) => Object.assign({}, state.teamspace);
+const selectCurrentUserDomain = (state) => Object.assign({}, state.currentUser);
 
 export const selectCurrentTeamspace = createSelector(
-	selectTeamspaceDomain, (state) => state.currentTeamspace
+	selectCurrentUserDomain, (state) => state.currentTeamspace
 );
 
 export const selectCurrentUser = createSelector(
-	selectTeamspaceDomain, (state) => state.currentUser || {}
+	selectCurrentUserDomain, (state) => state.currentUser || {}
 );
 
 export const selectAvatar = createSelector(
@@ -32,11 +32,11 @@ export const selectAvatar = createSelector(
 );
 
 export const selectIsPending = createSelector(
-	selectTeamspaceDomain, (state) => state.isPending
+	selectCurrentUserDomain, (state) => state.isPending
 );
 
 export const selectIsAvatarPending = createSelector(
-	selectTeamspaceDomain, (state) => state.isAvatarPending
+	selectCurrentUserDomain, (state) => state.isAvatarPending
 );
 
 export const selectBillingInfo = createSelector(
@@ -44,10 +44,10 @@ export const selectBillingInfo = createSelector(
 );
 
 export const selectCollaboratorLimit = createSelector(
-	selectTeamspaceDomain, (state) => state.collaboratorLimit
+	selectCurrentUserDomain, (state) => state.collaboratorLimit
 );
 
 export const selectSpaceInfo = createSelector(
-	selectTeamspaceDomain,
+	selectCurrentUserDomain,
 	(state) => ({ spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed })
 );

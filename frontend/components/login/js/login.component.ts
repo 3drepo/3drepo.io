@@ -62,7 +62,6 @@ class LoginController implements ng.IController {
 		}
 
 		this.watchers();
-
 	}
 
 	public watchers() {

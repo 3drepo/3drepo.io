@@ -21,7 +21,7 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../../helpers/migration';
 
 import { TopMenu } from './topMenu.component';
-import { selectCurrentUser } from '../../../modules/teamspace';
+import { selectCurrentUser } from '../../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser

@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 
-import { reducer as teamspaceReducer } from './teamspace/teamspace.redux';
+import { reducer as currentUserReducer } from './currentUser/currentUser.redux';
 import { reducer as userManagementReducer } from './userManagement/userManagement.redux';
 import { reducer as dialogReducer } from './dialog/dialog.redux';
 import { reducer as jobsReducer } from './jobs/jobs.redux';
@@ -12,7 +12,7 @@ import { reducer as modelReducer } from './model/model.redux';
 
 export default function createReducer() {
 	return combineReducers({
-		teamspace: teamspaceReducer,
+		currentUser: currentUserReducer,
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,
 		jobs: jobsReducer,

@@ -23,7 +23,7 @@ import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
 import { selectTeamspacesWithAdminAccess } from '../teamspaces/teamspaces.selectors';
 import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
-import { selectCurrentUser } from '../teamspace';
+import { selectCurrentUser } from '../currentUser';
 
 import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
 import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';

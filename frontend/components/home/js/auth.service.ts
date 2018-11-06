@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { dispatch, history } from '../../../helpers/migration';
-import { TeamspaceActions } from '../../../modules/teamspace';
-import { getAvatarUrl } from '../../../modules/teamspace/teamspace.sagas';
+import { dispatch, history } from "../../../helpers/migration";
+import { CurrentUserActions } from "../../../modules/currentUser";
+import { getAvatarUrl } from "../../../modules/currentUser/currentUser.sagas";
 
 export class AuthService {
 
@@ -126,7 +126,7 @@ export class AuthService {
 		this.AnalyticService.setUserId(this.username);
 		this.authDefer.resolve(this.loggedIn);
 
-		dispatch(TeamspaceActions.fetchUserSuccess({
+		dispatch(CurrentUserActions.fetchUserSuccess({
 			username: response.data.username,
 			avatarUrl: getAvatarUrl(response.data.username)
 		}));

@@ -16,8 +16,8 @@
  */
 
 export {
-	TeamspaceTypes,
-	TeamspaceActions
-} from './teamspace.redux';
+	CurrentUserTypes,
+	CurrentUserActions
+} from './currentUser.redux';
 
-export * from './teamspace.selectors';
+export * from './currentUser.selectors';

@@ -16,7 +16,7 @@
  */
 
 import { dispatch } from '../../../helpers/migration';
-import { TeamspaceActions } from '../../../modules/teamspace';
+import { CurrentUserActions } from '../../../modules/currentUser';
 
 export class AccountService {
 
@@ -247,7 +247,7 @@ export class AccountService {
 	 * @returns {*|promise}
 	 */
 	public getUserInfo(username): void {
-		dispatch(TeamspaceActions.fetchUser(username));
+		dispatch(CurrentUserActions.fetchUser(username));
 	}
 
 	/**

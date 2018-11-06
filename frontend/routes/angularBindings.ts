@@ -26,4 +26,4 @@ angular
 	))
 	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogout', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
-	.component('login', wrap(Login, []));
+	.component('login', wrap(Login, ['headlineText']));

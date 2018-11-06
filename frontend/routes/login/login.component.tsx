@@ -42,7 +42,9 @@ const DEFAULT_INPUT_PROPS = {
 	}
 };
 
-interface IProps {}
+interface IProps {
+	headlineText?: string;
+}
 
 interface IState {
 	login: string;
@@ -92,12 +94,13 @@ export class Login extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
+		const { headlineText } = this.props;
 		const { login, password } = this.state;
 		return (
 			<Grid container flex-direction="row" justify="center">
 				<Container item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in">
-						<Headline>Welcome to 3D Repo!</Headline>
+						<Headline>{headlineText || 'Welcome to 3D Repo'}</Headline>
 
 						<Formik
 							initialValues={{ login, password }}
