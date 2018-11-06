@@ -111,16 +111,16 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 					<NotificationListItemSecondaryAction>
 						{!read  &&
 						<SmallIconButton tooltip="Mark as read" onClick={this.markAsRead}>
-							drafts
+							lens
 						</SmallIconButton>
 						}
 						{read  &&
 						<SmallIconButton tooltip="Mark as unread" onClick={this.markAsUnread}>
-							markunread
+							panorama_fish_eye
 						</SmallIconButton>
 						}
-						<SmallIconButton tooltip="Delete" onClick={this.delete}>
-							delete
+						<SmallIconButton tooltip="Clear" onClick={this.delete}>
+							clear
 						</SmallIconButton>
 					</NotificationListItemSecondaryAction>
 

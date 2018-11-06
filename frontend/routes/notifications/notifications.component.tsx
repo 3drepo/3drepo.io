@@ -104,7 +104,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							open={!!this.state.menuElement}
 							onClose={this.toggleMenu}
 							>
-								<MenuItem onClick={this.deleteAllNotifications} disabled={!this.hasNotifications()}>Delete all</MenuItem>
+								<MenuItem onClick={this.deleteAllNotifications} disabled={!this.hasNotifications()}>Clear all</MenuItem>
 							</Menu>
 					</BarIconButton>
 					<BarIconButton aria-label="Close panel" onClick={this.toggleDrawer}>
