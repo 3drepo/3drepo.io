@@ -19,13 +19,14 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../helpers/migration';
-import { ModelActions, selectSettings } from './../../modules/model';
+import { ModelActions, selectSettings, selectIsPending } from './../../modules/model';
 import { ModelSettings } from './modelSettings.component';
 import { selectCurrentTeamspace } from './../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
-	modelSettings: selectSettings
+	modelSettings: selectSettings,
+	isSettingsLoading: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

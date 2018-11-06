@@ -39,10 +39,14 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId);
 	}
 
-	public revisionClickHandler = (event, tag) => {
+	public revisionClickHandler = (event, { tag, _id }) => {
 		const { modelId, handleClose, history, location: { pathname } } = this.props;
 		handleClose();
-		history.push(`${pathname}/${modelId}/${tag}`);
+		if (tag) {
+			history.push(`${pathname}/${modelId}/${tag}`);
+		} else {
+			history.push(`${pathname}/${modelId}/${_id}`);
+		}
 	}
 
 	public render() {
@@ -55,29 +59,28 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 					:
 					<>
 						<List>
-							{revisions && revisions.map((revision) => {
-								return (
-									<Item button key={revision._id}
-										onClick={(event) => this.revisionClickHandler(event, revision.tag)}>
-										<Column>
-											<Property name="Tag">
-												{revision.tag
-													? revision.tag
-													: <DateTime value={revision.timestamp} format={'D MMM'} />}
-											</Property>
+							{revisions && revisions.map((revision) => (
+								<Item button key={revision._id}
+									onClick={(event) => this.revisionClickHandler(event, revision)}>
+									<Column>
+										<Property name="Tag">
+											{revision.tag
+												? revision.tag
+												: <DateTime value={revision.timestamp} format={'D MMM'} />}
+										</Property>
 
-											<Property name="Author">
-												{revision.author}
-											</Property>
-										</Column>
-										<Column>
-											<Property name="Date">
-												<DateTime value={revision.timestamp} format={'D MMM'} />
-											</Property>
-											<Property name="ID">{revision._id}</Property>
-										</Column>
-									</Item>);
-							})}
+										<Property name="Author">
+											{revision.author}
+										</Property>
+									</Column>
+									<Column>
+										<Property name="Date">
+											<DateTime value={revision.timestamp} format={'D MMM'} />
+										</Property>
+										<Property name="ID">{revision._id}</Property>
+									</Column>
+								</Item>)
+							)}
 						</List>
 						<StyledDialogActions>
 							<Button variant="raised" color="secondary" onClick={handleClose}>

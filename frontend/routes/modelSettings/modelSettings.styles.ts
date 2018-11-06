@@ -54,10 +54,6 @@ export const SelectWrapper = styled(FormControl)`
 	}
 `;
 
-export const TopicTypesContainer = styled.div`
-	margin: 30px 0 15px;
-`;
-
 export const GridColumn = styled(Grid)`
 	margin-top: 30px;
 
@@ -93,4 +89,14 @@ export const StyledLink = styled(Link)`
 	display: flex;
 	text-decoration: none;
 	line-height: 1;
+`;
+
+export const LoaderContainer = styled.div`
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	padding-top: 100px;
+	box-sizing: border-box;
 `;

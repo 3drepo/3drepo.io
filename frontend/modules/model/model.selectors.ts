@@ -26,3 +26,7 @@ export const selectSettings = createSelector(
 export const selectRevisions = createSelector(
 	selectModelDomain, (state) => state.revisions
 );
+
+export const selectIsPending = createSelector(
+	selectModelDomain, (state) => state.isPending
+);
