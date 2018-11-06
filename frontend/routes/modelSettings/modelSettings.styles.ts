@@ -23,7 +23,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
-import Icon from '@material-ui/core/Icon';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 
 export const StyledTextField = styled(TextField)``;
 
@@ -82,7 +82,7 @@ export const TypesGrid = styled(Grid)`
 	margin-bottom: 30px;
 `;
 
-export const StyledIcon = styled(Icon)`
+export const StyledIcon = styled(ArrowBack)`
 	color: ${COLOR.WHITE};
 `;
 

@@ -17,6 +17,8 @@
 
 import * as React from 'react';
 import { groupBy, isEmpty, isEqual } from 'lodash';
+import Label from '@material-ui/icons/Label';
+import LabelOutlined from '@material-ui/icons/LabelOutlined';
 
 import { TreeList } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
@@ -110,6 +112,10 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				name={name}
 				level={2}
 				items={items}
+				IconProps={{
+					IconClosed: Label,
+					IconOpened: LabelOutlined
+				}}
 				renderItem={renderChildItem}
 				renderActions={this.renderProjectActions}
 			/>

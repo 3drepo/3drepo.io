@@ -17,8 +17,9 @@
 
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
-import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
 import * as CellSelect from '../components/customTable/components/cellSelect/cellSelect.styles';
 import * as UserManagementTab from '../components/userManagementTab/userManagementTab.styles';
@@ -58,11 +59,11 @@ export const SelectContainer = styled(Grid)`
   width: 45%;
 `;
 
-export const IconLeft = styled(Icon)`
+export const IconLeft = styled(KeyboardArrowLeft)`
   margin-left: -8px;
 `;
 
-export const IconRight = styled(Icon) `
+export const IconRight = styled(KeyboardArrowRight) `
   margin-right: -8px;
 `;
 

@@ -19,7 +19,20 @@ import * as React from 'react';
 import { isEmpty } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 
-import { Container, Headline, Details, Title, StyledIcon } from './treeList.styles';
+import { Container, Headline, Details, Title, IconContainer } from './treeList.styles';
+import Folder from '@material-ui/icons/Folder';
+import FolderOpen from '@material-ui/icons/FolderOpen';
+
+const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
+	let Icon = IconClosed || Folder;
+
+	if (active) {
+		Icon = IconOpened || FolderOpen;
+	}
+	return <IconContainer>
+		<Icon {...iconProps} />
+	</IconContainer>;
+};
 
 export const DefaultHeadline = ({renderActions, ...props}) => (
 	<Grid
@@ -28,7 +41,7 @@ export const DefaultHeadline = ({renderActions, ...props}) => (
 		alignItems="center"
 		justify="flex-start"
 		wrap="nowrap">
-		<StyledIcon fontSize="small">{props.active ? 'folder_open' : 'folder'}</StyledIcon>
+		<HeadlineIcon fontSize="small" active={props.active} {...props.IconProps} />
 		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
 		{renderActions && renderActions(props)}
 	</Grid>
@@ -41,6 +54,7 @@ interface IProps {
 	active?: boolean;
 	disableShadow?: boolean;
 	forceActive?: boolean;
+	IconProps?: any;
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => JSX.Element;

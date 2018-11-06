@@ -198,7 +198,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	public renderTitleWithBackLink = () => (
 		<>
 			<StyledLink to={this.props.location.pathname}>
-				<StyledIcon>arrow_back</StyledIcon>
+				<StyledIcon />
 			</StyledLink>
 			Model Settings
 		</>

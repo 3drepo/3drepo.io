@@ -20,7 +20,6 @@ import { matchesProperty, cond, orderBy, pick, values, stubTrue, isEqual, isEmpt
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 import Checkbox from '@material-ui/core/Checkbox';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
@@ -31,10 +30,10 @@ import { TableHeading } from './components/tableHeading/tableHeading.component';
 
 import { Container, Head, BodyWrapper, Body, Row, Cell, CheckboxCell } from './customTable.styles';
 
-export const TableButton = ({icon, onClick, disabled}) => {
+export const TableButton = ({Icon, onClick, disabled}) => {
 	return (
 		<IconButton onClick={onClick} disabled={disabled}>
-			<Icon>{icon}</Icon>
+			<Icon />
 		</IconButton>
 	);
 };

@@ -20,7 +20,7 @@ import { Route } from 'react-router-dom';
 import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
 import { isEmpty, isEqual } from 'lodash';
-import Icon from '@material-ui/core/Icon';
+import Add from '@material-ui/icons/Add';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
@@ -341,7 +341,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			onClick={props.onClick}
 			disabled={isPending}
 		>
-			<Icon>add</Icon>
+			<Add />
 		</MenuButton>
 	)
 
@@ -367,7 +367,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				<Head>
 					3D MODELS & FEDERATIONS
 					<ButtonMenu
-						icon="add"
 						renderButton={this.renderMenuButton.bind(this, isPending)}
 						renderContent={this.renderMenu}
 						PopoverProps={{
