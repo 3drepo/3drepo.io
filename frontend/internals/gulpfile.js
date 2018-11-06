@@ -206,13 +206,13 @@ gulp.task('gulp-watch', function() {
 
   // WATCHERS
   gulp.watch(["../index.html"], gulp.series(["index", "service-workers-dev"]))
-  gulp.watch(["./../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
-  gulp.watch(["./../../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
+  gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
+  gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
   gulp.watch([allCss], gulp.series(["css", "service-workers-dev"]))
   gulp.watch([allPug], gulp.series(["pug", "service-workers-dev"]))
   gulp.watch([icons], gulp.series(["icons", "service-workers-dev"]))
-  gulp.watch(["./../manifest.json"], gulp.series(['manifest-file', "service-workers-dev"]))
-  gulp.watch(["./../manifest-icons/**.png"], gulp.series(['manifest-icons', "service-workers-dev"]))
+  gulp.watch(["../manifest.json"], gulp.series(['manifest-file', "service-workers-dev"]))
+  gulp.watch(["../manifest-icons/**.png"], gulp.series(['manifest-icons', "service-workers-dev"]))
 
 });
 
