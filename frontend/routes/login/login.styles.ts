@@ -56,7 +56,7 @@ export const LoginButtons = styled(Grid)`
   }
 `;
 
-export const Footer = styled(Grid)`
+export const FooterContainer = styled(Grid)`
   && {
     border-top: 1px solid ${COLOR.BLACK_6};
     margin-left: -${CONTENT_PADDING}px;

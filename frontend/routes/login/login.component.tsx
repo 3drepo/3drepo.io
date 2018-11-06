@@ -16,17 +16,17 @@
  */
 
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik, Field } from 'formik';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Tooltip from '@material-ui/core/Tooltip';
 
 import { schema } from '../../services/validation';
-import { clientConfigService } from '../../services/clientConfig';
 import { Panel } from '../components/panel/panel.component';
-import { Container, Headline, LoginButtons, StyledButton, Version, Footer } from './login.styles';
+import { Container, Headline, LoginButtons, StyledButton } from './login.styles';
+import { Footer } from './components/footer';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,
@@ -51,8 +51,6 @@ interface IState {
 	password: string;
 }
 
-const APP_VERSION = clientConfigService.VERSION;
-
 export class Login extends React.PureComponent<IProps, IState> {
 	public state = {
 		login: '',
@@ -60,23 +58,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 	};
 
 	public handleSubmit = () => {}
-
-	public renderFooter = () => (
-		<Footer container alignItems="center" justify="space-between">
-			<Version flex-direction="row">
-				Version:
-				<Tooltip title="Release notes">
-					<StyledButton>
-						{APP_VERSION}
-					</StyledButton>
-				</Tooltip>
-			</Version>
-			<Grid>
-				<StyledButton>Sign up</StyledButton>
-				<StyledButton>Pricing</StyledButton>
-			</Grid>
-		</Footer>
-	)
 
 	public renderLoginButtons = () => (
 		<LoginButtons container alignItems="center" justify="space-between">
@@ -128,10 +109,10 @@ export class Login extends React.PureComponent<IProps, IState> {
 									/>
 								)} />
 
-								{this.renderLoginButtons()}
-								{this.renderFooter()}
+								{ this.renderLoginButtons() }
 							</form>
 						</Formik>
+						<Footer />
 					</Panel>
 				</Container>
 			</Grid>
