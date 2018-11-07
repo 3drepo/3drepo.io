@@ -17,7 +17,6 @@
 
 import { history, getState } from '../../../helpers/migration';
 import { get } from 'lodash';
-import * as API from "../../../services/api";
 
 import { selectIsAuthenticated } from "../../../modules/auth";
 

@@ -17,6 +17,6 @@ angular
 	.module('3drepo')
 	.component('app', wrap(App))
 	.component('dashboard', wrap(Dashboard))
-	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogout', 'onLogoClick']))
+	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
 	.component('login', wrap(Login, ['headlineText']));

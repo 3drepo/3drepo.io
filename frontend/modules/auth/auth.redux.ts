@@ -18,10 +18,11 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
+	authenticate: [],
 	login: ['username', 'password'],
 	loginSuccess: [],
 	loginFailure: [],
-	authenticate: []
+	logout: []
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {

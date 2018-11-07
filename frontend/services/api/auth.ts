@@ -20,7 +20,6 @@ import api from './';
 /**
  * Log in user
  */
-
 export const login = (username, password) => {
 	return api.post('login', { username, password });
 };
@@ -30,4 +29,11 @@ export const login = (username, password) => {
  */
 export const authenticate = () => {
 	return api.get('login');
+};
+
+/**
+ * Log out user
+ */
+export const logout = () => {
+	return api.post('logout');
 };

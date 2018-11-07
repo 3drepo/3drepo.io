@@ -453,11 +453,6 @@ class HomeController implements ng.IController {
 		this.$location.path(minusSlash);
 	}
 
-	public logout = () => {
-		this.StateManager.resetServiceStates();
-		this.AuthService.logout();
-	}
-
 	public home = () => {
 		this.StateManager.resetServiceStates();
 		this.StateManager.goHome();

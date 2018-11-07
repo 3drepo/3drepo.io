@@ -22,9 +22,11 @@ import { connect, addRouting } from '../../../helpers/migration';
 
 import { TopMenu } from './topMenu.component';
 import { selectCurrentUser } from '../../../modules/currentUser';
+import { AuthActions } from '../../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	onLogout: AuthActions.logout
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);

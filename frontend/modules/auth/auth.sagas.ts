@@ -22,6 +22,7 @@ import { AuthTypes, AuthActions } from './auth.redux';
 import { DialogActions } from '../dialog';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
+import { getAngularService } from '../../helpers/migration';
 
 export function* login({ username, password }) {
 	try {
@@ -39,6 +40,24 @@ export function* login({ username, password }) {
 		}
 	}
 }
+
+export function* logout() {
+	try {
+		yield API.logout();
+
+		const StateManager = getAngularService('StateManager') as any;
+		StateManager.resetServiceStates();
+
+		yield put({ type: 'RESET_APP' });
+	} catch (e) {
+		if (e.response.status === 401) {
+			yield put(AuthActions.logoutFailure());
+		} else {
+			yield put(DialogActions.showErrorDialog('logout', 'user', e.response));
+		}
+	}
+}
+
 export function* authenticate() {
 	try {
 		const { data: { username }} = yield API.authenticate();
@@ -57,6 +76,8 @@ export function* authenticate() {
 }
 
 export default function* AuthSaga() {
-	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
+	yield takeLatest(AuthTypes.LOGIN, login);
+	yield takeLatest(AuthTypes.LOGOUT, logout);
+
 }
