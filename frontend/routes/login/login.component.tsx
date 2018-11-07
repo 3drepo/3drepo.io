@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik, Field, Form } from 'formik';
 import Grid from '@material-ui/core/Grid';
@@ -27,6 +27,7 @@ import { schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
 import { Container, Headline, LoginButtons, StyledButton } from './login.styles';
 import { Footer } from './components/footer';
+import { isEmpty } from 'lodash';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,
@@ -42,7 +43,11 @@ const DEFAULT_INPUT_PROPS = {
 	}
 };
 
+const DEFAULT_LOGIN_REDIRECT = '/dashboard/teamspaces';
+
 interface IProps {
+	location: any;
+	isAuthenticated: boolean;
 	headlineText?: string;
 	onLogin: (login, password) => void;
 }
@@ -57,6 +62,16 @@ export class Login extends React.PureComponent<IProps, IState> {
 		login: '',
 		password: ''
 	};
+
+	public componentDidUpdate(prevProps: IProps) {
+		const changes = {};
+
+		// TODO
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
 
 	public handleSubmit = (data, form) => {
 		this.props.onLogin(data.login, data.password);
@@ -87,8 +102,14 @@ export class Login extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { headlineText } = this.props;
+		const { headlineText, location, isAuthenticated } = this.props;
 		const { login, password } = this.state;
+		const { from } = location.state || { from: { pathname: DEFAULT_LOGIN_REDIRECT } };
+
+		if (isAuthenticated) {
+			return <Redirect to={from} />;
+		}
+
 		return (
 			<Grid container flex-direction="row" justify="center">
 				<Container item xs={9} sm={6} md={4} lg={3} xl={2}>

@@ -15,9 +15,11 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { history } from '../../../helpers/migration';
+import { history, getState } from '../../../helpers/migration';
 import { get } from 'lodash';
 import * as API from "../../../services/api";
+
+import { selectIsAuthenticated } from "../../../modules/auth";
 
 function StateManagerRun(
 	$location,
@@ -78,52 +80,21 @@ function StateManagerRun(
 
 	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
-		const isAuthenticated = AuthService.isLoggedIn();
-		const originURL = `${location.pathname}${location.search}`;
+		const isAuthenticated = selectIsAuthenticated(getState());
 
-		if (toState.name === 'app.homepage') {
+		if (isLoginRequired) {
 			event.preventDefault();
 
 			if (isAuthenticated) {
-				AuthService.loginSuccess({
-					data: {
-						username: AuthService.username
-					}
-				});
-				$state.go('app.dashboard.pages', { page: 'teamspaces'});
+				if (toState.name.includes('app.dashboard')) {
+					history.push(originURL);
+					$urlRouter.update();
+				} else {
+					$state.go(toState, toParams);
+				}
 			} else {
 				$state.go('app.login', { referrer: originURL });
 			}
-		}
-
-		if (AuthService.loggedOutStates.includes(toState.name) && isAuthenticated) {
-			event.preventDefault();
-			AuthService.loginSuccess({
-				data: {
-					username: AuthService.username
-				}
-			});
-			$state.go('app.dashboard.pages', { page: 'teamspaces' });
-		}
-
-		if (isLoginRequired && !isAuthenticated) {
-			event.preventDefault();
-			StateManager.state.authInitialized = false;
-			API.authenticate().then(() => {
-				StateManager.state.authInitialized = true;
-				$timeout(() => {
-					if (toState.name.includes('app.dashboard')) {
-						history.push(originURL);
-						$urlRouter.update();
-					} else {
-						$state.go(toState, toParams);
-					}
-				});
-			})
-			.catch((error) => {
-				$state.go('app.login', { referrer: originURL });
-				console.error('Error initialising auth from state manager: ', error);
-			});
 		}
 
 		StateManager.setState(toParams);

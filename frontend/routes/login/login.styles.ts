@@ -35,6 +35,7 @@ export const Container = styled(Grid)`
 export const Headline = styled.h3`
   color: ${COLOR.BLACK_60};
   font-weight: ${FONT_WEIGHT.NORMAL};
+  margin-top: 10px;
 `;
 
 export const StyledButton: any = styled(Button)`

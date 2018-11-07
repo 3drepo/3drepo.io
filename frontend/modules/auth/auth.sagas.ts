@@ -18,7 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { AuthTypes } from './auth.redux';
+import { AuthTypes, AuthActions } from './auth.redux';
 import { DialogActions } from '../dialog';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
@@ -30,16 +30,29 @@ export function* login({ username, password }) {
 			username,
 			avatarUrl: getAvatarUrl(username)
 		});
-
+		yield put(AuthActions.loginSuccess());
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('login', 'user', e.response));
+		if (e.response.status === 401) {
+			yield put(AuthActions.loginFailure());
+		} else {
+			yield put(DialogActions.showErrorDialog('login', 'user', e.response));
+		}
 	}
 }
 export function* authenticate() {
 	try {
-		const response = yield API.authenticate();
+		const { data: { username }} = yield API.authenticate();
+		yield CurrentUserActions.fetchUserSuccess({
+			username,
+			avatarUrl: getAvatarUrl(username)
+		});
+		yield put(AuthActions.loginSuccess());
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('authenticate', 'user', e.response));
+		if (e.response.status === 401) {
+			yield put(AuthActions.loginFailure());
+		} else {
+			yield put(DialogActions.showErrorDialog('authenticate', 'user', e.response));
+		}
 	}
 }
 

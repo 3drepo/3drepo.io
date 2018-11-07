@@ -5,25 +5,18 @@
 import { react2angular as wrap } from 'react2angular';
 
 // Routes
-import DialogContainer from './components/dialogContainer/dialogContainer.container';
-
-// Components
-import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
-import Dashboard from './dashboard/dashboard.container';
-import { UserInfo } from './components/userInfo/userInfo.component';
-import TopMenu from './components/topMenu/topMenu.container';
+import App from './app/app.container';
 import ModelSettings from './modelSettings/modelSettings.container';
 import Login from './login/login.container';
 
+// Components
+import Dashboard from './dashboard/dashboard.container';
+import TopMenu from './components/topMenu/topMenu.container';
+
 angular
 	.module('3drepo')
-	.component('dialogContainer', wrap(DialogContainer))
-	.component('snackbarContainer', wrap(SnackbarContainer))
+	.component('app', wrap(App))
 	.component('dashboard', wrap(Dashboard))
-	.component('userInfo', wrap(
-		UserInfo,
-		['loading', 'hasAvatar', 'avatarUrl', 'username', 'firstName', 'lastName', 'email']
-	))
 	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogout', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
 	.component('login', wrap(Login, ['headlineText']));

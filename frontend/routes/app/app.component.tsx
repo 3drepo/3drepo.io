@@ -15,20 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
+import * as React from 'react';
+import { DialogContainer } from '../components/dialogContainer';
+import { SnackbarContainer } from '../components/snackbarContainer';
 
-import { Login } from './login.component';
-import { AuthActions, selectIsAuthenticated } from '../../modules/auth';
+interface IProps {
+	authenticate: () => void;
+}
 
-const mapStateToProps = createStructuredSelector({
-	isAuthenticated: selectIsAuthenticated
-});
+export class App extends React.PureComponent<IProps, any> {
+	public componentDidMount() {
+		this.props.authenticate();
+	}
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogin: AuthActions.login
-}, dispatch);
-
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
+	public render() {
+		// TODO: In the future it'll return first level routes
+		return (
+			<>
+				<DialogContainer />
+				<SnackbarContainer />
+			</>
+		);
+	}
+}

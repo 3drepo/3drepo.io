@@ -15,20 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
-
-import { Login } from './login.component';
-import { AuthActions, selectIsAuthenticated } from '../../modules/auth';
-
-const mapStateToProps = createStructuredSelector({
-	isAuthenticated: selectIsAuthenticated
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogin: AuthActions.login
-}, dispatch);
-
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
+export { default as App } from './app.container';

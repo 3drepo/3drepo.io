@@ -19,12 +19,24 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	login: ['username', 'password'],
+	loginSuccess: [],
+	loginFailure: [],
 	authenticate: []
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {
-	isLoggedIn: false
+	isAuthenticated: false
+};
+
+export const loginSuccess = (state = INITIAL_STATE) => {
+	return { ...state, isAuthenticated: true };
+};
+
+export const loginFailure = (state = INITIAL_STATE) => {
+	return { ...state, isAuthenticated: false };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
+	[AuthTypes.LOGIN_FAILURE]: loginFailure
 });

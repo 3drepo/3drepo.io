@@ -126,11 +126,6 @@ export class AuthService {
 		});
 		this.AnalyticService.setUserId(this.username);
 		this.authDefer.resolve(this.loggedIn);
-
-		dispatch(CurrentUserActions.fetchUserSuccess({
-			username: response.data.username,
-			avatarUrl: getAvatarUrl(response.data.username)
-		}));
 	}
 
 	public loginFailure(response) {

@@ -17,18 +17,15 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
-import { Login } from './login.component';
-import { AuthActions, selectIsAuthenticated } from '../../modules/auth';
+import { App } from './app.component';
+import { AuthActions } from '../../modules/auth';
 
-const mapStateToProps = createStructuredSelector({
-	isAuthenticated: selectIsAuthenticated
-});
+const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogin: AuthActions.login
+	authenticate: AuthActions.authenticate
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
+export default connect(mapStateToProps, mapDispatchToProps)(App);
