@@ -24,6 +24,7 @@ import { StyledGrid, StyledGrow } from './rowMenu.styles';
 
 interface IProps {
 	open?: boolean;
+	isPendingStatus?: boolean;
 }
 
 interface IState {
@@ -65,10 +66,10 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { children } = this.props;
+		const { children, isPendingStatus } = this.props;
 		const { open, forceOpen } = this.state;
 
-		const growProps = {
+		const growProps = !isPendingStatus && {
 			in: open || forceOpen,
 			onEnter: this.onMenuEnter,
 			onEntered: this.onMenuEntered,
@@ -84,7 +85,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 				justify="flex-start"
 			>
 				<StyledGrow
-					appear
+					appear={!isPendingStatus}
 					{...growProps}
 				>
 					<StyledGrid
@@ -97,7 +98,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					{children}
 					</StyledGrid>
 				</StyledGrow>
-				<IconButton aria-label="Toggle menu" onClick={this.toggleForceOpen}>
+				<IconButton aria-label="Toggle menu" onClick={this.toggleForceOpen} disabled={isPendingStatus}>
 					<MoreVert fontSize="small" />
 				</IconButton>
 			</StyledGrid>

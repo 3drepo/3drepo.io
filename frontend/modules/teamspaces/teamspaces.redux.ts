@@ -20,6 +20,7 @@ import { keyBy } from 'lodash';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	setTeamspaces: ['teamspaces'],
+	setModelUploadStatus: ['teamspace', 'project', 'model', 'status'],
 	// Projects
 	createProject: ['teamspace', 'projectData'],
 	updateProject: ['teamspace', 'projectName', 'projectData'],
@@ -82,7 +83,6 @@ const updateModelSuccess = (state = INITIAL_STATE, action) => {
 	const projectIndex = projects.indexOf(findedProject);
 	const findedModel = findedProject.models.find((model) => model.name === action.modelData.name);
 	const modelIndex = findedProject.models.indexOf(findedModel);
-
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex] = action.modelData;
 
 	return { ...state, teamspaces };
@@ -95,6 +95,7 @@ const createModelSuccess = (state = INITIAL_STATE, action) => {
 	const projectIndex = projects.indexOf(findedProject);
 	const targetModels = teamspaces[action.teamspace].projects[projectIndex].models;
 	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, action.modelData];
+
 	return { ...state, teamspaces };
 };
 
@@ -109,8 +110,22 @@ const removeModelSuccess = (state = INITIAL_STATE, action) => {
 	return { ...state, teamspaces };
 };
 
+const setModelUploadStatus = (state = INITIAL_STATE, action) => {
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[action.teamspace].projects];
+	const findedProject = projects.find((project) => project.name === action.project);
+	const projectIndex = projects.indexOf(findedProject);
+	const findedModel = findedProject.models.find((modelItem) => modelItem.model === action.model);
+	const modelIndex = findedProject.models.indexOf(findedModel);
+
+	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].status = action.status;
+
+	return { ...state, teamspaces };
+};
+
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspacesTypes.SET_TEAMSPACES]: setTeamspaces,
+	[TeamspacesTypes.SET_MODEL_UPLOAD_STATUS]: setModelUploadStatus,
 	// Projects
 	[TeamspacesTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[TeamspacesTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,

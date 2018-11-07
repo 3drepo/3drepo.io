@@ -20,6 +20,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 
+import { getAngularService } from '../../../../helpers/migration';
+
 import { DateTime } from './../../../components/dateTime/dateTime.component';
 import { Property } from './../../../components/property/property.component';
 import { Item, Column, Message, StyledDialogActions } from './revisionsDialog.styles';
@@ -34,6 +36,7 @@ interface IProps {
 	history: any;
 }
 
+
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId);
@@ -41,12 +44,20 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	public revisionClickHandler = (event, { tag, _id }) => {
 		const { modelId, handleClose, history, location: { pathname } } = this.props;
+
 		handleClose();
+
 		if (tag) {
 			history.push(`${pathname}/${modelId}/${tag}`);
 		} else {
 			history.push(`${pathname}/${modelId}/${_id}`);
 		}
+		const analyticService = getAngularService("AnalyticService");
+
+		analyticService.sendEvent({
+			eventCategory: "Model",
+			eventAction: "view"
+		});
 	}
 
 	public render() {
