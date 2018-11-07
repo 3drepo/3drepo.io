@@ -29,7 +29,7 @@ import { Panel } from '../components/panel/panel.component';
 import { ModelItem } from './components/modelItem/modelItem.component';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
-import { runAngularTimeout } from '../../helpers/migration';
+import { getAngularService, runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
@@ -231,7 +231,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				teamspaceName,
 				modelName: modelProps.name,
 				modelId: modelProps.model,
-				canUpload: modelProps.canUpload
+				canUpload: modelProps.canUpload,
+				projectName: modelProps.projectName
 			}
 		});
 	}
@@ -248,8 +249,20 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			}
 		});
 	}
-	public createModelItemClickHandler = (modelId) =>
-		this.props.history.push(`${this.state.activeTeamspace}/${modelId}`)
+
+	public createModelItemClickHandler = (event, modelId, props) => {
+		if (props.timestamp) {
+			this.props.history.push(`${this.state.activeTeamspace}/${modelId}`);
+			const analyticService = getAngularService('AnalyticService');
+
+			analyticService.sendEvent({
+				eventCategory: "Model",
+				eventAction: "view"
+			});
+		} else {
+			this.openUploadModelFileDialog(event, this.state.activeTeamspace, props);
+		}
+	}
 
 	/**
 	 * Render methods
@@ -261,7 +274,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			<ModelItem
 				{...props}
 				actions={[]}
-				onModelItemClick={() => this.createModelItemClickHandler(props.model)}
+				onModelItemClick={(event) => this.createModelItemClickHandler(event, props.model, props)}
 				onPermissionsClick={this.createRouteHandler(`/${this.props.currentTeamspace}`, {
 					page: 'userManagement',
 					teamspace: this.state.activeTeamspace,

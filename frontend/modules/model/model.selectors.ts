@@ -30,3 +30,7 @@ export const selectRevisions = createSelector(
 export const selectIsPending = createSelector(
 	selectModelDomain, (state) => state.isPending
 );
+
+export const selectUploadStatus = createSelector(
+	selectModelDomain, (state) => state.uploadStatus
+);
