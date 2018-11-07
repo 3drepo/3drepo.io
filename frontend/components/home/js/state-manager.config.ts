@@ -16,7 +16,6 @@
  */
 
 function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
-
 	$locationProvider.html5Mode(true);
 
 	$stateProvider.state("home", {
