@@ -16,12 +16,15 @@
  */
 
 import * as React from 'react';
+import { startCase } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
-import { Container, SubmodelsList, Time, LinkedName } from './modelItem.styles';
+import { Loader } from '../../../components/loader/loader.component';
+
+import { Container, SubmodelsList, Time, Name, LinkedName, Status, TimeWrapper } from './modelItem.styles';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 
@@ -30,9 +33,11 @@ interface IAction {
 	Icon: React.ComponentType;
 	action: () => void;
 	color?: string;
+	isHidden?: boolean;
 }
 interface IProps {
 	name: string;
+	status: string;
 	federate: boolean;
 	model: string;
 	subModels?: any[];
@@ -48,6 +53,8 @@ interface IProps {
 interface IState {
 	hovered: boolean;
 }
+
+const isPendingStatus = (status) => status !== 'ok' && status !== 'failed';
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -70,7 +77,6 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 			...ROW_ACTIONS.DELETE,
 			action: props.onDeleteClick
 		}];
-
 		this.modelActions = [{
 			...ROW_ACTIONS.UPLOAD_FILE,
 			action: props.onModelUpload
@@ -79,7 +85,8 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 			action: props.onRevisionsClick
 		}, {
 			...ROW_ACTIONS.DOWNLOAD,
-			action: props.onDownloadClick
+			action: props.onDownloadClick,
+			isHidden: !Boolean(props.timestamp)
 		}, ...sharedActions];
 
 		this.federationActions = [{
@@ -90,19 +97,23 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 	public renderSubModels = (subModels = []) => {
 		const submodelsAsString = subModels.map(({ name }) => name).join(', ');
+
 		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
 	}
 
 	public renderActions = (actions) => {
-		return actions ? actions.map(({label, action, Icon, color}, index) => {
+		return actions ? actions.map(({label, action, Icon, color, isHidden = false}, index) => {
 			const iconProps = {color, fontSize: 'small'} as any;
-			return (
-				<Tooltip title={label} key={index}>
-					<IconButton aria-label={label} onClick={action}>
-						<Icon {...iconProps} />
-					</IconButton>
-				</Tooltip>
-			);
+
+			if (!isHidden && !isPendingStatus(this.props.status)) {
+				return (
+					<Tooltip title={label} key={index}>
+						<IconButton aria-label={label} onClick={action}>
+							<Icon {...iconProps} />
+						</IconButton>
+					</Tooltip>
+				);
+			}
 		}) : null;
 	}
 
@@ -110,41 +121,37 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		this.setState({ hovered });
 	}
 
+	public renderPendingStatus = (status) => (
+		<Status>
+			<Loader content={`${startCase(status)}...`} size={20} horizontal={true} />
+		</Status>
+	)
+
 	public render() {
-		const { name, subModels, timestamp, onModelItemClick } = this.props;
+		const { name, subModels, timestamp, onModelItemClick, status } = this.props;
 		const { hovered } = this.state;
 		const isFederation = Boolean(subModels);
 		const actions = isFederation ? this.federationActions : this.modelActions;
 
-		return (
-			<Container
-				onMouseEnter={this.createHoverHandler(true)}
-				onMouseLeave={this.createHoverHandler(false)}
-			>
-				<Grid
-					container
-					direction="row"
-					alignItems="center"
-					justify="space-between"
-					wrap="nowrap"
-				>
-					<Grid container>
-						<LinkedName onClick={onModelItemClick}>{name}</LinkedName>
+		return <Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
+				<Grid container direction="row" alignItems="center" justify="space-between" wrap="nowrap">
+					<Grid container justify="space-between" wrap="nowrap" alignItems="center">
+						{ isPendingStatus(status)
+							? <><Name>{name}</Name> {this.renderPendingStatus(status)}</>
+							: <LinkedName onClick={onModelItemClick}>{name}</LinkedName> }
 					</Grid>
-					<Grid
-						container
-						wrap="nowrap"
-						direction="row"
-						alignItems="center"
-						justify="flex-end">
-						<Time>{timestamp && !hovered ? <DateTime value={timestamp} format="D ddd" /> : null}</Time>
-						<RowMenu open={hovered}>
+					<TimeWrapper container wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
+						<Time>
+							{timestamp && !hovered  ? (
+								<DateTime value={timestamp} format="D ddd" />
+							) : null}
+						</Time>
+						<RowMenu open={hovered} isPendingStatus={isPendingStatus(status)}>
 							{this.renderActions(actions)}
 						</RowMenu>
-					</Grid>
+					</TimeWrapper>
 				</Grid>
 				{this.renderSubModels(subModels)}
-			</Container>
-		);
+			</Container>;
 	}
 }

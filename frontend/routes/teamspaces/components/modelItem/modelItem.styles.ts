@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
 
 import { FONT_WEIGHT, COLOR } from '../../../../styles';
 import * as RowMenu from '../rowMenu/rowMenu.styles';
@@ -64,8 +65,27 @@ export const Time = styled.div`
 
 export const LinkedName = styled.span`
   cursor: pointer;
+<<<<<<< HEAD
 
   &:hover {
     text-decoration: underline;
   }
+=======
+  width: 100%;
+`;
+
+export const Name = styled.span`
+  width: 100%;
+`;
+
+export const Status = styled.span`
+  align-items: center;
+  justify-content: flex-end;
+  display: flex;
+  width: 100%;
+`;
+
+export const TimeWrapper = styled(Grid)`
+  max-width: 100px;
+>>>>>>> ISSUE #1183 - Revisions issues
 `;

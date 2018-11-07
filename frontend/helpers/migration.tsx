@@ -6,7 +6,7 @@ import { invoke } from 'lodash';
 import configureStore from '../modules/store';
 
 // Angular service injector
-const getAngularService = (name, caller?) => angular.element(document.body).injector().get(name, caller);
+export const getAngularService = (name, caller?) => angular.element(document.body).injector().get(name, caller);
 
 // Should be replaced with proper react-redux connect if app is fully migrated
 const initialState = {};

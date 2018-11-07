@@ -22,13 +22,19 @@ import { Container, Content } from './loader.styles';
 
 interface IProps {
 	content?: string;
+	size?: number;
+	horizontal?: boolean;
 }
 
 export const Loader = (props: IProps) => {
+	const styleProps = {
+		horizontal: props.horizontal
+	};
+
 	return (
-		<Container>
-			<CircularProgress size={30} />
-			<Content>
+		<Container {...styleProps}>
+			<CircularProgress size={props.size || 30} />
+			<Content {...styleProps}>
 				{props.content}
 			</Content>
 		</Container>

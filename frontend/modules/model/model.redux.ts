@@ -24,8 +24,11 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
 	downloadModel: ['teamspace', 'modelId'],
-	uploadModelFile: ['teamspace', 'modelId', 'fileData'],
-	setPendingState: ['pendingState']
+	uploadModelFile: ['teamspace', 'project', 'modelId', 'fileData'],
+	setPendingState: ['pendingState'],
+	onModelStatusChanged: ['modelData', 'teamspace', 'project', 'modelId'],
+	subscribeOnStatusChange: ['teamspace', 'project', 'modelId'],
+	unsubscribeOnStatusChange: ['teamspace', 'project', 'modelId']
 }, { prefix: 'MODEL_' });
 
 export const INITIAL_STATE = {

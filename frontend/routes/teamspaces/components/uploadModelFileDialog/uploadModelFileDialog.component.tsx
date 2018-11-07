@@ -36,7 +36,7 @@ import {
 } from './uploadModelFileDialog.styles';
 
 interface IProps {
-	uploadModelFile: (teamspace, modelId, fileData) => void;
+	uploadModelFile: (teamspace, projectName, modelId, fileData) => void;
 	fetchModelSettings: (teamspace, modelId) => void;
 	fetchRevisions: (teamspace, modelId) => void;
 	handleClose: () => void;
@@ -45,6 +45,8 @@ interface IProps {
 	modelId: string;
 	modelName: string;
 	teamspaceName: string;
+	projectName: string;
+	isPending: boolean;
 }
 
 interface IState {
@@ -65,14 +67,14 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleFileUpload = (values) => {
-		const { modelId, teamspaceName, handleClose, uploadModelFile } = this.props;
+		const { modelId, teamspaceName, projectName, handleClose, uploadModelFile } = this.props;
 
 		const fileData = {
 			file: this.inputFileRef.current.files[0],
 			tag: values.revisionName,
 			desc: values.revisionDesc
 		};
-		uploadModelFile(teamspaceName, modelId, fileData);
+		uploadModelFile(teamspaceName, projectName, modelId, fileData);
 		handleClose();
 	}
 
@@ -85,6 +87,9 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public getAcceptedFormats = () => acceptedFileFormats.map((format) => `.${format}`).toString();
 
 	public renderRevisionInfo = (revisions) => {
+		if (!revisions.length) {
+			return `No revisions yet.`;
+		}
 		const lastRevision = revisions[revisions.length - 1];
 		const info = `Revision ${revisions.length}`;
 		const formatedDate = dayjs(lastRevision.timestamp).format('DD MMM YYYY');
@@ -97,23 +102,25 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { modelSettings, revisions, modelName, handleClose } = this.props;
+		const { modelSettings, revisions, modelName, handleClose, isPending } = this.props;
 
-		if (!modelSettings || !revisions.length ) {
+		if (isPending) {
 			return <Loader />;
 		}
 
 		return (
-			<Formik onSubmit={this.handleFileUpload} initialValues={{}}>
+			<Formik onSubmit={this.handleFileUpload} initialValues={{
+				revisionName: '', revisionDesc: ''
+			}}>
 				<Form>
 					<DialogContent>
 						<ModelName>{modelName}</ModelName>
-						<ModelInfo>
-							{ revisions && this.renderRevisionInfo(revisions)	}
-						</ModelInfo>
+
+						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
+
 						<Field
 							name="revisionName"
-							render={({ field, form }) =>
+							render={({ field }) =>
 								<TextField
 									{...field}
 									label="Name"
@@ -124,7 +131,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								/>
 						<Field
 							name="revisionDesc"
-							render={({ field, form }) =>
+							render={({ field }) =>
 								<TextField
 									{...field}
 									label="Description"
