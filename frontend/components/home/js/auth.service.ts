@@ -82,9 +82,8 @@ export class AuthService {
 			"app.passwordChange"
 		];
 
-		// TODO: null means it"s the first login,
-		// should be a seperate var
-		this.loggedIn = null;
+		this.loggedIn = this.localStorageLoggedIn() || null;
+		this.username = this.getLocalStorageUsername() || null;
 
 		this.initAutoLogout();
 
@@ -117,6 +116,7 @@ export class AuthService {
 		// Set the session as logged in on the client
 		// using local storage
 		localStorage.setItem("loggedIn", "true");
+		localStorage.setItem("username", response.data.username);
 
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: response.data.username,
@@ -140,6 +140,7 @@ export class AuthService {
 		response.initialiser = undefined;
 
 		localStorage.setItem("loggedIn", "false");
+		localStorage.removeItem("username");
 
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: null,
@@ -156,6 +157,8 @@ export class AuthService {
 		this.username  = null;
 
 		localStorage.setItem("loggedIn", "false");
+		localStorage.removeItem("username");
+
 		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {});
 
 		this.authDefer.resolve(this.loggedIn);
@@ -188,6 +191,10 @@ export class AuthService {
 		return localStorage.getItem("loggedIn") === "true";
 	}
 
+	public getLocalStorageUsername() {
+		return localStorage.getItem("username");
+	}
+
 	public shouldAutoLogout() {
 		const sessionLogin = this.localStorageLoggedIn();
 
@@ -204,9 +211,11 @@ export class AuthService {
 			this.$window.location.reload();
 		} else if (loginStateMismatch && isLoggedOutPage) {
 			if (sessionLogin) {
-				this.APIService.post("logout");
-				localStorage.setItem("loggedIn", "false");
-				dispatch({ type: 'RESET_APP' });
+				this.APIService.post("logout").then(() => {
+					localStorage.setItem("loggedIn", "false");
+					localStorage.removeItem("username");
+					dispatch({ type: 'RESET_APP' });
+				});
 			}
 		}
 	}
@@ -257,7 +266,7 @@ export class AuthService {
 			this.loginRequestPromise =  this.APIService.get("login").then((response) => {
 				this.loginRequestPromise = null;
 				return response;
-			});
+			}).catch(this.loginFailure.bind(this));
 		}
 		return this.loginRequestPromise;
 	}

@@ -36,7 +36,7 @@ export const { Types: TeamspaceTypes, Creators: TeamspaceActions } = createActio
 export const INITIAL_STATE = {
 	currentTeamspace: '',
 	currentUser: {
-		username: ''
+		username: localStorage.getItem('username') || ''
 	},
 	isPending: true,
 	isAvatarPending: true,

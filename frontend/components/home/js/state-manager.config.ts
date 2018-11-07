@@ -28,12 +28,16 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
+	$stateProvider.state("app.homepage", {
+		url: "/"
+	});
+
 	$stateProvider.state("app.viewer", {
-		url: "/viewer/:modelId/:revision",
+		url: "/viewer/:teamspace/:modelId/:revision",
 		template: `
 			<model
 				is-lite-mode="vm.isLiteMode"
-				account="vm.state.account"
+				account="vm.state.teamspace"
 				model="vm.state.modelId"
 				branch="vm.state.branch"
 				revision="vm.state.revision"
@@ -85,6 +89,9 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		template: '<login login-message="vm.loginMessage"/>',
 		data: {
 			isLogoutRequired: true
+		},
+		params: {
+			referrer: { dynamic: true, value: '/dashboard/teamspaces' }
 		}
 	});
 
@@ -152,7 +159,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$httpProvider.interceptors.push("AuthInterceptor");
-	$urlRouterProvider.otherwise("/login");
+	$urlRouterProvider.otherwise("/");
 }
 
 export const StateManagerConfigModule = angular

@@ -247,7 +247,7 @@ class HomeController implements ng.IController {
 						false
 					);
 				}
-			} else {
+			} else if (this.AuthService.isLoggedIn()) {
 				this.AuthService.logout();
 			}
 

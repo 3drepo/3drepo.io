@@ -77,15 +77,32 @@ function StateManagerRun(
 
 	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
+		const isAuthenticated = AuthService.isLoggedIn();
+		const originURL = `${location.pathname}${location.search}`;
 
-		if (isLoginRequired && !AuthService.isLoggedIn()) {
+		if (toState.name === 'app.homepage') {
+			event.preventDefault();
+
+			if (isAuthenticated) {
+				AuthService.loginSuccess({
+					data: {
+						username: AuthService.username
+					}
+				});
+				$state.go('app.dashboard.pages', { page: 'teamspaces'});
+			} else {
+				$state.go('app.login', { referrer: originURL });
+			}
+		}
+
+		if (isLoginRequired && !isAuthenticated) {
 			event.preventDefault();
 			StateManager.state.authInitialized = false;
 			AuthService.init().then(() => {
 				StateManager.state.authInitialized = true;
 				$timeout(() => {
 					if (toState.name.includes('app.dashboard')) {
-						history.push(`${location.pathname}${location.search}`);
+						history.push(originURL);
 						$urlRouter.update();
 					} else {
 						$state.go(toState, toParams);
@@ -93,7 +110,7 @@ function StateManagerRun(
 				});
 			})
 			.catch((error) => {
-				$state.go('app.login');
+				$state.go('app.login', { referrer: originURL });
 				console.error('Error initialising auth from state manager: ', error);
 			});
 		}

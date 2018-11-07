@@ -23,6 +23,7 @@ class LoginController implements ng.IController {
 		"$scope",
 		"$location",
 		"$timeout",
+		"$state",
 
 		"AuthService",
 		"EventService",
@@ -41,6 +42,7 @@ class LoginController implements ng.IController {
 		private $scope,
 		private $location,
 		private $timeout,
+		private $state,
 
 		private AuthService,
 		private EventService,
@@ -87,8 +89,9 @@ class LoginController implements ng.IController {
 		this.loggingIn = true;
 		this.AuthService.login(this.user.username, this.user.password)
 			.then(() => {
+				console.log('params', this.$state.params)
 				this.$timeout(() => {
-					history.push('/dashboard');
+					history.push('/dashboard/teamspaces');
 				});
 				this.loggingIn = false;
 			})
