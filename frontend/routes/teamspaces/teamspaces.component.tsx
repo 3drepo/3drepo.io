@@ -253,12 +253,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public createModelItemClickHandler = (event, modelId, props) => {
 		if (props.timestamp) {
 			this.props.history.push(`${this.state.activeTeamspace}/${modelId}`);
-			const analyticService = getAngularService('AnalyticService');
+			const analyticService = getAngularService('AnalyticService') as any;
 
-			analyticService.sendEvent({
-				eventCategory: "Model",
-				eventAction: "view"
-			});
+			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
 		} else {
 			this.openUploadModelFileDialog(event, this.state.activeTeamspace, props);
 		}

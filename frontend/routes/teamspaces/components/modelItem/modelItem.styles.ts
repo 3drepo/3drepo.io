@@ -65,16 +65,15 @@ export const Time = styled.div`
 
 export const LinkedName = styled.span`
   cursor: pointer;
-<<<<<<< HEAD
 
   &:hover {
     text-decoration: underline;
   }
-=======
   width: 100%;
 `;
 
 export const Name = styled.span`
+  color: ${COLOR.BLACK_40};
   width: 100%;
 `;
 
@@ -87,5 +86,4 @@ export const Status = styled.span`
 
 export const TimeWrapper = styled(Grid)`
   max-width: 100px;
->>>>>>> ISSUE #1183 - Revisions issues
 `;
