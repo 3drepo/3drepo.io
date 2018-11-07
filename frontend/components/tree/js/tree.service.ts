@@ -224,9 +224,9 @@ export class TreeService {
 
 					const awaitedSubTrees = [];
 
-					if (idToPath && idToPath.treePaths) {
+					if (idToPath && idToPath.mainTree) {
 
-						mainTree.idToPath = idToPath.treePaths.idToPath;
+						mainTree.idToPath = idToPath.mainTree.idToPath;
 
 						if (subTrees) {
 
