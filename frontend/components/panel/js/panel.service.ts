@@ -116,6 +116,15 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download",
+					divider: true
+				},
+				{
+					hidden: false,
 					value: "sortByDate",
 					label: "Sort by Date",
 					firstSelectedIcon: "fa-sort-amount-desc",

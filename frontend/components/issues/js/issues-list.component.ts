@@ -194,6 +194,12 @@ class IssuesListController implements ng.IController {
 				this.$window.open(bcfUrl, "_blank");
 				break;
 
+			case "downloadJSON":
+				const jsonEndpoint = this.account + "/" + this.model + "/issues.json?print=true";
+				const jsonUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, jsonEndpoint);
+				this.$window.open(jsonUrl, "_blank");
+				break;
+
 			case "importBCF":
 				document.getElementById("bcfImportInput").click();
 				break;
