@@ -538,22 +538,15 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={({ form }) => {
-							return (
-								<Button
-									type="submit"
-									variant="raised"
-									color="secondary"
-									disabled={
-										(!form.isValid || form.isValidating) && !editMode || !form.dirty ||
-										(editMode && !(Boolean(name) || Boolean(federatedModels.length)))
-									}
-								>
-									Save
-							</Button>
-							)
-						}
-
+						<Field render={({ form }) =>
+							<Button
+								type="submit"
+								variant="raised"
+								color="secondary"
+								disabled={
+									(!form.isValid || form.isValidating) && !editMode || !form.dirty ||
+									(editMode && !(Boolean(name) || Boolean(federatedModels.length)))
+								}>Save</Button>
 						} />
 					</DialogActions>
 				</Form>

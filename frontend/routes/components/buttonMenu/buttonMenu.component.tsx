@@ -22,7 +22,7 @@ import { IconProps as IIconProps } from '@material-ui/core/Icon';
 import { StyledPopover } from './buttonMenu.styles';
 
 interface IProps {
-	Icon: React.ComponentType;
+	Icon?: React.ComponentType;
 	open?: boolean;
 	ButtonProps?: IconButtonProps;
 	IconProps?: IIconProps;
