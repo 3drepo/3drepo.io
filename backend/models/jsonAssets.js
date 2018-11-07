@@ -215,6 +215,10 @@ JSONAssets.getIdMap = function(account, model, branch, rev, username) {
 	return getHelperJSONFile(account, model, branch, rev, username, "idMap");
 };
 
+JSONAssets.getIdToMeshes = function(account, model, branch, rev, username) {
+	return getHelperJSONFile(account, model, branch, rev, username, "idToMeshes");
+};
+
 JSONAssets.getTreePath = function(account, model, branch, rev, username) {
 	return getHelperJSONFile(account, model, branch, rev, username, "tree_path");
 };

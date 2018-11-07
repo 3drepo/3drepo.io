@@ -332,18 +332,19 @@ function getIdMap(req, res, next) {
 }
 
 function getIdToMeshes(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getIdToMeshes(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
+		req.session.user.username
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getIdToMeshes(account, model, branch, req.params.rev, username).then(idToMeshes => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, idToMeshes);
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
