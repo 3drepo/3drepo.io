@@ -36,7 +36,6 @@ interface IProps {
 	history: any;
 }
 
-
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId);
@@ -52,7 +51,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		} else {
 			history.push(`${pathname}/${modelId}/${_id}`);
 		}
-		const analyticService = getAngularService("AnalyticService");
+		const analyticService = getAngularService('AnalyticService') as any;
 
 		analyticService.sendEvent({
 			eventCategory: "Model",
