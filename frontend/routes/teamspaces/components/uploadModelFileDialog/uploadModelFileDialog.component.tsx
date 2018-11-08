@@ -23,8 +23,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
+import { clientConfigService } from '../../../../services/clientConfig';
 import { Loader } from './../../../components/loader/loader.component';
-import { acceptedFileFormats, unitsMap } from '../../../../constants/model-parameters';
+import { unitsMap } from '../../../../constants/model-parameters';
 
 import {
 	ModelName,
@@ -84,7 +85,8 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public getAcceptedFormats = () => acceptedFileFormats.map((format) => `.${format}`).toString();
+	public getAcceptedFormats = () =>
+		clientConfigService.acceptedFormat.map((format) => `.${format}`).toString();
 
 	public renderRevisionInfo = (revisions) => {
 		if (!revisions.length) {

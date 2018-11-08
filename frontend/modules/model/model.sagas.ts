@@ -19,7 +19,7 @@ import { all, put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
-import { MODEL_STATUSES_MAP, UPLOAD_FILE_STATUSES } from './model.helpers';
+import { modelStatusesMap, uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
@@ -42,7 +42,7 @@ export function* fetchSettings({ teamspace, modelId }) {
 
 export function* updateSettings({ teamspace, modelId, settings }) {
 	try {
-		const response = yield API.editModelSettings(teamspace, modelId, settings);
+		yield API.editModelSettings(teamspace, modelId, settings);
 
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
@@ -75,11 +75,11 @@ export function* downloadModel({ teamspace, modelId }) {
 }
 
 export function* onModelStatusChanged({ modelData: { status }, teamspace, project, modelId }) {
-	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, MODEL_STATUSES_MAP[status]));
+	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelStatusesMap[status]));
 }
 
 export function* subscribeOnStatusChange({ teamspace, project, modelId }) {
-	const notificationService = yield getAngularService("NotificationService");
+	const notificationService = yield getAngularService('NotificationService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
 	const onChanged = (modelData) => dispatch(ModelActions.onModelStatusChanged(modelData, teamspace, project, modelId));
@@ -87,7 +87,7 @@ export function* subscribeOnStatusChange({ teamspace, project, modelId }) {
 }
 
 export function* unsubscribeOnStatusChange({ teamspace, project, modelId }) {
-	const notificationService = yield getAngularService("NotificationService");
+	const notificationService = yield getAngularService('NotificationService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
 	const onChanged = (modelData) => dispatch(ModelActions.onModelStatusChanged(modelData, teamspace, project, modelId));
@@ -96,8 +96,6 @@ export function* unsubscribeOnStatusChange({ teamspace, project, modelId }) {
 
 export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
 	try {
-		yield subscribeOnStatusChange({teamspace, project, modelId});
-
 		const formData = new FormData();
 		formData.append('file', fileData.file);
 		formData.append('tag', fileData.tag);
@@ -105,14 +103,14 @@ export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
 
 		const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);
 
-		if (status === UPLOAD_FILE_STATUSES.OK) {
+		if (status === uploadFileStatuses.OK) {
 			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
 				yield put(SnackbarActions.show(data.errorReason.message));
 			} else {
 				yield put(SnackbarActions.show('Model uploaded succesfully'));
 			}
 		}
-		if (status === UPLOAD_FILE_STATUSES.FAILED) {
+		if (status === uploadFileStatuses.FAILED) {
 			yield put(SnackbarActions.show('Failed to import model'));
 		}
 	} catch (e) {

@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import * as Yup from 'yup';
 import * as queryString from 'query-string';
 import { isEmpty } from 'lodash';
 import { Formik, Field } from 'formik';
@@ -44,6 +45,12 @@ import {
 	BackButton,
 	LoaderContainer
 } from './modelSettings.styles';
+
+const ModelSettingsSchema = Yup.object().shape({
+	code: Yup.string()
+		.max(5)
+		.matches(/^[A-Za-z0-9]+$/)
+});
 
 const PANEL_PROPS = {
 	paperProps: {
@@ -216,6 +223,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 					id, name, type, code: properties.code, unit: properties.unit, fourDSequenceTag,
 					latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
 				}}
+				validationSchema={ModelSettingsSchema}
 				onSubmit={this.handleUpdateSettings}
 			>
 				<StyledForm>

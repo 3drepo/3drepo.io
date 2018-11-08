@@ -1,4 +1,4 @@
-export const UPLOAD_FILE_STATUSES = {
+export const uploadFileStatuses = {
 	OK: 'ok',
 	FAILED: 'failed',
 	QUEUED: 'queued',
@@ -7,7 +7,7 @@ export const UPLOAD_FILE_STATUSES = {
 	UPLOADED: 'uploaded'
 };
 
-export const MODEL_STATUSES_MAP = {
+export const modelStatusesMap = {
 	queued: 'queued',
 	uploading: 'uploading',
 	processing: 'processing',

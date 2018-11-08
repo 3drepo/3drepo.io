@@ -26,7 +26,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import { ModelItem } from './components/modelItem/modelItem.component';
+import ModelItem from './components/modelItem/modelItem.container';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { getAngularService, runAngularTimeout } from '../../helpers/migration';
@@ -98,7 +98,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as IState;
 
 		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
@@ -107,6 +107,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		}
 
 		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
+
 		if (teamspacesChanged) {
 			changes.teamspacesItems = getTeamspacesItems(this.props.teamspaces);
 		}
@@ -196,6 +197,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 		const isNewModel = !modelName.length;
+		console.log('show dialog');
 
 		this.props.showDialog({
 			title: modelName ? `Edit ${type}` : `New ${type}`,
@@ -212,9 +214,14 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				modelId
 			},
 			onConfirm: ({ teamspace, ...modelData }) => {
+				console.log('onConfirm')
 				if (isNewModel) {
+					console.log('onConfirm:isNewModel');
+
 					this.props.createModel(teamspace, modelData);
 				} else {
+					console.log('onConfirm:!isNewModel');
+
 					this.props.updateModel(teamspace, modelName, modelData);
 				}
 			}

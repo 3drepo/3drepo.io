@@ -288,7 +288,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 		return (
 			<ModelsTableContainer>
 				<SubModelsTable
-					title={'Available'}
+					title="Available"
 					models={availableModels}
 					selectedModels={selectedAvailableModels}
 					handleIconClick={this.moveToFederated}
@@ -298,7 +298,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					checkboxDisabled={!this.state.selectedProject}
 				/>
 				<SubModelsTable
-					title={'Federated'}
+					title="Federated"
 					models={federatedModels}
 					selectedModels={selectedFederatedModels}
 					handleIconClick={this.moveToAvailable}
@@ -443,10 +443,6 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { modelName, teamspace, project, teamspaces, handleClose, type, editMode } = this.props;
 		const { name, projectsItems, selectedTeamspace, selectedProject, unit, federatedModels } = this.state;
-
-		if (editMode && !teamspace) {
-			return null;
-		}
 
 		return (
 			<Formik

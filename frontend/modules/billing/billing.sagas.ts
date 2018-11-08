@@ -22,7 +22,7 @@ import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from
 import { DialogActions } from '../dialog';
 import {
 	LoadingDialog
-} from './../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
+} from '../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
 import { SnackbarActions } from '../snackbar';
 
 export function* fetchPlans() {

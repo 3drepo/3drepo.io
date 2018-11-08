@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy } from 'lodash';
+import { cloneDeep, keyBy } from 'lodash';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	setTeamspaces: ['teamspaces'],
@@ -61,13 +61,14 @@ const updateProjectSuccess = (state = INITIAL_STATE, action) => {
 };
 
 const createProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
+	const teamspaces = cloneDeep(state.teamspaces);
 	teamspaces[action.teamspace].projects.push(action.projectData);
+
 	return { ...state, teamspaces };
 };
 
 const removeProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
+	const teamspaces = cloneDeep(state.teamspaces);
 	const projects = [...state.teamspaces[action.teamspace].projects]
 		.filter(({ name }) => name !== action.projectName);
 	teamspaces[action.teamspace].projects = projects;
@@ -79,10 +80,9 @@ const removeProjectSuccess = (state = INITIAL_STATE, action) => {
 const updateModelSuccess = (state = INITIAL_STATE, action) => {
 	const teamspaces = { ...state.teamspaces };
 	const projects = [...state.teamspaces[action.teamspace].projects];
-	const findedProject = projects.find((project) => project.name === action.modelData.projectName);
-	const projectIndex = projects.indexOf(findedProject);
-	const findedModel = findedProject.models.find((model) => model.name === action.modelData.name);
-	const modelIndex = findedProject.models.indexOf(findedModel);
+	const projectIndex = projects.findIndex((project) => project.name === action.modelData.projectName);
+	const foundProject = projects[projectIndex];
+	const modelIndex = foundProject.models.findIndex((model) => model.name === action.modelData.name);
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex] = action.modelData;
 
 	return { ...state, teamspaces };

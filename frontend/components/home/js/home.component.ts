@@ -415,7 +415,6 @@ class HomeController implements ng.IController {
 		// we can improve the percieved performance for the user
 
 		const preCacheTemplates = [
-			"templates/account-teamspaces.html",
 			"templates/account-info.html",
 			"templates/sign-up.html",
 			"templates/register-request.html"
