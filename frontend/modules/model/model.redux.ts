@@ -46,19 +46,12 @@ const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	return { ...state, settings };
 };
 
-const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
-		console.log('state.settings', state.settings);
-		console.log('settings', settings);
-	// return { ...state, settings };
-};
-
 const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {
 	return { ...state, revisions };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
-	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
 	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState
 });
