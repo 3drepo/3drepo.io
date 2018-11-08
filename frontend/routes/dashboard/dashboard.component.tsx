@@ -25,6 +25,7 @@ import Profile from '../profile/profile.container';
 import Billing from '../billing/billing.container';
 import { Container, Sidebar, Content } from './dashboard.styles';
 import { UserInfo } from '../components/userInfo/userInfo.component';
+import { RoutePlaceholder } from './components/routePlaceholder/routePlaceholder.component';
 
 const MENU_ITEMS = [
 	{
@@ -60,11 +61,29 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public renderRoutes = (match, currentUser) => (
 		<Switch>
-			<Route exact path={`${match.url}/teamspaces`} component={Teamspaces} />
-			<Route exact path={`${match.url}/teamspaces/:teamspace/models/:modelId`} component={ModelSettings} />
-			<Route path={`${match.url}/user-management/:teamspace`} component={UserManagement} />
-			<Route exact path={`${match.url}/profile`} component={Profile} />
-			<Route path={`${match.url}/billing`} component={Billing} />
+			<Route
+				exact
+				path={`${match.url}/teamspaces`}
+				component={Teamspaces}
+			/>
+			<Route
+				exact
+				path={`${match.url}/teamspaces/:teamspace/models/:modelId`}
+				component={ModelSettings}
+			/>
+			<Route
+				path={`${match.url}/user-management/:teamspace`}
+				component={UserManagement}
+			/>
+			<Route
+				exact
+				path={`${match.url}/profile`}
+				component={Profile}
+			/>
+			<Route
+				path={`${match.url}/billing`}
+				component={Billing}
+			/>
 			<Redirect exact from={match.url} to={`${match.url}/teamspaces`} />
 			<Redirect
 				exact
@@ -91,11 +110,12 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 					/>
 				</Sidebar>
 				<Route path={`${match.url}dashboard`} render={({match: matchDashboard}) => (
-					<>
-						{!isPending && <Content>
-							{this.renderRoutes(matchDashboard, currentUser)}
-						</Content>}
-					</>
+					<Content>
+						{ isPending
+								? <RoutePlaceholder />
+								:	this.renderRoutes(matchDashboard, currentUser)
+						}
+					</Content>
 				)} />
 			</Container>
 		);

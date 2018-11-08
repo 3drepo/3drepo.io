@@ -17,24 +17,14 @@
 
 import * as React from 'react';
 
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
-import { MuiTheme, theme } from '../../../styles';
-import { Container, Title, Content } from './panel.styles';
+import { Container } from './routePlaceholder.styles';
+import { Panel } from '../../../components/panel/panel.component';
+import { Loader } from '../../../components/loader/loader.component';
 
-interface IProps {
-	title?: string | JSX.Element;
-	children: any;
-	paperProps?: any;
-}
-
-export const Panel = (props: IProps) => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={MuiTheme}>
-			<Container {...props.paperProps}>
-				<Title> { props.title } </Title>
-				<Content> { props.children } </Content>
-			</Container>
-		</MuiThemeProvider>
-	</ThemeProvider>
+export const RoutePlaceholder = () => (
+	<Panel>
+		<Container>
+			<Loader content="Loading current user data" />
+		</Container>
+	</Panel>
 );

@@ -15,26 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import styled from 'styled-components';
 
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
-import { MuiTheme, theme } from '../../../styles';
-import { Container, Title, Content } from './panel.styles';
-
-interface IProps {
-	title?: string | JSX.Element;
-	children: any;
-	paperProps?: any;
-}
-
-export const Panel = (props: IProps) => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={MuiTheme}>
-			<Container {...props.paperProps}>
-				<Title> { props.title } </Title>
-				<Content> { props.children } </Content>
-			</Container>
-		</MuiThemeProvider>
-	</ThemeProvider>
-);
+export const Container = styled.div`
+  position: relative;
+  padding-top: 100px;
+  height: 300px;
+`;
