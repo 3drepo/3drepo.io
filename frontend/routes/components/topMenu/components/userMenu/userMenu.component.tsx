@@ -17,8 +17,11 @@
 
 import * as React from 'react';
 import Divider from '@material-ui/core/Divider';
-import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
+import ViewList from '@material-ui/icons/ViewList';
+import ExitToApp from '@material-ui/icons/ExitToApp';
+import Description from '@material-ui/icons/Description';
+import Restore from '@material-ui/icons/Restore';
 
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import {
@@ -32,23 +35,21 @@ import {
 } from './userMenu.styles';
 import { Avatar } from '../../../avatar/avatar.component';
 
-const UserButton = ({ IconProps, icon, ...props }) => {
-	return (
-		<IconButton
-			{...props}
-			aria-label="Toggle user menu"
-			aria-haspopup="true"
-		>
-			<UserIcon {...IconProps}>{icon}</UserIcon>
-		</IconButton>
-	);
-};
+const UserButton = ({ IconProps, Icon, ...props }) => (
+	<IconButton
+		{...props}
+		aria-label="Toggle user menu"
+		aria-haspopup="true"
+	>
+		<UserIcon {...IconProps} />
+	</IconButton>
+);
 
-const UserMenuButton = (props) => {
+const UserMenuButton = ({Icon, ...props}) => {
 	return (
 		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
-				<Icon>{props.icon}</Icon>
+				<Icon />
 			</MenuIcon>
 			<MenuText primary={props.label} />
 		</MenuItem>
@@ -78,12 +79,12 @@ const UserMenuContent = (props) => {
 			</MenuUser>
 			<Divider />
 			<UserMenuButton
-				icon="view_list"
+				Icon={ViewList}
 				label="Teamspaces"
 				onButtonClick={invokeAndClose(props.onTeamspacesClick)}
 			/>
 			<UserMenuButton
-				icon="description"
+				Icon={Description}
 				label="User manual"
 				onButtonClick={invokeAndClose(props.openUserManual)}
 			/>
@@ -99,12 +100,12 @@ const UserMenuContent = (props) => {
 				<MenuText primary="Lite mode" />
 			</MenuItem>
 			{hasMemorySettings && <UserMenuButton
-				icon="restore"
+				Icon={Restore}
 				label="Reset Settings"
 				onButtonClick={invokeAndClose(props.resetMemorySettings)}
 			/>}
 			<UserMenuButton
-				icon="exit_to_app"
+				Icon={ExitToApp}
 				label="Logout"
 				onButtonClick={invokeAndClose(props.onLogout)}
 			/>
@@ -140,7 +141,6 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 			<ButtonMenu
 				renderButton={UserButton}
 				renderContent={(props) => <UserMenuContent {...props} {...menuContentProps} />}
-				icon="account_circle"
 				PopoverProps={{
 					anchorOrigin: {
 						vertical: 'top',

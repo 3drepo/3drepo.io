@@ -37,12 +37,12 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		template: `
 			<model
 				is-lite-mode="vm.isLiteMode"
-				account="vm.state.teamspace"
-				model="vm.state.modelId"
-				branch="vm.state.branch"
-				revision="vm.state.revision"
-				issue-id="vm.state.issueId"
-				risk-id="vm.state.riskId"
+				account="vm.$state.params.teamspace"
+				model="vm.$state.params.modelId"
+				branch="vm.$state.params.branch"
+				revision="vm.$state.params.revision"
+				issue-id="vm.$state.params.issueId"
+				risk-id="vm.$state.params.riskId"
 				state="vm.state"
 			/>
 		`,

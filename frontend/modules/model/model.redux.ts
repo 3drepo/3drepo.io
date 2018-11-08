@@ -21,7 +21,6 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettings: ['teamspace', 'modelId'],
 	fetchSettingsSuccess: ['settings'],
 	updateSettings: ['teamspace', 'modelId', 'settings'],
-	updateSettingsSuccess: ['settings'],
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
 	downloadModel: ['teamspace', 'modelId'],

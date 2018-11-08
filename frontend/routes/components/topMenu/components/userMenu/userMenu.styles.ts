@@ -21,16 +21,17 @@ import List from '@material-ui/core/List';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import Switch from '@material-ui/core/Switch';
 
 import { COLOR } from '../../../../../styles';
 import * as AvatarStyles from '../../../avatar/avatar.styles';
 
-export const UserIcon = styled(Icon)`
+export const UserIcon = styled(AccountCircle)`
 	&& {
 		color: ${COLOR.WHITE};
 		font-size: 45px;
-		text-shadow: 0 0 2px ${COLOR.BLACK_40};
+		filter: drop-shadow(0px 0px 2px ${COLOR.BLACK_30});
 	}
 `;
 

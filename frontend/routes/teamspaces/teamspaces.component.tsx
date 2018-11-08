@@ -50,7 +50,6 @@ const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account, projects }
 
 interface IProps {
 	match: any;
-	location: any;
 	history: any;
 	currentTeamspace: string;
 	teamspaces: any[];
@@ -223,25 +222,25 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			this.props.showDialog({
 				title: modelName ? "Edit federation" : "New federation",
 				template: FederationDialog,
-				data: {
-					name: modelName,
-					modelName,
-					teamspace: teamspaceName,
-					teamspaces,
-					project: projectName,
-					projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-					editMode: !!modelName,
-					modelId
-				},
-				onConfirm: ({ teamspace, ...modelData }) => {
-					if (isNewModel) {
-						this.props.createModel(teamspace, modelData);
-					} else {
-						this.props.updateModel(teamspace, modelId, modelData);
-					}
+				data: {name: modelName,
+				modelName,
+				teamspace: teamspaceName,
+				teamspaces,
+				project:  projectName ,
+				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
+
+				editMode: !!modelName,
+				modelId
+			},
+			onConfirm: ({ teamspace, ...modelData }) => {
+				if (isNewModel) {
+					this.props.createModel(teamspace, modelData);
+				} else {
+					this.props.updateModel(teamspace, modelId, modelData);
 				}
-			});
-		}
+			}
+		});
+	}
 
 	public openUploadModelFileDialog = (event, teamspaceName = '', modelProps) => {
 		event.stopPropagation();
@@ -272,14 +271,18 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public createModelItemClickHandler = (event, modelId, props) => {
+	public createModelItemClickHandler = (event, props) => {
+		const { activeTeamspace } = this.state;
 		if (props.timestamp) {
-            this.createRouteHandler(`/viewer/${modelId}`)();
-			const analyticService = getAngularService('AnalyticService') as any;
+			event.persist();
+			runAngularTimeout(() => {
+				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
+			});
 
+			const analyticService = getAngularService('AnalyticService') as any;
 			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
 		} else {
-			this.openUploadModelFileDialog(event, this.state.activeTeamspace, props);
+			this.openUploadModelFileDialog(event, activeTeamspace, props);
 		}
 	}
 
@@ -288,15 +291,18 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 */
 	public renderModel = (props) => {
 		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
-        const { activeTeamspace } = this.state;const { match } = this.props;
+		const { activeTeamspace } = this.state;
+		const { match } = this.props;
+
 		return (
 			<ModelItem
 				{...props}
 				actions={[]}
-				onModelItemClick={this.createRouteHandler(`/viewer/${props.model}`)}
+				onModelItemClick={(event) => this.createModelItemClickHandler(event, props)}
 				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
 					project: props.projectName,
-					view: PERMISSIONS_VIEWS.MODELS
+					view: PERMISSIONS_VIEWS.MODELS,
+					modelId: props.model
 				})}
 				onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`)}
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}

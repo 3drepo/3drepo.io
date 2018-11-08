@@ -95,16 +95,15 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-        const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
+		const { modelSettings: { properties }, match, fetchModelSettings } = this.props;
 		const { teamspace, modelId } = match.params;
-
 		const topicTypes = properties && properties.topicTypes ? properties.topicTypes : [];
 
 		if (topicTypes.length) {
 			this.setState({ topicTypes });
 		}
 
-        this.props.fetchModelSettings(teamspace, modelId);
+		fetchModelSettings(teamspace, modelId);
 	}
 
 	public componentDidUpdate(prevProps) {

@@ -45,6 +45,10 @@ home [ui-view] > * {
 	z-index: 1;
 }
 
+home #model {
+	pointer-events: all;
+}
+
 @media (max-width: 767px) {
 	home #homeLogo {
 		display: none;

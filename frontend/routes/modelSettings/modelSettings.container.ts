@@ -23,9 +23,9 @@ import { ModelSettings } from './modelSettings.component';
 import { selectCurrentTeamspace } from './../../modules/userManagement';
 
 const mapStateToProps = createStructuredSelector({
-  currentTeamspace: selectCurrentTeamspace,
-    modelSettings: selectSettings,
-    isSettingsLoading: selectIsPending
+	currentTeamspace: selectCurrentTeamspace,
+	modelSettings: selectSettings,
+	isSettingsLoading: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
