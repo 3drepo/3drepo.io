@@ -36,7 +36,7 @@ export function* fetchSettings({ teamspace, modelId }) {
 			put(ModelActions.setPendingState(false))
 		]);
 	} catch (e) {
-		put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
 	}
 }
 
@@ -46,7 +46,7 @@ export function* updateSettings({ teamspace, modelId, settings }) {
 
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
-		put(DialogActions.showErrorDialog('update', 'model settings', e.response));
+		yield put(DialogActions.showErrorDialog('update', 'model settings', e.response));
 	}
 }
 
@@ -61,7 +61,7 @@ export function* fetchRevisions({ teamspace, modelId }) {
 			put(ModelActions.setPendingState(false))
 		]);
 	} catch (e) {
-		put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
 	}
 }
 

@@ -117,9 +117,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 				<Form>
 					<DialogContent>
 						<ModelName>{modelName}</ModelName>
-
 						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
-
 						<Field
 							name="revisionName"
 							render={({ field }) =>

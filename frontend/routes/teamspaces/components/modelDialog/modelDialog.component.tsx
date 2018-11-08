@@ -20,6 +20,7 @@ import * as Yup from 'yup';
 import { isEmpty } from 'lodash';
 import { Formik, Form, Field } from 'formik';
 import { upperFirst, mapValues, keyBy, includes, differenceBy } from 'lodash';
+
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
@@ -31,9 +32,11 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Row, SelectWrapper,	FieldWrapper,	ModelsTableContainer } from './modelDialog.styles';
-
 import { SubModelsTable } from '../../components/subModelsTable/subModelsTable.component';
+import { LoadingDialog }
+	from '../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
+
+import { Row, SelectWrapper, FieldWrapper, ModelsTableContainer } from './modelDialog.styles';
 
 import { MODEL_TYPE, FEDERATION_TYPE, MODEL_SUBTYPES } from './../../teamspaces.contants';
 
@@ -52,11 +55,6 @@ const ModelSchema = Yup.object().shape({
 const FederationSchema = Yup.object().shape({
 	...commonSchemaValues
 });
-
-const commonInitialValues = {
-	unit: '',
-	desc: ''
-};
 
 const dataByType = {
 	[MODEL_TYPE]: {
@@ -111,6 +109,7 @@ interface IProps {
 	settings: any;
 	fetchModelSettings: (teamspace, modelId) => void;
 	editMode: boolean;
+	isPending: boolean;
 	modelId: string;
 }
 
@@ -163,32 +162,32 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		if (this.props.name.length) {
-			this.setState({
-				name: this.props.name
-			});
+		const { editMode, modelId, name, teamspace, fetchModelSettings, project, type } = this.props;
+
+		if (name.length) {
+			this.setState({ name });
 		}
 
-		if (this.props.editMode) {
-			this.props.fetchModelSettings(this.props.teamspace, this.props.modelId);
+		if (editMode) {
+			fetchModelSettings(teamspace, modelId);
 		}
 
-		if (this.props.project && this.props.type === FEDERATION_TYPE) {
-			this.setInitialAvailableModels(this.props.project);
+		if (project && type === FEDERATION_TYPE) {
+			this.setInitialAvailableModels(project);
 		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-		const { editMode, settings, type } = this.props;
+		const { editMode, settings, type, projects, project, modelName } = this.props;
 
 		if ((editMode && settings && prevProps.settings !== settings)) {
-			changes.unit = this.props.settings.properties.unit;
+			changes.unit = settings.properties.unit;
 		}
 
 		if (editMode && type === FEDERATION_TYPE && !prevState.federatedModels.length && !prevState.availableModels.length) {
-			const selectedProject = getProject(this.props.projects, this.props.project);
-			const federatedModels = getFederatedModels(selectedProject, this.props.modelName);
+			const selectedProject = getProject(projects, project);
+			const federatedModels = getFederatedModels(selectedProject, modelName);
 			const availableModels = differenceBy(this.state.availableModels, federatedModels, 'name');
 			const availableMap = getModelsMap(selectedProject);
 
@@ -203,7 +202,9 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleModelSave = (values) => {
-		if (this.props.type === FEDERATION_TYPE) {
+		const { type, handleResolve } = this.props;
+
+		if (type === FEDERATION_TYPE) {
 			const subModels = this.state.federatedModels.map((model) => {
 				return {
 					name: model.name,
@@ -221,13 +222,13 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 				modelName: values.name
 			};
 
-			this.props.handleResolve(federationValues);
+			handleResolve(federationValues);
 		} else {
 			const modelValues = {
 				...values,
 				modelName: values.name
 			};
-			this.props.handleResolve(modelValues);
+			handleResolve(modelValues);
 		}
 	}
 
@@ -441,22 +442,24 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { modelName, teamspace, project, teamspaces, handleClose, type, editMode } = this.props;
+		const { modelName, teamspace, project, teamspaces, handleClose, type, editMode, isPending } = this.props;
 		const { name, projectsItems, selectedTeamspace, selectedProject, unit, federatedModels } = this.state;
+
+		if (editMode && isPending) {
+			return (
+				<LoadingDialog content={`Loading ${modelName} data...`} />
+			);
+		}
 
 		return (
 			<Formik
 				initialValues={
 					{
-						teamspace: teamspace ? teamspace : selectedTeamspace,
-						project: project ? project : selectedProject,
-						name,
-						modelName,
-						...commonInitialValues,
-						...dataByType[type].initialValues
+						teamspace: teamspace ? teamspace : selectedTeamspace, project: project ? project : selectedProject,
+						name, modelName, unit, desc: '', ...dataByType[type].initialValues
 					}
 				}
-				validationSchema={this.props.type === FEDERATION_TYPE ? FederationSchema : ModelSchema}
+				validationSchema={type === FEDERATION_TYPE ? FederationSchema : ModelSchema}
 				onSubmit={this.handleModelSave}
 			>
 				<Form>
@@ -505,6 +508,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.name && (form.errors.name || '')}
 											label={`${upperFirst(type)} Name`}
 											margin="normal"
+											disabled={editMode}
 											required
 											fullWidth={true}
 											value={this.state.name}
@@ -514,7 +518,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 								</FieldWrapper>
 								<SelectWrapper fullWidth={true} required={true}>
 									<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-									<Field name="unit" render={({ field, form }) => (
+									<Field name="unit" render={({ field }) => (
 										<CellSelect
 											{...field}
 											placeholder="Select unit"
@@ -534,15 +538,15 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={({ form }) =>
-							<Button
-								type="submit"
-								variant="raised"
-								color="secondary"
-								disabled={
-									(!form.isValid || form.isValidating) && !editMode || !form.dirty ||
-									(editMode && !(Boolean(name) || Boolean(federatedModels.length)))
-								}>Save</Button>
+						<Field render={({ form }) => {
+							return (
+								<Button
+									type="submit"
+									variant="raised"
+									color="secondary"
+									disabled={(!form.isValid || form.isValidating)}>Save</Button>
+							);
+						}
 						} />
 					</DialogActions>
 				</Form>
