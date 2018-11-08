@@ -148,7 +148,8 @@ export class AuthService {
 			error: response.data
 		});
 
-		history.push('/login');
+		const originURL = `${location.pathname}${location.search}`;
+		this.$state.go('app.login', { referrer: originURL });
 		this.authDefer.resolve(response.data);
 	}
 

@@ -89,9 +89,8 @@ class LoginController implements ng.IController {
 		this.loggingIn = true;
 		this.AuthService.login(this.user.username, this.user.password)
 			.then(() => {
-				console.log('params', this.$state.params)
 				this.$timeout(() => {
-					history.push('/dashboard/teamspaces');
+					history.push(this.$state.params.referrer || '/dashboard/teamspaces');
 				});
 				this.loggingIn = false;
 			})

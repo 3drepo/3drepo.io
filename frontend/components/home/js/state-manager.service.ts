@@ -239,9 +239,6 @@ export class StateManagerService {
 			// we need to go back to the account page if possible.
 			if ((functionList.length === 0) && this.AuthService.isLoggedIn() && !this.state.account) {
 				this.setStateVar("account", this.AuthService.getUsername());
-				this.updateState(false);
-			} else {
-				this.updateState(true);
 			}
 		} else {
 			this.stateChangeQueue.pop();
@@ -278,41 +275,6 @@ export class StateManagerService {
 
 	}
 
-	public genStateName() {
-
-		let currentChildren = this.structure.children;
-		let childidx = 0;
-		let stateName  = "home."; // Assume that the base state is there.
-		const functionList = this.functionsUsed();
-		const usesFunction = (functionList.length > 0);
-
-		if (usesFunction) {
-			stateName += functionList.join(".") + ".";
-		} else {
-			while (childidx < currentChildren.length) {
-				const child  = currentChildren[childidx];
-				const plugin = child.plugin;
-
-				if (this.state.hasOwnProperty(plugin) && this.state[plugin]) {
-					stateName += plugin + ".";
-
-					if (child.children) {
-						currentChildren = child.children;
-					} else {
-						currentChildren = [];
-					}
-
-					childidx = -1;
-				}
-
-				childidx += 1;
-			}
-		}
-
-		return stateName.substring(0, stateName.length - 1);
-
-	}
-
 	public setStateVar(letName, value) {
 		if (value === null) {
 			delete this.state[letName];
@@ -345,23 +307,6 @@ export class StateManagerService {
 				this.query[param] = queryParams[param];
 			}
 		}
-	}
-
-	public updateState(dontUpdateLocation) {
-		// const newStateName = this.genStateName();
-
-		// if (Object.keys(this.changedState).length) {
-		// 	this.changedState = {};
-		// }
-
-		// const updateLocation = !dontUpdateLocation ? true : false; // In case of null
-		// this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
-
-		// // This timeout is needed or changing revision doesn't work... for some reason.
-		// this.$timeout(() => {
-		// 	this.state.changing = false;
-		// });
-
 	}
 
 	public refreshHandler(event) {
@@ -409,7 +354,6 @@ export class StateManagerService {
 				this.setStateVar(key, value[key]);
 			}
 		}
-		this.updateState(false);
 	}
 
 }

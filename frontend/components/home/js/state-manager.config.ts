@@ -91,7 +91,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 			isLogoutRequired: true
 		},
 		params: {
-			referrer: { dynamic: true, value: '/dashboard/teamspaces' }
+			referrer: { dynamic: true, value: null }
 		}
 	});
 
