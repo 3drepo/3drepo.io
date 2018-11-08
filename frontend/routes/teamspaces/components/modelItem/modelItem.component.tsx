@@ -37,9 +37,11 @@ interface IAction {
 }
 interface IProps {
 	name: string;
+	currentTeamspace: string;
 	status: string;
 	federate: boolean;
 	model: string;
+	projectName: string;
 	subModels?: any[];
 	timestamp: string;
 	onModelItemClick: (event) => void;
@@ -48,6 +50,8 @@ interface IProps {
 	onDownloadClick: (event) => void;
 	onSettingsClick: (event) => void;
 	onPermissionsClick: (event) => void;
+	subscribeOnStatusChange: (teamspace, project, modelId) => void;
+	unsubscribeOnStatusChange: (teamspace, project, modelId) => void;
 }
 
 interface IState {
@@ -93,6 +97,16 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 			...ROW_ACTIONS.EDIT,
 			action: props.onEditClick
 		}, ...sharedActions];
+	}
+
+	public componentDidMount = () => {
+		const { currentTeamspace, projectName, model, subscribeOnStatusChange } = this.props;
+		subscribeOnStatusChange(currentTeamspace, projectName, model);
+	}
+
+	public componentWillUnmount = () => {
+		const { currentTeamspace, projectName, model, unsubscribeOnStatusChange } = this.props;
+		unsubscribeOnStatusChange(currentTeamspace, projectName, model);
 	}
 
 	public renderSubModels = (subModels = []) => {

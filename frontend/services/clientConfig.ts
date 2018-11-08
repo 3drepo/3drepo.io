@@ -2,6 +2,7 @@ export class ClientConfigService {
 	public responseCodes;
 	public countries;
 	public units;
+	public acceptedFormat;
 	public apiUrl;
 	public GET_API;
 	public POST_API;
