@@ -27,10 +27,10 @@ import { getAngularService } from '../../helpers/migration';
 export function* login({ username, password }) {
 	try {
 		yield API.login(username, password);
-		yield CurrentUserActions.fetchUserSuccess({
+		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
 			avatarUrl: getAvatarUrl(username)
-		});
+		}));
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
 		if (e.response.status === 401) {
@@ -61,10 +61,10 @@ export function* logout() {
 export function* authenticate() {
 	try {
 		const { data: { username }} = yield API.authenticate();
-		yield CurrentUserActions.fetchUserSuccess({
+		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
 			avatarUrl: getAvatarUrl(username)
-		});
+		}));
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
 		if (e.response.status === 401) {

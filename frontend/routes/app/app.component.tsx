@@ -16,16 +16,53 @@
  */
 
 import * as React from 'react';
+import { isEmpty } from 'lodash';
+import { runAngularTimeout } from '../../helpers/migration';
 import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 
 interface IProps {
+	location: any;
+	history: any;
+	isAuthenticated: boolean;
 	authenticate: () => void;
 }
 
-export class App extends React.PureComponent<IProps, any> {
+interface IState {
+	referrer?: string;
+}
+
+const DEFAULT_REDIRECT = '/dashboard/teamspaces';
+
+export class App extends React.PureComponent<IProps, IState> {
+	public state = {
+		referrer: DEFAULT_REDIRECT
+	};
+
 	public componentDidMount() {
 		this.props.authenticate();
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as IState;
+		const { location, history, isAuthenticated } = this.props;
+
+		if (isAuthenticated !== prevProps.isAuthenticated) {
+			if (isAuthenticated) {
+				history.push(this.state.referrer);
+				changes.referrer = DEFAULT_REDIRECT;
+			} else {
+				// To force Agnular to refresh state
+				runAngularTimeout(() => {
+					history.push('/login');
+				});
+				changes.referrer = `${location.pathname }${ location.search }`;
+			}
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
 	}
 
 	public render() {

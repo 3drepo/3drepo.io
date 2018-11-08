@@ -28,6 +28,7 @@ import { Panel } from '../components/panel/panel.component';
 import { Container, Headline, LoginButtons, StyledButton } from './login.styles';
 import { Footer } from './components/footer';
 import { isEmpty } from 'lodash';
+import { history } from '../../helpers/migration';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,
@@ -43,11 +44,9 @@ const DEFAULT_INPUT_PROPS = {
 	}
 };
 
-const DEFAULT_LOGIN_REDIRECT = '/dashboard/teamspaces';
-
 interface IProps {
+	history: any;
 	location: any;
-	isAuthenticated: boolean;
 	headlineText?: string;
 	onLogin: (login, password) => void;
 }
@@ -62,16 +61,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 		login: '',
 		password: ''
 	};
-
-	public componentDidUpdate(prevProps: IProps) {
-		const changes = {};
-
-		// TODO
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
-	}
 
 	public handleSubmit = (data, form) => {
 		this.props.onLogin(data.login, data.password);
@@ -102,13 +91,8 @@ export class Login extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { headlineText, location, isAuthenticated } = this.props;
+		const { headlineText } = this.props;
 		const { login, password } = this.state;
-		const { from } = location.state || { from: { pathname: DEFAULT_LOGIN_REDIRECT } };
-
-		if (isAuthenticated) {
-			return <Redirect to={from} />;
-		}
 
 		return (
 			<Grid container flex-direction="row" justify="center">

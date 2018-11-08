@@ -25,10 +25,11 @@ import { selectCurrentUser } from '../../../modules/currentUser';
 import { AuthActions } from '../../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
-	currentUser: selectCurrentUser,
-	onLogout: AuthActions.logout
+	currentUser: selectCurrentUser
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	onLogout: AuthActions.logout
+}, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));

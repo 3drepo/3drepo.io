@@ -30,7 +30,6 @@ export class AuthInterceptor {
 	public responseError = (response) => {
 		const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
 		const notLogin = response.data.place !== 'GET /login';
-
 		const unauthorized = response.status === 401 &&
 			invalidMessages.includes(response.data.message);
 
@@ -65,9 +64,7 @@ export class AuthInterceptor {
 			StateManager.resetServiceStates();
 			AuthService.logoutSuccess();
 		});
-
 	}
-
 }
 
 export const AuthInterceptorModule = angular

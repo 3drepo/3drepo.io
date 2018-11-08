@@ -346,13 +346,13 @@ class HomeController implements ng.IController {
 			this.removeTrailingSlash();
 		}
 
-		// If it's a logged in page just redirect to the
+/* 		// If it's a logged in page just redirect to the
 		// users teamspace page
 		this.AuthService.authDefer.promise.then(() => {
 			if (this.AuthService.loggedOutPage() && this.AuthService.getUsername()) {
 				this.$location.path('/dashboard/teamspaces');
 			}
-		});
+		}); */
 
 	}
 

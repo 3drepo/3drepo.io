@@ -81,19 +81,9 @@ function StateManagerRun(
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
 		const isAuthenticated = selectIsAuthenticated(getState());
 
-		if (isLoginRequired) {
+		if (isLoginRequired && !isAuthenticated) {
 			event.preventDefault();
-
-			if (isAuthenticated) {
-				if (toState.name.includes('app.dashboard')) {
-					history.push(originURL);
-					$urlRouter.update();
-				} else {
-					$state.go(toState, toParams);
-				}
-			} else {
-				$state.go('app.login', { referrer: originURL });
-			}
+			$state.go('app.login');
 		}
 
 		StateManager.setState(toParams);
