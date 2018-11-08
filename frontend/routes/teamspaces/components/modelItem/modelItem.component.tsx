@@ -58,7 +58,7 @@ interface IState {
 	hovered: boolean;
 }
 
-const isPendingStatus = (status) => status !== 'ok' && status !== 'failed';
+const isPendingStatus = (status) => status && status !== 'ok' && status !== 'failed';
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {

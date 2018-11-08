@@ -19,11 +19,12 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { connect, addRouting } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings } from './../../../../modules/model';
+import { ModelActions, selectSettings, selectIsPending } from './../../../../modules/model';
 import { ModelDialog } from './modelDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	settings: selectSettings
+	settings: selectSettings,
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

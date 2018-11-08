@@ -80,10 +80,11 @@ const removeProjectSuccess = (state = INITIAL_STATE, action) => {
 const updateModelSuccess = (state = INITIAL_STATE, action) => {
 	const teamspaces = { ...state.teamspaces };
 	const projects = [...state.teamspaces[action.teamspace].projects];
-	const projectIndex = projects.findIndex((project) => project.name === action.modelData.projectName);
+	const projectIndex = projects.findIndex((project) => project.name === action.modelData.project);
 	const foundProject = projects[projectIndex];
-	const modelIndex = foundProject.models.findIndex((model) => model.name === action.modelData.name);
-	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex] = action.modelData;
+	const modelIndex = foundProject.models.findIndex((model) => model.name === action.modelName);
+
+	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].subModels = action.modelData.subModels;
 
 	return { ...state, teamspaces };
 };

@@ -30,6 +30,7 @@ import ModelItem from './components/modelItem/modelItem.container';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { getAngularService, runAngularTimeout } from '../../helpers/migration';
+import { ErrorDialog } from './../../routes/components/dialogContainer/components/errorDialog/errorDialog.component';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
@@ -122,6 +123,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return teamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
+	public getProjectModels = () => {
+		const project
+	}
+
 	public createRouteHandler = (pathname, params = {}) => (event) => {
 		event.stopPropagation();
 
@@ -178,6 +183,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public createRemoveModelHandler = (modelName, modelId, projectName, type) => (event) => {
 		event.stopPropagation();
+
 		this.props.showConfirmDialog({
 			title: `Delete ${type}`,
 			content: `
