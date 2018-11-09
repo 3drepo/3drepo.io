@@ -216,31 +216,31 @@ class HomeController implements ng.IController {
 		}
 
 		switch (event) {
-		case this.AuthService.events.USER_LOGGED_IN:
-			if (!currentData.error) {
-				if (!currentData.initialiser) {
-					if (!this.state.account) {
-						const username = this.AuthService.getUsername();
-						if (!username) {
-							console.error('Username is not defined for statemanager!');
+			case this.AuthService.events.USER_LOGGED_IN:
+				if (!currentData.error) {
+					if (!currentData.initialiser) {
+						if (!this.state.account) {
+							const username = this.AuthService.getUsername();
+							if (!username) {
+								console.error('Username is not defined for statemanager!');
+							}
+
+							this.state.account = username;
+
+						}
+					} else if (!currentData.username) {
+						this.StateManager.setHomeState({
+							loggedIn: false,
+							account: null,
+							returnUrl: this.$location.path() !== '/' ? this.$location.path() : null
+						});
+
+						if (this.StateManager.query) {
+							this.$location.search('username', this.StateManager.query.username);
+							this.$location.search('token', this.StateManager.query.token);
 						}
 
-						this.state.account = username;
-
 					}
-				} else if (!currentData.username) {
-					this.StateManager.setHomeState({
-						loggedIn: false,
-						account: null,
-						returnUrl: this.$location.path() !== '/' ? this.$location.path() : null
-					});
-
-					if (this.StateManager.query) {
-						this.$location.search('username', this.StateManager.query.username);
-						this.$location.search('token', this.StateManager.query.token);
-					}
-
-				}
 
 				if (currentData.flags && currentData.flags.termsPrompt) {
 					this.DialogService.showDialog(
@@ -256,7 +256,10 @@ class HomeController implements ng.IController {
 				this.AuthService.logout();
 			}
 
-			break;
+				break;
+			default:
+				break;
+		}
 	}
 
 	public getLiteModeState() {
@@ -300,12 +303,6 @@ class HomeController implements ng.IController {
 					typeof custom.backgroundImage === 'string'
 				) {
 					this.backgroundImage = custom.backgroundImage;
-				}
-				if (
-					custom.topLogo &&
-					typeof custom.topLogo === 'string'
-				) {
-					this.topLogo = custom.topLogo;
 				}
 				if (
 					custom.css

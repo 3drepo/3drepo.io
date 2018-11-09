@@ -15,25 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import styled from 'styled-components';
+import { FONT_WEIGHT, COLOR } from '../../../styles';
 
-import { clientConfigService } from '../../../services/clientConfig';
-// @ts-ignore
-import * as DEFAULT_LOGO from '../../../images/3drepo-logo-white.png';
-import { Image } from './logo.styles';
+export const Container = styled.div`
+  max-width: 500px;
+`;
 
-interface IProps {
-	src?: string;
-	alt?: string;
-	onClick?: () => void;
-}
-
-const customLogoSrc = clientConfigService.getCustomLogoPath();
-
-const logoProps = {
-	src: customLogoSrc || DEFAULT_LOGO,
-	alt: '3D Repo',
-	longdesc: '3DRepoBuildingInformationModellingSoftware'
-};
-
-export const Logo = (props: IProps) => <Image {...logoProps} {...props} />;
+export const Link = styled.a`
+  font-weight: ${FONT_WEIGHT.SEMIBOLD};
+  color: ${COLOR.PRIMARY_MAIN};
+  padding: 0 5px;
+  text-decoration: none;
+`;

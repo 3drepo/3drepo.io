@@ -16,21 +16,28 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-
 import * as API from '../../services/api';
-import { AuthTypes, AuthActions } from './auth.redux';
-import { DialogActions } from '../dialog';
+import { getAngularService } from '../../helpers/migration';
+import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
-import { getAngularService } from '../../helpers/migration';
+import { DialogActions } from '../dialog';
+import { AuthActions, AuthTypes } from './auth.redux';
 
 export function* login({ username, password }) {
 	try {
-		yield API.login(username, password);
+		const { data: { flags }} = yield API.login(username, password);
+
+		if (flags && flags.termsPrompt) {
+			yield put(DialogActions.showDialog({
+				title: 'Terms and Privacy Policy Update',
+				template: NewTermsDialog
+			}));
+		}
 
 		// TODO: Replace to proper service after migration
 		const AnalyticService = getAngularService('AnalyticService') as any;
-		yield AnalyticService.setUserId(this.username);
+		yield AnalyticService.setUserId(username);
 
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,

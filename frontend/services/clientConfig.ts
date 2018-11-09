@@ -1,3 +1,11 @@
+const getSubdomain = () => {
+	const {host} = location;
+	if (host.indexOf(".") < 0) {
+		return "";
+	}
+	return host.split(".")[0];
+};
+
 export class ClientConfigService {
 	public responseCodes;
 	public countries;
@@ -11,6 +19,7 @@ export class ClientConfigService {
 	private apiAlgorithm;
 	private MAP_API;
 	private C;
+	private customLogins;
 
 	constructor() {
 		if (window && window.ClientConfig) {
@@ -55,7 +64,18 @@ export class ClientConfigService {
 		}
 
 		return roundRobin;
+	}
 
+	public getCustomLogoPath() {
+		const subdomain = getSubdomain();
+		const custom = this.customLogins && this.customLogins[subdomain];
+
+		if (subdomain && custom && custom.topLogo &&
+			typeof custom.topLogo === "string") {
+			return custom.topLogo;
+		}
+
+		return '';
 	}
 }
 
