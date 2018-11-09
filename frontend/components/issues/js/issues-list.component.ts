@@ -30,6 +30,7 @@ class IssuesListController implements ng.IController {
 
 		"APIService",
 		"IssuesService",
+		"PanelService",
 		"ClientConfigService"
 	];
 
@@ -60,6 +61,7 @@ class IssuesListController implements ng.IController {
 
 		private apiService: APIService,
 		private issuesService: IssuesService,
+		private PanelService: any,
 		private clientConfigService: any
 	) {}
 
@@ -195,9 +197,10 @@ class IssuesListController implements ng.IController {
 				break;
 
 			case "downloadJSON":
-				const jsonEndpoint = this.account + "/" + this.model + "/issues.json?print=true";
-				const jsonUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, jsonEndpoint);
-				this.$window.open(jsonUrl, "_blank");
+				const jsonEndpoint = this.account + "/" + this.model + "/issues.json";
+				this.apiService.get(jsonEndpoint).then((res) => {
+					this.PanelService.downloadJSON(JSON.stringify(res.data), "issues", 'application/json');
+				});
 				break;
 
 			case "importBCF":

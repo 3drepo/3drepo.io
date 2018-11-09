@@ -505,6 +505,22 @@ export class PanelService {
 	}
 
 	/**
+	 * Download server response JSON file from panel menu
+	 *
+	 * @param content The JSON response to download
+	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
+	 * @param contentType content type for downloaded file : "text/plain", "application/json"
+	 */
+
+	public downloadJSON(content, fileName, contentType) {
+		const a = document.createElement("a");
+		const file = new Blob([content], {type: contentType});
+		a.href = URL.createObjectURL(file);
+		a.download = fileName + ".json";
+		a.click();
+	}
+
+	/**
 	 * Adds a menu item for chips filtering.
 	 * This method is used from within the contained panelCard
 	 * generally for creating menues from data from an API call.
