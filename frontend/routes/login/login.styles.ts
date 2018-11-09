@@ -65,6 +65,11 @@ export const LoginButtons = styled(Grid)`
   }
 `;
 
+export const UserNotice = styled.span`
+  color: ${COLOR.BLACK_60};
+  margin: 10px 0;
+`;
+
 export const FooterContainer = styled(Grid)`
   && {
     border-top: 1px solid ${COLOR.BLACK_6};

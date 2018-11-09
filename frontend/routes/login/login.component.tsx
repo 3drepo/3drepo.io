@@ -23,10 +23,11 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
+import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
 import { Logo } from '../components/logo/logo.component';
-import { Container, Headline, LoginButtons, StyledButton } from './login.styles';
+import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 import { Footer } from './components/footer';
 
 const LoginSchema = Yup.object().shape({
@@ -43,6 +44,8 @@ const DEFAULT_INPUT_PROPS = {
 	}
 };
 
+const USER_NOTICE = clientConfigService.userNotice;
+
 interface IProps {
 	history: any;
 	location: any;
@@ -54,6 +57,7 @@ interface IState {
 	login: string;
 	password: string;
 }
+
 
 export class Login extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -99,12 +103,11 @@ export class Login extends React.PureComponent<IProps, IState> {
 				direction="column"
 				justify="center"
 				alignItems="center">
-				<Grid item>
-					<Logo />
-				</Grid>
+				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in">
 						<Headline>{headlineText || 'Welcome to 3D Repo'}</Headline>
+						{ USER_NOTICE && <UserNotice>{ USER_NOTICE }</UserNotice> }
 
 						<Formik
 							initialValues={{ login, password }}
@@ -138,7 +141,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 						<Footer />
 					</Panel>
 				</Grid>
-			</Grid>
+			</Container>
 		);
 	}
 }

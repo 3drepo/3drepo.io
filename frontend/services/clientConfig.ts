@@ -15,6 +15,7 @@ export class ClientConfigService {
 	public GET_API;
 	public POST_API;
 	public VERSION;
+	public userNotice;
 	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;

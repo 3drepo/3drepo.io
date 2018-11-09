@@ -64,6 +64,7 @@ export function* logout() {
 		yield put({ type: 'RESET_APP' });
 	} catch (e) {
 		if (e.response.status === 401) {
+			yield put({ type: 'RESET_APP' });
 			yield put(AuthActions.logoutFailure());
 		} else {
 			yield put(DialogActions.showErrorDialog('logout', 'user', e.response));

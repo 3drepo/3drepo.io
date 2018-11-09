@@ -36,7 +36,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 export const INITIAL_STATE = {
 	currentTeamspace: '',
 	currentUser: {
-		username: localStorage.getItem('username') || ''
+		username: ''
 	},
 	isPending: true,
 	isAvatarPending: true,
