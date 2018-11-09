@@ -85,8 +85,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public getAcceptedFormats = () =>
-		clientConfigService.acceptedFormat.map((format) => `.${format}`).toString();
+	public getAcceptedFormats = () => clientConfigService.acceptedFormat.map((format) => `.${format}`).toString();
 
 	public renderRevisionInfo = (revisions) => {
 		if (!revisions.length) {
@@ -111,9 +110,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<Formik onSubmit={this.handleFileUpload} initialValues={{
-				revisionName: '', revisionDesc: ''
-			}}>
+			<Formik onSubmit={this.handleFileUpload} initialValues={{ revisionName: '', revisionDesc: '' }}>
 				<Form>
 					<DialogContent>
 						<ModelName>{modelName}</ModelName>
@@ -140,15 +137,12 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								/>
 							}
 						/>
-
 						{ modelSettings.properties &&
 							<ModelInfo>
 								{ `Model units: ${unitsMap[modelSettings.properties.unit]}` }
 							</ModelInfo>
 						}
-
 						{ this.state.fileName && <ModelInfo>File name: { this.state.fileName } </ModelInfo> }
-
 						<StyledDialogActions>
 							<HiddenFileInput
 								accept={this.getAcceptedFormats()}

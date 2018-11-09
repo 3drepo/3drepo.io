@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import { Route } from 'react-router-dom';
 import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
 import { isEmpty, isEqual } from 'lodash';
@@ -30,11 +29,11 @@ import ModelItem from './components/modelItem/modelItem.container';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { TABS_TYPES } from '../userManagement/userManagement.component';
 import { getAngularService, runAngularTimeout } from '../../helpers/migration';
-import { ErrorDialog } from './../../routes/components/dialogContainer/components/errorDialog/errorDialog.component';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
-import ModelDialog from './components/modelDialog/modelDialog.container';
+import { ModelDialog } from './components/modelDialog/modelDialog.component';
+import FederationDialog from './components/federationDialog/federationDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
@@ -123,10 +122,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return teamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
-	public getProjectModels = () => {
-		const project
-	}
-
 	public createRouteHandler = (pathname, params = {}) => (event) => {
 		event.stopPropagation();
 
@@ -199,40 +194,57 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public openModelDialog =
-		(event, type = MODEL_TYPE, teamspaceName = '', projectName = '', modelName = '', modelId = '') => {
+		(event, teamspaceName = '', projectName = '', modelName = '', modelId = '') => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
-		const isNewModel = !modelName.length;
-		console.log('show dialog');
+		const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
 
 		this.props.showDialog({
-			title: modelName ? `Edit ${type}` : `New ${type}`,
+			title: "New model",
 			template: ModelDialog,
 			data: {
-				name: modelName,
 				modelName,
 				teamspace: teamspaceName,
-				teamspaces: teamspacesItems,
-				project: teamspaceName ? projectName : '',
+				teamspaces,
+				project: projectName,
 				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-				type,
-				editMode: !!modelName,
 				modelId
 			},
 			onConfirm: ({ teamspace, ...modelData }) => {
-				console.log('onConfirm')
-				if (isNewModel) {
-					console.log('onConfirm:isNewModel');
-
-					this.props.createModel(teamspace, modelData);
-				} else {
-					console.log('onConfirm:!isNewModel');
-
-					this.props.updateModel(teamspace, modelName, modelData);
-				}
+				this.props.createModel(teamspace, modelData);
 			}
 		});
 	}
+
+	public openFederationDialog =
+		(event, teamspaceName = '', projectName = '', modelName = '', modelId = '') => {
+			event.stopPropagation();
+			const { teamspacesItems } = this.state as IState;
+			const isNewModel = !modelName.length;
+			const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
+
+			this.props.showDialog({
+				title: modelName ? "Edit federation" : "New federation",
+				template: FederationDialog,
+				data: {
+					name: modelName,
+					modelName,
+					teamspace: teamspaceName,
+					teamspaces,
+					project: projectName,
+					projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
+					editMode: !!modelName,
+					modelId
+				},
+				onConfirm: ({ teamspace, ...modelData }) => {
+					if (isNewModel) {
+						this.props.createModel(teamspace, modelData);
+					} else {
+						this.props.updateModel(teamspace, modelId, modelData);
+					}
+				}
+			});
+		}
 
 	public openUploadModelFileDialog = (event, teamspaceName = '', modelProps) => {
 		event.stopPropagation();
@@ -304,7 +316,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onModelUpload={(event) => this.openUploadModelFileDialog(event, this.state.activeTeamspace, props)}
 				onEditClick={
 					(event) =>
-						this.openModelDialog(event, type, this.state.activeTeamspace, props.projectName, props.name, props.model)
+						this.openFederationDialog(event, this.state.activeTeamspace, props.projectName, props.name, props.model)
 				}
 			/>
 		);
@@ -316,7 +328,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				{...props}
 				renderChildItem={(modelProps) => this.renderModel({ ...modelProps, projectName: props.projectName })}
 				onAddClick={
-					(event) => this.openModelDialog(event, props.type, this.state.activeTeamspace, props.projectName)
+					(event) => props.type === FEDERATION_TYPE
+						? this.openFederationDialog(event, this.state.activeTeamspace, props.projectName)
+						: this.openModelDialog(event, this.state.activeTeamspace, props.projectName)
 				}
 			/>
 		);
@@ -372,10 +386,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return (
 			<>
 				<MenuItem onClick={(event) => { this.openProjectDialog(event); close(event); }}> Add project </MenuItem>
-				<MenuItem onClick={(event) => { this.openModelDialog(event, MODEL_TYPE); close(event); }}>
+				<MenuItem onClick={(event) => { this.openModelDialog(event); close(event); }}>
 					Add model
 				</MenuItem>
-				<MenuItem onClick={(event) => { this.openModelDialog(event, FEDERATION_TYPE); close(event); }}>
+				<MenuItem onClick={(event) => { this.openFederationDialog(event); close(event); }}>
 					Add federation
 				</MenuItem>
 			</>
