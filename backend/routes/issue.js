@@ -38,7 +38,6 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 router.get("/issues.json", middlewares.issue.canView, listIssues);
-router.get("/issues.json/:print", middlewares.issue.canView, getIssuesJSON);
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
@@ -235,24 +234,6 @@ function getIssuesBCF(req, res, next) {
 
 }
 
-function getIssuesJSON(req, res, next) {
-	if (req.params.print){
-		console.log("im true");
-	}
-	// console.log("req", req);
-	console.log("res", res);
-	// console.log("next", next);
-	var data = JSON.stringify(res);
-	console.log("data",  data);
-// 	let data = JSON.stringify(req.getIssuesJSON, null, 2);
-
-// 	fs.writeFile('issues.json', data, (err) => {  
-//     	if (err) throw err;
-//    		 console.log('Data written to file');
-// 	});
-
-// console.log('This is after the write call');  
-}
 
 function findIssueById(req, res, next) {
 
