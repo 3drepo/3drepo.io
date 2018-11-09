@@ -7,8 +7,8 @@ interface IProps {
 	content?: string;
 	handleResolve: () => void;
 	handleClose: () => void;
-
 }
+
 export const ConfirmDialog = (props: IProps) => {
 	const { content } = props;
 	return (

@@ -75,9 +75,24 @@ export function* authenticate() {
 	}
 }
 
+export function* sessionExpired() {
+	try {
+		const StateManager = getAngularService('StateManager') as any;
+		StateManager.resetServiceStates();
+
+		yield put({ type: 'RESET_APP' });
+		yield put(DialogActions.showDialog({
+			title: 'Session expired',
+			content: 'You have been logged out as your session has expired'
+		}));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('verify', 'user session', e.response));
+	}
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
-
+	yield takeLatest(AuthTypes.SESSION_EXPIRED, sessionExpired);
 }

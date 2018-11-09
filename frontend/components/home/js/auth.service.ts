@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { dispatch, history } from "../../../helpers/migration";
-import { CurrentUserActions } from "../../../modules/currentUser";
-import { getAvatarUrl } from "../../../modules/currentUser/currentUser.sagas";
 import { AuthActions } from "../../../modules/auth";
 
 export class AuthService {
@@ -204,6 +202,12 @@ export class AuthService {
 		const isLoggedOutPage = this.loggedOutPage();
 		const isStatic = this.$state.current.name.includes('app.static');
 		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
+			this.$window.location.reload();
+		} else if (loginStateMismatch && isLoggedOutPage) {
+			if (sessionLogin) {
+				dispatch(AuthActions.logout());
+			}
+		}
 			this.$location.path('/login');
 			this.resetApp();
 		} else if (loginStateMismatch && isLoggedOutPage && sessionLogin && this.loggedIn) {

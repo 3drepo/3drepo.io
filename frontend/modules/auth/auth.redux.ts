@@ -22,7 +22,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	login: ['username', 'password'],
 	loginSuccess: [],
 	loginFailure: [],
-	logout: []
+	logout: [],
+	sessionExpired: []
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {
