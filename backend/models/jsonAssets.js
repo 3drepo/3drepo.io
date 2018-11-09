@@ -114,13 +114,24 @@ function appendSubModelFiles(subTreeFiles, outStream) {
 	});
 }
 
-function getHelperJSONFile(account, model, branch, rev, username, filename) {
+function getHelperJSONFile(account, model, branch, rev, username, filename, prefix = "mainTree", allowNotFound, defaultValues = {}) {
 	return History.getHistory({ account, model }, branch, rev).then((history) => {
 		if(history) {
 			const revId = utils.uuidToString(history._id);
 			const treeFileName = `${revId}/${filename}.json`;
-			const mainTreePromise = FileRef.getJSONFile(account, model, treeFileName);
+			let mainTreePromise;
 			const subTreesPromise = getFileFromSubModels(account, model, history.current, username, `${filename}.json`);
+
+			if (allowNotFound) {
+				mainTreePromise = FileRef.getJSONFile(account, model, treeFileName).catch(() => {
+					const fakeStream = Stream.PassThrough();
+					fakeStream.write(JSON.stringify(defaultValues));
+					fakeStream.end();
+					return { fileName: treeFileName, readStream: fakeStream };
+				});
+			} else {
+				mainTreePromise = FileRef.getJSONFile(account, model, treeFileName);
+			}
 
 			return mainTreePromise.then((file) => {
 				const outStream = Stream.PassThrough();
@@ -128,10 +139,14 @@ function getHelperJSONFile(account, model, branch, rev, username, filename) {
 				file.readStream = outStream;
 				delete file.size;
 				new Promise(function(resolve) {
-					outStream.write("{\"mainTree\": ");
-					readStream.on("data", d => outStream.write(d));
-					readStream.on("end", ()=> resolve());
-					readStream.on("error", err => outStream.emit("error", err));
+					outStream.write(`{"${prefix}":`);
+					if(readStream) {
+						readStream.on("data", d => outStream.write(d));
+						readStream.on("end", ()=> resolve());
+						readStream.on("error", err => outStream.emit("error", err));
+					} else {
+						resolve();
+					}
 				}).then(() => {
 					return subTreesPromise.then((subTreeFiles) => {
 						outStream.write(",");
@@ -209,6 +224,10 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 			return Promise.reject(ResponseCodes.INVALID_TAG_NAME);
 		}
 	});
+};
+
+JSONAssets.getModelProperties = function(account, model, branch, rev, username) {
+	return getHelperJSONFile(account, model, branch, rev, username, "modelProperties", "properties", true, {hiddenNodes: []});
 };
 
 JSONAssets.getIdMap = function(account, model, branch, rev, username) {

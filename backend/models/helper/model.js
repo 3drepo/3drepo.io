@@ -31,7 +31,6 @@ const Mesh = require("../mesh");
 const Scene = require("../scene");
 const Ref = require("../ref");
 const utils = require("../../utils");
-const stash = require("./stash");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
 const fs = require("fs");
@@ -505,98 +504,6 @@ function getAllMeshes(account, model, branch, rev, username) {
 
 	});
 
-}
-
-function getModelProperties(account, model, branch, rev, username) {
-
-	let subProperties;
-	let revId, modelPropertiesFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.resolve([]);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve([]);
-		} else {
-			revId = utils.uuidToString(history._id);
-			modelPropertiesFileName = `/${account}/${model}/revision/${revId}/modelProperties.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getModelProps = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getModelProps.push(
-				getModelProperties(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						properties: obj.properties,
-						owner: ref.owner,
-						model: ref.project
-					});
-				})
-					.catch(() => {
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getModelProps);
-
-	}).then(_subProperties => {
-
-		subProperties = _subProperties;
-		return stash.findStashByFilename({ account, model }, "json_mpc", modelPropertiesFileName);
-
-	}).then(buf => {
-		let properties = { hiddenNodes : null };
-
-		if(buf) {
-			properties = JSON.parse(buf);
-		}
-
-		if (!properties.hiddenNodes) {
-			properties.hiddenNodes = [];
-		}
-
-		if(subProperties.length > 0) {
-			properties.subModels = [];
-		}
-		subProperties.forEach(subProperty => {
-			// Model properties hidden nodes
-			// For a federation concatenate all together in a
-			// single array
-
-			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0) {
-				properties.subModels.push({properties: subProperty.properties, account: subProperty.owner, model: subProperty.model});
-			}
-		});
-
-		return Promise.resolve({properties, status});
-
-	});
 }
 
 function searchTree(account, model, branch, rev, searchString, username) {
@@ -1171,7 +1078,6 @@ module.exports = {
 	createFederatedModel,
 	listSubModels,
 	getAllMeshes,
-	getModelProperties,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,

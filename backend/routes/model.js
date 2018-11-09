@@ -370,18 +370,20 @@ function getModelTree(req, res, next) {
 }
 
 function getModelProperties(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getModelProperties(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
+		req.session.user.username
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getModelProperties(account, model, branch, req.params.rev, username).then(properties => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, properties);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
