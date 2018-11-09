@@ -106,14 +106,11 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
-
 		const { properties, surveyPoints, elevation, angleFromNorth } = this.props.modelSettings;
-		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
 		const prevSurveyPoints = prevProps.modelSettings.surveyPoints;
 		const prevProperties = prevProps.modelSettings.properties;
-
 		const topicTypes = properties ? properties.topicTypes : [];
 		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
 
@@ -129,8 +126,20 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			changes.angleFromNorth = angleFromNorth;
 		}
 
-		if (prevSurveyPoints !== surveyPoints && surveyPoints.length) {
-			const [ { latLong, position } ] = surveyPoints;
+		const pointsChanges = this.getSurveyPointsChanges(prevSurveyPoints, surveyPoints);
+
+		if (!isEmpty({ ...changes, ...pointsChanges })) {
+			this.setState({ ...changes, ...pointsChanges });
+		}
+	}
+
+	public getSurveyPointsChanges = (prevPoints, currentPoints) => {
+		const changes = {} as any;
+
+		if (prevPoints !== currentPoints && currentPoints.length) {
+			const { axisX, axisY, axisZ, latitude, longitude } = this.state;
+			const [{ latLong, position }] = currentPoints;
+
 			if (axisX !== position[0]) {
 				changes.axisX = position[0];
 			}
@@ -151,10 +160,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				changes.longitude = latLong[1];
 			}
 		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
+		return changes;
 	}
 
 	public handleUpdateSettings = (data) => {
