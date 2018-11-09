@@ -45,6 +45,10 @@ home [ui-view] > * {
 	z-index: 1;
 }
 
+home [ui-view] login {
+	height: 100%;
+}
+
 home #model {
 	pointer-events: all;
 }

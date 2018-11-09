@@ -25,6 +25,14 @@ import * as PanelStyles from '../components/panel/panel.styles';
 const CONTENT_PADDING = 20;
 
 export const Container = styled(Grid)`
+  && {
+    height: 100%;
+  }
+
+  ${PanelStyles.Container} {
+    margin-top: 30px;
+  }
+
   ${PanelStyles.Content} {
     padding: ${CONTENT_PADDING}px;
     overflow-y: auto;

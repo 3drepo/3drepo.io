@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik, Field, Form } from 'formik';
 import Grid from '@material-ui/core/Grid';
@@ -25,10 +25,9 @@ import Button from '@material-ui/core/Button';
 
 import { schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
+import { Logo } from '../components/logo/logo.component';
 import { Container, Headline, LoginButtons, StyledButton } from './login.styles';
 import { Footer } from './components/footer';
-import { isEmpty } from 'lodash';
-import { history } from '../../helpers/migration';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,
@@ -95,8 +94,15 @@ export class Login extends React.PureComponent<IProps, IState> {
 		const { login, password } = this.state;
 
 		return (
-			<Grid container flex-direction="row" justify="center">
-				<Container item xs={9} sm={6} md={4} lg={3} xl={2}>
+			<Container
+				container
+				direction="column"
+				justify="center"
+				alignItems="center">
+				<Grid item>
+					<Logo />
+				</Grid>
+				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in">
 						<Headline>{headlineText || 'Welcome to 3D Repo'}</Headline>
 
@@ -131,7 +137,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 						</Formik>
 						<Footer />
 					</Panel>
-				</Container>
+				</Grid>
 			</Grid>
 		);
 	}

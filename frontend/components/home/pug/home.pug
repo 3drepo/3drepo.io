@@ -20,6 +20,7 @@ div.homeContainer(
 
 	.homeHolder(layout="column" flex ng-if="!vm.isLegalPage")
 		top-menu(
+			ng-if="vm.isAuthenticated"
 			is-lite-mode="vm.isLiteMode"
 			logo-url="vm.topLogo"
 			on-lite-mode-change="vm.onLiteModeChange"

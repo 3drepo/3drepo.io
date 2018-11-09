@@ -15,23 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { COLOR } from '../../../styles';
-import * as LogoStyles from '../logo/logo.styles';
+import * as React from 'react';
 
-export const Container = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-  padding-right: 5px;
-  height: 80px;
+// @ts-ignore
+import * as DEFAULT_LOGO from '../../../images/3drepo-logo-white.png';
+import { Image } from './logo.styles';
 
-  ${LogoStyles.Image} {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-`;
+interface IProps {
+	src?: string;
+	alt?: string;
+	onClick?: () => void;
+}
+
+const logoProps = {
+	src: `${DEFAULT_LOGO}`,
+	alt: '3D Repo',
+	longdesc: '3DRepoBuildingInformationModellingSoftware'
+};
+
+export const Logo = (props: IProps) => <Image {...logoProps} {...props} />;

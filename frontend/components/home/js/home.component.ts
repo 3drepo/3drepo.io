@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { subscribe } from '../../../helpers/migration';
+import { selectIsAuthenticated } from '../../../modules/auth';
 
 class HomeController implements ng.IController {
 
@@ -91,7 +93,11 @@ class HomeController implements ng.IController {
 		private ViewerService,
 		private TemplateService,
 		private DialogService
-	) {}
+	) {
+		subscribe(this, {
+			isAuthenticated: selectIsAuthenticated
+		});
+	}
 
 	public $onInit() {
 
@@ -345,15 +351,6 @@ class HomeController implements ng.IController {
 		if (this.hasTrailingSlash()) {
 			this.removeTrailingSlash();
 		}
-
-/* 		// If it's a logged in page just redirect to the
-		// users teamspace page
-		this.AuthService.authDefer.promise.then(() => {
-			if (this.AuthService.loggedOutPage() && this.AuthService.getUsername()) {
-				this.$location.path('/dashboard/teamspaces');
-			}
-		}); */
-
 	}
 
 	public pageCheck(state, pages) {

@@ -17,21 +17,16 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
-import * as LogoStyles from '../logo/logo.styles';
 
-export const Container = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-  padding-right: 5px;
-  height: 80px;
+export const Image = styled.img`
+  width: 150px;
+	pointer-events: inherit;
+	outline: none;
+	user-select: none;
+  filter: drop-shadow(0px 0px 1px ${COLOR.BLACK_50});
 
-  ${LogoStyles.Image} {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
+  &:hover {
+    cursor: pointer;
+	  user-select: none;
   }
 `;
