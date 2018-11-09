@@ -48,8 +48,8 @@ export const createModel = (teamspace, modelData) => {
  * @param teamspace
  * @param model
  */
-export const updateModel = (teamspace, modelName, modelData) => {
-	return api.put(`${teamspace}/model/${modelName}`, modelData);
+export const updateModel = (teamspace, modelId, modelData) => {
+	return api.put(`${teamspace}/${modelId}`, modelData);
 };
 
 /**

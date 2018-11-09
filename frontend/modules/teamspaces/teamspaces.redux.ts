@@ -30,10 +30,10 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	removeProjectSuccess: ['teamspace', 'projectName'],
 	// Models
 	createModel: ['teamspace', 'modelData'],
-	updateModel: ['teamspace', 'modelName', 'modelData'],
+	updateModel: ['teamspace', 'modelId', 'modelData'],
 	removeModel: ['teamspace', 'modelData'],
 	createModelSuccess: ['teamspace', 'modelData'],
-	updateModelSuccess: ['teamspace', 'modelName', 'modelData'],
+	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
 	removeModelSuccess: ['teamspace', 'modelData']
 }, { prefix: 'TEAMSPACES_' });
 
@@ -76,49 +76,43 @@ const removeProjectSuccess = (state = INITIAL_STATE, action) => {
 	return { ...state, teamspaces };
 };
 
+const getModelData = (state, teamspace, projectName) => {
+	const teamspaces = { ...state.teamspaces };
+	const projects = [...state.teamspaces[teamspace].projects];
+	const projectIndex = projects.findIndex((project) => project.name === projectName);
+	const foundProject = projects[projectIndex];
+
+	return { projectIndex, foundProject, teamspaces };
+};
+
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	const projects = [...state.teamspaces[action.teamspace].projects];
-	const projectIndex = projects.findIndex((project) => project.name === action.modelData.project);
-	const foundProject = projects[projectIndex];
-	const modelIndex = foundProject.models.findIndex((model) => model.name === action.modelName);
-
+	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.project);
+	const modelIndex = foundProject.models.findIndex((model) => model.name === action.modelData.modelName);
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].subModels = action.modelData.subModels;
 
 	return { ...state, teamspaces };
 };
 
 const createModelSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	const projects = [...state.teamspaces[action.teamspace].projects];
-	const findedProject = projects.find((project) => project.name === action.modelData.projectName);
-	const projectIndex = projects.indexOf(findedProject);
-	const targetModels = teamspaces[action.teamspace].projects[projectIndex].models;
+	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
+	const targetModels = foundProject.models;
 	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, action.modelData];
 
 	return { ...state, teamspaces };
 };
 
 const removeModelSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	const projects = [...state.teamspaces[action.teamspace].projects];
-	const findedProject = projects.find((project) => project.name === action.modelData.projectName);
-	const projectIndex = projects.indexOf(findedProject);
-	const updatedModels = findedProject.models.filter((model) => model.name !== action.modelData.name);
+	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
+	const updatedModels = foundProject.models.filter((model) => model.name !== action.modelData.name);
 	teamspaces[action.teamspace].projects[projectIndex].models = updatedModels;
 
 	return { ...state, teamspaces };
 };
 
 const setModelUploadStatus = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
-	const projects = [...state.teamspaces[action.teamspace].projects];
-	const findedProject = projects.find((project) => project.name === action.project);
-	const projectIndex = projects.indexOf(findedProject);
-	const findedModel = findedProject.models.find((modelItem) => modelItem.model === action.model);
-	const modelIndex = findedProject.models.indexOf(findedModel);
-
+	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.project);
+	const modelIndex = foundProject.models.findIndex((model) => model.model === action.model);
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].status = action.status;
 
 	return { ...state, teamspaces };
