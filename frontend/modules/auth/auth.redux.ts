@@ -23,7 +23,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	loginSuccess: [],
 	loginFailure: [],
 	logout: [],
-	sessionExpired: []
+	sessionExpired: [],
+	sendPasswordChangeRequest: ['userNameOrEmail']
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {

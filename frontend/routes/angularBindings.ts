@@ -8,6 +8,7 @@ import { react2angular as wrap } from 'react2angular';
 import App from './app/app.container';
 import ModelSettings from './modelSettings/modelSettings.container';
 import Login from './login/login.container';
+import PasswordForgot from './passwordForgot/passwordForgot.container';
 
 // Components
 import Dashboard from './dashboard/dashboard.container';
@@ -19,4 +20,5 @@ angular
 	.component('dashboard', wrap(Dashboard))
 	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
-	.component('login', wrap(Login, ['headlineText']));
+	.component('login', wrap(Login, ['headlineText']))
+	.component('passwordForgot', wrap(PasswordForgot));

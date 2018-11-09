@@ -105,9 +105,19 @@ export function* sessionExpired() {
 	}
 }
 
+export function* sendPasswordChangeRequest({ userNameOrEmail }) {
+	try {
+		yield API.forgotPassword(userNameOrEmail);
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
+	}
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
 	yield takeLatest(AuthTypes.LOGOUT, logout);
 	yield takeLatest(AuthTypes.SESSION_EXPIRED, sessionExpired);
+	yield takeLatest(AuthTypes.SEND_PASSWORD_CHANGE_REQUEST, sendPasswordChangeRequest);
+
 }

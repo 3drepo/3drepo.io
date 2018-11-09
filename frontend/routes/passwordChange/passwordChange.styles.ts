@@ -15,33 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import styled from 'styled-components';
 
-/**
- * Log in user
- */
-export const login = (username, password) => {
-	return api.post('login', { username, password });
-};
-
-/**
- * Check user session
- */
-export const authenticate = () => {
-	return api.get('login');
-};
-
-/**
- * Log out user
- */
-export const logout = () => {
-	return api.post('logout');
-};
-
-/**
- * Reset password
- */
-
-export const forgotPassword = (userNameOrEmail) => {
-	return api.post('forgot-password', { userNameOrEmail });
-};
+export const Container = styled.div``;

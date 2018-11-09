@@ -15,33 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import * as React from 'react';
 
-/**
- * Log in user
- */
-export const login = (username, password) => {
-	return api.post('login', { username, password });
-};
+import { Container } from './passwordChange.styles';
 
-/**
- * Check user session
- */
-export const authenticate = () => {
-	return api.get('login');
-};
+interface IProps {
+	noop: string; // TODO: Remove sample
+}
 
-/**
- * Log out user
- */
-export const logout = () => {
-	return api.post('logout');
-};
+export class PasswordChange extends React.PureComponent<IProps, any> {
 
-/**
- * Reset password
- */
-
-export const forgotPassword = (userNameOrEmail) => {
-	return api.post('forgot-password', { userNameOrEmail });
-};
+	public render() {
+		return (
+			<Container>
+				PasswordChange component
+			</Container>
+		);
+	}
+}

@@ -15,33 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect, addRouting } from '../../helpers/migration';
 
-/**
- * Log in user
- */
-export const login = (username, password) => {
-	return api.post('login', { username, password });
-};
+import { PasswordForgot } from './passwordForgot.component';
+import { withRouter } from 'react-router-dom';
+import { AuthActions } from '../../modules/auth';
 
-/**
- * Check user session
- */
-export const authenticate = () => {
-	return api.get('login');
-};
+const mapStateToProps = createStructuredSelector({});
 
-/**
- * Log out user
- */
-export const logout = () => {
-	return api.post('logout');
-};
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	sendRequest: AuthActions.sendPasswordChangeRequest
+}, dispatch);
 
-/**
- * Reset password
- */
-
-export const forgotPassword = (userNameOrEmail) => {
-	return api.post('forgot-password', { userNameOrEmail });
-};
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(PasswordForgot)));

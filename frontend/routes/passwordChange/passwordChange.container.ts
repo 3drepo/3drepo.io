@@ -15,33 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../helpers/migration';
 
-/**
- * Log in user
- */
-export const login = (username, password) => {
-	return api.post('login', { username, password });
-};
+import { PasswordChange } from './passwordChange.component';
 
-/**
- * Check user session
- */
-export const authenticate = () => {
-	return api.get('login');
-};
+const mapStateToProps = createStructuredSelector({});
 
-/**
- * Log out user
- */
-export const logout = () => {
-	return api.post('logout');
-};
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-/**
- * Reset password
- */
-
-export const forgotPassword = (userNameOrEmail) => {
-	return api.post('forgot-password', { userNameOrEmail });
-};
+export default connect(mapStateToProps, mapDispatchToProps)(PasswordChange);

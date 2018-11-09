@@ -45,7 +45,8 @@ home [ui-view] > * {
 	z-index: 1;
 }
 
-home [ui-view] login {
+home [ui-view] login,
+home [ui-view] password-forgot {
 	height: 100%;
 }
 
