@@ -31,10 +31,8 @@ export function* fetchSettings({ teamspace, modelId }) {
 
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
 
-		yield all([
-			put(ModelActions.fetchSettingsSuccess(settings)),
-			put(ModelActions.setPendingState(false))
-		]);
+		yield put(ModelActions.fetchSettingsSuccess(settings));
+		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
 	}
@@ -56,10 +54,8 @@ export function* fetchRevisions({ teamspace, modelId }) {
 
 		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId);
 
-		yield all([
-			put(ModelActions.fetchRevisionsSuccess(revisions)),
-			put(ModelActions.setPendingState(false))
-		]);
+		yield put(ModelActions.fetchRevisionsSuccess(revisions));
+		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
 	}
