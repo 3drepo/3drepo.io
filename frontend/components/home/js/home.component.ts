@@ -112,7 +112,6 @@ class HomeController implements ng.IController {
 
 		// Pages to not attempt a interval triggered logout from
 
-		this.doNotLogout = this.AuthService.doNotLogout;
 		this.legalPages = this.AuthService.legalPages;
 		this.loggedOutStates = this.AuthService.loggedOutStates;
 
@@ -258,20 +257,6 @@ class HomeController implements ng.IController {
 			}
 
 			break;
-
-		case this.AuthService.events.USER_LOGGED_OUT:
-			// TODO: Use state manager
-			// Only fire the Logout Event if we're on the home page
-			const currentPage = this.$location.path();
-
-			if (this.doNotLogout.indexOf(currentPage) === -1) {
-				this.StateManager.setHomeState({
-					loggedIn: false,
-					account: null
-				});
-			}
-			break;
-		}
 	}
 
 	public getLiteModeState() {

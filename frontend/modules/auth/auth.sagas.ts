@@ -27,6 +27,11 @@ import { getAngularService } from '../../helpers/migration';
 export function* login({ username, password }) {
 	try {
 		yield API.login(username, password);
+
+		// TODO: Replace to proper service after migration
+		const AnalyticService = getAngularService('AnalyticService') as any;
+		yield AnalyticService.setUserId(this.username);
+
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
 			avatarUrl: getAvatarUrl(username)
@@ -45,6 +50,7 @@ export function* logout() {
 	try {
 		yield API.logout();
 
+		// TODO: Replace to proper service after migration
 		const StateManager = getAngularService('StateManager') as any;
 		StateManager.resetServiceStates();
 
@@ -77,6 +83,7 @@ export function* authenticate() {
 
 export function* sessionExpired() {
 	try {
+		// TODO: Replace to proper service after migration
 		const StateManager = getAngularService('StateManager') as any;
 		StateManager.resetServiceStates();
 
