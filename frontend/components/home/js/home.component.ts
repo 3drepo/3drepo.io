@@ -162,12 +162,6 @@ class HomeController implements ng.IController {
 			}
 		);
 
-		// TODO: This feels like a bit of a hack. Let's come up with
-		// a better way!
-		this.$scope.$watch(() => this.AuthService.state.currentData, (currentData) => {
-			this.handleLoginStatus(currentData);
-		}, true);
-
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
 			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				this.pointerEvents = event.value.on ? 'none' : 'inherit';
@@ -208,62 +202,7 @@ class HomeController implements ng.IController {
 
 	}
 
-	public handleLoginStatus(currentData) {
-		const event = this.AuthService.state.currentEvent;
-
-		if (!angular.isDefined(event)) {
-			return;
-		}
-
-		switch (event) {
-			case this.AuthService.events.USER_LOGGED_IN:
-				if (!currentData.error) {
-					if (!currentData.initialiser) {
-						if (!this.state.account) {
-							const username = this.AuthService.getUsername();
-							if (!username) {
-								console.error('Username is not defined for statemanager!');
-							}
-
-							this.state.account = username;
-
-						}
-					} else if (!currentData.username) {
-						this.StateManager.setHomeState({
-							loggedIn: false,
-							account: null,
-							returnUrl: this.$location.path() !== '/' ? this.$location.path() : null
-						});
-
-						if (this.StateManager.query) {
-							this.$location.search('username', this.StateManager.query.username);
-							this.$location.search('token', this.StateManager.query.token);
-						}
-
-					}
-
-				if (currentData.flags && currentData.flags.termsPrompt) {
-					this.DialogService.showDialog(
-						'new-terms-dialog.html',
-						this.$scope,
-						null,
-						false,
-						null,
-						false
-					);
-				}
-			} else if (this.AuthService.isLoggedIn()) {
-				this.AuthService.logout();
-			}
-
-				break;
-			default:
-				break;
-		}
-	}
-
 	public getLiteModeState() {
-
 		const stored = localStorage.getItem('liteMode');
 		if (stored !== undefined && stored !== null) {
 			if (stored === 'false') {
