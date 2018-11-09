@@ -381,11 +381,19 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download"
+				},
+				{
+					hidden: false,
 					value: "deleteAll",
 					label: "Delete All",
 					selected: false,
 					noToggle: true,
-					icon: "delete"
+					icon: "fa-trash"
 				}
 			],
 			options: [

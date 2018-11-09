@@ -20,6 +20,7 @@ import { GroupsService } from "./groups.service";
 import { NotificationEvents } from "../../notifications/js/notification.events";
 import { NotificationService } from "../../notifications/js/notification.service";
 import { TreeService } from "../../tree/js/tree.service";
+import { APIService } from "../../home/js/api.service";
 
 class GroupsController implements ng.IController {
 	public static $inject: string[] = [
@@ -32,7 +33,9 @@ class GroupsController implements ng.IController {
 		"AuthService",
 		"ClientConfigService",
 		"IconsConstant",
-		"NotificationService"
+		"NotificationService",
+		"APIService",
+		"PanelService"
 	];
 
 	private onContentHeightRequest: any;
@@ -73,7 +76,9 @@ class GroupsController implements ng.IController {
 		private authService: AuthService,
 		private clientConfigService: any,
 		private iconsConstant: any,
-		private notificationService: NotificationService
+		private notificationService: NotificationService,
+		private apiService: APIService,
+		private PanelService: any
 	) { }
 
 	public $onInit() {
@@ -171,7 +176,7 @@ class GroupsController implements ng.IController {
 		this.$scope.$watchCollection(() => {
 			return this.treeService.currentSelectedNodes;
 		}, () => {
-			this.$timeout( () => {
+			this.$timeout(() => {
 				/*
 				 *	Temporary fix: This timeout is required because
 				 * when currentSelectedNodes may be updated before unity
@@ -199,6 +204,12 @@ class GroupsController implements ng.IController {
 						case "deleteAll":
 							this.deleteAllGroups();
 							break;
+						case "downloadJSON":
+							const jsonEndpoint = this.account + "/" + this.model +
+							"/groups/revision/master/head/?noIssues=true&noRisks=true";
+							this.apiService.get(jsonEndpoint).then((res) => {
+								this.PanelService.downloadJSON(JSON.stringify(res.data), "groups", "application/json");
+							});
 						default:
 							console.error("Groups option menu selection unhandled");
 					}
@@ -268,7 +279,7 @@ class GroupsController implements ng.IController {
 
 		this.dialogService.confirm(`Confirm Delete`, content, true, "Yes", "Cancel")
 			.then(() => {
-					this.groupsService.deleteGroups(this.teamspace, this.model, this.groupsToShow);
+				this.groupsService.deleteGroups(this.teamspace, this.model, this.groupsToShow);
 			})
 			.catch(() => { });
 	}
@@ -411,7 +422,7 @@ class GroupsController implements ng.IController {
 		this.focusGroupName();
 		// FIXME: messy. savedGroupData should probably be tracked by service and whilst it
 		// initialises that it should setup these 2 values.
-		this.groupsService.updateSelectedObjectsLen().then( (totalMeshes) => {
+		this.groupsService.updateSelectedObjectsLen().then((totalMeshes) => {
 			this.selectedGroup.totalSavedMeshes = this.selectedGroup.new ? 0 : totalMeshes;
 		});
 	}
@@ -510,7 +521,7 @@ class GroupsController implements ng.IController {
 	}
 
 	private filterGroups() {
-			this.groupsService.groupsFilterSearch(this.filterText);
+		this.groupsService.groupsFilterSearch(this.filterText);
 	}
 }
 
