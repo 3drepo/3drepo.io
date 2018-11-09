@@ -154,13 +154,15 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 					<Grid container justify="space-between" wrap="nowrap" alignItems="center">
 						{ isPending
 							? <><Name>{name}</Name> {this.renderPendingStatus(status)}</>
-							: <LinkedName onClick={onModelItemClick}>{name}</LinkedName> }
+							: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
+						}
 					</Grid>
 					<TimeWrapper container wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
 						<Time>
-							{ timestamp && (!hovered || hovered && isPending) ? (
-								<DateTime value={timestamp} format="D ddd" />
-							) : null}
+							{ timestamp && (!hovered || hovered && isPending)
+								? (<DateTime value={timestamp} format="D ddd" />)
+								: null
+							}
 						</Time>
 						<RowMenu open={hovered} disabled={isPending}>
 							{this.renderActions(actions)}

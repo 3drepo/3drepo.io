@@ -284,7 +284,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								)} />
 							</SelectWrapper>
 						</FieldsRow>
-						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={"Enter topic types"} />} />
+						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={"Enter topic types"} /> } />
 					</Grid>
 					<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
 					<Grid container direction="column" wrap="nowrap">

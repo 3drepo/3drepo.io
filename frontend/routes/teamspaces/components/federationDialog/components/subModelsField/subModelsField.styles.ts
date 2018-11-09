@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withRouter } from 'react-router-dom';
-import { bindActionCreators } from 'redux';
-import { connect, addRouting } from '../../../../helpers/migration';
-import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings, selectIsPending } from './../../../../modules/model';
-import { ModelDialog } from './modelDialog.component';
+import styled from 'styled-components';
+import { COLOR } from './../../../../../../styles/colors';
 
-const mapStateToProps = createStructuredSelector({
-	settings: selectSettings,
-	isPending: selectIsPending
-});
+export const ModelsTableContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	margin-top: 15px;
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelSettings: ModelActions.fetchSettings
-}, dispatch);
+	> div {
+		width: 100%;
+		border-bottom: 1px solid ${COLOR.BLACK_6};
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelDialog)));
+		&:first-child {
+			&:first-child {
+				border-right: 1px solid ${COLOR.BLACK_6};
+			}
+		}
+	}
+`;
