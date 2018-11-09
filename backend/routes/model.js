@@ -49,8 +49,6 @@ router.post("/model",
 	middlewares.canCreateModel,
 	createModel
 );
-router.get("/:model/revision/master/head/meshes.json", middlewares.hasReadAccessToModel, getAllMeshes);
-router.get("/:model/revision/:rev/meshes.json", middlewares.hasReadAccessToModel, getAllMeshes);
 
 // Unity information
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
@@ -291,23 +289,6 @@ function deleteModel(req, res, next) {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
-	});
-}
-
-function getAllMeshes(req, res,next) {
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getAllMeshes(account, model, branch, req.params.rev, username).then(meshes => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, meshes.results);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
