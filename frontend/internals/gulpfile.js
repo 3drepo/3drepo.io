@@ -48,14 +48,6 @@ function swallowError (error) {
   this.emit('end')
 }
 
-gulp.task('index', function(done){
-    return gulp.src('../index.html')
-          .on('error', swallowError)
-          .pipe(gulp.dest('./../../public/'))
-          .pipe(livereload())
-          .on("end", done);
-})
-
 gulp.task('pug', function(done){
   return gulp.src(allPug)
         // .pipe(print())
@@ -202,7 +194,7 @@ gulp.task('gulp-watch', function() {
   isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
   // WATCHERS
-  gulp.watch(["../index.html"], gulp.series(["index", "service-workers-dev"]))
+  gulp.watch(["./../../public/index.html"], gulp.series(["reload", "service-workers-dev"]))
   gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
   gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
   gulp.watch(allCss, gulp.series(["css", "service-workers-dev"]))
@@ -217,7 +209,6 @@ gulp.task("watch", gulp.parallel(["gulp-watch", "webpack-watch"]));
 
 gulp.task('build', gulp.series(
   gulp.parallel(
-    'index',
     'pug',
     'css',
     'icons',

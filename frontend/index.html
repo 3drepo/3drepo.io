@@ -142,8 +142,6 @@
 
     <!-- Load config from server and dependencies + 3D Repo JavaScript-->
     <script src="/config/config.js"></script>
-    <script src="/dist/three_d_repo.min.js" async></script>
-
     <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded" async></script>
 
     <!-- Load LiveReload if on Dev-->
@@ -151,14 +149,13 @@
       if (window) {
 
         if (window.ClientConfig && window.ClientConfig.development === true) {
-            console.debug("Development Environment");
-            console.debug("Development - Loading livereload.js");
-            var src = "//localhost:35729/livereload.js";
-            var script = document.createElement("script");
-            script.setAttribute("src", src);
-            document.head.appendChild(script);
+          console.debug("Development Environment");
+          console.debug("Development - Loading livereload.js");
+          var src = "//localhost:35729/livereload.js";
+          var script = document.createElement("script");
+          script.setAttribute("src", src);
+          document.head.appendChild(script);
         }
-
       }
     </script>
   </body>

@@ -1,5 +1,7 @@
 const {resolve} = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HTMLWebpackPlugin = require('html-webpack-plugin');
+
 
 const MODES = {
   DEVELOPMENT: 'development',
@@ -50,6 +52,15 @@ module.exports = (options) => {
               }
             }
           }]
+        },
+        {
+          test: /\.(html)$/,
+          use: {
+            loader: 'html-loader',
+            options: {
+              minimize: true
+            }
+          }
         }
       ]
     },
@@ -57,6 +68,10 @@ module.exports = (options) => {
       new CopyWebpackPlugin([
         { from: 'node_modules/zxcvbn/dist/zxcvbn.js' }
       ], options),
+      new HTMLWebpackPlugin({
+        template: './index.html',
+        filename: '../index.html'
+      }),
       ...(options.plugins || [])
     ]
   }
