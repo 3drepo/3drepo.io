@@ -66,7 +66,24 @@ module.exports = (options) => {
     },
     plugins: [
       new CopyWebpackPlugin([
-        { from: 'node_modules/zxcvbn/dist/zxcvbn.js' }
+        { from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
+        { from: 'manifest.json', to: '../' },
+        { from: 'images/**', to: '../' },
+        { from: 'icons/*', to: '../' },
+        { from: 'custom/**', to: '../' },
+        { from: 'unity/**', to: '../' },
+        { from: 'manifest-icons/*', to: '../' },
+        { from: 'manifest-icons/*', to: '../' },
+        { 
+          context: 'node_modules/material-design-icons/iconfont',
+          from: '*.{eot,svg,ttf,woff,woff2}',
+          to: '../fonts'
+        },
+        {
+          context: 'node_modules/font-awesome/fonts',
+          from: '*.{eot,svg,ttf,woff,woff2}',
+          to: '../fonts'
+        }
       ], options),
       new HTMLWebpackPlugin({
         template: './index.html',
@@ -75,16 +92,15 @@ module.exports = (options) => {
       new SWPrecacheWebpackPlugin({
         filename: '../service-worker.js',
         staticFileGlobs: [
-          `../../public/index.html`,
-          `../../public/templates/.{html}`,
-          `../../public/dist/**/*.{js,css}`,
-          `../../public/fonts/**/*.{svg,eot,ttf,woff,woff2}`,
-          `../../public/icons/**/*.{svg}`,
-          `../../public/images/**/*.{png,jpg}`,
-          `../../public/unity/**/*.{js,html,data,mem,css,png,jpg}`,
+          '../../public/index.html',
+          '../../public/templates/.{html}',
+          '../../public/dist/**/*.{js,css}',
+          '../../public/fonts/**/*.{svg,eot,ttf,woff,woff2}',
+          '../../public/icons/**/*.{svg}',
+          '../../public/images/**/*.{png,jpg}',
+          '../../public/unity/**/*.{js,html,data,mem,css,png,jpg}',
         ],
-        stripPrefix: `../../public/`//,
-        //verbose: verbose,
+        stripPrefix: '../../public/'
       }),
       ...(options.plugins || [])
     ]

@@ -13,15 +13,6 @@ const exec = require('child_process').exec;
 
 let isWatch = false;
 
-const allImages = [
-  '../images/**'
-]
-
-const allFonts = [
-  '../node_modules/material-design-icons/iconfont/*.{eot,svg,ttf,woff,woff2}',
-  '../node_modules/font-awesome/fonts/*.{eot,svg,ttf,woff,woff2}'
-]
-
 const allCss = [
     '../css/ui.css',
     '../css/simplebar.css',
@@ -32,17 +23,8 @@ const allCss = [
 ]
 
 const allPug = ['../components/**/**.pug', './../../pug/legal/**.pug'];
-const icons = '../icons/*';
-
-function exitOnError(error) {
-  gutil.log(gutil.colors.red('[Error]'), error.toString());
-  if (!isWatch) {
-    process.exit(1);
-  }
-}
 
 function swallowError (error) {
-
   // If you want details of the error in the console
   console.log(error.toString())
   this.emit('end')
@@ -57,7 +39,6 @@ gulp.task('pug', function(done){
         .pipe(gulp.dest("./../../public/templates/"))
         .pipe(livereload())
         .on("end", done);
-
 });
 
 gulp.task('css', function(done) {
@@ -69,60 +50,6 @@ gulp.task('css', function(done) {
          .pipe(gulp.dest("./../../public/dist/"))
          .pipe(livereload())
          .on("end", done);
-
-});
-
-gulp.task('icons', function (done) {
-  return gulp.src('../icons/*')
-    .on('error', swallowError)
-    //.pipe(print())
-    .pipe(gulp.dest('./../../public/icons/'))
-    .pipe(livereload())
-    .on("end", done);
-});
-
-gulp.task('images', function(done) {
-  return gulp.src(allImages)
-        .on('error', swallowError)
-        .pipe(gulp.dest('./../../public/images/'))
-        .pipe(livereload())
-        .on("end", done);
-});
-
-gulp.task('fonts', function(done) {
-  return gulp.src(allFonts)
-        .on('error', swallowError)
-        .pipe(gulp.dest('./../../public/fonts/'))
-        .pipe(livereload())
-        .on("end", done);
-});
-
-gulp.task('unity', function(done) {
-  return gulp.src("../unity/**")
-        .on('error', swallowError)
-        .pipe(gulp.dest('./../../public/unity/'))
-        .on("end", done);
-});
-
-gulp.task('custom', function(done) {
-  return gulp.src("../custom/**")
-        .on('error', swallowError)
-        .pipe(gulp.dest('./../../public/custom/'))
-        .on("end", done);
-});
-
-gulp.task('manifest-file', function(done) {
-  return gulp.src("../manifest.json")
-    .on('error', swallowError)
-    .pipe(gulp.dest('./../../public/'))
-    .on("end", done);
-});
-
-gulp.task('manifest-icons', function(done) {
-  return gulp.src("../manifest-icons/**.png")
-    .on('error', swallowError)
-    .pipe(gulp.dest('./../../public/manifest-icons/'))
-    .on("end", done);
 });
 
 // BUILD COMPONENTS
@@ -166,30 +93,18 @@ gulp.task('gulp-watch', function() {
   isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
   // WATCHERS
-  gulp.watch(["./../../public/index.html"], gulp.series(["reload", "service-workers-dev"]))
-  gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
-  gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["service-workers-dev"]))
-  gulp.watch(allCss, gulp.series(["css", "service-workers-dev"]))
-  gulp.watch(allPug, gulp.series(["pug", "service-workers-dev"]))
-  gulp.watch(icons, gulp.series(["icons", "service-workers-dev"]))
-  gulp.watch(["../manifest.json"], gulp.series(['manifest-file', "service-workers-dev"]))
-  gulp.watch(["../manifest-icons/**.png"], gulp.series(['manifest-icons', "service-workers-dev"]))
-
+  gulp.watch(["./../../public/index.html"], gulp.series(["reload"]))
+  gulp.watch(["./../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
+  gulp.watch([allCss], gulp.series(["css"]))
+  gulp.watch([allPug], gulp.series(["pug"]))
 });
 
-gulp.task("watch", gulp.parallel(["gulp-watch", "webpack-watch"]));
+gulp.task("watch", gulp.parallel(["pug", "css", "gulp-watch", "webpack-watch"]));
 
 gulp.task('build', gulp.series(
   gulp.parallel(
     'pug',
     'css',
-    'icons',
-    'fonts',
-    'images',
-    'unity',
-    'custom',
-    'manifest-icons',
-    'manifest-file',
     'webpack-build'
   ))
 );
