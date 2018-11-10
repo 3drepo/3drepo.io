@@ -1,7 +1,7 @@
 const {resolve} = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 
 const MODES = {
   DEVELOPMENT: 'development',
@@ -71,6 +71,20 @@ module.exports = (options) => {
       new HTMLWebpackPlugin({
         template: './index.html',
         filename: '../index.html'
+      }),
+      new SWPrecacheWebpackPlugin({
+        filename: '../service-worker.js',
+        staticFileGlobs: [
+          `../../public/index.html`,
+          `../../public/templates/.{html}`,
+          `../../public/dist/**/*.{js,css}`,
+          `../../public/fonts/**/*.{svg,eot,ttf,woff,woff2}`,
+          `../../public/icons/**/*.{svg}`,
+          `../../public/images/**/*.{png,jpg}`,
+          `../../public/unity/**/*.{js,html,data,mem,css,png,jpg}`,
+        ],
+        stripPrefix: `../../public/`//,
+        //verbose: verbose,
       }),
       ...(options.plugins || [])
     ]

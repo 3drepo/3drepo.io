@@ -125,34 +125,6 @@ gulp.task('manifest-icons', function(done) {
     .on("end", done);
 });
 
-const sw = function(callback, verbose) {
-  var swPrecache = require('sw-precache');
-  var serviceWorkerName = "service-worker";
-  console.log("Service workers");
-  const dir = "../../public/";
-  swPrecache.write(path.join(dir, `${serviceWorkerName}.js`) , {
-    staticFileGlobs: [
-      `${dir}/index.html`,
-      `${dir}/templates/.{html}`,
-      `${dir}/dist/**/*.{js,css}`,
-      `${dir}/fonts/**/*.{svg,eot,ttf,woff,woff2}`,
-      `${dir}/icons/**/*.{svg}`,
-      `${dir}/images/**/*.{png,jpg}`,
-      `${dir}/unity/**/*.{js,html,data,mem,css,png,jpg}`,
-    ],
-    stripPrefix: `${dir}`,
-    verbose: verbose,
-  }, callback);
-}
-
-gulp.task('service-workers', function(callback) {
-  sw(callback, true)
-});
-
-gulp.task('service-workers-dev', function(callback) {
-  sw(callback, false)
-});
-
 // BUILD COMPONENTS
 gulp.task("typedoc", function() {
     return gulp
@@ -219,8 +191,6 @@ gulp.task('build', gulp.series(
     'manifest-icons',
     'manifest-file',
     'webpack-build'
-  ),
-  'service-workers'
-  )
+  ))
 );
 
