@@ -13,44 +13,11 @@ const exec = require('child_process').exec;
 
 let isWatch = false;
 
-const allCss = [
-    '../css/ui.css',
-    '../css/simplebar.css',
-    '../node_modules/simplebar/dist/simplebar.css',
-    '../node_modules/angular-material/angular-material.css',
-    '../node_modules/font-awesome/css/font-awesome.css',
-    '../components/**/**.css',
-]
-
-const allPug = ['../components/**/**.pug', './../../pug/legal/**.pug'];
-
 function swallowError (error) {
   // If you want details of the error in the console
   console.log(error.toString())
   this.emit('end')
 }
-
-gulp.task('pug', function(done){
-  return gulp.src(allPug)
-        // .pipe(print())
-        .pipe(rename({dirname: ''}))
-        .pipe(pug({ verbose : false }))
-        .on('error', swallowError)
-        .pipe(gulp.dest("./../../public/templates/"))
-        .pipe(livereload())
-        .on("end", done);
-});
-
-gulp.task('css', function(done) {
-  return gulp.src(allCss)
-         //.pipe(print())
-         .pipe(concat("three_d_repo.min.css"))
-         .pipe(cssnano())
-         .on('error', swallowError)
-         .pipe(gulp.dest("./../../public/dist/"))
-         .pipe(livereload())
-         .on("end", done);
-});
 
 // BUILD COMPONENTS
 gulp.task("typedoc", function() {
@@ -64,13 +31,6 @@ gulp.task("typedoc", function() {
         }))
     ;
 });
-
-gulp.task("reload", function() {
-  return gulp
-    .src(["./../../public/dist/three_d_repo.min.js"])
-    .pipe(livereload())
-});
-
 
 gulp.task('webpack-build', function (cb) {
   exec('webpack --config ./webpack/webpack.prod.config.js', function (err, stdout, stderr) {
@@ -95,16 +55,12 @@ gulp.task('gulp-watch', function() {
   // WATCHERS
   gulp.watch(["./../../public/index.html"], gulp.series(["reload"]))
   gulp.watch(["./../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
-  gulp.watch([allCss], gulp.series(["css"]))
-  gulp.watch([allPug], gulp.series(["pug"]))
 });
 
-gulp.task("watch", gulp.parallel(["pug", "css", "gulp-watch", "webpack-watch"]));
+gulp.task("watch", gulp.parallel(["gulp-watch", "webpack-watch"]));
 
 gulp.task('build', gulp.series(
   gulp.parallel(
-    'pug',
-    'css',
     'webpack-build'
   ))
 );

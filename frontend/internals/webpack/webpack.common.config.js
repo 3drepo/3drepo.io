@@ -15,7 +15,7 @@ module.exports = (options) => {
     entry: options.entry || './main.ts',
     output: Object.assign({
       path: resolve(__dirname, '../../../public/dist/'),
-      filename: 'three_d_repo.min.js'
+      filename: 'three_d_repo.[contenthash].js'
     }, options.output),
     resolve: {
       extensions: ['.ts', '.js', '.tsx']
@@ -35,6 +35,39 @@ module.exports = (options) => {
           loader: 'lodash-ts-imports-loader',
           exclude: /node_modules/,
           enforce: 'pre'
+        },
+        {
+          test: /\.css$/,
+          exclude: /node-modules/,
+          use: [
+            'style-loader', {
+            loader: 'css-loader',
+            options: {
+              import: false
+            }
+          }]
+        },
+        {
+          test: /\.css$/,
+          include: /node-modules/,
+          use: ['style-loader', 'css-loader']
+        },
+        {
+          test: /\.(eot|otf|ttf|woff|woff2)$/,
+          use: [{
+            loader: 'file-loader',
+            options: {
+              outputPath: '../fonts/',
+              publicPath: 'fonts/',
+              name() {
+                if (options.mode === 'development') {
+                  return '[name].[ext]'
+                }
+
+                return '[hash].[ext]'
+              }
+            }
+          }]
         },
         {
           test: /\.(png|jpg|gif|svg)$/,
@@ -61,6 +94,22 @@ module.exports = (options) => {
               minimize: true
             }
           }
+        },
+        {
+          test: /\.pug$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                outputPath: '../templates/',
+                publicPath: 'templates/',
+                name: '[name].html'
+              }
+            },
+            'extract-loader',
+            'html-loader',
+            'pug-html-loader'
+          ]
         }
       ]
     },
@@ -73,17 +122,7 @@ module.exports = (options) => {
         { from: 'custom/**', to: '../' },
         { from: 'unity/**', to: '../' },
         { from: 'manifest-icons/*', to: '../' },
-        { from: 'manifest-icons/*', to: '../' },
-        { 
-          context: 'node_modules/material-design-icons/iconfont',
-          from: '*.{eot,svg,ttf,woff,woff2}',
-          to: '../fonts'
-        },
-        {
-          context: 'node_modules/font-awesome/fonts',
-          from: '*.{eot,svg,ttf,woff,woff2}',
-          to: '../fonts'
-        }
+        { from: 'manifest-icons/*', to: '../' }
       ], options),
       new HTMLWebpackPlugin({
         template: './index.html',
@@ -95,7 +134,7 @@ module.exports = (options) => {
           '../../public/index.html',
           '../../public/templates/.{html}',
           '../../public/dist/**/*.{js,css}',
-          '../../public/fonts/**/*.{svg,eot,ttf,woff,woff2}',
+          '../../public/dist/**/*.{svg,eot,ttf,woff,woff2}',
           '../../public/icons/**/*.{svg}',
           '../../public/images/**/*.{png,jpg}',
           '../../public/unity/**/*.{js,html,data,mem,css,png,jpg}',
