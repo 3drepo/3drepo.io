@@ -208,7 +208,7 @@ class GroupsController implements ng.IController {
 							const jsonEndpoint = this.account + "/" + this.model +
 							"/groups/revision/master/head/?noIssues=true&noRisks=true";
 							this.apiService.get(jsonEndpoint).then((res) => {
-								this.PanelService.downloadJSON(JSON.stringify(res.data), "groups", "application/json");
+								this.PanelService.downloadJSON(JSON.stringify(res.data, null, 2), "groups", "application/json");
 							});
 						default:
 							console.error("Groups option menu selection unhandled");
