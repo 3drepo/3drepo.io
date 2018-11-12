@@ -153,6 +153,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 		// Secondary color is used to make the badge disappear
 		const badgeColor = unreadCount > 0 ? 'primary' : 'secondary';
+		const today = simpleDate(new Date());
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
@@ -172,10 +173,10 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							<NotificationEmptyItem/>}
 						{this.hasNotifications() &&
 							<>
-							<NotificationsPanelHeader/>
+							<NotificationsPanelHeader />
 							{hasThisWeekNot &&
 								<NotificationWeekHeader labelLeft='This week'
-										labelRight={simpleDate(new Date())}/>
+										labelRight={today}/>
 							}
 
 							{groupedByTeamspace.thisWeek.map((notifications) =>
@@ -187,7 +188,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 									/>)
 							)}
 							{hasLastWeekNot &&
-								<NotificationWeekHeader labelLeft='Last week'/>
+								<NotificationWeekHeader labelLeft='Last week' labelRight={!hasThisWeekNot ? today : ''}/>
 							}
 							{groupedByTeamspace.lastWeek.map((notifications) =>
 								(<NotificationsPanel
@@ -199,7 +200,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							)}
 
 							{hasOlderNot &&
-								<NotificationWeekHeader labelLeft='more than two weeks ago'/>
+								<NotificationWeekHeader
+									labelLeft='more than two weeks ago'
+									labelRight={!hasThisWeekNot && !hasLastWeekNot ? today : ''}/>
 							}
 							{groupedByTeamspace.older.map((notifications) =>
 								(<NotificationsPanel

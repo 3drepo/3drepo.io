@@ -155,7 +155,8 @@ export const MuiTheme = createMuiTheme({
 				width: 20,
 				height: 20,
 				top: 1,
-				right: -4
+				right: -4,
+				pointerEvents: 'none'
 			},
 			colorPrimary: {
 				backgroundColor: '#e8004e'
