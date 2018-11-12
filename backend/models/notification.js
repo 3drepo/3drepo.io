@@ -17,16 +17,18 @@
 
 "use strict";
 const hasWriteAccessToModel = require("../middlewares/checkPermissions").hasWriteAccessToModelHelper;
-const job = require("../models/job");
 const modelSettings = require("../models/modelSetting");
+const job = require("./job");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const db = require("../handler/db");
 const _ = require("lodash");
+const ModelSetting = require("./modelSetting");
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
-	ISSUE_CREATED : "ISSUE_CREATED"
+	ISSUE_CREATED : "ISSUE_CREATED",
+	MODEL_UPDATED : "MODEL_UPDATED"
 };
 
 const NOTIFICATIONS_DB = "notifications";
@@ -113,6 +115,12 @@ module.exports = {
 		return this.upsertNotification(username,data,types.ISSUE_ASSIGNED,criteria);
 	},
 
+	upsertModelUpdatedNotification: function(username, teamSpace, modelId, revision) {
+		const criteria = {teamSpace,  modelId};
+		const data = {revision: revision };
+		return this.upsertNotification(username,data,types.MODEL_UPDATED,criteria);
+	},
+
 	removeIssueAssignedNotification:function(username, teamSpace, modelId, issueId) {
 		const criteria = {teamSpace,  modelId, issuesId:{$in: [issueId]}};
 
@@ -186,6 +194,18 @@ module.exports = {
 					return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
 				});
 			});
+	},
+
+	upsertModelUpdatedNotifications: function(username, teamSpace, modelId, revision) {
+		const account = teamSpace;
+		const model = modelId;
+		const res = ModelSetting.findById({ account, model}, modelId).then(_modelSetting =>
+			_modelSetting.permissions.filter(p => p.user !== username).map(p =>
+				this.upsertModelUpdatedNotification(p.user, teamSpace, modelId, revision)
+			)
+		);
+
+		return res;
 	},
 
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {

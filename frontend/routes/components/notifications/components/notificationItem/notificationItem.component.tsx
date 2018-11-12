@@ -34,7 +34,7 @@ export interface INotification {
 	modelId: string;
 	teamSpace: string;
 	modelName: string;
-	issuesId: string[];
+	issuesId?: string[];
 	timestamp: number;
 }
 
