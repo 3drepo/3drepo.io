@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ListItem, ListItemText, Paper} from '@material-ui/core';
+import { ListItem, ListItemText, Paper, List} from '@material-ui/core';
 import { PaperProps } from '@material-ui/core/Paper';
 import styled from 'styled-components';
 import * as React from 'react';
+import Badge, { BadgeProps } from '@material-ui/core/Badge';
 
 export const NotificationListItem = styled(ListItem)`
 	&& {
@@ -50,27 +51,41 @@ export const NotificationListItemSecondaryAction = styled.div`
 `;
 
 export const NotificationsPanelItem = styled(ListItem)`
-&& {
-	padding-left: 5px;
-	padding-right: 5px;
-	padding-bottom: 5px;
-	padding-top: 0px;
-	width: 100%;
-	display: block;
-}
+	&& {
+		padding-left: 5px;
+		padding-right: 5px;
+		padding-bottom: 5px;
+		padding-top: 0px;
+		width: 100%;
+		display: block;
+	}
 `;
 
 export const NotificationsPanelHeaderContainer = styled.div`
-&& {
-	display: flex;
-	justify-content: space-between;
-	padding-left: 2px;
-	padding-right: 2px;
-}
+	&& {
+		display: flex;
+		justify-content: space-between;
+		padding-left: 2px;
+		padding-right: 2px;
+	}
 `;
 
 export const NotificationItemContainer = styled< {read: boolean} & PaperProps>
 	(({read, ...rest}) => (<Paper {...rest}/>))`
   backgroundColor: ${(props) => props.read ? 'transparent' : 'white'};
   margin:3px;
+`;
+
+export const NotificationsList = styled(List)`
+	&& {
+		height: 100%;
+		width: 300px;
+	}
+`;
+
+export const NotificationsBadge = styled(Badge)`
+	&&{
+		margin-right: 10px;
+		margin-top: 2px;
+	}
 `;

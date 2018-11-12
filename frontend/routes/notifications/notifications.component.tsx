@@ -29,6 +29,7 @@ import { INotification } from './notification.item';
 import { NotificationEmptyItem } from './notifications.emptyItem';
 import { NotificationsPanel } from './notifications.panel';
 import { NotificationsPanelHeader } from './notifications.panel.header';
+import { NotificationsList, NotificationsBadge } from './notifications.styles';
 
 // Props bound in <file://./notifications.container.ts>
 
@@ -155,7 +156,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
-				<Badge badgeContent={unreadCount} color={badgeColor} style={ {marginRight: 10, marginTop: 2}}>
+				<NotificationsBadge badgeContent={unreadCount} color={badgeColor}>
 					<UserActionButton
 						variant='flat'
 						aria-label='Toggle panel'
@@ -163,10 +164,10 @@ export class Notifications extends React.PureComponent<IProps, any> {
 					>
 						<Icon fontSize='large'>notifications</Icon>
 					</UserActionButton>
-				</Badge>
+				</NotificationsBadge>
 				<Drawer variant='persistent' anchor='right' open={this.state.open} onClose={this.toggleDrawer}
 						SlideProps={{unmountOnExit: true}}>
-					<List subheader={this.renderNotificationsHeader()} style={{height: '100%', width: 300 }} >
+					<NotificationsList subheader={this.renderNotificationsHeader()}>
 						{!this.hasNotifications() &&
 							<NotificationEmptyItem/>}
 						{this.hasNotifications() &&
@@ -210,7 +211,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 							)}
 							</>
 						}
-					</List>
+					</NotificationsList>
 				</Drawer>
 			</MuiThemeProvider>
 		);
