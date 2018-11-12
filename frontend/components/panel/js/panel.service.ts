@@ -300,6 +300,14 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download"
+				},
+				{
+					hidden: false,
 					value: "mitigation_status",
 					label: "Mitigation Status",
 					toggle: false,
@@ -381,19 +389,19 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "downloadJSON",
-					label: "Download JSON",
-					selected: false,
-					noToggle: true,
-					icon: "fa-download"
-				},
-				{
-					hidden: false,
 					value: "deleteAll",
 					label: "Delete All",
 					selected: false,
 					noToggle: true,
 					icon: "fa-trash"
+				},
+				{
+					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download"
 				}
 			],
 			options: [
