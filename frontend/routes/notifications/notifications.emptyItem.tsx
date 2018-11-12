@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from "react";
-import { Icon } from "@material-ui/core";
-import { EmptyItem, EmptyItemText } from "./notifications.emptyIem.styles";
+import * as React from 'react';
+import { Icon } from '@material-ui/core';
+import { EmptyItem, EmptyItemText } from './notifications.emptyIem.styles';
 
 export class NotificationEmptyItem extends React.PureComponent {
 	public render = () => {
@@ -29,7 +29,7 @@ export class NotificationEmptyItem extends React.PureComponent {
 					</EmptyItemText>
 				</div>
 				<div >
-					<Icon fontSize="large" color="disabled" >notifications</Icon>
+					<Icon fontSize='large' color='disabled' >notifications</Icon>
 				</div>
 			</EmptyItem>
 			);

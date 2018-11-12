@@ -48,7 +48,7 @@ export const deleteNotification = (state = INITIAL_STATE, { notification }) =>  
 
 export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) =>  {
 	const _id = notificationPatch._id;
-	return sortByTimeStamp(state.map((n) => n._id === _id ?  Object.assign(n, notificationPatch) : n ));
+	return sortByTimeStamp(state.map((n) => n._id === _id ?  {...n, ...notificationPatch} : n ));
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

@@ -50,7 +50,7 @@ export const BarIconButton = styled(IconButton)`
 export const UserActionButton = styled(Button)`
 && {
   color: ${COLOR.WHITE};
-  text-shadow: 0px 0px 3px rgba(0,0,0,0.2);
+  text-shadow: 0px 0px 3px ${COLOR.BLACK_20};
   min-width: 0px;
   min-height: 0px;
   padding:0px;

@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Paper, Tooltip } from "@material-ui/core";
+import { Paper, Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Icon from '@material-ui/core/Icon';
 import * as React from 'react';
@@ -24,6 +24,7 @@ import { NotificationListItem,
 		NotificationListItemSecondaryAction,
 		NotificationListItemText,
 		NotificationItemContainer} from './notifications.styles';
+import { COLOR } from '../../styles';
 
 export interface INotification {
 	_id: string;
@@ -45,18 +46,18 @@ interface IProps extends INotification {
 
 const NotificationItemText = (props) => {
 	const fontWeight = props.fontWeight;
-	const color =  props.primaryColor;
+	const color = props.primaryColor;
 	const secColor = props.secondaryColor;
 
-	const primaryStyle = Object.assign({color}, {fontWeight});
-	const secondaryStyle = Object.assign( {color: secColor},  {fontWeight});
+	const primaryStyle = {color, fontWeight};
+	const secondaryStyle = {color: secColor, fontWeight};
 
 	return (
 		<NotificationListItemText
 			primaryTypographyProps = { {style: primaryStyle} }
 			secondaryTypographyProps = { {style: secondaryStyle} }
 			primary={props.primary}
-			secondary={ <Tooltip title={props.secondary} placement="bottom-start"><span>{props.secondary}</span></Tooltip>}/>);
+			secondary={ <Tooltip title={props.secondary} placement='bottom-start'><span>{props.secondary}</span></Tooltip>}/>);
 };
 
 export class NotificationItem extends React.PureComponent<IProps, any> {
@@ -84,7 +85,7 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 	public render = () => {
 		const {issuesId , teamSpace, modelName, read} =  this.props;
 
-		const backgroundColor = read ? "transparent" : "white";
+		const backgroundColor = read ? 'transparent' : COLOR.WHITE;
 		const assignedIssuesText = `${issuesId.length} assigned issues `;
 		const modelText = `In ${modelName}`;
 
@@ -97,29 +98,29 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 
 						{read &&
 							<NotificationItemText
-								primaryColor="rgba(0, 0, 0, 0.54)" secondaryColor="rgba(0, 0, 0, 0.24)" fontWeight="400"
+								primaryColor='rgba(0, 0, 0, 0.54)' secondaryColor='rgba(0, 0, 0, 0.24)' fontWeight='400'
 								primary={assignedIssuesText} secondary={modelText}
 								/>
 						}
 						{!read &&
 							<NotificationItemText
-								primaryColor="rgba(0, 0, 0, 0.87)" secondaryColor="rgba(0, 0, 0, 0.54)" fontWeight="600"
+								primaryColor='rgba(0, 0, 0, 0.87)' secondaryColor='rgba(0, 0, 0, 0.54)' fontWeight='600'
 								primary={assignedIssuesText} secondary={modelText}
 								/>
 						}
 
 						<NotificationListItemSecondaryAction>
 							{!read  &&
-							<SmallIconButton tooltip="Mark as read" onClick={this.markAsRead}>
+							<SmallIconButton tooltip='Mark as read' onClick={this.markAsRead}>
 								lens
 							</SmallIconButton>
 							}
 							{read  &&
-							<SmallIconButton tooltip="Mark as unread" onClick={this.markAsUnread}>
+							<SmallIconButton tooltip='Mark as unread' onClick={this.markAsUnread}>
 								panorama_fish_eye
 							</SmallIconButton>
 							}
-							<SmallIconButton tooltip="Clear" onClick={this.delete}>
+							<SmallIconButton tooltip='Clear' onClick={this.delete}>
 								clear
 							</SmallIconButton>
 						</NotificationListItemSecondaryAction>

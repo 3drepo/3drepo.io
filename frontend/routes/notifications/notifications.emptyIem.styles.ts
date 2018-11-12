@@ -16,6 +16,7 @@
  */
 import styled from 'styled-components';
 import { ListItem } from '@material-ui/core';
+import { FONT_WEIGHT } from '../../styles';
 
 export const EmptyItem = styled(ListItem)`
 	&&& {
@@ -28,6 +29,6 @@ export const EmptyItem = styled(ListItem)`
 
 export const EmptyItemText = styled.h3`
 	max-width: 142px;
-	font-weight: normal;
+	font-weight: ${FONT_WEIGHT.NORMAL};
 	color: rgba(0,0,0,0.54);
 `;

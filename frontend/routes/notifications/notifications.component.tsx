@@ -14,21 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Badge, List, Menu, MenuItem } from "@material-ui/core";
-import Drawer from "@material-ui/core/Drawer";
-import Icon from "@material-ui/core/Icon";
-import { MuiThemeProvider } from "@material-ui/core/styles";
+import { Badge, List, Menu, MenuItem } from '@material-ui/core';
+import Drawer from '@material-ui/core/Drawer';
+import Icon from '@material-ui/core/Icon';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import { groupBy, sortBy, toArray } from "lodash";
-import * as React from "react";
-import { getSunday, simpleDate } from "../../components/utils/js/utils.filter";
-import { MuiTheme } from "../../styles";
-import { BarIconButton, UserActionButton } from "../components/components.styles";
-import { ListSubheaderToolbar } from "../components/listSubheaderToolbar/listSubheaderToolbar.component";
-import { INotification } from "./notification.item";
-import { NotificationEmptyItem } from "./notifications.emptyItem";
-import { NotificationsPanel } from "./notifications.panel";
-import { NotificationsPanelHeader } from "./notifications.panel.header";
+import { groupBy, sortBy, toArray } from 'lodash';
+import * as React from 'react';
+import { getSunday, simpleDate } from '../../components/utils/js/utils.filter';
+import { MuiTheme } from '../../styles';
+import { BarIconButton, UserActionButton } from '../components/components.styles';
+import { ListSubheaderToolbar } from '../components/listSubheaderToolbar/listSubheaderToolbar.component';
+import { INotification } from './notification.item';
+import { NotificationEmptyItem } from './notifications.emptyItem';
+import { NotificationsPanel } from './notifications.panel';
+import { NotificationsPanelHeader } from './notifications.panel.header';
 
 // Props bound in <file://./notifications.container.ts>
 
@@ -51,11 +51,16 @@ const NotificationWeekHeader = (props) =>
 
 export class Notifications extends React.PureComponent<IProps, any> {
 	public state = {
+		hasThisWeekNot: false,
+		hasLastWeekNot: false,
+		hasOlderNot: false,
+		unreadCount: 0,
+		groupedByTeamspace: {thisWeek: [] , lastWeek: [] , older: []},
 		open: false,
 		menuElement: null
 	};
 
-	public componentDidMount = () => {
+	public componentDidMount() {
 		// This will download notifications from the server and save to the store on init
 		this.props.sendGetNotifications();
 	}
@@ -90,14 +95,18 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		return notifications.filter((n) => n.timestamp < prevSunday );
 	}
 
+	public groupByTeamSpace = (notifications) => {
+		return toArray(groupBy(sortBy(notifications, 'teamSpace'), 'teamSpace'));
+	}
+
 	public hasNotifications = () => {
 		return this.props.notifications.length > 0;
 	}
 
-	public renderNotificationsHeader = () => {
+	public renderNotificationsHeader() {
 		return (<ListSubheaderToolbar rightContent={
 					<>
-					<BarIconButton aria-label="Menu" style={{marginRight: -18}} onClick={this.toggleMenu}>
+					<BarIconButton aria-label='Menu' style={{marginRight: -18}} onClick={this.toggleMenu}>
 						<Icon>more_vert</Icon>
 						<Menu
 							anchorEl={this.state.menuElement}
@@ -107,34 +116,55 @@ export class Notifications extends React.PureComponent<IProps, any> {
 								<MenuItem onClick={this.deleteAllNotifications} disabled={!this.hasNotifications()}>Clear all</MenuItem>
 							</Menu>
 					</BarIconButton>
-					<BarIconButton aria-label="Close panel" onClick={this.toggleDrawer}>
+					<BarIconButton aria-label='Close panel' onClick={this.toggleDrawer}>
 						<Icon>close</Icon>
 					</BarIconButton>
 					</>
 					}>
-					<Typography variant="title" color="inherit" >
+					<Typography variant='title' color='inherit' >
 						Notifications
 					</Typography>
 				</ListSubheaderToolbar>);
 	}
 
-	public render = () => {
-		const count =  this.props.notifications.filter((n) => !n.read).length;
-		const badgeColor = count > 0 ? "primary" : "secondary"; // Secondary color is used to make the badge disappear
-		const groupedByTeamspace = toArray(groupBy(sortBy(this.props.notifications, "teamSpace"), "teamSpace"));
+	public componentDidUpdate(prevProps: IProps) {
+		if (prevProps.notifications !== this.props.notifications) {
+			const unreadCount =  this.props.notifications.filter((n) => !n.read).length;
+			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
+
+			const thisWeek =  this.thisWeeksNotifications(this.props.notifications);
+			const lastWeek =  this.lastWeeksNotifications(this.props.notifications);
+			const older = this.moreThanTwoWeeksAgoNotifications(this.props.notifications);
+
+			groupedByTeamspace.thisWeek = this.groupByTeamSpace(thisWeek);
+			groupedByTeamspace.lastWeek = this.groupByTeamSpace(lastWeek);
+			groupedByTeamspace.older = this.groupByTeamSpace(older);
+
+			const hasThisWeekNot = thisWeek.length > 0 ;
+			const hasLastWeekNot = lastWeek.length > 0;
+			const hasOlderNot = older.length > 0;
+			this.setState({unreadCount, groupedByTeamspace, hasThisWeekNot, hasLastWeekNot, hasOlderNot });
+		}
+	}
+
+	public render() {
+		const {unreadCount, groupedByTeamspace, hasThisWeekNot, hasLastWeekNot, hasOlderNot} = this.state;
+
+		// Secondary color is used to make the badge disappear
+		const badgeColor = unreadCount > 0 ? 'primary' : 'secondary';
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
-				<Badge badgeContent={count} color={badgeColor} style={ {marginRight: 10, marginTop: 2}}>
+				<Badge badgeContent={unreadCount} color={badgeColor} style={ {marginRight: 10, marginTop: 2}}>
 					<UserActionButton
-						variant="flat"
-						aria-label="Toggle panel"
+						variant='flat'
+						aria-label='Toggle panel'
 						onClick={this.toggleDrawer}
 					>
-						<Icon fontSize="large">notifications</Icon>
+						<Icon fontSize='large'>notifications</Icon>
 					</UserActionButton>
 				</Badge>
-				<Drawer variant="persistent" anchor="right" open={this.state.open} onClose={this.toggleDrawer}
+				<Drawer variant='persistent' anchor='right' open={this.state.open} onClose={this.toggleDrawer}
 						SlideProps={{unmountOnExit: true}}>
 					<List subheader={this.renderNotificationsHeader()} style={{height: '100%', width: 300 }} >
 						{!this.hasNotifications() &&
@@ -142,40 +172,40 @@ export class Notifications extends React.PureComponent<IProps, any> {
 						{this.hasNotifications() &&
 							<>
 							<NotificationsPanelHeader/>
-							{this.thisWeeksNotifications(this.props.notifications).length > 0 &&
-								<NotificationWeekHeader labelLeft="This week"
+							{hasThisWeekNot &&
+								<NotificationWeekHeader labelLeft='This week'
 										labelRight={simpleDate(new Date())}/>
 							}
 
-							{groupedByTeamspace.map((notifications) =>
+							{groupedByTeamspace.thisWeek.map((notifications) =>
 								(<NotificationsPanel
 									key={`${notifications[0].teamSpace}-thisweek`}
-									labelLeft={"In " + notifications[0].teamSpace}
+									labelLeft={'In ' + notifications[0].teamSpace}
 									{...this.props}
-									notifications={this.thisWeeksNotifications(notifications)}
+									notifications={notifications}
 									/>)
 							)}
-							{this.lastWeeksNotifications(this.props.notifications).length > 0 &&
-								<NotificationWeekHeader labelLeft="Last week"/>
+							{hasLastWeekNot &&
+								<NotificationWeekHeader labelLeft='Last week'/>
 							}
-							{groupedByTeamspace.map((notifications) =>
+							{groupedByTeamspace.lastWeek.map((notifications) =>
 								(<NotificationsPanel
 									key={`${notifications[0].teamSpace}-lastweek`}
-									labelLeft={"In " + notifications[0].teamSpace}
+									labelLeft={'In ' + notifications[0].teamSpace}
 									{...this.props}
-									notifications={this.lastWeeksNotifications(notifications) }
+									notifications={notifications}
 									/>)
 							)}
 
-							{this.moreThanTwoWeeksAgoNotifications(this.props.notifications).length > 0 &&
-								<NotificationWeekHeader labelLeft="more than two weeks ago"/>
+							{hasOlderNot &&
+								<NotificationWeekHeader labelLeft='more than two weeks ago'/>
 							}
-							{groupedByTeamspace.map((notifications) =>
+							{groupedByTeamspace.older.map((notifications) =>
 								(<NotificationsPanel
 									key={`${notifications[0].teamSpace}-older`}
-									labelLeft={"In " + notifications[0].teamSpace}
+									labelLeft={'In ' + notifications[0].teamSpace}
 									{...this.props}
-									notifications={this.moreThanTwoWeeksAgoNotifications(notifications) }
+									notifications={notifications}
 									/>)
 							)}
 							</>
