@@ -25,15 +25,11 @@ interface IProps {
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
-	public state = {
-
-	};
-
 	public render = () => {
-
 		return (
 			<Tooltip title={this.props.tooltip}>
-			<SmallIconButtonStyled component="span"
+			<SmallIconButtonStyled
+				component="span"
 				aria-label={this.props.tooltip}
 				onClick={this.props.onClick}>
 				<Icon>{this.props.children}</Icon>

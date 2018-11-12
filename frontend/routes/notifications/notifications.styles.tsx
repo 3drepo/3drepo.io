@@ -14,8 +14,40 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { ListItem, ListItemText, Paper} from '@material-ui/core';
+import { PaperProps } from '@material-ui/core/Paper';
 import styled from 'styled-components';
-import { ListItem } from '@material-ui/core';
+import * as React from 'react';
+
+export const NotificationListItem = styled(ListItem)`
+	&& {
+		padding: 6px;
+	}
+`;
+
+export const NotificationListItemText = styled(ListItemText)`
+	&& {
+		padding: 0px;
+		margin-left: 9px;
+	}
+
+	${NotificationListItem}:hover & {
+		width:  0px;
+	}
+`;
+
+export const NotificationListItemSecondaryAction = styled.div`
+	visibility: hidden;
+	width:0px;
+	height:40px;
+	overflow:hidden;
+
+	${NotificationListItem}:hover & {
+		visibility: inherit ;
+		width:75px;
+	}
+`;
 
 export const NotificationsPanelItem = styled(ListItem)`
 && {
@@ -35,4 +67,10 @@ export const NotificationsPanelHeaderContainer = styled.div`
 	padding-left: 2px;
 	padding-right: 2px;
 }
+`;
+
+export const NotificationItemContainer = styled< {read: boolean} & PaperProps>
+	(({read, ...rest}) => (<Paper {...rest}/>))`
+  backgroundColor: ${(props) => props.read ? 'transparent' : 'white'};
+  margin:3px;
 `;

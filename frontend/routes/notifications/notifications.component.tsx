@@ -60,8 +60,8 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		this.props.sendGetNotifications();
 	}
 
-	public toggleDrawer = (e: React.SyntheticEvent) => {
-		this.setState(Object.assign({open: !this.state.open }));
+	public toggleDrawer = () => {
+		this.setState({open: !this.state.open });
 	}
 
 	public toggleMenu = (e: React.SyntheticEvent) => {
@@ -112,7 +112,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 					</BarIconButton>
 					</>
 					}>
-					<Typography variant={"title"} color={"inherit"} >
+					<Typography variant="title" color="inherit" >
 						Notifications
 					</Typography>
 				</ListSubheaderToolbar>);

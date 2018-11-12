@@ -16,7 +16,6 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { consolidateStreamedStyles } from 'styled-components';
 
 export const { Types: NotificationsTypes, Creators: NotificationsActions } = createActions({
 	sendGetNotifications: [],
@@ -34,30 +33,22 @@ export const INITIAL_STATE = [];
 
 export const setNotifications = (state = INITIAL_STATE, { notifications }) =>  (notifications) ;
 
+const sortByTimeStamp = (notifications) => notifications.sort((a, b) => b.timestamp - a.timestamp);
+
 export const upsertNotification = (state = INITIAL_STATE, { notification }) =>  {
 	const index = state.findIndex((n) => n._id === notification._id);
 	const newState = state.concat([]);
 	newState.splice(index, (index >= 0 ? 1 : 0), notification);
-	return newState.sort((a, b) => b.timestamp - a.timestamp);
+	return sortByTimeStamp(newState);
 };
 
 export const deleteNotification = (state = INITIAL_STATE, { notification }) =>  {
-	const index = state.findIndex((n) => n._id === notification._id);
-	const newState = state.concat([]);
-	newState.splice(index, (index >= 0 ? 1 : 0));
-	return newState.sort((a, b) => b.timestamp - a.timestamp);
+	return state.filter((n) => n._id !== notification._id);
 };
 
 export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) =>  {
-	const index = state.findIndex((n) => n._id === notificationPatch._id);
-	const newState = state.concat([]);
-	if (index === -1) {
-		return newState;
-	}
-
-	const notification = Object.assign(state[index], notificationPatch);
-	newState.splice(index, (index >= 0 ? 1 : 0), notification);
-	return newState.sort((a, b) => b.timestamp - a.timestamp);
+	const _id = notificationPatch._id;
+	return sortByTimeStamp(state.map((n) => n._id === _id ?  Object.assign(n, notificationPatch) : n ));
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

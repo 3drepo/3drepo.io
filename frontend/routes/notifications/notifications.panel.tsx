@@ -15,13 +15,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from "react";
-import {INotification, NotificationItem} from "./notification.item";
-import { List } from "@material-ui/core";
-import { ItemLabel } from "../components/components.styles";
-import { NotificationsPanelItem, NotificationsPanelHeaderContainer } from "./notifications.panel.styles";
-import { NotificationsPanelHeader } from "./notifications.panel.header";
+import { List } from '@material-ui/core';
+import * as React from 'react';
+import { INotification, NotificationItem } from './notification.item';
+import { NotificationsPanelHeader } from './notifications.panel.header';
+import { NotificationsPanelItem } from './notifications.styles';
 
 interface IProps {
 	labelLeft?: string;
@@ -38,7 +36,7 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 		const {notifications, labelLeft, labelRight} = this.props;
 
 		if (this.props.notifications.length === 0) {
-			return (<></>);
+			return null;
 		}
 
 		return (<>

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ItemLabel } from "../components/components.styles";
-import { NotificationsPanelHeaderContainer, NotificationsPanelItem } from "./notifications.panel.styles";
+import { NotificationsPanelHeaderContainer, NotificationsPanelItem } from "./notifications.styles";
 import * as React from "react";
 
 export class NotificationsPanelHeader extends React.PureComponent<any, any> {

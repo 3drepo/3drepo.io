@@ -17,12 +17,13 @@
  */
 import { Paper, Tooltip } from "@material-ui/core";
 import Avatar from '@material-ui/core/Avatar';
-import Icon from "@material-ui/core/Icon";
-import * as React from "react";
-import { SmallIconButton } from "../components/smallIconButon/smallIconButton.component";
+import Icon from '@material-ui/core/Icon';
+import * as React from 'react';
+import { SmallIconButton } from '../components/smallIconButon/smallIconButton.component';
 import { NotificationListItem,
 		NotificationListItemSecondaryAction,
-		NotificationListItemText } from "./notifications.styles";
+		NotificationListItemText,
+		NotificationItemContainer} from './notifications.styles';
 
 export interface INotification {
 	_id: string;
@@ -47,8 +48,8 @@ const NotificationItemText = (props) => {
 	const color =  props.primaryColor;
 	const secColor = props.secondaryColor;
 
-	const primaryStyle =  Object.assign({color}, {fontWeight});
-	const secondaryStyle =  Object.assign( {color: secColor},  {fontWeight});
+	const primaryStyle = Object.assign({color}, {fontWeight});
+	const secondaryStyle = Object.assign( {color: secColor},  {fontWeight});
 
 	return (
 		<NotificationListItemText
@@ -88,44 +89,43 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 		const modelText = `In ${modelName}`;
 
 		return (
-			<Paper  style={ Object.assign({backgroundColor}, {margin: 3})}
-							onClick={this.gotoNotification.bind(this)}>
-			<NotificationListItem button >
-					<Avatar>
-						<Icon>place</Icon>
-					</Avatar>
+			<NotificationItemContainer read={read} onClick={this.gotoNotification.bind(this)}>
+				<NotificationListItem button >
+						<Avatar>
+							<Icon>place</Icon>
+						</Avatar>
 
-					{read &&
-						<NotificationItemText
-							primaryColor="rgba(0, 0, 0, 0.54)" secondaryColor="rgba(0, 0, 0, 0.24)" fontWeight="400"
-							primary={assignedIssuesText} secondary={modelText}
-							/>
-					}
-					{!read &&
-						<NotificationItemText
-							primaryColor="rgba(0, 0, 0, 0.87)" secondaryColor="rgba(0, 0, 0, 0.54)" fontWeight="600"
-							primary={assignedIssuesText} secondary={modelText}
-							/>
-					}
-
-					<NotificationListItemSecondaryAction>
-						{!read  &&
-						<SmallIconButton tooltip="Mark as read" onClick={this.markAsRead}>
-							lens
-						</SmallIconButton>
+						{read &&
+							<NotificationItemText
+								primaryColor="rgba(0, 0, 0, 0.54)" secondaryColor="rgba(0, 0, 0, 0.24)" fontWeight="400"
+								primary={assignedIssuesText} secondary={modelText}
+								/>
 						}
-						{read  &&
-						<SmallIconButton tooltip="Mark as unread" onClick={this.markAsUnread}>
-							panorama_fish_eye
-						</SmallIconButton>
+						{!read &&
+							<NotificationItemText
+								primaryColor="rgba(0, 0, 0, 0.87)" secondaryColor="rgba(0, 0, 0, 0.54)" fontWeight="600"
+								primary={assignedIssuesText} secondary={modelText}
+								/>
 						}
-						<SmallIconButton tooltip="Clear" onClick={this.delete}>
-							clear
-						</SmallIconButton>
-					</NotificationListItemSecondaryAction>
 
-			</NotificationListItem>
-			</Paper>
+						<NotificationListItemSecondaryAction>
+							{!read  &&
+							<SmallIconButton tooltip="Mark as read" onClick={this.markAsRead}>
+								lens
+							</SmallIconButton>
+							}
+							{read  &&
+							<SmallIconButton tooltip="Mark as unread" onClick={this.markAsUnread}>
+								panorama_fish_eye
+							</SmallIconButton>
+							}
+							<SmallIconButton tooltip="Clear" onClick={this.delete}>
+								clear
+							</SmallIconButton>
+						</NotificationListItemSecondaryAction>
+
+				</NotificationListItem>
+			</NotificationItemContainer>
 		);
 	}
 }

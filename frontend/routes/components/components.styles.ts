@@ -38,27 +38,25 @@ export const ItemLabelDetail = styled(BaseStyles)`
 `;
 
 export const BarIconButton = styled(IconButton)`
-  && {
-    color: rgba(255, 255, 255, 0.87)
-  }
+&& {
+  color: rgba(255, 255, 255, 0.87)
+}
 
-	&:hover {
-		background-color: white
-	}
-  `;
+&:hover {
+  background-color: ${COLOR.WHITE}
+}
+`;
 
 export const UserActionButton = styled(Button)`
-  && {
-    color: white;
-    text-shadow: 0px 0px 3px rgba(0,0,0,0.2);
-    min-width: 0px;
-    min-height: 0px;
-    padding:0px;
-  }
+&& {
+  color: ${COLOR.WHITE};
+  text-shadow: 0px 0px 3px rgba(0,0,0,0.2);
+  min-width: 0px;
+  min-height: 0px;
+  padding:0px;
+}
 
-  &&:hover {
-    background-color: transparent;
-  }
-
-
+&&:hover {
+  background-color: transparent;
+}
 `;

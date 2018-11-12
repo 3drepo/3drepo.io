@@ -19,8 +19,6 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { COLOR } from './colors';
 import { FONT_WEIGHT } from './fonts';
 import * as mixins from './mixins';
-import { reducer } from '../modules/teamspace/teamspace.redux';
-import color from '@material-ui/core/colors/amber';
 
 export const theme = {
 	colors: COLOR,
@@ -118,8 +116,8 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiToolbar: {
 			root: {
-				backgroundColor: '#0c2f54',
-				color: 'rgba(255, 255, 255, 0.87)'
+				backgroundColor: theme.colors.PRIMARY_MAIN,
+				color: theme.colors.WHITE_87
 			},
 			regular: {
 				/* tslint:disable */
