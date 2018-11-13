@@ -13,11 +13,11 @@ export const ConfirmDialog = (props: IProps) => {
 	const { content } = props;
 	return (
 		<>
-			{content && (
+			{ content && (
 				<DialogContent>
-					<div dangerouslySetInnerHTML={{ __html: content }}></div>
+					<div dangerouslySetInnerHTML={{ __html: content }} />
 				</DialogContent>
-			)}
+			) }
 
 			<DialogActions>
 				<Button onClick={props.handleClose} color="secondary">No</Button>;

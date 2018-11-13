@@ -29,13 +29,13 @@ export const UserManagementTab = (props: IProps) => {
 	return (
 		<>
 			<Container
-				container
+				container={true}
 				direction="column"
 				alignItems="stretch"
 				wrap="nowrap"
 			>
-				<Content item>{children}</Content>
-				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
+				<Content item={true}>{children}</Content>
+				{footerLabel && (<Footer item={true}>{footerLabel}</Footer>)}
 			</Container>
 		</>
 	);

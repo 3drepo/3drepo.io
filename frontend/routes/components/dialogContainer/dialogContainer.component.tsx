@@ -71,19 +71,19 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Dialog open={this.props.isOpen} onClose={this.handleClose}>
-					{title && <DialogTitle disableTypography>{title}</DialogTitle>}
-					{content && !DialogTemplate && (
+					{title && <DialogTitle disableTypography={true}>{title}</DialogTitle>}
+					{ content && !DialogTemplate && (
 							<DialogContent>
 								<div dangerouslySetInnerHTML={{ __html: content }} />
 							</DialogContent>
-						)}
-					{DialogTemplate && (
+						) }
+					{ DialogTemplate && (
 						<DialogTemplate
 							{...data}
 							handleResolve={this.handleResolve}
 							handleClose={this.handleClose}
 						/>
-					)}
+					) }
 				</Dialog>
 			</MuiThemeProvider>
 		);

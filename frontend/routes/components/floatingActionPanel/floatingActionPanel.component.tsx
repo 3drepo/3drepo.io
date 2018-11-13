@@ -96,14 +96,14 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 					open={shouldOpen}
 					anchorEl={anchorEl}
 					onClose={this.handleClose}
-					anchorOrigin={{
+					anchorOrigin={ {
 						vertical: 'top',
 						horizontal: 'left'
-					}}
-					transformOrigin={{
+					} }
+					transformOrigin={ {
 						vertical: 'top',
 						horizontal: 'right'
-					}}
+					} }
 				>
 					{
 						this.props.children || this.props.render({
@@ -126,7 +126,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 		const shouldUsePortal = Boolean(this.props.container);
 		return (
 			<>
-				{ shouldUsePortal ? this.renderInContainer(this.props.container) : this.renderPanel() }
+				{shouldUsePortal ? this.renderInContainer(this.props.container) : this.renderPanel()}
 			</>
 		);
 	}

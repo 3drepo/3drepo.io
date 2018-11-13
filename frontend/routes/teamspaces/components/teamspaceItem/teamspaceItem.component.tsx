@@ -37,6 +37,15 @@ interface IProps {
 
 export const TeamspaceItem = (props: IProps) => {
 	const { account, projects, onToggle, active, renderChildItem, isMyTeamspace, onAddProject} = props;
+
+	const renderActions = () => (
+		<TooltipButton
+			{...ROW_ACTIONS.ADD_NEW}
+			label="Add new project"
+			action={onAddProject}
+		/>
+	);
+
 	return (
 		<TreeList
 			name={account}
@@ -46,17 +55,11 @@ export const TeamspaceItem = (props: IProps) => {
 			active={active}
 			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
-			IconProps={{
+			IconProps={ {
 				IconOpened: StorageOutlined,
 				IconClosed: StorageNormal
-			}}
-			renderActions={() => (
-				<TooltipButton
-					{...ROW_ACTIONS.ADD_NEW}
-					label="Add new project"
-					action={onAddProject}
-				/>
-			)}
+			} }
+			renderActions={renderActions}
 		/>
 	);
 };

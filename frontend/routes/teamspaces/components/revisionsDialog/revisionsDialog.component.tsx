@@ -47,21 +47,17 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId);
 	}
 
-	public revisionClickHandler = (event, { tag, _id }) => {
+	public revisionClickHandler = ({ tag, _id }) => () => {
 		const { modelId, handleClose, history, location: { pathname } } = this.props;
 
 		handleClose();
 
-		if (tag) {
-			history.push(`${pathname}/${modelId}/${tag}`);
-		} else {
-			history.push(`${pathname}/${modelId}/${_id}`);
-		}
+		history.push(`${pathname}/${modelId}/${tag || _id}`);
 		const analyticService = getAngularService('AnalyticService') as any;
 
 		analyticService.sendEvent({
-			eventCategory: "Model",
-			eventAction: "view"
+			eventCategory: 'Model',
+			eventAction: 'view'
 		});
 	}
 
@@ -76,26 +72,27 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 					<>
 						<StyledList>
 							{revisions && revisions.map((revision, index) => (
-								<Item
-									button
-									key={revision._id}
-									divider
-									onClick={(event) => this.revisionClickHandler(event, revision)}
+								<Item button ={true}key={revision._id}
+									divideronClick={ this.revisionClickHandler( revision)}
 									last={index === 0}>
 										<Row>
-											<Property>
-												{revision.tag ? revision.tag : '(empty tag)'}
-											</Property>
-											<Property>{ revision.author }</Property>
-											<Property>
-												<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
-											</Property>
+										<Property >
+											{revision.tag
+												? revision.tag
+												: '(empty tag)'}
+										</Property>
+
+										<Property >
+											{revision.author}
+										</Property>
+									<Property >
+											<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
+										</Property>
 										</Row>
-										<Description>
-											{ revision.desc ? revision.desc : '(empty description)' }
-										</Description>
+										<Description>{revision.desc ? revision.desc : '(empty description)' }
+									</Description>
 								</Item>)
-							)}
+							) }
 						</StyledList>
 						<StyledDialogActions>
 							<Button variant="raised" color="secondary" onClick={handleClose}>

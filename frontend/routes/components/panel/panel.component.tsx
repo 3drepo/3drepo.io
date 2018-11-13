@@ -32,8 +32,8 @@ export const Panel = (props: IProps) => (
 	<ThemeProvider theme={theme}>
 		<MuiThemeProvider theme={MuiTheme}>
 			<Container {...props.paperProps}>
-				<Title> { props.title } </Title>
-				<Content> { props.children } </Content>
+				<Title> {props.title} </Title>
+				<Content> {props.children} </Content>
 			</Container>
 		</MuiThemeProvider>
 	</ThemeProvider>

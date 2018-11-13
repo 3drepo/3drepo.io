@@ -67,6 +67,40 @@ export class Billing extends React.PureComponent<IProps, IState> {
 		this.setState({ activeTab });
 	}
 
+	public renderRoute = ({ match }) => {
+		const { activeTab } = this.state;
+
+		return (
+			<>
+				<Header>
+					<Tabs
+						value={activeTab || match.params.tab}
+						indicatorColor='primary'
+						textColor='primary'
+						onChange={this.handleChange}
+					>
+						{ TABS_ROUTES.map(({ label, path }, index) => {
+							const props = {
+								label,
+								component: Link,
+								value: path,
+								to: `${this.props.match.url}/${path}`
+							};
+							return <Tab key={index} {...props} />;
+						})}
+					</Tabs>
+				</Header>
+				<TabContent>
+					<Switch>
+						{ TABS_ROUTES.map(({ path, component: Component }, index) => (
+							<Route key={index} path={`${this.props.match.url}/${path}`} component={Component} />
+						))}
+					</Switch>
+				</TabContent>
+			</>
+		);
+	}
+
 	public render() {
 		const { activeTab } = this.state;
 		const paperProps = { height: '100%' };
@@ -74,38 +108,9 @@ export class Billing extends React.PureComponent<IProps, IState> {
 		return (
 			<Panel title='Billing' paperProps={paperProps}>
 				<Switch>
-					<Route path={`${this.props.match.url}/:tab`} render={({ match }) => (
-						<>
-							<Header>
-								<Tabs
-									value={activeTab || match.params.tab}
-									indicatorColor='primary'
-									textColor='primary'
-									onChange={this.handleChange}
-								>
-									{TABS_ROUTES.map(({label, path}, index) => {
-										const props = {
-											key: index,
-											label,
-											component: Link,
-											value: path,
-											to: `${this.props.match.url}/${path}`
-										};
-										return <Tab {...props} />;
-									})}
-								</Tabs>
-							</Header>
-							<TabContent>
-								<Switch>
-									{TABS_ROUTES.map(({ path, component: Component }, index) => (
-										<Route key={index} path={`${this.props.match.url}/${path}`} component={Component} />
-									))}
-								</Switch>
-							</TabContent>
-						</>
-					)} />
+					<Route path={`${this.props.match.url}/:tab`} render={this.renderRoute} />
 					<Redirect
-						exact
+						exact={true}
 						from={`${this.props.match.url}`}
 						to={`${this.props.match.url}/${TABS.SUBSCRIPTION.path}`}
 					/>

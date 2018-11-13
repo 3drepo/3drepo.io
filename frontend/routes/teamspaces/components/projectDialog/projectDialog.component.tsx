@@ -63,8 +63,8 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 				<Form>
 					<DialogContent>
 						<FormControl fullWidth={true} required={true}>
-							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<Field name="teamspace" render={({ field, form }) => (
+							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+							<Field name="teamspace" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
@@ -77,14 +77,14 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 								/>
 							)} />
 						</FormControl>
-						<Field name="name" render={({ field, form }) => (
+						<Field name="name" render={ ({ field, form }) => (
 							<TextField
 								{...field}
 								error={Boolean(form.touched.name && form.errors.name)}
 								helperText={form.touched.name && (form.errors.name || '')}
 								label="Name"
 								margin="normal"
-								required
+								required={true}
 								fullWidth={true}
 							/>
 						)} />
@@ -97,7 +97,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 						>
 							Cancel
 						</Button>
-						<Field render={({ form }) => (
+						<Field render={ ({ form }) => (
 							<Button
 								type="submit"
 								variant="raised"

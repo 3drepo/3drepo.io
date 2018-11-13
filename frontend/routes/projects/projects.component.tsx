@@ -144,8 +144,8 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				{ currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions /> }
-				{ currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions /> }
+				{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
+				{currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions />}
 			</>
 		);
 	}
@@ -159,14 +159,14 @@ export class Projects extends React.PureComponent<IProps, IState> {
 				<UserManagementTab footerLabel={footerLabel}>
 					<>
 						<Options
-							container
+							container={true}
 							direction="row"
 							justify="space-between"
 							alignContent="center"
 						>
-							<SelectContainer item>
+							<SelectContainer item={true}>
 								<FormControl fullWidth={true}>
-									<InputLabel shrink htmlFor="project">
+									<InputLabel shrink={true} htmlFor="project">
 										Project
 									</InputLabel>
 									<CellSelect
@@ -179,7 +179,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 									/>
 								</FormControl>
 							</SelectContainer>
-							<Grid item>
+							<Grid item={true}>
 								<SwitchButton
 									color="secondary"
 									onClick={this.handleViewChange}
