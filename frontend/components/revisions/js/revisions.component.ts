@@ -1,9 +1,9 @@
 class RevisionsController implements ng.IController {
-
 	public static $inject: string[] = [
 		"$scope",
 		"$filter",
 		"$location",
+		"$state",
 
 		"DialogService",
 		"RevisionsService",
@@ -21,6 +21,7 @@ class RevisionsController implements ng.IController {
 		private $scope: ng.IScope,
 		private $filter: any, // TODO: Figure out how to make Filters work with TSC
 		private $location: ng.ILocationService,
+		private $state,
 
 		private DialogService,
 		private RevisionsService,
@@ -95,11 +96,12 @@ class RevisionsController implements ng.IController {
 	}
 
 	public goToRevision(revId) {
-
 		this.revision = revId;
 		this.DialogService.closeDialog();
-		this.$location.path(`/${this.account}/${this.model}/${revId}`);
-
+		this.$state.go('app.viewer', {
+			modelId: this.model,
+			revision: revId
+		});
 	}
 
 	public closeDialog() {

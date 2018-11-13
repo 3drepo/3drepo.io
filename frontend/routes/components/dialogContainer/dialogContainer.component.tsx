@@ -16,13 +16,13 @@
  */
 
 import * as React from 'react';
-import { dispatch } from '../../../helpers/migration';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 
+import { dispatch } from '../../../helpers/migration';
 import { MuiTheme } from '../../../styles';
 
 interface IProps {

@@ -15,11 +15,15 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { history } from '../../../helpers/migration';
+
 class LoginController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
 		"$location",
+		"$timeout",
+		"$state",
 
 		"AuthService",
 		"EventService",
@@ -37,6 +41,8 @@ class LoginController implements ng.IController {
 	constructor(
 		private $scope,
 		private $location,
+		private $timeout,
+		private $state,
 
 		private AuthService,
 		private EventService,
@@ -83,6 +89,9 @@ class LoginController implements ng.IController {
 		this.loggingIn = true;
 		this.AuthService.login(this.user.username, this.user.password)
 			.then(() => {
+				this.$timeout(() => {
+					history.push(this.$state.params.referrer || '/dashboard/teamspaces');
+				});
 				this.loggingIn = false;
 			})
 			.catch(() => {

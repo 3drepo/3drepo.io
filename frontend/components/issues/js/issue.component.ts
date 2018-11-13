@@ -931,14 +931,14 @@ class IssueController implements ng.IController {
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					issue: this.data._id,
+					issueId: this.data._id,
 					noSet: true
 				};
 
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"home.account.model.issue",
+					"app.viewer.issues",
 					issueState,
 					{notify: false}
 				);

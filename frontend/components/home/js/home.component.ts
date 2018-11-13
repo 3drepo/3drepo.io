@@ -29,6 +29,7 @@ class HomeController implements ng.IController {
 		"$window",
 		"$location",
 		"$document",
+		"$state",
 
 		"AuthService",
 		"StateManager",
@@ -44,7 +45,7 @@ class HomeController implements ng.IController {
 
 	private doNotLogout;
 	private legalPages;
-	private loggedOutPages;
+	private loggedOutStates;
 	private loggedIn;
 	private loginPage;
 	private isLoggedOutPage;
@@ -78,6 +79,7 @@ class HomeController implements ng.IController {
 		private $window,
 		private $location,
 		private $document,
+		private $state,
 
 		private AuthService,
 		private StateManager,
@@ -106,7 +108,7 @@ class HomeController implements ng.IController {
 
 		this.doNotLogout = this.AuthService.doNotLogout;
 		this.legalPages = this.AuthService.legalPages;
-		this.loggedOutPages = this.AuthService.loggedOutPages;
+		this.loggedOutStates = this.AuthService.loggedOutStates;
 
 		this.loggedIn = false;
 		this.loginPage = true;
@@ -178,57 +180,22 @@ class HomeController implements ng.IController {
 			if ( (newState && change) || (newState && this.firstState)) {
 
 				// If it's a legal page
-				const legal = this.pageCheck(newState, this.legalPages);
-				const loggedOutPage = this.pageCheck(newState, this.loggedOutPages);
+				const legal = this.$state.current.name.includes('app.static');
+				const loggedOutPage = this.pageCheck(this.$state.current.name, this.loggedOutStates);
 
 				if (legal) {
-
 					this.isLegalPage = true;
 					this.isLoggedOutPage = false;
-
-					this.legalPages.forEach((page) => {
-						this.setPage(newState, page);
-					});
-
 				} else if (loggedOutPage && !newState.loggedIn) {
-
 					// If its a logged out page which isnt login
-
 					this.isLegalPage = false;
 					this.isLoggedOutPage = true;
-					this.loggedOutPages.forEach((page) => {
-						this.setPage(newState, page);
-					});
-
-				} else if (
-					this.AuthService.getUsername() &&
-					newState.account !== this.AuthService.getUsername() &&
-					!newState.model
-				) {
-					// If it's some other random page that doesn't match
-					// anything sensible like legal, logged out pages, or account
-					this.isLoggedOutPage = false;
-					this.page = "";
-					this.$location.search({}); // Reset query parameters
-
-					let url = "/" + this.AuthService.getUsername();
-
-					if (this.state.returnUrl) {
-						url = this.state.returnUrl;
-						this.state.returnUrl = null;
-					}
-
-					this.$location.path(url);
 				} else if (
 					!this.AuthService.getUsername() &&
 					!legal &&
 					!loggedOutPage
 				) {
-
-					// Login page or none existant page
-
 					this.isLoggedOutPage = false;
-					this.page = "";
 				}
 
 			}
@@ -245,13 +212,8 @@ class HomeController implements ng.IController {
 
 		switch (event) {
 		case this.AuthService.events.USER_LOGGED_IN:
-
 			if (!currentData.error) {
 				if (!currentData.initialiser) {
-					if (!this.state.returnUrl) {
-						this.StateManager.updateState(true);
-					}
-
 					if (!this.state.account) {
 						const username = this.AuthService.getUsername();
 						if (!username) {
@@ -285,7 +247,7 @@ class HomeController implements ng.IController {
 						false
 					);
 				}
-			} else {
+			} else if (this.AuthService.isLoggedIn()) {
 				this.AuthService.logout();
 			}
 
@@ -386,22 +348,19 @@ class HomeController implements ng.IController {
 		// If it's a logged in page just redirect to the
 		// users teamspace page
 		this.AuthService.authDefer.promise.then(() => {
-			if ( this.AuthService.loggedOutPage() && this.AuthService.getUsername()) {
-				this.$location.path("/" + this.AuthService.getUsername());
+			if (
+				this.AuthService.loggedOutPage() &&
+				this.AuthService.getUsername()
+			) {
+				this.$location.path("/dashboard/teamspaces");
 			}
 		});
 	}
 
 	public pageCheck(state, pages) {
-		return pages.filter((page) => {
+		return pages.some((page) => {
 			return state[page] === true;
-		}).length;
-	}
-
-	public setPage(state, page) {
-		if (state[page] === true) {
-			this.page = page;
-		}
+		});
 	}
 
 	public precacheTeamspaceTemplate() {
@@ -410,7 +369,6 @@ class HomeController implements ng.IController {
 		// we can improve the percieved performance for the user
 
 		const preCacheTemplates = [
-			"templates/account-info.html",
 			"templates/sign-up.html",
 			"templates/register-request.html"
 		];
@@ -496,12 +454,12 @@ class HomeController implements ng.IController {
 		this.$location.path(minusSlash);
 	}
 
-	public logout() {
+	public logout = () => {
 		this.StateManager.resetServiceStates();
 		this.AuthService.logout();
 	}
 
-	public home() {
+	public home = () => {
 		this.StateManager.resetServiceStates();
 		this.StateManager.goHome();
 	}
@@ -510,6 +468,12 @@ class HomeController implements ng.IController {
 		this.$window.open("/" + display.value);
 	}
 
+	public onLiteModeChange = () => {
+		this.$timeout(() => {
+			this.setLiteMode(!this.isLiteMode);
+			location.reload();
+		});
+	}
 }
 
 export const HomeComponent: ng.IComponentOptions = {

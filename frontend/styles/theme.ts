@@ -18,12 +18,14 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 import { COLOR } from './colors';
 import { FONT_WEIGHT } from './fonts';
+import { media } from './media';
 import * as mixins from './mixins';
 
 export const theme = {
 	colors: COLOR,
 	fontWeights: FONT_WEIGHT,
-	mixins
+	mixins,
+	media
 };
 
 export const MuiTheme = createMuiTheme({
