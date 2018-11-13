@@ -22,6 +22,9 @@ import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
+import StorageNormal from '@material-ui/icons/Storage';
+import StorageOutlined from '@material-ui/icons/StorageOutlined';
+
 interface IProps {
 	account: string;
 	projects: any[];
@@ -43,6 +46,10 @@ export const TeamspaceItem = (props: IProps) => {
 			active={active}
 			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
+			IconProps={{
+				IconOpened: StorageOutlined,
+				IconClosed: StorageNormal
+			}}
 			renderActions={() => (
 				<TooltipButton
 					{...ROW_ACTIONS.ADD_NEW}
