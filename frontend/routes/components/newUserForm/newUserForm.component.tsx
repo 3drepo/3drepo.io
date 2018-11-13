@@ -18,18 +18,13 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 
-import { ButtonProps } from '@material-ui/core/Button';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Paper from '@material-ui/core/Paper';
-import Popper from '@material-ui/core/Popper';
-import TextField from '@material-ui/core/TextField';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
@@ -90,13 +85,13 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 
 		return (
 			<StyledTextField
-				fullWidth
-				InputProps={{
+				fullWidth={true}
+				InputProps={ {
 					inputRef: (node) => {
 						ref(node);
 						inputRef(node);
 					}
-				}}
+				} }
 				{...other}
 			/>
 		);
@@ -122,16 +117,32 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public renderSuggestionsContainer = (options) => (
+		<SuggestionsList
+			anchorEl={this.popperNode}
+			open={Boolean(options.children)}
+			placement="bottom"
+		>
+			<Paper
+				square={true}
+				{...options.containerProps}
+				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
+			>
+				{options.children}
+			</Paper>
+		</SuggestionsList>
+	)
+
 	public render() {
-		const { onSave, onCancel, clearSuggestions, jobs, users, title } = this.props;
+		const { clearSuggestions, jobs, users, title } = this.props;
 		return (
 			<Container>
 				<Grid
-					container
+					container={true}
 					direction="column">
 					<Title>{title}</Title>
 
-					<FormControl required>
+					<FormControl required={true}>
 						<Autosuggest
 							suggestions={users}
 							onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -140,40 +151,26 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 							getSuggestionValue={this.getSuggestionValue}
 							renderInputComponent={this.renderInputComponent}
 							renderSuggestion={this.renderUserSuggestion}
-							inputProps={{
+							inputProps={ {
 								onChange: this.handleChange('name'),
 								label: 'Username or email address',
 								value: this.state.name,
 								inputRef: (node) => {
 									this.popperNode = node;
 								}
-							}}
-							renderSuggestionsContainer={(options) => (
-								<SuggestionsList
-									anchorEl={this.popperNode}
-									open={Boolean(options.children)}
-									placement="bottom"
-								>
-									<Paper
-										square
-										{...options.containerProps}
-										style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
-									>
-										{options.children}
-									</Paper>
-								</SuggestionsList>
-							)}
+							} }
+							renderSuggestionsContainer={this.renderSuggestionsContainer}
 						/>
 					</FormControl>
 
 					<FormControl>
-						<InputLabel shrink htmlFor="job">Job</InputLabel>
+						<InputLabel shrink={true} htmlFor="job">Job</InputLabel>
 						<StyledSelect
 							value={this.state.job}
-							displayEmpty
-							inputProps={{
+							displayEmpty={true}
+							inputProps={ {
 								id: "job"
-							}}
+							} }
 							onChange={this.handleChange('job')}
 						>
 							<EmptySelectValue value="">Unassigned</EmptySelectValue>
@@ -193,7 +190,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 					/>
 
 					<Grid
-						container
+						container={true}
 						direction="row">
 						<SaveButton
 							variant="contained"

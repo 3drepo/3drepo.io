@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
-import * as queryString from 'query-string';
 import { isEmpty } from 'lodash';
 import { Formik, Field } from 'formik';
 
@@ -231,26 +230,26 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 		return	(
 			<Formik
-				initialValues={{
+				initialValues={ {
 					id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
 					latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
-				}}
+				} }
 				validationSchema={ModelSettingsSchema}
 				onSubmit={this.handleUpdateSettings}
 			>
 				<StyledForm>
 					<Headline color="primary" variant="subheading">Model Information</Headline>
 					<Grid>
-						<FieldsRow container wrap="nowrap">
-							<Field name="id" render={({ field }) => (
+						<FieldsRow container={true} wrap="nowrap">
+							<Field name="id" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model ID"
 									margin="normal"
-									disabled
+									disabled={true}
 								/>
 							)} />
-							<Field name="name" render={({ field, form }) => (
+							<Field name="name" render={ ({ field, form }) => (
 								<StyledTextField
 									{...field}
 									error={Boolean(form.errors.name)}
@@ -260,16 +259,16 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</FieldsRow>
-						<FieldsRow container wrap="nowrap">
-							<Field name="type" render={({ field }) => (
+						<FieldsRow container={true} wrap="nowrap">
+							<Field name="type" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model type"
 									margin="normal"
-									disabled
+									disabled={true}
 								/>
 							)} />
-							<Field name="code" render={({ field }) => (
+							<Field name="code" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model code"
@@ -277,8 +276,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</FieldsRow>
-						<FieldsRow container wrap="nowrap">
-							<Field name="fourDSequenceTag" render={({ field }) => (
+						<FieldsRow container={true} wrap="nowrap">
+							<Field name="fourDSequenceTag" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="4D Sequence Tag"
@@ -286,8 +285,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 							<SelectWrapper fullWidth={true}>
-								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-								<Field name="unit" render={({ field }) => (
+								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										items={clientConfigService.units}
@@ -297,14 +296,14 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								)} />
 							</SelectWrapper>
 						</FieldsRow>
-						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={"Enter topic types"} /> } />
+						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={"Enter topic types"} />} />
 					</Grid>
 					<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
-					<Grid container direction="column" wrap="nowrap">
-						<Grid container direction="row" wrap="nowrap">
-							<GridColumn container direction="column" wrap="nowrap">
+					<Grid container={true} direction="column" wrap="nowrap">
+						<Grid container={true} direction="row" wrap="nowrap">
+							<GridColumn container={true} direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
-								<Field name="latitude" render={({ field }) => (
+								<Field name="latitude" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -314,7 +313,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										onChange={this.handlePointChange(field.onChange, field.name)}
 									/>
 								)} />
-								<Field name="longitude" render={({ field }) => (
+								<Field name="longitude" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -324,7 +323,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										onChange={this.handlePointChange(field.onChange, field.name)}
 									/>
 								)} />
-								<Field name="elevation" render={({ field }) => (
+								<Field name="elevation" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -334,7 +333,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										disabled
 									/>
 								)} />
-								<Field name="angleFromNorth" render={({ field }) => (
+								<Field name="angleFromNorth" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -345,9 +344,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									/>
 								)} />
 							</GridColumn>
-							<GridColumn container direction="column" wrap="nowrap">
+							<GridColumn container={true} direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Project Point</Headline>
-								<Field name="axisX" render={({ field }) => (
+								<Field name="axisX" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -357,7 +356,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										onChange={this.handlePointChange(field.onChange, field.name)}
 									/>
 								)} />
-								<Field name="axisY" render={({ field }) => (
+								<Field name="axisY" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -367,7 +366,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										onChange={this.handlePointChange(field.onChange, field.name)}
 									/>
 								)} />
-								<Field name="axisZ" render={({ field }) => (
+								<Field name="axisZ" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
 										type="number"
@@ -380,8 +379,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							</GridColumn>
 						</Grid>
 					</Grid>
-					<Grid container direction="column" alignItems="flex-end">
-						<Field render={({ form }) =>
+					<Grid container={true} direction="column" alignItems="flex-end">
+						<Field render={ ({ form }) =>
 							<Button
 								type="submit"
 								variant="raised"
@@ -392,8 +391,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								}
 							>
 								Save
-							</Button>
-						} />
+							</Button>} />
 					</Grid>
 				</StyledForm>
 			</Formik>
@@ -405,7 +403,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Panel {...PANEL_PROPS} title={this.renderTitleWithBackLink()}>
-				{ isSettingsLoading ? this.renderLoader('Loading model settings data...') : this.renderForm() }
+				{isSettingsLoading ? this.renderLoader('Loading model settings data...') : this.renderForm()}
 			</Panel>
 		);
 	}

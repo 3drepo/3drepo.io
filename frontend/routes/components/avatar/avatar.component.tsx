@@ -72,10 +72,10 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 		const { avatarLoaded } = this.state;
 
 		return (
-			<Container {...containerProps }>
-				{ (!url || loading || !avatarLoaded) && this.renderPlaceholder() }
-				{ !url && this.renderInitials(name) }
-				{ url && this.renderImage(url, name) }
+			<Container {...containerProps}>
+				{(!url || loading || !avatarLoaded) && this.renderPlaceholder()}
+				{!url && this.renderInitials(name)}
+				{url && this.renderImage(url, name)}
 			</Container>
 		);
 	}

@@ -221,9 +221,10 @@ export class Users extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderNewUserForm = (container) => {
+	public renderNewUserFormPanel = ({ closePanel }) => {
 		const { limit } = this.state;
-		const { users, usersSuggestions, clearUsersSuggestions, onUsersSearch} = this.props;
+		const { users, usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
+
 		const formProps = {
 			title: this.getFooterLabel(users, limit),
 			jobs: this.state.jobs,
@@ -232,20 +233,24 @@ export class Users extends React.PureComponent<IProps, IState> {
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch
 		};
+		return <NewUserForm {...formProps} onCancel={closePanel} />;
+	}
+
+	public renderNewUserForm = (container) => {
+		const { limit } = this.state;
+		const { users } = this.props;
 
 		const isButtonDisabled = limit <= users.length;
 
 		return (
 			<FloatingActionPanel
-				buttonProps={{
+				buttonProps={ {
 					disabled: isButtonDisabled,
 					label: isButtonDisabled ? 'All licences assigned' : ''
-				}}
+				} }
 				container={container}
 				key={this.state.panelKey}
-				render={({ closePanel }) => {
-					return <NewUserForm {...formProps} onCancel={closePanel} />;
-				}}
+				render={this.renderNewUserFormPanel}
 			/>
 		);
 	}

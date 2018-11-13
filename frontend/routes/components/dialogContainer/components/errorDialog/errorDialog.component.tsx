@@ -21,9 +21,9 @@ export const ErrorDialog = (props: IProps) => {
 				}
 
 				<br /><br/>
-				<strong>{ message }</strong>
+				<strong>{message}</strong>
 				<br />
-				{ status && (<code>(Status Code: {status})</code>) }
+				{status && (<code>(Status Code: {status})</code>)}
 				<br /><br />
 				If this is unexpected please message support@3drepo.io.
 			</DialogContent>

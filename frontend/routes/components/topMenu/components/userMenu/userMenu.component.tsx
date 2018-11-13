@@ -47,7 +47,7 @@ const UserButton = ({ IconProps, Icon, ...props }) => (
 
 const UserMenuButton = ({Icon, ...props}) => {
 	return (
-		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem button={true} aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
 				<Icon />
 			</MenuIcon>
@@ -93,17 +93,17 @@ const UserMenuContent = (props) => {
 					checked={props.isLiteMode}
 					onChange={invokeAndClose(props.onLiteModeChange)}
 					color="secondary"
-					inputProps={{
+					inputProps={ {
 						'aria-label': 'Lite mode'
-					}}
+					} }
 				/>
 				<MenuText primary="Lite mode" />
 			</MenuItem>
-			{hasMemorySettings && <UserMenuButton
+			{ hasMemorySettings && <UserMenuButton
 				Icon={Restore}
 				label="Reset Settings"
 				onButtonClick={invokeAndClose(props.resetMemorySettings)}
-			/>}
+			/> }
 			<UserMenuButton
 				Icon={ExitToApp}
 				label="Logout"
@@ -130,23 +130,27 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 		window.open('http://3drepo.org/models/3drepo-io-user-manual/', '_blank');
 	}
 
-	public render() {
+	public renderMenuContent = (props) => {
 		const menuContentProps = {
 			...this.props,
 			openUserManual: this.openUserManual,
 			resetMemorySettings: this.resetMemorySettings
 		};
 
+		return <UserMenuContent {...props} {...menuContentProps} />;
+	}
+
+	public render() {
 		return (
 			<ButtonMenu
 				renderButton={UserButton}
-				renderContent={(props) => <UserMenuContent {...props} {...menuContentProps} />}
-				PopoverProps={{
+				renderContent={this.renderMenuContent}
+				PopoverProps={ {
 					anchorOrigin: {
 						vertical: 'top',
 						horizontal: 'right'
 					}
-				}}
+				} }
 			/>
 		);
 	}

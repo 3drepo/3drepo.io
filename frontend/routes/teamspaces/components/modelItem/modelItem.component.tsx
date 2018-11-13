@@ -113,7 +113,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	public renderSubModels = (subModels = []) => {
 		const submodelsAsString = subModels.map(({ name }) => name).join(', ');
 
-		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
+		return subModels.length ? <SubmodelsList>{submodelsAsString}</SubmodelsList> : null;
 	}
 
 	public renderActions = (actions) => {
@@ -151,14 +151,14 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
-				<Grid container direction="row" alignItems="center" justify="space-between" wrap="nowrap">
-					<Grid container justify="space-between" wrap="nowrap" alignItems="center">
+				<Grid container={true} direction="row" alignItems="center" justify="space-between" wrap="nowrap">
+					<Grid container={true} justify="space-between" wrap="nowrap" alignItems="center">
 						{ isPending
 							? <><Name>{name}</Name> {this.renderPendingStatus(status)}</>
 							: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
 						}
 					</Grid>
-					<TimeWrapper container wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
+					<TimeWrapper container={true} wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
 						<Time>
 							{ timestamp && (!hovered || hovered && isPending)
 								? (<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />)

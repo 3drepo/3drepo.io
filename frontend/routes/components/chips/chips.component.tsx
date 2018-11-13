@@ -57,8 +57,10 @@ export class Chips extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleNewChipSubmit = (event) => {
+	public handleNewChipSubmit: any = (event) => {
 		if (event.key === ENTER_KEY) {
+			event.preventDefault();
+
 			this.setState({
 				value: [...this.state.value, {
 					label: event.target.value, value: snakeCase(event.target.value)
@@ -66,11 +68,10 @@ export class Chips extends React.PureComponent<IProps, IState> {
 			}, this.handleChange);
 
 			event.target.value = '';
-			event.preventDefault();
 		}
 	}
 
-	public deleteChip = (type) => {
+	public deleteChip = (type) => () => {
 		this.setState({
 			value: this.state.value.filter((typeItem) => typeItem.value !== type.value)
 		}, this.handleChange);
@@ -80,21 +81,21 @@ export class Chips extends React.PureComponent<IProps, IState> {
 		const { name, onBlur, value, inputPlaceholder } = this.props;
 
 		return (
-			<ChipsGrid container direction="column">
+			<ChipsGrid container={true} direction="column">
 				<ChipsContainer>
-					{value.map(
+					{ value.map(
 						(chip, index) => (
 							<Chip
 								key={index}
 								label={chip.label}
-								onDelete={() => this.deleteChip(chip)}
+								onDelete={this.deleteChip(chip)}
 							/>
 						)
-					)}
+					) }
 				</ChipsContainer>
 				<Input
-					onKeyPress={(event) => this.handleNewChipSubmit(event)}
-					placeholder={ inputPlaceholder }
+					onKeyPress={this.handleNewChipSubmit}
+					placeholder={inputPlaceholder}
 					onBlur={onBlur}
 					name={name}
 				/>

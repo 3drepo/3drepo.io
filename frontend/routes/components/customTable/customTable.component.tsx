@@ -409,9 +409,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 */
 	public renderRows = (cells = [], data = [], showCheckbox) => {
 		return data.map((row, index) => {
-			const rowProps = {key: index, clickable: showCheckbox && !row.disabled, style: this.props.rowStyle};
+			const rowProps = {clickable: showCheckbox && !row.disabled, style: this.props.rowStyle};
 			return (
-				<Row {...rowProps}>
+				<Row key={index} {...rowProps}>
 					{
 						showCheckbox ? (
 							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
@@ -486,7 +486,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				</Head>
 				<BodyWrapper>
 					<Body innerRef={this.rowsContainerRef}>
-						<SimpleBar data-simplebar-x-hidden>
+						<SimpleBar data-simplebar-x-hidden={true}>
 							{this.renderRows(cells, processedRows, showCheckbox)}
 						</SimpleBar>
 					</Body>

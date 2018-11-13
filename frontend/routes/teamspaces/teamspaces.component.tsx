@@ -136,7 +136,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	/**
 	 * Dialog handlers
 	 */
-	public openProjectDialog = (event, teamspaceName = '', projectName = '') => {
+	public openProjectDialog = (teamspaceName = '', projectName = '') => (event) => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 
@@ -192,13 +192,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public openModelDialog =
-		(event, teamspaceName = '', projectName = '', modelName = '', modelId = '') => {
+		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 		event.stopPropagation();
 		const { teamspacesItems } = this.state as IState;
 		const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
 
 		this.props.showDialog({
-			title: "New model",
+			title: 'New model',
 			template: ModelDialog,
 			data: {
 				modelName,
@@ -215,7 +215,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public openFederationDialog =
-		(event, teamspaceName = '', projectName = '', modelName = '', modelId = '') => {
+		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 			event.stopPropagation();
 			const { teamspacesItems } = this.state as IState;
 			const isNewModel = !modelName.length;
@@ -244,7 +244,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openUploadModelFileDialog = (event, teamspaceName = '', modelProps) => {
+	public openUploadModelFileDialog = (teamspaceName = '', modelProps) => (event) => {
 		event.stopPropagation();
 
 		this.props.showDialog({
@@ -260,7 +260,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openModelRevisionsDialog = (event, props) => {
+	public openModelRevisionsDialog = (props) => (event) => {
 		event.stopPropagation();
 
 		this.props.showDialog({
@@ -273,7 +273,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public createModelItemClickHandler = (event, props) => {
+	public createModelItemClickHandler = (props) => (event) => {
 		const { activeTeamspace } = this.state;
 		if (props.timestamp) {
 			event.persist();
@@ -284,8 +284,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			const analyticService = getAngularService('AnalyticService') as any;
 			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
 		} else {
-			this.openUploadModelFileDialog(event, activeTeamspace, props);
+			this.openUploadModelFileDialog(activeTeamspace, props)(event);
 		}
+	}
+
+	public createDownloadModelHandler = (activeTeamspace, modelId) => () => {
+		this.props.downloadModel(activeTeamspace, modelId);
 	}
 
 	/**
@@ -294,14 +298,14 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderModel = (props) => {
 		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
 		const { activeTeamspace } = this.state;
-		const { match } = this.props;
+		const { match, downloadModel } = this.props;
 
 		return (
 			<ModelItem
 				{...props}
 				actions={[]}
-				onModelItemClick={(event) => this.createModelItemClickHandler(event, props)}
-				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+				onModelItemClick={this.createModelItemClickHandler(props)}
+				onPermissionsClick={ this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
 					project: props.projectName,
 					view: PERMISSIONS_VIEWS.MODELS,
 					modelId: props.model
@@ -310,30 +314,30 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					project: props.projectName
 				})}
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
-				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
-				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
-				onModelUpload={(event) => this.openUploadModelFileDialog(event, this.state.activeTeamspace, props)}
-				onEditClick={
-					(event) =>
-						this.openFederationDialog(event, this.state.activeTeamspace, props.projectName, props.name, props.model)
-				}
+				onDownloadClick={this.createDownloadModelHandler(this.state.activeTeamspace, props.model)}
+				onRevisionsClick={this.openModelRevisionsDialog(props)}
+				onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
+				onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
 			/>
 		);
 	}
 
-	public renderModelDirectory = (props) => {
-		return(
-			<ModelDirectoryItem
-				{...props}
-				renderChildItem={(modelProps) => this.renderModel({ ...modelProps, projectName: props.projectName })}
-				onAddClick={
-					(event) => props.type === FEDERATION_TYPE
-						? this.openFederationDialog(event, this.state.activeTeamspace, props.projectName)
-						: this.openModelDialog(event, this.state.activeTeamspace, props.projectName)
-				}
-			/>
-		);
+	public createModelDirectoryAddHandler = (props) => {
+		return props.type === FEDERATION_TYPE
+			? this.openFederationDialog(this.state.activeTeamspace, props.projectName)
+			: this.openModelDialog(this.state.activeTeamspace, props.projectName);
 	}
+
+	public renderModelDirectoryItem = (projectName) =>
+		(modelProps) => this.renderModel({ ...modelProps, projectName })
+
+	public renderModelDirectory = (props) => (
+		<ModelDirectoryItem
+			{...props}
+			renderChildItem={this.renderModelDirectoryItem(props.projectName)}
+			onAddClick={this.createModelDirectoryAddHandler(props)}
+		/>
+	)
 
 	public isActiveProject = (projectName) => {
 		const queryParams = queryString.parse(this.props.location.search);
@@ -361,12 +365,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			<ProjectItem
 				{...props}
 				renderChildItem={this.renderModelDirectory}
-				onEditClick={(event) => this.openProjectDialog(event, activeTeamspace, props.name)}
+				onEditClick={this.openProjectDialog(activeTeamspace, props.name)}
 				onPermissionsClick={
 					this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
 						project: props.name
-					})
-				}
+					})}
 				onRemoveClick={this.createRemoveProjectHandler(props.name)}
 				active={this.isActiveProject(props.name)}
 			/>
@@ -382,7 +385,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				isMyTeamspace={index === 0}
 				renderChildItem={this.renderProject}
 				onToggle={this.onTeamspaceClick.bind(this, teamspace)}
-				onAddProject={(event) => this.openProjectDialog(event, teamspace.account)}
+				onAddProject={this.openProjectDialog(teamspace.account)}
 			/>
 		));
 	}
@@ -403,21 +406,19 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderMenu = ({ close }) => {
+		const createMenuClickHandler = (onClick, onClose) => (event) => {
+			onClick(event);
+			onClose(event);
+		};
 		return (
 			<>
-				<MenuItem onClick={(event) => {
-					this.openProjectDialog(event); close(event);
-				}}>
+				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog, close)}>
 					Add project
 				</MenuItem>
-				<MenuItem onClick={(event) => {
-					this.openModelDialog(event); close(event);
-				}}>
+				<MenuItem onClick={createMenuClickHandler(this.openModelDialog, close)}>
 					Add model
 				</MenuItem>
-				<MenuItem onClick={(event) => {
-					this.openFederationDialog(event); close(event);
-				}}>
+				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog, close)}>
 					Add federation
 				</MenuItem>
 			</>
@@ -434,7 +435,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}
 						renderContent={this.renderMenu}
-						PopoverProps={{
+						PopoverProps={ {
 							anchorOrigin: {
 								vertical: 'center',
 								horizontal: 'left'
@@ -443,7 +444,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 								vertical: 'top',
 								horizontal: 'right'
 							}
-						}}
+						} }
 					/>
 				</Head>
 				<List>
