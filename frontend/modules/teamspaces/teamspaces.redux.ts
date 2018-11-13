@@ -48,7 +48,7 @@ const setTeamspaces = (state = INITIAL_STATE, action) => {
 
 // Projects
 const updateProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = { ...state.teamspaces };
+	const teamspaces = cloneDeep(state.teamspaces);
 	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
 		if (project.name === action.projectName) {
 			return { ...project, ...action.projectData };
@@ -88,8 +88,8 @@ const getModelData = (state, teamspace, projectName) => {
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.project);
-	const modelIndex = foundProject.models.findIndex((model) => model.name === action.modelData.modelName);
-	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].subModels = action.modelData.subModels;
+	const modelIndex = foundProject.models.findIndex((model) => model.model === action.modelId);
+	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex] = action.modelData;
 
 	return { ...state, teamspaces };
 };
