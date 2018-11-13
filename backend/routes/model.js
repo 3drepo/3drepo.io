@@ -286,8 +286,8 @@ function deleteModel(req, res, next) {
 	const model = req.params.model;
 
 	// delete
-	ModelHelpers.removeModel(account, model).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
+	ModelHelpers.removeModel(account, model).then((removedModel) => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model, federate: removedModel.federate });
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
