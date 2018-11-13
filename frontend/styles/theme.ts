@@ -69,9 +69,12 @@ export const MuiTheme = createMuiTheme({
 		MuiDialogTitle: {
 			root: {
 				background: theme.colors.PRIMARY_MAIN,
-				padding: '15px 24px 15px',
+				padding: '0 24px 0',
 				color: theme.colors.WHITE,
-				fontSize: '20px'
+				fontSize: '20px',
+				height: '40px',
+				display: 'flex',
+				alignItems: 'center'
 			}
 		},
 		MuiDialogContent: {
