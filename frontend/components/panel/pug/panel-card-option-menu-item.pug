@@ -1,7 +1,7 @@
 div(layout="column" flex
 )
 	md-divider(ng-if="menuItem.upperDivider" flex)
-	div(layout="row" flex)
+	div(layout="column" layout-align="center center" flex )
 		md-icon(md-font-icon="{{menuItem.icon}}", class="fa angular-material-icons ng-scope material-icons", ng-if="menuItem.noToggle && menuItem.icon !== 'fa-eye' && menuItem.icon !== 'fa-scissors' && menuItem.icon !== 'delete'")
 		md-icon(class="angular-material-icons ng-scope material-icons" role="img" aria-hidden="true", ng-if="menuItem.noToggle && menuItem.icon === 'delete'") {{menuItem.icon}}
 		md-icon(md-font-icon="{{menuItem.firstSelectedIcon}}", class="fa", ng-if="menuItem.firstSelected")
@@ -19,3 +19,10 @@ div(layout="column" flex
 		p(flex="") {{menuItem.label}}
 			md-datepicker(ng-if="menuItem.date" ng-model="menuItem.dateValue" ng-change="vm.onDateChanged(menuItem, parentItem, $mdMenu)" ng-init="vm.addPreventCloseToDatepicker()")
 	md-divider(ng-if="menuItem.divider" flex)
+	//-  p
+    //-   mat-form-field(appearance='legacy')
+    //-     mat-label Legacy form field
+    //-     input(matinput='', placeholder='Placeholder')
+    //-     mat-icon(matsuffix='') sentiment_very_satisfied
+    //-     mat-hint Hint
+
