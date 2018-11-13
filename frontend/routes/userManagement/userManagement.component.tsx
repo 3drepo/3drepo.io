@@ -16,9 +16,8 @@
  */
 
 import * as React from 'react';
-import { Route } from 'react-router-dom';
-import * as queryString from 'query-string';
-import { isEqual, isEmpty, isUndefined } from 'lodash';
+import { Route, Switch, Link, Redirect } from 'react-router-dom';
+import { isEqual, isEmpty } from 'lodash';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FormControl from '@material-ui/core/FormControl';
@@ -39,15 +38,37 @@ import {
 	LoaderContainer
 } from './userManagement.styles';
 
-export const TABS_TYPES = {
-	USERS: 0,
-	PROJECTS: 1,
-	JOBS: 2
+export const USERS_TAB = {
+	label: 'Users',
+	path: 'users',
+	isAdminOnly: true,
+	component: Users
 };
 
-const ADMIN_TABS = [TABS_TYPES.USERS, TABS_TYPES.JOBS] as any;
+export const PROJECTS_TAB = {
+	label: 'Projects',
+	path: 'projects',
+	component: Projects,
+	isAdminOnly: false
+};
+
+export const JOBS_TAB = {
+	label: 'Jobs',
+	path: 'jobs',
+	isAdminOnly: true,
+	component: Jobs
+};
+
+const TABS_ROUTES = [
+	USERS_TAB,
+	PROJECTS_TAB,
+	JOBS_TAB
+];
+
+const ADMIN_TABS = [USERS_TAB.path, JOBS_TAB.path] as any;
 
 interface IProps {
+	match: any;
 	location: any;
 	history: any;
 	defaultTeamspace: string;
@@ -58,51 +79,43 @@ interface IProps {
 }
 
 interface IState {
-	activeTab: number;
+	activeTab: string;
 	selectedTeamspace: string;
 	teamspacesItems: any[];
 }
 
 export class UserManagement extends React.PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps, prevState) => {
-		const queryParams = queryString.parse(location.search);
-		const activeTab = Number(queryParams.tab || prevState.activeTab);
-		const initialTab = isUndefined(nextProps.isTeamspaceAdmin) ? TABS_TYPES.USERS : TABS_TYPES.PROJECTS;
 		return {
-			activeTab: nextProps.isTeamspaceAdmin ? activeTab : initialTab,
-			selectedTeamspace: queryParams.teamspace || prevState.selectedTeamspace
+			selectedTeamspace: nextProps.match.params.teamspace || prevState.selectedTeamspace
 		};
 	}
 
 	public state = {
-		activeTab: TABS_TYPES.USERS,
+		activeTab: USERS_TAB.path,
 		selectedTeamspace: '',
 		teamspacesItems: []
 	};
 
-	public updateUrlParams = (params) => {
-		const { pathname, search } = this.props.location;
-		const queryParams = Object.assign({}, queryString.parse(search), params);
-		const updatedQueryString = queryString.stringify(queryParams);
-
-		this.props.history.push(`${pathname}?${updatedQueryString}`);
-	}
-
 	public handleChange = (event, activeTab) => {
-		this.updateUrlParams({tab: activeTab});
 		this.setState({activeTab});
 	}
 
 	public onTeamspaceChange = (event, teamspace) => {
-		this.updateUrlParams({teamspace});
-		if (this.props.onTeamspaceChange) {
-			this.props.onTeamspaceChange(teamspace);
+		const { match, location, onTeamspaceChange } = this.props;
+		const newRoute = location.pathname.replace(match.params.teamspace, teamspace);
+
+		this.props.history.push(newRoute);
+		if (onTeamspaceChange) {
+			onTeamspaceChange(teamspace);
 		}
 	}
 
 	public componentDidMount() {
-		const {teamspaces, defaultTeamspace, location} = this.props;
-		const selectedTeamspace = queryString.parse(location.search).teamspace;
+		const { teamspaces, defaultTeamspace, match, history } = this.props;
+		const { activeTab } = this.state;
+		const selectedTeamspace = match.params.teamspace;
+
 		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		} as any;
@@ -110,11 +123,19 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		const teamspaceData = teamspaces.find(({ account }) => account === selectedTeamspace);
 		const teamspace = teamspaceData ? selectedTeamspace : defaultTeamspace;
 
+		// Redirect to projects tab if user has not admin rights
+		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(activeTab)) {
+			changes.activeTab = PROJECTS_TAB.path;
+			history.push(`${match.url}/${PROJECTS_TAB.path}`);
+		} else {
+			changes.activeTab = location.pathname.replace(`${match.url}/`, '');
+		}
+
+		this.props.onTeamspaceChange(teamspace);
 		this.setState(changes);
-		this.onTeamspaceChange(null, teamspace);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
 		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
@@ -128,8 +149,8 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderTabContent = () => {
-		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
-		const {activeTab, selectedTeamspace} = this.state;
+		const {isLoadingTeamspace, isTeamspaceAdmin, match} = this.props;
+		const {selectedTeamspace, activeTab} = this.state;
 
 		if (!selectedTeamspace) {
 			return <TextOverlay content="Select teamspace to enable settings" />;
@@ -149,51 +170,73 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		}
 
 		return (
-			<>
-				{ activeTab === TABS_TYPES.USERS && <Users /> }
-				{ activeTab === TABS_TYPES.PROJECTS && <Projects /> }
-				{ activeTab === TABS_TYPES.JOBS && <Jobs /> }
-			</>
+			<Switch>
+				{TABS_ROUTES.map(({path, component: Component}, index) => (
+					<Route key={index} exact path={`${match.path}/${path}`} component={Component} />
+				))}
+			</Switch>
 		);
 	}
 
 	public render() {
-		const {isLoadingTeamspace, isTeamspaceAdmin} = this.props;
-		const {activeTab, selectedTeamspace, teamspacesItems} = this.state;
+		const {match: userManagmentMatch, isLoadingTeamspace, isTeamspaceAdmin} = this.props;
+		const {teamspacesItems, activeTab} = this.state;
 
+		const selectedTeamspace = userManagmentMatch.params.teamspace;
 		const paperProps = { height: '100%' };
+		const isTabDisabled = Boolean(!selectedTeamspace || isLoadingTeamspace);
 
 		return (
 			<Panel title="User management" paperProps={paperProps}>
-				<Header>
-					<TeamspaceSelectContainer>
-						<FormControl fullWidth={true}>
-							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<CellSelect
-								items={teamspacesItems}
-								value={selectedTeamspace}
-								placeholder="Select teamspace"
-								disabledPlaceholder={true}
-								onChange={this.onTeamspaceChange}
-								inputId="teamspace-select"
-							/>
-						</FormControl>
-					</TeamspaceSelectContainer>
-					<Tabs
-						value={activeTab}
-						indicatorColor="primary"
-						textColor="primary"
-						onChange={this.handleChange}
-					>
-						<Tab label="Users" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
-						<Tab label="Projects" disabled={!selectedTeamspace || isLoadingTeamspace} />
-						<Tab label="Jobs" disabled={!selectedTeamspace || isLoadingTeamspace || !isTeamspaceAdmin} />
-					</Tabs>
-				</Header>
-				<TabContent>
-					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-					<Route exact path="/:teamspace" render={this.renderTabContent} />
-				</TabContent>
+				<Switch>
+					<Route path={`${userManagmentMatch.url}/:tab`} render={() => (
+						<>
+							<Header>
+								<TeamspaceSelectContainer>
+									<FormControl fullWidth={true}>
+										<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+										<CellSelect
+											items={teamspacesItems}
+											value={selectedTeamspace}
+											placeholder="Select teamspace"
+											disabledPlaceholder={true}
+											onChange={this.onTeamspaceChange}
+											inputId="teamspace-select"
+										/>
+									</FormControl>
+								</TeamspaceSelectContainer>
+								<Tabs
+									value={activeTab}
+									indicatorColor="primary"
+									textColor="primary"
+									onChange={this.handleChange}
+								>
+									{
+										TABS_ROUTES.map(({ label, path, isAdminOnly }, index) => {
+											const props = {
+												key: index,
+												label,
+												to: `${userManagmentMatch.url}/${path}`,
+												value: path,
+												disabled: isTabDisabled || (isAdminOnly && !isTeamspaceAdmin)
+											};
+
+											return <Tab {...props} component={Link} />;
+										})
+									}
+								</Tabs>
+							</Header>
+							<TabContent>
+								{this.renderTabContent()}
+							</TabContent>
+						</>
+					)} />
+					<Redirect
+						exact
+						from={`${userManagmentMatch.url}`}
+						to={`${userManagmentMatch.url}/users`}
+					/>
+				</Switch>
 			</Panel>
 		);
 	}

@@ -231,8 +231,7 @@ export class IssuesService {
 
 	public getDisplayIssue() {
 		if (this.state.displayIssue && this.state.allIssues.length > 0) {
-
-			const issueToDisplay = this.state.allIssues.find((issue) => {
+			const issueToDisplay = [...this.state.allIssues].find((issue) => {
 				return issue._id === this.state.displayIssue;
 			});
 

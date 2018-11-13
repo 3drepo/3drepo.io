@@ -16,116 +16,150 @@
  */
 
 function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
-
 	$locationProvider.html5Mode(true);
 
-	$stateProvider.state("home", {
-		name: "home",
-		url: "/?page&teamspace&tab&project&view&modelId",
-		resolve: {
-			init: ["AuthService", "StateManager", "$q", (AuthService, StateManager, $q) => {
-				StateManager.state.authInitialized = false;
-				const finishedAuth = $q.defer();
-
-				AuthService.init()
-					.then(() => {
-						StateManager.state.authInitialized = true;
-						finishedAuth.resolve();
-					})
-					.catch((error) => {
-						console.error("Error initialising auth from state manager: ", error);
-						finishedAuth.reject();
-					});
-
-				return finishedAuth.promise;
-			}]
+	$stateProvider.state("app", {
+		url: "",
+		abstract: true,
+		views: {
+			'main@': {
+				template: "<home flex layout='column'></home>"
+			}
 		}
 	});
 
+	$stateProvider.state("app.homepage", {
+		url: "/"
+	});
+
+	$stateProvider.state("app.viewer", {
+		url: "/viewer/:teamspace/:modelId/:revision",
+		template: `
+			<model
+				is-lite-mode="vm.isLiteMode"
+				account="vm.$state.params.teamspace"
+				model="vm.$state.params.modelId"
+				branch="vm.$state.params.branch"
+				revision="vm.$state.params.revision"
+				issue-id="vm.$state.params.issueId"
+				risk-id="vm.$state.params.riskId"
+				state="vm.state"
+			/>
+		`,
+		data: {
+			isLoginRequired: true
+		},
+		params: {
+			modelId: { squash: true, value: null },
+			revision: { squash: true, value: null }
+		}
+	});
+
+	$stateProvider.state("app.viewer.issues", {
+		url: "/issues/:issueId",
+		data: {
+			isLoginRequired: true
+		}
+	});
+
+	$stateProvider.state("app.viewer.risks", {
+		url: "/risks/:riskId",
+		data: {
+			isLoginRequired: true
+		}
+	});
+
+	$stateProvider.state("app.dashboard", {
+		url: "/dashboard",
+		template: "<dashboard flex/>",
+		data: {
+			isLoginRequired: true
+		}
+	});
+
+	$stateProvider.state("app.dashboard.pages", {
+		url: "/*page?project&view",
+		data: {
+			isLoginRequired: true
+		}
+	});
+
+	$stateProvider.state("app.login", {
+		url: "/login",
+		template: '<login login-message="vm.loginMessage"/>',
+		data: {
+			isLogoutRequired: true
+		},
+		params: {
+			referrer: { dynamic: true, value: null }
+		}
+	});
+
+	$stateProvider.state("app.signUp", {
+		url: "/sign-up",
+		template: "<sign-up />",
+		data: {
+			isLogoutRequired: true
+		}
+	});
+
+	$stateProvider.state("app.passwordForgot", {
+		url: "/password-forgot",
+		template: "<password-forgot />",
+		data: {
+			isLogoutRequired: true
+		}
+	});
+
+	$stateProvider.state("app.passwordChange", {
+		url: "/password-change?token&username",
+		template: `
+			<password-change
+				token="vm.query.token"
+				username="vm.query.username"
+			/>
+		`,
+		data: {
+			isLogoutRequired: true
+		}
+	});
+
+	$stateProvider.state("app.registerRequest", {
+		url: "/register-request",
+		template: "<register-request />"
+	});
+
+	$stateProvider.state("app.registerVerify", {
+		url: "/register-verify?token&username?pay",
+		template: "<register-verify />",
+		data: {
+			isLogoutRequired: true
+		}
+	});
+
+	// Static pages
+	$stateProvider.state("app.static", {
+		url: "",
+		template: "<ui-view />"
+	});
+
+	$stateProvider.state("app.static.privacy", {
+		url: "/privacy",
+		template: '<privacy id="privacy" />'
+	});
+
+	$stateProvider.state("app.static.terms", {
+		url: "/terms",
+		template: '<terms id="terms" />'
+	});
+
+	$stateProvider.state("app.static.cookies", {
+		url: "/cookies",
+		template: '<cookies id="cookies" />'
+	});
+
 	$httpProvider.interceptors.push("AuthInterceptor");
-
-	// Convert blah_test to blahTest
-	const camelCase = (name) => {
-		return name.replace(/-([a-z])/g, (g) => {
-			return g[1].toUpperCase();
-		});
-	};
-
-	const handleFunctions = (childFunction, childFunctionKebabCase, childFunctionName) => {
-		$stateProvider.state(childFunctionName, {
-			name: childFunction,
-			url: childFunction,
-			resolve: {
-				init: [
-					"StateManager",
-					"$location",
-					"$stateParams",
-					(StateManager, $location, $stateParams) => {
-					$stateParams[childFunctionKebabCase] = true;
-
-					StateManager.setState($stateParams);
-				}]
-			}
-		});
-	};
-
-	const handleChildState = (childState, childStateName, parentState, parentStateName, i) => {
-		$stateProvider.state(childStateName, {
-			name: parentState.children[i].plugin,
-			params: childState.params,
-			url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
-			reloadOnSearch : false,
-			resolve: {
-				init: [
-					"StateManager",
-					"$location",
-					"$stateParams",
-					(StateManager, $location, $stateParams) => {
-						StateManager.setState($stateParams);
-					}
-				]
-			}
-		});
-	};
-
-	// TODO: We need to find a way to make ClientConfig come from the service
-	const stateStack       = [window.ClientConfig.structure];
-	const stateNameStack   = ["home"];
-
-	while (stateStack.length > 0) {
-		const stackLength = stateStack.length;
-		const parentState = stateStack[0];
-		const parentStateName = stateNameStack[0];
-
-		// First loop through the list of functions as these are
-		// more specific than the
-		if (parentState.functions) {
-			for (let i = 0; i < parentState.functions.length; i++) {
-				const childFunctionKebabCase = parentState.functions[i];
-				const childFunction	= camelCase(childFunctionKebabCase);
-				const childFunctionName = parentStateName + "." + childFunctionKebabCase;
-
-				handleFunctions(childFunction, childFunctionKebabCase, childFunctionName);
-			}
-		}
-
-		if (parentState.children) {
-			for (let i = 0; i < parentState.children.length; i++) {
-				const childState     = parentState.children[i];
-				const childStateName = parentStateName + "." + childState.plugin;
-
-				stateNameStack.push(childStateName);
-				stateStack.push(parentState.children[i]);
-
-				handleChildState(childState, childStateName, parentState, parentStateName, i);
-			}
-		}
-
-		stateStack.splice(0, 1);
-		stateNameStack.splice(0, 1);
-	}
-
-	$urlRouterProvider.otherwise("");
+	$urlRouterProvider.otherwise("/");
 }
 
 export const StateManagerConfigModule = angular

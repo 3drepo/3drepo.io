@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 import { ModelActions, selectSettings, selectIsPending } from './../../modules/model';
 import { ModelSettings } from './modelSettings.component';
 import { selectCurrentTeamspace } from './../../modules/userManagement';
@@ -34,4 +33,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateModelSettings: ModelActions.updateSettings
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelSettings)));
+export default connect(mapStateToProps, mapDispatchToProps)(ModelSettings);

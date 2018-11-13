@@ -229,7 +229,6 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 			changes.rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
 			changes.currentUser = this.props.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
 		}
-
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
@@ -251,12 +250,11 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 				/>
 			);
 		}
-
 		return <CheckboxField {...props} />;
 	}
 
 	public render() {
-		const { rows, cells } = this.state;
+		const {rows, cells } = this.state;
 
 		return (
 			<>

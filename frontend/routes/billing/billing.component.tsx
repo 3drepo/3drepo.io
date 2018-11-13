@@ -16,38 +16,40 @@
  */
 
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { Route, Link, Switch, Redirect } from 'react-router-dom';
 import * as queryString from 'query-string';
-import { Panel } from '../components/panel/panel.component';
-import Tabs from '@material-ui/core/Tabs';
+import { values } from 'lodash';
 import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+
+import { Panel } from '../components/panel/panel.component';
 import Subscription from './../subscription/subscription.container';
 import History from './../history/history.container';
 import { Header, TabContent } from './billing.styles';
 
-export const TABS_TYPES = {
-	SUBSCRIPTION: 0,
-	HISTORY: 1
-};
-
 const TABS = {
-	[TABS_TYPES.SUBSCRIPTION]: {
-		id: TABS_TYPES.SUBSCRIPTION,
-		label: 'Subscription'
+	SUBSCRIPTION: {
+		label: 'Subscription',
+		path: 'subscription',
+		component: Subscription
 	},
-	[TABS_TYPES.HISTORY]: {
-		id: TABS_TYPES.HISTORY,
-		label: 'History'
+	HISTORY: {
+		label: 'History',
+		path: 'history',
+		component: History
 	}
 };
 
+const TABS_ROUTES = values(TABS);
+
 interface IProps {
+	match: any;
 	location: any;
 	history: any;
 }
 
 interface IState {
-	activeTab: number;
+	activeTab: string;
 }
 
 export class Billing extends React.PureComponent<IProps, IState> {
@@ -58,31 +60,11 @@ export class Billing extends React.PureComponent<IProps, IState> {
 	}
 
 	public state = {
-		activeTab: TABS_TYPES.SUBSCRIPTION
+		activeTab: TABS.SUBSCRIPTION.path
 	};
 
-	public updateUrlParams = (params) => {
-		const { pathname, search } = this.props.location;
-		const queryParams = Object.assign({}, queryString.parse(search), params);
-		const updatedQueryString = queryString.stringify(queryParams);
-
-		this.props.history.push(`${pathname}?${updatedQueryString}`);
-	}
-
 	public handleChange = (event, activeTab) => {
-		this.updateUrlParams({ tab: activeTab });
 		this.setState({ activeTab });
-	}
-
-	public renderTabContent = () => {
-		const { activeTab } = this.state;
-
-		return (
-			<>
-				{activeTab === TABS_TYPES.SUBSCRIPTION && <Subscription />}
-				{activeTab === TABS_TYPES.HISTORY && <History />}
-			</>
-		);
 	}
 
 	public render() {
@@ -91,21 +73,43 @@ export class Billing extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Panel title='Billing' paperProps={paperProps}>
-				<Header>
-					<Tabs
-						value={activeTab}
-						indicatorColor='primary'
-						textColor='primary'
-						onChange={this.handleChange}
-					>
-						<Tab label='Subscription' />
-						<Tab label='History' />
-					</Tabs>
-				</Header>
-				<TabContent>
-					{/* TODO: This should be splitted to multiple routes after setup proper url's approach */}
-					<Route render={this.renderTabContent} />
-				</TabContent>
+				<Switch>
+					<Route path={`${this.props.match.url}/:tab`} render={({ match }) => (
+						<>
+							<Header>
+								<Tabs
+									value={activeTab || match.params.tab}
+									indicatorColor='primary'
+									textColor='primary'
+									onChange={this.handleChange}
+								>
+									{TABS_ROUTES.map(({label, path}, index) => {
+										const props = {
+											key: index,
+											label,
+											component: Link,
+											value: path,
+											to: `${this.props.match.url}/${path}`
+										};
+										return <Tab {...props} />;
+									})}
+								</Tabs>
+							</Header>
+							<TabContent>
+								<Switch>
+									{TABS_ROUTES.map(({ path, component: Component }, index) => (
+										<Route key={index} path={`${this.props.match.url}/${path}`} component={Component} />
+									))}
+								</Switch>
+							</TabContent>
+						</>
+					)} />
+					<Redirect
+						exact
+						from={`${this.props.match.url}`}
+						to={`${this.props.match.url}/${TABS.SUBSCRIPTION.path}`}
+					/>
+				</Switch>
 			</Panel>
 		);
 	}

@@ -152,7 +152,11 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 				validationSchema={SubscriptionSchema}
 			>
 				<StyledForm>
-					<FormContainer container direction="column">
+					<FormContainer
+						container
+						direction="column"
+						wrap="nowrap"
+					>
 						<FieldsRow container wrap="nowrap">
 							<FieldsColumn>
 								<FieldsRow container wrap="nowrap">

@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import { FONT_WEIGHT, COLOR } from '../../styles';
+import { COLOR, media } from '../../styles';
 
 export const Header = styled.div`
 	background-color: ${COLOR.WHITE};
@@ -29,6 +29,8 @@ export const TabContent = styled.div`
 	flex: 1;
 	position: relative;
 	height: calc(100% - 100px);
+
+	${media.tablet`height: 500px;`}
 `;
 
 export const TeamspaceSelectContainer = styled.div`
