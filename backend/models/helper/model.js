@@ -786,7 +786,7 @@ function removeModel(account, model, forceRemove) {
 
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
-				deletePromises.push(setting.remove);
+				deletePromises.push(setting.remove());
 				deletePromises.push(Project.removeModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
