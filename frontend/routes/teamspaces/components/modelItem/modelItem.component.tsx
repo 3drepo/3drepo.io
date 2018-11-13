@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { startCase } from 'lodash';
+
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -160,7 +161,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 					<TimeWrapper container wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
 						<Time>
 							{ timestamp && (!hovered || hovered && isPending)
-								? (<DateTime value={timestamp} format="D ddd" />)
+								? (<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />)
 								: null
 							}
 						</Time>
