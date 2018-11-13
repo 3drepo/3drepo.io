@@ -22,7 +22,7 @@ import { DefaultHeadline } from '../../../components/treeList/treeList.component
 
 export const MyTeamspaceItem = (props) => (
 	<Container>
-		<Subtitle>My teamspace: </Subtitle>
+		<Subtitle>My Teamspace: </Subtitle>
 		<DefaultHeadline {...props} />
 	</Container>
 );
