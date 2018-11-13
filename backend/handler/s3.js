@@ -39,7 +39,6 @@ class S3Handler {
 			return { Key: item};
 		});
 		const params = { Delete: {Objects: delList}, Bucket: config.s3.bucketName };
-		console.log(params);
 		return this.s3Conn.deleteObjects(params).promise();
 	}
 }
