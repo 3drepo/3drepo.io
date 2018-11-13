@@ -39,6 +39,27 @@ function fetchFile(account, collection, fileName) {
 	});
 }
 
+function removeAllFiles(account, collection) {
+	return DB.getCollection(account, collection).then((col) => {
+		if (col) {
+			const query = [
+				{
+					$group: {
+						_id: "$type",
+						links: {$addToSet:  "$link"}
+					}
+				}];
+			return col.aggregate(query).toArray().then((results) => {
+				const delPromises = [];
+				results.forEach((entry) => {
+					delPromises.push(ExternalServices.removeFiles(entry._id, entry.links));
+				});
+				return Promise.all(delPromises);
+			});
+		}
+	});
+}
+
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
@@ -67,6 +88,14 @@ FileRef.getUnityBundle = function(account, model, fileName) {
 
 FileRef.getJSONFile = function(account, model, fileName) {
 	return fetchFile(account, model + JSON_FILE_REF_EXT, fileName);
+};
+
+FileRef.removeAllFilesFromModel = function(account, model) {
+	const promises = [];
+	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
+	return Promise.all(promises);
 };
 
 module.exports = FileRef;

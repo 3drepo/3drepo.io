@@ -32,4 +32,14 @@ ExternalServices.getFile = (type, key) => {
 	}
 };
 
+ExternalServices.removeFiles = (type, keys) => {
+	switch(type) {
+	case "s3" :
+		return S3Handler.removeFiles(keys);
+	default:
+		SystemLogger.logError(`Unrecognised external service: ${type}`);
+		return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+	}
+};
+
 module.exports = ExternalServices;

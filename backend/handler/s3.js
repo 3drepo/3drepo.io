@@ -33,6 +33,15 @@ class S3Handler {
 	getFile(key) {
 		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).createReadStream();
 	}
+
+	removeFiles(keys) {
+		const delList = keys.map((item) => {
+			return { Key: item};
+		});
+		const params = { Delete: {Objects: delList}, Bucket: config.s3.bucketName };
+		console.log(params);
+		return this.s3Conn.deleteObjects(params).promise();
+	}
 }
 
 module.exports = new S3Handler();

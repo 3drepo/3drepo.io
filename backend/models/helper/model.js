@@ -731,60 +731,68 @@ function importModel(account, model, username, modelSetting, source, data) {
 
 }
 
-function removeModel(account, model, forceRemove) {
-
-	let setting;
-	return ModelSetting.findById({account, model}, model).then(_setting => {
-
-		setting = _setting;
-
-		if(!setting) {
-			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
-		}
-
-		return ModelSetting.find({ account, model}, { federate: true });
-
-	}).then(settings => {
-
+function isSubModel(account, model) {
+	return ModelSetting.find({ account, model}, { federate: true }).then((feds) => {
 		const promises = [];
 
-		settings.forEach(modelSetting => {
-			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
-				if(subModels.find(subModel => subModel.model === model)) {
-					return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
-				}
+		feds.forEach(modelSetting => {
+			promises.push(listSubModels(account, modelSetting._id).then(subModels => {
+				return subModels.find(subModel => subModel.model === model);
 			}));
 		});
 
-		return Promise.all(promises);
-
-	}).then(() => {
-
-		return ModelFactory.dbManager.listCollections(account);
-
-	}).then(collections => {
-		// remove model collections
-
-		const promises = [];
-
-		collections.forEach(collection => {
-			if(collection.name.startsWith(model + ".")) {
-				promises.push(ModelFactory.dbManager.dropCollection(account, collection));
-			}
+		return Promise.all(promises).then((results) => {
+			return results.reduce((isSub, current) => isSub || current, false);
 		});
-
-		return Promise.all(promises);
-
-	}).then(() => {
-		// remove model settings
-		return setting.remove();
-
-	}).then(() => {
-
-		// remove model from all project
-		return Project.removeModel(account, model);
 	});
+}
 
+function removeModelCollections(account, model) {
+	return FileRef.removeAllFilesFromModel(account, model).then(() => {
+		return ModelFactory.dbManager.listCollections(account).then((collections) => {
+			const promises = [];
+
+			collections.forEach(collection => {
+				if(collection.name.startsWith(model + ".")) {
+
+					promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+				}
+			});
+
+			return Promise.all(promises);
+		});
+	});
+}
+
+function removeModel(account, model, forceRemove) {
+
+	return ModelSetting.findById({account, model}, model).then(setting => {
+		if (!setting) {
+			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
+		}
+
+		let subModelCheckPromise;
+		if (!forceRemove && !setting.federate) {
+			subModelCheckPromise = isSubModel(account, model);
+
+		} else {
+			subModelCheckPromise = Promise.resolve(false);
+		}
+
+		return subModelCheckPromise.then((isSub) => {
+			if (isSub) {
+				return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
+			}
+
+			const deletePromises = [];
+			deletePromises.push(removeModelCollections(account, model));
+			deletePromises.push(setting.remove);
+			deletePromises.push(Project.removeModel(account, model));
+
+			return Promise.all(deletePromises);
+
+		});
+	});
 }
 
 function getModelPermission(username, setting, account) {
