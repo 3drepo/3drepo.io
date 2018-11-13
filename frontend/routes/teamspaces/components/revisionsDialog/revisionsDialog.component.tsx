@@ -16,15 +16,21 @@
  */
 
 import * as React from 'react';
-import DialogContent from '@material-ui/core/DialogContent';
-import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 
 import { getAngularService } from '../../../../helpers/migration';
 
 import { DateTime } from './../../../components/dateTime/dateTime.component';
-import { Property } from './../../../components/property/property.component';
-import { Item, Column, Message, StyledDialogActions } from './revisionsDialog.styles';
+import {
+	Item,
+	Row,
+	Description,
+	Message,
+	StyledDialogActions,
+	StyledDialogContent,
+	StyledList,
+	Property
+} from './revisionsDialog.styles';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -63,35 +69,34 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		const { handleClose, revisions } = this.props;
 
 		return (
-			<DialogContent>
+			<StyledDialogContent>
 				{ !revisions.length ?
 					<Message>No Revisions Present</Message>
 					:
 					<>
-						<List>
-							{revisions && revisions.map((revision) => (
-								<Item button key={revision._id}
-									onClick={(event) => this.revisionClickHandler(event, revision)}>
-									<Column>
-										<Property name="Tag">
-											{revision.tag
-												? revision.tag
-												: <DateTime value={revision.timestamp} format={'D MMM'} />}
-										</Property>
-
-										<Property name="Author">
-											{revision.author}
-										</Property>
-									</Column>
-									<Column>
-										<Property name="Date">
-											<DateTime value={revision.timestamp} format={'D MMM'} />
-										</Property>
-										<Property name="ID">{revision._id}</Property>
-									</Column>
+						<StyledList>
+							{revisions && revisions.map((revision, index) => (
+								<Item
+									button
+									key={revision._id}
+									divider
+									onClick={(event) => this.revisionClickHandler(event, revision)}
+									last={index === 0}>
+										<Row>
+											<Property>
+												{revision.tag ? revision.tag : '(empty tag)'}
+											</Property>
+											<Property>{ revision.author }</Property>
+											<Property>
+												<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
+											</Property>
+										</Row>
+										<Description>
+											{ revision.desc ? revision.desc : '(empty description)' }
+										</Description>
 								</Item>)
 							)}
-						</List>
+						</StyledList>
 						<StyledDialogActions>
 							<Button variant="raised" color="secondary" onClick={handleClose}>
 								Cancel
@@ -99,7 +104,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 						</StyledDialogActions>
 					</>
 				}
-			</DialogContent>
+			</StyledDialogContent>
 		);
 	}
 }

@@ -262,7 +262,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		event.stopPropagation();
 
 		this.props.showDialog({
-			title: 'Revisions',
+			title: `${props.name} - Revisions`,
 			template: RevisionsDialog,
 			data: {
 				teamspace: this.state.activeTeamspace,
