@@ -20,9 +20,12 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import { isEmpty, includes, differenceBy } from 'lodash';
 import {
-	getAvailableModels, getFederatedModels, getModelsMap, getProject, getNewSelectedModels
+	getAvailableModels,
+	getFederatedModels,
+	getModelsMap,
+	getProject,
+	getNewSelectedModels
 } from './federationDialog.helpers';
-import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -33,12 +36,10 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import {
-	LoadingDialog
-} from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
+import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
-import { Row, SelectWrapper, FieldWrapper } from './federationDialog.styles';
+import { Row, SelectWrapper, FieldWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
 	modelName: schema.firstName.min(2).max(120).required(),
@@ -288,7 +289,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handleModelSave}
 			>
 				<Form>
-					<DialogContent>
+					<StyledDialogContent>
 						<SelectWrapper fullWidth={true} required={true}>
 							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<Field name="teamspace" render={({ field, form }) => (
@@ -375,7 +376,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 								handleSelectFederatedItemClick={this.handleSelectFederatedItemClick}
 							/>
 						} />
-					</DialogContent>
+					</StyledDialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
 						<Field render={({ form }) =>
