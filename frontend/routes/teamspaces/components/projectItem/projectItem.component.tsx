@@ -28,6 +28,7 @@ import { RowMenu } from '../rowMenu/rowMenu.component';
 interface IProps {
 	name: string;
 	models: any[];
+	active: boolean;
 	renderChildItem: () => JSX.Element;
 	onEditClick: (event) => void;
 	onRemoveClick: (event) => void;
@@ -104,7 +105,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { renderChildItem, name } = this.props;
+		const { renderChildItem, name, active } = this.props;
 		const { items } = this.state;
 
 		return (
@@ -118,6 +119,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				}}
 				renderItem={renderChildItem}
 				renderActions={this.renderProjectActions}
+				active={active}
 			/>
 		);
 	}
