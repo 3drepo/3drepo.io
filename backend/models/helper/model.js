@@ -1357,9 +1357,10 @@ function removeModel(account, model, forceRemove) {
 		return setting.remove();
 
 	}).then(() => {
-
 		// remove model from all project
-		return Project.removeModel(account, model);
+		return Project.removeModel(account, model).then((removedData) => {
+			return Object.assign({}, removedData, {federate: setting.federate});
+		})
 	});
 
 }
