@@ -36,6 +36,8 @@ class ViewerController implements ng.IController {
 	private measureMode: boolean;
 	private viewer: any;
 	private deviceMemory: any;
+	private cancelPinWatcher: any;
+	private cancelEventWatcher: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -49,7 +51,6 @@ class ViewerController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.branch   = this.branch ? this.branch : "master";
 		this.revision = this.revision ? this.revision : "head";
 
@@ -65,20 +66,21 @@ class ViewerController implements ng.IController {
 		}
 
 		this.viewer = this.ViewerService.getViewer();
-
 		this.watchers();
-
 	}
 
 	public $onDestroy() {
 		this.$element.on("$destroy", () => {
+			this.cancelPinWatcher();
+			this.cancelEventWatcher();
 			this.ViewerService.diffToolDisableAndClear();
 			this.viewer.reset(); // Remove events watch
+			this.viewer.destroy();
 		});
 	}
 
 	public watchers() {
-		this.$scope.$watch(() => {
+		this.cancelPinWatcher = this.$scope.$watch(() => {
 			return this.ViewerService.pin;
 		}, () => {
 			if (this.viewer) {
@@ -86,16 +88,13 @@ class ViewerController implements ng.IController {
 			}
 		}, true);
 
-		this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
+		this.cancelEventWatcher = this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
 			const validEvent = event !== undefined && event.type !== undefined;
-
 			if (validEvent && this.ViewerService.initialised) {
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}
 		});
-
 	}
-
 }
 
 export const ViewerComponent: ng.IComponentOptions = {

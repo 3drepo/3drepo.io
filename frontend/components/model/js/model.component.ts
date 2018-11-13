@@ -74,11 +74,9 @@ class ModelController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
 		this.pointerEvents = "inherit";
 
-		history.pushState(null, null, document.URL);
 		const popStateHandler = (event) => {
 			this.StateManager.popStateHandler(event, this.account, this.model);
 		};
@@ -162,7 +160,7 @@ class ModelController implements ng.IController {
 				.ok("OK")
 		);
 
-		this.$location.path(this.AuthService.getUsername());
+		this.$location.path('/dashboard/teamspaces');
 
 	}
 

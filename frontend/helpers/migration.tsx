@@ -1,9 +1,9 @@
 import createConnect from 'redux-connect-standalone';
 import * as React from 'react';
-import { render } from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { invoke } from 'lodash';
 import configureStore from '../modules/store';
+import createBrowserHistory from 'history/createBrowserHistory';
 
 // Angular service injector
 export const getAngularService = (name, caller?) => angular.element(document.body).injector().get(name, caller);
@@ -54,10 +54,13 @@ export const runAngularTimeout = (callback, context?) => {
 	return $timeout(callback);
 };
 
+/* TODO: This custom hitory should be removed, if angular routes are migrated to react */
+export const history = createBrowserHistory();
+
 /* TODO: At the end Router should wrap whole app - not a specific component */
 export const addRouting = (Component) => {
 	return (props) => (
-		<Router>
+		<Router history={history}>
 			<Component {...props} />
 		</Router>
 	);

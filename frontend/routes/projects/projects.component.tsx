@@ -167,7 +167,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 							<SelectContainer item>
 								<FormControl fullWidth={true}>
 									<InputLabel shrink htmlFor="project">
-											Project
+										Project
 									</InputLabel>
 									<CellSelect
 										items={projectsItems}

@@ -15,6 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { history } from '../../../helpers/migration';
+
 export class StateManagerService {
 
 	public static $inject: string[] = [
@@ -65,10 +67,6 @@ export class StateManagerService {
 		private IssuesService: any,
 		private RisksService: any
 	) {
-		// Stores the state, required as ui-router does not allow inherited
-		// stateParams, and we need to dynamically generate state diagram.
-		// One day this might change.
-		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 		this.state = {
 			changing: true
 		};
@@ -134,15 +132,14 @@ export class StateManagerService {
 	}
 
 	public goHome() {
-
-		// TODO: Do this properly using state manager
 		let path = "/";
-
 		if (this.AuthService.isLoggedIn() && this.AuthService.getUsername()) {
-			path = "/" + this.AuthService.getUsername();
+			path = "/dashboard/teamspaces";
 		}
 
-		this.$location.path(path);
+		this.$timeout(() => {
+			history.push(path);
+		});
 	}
 
 	public destroy()  {
@@ -239,9 +236,6 @@ export class StateManagerService {
 			// we need to go back to the account page if possible.
 			if ((functionList.length === 0) && this.AuthService.isLoggedIn() && !this.state.account) {
 				this.setStateVar("account", this.AuthService.getUsername());
-				this.updateState(false);
-			} else {
-				this.updateState(true);
 			}
 		} else {
 			this.stateChangeQueue.pop();
@@ -278,41 +272,6 @@ export class StateManagerService {
 
 	}
 
-	public genStateName() {
-
-		let currentChildren = this.structure.children;
-		let childidx = 0;
-		let stateName  = "home."; // Assume that the base state is there.
-		const functionList = this.functionsUsed();
-		const usesFunction = (functionList.length > 0);
-
-		if (usesFunction) {
-			stateName += functionList.join(".") + ".";
-		} else {
-			while (childidx < currentChildren.length) {
-				const child  = currentChildren[childidx];
-				const plugin = child.plugin;
-
-				if (this.state.hasOwnProperty(plugin) && this.state[plugin]) {
-					stateName += plugin + ".";
-
-					if (child.children) {
-						currentChildren = child.children;
-					} else {
-						currentChildren = [];
-					}
-
-					childidx = -1;
-				}
-
-				childidx += 1;
-			}
-		}
-
-		return stateName.substring(0, stateName.length - 1);
-
-	}
-
 	public setStateVar(letName, value) {
 		if (value === null) {
 			delete this.state[letName];
@@ -345,23 +304,6 @@ export class StateManagerService {
 				this.query[param] = queryParams[param];
 			}
 		}
-	}
-
-	public updateState(dontUpdateLocation) {
-		const newStateName = this.genStateName();
-
-		if (Object.keys(this.changedState).length) {
-			this.changedState = {};
-		}
-
-		const updateLocation = !dontUpdateLocation ? true : false; // In case of null
-		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
-
-		// This timeout is needed or changing revision doesn't work... for some reason.
-		this.$timeout(() => {
-			this.state.changing = false;
-		});
-
 	}
 
 	public refreshHandler(event) {
@@ -409,7 +351,6 @@ export class StateManagerService {
 				this.setStateVar(key, value[key]);
 			}
 		}
-		this.updateState(false);
 	}
 
 }

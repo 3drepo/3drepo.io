@@ -55,15 +55,19 @@ export const StyledButton = styled(Button)`
 `;
 
 export const FormContainer = styled(Grid)`
-  padding: 24px;
-  background-color: rgb(250, 250, 250);
-  height: 100%;
-  justify-content: space-between;
+  && {
+    padding: 24px;
+    background-color: rgb(250, 250, 250);
+    height: 100%;
+    justify-content: space-between;
+  }
 `;
 
 export const FieldsColumn = styled.div``;
 
 export const FieldsRow = styled(Grid)`
+  overflow: auto;
+
   ${StyledTextField} {
     width: 100%;
   }
@@ -73,11 +77,11 @@ export const FieldsRow = styled(Grid)`
   }
 
   ${FieldsColumn}:nth-child(2n) {
-    margin-left: 6px;
+    margin-left: 12px;
   }
 
   ${FieldsColumn}:nth-child(2n + 1) {
-    margin-right: 6px;
+    margin-right: 12px;
   }
 `;
 
