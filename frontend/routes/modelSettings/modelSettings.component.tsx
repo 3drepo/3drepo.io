@@ -204,8 +204,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 		runAngularTimeout(() => {
 			history.push({
-				pathname: `/dashboard/teamspaces/${teamspace}`,
-				search: `?project=${project}`
+				pathname: '/dashboard/teamspaces',
+				search: `?teamspace=${teamspace}&project=${project}`
 			});
 		});
 	}
@@ -229,7 +229,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
 		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
 
-		console.log('props', this.props);
 		return	(
 			<Formik
 				initialValues={{
