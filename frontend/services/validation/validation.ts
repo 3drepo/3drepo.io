@@ -21,7 +21,8 @@ import { getPasswordStrength } from './customValidators';
 export const VALIDATIONS_MESSAGES = {
 	REQUIRED: 'This field is required',
 	TOO_SHORT_STRING: 'Must be at least ${min} characters',
-	TOO_LONG_STRING: 'Must be at most ${max} characters'
+	TOO_LONG_STRING: 'Must be at most ${max} characters',
+	NOT_ALPHANUMERIC: 'Must use alphanumeric characters'
 };
 
 Yup.addMethod(Yup.string, 'differentThan', differentThan );
@@ -53,6 +54,11 @@ export const schema = {
 		.ensure()
 		.min(8, VALIDATIONS_MESSAGES.TOO_SHORT_STRING)
 		.max(128, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+
+	revisionName: Yup.string()
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
+		.max(20, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.matches(/^[A-Za-z0-9]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC),
 
 	required: Yup.string()
 		.required(VALIDATIONS_MESSAGES.REQUIRED)
