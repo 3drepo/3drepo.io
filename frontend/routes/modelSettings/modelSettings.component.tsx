@@ -226,13 +226,14 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderForm = () => {
-		const { id, name, type, fourDSequenceTag, properties } = this.props.modelSettings;
+		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
 		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
 
+		console.log('props', this.props);
 		return	(
 			<Formik
 				initialValues={{
-					id, name, type, code: properties.code, unit: properties.unit, fourDSequenceTag,
+					id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
 					latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
 				}}
 				validationSchema={ModelSettingsSchema}
@@ -292,6 +293,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										{...field}
 										items={clientConfigService.units}
 										inputId="unit-select"
+										disabled
 									/>
 								)} />
 							</SelectWrapper>
@@ -330,7 +332,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										label="Elevation"
 										margin="normal"
 										value={elevation}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										disabled
 									/>
 								)} />
 								<Field name="angleFromNorth" render={({ field }) => (

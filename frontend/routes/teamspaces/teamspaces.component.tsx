@@ -334,7 +334,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public isActiveProject = (projectName) => {
-		const queryParams = queryString.parse(location.search);
+		const queryParams = queryString.parse(this.props.location.search);
 		const { project } = queryParams;
 		if (project) {
 			return project === projectName;
