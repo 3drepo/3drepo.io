@@ -91,8 +91,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
+		const { teamspace } = queryString.parse(this.props.location.search);
+
 		this.setState({
-			activeTeamspace: this.props.currentTeamspace,
+			activeTeamspace: teamspace || this.props.currentTeamspace,
 			teamspacesItems: getTeamspacesItems(this.props.teamspaces)
 		});
 	}
