@@ -115,10 +115,9 @@ module.exports = {
 		return this.upsertNotification(username,data,types.ISSUE_ASSIGNED,criteria);
 	},
 
-	upsertModelUpdatedNotification: function(username, teamSpace, modelId, revision) {
-		const criteria = {teamSpace,  modelId};
-		const data = {revision: revision };
-		return this.upsertNotification(username,data,types.MODEL_UPDATED,criteria);
+	insertModelUpdatedNotification: function(username, teamSpace, modelId, revision) {
+		const data = {teamSpace,  modelId, revision};
+		return this.insertNotification(username, types.MODEL_UPDATED, data);
 	},
 
 	removeIssueAssignedNotification:function(username, teamSpace, modelId, issueId) {
@@ -196,12 +195,12 @@ module.exports = {
 			});
 	},
 
-	upsertModelUpdatedNotifications: function(username, teamSpace, modelId, revision) {
+	insertModelUpdatedNotifications: function(username, teamSpace, modelId, revision) {
 		const account = teamSpace;
 		const model = modelId;
 		const res = ModelSetting.findById({ account, model}, modelId).then(_modelSetting =>
 			_modelSetting.permissions.filter(p => p.user !== username).map(p =>
-				this.upsertModelUpdatedNotification(p.user, teamSpace, modelId, revision)
+				this.insertModelUpdatedNotification(p.user, teamSpace, modelId, revision)
 			)
 		);
 
