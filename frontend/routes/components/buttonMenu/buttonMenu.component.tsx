@@ -95,7 +95,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 					open={activeMenu}
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
-					disableRestoreFocus
+					disableRestoreFocus={true}
 				>
 					{renderContent({ close: this.toggleMenu(false) })}
 				</StyledPopover>

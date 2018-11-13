@@ -32,6 +32,15 @@ interface IProps {
 
 export const ModelDirectoryItem = (props: IProps) => {
 	const { renderChildItem, name, items, onAddClick } = props;
+
+	const renderActions = () => (
+		<TooltipButton
+			{...ROW_ACTIONS.ADD_NEW}
+			label={`Add new ${name.slice(0, -1).toLowerCase()}`}
+			action={onAddClick}
+		/>
+	);
+
 	return (
 		<TreeList
 			name={name}
@@ -41,17 +50,11 @@ export const ModelDirectoryItem = (props: IProps) => {
 			active={true}
 			disableShadow={true}
 			forceActive={true}
-			IconProps={{
+			IconProps={ {
 				IconOpened: BookmarksOutlined,
 				IconClosed: Bookmarks
-			}}
-			renderActions={() => (
-				<TooltipButton
-					{...ROW_ACTIONS.ADD_NEW}
-					label={`Add new ${name.slice(0, -1).toLowerCase()}`}
-					action={onAddClick}
-				/>
-			)}
+			} }
+			renderActions={renderActions}
 		/>
 	);
 };

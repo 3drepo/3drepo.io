@@ -108,7 +108,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				name={name}
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
-				displayEmpty
+				displayEmpty={true}
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={selectedValue}
 				onChange={this.handleChange}

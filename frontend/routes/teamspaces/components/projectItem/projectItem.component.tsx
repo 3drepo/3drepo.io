@@ -113,10 +113,10 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				name={name}
 				level={2}
 				items={items}
-				IconProps={{
+				IconProps={ {
 					IconClosed: Label,
 					IconOpened: LabelOutlined
-				}}
+				} }
 				renderItem={renderChildItem}
 				renderActions={this.renderProjectActions}
 				active={active}

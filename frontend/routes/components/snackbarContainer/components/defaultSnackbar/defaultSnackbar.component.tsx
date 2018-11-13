@@ -29,7 +29,7 @@ export const DefaultSnackbar = (props: IProps) => {
 	return (
 		<SnackbarContent
 			message={props.message}
-			action={[
+			action={ [
 				<IconButton
 					key="close"
 					aria-label="Close"
@@ -38,7 +38,7 @@ export const DefaultSnackbar = (props: IProps) => {
 				>
 					<Close />
 				</IconButton>
-			]}
+			] }
 		/>
 	);
 };

@@ -58,13 +58,13 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 		return (
 			<Tooltip title={tooltipText}>
 				<RadioContainer
-					container
+					container={true}
 					direction="column"
 					justify="center"
 					alignItems="center"
 					{...RadioContainerProps}
 				>
-					<Grid item>
+					<Grid item={true}>
 						<SortLabel
 							active={activeSort}
 							direction={sortOrder}
@@ -73,7 +73,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 							{label}
 						</SortLabel>
 					</Grid>
-					<Grid item>
+					<Grid item={true}>
 						<RadioButton
 							checked={checked}
 							name={name || label}

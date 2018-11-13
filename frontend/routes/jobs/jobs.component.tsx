@@ -134,23 +134,22 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderNewJobForm = (container) => {
+	public renderNewJobFormPanel = ({ closePanel }) => {
 		const formProps = {
 			title: 'Add new job',
 			colors: this.props.colors,
 			onSave: this.onSave
 		};
-
-		return (
-			<FloatingActionPanel
-				container={container}
-				key={this.state.panelKey}
-				render={({ closePanel }) => {
-					return <NewJobForm {...formProps} onCancel={closePanel} />;
-				}}
-			/>
-		);
+		return <NewJobForm {...formProps} onCancel={closePanel} />;
 	}
+
+	public renderNewJobForm = (container) => (
+		<FloatingActionPanel
+			container={container}
+			key={this.state.panelKey}
+			render={this.renderNewJobFormPanel}
+		/>
+	)
 
 	public render() {
 		const { containerElement, rows } = this.state;

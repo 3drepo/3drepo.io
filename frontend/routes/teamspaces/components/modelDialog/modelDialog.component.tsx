@@ -141,8 +141,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 				<Form>
 					<DialogContent>
 						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<Field name="teamspace" render={({ field, form }) => (
+							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+							<Field name="teamspace" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
@@ -158,8 +158,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 							)} />
 						</SelectWrapper>
 						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-							<Field name="project" render={({ field, form }) => (
+							<InputLabel shrink={true} htmlFor="project-select">Project</InputLabel>
+							<Field name="project" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.project && form.errors.project)}
@@ -176,14 +176,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 						</SelectWrapper>
 						<Row>
 							<FieldWrapper>
-								<Field name="modelName" render={({ field, form }) => (
+								<Field name="modelName" render={ ({ field, form }) => (
 									<TextField
 										{...field}
 										error={Boolean(form.touched.modelName && form.errors.modelName)}
 										helperText={form.touched.modelName && (form.errors.modelName || '')}
 										label="Model Name"
 										margin="normal"
-										required
+										required={true}
 										fullWidth={true}
 										value={this.state.modelName}
 										onChange={this.handleNameChange(field.onChange)}
@@ -191,13 +191,13 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 								)} />
 							</FieldWrapper>
 							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-								<Field name="unit" render={({ field }) => (
+								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select unit"
 										disabledPlaceholder={true}
-										required
+										required={true}
 										items={clientConfigService.units}
 										value={unit}
 										onChange={this.handleUnitChange(field.onChange)}
@@ -208,7 +208,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 						</Row>
 						<Row>
 							<FieldWrapper>
-								<Field name="code" render={({ field }) => (
+								<Field name="code" render={ ({ field }) => (
 									<TextField
 										{...field}
 										label="Model Code (optional)"
@@ -218,14 +218,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 								)} />
 							</FieldWrapper>
 							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
-								<Field name="type" render={({ field }) => (
+								<InputLabel shrink={true} htmlFor="type-select">Model Type</InputLabel>
+								<Field name="type" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select model type"
 										disabledPlaceholder={true}
 										items={MODEL_SUBTYPES}
-										required
+										required={true}
 										inputId="type-select"
 									/>
 								)} />
@@ -234,13 +234,14 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={({ form }) =>
+						<Field render={ ({ form }) =>
 							<Button
-								type="submit" variant="raised" color="secondary"
+								type="submit"
+								variant="raised"
+								color="secondary"
 								disabled={(!form.isValid || form.isValidating)}>
 								Save
-							</Button>
-						} />
+							</Button>} />
 					</DialogActions>
 				</Form>
 			</Formik>

@@ -121,7 +121,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
 						<Field
 							name="revisionName"
-							render={({ field, form }) =>
+							render={ ({ field, form }) =>
 								<TextField
 									{...field}
 									error={Boolean(form.errors.revisionName)}
@@ -129,26 +129,24 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									label="Name"
 									margin="normal"
 									fullWidth={true}
-								/>
-							}
+								/>}
 								/>
 						<Field
 							name="revisionDesc"
-							render={({ field }) =>
+							render={ ({ field }) =>
 								<TextField
 									{...field}
 									label="Description"
 									margin="normal"
 									fullWidth={true}
-								/>
-							}
+								/>}
 						/>
 						{ modelSettings.properties &&
 							<ModelInfo>
-								{ `Model units: ${unitsMap[modelSettings.properties.unit]}` }
+								{`Model units: ${unitsMap[modelSettings.properties.unit]}`}
 							</ModelInfo>
 						}
-						{ this.state.fileName && <ModelInfo>File name: { this.state.fileName } </ModelInfo> }
+						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
 						<StyledDialogActions>
 							<Field name="file" render={({ field }) =>
 								<FileInputField
@@ -156,21 +154,21 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									onChange={this.handleFileChange(field.onChange)}
 						/>
 					} />
-							<Field render={() =>
+							<Field render={ () =>
 								<CancelButton
 									onClick={handleClose}
 									color="secondary">
 									Cancel
-									</CancelButton>}
+									</CancelButton> }
 							/>
-							<Field render={({ form }) =>
+							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
 									variant="raised"
 									color="secondary"
 									disabled={(!form.isValid || form.isValidating)}>
-									Upload
-								</Button>
+										Upload
+									</Button>
 							}	/>
 						</StyledDialogActions>
 					</DialogContent>
