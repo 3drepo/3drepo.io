@@ -25,10 +25,10 @@ import { DialogActions } from '../dialog';
 // Projects
 export function* createProject({ teamspace, projectData }) {
 	try {
-		yield API.createProject(teamspace, projectData);
+		const response = yield API.createProject(teamspace, projectData);
 
 		yield put(SnackbarActions.show('Project created'));
-		yield put(TeamspacesActions.createProjectSuccess(teamspace, projectData));
+		yield put(TeamspacesActions.createProjectSuccess(teamspace, response.data));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('create', 'project', e.response));
 	}
