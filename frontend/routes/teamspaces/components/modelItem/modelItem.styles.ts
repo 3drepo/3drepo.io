@@ -85,5 +85,5 @@ export const Status = styled.span`
 `;
 
 export const TimeWrapper = styled(Grid)`
-  max-width: 100px;
+  max-width: 150px;
 `;
