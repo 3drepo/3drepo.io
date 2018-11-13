@@ -223,7 +223,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			const isNewModel = !modelName.length;
 			const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
 
-			debugger
 			this.props.showDialog({
 				title: modelName ? "Edit federation" : "New federation",
 				template: FederationDialog,
