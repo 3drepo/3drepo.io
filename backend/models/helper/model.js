@@ -768,7 +768,7 @@ function removeModel(account, model, forceRemove) {
 
 	return ModelSetting.findById({account, model}, model).then(setting => {
 		if (!setting) {
-			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
 
 		let subModelCheckPromise;
@@ -784,12 +784,15 @@ function removeModel(account, model, forceRemove) {
 				return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
 			}
 
-			const deletePromises = [];
-			deletePromises.push(removeModelCollections(account, model));
-			deletePromises.push(setting.remove);
-			deletePromises.push(Project.removeModel(account, model));
-
-			return Promise.all(deletePromises);
+			return removeModelCollections(account, model).then(() => {
+				const deletePromises = [];
+				deletePromises.push(setting.remove);
+				deletePromises.push(Project.removeModel(account, model));
+				return Promise.all(deletePromises);
+			}).catch((err) => {
+				systemLogger.logError("Failed to remove collections: ", err);
+				return Promise.reject(responseCodes.REMOVE_MODEL_FAILED);
+			});
 
 		});
 	});

@@ -223,6 +223,8 @@
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
 		ISSUE_UPDATE_FAILED: { message: "Failed updating issue", status: 500 },
 
+		REMOVE_MODEL_FAILED: { message: "Failed to remove data associated with model", status: 500 },
+
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
 
