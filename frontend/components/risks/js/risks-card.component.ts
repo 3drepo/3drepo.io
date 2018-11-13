@@ -340,7 +340,7 @@ class RisksCardController implements ng.IController {
 		if (risk) {
 			this.viewerService.highlightObjects([]);
 
-			this.$state.go("app.viewer.risks",
+			this.$state.go("app.viewer",
 				{
 					account: this.account,
 					model: this.model,

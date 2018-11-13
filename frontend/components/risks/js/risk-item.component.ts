@@ -759,7 +759,7 @@ class RiskItemController implements ng.IController {
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"app.viewer.risks",
+					"app.viewer",
 					riskState,
 					{notify: false}
 				);

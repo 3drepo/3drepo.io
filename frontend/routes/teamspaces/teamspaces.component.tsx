@@ -220,7 +220,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
 
 			this.props.showDialog({
-				title: modelName ? "Edit federation" : "New federation",
+				title: modelName ? 'Edit federation' : 'New federation',
 				template: FederationDialog,
 				data: {name: modelName,
 				modelName,
