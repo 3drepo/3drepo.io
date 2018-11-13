@@ -76,7 +76,7 @@ interface IProps {
 	location: any;
 	history: any;
 	fetchModelSettings: (teamspace, modelId) => void;
-	updateModelSettings: (teamspace, modelId, settings) => void;
+	updateModelSettings: (modelData, settings) => void;
 	modelSettings: any;
 	currentTeamspace: string;
 	isSettingsLoading: boolean;
@@ -114,7 +114,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const topicTypes = properties ? properties.topicTypes : [];
 		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
 
-		if (!prevTopicTypes.length && topicTypes && topicTypes.length) {
+		if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
 			changes.topicTypes = topicTypes;
 		}
 
@@ -164,8 +164,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleUpdateSettings = (data) => {
-		const queryParams = queryString.parse(this.props.location.search);
-		const { modelId, targetAcct } = queryParams;
+		const { modelId, project, teamspace } = this.props.match.params;
 		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag, topicTypes } = data;
 		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
 		const types = topicTypes.map((topicType) => topicType.label);
@@ -185,7 +184,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			topicTypes: types
 		};
 
-		this.props.updateModelSettings(targetAcct, modelId, settings);
+		const modelData = { teamspace, project, modelId };
+		this.props.updateModelSettings(modelData, settings);
 	}
 
 	public handlePointChange = (onChange, name) => (event, ...params) => {
@@ -197,10 +197,16 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleBackLink = () => {
-		const { history } = this.props;
+		const { history, location, match } = this.props;
+		const queryParams = queryString.parse(location.search);
+		const { project } = queryParams;
+		const { teamspace } = match.params;
 
 		runAngularTimeout(() => {
-			history.goBack();
+			history.push({
+				pathname: `/dashboard/teamspaces/${teamspace}`,
+				search: `?project=${project}`
+			});
 		});
 	}
 

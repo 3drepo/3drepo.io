@@ -304,7 +304,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					view: PERMISSIONS_VIEWS.MODELS,
 					modelId: props.model
 				})}
-				onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`)}
+				onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`, {
+					project: props.projectName
+				})}
 				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
 				onDownloadClick={() => this.props.downloadModel(this.state.activeTeamspace, props.model)}
 				onRevisionsClick={(event) => this.openModelRevisionsDialog(event, props)}
@@ -331,6 +333,26 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public isActiveProject = (projectName) => {
+		const queryParams = queryString.parse(location.search);
+		const { project } = queryParams;
+		if (project) {
+			return project === projectName;
+		}
+
+		return false;
+	}
+
+	public isActiveTeamspace = (account) => {
+		const { teamspace } = this.props.match.params;
+
+		if (teamspace) {
+			return account === teamspace;
+		}
+
+		return account === this.state.activeTeamspace;
+	}
+
 	public renderProject = (props) => {
 		const { activeTeamspace } = this.state;
 		return (
@@ -344,6 +366,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					})
 				}
 				onRemoveClick={this.createRemoveProjectHandler(props.name)}
+				active={this.isActiveProject(props.name)}
 			/>
 		);
 	}
@@ -353,7 +376,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			<TeamspaceItem
 				{...teamspace}
 				key={index}
-				active={teamspace.account === this.state.activeTeamspace}
+				active={this.isActiveTeamspace(teamspace.account)}
 				isMyTeamspace={index === 0}
 				renderChildItem={this.renderProject}
 				onToggle={this.onTeamspaceClick.bind(this, teamspace)}
