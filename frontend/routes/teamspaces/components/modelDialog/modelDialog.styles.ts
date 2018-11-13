@@ -27,7 +27,7 @@ export const StyledField = styled(Field)`
 `;
 
 export const SelectWrapper = styled(FormControl)`
-  && {
+  &&:not(:first-child) {
     margin-top: 15px;
   }
 `;
