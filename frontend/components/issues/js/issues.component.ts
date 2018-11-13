@@ -385,7 +385,7 @@ class IssuesController implements ng.IController {
 		if (issue) {
 			this.viewerService.highlightObjects([]);
 
-			this.$state.go("app.viewer.issues",
+			this.$state.go("app.viewer",
 				{
 					account: this.account,
 					model: this.model,

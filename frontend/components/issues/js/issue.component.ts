@@ -938,7 +938,7 @@ class IssueController implements ng.IController {
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"app.viewer.issues",
+					"app.viewer",
 					issueState,
 					{notify: false}
 				);

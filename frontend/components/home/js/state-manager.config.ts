@@ -33,7 +33,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state("app.viewer", {
-		url: "/viewer/:teamspace/:modelId/:revision",
+		url: "/viewer/:teamspace/:modelId/:revision?issueId&riskId",
 		template: `
 			<model
 				is-lite-mode="vm.isLiteMode"
@@ -52,20 +52,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		params: {
 			modelId: { squash: true, value: null },
 			revision: { squash: true, value: null }
-		}
-	});
-
-	$stateProvider.state("app.viewer.issues", {
-		url: "/issues/:issueId",
-		data: {
-			isLoginRequired: true
-		}
-	});
-
-	$stateProvider.state("app.viewer.risks", {
-		url: "/risks/:riskId",
-		data: {
-			isLoginRequired: true
 		}
 	});
 
