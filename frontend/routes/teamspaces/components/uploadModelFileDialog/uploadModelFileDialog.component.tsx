@@ -23,9 +23,11 @@ import { Formik, Form, Field } from 'formik';
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import {
+	LoadingDialog
+} from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
 
 import { schema } from '../../../../services/validation';
-import { Loader } from './../../../components/loader/loader.component';
 import { FileInputField } from './components/fileInputField.component';
 import { unitsMap } from '../../../../constants/model-parameters';
 
@@ -104,7 +106,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		const { modelSettings, revisions, modelName, handleClose, isPending } = this.props;
 
 		if (isPending) {
-			return <Loader />;
+			return <LoadingDialog content={`Loading ${modelName} data...`} />;
 		}
 
 		return (
