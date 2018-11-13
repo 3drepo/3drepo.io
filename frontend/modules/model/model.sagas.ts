@@ -38,10 +38,12 @@ export function* fetchSettings({ teamspace, modelId }) {
 	}
 }
 
-export function* updateSettings({ teamspace, modelId, settings }) {
+export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
 		yield API.editModelSettings(teamspace, modelId, settings);
 
+		yield put(TeamspacesActions.updateModelSuccess(
+			teamspace, modelId, { project, model: modelId, name: settings.name } ));
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'model settings', e.response));
