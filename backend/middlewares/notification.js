@@ -47,7 +47,7 @@ module.exports = {
 			Promise.all([
 				notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue),
 				notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue),
-				notification.upsertModelUpdatedNotifications(username, teamspace, modelId, Math.random() + modelId)
+				notification.upsertModelUpdatedNotifications(username, teamspace, modelId, Math.round(Math.random() * 10000))
 			]).then((notifications) => {
 				notifications = _.flatten(notifications);
 				req.userNotifications = notifications;

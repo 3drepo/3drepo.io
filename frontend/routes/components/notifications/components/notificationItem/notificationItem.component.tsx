@@ -19,9 +19,11 @@ import * as React from 'react';
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';
+
 import PanoramaFishEye from '@material-ui/icons/PanoramaFishEye';
 import Lens from '@material-ui/icons/Lens';
 import Clear from '@material-ui/icons/Clear';
+import ChangeHistory from '@material-ui/icons/ChangeHistory';
 
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
@@ -35,13 +37,25 @@ export interface INotification {
 	teamSpace: string;
 	modelName: string;
 	issuesId?: string[];
+	revision?: string;
 	timestamp: number;
 }
+
+const TYPES = {
+	ISSUE_ASSIGNED : 'ISSUE_ASSIGNED',
+	MODEL_UPDATED : 'MODEL_UPDATED'
+};
 
 interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
 	history: any;
+}
+
+interface IState {
+	icon: React.ComponentType;
+	details: string;
+	summary: string;
 }
 
 const LabelWithTooltip = (props) => (
@@ -68,7 +82,27 @@ const NotificationItemText = (props) => {
 	);
 };
 
-export class NotificationItem extends React.PureComponent<IProps, any> {
+const getIcon = (notification) => {
+	switch (notification.type) {
+		case TYPES.ISSUE_ASSIGNED:
+			return Place;
+		case TYPES.MODEL_UPDATED:
+			return ChangeHistory;
+	}
+};
+
+const getDetails = (notification) => {
+	switch (notification.type) {
+		case TYPES.ISSUE_ASSIGNED:
+			return `${notification.issuesId.length} assigned issues `;
+		case TYPES.MODEL_UPDATED:
+			return `${notification.revision} uploaded`;
+	}
+};
+
+const getSummary  = (notification) =>  `In ${notification.modelName}`;
+
+export class NotificationItem extends React.PureComponent<IProps, IState> {
 	public gotoNotification = () => {
 		const {teamSpace, modelId, _id: notificationId, history} = this.props;
 		history.push(`/viewer/${teamSpace}/${modelId}?notificationId=${notificationId}`);
@@ -89,11 +123,23 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 		this.props.sendUpdateNotificationRead(this.props._id, false);
 	}
 
-	public render = () => {
-		const {issuesId, modelName, read} =  this.props;
+	public componentDidUpdate(prevProps: IProps) {
+		if (prevProps.type !== this.props.type ) {
+			this.setState({ icon: getIcon(this.props) });
+		}
 
-		const assignedIssuesText = `${issuesId.length} assigned issues `;
-		const modelText = `In ${modelName}`;
+		if (prevProps.issuesId !== this.props.issuesId || prevProps.revision !== this.props.revision) {
+			this.setState({ details : getDetails(this.props)});
+		}
+
+		if (prevProps.modelName !== this.props.modelName) {
+			this.setState({ summary: getSummary(this.props) });
+		}
+	}
+
+	public render = () => {
+		const {read} =  this.props;
+
 		const containerProps: any = {
 			read: read.toString(),
 			onClick: this.gotoNotification
@@ -103,7 +149,7 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 			<Container {...containerProps}>
 				<Item button>
 					<Avatar>
-						<Place />
+						{this.state.icon}
 					</Avatar>
 
 					{read &&
@@ -111,8 +157,8 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 							primaryColor="rgba(0, 0, 0, 0.54)"
 							secondaryColor="rgba(0, 0, 0, 0.24)"
 							fontWeight={FONT_WEIGHT.NORMAL}
-							primary={assignedIssuesText}
-							secondary={modelText}
+							primary={this.state.details}
+							secondary={this.state.summary}
 						/>
 					}
 					{!read &&
@@ -120,8 +166,8 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 							primaryColor="rgba(0, 0, 0, 0.87)"
 							secondaryColor="rgba(0, 0, 0, 0.54)"
 							fontWeight={FONT_WEIGHT.BOLD}
-							primary={assignedIssuesText}
-							secondary={modelText}
+							primary={this.state.details}
+							secondary={this.state.summary}
 						/>
 					}
 
