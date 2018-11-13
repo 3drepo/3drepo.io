@@ -56,8 +56,10 @@ class S3Handler {
 
 	testConnection() {
 		return this.s3Conn.headBucket({Bucket: config.s3.bucketName}, (err) => {
-			systemLogger.logError("failed to connect to S3: ", err);
-			throw new Error("S3 connection failed");
+			if(err) {
+				systemLogger.logError("failed to connect to S3: ", err);
+				throw new Error("S3 connection failed");
+			}
 		});
 	}
 }
