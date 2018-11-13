@@ -18,16 +18,28 @@
 "use strict";
 
 const config = require("../config.js");
+const systemLogger = require("../logger.js").systemLogger;
 const AWS = require("aws-sdk");
 
 class S3Handler {
 	constructor() {
-		AWS.config.update({
-			accessKeyId: config.s3.accessKey,
-			secretAccessKey: config.s3.secretKey,
-			region: config.s3.region
-		});
-		this.s3Conn = new AWS.S3();
+		if (config.s3 &&
+			config.s3.accessKey &&
+			config.s3.secretKey &&
+			config.s3.bucketName &&
+			config.s3.region) {
+
+			AWS.config.update({
+				accessKeyId: config.s3.accessKey,
+				secretAccessKey: config.s3.secretKey,
+				region: config.s3.region
+			});
+			this.s3Conn = new AWS.S3();
+			this.testConnection();
+		} else {
+			systemLogger.logError("S3 is not configured.");
+			throw new Error("S3 is not configured");
+		}
 	}
 
 	getFile(key) {
@@ -40,6 +52,13 @@ class S3Handler {
 		});
 		const params = { Delete: {Objects: delList}, Bucket: config.s3.bucketName };
 		return this.s3Conn.deleteObjects(params).promise();
+	}
+
+	testConnection() {
+		return this.s3Conn.headBucket({Bucket: config.s3.bucketName}, (err) => {
+			systemLogger.logError("failed to connect to S3: ", err);
+			throw new Error("S3 connection failed");
+		});
 	}
 }
 
