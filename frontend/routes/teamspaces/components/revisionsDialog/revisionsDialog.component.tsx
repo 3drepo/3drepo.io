@@ -72,8 +72,11 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 					<>
 						<StyledList>
 							{revisions && revisions.map((revision, index) => (
-								<Item button={true}key={revision._id}
-									divideronClick={this.revisionClickHandler( revision)}
+								<Item
+									button={true}
+									key={revision._id}
+									divider
+									onClick={this.revisionClickHandler(revision)}
 									last={index === 0}>
 										<Row>
 										<Property >

@@ -85,5 +85,5 @@ export const Status = styled.span`
 `;
 
 export const TimeWrapper = styled(Grid)`
-  max-width: 150px;
-`;
+  max-width: ${(props: any) => props.pending ? '48px' : '150px'};
+` as any;
