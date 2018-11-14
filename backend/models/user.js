@@ -425,7 +425,9 @@ schema.statics.verify = function (username, token, options) {
 		}
 
 	}).then((user) => {
-		Mailer.sendWelcomeUserEmail(user.customData.email, {user: formatPronouns(user.customData.firstName)});
+		const name = user.customData.firstName && user.customData.firstName.length > 0 ?
+			formatPronouns(user.customData.firstName) : user.user;
+		Mailer.sendWelcomeUserEmail(user.customData.email, {user: name});
 
 		if (!skipImportToyModel) {
 
