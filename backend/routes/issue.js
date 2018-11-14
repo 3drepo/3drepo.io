@@ -26,7 +26,6 @@ const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
-const fs = require("fs");
 
 const User = require("../models/user");
 const Job = require("../models/job");
@@ -233,7 +232,6 @@ function getIssuesBCF(req, res, next) {
 	});
 
 }
-
 
 function findIssueById(req, res, next) {
 
