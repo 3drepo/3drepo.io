@@ -21,10 +21,14 @@ import Button from '@material-ui/core/Button';
 
 import { COLOR } from '../../../../styles';
 
-export const ModelName = styled.h3``;
+export const ModelName = styled.h3`
+  margin: 0 0 24px;
+  color: ${COLOR.BLACK_60};
+`;
 
 export const ModelInfo = styled.p`
   color: ${COLOR.BLACK_40};
+  margin: 0;
   font-size: 14px;
 `;
 
