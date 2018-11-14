@@ -100,6 +100,11 @@ export function* unsubscribeOnStatusChange({ teamspace, project, modelId }) {
 }
 
 export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
+
+	console.log("filedata", fileData)
+	const splitFileName = fileData.file.name.split(".");
+	console.log(splitFileName);
+
 	try {
 		const formData = new FormData();
 		formData.append('file', fileData.file);
