@@ -19,7 +19,7 @@ import { all, put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
-import { modelStatusesMap, uploadFileStatuses } from './model.helpers';
+import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
@@ -72,8 +72,15 @@ export function* downloadModel({ teamspace, modelId }) {
 	}
 }
 
-export function* onModelStatusChanged({ modelData: { status }, teamspace, project, modelId }) {
-	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelStatusesMap[status]));
+export function* onModelStatusChanged({ modelData, teamspace, project, modelId }) {
+	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, uploadFileStatuses[modelData.status]));
+
+	if (status === uploadFileStatuses.ok) {
+		yield put(SnackbarActions.show('Model uploaded succesfully'));
+	}
+	if (status === uploadFileStatuses.failed) {
+		yield put(SnackbarActions.show('Failed to import model'));
+	}
 }
 
 export function* subscribeOnStatusChange({ teamspace, project, modelId }) {
@@ -101,14 +108,14 @@ export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
 
 		const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);
 
-		if (status === uploadFileStatuses.OK) {
+		if (status === uploadFileStatuses.ok) {
 			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
 				yield put(SnackbarActions.show(data.errorReason.message));
 			} else {
 				yield put(SnackbarActions.show('Model uploaded succesfully'));
 			}
 		}
-		if (status === uploadFileStatuses.FAILED) {
+		if (status === uploadFileStatuses.failed) {
 			yield put(SnackbarActions.show('Failed to import model'));
 		}
 	} catch (e) {

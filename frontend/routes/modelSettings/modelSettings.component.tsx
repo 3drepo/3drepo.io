@@ -163,7 +163,10 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleUpdateSettings = (data) => {
-		const { modelId, project, teamspace } = this.props.match.params;
+		const { match, location, updateModelSettings } = this.props;
+		const { modelId, teamspace } = match.params;
+		const queryParams = queryString.parse(location.search);
+		const { project } = queryParams;
 		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag, topicTypes } = data;
 		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
 		const types = topicTypes.map((topicType) => topicType.label);
@@ -184,7 +187,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		};
 
 		const modelData = { teamspace, project, modelId };
-		this.props.updateModelSettings(modelData, settings);
+		updateModelSettings(modelData, settings);
 	}
 
 	public handlePointChange = (onChange, name) => (event, ...params) => {
