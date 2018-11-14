@@ -12,8 +12,7 @@
         "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
         "forin": false,
         "no-bitwise": false,
-        //TODO: Should be set to [true, "single", "jsx-double"] after migration
-        "quotemark": [true, "single", "double", "jsx-double"],
+        "quotemark": [true, "single", "jsx-double"],
 
         "jsx-alignment": false,
         "jsx-no-multiline-js": false,
