@@ -153,10 +153,11 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 						}
 						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
 						<StyledDialogActions>
-							<Field name="file" render={({ field }) =>
+							<Field name="file" render={({ field, form }) =>
 								<FileInputField
 									{...field}
 									onChange={this.handleFileChange(field.onChange)}
+									error={Boolean(form.errors.file)}
 						/>} />
 							<Field render={ () =>
 								<CancelButton
