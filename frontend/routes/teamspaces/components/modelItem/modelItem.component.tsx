@@ -63,7 +63,8 @@ const isPendingStatus = (status) => status && status !== 'ok' && status !== 'fai
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {
-		hovered: false
+		hovered: false,
+		statusText: ''
 	};
 
 	private modelActions: IAction[] = [];

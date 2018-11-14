@@ -17,6 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep, keyBy } from 'lodash';
+import { uploadFileStatuses } from './../model/model.helpers';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	setTeamspaces: ['teamspaces'],
@@ -77,7 +78,7 @@ const removeProjectSuccess = (state = INITIAL_STATE, action) => {
 };
 
 const getModelData = (state, teamspace, projectName) => {
-	const teamspaces = { ...state.teamspaces };
+	const teamspaces = cloneDeep(state.teamspaces);
 	const projects = [...state.teamspaces[teamspace].projects];
 	const projectIndex = projects.findIndex((project) => project.name === projectName);
 	const foundProject = projects[projectIndex];
@@ -104,8 +105,9 @@ const createModelSuccess = (state = INITIAL_STATE, action) => {
 
 const removeModelSuccess = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
-	const updatedModels = foundProject.models.filter((model) => model.name !== action.modelData.name);
-	teamspaces[action.teamspace].projects[projectIndex].models = updatedModels;
+
+	const models = foundProject.models.filter((model) => model.model !== action.modelData.model);
+	teamspaces[action.teamspace].projects[projectIndex].models = models;
 
 	return { ...state, teamspaces };
 };
@@ -114,6 +116,10 @@ const setModelUploadStatus = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.project);
 	const modelIndex = foundProject.models.findIndex((model) => model.model === action.model);
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].status = action.status;
+
+	if (action.status === uploadFileStatuses.ok) {
+		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = new Date();
+	}
 
 	return { ...state, teamspaces };
 };
