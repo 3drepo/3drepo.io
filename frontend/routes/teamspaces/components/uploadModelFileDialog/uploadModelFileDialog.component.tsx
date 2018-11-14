@@ -152,8 +152,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 								<FileInputField
 									{...field}
 									onChange={this.handleFileChange(field.onChange)}
-						/>
-					} />
+						/>} />
 							<Field render={ () =>
 								<CancelButton
 									onClick={handleClose}
@@ -168,8 +167,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									color="secondary"
 									disabled={(!form.isValid || form.isValidating)}>
 										Upload
-									</Button>
-							}	/>
+									</Button>}	/>
 						</StyledDialogActions>
 					</DialogContent>
 				</Form>

@@ -54,12 +54,13 @@ export const Container = styled.div`
 	width: 290px;
 
 	${StyledTextField},
-	${StyledSelect},
+	${/* sc-selector */ StyledSelect},
 	${Title} {
 		margin-bottom: 12px;
 	}
 
-	${StyledTextField}, ${StyledTextField} *,
+	${StyledTextField},
+	${/* sc-selector */ StyledTextField} *,
 	${StyledSelect} {
 		font-size: 14px;
 		color: ${COLOR.BLACK_60};

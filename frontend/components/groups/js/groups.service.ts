@@ -18,13 +18,13 @@
 export class GroupsService {
 
 	public static $inject: string[] = [
-		"$q",
-		"$timeout",
-		"APIService",
-		"TreeService",
-		"MultiSelectService",
-		"AuthService",
-		"ViewerService"
+		'$q',
+		'$timeout',
+		'APIService',
+		'TreeService',
+		'MultiSelectService',
+		'AuthService',
+		'ViewerService'
 	];
 
 	public state;
@@ -137,7 +137,7 @@ export class GroupsService {
 				for (const key in meshes) {
 					if (key) {
 						const meshIds = meshes[key].meshes;
-						const pair = key.split("@");
+						const pair = key.split('@');
 						const modelAccount = pair[0];
 						const modelId = pair[1];
 
@@ -164,7 +164,7 @@ export class GroupsService {
 
 				if (group.models.hasOwnProperty(key)) {
 					const meshIds = group.models[key].meshes;
-					const pair = key.split("@");
+					const pair = key.split('@');
 					const account = pair[0];
 					const model = pair[1];
 
@@ -220,7 +220,7 @@ export class GroupsService {
 			groupNames.push(group.name);
 		});
 
-		const prefix = "Group ";
+		const prefix = 'Group ';
 		let num = 1;
 
 		while (groupNames.indexOf(prefix + num) !== -1) {
@@ -255,7 +255,7 @@ export class GroupsService {
 			return this.getRGBA(group.color);
 		}
 
-		return "rgba(255, 255, 255, 1)";
+		return 'rgba(255, 255, 255, 1)';
 	}
 
 	/**
@@ -297,7 +297,7 @@ export class GroupsService {
 	public cleanGroups(groups: any[]) {
 		groups.forEach((group) => {
 			if (!group.name) {
-				group.name = "(No assigned name)";
+				group.name = '(No assigned name)';
 			}
 		});
 	}
@@ -346,7 +346,7 @@ export class GroupsService {
 	 */
 	public deleteGroups(teamspace: string, model: string, groups: any) {
 		if (groups.length > 0) {
-			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(",")}`;
+			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(',')}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
 					groups.forEach(this.deleteStateGroup.bind(this));
@@ -437,7 +437,7 @@ export class GroupsService {
 				updatedAt: Date.now(),
 				updatedBy: this.AuthService.getUsername(),
 				author: this.AuthService.getUsername(),
-				description: "",
+				description: '',
 				name: this.getDefaultGroupName(this.state.groups),
 				color: this.getRandomColor(),
 				objects,
@@ -592,7 +592,7 @@ export class GroupsService {
 	 * @param groupB the other group to be compared
 	 */
 	public areGroupsEqual(groupA: any, groupB: any): boolean {
-		const fields = ["_id", "__v", "name", "author", "description", "createdAt", "updatedBy", "updatedAt", "color"];
+		const fields = ['_id', '__v', 'name', 'author', 'description', 'createdAt', 'updatedBy', 'updatedAt', 'color'];
 		const areEqual = fields.every((f) => angular.toJson(groupA[f]) === angular.toJson(groupB[f]));
 
 		return areEqual;
@@ -613,10 +613,10 @@ export class GroupsService {
 
 	private getFullIdsForNodes(nodes: any[]) {
 		return nodes.reduce((obj, currentVal) => {
-			const nsp = currentVal.account + "." + currentVal.model;
-			let ids = obj.concat(currentVal.shared_ids.map((id) => nsp + "." + id));
+			const nsp = currentVal.account + '.' + currentVal.model;
+			let ids = obj.concat(currentVal.shared_ids.map((id) => nsp + '.' + id));
 			if (Array.isArray(currentVal.ifc_guids)) {
-				ids = ids.concat(currentVal.ifc_guids.map((id) => nsp + "." + id));
+				ids = ids.concat(currentVal.ifc_guids.map((id) => nsp + '.' + id));
 			}
 
 			return ids;
@@ -693,5 +693,5 @@ export class GroupsService {
 }
 
 export const GroupsServiceModule = angular
-	.module("3drepo")
-	.service("GroupsService", GroupsService);
+	.module('3drepo')
+	.service('GroupsService', GroupsService);

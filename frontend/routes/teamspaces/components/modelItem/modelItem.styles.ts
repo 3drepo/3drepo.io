@@ -33,7 +33,7 @@ export const Container = styled.div`
 
   ${RowMenu.StyledGrow} {
     position: absolute;
-    box-shadow: -10px 0px 26px -6px transparent;
+    box-shadow: -10px 0 26px -6px transparent;
     right: 45px;
     width: auto;
     transition: background 200ms ease-in-out;
@@ -42,7 +42,7 @@ export const Container = styled.div`
   &:hover,
   &:hover ${RowMenu.StyledGrow} {
     background: ${MODEL_HOVER_COLOR};
-    box-shadow: -10px 0px 20px -6px ${MODEL_HOVER_COLOR};
+    box-shadow: -10px 0 20px -6px ${MODEL_HOVER_COLOR};
   }
 `;
 

@@ -20,13 +20,13 @@ declare const Viewer: any;
 export class ViewerService {
 
 	public static $inject: string[] = [
-		"$q",
-		"$timeout",
+		'$q',
+		'$timeout',
 
-		"ClientConfigService",
-		"APIService",
-		"DialogService",
-		"EventService"
+		'ClientConfigService',
+		'APIService',
+		'DialogService',
+		'EventService'
 	];
 
 	public pin: any;
@@ -51,7 +51,7 @@ export class ViewerService {
 		public EventService: any
 	) {
 
-		this.newPinId = "newPinId";
+		this.newPinId = 'newPinId';
 		this.pinData = null;
 		this.viewer = undefined;
 
@@ -102,7 +102,7 @@ export class ViewerService {
 			switch (event.type) {
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
-				if (this.newPinId === "newPinId") {
+				if (this.newPinId === 'newPinId') {
 					this.removeUnsavedPin();
 					return;
 				}
@@ -295,10 +295,10 @@ export class ViewerService {
 
 	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
 
-		let errorType = "3D Repo Error";
+		let errorType = '3D Repo Error';
 
 		if (isUnity) {
-			errorType = "Unity Error";
+			errorType = 'Unity Error';
 		}
 
 		this.DialogService.html(errorType, message, true)
@@ -307,13 +307,13 @@ export class ViewerService {
 					location.reload();
 				}
 			}, () => {
-				console.error("Unity errored and user canceled reload", message);
+				console.error('Unity errored and user canceled reload', message);
 			});
 
 	}
 
 	public getModelInfo(account: string, model: string)  {
-		const url = account + "/" + model + ".json";
+		const url = account + '/' + model + '.json';
 		return this.APIService.get(url);
 	}
 
@@ -356,8 +356,8 @@ export class ViewerService {
 		if (this.viewer === undefined) {
 
 			this.viewer = new Viewer(
-				"viewer",
-				document.getElementById("viewer"),
+				'viewer',
+				document.getElementById('viewer'),
 				this.EventService.send,
 				this.handleUnityError.bind(this)
 			);
@@ -370,7 +370,7 @@ export class ViewerService {
 	}
 
 	public initViewer() {
-		console.debug("Initiating Viewer");
+		console.debug('Initiating Viewer');
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else if (this.viewer) {
@@ -378,7 +378,7 @@ export class ViewerService {
 			return this.viewer.insertUnityLoader()
 				.then(() => { this.callInit(); })
 				.catch((error) => {
-					console.error("Error inserting Unity script: ", error);
+					console.error('Error inserting Unity script: ', error);
 				});
 
 		}
@@ -407,7 +407,7 @@ export class ViewerService {
 				showAll : true
 			})
 			.catch((error) => {
-				console.error("Error creating Viewer Directive: ", error);
+				console.error('Error creating Viewer Directive: ', error);
 			});
 
 	}
@@ -415,8 +415,8 @@ export class ViewerService {
 	public loadViewerModel(account, model, branch, revision) {
 
 		if (!account || !model) {
-			console.error("Account, model, branch or revision was not defined!", account, model, branch, revision);
-			return Promise.reject("Account, model, branch or revision was not defined!");
+			console.error('Account, model, branch or revision was not defined!', account, model, branch, revision);
+			return Promise.reject('Account, model, branch or revision was not defined!');
 		} else {
 			this.account = account;
 			this.model = model;
@@ -433,7 +433,7 @@ export class ViewerService {
 					this.initialised.resolve();
 				})
 				.catch((error) => {
-					console.error("Error loading model: ", error);
+					console.error('Error loading model: ', error);
 				});
 			return this.currentModel.promise;
 		}
@@ -588,21 +588,21 @@ export class ViewerService {
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;
-			this.APIService.put(this.account + "/" + this.model + "/settings/heliSpeed", {heliSpeed: value})
+			this.APIService.put(this.account + '/' + this.model + '/settings/heliSpeed', {heliSpeed: value})
 				.catch((err) => {
-				console.error("Failed to update helicopter speed", err);
+				console.error('Failed to update helicopter speed', err);
 			});
 		}
 	}
 
 	private setHelicopterSpeed() {
 		if (this.account && this.model) {
-			this.APIService.get(this.account + "/" + this.model + "/settings/heliSpeed")
+			this.APIService.get(this.account + '/' + this.model + '/settings/heliSpeed')
 				.then((res) => {
 					this.heliSpeed = res.data.heliSpeed ? res.data.heliSpeed : 1;
 				})
 				.catch((err) => {
-				console.error("Failed to fetch helicopter speed", err);
+				console.error('Failed to fetch helicopter speed', err);
 			});
 		}
 	}
@@ -610,5 +610,5 @@ export class ViewerService {
 }
 
 export const ViewerServiceModule = angular
-	.module("3drepo")
-	.service("ViewerService", ViewerService);
+	.module('3drepo')
+	.service('ViewerService', ViewerService);

@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationEvents } from "./notification.events";
-import { NotificationsChannel } from "./notifications.channel";
+import { NotificationEvents } from './notification.events';
+import { NotificationsChannel } from './notifications.channel';
 
 export class NotificationIssuesEvents extends NotificationEvents {
 	private comments: { [id: string]: NotificationEvents};
 
 	constructor(protected channel: NotificationsChannel) {
-		super(channel, "issue");
+		super(channel, 'issue');
 		this.comments = {};
 	}
 
 	public getCommentsNotifications(id: string): NotificationEvents {
 		if (!this.comments[id]) {
-			this.comments[id] =  new NotificationEvents(this.channel, "comment", id);
+			this.comments[id] =  new NotificationEvents(this.channel, 'comment', id);
 		}
 
 		return this.comments[id];

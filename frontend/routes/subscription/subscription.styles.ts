@@ -72,15 +72,15 @@ export const FieldsRow = styled(Grid)`
     width: 100%;
   }
 
-  > ${StyledTextField}:nth-child(1) {
+  > ${/* sc-selector */ StyledTextField}:nth-child(1) {
     margin-right: 12px;
   }
 
-  ${FieldsColumn}:nth-child(2n) {
+  ${/* sc-selector */ FieldsColumn}:nth-child(2n) {
     margin-left: 12px;
   }
 
-  ${FieldsColumn}:nth-child(2n + 1) {
+  ${/* sc-selector */ FieldsColumn}:nth-child(2n + 1) {
     margin-right: 12px;
   }
 `;

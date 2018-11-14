@@ -18,24 +18,24 @@
 class ModelController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$window",
-		"$timeout",
-		"$scope",
-		"$element",
-		"$location",
-		"$compile",
-		"$mdDialog",
+		'$window',
+		'$timeout',
+		'$scope',
+		'$element',
+		'$location',
+		'$compile',
+		'$mdDialog',
 
-		"ClipService",
-		"EventService",
-		"TreeService",
-		"RevisionsService",
-		"AuthService",
-		"IssuesService",
-		"RisksService",
-		"StateManager",
-		"PanelService",
-		"ViewerService"
+		'ClipService',
+		'EventService',
+		'TreeService',
+		'RevisionsService',
+		'AuthService',
+		'IssuesService',
+		'RisksService',
+		'StateManager',
+		'PanelService',
+		'ViewerService'
 	];
 
 	private issuesCardIndex;
@@ -76,8 +76,8 @@ class ModelController implements ng.IController {
 	) {}
 
 	public $onInit() {
-		this.issuesCardIndex = this.PanelService.getCardIndex("issues");
-		this.pointerEvents = "inherit";
+		this.issuesCardIndex = this.PanelService.getCardIndex('issues');
+		this.pointerEvents = 'inherit';
 
 		const popStateHandler = (event) => {
 			this.StateManager.popStateHandler(event, this.account, this.model);
@@ -88,18 +88,18 @@ class ModelController implements ng.IController {
 		};
 
 		// listen for user clicking the back button
-		window.addEventListener("popstate", popStateHandler);
-		window.addEventListener("beforeunload", refreshHandler);
+		window.addEventListener('popstate', popStateHandler);
+		window.addEventListener('beforeunload', refreshHandler);
 
-		this.$scope.$on("$destroy", () => {
-			window.removeEventListener("beforeunload", refreshHandler);
-			window.removeEventListener("popstate", popStateHandler);
+		this.$scope.$on('$destroy', () => {
+			window.removeEventListener('beforeunload', refreshHandler);
+			window.removeEventListener('popstate', popStateHandler);
 		});
 
 		this.$timeout(() => {
 			// Get the model element
 			this.modelUI = angular.element(
-				this.$element[0].querySelector("#modelUI")
+				this.$element[0].querySelector('#modelUI')
 			);
 		});
 
@@ -108,7 +108,7 @@ class ModelController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watchGroup(["vm.account", "vm.model"], () => {
+		this.$scope.$watchGroup(['vm.account', 'vm.model'], () => {
 			if (this.account && this.model) {
 				angular.element(() => {
 					this.setupModelInfo();
@@ -116,7 +116,7 @@ class ModelController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.issueId", () => {
+		this.$scope.$watch('vm.issueId', () => {
 			if (this.issueId) {
 				// timeout to make sure event is sent after issue panel card is setup
 				// assume issue card shown by default
@@ -126,7 +126,7 @@ class ModelController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.riskId", () => {
+		this.$scope.$watch('vm.riskId', () => {
 			if (this.riskId) {
 				// timeout to make sure event is sent after risk panel card is setup
 				this.$timeout(() => {
@@ -140,7 +140,7 @@ class ModelController implements ng.IController {
 			this.event = event;
 
 			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				this.pointerEvents = event.value.on ? "none" : "inherit";
+				this.pointerEvents = event.value.on ? 'none' : 'inherit';
 			}
 
 		});
@@ -149,17 +149,17 @@ class ModelController implements ng.IController {
 
 	public handleModelError() {
 
-		const message = "The model was either not found, failed to load correctly " +
-		"or you are not authorized to view it. " +
-		" You will now be redirected to the teamspace page.";
+		const message = 'The model was either not found, failed to load correctly ' +
+		'or you are not authorized to view it. ' +
+		' You will now be redirected to the teamspace page.';
 
 		this.$mdDialog.show(
 			this.$mdDialog.alert()
 				.clickOutsideToClose(true)
-				.title("Model Error")
+				.title('Model Error')
 				.textContent(message)
-				.ariaLabel("Model Error")
-				.ok("OK")
+				.ariaLabel('Model Error')
+				.ok('OK')
 		);
 
 		this.$location.path('/dashboard/teamspaces');
@@ -176,10 +176,10 @@ class ModelController implements ng.IController {
 					this.ViewerService.initViewer().then(() => {
 						this.loadModel();
 					}).catch((err) => {
-						console.error("Failed to load model: ", err);
+						console.error('Failed to load model: ', err);
 					});
 				} else {
-					console.error("Failed to locate viewer");
+					console.error('Failed to locate viewer');
 				}
 			} else {
 				this.loadModel();
@@ -215,8 +215,8 @@ class ModelController implements ng.IController {
 	private setupViewer() {
 		if (this.riskId) {
 			// assume issue card shown by default
-			this.PanelService.hidePanelsByType("issues");
-			this.PanelService.showPanelsByType("risks");
+			this.PanelService.hidePanelsByType('issues');
+			this.PanelService.showPanelsByType('risks');
 
 			// timeout to make sure event is sent after risk panel card is setup
 			this.$timeout(() => {
@@ -228,7 +228,7 @@ class ModelController implements ng.IController {
 		this.ClipService.initClip(this.settings.properties.unit);
 		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
 			.catch((error) => {
-				console.error("Error initialising tree: ", error);
+				console.error('Error initialising tree: ', error);
 			});
 	}
 
@@ -243,7 +243,7 @@ class ModelController implements ng.IController {
 				console.error(error);
 				// If we are not logged in the
 				// session expired popup takes prescedence
-				if (error.data.message !== "You are not logged in") {
+				if (error.data.message !== 'You are not logged in') {
 					this.handleModelError();
 				}
 
@@ -254,20 +254,20 @@ class ModelController implements ng.IController {
 
 export const ModelComponent: ng.IComponentOptions = {
 	bindings: {
-		account:  "=",
-		branch:   "=",
-		issueId: "=",
-		riskId: "=",
-		model:  "=",
-		revision: "=",
-		state:    "=",
-		isLiteMode: "="
+		account:  '=',
+		branch:   '=',
+		issueId: '=',
+		riskId: '=',
+		model:  '=',
+		revision: '=',
+		state:    '=',
+		isLiteMode: '='
 	},
 	controller: ModelController,
-	controllerAs: "vm",
-	templateUrl: "templates/model.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/model.html'
 };
 
 export const ModelComponentModule = angular
-	.module("3drepo")
-	.component("model", ModelComponent);
+	.module('3drepo')
+	.component('model', ModelComponent);

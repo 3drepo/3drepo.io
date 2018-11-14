@@ -22,11 +22,11 @@ interface IViewState {
 export class ViewpointsService {
 
 	public static $inject: string[] = [
-		"$timeout",
-		"$q",
-		"APIService",
-		"ClipService",
-		"ViewerService"
+		'$timeout',
+		'$q',
+		'APIService',
+		'ClipService',
+		'ViewerService'
 	];
 
 	private state: IViewState;
@@ -67,7 +67,7 @@ export class ViewpointsService {
 	 * @param thumbnail URI for thumbnail
 	 */
 	public getThumbnailUrl(thumbnail: string) {
-		return (thumbnail) ? this.APIService.getAPIUrl(thumbnail) : "";
+		return (thumbnail) ? this.APIService.getAPIUrl(thumbnail) : '';
 	}
 
 	/**
@@ -133,7 +133,7 @@ export class ViewpointsService {
 				return this.APIService.post(viewpointsUrl, view)
 					.then((response: any) => {
 						view._id = response.data._id;
-						view.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpointsUrl + view._id + "/thumbnail.png");
+						view.screenshot.thumbnailUrl = this.getThumbnailUrl(viewpointsUrl + view._id + '/thumbnail.png');
 						this.state.viewpoints.push(view);
 					});
 			});
@@ -250,5 +250,5 @@ export class ViewpointsService {
 }
 
 export const ViewpointsServiceModule = angular
-	.module("3drepo")
-	.service("ViewpointsService", ViewpointsService);
+	.module('3drepo')
+	.service('ViewpointsService', ViewpointsService);

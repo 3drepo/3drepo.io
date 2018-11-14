@@ -18,8 +18,8 @@
 export class ClipService {
 
 	public static $inject: string[] = [
-		"ClientConfigService",
-		"ViewerService"
+		'ClientConfigService',
+		'ViewerService'
 	];
 
 	public state: any;
@@ -55,21 +55,21 @@ export class ClipService {
 			displayDistance: 0.0,
 			precision: 3,
 			sliderPosition: 0,
-			axes: ["X", "Y", "Z"],
+			axes: ['X', 'Y', 'Z'],
 			visible: false,
 			bbox: null,
 			direction: false,
 			availableUnits: this.ClientConfigService.units,
-			progressInfo: "Model loading...",
+			progressInfo: 'Model loading...',
 			normal: null
 		};
 	}
 
 	public handleUpDownArrow(event) {
 		if (event.key) {
-			if (event.key === "ArrowUp") {
+			if (event.key === 'ArrowUp') {
 				this.increment(0.005);
-			} else if (event.key === "ArrowDown") {
+			} else if (event.key === 'ArrowDown') {
 				this.decrement(0.005);
 			}
 		}
@@ -92,47 +92,47 @@ export class ClipService {
 		let scaler = 1;
 
 		switch (targetUnit) {
-		case "mm":
-			if (currentUnit === "cm") {
+		case 'mm':
+			if (currentUnit === 'cm') {
 				scaler = 10;
 			}
-			if (currentUnit === "dm") {
+			if (currentUnit === 'dm') {
 				scaler = 100;
 			}
-			if (currentUnit === "m") {
+			if (currentUnit === 'm') {
 				scaler = 1000;
 			}
 			break;
-		case "cm":
-			if (currentUnit === "mm") {
+		case 'cm':
+			if (currentUnit === 'mm') {
 				scaler = 0.1;
 			}
-			if (currentUnit === "dm") {
+			if (currentUnit === 'dm') {
 				scaler = 10;
 			}
-			if (currentUnit === "m") {
+			if (currentUnit === 'm') {
 				scaler = 100;
 			}
 			break;
-		case "dm":
-			if (currentUnit === "mm") {
+		case 'dm':
+			if (currentUnit === 'mm') {
 				scaler = 0.01;
 			}
-			if (currentUnit === "cm") {
+			if (currentUnit === 'cm') {
 				scaler = 0.1;
 			}
-			if (currentUnit === "m") {
+			if (currentUnit === 'm') {
 				scaler = 10;
 			}
 			break;
-		case "m":
-			if (currentUnit === "mm") {
+		case 'm':
+			if (currentUnit === 'mm') {
 				scaler = 0.001;
 			}
-			if (currentUnit === "cm") {
+			if (currentUnit === 'cm') {
 				scaler = 0.01;
 			}
-			if (currentUnit === "dm") {
+			if (currentUnit === 'dm') {
 				scaler = 0.1;
 			}
 			break;
@@ -170,7 +170,7 @@ export class ClipService {
 			this.state.bbox = bbox;
 			if (!this.state.normal) {
 				this.setDisplayValues(
-					"X",
+					'X',
 					this.state.bbox.max[0],
 					this.state.visible,
 					false,
@@ -194,7 +194,7 @@ export class ClipService {
 			this.updateDisplayedDistance(false, this.state.visible);
 		}
 
-		if (newAxis !== "") {
+		if (newAxis !== '') {
 			this.state.normal = null;
 		}
 
@@ -268,11 +268,11 @@ export class ClipService {
 		let res = null;
 		if (normal.length === 3) {
 			if (normal[1] === 0  && normal[2] === 0) {
-				res = "X";
+				res = 'X';
 			} else if (normal[0] === 0 && normal[2] === 0) {
-				res = "Z";
+				res = 'Z';
 			} else if (normal[0] === 0 && normal[1] === 0) {
-				res = "Y";
+				res = 'Y';
 			}
 		}
 
@@ -309,7 +309,7 @@ export class ClipService {
 		if (axis) {
 			this.state.displayedAxis = axis;
 		} else {
-			this.state.displayedAxis = "";
+			this.state.displayedAxis = '';
 		}
 
 		if (slider) {
@@ -331,9 +331,9 @@ export class ClipService {
 		if (this.state.normal) {
 			normal = this.state.normal;
 		} else if (this.state.displayedAxis) {
-			if (this.state.displayedAxis === "Y") {
+			if (this.state.displayedAxis === 'Y') {
 				normal = [0, 0, -1]; // Unity has flipped Z axis
-			} else if (this.state.displayedAxis === "Z") {
+			} else if (this.state.displayedAxis === 'Z') {
 				normal = [0, -1, 0];
 			}
 		}
@@ -410,14 +410,14 @@ export class ClipService {
 	}
 
 	public handleMetric(unit) {
-		const metric = ["cm", "dm", "mm", "m"];
+		const metric = ['cm', 'dm', 'mm', 'm'];
 		const isMetric = metric.indexOf(unit) !== -1;
-		return unit !== "ft" && isMetric;
+		return unit !== 'ft' && isMetric;
 	}
 
 	public handleFt(unit) {
 		const notMetric = !this.handleMetric(this.state.modelUnits);
-		return unit === "ft" && notMetric;
+		return unit === 'ft' && notMetric;
 	}
 
 	/**
@@ -459,13 +459,13 @@ export class ClipService {
 		let max = 0;
 
 		if (this.state.bbox) {
-			if (this.state.displayedAxis === "X") {
+			if (this.state.displayedAxis === 'X') {
 				min = this.state.bbox.min[0];
 				max = this.state.bbox.max[0];
-			} else if (this.state.displayedAxis === "Y") {
+			} else if (this.state.displayedAxis === 'Y') {
 				min = this.state.bbox.min[2];
 				max = this.state.bbox.max[2];
-			} else if (this.state.displayedAxis === "Z") {
+			} else if (this.state.displayedAxis === 'Z') {
 				min = this.state.bbox.min[1];
 				max = this.state.bbox.max[1];
 			}
@@ -510,5 +510,5 @@ export class ClipService {
 }
 
 export const ClipServiceModule = angular
-	.module("3drepo")
-	.service("ClipService", ClipService);
+	.module('3drepo')
+	.service('ClipService', ClipService);

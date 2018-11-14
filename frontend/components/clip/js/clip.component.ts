@@ -18,14 +18,14 @@
 class ClipController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"$element",
+		'$scope',
+		'$timeout',
+		'$element',
 
-		"ClipService",
-		"EventService",
-		"ViewerService",
-		"ClientConfigService"
+		'ClipService',
+		'EventService',
+		'ViewerService',
+		'ClientConfigService'
 	];
 
 	public account: string;
@@ -72,11 +72,11 @@ class ClipController implements ng.IController {
 
 		this.onContentHeightRequest({height: 130});
 
-		this.$element.bind("DOMMouseScroll mousewheel onmousewheel", (event) => {
+		this.$element.bind('DOMMouseScroll mousewheel onmousewheel', (event) => {
 			this.handleScroll(event);
 		});
 
-		this.$element.bind("keydown", (event) => {
+		this.$element.bind('keydown', (event) => {
 			this.handleUpDownArrow(event);
 		});
 
@@ -101,25 +101,25 @@ class ClipController implements ng.IController {
 			true
 		);
 
-		this.$scope.$watch("vm.displayDistance", (value) => {
+		this.$scope.$watch('vm.displayDistance', (value) => {
 			this.ClipService.setDisplayedDistance(value);
 		});
 
-		this.$scope.$watch("vm.units", (newUnits, oldUnits) => {
+		this.$scope.$watch('vm.units', (newUnits, oldUnits) => {
 			this.ClipService.updateUnits(newUnits, oldUnits);
 		});
 
 		/*
 		 * Watch for show/hide of card
 		 */
-		this.$scope.$watch("vm.show", (newValue)  =>  {
+		this.$scope.$watch('vm.show', (newValue)  =>  {
 			this.ClipService.setShow(newValue);
 		});
 
 		/*
 		 * Toggle the clipping plane
 		 */
-		this.$scope.$watch("vm.visible", (newVisibility) => {
+		this.$scope.$watch('vm.visible', (newVisibility) => {
 			if (newVisibility !== undefined && newVisibility !== null) {
 				if (newVisibility) {
 					this.updateClippingPlane(this.account, this.model);
@@ -132,14 +132,14 @@ class ClipController implements ng.IController {
 		/*
 		 * Change the clipping plane axis
 		 */
-		this.$scope.$watch("vm.displayedAxis", (value) => {
+		this.$scope.$watch('vm.displayedAxis', (value) => {
 			this.ClipService.setDisplayedAxis(value);
 		});
 
 		/*
 		 * Watch the slider position
 		 */
-		this.$scope.$watch("vm.sliderPosition", (value) => {
+		this.$scope.$watch('vm.sliderPosition', (value) => {
 			this.ClipService.setSliderPosition(value);
 		});
 
@@ -251,17 +251,17 @@ class ClipController implements ng.IController {
 
 export const ClipComponent: ng.IComponentOptions = {
 	bindings: {
-		show: "=",
-		visible: "=",
-		onContentHeightRequest: "&",
-		account: "<",
-		model: "<"
+		show: '=',
+		visible: '=',
+		onContentHeightRequest: '&',
+		account: '<',
+		model: '<'
 	},
 	controller: ClipController,
-	controllerAs: "vm",
-	templateUrl: "templates/clip.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/clip.html'
 };
 
 export const ClipComponentModule = angular
-	.module("3drepo")
-	.component("clip", ClipComponent);
+	.module('3drepo')
+	.component('clip', ClipComponent);

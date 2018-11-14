@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { NotificationsChannel } from "./notifications.channel";
+import { NotificationsChannel } from './notifications.channel';
 
 declare const io;
 
 export class NotificationService {
 	public static $inject: string[] = [
-		"$injector",
-		"ClientConfigService",
-		"DialogService"
+		'$injector',
+		'ClientConfigService',
+		'DialogService'
 	];
 
 	public subscribe: any;
@@ -42,13 +42,13 @@ export class NotificationService {
 		this.dialogOpen = false;
 
 		if (!ClientConfigService.chatHost || !ClientConfigService.chatPath) {
-			console.error("Chat server settings missing");
+			console.error('Chat server settings missing');
 			return;
 		}
 
 		this.socket = io(ClientConfigService.chatHost, {
 			path: ClientConfigService.chatPath,
-			transports: ["websocket"],
+			transports: ['websocket'],
 			reconnection: true,
 			reconnectionDelay: 500,
 			reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity
@@ -59,20 +59,20 @@ export class NotificationService {
 	}
 
 	public setupSocketEvents() {
-		this.socket.on("connect", () => {
+		this.socket.on('connect', () => {
 			this.addSocketIdToHeader(this.socket.id);
 		});
 
-		this.socket.on("disconnect", () => {
+		this.socket.on('disconnect', () => {
 
-			console.error("The websocket for the notification service was disconnected");
+			console.error('The websocket for the notification service was disconnected');
 			this.DialogService.disconnected();
 
 		});
 
-		this.socket.on("reconnect", () => {
+		this.socket.on('reconnect', () => {
 
-			console.debug("Rejoining all rooms on reconnect");
+			console.debug('Rejoining all rooms on reconnect');
 
 			this.addSocketIdToHeader(this.socket.id);
 
@@ -81,7 +81,7 @@ export class NotificationService {
 
 			lastJoined.forEach((room) => {
 
-				room = room.split("::");
+				room = room.split('::');
 
 				const account = room[0];
 				const model = room[1];
@@ -93,35 +93,35 @@ export class NotificationService {
 
 	public addSocketIdToHeader(socketId: string) {
 
-		const $httpProvider = this.$injector.get("$http");
+		const $httpProvider = this.$injector.get('$http');
 
 		$httpProvider.defaults.headers.post = $httpProvider.defaults.headers.post || {};
 		$httpProvider.defaults.headers.put = $httpProvider.defaults.headers.put || {};
 		$httpProvider.defaults.headers.delete = $httpProvider.defaults.headers.delete || {};
 
-		$httpProvider.defaults.headers.post["x-socket-id"] = socketId;
-		$httpProvider.defaults.headers.put["x-socket-id"] = socketId;
-		$httpProvider.defaults.headers.delete["x-socket-id"] = socketId;
+		$httpProvider.defaults.headers.post['x-socket-id'] = socketId;
+		$httpProvider.defaults.headers.put['x-socket-id'] = socketId;
+		$httpProvider.defaults.headers.delete['x-socket-id'] = socketId;
 	}
 
 	public joinRoom(account: string, model: string) {
 
-		let modelNameSpace = "";
+		let modelNameSpace = '';
 
 		if (model) {
-			modelNameSpace = "::" + model;
+			modelNameSpace = '::' + model;
 		}
 
 		const room =  account + modelNameSpace;
 		if (this.joined.indexOf(room) === -1) {
 
-			this.socket.emit("join", {account, model});
+			this.socket.emit('join', {account, model});
 			this.joined.push(room);
 		}
 	}
 
 	public getChannel(account: string, model: string): NotificationsChannel {
-		const channelId: string = account + "::" + model;
+		const channelId: string = account + '::' + model;
 
 		if ( !this.channels[channelId] ) {
 			this.channels[channelId] = new NotificationsChannel(this, account, model);
@@ -132,19 +132,19 @@ export class NotificationService {
 
 	public getEventName(account: string, model: string, keys: string, event): string {
 
-		let modelNameSpace = "";
+		let modelNameSpace = '';
 
 		if (model) {
-			modelNameSpace = "::" + model;
+			modelNameSpace = '::' + model;
 		}
 
-		let keyString = "";
+		let keyString = '';
 
 		if (!!keys) {
-			keyString =  "::" + keys;
+			keyString =  '::' + keys;
 		}
 
-		return account + modelNameSpace +  keyString + "::" + event;
+		return account + modelNameSpace +  keyString + '::' + event;
 	}
 
 	public performSubscribe(account: string, model: string, keys: any, event: any, callback: any) {
@@ -164,5 +164,5 @@ export class NotificationService {
 }
 
 export const NotificationServiceModule = angular
-	.module("3drepo")
-	.service("NotificationService", NotificationService);
+	.module('3drepo')
+	.service('NotificationService', NotificationService);

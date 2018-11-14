@@ -18,8 +18,10 @@
     "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./tests",
     "unity-util": "webpack --config ./internals/webpack/webpack.demo.config.js",
-    "lint": "tslint --config tslint.json --project ./ --exclude tests --format stylish",
-    "lint:fix": "yarn lint --fix"
+    "lint:ts": "tslint --config tslint.json --project ./ --exclude tests --format stylish",
+    "lint:css": "stylelint ./**/*.styles.ts",
+    "lint": "yarn lint:ts && yarn lint:css",
+    "lint:fix": "yarn lint:ts --fix"
   },
   "keywords": [
     "3drepo",
@@ -96,6 +98,10 @@
     "mocha": "4.0.1",
     "protractor": "5.3.1",
     "styled-components": "^3.4.5",
+    "stylelint": "^9.8.0",
+    "stylelint-config-recommended": "^2.1.0",
+    "stylelint-config-styled-components": "^0.1.1",
+    "stylelint-processor-styled-components": "^1.5.0",
     "ts-loader": "4.3.0",
     "tslint": "^5.11.0",
     "tslint-react": "^3.6.0",

@@ -18,13 +18,13 @@
 class DocsController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$mdDialog",
-		"$timeout",
-		"$filter",
+		'$scope',
+		'$mdDialog',
+		'$timeout',
+		'$filter',
 
-		"DocsService",
-		"ViewerService"
+		'DocsService',
+		'ViewerService'
 	];
 
 	private onContentHeightRequest;
@@ -96,7 +96,7 @@ class DocsController implements ng.IController {
 				const value = this.docs[key];
 				contentHeight += this.DocsService.docTypeHeight;
 				if (value.show) {
-					if (key === "Meta Data") {
+					if (key === 'Meta Data') {
 						const len = Object.keys(value.data[0].metadata).length;
 						itemsHeight = len * metaDataItemHeight;
 					}
@@ -112,14 +112,14 @@ class DocsController implements ng.IController {
 
 export const DocsComponent: ng.IComponentOptions = {
 	bindings: {
-		onContentHeightRequest: "&",
-		show: "="
+		onContentHeightRequest: '&',
+		show: '='
 	},
 	controller: DocsController,
-	controllerAs: "vm",
-	templateUrl: "templates/docs.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/docs.html'
 };
 
 export const DocsComponentModule = angular
-	.module("3drepo")
-	.component("docs", DocsComponent);
+	.module('3drepo')
+	.component('docs', DocsComponent);

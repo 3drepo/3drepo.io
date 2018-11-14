@@ -18,9 +18,9 @@
 class PanelCardFilterController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$timeout",
-		"$scope",
-		"$element"
+		'$timeout',
+		'$scope',
+		'$element'
 	];
 
 	private filterTimeout = null;
@@ -45,18 +45,18 @@ class PanelCardFilterController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.filterInputText", (newValue) => {
+		this.$scope.$watch('vm.filterInputText', (newValue) => {
 			if (this.isDefined(newValue)) {
 				this.filterText = this.filterInputText;
 			}
 		});
 
-		this.$scope.$watch("vm.showFilter", (newValue) => {
+		this.$scope.$watch('vm.showFilter', (newValue) => {
 			if (this.isDefined(newValue) && newValue) {
 				this.$timeout(() => {
-					this.filterInput = angular.element(this.$element[0].querySelector("#panelCardFilterInput"));
+					this.filterInput = angular.element(this.$element[0].querySelector('#panelCardFilterInput'));
 					this.filterInput.focus();
-					this.filterInput.value = "";
+					this.filterInput.value = '';
 				});
 
 				this.collapsed = false;
@@ -66,7 +66,7 @@ class PanelCardFilterController implements ng.IController {
 	}
 
 	public clearFilter() {
-		this.filterInputText = "";
+		this.filterInputText = '';
 		this.filterInput.focus();
 		this.showFilter = false;
 	}
@@ -75,14 +75,14 @@ class PanelCardFilterController implements ng.IController {
 
 export const PanelCardFilterComponent: ng.IComponentOptions = {
 	bindings: {
-		filterText: "=",
-		showFilter: "="
+		filterText: '=',
+		showFilter: '='
 	},
 	controller: PanelCardFilterController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card-filter.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card-filter.html'
 };
 
 export const PanelCardFilterComponentComponentModule = angular
-	.module("3drepo")
-	.component("panelCardFilter", PanelCardFilterComponent);
+	.module('3drepo')
+	.component('panelCardFilter', PanelCardFilterComponent);

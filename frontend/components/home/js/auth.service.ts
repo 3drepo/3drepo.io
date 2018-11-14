@@ -14,25 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { dispatch, history } from "../../../helpers/migration";
-import { TeamspaceActions } from "../../../modules/teamspace";
-import { getAvatarUrl } from "../../../modules/teamspace/teamspace.sagas";
+import { dispatch, history } from '../../../helpers/migration';
+import { TeamspaceActions } from '../../../modules/teamspace';
+import { getAvatarUrl } from '../../../modules/teamspace/teamspace.sagas';
 
 export class AuthService {
 
 	public static $inject: string[] = [
-		"$injector",
-		"$q",
-		"$interval",
-		"$location",
-		"$window",
-		"$mdDialog",
-		"$timeout",
-		"$state",
+		'$injector',
+		'$q',
+		'$interval',
+		'$location',
+		'$window',
+		'$mdDialog',
+		'$timeout',
+		'$state',
 
-		"ClientConfigService",
-		"AnalyticService",
-		"APIService"
+		'ClientConfigService',
+		'AnalyticService',
+		'APIService'
 	];
 
 	public authDefer;
@@ -64,22 +64,22 @@ export class AuthService {
 		this.authDefer = $q.defer();
 
 		this.doNotLogout = [
-			"/terms",
-			"/privacy",
-			"/signUp",
-			"/passwordForgot",
-			"/passwordChange",
-			"/registerRequest",
-			"/registerVerify"
+			'/terms',
+			'/privacy',
+			'/signUp',
+			'/passwordForgot',
+			'/passwordChange',
+			'/registerRequest',
+			'/registerVerify'
 		];
 
 		this.loggedOutStates = [
-			"app.login",
-			"app.signUp",
-			"app.passwordForgot",
-			"app.registerRequest",
-			"app.registerVerify",
-			"app.passwordChange"
+			'app.login',
+			'app.signUp',
+			'app.passwordForgot',
+			'app.registerRequest',
+			'app.registerVerify',
+			'app.passwordChange'
 		];
 
 		this.loggedIn = this.localStorageLoggedIn() || null;
@@ -89,8 +89,8 @@ export class AuthService {
 
 		this.state = {};
 		this.events = {
-			USER_LOGGED_IN : "USER_LOGGED_IN",
-			USER_LOGGED_OUT : "USER_LOGGED_OUT"
+			USER_LOGGED_IN : 'USER_LOGGED_IN',
+			USER_LOGGED_OUT : 'USER_LOGGED_OUT'
 		};
 
 	}
@@ -115,8 +115,8 @@ export class AuthService {
 
 		// Set the session as logged in on the client
 		// using local storage
-		localStorage.setItem("loggedIn", "true");
-		localStorage.setItem("username", response.data.username);
+		localStorage.setItem('loggedIn', 'true');
+		localStorage.setItem('username', response.data.username);
 
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: response.data.username,
@@ -139,8 +139,8 @@ export class AuthService {
 		const initialiser = response.initialiser;
 		response.initialiser = undefined;
 
-		localStorage.setItem("loggedIn", "false");
-		localStorage.removeItem("username");
+		localStorage.setItem('loggedIn', 'false');
+		localStorage.removeItem('username');
 
 		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
 			username: null,
@@ -157,8 +157,8 @@ export class AuthService {
 		this.loggedIn  = false;
 		this.username  = null;
 
-		localStorage.setItem("loggedIn", "false");
-		localStorage.removeItem("username");
+		localStorage.setItem('loggedIn', 'false');
+		localStorage.removeItem('username');
 
 		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {});
 
@@ -189,11 +189,11 @@ export class AuthService {
 	}
 
 	public localStorageLoggedIn() {
-		return localStorage.getItem("loggedIn") === "true";
+		return localStorage.getItem('loggedIn') === 'true';
 	}
 
 	public getLocalStorageUsername() {
-		return localStorage.getItem("username");
+		return localStorage.getItem('username');
 	}
 
 	public shouldAutoLogout() {
@@ -212,9 +212,9 @@ export class AuthService {
 			this.$window.location.reload();
 		} else if (loginStateMismatch && isLoggedOutPage) {
 			if (sessionLogin) {
-				this.APIService.post("logout").then(() => {
-					localStorage.setItem("loggedIn", "false");
-					localStorage.removeItem("username");
+				this.APIService.post('logout').then(() => {
+					localStorage.setItem('loggedIn', 'false');
+					localStorage.removeItem('username');
 					dispatch({ type: 'RESET_APP' });
 				});
 			}
@@ -264,7 +264,7 @@ export class AuthService {
 
 	public sendLoginRequest() {
 		if (!this.loginRequestPromise) {
-			this.loginRequestPromise =  this.APIService.get("login").then((response) => {
+			this.loginRequestPromise =  this.APIService.get('login').then((response) => {
 				this.loginRequestPromise = null;
 				return response;
 			}).catch(this.loginFailure.bind(this));
@@ -279,7 +279,7 @@ export class AuthService {
 
 		const postData = {username: loginUsername, password};
 
-		this.APIService.post("login", postData)
+		this.APIService.post('login', postData)
 			.then(this.loginSuccess.bind(this))
 			.catch(this.loginFailure.bind(this));
 
@@ -289,7 +289,7 @@ export class AuthService {
 	public logout() {
 		this.authDefer = this.$q.defer();
 
-		this.APIService.post("logout")
+		this.APIService.post('logout')
 			.then(this.logoutSuccess.bind(this))
 			.catch(this.logoutFailure.bind(this));
 
@@ -303,5 +303,5 @@ export class AuthService {
 }
 
 export const AuthServiceModule = angular
-	.module("3drepo")
-	.service("AuthService", AuthService);
+	.module('3drepo')
+	.service('AuthService', AuthService);
