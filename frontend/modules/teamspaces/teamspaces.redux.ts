@@ -39,12 +39,12 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 }, { prefix: 'TEAMSPACES_' });
 
 export const INITIAL_STATE = {
-	teamspaces: []
+	teamspaces: {}
 };
 
 const setTeamspaces = (state = INITIAL_STATE, action) => {
 	const teamspaces = keyBy(action.teamspaces, 'account');
-	return { ...state, teamspaces };
+	return Object.assign({}, state, {teamspaces});
 };
 
 // Projects
@@ -105,7 +105,6 @@ const createModelSuccess = (state = INITIAL_STATE, action) => {
 
 const removeModelSuccess = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
-
 	const models = foundProject.models.filter((model) => model.model !== action.modelData.model);
 	teamspaces[action.teamspace].projects[projectIndex].models = models;
 
