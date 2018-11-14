@@ -39,8 +39,6 @@ export const StyledList = styled(List)`
 
 export const UserContainer = styled(ListItem)`
   display: flex;
-  flex-direction: column;
-  display: flex;
   flex-direction: row;
 `;
 

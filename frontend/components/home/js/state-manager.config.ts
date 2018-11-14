@@ -18,22 +18,22 @@
 function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$locationProvider.html5Mode(true);
 
-	$stateProvider.state("app", {
-		url: "",
+	$stateProvider.state('app', {
+		url: '',
 		abstract: true,
 		views: {
 			'main@': {
-				template: "<home flex layout='column'></home>"
+				template: '<home flex layout=\'column\'></home>'
 			}
 		}
 	});
 
-	$stateProvider.state("app.homepage", {
-		url: "/"
+	$stateProvider.state('app.homepage', {
+		url: '/'
 	});
 
-	$stateProvider.state("app.viewer", {
-		url: "/viewer/:teamspace/:modelId/:revision?issueId&riskId",
+	$stateProvider.state('app.viewer', {
+		url: '/viewer/:teamspace/:modelId/:revision?issueId&riskId',
 		template: `
 			<model
 				is-lite-mode="vm.isLiteMode"
@@ -55,23 +55,23 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
-	$stateProvider.state("app.dashboard", {
-		url: "/dashboard",
-		template: "<dashboard flex/>",
+	$stateProvider.state('app.dashboard', {
+		url: '/dashboard',
+		template: '<dashboard flex/>',
 		data: {
 			isLoginRequired: true
 		}
 	});
 
-	$stateProvider.state("app.dashboard.pages", {
-		url: "/*page?project&view",
+	$stateProvider.state('app.dashboard.pages', {
+		url: '/*page?project&view',
 		data: {
 			isLoginRequired: true
 		}
 	});
 
-	$stateProvider.state("app.login", {
-		url: "/login",
+	$stateProvider.state('app.login', {
+		url: '/login',
 		template: '<login login-message="vm.loginMessage"/>',
 		data: {
 			isLogoutRequired: true
@@ -81,24 +81,24 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
-	$stateProvider.state("app.signUp", {
-		url: "/sign-up",
-		template: "<sign-up />",
+	$stateProvider.state('app.signUp', {
+		url: '/sign-up',
+		template: '<sign-up />',
 		data: {
 			isLogoutRequired: true
 		}
 	});
 
-	$stateProvider.state("app.passwordForgot", {
-		url: "/password-forgot",
-		template: "<password-forgot />",
+	$stateProvider.state('app.passwordForgot', {
+		url: '/password-forgot',
+		template: '<password-forgot />',
 		data: {
 			isLogoutRequired: true
 		}
 	});
 
-	$stateProvider.state("app.passwordChange", {
-		url: "/password-change?token&username",
+	$stateProvider.state('app.passwordChange', {
+		url: '/password-change?token&username',
 		template: `
 			<password-change
 				token="vm.query.token"
@@ -110,50 +110,50 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
-	$stateProvider.state("app.registerRequest", {
-		url: "/register-request",
-		template: "<register-request />"
+	$stateProvider.state('app.registerRequest', {
+		url: '/register-request',
+		template: '<register-request />'
 	});
 
-	$stateProvider.state("app.registerVerify", {
-		url: "/register-verify?token&username?pay",
-		template: "<register-verify />",
+	$stateProvider.state('app.registerVerify', {
+		url: '/register-verify?token&username?pay',
+		template: '<register-verify />',
 		data: {
 			isLogoutRequired: true
 		}
 	});
 
 	// Static pages
-	$stateProvider.state("app.static", {
-		url: "",
-		template: "<ui-view />"
+	$stateProvider.state('app.static', {
+		url: '',
+		template: '<ui-view />'
 	});
 
-	$stateProvider.state("app.static.privacy", {
-		url: "/privacy",
+	$stateProvider.state('app.static.privacy', {
+		url: '/privacy',
 		template: '<privacy id="privacy" />'
 	});
 
-	$stateProvider.state("app.static.terms", {
-		url: "/terms",
+	$stateProvider.state('app.static.terms', {
+		url: '/terms',
 		template: '<terms id="terms" />'
 	});
 
-	$stateProvider.state("app.static.cookies", {
-		url: "/cookies",
+	$stateProvider.state('app.static.cookies', {
+		url: '/cookies',
 		template: '<cookies id="cookies" />'
 	});
 
-	$httpProvider.interceptors.push("AuthInterceptor");
-	$urlRouterProvider.otherwise("/");
+	$httpProvider.interceptors.push('AuthInterceptor');
+	$urlRouterProvider.otherwise('/');
 }
 
 export const StateManagerConfigModule = angular
-	.module("3drepo")
+	.module('3drepo')
 	.config([
-		"$stateProvider",
-		"$urlRouterProvider",
-		"$locationProvider",
-		"$httpProvider",
+		'$stateProvider',
+		'$urlRouterProvider',
+		'$locationProvider',
+		'$httpProvider',
 		StateManagerConfig
 	]);

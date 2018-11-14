@@ -17,8 +17,8 @@
 
 import * as React from 'react';
 
-import ListItem from "@material-ui/core/ListItem";
-import { ListItemContainer, StyledLink } from "./listItemLink.styles";
+import ListItem from '@material-ui/core/ListItem';
+import { ListItemContainer, StyledLink } from './listItemLink.styles';
 
 interface IProps {
 	to: string;

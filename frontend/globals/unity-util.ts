@@ -50,7 +50,7 @@ export class UnityUtil {
 	public static vpPromise = null;
 	public static objectStatusPromise = null;
 	public static loadedFlag = false;
-	public static UNITY_GAME_OBJECT = "WebGLInterface";
+	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	public static defaultHighlightColor = [1, 1, 0];
 
 	public static init(
@@ -61,28 +61,28 @@ export class UnityUtil {
 
 	public static onProgress(gameInstance, progress: number) {
 
-		const appendTo = "viewer";
+		const appendTo = 'viewer';
 
 		if (!gameInstance.progress) {
-			gameInstance.progress = document.createElement("div");
-			gameInstance.progress.className = "unityProgressBar";
+			gameInstance.progress = document.createElement('div');
+			gameInstance.progress.className = 'unityProgressBar';
 			document.getElementById(appendTo).appendChild(gameInstance.progress);
 		}
 
 		requestAnimationFrame(() => {
 			if (progress === 1) {
 				gameInstance.progress.style.width = 0;
-				gameInstance.progress.style.display = "none";
+				gameInstance.progress.style.display = 'none';
 			} else {
 				const width = document.body.clientWidth * (progress);
-				gameInstance.progress.style.width = width + "px";
+				gameInstance.progress.style.width = width + 'px';
 			}
 		});
 
 	}
 
 	public static loadUnity(divId: any, unityJsonPath?: string) {
-		unityJsonPath = unityJsonPath || "unity/Build/unity.json";
+		unityJsonPath = unityJsonPath || 'unity/Build/unity.json';
 
 		const unitySettings: any = {
 			onProgress: this.onProgress
@@ -110,11 +110,11 @@ export class UnityUtil {
 	public static cancelLoadModel() {
 		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
 			// If the previous model is being loaded but hasn't finished yet
-			UnityUtil.loadedResolve.reject("cancel");
+			UnityUtil.loadedResolve.reject('cancel');
 		}
 
 		if (UnityUtil.loadingResolve) {
-			UnityUtil.loadingResolve.reject("cancel");
+			UnityUtil.loadingResolve.reject('cancel');
 		}
 	}
 
@@ -123,8 +123,8 @@ export class UnityUtil {
 	 */
 	public static isUnityError(err) {
 		const checks = [
-			"Array buffer allocation failed", "Invalid typed array length",
-			"Unity", "unity", "emscripten", "blob:http"
+			'Array buffer allocation failed', 'Invalid typed array length',
+			'Unity', 'unity', 'emscripten', 'blob:http'
 		];
 		const hasUnityError = !checks.every((check) => err.indexOf(check) === -1);
 		return hasUnityError;
@@ -214,8 +214,8 @@ export class UnityUtil {
 					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}
 			}).catch((error) => {
-				if (error !== "cancel") {
-					console.error("UnityUtil.onLoaded() failed: ", error);
+				if (error !== 'cancel') {
+					console.error('UnityUtil.onLoaded() failed: ', error);
 					UnityUtil.userAlert(error, true, true);
 				}
 			});
@@ -226,9 +226,9 @@ export class UnityUtil {
 					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}
 			}).catch((error) => {
-				if (error !== "cancel") {
+				if (error !== 'cancel') {
 					UnityUtil.userAlert(error, true, true);
-					console.error("UnityUtil.onLoading() failed: ", error);
+					console.error('UnityUtil.onLoading() failed: ', error);
 				}
 			});
 		} else {
@@ -237,9 +237,9 @@ export class UnityUtil {
 					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}
 			}).catch((error) => {
-				if (error !== "cancel") {
+				if (error !== 'cancel') {
 					UnityUtil.userAlert(error, true, true);
-					console.error("UnityUtil.onReady() failed: ", error);
+					console.error('UnityUtil.onReady() failed: ', error);
 				}
 			});
 		}
@@ -334,7 +334,7 @@ export class UnityUtil {
 			try {
 				viewpoint = JSON.parse(vpInfo);
 			} catch {
-				console.error("Failed to parse viewpoint", vpInfo);
+				console.error('Failed to parse viewpoint', vpInfo);
 			}
 			UnityUtil.vpPromise.resolve(viewpoint);
 			UnityUtil.vpPromise = null;
@@ -353,7 +353,7 @@ export class UnityUtil {
 		const params = {
 			groups: meshIDs
 		};
-		UnityUtil.toUnity("CentreToObject", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.toUnity('CentreToObject', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	/**
@@ -367,14 +367,14 @@ export class UnityUtil {
 			pinName : id
 		};
 
-		UnityUtil.toUnity("ChangePinColor", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.toUnity('ChangePinColor', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	/**
 	 * Clear all highlighting.
 	 */
 	public static clearHighlights() {
-		UnityUtil.toUnity("ClearHighlighting", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		UnityUtil.toUnity('ClearHighlighting', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
@@ -382,7 +382,7 @@ export class UnityUtil {
 	* i.e. models will be rendered in greyscale, detailing the difference/clash
 	*/
 	public static diffToolDiffView() {
-		UnityUtil.toUnity("DiffToolShowDiff", undefined, undefined);
+		UnityUtil.toUnity('DiffToolShowDiff', undefined, undefined);
 	}
 
 	/**
@@ -390,7 +390,7 @@ export class UnityUtil {
 	* This also unloads the comparator models
 	*/
 	public static diffToolDisableAndClear() {
-		UnityUtil.toUnity("DiffToolDisable", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		UnityUtil.toUnity('DiffToolDisable', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
@@ -398,7 +398,7 @@ export class UnityUtil {
 	* This starts the diff tool in diff mode
 	*/
 	public static diffToolEnableWithDiffMode() {
-		UnityUtil.toUnity("DiffToolStartDiffMode", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		UnityUtil.toUnity('DiffToolStartDiffMode', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
@@ -406,7 +406,7 @@ export class UnityUtil {
 	* This starts the diff tool in clash mode
 	*/
 	public static diffToolEnableWithClashMode() {
-		UnityUtil.toUnity("DiffToolStartClashMode", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		UnityUtil.toUnity('DiffToolStartClashMode', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
@@ -423,10 +423,10 @@ export class UnityUtil {
 			model
 		};
 
-		if (revision !== "head") {
+		if (revision !== 'head') {
 			params.revID = revision;
 		}
-		UnityUtil.toUnity("DiffToolLoadComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		if (!UnityUtil.loadComparatorPromise) {
 			UnityUtil.loadComparatorPromise = new Promise((resolve, reject) => {
@@ -447,7 +447,7 @@ export class UnityUtil {
 			database : account,
 			model
 		};
-		UnityUtil.toUnity("DiffToolAssignAsComparator", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 	}
 
@@ -456,7 +456,7 @@ export class UnityUtil {
 	 * @param {string} theshold - tolerance level for diffing/clashing
 	 */
 	public static diffToolSetThreshold(theshold) {
-		UnityUtil.toUnity("DiffToolSetThreshold", UnityUtil.LoadingState.MODEL_LOADED, theshold);
+		UnityUtil.toUnity('DiffToolSetThreshold', UnityUtil.LoadingState.MODEL_LOADED, theshold);
 
 	}
 
@@ -465,7 +465,7 @@ export class UnityUtil {
 	* i.e. Only show the model you are trying to compare with, not the base model
 	*/
 	public static diffToolShowComparatorModel() {
-		UnityUtil.toUnity("DiffToolShowComparatorModel", undefined, undefined);
+		UnityUtil.toUnity('DiffToolShowComparatorModel', undefined, undefined);
 	}
 
 	/**
@@ -473,28 +473,28 @@ export class UnityUtil {
 	* i.e. It will show only the original model, not the comparator nor the diff view
 	*/
 	public static diffToolShowBaseModel() {
-		UnityUtil.toUnity("DiffToolShowBaseModel", undefined, undefined);
+		UnityUtil.toUnity('DiffToolShowBaseModel', undefined, undefined);
 	}
 
 	/**
 	* Compare transparent objects as if they are opaque objects
 	*/
 	public static diffToolRenderTransAsOpaque() {
-		UnityUtil.toUnity("DiffToolRenderTransAsOpaque", undefined, undefined);
+		UnityUtil.toUnity('DiffToolRenderTransAsOpaque', undefined, undefined);
 	}
 
 	/**
 	* Ignore semi-transparent objects in diff
 	*/
 	public static diffToolRenderTransAsInvisible() {
-		UnityUtil.toUnity("DiffToolRenderTransAsInvisible", undefined, undefined);
+		UnityUtil.toUnity('DiffToolRenderTransAsInvisible', undefined, undefined);
 	}
 
 	/**
 	* Compare transparent objects as of normal
 	*/
 	public static diffToolRenderTransAsDefault() {
-		UnityUtil.toUnity("DiffToolRenderTransAsDefault", undefined, undefined);
+		UnityUtil.toUnity('DiffToolRenderTransAsDefault', undefined, undefined);
 	}
 
 	/**
@@ -508,28 +508,28 @@ export class UnityUtil {
 	*  Start clip editing in box mode
 	*/
 	public static startBoxClip() {
-		UnityUtil.toUnity("StartBoxClip", undefined, undefined);
+		UnityUtil.toUnity('StartBoxClip', undefined, undefined);
 	}
 
 	/**
 	*  Start editing mode with current clip plane state
 	*/
 	public static startClipEdit() {
-		UnityUtil.toUnity("StartClipEdit", undefined, undefined);
+		UnityUtil.toUnity('StartClipEdit', undefined, undefined);
 	}
 
 	/**
 	*  Stop editing mode
 	*/
 	public static stopClipEdit() {
-		UnityUtil.toUnity("StopClipEdit", undefined, undefined);
+		UnityUtil.toUnity('StopClipEdit', undefined, undefined);
 	}
 
 	/**
 	 * Disable the Measuring tool.
 	 */
 	public static disableMeasuringTool() {
-		UnityUtil.toUnity("StopMeasuringTool", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('StopMeasuringTool', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
@@ -548,14 +548,14 @@ export class UnityUtil {
 			normal,
 			color : colour
 		};
-		UnityUtil.toUnity("DropPin", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	/**
 	 * Enable measuring tool. This will allow you to start measuring by clicking on the model
 	 */
 	public static enableMeasuringTool() {
-		UnityUtil.toUnity("StartMeasuringTool", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('StartMeasuringTool', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
@@ -569,9 +569,9 @@ export class UnityUtil {
 	 * @param {object} promise - promise that the function will resolve with the object status info.
 	 */
 	public static getObjectsStatus(account, model, promise) {
-		let nameSpace = "";
+		let nameSpace = '';
 		if (account && model) {
-			nameSpace = account + "." + model;
+			nameSpace = account + '.' + model;
 		}
 		if (UnityUtil.objectStatusPromise && UnityUtil.objectStatusPromise.then) {
 			UnityUtil.objectStatusPromise.then(() => {
@@ -584,36 +584,36 @@ export class UnityUtil {
 
 	public static _getObjectsStatus(nameSpace, promise) {
 		UnityUtil.objectStatusPromise = promise;
-		UnityUtil.toUnity("GetObjectsStatus", UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
+		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 	}
 
 	public static getPointInfo() {
-		UnityUtil.toUnity("GetPointInfo", false, 0);
+		UnityUtil.toUnity('GetPointInfo', false, 0);
 	}
 
 	/**
 	 * Decrease the speed of Helicopter navigation (by x0.75)
 	 */
 	public static helicopterSpeedDown() {
-		UnityUtil.toUnity("HelicopterSpeedDown", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('HelicopterSpeedDown', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Increase the speed of Helicopter navigation (by x1.25)
 	 */
 	public static helicopterSpeedUp() {
-		UnityUtil.toUnity("HelicopterSpeedUp", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('HelicopterSpeedUp', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Reset the speed of Helicopter navigation
 	 */
 	public static helicopterSpeedReset() {
-		UnityUtil.toUnity("HelicopterSpeedReset", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('HelicopterSpeedReset', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	public static hideHiddenByDefaultObjects() {
-		UnityUtil.toUnity("HideHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		UnityUtil.toUnity('HideHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
@@ -643,7 +643,7 @@ export class UnityUtil {
 					forceReHighlight,
 					color: color ? color : UnityUtil.defaultHighlightColor
 				};
-				UnityUtil.toUnity("HighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+				UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 			}, i > 0 ? 100 : 0);
 		}
 
@@ -662,7 +662,7 @@ export class UnityUtil {
 			ids : idArr
 		};
 
-		UnityUtil.toUnity("UnhighlightObjects", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
 	/**
@@ -688,12 +688,12 @@ export class UnityUtil {
 			model
 		};
 
-		if (revision !== "head") {
+		if (revision !== 'head') {
 			params.revID = revision;
 		}
 
 		UnityUtil.onLoaded();
-		UnityUtil.toUnity("LoadModel", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
 
@@ -703,7 +703,7 @@ export class UnityUtil {
 	 * Reset map sources.
 	 */
 	public static resetMapSources() {
-		UnityUtil.toUnity("ResetMapSources", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('ResetMapSources', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -711,7 +711,7 @@ export class UnityUtil {
 	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
 	 */
 	public static addMapSource(mapSource) {
-		UnityUtil.toUnity("AddMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
 	}
 
 	/**
@@ -719,7 +719,7 @@ export class UnityUtil {
 	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
 	 */
 	public static removeMapSource(mapSource) {
-		UnityUtil.toUnity("RemoveMapSource", UnityUtil.LoadingState.VIEWER_READY, mapSource);
+		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
 	}
 
 	/**
@@ -727,21 +727,21 @@ export class UnityUtil {
 	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
 	public static mapInitialise(surveyingInfo) {
-		UnityUtil.toUnity("MapsInitiate", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(surveyingInfo));
+		UnityUtil.toUnity('MapsInitiate', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(surveyingInfo));
 	}
 
 	/**
 	 * Start map generation
 	 */
 	public static mapStart() {
-		UnityUtil.toUnity("ShowMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('ShowMap', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
 	 * Stop map generation
 	 */
 	public static mapStop() {
-		UnityUtil.toUnity("HideMap", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('HideMap', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
@@ -754,11 +754,11 @@ export class UnityUtil {
 	public static overrideMeshColor(account, model, meshIDs, color) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + "."  + model;
+			param.nameSpace = account + '.'  + model;
 		}
 		param.ids = meshIDs;
 		param.color = color;
-		UnityUtil.toUnity("OverrideMeshColor", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 	}
 
 	/**
@@ -770,10 +770,10 @@ export class UnityUtil {
 	public static resetMeshColor(account, model, meshIDs) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + "."  + model;
+			param.nameSpace = account + '.'  + model;
 		}
 		param.ids = meshIDs;
-		UnityUtil.toUnity("ResetMeshColor", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 	}
 
 	/**
@@ -781,7 +781,7 @@ export class UnityUtil {
 	 * @param {string} id - pin identifier
 	 */
 	public static removePin(id) {
-		UnityUtil.toUnity("RemovePin", UnityUtil.LoadingState.MODEL_LOADING, id);
+		UnityUtil.toUnity('RemovePin', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	/**
@@ -796,7 +796,7 @@ export class UnityUtil {
 	 * Reset the viewpoint to ISO view.
 	 */
 	public static resetCamera() {
-		UnityUtil.toUnity("ResetCamera", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('ResetCamera', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -807,7 +807,7 @@ export class UnityUtil {
 	 */
 	public static requestScreenShot(promise) {
 		UnityUtil.screenshotPromises.push(promise);
-		UnityUtil.toUnity("RequestScreenShot", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -830,10 +830,10 @@ export class UnityUtil {
 	public static _requestViewpoint(account, model, promise) {
 		const param: any = {};
 		if (account && model) {
-			param.namespace = account + "."  + model;
+			param.namespace = account + '.'  + model;
 		}
 		UnityUtil.vpPromise = promise;
-		UnityUtil.toUnity("RequestViewpoint", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
 	}
 
 	/**
@@ -841,7 +841,7 @@ export class UnityUtil {
 	 * @param {string[]} hostname - list of API names to use. (e.g https://api1.www.3drepo.io/api/)
 	 */
 	public static setAPIHost(hostname) {
-		UnityUtil.toUnity("SetAPIHost", UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
+		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
 	/**r
@@ -849,7 +849,7 @@ export class UnityUtil {
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */
 	public static setNavigation(navMode) {
-		UnityUtil.toUnity("SetNavMode", UnityUtil.LoadingState.VIEWER_READY, navMode);
+		UnityUtil.toUnity('SetNavMode', UnityUtil.LoadingState.VIEWER_READY, navMode);
 	}
 
 	/**
@@ -858,7 +858,7 @@ export class UnityUtil {
 	 * @param {string} units - i.e. "m", "mm", "ft" etc.
 	 */
 	public static setUnits(units) {
-		UnityUtil.toUnity("SetUnits", UnityUtil.LoadingState.MODEL_LOADING, units);
+		UnityUtil.toUnity('SetUnits', UnityUtil.LoadingState.MODEL_LOADING, units);
 	}
 
 	/**
@@ -874,14 +874,14 @@ export class UnityUtil {
 	public static setViewpoint(pos, up, forward, lookAt, account, model) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + "." + model;
+			param.nameSpace = account + '.' + model;
 		}
 
 		param.position = pos;
 		param.up = up;
 		param.forward = forward;
 		param.lookAt = lookAt;
-		UnityUtil.toUnity("SetViewpoint", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+		UnityUtil.toUnity('SetViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
 
 	}
 
@@ -889,21 +889,21 @@ export class UnityUtil {
 	 * Make all hidden by default objects visible
 	 */
 	public static showHiddenByDefaultObjects() {
-		UnityUtil.toUnity("ShowHiddenByDefaultObjects", UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		UnityUtil.toUnity('ShowHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
 	 * Start rectangular select
 	 */
 	public static startAreaSelection() {
-		UnityUtil.toUnity("StartRectangularSelect", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('StartRectangularSelect', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
 	 * Stop rectangular select
 	 */
 	public static stopAreaSelection() {
-		UnityUtil.toUnity("StopRectangularSelect", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('StopRectangularSelect', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 	/**
@@ -911,7 +911,7 @@ export class UnityUtil {
 	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
 	 */
 	public static toggleStats() {
-		UnityUtil.toUnity("ShowStats", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('ShowStats', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -924,12 +924,12 @@ export class UnityUtil {
 	public static toggleVisibility(account, model, ids, visibility) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + "." + model;
+			param.nameSpace = account + '.' + model;
 		}
 
 		param.ids = ids;
 		param.visible = visibility;
-		UnityUtil.toUnity("ToggleVisibility", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 
 	}
 
@@ -949,10 +949,10 @@ export class UnityUtil {
 		const param: any = {};
 		param.clip = clipPlane;
 		if (account && model) {
-			param.nameSpace = account + "." + model;
+			param.nameSpace = account + '.' + model;
 		}
 		param.requiresBroadcast = requireBroadcast;
-		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 	}
 
 	/**
@@ -960,14 +960,14 @@ export class UnityUtil {
 	 * This will also toggle edit mode to false
 	 */
 	public static disableClippingPlanes() {
-		UnityUtil.toUnity("DisableClip", undefined, undefined);
+		UnityUtil.toUnity('DisableClip', undefined, undefined);
 	}
 
 	/**
 	 * Zoom to highlighted meshes
 	 */
 	public static zoomToHighlightedMeshes() {
-		UnityUtil.toUnity("ZoomToHighlightedMeshes", UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
 }

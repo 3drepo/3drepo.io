@@ -44,7 +44,7 @@ export class ClientConfigService {
 
 			this.apiUrlCounter[type] += 1;
 
-			return this.apiUrls[type][functionIndex] + "/" + path;
+			return this.apiUrls[type][functionIndex] + '/' + path;
 		};
 
 		for (const k in this.apiUrls) {

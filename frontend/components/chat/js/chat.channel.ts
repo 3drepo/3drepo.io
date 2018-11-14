@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatService } from "./chat.service";
-import { ChatEvents } from "./chat.events";
-import { ModelChatEvents } from "./models.chat.events";
-import { IssuesChatEvents } from "./issues.chat.events";
-import { NotificationsChatEvents } from "./notifications.chat.events";
+import { ChatService } from './chat.service';
+import { ChatEvents } from './chat.events';
+import { ModelChatEvents } from './models.chat.events';
+import { IssuesChatEvents } from './issues.chat.events';
+import { NotificationsChatEvents } from './notifications.chat.events';
 
 export class ChatChannel {
 	/**
@@ -56,11 +56,11 @@ export class ChatChannel {
 	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
 	constructor(private chatService: ChatService, private account: string, private modelStr: string) {
-		this.groups = new ChatEvents(this, "group");
+		this.groups = new ChatEvents(this, 'group');
 		this.issues = new IssuesChatEvents(this);
 		this.risks = new ChatEvents(this, "risk");
 		this.model = new ModelChatEvents(this);
-		this.views = new ChatEvents(this, "view");
+		this.views = new ChatEvents(this, 'view');
 		this.notifications = new NotificationsChatEvents(this);
 	}
 

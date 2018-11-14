@@ -14,22 +14,22 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { RisksService } from "./risks.service";
-import { IChip } from "../../panel/js/panel-card-chips-filter.component";
+import { RisksService } from './risks.service';
+import { IChip } from '../../panel/js/panel-card-chips-filter.component';
 
 class RisksListController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$window",
-		"$timeout",
-		"$compile",
-		"$element",
-		"$filter",
+		'$scope',
+		'$window',
+		'$timeout',
+		'$compile',
+		'$element',
+		'$filter',
 
-		"RisksService",
-		"ClientConfigService",
-		"PanelService"
+		'RisksService',
+		'ClientConfigService',
+		'PanelService'
 	];
 
 	private toShow: string;
@@ -64,7 +64,7 @@ class RisksListController implements ng.IController {
 
 	public $onInit() {
 
-		this.toShow = "list";
+		this.toShow = 'list';
 		this.focusedRiskIndex = null;
 		this.selectedRiskIndex = null;
 		this.internalSelectedRisk = null;
@@ -85,23 +85,23 @@ class RisksListController implements ng.IController {
 			true
 		);
 
-		this.$scope.$watch("vm.risksToShow", () => {
+		this.$scope.$watch('vm.risksToShow', () => {
 			this.setContentAndSize();
 			this.risksService.showRiskPins();
 		});
 
-		this.$scope.$watchCollection("vm.filterChips", (chips: IChip[], oldChips: IChip[]) => {
+		this.$scope.$watchCollection('vm.filterChips', (chips: IChip[], oldChips: IChip[]) => {
 			this.risksService.setupRisksToShow(this.model, chips);
 		});
 
-		this.$scope.$watch("vm.filterText", () => {
+		this.$scope.$watch('vm.filterText', () => {
 
 			// Filter text
 			// this.setupRisksToShow();
 
 		});
 
-		this.$scope.$watch("vm.menuOption", () => {
+		this.$scope.$watch('vm.menuOption', () => {
 
 			// Menu option
 			if (this.menuOption && this.menuOption.value) {
@@ -133,13 +133,13 @@ class RisksListController implements ng.IController {
 
 		switch (this.menuOption.value) {
 
-			case "print":
-				const printEndpoint = this.account + "/" + this.model + "/risks.html?ids=" + ids.join(",");
+			case 'print':
+				const printEndpoint = this.account + '/' + this.model + '/risks.html?ids=' + ids.join(',');
 				const printUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, printEndpoint);
-				this.$window.open(printUrl, "_blank");
+				this.$window.open(printUrl, '_blank');
 				break;
 
-			case "showPins":
+			case 'showPins':
 				this.risksService.state.risksCardOptions.showPins = this.menuOption.selected;
 				break;
 
@@ -156,15 +156,15 @@ class RisksListController implements ng.IController {
 
 		// Setup what to show
 		if (this.risksService.state.risksToShow.length > 0) {
-			this.toShow = "list";
+			this.toShow = 'list';
 			const buttonSpace = 70;
 			const numOfRisks = this.risksService.state.risksToShow.length;
 			const heights = this.risksService.state.heights.risksListItemHeight + buttonSpace;
 			const risksHeight = numOfRisks * heights;
 			this.contentHeight({height: risksHeight });
 		} else {
-			this.toShow = "info";
-			this.info = this.filterChips.length > 0 ? "No results found" : "There are currently no open risks";
+			this.toShow = 'info';
+			this.info = this.filterChips.length > 0 ? 'No results found' : 'There are currently no open risks';
 			this.contentHeight({height: this.risksService.state.heights.infoHeight});
 		}
 
@@ -173,7 +173,7 @@ class RisksListController implements ng.IController {
 
 	public selectRisk(risk) {
 		this.risksService.setSelectedRisk(risk, false, this.revision);
-		angular.element(this.$window).triggerHandler("resize");
+		angular.element(this.$window).triggerHandler('resize');
 	}
 
 	public isSelectedRisk(risk) {
@@ -188,26 +188,26 @@ class RisksListController implements ng.IController {
 
 export const RisksListComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		allRisks: "<",
-		risksToShow: "<",
-		filterChips: "=",
-		filterText: "<",
-		onEditRisk: "&",
-		nonListSelect: "<",
-		contentHeight: "&",
-		menuOption: "<",
-		importBcf: "&",
-		selectedRisk: "<",
-		risksCardOptions: "<"
+		account: '<',
+		model: '<',
+		revision: '<',
+		allRisks: '<',
+		risksToShow: '<',
+		filterChips: '=',
+		filterText: '<',
+		onEditRisk: '&',
+		nonListSelect: '<',
+		contentHeight: '&',
+		menuOption: '<',
+		importBcf: '&',
+		selectedRisk: '<',
+		risksCardOptions: '<'
 	},
 	controller: RisksListController,
-	controllerAs: "vm",
-	templateUrl: "templates/risks-list.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/risks-list.html'
 };
 
 export const RisksListComponentModule = angular
-	.module("3drepo")
-	.component("risksList", RisksListComponent);
+	.module('3drepo')
+	.component('risksList', RisksListComponent);

@@ -92,7 +92,7 @@ export function* removeUser({ username }) {
 			};
 
 			if (errorData.teamspace) {
-				config.data.teamspacePerms = errorData.teamspace.permissions.join(", ");
+				config.data.teamspacePerms = errorData.teamspace.permissions.join(', ');
 			}
 
 			yield put(DialogActions.showDialog(config));

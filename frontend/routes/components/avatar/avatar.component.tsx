@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { memoize } from 'lodash';
 
-import { Container, AvatarPlaceholder, StyledAvatar, StyledIcon } from "./avatar.styles";
+import { Container, AvatarPlaceholder, StyledAvatar, StyledIcon } from './avatar.styles';
 
 interface IProps {
 	name: string;

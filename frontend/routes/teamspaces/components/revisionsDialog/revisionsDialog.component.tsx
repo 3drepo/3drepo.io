@@ -72,8 +72,8 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 					<>
 						<StyledList>
 							{revisions && revisions.map((revision, index) => (
-								<Item button ={true}key={revision._id}
-									divideronClick={ this.revisionClickHandler( revision)}
+								<Item button={true}key={revision._id}
+									divideronClick={this.revisionClickHandler( revision)}
 									last={index === 0}>
 										<Row>
 										<Property >
@@ -89,7 +89,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 											<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
 										</Property>
 										</Row>
-										<Description>{revision.desc ? revision.desc : '(empty description)' }
+										<Description>{revision.desc ? revision.desc : '(empty description)'}
 									</Description>
 								</Item>)
 							) }

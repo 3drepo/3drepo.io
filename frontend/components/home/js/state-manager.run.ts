@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { history } from "../../../helpers/migration";
+import { history } from '../../../helpers/migration';
 import { get } from 'lodash';
 
 function StateManagerRun(
@@ -32,25 +32,25 @@ function StateManagerRun(
 	$urlRouter
 ) {
 
-	const dateFilter = $filter("date");
+	const dateFilter = $filter('date');
 
 	$mdDateLocale.formatDate = (date, timezone) => {
 		if (!date) {
-			return "";
+			return '';
 		}
 
 		const localeTime = date.toLocaleTimeString();
 		let formatDate = date;
 		if (date.getHours() === 0 &&
-			(localeTime.indexOf("11:") !== -1 || localeTime.indexOf("23:") !== -1)) {
+			(localeTime.indexOf('11:') !== -1 || localeTime.indexOf('23:') !== -1)) {
 			formatDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 1, 0, 0);
 		}
 
-		return dateFilter(formatDate, "d/M/yyyy", timezone);
+		return dateFilter(formatDate, 'd/M/yyyy', timezone);
 	};
 
 	$mdDateLocale.parseDate = (dateString) => {
-		const dateArr = dateString.split("/").concat([1900, 1 , 1]);
+		const dateArr = dateString.split('/').concat([1900, 1 , 1]);
 		return new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
 	};
 
@@ -128,18 +128,18 @@ function StateManagerRun(
 }
 
 export const StateManagerRunModule = angular
-	.module("3drepo")
+	.module('3drepo')
 	.run([
-		"$location",
-		"$rootScope",
-		"$state",
-		"$timeout",
-		"$mdDateLocale",
-		"$filter",
+		'$location',
+		'$rootScope',
+		'$state',
+		'$timeout',
+		'$mdDateLocale',
+		'$filter',
 
-		"StateManager",
-		"AuthService",
-		"AnalyticService",
-		"$urlRouter",
+		'StateManager',
+		'AuthService',
+		'AnalyticService',
+		'$urlRouter',
 		StateManagerRun
 	]);

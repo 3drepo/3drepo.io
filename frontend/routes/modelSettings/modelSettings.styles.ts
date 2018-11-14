@@ -34,15 +34,15 @@ export const FieldsRow = styled(Grid)`
 		margin-right: 12px;
 	}
 
-	${StyledTextField}:nth-child(2n) {
+	${/* sc-selector */ StyledTextField}:nth-child(2n) {
 		margin-left: 12px;
 	}
 
-	${StyledTextField}:nth-child(2n + 1) {
+	${/* sc-selector */ StyledTextField}:nth-child(2n + 1) {
 		margin-left: 0;
 	}
 
-	${StyledTextField}:last-child {
+	${/* sc-selector */ StyledTextField}:last-child {
 		margin-right: 0;
 	}
 `;
@@ -83,7 +83,7 @@ export const StyledIcon = styled(ArrowBack)`
 `;
 
 export const BackButton = styled.span`
-	color: green;
+	color: ${COLOR.SECONDARY_MAIN};
 	color: ${COLOR.WHITE};
 	margin-right: 15px;
 	display: flex;

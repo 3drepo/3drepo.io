@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 export const ListItemContainer = styled.li`
   height: 72px;
@@ -26,7 +26,7 @@ export const ListItemContainer = styled.li`
   transition: background-color .4s cubic-bezier(.25,.8,.25,1);
 
   &:hover {
-    background-color: rgba(158,158,158,0.2);;
+    background-color: rgba(158,158,158,0.2);
   }
 `;
 

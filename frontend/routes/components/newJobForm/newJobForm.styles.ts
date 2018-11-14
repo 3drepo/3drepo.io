@@ -50,10 +50,4 @@ export const Container = styled.div`
 	${Title} {
 		margin-bottom: 12px;
 	}
-
-	${StyledTextField}, ${StyledTextField} *
-	[class*='MuiTypography'] {
-		font-size: 14px;
-		color: ${COLOR.BLACK_60};
-	}
 `;
