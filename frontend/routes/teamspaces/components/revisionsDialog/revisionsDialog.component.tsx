@@ -75,7 +75,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 								<Item
 									button={true}
 									key={revision._id}
-									divider
+									divider={true}
 									onClick={this.revisionClickHandler(revision)}
 									last={index === 0}>
 										<Row>
