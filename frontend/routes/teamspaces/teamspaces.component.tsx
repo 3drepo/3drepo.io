@@ -51,6 +51,7 @@ const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account, projects }
 interface IProps {
 	match: any;
 	history: any;
+	location: any;
 	currentTeamspace: string;
 	teamspaces: any[];
 	isPending: boolean;
@@ -298,11 +299,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderModel = (props) => {
 		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
 		const { activeTeamspace } = this.state;
-		const { match, downloadModel } = this.props;
+		const { match } = this.props;
 
 		return (
 			<ModelItem
 				{...props}
+				key={props.model}
 				actions={[]}
 				onModelItemClick={this.createModelItemClickHandler(props)}
 				onPermissionsClick={ this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
@@ -361,6 +363,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public renderProject = (props) => {
 		const { activeTeamspace } = this.state;
+
 		return (
 			<ProjectItem
 				{...props}

@@ -150,8 +150,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		const actions = isFederation ? this.federationActions : this.modelActions;
 		const isPending = isPendingStatus(status);
 
-		return (
-			<Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
+		return <Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
 				<Grid container={true} direction="row" alignItems="center" justify="space-between" wrap="nowrap">
 					<Grid container={true} justify="space-between" wrap="nowrap" alignItems="center">
 						{ isPending
@@ -159,20 +158,18 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 							: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
 						}
 					</Grid>
-					<TimeWrapper container={true} wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
-						<Time>
-							{ timestamp && (!hovered || hovered && isPending)
-								? (<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />)
-								: null
-							}
-						</Time>
+					<TimeWrapper container={true} wrap="nowrap" direction="row" alignItems="center" justify="flex-end" pending={isPending ? 1 : 0}>
+						{ timestamp && !hovered && !isPending &&
+							<Time>
+								<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />
+							</Time>
+						}
 						<RowMenu open={hovered} disabled={isPending}>
 							{this.renderActions(actions)}
 						</RowMenu>
 					</TimeWrapper>
 				</Grid>
 				{this.renderSubModels(subModels)}
-			</Container>
-		);
+			</Container>;
 	}
 }

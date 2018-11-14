@@ -42,7 +42,7 @@ export const Item = styled(ListItem)`
   ${Property} {
     font-weight: ${(props: any) => props.last ? '500' : '200'};
   }
-`;
+` as any;
 
 export const Row = styled.div`
   display: flex;
