@@ -31,7 +31,7 @@ export const UserIcon = styled(AccountCircle)`
 	&& {
 		color: ${COLOR.WHITE};
 		font-size: 45px;
-		filter: drop-shadow(0px 0px 2px ${COLOR.BLACK_30});
+		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
 	}
 `;
 

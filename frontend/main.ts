@@ -9,7 +9,7 @@ import 'angular-recaptcha';
 import * as io from 'socket.io-client';
 import 'simplebar';
 
-import "ngclipboard";
+import 'ngclipboard';
 
 // TypeScript compiled globals
 import { UnityUtil } from './globals/unity-util';

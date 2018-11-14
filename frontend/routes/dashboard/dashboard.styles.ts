@@ -22,7 +22,7 @@ import { media } from '../../styles';
 
 export const Container = styled(Grid)`
   && {
-    padding: 30px 50px 60px 50px;
+    padding: 30px 50px 60px;
     height: 100%;
     overflow: hidden;
 
@@ -53,7 +53,7 @@ export const Content = styled(Grid)`
   && {
     flex: 1;
     overflow: hidden;
-    filter: drop-shadow(0px 2px 1px rgba(0,0,0,0.25));
+    filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25));
   }
 
   ${PanelStyles.Container} {

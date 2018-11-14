@@ -18,11 +18,11 @@
 class RightPanelController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"EventService",
-		"DocsService",
-		"MeasureService"
+		'$scope',
+		'$timeout',
+		'EventService',
+		'DocsService',
+		'MeasureService'
 	];
 
 	private highlightBackground;
@@ -43,23 +43,23 @@ class RightPanelController implements ng.IController {
 
 	public $onInit() {
 
-		this.highlightBackground = "#FF9800";
+		this.highlightBackground = '#FF9800';
 		this.measureActive = false;
 		this.measureDisabled = false;
 
 		this.metaData = false;
 		this.showPanel = true;
 
-		this.measureBackground = "";
-		this.metaBackground = "";
+		this.measureBackground = '';
+		this.metaBackground = '';
 
 		this.watchers();
 
 	}
 
 	public $onDestroy() {
-		this.metaBackground = "";
-		this.measureBackground = "";
+		this.metaBackground = '';
+		this.measureBackground = '';
 		this.MeasureService.deactivateMeasure();
 	}
 
@@ -74,7 +74,7 @@ class RightPanelController implements ng.IController {
 
 				// Clear the background of measure tooltip
 				if (!this.measureActive) {
-					this.measureBackground = "";
+					this.measureBackground = '';
 				} else {
 					this.measureBackground = this.highlightBackground;
 				}
@@ -83,7 +83,7 @@ class RightPanelController implements ng.IController {
 			if (this.measureDisabled !== this.MeasureService.state.disabled ) {
 				this.measureDisabled = this.MeasureService.state.disabled;
 				if (this.measureDisabled) {
-					this.measureBackground = "";
+					this.measureBackground = '';
 					this.measureActive = false;
 				}
 			}
@@ -93,7 +93,7 @@ class RightPanelController implements ng.IController {
 	}
 
 	public disableOtherModes(setMode) {
-		if (setMode === "meta") {
+		if (setMode === 'meta') {
 
 			if (this.measureActive) {
 				this.toggleMeasure();
@@ -103,7 +103,7 @@ class RightPanelController implements ng.IController {
 				this.toggleAutoMetaData();
 			}
 
-		} else if (setMode === "measure") {
+		} else if (setMode === 'measure') {
 
 			if (!this.measureActive) {
 				this.toggleMeasure();
@@ -130,7 +130,7 @@ class RightPanelController implements ng.IController {
 		}
 
 		this.metaData = !this.metaData;
-		this.metaBackground = this.metaData ? this.highlightBackground : "";
+		this.metaBackground = this.metaData ? this.highlightBackground : '';
 		this.DocsService.state.active = this.metaData;
 		this.DocsService.state.show = false;
 
@@ -141,10 +141,10 @@ class RightPanelController implements ng.IController {
 export const RightPanelComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: RightPanelController,
-	controllerAs: "vm",
-	templateUrl: "templates/right-panel.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/right-panel.html'
 };
 
 export const RightPanelComponentModule = angular
-	.module("3drepo")
-	.component("rightPanel", RightPanelComponent);
+	.module('3drepo')
+	.component('rightPanel', RightPanelComponent);

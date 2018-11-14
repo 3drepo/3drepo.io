@@ -16,8 +16,7 @@
  */
 
 import styled from 'styled-components';
-import Avatar from "@material-ui/core/Avatar";
-import SvgIcon from "@material-ui/core/SvgIcon";
+import Avatar from '@material-ui/core/Avatar';
 
 import { COLOR } from '../../../styles';
 import Icon from '@material-ui/core/Icon';

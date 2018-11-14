@@ -18,15 +18,15 @@
 class TreeController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"$element",
+		'$scope',
+		'$timeout',
+		'$element',
 
-		"TreeService",
-		"EventService",
-		"MultiSelectService",
-		"ViewerService",
-		"GroupsService"
+		'TreeService',
+		'EventService',
+		'MultiSelectService',
+		'ViewerService',
+		'GroupsService'
 	];
 
 	public showProgress: boolean; // in pug
@@ -77,7 +77,7 @@ class TreeController implements ng.IController {
 		this.TreeService.clearCurrentlySelected();
 		this.viewerSelectedObject = null;
 		this.showProgress = true;
-		this.progressInfo = "Loading full tree structure";
+		this.progressInfo = 'Loading full tree structure';
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
 		this.hideIfc = true;
 		this.initTreeOnReady();
@@ -103,10 +103,10 @@ class TreeController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.filterText", (newValue) => {
+		this.$scope.$watch('vm.filterText', (newValue) => {
 
 			if (newValue !== undefined) {
-				if (newValue.toString() === "") {
+				if (newValue.toString() === '') {
 					this.showTreeInPane();
 				} else {
 					// Use rIC if available for smoother interactions
@@ -121,17 +121,17 @@ class TreeController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.selectedMenuOption",
+		this.$scope.$watch('vm.selectedMenuOption',
 			(selectedOption: any) => {
 
-				if (selectedOption && selectedOption.hasOwnProperty("value")) {
+				if (selectedOption && selectedOption.hasOwnProperty('value')) {
 
 					// Menu option
 					switch (selectedOption.value) {
-						case "showAll":
+						case 'showAll':
 							this.TreeService.showAllTreeNodes(true);
 							break;
-						case "hideIfc":
+						case 'hideIfc':
 							this.hideIfc = selectedOption.selected;
 							this.TreeService.setHideIfc(this.hideIfc);
 							if (this.hideIfc) {
@@ -142,11 +142,11 @@ class TreeController implements ng.IController {
 								this.TreeService.showTreeNodes(this.TreeService.getHiddenByDefaultNodes());
 							}
 							break;
-						case "isolate":
+						case 'isolate':
 							this.TreeService.isolateSelected();
 							break;
 						default:
-							console.error("Tree option menu selection unhandled");
+							console.error('Tree option menu selection unhandled');
 					}
 				}
 
@@ -200,7 +200,7 @@ class TreeController implements ng.IController {
 
 	public resize() {
 		return this.$timeout().then(() => {
-			angular.element((window as any).window).triggerHandler("resize");
+			angular.element((window as any).window).triggerHandler('resize');
 		});
 	}
 
@@ -261,7 +261,7 @@ class TreeController implements ng.IController {
 		this.filterItemsFound = false;
 		this.showTree = false;
 		this.showProgress = true;
-		this.progressInfo = "Filtering tree for objects";
+		this.progressInfo = 'Filtering tree for objects';
 
 		this.TreeService.search(filterText, this.revision)
 			.then((json) => {
@@ -329,7 +329,7 @@ class TreeController implements ng.IController {
 		// the maximum top index that can be set
 
 		const nodesToShow = this.fetchNodesToShow();
-		const height = document.getElementById("treeInfiniteScroll").clientHeight;
+		const height = document.getElementById('treeInfiniteScroll').clientHeight;
 		const maxInTree = Math.ceil(height / this.nodeHeight);
 		const maximumTopIndex = nodesToShow.length - maxInTree;
 
@@ -406,20 +406,20 @@ class TreeController implements ng.IController {
 
 export const TreeComponent: ng.IComponentOptions = {
 	bindings: {
-		account:  "=",
-		branch:   "=",
-		filterText: "=",
-		showFilter: "=",
-		model:  "=",
-		onContentHeightRequest: "&",
-		revision: "=",
-		selectedMenuOption: "="
+		account:  '=',
+		branch:   '=',
+		filterText: '=',
+		showFilter: '=',
+		model:  '=',
+		onContentHeightRequest: '&',
+		revision: '=',
+		selectedMenuOption: '='
 	},
 	controller: TreeController,
-	controllerAs: "vm",
-	templateUrl: "templates/tree.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/tree.html'
 };
 
 export const TreeComponentModule = angular
-	.module("3drepo")
-	.component("tree", TreeComponent);
+	.module('3drepo')
+	.component('tree', TreeComponent);

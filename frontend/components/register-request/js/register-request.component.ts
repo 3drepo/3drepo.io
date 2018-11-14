@@ -35,11 +35,11 @@
 class RegisterRequestController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$window",
+		'$scope',
+		'$window',
 
-		"AuthService",
-		"$location"
+		'AuthService',
+		'$location'
 	];
 
 	constructor(
@@ -58,7 +58,7 @@ class RegisterRequestController implements ng.IController {
 				this.goToLoginPage();
 			}
 		}).catch(() => {
-			console.debug("User is not logged in");
+			console.debug('User is not logged in');
 		});
 
 		this.watchers();
@@ -66,7 +66,7 @@ class RegisterRequestController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watch("AuthService.isLoggedIn()", (newValue) => {
+		this.$scope.$watch('AuthService.isLoggedIn()', (newValue) => {
 			// TODO: this is a hack
 			if (newValue === true) {
 				this.goToLoginPage();
@@ -75,20 +75,20 @@ class RegisterRequestController implements ng.IController {
 	}
 
 	public goToLoginPage() {
-		this.$location.path("/");
+		this.$location.path('/');
 	}
 
 }
 
 export const RegisterRequestComponent: ng.IComponentOptions = {
 	bindings: {
-		state: "="
+		state: '='
 	},
 	controller: RegisterRequestController,
-	controllerAs: "vm",
-	templateUrl: "templates/register-request.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/register-request.html'
 };
 
 export const RegisterRequestComponentModule = angular
-	.module("3drepo")
-	.component("registerRequest", RegisterRequestComponent);
+	.module('3drepo')
+	.component('registerRequest', RegisterRequestComponent);

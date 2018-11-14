@@ -14,32 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { APIService } from "../../home/js/api.service";
-import { AuthService } from "../../home/js/auth.service";
-import { IChip } from "../../panel/js/panel-card-chips-filter.component";
-import { MultiSelectService } from "../../viewer/js/multi-select.service";
-import { PanelService } from "../../panel/js/panel.service";
-import { TreeService } from "../../tree/js/tree.service";
-import { ViewerService } from "../../viewer/js/viewer.service";
-import { stringSearch } from "../../../helpers/searching";
+import { APIService } from '../../home/js/api.service';
+import { AuthService } from '../../home/js/auth.service';
+import { IChip } from '../../panel/js/panel-card-chips-filter.component';
+import { MultiSelectService } from '../../viewer/js/multi-select.service';
+import { PanelService } from '../../panel/js/panel.service';
+import { TreeService } from '../../tree/js/tree.service';
+import { ViewerService } from '../../viewer/js/viewer.service';
+import { stringSearch } from '../../../helpers/searching';
 
 declare const Pin;
 
 export class RisksService {
 
 	public static $inject: string[] = [
-		"$q",
-		"$sanitize",
-		"$timeout",
-		"$filter",
+		'$q',
+		'$sanitize',
+		'$timeout',
+		'$filter',
 
-		"APIService",
-		"AuthService",
-		"ClientConfigService",
-		"MultiSelectService",
-		"PanelService",
-		"TreeService",
-		"ViewerService"
+		'APIService',
+		'AuthService',
+		'ClientConfigService',
+		'MultiSelectService',
+		'PanelService',
+		'TreeService',
+		'ViewerService'
 	];
 
 	public state: any;
@@ -66,13 +66,13 @@ export class RisksService {
 		this.pin = {
 			pinDropMode: null
 		};
-		this.newPinId = "newRiskPinId";
+		this.newPinId = 'newRiskPinId';
 	}
 
 	public handlePickPointEvent(event, account, model) {
 
 		if (
-			event.value.hasOwnProperty("id") &&
+			event.value.hasOwnProperty('id') &&
 			this.pin.pinDropMode
 		) {
 
@@ -90,7 +90,7 @@ export class RisksService {
 				account,
 				colours: this.getLevelOfRiskColor(this.levelOfRisk, true),
 				id: this.newPinId,
-				type: "risk",
+				type: 'risk',
 				model,
 				pickedNorm: normal,
 				pickedPos: position,
@@ -153,7 +153,7 @@ export class RisksService {
 					const jobs = Object.keys(newJobs).map( (j) => ({_id : j }));
 					this.addJobsToAllJobs(jobs);
 				} else {
-					throw new Error("Error");
+					throw new Error('Error');
 				}
 
 			});
@@ -161,7 +161,7 @@ export class RisksService {
 	}
 
 	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
-		const url = account + "/jobs";
+		const url = account + '/jobs';
 
 		return this.apiService.get(url)
 			.then((response) => {
@@ -180,14 +180,14 @@ export class RisksService {
 			label: role._id
 		}));
 
-		const assignedMenu = menuChips.concat([{value: null, label: "Unassigned"}]);
+		const assignedMenu = menuChips.concat([{value: null, label: 'Unassigned'}]);
 
-		this.panelService.setChipFilterMenuItem("risks", {label: "Created by", value: "creator_role"}, menuChips);
-		this.panelService.setChipFilterMenuItem("risks", {label: "Assigned to", value: "assigned_roles"}, assignedMenu);
+		this.panelService.setChipFilterMenuItem('risks', {label: 'Created by', value: 'creator_role'}, menuChips);
+		this.panelService.setChipFilterMenuItem('risks', {label: 'Assigned to', value: 'assigned_roles'}, assignedMenu);
 	}
 
 	public getUserJobForModel(account: string, model: string): Promise<any> {
-		const url = account + "/myJob";
+		const url = account + '/myJob';
 
 		return this.apiService.get(url)
 			.then((response) => {
@@ -199,12 +199,12 @@ export class RisksService {
 	public createBlankRisk(creatorRole) {
 		return {
 			creator_role: creatorRole,
-			associated_activity: "",
-			category: "",
+			associated_activity: '',
+			category: '',
 			likelihood: 0,
 			consequence: 0,
 			level_of_risk: 0,
-			mitigation_status: "",
+			mitigation_status: '',
 			assigned_roles: [],
 			viewpoint: {}
 		};
@@ -245,26 +245,26 @@ export class RisksService {
 
 		if (!criteria.mitigation_status) { // If there is no explicit filter for status dont show closed risks
 									// thats the general criteria for showing risks.
-			filters.push((risk) => risk.mitigation_status !== "agreed_fully");
+			filters.push((risk) => risk.mitigation_status !== 'agreed_fully');
 		}
 
-		filters = filters.concat(this.getOrClause(criteria[""], this.handleRiskFilter));
+		filters = filters.concat(this.getOrClause(criteria[''], this.handleRiskFilter));
 
-		filters = filters.concat(this.createFilterByField(criteria, "associated_activity"));
+		filters = filters.concat(this.createFilterByField(criteria, 'associated_activity'));
 
-		filters = filters.concat(this.createFilterByField(criteria, "creator_role"));
+		filters = filters.concat(this.createFilterByField(criteria, 'creator_role'));
 
-		filters = filters.concat(this.createFilterByField(criteria, "mitigation_status"));
+		filters = filters.concat(this.createFilterByField(criteria, 'mitigation_status'));
 
 		filters = filters.concat(this.getOrClause(criteria.assigned_roles, this.filterAssignedRoles));
 
-		filters = filters.concat(this.createFilterByField(criteria, "category"));
+		filters = filters.concat(this.createFilterByField(criteria, 'category'));
 
-		filters = filters.concat(this.createFilterByField(criteria, "likelihood"));
+		filters = filters.concat(this.createFilterByField(criteria, 'likelihood'));
 
-		filters = filters.concat(this.createFilterByField(criteria, "consequence"));
+		filters = filters.concat(this.createFilterByField(criteria, 'consequence'));
 
-		filters = filters.concat(this.createFilterByField(criteria, "level_of_risk"));
+		filters = filters.concat(this.createFilterByField(criteria, 'level_of_risk'));
 
 		if (!this.state.risksCardOptions.showSubModelRisks) {
 			filters.push((risk) => risk.model === model);
@@ -321,7 +321,7 @@ export class RisksService {
 		if (!tag) {
 			return risk.assigned_roles.length === 0;
 		}
-		return this.filterByField("assigned_roles", risk, tag);
+		return this.filterByField('assigned_roles', risk, tag);
 	}
 
 	public handleRiskFilter(risk: any, filterText: string) {
@@ -337,7 +337,7 @@ export class RisksService {
 		}
 
 		// Search the list of assigned risks
-		if (risk.hasOwnProperty("assigned_roles")) {
+		if (risk.hasOwnProperty('assigned_roles')) {
 			for (let roleIdx = 0; roleIdx < risk.assigned_roles.length; ++roleIdx) {
 				if (stringSearch(risk.assigned_roles[roleIdx], filterText)) {
 					return true;
@@ -443,7 +443,7 @@ export class RisksService {
 
 				this.viewerService.addPin({
 					id: risk._id,
-					type: "risk",
+					type: 'risk',
 					account: risk.account,
 					model: risk.model,
 					pickedPos: risk.position,
@@ -502,7 +502,7 @@ export class RisksService {
 			const matches = oldRisk._id === risk._id;
 			if (matches) {
 
-				if (risk.status === "agreed_fully") {
+				if (risk.status === 'agreed_fully') {
 
 					this.state.allRisks[i].justClosed = true;
 
@@ -530,7 +530,7 @@ export class RisksService {
 
 	public deleteRisks(teamspace: string, model: string, risks: any) {
 		if (risks.length > 0) {
-			const url = `${teamspace}/${model}/risks/?ids=${risks.map((risk) => risk._id).join(",")}`;
+			const url = `${teamspace}/${model}/risks/?ids=${risks.map((risk) => risk._id).join(',')}`;
 			return this.apiService.delete(url, undefined)
 				.then((response) => {
 					risks.forEach(this.deleteRiskFromState.bind(this));
@@ -570,7 +570,7 @@ export class RisksService {
 			}
 
 			if (risk.assigned_roles) {
-				if (risk.assigned_roles.indexOf("Unassigned") !== -1) {
+				if (risk.assigned_roles.indexOf('Unassigned') !== -1) {
 					risk.assigned_roles = [];
 				}
 
@@ -590,7 +590,7 @@ export class RisksService {
 			}
 
 			if (!risk.descriptionThumbnail) {
-				if (risk.viewpoint && risk.viewpoint.screenshotSmall && risk.viewpoint.screenshotSmall !== "undefined") {
+				if (risk.viewpoint && risk.viewpoint.screenshotSmall && risk.viewpoint.screenshotSmall !== 'undefined') {
 					risk.descriptionThumbnail = this.apiService.getAPIUrl(risk.viewpoint.screenshotSmall);
 				}
 			}
@@ -664,19 +664,19 @@ export class RisksService {
 		this.treeService.clearCurrentlySelected();
 
 		// Reset object visibility
-		if (risk.viewpoint && risk.viewpoint.hasOwnProperty("hideIfc")) {
+		if (risk.viewpoint && risk.viewpoint.hasOwnProperty('hideIfc')) {
 			this.treeService.setHideIfc(risk.viewpoint.hideIfc);
 		}
 
-		const hasHiddenOrShownGroup = risk.viewpoint.hasOwnProperty("hidden_group_id") ||
-						risk.viewpoint.hasOwnProperty("shown_group_id") ;
+		const hasHiddenOrShownGroup = risk.viewpoint.hasOwnProperty('hidden_group_id') ||
+						risk.viewpoint.hasOwnProperty('shown_group_id') ;
 
 		this.treeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 
 		// Show multi objects
-		if ((risk.viewpoint && (risk.viewpoint.hasOwnProperty("highlighted_group_id") ||
-						risk.viewpoint.hasOwnProperty("group_id"))) ||
-						risk.hasOwnProperty("group_id") ||
+		if ((risk.viewpoint && (risk.viewpoint.hasOwnProperty('highlighted_group_id') ||
+						risk.viewpoint.hasOwnProperty('group_id'))) ||
+						risk.hasOwnProperty('group_id') ||
 						hasHiddenOrShownGroup
 		) {
 
@@ -731,9 +731,9 @@ export class RisksService {
 
 		const promises = [];
 
-		if (risk.viewpoint && (risk.viewpoint.hasOwnProperty("highlighted_group_id") ||
-					risk.viewpoint.hasOwnProperty("hidden_group_id") ||
-					risk.viewpoint.hasOwnProperty("shown_group_id"))) {
+		if (risk.viewpoint && (risk.viewpoint.hasOwnProperty('highlighted_group_id') ||
+					risk.viewpoint.hasOwnProperty('hidden_group_id') ||
+					risk.viewpoint.hasOwnProperty('shown_group_id'))) {
 
 			if (risk.viewpoint.hidden_group_id) {
 
@@ -757,7 +757,7 @@ export class RisksService {
 							return this.handleHidden(response.data.objects);
 						})
 						.catch((error) => {
-							console.error("There was a problem getting visibility: ", error);
+							console.error('There was a problem getting visibility: ', error);
 						});
 
 				}
@@ -771,9 +771,9 @@ export class RisksService {
 				const shownGroupId = risk.viewpoint.shown_group_id;
 				let shownGroupUrl;
 				if (revision) {
-					shownGroupUrl = risk.account + "/" + risk.model + "/groups/revision/" + revision + "/" + shownGroupId;
+					shownGroupUrl = risk.account + '/' + risk.model + '/groups/revision/' + revision + '/' + shownGroupId;
 				} else {
-					shownGroupUrl = risk.account + "/" + risk.model + "/groups/revision/master/head/" + shownGroupId;
+					shownGroupUrl = risk.account + '/' + risk.model + '/groups/revision/master/head/' + shownGroupId;
 				}
 
 				let shownPromise;
@@ -788,7 +788,7 @@ export class RisksService {
 							return this.handleShown(response.data.objects);
 						})
 						.catch((error) => {
-							console.error("There was a problem getting visibility: ", error);
+							console.error('There was a problem getting visibility: ', error);
 						});
 				}
 
@@ -817,7 +817,7 @@ export class RisksService {
 							return this.handleHighlights(response.data.objects);
 						})
 						.catch((error) => {
-							console.error("There was a problem getting the highlights: ", error);
+							console.error('There was a problem getting the highlights: ', error);
 						});
 
 				}
@@ -827,13 +827,13 @@ export class RisksService {
 
 		} else {
 
-			const hasGroup = (risk.viewpoint && risk.viewpoint.hasOwnProperty("group_id"));
+			const hasGroup = (risk.viewpoint && risk.viewpoint.hasOwnProperty('group_id'));
 			const groupId = hasGroup ? risk.viewpoint.group_id : risk.group_id;
 			let groupUrl;
 			if (revision) {
-				groupUrl = risk.account + "/" + risk.model + "/groups/revision/" + revision + "/" + groupId;
+				groupUrl = risk.account + '/' + risk.model + '/groups/revision/' + revision + '/' + groupId;
 			} else {
-				groupUrl = risk.account + "/" + risk.model + "/groups/revision/master/head/" + groupId;
+				groupUrl = risk.account + '/' + risk.model + '/groups/revision/master/head/' + groupId;
 			}
 
 			let handleTreePromise;
@@ -844,14 +844,14 @@ export class RisksService {
 
 				handleTreePromise = this.apiService.get(groupUrl)
 					.then((response) => {
-						if (response.data.hiddenObjects && response.data.hiddenObjects && !risk.viewpoint.hasOwnProperty("group_id")) {
+						if (response.data.hiddenObjects && response.data.hiddenObjects && !risk.viewpoint.hasOwnProperty('group_id')) {
 							response.data.hiddenObjects = null;
 						}
 						this.groupsCache[groupId] = response;
 						return this.handleTree(response);
 					})
 					.catch((error) => {
-						console.error("There was a problem getting the highlights: ", error);
+						console.error('There was a problem getting the highlights: ', error);
 					});
 
 			}
@@ -869,7 +869,7 @@ export class RisksService {
 		this.$timeout(() => {
 		this.treeService.selectNodesBySharedIds(objects)
 			.then(() => {
-				angular.element((window as any)).triggerHandler("resize");
+				angular.element((window as any)).triggerHandler('resize');
 			});
 		});
 	}
@@ -904,7 +904,7 @@ export class RisksService {
 
 	public getRisk(account, model, riskId) {
 
-		const riskUrl = account + "/" + model + "/risks/" + riskId + ".json";
+		const riskUrl = account + '/' + model + '/risks/' + riskId + '.json';
 
 		return this.apiService.get(riskUrl)
 			.then((res) => {
@@ -917,9 +917,9 @@ export class RisksService {
 
 		let endpoint;
 		if (revision) {
-			endpoint = account + "/" + model + "/revision/" + revision + "/risks.json";
+			endpoint = account + '/' + model + '/revision/' + revision + '/risks.json';
 		} else {
-			endpoint = account + "/" + model + "/risks.json";
+			endpoint = account + '/' + model + '/risks.json';
 		}
 
 		return this.apiService.get(endpoint)
@@ -934,13 +934,13 @@ export class RisksService {
 
 	public saveRisk(risk) {
 
-		const base = risk.account + "/" + risk.model;
+		const base = risk.account + '/' + risk.model;
 		let saveUrl;
 
 		if (risk.rev_id) {
-			saveUrl = base + "/revision/" + risk.rev_id + "/risks.json";
+			saveUrl = base + '/revision/' + risk.rev_id + '/risks.json';
 		} else {
-			saveUrl = base + "/risks.json";
+			saveUrl = base + '/risks.json';
 		}
 
 		if (risk.pickedPos !== null) {
@@ -959,19 +959,19 @@ export class RisksService {
 	 * @returns {*}
 	 */
 	public updateRisk(risk, riskData) {
-		let endpoint = risk.account + "/" + risk.model;
+		let endpoint = risk.account + '/' + risk.model;
 
 		if (risk.rev_id) {
-			endpoint += "/revision/" + risk.rev_id + "/risks/" +  risk._id + ".json";
+			endpoint += '/revision/' + risk.rev_id + '/risks/' +  risk._id + '.json';
 		} else {
-			endpoint += "/risks/" + risk._id + ".json";
+			endpoint += '/risks/' + risk._id + '.json';
 		}
 
 		return this.apiService.put(endpoint, riskData);
 	}
 
 	public getJobColor(id) {
-		let roleColor = "#ffffff";
+		let roleColor = '#ffffff';
 		let found = false;
 		if (id && this.state.availableJobs) {
 			for (let i = 0; i <  this.state.availableJobs.length; i ++) {
@@ -984,7 +984,7 @@ export class RisksService {
 			}
 		}
 		if (!found) {
-			console.debug("Job color not found for", id);
+			console.debug('Job color not found for', id);
 		}
 		return roleColor;
 	}
@@ -998,37 +998,37 @@ export class RisksService {
 
 		switch (risk.level_of_risk) {
 			case 0:
-				statusIcon.colour = "#008000";
+				statusIcon.colour = '#008000';
 				break;
 			case 1:
-				statusIcon.colour = "#32cd32";
+				statusIcon.colour = '#32cd32';
 				break;
 			case 2:
-				statusIcon.colour = "#fffacd";
+				statusIcon.colour = '#fffacd';
 				break;
 			case 3:
-				statusIcon.colour = "#ff8c00";
+				statusIcon.colour = '#ff8c00';
 				break;
 			case 4:
-				statusIcon.colour = "#800000";
+				statusIcon.colour = '#800000';
 				break;
 		}
 
 		switch (risk.mitigation_status) {
-			case "":
-				statusIcon.icon = "new_releases";
+			case '':
+				statusIcon.icon = 'new_releases';
 				break;
-			case "proposed":
-				statusIcon.icon = "error_outline";
+			case 'proposed':
+				statusIcon.icon = 'error_outline';
 				break;
-			case "agreed_partial":
-				statusIcon.icon = "error";
+			case 'agreed_partial':
+				statusIcon.icon = 'error';
 				break;
-			case "agreed_fully":
-				statusIcon.icon = "check_circle";
+			case 'agreed_fully':
+				statusIcon.icon = 'check_circle';
 				break;
-			case "rejected":
-				statusIcon.icon = "sync_problem";
+			case 'rejected':
+				statusIcon.icon = 'sync_problem';
 				break;
 		}
 
@@ -1059,5 +1059,5 @@ export class RisksService {
 }
 
 export const RisksServiceModule = angular
-	.module("3drepo")
-	.service("RisksService", RisksService);
+	.module('3drepo')
+	.service('RisksService', RisksService);

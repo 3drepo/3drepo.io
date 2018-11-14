@@ -39,7 +39,7 @@ import {
 	FormInfo,
 	PayPalLogo,
 	StyledForm
-} from "../subscription.styles";
+} from '../subscription.styles';
 
 const SubscriptionSchema = Yup.object().shape({
 	firstName: schema.firstName,
@@ -170,7 +170,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 												required={true}
 												type="number"
 												value={numLicences}
-												inputProps={{ min: "0", max: "1000" }}
+												inputProps={{ min: '0', max: '1000' }}
 												onChange={this.handleLicencesChange(field.onChange)}
 											/>
 										)}

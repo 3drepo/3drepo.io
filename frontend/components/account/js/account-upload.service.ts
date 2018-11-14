@@ -18,10 +18,10 @@
 export class AccountUploadService {
 
 	public static $inject: string[] = [
-		"$q",
-		"ClientConfigService",
-		"APIService",
-		"RevisionsService"
+		'$q',
+		'ClientConfigService',
+		'APIService',
+		'RevisionsService'
 	];
 
 	constructor(
@@ -40,14 +40,14 @@ export class AccountUploadService {
 	 */
 	public newModel(modelData: any): Promise<any> {
 		const data = {
-			desc: "",
+			desc: '',
 			project : modelData.project,
-			type: (modelData.type === "Other") ? modelData.otherType : modelData.type,
+			type: (modelData.type === 'Other') ? modelData.otherType : modelData.type,
 			unit: modelData.unit,
 			code: modelData.code,
 			modelName: modelData.name
 		};
-		return this.APIService.post(modelData.teamspace + "/model", data);
+		return this.APIService.post(modelData.teamspace + '/model', data);
 	}
 
 	/**
@@ -56,7 +56,7 @@ export class AccountUploadService {
 	 * @param modelData
 	 */
 	public uploadStatus(modelData: any): Promise<any> {
-		return this.APIService.get(modelData.teamspace + "/" + modelData.model + ".json");
+		return this.APIService.get(modelData.teamspace + '/' + modelData.model + '.json');
 	}
 
 	public uploadRevisionToModel(uploadFileData) {
@@ -74,30 +74,30 @@ export class AccountUploadService {
 		if (uploadFileData.tag && validTag) {
 
 			// Check it's a valid tag
-			uploadPromise.reject("Invalid revision name; check length is between 1 and 20 and uses alphanumeric characters");
+			uploadPromise.reject('Invalid revision name; check length is between 1 and 20 and uses alphanumeric characters');
 
 		} else if (uploadFileData.file.size > this.ClientConfigService.uploadSizeLimit) {
 
 			// Check for file size limit
 			const size: any = this.ClientConfigService.uploadSizeLimit / 1048576;
 			const maxSize = parseInt(size, 10).toFixed(0);
-			uploadPromise.reject("File exceeds size limit of " + maxSize + "mb");
+			uploadPromise.reject('File exceeds size limit of ' + maxSize + 'mb');
 
 		} else {
 
 			const formData = new FormData();
-			formData.append("file", uploadFileData.file);
+			formData.append('file', uploadFileData.file);
 
 			if (uploadFileData.tag) {
-				formData.append("tag", uploadFileData.tag);
+				formData.append('tag', uploadFileData.tag);
 			}
 
 			if (uploadFileData.desc) {
-				formData.append("desc", uploadFileData.desc);
+				formData.append('desc', uploadFileData.desc);
 			}
 
-			const endpoint = uploadFileData.account + "/" + uploadFileData.model.model + "/upload";
-			const headers =  {"Content-Type": undefined};
+			const endpoint = uploadFileData.account + '/' + uploadFileData.model.model + '/upload';
+			const headers =  {'Content-Type': undefined};
 
 			this.APIService.post(endpoint, formData, headers)
 				.then((response) => {
@@ -121,5 +121,5 @@ export class AccountUploadService {
 }
 
 export const AccountUploadServiceModule = angular
-	.module("3drepo")
-	.service("AccountUploadService", AccountUploadService);
+	.module('3drepo')
+	.service('AccountUploadService', AccountUploadService);

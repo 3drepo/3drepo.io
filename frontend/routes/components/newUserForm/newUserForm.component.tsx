@@ -169,7 +169,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 							value={this.state.job}
 							displayEmpty={true}
 							inputProps={ {
-								id: "job"
+								id: 'job'
 							} }
 							onChange={this.handleChange('job')}
 						>

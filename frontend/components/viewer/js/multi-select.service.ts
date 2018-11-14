@@ -18,23 +18,23 @@
 export class MultiSelectService {
 
 	public static $inject: string[] = [
-		"ViewerService",
-		"$document"
+		'ViewerService',
+		'$document'
 	];
 
-	private isMac = (navigator.platform.indexOf("Mac") !== -1);
+	private isMac = (navigator.platform.indexOf('Mac') !== -1);
 	private accumMode = false;
 	private decumMode = false;
 	private areaSelectMode = false;
 
 	private cursorIcons = {
-		accumMode : "url(./icons/cursor_add.png), auto",
-		decumMode : "url(./icons/cursor_del.png), auto",
-		areaMode  : "url(./icons/cursor_rect.png), auto",
-		areaAccumMode: "url(./icons/cursor_rect_add.png), auto",
-		areaDecumMode: "url(./icons/cursor_rect_del.png), auto",
-		noneCanvas     : "default",
-		nonePanel       : "pointer"
+		accumMode : 'url(./icons/cursor_add.png), auto',
+		decumMode : 'url(./icons/cursor_del.png), auto',
+		areaMode  : 'url(./icons/cursor_rect.png), auto',
+		areaAccumMode: 'url(./icons/cursor_rect_add.png), auto',
+		areaDecumMode: 'url(./icons/cursor_rect_del.png), auto',
+		noneCanvas     : 'default',
+		nonePanel       : 'pointer'
 	};
 
 	constructor(
@@ -48,11 +48,11 @@ export class MultiSelectService {
 
 	public initKeyWatchers() {
 
-		this.$document.bind("keydown", (event) => {
+		this.$document.bind('keydown', (event) => {
 			this.handleKey(event.which, true);
 		});
 
-		this.$document.bind("keyup", (event) => {
+		this.$document.bind('keyup', (event) => {
 			this.handleKey(event.which, false);
 		});
 
@@ -123,16 +123,16 @@ export class MultiSelectService {
 			canvasIcon = panelIcon = this.cursorIcons.decumMode;
 		}
 
-		if (document.getElementById("#canvas")) {
-			document.getElementById("#canvas").style.cursor = canvasIcon;
+		if (document.getElementById('#canvas')) {
+			document.getElementById('#canvas').style.cursor = canvasIcon;
 		}
 
-		const groupElements: any = document.getElementsByClassName("groupsList");
+		const groupElements: any = document.getElementsByClassName('groupsList');
 		for (let i = 0; i < groupElements.length; ++i) {
 			groupElements[i].style.cursor = panelIcon;
 		}
 
-		const treeNodeElements: any = document.getElementsByClassName("treeNode");
+		const treeNodeElements: any = document.getElementsByClassName('treeNode');
 		for (let i = 0; i < treeNodeElements.length; ++i) {
 			treeNodeElements[i].style.cursor = panelIcon;
 		}
@@ -156,5 +156,5 @@ export class MultiSelectService {
 }
 
 export const MultiSelectServiceModule = angular
-	.module("3drepo")
-	.service("MultiSelectService", MultiSelectService);
+	.module('3drepo')
+	.service('MultiSelectService', MultiSelectService);

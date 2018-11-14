@@ -15,15 +15,15 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { evaluatePassword } from "../../../services/validation";
+import { evaluatePassword } from '../../../services/validation';
 
 class PasswordChangeController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"APIService",
-		"StateManager",
-		"$timeout"
+		'$scope',
+		'APIService',
+		'StateManager',
+		'$timeout'
 	];
 
 	private pageState;
@@ -63,21 +63,21 @@ class PasswordChangeController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.newPassword", () => {
-			this.message = "";
+		this.$scope.$watch('vm.newPassword', () => {
+			this.message = '';
 			if (this.newPassword !== undefined) {
 				evaluatePassword(this.newPassword).then(({ validPassword, comment }) => {
 					this.$timeout(() => {
 						this.newPasswordValid = validPassword;
 						this.passwordStrength = `(${comment})`;
 						this.checkPasswordMatches();
-						this.$scope.password.new.$setValidity("invalid", this.newPasswordValid);
+						this.$scope.password.new.$setValidity('invalid', this.newPasswordValid);
 					});
 				});
 			}
 		});
 
-		this.$scope.$watch("vm.confirmPassword", () => {
+		this.$scope.$watch('vm.confirmPassword', () => {
 			this.checkPasswordMatches();
 		});
 	}
@@ -101,18 +101,18 @@ class PasswordChangeController implements ng.IController {
 	private checkPasswordMatches() {
 		const matched = this.confirmPassword === this.newPassword;
 		const showMessage = this.confirmPassword !== undefined &&
-									this.confirmPassword !== "" &&
+									this.confirmPassword !== '' &&
 									!matched;
-		this.passwordConfirmMessage = showMessage ? "(Password Mismatched)" : "";
-		this.$scope.password.confirm.$setValidity("invalid", matched);
+		this.passwordConfirmMessage = showMessage ? '(Password Mismatched)' : '';
+		this.$scope.password.confirm.$setValidity('invalid', matched);
 	}
 
 	private doPasswordChange() {
 		const allowSubmission = this.newPasswordValid && this.newPassword === this.confirmPassword && !this.showProgress;
 		if (allowSubmission) {
-			this.message = "";
+			this.message = '';
 			this.showProgress = true;
-			const url = this.username + "/password";
+			const url = this.username + '/password';
 
 			this.APIService.put(url, {
 				newPassword: this.newPassword,
@@ -133,14 +133,14 @@ class PasswordChangeController implements ng.IController {
 
 export const PasswordChangeComponent: ng.IComponentOptions = {
 	bindings: {
-		token: "=",
-		username: "="
+		token: '=',
+		username: '='
 	},
 	controller: PasswordChangeController,
-	controllerAs: "vm",
-	templateUrl: "templates/password-change.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/password-change.html'
 };
 
 export const PasswordChangeComponentModule = angular
-	.module("3drepo")
-	.component("passwordChange", PasswordChangeComponent);
+	.module('3drepo')
+	.component('passwordChange', PasswordChangeComponent);

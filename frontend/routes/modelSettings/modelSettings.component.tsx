@@ -291,12 +291,12 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										{...field}
 										items={clientConfigService.units}
 										inputId="unit-select"
-										disabled
+										disabled={true}
 									/>
 								)} />
 							</SelectWrapper>
 						</FieldsRow>
-						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={"Enter topic types"} />} />
+						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
 					</Grid>
 					<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
 					<Grid container={true} direction="column" wrap="nowrap">
@@ -330,7 +330,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										label="Elevation"
 										margin="normal"
 										value={elevation}
-										disabled
+										disabled={true}
 									/>
 								)} />
 								<Field name="angleFromNorth" render={ ({ field }) => (

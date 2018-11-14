@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationService } from "./notification.service";
-import { NotificationEvents } from "./notification.events";
-import { NotificationModelEvents } from "./notification.model.events";
-import { NotificationIssuesEvents } from "./notification.issues.events";
-import { NotificationRisksEvents } from "./notification.risks.events";
+import { NotificationService } from './notification.service';
+import { NotificationEvents } from './notification.events';
+import { NotificationModelEvents } from './notification.model.events';
+import { NotificationIssuesEvents } from './notification.issues.events';
+import { NotificationRisksEvents } from './notification.risks.events';
 
 export class NotificationsChannel {
 	/**
@@ -54,11 +54,11 @@ export class NotificationsChannel {
 	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
 	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
-		this.groups = new NotificationEvents(this, "group");
+		this.groups = new NotificationEvents(this, 'group');
 		this.issues = new NotificationIssuesEvents(this);
 		this.risks = new NotificationRisksEvents(this);
 		this.model = new NotificationModelEvents(this);
-		this.views = new NotificationEvents(this, "view");
+		this.views = new NotificationEvents(this, 'view');
 	}
 
 	/**

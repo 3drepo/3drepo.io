@@ -55,12 +55,12 @@ const COLORS = {
 
 const componentToHex = memoize((c) => {
 	const hex = c.toString(16);
-	return hex.length === 1 ? "0" + hex : hex;
+	return hex.length === 1 ? '0' + hex : hex;
 });
 
 const rgbaToHex = memoize((rgbaColor) => {
 	const [r, g, b] = rgbaColor.match(/[.\d]+/g).map(Number);
-	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+	return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 });
 
 const hexToRgba = memoize((hex) => {
@@ -272,7 +272,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
 		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
 
-		this.onColorHashChange(rgbaToHex(rgbaColor).toUpperCase().replace("#", ""), { x, y }, shouldRefreshCanvas);
+		this.onColorHashChange(rgbaToHex(rgbaColor).toUpperCase().replace('#', ''), { x, y }, shouldRefreshCanvas);
 	}
 
 	public onColorHashChange = (color = this.state.color, position?, shouldRefreshCanvas = false): void => {

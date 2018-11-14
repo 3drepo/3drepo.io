@@ -24,10 +24,10 @@ export interface IChip {
 
 class PanelCardChipsFilterController implements ng.IController {
 	public static $inject: string[] = [
-		"$mdDateLocale",
-		"$mdConstant",
-		"$scope",
-		"$element"
+		'$mdDateLocale',
+		'$mdConstant',
+		'$scope',
+		'$element'
 	];
 
 	public suggestions: IChip[] = [];
@@ -37,7 +37,7 @@ class PanelCardChipsFilterController implements ng.IController {
 	private selectedItem: any = null;
 	private searchText: string = null;
 	private chipSeparators: any[];
-	private placeHolder: string = "Search";
+	private placeHolder: string = 'Search';
 
 	constructor(private $mdDateLocale: any, private $mdConstant: any, private $scope: ng.IScope, private $element: any) {
 		this.chipSeparators = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
@@ -49,10 +49,10 @@ class PanelCardChipsFilterController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watch("vm.showFilter", (newValue) => {
+		this.$scope.$watch('vm.showFilter', (newValue) => {
 			if (newValue) {
-				const filterInput: any = angular.element(this.$element[0].querySelector("#panelCardFilterInput"));
-				filterInput.value = "";
+				const filterInput: any = angular.element(this.$element[0].querySelector('#panelCardFilterInput'));
+				filterInput.value = '';
 
 				this.collapsed = false;
 			}
@@ -66,19 +66,19 @@ class PanelCardChipsFilterController implements ng.IController {
 		}
 
 		// Otherwise, create a new one
-		return { name: chip, value: chip, nameType: "", type: "" };
+		return { name: chip, value: chip, nameType: '', type: '' };
 	}
 
 	private formatChip(chip) {
-		return  chip.nameType + (chip.nameType === "" ? "" : ":" ) + chip.name;
+		return  chip.nameType + (chip.nameType === '' ? '' : ':' ) + chip.name;
 	}
 
 	private onPaste(event: ClipboardEvent) {
-		const pastedText = event.clipboardData.getData("text");
+		const pastedText = event.clipboardData.getData('text');
 		event.preventDefault();
 
-		const newchips = pastedText.split(",").map((c) => {
-			if (c.includes(":")) {
+		const newchips = pastedText.split(',').map((c) => {
+			if (c.includes(':')) {
 				const suggestion = this.suggestions.find(this.equalChipLabel.bind(this , c));
 
 				if (suggestion) {
@@ -86,11 +86,11 @@ class PanelCardChipsFilterController implements ng.IController {
 				}
 
 				// if its not a suggestion it tries to guess if its a date type
-				const name = c.split(":")[1];
+				const name = c.split(':')[1];
 				const value: Date = this.$mdDateLocale.parseDate(name);
 
 				if (  !isNaN( value.getTime())) { // If is a date
-					const nameType = c.split(":")[0];
+					const nameType = c.split(':')[0];
 					const type = this.snakeCase(nameType);
 					return  {name, nameType, type, value};
 				}
@@ -104,7 +104,7 @@ class PanelCardChipsFilterController implements ng.IController {
 	}
 
 	private snakeCase(pascalCase: string): string {
-		return pascalCase.replace(/[A-Z]/g, (x) => "_" + x.toLowerCase()).substring(1);
+		return pascalCase.replace(/[A-Z]/g, (x) => '_' + x.toLowerCase()).substring(1);
 	}
 
 	private equalChipLabel( label: string, chip: IChip): boolean {
@@ -129,17 +129,17 @@ class PanelCardChipsFilterController implements ng.IController {
 
 export const PanelCardChipsFilterComponent: ng.IComponentOptions = {
 	bindings: {
-		chips: "=",
-		suggestions: "=",
-		placeHolder: "@",
-		showFilter: "="
+		chips: '=',
+		suggestions: '=',
+		placeHolder: '@',
+		showFilter: '='
 	},
 
 	controller: PanelCardChipsFilterController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card-chips-filter.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card-chips-filter.html'
 };
 
 export const PanelCardChipsFilterComponentModule = angular
-	.module("3drepo")
-	.component("panelCardChipsFilter", PanelCardChipsFilterComponent);
+	.module('3drepo')
+	.component('panelCardChipsFilter', PanelCardChipsFilterComponent);

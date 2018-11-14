@@ -18,11 +18,11 @@
 export class TreeService {
 
 	public static $inject: string[] = [
-		"$q",
-		"APIService",
-		"ViewerService",
-		"DocsService",
-		"MultiSelectService"
+		'$q',
+		'APIService',
+		'ViewerService',
+		'DocsService',
+		'MultiSelectService'
 	];
 
 	public highlightMap;
@@ -88,9 +88,9 @@ export class TreeService {
 		};
 
 		this.VISIBILITY_STATES = {
-			parentOfInvisible : "parentOfInvisible",
-			visible : "visible",
-			invisible : "invisible"
+			parentOfInvisible : 'parentOfInvisible',
+			visible : 'visible',
+			invisible : 'invisible'
 		};
 
 	}
@@ -118,17 +118,17 @@ export class TreeService {
 
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
 		this.treeMap = null;
-		branch = branch ? branch : "master";
+		branch = branch ? branch : 'master';
 
 		// revision = revision ? revision : "head";
 
 		if (!revision) {
-			this.baseURL = account + "/" + model + "/revision/master/head/";
+			this.baseURL = account + '/' + model + '/revision/master/head/';
 		} else {
-			this.baseURL = account + "/" + model + "/revision/" + revision + "/";
+			this.baseURL = account + '/' + model + '/revision/' + revision + '/';
 		}
 
-		const url = this.baseURL + "fulltree.json";
+		const url = this.baseURL + 'fulltree.json';
 
 		const meshesAndTrees = [
 			this.getIdToMeshes(),
@@ -148,17 +148,17 @@ export class TreeService {
 				});
 			})
 			.catch((error) => {
-				console.error("Error resolving tree(s): ", error);
+				console.error('Error resolving tree(s): ', error);
 			});
 
 	}
 
 	public getIdToMeshes() {
 
-		const url = this.baseURL + "idToMeshes.json";
+		const url = this.baseURL + 'idToMeshes.json';
 		const options = {
 			headers: {
-				"Content-Type": "application/json"
+				'Content-Type': 'application/json'
 			}
 		};
 
@@ -167,7 +167,7 @@ export class TreeService {
 				this.idToMeshes = json.data.idToMeshes;
 			})
 			.catch((error) => {
-				console.error("Failed to get Id to Meshes:", error);
+				console.error('Failed to get Id to Meshes:', error);
 			});
 
 	}
@@ -176,7 +176,7 @@ export class TreeService {
 
 		return this.APIService.get(url, {
 			headers: {
-				"Content-Type": "application/json"
+				'Content-Type': 'application/json'
 			}
 		})
 			.then((json) => {
@@ -190,14 +190,14 @@ export class TreeService {
 
 					mainTree.nodes.name = setting.name;
 					mainTree.nodes.children.forEach((child) => {
-						const name = child.name.split(":");
+						const name = child.name.split(':');
 						const subModel = setting.subModels.find((m) => {
 							return m.model === name[1];
 						});
 
 						if (subModel) {
 							name[1] = subModel.name;
-							child.name = name.join(":");
+							child.name = name.join(':');
 						}
 
 						if (subModel && child.children && child.children[0]) {
@@ -213,7 +213,7 @@ export class TreeService {
 				return this.handleIdToPath(mainTree, subTrees, subTreesById);
 			})
 			.catch((error) => {
-				console.error("Tree Init Error:", error);
+				console.error('Tree Init Error:', error);
 				this.reset();
 			});
 	}
@@ -265,7 +265,7 @@ export class TreeService {
 
 				})
 				.catch((error) => {
-					console.error("Error getting getIdToPath", error);
+					console.error('Error getting getIdToPath', error);
 					this.reset();
 				});
 
@@ -273,10 +273,10 @@ export class TreeService {
 
 	public getIdToPath() {
 
-		const url = this.baseURL + "tree_path.json";
+		const url = this.baseURL + 'tree_path.json';
 		return this.APIService.get(url, {
 			headers: {
-				"Content-Type": "application/json"
+				'Content-Type': 'application/json'
 			}
 		})
 			.then((response) => {
@@ -306,7 +306,7 @@ export class TreeService {
 					subTree.parentId = treeId;
 
 					// Correct main tree using incoming subtree for federation
-					const nodeIdsToUpdate = this.idToObjRef[subTree.parentId].path.split("__");
+					const nodeIdsToUpdate = this.idToObjRef[subTree.parentId].path.split('__');
 
 					for (let i = nodeIdsToUpdate.length - 1; i >= 0; i--) {
 						const nodeToUpdate = this.idToObjRef[nodeIdsToUpdate[i]];
@@ -327,7 +327,7 @@ export class TreeService {
 				})
 				.catch((res) => {
 					this.attachStatus(res, subtree, this.idToObjRef);
-					console.warn("Subtree issue: ", res);
+					console.warn('Subtree issue: ', res);
 				});
 
 			awaitedSubTrees.push(getSubTree);
@@ -338,11 +338,11 @@ export class TreeService {
 
 	public attachStatus(res: any, tree: any, idToObjRef: any) {
 		if (res.status === 401) {
-			tree.status = "NO_ACCESS";
+			tree.status = 'NO_ACCESS';
 		}
 
 		if (res.status === 404) {
-			tree.status = "NOT_FOUND";
+			tree.status = 'NOT_FOUND';
 		}
 
 		if (tree.status) {
@@ -463,14 +463,14 @@ export class TreeService {
 	public getMeshMapFromNodes(nodes: any) {
 
 		if (!Array.isArray(nodes)) {
-			console.error("getMeshMapFromNodes nodes is not an array: ", nodes);
+			console.error('getMeshMapFromNodes nodes is not an array: ', nodes);
 			return;
 		}
 
 		const idToMeshes = this.treeMap.idToMeshes;
 
 		if (!idToMeshes) {
-			console.error("getMeshMapFromNodes - idToMeshes is not defined: ", idToMeshes);
+			console.error('getMeshMapFromNodes - idToMeshes is not defined: ', idToMeshes);
 			return;
 		}
 
@@ -482,12 +482,12 @@ export class TreeService {
 
 			const childNode = stack.pop();
 			if (childNode === undefined) {
-				console.error("childNode is undefined");
+				console.error('childNode is undefined');
 				continue;
 			}
 
 			const model = childNode.model || childNode.project;
-			const key = childNode.account + "@" + model;
+			const key = childNode.account + '@' + model;
 
 			if (highlightMap[key] === undefined) {
 				highlightMap[key] = {};
@@ -624,15 +624,15 @@ export class TreeService {
 
 		if (this.idToPath[objectID]) {
 			// If the Object ID is on the main tree then use that path
-			path = this.idToPath[objectID].split("__");
+			path = this.idToPath[objectID].split('__');
 		} else if (this.subModelIdToPath[objectID]) {
 			// Else check the submodel for the id for the path
-			path = this.subModelIdToPath[objectID].split("__");
+			path = this.subModelIdToPath[objectID].split('__');
 			const subtree = this.subTreesById[path[0]];
-			const parentPath = this.idToObjRef[subtree.parentId].path.split("__");
+			const parentPath = this.idToObjRef[subtree.parentId].path.split('__');
 			path = parentPath.concat(path);
 		} else {
-			path = this.getNodeById(objectID).path.split("__");
+			path = this.getNodeById(objectID).path.split('__');
 		}
 
 		return path;
@@ -691,7 +691,7 @@ export class TreeService {
 					children = children.concat(child.children);
 				}
 
-				if (!child.hasOwnProperty("defaultState")) {
+				if (!child.hasOwnProperty('defaultState')) {
 					if (visibility === this.VISIBILITY_STATES.visible && this.canShowNode(child)) {
 						child.toggleState = this.VISIBILITY_STATES.visible;
 					} else {
@@ -796,7 +796,7 @@ export class TreeService {
 			if (id) {
 				const account = clickedIds[id].account;
 				const model = clickedIds[id].model || clickedIds[id].project; // TODO: Kill .project from backend
-				const key = account + "@" + model;
+				const key = account + '@' + model;
 
 				if (!objectIds[key]) {
 					objectIds[key] = [];
@@ -809,7 +809,7 @@ export class TreeService {
 		// Update viewer object visibility
 		for (const key in objectIds) {
 			if (key) {
-				const vals = key.split("@");
+				const vals = key.split('@');
 				const account = vals[0];
 				const model = vals[1];
 
@@ -1001,7 +1001,7 @@ export class TreeService {
 					continue;
 				}
 
-				const vals = key.split("@");
+				const vals = key.split('@');
 				const account = vals[0];
 				const model = vals[1];
 
@@ -1026,7 +1026,7 @@ export class TreeService {
 	public selectNodes(nodes: any[], skipExpand?: boolean, colour?: number[]): any {
 
 		if (!nodes || nodes.length === 0) {
-			return Promise.resolve("No nodes specified");
+			return Promise.resolve('No nodes specified');
 		}
 
 		nodes = this.sanitiseNodeArray(nodes);
@@ -1051,7 +1051,7 @@ export class TreeService {
 					});
 
 					if (meshes.length > 0) {
-						const vals = key.split("@");
+						const vals = key.split('@');
 						const account = vals[0];
 						const model = vals[1];
 						// Separately highlight the children
@@ -1062,7 +1062,7 @@ export class TreeService {
 							colour,
 							model,
 							multi: true,
-							source: "tree",
+							source: 'tree',
 							forceReHighlight : true
 						});
 					}
@@ -1277,7 +1277,7 @@ export class TreeService {
 				node.canExpand = false;
 				for (let idx = 0; idx < node.children.length; ++idx) {
 					const child = node.children[idx];
-					if (!(child.type === "mesh" && (!child.name || child.name === ""))) {
+					if (!(child.type === 'mesh' && (!child.name || child.name === ''))) {
 						// There is at least 1 child with name or not a mesh, allow expand
 						node.canExpand = true;
 						break;
@@ -1285,7 +1285,7 @@ export class TreeService {
 				}
 
 				processNodes = processNodes.concat(node.children);
-			} else if (node.type === "mesh" && (!node.name || node.name === "")) {
+			} else if (node.type === 'mesh' && (!node.name || node.name === '')) {
 				node.ignore = true;
 			}
 
@@ -1332,7 +1332,7 @@ export class TreeService {
 			this.selectedIndex = selectedIndex;
 			return Promise.resolve(selectedIndex);
 		} else {
-			return Promise.reject("Failed to find path for node");
+			return Promise.reject('Failed to find path for node');
 		}
 
 	}
@@ -1380,7 +1380,7 @@ export class TreeService {
 				const childNode = nodeToExpand.children[i];
 				childNode.level = nodeToExpand.level + 1;
 
-				if (childNode && childNode.hasOwnProperty("name")) {
+				if (childNode && childNode.hasOwnProperty('name')) {
 					if (this.nodesToShow.indexOf(childNode) === -1) {
 						childrenToAdd.push(childNode);
 						position++;
@@ -1411,7 +1411,7 @@ export class TreeService {
 		return nodes.map((node) => {
 			if (node) {
 				if (node.ignore) {
-					const path = node.path.split("__");
+					const path = node.path.split('__');
 					return this.getNodeById(path[path.length - 2]);
 
 				} else {
@@ -1463,5 +1463,5 @@ export class TreeService {
 }
 
 export const TreeServiceModule = angular
-	.module("3drepo")
-	.service("TreeService", TreeService);
+	.module('3drepo')
+	.service('TreeService', TreeService);

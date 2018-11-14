@@ -20,15 +20,15 @@ import { history } from '../../../helpers/migration';
 class LoginController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$location",
-		"$timeout",
-		"$state",
+		'$scope',
+		'$location',
+		'$timeout',
+		'$state',
 
-		"AuthService",
-		"EventService",
-		"ClientConfigService",
-		"APIService"
+		'AuthService',
+		'EventService',
+		'ClientConfigService',
+		'APIService'
 	];
 
 	private version: string;
@@ -58,7 +58,7 @@ class LoginController implements ng.IController {
 
 		// Set a custom login message if there is one
 		if (!this.loginMessage) {
-			this.loginMessage = "Welcome to 3D Repo";
+			this.loginMessage = 'Welcome to 3D Repo';
 		}
 
 		this.watchers();
@@ -72,9 +72,9 @@ class LoginController implements ng.IController {
 		}, () => {
 			if (this.AuthService.state.currentEvent === this.AuthService.events.USER_LOGGED_IN) {
 				// Show an error message for incorrect login
-				if (!this.AuthService.state.currentData.initialiser && this.AuthService.state.currentData.hasOwnProperty("error")) {
+				if (!this.AuthService.state.currentData.initialiser && this.AuthService.state.currentData.hasOwnProperty('error')) {
 					if (this.AuthService.state.currentData.error.status === 500) {
-						this.errorMessage = "There is currently a problem with the system. Please try again later.";
+						this.errorMessage = 'There is currently a problem with the system. Please try again later.';
 					} else {
 						this.errorMessage = this.APIService.getErrorMessage(this.AuthService.state.currentData.error);
 					}
@@ -85,7 +85,7 @@ class LoginController implements ng.IController {
 	}
 
 	public handleLogin() {
-		this.errorMessage = "";
+		this.errorMessage = '';
 		this.loggingIn = true;
 		this.AuthService.login(this.user.username, this.user.password)
 			.then(() => {
@@ -111,11 +111,11 @@ class LoginController implements ng.IController {
 				this.handleLogin();
 			} else {
 
-				this.errorMessage = "Username and/or password not provided";
+				this.errorMessage = 'Username and/or password not provided';
 				if (this.user && this.user.password && !this.user.username) {
-					this.errorMessage = "Username not provided";
+					this.errorMessage = 'Username not provided';
 				} else if (this.user && this.user.username && !this.user.password) {
-					this.errorMessage = "Password not provided";
+					this.errorMessage = 'Password not provided';
 				}
 			}
 		}
@@ -125,13 +125,13 @@ class LoginController implements ng.IController {
 
 export const LoginComponent: ng.IComponentOptions = {
 	bindings: {
-		loginMessage : "<"
+		loginMessage : '<'
 	},
 	controller: LoginController,
-	controllerAs: "vm",
-	templateUrl: "templates/login.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/login.html'
 };
 
 export const LoginComponentModule = angular
-	.module("3drepo")
-	.component("login", LoginComponent);
+	.module('3drepo')
+	.component('login', LoginComponent);

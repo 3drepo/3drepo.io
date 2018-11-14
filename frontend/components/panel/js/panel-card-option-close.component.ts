@@ -31,13 +31,13 @@ class PanelCardOptionCloseController implements ng.IController {
 
 export const PanelCardOptionCloseComponent: ng.IComponentOptions = {
 	bindings: {
-		show: "="
+		show: '='
 	},
 	controller: PanelCardOptionCloseController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-close.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card-option-close.html'
 };
 
 export const PanelCardOptionCloseComponentModule = angular
-	.module("3drepo")
-	.component("panelCardOptionClose", PanelCardOptionCloseComponent);
+	.module('3drepo')
+	.component('panelCardOptionClose', PanelCardOptionCloseComponent);

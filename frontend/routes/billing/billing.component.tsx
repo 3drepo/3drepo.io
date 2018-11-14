@@ -75,8 +75,8 @@ export class Billing extends React.PureComponent<IProps, IState> {
 				<Header>
 					<Tabs
 						value={activeTab || match.params.tab}
-						indicatorColor='primary'
-						textColor='primary'
+						indicatorColor="primary"
+						textColor="primary"
 						onChange={this.handleChange}
 					>
 						{ TABS_ROUTES.map(({ label, path }, index) => {
@@ -106,7 +106,7 @@ export class Billing extends React.PureComponent<IProps, IState> {
 		const paperProps = { height: '100%' };
 
 		return (
-			<Panel title='Billing' paperProps={paperProps}>
+			<Panel title="Billing" paperProps={paperProps}>
 				<Switch>
 					<Route path={`${this.props.match.url}/:tab`} render={this.renderRoute} />
 					<Redirect

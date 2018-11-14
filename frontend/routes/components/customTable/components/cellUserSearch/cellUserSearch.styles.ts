@@ -53,6 +53,11 @@ export const SearchField = styled(TextField).attrs({
 
 	.search-field__label {
 		margin-top: 3px;
+		transform: translate(0, 5px) scale(1);
+
+		&[data-shrink='true'] {
+			transform: translate(0, -8px) scale(0.75) !important;
+		}
 	}
 
 	.search-field__label ~ div {
@@ -67,14 +72,6 @@ export const SearchField = styled(TextField).attrs({
 
 		&:not(:hover):before {
 			opacity: 0;
-		}
-	}
-
-	.search-field__label {
-		transform: translate(0, 5px) scale(1);
-
-		&[data-shrink='true'] {
-			transform: translate(0, -8px) scale(0.75) !important;
 		}
 	}
 `;
