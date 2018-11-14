@@ -531,7 +531,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
 
-                                        <img align="center" alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/4d775477-1ed3-4262-a82f-ea58cb890573.png" width="360" style="max-width: 360px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/ncq7d6tqhd0ozip/3D%20Repo%20Logo.png?raw=1" width="360" style="max-width: 360px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
 
 
                             </td>
@@ -661,7 +661,7 @@ const html = data => `
 
 
 
-                        <img alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/80a3af48-cabc-477d-a680-8774d5302f77.jpg" width="264" style="max-width: 791px; border-radius: 0%;" class="mcnImage">
+                        <img alt="" src="https://www.dropbox.com/s/2pw08kqvxex4zto/Quick%20User%20Guide.jpg?raw=1" width="264" style="max-width: 791px; border-radius: 0%;" class="mcnImage">
 
 
 
@@ -696,7 +696,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
                                     <a href="http://3drepo.org/wp-content/uploads/2018/11/3D-Repo-Quick-Start-Guide.pdf" title="Quick Start Guide" class="" target="_blank">
-                                        <img align="center" alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/438265da-6877-458e-b301-ac117753b709.png" width="564" style="max-width: 1200px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 1%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/76po72y098jsz5m/Quick-Start%20Guide%20Button.png?raw=1" width="564" style="max-width: 1200px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 1%;" class="mcnImage">
                                     </a>
 
                             </td>
@@ -755,7 +755,7 @@ const html = data => `
                     <td class="mcnCaptionLeftImageContent" align="center" valign="top">
 
 
-                        <img alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/4ae251a7-c34c-4ab2-8538-871688221ef2.jpg" width="264" style="max-width:656px;" class="mcnImage">
+                        <img alt="" src="https://www.dropbox.com/s/66c5jf2fvfbrm2r/How%20to%20Videos.jpg?raw=1" width="264" style="max-width:656px;" class="mcnImage">
 
 
                     </td>
@@ -807,7 +807,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
                                     <a href="https://www.youtube.com/playlist?list=PLS-KUH7mmZWh8vyBos3acJf61N22HGwuZ" title="How to Videos" class="" target="_blank">
-                                        <img align="center" alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/7514c5cc-f9ff-47af-b781-1ebd82755962.png" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/9v83zob6b03z2ba/How%20to%20Videos%20Button.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
 
                             </td>
