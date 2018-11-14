@@ -32,22 +32,6 @@ gulp.task("typedoc", function() {
     ;
 });
 
-gulp.task('webpack-build', function (cb) {
-  exec('webpack --config ./webpack/webpack.prod.config.js', function (err, stdout, stderr) {
-    console.log(stdout);
-    console.log(stderr);
-    cb(err);
-  });
-})
-
-gulp.task('webpack-watch', function (cb) {
-  exec('webpack --watch --config ./webpack/webpack.dev.config.js', function (err, stdout, stderr) {
-    console.log(stdout);
-    console.log(stderr);
-    cb(err);
-  });
-})
-
 // Watch for changes and live reload in development
 gulp.task('gulp-watch', function() {
   isWatch = true;
