@@ -47,8 +47,12 @@ export class NewJobForm extends React.PureComponent<IProps, IState> {
 		color: ''
 	};
 
-	public handleChange = (field) => (value) => {
-		this.setState({[field]: value} as any);
+	public handleColorChange = (value) => {
+		this.setState({color: value} as any);
+	}
+
+	public handleJobNameChange = (event) => {
+		this.setState({name: event.target.value} as any);
 	}
 
 	public handleSave = () => {
@@ -62,34 +66,34 @@ export class NewJobForm extends React.PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<Grid
-					container
+					container={true}
 					direction="column">
 					<Title>{title}</Title>
 
 					<Grid
-						item
-						container
+						item={true}
+						container={true}
 						direction="row"
 						spacing={16}
 						wrap="nowrap"
 					>
-						<StyledTextFieldContainer item>
+						<StyledTextFieldContainer item={true}>
 							<StyledTextField
-								autoFocus
+								autoFocus={true}
 								placeholder="Set job name"
-								fullWidth
+								fullWidth={true}
 								value={name}
-								onChange={(event) => this.handleChange('name')(event.currentTarget.value)}
-								InputLabelProps={{
+								onChange={this.handleJobNameChange}
+								InputLabelProps={ {
 									shrink: true
-								}}
+								} }
 							/>
 						</StyledTextFieldContainer>
-						<Grid item>
+						<Grid item={true}>
 							<ColorPicker
 								value={color}
 								predefinedColors={colors}
-								onChange={this.handleChange('color')}
+								onChange={this.handleColorChange}
 							/>
 						</Grid>
 					</Grid>

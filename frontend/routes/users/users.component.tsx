@@ -197,7 +197,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
 
 		const jobsChanged = !isEqual(prevProps.jobs, this.props.jobs);
@@ -221,27 +221,36 @@ export class Users extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderNewUserForm = (container) => {
+	public renderNewUserFormPanel = ({ closePanel }) => {
+		const { limit } = this.state;
+		const { users, usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
+
 		const formProps = {
-			title: this.getFooterLabel(),
+			title: this.getFooterLabel(users, limit),
 			jobs: this.state.jobs,
-			users: this.props.usersSuggestions,
+			users: usersSuggestions,
 			onSave: this.onSave,
-			clearSuggestions: this.props.clearUsersSuggestions,
-			getUsersSuggestions: this.props.onUsersSearch
+			clearSuggestions: clearUsersSuggestions,
+			getUsersSuggestions: onUsersSearch
 		};
+		return <NewUserForm {...formProps} onCancel={closePanel} />;
+	}
+
+	public renderNewUserForm = (container) => {
+		const { limit } = this.state;
+		const { users } = this.props;
+
+		const isButtonDisabled = limit <= users.length;
 
 		return (
 			<FloatingActionPanel
-				buttonProps={{
-					disabled: this.props.limit <= this.props.users.length,
-					label: 'All licences assigned'
-				}}
+				buttonProps={ {
+					disabled: isButtonDisabled,
+					label: isButtonDisabled ? 'All licences assigned' : ''
+				} }
 				container={container}
 				key={this.state.panelKey}
-				render={({ closePanel }) => {
-					return <NewUserForm {...formProps} onCancel={closePanel} />;
-				}}
+				render={this.renderNewUserFormPanel}
 			/>
 		);
 	}

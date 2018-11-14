@@ -18,12 +18,14 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 import { COLOR } from './colors';
 import { FONT_WEIGHT } from './fonts';
+import { media } from './media';
 import * as mixins from './mixins';
 
 export const theme = {
 	colors: COLOR,
 	fontWeights: FONT_WEIGHT,
-	mixins
+	mixins,
+	media
 };
 
 export const MuiTheme = createMuiTheme({
@@ -66,16 +68,20 @@ export const MuiTheme = createMuiTheme({
 		},
 		MuiDialogTitle: {
 			root: {
-				background: '#08203a',
-				padding: '15px 24px 15px',
+				background: theme.colors.PRIMARY_MAIN,
+				padding: '0 24px 0',
 				color: theme.colors.WHITE,
-				fontSize: '20px'
+				fontSize: '20px',
+				height: '40px',
+				display: 'flex',
+				alignItems: 'center'
 			}
 		},
 		MuiDialogContent: {
 			root: {
 				padding: '24px',
-				minWidth: '250px'
+				minWidth: '250px',
+				maxHeight: '60vh'
 			}
 		},
 		MuiDialog: {

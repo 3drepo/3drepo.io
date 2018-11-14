@@ -18,8 +18,8 @@
 class PasswordForgotController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"APIService"
+		'$scope',
+		'APIService'
 	];
 
 	private showProgress;
@@ -38,15 +38,15 @@ class PasswordForgotController implements ng.IController {
 
 	public $onInit() {
 		this.showProgress = false;
-		this.messageColour = "rgba(0, 0, 0, 0.7)";
-		this.messageErrorColour = "#F44336";
+		this.messageColour = 'rgba(0, 0, 0, 0.7)';
+		this.messageErrorColour = '#F44336';
 		this.buttonDisabled = true;
 		this.watchers();
 	}
 
 	public watchers() {
-		this.$scope.$watch("vm.usernameOrEmail", () => {
-			this.message = "";
+		this.$scope.$watch('vm.usernameOrEmail', () => {
+			this.message = '';
 			if (this.usernameOrEmail) {
 				this.buttonDisabled = false;
 			}
@@ -64,16 +64,16 @@ class PasswordForgotController implements ng.IController {
 		}
 
 		if (requestChange) {
-			if (this.usernameOrEmail && this.usernameOrEmail !== "") {
+			if (this.usernameOrEmail && this.usernameOrEmail !== '') {
 				this.showProgress = true;
 				this.buttonDisabled = false;
-				this.APIService.post("forgot-password", {userNameOrEmail: this.usernameOrEmail})
+				this.APIService.post('forgot-password', {userNameOrEmail: this.usernameOrEmail})
 					.then((response) => {
 						this.showProgress = false;
 						if (response.status === 200) {
 							this.verified = true;
 							this.messageColor = this.messageColour;
-							this.message = "Thank you. You will receive an email shortly with a link to change your password";
+							this.message = 'Thank you. You will receive an email shortly with a link to change your password';
 						} else {
 							this.buttonDisabled = false;
 							this.messageColor = this.messageErrorColour;
@@ -92,10 +92,10 @@ class PasswordForgotController implements ng.IController {
 export const PasswordForgotComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: PasswordForgotController,
-	controllerAs: "vm",
-	templateUrl: "templates/password-forgot.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/password-forgot.html'
 };
 
 export const PasswordForgotComponentModule = angular
-	.module("3drepo")
-	.component("passwordForgot", PasswordForgotComponent);
+	.module('3drepo')
+	.component('passwordForgot', PasswordForgotComponent);

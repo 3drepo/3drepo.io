@@ -25,7 +25,7 @@ import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TeamspacesActions } from '../teamspaces';
 
-const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
+export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
 
 export function* fetchUser({ username }) {
 	try {

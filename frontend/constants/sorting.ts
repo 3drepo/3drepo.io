@@ -6,6 +6,6 @@ export const SORT_TYPES = {
 };
 
 export const SORT_ORDER_TYPES = {
-	ASCENDING: "asc",
-	DESCENDING: "desc"
+	ASCENDING: 'asc',
+	DESCENDING: 'desc'
 };

@@ -18,14 +18,14 @@
 class PanelController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$window",
-		"$scope",
-		"$timeout",
+		'$window',
+		'$scope',
+		'$timeout',
 
-		"PanelService",
-		"EventService",
-		"GroupsService",
-		"TreeService"
+		'PanelService',
+		'EventService',
+		'GroupsService',
+		'TreeService'
 	];
 
 	public maxHeightAvailable;
@@ -54,7 +54,7 @@ class PanelController implements ng.IController {
 
 	public $onInit() {
 
-		this.highlightBackground = "#3171B6";
+		this.highlightBackground = '#3171B6';
 		this.contentItems = [];
 		this.showPanel = true;
 		this.activate = true;
@@ -87,7 +87,7 @@ class PanelController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.contentItems", (newValue: any, oldValue: any) => {
+		this.$scope.$watch('vm.contentItems', (newValue: any, oldValue: any) => {
 			if (newValue && newValue.length) {
 				this.setupShownCards();
 			}
@@ -118,9 +118,9 @@ class PanelController implements ng.IController {
 		/*
 		* Mouse down
 		*/
-		angular.element(document).bind("mousedown", (event) => {
+		angular.element(document).bind('mousedown', (event) => {
 			// If we have clicked on a canvas, we are probably moving the model around
-			if (event.target.tagName === "CANVAS") {
+			if (event.target.tagName === 'CANVAS') {
 				this.activate = false;
 			}
 		});
@@ -128,14 +128,14 @@ class PanelController implements ng.IController {
 		/*
 		* Mouse up
 		*/
-		angular.element(document).bind("mouseup", () => {
+		angular.element(document).bind('mouseup', () => {
 			this.activate = true;
 		});
 
 		/*
 		* Watch for screen resize
 		*/
-		angular.element(window as any).bind("resize", () => {
+		angular.element(window as any).bind('resize', () => {
 			this.resize();
 		});
 
@@ -195,7 +195,7 @@ class PanelController implements ng.IController {
 
 	public updatePanelButtons() {
 		for (let i = 0; i < this.contentItems.length; i++) {
-			this.contentItems[i].bgColour = (this.contentItems[i].show) ? this.highlightBackground : "";
+			this.contentItems[i].bgColour = (this.contentItems[i].show) ? this.highlightBackground : '';
 		}
 	}
 
@@ -258,7 +258,7 @@ class PanelController implements ng.IController {
 		}
 		this.updatePanelButtons();
 		this.$timeout().then(() => {
-			angular.element(window as any).triggerHandler("resize");
+			angular.element(window as any).triggerHandler('resize');
 		});
 	}
 
@@ -266,21 +266,21 @@ class PanelController implements ng.IController {
 
 export const PanelComponent: ng.IComponentOptions = {
 	bindings: {
-		account:  "=",
-		branch:   "=",
-		model:  "=",
-		modelSettings: "=",
-		isLiteMode: "=",
-		position: "@",
-		revision: "=",
-		selectedObjects: "=",
-		setInitialSelectedObjects: "&"
+		account:  '=',
+		branch:   '=',
+		model:  '=',
+		modelSettings: '=',
+		isLiteMode: '=',
+		position: '@',
+		revision: '=',
+		selectedObjects: '=',
+		setInitialSelectedObjects: '&'
 	},
 	controller: PanelController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel.html'
 };
 
 export const PanelComponentModule = angular
-	.module("3drepo")
-	.component("panel", PanelComponent);
+	.module('3drepo')
+	.component('panel', PanelComponent);

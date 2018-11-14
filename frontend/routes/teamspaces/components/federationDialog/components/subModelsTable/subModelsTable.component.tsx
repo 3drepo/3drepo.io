@@ -51,9 +51,12 @@ export const SubModelsTable = (props: IProps) => {
 		selectedModels,
 		handleAllClick,
 		handleIconClick,
-		handleItemClick,
 		checkboxDisabled
 	} = props;
+
+	const handleItemClick = (name) => (event) => {
+		props.handleItemClick(event, name);
+	};
 
 	return (
 		<StyledTable>
@@ -76,20 +79,20 @@ export const SubModelsTable = (props: IProps) => {
 				</TableRow>
 			</StyledTableHead>
 			<TableBody>
-				{models
+				{ models
 					.map((model) => {
 						const isModelSelected = isSelected(selectedModels, model.name);
 						return (
 							<TableRow
 								key={model.name} role="checkbox"
-								onClick={(event) => handleItemClick(event, model.name)}
+								onClick={handleItemClick(model.name)}
 							>
 								<TableCell padding="none">
 									<StyledCheckbox checked={isModelSelected} /> {model.name}
 								</TableCell>
 							</TableRow>
 						);
-					})}
+					}) }
 			</TableBody>
 		</StyledTable>
 	);

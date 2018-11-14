@@ -14,25 +14,25 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AuthService } from "../../home/js/auth.service";
-import { DialogService } from "../../home/js/dialog.service";
-import { GroupsService } from "./groups.service";
-import { NotificationEvents } from "../../notifications/js/notification.events";
-import { NotificationService } from "../../notifications/js/notification.service";
-import { TreeService } from "../../tree/js/tree.service";
+import { AuthService } from '../../home/js/auth.service';
+import { DialogService } from '../../home/js/dialog.service';
+import { GroupsService } from './groups.service';
+import { NotificationEvents } from '../../notifications/js/notification.events';
+import { NotificationService } from '../../notifications/js/notification.service';
+import { TreeService } from '../../tree/js/tree.service';
 
 class GroupsController implements ng.IController {
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"$element",
-		"GroupsService",
-		"DialogService",
-		"TreeService",
-		"AuthService",
-		"ClientConfigService",
-		"IconsConstant",
-		"NotificationService"
+		'$scope',
+		'$timeout',
+		'$element',
+		'GroupsService',
+		'DialogService',
+		'TreeService',
+		'AuthService',
+		'ClientConfigService',
+		'IconsConstant',
+		'NotificationService'
 	];
 
 	private onContentHeightRequest: any;
@@ -89,7 +89,7 @@ class GroupsController implements ng.IController {
 		this.onContentHeightRequest({ height: 1000 });
 		this.groupsService.reset();
 		this.watchers();
-		this.toShow = "groups";
+		this.toShow = 'groups';
 		this.loading = true;
 		this.groupsService.getGroups(this.account, this.model, this.revision)
 			.then(() => {
@@ -114,7 +114,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public watchers() {
-		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
+		this.$scope.$watch('vm.filterText', (searchQuery: string) => {
 			this.filterText = searchQuery;
 			this.filterGroups();
 		});
@@ -126,18 +126,18 @@ class GroupsController implements ng.IController {
 			this.updateChangeStatus();
 		}, true);
 
-		this.$scope.$watchCollection("vm.groups", () => {
+		this.$scope.$watchCollection('vm.groups', () => {
 			this.setContentHeight();
 			this.filterGroups();
 		});
 
-		this.$scope.$watchCollection("vm.savedGroupData", () => {
+		this.$scope.$watchCollection('vm.savedGroupData', () => {
 			this.updateChangeStatus();
 		});
 
-		this.$scope.$watch("vm.hideItem", (newValue) => {
+		this.$scope.$watch('vm.hideItem', (newValue) => {
 			if (newValue) {
-				this.toShow = "groups";
+				this.toShow = 'groups';
 				this.setContentHeight();
 				this.resetToSavedGroup();
 				if (this.lastColorOverride) {
@@ -147,7 +147,7 @@ class GroupsController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.hexColor", () => {
+		this.$scope.$watch('vm.hexColor', () => {
 			if (this.hexColor) {
 				const validHex = this.groupsService.hexToRGBA(this.hexColor);
 				if (validHex.length === 3) {
@@ -156,7 +156,7 @@ class GroupsController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 				this.canAddGroup = this.authService.hasPermission(
 					this.clientConfigService.permissions.PERM_CREATE_ISSUE,
@@ -190,18 +190,18 @@ class GroupsController implements ng.IController {
 			});
 		});
 
-		this.$scope.$watch("vm.selectedMenuOption",
+		this.$scope.$watch('vm.selectedMenuOption',
 			(selectedOption: any) => {
-				if (selectedOption && selectedOption.hasOwnProperty("value")) {
+				if (selectedOption && selectedOption.hasOwnProperty('value')) {
 					switch (selectedOption.value) {
-						case "overrideAll":
+						case 'overrideAll':
 							this.groupsService.colorOverrideAllGroups(selectedOption.selected);
 							break;
-						case "deleteAll":
+						case 'deleteAll':
 							this.deleteAllGroups();
 							break;
 						default:
-							console.error("Groups option menu selection unhandled");
+							console.error('Groups option menu selection unhandled');
 					}
 				}
 			});
@@ -266,7 +266,7 @@ class GroupsController implements ng.IController {
 	public confirmDeleteAllDialog() {
 		const content = `Delete all groups?`;
 		const escapable = true;
-		this.dialogService.confirm(`Confirm Delete`, content, escapable, "Yes", "Cancel")
+		this.dialogService.confirm(`Confirm Delete`, content, escapable, 'Yes', 'Cancel')
 			.then(() => {
 				this.groupsService.deleteAllGroups(this.teamspace, this.model);
 			})
@@ -303,17 +303,17 @@ class GroupsController implements ng.IController {
 	}
 
 	public errorDialog(error) {
-		const content = "Delete group failed. Contact support@3drepo.io if problem persists.";
+		const content = 'Delete group failed. Contact support@3drepo.io if problem persists.';
 		const escapable = true;
 		console.error(error);
-		this.dialogService.text("Error Deleting Groups", content, escapable);
+		this.dialogService.text('Error Deleting Groups', content, escapable);
 	}
 
 	public confirmUpdateDialog(saved: number, selected: number) {
 		const content = `A significant change is about to be applied to this group
 					(${saved} to ${selected} objects). Do you wish to proceed?`;
 		const escapable = true;
-		this.dialogService.confirm(`Confirm Group Update`, content, escapable, "Update", "Cancel")
+		this.dialogService.confirm(`Confirm Group Update`, content, escapable, 'Update', 'Cancel')
 			.then(() => {
 				this.updateGroup();
 			})
@@ -330,7 +330,7 @@ class GroupsController implements ng.IController {
 
 	public setSelectedGroupColor(color: number[], isHex: boolean) {
 		if (!isHex) {
-			this.hexColor = "";
+			this.hexColor = '';
 		}
 		this.groupsService.setSelectedGroupColor(color);
 	}
@@ -363,7 +363,7 @@ class GroupsController implements ng.IController {
 				this.savingGroup = false;
 			})
 			.catch((error) => {
-				this.handleGroupError("update");
+				this.handleGroupError('update');
 				this.savingGroup = false;
 				console.error(error);
 			});
@@ -382,7 +382,7 @@ class GroupsController implements ng.IController {
 				this.updateChangeStatus();
 			})
 			.catch((error) => {
-				this.handleGroupError("create");
+				this.handleGroupError('create');
 				this.savingGroup = false;
 				console.error(error);
 			});
@@ -390,7 +390,7 @@ class GroupsController implements ng.IController {
 	}
 
 	public isEditing(): boolean {
-		return this.toShow === "group";
+		return this.toShow === 'group';
 	}
 
 	public getColorOverrideRGBA(group: any): string {
@@ -398,13 +398,13 @@ class GroupsController implements ng.IController {
 		if (hasOverride) {
 			return this.getGroupRGBAColor(group);
 		}
-		return "rgba(0,0,0,0.54)";
+		return 'rgba(0,0,0,0.54)';
 	}
 
 	public showGroupPane() {
 		this.savedGroupData = Object.assign({}, this.selectedGroup);
-		this.toShow = "group";
-		this.hexColor = "";
+		this.toShow = 'group';
+		this.hexColor = '';
 
 		this.onContentHeightRequest({ height: 310 });
 		this.onShowItem();
@@ -417,13 +417,13 @@ class GroupsController implements ng.IController {
 	}
 
 	public cancelEdit() {
-		this.hexColor = "";
+		this.hexColor = '';
 		this.onHideItem();
 	}
 
 	public focusGroupName() {
 		this.$timeout(() => {
-			const input: HTMLElement = this.$element[0].querySelector("#groupName");
+			const input: HTMLElement = this.$element[0].querySelector('#groupName');
 			input.focus();
 		});
 	}
@@ -444,7 +444,7 @@ class GroupsController implements ng.IController {
 
 	public setContentHeight() {
 
-		if (this.toShow === "group") {
+		if (this.toShow === 'group') {
 			return 310;
 		}
 
@@ -510,7 +510,7 @@ class GroupsController implements ng.IController {
 	}
 
 	private filterGroups() {
-		if (this.filterText !== undefined && this.filterText !== "") {
+		if (this.filterText !== undefined && this.filterText !== '') {
 			this.groupsToShow = this.groupsService.groupsFilterSearch(this.filterText);
 		} else {
 			this.groupsToShow = this.groups;
@@ -520,22 +520,22 @@ class GroupsController implements ng.IController {
 
 export const GroupsComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		modelSettings: "<",
-		filterText: "<",
-		onContentHeightRequest: "&",
-		onShowItem: "&",
-		onHideItem: "&",
-		hideItem: "<",
-		selectedMenuOption: "="
+		account: '<',
+		model: '<',
+		revision: '<',
+		modelSettings: '<',
+		filterText: '<',
+		onContentHeightRequest: '&',
+		onShowItem: '&',
+		onHideItem: '&',
+		hideItem: '<',
+		selectedMenuOption: '='
 	},
 	controller: GroupsController,
-	controllerAs: "vm",
-	templateUrl: "templates/groups.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/groups.html'
 };
 
 export const GroupsComponentModule = angular
-	.module("3drepo")
-	.component("groups", GroupsComponent);
+	.module('3drepo')
+	.component('groups', GroupsComponent);

@@ -28,26 +28,26 @@ export const RemoveUserDialog = (props: IProps) => {
 		<>
 			<DialogContent>
 				{description}
-				{props.projects.length ? (
+				{ props.projects.length ? (
 					<>
 						<Headline>Projects: </Headline>
 						{renderItems(props.projects)}
 					</>
-				) : ''}
+				) : '' }
 
-				{props.models.length ? (
+				{ props.models.length ? (
 					<>
 						<Headline>Models: </Headline>
 						{renderItems(props.models)}
 					</>
-				) : ''}
+				) : '' }
 
-				{props.teamspacePerms ? (
+				{ props.teamspacePerms ? (
 					<>
 						<Headline>Teamspace: </Headline>
 						<p>{props.teamspacePerms}</p>
 					</>
-				) : ''}
+				) : '' }
 			</DialogContent>
 
 			<DialogActions>

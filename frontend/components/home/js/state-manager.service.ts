@@ -15,27 +15,29 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { history } from '../../../helpers/migration';
+
 export class StateManagerService {
 
 	public static $inject: string[] = [
-		"$mdDialog",
-		"$location",
-		"$q",
-		"$state",
-		"$rootScope",
-		"$timeout",
-		"$window",
+		'$mdDialog',
+		'$location',
+		'$q',
+		'$state',
+		'$rootScope',
+		'$timeout',
+		'$window',
 
-		"AuthService",
-		"ClientConfigService",
-		"ClipService",
-		"CompareService",
-		"GroupsService",
-		"PanelService",
-		"TreeService",
-		"ViewerService",
-		"IssuesService",
-		"RisksService"
+		'AuthService',
+		'ClientConfigService',
+		'ClipService',
+		'CompareService',
+		'GroupsService',
+		'PanelService',
+		'TreeService',
+		'ViewerService',
+		'IssuesService',
+		'RisksService'
 	];
 
 	private state: any;
@@ -67,10 +69,6 @@ export class StateManagerService {
 		private IssuesService: any,
 		private RisksService: any
 	) {
-		// Stores the state, required as ui-router does not allow inherited
-		// stateParams, and we need to dynamically generate state diagram.
-		// One day this might change.
-		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 		this.state = {
 			changing: true
 		};
@@ -118,7 +116,7 @@ export class StateManagerService {
 					functionName = parentState.functions[i];
 
 					if (this.functions.indexOf(functionName) > -1) {
-						console.error("Duplicate function name when loading in StateManager : " + functionName);
+						console.error('Duplicate function name when loading in StateManager : ' + functionName);
 					} else {
 						this.functions.push(functionName);
 					}
@@ -137,15 +135,14 @@ export class StateManagerService {
 	}
 
 	public goHome() {
-
-		// TODO: Do this properly using state manager
-		let path = "/";
-
+		let path = '/';
 		if (this.AuthService.isLoggedIn() && this.AuthService.getUsername()) {
-			path = "/" + this.AuthService.getUsername();
+			path = '/dashboard/teamspaces';
 		}
 
-		this.$location.path(path);
+		this.$timeout(() => {
+			history.push(path);
+		});
 	}
 
 	public destroy()  {
@@ -203,7 +200,7 @@ export class StateManagerService {
 		// Loop through structure. If a parent is null, then we must clear
 		// it's children
 		const stateStack = [this.ClientConfigService.structure];
-		const stateNameStack = ["home"];
+		const stateNameStack = ['home'];
 		let clearBelow = false;
 
 		while (stateStack.length > 0) {
@@ -211,7 +208,7 @@ export class StateManagerService {
 			const parentState = stateStack[stackLength - 1];
 			const parentStateName = stateNameStack[stackLength - 1];
 
-			if (parentStateName !== "home" && !this.state[parentStateName]) {
+			if (parentStateName !== 'home' && !this.state[parentStateName]) {
 				clearBelow = true;
 			}
 
@@ -241,10 +238,7 @@ export class StateManagerService {
 			// and yet there is no account set. Then
 			// we need to go back to the account page if possible.
 			if ((functionList.length === 0) && this.AuthService.isLoggedIn() && !this.state.account) {
-				this.setStateVar("account", this.AuthService.getUsername());
-				this.updateState(false);
-			} else {
-				this.updateState(true);
+				this.setStateVar('account', this.AuthService.getUsername());
 			}
 		} else {
 			this.stateChangeQueue.pop();
@@ -278,41 +272,6 @@ export class StateManagerService {
 		}
 
 		return functionList;
-
-	}
-
-	public genStateName() {
-
-		let currentChildren = this.structure.children;
-		let childidx = 0;
-		let stateName  = "home."; // Assume that the base state is there.
-		const functionList = this.functionsUsed();
-		const usesFunction = (functionList.length > 0);
-
-		if (usesFunction) {
-			stateName += functionList.join(".") + ".";
-		} else {
-			while (childidx < currentChildren.length) {
-				const child  = currentChildren[childidx];
-				const plugin = child.plugin;
-
-				if (this.state.hasOwnProperty(plugin) && this.state[plugin]) {
-					stateName += plugin + ".";
-
-					if (child.children) {
-						currentChildren = child.children;
-					} else {
-						currentChildren = [];
-					}
-
-					childidx = -1;
-				}
-
-				childidx += 1;
-			}
-		}
-
-		return stateName.substring(0, stateName.length - 1);
 
 	}
 
@@ -350,26 +309,9 @@ export class StateManagerService {
 		}
 	}
 
-	public updateState(dontUpdateLocation) {
-		const newStateName = this.genStateName();
-
-		if (Object.keys(this.changedState).length) {
-			this.changedState = {};
-		}
-
-		const updateLocation = !dontUpdateLocation ? true : false; // In case of null
-		this.$state.transitionTo(newStateName, this.state, { location: updateLocation });
-
-		// This timeout is needed or changing revision doesn't work... for some reason.
-		this.$timeout(() => {
-			this.state.changing = false;
-		});
-
-	}
-
 	public refreshHandler(event) {
 
-		const confirmationMessage = "This will reload the whole model, are you sure?";
+		const confirmationMessage = 'This will reload the whole model, are you sure?';
 		event.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
 		return confirmationMessage;              // Gecko, WebKit, Chrome <34
 
@@ -378,21 +320,21 @@ export class StateManagerService {
 	public popStateHandler(event, account, model) {
 
 		// the fake state has already been popped by user at this moment
-		const message = "This will go back to teamspaces page are you sure you want to continue?";
+		const message = 'This will go back to teamspaces page are you sure you want to continue?';
 		const path = this.$location.path();
 
-		if (path === "/" + account + "/" + model) {
+		if (path === '/' + account + '/' + model) {
 
-			const title = "Go back to Teamspaces?";
+			const title = 'Go back to Teamspaces?';
 			this.$mdDialog.show(
 
 				this.$mdDialog.confirm()
 					.clickOutsideToClose(true)
 					.title(title)
 					.textContent(message)
-					.ariaLabel(title + " Dialog")
-					.cancel("Cancel")
-					.ok("Confirm")
+					.ariaLabel(title + ' Dialog')
+					.cancel('Cancel')
+					.ok('Confirm')
 
 			).then(
 				() => {
@@ -408,15 +350,14 @@ export class StateManagerService {
 
 	public setHomeState(value) {
 		for (const key in value) {
-			if (key !== "updateLocation" && value.hasOwnProperty(key)) {
+			if (key !== 'updateLocation' && value.hasOwnProperty(key)) {
 				this.setStateVar(key, value[key]);
 			}
 		}
-		this.updateState(false);
 	}
 
 }
 
 export const StateManagerServiceModule = angular
-	.module("3drepo")
-	.service("StateManager", StateManagerService);
+	.module('3drepo')
+	.service('StateManager', StateManagerService);

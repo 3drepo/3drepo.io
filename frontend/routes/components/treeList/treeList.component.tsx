@@ -29,14 +29,16 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	if (active) {
 		Icon = IconOpened || FolderOpen;
 	}
-	return <IconContainer>
-		<Icon {...iconProps} />
-	</IconContainer>;
+	return (
+		<IconContainer>
+			<Icon {...iconProps} />
+		</IconContainer>
+	);
 };
 
 export const DefaultHeadline = ({renderActions, ...props}) => (
 	<Grid
-		container
+		container={true}
 		direction="row"
 		alignItems="center"
 		justify="flex-start"
@@ -158,7 +160,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 							: <DefaultHeadline {...headlineProps}/>
 					}
 				</Headline>
-				{ active ? <Details {...props}>{this.renderItems()}</Details> : null }
+				{active ? <Details {...props}>{this.renderItems()}</Details> : null}
 			</Container>
 		);
 	}

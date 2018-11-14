@@ -64,9 +64,9 @@ export const MODEL_TYPE = 'model';
 export const FEDERATION_TYPE = 'federation';
 
 export const MODEL_SUBTYPES = [
-	{ value: "Architectural" },
-	{ value: "Structural" },
-	{ value: "Mechanical" },
-	{ value: "GIS" },
-	{ value: "Other" }
+	{ value: 'Architectural' },
+	{ value: 'Structural' },
+	{ value: 'Mechanical' },
+	{ value: 'GIS' },
+	{ value: 'Other' }
 ];

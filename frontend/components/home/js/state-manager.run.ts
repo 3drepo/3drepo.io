@@ -15,6 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { history } from '../../../helpers/migration';
+import { get } from 'lodash';
+
 function StateManagerRun(
 	$location,
 	$rootScope,
@@ -25,89 +28,112 @@ function StateManagerRun(
 
 	StateManager,
 	AuthService,
-	AnalyticService
+	AnalyticService,
+	$urlRouter
 ) {
 
-	const dateFilter = $filter("date");
+	const dateFilter = $filter('date');
 
 	$mdDateLocale.formatDate = (date, timezone) => {
 		if (!date) {
-			return "";
+			return '';
 		}
 
 		const localeTime = date.toLocaleTimeString();
 		let formatDate = date;
 		if (date.getHours() === 0 &&
-			(localeTime.indexOf("11:") !== -1 || localeTime.indexOf("23:") !== -1)) {
+			(localeTime.indexOf('11:') !== -1 || localeTime.indexOf('23:') !== -1)) {
 			formatDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 1, 0, 0);
 		}
 
-		return dateFilter(formatDate, "d/M/yyyy", timezone);
+		return dateFilter(formatDate, 'd/M/yyyy', timezone);
 	};
 
 	$mdDateLocale.parseDate = (dateString) => {
-		const dateArr = dateString.split("/").concat([1900, 1 , 1]);
+		const dateArr = dateString.split('/').concat([1900, 1 , 1]);
 		return new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
 	};
 
-	$rootScope.$on("$stateChangeStart", (event, toState, toParams, fromState, fromParams) => {
-		StateManager.state.changing = true;
+	$rootScope.$on('$locationChangeSuccess', (e, newUrl, oldUrl) => {
+		e.preventDefault();
 
-		for (let i = 0; i < StateManager.functions.length; i++) {
-			StateManager.setStateVar(StateManager.functions[i], false);
+		if ($state.current.name !== 'app.dashboard.pages') {
+			$urlRouter.sync();
+		} else if (newUrl !== oldUrl) {
+			$timeout(() => {
+				history.push(`${location.pathname}${location.search}`);
+			});
 		}
-
-		StateManager.clearQuery();
-
-		const stateChangeObject = {
-			toState,
-			toParams,
-			fromState,
-			fromParams
-		};
-
-		StateManager.startStateChange(stateChangeObject);
-	});
-
-	$rootScope.$on("$stateChangeSuccess", (event, toState, toParams, fromState, fromParams) => {
-
-		const stateChangeObject = {
-			toState,
-			toParams,
-			fromState,
-			fromParams
-		};
-		StateManager.handleStateChange(stateChangeObject);
-	});
-
-	$rootScope.$on("$locationChangeSuccess", () => {
 
 		AnalyticService.sendPageView(location);
 
 		const queryParams = $location.search();
-
-		if (Object.keys(queryParams).length === 0) {
+		if (Object.keys(queryParams).length) {
 			StateManager.clearQuery();
 		} else {
 			StateManager.setQuery(queryParams);
 		}
-
 	});
 
+	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
+		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
+		const isAuthenticated = AuthService.isLoggedIn();
+		const originURL = `${location.pathname}${location.search}`;
+
+		if (toState.name === 'app.homepage') {
+			event.preventDefault();
+
+			if (isAuthenticated) {
+				AuthService.loginSuccess({
+					data: {
+						username: AuthService.username
+					}
+				});
+				$state.go('app.dashboard.pages', { page: 'teamspaces'});
+			} else {
+				$state.go('app.login', { referrer: originURL });
+			}
+		}
+
+		if (isLoginRequired && !isAuthenticated) {
+			event.preventDefault();
+			StateManager.state.authInitialized = false;
+			AuthService.init().then(() => {
+				StateManager.state.authInitialized = true;
+				$timeout(() => {
+					if (toState.name.includes('app.dashboard')) {
+						history.push(originURL);
+						$urlRouter.update();
+					} else {
+						$state.go(toState, toParams);
+					}
+				});
+			})
+			.catch((error) => {
+				$state.go('app.login', { referrer: originURL });
+				console.error('Error initialising auth from state manager: ', error);
+			});
+		}
+
+		StateManager.setState(toParams);
+	});
+
+	$urlRouter.listen();
 }
 
 export const StateManagerRunModule = angular
-	.module("3drepo")
+	.module('3drepo')
 	.run([
-		"$location",
-		"$rootScope",
-		"$state",
-		"$timeout",
-		"$mdDateLocale",
-		"$filter",
+		'$location',
+		'$rootScope',
+		'$state',
+		'$timeout',
+		'$mdDateLocale',
+		'$filter',
 
-		"StateManager",
-		"AuthService",
-		"AnalyticService",
+		'StateManager',
+		'AuthService',
+		'AnalyticService',
+		'$urlRouter',
 		StateManagerRun
 	]);

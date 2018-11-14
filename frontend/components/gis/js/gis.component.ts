@@ -18,11 +18,11 @@
 class GISController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$q",
+		'$scope',
+		'$q',
 
-		"ViewerService",
-		"GISService"
+		'ViewerService',
+		'GISService'
 	];
 
 	private selectedProvider: any;
@@ -58,7 +58,7 @@ class GISController implements ng.IController {
 	public watchers() {
 		const modelsLoaded = this.$q.defer();
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 
 			if (
 				this.modelSettings &&
@@ -92,7 +92,7 @@ class GISController implements ng.IController {
 	public setMapProvider(provider: any) {
 		if (this.selectedProvider.name !== provider.name) {
 			for (let i = 0; this.selectedProvider.layers && i < this.selectedProvider.layers.length; i++) {
-				if (this.selectedProvider.layers[i].visibility === "visible") {
+				if (this.selectedProvider.layers[i].visibility === 'visible') {
 					this.GISService.toggleLayerVisibility(this.selectedProvider.layers[i]);
 				}
 			}
@@ -122,17 +122,17 @@ class GISController implements ng.IController {
 
 export const GISComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		modelSettings: "<",
-		onContentHeightRequest: "&"
+		account: '<',
+		model: '<',
+		revision: '<',
+		modelSettings: '<',
+		onContentHeightRequest: '&'
 	},
 	controller: GISController,
-	controllerAs: "vm",
-	templateUrl: "templates/gis.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/gis.html'
 };
 
 export const GISComponentModule = angular
-	.module("3drepo")
-	.component("gis", GISComponent);
+	.module('3drepo')
+	.component('gis', GISComponent);

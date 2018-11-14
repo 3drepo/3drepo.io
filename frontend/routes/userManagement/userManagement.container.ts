@@ -48,4 +48,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onTeamspaceChange: UserManagementActions.fetchTeamspaceDetails
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(UserManagement)));
+export default connect(mapStateToProps, mapDispatchToProps)(UserManagement);

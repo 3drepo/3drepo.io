@@ -22,6 +22,9 @@ import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
+import StorageNormal from '@material-ui/icons/Storage';
+import StorageOutlined from '@material-ui/icons/StorageOutlined';
+
 interface IProps {
 	account: string;
 	projects: any[];
@@ -34,6 +37,15 @@ interface IProps {
 
 export const TeamspaceItem = (props: IProps) => {
 	const { account, projects, onToggle, active, renderChildItem, isMyTeamspace, onAddProject} = props;
+
+	const renderActions = () => (
+		<TooltipButton
+			{...ROW_ACTIONS.ADD_NEW}
+			label="Add new project"
+			action={onAddProject}
+		/>
+	);
+
 	return (
 		<TreeList
 			name={account}
@@ -43,13 +55,11 @@ export const TeamspaceItem = (props: IProps) => {
 			active={active}
 			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
-			renderActions={() => (
-				<TooltipButton
-					{...ROW_ACTIONS.ADD_NEW}
-					label="Add new project"
-					action={onAddProject}
-				/>
-			)}
+			IconProps={ {
+				IconOpened: StorageOutlined,
+				IconClosed: StorageNormal
+			} }
+			renderActions={renderActions}
 		/>
 	);
 };

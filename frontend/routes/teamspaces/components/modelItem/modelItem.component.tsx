@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { startCase } from 'lodash';
+
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -62,7 +63,8 @@ const isPendingStatus = (status) => status && status !== 'ok' && status !== 'fai
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {
-		hovered: false
+		hovered: false,
+		statusText: ''
 	};
 
 	private modelActions: IAction[] = [];
@@ -112,7 +114,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	public renderSubModels = (subModels = []) => {
 		const submodelsAsString = subModels.map(({ name }) => name).join(', ');
 
-		return subModels.length ? <SubmodelsList>{ submodelsAsString }</SubmodelsList> : null;
+		return subModels.length ? <SubmodelsList>{submodelsAsString}</SubmodelsList> : null;
 	}
 
 	public renderActions = (actions) => {
@@ -148,28 +150,34 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		const actions = isFederation ? this.federationActions : this.modelActions;
 		const isPending = isPendingStatus(status);
 
-		return (
-			<Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
-				<Grid container direction="row" alignItems="center" justify="space-between" wrap="nowrap">
-					<Grid container justify="space-between" wrap="nowrap" alignItems="center">
-						{ isPending
-							? <><Name>{name}</Name> {this.renderPendingStatus(status)}</>
-							: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
-						}
-					</Grid>
-					<TimeWrapper container wrap="nowrap" direction="row" alignItems="center" justify="flex-end">
-						<Time>
-							{ timestamp && (!hovered || hovered && isPending)
-								? (<DateTime value={timestamp} format="D ddd" />)
-								: null
+		return(
+				<Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
+					<Grid container={true} direction="row" alignItems="center" justify="space-between" wrap="nowrap">
+						<Grid container={true} justify="space-between" wrap="nowrap" alignItems="center">
+							{ isPending
+								? <><Name>{name}</Name> {this.renderPendingStatus(status)}</>
+								: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
 							}
-						</Time>
-						<RowMenu open={hovered} disabled={isPending}>
-							{this.renderActions(actions)}
-						</RowMenu>
-					</TimeWrapper>
-				</Grid>
-				{this.renderSubModels(subModels)}
+						</Grid>
+						<TimeWrapper
+							container={true}
+							wrap="nowrap"
+							direction="row"
+							alignItems="center"
+							justify="flex-end"
+							pending={isPending ? 1 : 0}
+						>
+							{ timestamp && !hovered && !isPending &&
+								<Time>
+									<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />
+								</Time>
+							}
+							<RowMenu open={hovered} disabled={isPending}>
+								{this.renderActions(actions)}
+							</RowMenu>
+						</TimeWrapper>
+					</Grid>
+					{this.renderSubModels(subModels)}
 			</Container>
 		);
 	}

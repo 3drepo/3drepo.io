@@ -55,12 +55,12 @@ const COLORS = {
 
 const componentToHex = memoize((c) => {
 	const hex = c.toString(16);
-	return hex.length === 1 ? "0" + hex : hex;
+	return hex.length === 1 ? '0' + hex : hex;
 });
 
 const rgbaToHex = memoize((rgbaColor) => {
 	const [r, g, b] = rgbaColor.match(/[.\d]+/g).map(Number);
-	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+	return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 });
 
 const hexToRgba = memoize((hex) => {
@@ -272,7 +272,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		const imageData = canvasCtx.getImageData(x, y, 1, 1).data;
 		const rgbaColor = `rgba(${imageData[0]}, ${imageData[1]}, ${imageData[2]}, 1)`;
 
-		this.onColorHashChange(rgbaToHex(rgbaColor).toUpperCase().replace("#", ""), { x, y }, shouldRefreshCanvas);
+		this.onColorHashChange(rgbaToHex(rgbaColor).toUpperCase().replace('#', ''), { x, y }, shouldRefreshCanvas);
 	}
 
 	public onColorHashChange = (color = this.state.color, position?, shouldRefreshCanvas = false): void => {
@@ -291,7 +291,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public onPredefinedColorClick = (predefinedColor): void => {
+	public onPredefinedColorClick = (predefinedColor) => () => {
 		this.onColorHashChange(predefinedColor.toUpperCase().replace('#', ''));
 	}
 
@@ -299,10 +299,10 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		return colors.slice(0, 7).map((color, index) => {
 			return (
 				<PredefinedColor
-					item
+					item={true}
 					key={index}
 					color={color}
-					onClick={() => this.onPredefinedColorClick(color)}
+					onClick={this.onPredefinedColorClick(color)}
 				/>
 			);
 		});
@@ -322,14 +322,14 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
 					<ColorSelect
-						container
+						container={true}
 						onClick={this.handleClick}
 						direction="row"
 						alignItems="center"
 						justify="flex-start"
 					>
-						<Dot item color={value}></Dot>
-						<Grid item>
+						<Dot item={true} color={value} />
+						<Grid item={true}>
 							<StyledIconButton aria-label="Toggle picker">
 								<ArrowDropDown />
 							</StyledIconButton>
@@ -346,7 +346,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					{
 						predefinedColors.length ? (
 							<PredefinedColorsContainer
-								container
+								container={true}
 								direction="row"
 								alignItems="center"
 								justify="flex-start"
@@ -356,12 +356,12 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						) : null
 					}
 					<Grid
-						container
+						container={true}
 						direction="row"
 						alignItems="center"
 						justify="space-between"
 					>
-						<CanvasContainer item>
+						<CanvasContainer item={true}>
 							<BlockCanvas
 								innerRef={this.blockCanvasRef}
 								width={185}
@@ -372,13 +372,13 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 							/>
 							<ColorPointer
 								innerRef={this.pointerRef}
-								style={{
+								style={ {
 									top: pointerTop,
 									left: pointerLeft
-								}}
+								} }
 							/>
 						</CanvasContainer>
-						<CanvasContainer item>
+						<CanvasContainer item={true}>
 							<StripCanvas
 								innerRef={this.stripCanvasRef}
 								width={23}
@@ -388,20 +388,20 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						</CanvasContainer>
 					</Grid>
 					<Grid
-						container
+						container={true}
 						direction="row"
 						justify="flex-start"
 						alignItems="center"
 					>
-						<Grid item>
-							<SelectedColor color={colorHash}></SelectedColor>
+						<Grid item={true}>
+							<SelectedColor color={colorHash} />
 						</Grid>
-						<Grid item>
+						<Grid item={true}>
 							<FormControl>
 								<SelectedHash
 									value={hashInput}
 									onChange={this.handleHashInputChange}
-									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
+									startAdornment={<StyledStartAdornment position="start" disableTypography={true}>#</StyledStartAdornment>}
 								/>
 							</FormControl>
 						</Grid>

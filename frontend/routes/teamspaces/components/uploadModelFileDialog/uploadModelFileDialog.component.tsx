@@ -17,24 +17,26 @@
 
 import * as React from 'react';
 import * as dayjs from 'dayjs';
+import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import {
+	LoadingDialog
+} from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
 
-import { clientConfigService } from '../../../../services/clientConfig';
-import { Loader } from './../../../components/loader/loader.component';
+import { schema } from '../../../../services/validation';
+import { FileInputField } from './components/fileInputField.component';
 import { unitsMap } from '../../../../constants/model-parameters';
 
-import {
-	ModelName,
-	ModelInfo,
-	HiddenFileInput,
-	FileLabel,
-	StyledDialogActions,
-	CancelButton
-} from './uploadModelFileDialog.styles';
+import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploadModelFileDialog.styles';
+
+const UploadSchema = Yup.object().shape({
+	revisionName: schema.revisionName,
+	file: Yup.mixed().required()
+});
 
 interface IProps {
 	uploadModelFile: (teamspace, projectName, modelId, fileData) => void;
@@ -59,8 +61,6 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		fileName: ''
 	};
 
-	public inputFileRef = React.createRef<HTMLInputElement>();
-
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId);
@@ -71,21 +71,13 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		const { modelId, teamspaceName, projectName, handleClose, uploadModelFile } = this.props;
 
 		const fileData = {
-			file: this.inputFileRef.current.files[0],
+			file: values.file,
 			tag: values.revisionName,
 			desc: values.revisionDesc
 		};
 		uploadModelFile(teamspaceName, projectName, modelId, fileData);
 		handleClose();
 	}
-
-	public onInputChange = (event) => {
-		this.setState({
-			fileName: event.target.files[0].name
-		});
-	}
-
-	public getAcceptedFormats = () => clientConfigService.acceptedFormat.map((format) => `.${format}`).toString();
 
 	public renderRevisionInfo = (revisions) => {
 		if (!revisions.length) {
@@ -102,74 +94,80 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return `${info}: ${formatedDate}`;
 	}
 
+	public handleFileChange = (onChange) => (event, ...params) => {
+		this.setState({
+			fileName: event.target.value.name
+		});
+
+		onChange(event, ...params);
+	}
+
 	public render() {
 		const { modelSettings, revisions, modelName, handleClose, isPending } = this.props;
 
 		if (isPending) {
-			return <Loader />;
+			return <LoadingDialog content={`Loading ${modelName} data...`} />;
 		}
 
 		return (
-			<Formik onSubmit={this.handleFileUpload} initialValues={{ revisionName: '', revisionDesc: '' }}>
+			<Formik
+				onSubmit={this.handleFileUpload}
+				initialValues={{ revisionName: '', revisionDesc: '', file: '' }}
+				validationSchema={UploadSchema}
+			>
 				<Form>
 					<DialogContent>
 						<ModelName>{modelName}</ModelName>
 						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
 						<Field
 							name="revisionName"
-							render={({ field }) =>
+							render={ ({ field, form }) =>
 								<TextField
 									{...field}
+									error={Boolean(form.errors.revisionName)}
+									helperText={form.errors.revisionName}
 									label="Name"
 									margin="normal"
 									fullWidth={true}
-								/>
-							}
+								/>}
 								/>
 						<Field
 							name="revisionDesc"
-							render={({ field }) =>
+							render={ ({ field }) =>
 								<TextField
 									{...field}
 									label="Description"
 									margin="normal"
 									fullWidth={true}
-								/>
-							}
+								/>}
 						/>
 						{ modelSettings.properties &&
 							<ModelInfo>
-								{ `Model units: ${unitsMap[modelSettings.properties.unit]}` }
+								{`Model units: ${unitsMap[modelSettings.properties.unit]}`}
 							</ModelInfo>
 						}
-						{ this.state.fileName && <ModelInfo>File name: { this.state.fileName } </ModelInfo> }
+						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
 						<StyledDialogActions>
-							<HiddenFileInput
-								accept={this.getAcceptedFormats()}
-								id="flat-button-file"
-								type="file"
-								innerRef={this.inputFileRef}
-								onChange={this.onInputChange}
-							/>
-							<FileLabel htmlFor="flat-button-file">
-								<Button component="span">Select file</Button>
-							</FileLabel>
-							<Field render={() =>
+							<Field name="file" render={({ field }) =>
+								<FileInputField
+									{...field}
+									onChange={this.handleFileChange(field.onChange)}
+						/>} />
+							<Field render={ () =>
 								<CancelButton
 									onClick={handleClose}
 									color="secondary">
 									Cancel
-									</CancelButton>}
+									</CancelButton> }
 							/>
-							<Field render={() =>
+							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
 									variant="raised"
 									color="secondary"
-									disabled={!this.state.fileName}>
+									disabled={(!form.isValid || form.isValidating)}>
 										Upload
-									</Button>}
-								/>
+									</Button>}	/>
 						</StyledDialogActions>
 					</DialogContent>
 				</Form>

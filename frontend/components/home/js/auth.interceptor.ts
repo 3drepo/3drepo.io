@@ -16,9 +16,8 @@
  */
 
 export class AuthInterceptor {
-
 	public static $inject: string[] = [
-		"$injector"
+		'$injector'
 	];
 
 	private dialogOpen = false;
@@ -28,12 +27,12 @@ export class AuthInterceptor {
 	) {
 	}
 
-	public responseError(response) {
+	public responseError = (response) => {
 
-		const notLogin = response.data.place !== "GET /login";
+		const notLogin = response.data.place !== 'GET /login';
 
 		const unauthorized = response.status === 401 &&
-							response.data.message === "You are not logged in";
+							response.data.message === 'You are not logged in';
 		const sessionHasExpired = unauthorized && !this.dialogOpen && notLogin;
 
 		if (sessionHasExpired) {
@@ -44,23 +43,23 @@ export class AuthInterceptor {
 
 	}
 
-	public request(config) {
+	public request = (config) => {
 		return config;
 	}
 
-	public requestError(config) {
+	public requestError = (config) => {
 		return config;
 	}
 
-	public response(res) {
+	public response = (res) => {
 		return res;
 	}
 
-	public sessionExpired() {
+	public sessionExpired = () => {
 
-		const DialogService = this.$injector.get("DialogService");
-		const AuthService = this.$injector.get("AuthService");
-		const StateManager = this.$injector.get("StateManager");
+		const DialogService = this.$injector.get('DialogService');
+		const AuthService = this.$injector.get('AuthService');
+		const StateManager = this.$injector.get('StateManager');
 
 		DialogService.sessionExpired().then(() => {
 			StateManager.resetServiceStates();
@@ -72,5 +71,5 @@ export class AuthInterceptor {
 }
 
 export const AuthInterceptorModule = angular
-	.module("3drepo")
-	.service("AuthInterceptor", AuthInterceptor);
+	.module('3drepo')
+	.service('AuthInterceptor', AuthInterceptor);

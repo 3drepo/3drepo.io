@@ -21,8 +21,8 @@ import { TeamspaceActions } from '../../../modules/teamspace';
 export class AccountService {
 
 	public static $inject: string[] = [
-		"$q",
-		"APIService"
+		'$q',
+		'APIService'
 	];
 
 	public accountDefer;
@@ -384,5 +384,5 @@ export class AccountService {
 }
 
 export const AccountServiceModule = angular
-	.module("3drepo")
-	.service("AccountService", AccountService);
+	.module('3drepo')
+	.service('AccountService', AccountService);

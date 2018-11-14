@@ -20,14 +20,14 @@ declare var Viewer;
 class BottomButtonsController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$interval",
-		"$timeout",
-		"$element",
+		'$scope',
+		'$interval',
+		'$timeout',
+		'$element',
 
-		"ViewerService",
-		"TreeService",
-		"IconsConstant"
+		'ViewerService',
+		'TreeService',
+		'IconsConstant'
 	];
 
 	private showButtons: boolean;
@@ -66,17 +66,17 @@ class BottomButtonsController implements ng.IController {
 			MODES : {
 				HELICOPTER : {
 					mode: Viewer.NAV_MODES.HELICOPTER,
-					label: "Helicopter"
+					label: 'Helicopter'
 				},
 				TURNTABLE : {
 					mode: Viewer.NAV_MODES.TURNTABLE,
-					label: "Turntable"
+					label: 'Turntable'
 				}
 			},
 			SPEED : {
 				RESET : {
-					mode: "RESET",
-					label: "Reset",
+					mode: 'RESET',
+					label: 'Reset',
 					fn: () => {
 						this.ViewerService.helicopterSpeedReset(true);
 						this.navigationState.VALUE = 1;
@@ -84,8 +84,8 @@ class BottomButtonsController implements ng.IController {
 					}
 				},
 				INCREASE : {
-					mode: "INCREASE",
-					label: "Increase",
+					mode: 'INCREASE',
+					label: 'Increase',
 					fn: () => {
 						if (this.navigationState.VALUE < 99) {
 							this.ViewerService.helicopterSpeedUp(++this.navigationState.VALUE);
@@ -94,8 +94,8 @@ class BottomButtonsController implements ng.IController {
 					}
 				},
 				DECREASE : {
-					mode: "DECREASE",
-					label: "Decrease",
+					mode: 'DECREASE',
+					label: 'Decrease',
 					fn: () => {
 						if (this.navigationState.VALUE > -99) {
 							this.ViewerService.helicopterSpeedDown(--this.navigationState.VALUE);
@@ -107,10 +107,10 @@ class BottomButtonsController implements ng.IController {
 
 		};
 
-		document.addEventListener("click", (event: any) => {
+		document.addEventListener('click', (event: any) => {
 			// If the click is on the scene somewhere, hide the buttons
 			const valid = event && event.target && event.target.classList;
-			if (valid && event.target.classList.contains("emscripten")) {
+			if (valid && event.target.classList.contains('emscripten')) {
 				this.showNavigationState = false;
 			}
 		}, false);
@@ -124,17 +124,17 @@ class BottomButtonsController implements ng.IController {
 
 		this.isFocusMode = false;
 
-		this.escapeFocusModeButton = document.createElement("md-button");
-		this.escapeFocusModeButton.className = "focus-button";
-		const icon = document.createElement("md-icon");
-		icon.innerHTML = "clear";
-		icon.className = "angular-material-icons material-icons close-icon";
+		this.escapeFocusModeButton = document.createElement('md-button');
+		this.escapeFocusModeButton.className = 'focus-button';
+		const icon = document.createElement('md-icon');
+		icon.innerHTML = 'clear';
+		icon.className = 'angular-material-icons material-icons close-icon';
 
 		this.escapeFocusModeButton.appendChild(icon);
-		document.getElementsByTagName("home")[0].appendChild(this.escapeFocusModeButton);
+		document.getElementsByTagName('home')[0].appendChild(this.escapeFocusModeButton);
 
 		// Bind a click handler to exit focus mode
-		this.escapeFocusModeButton.addEventListener("click", this.focusMode.bind(this));
+		this.escapeFocusModeButton.addEventListener('click', this.focusMode.bind(this));
 
 		this.watchers();
 	}
@@ -171,8 +171,8 @@ class BottomButtonsController implements ng.IController {
 	public addButtons() {
 		this.bottomButtons = [];
 		this.bottomButtons.push({
-			label: "Extent",
-			icon: "fa fa-home",
+			label: 'Extent',
+			icon: 'fa fa-home',
 			month: (new Date()).getMonth(),
 			click: () => { this.extent(); }
 		});
@@ -185,22 +185,22 @@ class BottomButtonsController implements ng.IController {
 		});
 
 		this.bottomButtons.push({
-			label: "Show All",
+			label: 'Show All',
 			click: () => { this.showAll(); }
 		});
 
 		this.bottomButtons.push({
-			label: "Hide",
+			label: 'Hide',
 			click: () => { this.hide(); }
 		});
 
 		this.bottomButtons.push({
-			label: "Isolate",
+			label: 'Isolate',
 			click: () => { this.isolate(); }
 		});
 
 		this.bottomButtons.push({
-			label: "Focus",
+			label: 'Focus',
 			click: () => { this.focusMode(); }
 		});
 	}
@@ -240,17 +240,17 @@ class BottomButtonsController implements ng.IController {
 	}
 
 	public getAllElementHolder(): any {
-		return document.getElementsByClassName("homeHolder")[0];
+		return document.getElementsByClassName('homeHolder')[0];
 	}
 
 	public setFocusModeButtonVisibility() {
 		if (this.isFocusMode) {
-			this.escapeFocusModeButton.style.display = "initial";
+			this.escapeFocusModeButton.style.display = 'initial';
 		} else {
-			this.escapeFocusModeButton.style.display = "none";
+			this.escapeFocusModeButton.style.display = 'none';
 		}
 		const allElementsHolder = this.getAllElementHolder();
-		allElementsHolder.style.visibility = (this.isFocusMode) ? "hidden" : "visible";
+		allElementsHolder.style.visibility = (this.isFocusMode) ? 'hidden' : 'visible';
 	}
 
 }
@@ -258,10 +258,10 @@ class BottomButtonsController implements ng.IController {
 export const BottomButtonsComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: BottomButtonsController,
-	controllerAs: "vm",
-	templateUrl: "templates/bottom-buttons.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/bottom-buttons.html'
 };
 
 export const BottomButtonsComponentModule = angular
-	.module("3drepo")
-	.component("bottomButtons", BottomButtonsComponent);
+	.module('3drepo')
+	.component('bottomButtons', BottomButtonsComponent);

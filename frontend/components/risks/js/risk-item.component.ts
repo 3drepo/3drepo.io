@@ -14,40 +14,40 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AnalyticService } from "../../home/js/analytic.service";
-import { APIService } from "../../home/js/api.service";
-import { AuthService } from "../../home/js/auth.service";
-import { DialogService } from "../../home/js/dialog.service";
-import { MeasureService } from "../../measure/js/measure.service";
-import { NotificationEvents } from "../../notifications/js/notification.events";
-import { NotificationRisksEvents } from "../../notifications/js/notification.risks.events";
-import { NotificationService } from "../../notifications/js/notification.service";
-import { RisksService } from "./risks.service";
-import { StateManagerService } from "../../home/js/state-manager.service";
-import { TreeService } from "../../tree/js/tree.service";
-import { ViewerService } from "../../viewer/js/viewer.service";
+import { AnalyticService } from '../../home/js/analytic.service';
+import { APIService } from '../../home/js/api.service';
+import { AuthService } from '../../home/js/auth.service';
+import { DialogService } from '../../home/js/dialog.service';
+import { MeasureService } from '../../measure/js/measure.service';
+import { NotificationEvents } from '../../notifications/js/notification.events';
+import { NotificationRisksEvents } from '../../notifications/js/notification.risks.events';
+import { NotificationService } from '../../notifications/js/notification.service';
+import { RisksService } from './risks.service';
+import { StateManagerService } from '../../home/js/state-manager.service';
+import { TreeService } from '../../tree/js/tree.service';
+import { ViewerService } from '../../viewer/js/viewer.service';
 
 class RiskItemController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$location",
-		"$q",
-		"$mdDialog",
-		"$element",
-		"$state",
-		"$timeout",
-		"$scope",
+		'$location',
+		'$q',
+		'$mdDialog',
+		'$element',
+		'$state',
+		'$timeout',
+		'$scope',
 
-		"RisksService",
-		"APIService",
-		"NotificationService",
-		"AuthService",
-		"AnalyticService",
-		"StateManager",
-		"MeasureService",
-		"ViewerService",
-		"TreeService",
-		"DialogService"
+		'RisksService',
+		'APIService',
+		'NotificationService',
+		'AuthService',
+		'AnalyticService',
+		'StateManager',
+		'MeasureService',
+		'ViewerService',
+		'TreeService',
+		'DialogService'
 	];
 
 	private failedToLoad: boolean;
@@ -123,11 +123,11 @@ class RiskItemController implements ng.IController {
 		this.savedScreenshot = null;
 		this.aboutToBeDestroyed = false;
 
-		this.reasonCommentText = "Comment requires text";
-		this.reasonTitleText = "Risk requires name";
-		this.disabledReason = "";
+		this.reasonCommentText = 'Comment requires text';
+		this.reasonTitleText = 'Risk requires name';
+		this.disabledReason = '';
 
-		this.riskProgressInfo = "Loading Risk...";
+		this.riskProgressInfo = 'Loading Risk...';
 		this.textInputHasFocusFlag = false;
 		this.submitDisabled = true;
 		this.pinDisabled = true;
@@ -136,55 +136,55 @@ class RiskItemController implements ng.IController {
 		this.clearPin = false;
 
 		this.categories = [
-			{value: "health_material_effect", label: "Health - Material effect"},
-			{value: "health_mechanical_effect", label: "Health - Mechanical effect"},
-			{value: "safety_fall", label: "Safety Issue - Fall"},
-			{value: "safety_trapped", label: "Safety Issue - Trapped"},
-			{value: "safety_event", label: "Safety Issue - Event"},
-			{value: "safety_handling", label: "Safety Issue - Handling"},
-			{value: "safety_struck", label: "Safety Issue - Struck"},
-			{value: "safety_public", label: "Safety Issue - Public"},
-			{value: "environmental", label: "Environmental Issue"},
-			{value: "commercial", label: "Commercial Issue"},
-			{value: "social", label: "Social Issue"},
-			{value: "other", label: "Other Issue"},
-			{value: "unknown", label: "UNKNOWN"},
-			{value: "", label: "UNSET"}
+			{value: 'health_material_effect', label: 'Health - Material effect'},
+			{value: 'health_mechanical_effect', label: 'Health - Mechanical effect'},
+			{value: 'safety_fall', label: 'Safety Issue - Fall'},
+			{value: 'safety_trapped', label: 'Safety Issue - Trapped'},
+			{value: 'safety_event', label: 'Safety Issue - Event'},
+			{value: 'safety_handling', label: 'Safety Issue - Handling'},
+			{value: 'safety_struck', label: 'Safety Issue - Struck'},
+			{value: 'safety_public', label: 'Safety Issue - Public'},
+			{value: 'environmental', label: 'Environmental Issue'},
+			{value: 'commercial', label: 'Commercial Issue'},
+			{value: 'social', label: 'Social Issue'},
+			{value: 'other', label: 'Other Issue'},
+			{value: 'unknown', label: 'UNKNOWN'},
+			{value: '', label: 'UNSET'}
 		];
 		this.likelihoods = [
-			{value: 0, label: "Very Low"},
-			{value: 1, label: "Low"},
-			{value: 2, label: "Moderate"},
-			{value: 3, label: "High"},
-			{value: 4, label: "Very High"}
+			{value: 0, label: 'Very Low'},
+			{value: 1, label: 'Low'},
+			{value: 2, label: 'Moderate'},
+			{value: 3, label: 'High'},
+			{value: 4, label: 'Very High'}
 		];
 		this.consequences = [
-			{value: 0, label: "Very Low"},
-			{value: 1, label: "Low"},
-			{value: 2, label: "Moderate"},
-			{value: 3, label: "High"},
-			{value: 4, label: "Very High"}
+			{value: 0, label: 'Very Low'},
+			{value: 1, label: 'Low'},
+			{value: 2, label: 'Moderate'},
+			{value: 3, label: 'High'},
+			{value: 4, label: 'Very High'}
 		];
 		this.levels = [
-			{value: 0, label: "Very Low"},
-			{value: 1, label: "Low"},
-			{value: 2, label: "Moderate"},
-			{value: 3, label: "High"},
-			{value: 4, label: "Very High"}
+			{value: 0, label: 'Very Low'},
+			{value: 1, label: 'Low'},
+			{value: 2, label: 'Moderate'},
+			{value: 3, label: 'High'},
+			{value: 4, label: 'Very High'}
 		];
 		this.statuses = [
-			{value: "", label: "Unmitigated"},
-			{value: "proposed", label: "Proposed"},
-			{value: "agreed_partial", label: "Agreed (Partial)"},
-			{value: "agreed_fully", label: "Agreed (Fully)"},
-			{value: "rejected", label: "Rejected"}
+			{value: '', label: 'Unmitigated'},
+			{value: 'proposed', label: 'Proposed'},
+			{value: 'agreed_partial', label: 'Agreed (Partial)'},
+			{value: 'agreed_fully', label: 'Agreed (Fully)'},
+			{value: 'rejected', label: 'Rejected'}
 		];
 
 		this.actions = {
 			screenshot: {
-				id: "screenshot",
-				icon: "camera_alt",
-				label: "Screenshot",
+				id: 'screenshot',
+				icon: 'camera_alt',
+				label: 'Screenshot',
 				disabled: () => {
 					return !this.data && this.submitDisabled;
 				},
@@ -194,9 +194,9 @@ class RiskItemController implements ng.IController {
 				selected: false
 			},
 			pin: {
-				id: "pin",
-				icon: "place",
-				label: "Pin",
+				id: 'pin',
+				icon: 'place',
+				label: 'Pin',
 				disabled: () => {
 					return this.submitDisabled || this.pinHidden;
 				},
@@ -221,8 +221,8 @@ class RiskItemController implements ng.IController {
 		};
 
 		// listen for user clicking the back button
-		window.addEventListener("popstate", this.popStateHandler);
-		window.addEventListener("beforeunload", this.refreshHandler);
+		window.addEventListener('popstate', this.popStateHandler);
+		window.addEventListener('beforeunload', this.refreshHandler);
 		this.watchers();
 	}
 
@@ -232,8 +232,8 @@ class RiskItemController implements ng.IController {
 	 */
 	public $onDestroy() {
 
-		window.removeEventListener("popstate", this.popStateHandler);
-		window.removeEventListener("beforeunload", this.refreshHandler);
+		window.removeEventListener('popstate', this.popStateHandler);
+		window.removeEventListener('beforeunload', this.refreshHandler);
 
 		this.risksService.removeUnsavedPin();
 
@@ -257,14 +257,14 @@ class RiskItemController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watchGroup([
-			"vm.riskData.safetibase_id",
-			"vm.riskData.associated_activity",
-			"vm.riskData.assigned_roles[0]",
-			"vm.riskData.category",
-			"vm.riskData.likelihood",
-			"vm.riskData.consequence",
-			"vm.riskData.level_of_risk",
-			"vm.riskData.mitigation_status"
+			'vm.riskData.safetibase_id',
+			'vm.riskData.associated_activity',
+			'vm.riskData.assigned_roles[0]',
+			'vm.riskData.category',
+			'vm.riskData.likelihood',
+			'vm.riskData.consequence',
+			'vm.riskData.level_of_risk',
+			'vm.riskData.mitigation_status'
 		], () => {
 			if (this.riskData && this.canSubmitUpdateRisk()) {
 				this.updateRisk();
@@ -272,18 +272,18 @@ class RiskItemController implements ng.IController {
 		});
 
 		// This keeps the colours updated etc
-		this.$scope.$watch("vm.riskData.level_of_risk", (levelOfRisk) => {
+		this.$scope.$watch('vm.riskData.level_of_risk', (levelOfRisk) => {
 			this.risksService.setLevelOfRisk(levelOfRisk);
 			this.risksService.showRiskPins();
 		}, true);
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
 			}
 		});
 
-		this.$scope.$watch("vm.availableJobs", () => {
+		this.$scope.$watch('vm.availableJobs', () => {
 			// Role
 			if (this.availableJobs) {
 				this.modelJobs = this.availableJobs.map((availableJob) => {
@@ -295,11 +295,11 @@ class RiskItemController implements ng.IController {
 				});
 
 				// Always have an unassign option for users
-				this.modelJobs.push("Unassigned");
+				this.modelJobs.push('Unassigned');
 			}
 		});
 
-		this.$scope.$watch("vm.data", () => {
+		this.$scope.$watch('vm.data', () => {
 
 			// Data
 			if (this.data && this.statuses && this.statuses.length) {
@@ -385,11 +385,11 @@ class RiskItemController implements ng.IController {
 
 	public handleUpdateError(error) {
 		this.saving = false;
-		const content = "Property update failed." +
-		"Contact support@3drepo.org if problem persists.";
+		const content = 'Property update failed.' +
+		'Contact support@3drepo.org if problem persists.';
 		const escapable = true;
 		console.error(error);
-		this.dialogService.text("Error Updating risk", content, escapable);
+		this.dialogService.text('Error Updating risk', content, escapable);
 	}
 
 	/**
@@ -414,7 +414,7 @@ class RiskItemController implements ng.IController {
 	public showViewpoint(event, viewpoint) {
 		// README: vm should also highlight selected objects within vm issue, but
 		// will require a lot of rewriting for vm to work at present!
-		if (viewpoint && (event.type === "click")) {
+		if (viewpoint && (event.type === 'click')) {
 
 			// We clone the riskData so that we don't
 			// overwrite the original issue data itself
@@ -456,9 +456,9 @@ class RiskItemController implements ng.IController {
 				parentCtrl: this
 			},
 			bindToController: true,
-			controllerAs: "vm",
+			controllerAs: 'vm',
 			targetEvent: $event,
-			templateUrl: "templates/screenshot-dialog.html",
+			templateUrl: 'templates/screenshot-dialog.html',
 			clickOutsideToClose: true,
 			escapeToClose: true,
 			focusOnOpen: true
@@ -477,7 +477,7 @@ class RiskItemController implements ng.IController {
 		const selected = this.actions[action].selected;
 
 		switch (action) {
-		case "pin":
+		case 'pin':
 
 			if (selected) {
 				this.risksService.setPinDropMode(true);
@@ -489,7 +489,7 @@ class RiskItemController implements ng.IController {
 			}
 			break;
 
-		case "screenshot":
+		case 'screenshot':
 
 			// There is no concept of selected in screenshot as there will be a popup once you click the button
 			this.actions[action].selected = false;
@@ -548,12 +548,12 @@ class RiskItemController implements ng.IController {
 				// show the user a popup if something goes wrong at any point
 
 				this.saving = false;
-				const content = "Something went wrong saving the risk. " +
-				"If this continues please message support@3drepo.org";
+				const content = 'Something went wrong saving the risk. ' +
+				'If this continues please message support@3drepo.org';
 				const escapable = true;
 
-				this.dialogService.text("Error saving risk", content, escapable);
-				console.error("Something went wrong saving the risk: ", error);
+				this.dialogService.text('Error saving risk', content, escapable);
+				console.error('Something went wrong saving the risk: ', error);
 			});
 
 	}
@@ -565,7 +565,7 @@ class RiskItemController implements ng.IController {
 		if (this.data && this.riskData.account && this.riskData.model) {
 
 			// If it's unassigned we can update so that there are no assigned roles
-			if (this.riskData.assigned_roles.indexOf("Unassigned") !== -1) {
+			if (this.riskData.assigned_roles.indexOf('Unassigned') !== -1) {
 				this.riskData.assigned_roles = [];
 			}
 
@@ -599,8 +599,8 @@ class RiskItemController implements ng.IController {
 				.catch(this.handleUpdateError.bind(this));
 
 			this.analyticService.sendEvent({
-				eventCategory: "Risk",
-				eventAction: "edit"
+				eventCategory: 'Risk',
+				eventAction: 'edit'
 			});
 		}
 
@@ -690,7 +690,7 @@ class RiskItemController implements ng.IController {
 	public doSaveRisk(viewpoint, screenshot) {
 
 		// Remove base64 header text from screenshot and add to viewpoint
-		screenshot = screenshot.substring(screenshot.indexOf(",") + 1);
+		screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
 		viewpoint.screenshot = screenshot;
 
 		// Save risk
@@ -752,21 +752,21 @@ class RiskItemController implements ng.IController {
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					risk: this.data._id,
+					riskId: this.data._id,
 					noSet: true
 				};
 
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"home.account.model.risk",
+					'app.viewer',
 					riskState,
 					{notify: false}
 				);
 
 				this.analyticService.sendEvent({
-					eventCategory: "Risk",
-					eventAction: "create"
+					eventCategory: 'Risk',
+					eventAction: 'create'
 				});
 
 			});
@@ -774,12 +774,12 @@ class RiskItemController implements ng.IController {
 	}
 
 	public errorSavingScreenshot(error) {
-		const content = "Something went wrong saving the screenshot. " +
-		"If this continues please message support@3drepo.io.";
+		const content = 'Something went wrong saving the screenshot. ' +
+		'If this continues please message support@3drepo.io.';
 		const escapable = true;
 
-		this.dialogService.text("Error Saving Screenshot", content, escapable);
-		console.error("Something went wrong saving the screenshot: ", error);
+		this.dialogService.text('Error Saving Screenshot', content, escapable);
+		console.error('Something went wrong saving the screenshot: ', error);
 	}
 
 	/**
@@ -791,7 +791,7 @@ class RiskItemController implements ng.IController {
 
 		this.savedScreenshot = data.screenshot;
 
-		if (typeof this.data === "object") {
+		if (typeof this.data === 'object') {
 
 			// Comment
 			this.commentThumbnail = data.screenshot;
@@ -814,7 +814,7 @@ class RiskItemController implements ng.IController {
 		viewpointPromise.promise
 			.then((viewpoint) => {
 				this.commentViewpoint = viewpoint;
-				this.commentViewpoint.screenshot = data.screenshot.substring(data.screenshot.indexOf(",") + 1);
+				this.commentViewpoint.screenshot = data.screenshot.substring(data.screenshot.indexOf(',') + 1);
 			}).catch((error) => {
 				this.errorSavingScreenshot(error);
 			});
@@ -838,7 +838,7 @@ class RiskItemController implements ng.IController {
 		if (this.data) {
 
 			// Description text
-			if (this.riskData && this.riskData.hasOwnProperty("desc")) {
+			if (this.riskData && this.riskData.hasOwnProperty('desc')) {
 				height += descriptionTextHeight;
 			}
 			// Description thumbnail
@@ -861,7 +861,7 @@ class RiskItemController implements ng.IController {
 		if (height) {
 			this.contentHeight({height});
 		} else {
-			console.error("Height was trying to be set to falsy value");
+			console.error('Height was trying to be set to falsy value');
 		}
 
 	}
@@ -898,11 +898,11 @@ class RiskItemController implements ng.IController {
 			let keyIdx = 0;
 
 			while (!changed && keyIdx < keys.length) {
-				if ("[object Array]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+				if ('[object Array]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
 					changed = 0 !== this.riskData[keys[keyIdx]].length &&
 						JSON.stringify(this.riskData[keys[keyIdx]]) !== JSON.stringify(this.savedData[keys[keyIdx]]);
-				} else if ("[object String]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]]) ||
-					"[object Number]" === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+				} else if ('[object String]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]]) ||
+					'[object Number]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
 					changed = this.riskData[keys[keyIdx]] !== this.savedData[keys[keyIdx]];
 				}
 				keyIdx++;
@@ -923,24 +923,24 @@ class RiskItemController implements ng.IController {
 
 export const RiskItemComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		data: "=",
-		exit: "&",
-		event: "<",
-		contentHeight: "&",
-		selectedObjects: "<",
-		modelSettings: "<",
-		setInitialSelectedObjects: "&",
-		userJob: "<",
-		availableJobs: "<"
+		account: '<',
+		model: '<',
+		revision: '<',
+		data: '=',
+		exit: '&',
+		event: '<',
+		contentHeight: '&',
+		selectedObjects: '<',
+		modelSettings: '<',
+		setInitialSelectedObjects: '&',
+		userJob: '<',
+		availableJobs: '<'
 	},
 	controller: RiskItemController,
-	controllerAs: "vm",
-	templateUrl: "templates/risk-item.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/risk-item.html'
 };
 
 export const RiskItemComponentModule = angular
-	.module("3drepo")
-	.component("risk", RiskItemComponent);
+	.module('3drepo')
+	.component('risk', RiskItemComponent);

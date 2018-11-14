@@ -25,10 +25,10 @@ import { DialogActions } from '../dialog';
 // Projects
 export function* createProject({ teamspace, projectData }) {
 	try {
-		yield API.createProject(teamspace, projectData);
+		const response = yield API.createProject(teamspace, projectData);
 
 		yield put(SnackbarActions.show('Project created'));
-		yield put(TeamspacesActions.createProjectSuccess(teamspace, projectData));
+		yield put(TeamspacesActions.createProjectSuccess(teamspace, response.data));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('create', 'project', e.response));
 	}
@@ -67,7 +67,7 @@ export function* createModel({ teamspace, modelData }) {
 			subModels: modelData.subModels
 		};
 
-		yield put(SnackbarActions.show('Model created'));
+		yield put(SnackbarActions.show(`${modelData.federate ? 'Federation' : 'Model'} created`));
 		yield put(TeamspacesActions.createModelSuccess(teamspace, createdModel));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('create', 'model', e.response));
@@ -76,8 +76,8 @@ export function* createModel({ teamspace, modelData }) {
 
 export function* updateModel({ teamspace, modelId, modelData }) {
 	try {
-		const response = yield API.updateModel(teamspace, modelId, modelData);
-		yield put(SnackbarActions.show('Model updated'));
+		yield API.updateModel(teamspace, modelId, modelData);
+		yield put(SnackbarActions.show(`${modelData.federate ? 'Federation' : 'Model'} updated`));
 		yield put(TeamspacesActions.updateModelSuccess(teamspace, modelId, modelData));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'model', e.response));
@@ -89,7 +89,7 @@ export function* removeModel({ teamspace, modelData }) {
 		const response = yield API.removeModel(teamspace, modelData.id);
 		const removedModel = response.data;
 
-		yield put(SnackbarActions.show('Model removed'));
+		yield put(SnackbarActions.show(`${removedModel.federate ? 'Federation' : 'Model'} removed`));
 		yield put(TeamspacesActions.removeModelSuccess(
 			teamspace, { ...removedModel, projectName: modelData.project, name: modelData.name })
 		);

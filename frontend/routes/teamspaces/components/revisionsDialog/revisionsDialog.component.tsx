@@ -16,15 +16,21 @@
  */
 
 import * as React from 'react';
-import DialogContent from '@material-ui/core/DialogContent';
-import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 
 import { getAngularService } from '../../../../helpers/migration';
 
 import { DateTime } from './../../../components/dateTime/dateTime.component';
-import { Property } from './../../../components/property/property.component';
-import { Item, Column, Message, StyledDialogActions } from './revisionsDialog.styles';
+import {
+	Item,
+	Row,
+	Description,
+	Message,
+	StyledDialogActions,
+	StyledDialogContent,
+	StyledList,
+	Property
+} from './revisionsDialog.styles';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -41,21 +47,17 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId);
 	}
 
-	public revisionClickHandler = (event, { tag, _id }) => {
+	public revisionClickHandler = ({ tag, _id }) => () => {
 		const { modelId, handleClose, history, location: { pathname } } = this.props;
 
 		handleClose();
 
-		if (tag) {
-			history.push(`${pathname}/${modelId}/${tag}`);
-		} else {
-			history.push(`${pathname}/${modelId}/${_id}`);
-		}
+		history.push(`${pathname}/${modelId}/${tag || _id}`);
 		const analyticService = getAngularService('AnalyticService') as any;
 
 		analyticService.sendEvent({
-			eventCategory: "Model",
-			eventAction: "view"
+			eventCategory: 'Model',
+			eventAction: 'view'
 		});
 	}
 
@@ -63,35 +65,38 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		const { handleClose, revisions } = this.props;
 
 		return (
-			<DialogContent>
+			<StyledDialogContent>
 				{ !revisions.length ?
 					<Message>No Revisions Present</Message>
 					:
 					<>
-						<List>
-							{revisions && revisions.map((revision) => (
-								<Item button key={revision._id}
-									onClick={(event) => this.revisionClickHandler(event, revision)}>
-									<Column>
-										<Property name="Tag">
+						<StyledList>
+							{revisions && revisions.map((revision, index) => (
+								<Item
+									button={true}
+									key={revision._id}
+									divider={true}
+									onClick={this.revisionClickHandler(revision)}
+									last={index === 0}>
+										<Row>
+										<Property >
 											{revision.tag
 												? revision.tag
-												: <DateTime value={revision.timestamp} format={'D MMM'} />}
+												: '(empty tag)'}
 										</Property>
 
-										<Property name="Author">
+										<Property >
 											{revision.author}
 										</Property>
-									</Column>
-									<Column>
-										<Property name="Date">
-											<DateTime value={revision.timestamp} format={'D MMM'} />
+									<Property >
+											<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
 										</Property>
-										<Property name="ID">{revision._id}</Property>
-									</Column>
+										</Row>
+										<Description>{revision.desc ? revision.desc : '(empty description)'}
+									</Description>
 								</Item>)
-							)}
-						</List>
+							) }
+						</StyledList>
 						<StyledDialogActions>
 							<Button variant="raised" color="secondary" onClick={handleClose}>
 								Cancel
@@ -99,7 +104,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 						</StyledDialogActions>
 					</>
 				}
-			</DialogContent>
+			</StyledDialogContent>
 		);
 	}
 }

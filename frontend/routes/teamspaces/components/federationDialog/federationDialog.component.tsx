@@ -20,9 +20,12 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import { isEmpty, includes, differenceBy } from 'lodash';
 import {
-	getAvailableModels, getFederatedModels, getModelsMap, getProject, getNewSelectedModels
+	getAvailableModels,
+	getFederatedModels,
+	getModelsMap,
+	getProject,
+	getNewSelectedModels
 } from './federationDialog.helpers';
-import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -33,12 +36,10 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import {
-	LoadingDialog
-} from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
+import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
-import { Row, SelectWrapper, FieldWrapper } from './federationDialog.styles';
+import { Row, SelectWrapper, FieldWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
 	modelName: schema.firstName.min(2).max(120).required(),
@@ -288,10 +289,10 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handleModelSave}
 			>
 				<Form>
-					<DialogContent>
+					<StyledDialogContent>
 						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<Field name="teamspace" render={({ field, form }) => (
+							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+							<Field name="teamspace" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
@@ -307,8 +308,8 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 							)} />
 						</SelectWrapper>
 						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-							<Field name="project" render={({ field, form }) => (
+							<InputLabel shrink={true} htmlFor="project-select">Project</InputLabel>
+							<Field name="project" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
 									error={Boolean(form.touched.project && form.errors.project)}
@@ -325,7 +326,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 						</SelectWrapper>
 						<Row>
 							<FieldWrapper>
-								<Field name="modelName" render={({ field, form }) => (
+								<Field name="modelName" render={ ({ field, form }) => (
 									<TextField
 										{...field}
 										error={Boolean(form.touched.name && form.errors.name)}
@@ -333,7 +334,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 										label="Federation Name"
 										margin="normal"
 										disabled={editMode}
-										required
+										required={true}
 										fullWidth={true}
 										value={this.state.name}
 										onChange={this.handleNameChange(field.onChange)}
@@ -341,13 +342,13 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 								)} />
 							</FieldWrapper>
 							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-								<Field name="unit" render={({ field }) => (
+								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select unit"
 										disabledPlaceholder={true}
-										required
+										required={true}
 										items={clientConfigService.units}
 										value={unit}
 										disabled={editMode}
@@ -357,7 +358,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 								)} />
 							</SelectWrapper>
 						</Row>
-						<Field name="subModels" render={({ field }) =>
+						<Field name="subModels" render={ ({ field }) =>
 							<SubModelsField
 								{...field}
 								availableModels={availableModels}
@@ -373,19 +374,17 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 								handleSelectAvailableItemClick={this.handleSelectAvailableItemClick}
 								handleSelectAllFederatedClick={this.handleSelectAllFederatedClick}
 								handleSelectFederatedItemClick={this.handleSelectFederatedItemClick}
-							/>
-						} />
-					</DialogContent>
+							/>} />
+					</StyledDialogContent>
 					<DialogActions>
 						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={({ form }) =>
+						<Field render={ ({ form }) =>
 							<Button
 								type="submit"
 								variant="raised"
 								color="secondary"
 								disabled={(!form.isValid || form.isValidating)}
-							>Save</Button>
-						} />
+							>Save</Button>} />
 					</DialogActions>
 				</Form>
 			</Formik>

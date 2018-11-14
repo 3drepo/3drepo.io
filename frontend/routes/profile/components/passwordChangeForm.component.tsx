@@ -86,48 +86,48 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handlePasswordUpdate}
 			>
 				<Form>
-					<FormContainer container direction="column">
+					<FormContainer container={true} direction="column">
 						<Headline color="primary" variant="subheading">Password settings</Headline>
-						<FieldsRow container wrap="nowrap">
-							<Field name="oldPassword" render={({ field, form }) => (
+						<FieldsRow container={true} wrap="nowrap">
+							<Field name="oldPassword" render={ ({ field, form }) => (
 								<StyledTextField
-									{ ...field }
+									{...field}
 									error={Boolean(form.touched.oldPassword && form.errors.oldPassword)}
 									helperText={form.touched.oldPassword && (form.errors.oldPassword || '')}
 									label="Old password"
 									margin="normal"
-									required
+									required={true}
 									type="password"
 								/>
 							)} />
 
-							<Field name="newPassword" render={({ field, form }) => (
+							<Field name="newPassword" render={ ({ field, form }) => (
 								<StyledTextField
-									{ ...field }
+									{...field}
 									error={Boolean(form.touched.newPassword && form.errors.newPassword)}
 									helperText={form.touched.newPassword && (form.errors.newPassword || '')}
 									label={`New password${this.state.newPasswordStrengthMessage}`}
 									margin="normal"
-									required
+									required={true}
 									type="password"
 									onChange={this.handleNewPasswordChange(field.onChange)}
 								/>
 							)} />
-							<Field name="newPasswordConfirm" render={({ field, form }) => (
+							<Field name="newPasswordConfirm" render={ ({ field, form }) => (
 								<StyledTextField
-									{ ...field }
+									{...field}
 									error={Boolean(form.touched.newPasswordConfirm && form.errors.newPasswordConfirm)}
 									helperText={form.touched.newPasswordConfirm && (form.errors.newPasswordConfirm || '')}
 									label="New password confirmation"
 									margin="normal"
-									required
+									required={true}
 									type="password"
 									onChange={this.handleNewPasswordChange(field.onChange)}
 								/>
 							)} />
 						</FieldsRow>
 
-						<Field render={({ form }) => (
+						<Field render={ ({ form }) => (
 							<StyledButton
 								color="secondary"
 								variant="raised"
