@@ -10,6 +10,6 @@ module.exports = getWebpackConfig({
       port: '35729',
       start: true,
       quiet: false
-    })
+    }),
   ]
 });

@@ -1,14 +1,11 @@
 const { resolve } = require('path');
-const getWebpackConfig = require('./webpack.common.config');
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
   mode: 'development',
   context: resolve(__dirname, '../../components'),
   output: {
-    path: resolve(__dirname, '../../docs'),
-    libraryTarget: "umd",
-    library: "sample",
+    path: resolve(__dirname, '../../docs')
   },
   module: {
     rules: [

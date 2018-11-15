@@ -2,6 +2,7 @@ const {resolve} = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
+const loaders = require('./tools/loaders');
 
 const MODES = {
   DEVELOPMENT: 'development',
@@ -22,95 +23,14 @@ module.exports = (options) => {
     },
     module: {
       rules: [
-        {
-          test: /\.(ts|tsx)$/,
-          loader: 'ts-loader',
-          exclude: /node_modules/,
-          options: {
-            transpileOnly: options.mode !== MODES.PRODUCTION
-          }
-        },
-        {
-          test: /\.(ts|tsx)$/,
-          loader: 'lodash-ts-imports-loader',
-          exclude: /node_modules/,
-          enforce: 'pre'
-        },
-        {
-          test: /\.css$/,
-          exclude: /node-modules/,
-          use: [
-            'style-loader', {
-            loader: 'css-loader',
-            options: {
-              import: false
-            }
-          }]
-        },
-        {
-          test: /\.css$/,
-          include: /node-modules/,
-          use: ['style-loader', 'css-loader']
-        },
-        {
-          test: /\.(eot|otf|ttf|woff|woff2)$/,
-          use: [{
-            loader: 'file-loader',
-            options: {
-              outputPath: '../fonts/',
-              publicPath: 'fonts/',
-              name() {
-                if (options.mode === 'development') {
-                  return '[name].[ext]'
-                }
-
-                return '[hash].[ext]'
-              }
-            }
-          }]
-        },
-        {
-          test: /\.(png|jpg|gif|svg)$/,
-          use: [{
-            loader: 'file-loader',
-            options: {
-              outputPath: '../images/',
-              publicPath: 'images/',
-              name() {
-                if (options.mode === 'development') {
-                  return '[name].[ext]'
-                }
-
-                return '[hash].[ext]'
-              }
-            }
-          }]
-        },
-        {
-          test: /\.(html)$/,
-          use: {
-            loader: 'html-loader',
-            options: {
-              minimize: true
-            }
-          }
-        },
-        {
-          test: /\.pug$/,
-          use: [
-            {
-              loader: 'file-loader',
-              options: {
-                outputPath: '../templates/',
-                publicPath: 'templates/',
-                name: '[name].html'
-              }
-            },
-            'extract-loader',
-            'html-loader',
-            'pug-html-loader'
-          ]
-        }
+        loaders.TSLoader(options),
+        loaders.LodashTSLoader,
+        loaders.CSSLoader,
+        loaders.CSSExternalLoader,
+        loaders.getFontLoader(options),
+        loaders.getImageLoader(options),
+        loaders.HTMLLoader,
+        loaders.PugLoader
       ]
     },
     plugins: [
@@ -119,15 +39,15 @@ module.exports = (options) => {
         { from: 'manifest.json', to: '../' },
         { from: 'images/**', to: '../' },
         { from: 'icons/*', to: '../' },
-        { from: 'custom/**', to: '../' },
         { from: 'unity/**', to: '../' },
-        { from: 'manifest-icons/*', to: '../' },
         { from: 'manifest-icons/*', to: '../' }
       ], options),
+
       new HTMLWebpackPlugin({
         template: './index.html',
         filename: '../index.html'
       }),
+
       new SWPrecacheWebpackPlugin({
         filename: '../service-worker.js',
         staticFileGlobs: [
@@ -141,6 +61,7 @@ module.exports = (options) => {
         ],
         stripPrefix: '../../public/'
       }),
+
       ...(options.plugins || [])
     ]
   }
