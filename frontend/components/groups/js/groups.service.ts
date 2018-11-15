@@ -72,7 +72,7 @@ export class GroupsService {
 	 */
 	public groupsFilterSearch(searchQuery: string) {
 
-		if (searchQuery === undefined || searchQuery === "") {
+		if (searchQuery === undefined || searchQuery === '') {
 			this.state.groupsToShow = this.state.groups.slice();
 		} else {
 			this.state.groupsToShow = this.state.groups.filter((group) => {
