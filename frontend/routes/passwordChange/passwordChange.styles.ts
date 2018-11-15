@@ -16,5 +16,41 @@
  */
 
 import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
-export const Container = styled.div``;
+import * as PanelStyles from '../components/panel/panel.styles';
+import { COLOR } from '../../styles';
+
+export const Container = styled(Grid)`
+  && {
+    height: 100%;
+  }
+
+  ${PanelStyles.Container} {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  ${PanelStyles.Content} {
+    padding: 20px;
+  }
+`;
+
+export const Message = styled.div`
+  color: ${COLOR.BLACK_60};
+`;
+
+export const StyledButton = styled(Button)`
+  && {
+    margin-left: -5px;
+    padding: 0 8px;
+  }
+` as any;
+
+export const Buttons = styled(Grid)`
+  && {
+    margin-top: 10px;
+  }
+`;

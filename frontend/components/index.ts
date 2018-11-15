@@ -46,7 +46,6 @@ import "./panel/js/panel-card-option-visible.component";
 import "./panel/js/panel-card-option-chips-filter.component";
 import "./panel/js/panel.component";
 import "./panel/js/panel.service";
-import "./password-change/js/password-change.component";
 import "./payment/js/payment.component";
 import "./privacy/js/privacy.component";
 import "./register-request/js/register-request.component";

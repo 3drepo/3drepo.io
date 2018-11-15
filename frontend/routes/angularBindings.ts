@@ -9,6 +9,7 @@ import App from './app/app.container';
 import ModelSettings from './modelSettings/modelSettings.container';
 import Login from './login/login.container';
 import PasswordForgot from './passwordForgot/passwordForgot.container';
+import PasswordChange from './passwordChange/passwordChange.container';
 
 // Components
 import Dashboard from './dashboard/dashboard.container';
@@ -21,4 +22,5 @@ angular
 	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
 	.component('login', wrap(Login, ['headlineText']))
-	.component('passwordForgot', wrap(PasswordForgot));
+	.component('passwordForgot', wrap(PasswordForgot))
+	.component('passwordChange', wrap(PasswordChange));

@@ -44,9 +44,8 @@ requireAll(require.context('./components', true, /\.css/));
 requireAll(require.context('./css', true, /\.css/));
 // @ts-ignore
 requireAll(require.context('./components', true, /\.pug/));
-
-// TODO: Handle legal pages
-//requireAll(require.context('../pug/legal', true, /\.pug/));
+// @ts-ignore
+requireAll(require.context('../pug/legal', true, /\.pug/));
 
 // Kickstart the application
 angular.bootstrap(document.body, ['3drepo'], { strictDi: true });

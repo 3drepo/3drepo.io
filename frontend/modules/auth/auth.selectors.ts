@@ -22,3 +22,7 @@ export const selectAuthDomain = (state) => Object.assign({}, state.auth);
 export const selectIsAuthenticated = createSelector(
 	selectAuthDomain, (state) => state.isAuthenticated
 );
+
+export const selectIsPassForgotPending = createSelector(
+	selectAuthDomain, (state) => state.isPassForgotPending
+);

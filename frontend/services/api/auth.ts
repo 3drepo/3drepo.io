@@ -41,7 +41,13 @@ export const logout = () => {
 /**
  * Reset password
  */
-
 export const forgotPassword = (userNameOrEmail) => {
 	return api.post('forgot-password', { userNameOrEmail });
+};
+
+/**
+ * Change password
+ */
+export const changePassword = (username, token, newPassword) => {
+	return api.put(`${username}/password`, { token, newPassword });
 };

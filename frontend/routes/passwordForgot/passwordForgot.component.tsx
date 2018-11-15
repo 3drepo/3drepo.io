@@ -28,6 +28,7 @@ import { Link } from 'react-router-dom';
 
 interface IProps {
 	sendRequest: (userNameOrEmail) => void;
+	isPending: boolean;
 }
 
 interface IState {

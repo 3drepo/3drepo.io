@@ -21,9 +21,11 @@ import { connect, addRouting } from '../../helpers/migration';
 
 import { PasswordForgot } from './passwordForgot.component';
 import { withRouter } from 'react-router-dom';
-import { AuthActions } from '../../modules/auth';
+import { AuthActions, selectIsPassForgotPending } from '../../modules/auth';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isPending: selectIsPassForgotPending
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	sendRequest: AuthActions.sendPasswordChangeRequest

@@ -23,6 +23,7 @@ import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
+import { SnackbarActions } from '../snackbar';
 
 export function* login({ username, password }) {
 	try {
@@ -106,11 +107,29 @@ export function* sessionExpired() {
 }
 
 export function* sendPasswordChangeRequest({ userNameOrEmail }) {
+	yield put(AuthActions.setPassForgotPendingStatus(true));
+
 	try {
 		yield API.forgotPassword(userNameOrEmail);
+		yield put(SnackbarActions.show('Thank you. You will receive an email shortly with a link to change your password.'));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
 	}
+
+	yield put(AuthActions.setPassForgotPendingStatus(false));
+}
+
+export function* changePassword({ username, token, password }) {
+	yield put(AuthActions.setPassForgotPendingStatus(true));
+
+	try {
+		yield API.changePassword(username, token, password);
+		yield put(SnackbarActions.show('Password changed'));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
+	}
+
+	yield put(AuthActions.setPassForgotPendingStatus(false));
 }
 
 export default function* AuthSaga() {
@@ -119,5 +138,5 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.LOGOUT, logout);
 	yield takeLatest(AuthTypes.SESSION_EXPIRED, sessionExpired);
 	yield takeLatest(AuthTypes.SEND_PASSWORD_CHANGE_REQUEST, sendPasswordChangeRequest);
-
+	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
 }
