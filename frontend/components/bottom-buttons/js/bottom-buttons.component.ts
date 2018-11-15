@@ -200,6 +200,20 @@ class BottomButtonsController implements ng.IController {
 		});
 
 		this.bottomButtons.push({
+			label: "Clip",
+			editMode: false,
+			click: (item) => {
+				item.editMode = !item.editMode;
+				if (item.editMode) {
+					item.background = "#FF9800";
+				} else {
+					delete item.background;
+				}
+
+			}
+		});
+
+		this.bottomButtons.push({
 			label: "Focus",
 			click: () => { this.focusMode(); }
 		});
