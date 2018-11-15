@@ -39,6 +39,7 @@ class BottomButtonsController implements ng.IController {
 	private customIcons: any;
 	private isFocusMode: boolean;
 	private escapeFocusModeButton: HTMLElement;
+	private clipButton: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -199,13 +200,29 @@ class BottomButtonsController implements ng.IController {
 			click: () => { this.isolate(); }
 		});
 
-		this.bottomButtons.push({
+		this.clipButton = {
 			label: "Clip",
 			editMode: false,
-			click: (item) => {
-				this.clipButtonClicked(item);
-			}
-		});
+			hasClipPlane: false,
+			click: () => {
+				this.clipButtonClicked();
+			},
+			modes : [
+				{
+					tooltip: "Start box clip",
+					click: () => {
+						this.boxClipInit();
+					}
+				},
+				{
+					tooltip: "Start single clip",
+					click: () => {
+						this.singleClipInit();
+					}
+				}
+			];
+		};
+		this.bottomButtons.push(this.clipButton);
 
 		this.bottomButtons.push({
 			label: "Focus",
@@ -261,13 +278,21 @@ class BottomButtonsController implements ng.IController {
 		allElementsHolder.style.visibility = (this.isFocusMode) ? "hidden" : "visible";
 	}
 
-	private clipButtonClicked(button) {
-		button.editMode = !button.editMode;
-		if (button.editMode) {
-			button.background = "#FF9800";
+	private clipButtonClicked() {
+		if (this.clipButton.editMode) {
+			// We're currently in edit mode, toggle it off
+			this.clipButton.editMode = false;
+			delete this.clipButton.background;
 		} else {
-			delete button.background;
+			if (this.clipButton.hasClipPlane) {
+				this.clipButton.editMode = true;
+				this.clipButton.background = "#FF9800";
+			} else {
+				// show panel
+				this.clipButton.showPanel = !this.clipButton.showPanel;
+			}
 		}
+
 	}
 
 }

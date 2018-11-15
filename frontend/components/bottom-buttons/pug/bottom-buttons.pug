@@ -48,7 +48,23 @@ div(
 
 			label(ng-if="button.isViewingOptionButton") {{vm.navigationState.MODES[vm.selectedMode].label}}
 
-			// OPTIONS
+			// CLIP OPTIONS
+			.viewingOptionButtonHolder(layout-align="center center")
+				.viewingOptionButtons(
+					layout="column"
+					ng-if="button.showPanel"
+					layout-align="center center")
+
+					md-button.md-fab.md-mini.md-icon-button.md-accent.md-ink-ripple.actionButton(
+						ng-repeat="mode in button.modes"
+						ng-click="mode.click();"
+						aria-label="")
+
+						md-icon.angular-material-icons() crop
+						md-tooltip() {{mode.tooltip}}
+
+
+			// NAVIGATION OPTIONS
 			.viewingOptionButtonHolder(layout-align="center center")
 				.viewingOptionButtons(
 					layout="column"
