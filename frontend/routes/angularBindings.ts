@@ -10,6 +10,7 @@ import ModelSettings from './modelSettings/modelSettings.container';
 import Login from './login/login.container';
 import PasswordForgot from './passwordForgot/passwordForgot.container';
 import PasswordChange from './passwordChange/passwordChange.container';
+import SignUp from './signUp/signUp.container';
 
 // Components
 import Dashboard from './dashboard/dashboard.container';
@@ -23,4 +24,5 @@ angular
 	.component('modelSettings', wrap(ModelSettings))
 	.component('login', wrap(Login, ['headlineText']))
 	.component('passwordForgot', wrap(PasswordForgot))
-	.component('passwordChange', wrap(PasswordChange));
+	.component('passwordChange', wrap(PasswordChange))
+	.component('signUp', wrap(SignUp));

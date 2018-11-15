@@ -19,7 +19,7 @@ declare const grecaptcha;
 import { evaluatePassword } from '../../../services/validation';
 import { history } from '../../../helpers/migration';
 
-class SignupController implements ng.IController {
+class SignupOldController implements ng.IController {
 
 	public static $inject: string[] = [
 		'$scope',
@@ -358,13 +358,13 @@ class SignupController implements ng.IController {
 	}
 }
 
-export const SignupComponent: ng.IComponentOptions = {
+export const SignupOldComponent: ng.IComponentOptions = {
 	bindings: {},
-	controller: SignupController,
-	controllerAs: 'vm',
-	templateUrl: 'templates/sign-up.html'
+	controller: SignupOldController,
+	controllerAs: "vm",
+	templateUrl: "templates/sign-up-old.html"
 };
 
 export const SignupComponentModule = angular
-	.module('3drepo')
-	.component('signUp', SignupComponent);
+	.module("3drepo")
+	.component("signUpOld", SignupOldComponent);

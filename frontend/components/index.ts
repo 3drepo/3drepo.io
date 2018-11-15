@@ -1,6 +1,9 @@
 // Components & services
+import './account/js/account.service';
 import './account/js/account-upload.service';
 import './bottom-buttons/js/bottom-buttons.component';
+import './clip/js/clip.component';
+import './clip/js/clip.service';
 import './compare/js/compare.component';
 import './compare/js/compare.service';
 import './cookies/js/cookies.component';
