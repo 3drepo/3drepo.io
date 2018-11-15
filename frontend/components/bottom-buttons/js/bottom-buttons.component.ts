@@ -203,13 +203,7 @@ class BottomButtonsController implements ng.IController {
 			label: "Clip",
 			editMode: false,
 			click: (item) => {
-				item.editMode = !item.editMode;
-				if (item.editMode) {
-					item.background = "#FF9800";
-				} else {
-					delete item.background;
-				}
-
+				this.clipButtonClicked(item);
 			}
 		});
 
@@ -265,6 +259,15 @@ class BottomButtonsController implements ng.IController {
 		}
 		const allElementsHolder = this.getAllElementHolder();
 		allElementsHolder.style.visibility = (this.isFocusMode) ? "hidden" : "visible";
+	}
+
+	private clipButtonClicked(button) {
+		button.editMode = !button.editMode;
+		if (button.editMode) {
+			button.background = "#FF9800";
+		} else {
+			delete button.background;
+		}
 	}
 
 }
