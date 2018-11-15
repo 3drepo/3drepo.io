@@ -40,6 +40,10 @@ export class App extends React.PureComponent<IProps, IState> {
 		referrer: DEFAULT_REDIRECT
 	};
 
+	public componentWillUnmount;
+
+	private authenticationInterval;
+
 	public isStaticRoute(path) {
 		const staticRoutes = ['cookies', 'terms', 'privacy'] as any;
 		return staticRoutes.includes(path.replace('/', ''));

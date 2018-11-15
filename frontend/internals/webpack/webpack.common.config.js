@@ -63,7 +63,8 @@ module.exports = (options) => {
       }),
 
       ...(options.plugins || [])
-    ]
+    ],
+    stats: options.stats
   }
 
   return config;

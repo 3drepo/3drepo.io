@@ -29,5 +29,5 @@ module.exports = {
       verbose: false
     }, ['./components'])
   ],
-  stats: 'none'
+  //stats: 'none'
 };

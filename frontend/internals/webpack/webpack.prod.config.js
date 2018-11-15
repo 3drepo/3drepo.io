@@ -8,5 +8,6 @@ module.exports = getWebpackConfig({
   },
   plugins: [
     new CopyWebpackPlugin([{ from: 'custom/**', to: '../' }])
-  ]
+  ],
+  stats: false
 });
