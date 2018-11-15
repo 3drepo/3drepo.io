@@ -15,14 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import * as React from 'react';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
+import { StyledButton, LoaderContainer } from './submitButton.styles';
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated
-);
+interface IProps {
+	pending?: boolean;
+	disabled?: boolean;
+}
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending
+export const SubmitButton = (props: IProps) => (
+	<StyledButton
+		type="submit"
+		variant="raised"
+		color="secondary"
+		disabled={props.pending || props.disabled}
+	>
+		{props.children}
+		{props.pending && (
+			<LoaderContainer>
+				<CircularProgress size={16} />
+			</LoaderContainer>
+		)}
+	</StyledButton>
 );

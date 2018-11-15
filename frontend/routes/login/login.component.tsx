@@ -27,6 +27,7 @@ import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
 import { Logo } from '../components/logo/logo.component';
+import { SubmitButton } from '../components/submitButton/submitButton.component';
 import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 import { Footer } from './components/footer';
 
@@ -51,13 +52,13 @@ interface IProps {
 	location: any;
 	headlineText?: string;
 	onLogin: (login, password) => void;
+	isPending: boolean;
 }
 
 interface IState {
 	login: string;
 	password: string;
 }
-
 
 export class Login extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -81,14 +82,12 @@ export class Login extends React.PureComponent<IProps, IState> {
 			</StyledButton>
 
 			<Field render={({ form }) => (
-				<Button
-					type="submit"
-					color="secondary"
-					variant="raised"
+				<SubmitButton
+					pending={this.props.isPending}
 					disabled={!form.isValid || form.isValidating}
 				>
 					Log in
-				</Button>
+				</SubmitButton>
 			)} />
 		</LoginButtons>
 	)

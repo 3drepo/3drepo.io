@@ -25,13 +25,13 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	logout: [],
 	sessionExpired: [],
 	sendPasswordChangeRequest: ['userNameOrEmail'],
-	setPassForgotPendingStatus: ['isPending'],
+	setPendingStatus: ['isPending'],
 	changePassword: ['username', 'token', 'password']
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {
 	isAuthenticated: false,
-	isPassForgotPending: false
+	isPending: false
 };
 
 export const loginSuccess = (state = INITIAL_STATE) => {
@@ -42,12 +42,12 @@ export const loginFailure = (state = INITIAL_STATE) => {
 	return { ...state, isAuthenticated: false };
 };
 
-export const setPassForgotPendingStatus = (state = INITIAL_STATE, { isPending }) => {
-	return { ...state, isPassForgotPending: isPending };
+export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => {
+	return { ...state, isPending };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
 	[AuthTypes.LOGIN_FAILURE]: loginFailure,
-	[AuthTypes.SET_PASS_FORGOT_PENDING_STATUS]: setPassForgotPendingStatus
+	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus
 });

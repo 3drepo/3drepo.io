@@ -21,10 +21,11 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { Login } from './login.component';
-import { AuthActions, selectIsAuthenticated } from '../../modules/auth';
+import { AuthActions, selectIsAuthenticated, selectIsPending } from '../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
-	isAuthenticated: selectIsAuthenticated
+	isAuthenticated: selectIsAuthenticated,
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

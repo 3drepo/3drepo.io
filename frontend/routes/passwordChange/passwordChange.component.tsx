@@ -28,6 +28,7 @@ import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../s
 import { Logo } from '../components/logo/logo.component';
 import { Panel } from '../components/panel/panel.component';
 import { Container, Message, Buttons, StyledButton } from './passwordChange.styles';
+import { SubmitButton } from '../components/submitButton/submitButton.component';
 
 const PasswordChangeSchema = Yup.object().shape({
 	newPassword: schema.password
@@ -143,14 +144,12 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 					<Buttons container justify="space-between">
 						{this.renderBackToLogin()}
 						<Field render={({ form }) => (
-							<Button
-								type="submit"
-								variant="raised"
-								color="secondary"
+							<SubmitButton
+								pending={this.props.isPending}
 								disabled={!form.isValid || form.isValidating}
 							>
 								Set password
-							</Button>
+							</SubmitButton>
 						)} />
 					</Buttons>
 				</Form>

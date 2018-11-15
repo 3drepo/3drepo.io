@@ -21,9 +21,11 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { PasswordChange } from './passwordChange.component';
-import { AuthActions } from '../../modules/auth';
+import { AuthActions, selectIsPending } from '../../modules/auth';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isPending: selectIsPending
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	changePassword: AuthActions.changePassword

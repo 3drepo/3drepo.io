@@ -26,6 +26,8 @@ import { AuthActions, AuthTypes } from './auth.redux';
 import { SnackbarActions } from '../snackbar';
 
 export function* login({ username, password }) {
+	yield put(AuthActions.setPendingStatus(true));
+
 	try {
 		const { data: { flags }} = yield API.login(username, password);
 
@@ -52,6 +54,7 @@ export function* login({ username, password }) {
 			yield put(DialogActions.showErrorDialog('login', 'user', e.response));
 		}
 	}
+	yield put(AuthActions.setPendingStatus(false));
 }
 
 export function* logout() {
@@ -107,7 +110,7 @@ export function* sessionExpired() {
 }
 
 export function* sendPasswordChangeRequest({ userNameOrEmail }) {
-	yield put(AuthActions.setPassForgotPendingStatus(true));
+	yield put(AuthActions.setPendingStatus(true));
 
 	try {
 		yield API.forgotPassword(userNameOrEmail);
@@ -115,21 +118,20 @@ export function* sendPasswordChangeRequest({ userNameOrEmail }) {
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
 	}
-
-	yield put(AuthActions.setPassForgotPendingStatus(false));
+	yield put(AuthActions.setPendingStatus(false));
 }
 
 export function* changePassword({ username, token, password }) {
-	yield put(AuthActions.setPassForgotPendingStatus(true));
+	yield put(AuthActions.setPendingStatus(true));
 
 	try {
 		yield API.changePassword(username, token, password);
-		yield put(SnackbarActions.show('Password changed'));
+		yield put(SnackbarActions.show('Your password has been reset.'));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
+		yield put(DialogActions.showErrorDialog('change', 'password', e.response));
 	}
 
-	yield put(AuthActions.setPassForgotPendingStatus(false));
+	yield put(AuthActions.setPendingStatus(false));
 }
 
 export default function* AuthSaga() {

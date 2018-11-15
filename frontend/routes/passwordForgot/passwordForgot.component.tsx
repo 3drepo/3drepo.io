@@ -17,14 +17,14 @@
 
 import * as React from 'react';
 import { Formik, Form, Field } from 'formik';
+import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import { Container, Message, Buttons, StyledButton } from './passwordForgot.styles';
 import { Logo } from '../components/logo/logo.component';
 import { Panel } from '../components/panel/panel.component';
-import { Link } from 'react-router-dom';
+import { SubmitButton } from '../components/submitButton/submitButton.component';
 
 interface IProps {
 	sendRequest: (userNameOrEmail) => void;
@@ -46,6 +46,7 @@ export class PasswordForgot extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { userNameOrEmail } = this.state;
+		const { isPending } = this.props;
 
 		return (
 			<Container
@@ -77,18 +78,17 @@ export class PasswordForgot extends React.PureComponent<IProps, IState> {
 										color="secondary"
 										component={Link}
 										to="/login"
+										disabled={isPending}
 									>
 										Back to Login
 									</StyledButton>
 									<Field render={({ form }) => (
-										<Button
-											type="submit"
-											variant="raised"
-											color="secondary"
+										<SubmitButton
+											pending={isPending}
 											disabled={!form.isValid || form.isValidating}
 										>
 											Send request
-										</Button>
+										</SubmitButton>
 									)} />
 								</Buttons>
 							</Form>

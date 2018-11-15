@@ -21,10 +21,10 @@ import { connect, addRouting } from '../../helpers/migration';
 
 import { PasswordForgot } from './passwordForgot.component';
 import { withRouter } from 'react-router-dom';
-import { AuthActions, selectIsPassForgotPending } from '../../modules/auth';
+import { AuthActions, selectIsPending } from '../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
-	isPending: selectIsPassForgotPending
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

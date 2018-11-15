@@ -15,14 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import Button from '@material-ui/core/Button';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
+export const StyledButton = styled(Button)`
+  && {
+    position: relative;
+    overflow: hidden;
+  }
+`;
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated
-);
-
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending
-);
+export const LoaderContainer = styled.div`
+  position: absolute;
+  background: rgb(220, 220, 220, 0.85);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+`;
