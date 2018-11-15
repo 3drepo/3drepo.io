@@ -30,7 +30,7 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {
-	isAuthenticated: false,
+	isAuthenticated: null,
 	isPending: false
 };
 

@@ -33,11 +33,17 @@ interface IState {
 }
 
 const DEFAULT_REDIRECT = '/dashboard/teamspaces';
+const MAIN_ROUTE_PATH =  '/';
 
 export class App extends React.PureComponent<IProps, IState> {
 	public state = {
 		referrer: DEFAULT_REDIRECT
 	};
+
+	public isStaticRoute(path) {
+		const staticRoutes = ['cookies', 'terms', 'privacy'] as any;
+		return staticRoutes.includes(path.replace('/', ''));
+	}
 
 	public componentDidMount() {
 		this.props.authenticate();
@@ -46,17 +52,20 @@ export class App extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 		const { location, history, isAuthenticated } = this.props;
+		const isStaticRoute = this.isStaticRoute(location.pathname);
 
-		if (isAuthenticated !== prevProps.isAuthenticated) {
+		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
 				history.push(this.state.referrer);
 				changes.referrer = DEFAULT_REDIRECT;
 			} else {
-				// To force Agnular to refresh state
+				if (location.pathname !== MAIN_ROUTE_PATH) {
+					changes.referrer = `${location.pathname }${ location.search }`;
+				}
+
 				runAngularTimeout(() => {
 					history.push('/login');
 				});
-				changes.referrer = `${location.pathname }${ location.search }`;
 			}
 		}
 
@@ -66,7 +75,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		// TODO: In the future it'll return first level routes
+		// TODO: In the future it'll return first level routes eg. Dashboard, Login
 		return (
 			<>
 				<DialogContainer />
