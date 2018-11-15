@@ -17,7 +17,8 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { withRouter } from 'react-router-dom';
+import { connect, addRouting } from '../../helpers/migration';
 
 import { SignUp } from './signUp.component';
 
@@ -25,4 +26,4 @@ const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignUp);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(SignUp)));

@@ -47,7 +47,8 @@ home [ui-view] > * {
 
 home [ui-view] login,
 home [ui-view] password-forgot,
-home [ui-view] password-change {
+home [ui-view] password-change,
+home [ui-view] sign-up {
 	height: 100%;
 }
 
