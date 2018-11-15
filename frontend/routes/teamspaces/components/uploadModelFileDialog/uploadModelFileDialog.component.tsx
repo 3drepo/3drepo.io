@@ -35,8 +35,13 @@ import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploa
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,
-	file: Yup.mixed().required()
+	file: Yup.mixed().required().test('is-idgn', 'File format not Supported', (value) =>  {
+		const fileSplit = value.name.split('.');
+		return fileSplit.indexOf('i') === -1;
+	})
 });
+
+// !idgnCheck ? true : false;
 
 interface IProps {
 	uploadModelFile: (teamspace, projectName, modelId, fileData) => void;
@@ -94,12 +99,14 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return `${info}: ${formatedDate}`;
 	}
 
-	public handleFileChange = (onChange) => (event, ...params) => {
+	public handleFileChange = (onChange) => (event, ...params) => {		
 		this.setState({
 			fileName: event.target.value.name
 		});
 
 		onChange(event, ...params);
+		console.log("i am the params", this.state.fileName);
+
 	}
 
 	public render() {
@@ -151,8 +158,8 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 							<Field name="file" render={({ field, form }) =>
 								<FileInputField
 									{...field}
-									onChange={this.handleFileChange(field.onChange)}
 									error={Boolean(form.errors.file)}
+									onChange={this.handleFileChange(field.onChange)}
 						/>} />
 							<Field render={ () =>
 								<CancelButton
