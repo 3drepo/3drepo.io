@@ -152,6 +152,8 @@ export class Viewer {
 	public settings;
 	public nav;
 
+	public numClips;
+
 	public setSpeed;
 	public currentViewpoint;
 	public changeAvatarHeight;
@@ -278,6 +280,7 @@ export class Viewer {
 			Module.errorhandler = UnityUtil.onUnityError;
 
 			this.currentNavMode = null;
+			this.numClips = 0;
 
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
@@ -631,8 +634,28 @@ export class Viewer {
 		}
 	}
 
-	public clearClippingPlanes() {
-		UnityUtil.disableClippingPlanes();
+	public startBoxClip() {
+		UnityUtil.startBoxClip();
+	}
+
+	public startSingleClip() {
+		UnityUtil.startSingleClip();
+	}
+
+	public startClipEdit() {
+		UnityUtil.startClipEdit();
+	}
+
+	public stopClipEdit() {
+		UnityUtil.stopClipEdit();
+	}
+
+	public numClipPlanesUpdated(nPlanes) {
+		this.numClips = nPlanes;
+	}
+
+	public getNumPlanes() {
+		return this.numClips;
 	}
 
 	/****************************************************************************

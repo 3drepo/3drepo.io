@@ -165,6 +165,11 @@ class BottomButtonsController implements ng.IController {
 					}
 				}
 			}
+
+			this.clipButton.numClips = this.ViewerService.getNumPlanes();
+			if (!this.clipButton.numClips) {
+				this.disableClipEdit();
+			}
 		}, 1000);
 
 	}
@@ -212,16 +217,14 @@ class BottomButtonsController implements ng.IController {
 					tooltip: "Start box clip",
 					text: 6,
 					click: () => {
-						// this.boxClipInit();
-						this.clipButton.showPanel = false;
+						this.startClip(false);
 					}
 				},
 				{
 					tooltip: "Start single clip",
 					text: 1,
 					click: () => {
-						// this.singleClipInit();
-						this.clipButton.showPanel = false;
+						this.startClip(true);
 					}
 				}
 			]
@@ -285,18 +288,38 @@ class BottomButtonsController implements ng.IController {
 	private clipButtonClicked() {
 		if (this.clipButton.editMode) {
 			// We're currently in edit mode, toggle it off
-			this.clipButton.editMode = false;
-			delete this.clipButton.background;
+			this.disableClipEdit();
 		} else {
 			if (this.clipButton.numClips) {
-				this.clipButton.editMode = true;
-				this.clipButton.background = "#FF9800"; // FIXME: This should really be a constant with highlight colour
+				this.enableClipEdit();
 			} else {
 				// toggle panel
 				this.clipButton.showPanel = !this.clipButton.showPanel;
 			}
 		}
 
+	}
+
+	private startClip(isSingle) {
+		if (isSingle) {
+			this.ViewerService.startSingleClip();
+		} else {
+			this.ViewerService.startBoxClip();
+		}
+		this.clipButton.showPanel = false;
+		this.enableClipEdit();
+	}
+
+	private enableClipEdit() {
+		this.clipButton.editMode = true;
+		this.clipButton.background = "#FF9800"; // FIXME: This should really be a constant with highlight colour
+		this.ViewerService.startClipEdit();
+	}
+
+	private disableClipEdit() {
+		this.clipButton.editMode = false;
+		delete this.clipButton.background;
+		this.ViewerService.stopClipEdit();
 	}
 
 }

@@ -92,6 +92,12 @@ export class ViewerService {
 		}
 	}
 
+	public getNumPlanes() {
+		if (this.viewer) {
+			return this.viewer.getNumPlanes();
+		}
+	}
+
 	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
@@ -213,12 +219,6 @@ export class ViewerService {
 				params.id
 			);
 		});
-	}
-
-	public clearClippingPlanes() {
-		if (this.viewer) {
-			this.viewer.clearClippingPlanes();
-		}
 	}
 
 	public getObjectsStatus(params) {
@@ -538,6 +538,30 @@ export class ViewerService {
 	public startAreaSelect() {
 		if (this.viewer) {
 			this.viewer.startAreaSelect();
+		}
+	}
+
+	public startBoxClip() {
+		if (this.viewer) {
+			this.viewer.startBoxClip();
+		}
+	}
+
+	public startSingleClip() {
+		if (this.viewer) {
+			this.viewer.startSingleClip();
+		}
+	}
+
+	public startClipEdit() {
+		if (this.viewer) {
+			this.viewer.startClipEdit();
+		}
+	}
+
+	public stopClipEdit() {
+		if (this.viewer) {
+			this.viewer.stopClipEdit();
 		}
 	}
 
