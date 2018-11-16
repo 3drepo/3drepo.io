@@ -10,5 +10,5 @@ module.exports = getWebpackConfig({
   plugins: [
     new CopyWebpackPlugin([{ from: 'custom/**', to: '../' }])
   ],
-  stats: false
+  stats: 'errors-only'
 });

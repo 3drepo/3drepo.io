@@ -1,5 +1,4 @@
 // Components & services
-import './account/js/account.service';
 import './account/js/account-upload.service';
 import './bottom-buttons/js/bottom-buttons.component';
 import './clip/js/clip.component';
