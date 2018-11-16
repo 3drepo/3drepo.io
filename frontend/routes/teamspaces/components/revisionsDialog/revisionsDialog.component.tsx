@@ -29,7 +29,8 @@ import {
 	StyledDialogActions,
 	StyledDialogContent,
 	StyledList,
-	Property
+	Property,
+	PropertyWrapper
 } from './revisionsDialog.styles';
 
 interface IProps {
@@ -77,20 +78,19 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 									key={revision._id}
 									divider={true}
 									onClick={this.revisionClickHandler(revision)}
-									last={index === 0}>
+									last={index === 0 ? 1 : 0}>
 										<Row>
-										<Property >
-											{revision.tag
-												? revision.tag
-												: '(empty tag)'}
-										</Property>
-
-										<Property >
-											{revision.author}
-										</Property>
-									<Property >
-											<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
-										</Property>
+											<PropertyWrapper>
+												<Property width="160">
+													{revision.tag ? revision.tag : '(empty tag)'}
+												</Property>
+												<Property>
+													{revision.author}
+												</Property>
+											</PropertyWrapper>
+											<Property>
+												<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
+											</Property>
 										</Row>
 										<Description>{revision.desc ? revision.desc : '(empty description)'}
 									</Description>

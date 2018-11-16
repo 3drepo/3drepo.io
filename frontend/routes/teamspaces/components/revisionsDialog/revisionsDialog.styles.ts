@@ -24,7 +24,16 @@ import List from '@material-ui/core/List';
 import { COLOR } from '../../../../styles/colors';
 
 export const Property = styled.div`
-	color: ${COLOR.BLACK};
+  color: ${COLOR.BLACK};
+  width: ${(props: any) => props.width ? `${props.width}px` : 'auto'};
+` as any;
+
+export const PropertyWrapper = styled.div`
+  display: flex;
+
+  ${Property} {
+    margin-right: 30px;
+  }
 `;
 
 export const Item = styled(ListItem)`
