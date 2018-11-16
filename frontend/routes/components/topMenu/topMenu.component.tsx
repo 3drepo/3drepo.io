@@ -40,7 +40,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 			<MuiThemeProvider theme={MuiTheme}>
 				<Container>
 					<Logo onClick={onLogoClick} />
-					 <UserMenu
+					<UserMenu
 						{...userMenuProps}
 						onTeamspacesClick={this.props.onLogoClick}
 					/>

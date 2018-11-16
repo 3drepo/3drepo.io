@@ -18,7 +18,7 @@
 import { history, getState } from '../../../helpers/migration';
 import { get } from 'lodash';
 
-import { selectIsAuthenticated } from "../../../modules/auth";
+import { selectIsAuthenticated } from '../../../modules/auth';
 
 function StateManagerRun(
 	$location,

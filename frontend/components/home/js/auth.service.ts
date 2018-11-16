@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { getState, dispatch, history } from "../../../helpers/migration";
-import { AuthActions, selectIsAuthenticated } from "../../../modules/auth";
-import { selectCurrentUser } from "../../../modules/currentUser";
+import { getState } from '../../../helpers/migration';
+import { selectIsAuthenticated } from '../../../modules/auth';
+import { selectCurrentUser } from '../../../modules/currentUser';
 
 export class AuthService {
 	public static $inject: string[] = [

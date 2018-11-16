@@ -107,7 +107,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in">
 						<Headline>{headlineText || 'Welcome to 3D Repo'}</Headline>
-						{ USER_NOTICE && <UserNotice>{ USER_NOTICE }</UserNotice> }
+						{USER_NOTICE && <UserNotice>{USER_NOTICE}</UserNotice>}
 
 						<Formik
 							initialValues={{ login, password }}
@@ -135,7 +135,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 									/>
 								)} />
 
-								{ this.renderLoginButtons() }
+								{this.renderLoginButtons()}
 							</Form>
 						</Formik>
 						<Footer />

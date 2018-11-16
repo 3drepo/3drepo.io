@@ -23,7 +23,7 @@ export const Image = styled.img`
 	pointer-events: inherit;
 	outline: none;
 	user-select: none;
-  filter: drop-shadow(0px 0px 1px ${COLOR.BLACK_50});
+  filter: drop-shadow(0 0 1px ${COLOR.BLACK_50});
 
   &:hover {
     cursor: pointer;

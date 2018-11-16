@@ -1,9 +1,9 @@
 const getSubdomain = () => {
 	const {host} = location;
-	if (host.indexOf(".") < 0) {
-		return "";
+	if (host.indexOf('.') < 0) {
+		return '';
 	}
-	return host.split(".")[0];
+	return host.split('.')[0];
 };
 
 export class ClientConfigService {
@@ -74,7 +74,7 @@ export class ClientConfigService {
 		const custom = this.customLogins && this.customLogins[subdomain];
 
 		if (subdomain && custom && custom.topLogo &&
-			typeof custom.topLogo === "string") {
+			typeof custom.topLogo === 'string') {
 			return custom.topLogo;
 		}
 
