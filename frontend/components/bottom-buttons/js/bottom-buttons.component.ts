@@ -203,24 +203,26 @@ class BottomButtonsController implements ng.IController {
 		this.clipButton = {
 			label: "Clip",
 			editMode: false,
-			hasClipPlane: false,
+			numClips: 0,
 			click: () => {
 				this.clipButtonClicked();
 			},
 			modes : [
 				{
 					tooltip: "Start box clip",
+					text: 6,
 					click: () => {
-						this.boxClipInit();
+						// this.boxClipInit();
 					}
 				},
 				{
 					tooltip: "Start single clip",
+					text: 1,
 					click: () => {
-						this.singleClipInit();
+						// this.singleClipInit();
 					}
 				}
-			];
+			]
 		};
 		this.bottomButtons.push(this.clipButton);
 
