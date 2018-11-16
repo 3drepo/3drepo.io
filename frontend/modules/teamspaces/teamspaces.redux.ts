@@ -91,6 +91,7 @@ const updateModelSuccess = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.project);
 	const modelIndex = foundProject.models.findIndex((model) => model.model === action.modelId);
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex] = action.modelData;
+	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = new Date();
 
 	return { ...state, teamspaces };
 };
