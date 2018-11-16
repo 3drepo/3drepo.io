@@ -290,23 +290,23 @@ schema.statics.populateUsersForMultiplePermissions = function (account, permissi
 };
 
 /**
- * Fills out the models name and extra data for the  modelids passed through parameter.
- * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an object which keys are modelids
+ * Fills out the models name for the  modelids passed through parameter.
+ * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an array of modelids
  * @returns {Object} which contains the models data
   */
-schema.statics.getModelsData = function(teamSpaces) {
+schema.statics.getModelsName = function(teamSpaces) {
 	return Promise.all(
-		Object.keys(teamSpaces).map(ACCOUNT_DB => {
-			const modelsIds = teamSpaces[ACCOUNT_DB];
+		Object.keys(teamSpaces).map(accountDB => {
+			const modelsIds = teamSpaces[accountDB];
 
-			return db.getCollection(ACCOUNT_DB, MODELS_COLL)
-				.then(collection => collection.find({_id: {$in:modelsIds}}).toArray())
+			return db.getCollection(accountDB, MODELS_COLL)
+				.then(collection => collection.find({_id: {$in:modelsIds}},{ name: 1, _id: 1}).toArray())
 				.then(models => {
 					const res = {};
 					const indexedModels = models.reduce((ac,c) => {
-						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+						const obj = {}; obj[c._id] = c.name; return Object.assign(ac,obj); // indexing by model._id
 					} ,{});
-					res[ACCOUNT_DB] = indexedModels;
+					res[accountDB] = indexedModels;
 					return res;
 				});
 		})

@@ -54,10 +54,10 @@ const extractTeamSpaceInfo = function(notifications) {
 
 const fillModelNames = function(notifications) {
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return  modelSettings.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+	return  modelSettings.getModelsName(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		return notifications.map(notification => {
 			const teamSpace = (modelsData[notification.teamSpace] || {});
-			const modelName = (teamSpace[notification.modelId] || {}).name;
+			const modelName = teamSpace[notification.modelId];
 			return Object.assign(notification, {modelName});
 		});
 	});
