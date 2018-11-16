@@ -213,6 +213,7 @@ class BottomButtonsController implements ng.IController {
 					text: 6,
 					click: () => {
 						// this.boxClipInit();
+						this.clipButton.showPanel = false;
 					}
 				},
 				{
@@ -220,6 +221,7 @@ class BottomButtonsController implements ng.IController {
 					text: 1,
 					click: () => {
 						// this.singleClipInit();
+						this.clipButton.showPanel = false;
 					}
 				}
 			]
@@ -286,11 +288,11 @@ class BottomButtonsController implements ng.IController {
 			this.clipButton.editMode = false;
 			delete this.clipButton.background;
 		} else {
-			if (this.clipButton.hasClipPlane) {
+			if (this.clipButton.numClips) {
 				this.clipButton.editMode = true;
-				this.clipButton.background = "#FF9800";
+				this.clipButton.background = "#FF9800"; // FIXME: This should really be a constant with highlight colour
 			} else {
-				// show panel
+				// toggle panel
 				this.clipButton.showPanel = !this.clipButton.showPanel;
 			}
 		}
