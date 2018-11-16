@@ -207,18 +207,18 @@ export class AuthService {
 		// Check if we're on a logged out page i.e. registerVerify
 		const isLoggedOutPage = this.loggedOutPage();
 		const isStatic = this.$state.current.name.includes('app.static');
-
 		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
-			this.$window.location.reload();
-		} else if (loginStateMismatch && isLoggedOutPage) {
-			if (sessionLogin) {
-				this.APIService.post('logout').then(() => {
-					localStorage.setItem('loggedIn', 'false');
-					localStorage.removeItem('username');
-					dispatch({ type: 'RESET_APP' });
-				});
-			}
+			this.$location.path('/login');
+			this.resetApp();
+		} else if (loginStateMismatch && isLoggedOutPage && sessionLogin) {
+			this.APIService.post('logout').then(this.resetApp());
 		}
+	}
+
+	public resetApp() {
+		localStorage.setItem('loggedIn', 'false');
+		localStorage.removeItem('username');
+		dispatch({ type: 'RESET_APP' });
 	}
 
 	public loggedOutPage() {
