@@ -82,7 +82,6 @@ function StateManagerRun(
 		const isAuthenticated = selectIsAuthenticated(getState());
 
 		if (isLoginRequired && !isAuthenticated) {
-			debugger;
 			event.preventDefault();
 			$state.go('app.login');
 		}

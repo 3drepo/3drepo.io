@@ -81,8 +81,6 @@ export class AuthService {
 			'app.passwordChange'
 		];
 
-		this.initAutoLogout();
-
 		this.state = {};
 		this.events = {
 			USER_LOGGED_IN : 'USER_LOGGED_IN',

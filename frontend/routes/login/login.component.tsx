@@ -101,7 +101,8 @@ export class Login extends React.PureComponent<IProps, IState> {
 				container
 				direction="column"
 				justify="center"
-				alignItems="center">
+				alignItems="center"
+				wrap="nowrap">
 				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in">

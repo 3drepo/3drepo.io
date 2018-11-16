@@ -26,7 +26,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	sessionExpired: [],
 	sendPasswordChangeRequest: ['userNameOrEmail'],
 	setPendingStatus: ['isPending'],
-	changePassword: ['username', 'token', 'password']
+	changePassword: ['username', 'token', 'password'],
+	setLocalSessionStatus: ['status']
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {
@@ -35,10 +36,12 @@ export const INITIAL_STATE = {
 };
 
 export const loginSuccess = (state = INITIAL_STATE) => {
+	setLocalSessionStatus(state, { status: true });
 	return { ...state, isAuthenticated: true };
 };
 
 export const loginFailure = (state = INITIAL_STATE) => {
+	setLocalSessionStatus(state, { status: false });
 	return { ...state, isAuthenticated: false };
 };
 
@@ -46,8 +49,14 @@ export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => {
 	return { ...state, isPending };
 };
 
+export const setLocalSessionStatus = (state = INITIAL_STATE, { status }) => {
+	window.localStorage.setItem('loggedIn', JSON.stringify(status));
+	return state;
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
 	[AuthTypes.LOGIN_FAILURE]: loginFailure,
-	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus
+	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
+	[AuthTypes.SET_LOCAL_SESSION_STATUS]: setLocalSessionStatus
 });

@@ -69,11 +69,11 @@ export function* logout() {
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put({ type: 'RESET_APP' });
-			yield put(AuthActions.logoutFailure());
 		} else {
 			yield put(DialogActions.showErrorDialog('logout', 'user', e.response));
 		}
 	}
+	yield put(AuthActions.setLocalSessionStatus(false));
 }
 
 export function* authenticate() {

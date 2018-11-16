@@ -23,6 +23,10 @@ export const selectIsAuthenticated = createSelector(
 	selectAuthDomain, (state) => state.isAuthenticated
 );
 
+export const selectActiveSession = createSelector(
+	selectAuthDomain, () => JSON.parse(window.localStorage.getItem('loggedIn'))
+);
+
 export const selectIsPending = createSelector(
 	selectAuthDomain, (state) => state.isPending
 );

@@ -20,16 +20,20 @@ import { isEmpty } from 'lodash';
 import { runAngularTimeout } from '../../helpers/migration';
 import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
+import { clientConfigService } from '../../services/clientConfig';
 
 interface IProps {
 	location: any;
 	history: any;
 	isAuthenticated: boolean;
+	hasActiveSession: boolean;
 	authenticate: () => void;
+	logout: () => void;
 }
 
 interface IState {
 	referrer?: string;
+	autologoutInterval?: number;
 }
 
 const DEFAULT_REDIRECT = '/dashboard/teamspaces';
@@ -37,10 +41,11 @@ const MAIN_ROUTE_PATH =  '/';
 
 export class App extends React.PureComponent<IProps, IState> {
 	public state = {
-		referrer: DEFAULT_REDIRECT
+		referrer: DEFAULT_REDIRECT,
+		autologoutInterval: clientConfigService.login_check_interval || 4
 	};
 
-	public componentWillUnmount;
+	public is;
 
 	private authenticationInterval;
 
@@ -53,6 +58,10 @@ export class App extends React.PureComponent<IProps, IState> {
 		this.props.authenticate();
 	}
 
+	public componentWillMount() {
+		this.toggleAutoLogout(false);
+	}
+
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 		const { location, history, isAuthenticated } = this.props;
@@ -62,11 +71,14 @@ export class App extends React.PureComponent<IProps, IState> {
 			if (isAuthenticated) {
 				history.push(this.state.referrer);
 				changes.referrer = DEFAULT_REDIRECT;
+
+				this.toggleAutoLogout();
 			} else {
 				if (location.pathname !== MAIN_ROUTE_PATH) {
 					changes.referrer = `${location.pathname }${ location.search }`;
 				}
 
+				this.toggleAutoLogout(false);
 				runAngularTimeout(() => {
 					history.push('/login');
 				});
@@ -75,6 +87,24 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
+		}
+	}
+
+	public toggleAutoLogout = (shouldStart = true) => {
+		if (shouldStart) {
+			this.authenticationInterval = setInterval(this.handleAutoLogout, this.state.autologoutInterval * 1000);
+		} else {
+			clearInterval(this.authenticationInterval);
+		}
+	}
+
+	public handleAutoLogout = () => {
+		const { isAuthenticated, location, logout, history } = this.props;
+		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
+		const isSessionExpired = hasActiveSession !== isAuthenticated;
+		if (isSessionExpired) {
+			history.push('/login');
+			logout();
 		}
 	}
 
