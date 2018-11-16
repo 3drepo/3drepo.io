@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { dispatch } from '../../../helpers/migration';
-import { NotificationsActions } from "../../../modules/notifications";
-import { ChatService } from "../../chat/js/chat.service";
 
 class HomeController implements ng.IController {
 
@@ -42,8 +39,7 @@ class HomeController implements ng.IController {
 		"AnalyticService",
 		"ViewerService",
 		"TemplateService",
-		"DialogService",
-		"ChatService"
+		"DialogService"
 	];
 
 	private doNotLogout;
@@ -69,7 +65,6 @@ class HomeController implements ng.IController {
 	private showMemorySelected;
 	private isLiteMode;
 	private deviceMemory;
-	private subscribedToNotifications = false;
 
 	constructor(
 		private $scope,
@@ -93,8 +88,7 @@ class HomeController implements ng.IController {
 		private AnalyticService,
 		private ViewerService,
 		private TemplateService,
-		private DialogService,
-		private chatService: ChatService
+		private DialogService
 	) {}
 
 	public $onInit() {
@@ -253,13 +247,6 @@ class HomeController implements ng.IController {
 		case this.AuthService.events.USER_LOGGED_IN:
 
 			if (!currentData.error) {
-				if (!this.subscribedToNotifications) {
-					this.chatService.getChannel(this.AuthService.getUsername())
-						.notifications.subscribeToUpserted(this.onNotificationUpserted, this);
-					this.chatService.getChannel(this.AuthService.getUsername())
-						.notifications.subscribeToDeleted(this.onNotificationDeleted, this);
-					this.subscribedToNotifications = true;
-				}
 				if (!currentData.initialiser) {
 					if (!this.state.returnUrl) {
 						this.StateManager.updateState(true);
@@ -319,14 +306,6 @@ class HomeController implements ng.IController {
 		}
 	}
 
-	public onNotificationUpserted(notification: any): void {
-		dispatch(NotificationsActions.upsertNotification(notification));
-	}
-
-	public onNotificationDeleted(notification: any): void {
-		dispatch(NotificationsActions.deleteNotification(notification));
-	}
-
 	public getLiteModeState() {
 
 		const stored = localStorage.getItem("liteMode");
@@ -351,6 +330,7 @@ class HomeController implements ng.IController {
 	}
 
 	public setLoginPage() {
+
 		if (this.ClientConfigService.customLogins !== undefined) {
 
 			const sub = this.getSubdomain();

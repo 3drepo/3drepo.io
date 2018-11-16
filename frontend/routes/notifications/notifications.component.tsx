@@ -30,6 +30,7 @@ import { NotificationEmptyItem } from './notifications.emptyItem';
 import { NotificationsPanel } from './notifications.panel';
 import { NotificationsPanelHeader } from './notifications.panel.header';
 import { NotificationsList, NotificationsBadge } from './notifications.styles';
+import { ChatService } from '../../components/chat/js/chat.service';
 
 // Props bound in <file://./notifications.container.ts>
 
@@ -38,11 +39,15 @@ interface IProps {
 	confirmSendDeleteAllNotifications: () => void ; // Bound to redux saga action confirmSendDeleteAllNotifications
 	sendUpdateNotificationRead: (id: string, read: boolean) => void; // Bound to redux saga sendUpdateNotificationRead
 	sendDeleteNotification: (id: string) => void; // Bound to redux saga sendDeleteNotification
+	deleteNotification: (notification: any) => void;
+	upsertNotification: (notification: any) => void;
 	notifications: INotification[]; // Bound to store state notifications
 
 	// Bound to angular in <file://../angularBindings.ts> and <file://../../components/account/pug/account-menu.pug>
 	location: any;
 	stateManager: any;
+	chatService: ChatService;
+	userAccount: string;
 }
 
 // Note: tried to use styled components and didnt worked.
@@ -64,6 +69,16 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		// This will download notifications from the server and save to the store on init
 		this.props.sendGetNotifications();
+
+		const chatChannel = this.props.chatService.getChannel(this.props.userAccount);
+		chatChannel.notifications.subscribeToUpserted(this.props.upsertNotification, this);
+		chatChannel.notifications.subscribeToDeleted(this.props.deleteNotification, this);
+	}
+
+	public componentWillUnmount() {
+		const chatChannel = this.props.chatService.getChannel(this.props.userAccount);
+		chatChannel.notifications.unsubscribeFromUpserted(this.props.upsertNotification);
+		chatChannel.notifications.unsubscribeFromDeleted(this.props.deleteNotification);
 	}
 
 	public toggleDrawer = () => {

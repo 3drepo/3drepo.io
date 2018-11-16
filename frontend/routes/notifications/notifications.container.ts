@@ -31,7 +31,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	sendGetNotifications: NotificationsActions.sendGetNotifications,
 	sendUpdateNotificationRead: NotificationsActions.sendUpdateNotificationRead,
 	sendDeleteNotification: NotificationsActions.sendDeleteNotification,
-	confirmSendDeleteAllNotifications: NotificationsActions.confirmSendDeleteAllNotifications
+	confirmSendDeleteAllNotifications: NotificationsActions.confirmSendDeleteAllNotifications,
+	upsertNotification: NotificationsActions.upsertNotification,
+	deleteNotification: NotificationsActions.deleteNotification
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Notifications);

@@ -21,7 +21,8 @@ class AccountMenuController implements ng.IController {
 		"$scope",
 		"$location",
 		"AuthService",
-		"StateManager"
+		"StateManager",
+		"ChatService"
 	];
 
 	private $mdOpenMenu;
@@ -34,7 +35,8 @@ class AccountMenuController implements ng.IController {
 		private $location: any,
 
 		private AuthService: any,
-		private StateManager: any
+		private StateManager: any,
+		private ChatService: any
 	) {}
 
 	public $onInit() {
