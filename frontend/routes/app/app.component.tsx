@@ -66,10 +66,11 @@ export class App extends React.PureComponent<IProps, IState> {
 		const changes = {} as IState;
 		const { location, history, isAuthenticated } = this.props;
 		const isStaticRoute = this.isStaticRoute(location.pathname);
-
 		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
-				history.push(this.state.referrer);
+				runAngularTimeout(() => {
+					history.push(this.state.referrer);
+				});
 				changes.referrer = DEFAULT_REDIRECT;
 
 				this.toggleAutoLogout();
@@ -99,7 +100,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleAutoLogout = () => {
-		const { isAuthenticated, location, logout, history } = this.props;
+		const { isAuthenticated, logout, history } = this.props;
 		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
 		const isSessionExpired = hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
