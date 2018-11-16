@@ -21,6 +21,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { StyledButton, LoaderContainer } from './submitButton.styles';
 
 interface IProps {
+	children: any;
 	pending?: boolean;
 	disabled?: boolean;
 }

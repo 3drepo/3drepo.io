@@ -2,16 +2,21 @@ const {resolve} = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 const loaders = require('./tools/loaders');
+
+const PROJECT_DIR = resolve(__dirname, '../../../');
+const APP_DIR = resolve(PROJECT_DIR, 'frontend');
+const DIST_DIR = resolve(PROJECT_DIR, 'public/dist/');
 
 module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,
-    context: resolve(__dirname, '../../'),
+    context: APP_DIR,
     entry: options.entry || './main.ts',
     output: Object.assign({
-      path: resolve(__dirname, '../../../public/dist/'),
-      filename: 'three_d_repo.[contenthash].js'
+      path: DIST_DIR,
+      filename: 'three_d_repo.[hash].js'
     }, options.output),
     resolve: {
       extensions: ['.ts', '.js', '.tsx']
@@ -29,6 +34,7 @@ module.exports = (options) => {
       ]
     },
     plugins: [
+      new CleanWebpackPlugin([DIST_DIR], { root: PROJECT_DIR }),
       new CopyWebpackPlugin([
         { from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
         { from: 'manifest.json', to: '../' },
