@@ -305,6 +305,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			<ModelItem
 				{...props}
 				key={props.model}
+				activeTeamspace={activeTeamspace}
 				actions={[]}
 				onModelItemClick={this.createModelItemClickHandler(props)}
 				onPermissionsClick={ this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
