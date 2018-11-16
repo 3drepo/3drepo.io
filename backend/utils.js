@@ -36,10 +36,14 @@ function Utils() {
 
 	/** *****************************************************************************
 	* Convert a string to a UUID
-	* @param {string} uuid - String representation of a UUID
+	* @param {string | Buffer} uuid - String representation of a UUID, or the UUID
 	* @returns {Buffer} binuuid - Binary representation of a UUID
 	*******************************************************************************/
 	this.stringToUUID = function(uuid) {
+		if (!_.isString(uuid)) {
+			return uuid;
+		}
+
 		const bytes = nodeuuid.parse(uuid);
 		const buf   = new Buffer.from(bytes);
 
@@ -171,7 +175,7 @@ function Utils() {
 		return this.resizeAndCropScreenshot(screenshotBuf, width, height, true);
 	};
 
-	this.changeObjectIdToString = function(obj) {
+	this.objectIdToString = function(obj) {
 		if (!obj || Object.keys(obj).length === 0 || _.isString(obj)) {
 			return obj;
 		}
@@ -181,10 +185,10 @@ function Utils() {
 		}
 
 		if (Array.isArray(obj)) {
-			return obj.map(o=> self.changeObjectIdToString(o));
+			return obj.map(o=> self.objectIdToString(o));
 		}
 
-		return  _.mapValues(obj, self.changeObjectIdToString);
+		return  _.mapValues(obj, self.objectIdToString);
 	};
 
 	/**

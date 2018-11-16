@@ -67,10 +67,6 @@ const getNotification = (username, type, criteria) =>
 	db.getCollection(NOTIFICATIONS_DB, username)
 		.then((collection) => collection.find(Object.assign({type},  criteria)).toArray());
 
-const convertIfNecessary = function(_id) {
-	return _.isString(_id) ? utils.stringToUUID(_id) : _id;
-};
-
 module.exports = {
 	types,
 
@@ -85,11 +81,11 @@ module.exports = {
 	insertNotification: function(username, type, data) {
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
 			collection.insertOne(generateNotification(type, data))
-		).then((o) => utils.changeObjectIdToString(o.ops[0]));
+		).then((o) => utils.objectIdToString(o.ops[0]));
 	},
 
 	updateNotification: function(username, _id, data) {
-		_id = convertIfNecessary(_id);
+		_id =  utils.stringToUUID(_id);
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
 			collection.update({_id}, { $set: data })
 		);
@@ -105,7 +101,7 @@ module.exports = {
 				const mergedData = Object.assign(_.mergeWith(n, data, unionArrayMerger), {read:false,timestamp});
 				return this.updateNotification(username, n._id, mergedData).then(() => {
 					const notification =  Object.assign(n, mergedData);
-					return utils.changeObjectIdToString(notification);
+					return utils.objectIdToString(notification);
 				});
 			}
 		});
@@ -131,17 +127,17 @@ module.exports = {
 
 				if (data.issuesId.length === 0) {
 					return this.deleteNotification(username, n._id)
-						.then(() => ({deleted:true , notification: {_id: utils.changeObjectIdToString(n._id) }}));
+						.then(() => ({deleted:true , notification: {_id: utils.objectIdToString(n._id) }}));
 				}
 				return this.updateNotification(username, n._id, data).then(() => {
-					return {deleted:false , notification: utils.changeObjectIdToString(n)};
+					return {deleted:false , notification: utils.objectIdToString(n)};
 				});
 			}
 		});
 	},
 
 	deleteNotification: function(username, _id) {
-		_id = convertIfNecessary(_id);
+		_id = utils.stringToUUID(_id);
 
 		return db.getCollection(NOTIFICATIONS_DB, username)
 			.then(c => c.deleteOne({_id}));
@@ -205,7 +201,7 @@ module.exports = {
 			})
 			.then((users) => {
 				return Promise.all(
-					users.map(u => this.removeIssueAssignedNotification(u, teamSpace, modelId, utils.changeObjectIdToString(issue._id)).then(n =>
+					users.map(u => this.removeIssueAssignedNotification(u, teamSpace, modelId, utils.objectIdToString(issue._id)).then(n =>
 						Object.assign({username:u}, n))))
 					.then(notifications => notifications.reduce((a,c) => ! c.notification ? a : a.concat(c), []))
 					.then(usersNotifications => {
@@ -221,7 +217,7 @@ module.exports = {
 	 * @returns {Promise<Notification[]>} It contains the notifications for the user passed through parameter
  	 */
 	getNotifications: function(username, criteria = {}) {
-		if (criteria._id && _.isString(criteria._id)) {
+		if (criteria._id) {
 			criteria._id = utils.stringToUUID(criteria._id);
 		}
 
