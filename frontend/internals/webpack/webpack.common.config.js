@@ -4,11 +4,6 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const loaders = require('./tools/loaders');
 
-const MODES = {
-  DEVELOPMENT: 'development',
-  PRODUCTION: 'production'
-};
-
 module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,

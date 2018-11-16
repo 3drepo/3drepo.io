@@ -1,3 +1,5 @@
+const MODES = require('./modes');
+
 const TSLoader = (options) => ({
   test: /\.(ts|tsx)$/,
   loader: 'ts-loader',

@@ -1,8 +1,9 @@
 const getWebpackConfig = require('./webpack.common.config');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
+const MODES = require('./tools/modes');
 
 module.exports = getWebpackConfig({
-  mode: 'development',
+  mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
   plugins: [
     new LiveReloadPlugin({
