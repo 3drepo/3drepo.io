@@ -19,7 +19,7 @@ class RegisterVerifyController implements ng.IController {
 
 	public static $inject: string[] = [
 		'$window',
-		"$state",
+		'$state',
 
 		'APIService',
 		'StateManager'
