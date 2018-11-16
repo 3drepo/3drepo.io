@@ -22,7 +22,7 @@
     "lint:css": "stylelint ./**/*.styles.ts",
     "lint": "yarn lint:ts && yarn lint:css",
     "lint:fix": "yarn lint:ts --fix",
-    "docs": "webpack --progress --config ./internals/webpack/webpack.typedoc.config.js"
+    "docs": "typedoc --out ./docs ./components --options ./internals/typedoc.js --logger none"
   },
   "keywords": [
     "3drepo",
@@ -106,7 +106,6 @@
     "tslint": "^5.11.0",
     "tslint-react": "^3.6.0",
     "typedoc": "^0.13.0",
-    "typedoc-webpack-plugin": "^1.1.4",
     "typescript": "3.1.1",
     "webpack": "4.24.0",
     "webpack-bundle-analyzer": "3.0.3",
