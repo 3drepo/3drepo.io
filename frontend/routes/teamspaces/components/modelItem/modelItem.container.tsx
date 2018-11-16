@@ -20,12 +20,9 @@ import { bindActionCreators } from 'redux';
 import { connect, addRouting } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions } from './../../../../modules/model';
-import { selectCurrentTeamspace } from './../../../../modules/teamspace';
 import { ModelItem } from './modelItem.component';
 
-const mapStateToProps = createStructuredSelector({
-	currentTeamspace: selectCurrentTeamspace
-});
+const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
