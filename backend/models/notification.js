@@ -18,6 +18,7 @@
 "use strict";
 const hasWriteAccessToModel = require("../middlewares/checkPermissions").hasWriteAccessToModelHelper;
 const job = require("../models/job");
+const modelSettings = require("../models/modelSetting");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const db = require("../db/db");
@@ -29,7 +30,6 @@ const types = {
 };
 
 const NOTIFICATIONS_DB = "notifications";
-const MODELS_COLL = "settings";
 
 const generateNotification = function(type, data) {
 	const timestamp = (new Date()).getTime();
@@ -52,33 +52,9 @@ const extractTeamSpaceInfo = function(notifications) {
 	return _.mapValues(_.groupBy(notifications, "teamSpace"), (notification) => _.map(notification, v => v.modelId));
 };
 
-/**
- * Fills out the models name and extra data for the  modelids passed through parameter.
- * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an object witch keys are modelids
- * @returns {Object} which contains the models data
-  */
-const getModelsData = function(teamSpaces) {
-	return Promise.all(
-		Object.keys(teamSpaces).map(ACCOUNT_DB => {
-			const modelsIds = teamSpaces[ACCOUNT_DB];
-
-			return db.getCollection(ACCOUNT_DB, MODELS_COLL)
-				.then(collection => collection.find({_id: {$in:modelsIds}}).toArray())
-				.then(models => {
-					const res = {};
-					const indexedModels = models.reduce((ac,c) => {
-						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
-					} ,{});
-					res[ACCOUNT_DB] = indexedModels;
-					return res;
-				});
-		})
-	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
-};
-
 const fillModelNames = function(notifications) {
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+	return  modelSettings.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		return notifications.map(notification => {
 			const teamSpace = (modelsData[notification.teamSpace] || {});
 			const modelName = (teamSpace[notification.modelId] || {}).name;

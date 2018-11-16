@@ -1157,7 +1157,7 @@ schema.methods.generateCommentsGUID = function() {
 	});
 };
 
-schema.statics.isIssueAssignation = function(oldIssue, newIssue) {
+schema.statics.isIssueAssignment = function(oldIssue, newIssue) {
 	if (!oldIssue) {
 		return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
 	}

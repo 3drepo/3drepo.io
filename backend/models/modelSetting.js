@@ -22,6 +22,9 @@ const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
+const db = require("../db/db");
+
+const MODELS_COLL = "settings";
 
 const schema = mongoose.Schema({
 	_id : String,
@@ -286,12 +289,33 @@ schema.statics.populateUsersForMultiplePermissions = function (account, permissi
 	return Promise.all(promises);
 };
 
+/**
+ * Fills out the models name and extra data for the  modelids passed through parameter.
+ * @param {Object} teamSpaces an object which keys are teamspaces ids and values are an object which keys are modelids
+ * @returns {Object} which contains the models data
+  */
+schema.statics.getModelsData = function(teamSpaces) {
+	return Promise.all(
+		Object.keys(teamSpaces).map(ACCOUNT_DB => {
+			const modelsIds = teamSpaces[ACCOUNT_DB];
+
+			return db.getCollection(ACCOUNT_DB, MODELS_COLL)
+				.then(collection => collection.find({_id: {$in:modelsIds}}).toArray())
+				.then(models => {
+					const res = {};
+					const indexedModels = models.reduce((ac,c) => {
+						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+					} ,{});
+					res[ACCOUNT_DB] = indexedModels;
+					return res;
+				});
+		})
+	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
+};
 const ModelSetting = ModelFactory.createClass(
 	"ModelSetting",
 	schema,
-	() => {
-		return "settings";
-	}
+	() => MODELS_COLL
 );
 
 module.exports = ModelSetting;
