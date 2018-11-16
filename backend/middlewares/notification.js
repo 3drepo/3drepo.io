@@ -43,7 +43,7 @@ module.exports = {
 			return;
 		}
 
-		if (!isCommentModification && issues.isIssueAssignation(oldIssue, issue)) {
+		if (!isCommentModification && issues.isIssueAssignment(oldIssue, issue)) {
 			Promise.all([
 				notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue),
 				notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue)
