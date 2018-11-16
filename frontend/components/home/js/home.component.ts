@@ -16,7 +16,7 @@
  */
 import { dispatch } from '../../../helpers/migration';
 import { NotificationsActions } from "../../../modules/notifications";
-import { NotificationService } from "../../notifications/js/notification.service";
+import { ChatService } from "../../chat/js/chat.service";
 
 class HomeController implements ng.IController {
 
@@ -43,7 +43,7 @@ class HomeController implements ng.IController {
 		"ViewerService",
 		"TemplateService",
 		"DialogService",
-		"NotificationService"
+		"ChatService"
 	];
 
 	private doNotLogout;
@@ -94,7 +94,7 @@ class HomeController implements ng.IController {
 		private ViewerService,
 		private TemplateService,
 		private DialogService,
-		private notificationService: NotificationService
+		private chatService: ChatService
 	) {}
 
 	public $onInit() {
@@ -254,9 +254,9 @@ class HomeController implements ng.IController {
 
 			if (!currentData.error) {
 				if (!this.subscribedToNotifications) {
-					this.notificationService.getChannel(this.AuthService.getUsername())
+					this.chatService.getChannel(this.AuthService.getUsername())
 						.notifications.subscribeToUpserted(this.onNotificationUpserted, this);
-					this.notificationService.getChannel(this.AuthService.getUsername())
+					this.chatService.getChannel(this.AuthService.getUsername())
 						.notifications.subscribeToDeleted(this.onNotificationDeleted, this);
 					this.subscribedToNotifications = true;
 				}

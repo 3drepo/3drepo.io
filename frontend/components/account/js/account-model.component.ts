@@ -20,8 +20,8 @@ import { AnalyticService } from "../../home/js/analytic.service";
 import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
-import { NotificationModelEvents } from "../../notifications/js/notification.model.events";
-import { NotificationService } from "../../notifications/js/notification.service";
+import { ModelChatEvents } from "../../chat/js/models.chat.events";
+import { ChatService } from "../../chat/js/chat.service";
 import { RevisionsService } from "../../revisions/js/revisions.service";
 
 import { PERMISSIONS_VIEWS } from "../../../routes/projects/projects.component";
@@ -39,7 +39,7 @@ class AccountModelController implements ng.IController {
 		"APIService",
 		"ClientConfigService",
 		"RevisionsService",
-		"NotificationService",
+		"ChatService",
 		"AuthService",
 		"AnalyticService",
 		"AccountUploadService"
@@ -70,7 +70,7 @@ class AccountModelController implements ng.IController {
 	private onSetupDeleteModel;
 	private revisions;
 	private project;
-	private modelNotifications: NotificationModelEvents;
+	private chatEventsModel: ModelChatEvents;
 
 	constructor(
 		private $scope: any,
@@ -82,7 +82,7 @@ class AccountModelController implements ng.IController {
 		private apiService: APIService,
 		private clientConfigService: any,
 		private revisionsService: RevisionsService,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private authService: AuthService,
 		private analyticService: AnalyticService,
 		private accountUploadService: AccountUploadService
@@ -154,7 +154,7 @@ class AccountModelController implements ng.IController {
 		this.modelToUploadFileWatch = undefined;
 
 		// Unsubscribe for notifications
-		this.modelNotifications.unsubscribeFromStatusChanged(this.onModelStatusChanged);
+		this.chatEventsModel.unsubscribeFromStatusChanged(this.onModelStatusChanged);
 	}
 
 	public watchers() {
@@ -376,8 +376,8 @@ class AccountModelController implements ng.IController {
 		this.onModelStatusChanged(this.model, false);
 
 		// Else if there's dynamic updates to the model listen for them
-		this.modelNotifications = this.notificationService.getChannel(this.account, this.model.model).model;
-		this.modelNotifications.subscribeToStatusChanged(this.onModelStatusChanged, this);
+		this.chatEventsModel = this.chatService.getChannel(this.account, this.model.model).model;
+		this.chatEventsModel.subscribeToStatusChanged(this.onModelStatusChanged, this);
 	}
 
 	/**

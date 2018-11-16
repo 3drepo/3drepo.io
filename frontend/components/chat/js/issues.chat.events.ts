@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationEvents } from "./notification.events";
-import { NotificationsChannel } from "./notifications.channel";
+import { ChatEvents } from "./chat.events";
+import { ChatChannel } from "./chat.channel";
 
-export class NotificationRisksEvents extends NotificationEvents {
-	private comments: { [id: string]: NotificationEvents};
+export class IssuesChatEvents extends ChatEvents {
+	private comments: { [id: string]: ChatEvents};
 
-	constructor(protected channel: NotificationsChannel) {
-		super(channel, "risk");
+	constructor(protected channel: ChatChannel) {
+		super(channel, "issue");
 		this.comments = {};
 	}
 
-	public getCommentsNotifications(id: string): NotificationEvents {
+	public getCommentsChatEvents(id: string): ChatEvents {
 		if (!this.comments[id]) {
-			this.comments[id] =  new NotificationEvents(this.channel, "comment", id);
+			this.comments[id] =  new ChatEvents(this.channel, "comment", id);
 		}
 
 		return this.comments[id];

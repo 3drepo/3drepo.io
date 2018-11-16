@@ -18,7 +18,7 @@ import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
 import { EventService } from "../../home/js/event.service";
 import { IssuesService } from "./issues.service";
-import { NotificationService } from "../../notifications/js/notification.service";
+import { ChatService } from "../../chat/js/chat.service";
 import { RevisionsService } from "../../revisions/js/revisions.service";
 import { ViewerService } from "../../viewer/js/viewer.service";
 
@@ -32,7 +32,7 @@ class IssuesController implements ng.IController {
 		"IssuesService",
 		"EventService",
 		"AuthService",
-		"NotificationService",
+		"ChatService",
 		"RevisionsService",
 		"ClientConfigService",
 		"DialogService",
@@ -80,7 +80,7 @@ class IssuesController implements ng.IController {
 		private issuesService: IssuesService,
 		private eventService: EventService,
 		private authService: AuthService,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private revisionsService: RevisionsService,
 		private clientConfigService: any,
 		private dialogService: DialogService,
@@ -128,14 +128,14 @@ class IssuesController implements ng.IController {
 
 		this.issuesService.reset();
 
-		let channel = this.notificationService.getChannel(this.account, this.model);
+		let channel = this.chatService.getChannel(this.account, this.model);
 
 		channel.issues.unsubscribeFromCreated(this.onIssueCreated);
 		channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
-				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel =  this.chatService.getChannel(subModel.database, subModel.model);
 				channel.issues.unsubscribeFromCreated(this.onIssueCreated);
 				channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
 		});
@@ -159,7 +159,7 @@ class IssuesController implements ng.IController {
 				});
 
 				this.subModels = this.modelSettings.subModels || [];
-				this.watchNotification();
+				this.watchChatEvents();
 
 				this.issuesService.addToAllTypes((this.modelSettings.properties && this.modelSettings.properties.topicTypes || []));
 			}
@@ -264,17 +264,17 @@ class IssuesController implements ng.IController {
 		this.onContentHeightRequest({height});
 	}
 
-	public watchNotification() {
+	public watchChatEvents() {
 		// Watch for new issues
 
-		let channel = this.notificationService.getChannel(this.account, this.model);
+		let channel = this.chatService.getChannel(this.account, this.model);
 
 		channel.issues.subscribeToCreated(this.onIssueCreated, this);
 		channel.issues.subscribeToUpdated(this.issuesService.updateIssues, this.issuesService);
 
 		// Do the same for all subModels
 		(this.subModels || []).forEach((subModel) => {
-				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel =  this.chatService.getChannel(subModel.database, subModel.model);
 				channel.issues.subscribeToCreated(this.onIssueCreated, this);
 				channel.issues.subscribeToUpdated(this.issuesService.updateIssues, this.issuesService);
 		});

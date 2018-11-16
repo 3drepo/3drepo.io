@@ -15,40 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationService } from "./notification.service";
-import { NotificationEvents } from "./notification.events";
-import { NotificationModelEvents } from "./notification.model.events";
-import { NotificationIssuesEvents } from "./notification.issues.events";
-import { NotificationRisksEvents } from "./notification.risks.events";
-import { NotificationNotificationsEvents } from "./notifications.notifications.events";
+import { ChatService } from "./chat.service";
+import { ChatEvents } from "./chat.events";
+import { ModelChatEvents } from "./models.chat.events";
+import { IssuesChatEvents } from "./issues.chat.events";
+import { NotificationsChatEvents } from "./notifications.chat.events";
 
-export class NotificationsChannel {
+export class ChatChannel {
 	/**
 	 * This property contains the object to suscribe to the issues and comments for the issues notification events
 	 */
-	public issues: NotificationIssuesEvents;
+	public issues: IssuesChatEvents;
 
 	/**
 	 * This property contains the object to suscribe to the risks and comments for the risks notification events
 	 */
-	public risks: NotificationRisksEvents;
+	public risks: ChatEvents;
 
 	/**
 	 * This property contains the object to suscribe to the groups notification events
 	 */
-	public groups: NotificationEvents;
+	public groups: ChatEvents;
 
 	/**
 	 * This property contains the object to suscribe to the views notification events
 	 */
-	public views: NotificationEvents;
+	public views: ChatEvents;
 
 	/**
 	 * This property contains the object to suscribe to the general modem status notification events
 	 */
-	public model: NotificationModelEvents;
+	public model: ModelChatEvents;
 
-	public 	notifications: NotificationNotificationsEvents;
+	public 	notifications: NotificationsChatEvents;
 
 	/**
 	 * This dictionary holds the callbacks for every event in the channel .
@@ -56,13 +55,13 @@ export class NotificationsChannel {
 	 */
 	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
-	constructor(private notificationService: NotificationService, private account: string, private modelStr: string) {
-		this.groups = new NotificationEvents(this, "group");
-		this.issues = new NotificationIssuesEvents(this);
-		this.risks = new NotificationRisksEvents(this);
-		this.model = new NotificationModelEvents(this);
-		this.views = new NotificationEvents(this, "view");
-		this.notifications = new NotificationNotificationsEvents(this);
+	constructor(private chatService: ChatService, private account: string, private modelStr: string) {
+		this.groups = new ChatEvents(this, "group");
+		this.issues = new IssuesChatEvents(this);
+		this.risks = new ChatEvents(this, "risk");
+		this.model = new ModelChatEvents(this);
+		this.views = new ChatEvents(this, "view");
+		this.notifications = new NotificationsChatEvents(this);
 	}
 
 	/**
@@ -73,9 +72,9 @@ export class NotificationsChannel {
 	 * @param keys extra keys for suscribing to a particular entity events
 	 */
 	public subscribe(event: string, callback: (data: any) => void, context: any, keys = null) {
-		const eventFullName = this.notificationService.getEventName(this.account, this.modelStr, keys, event);
+		const eventFullName = this.chatService.getEventName(this.account, this.modelStr, keys, event);
 		if (!this.hasSubscriptions(eventFullName)) {
-			this.notificationService.performSubscribe(this.account, this.modelStr, keys, event,
+			this.chatService.performSubscribe(this.account, this.modelStr, keys, event,
 				this.onEvent.bind(this, eventFullName));
 		}
 
@@ -89,12 +88,12 @@ export class NotificationsChannel {
 	 * @param keys extra keys for unsuscribing to a particular entity events
 	 */
 	public unsubscribe(event: string, callback: (data: any) => void, keys = null) {
-		const eventFullName = this.notificationService.getEventName(this.account, this.modelStr, keys, event);
+		const eventFullName = this.chatService.getEventName(this.account, this.modelStr, keys, event);
 
 		this.removeCallBack(eventFullName, callback);
 
 		if (!this.hasSubscriptions(eventFullName)) {
-			this.notificationService.performUnsubscribe(this.account, this.modelStr, keys, event);
+			this.chatService.performUnsubscribe(this.account, this.modelStr, keys, event);
 		}
 	}
 

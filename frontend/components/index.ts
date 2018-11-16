@@ -45,7 +45,7 @@ import "./issues/js/issues.service";
 import "./login/js/login.component";
 import "./measure/js/measure.service";
 import "./model/js/model.component";
-import "./notifications/js/notification.service";
+import "./chat/js/chat.service";
 import "./panel/js/panel-card.component";
 import "./panel/js/panel-card-filter.component";
 import "./panel/js/panel-card-chips-filter.component";

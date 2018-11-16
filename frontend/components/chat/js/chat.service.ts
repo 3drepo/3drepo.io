@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { NotificationsChannel } from "./notifications.channel";
+import { ChatChannel } from "./chat.channel";
 
 declare const io;
 
-export class NotificationService {
+export class ChatService {
 	public static $inject: string[] = [
 		"$injector",
 		"ClientConfigService",
@@ -32,7 +32,7 @@ export class NotificationService {
 	private lastDialogOpen;
 	private socket;
 	private joined;
-	private channels: { [id: string]: NotificationsChannel} = {};
+	private channels: { [id: string]: ChatChannel} = {};
 
 	constructor(
 		private $injector,
@@ -65,7 +65,7 @@ export class NotificationService {
 
 		this.socket.on("disconnect", () => {
 
-			console.error("The websocket for the notification service was disconnected");
+			console.error("The websocket for the chat service was disconnected");
 			this.DialogService.disconnected();
 
 		});
@@ -119,11 +119,11 @@ export class NotificationService {
 		}
 	}
 
-	public getChannel(account: string, model: string = ""): NotificationsChannel {
+	public getChannel(account: string, model: string = ""): ChatChannel {
 		const channelId: string = account + (model ? "::" + model : "");
 
 		if ( !this.channels[channelId] ) {
-			this.channels[channelId] = new NotificationsChannel(this, account, model);
+			this.channels[channelId] = new ChatChannel(this, account, model);
 		}
 
 		return this.channels[channelId];
@@ -162,6 +162,6 @@ export class NotificationService {
 
 }
 
-export const NotificationServiceModule = angular
+export const ChatServiceModule = angular
 	.module("3drepo")
-	.service("NotificationService", NotificationService);
+	.service("ChatService", ChatService);
