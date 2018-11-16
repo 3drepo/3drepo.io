@@ -57,7 +57,6 @@ gulp.task('index', function(done){
 })
 
 gulp.task('pug', function(done){
-
   return gulp.src(allPug)
         // .pipe(print())
         .pipe(rename({dirname: ''}))
@@ -70,7 +69,6 @@ gulp.task('pug', function(done){
 });
 
 gulp.task('css', function(done) {
-
   return gulp.src(allCss)
          //.pipe(print())
          .pipe(concat("three_d_repo.min.css"))
@@ -203,7 +201,6 @@ gulp.task('webpack-watch', function (cb) {
 gulp.task('gulp-watch', function() {
   isWatch = true;
   livereload.listen({host: 'localhost', port: '35729', start: true, quiet: false })
-
   // WATCHERS
   gulp.watch(["../index.html"], gulp.series(["index", "service-workers-dev"]))
   gulp.watch(["../../public/dist/three_d_repo.min.js"], gulp.series(["reload"]))
