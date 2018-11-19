@@ -19,11 +19,16 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
+import { AuthActions, selectIsPending } from '../../modules/auth';
 
 import { SignUp } from './signUp.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+  isPending: selectIsPending
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+  onRegister: AuthActions.register
+}, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(SignUp)));

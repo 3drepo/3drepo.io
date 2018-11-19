@@ -36,7 +36,7 @@ import {
 	Headline,
 	StyledGrid,
 	StyledFormControl,
-	ButtonContainer,
+	ButtonContainer
 } from './signUp.styles';
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 
@@ -59,7 +59,8 @@ const RegistrationSchema = Yup.object().shape({
 			Yup.ref('email'),
 			'Email confirmation must match email'
 		),
-	country: schema.required
+	countryCode: schema.required,
+	termsAgreed: schema.required
 });
 
 const DEFAULT_INPUT_PROPS = {
@@ -68,6 +69,11 @@ const DEFAULT_INPUT_PROPS = {
 };
 
 interface IProps {
+	history: any;
+	location: any;
+	headlineText?: string;
+	onRegister: (username, data) => void;
+	isPending: boolean;
 }
 
 interface IState {
@@ -79,8 +85,19 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		passwordStrengthMessage: ''
 	};
 
-	public handleSubmit = (data, form) => {
-		// this.props.onLogin(data.login, data.password);
+	public handleSubmit = (values, form) => {
+		const data = {
+			captcha: undefined,
+			company: values.company,
+			countryCode: values.countryCode,
+			email: values.email,
+			firstName: values.firstName,
+			lastName: values.lastName,
+			password: values.password,
+			mailListAgreed: values.mailListAgreed
+		};
+
+		this.props.onRegister(values.username, data);
 		form.resetForm();
 	}
 
@@ -204,7 +221,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									<StyledFormControl>
 										<InputLabel>Country *</InputLabel>
 										<Field
-											name="country"
+											name="countryCode"
 											render={({ field }) => (
 												<Select
 													{...field}
@@ -217,7 +234,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 								</FieldsRow>
 
 								<Field
-									name="subscription"
+									name="mailListAgreed"
 									render={({ field }) => (
 										<FormControlLabel
 											{...field}
@@ -228,7 +245,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 								/>
 
 								<Field
-									name="agreement"
+									name="termsAgreed"
 									required
 									render={({ field }) => (
 										<FormControlLabel

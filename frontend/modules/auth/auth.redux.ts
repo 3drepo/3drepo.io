@@ -27,7 +27,10 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	sendPasswordChangeRequest: ['userNameOrEmail'],
 	setPendingStatus: ['isPending'],
 	changePassword: ['username', 'token', 'password'],
-	setLocalSessionStatus: ['status']
+	setLocalSessionStatus: ['status'],
+	register: ['username', 'data'],
+	registerSuccess: [],
+	registerFailure: []
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {

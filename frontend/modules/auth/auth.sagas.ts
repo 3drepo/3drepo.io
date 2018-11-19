@@ -143,6 +143,23 @@ export function* changePassword({ username, token, password }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
+export function* register({ username, data }) {
+	yield put(AuthActions.setPendingStatus(true));
+
+	try {
+		const response = yield API.register(username, data);
+		console.log('Register: response', response);
+		// yield put(AuthActions.loginSuccess());
+	} catch (e) {
+		if (e.response.status === 401) {
+			yield put(AuthActions.loginFailure());
+		} else {
+			yield put(DialogActions.showErrorDialog('login', 'user', e.response));
+		}
+	}
+	yield put(AuthActions.setPendingStatus(false));
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
@@ -150,4 +167,5 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.SESSION_EXPIRED, sessionExpired);
 	yield takeLatest(AuthTypes.SEND_PASSWORD_CHANGE_REQUEST, sendPasswordChangeRequest);
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
+	yield takeLatest(AuthTypes.REGISTER, register);
 }
