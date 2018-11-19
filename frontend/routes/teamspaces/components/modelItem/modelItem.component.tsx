@@ -38,7 +38,7 @@ interface IAction {
 }
 interface IProps {
 	name: string;
-	currentTeamspace: string;
+	activeTeamspace: string;
 	status: string;
 	federate: boolean;
 	model: string;
@@ -102,13 +102,13 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount = () => {
-		const { currentTeamspace, projectName, model, subscribeOnStatusChange } = this.props;
-		subscribeOnStatusChange(currentTeamspace, projectName, model);
+		const { activeTeamspace, projectName, model, subscribeOnStatusChange } = this.props;
+		subscribeOnStatusChange(activeTeamspace, projectName, model);
 	}
 
 	public componentWillUnmount = () => {
-		const { currentTeamspace, projectName, model, unsubscribeOnStatusChange } = this.props;
-		unsubscribeOnStatusChange(currentTeamspace, projectName, model);
+		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange } = this.props;
+		unsubscribeOnStatusChange(activeTeamspace, projectName, model);
 	}
 
 	public renderSubModels = (subModels = []) => {

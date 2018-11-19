@@ -80,7 +80,6 @@ class GroupsController implements ng.IController {
 		this.customIcons = this.iconsConstant;
 
 		this.groups = [];
-		this.groupsToShow = [];
 
 		this.selectedNodes = [];
 		this.canAddGroup = false;
@@ -264,11 +263,10 @@ class GroupsController implements ng.IController {
 	}
 
 	public confirmDeleteAllDialog() {
-		const content = `Delete all groups?`;
-		const escapable = true;
-		this.dialogService.confirm(`Confirm Delete`, content, escapable, 'Yes', 'Cancel')
+		const content = this.filterText ? 'Delete displayed groups?' : 'Delete all groups?';
+		this.dialogService.confirm('Confirm Delete', content, true, 'Yes', 'Cancel')
 			.then(() => {
-				this.groupsService.deleteAllGroups(this.teamspace, this.model);
+					this.groupsService.deleteGroups(this.teamspace, this.model, this.groupsToShow);
 			})
 			.catch(() => { });
 	}
@@ -510,11 +508,7 @@ class GroupsController implements ng.IController {
 	}
 
 	private filterGroups() {
-		if (this.filterText !== undefined && this.filterText !== '') {
-			this.groupsToShow = this.groupsService.groupsFilterSearch(this.filterText);
-		} else {
-			this.groupsToShow = this.groups;
-		}
+			this.groupsService.groupsFilterSearch(this.filterText);
 	}
 }
 

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
@@ -74,11 +74,10 @@ export function* downloadModel({ teamspace, modelId }) {
 
 export function* onModelStatusChanged({ modelData, teamspace, project, modelId }) {
 	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, uploadFileStatuses[modelData.status]));
-
-	if (status === uploadFileStatuses.ok) {
-		yield put(SnackbarActions.show('Model uploaded succesfully'));
+	if (modelData.status === uploadFileStatuses.ok) {
+		yield put(SnackbarActions.show('Model uploaded successfully'));
 	}
-	if (status === uploadFileStatuses.failed) {
+	if (modelData.status === uploadFileStatuses.failed) {
 		yield put(SnackbarActions.show('Failed to import model'));
 	}
 }
@@ -113,7 +112,7 @@ export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
 			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
 				yield put(SnackbarActions.show(data.errorReason.message));
 			} else {
-				yield put(SnackbarActions.show('Model uploaded succesfully'));
+				yield put(SnackbarActions.show('Model uploaded successfully'));
 			}
 		}
 		if (status === uploadFileStatuses.failed) {

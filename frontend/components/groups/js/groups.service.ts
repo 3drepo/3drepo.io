@@ -47,6 +47,7 @@ export class GroupsService {
 	public reset() {
 		this.state = {
 			groups: [],
+			groupsToShow: [],
 			selectedGroup: {},
 			colorOverride: {},
 			totalSelectedMeshes: 0,
@@ -69,17 +70,22 @@ export class GroupsService {
 	/**
 	 * Filter groups using @param searchQuery
 	 */
-	public groupsFilterSearch(searchQuery: string): any[] {
-		return this.state.groups.filter((group) => {
-			const toKeep = this.stringSearch(group.name, searchQuery)
-				|| this.stringSearch(group.description, searchQuery)
-				|| this.stringSearch(group.author, searchQuery);
+	public groupsFilterSearch(searchQuery: string) {
 
-			if (!toKeep) {
-				this.unhighlightGroup(group);
-			}
-			return toKeep;
-		});
+		if (searchQuery === undefined || searchQuery === '') {
+			this.state.groupsToShow = this.state.groups.slice();
+		} else {
+			this.state.groupsToShow = this.state.groups.filter((group) => {
+				const toKeep = this.stringSearch(group.name, searchQuery)
+					|| this.stringSearch(group.description, searchQuery)
+					|| this.stringSearch(group.author, searchQuery);
+
+				if (!toKeep) {
+					this.unhighlightGroup(group);
+				}
+				return toKeep;
+			});
+		}
 	}
 	/**
 	 * Check if a group is currently color overriden
@@ -325,17 +331,8 @@ export class GroupsService {
 	 * @param model the model id for the group
 	 */
 	public deleteHighlightedGroups(teamspace: string, model: string) {
-		const groupsToDelete = this.state.groups.filter((g) => g.highlighted);
+		const groupsToDelete = this.state.groupsToShow.filter((g) => g.highlighted);
 		return this.deleteGroups(teamspace, model, groupsToDelete);
-	}
-
-	/**
-	 * Deletes all groups in the current model
-	 * @param teamspace the teamspace name for the group
-	 * @param model the model id for the group
-	 */
-	public deleteAllGroups(teamspace: string, model: string) {
-		return this.deleteGroups(teamspace, model, [].concat(this.state.groups));
 	}
 
 	/**
@@ -345,12 +342,14 @@ export class GroupsService {
 	 * @param groups the groups array to delete
 	 */
 	public deleteGroups(teamspace: string, model: string, groups: any) {
-		if (groups.length > 0) {
+		if (groups && groups.length > 0) {
 			const groupsUrl = `${teamspace}/${model}/groups/?ids=${groups.map((group) => group._id).join(',')}`;
 			return this.APIService.delete(groupsUrl)
 				.then((response) => {
 					groups.forEach(this.deleteStateGroup.bind(this));
 					return response;
+				}).catch((err) => {
+					Promise.reject(err);
 				});
 		} else {
 			return Promise.resolve();
@@ -534,11 +533,11 @@ export class GroupsService {
 	public deleteStateGroup(group: any) {
 		this.deselectObjectsFromGroup(group);
 		this.removeColorOverride(group._id);
-		const groupIndex = this.state.groups.indexOf(group);
-		const groupsCount = this.state.groups.length;
+		const groupIndex = this.state.groupsToShow.indexOf(group);
+		const groupsCount = this.state.groupsToShow.length;
 
 		if (this.state.selectedGroup && group._id === this.state.selectedGroup._id && groupsCount > 1) {
-			const nextGroup = this.state.groups[(groupIndex + 1) % groupsCount];
+			const nextGroup = this.state.groupsToShow[(groupIndex + 1) % groupsCount];
 			this.selectGroup(nextGroup);
 		}
 

@@ -19,6 +19,7 @@ class RegisterVerifyController implements ng.IController {
 
 	public static $inject: string[] = [
 		'$window',
+		'$state',
 
 		'APIService',
 		'StateManager'
@@ -34,19 +35,16 @@ class RegisterVerifyController implements ng.IController {
 
 	constructor(
 		private $window: ng.IWindowService,
+		private $state,
 
 		private APIService,
 		private StateManager
 	) {}
 
 	public $onInit() {
-		if (
-			this.StateManager && this.StateManager.query &&
-			this.StateManager.query.username && this.StateManager.query.token
-		) {
-
-			this.username = this.StateManager.query.username,
-			this.token = this.StateManager.query.token;
+		if (this.$state.params.username && this.$state.params.token) {
+			this.username = this.$state.params.username,
+			this.token = this.$state.params.token;
 			this.verified = false;
 			this.showPaymentWait = false;
 			this.databaseName = this.username;
