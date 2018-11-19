@@ -18,6 +18,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Field, Form } from 'formik';
+
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
 import { clientConfigService } from './../../services/clientConfig';
 
@@ -30,6 +31,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
 
 import {
 	Container,
@@ -41,7 +43,7 @@ import {
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 
 const RegistrationInitialValues = {
-	captcha: undefined,
+	captcha: '',
 	company: '',
 	countryCode: '',
 	email: '',
@@ -100,9 +102,11 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		passwordStrengthMessage: ''
 	};
 
+	public reCaptchaWrapperRef = React.createRef<HTMLElement>();
+
 	public handleSubmit = (values, form) => {
 		const data = {
-			captcha: undefined,
+			captcha: values.captcha,
 			company: values.company,
 			countryCode: values.countryCode,
 			email: values.email,
@@ -121,6 +125,10 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		this.setState({
 			passwordStrengthMessage: ''
 		});
+		
+		if (this.reCaptchaWrapperRef) {
+			this.reCaptchaWrapperRef.current.reCaptchaRef.current.reset();
+		}
 	}
 
 	public handlePasswordChange = (onChange) => (event, ...params) => {
@@ -255,6 +263,18 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									</StyledFormControl>
 								</FieldsRow>
 
+								{ clientConfigService.captcha_client_key &&
+									<Field
+										name="captcha"
+										render={({ field }) =>
+											<ReCaptcha
+												{...field}
+												key={clientConfigService.captcha_client_key}
+												ref={this.reCaptchaWrapperRef}
+											/>}
+									/>
+								}
+
 								<Field
 									name="mailListAgreed"
 									render={({ field }) => (
@@ -266,7 +286,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										/>
 									)}
 								/>
-
 								<Field
 									name="termsAgreed"
 									required
@@ -281,14 +300,17 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									}
 								/>
 								<ButtonContainer>
-									<Field render={({ form }) => (
-										<SubmitButton
-											pending={false}
-											disabled={!form.isValid || form.isValidating}
-										>
-											Sign up
-										</SubmitButton>
-									)} />
+									<Field render={({ form }) => {
+										console.log('form', form);
+										return (
+											<SubmitButton
+												pending={false}
+												disabled={!form.isValid || form.isValidating}
+											>
+												Sign up
+											</SubmitButton>
+										)
+									}} />
 								</ButtonContainer>
 							</Form>
 						</Formik>
