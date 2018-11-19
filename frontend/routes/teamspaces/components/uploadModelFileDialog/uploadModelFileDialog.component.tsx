@@ -34,15 +34,8 @@ import { unitsMap } from '../../../../constants/model-parameters';
 import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploadModelFileDialog.styles';
 
 const UploadSchema = Yup.object().shape({
-	revisionName: schema.revisionName,
-	file: Yup.mixed().required().test('is-idgn', 'File format not Supported', (value) =>  {
-		const fileSplit = value.name.split('.');
-		return fileSplit.indexOf('i') === -1;
-	})
+	revisionName: schema.revisionName
 });
-
-// !idgnCheck ? true : false;
-
 interface IProps {
 	uploadModelFile: (teamspace, projectName, modelData, fileData) => void;
 	fetchModelSettings: (teamspace, modelId) => void;
@@ -104,14 +97,16 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return `${info}: ${formatedDate}`;
 	}
 
-	public handleFileChange = (onChange) => (event, ...params) => {		
+	public handleFileChange = (onChange) => (event, ...params) => {
 		this.setState({
 			fileName: event.target.value.name
 		});
-
 		onChange(event, ...params);
-		console.log("i am the params", this.state.fileName);
+	}
 
+	public validateFileFormat(value) {
+		const fileSplit = value.name.split('.');
+		return fileSplit.indexOf('i') !== -1;
 	}
 
 	public render() {
@@ -160,10 +155,9 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 						}
 						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
 						<StyledDialogActions>
-							<Field name="file" render={({ field, form }) =>
+							<Field name="file" validate={this.validateFileFormat} render={({ field }) =>
 								<FileInputField
 									{...field}
-									error={Boolean(form.errors.file)}
 									onChange={this.handleFileChange(field.onChange)}
 						/>} />
 							<Field render={ () =>
