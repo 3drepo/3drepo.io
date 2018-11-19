@@ -21,21 +21,13 @@ const CSSLoader = {
   exclude: /node-modules/,
   use:[
     'style-loader', 
-    {
+    { 
       loader: 'css-loader',
       options: {
+        importLoaders: 1,
         import: false
       }
-    }
-  ]
-};
-
-const CSSExternalLoader = {
-  test: /\.css$/,
-  include: /node-modules/,
-  use: [
-    'style-loader',
-    { loader: 'css-loader', options: { importLoaders: 1 } },
+    },
     {
       loader: 'postcss-loader',
       options: {
@@ -47,41 +39,51 @@ const CSSExternalLoader = {
   ]
 };
 
-const getFontLoader = (options) => ({
+const CSSExternalLoader = {
+  test: /\.css$/,
+  include: /node-modules/,
+  use: [
+    'style-loader',
+    {
+      loader: 'css-loader',
+      options: {
+        importLoaders: 1
+      }
+    },
+    {
+      loader: 'postcss-loader',
+      options: {
+        config: {
+          path: './internals/webpack/tools'
+        }
+      }
+    }
+  ]
+};
+
+const FontLoader = {
   test: /\.(eot|otf|ttf|woff|woff2)$/,
   use: [{
     loader: 'file-loader',
     options: {
       outputPath: '../fonts/',
       publicPath: 'fonts/',
-      name() {
-        if (options.mode === 'development') {
-          return '[name].[ext]';
-        }
-
-        return '[hash].[ext]';
-      }
+      name: '[name]-[hash].[ext]'
     }
   }]
-});
+};
 
-const getImageLoader = (options) => ({
+const ImageLoader = {
   test: /\.(png|jpg|gif|svg)$/,
   use: [{
     loader: 'file-loader',
     options: {
       outputPath: '../images/',
       publicPath: 'images/',
-      name() {
-        if (options.mode === 'development') {
-          return '[name].[ext]';
-        }
-
-        return '[hash].[ext]';
-      }
+      name: '[name]-[hash].[ext]'
     }
   }]
-});
+};
 
 const HTMLLoader = {
   test: /\.(html)$/,
@@ -115,8 +117,8 @@ module.exports = {
   LodashTSLoader,
   CSSLoader,
   CSSExternalLoader,
-  getFontLoader,
-  getImageLoader,
+  FontLoader,
+  ImageLoader,
   HTMLLoader,
   PugLoader
 };

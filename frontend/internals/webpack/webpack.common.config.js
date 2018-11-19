@@ -18,21 +18,20 @@ module.exports = (options) => {
       path: DIST_DIR,
       filename: 'three_d_repo.[hash].js'
     }, options.output),
-    resolve: {
-      extensions: ['.ts', '.js', '.tsx']
-    },
+
     module: {
       rules: [
         loaders.TSLoader(options),
         loaders.LodashTSLoader,
         loaders.CSSLoader,
         loaders.CSSExternalLoader,
-        loaders.getFontLoader(options),
-        loaders.getImageLoader(options),
+        loaders.FontLoader,
+        loaders.ImageLoader,
         loaders.HTMLLoader,
         loaders.PugLoader
-      ]
+      ],
     },
+
     plugins: [
       new CleanWebpackPlugin([DIST_DIR], { root: PROJECT_DIR }),
       new CopyWebpackPlugin([
@@ -43,12 +42,10 @@ module.exports = (options) => {
         { from: 'unity/**', to: '../' },
         { from: 'manifest-icons/*', to: '../' }
       ], options),
-
       new HTMLWebpackPlugin({
         template: './index.html',
         filename: '../index.html'
       }),
-
       new SWPrecacheWebpackPlugin({
         filename: '../service-worker.js',
         staticFileGlobs: [
@@ -62,9 +59,18 @@ module.exports = (options) => {
         ],
         stripPrefix: '../../public/'
       }),
-
+      
       ...(options.plugins || [])
     ],
+
+    resolve: {
+      extensions: ['.ts', '.js', '.tsx'],
+      descriptionFiles: ['package.json'],
+      modules: ['node_modules']
+    },
+
+    target: 'web',
+
     stats: options.stats
   }
 
