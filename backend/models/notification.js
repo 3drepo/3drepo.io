@@ -16,14 +16,14 @@
  */
 
 "use strict";
-const hasWriteAccessToModel = require("../middlewares/checkPermissions").hasWriteAccessToModelHelper;
+const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const modelSettings = require("../models/modelSetting");
 const job = require("./job");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const db = require("../handler/db");
 const _ = require("lodash");
-const ModelSetting = require("./modelSetting");
+const User = require("./user");
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
@@ -180,7 +180,7 @@ module.exports = {
 				// For all the users with that assigned job we need
 				// to find those that can modify the model
 				return Promise.all(
-					users.map(user => hasWriteAccessToModel(user, teamSpace,modelId)
+					users.map(user => hasWriteAccessToModelHelper(user, teamSpace, modelId)
 						.then(canWrite => ({user, canWrite}))
 					)
 				);
@@ -205,16 +205,14 @@ module.exports = {
 	 *
 	 */
 	insertModelUpdatedNotifications: function(teamSpace, modelId, revision) {
-		const account = teamSpace;
-		const model = modelId;
-		const res = ModelSetting.findById({ account, model}, modelId).then(_modelSetting =>
-			Promise.all(_modelSetting.permissions.map(p =>
-				this.insertModelUpdatedNotification(p.user, teamSpace, modelId, revision).then(n=>({username:p.user, notification:n})))
-			).then(usersNotifications => {
-				return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
-			})
-		);
-		return res;
+		return User.getAllUsersInTeamspace(teamSpace)
+			.then(users => Promise.all(users.map(user => hasReadAccessToModelHelper(user, teamSpace, modelId).then(access => ({user,access})))))
+			.then(users=> users.filter(u=>u.access))
+			.then(users=> Promise.all(
+				users.map(u=>
+					this.insertModelUpdatedNotification(u.user, teamSpace, modelId, revision).then(n=>({username:u.user, notification:n}))
+				)))
+			.then(usersNotifications => fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications));
 	},
 
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {

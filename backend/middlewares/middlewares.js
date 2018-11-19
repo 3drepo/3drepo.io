@@ -128,7 +128,6 @@
 	}
 
 	function connectQueue(req, res, next) {
-
 		// init ampq and import queue object
 		if(config.cn_queue) {
 
@@ -143,6 +142,7 @@
 		}
 
 	}
+
 	function canCreateModel(req, res, next) {
 		if(req.body.subModels) {
 			checkPermissions([C.PERM_CREATE_FEDERATION])(req, res, next);
