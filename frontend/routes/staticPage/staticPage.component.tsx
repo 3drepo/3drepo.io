@@ -55,8 +55,8 @@ export class StaticPage extends React.PureComponent<IProps, any> {
 				key={page.route}
 				path={`${match.url}${page.route}`}
 				render={() =>
-					<PageTemplate title={ page.title }>
-						{ page.contentFile }
+					<PageTemplate title={page.title}>
+						{page.contentFile}
 					</PageTemplate>
 				}
 			/>

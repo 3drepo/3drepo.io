@@ -28,15 +28,16 @@ interface IProps {
 
 export const PageTemplate = (props: IProps) => {
 
-	return <ThemeProvider theme={theme}>
-			<MuiThemeProvider theme={MuiTheme}>
-				<Container>
-					<Header>
-						<Title>{props.title}</Title>
-						<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
-					</Header>
-					<Content dangerouslySetInnerHTML={{ __html: props.children }} />
-				</Container>
-			</MuiThemeProvider>
-		</ThemeProvider>;
+	return (
+		<ThemeProvider theme={theme}>
+				<MuiThemeProvider theme={MuiTheme}>
+					<Container>
+						<Header>
+							<Title>{props.title}</Title>
+							<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
+						</Header>
+						<Content dangerouslySetInnerHTML={{ __html: props.children }} />
+					</Container>
+				</MuiThemeProvider>
+		</ThemeProvider>);
 };

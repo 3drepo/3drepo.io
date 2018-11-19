@@ -16,7 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from './../../../../styles/colors';
+import { COLOR } from '../../../../styles/colors';
+import { FONT_WEIGHT } from '../../../../styles/fonts';
 
 export const Container = styled.div``;
 
@@ -40,7 +41,7 @@ export const Logo = styled.img`
 
 export const Title = styled.h2`
   margin: 0;
-  font-weight: 400;
+  font-weight: ${FONT_WEIGHT.NORMAL};
   font-size: 20px;
 `;
 
