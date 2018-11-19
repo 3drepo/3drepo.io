@@ -179,7 +179,7 @@ module.exports = {
 
 				// For all the users with that assigned job we need
 				// to find those that can modify the model
-				return  Promise.all(
+				return Promise.all(
 					users.map(user => hasWriteAccessToModel(user, teamSpace,modelId)
 						.then(canWrite => ({user, canWrite}))
 					)
@@ -195,11 +195,20 @@ module.exports = {
 			});
 	},
 
-	insertModelUpdatedNotifications: function(username, teamSpace, modelId, revision) {
+	/**
+	 * This function inserts a modelUpdateNotification for
+	 *
+	 * @param {*} teamSpace
+	 * @param {*} modelId
+	 * @param {*} revision
+	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
+	 *
+	 */
+	insertModelUpdatedNotifications: function(teamSpace, modelId, revision) {
 		const account = teamSpace;
 		const model = modelId;
 		const res = ModelSetting.findById({ account, model}, modelId).then(_modelSetting =>
-			Promise.all(_modelSetting.permissions.filter(p => p.user !== username).map(p =>
+			Promise.all(_modelSetting.permissions.map(p =>
 				this.insertModelUpdatedNotification(p.user, teamSpace, modelId, revision).then(n=>({username:p.user, notification:n})))
 			).then(usersNotifications => {
 				return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);

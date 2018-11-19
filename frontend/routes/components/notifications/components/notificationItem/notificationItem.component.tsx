@@ -91,12 +91,13 @@ const getIcon = (notification) => {
 	}
 };
 
-const getDetails = (notification) => {
+const getDetails = (notification: IProps) => {
 	switch (notification.type) {
 		case TYPES.ISSUE_ASSIGNED:
 			return `${notification.issuesId.length} assigned issues `;
 		case TYPES.MODEL_UPDATED:
-			return `${notification.revision} uploaded`;
+			return !notification.revision ? 'New revision uploaded' : `Revision ${notification.revision} uploaded`;
+
 	}
 };
 

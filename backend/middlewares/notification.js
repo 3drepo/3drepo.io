@@ -46,8 +46,7 @@ module.exports = {
 		if (!isCommentModification && issues.isIssueAssignment(oldIssue, issue)) {
 			Promise.all([
 				notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue),
-				notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue),
-				notification.insertModelUpdatedNotifications(username, teamspace, modelId, Math.round(Math.random() * 10000))
+				notification.upsertIssueAssignedNotifications(username, teamspace, modelId, issue)
 			]).then((notifications) => {
 				notifications = _.flatten(notifications);
 				req.userNotifications = notifications;

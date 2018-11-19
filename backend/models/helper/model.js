@@ -38,6 +38,7 @@ const Project = require("../project");
 const _ = require("lodash");
 const uuid = require("node-uuid");
 const FileRef = require("../fileRef");
+const notifications = require("../notification");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -119,6 +120,12 @@ function importSuccess(account, model, sharedSpacePath) {
 			}
 			setting.markModified("errorReason");
 			ChatEvent.modelStatusChanged(null, account, model, setting);
+
+			// Creates model updated notification.
+			History.findLatest({account, model},{tag:1}).then(h => {
+				const revision = (!h.tag) ? "" : h.tag;
+				return notifications.insertModelUpdatedNotifications(account, model, revision);
+			}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 			setting.save();
 		}
 	}).catch(err => {
