@@ -56,5 +56,5 @@ export const changePassword = (username, token, newPassword) => {
  * Register user
  */
 export const register = (username, data) => {
-	return api.post(username, { data });
+	return api.post(username, { ...data });
 };

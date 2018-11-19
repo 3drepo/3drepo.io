@@ -17,7 +17,7 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
-import { getAngularService } from '../../helpers/migration';
+import { getAngularService, history } from '../../helpers/migration';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
@@ -147,15 +147,10 @@ export function* register({ username, data }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
-		const response = yield API.register(username, data);
-		console.log('Register: response', response);
-		// yield put(AuthActions.loginSuccess());
+		yield API.register(username, data);
+		yield history.push('register-request');
 	} catch (e) {
-		if (e.response.status === 401) {
-			yield put(AuthActions.loginFailure());
-		} else {
-			yield put(DialogActions.showErrorDialog('login', 'user', e.response));
-		}
+		yield put(DialogActions.showErrorDialog('register', 'user', e.response));
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }

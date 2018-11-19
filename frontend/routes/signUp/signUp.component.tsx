@@ -40,6 +40,21 @@ import {
 } from './signUp.styles';
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 
+const RegistrationInitialValues = {
+	captcha: undefined,
+	company: '',
+	countryCode: '',
+	email: '',
+	emailConfirm: '',
+	username: '',
+	firstName: '',
+	lastName: '',
+	password: '',
+	passwordConfirm: '',
+	termsAgreed: false,
+	mailListAgreed: false
+};
+
 const RegistrationSchema = Yup.object().shape({
 	username: schema.required,
 	password: schema.password
@@ -98,7 +113,14 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		};
 
 		this.props.onRegister(values.username, data);
+		this.resetForm(form);
+	}
+
+	public resetForm = (form) => {
 		form.resetForm();
+		this.setState({
+			passwordStrengthMessage: ''
+		});
 	}
 
 	public handlePasswordChange = (onChange) => (event, ...params) => {
@@ -131,7 +153,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 					<Panel title="Sign up">
 						<Headline>{'Creating a 3D Repo account is free'}</Headline>
 						<Formik
-							initialValues={{}}
+							initialValues={RegistrationInitialValues}
 							onSubmit={this.handleSubmit}
 							validationSchema={RegistrationSchema}
 						>
@@ -238,6 +260,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									render={({ field }) => (
 										<FormControlLabel
 											{...field}
+											value={field.value ? '1' : '0'}
 											control={<Checkbox color="secondary"/>}
 											label="Sign up for the latest news and tutorials!"
 										/>
@@ -248,12 +271,14 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									name="termsAgreed"
 									required
 									render={({ field }) => (
-										<FormControlLabel
-											{...field}
-											control={<Checkbox color="secondary" />}
-											label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
-										/>
-									)}
+											<FormControlLabel
+												{...field}
+												value={field.value ? '1' : '0'}
+												control={<Checkbox color="secondary" />}
+												label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
+											/>
+										)
+									}
 								/>
 								<ButtonContainer>
 									<Field render={({ form }) => (
