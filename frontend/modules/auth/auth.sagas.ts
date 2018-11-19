@@ -24,6 +24,7 @@ import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { SnackbarActions } from '../snackbar';
+import { verificationMessages } from './auth.helpers';
 
 export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
@@ -155,6 +156,22 @@ export function* register({ username, data }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
+export function* verify({ username, token }) {
+	yield put(AuthActions.setPendingStatus(true));
+
+	try {
+		yield API.verify(username, token);
+		yield put(AuthActions.setVerifyMessage(verificationMessages.success));
+	} catch (e) {
+		if (e.response.data.code === 'ALREADY_VERIFIED') {
+			yield put(AuthActions.setVerifyMessage(verificationMessages.alreadyVerified));
+		} else {
+			yield put(AuthActions.setVerifyMessage(e.response.data.message));
+		}
+	}
+	yield put(AuthActions.setPendingStatus(false));
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
@@ -163,4 +180,5 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.SEND_PASSWORD_CHANGE_REQUEST, sendPasswordChangeRequest);
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
 	yield takeLatest(AuthTypes.REGISTER, register);
+	yield takeLatest(AuthTypes.VERIFY, verify);
 }

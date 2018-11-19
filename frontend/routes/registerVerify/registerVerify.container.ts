@@ -15,22 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect, addRouting } from '../../helpers/migration';
+import { withRouter } from 'react-router-dom';
+import { AuthActions, selectVerifyMessage, selectIsPending } from '../../modules/auth';
+import { RegisterVerify } from './registerVerify.component';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
+const mapStateToProps = createStructuredSelector({
+  verifyMessage: selectVerifyMessage,
+  isPending: selectIsPending
+});
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated
-);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+  verifyRequest: AuthActions.verify
+}, dispatch);
 
-export const selectActiveSession = createSelector(
-	selectAuthDomain, () => JSON.parse(window.localStorage.getItem('loggedIn'))
-);
-
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending
-);
-
-export const selectVerifyMessage = createSelector(
-	selectAuthDomain, (state) => state.verifyMessage
-);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterVerify)));

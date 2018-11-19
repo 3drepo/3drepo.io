@@ -48,7 +48,9 @@ home [ui-view] > * {
 home [ui-view] login,
 home [ui-view] password-forgot,
 home [ui-view] password-change,
-home [ui-view] sign-up {
+home [ui-view] sign-up,
+home [ui-view] register-request,
+home [ui-view] register-verify {
 	height: 100%;
 }
 

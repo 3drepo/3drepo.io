@@ -63,5 +63,5 @@ export const RegisterRequestComponent: ng.IComponentOptions = {
 };
 
 export const RegisterRequestComponentModule = angular
-	.module('3drepo')
-	.component('registerRequest', RegisterRequestComponent);
+	.module("3drepo")
+	.component("registerRequestOld", RegisterRequestComponent);

@@ -92,5 +92,5 @@ export const RegisterVerifyComponent: ng.IComponentOptions = {
 };
 
 export const RegisterVerifyComponentModule = angular
-	.module('3drepo')
-	.component('registerVerify', RegisterVerifyComponent);
+	.module("3drepo")
+	.component("registerVerifyOld", RegisterVerifyComponent);
