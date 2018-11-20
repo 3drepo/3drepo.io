@@ -51,8 +51,8 @@ interface IProps {
 	onDownloadClick: (event) => void;
 	onSettingsClick: (event) => void;
 	onPermissionsClick: (event) => void;
-	subscribeOnStatusChange: (teamspace, project, modelId) => void;
-	unsubscribeOnStatusChange: (teamspace, project, modelId) => void;
+	subscribeOnStatusChange: (teamspace, project, modelData) => void;
+	unsubscribeOnStatusChange: (teamspace, project, modelData) => void;
 }
 
 interface IState {
@@ -102,13 +102,15 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount = () => {
-		const { activeTeamspace, projectName, model, subscribeOnStatusChange } = this.props;
-		subscribeOnStatusChange(activeTeamspace, projectName, model);
+		const { activeTeamspace, projectName, model, subscribeOnStatusChange, name } = this.props;
+		const modelData = { modelId: model, modelName: name };
+		subscribeOnStatusChange(activeTeamspace, projectName, modelData);
 	}
 
 	public componentWillUnmount = () => {
-		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange } = this.props;
-		unsubscribeOnStatusChange(activeTeamspace, projectName, model);
+		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange, name } = this.props;
+		const modelData = { modelId: model, modelName: name };
+		unsubscribeOnStatusChange(activeTeamspace, projectName, modelData);
 	}
 
 	public renderSubModels = (subModels = []) => {
