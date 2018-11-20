@@ -57,14 +57,17 @@ interface IProps {
 
 interface IState {
 	hovered: boolean;
+	actionsMenuOpen: boolean;
 }
 
-const isPendingStatus = (status) => status && status !== 'ok' && status !== 'failed';
+const isPendingStatus = (status) => status && 
+	status === 'uploading' || status === 'queued' || status === 'processing';
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {
 		hovered: false,
-		statusText: ''
+		statusText: '',
+		actionsMenuOpen: false
 	};
 
 	private modelActions: IAction[] = [];
@@ -145,9 +148,14 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		</Status>
 	)
 
+	public toggleActionsMenuOpen = (event) => {
+		event.stopPropagation();
+		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
+	}
+
 	public render() {
 		const { name, subModels, timestamp, onModelItemClick, status } = this.props;
-		const { hovered } = this.state;
+		const { hovered, actionsMenuOpen } = this.state;
 		const isFederation = Boolean(subModels);
 		const actions = isFederation ? this.federationActions : this.modelActions;
 		const isPending = isPendingStatus(status);
@@ -169,12 +177,12 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 							justify="flex-end"
 							pending={isPending ? 1 : 0}
 						>
-							{ timestamp && !hovered && !isPending &&
+							{ timestamp && !hovered && !isPending && !actionsMenuOpen &&
 								<Time>
 									<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />
 								</Time>
 							}
-							<RowMenu open={hovered} disabled={isPending}>
+							<RowMenu open={hovered} disabled={isPending} forceOpen={actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
 								{this.renderActions(actions)}
 							</RowMenu>
 						</TimeWrapper>
