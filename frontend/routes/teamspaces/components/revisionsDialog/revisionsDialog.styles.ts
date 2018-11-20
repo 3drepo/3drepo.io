@@ -69,6 +69,7 @@ export const Description = styled.div`
 export const Message = styled.p`
   width: 100%;
   text-align: center;
+  margin: 22px 0 0;
 `;
 
 export const StyledDialogActions = styled(DialogActions)`
