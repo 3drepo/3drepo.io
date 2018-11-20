@@ -101,6 +101,16 @@ function StateManagerRun(
 			}
 		}
 
+		if (AuthService.loggedOutStates.includes(toState.name) && isAuthenticated) {
+			event.preventDefault();
+			AuthService.loginSuccess({
+				data: {
+					username: AuthService.username
+				}
+			});
+			$state.go('app.dashboard.pages', { page: 'teamspaces' });
+		}
+
 		if (isLoginRequired && !isAuthenticated) {
 			event.preventDefault();
 			StateManager.state.authInitialized = false;
