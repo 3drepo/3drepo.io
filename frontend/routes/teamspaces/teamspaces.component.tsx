@@ -416,13 +416,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		};
 		return (
 			<>
-				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog, close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog(), close)}>
 					Add project
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openModelDialog, close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openModelDialog(), close)}>
 					Add model
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog, close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog(), close)}>
 					Add federation
 				</MenuItem>
 			</>

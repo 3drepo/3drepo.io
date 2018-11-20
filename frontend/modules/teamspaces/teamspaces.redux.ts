@@ -103,7 +103,13 @@ const updateModelSuccess = (state = INITIAL_STATE, action) => {
 const createModelSuccess = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
 	const targetModels = foundProject.models;
-	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, action.modelData];
+	const createdModel = action.modelData;
+
+	if (action.modelData.federate) {
+		createdModel.timestamp = new Date();
+	}
+
+	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, createdModel];
 
 	return { ...state, teamspaces };
 };
