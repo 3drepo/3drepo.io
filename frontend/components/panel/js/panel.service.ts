@@ -63,7 +63,7 @@ export class PanelService {
 
 	public static $inject: string[] = [
 		"EventService",
-		"TreeService", 
+		"TreeService",
 		"APIService"
 	];
 
@@ -533,12 +533,12 @@ export class PanelService {
 
 	public downloadJSON(fileName, endpoint) {
 		this.apiService.get(endpoint).then((res) => {
-		 const content = JSON.stringify(res.data, null, 2);
-	     const a = document.createElement("a");
-	     const file = new Blob([content]);
-	     a.href = URL.createObjectURL(file);
-	     a.download = fileName + ".json";
-	     a.click();
+			const content = JSON.stringify(res.data, null, 2);
+			const a = document.createElement("a");
+			const file = new Blob([content]);
+			a.href = URL.createObjectURL(file);
+			a.download = fileName + ".json";
+			a.click();
 		});
 	}
 
