@@ -619,19 +619,8 @@ export class Viewer {
 		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
-	public updateClippingPlanes(clipPlanes: any, fromPanel: boolean, account, model) {
-		if (!clipPlanes || clipPlanes.length === 0) {
-			UnityUtil.disableClippingPlanes();
-		}
-
-		if (clipPlanes && clipPlanes.length > 0 ) {
-			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
-		}
-
-		if (clipPlanes && clipPlanes.length > 1) {
-			console.error("More than 1 clipping planes requested!");
-			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
-		}
+	public updateClippingPlanes(clipPlanes: any, account, model) {
+		UnityUtil.updateClippingPlanes(clipPlanes ?  clipPlanes : [], false, account, model);
 	}
 
 	public startBoxClip() {

@@ -953,7 +953,15 @@ export class UnityUtil {
 			param.nameSpace = account + "." + model;
 		}
 		param.requiresBroadcast = requireBroadcast;
-		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Reset clipping plane
+	 * This will also toggle edit mode to false
+	 */
+	public static disableClippingPlanes() {
+		UnityUtil.toUnity("DisableClip", undefined, undefined);
 	}
 
 	/**
