@@ -77,13 +77,6 @@ class SignupController implements ng.IController {
 	public $onInit() {
 
 		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
-		this.AuthService.sendLoginRequest().then((response) => {
-			if (response.data.username) {
-				this.goToLoginPage();
-			}
-		}).catch((response) => {
-			console.debug('User is not logged in');
-		});
 
 		this.enterKey = 13;
 		this.agreeToText = '',

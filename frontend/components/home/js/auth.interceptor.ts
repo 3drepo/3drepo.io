@@ -34,7 +34,6 @@ export class AuthInterceptor {
 		const unauthorized = response.status === 401 &&
 							response.data.message === 'You are not logged in';
 		const sessionHasExpired = unauthorized && !this.dialogOpen && notLogin;
-
 		if (sessionHasExpired) {
 			this.sessionExpired();
 		} else {
