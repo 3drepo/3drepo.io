@@ -119,6 +119,7 @@ export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
 		}
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('upload', 'model', e.response));
+		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, uploadFileStatuses.failed));
 	}
 }
 
