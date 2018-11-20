@@ -195,7 +195,7 @@ class IssuesListController implements ng.IController {
 
 			case "downloadJSON":
 				const jsonEndpoint = this.account + "/" + this.model + "/issues.json";
-					this.PanelService.downloadJSON("issues", jsonEndpoint);
+				this.PanelService.downloadJSON("issues", jsonEndpoint);
 				break;
 
 			case "importBCF":
