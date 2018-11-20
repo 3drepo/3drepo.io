@@ -204,15 +204,23 @@ module.exports = {
 	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
 	 *
 	 */
-	insertModelUpdatedNotifications: function(teamSpace, modelId, revision) {
-		return User.getAllUsersInTeamspace(teamSpace)
-			.then(users => Promise.all(users.map(user => hasReadAccessToModelHelper(user, teamSpace, modelId).then(access => ({user,access})))))
-			.then(users=> users.filter(u=>u.access))
-			.then(users=> Promise.all(
-				users.map(u=>
-					this.insertModelUpdatedNotification(u.user, teamSpace, modelId, revision).then(n=>({username:u.user, notification:n}))
-				)))
-			.then(usersNotifications => fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications));
+	insertModelUpdatedNotifications: async function(teamSpace, modelId, revision) {
+		const allUsers = await User.getAllUsersInTeamspace(teamSpace);
+		const usersAndPerms = await Promise.all(allUsers.map(async user => {
+			const access = await hasReadAccessToModelHelper(user, teamSpace, modelId);
+			return ({user,access});
+		}));
+
+		const users = usersAndPerms.filter(u=>u.access);
+
+		const notifications = await Promise.all(users.map(async u => {
+			const notification = await this.insertModelUpdatedNotification(u.user, teamSpace, modelId, revision);
+			return ({username:u.user, notification});
+		}));
+
+		await fillModelNames(notifications.map(un => un.notification));
+
+		return notifications;
 	},
 
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {
