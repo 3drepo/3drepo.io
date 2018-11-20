@@ -57,15 +57,22 @@ export class Chips extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleNewChipSubmit: any = (event) => {
+	public handleNewChipSubmit: any = (event) => {		
 		if (event.key === ENTER_KEY) {
 			event.preventDefault();
 
-			this.setState({
-				value: [...this.state.value, {
-					label: event.target.value, value: snakeCase(event.target.value)
-				}]
-			}, this.handleChange);
+			const newChip = {
+				value: snakeCase(event.target.value), 
+				label: event.target.value
+			}
+
+			const chipExists = !!this.state.value.find(chip => (chip.value === newChip.value));
+
+			if (!chipExists) {
+				this.setState({
+					value: [...this.state.value, newChip]
+				}, this.handleChange);
+			}
 
 			event.target.value = '';
 		}
