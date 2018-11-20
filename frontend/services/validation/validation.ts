@@ -29,21 +29,6 @@ Yup.addMethod(Yup.string, 'differentThan', differentThan );
 Yup.addMethod(Yup.string, 'equalTo', equalTo);
 Yup.addMethod(Yup.string, 'strength', strength );
 
-// Yup.addMethod(Yup.mixed, 'idgnCheck', function() {
-// 	return this.test('is-idgn', 'File format not accepted', (value) => {
-// 		const fileSplit = value.name.split('.');
-// 		return new Promise((resolve, reject) => {
-// 			if (fileSplit.indexOf('i') === -1) {
-// 				console.log(fileSplit.indexOf('i') === -1);
-// 				reject();
-// 			} else {
-// 				resolve(fileSplit.indexOf('i') === -1);
-// 				console.log(fileSplit.indexOf('i') === -1);
-// 			}
-// 		});
-// 	});
-// });
-
 /*
 	Validation schemas
 */
@@ -77,19 +62,6 @@ export const schema = {
 
 	required: Yup.string()
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
-
-	// /** This could be expanded later to contain a
-	//  *  list of non-accepted file formats */
-	// file: Yup.mixed()
-	// 		.required('File Required')
-	// 		.test(
-	// 			'fileFormat',
-	// 			'File Format not accepted',
-	// 			(value) => {
-	// 				const fileSplit = value.name.split('.');
-	// 				return Promise.resolve(fileSplit.indexOf('i') === -1);
-	// 			}
-	// 		)
 };
 
 export const getPasswordStrengthMessage = (score: number) => {
