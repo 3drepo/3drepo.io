@@ -49,6 +49,10 @@ export const showDialog = (state = INITIAL_STATE, action) => {
 };
 
 export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error } ) => {
+	if (error.handled) {
+		return state;
+	}
+
 	const config = {
 		title: 'Error',
 		template: ErrorDialog,
