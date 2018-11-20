@@ -82,6 +82,9 @@ export const Status = styled.span`
   justify-content: flex-end;
   display: flex;
   width: 100%;
+  font-weight: 400;
+  color: ${COLOR.BLACK_30};
+  font-size: 12px;
 `;
 
 export const TimeWrapper = styled(Grid)`
