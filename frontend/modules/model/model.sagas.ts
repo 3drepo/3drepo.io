@@ -72,50 +72,63 @@ export function* downloadModel({ teamspace, modelId }) {
 	}
 }
 
-export function* onModelStatusChanged({ modelData, teamspace, project, modelId }) {
+export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName }) {
 	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, uploadFileStatuses[modelData.status]));
+
 	if (modelData.status === uploadFileStatuses.ok) {
-		yield put(SnackbarActions.show('Model uploaded successfully'));
+		yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
 	}
 	if (modelData.status === uploadFileStatuses.failed) {
-		yield put(SnackbarActions.show('Failed to import model'));
+		if (modelData.hasOwnProperty('errorReason') && modelData.errorReason.message) {
+			yield put(SnackbarActions.show(`Failed to import ${modelName} model: ${modelData.errorReason.message}`));
+		} else {
+			yield put(SnackbarActions.show(`Failed to import ${modelName} model`));
+		}
 	}
 }
 
-export function* subscribeOnStatusChange({ teamspace, project, modelId }) {
+export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
+	const { modelId, modelName } = modelData;
 	const notificationService = yield getAngularService('NotificationService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
-	const onChanged = (modelData) => dispatch(ModelActions.onModelStatusChanged(modelData, teamspace, project, modelId));
+	const onChanged = (changedModelData) => 
+		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project, modelId, modelName));
 	modelNotifications.subscribeToStatusChanged(onChanged, this);
 }
 
-export function* unsubscribeOnStatusChange({ teamspace, project, modelId }) {
+export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
+	const { modelId, modelName } = modelData;
 	const notificationService = yield getAngularService('NotificationService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
-	const onChanged = (modelData) => dispatch(ModelActions.onModelStatusChanged(modelData, teamspace, project, modelId));
+	const onChanged = (changedModelData) => dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project,  modelId, modelName));
 	modelNotifications.unsubscribeFromStatusChanged(onChanged, this);
 }
 
-export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
+export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 	try {
 		const formData = new FormData();
 		formData.append('file', fileData.file);
 		formData.append('tag', fileData.tag);
 		formData.append('desc', fileData.desc);
 
+		const { modelId, modelName } = modelData;
 		const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);
 
 		if (status === uploadFileStatuses.ok) {
 			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
 				yield put(SnackbarActions.show(data.errorReason.message));
 			} else {
-				yield put(SnackbarActions.show('Model uploaded successfully'));
+				yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
 			}
 		}
 		if (status === uploadFileStatuses.failed) {
-			yield put(SnackbarActions.show('Failed to import model'));
+			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
+				yield put(SnackbarActions.show(`Failed to import ${modelName} model: ${data.errorReason.message}`));
+			} else {
+				yield put(SnackbarActions.show(`Failed to import ${modelName} model`));
+			}
 		}
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('upload', 'model', e.response));
