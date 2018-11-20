@@ -92,7 +92,7 @@ export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 	const notificationService = yield getAngularService('NotificationService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
-	const onChanged = (changedModelData) => 
+	const onChanged = (changedModelData) =>
 		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project, modelId, modelName));
 	modelNotifications.subscribeToStatusChanged(onChanged, this);
 }
@@ -102,7 +102,8 @@ export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
 	const notificationService = yield getAngularService('NotificationService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
-	const onChanged = (changedModelData) => dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project,  modelId, modelName));
+	const onChanged = (changedModelData) =>
+		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project,  modelId, modelName));
 	modelNotifications.unsubscribeFromStatusChanged(onChanged, this);
 }
 
@@ -132,7 +133,7 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 		}
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('upload', 'model', e.response));
-		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, uploadFileStatuses.failed));
+		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelData.modelId, uploadFileStatuses.failed));
 	}
 }
 

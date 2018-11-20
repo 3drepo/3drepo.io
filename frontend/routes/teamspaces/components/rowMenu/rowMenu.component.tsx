@@ -25,6 +25,8 @@ import { StyledGrid, StyledGrow } from './rowMenu.styles';
 interface IProps {
 	open?: boolean;
 	disabled?: boolean;
+	forceOpen?: boolean;
+	toggleForceOpen?: (event) => void;
 }
 
 interface IState {

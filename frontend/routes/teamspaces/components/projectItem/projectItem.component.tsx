@@ -37,6 +37,7 @@ interface IProps {
 
 interface IState {
 	items: any[];
+	actionsMenuOpen: boolean;
 }
 
 const splitModels = (modelsList = []) => {
@@ -65,7 +66,8 @@ const getProjectItems = (modelsList, projectName) => {
 
 export class ProjectItem extends React.PureComponent<IProps, IState> {
 	public state = {
-		items: []
+		items: [],
+		actionsMenuOpen: false
 	};
 
 	public componentDidMount() {
@@ -87,8 +89,13 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public toggleActionsMenuOpen = (event) => {
+		event.stopPropagation();
+		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
+	}
+
 	public renderProjectActions = ({ hovered }) => (
-		<RowMenu open={hovered}>
+		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
 				action={this.props.onEditClick}
