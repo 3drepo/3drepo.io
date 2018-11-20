@@ -28,11 +28,12 @@ export class AuthInterceptor {
 	}
 
 	public responseError = (response) => {
-
+		const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
 		const notLogin = response.data.place !== 'GET /login';
 
 		const unauthorized = response.status === 401 &&
-							response.data.message === 'You are not logged in';
+			invalidMessages.includes(response.data.message);
+
 		const sessionHasExpired = unauthorized && !this.dialogOpen && notLogin;
 		if (sessionHasExpired) {
 			this.sessionExpired();
