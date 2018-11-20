@@ -21,6 +21,7 @@ class PasswordChangeController implements ng.IController {
 
 	public static $inject: string[] = [
 		'$scope',
+		'$state',
 		'APIService',
 		'StateManager',
 		'$timeout'
@@ -46,10 +47,15 @@ class PasswordChangeController implements ng.IController {
 
 	constructor(
 		private $scope: any,
+		private $state: any,
 		private APIService: any,
 		private StateManager: any,
 		private $timeout: any
-	) { }
+	) {
+		const { token, username } = this.$state.params;
+		this.token = token;
+		this.username = username;
+	}
 
 	public $onInit() {
 		this.showProgress = false;
@@ -132,10 +138,7 @@ class PasswordChangeController implements ng.IController {
 }
 
 export const PasswordChangeComponent: ng.IComponentOptions = {
-	bindings: {
-		token: '=',
-		username: '='
-	},
+	bindings: {},
 	controller: PasswordChangeController,
 	controllerAs: 'vm',
 	templateUrl: 'templates/password-change.html'
