@@ -210,7 +210,7 @@ export class AuthService {
 		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
 			this.$location.path('/login');
 			this.resetApp();
-		} else if (loginStateMismatch && isLoggedOutPage && sessionLogin) {
+		} else if (loginStateMismatch && isLoggedOutPage && sessionLogin && this.loggedIn) {
 			this.APIService.post('logout').then(this.resetApp());
 		}
 	}
