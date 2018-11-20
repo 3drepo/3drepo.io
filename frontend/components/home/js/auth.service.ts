@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { getState } from '../../../helpers/migration';
-import { selectIsAuthenticated } from '../../../modules/auth';
+import { dispatch, getState } from '../../../helpers/migration';
+import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
 import { selectCurrentUser } from '../../../modules/currentUser';
 
 export class AuthService {
@@ -128,11 +128,8 @@ export class AuthService {
 				dispatch(AuthActions.logout());
 			}
 		}
-			this.$location.path('/login');
-			this.resetApp();
-		} else if (loginStateMismatch && isLoggedOutPage && sessionLogin && this.loggedIn) {
-			this.APIService.post('logout').then(this.resetApp());
-		}
+		this.$location.path('/login');
+		this.resetApp();
 	}
 
 	public resetApp() {
