@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as dayjs from 'dayjs';
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
@@ -34,8 +34,10 @@ import { unitsMap } from '../../../../constants/model-parameters';
 import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploadModelFileDialog.styles';
 
 const UploadSchema = Yup.object().shape({
-	revisionName: schema.revisionName
+	revisionName: schema.revisionName,
+	file:Yup.mixed().required('Required')
 });
+
 interface IProps {
 	uploadModelFile: (teamspace, projectName, modelData, fileData) => void;
 	fetchModelSettings: (teamspace, modelId) => void;
@@ -104,7 +106,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
-	public validateFileFormat(value) {
+	public validateFileFormat = (value) => {
 		const fileSplit = value.name.split('.');
 		return fileSplit.indexOf('i') !== -1;
 	}
@@ -116,69 +118,31 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			return <LoadingDialog content={`Loading ${modelName} data...`} />;
 		}
 
-		return (
-			<Formik
-				onSubmit={this.handleFileUpload}
-				initialValues={{ revisionName: '', revisionDesc: '', file: '' }}
-				validationSchema={UploadSchema}
-			>
-				<Form>
-					<DialogContent>
-						<ModelName>{modelName}</ModelName>
-						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
-						<Field
-							name="revisionName"
-							render={ ({ field, form }) =>
-								<TextField
-									{...field}
-									error={Boolean(form.errors.revisionName)}
-									helperText={form.errors.revisionName}
-									label="Name"
-									margin="normal"
-									fullWidth={true}
-								/>}
-								/>
-						<Field
-							name="revisionDesc"
-							render={ ({ field }) =>
-								<TextField
-									{...field}
-									label="Description"
-									margin="normal"
-									fullWidth={true}
-								/>}
-						/>
-						{ modelSettings.properties &&
-							<ModelInfo>
-								{`Model units: ${unitsMap[modelSettings.properties.unit]}`}
-							</ModelInfo>
-						}
-						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
-						<StyledDialogActions>
-							<Field name="file" validate={this.validateFileFormat} render={({ field }) =>
-								<FileInputField
-									{...field}
-									onChange={this.handleFileChange(field.onChange)}
-						/>} />
-							<Field render={ () =>
-								<CancelButton
-									onClick={handleClose}
-									color="secondary">
-									Cancel
-									</CancelButton> }
-							/>
-							<Field render={ ({ form }) =>
-								<Button
-									type="submit"
-									variant="raised"
-									color="secondary"
-									disabled={(!form.isValid || form.isValidating)}>
-										Upload
-									</Button>}	/>
-						</StyledDialogActions>
-					</DialogContent>
-				</Form>
-		</Formik>
-		);
+		return <Formik onSubmit={this.handleFileUpload} initialValues={{ revisionName: "", revisionDesc: "", file: "" }} validationSchema={UploadSchema}>
+        <Form>
+          <DialogContent>
+            <ModelName>{modelName}</ModelName>
+            <ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
+            <Field name="revisionName" render={({ field, form }) => <TextField {...field} error={Boolean(form.errors.revisionName)} helperText={form.errors.revisionName} label="Name" margin="normal" fullWidth={true} />} />
+            <Field name="revisionDesc" render={({ field }) => <TextField {...field} label="Description" margin="normal" fullWidth={true} />} />
+            {modelSettings.properties && <ModelInfo>
+                {`Model units: ${unitsMap[modelSettings.properties.unit]}`}
+              </ModelInfo>}
+            {this.state.fileName && <ModelInfo>
+                File name: {this.state.fileName}{" "}
+              </ModelInfo>}
+            <StyledDialogActions>
+              <ErrorMessage name="file" />
+              <Field name="file" validate={this.validateFileFormat} render={({ field }) => <FileInputField {...field} onChange={this.handleFileChange(field.onChange)} />} />
+              <Field render={() => <CancelButton onClick={handleClose} color="secondary">
+                    Cancel
+                  </CancelButton>} />
+              <Field render={({ form }) => <Button type="submit" variant="raised" color="secondary" disabled={!form.isValid || form.isValidating}>
+                    Upload
+                  </Button>} />
+            </StyledDialogActions>
+          </DialogContent>
+        </Form>
+      </Formik>;
 	}
 }
