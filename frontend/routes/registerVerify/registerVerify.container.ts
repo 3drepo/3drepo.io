@@ -23,12 +23,12 @@ import { AuthActions, selectVerifyMessage, selectIsPending } from '../../modules
 import { RegisterVerify } from './registerVerify.component';
 
 const mapStateToProps = createStructuredSelector({
-  verifyMessage: selectVerifyMessage,
-  isPending: selectIsPending
+	verifyMessage: selectVerifyMessage,
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-  verifyRequest: AuthActions.verify
+	verifyRequest: AuthActions.verify
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterVerify)));

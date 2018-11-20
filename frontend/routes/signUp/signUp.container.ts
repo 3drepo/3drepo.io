@@ -24,11 +24,11 @@ import { AuthActions, selectIsPending } from '../../modules/auth';
 import { SignUp } from './signUp.component';
 
 const mapStateToProps = createStructuredSelector({
-  isPending: selectIsPending
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-  onRegister: AuthActions.register
+	onRegister: AuthActions.register
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(SignUp)));

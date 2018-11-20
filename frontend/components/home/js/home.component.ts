@@ -284,7 +284,7 @@ class HomeController implements ng.IController {
 
 		// The account teamspace template is hefty. If we cache it ASAP
 		// we can improve the percieved performance for the user
-		
+
 		const preCacheTemplates = [
 			"templates/sign-up-old.html",
 			"templates/register-request.html"

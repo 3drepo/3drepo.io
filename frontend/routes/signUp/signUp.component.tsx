@@ -77,7 +77,8 @@ const RegistrationSchema = Yup.object().shape({
 			'Email confirmation must match email'
 		),
 	countryCode: schema.required,
-	termsAgreed: schema.required
+	captcha: clientConfigService.captchaClientKey ? schema.required : Yup.string(),
+	termsAgreed: Yup.boolean().oneOf([true])
 });
 
 const DEFAULT_INPUT_PROPS = {
@@ -122,10 +123,11 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 
 	public resetForm = (form) => {
 		form.resetForm();
+
 		this.setState({
 			passwordStrengthMessage: ''
 		});
-		
+
 		if (this.reCaptchaWrapperRef) {
 			this.reCaptchaWrapperRef.current.reCaptchaRef.current.reset();
 		}
@@ -263,25 +265,24 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									</StyledFormControl>
 								</FieldsRow>
 
-								{ clientConfigService.captcha_client_key &&
+								{ clientConfigService.captchaClientKey &&
 									<Field
 										name="captcha"
 										render={({ field }) =>
 											<ReCaptcha
 												{...field}
-												key={clientConfigService.captcha_client_key}
+												key={clientConfigService.captchaClientKey}
 												ref={this.reCaptchaWrapperRef}
 											/>}
 									/>
 								}
-
 								<Field
 									name="mailListAgreed"
 									render={({ field }) => (
 										<FormControlLabel
 											{...field}
 											value={field.value ? '1' : '0'}
-											control={<Checkbox color="secondary"/>}
+											control={<Checkbox color="secondary" checked={field.value} />}
 											label="Sign up for the latest news and tutorials!"
 										/>
 									)}
@@ -293,24 +294,21 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											<FormControlLabel
 												{...field}
 												value={field.value ? '1' : '0'}
-												control={<Checkbox color="secondary" />}
+												control={<Checkbox color="secondary" checked={field.value} />}
 												label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
 											/>
 										)
 									}
 								/>
 								<ButtonContainer>
-									<Field render={({ form }) => {
-										console.log('form', form);
-										return (
-											<SubmitButton
-												pending={false}
-												disabled={!form.isValid || form.isValidating}
-											>
-												Sign up
-											</SubmitButton>
-										)
-									}} />
+									<Field render={({ form }) => (
+										<SubmitButton
+											pending={false}
+											disabled={!form.isValid || form.isValidating}
+										>
+											Sign up
+										</SubmitButton>)}
+									/>
 								</ButtonContainer>
 							</Form>
 						</Formik>
