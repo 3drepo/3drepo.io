@@ -78,7 +78,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 		const modelData = {
 			modelName, modelId
-		}
+		};
 
 		uploadModelFile(teamspaceName, projectName, modelData, fileData);
 		handleClose();
