@@ -60,7 +60,7 @@ interface IState {
 	actionsMenuOpen: boolean;
 }
 
-const isPendingStatus = (status) => status && 
+const isPendingStatus = (status) => status &&
 	status === 'uploading' || status === 'queued' || status === 'processing';
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
@@ -182,7 +182,12 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 									<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />
 								</Time>
 							}
-							<RowMenu open={hovered} disabled={isPending} forceOpen={actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
+							<RowMenu
+								open={hovered}
+								disabled={isPending}
+								forceOpen={actionsMenuOpen}
+								toggleForceOpen={this.toggleActionsMenuOpen}
+							>
 								{this.renderActions(actions)}
 							</RowMenu>
 						</TimeWrapper>
