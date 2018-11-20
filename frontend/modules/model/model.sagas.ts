@@ -118,7 +118,7 @@ export function* uploadModelFile({ teamspace, project, modelId, fileData }) {
 			yield put(SnackbarActions.show('Failed to import model'));
 		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
+		yield put(DialogActions.showErrorDialog('upload', 'model', e.response));
 	}
 }
 
