@@ -14,7 +14,6 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { APIService } from "../../home/js/api.service";
 import { IssuesService } from "./issues.service";
 import { IChip } from "../../panel/js/panel-card-chips-filter.component";
 
@@ -28,7 +27,6 @@ class IssuesListController implements ng.IController {
 		"$element",
 		"$filter",
 
-		"APIService",
 		"IssuesService",
 		"PanelService",
 		"ClientConfigService"
@@ -59,7 +57,6 @@ class IssuesListController implements ng.IController {
 		private $element,
 		private $filter,
 
-		private apiService: APIService,
 		private issuesService: IssuesService,
 		private PanelService: any,
 		private clientConfigService: any
@@ -198,9 +195,7 @@ class IssuesListController implements ng.IController {
 
 			case "downloadJSON":
 				const jsonEndpoint = this.account + "/" + this.model + "/issues.json";
-				this.apiService.get(jsonEndpoint).then((res) => {
-					this.PanelService.downloadJSON(JSON.stringify(res.data, null, 2), "issues", 'application/json');
-				});
+					this.PanelService.downloadJSON("issues", jsonEndpoint);
 				break;
 
 			case "importBCF":

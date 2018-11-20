@@ -1,3 +1,4 @@
+import { APIService } from './../../home/js/api.service';
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -62,7 +63,8 @@ export class PanelService {
 
 	public static $inject: string[] = [
 		"EventService",
-		"TreeService"
+		"TreeService", 
+		"APIService"
 	];
 
 	private panelCards: IPanelCards;
@@ -70,7 +72,8 @@ export class PanelService {
 
 	constructor(
 		private EventService: any,
-		private TreeService: any
+		private TreeService: any,
+		private apiService: APIService
 	) {
 		this.reset();
 	}
@@ -528,12 +531,15 @@ export class PanelService {
 	 * @param contentType content type for downloaded file : "text/plain", "application/json"
 	 */
 
-	public downloadJSON(content, fileName, contentType) {
-		const a = document.createElement("a");
-		const file = new Blob([content], {type: contentType});
-		a.href = URL.createObjectURL(file);
-		a.download = fileName + ".json";
-		a.click();
+	public downloadJSON(fileName, endpoint) {
+		this.apiService.get(endpoint).then((res) => {
+		 const content = JSON.stringify(res.data, null, 2);
+	     const a = document.createElement("a");
+	     const file = new Blob([content]);
+	     a.href = URL.createObjectURL(file);
+	     a.download = fileName + ".json";
+	     a.click();
+		});
 	}
 
 	/**

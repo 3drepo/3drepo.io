@@ -20,7 +20,7 @@ import { GroupsService } from "./groups.service";
 import { NotificationEvents } from "../../notifications/js/notification.events";
 import { NotificationService } from "../../notifications/js/notification.service";
 import { TreeService } from "../../tree/js/tree.service";
-import { APIService } from "../../home/js/api.service";
+import { PanelService } from "../../panel/js/panel.service";
 
 class GroupsController implements ng.IController {
 	public static $inject: string[] = [
@@ -34,7 +34,6 @@ class GroupsController implements ng.IController {
 		"ClientConfigService",
 		"IconsConstant",
 		"NotificationService",
-		"APIService",
 		"PanelService"
 	];
 
@@ -77,8 +76,7 @@ class GroupsController implements ng.IController {
 		private clientConfigService: any,
 		private iconsConstant: any,
 		private notificationService: NotificationService,
-		private apiService: APIService,
-		private PanelService: any
+		private PanelService: PanelService
 	) { }
 
 	public $onInit() {
@@ -207,9 +205,8 @@ class GroupsController implements ng.IController {
 						case "downloadJSON":
 							const jsonEndpoint = this.account + "/" + this.model +
 							"/groups/revision/master/head/?noIssues=true&noRisks=true";
-							this.apiService.get(jsonEndpoint).then((res) => {
-								this.PanelService.downloadJSON(JSON.stringify(res.data, null, 2), "groups", "application/json");
-							});
+							this.PanelService.downloadJSON("groups", jsonEndpoint);
+							break;
 						default:
 							console.error("Groups option menu selection unhandled");
 					}

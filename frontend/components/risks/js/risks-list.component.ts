@@ -16,7 +16,6 @@
  */
 import { RisksService } from "./risks.service";
 import { IChip } from "../../panel/js/panel-card-chips-filter.component";
-import { APIService } from "../../home/js/api.service";
 
 class RisksListController implements ng.IController {
 
@@ -30,7 +29,6 @@ class RisksListController implements ng.IController {
 
 		"RisksService",
 		"ClientConfigService",
-		"APIService",
 		"PanelService"
 	];
 
@@ -61,7 +59,6 @@ class RisksListController implements ng.IController {
 
 		private risksService: RisksService,
 		private clientConfigService: any,
-		private apiService: APIService,
 		private PanelService: any
 	) {}
 
@@ -148,9 +145,7 @@ class RisksListController implements ng.IController {
 
 			case "downloadJSON":
 				const jsonEndpoint = this.account + "/" + this.model + "/risks.json";
-				this.apiService.get(jsonEndpoint).then((res) => {
-					this.PanelService.downloadJSON(JSON.stringify(res.data, null, 2), "risks", "application/json");
-				});
+				this.PanelService.downloadJSON(jsonEndpoint, "risks");
 				break;
 		}
 	}
