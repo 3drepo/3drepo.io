@@ -50,34 +50,7 @@ class RegisterRequestController implements ng.IController {
 		private $location
 	) {}
 
-	public $onInit() {
-
-		// TODO: this is a hack
-		this.AuthService.sendLoginRequest().then((response) => {
-			if (response.data.username) {
-				this.goToLoginPage();
-			}
-		}).catch(() => {
-			console.debug('User is not logged in');
-		});
-
-		this.watchers();
-
-	}
-
-	public watchers() {
-		this.$scope.$watch('AuthService.isLoggedIn()', (newValue) => {
-			// TODO: this is a hack
-			if (newValue === true) {
-				this.goToLoginPage();
-			}
-		});
-	}
-
-	public goToLoginPage() {
-		this.$location.path('/');
-	}
-
+	public $onInit() {}
 }
 
 export const RegisterRequestComponent: ng.IComponentOptions = {

@@ -25,8 +25,8 @@ import {
 	selectCurrentUser,
 	selectIsPending,
 	selectIsAvatarPending,
-	TeamspaceActions
-} from '../../modules/teamspace';
+	CurrentUserActions
+} from '../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
@@ -35,7 +35,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchUser: TeamspaceActions.fetchUser
+	fetchUser: CurrentUserActions.fetchUser
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Dashboard)));

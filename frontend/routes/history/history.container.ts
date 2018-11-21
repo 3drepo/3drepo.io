@@ -20,7 +20,7 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
 import { History } from './history.component';
-import { selectCurrentTeamspace } from './../../modules/teamspace';
+import { selectCurrentTeamspace } from './../../modules/currentUser';
 import { BillingActions, selectInvoices, selectIsPending } from './../../modules/billing';
 
 const mapStateToProps = createStructuredSelector({

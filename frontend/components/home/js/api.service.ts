@@ -82,10 +82,7 @@ export class APIService {
 		};
 
 		const request = this.$http.get(urlUse, config);
-		// const response = AuthService.handleSessionExpiration(request);
-
 		return request;
-
 	}
 
 	/**

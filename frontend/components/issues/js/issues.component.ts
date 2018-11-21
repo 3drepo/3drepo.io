@@ -154,10 +154,8 @@ class IssuesController implements ng.IController {
 			if (this.modelSettings) {
 
 				this.issuesReady.then(() => {
-					this.canAddIssue = this.authService.hasPermission(
-						this.clientConfigService.permissions.PERM_CREATE_ISSUE,
-						this.modelSettings.permissions
-					);
+					this.canAddIssue = this.clientConfigService.permissions.PERM_CREATE_ISSUE
+						.indexOf(this.modelSettings.permissions) !== -1;
 				});
 
 				this.subModels = this.modelSettings.subModels || [];

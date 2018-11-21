@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { subscribe } from '../../../helpers/migration';
+import { selectIsAuthenticated } from '../../../modules/auth';
 
 class HomeController implements ng.IController {
 
@@ -91,7 +93,11 @@ class HomeController implements ng.IController {
 		private ViewerService,
 		private TemplateService,
 		private DialogService
-	) {}
+	) {
+		subscribe(this, {
+			isAuthenticated: selectIsAuthenticated
+		});
+	}
 
 	public $onInit() {
 
@@ -106,7 +112,6 @@ class HomeController implements ng.IController {
 
 		// Pages to not attempt a interval triggered logout from
 
-		this.doNotLogout = this.AuthService.doNotLogout;
 		this.legalPages = this.AuthService.legalPages;
 		this.loggedOutStates = this.AuthService.loggedOutStates;
 
@@ -157,12 +162,6 @@ class HomeController implements ng.IController {
 			}
 		);
 
-		// TODO: This feels like a bit of a hack. Let's come up with
-		// a better way!
-		this.$scope.$watch(() => this.AuthService.state.currentData, (currentData) => {
-			this.handleLoginStatus(currentData);
-		}, true);
-
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
 			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				this.pointerEvents = event.value.on ? 'none' : 'inherit';
@@ -203,73 +202,7 @@ class HomeController implements ng.IController {
 
 	}
 
-	public handleLoginStatus(currentData) {
-		const event = this.AuthService.state.currentEvent;
-
-		if (!angular.isDefined(event)) {
-			return;
-		}
-
-		switch (event) {
-		case this.AuthService.events.USER_LOGGED_IN:
-			if (!currentData.error) {
-				if (!currentData.initialiser) {
-					if (!this.state.account) {
-						const username = this.AuthService.getUsername();
-						if (!username) {
-							console.error('Username is not defined for statemanager!');
-						}
-
-						this.state.account = username;
-
-					}
-				} else if (!currentData.username) {
-					this.StateManager.setHomeState({
-						loggedIn: false,
-						account: null,
-						returnUrl: this.$location.path() !== '/' ? this.$location.path() : null
-					});
-
-					if (this.StateManager.query) {
-						this.$location.search('username', this.StateManager.query.username);
-						this.$location.search('token', this.StateManager.query.token);
-					}
-
-				}
-
-				if (currentData.flags && currentData.flags.termsPrompt) {
-					this.DialogService.showDialog(
-						'new-terms-dialog.html',
-						this.$scope,
-						null,
-						false,
-						null,
-						false
-					);
-				}
-			} else if (this.AuthService.isLoggedIn()) {
-				this.AuthService.logout();
-			}
-
-			break;
-
-		case this.AuthService.events.USER_LOGGED_OUT:
-			// TODO: Use state manager
-			// Only fire the Logout Event if we're on the home page
-			const currentPage = this.$location.path();
-
-			if (this.doNotLogout.indexOf(currentPage) === -1) {
-				this.StateManager.setHomeState({
-					loggedIn: false,
-					account: null
-				});
-			}
-			break;
-		}
-	}
-
 	public getLiteModeState() {
-
 		const stored = localStorage.getItem('liteMode');
 		if (stored !== undefined && stored !== null) {
 			if (stored === 'false') {
@@ -311,12 +244,6 @@ class HomeController implements ng.IController {
 					this.backgroundImage = custom.backgroundImage;
 				}
 				if (
-					custom.topLogo &&
-					typeof custom.topLogo === 'string'
-				) {
-					this.topLogo = custom.topLogo;
-				}
-				if (
 					custom.css
 				) {
 					const link = document.createElement('link');
@@ -344,17 +271,6 @@ class HomeController implements ng.IController {
 		if (this.hasTrailingSlash()) {
 			this.removeTrailingSlash();
 		}
-
-		// If it's a logged in page just redirect to the
-		// users teamspace page
-		this.AuthService.authDefer.promise.then(() => {
-			if (
-				this.AuthService.loggedOutPage() &&
-				this.AuthService.getUsername()
-			) {
-				this.$location.path('/dashboard/teamspaces');
-			}
-		});
 	}
 
 	public pageCheck(state, pages) {
@@ -452,11 +368,6 @@ class HomeController implements ng.IController {
 		const currentPath = this.$location.path();
 		const minusSlash = currentPath.slice(0, -1);
 		this.$location.path(minusSlash);
-	}
-
-	public logout = () => {
-		this.StateManager.resetServiceStates();
-		this.AuthService.logout();
 	}
 
 	public home = () => {

@@ -19,6 +19,10 @@ export const dispatch = (action) => {
 	return store.dispatch(action);
 };
 
+// Use to manually get store data directly from AngularJS context
+// Should be removed if app is fully migrated
+export const getState = store.getState;
+
 // Use to listen store changes directly from AngularJS context
 // Should be removed if app is fully migrated
 export const subscribe = (context, selectors: any = {}) => {

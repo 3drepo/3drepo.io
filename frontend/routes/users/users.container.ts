@@ -28,10 +28,10 @@ import {
 } from '../../modules/userManagement';
 
 import {
-	TeamspaceActions,
+	CurrentUserActions,
 	selectCollaboratorLimit,
 	selectCurrentTeamspace
-} from '../../modules/teamspace';
+} from '../../modules/currentUser';
 
 import { selectJobs } from '../../modules/jobs';
 
@@ -43,19 +43,15 @@ const mapStateToProps = createStructuredSelector({
 	teamspace: selectCurrentTeamspace
 });
 
-export const mapDispatchToProps = (dispatch) =>
-	bindActionCreators(
-		{
-			addUser: UserManagementActions.addUser,
-			removeUser: UserManagementActions.removeUser,
-			updateJob: UserManagementActions.updateJob,
-			updatePermissions: UserManagementActions.updatePermissions,
-			onUsersSearch: UserManagementActions.getUsersSuggestions,
-			clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
-			fetchQuotaInfo: TeamspaceActions.fetchQuotaInfo
-		},
-		dispatch
-	);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	addUser: UserManagementActions.addUser,
+	removeUser: UserManagementActions.removeUser,
+	updateJob: UserManagementActions.updateJob,
+	updatePermissions: UserManagementActions.updatePermissions,
+	onUsersSearch: UserManagementActions.getUsersSuggestions,
+	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
+	fetchQuotaInfo: CurrentUserActions.fetchQuotaInfo
+}, dispatch);
 
 export default withRouter(
 	connect(

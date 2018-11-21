@@ -5,25 +5,25 @@
 import { react2angular as wrap } from 'react2angular';
 
 // Routes
-import DialogContainer from './components/dialogContainer/dialogContainer.container';
+import App from './app/app.container';
+import ModelSettings from './modelSettings/modelSettings.container';
+import Login from './login/login.container';
+import PasswordForgot from './passwordForgot/passwordForgot.container';
+import PasswordChange from './passwordChange/passwordChange.container';
 
 // Components
-import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
 import Dashboard from './dashboard/dashboard.container';
-import { UserInfo } from './components/userInfo/userInfo.component';
 import TopMenu from './components/topMenu/topMenu.container';
-import ModelSettings from './modelSettings/modelSettings.container';
 import Notifications from './notifications/notifications.container';
 
 angular
 	.module('3drepo')
-	.component('dialogContainer', wrap(DialogContainer))
-	.component('snackbarContainer', wrap(SnackbarContainer))
+	.component('app', wrap(App))
 	.component('dashboard', wrap(Dashboard))
-	.component('userInfo', wrap(
-		UserInfo,
-		['loading', 'hasAvatar', 'avatarUrl', 'username', 'firstName', 'lastName', 'email']
-	))
-	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogout', 'onLogoClick']))
+	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
-	.component('notifications', wrap(Notifications, ['location', 'stateManager', 'chatService', 'userAccount']));
+	.component('login', wrap(Login, ['headlineText']))
+	.component('passwordForgot', wrap(PasswordForgot))
+	.component('passwordChange', wrap(PasswordChange))
+    .component('notifications', wrap(Notifications, ['location', 'stateManager', 'chatService', 'userAccount']));
+
