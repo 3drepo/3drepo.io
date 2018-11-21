@@ -77,10 +77,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
-						<Paragraph>
-							{verifyMessage && verifyMessage}
-						</Paragraph>
-
+						{verifyMessage && <Paragraph> {verifyMessage} </Paragraph>}
 						<Buttons container justify="space-between">
 							<StyledButton
 								color="secondary"
