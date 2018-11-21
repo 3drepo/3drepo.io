@@ -38,6 +38,16 @@ interface IState {
 
 const DEFAULT_REDIRECT = '/dashboard/teamspaces';
 const MAIN_ROUTE_PATH =  '/';
+const STATIC_ROUTES = [
+	'cookies',
+	'terms',
+	'privacy',
+	'sign-up',
+	'register-request',
+	'register-verify',
+	'password-forgot',
+	'password-change'
+] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -50,8 +60,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	private authenticationInterval;
 
 	public isStaticRoute(path) {
-		const staticRoutes = ['cookies', 'terms', 'privacy'] as any;
-		return staticRoutes.includes(path.replace('/', ''));
+		return STATIC_ROUTES.includes(path.replace('/', ''));
 	}
 
 	public componentDidMount() {
@@ -84,6 +93,12 @@ export class App extends React.PureComponent<IProps, IState> {
 					history.push('/login');
 				});
 			}
+		}
+
+		if (isStaticRoute && isAuthenticated) {
+			runAngularTimeout(() => {
+				history.push('/dashboard/teamspaces');
+			});
 		}
 
 		if (!isEmpty(changes)) {
