@@ -19,44 +19,25 @@ import * as React from 'react';
 import { Route } from 'react-router-dom';
 
 import { PageTemplate } from './components/pageTemplate/pageTemplate.component';
-
-import * as CookiesPageContent from './../../staticPages/cookies.html';
-import * as TermsPageContent from './../../staticPages/terms.html';
-import * as PrivacyPageContent from './../../staticPages/privacy.html';
+import { clientConfigService } from '../../services/clientConfig';
 
 interface IProps {
 	match: any;
 }
 
-const staticPages = [
-	{
-		title: 'Cookies',
-		route: 'cookies',
-		contentFile: CookiesPageContent
-	},
-	{
-		title: 'Terms & Conditions',
-		route: 'terms',
-		contentFile: TermsPageContent
-	},
-	{
-		title: 'Privacy',
-		route: 'privacy',
-		contentFile: PrivacyPageContent
-	}
-];
-
 export class StaticPage extends React.PureComponent<IProps, any> {
+	public getFile = (fileName) => require(`./../../staticPages/${fileName}`);
+
 	public render() {
 		const { match } = this.props;
 
-		return staticPages.map((page) => (
+		return clientConfigService.legalTemplates.map((page) => (
 			<Route
 				key={page.route}
 				path={`${match.url}${page.route}`}
 				render={() =>
 					<PageTemplate title={page.title}>
-						{page.contentFile}
+						{this.getFile(page.fileName)}
 					</PageTemplate>
 				}
 			/>
