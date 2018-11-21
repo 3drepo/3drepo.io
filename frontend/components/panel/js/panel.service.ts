@@ -471,19 +471,6 @@ export class PanelService {
 		});
 
 		this.panelCards.left.push({
-			type: "clip",
-			title: "Clip",
-			showLiteMode: false,
-			show: false,
-			help: "Clipping plane",
-			icon: "crop",
-			fixedHeight: true,
-			options: [
-				{type: "visible", visible: true}
-			]
-		});
-
-		this.panelCards.left.push({
 			type: "compare",
 			title: "Compare",
 			showLiteMode: false,
