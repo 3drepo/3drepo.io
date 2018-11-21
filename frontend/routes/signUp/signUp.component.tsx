@@ -77,7 +77,7 @@ const RegistrationSchema = Yup.object().shape({
 			'Email confirmation must match email'
 		),
 	countryCode: schema.required,
-	captcha: clientConfigService.captchaClientKey ? schema.required : Yup.string(),
+	captcha: clientConfigService.captcha_client_key ? schema.required : Yup.string(),
 	termsAgreed: Yup.boolean().oneOf([true])
 });
 
@@ -103,7 +103,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		passwordStrengthMessage: ''
 	};
 
-	public reCaptchaWrapperRef = React.createRef<HTMLElement>();
+	public reCaptchaWrapperRef = React.createRef<any>();
 
 	public handleSubmit = (values, form) => {
 		const data = {
@@ -258,20 +258,20 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 												<Select
 													{...field}
 													required>
-													{ this.renderCountries() }
+													{this.renderCountries()}
 												</Select>
 											)}
 										/>
 									</StyledFormControl>
 								</FieldsRow>
 
-								{ clientConfigService.captchaClientKey &&
+								{ clientConfigService.captcha_client_key &&
 									<Field
 										name="captcha"
 										render={({ field }) =>
 											<ReCaptcha
 												{...field}
-												key={clientConfigService.captchaClientKey}
+												key={clientConfigService.captcha_client_key}
 												ref={this.reCaptchaWrapperRef}
 											/>}
 									/>
@@ -291,14 +291,13 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									name="termsAgreed"
 									required
 									render={({ field }) => (
-											<FormControlLabel
-												{...field}
-												value={field.value ? '1' : '0'}
-												control={<Checkbox color="secondary" checked={field.value} />}
-												label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
-											/>
-										)
-									}
+										<FormControlLabel
+											{...field}
+											value={field.value ? '1' : '0'}
+											control={<Checkbox color="secondary" checked={field.value} />}
+											label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
+										/>
+									)}
 								/>
 								<ButtonContainer>
 									<Field render={({ form }) => (

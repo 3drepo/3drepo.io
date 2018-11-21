@@ -460,7 +460,6 @@
 		"register-request",
 		"register-verify",
 		"signUp",
-		"signUpOld",
 		"termsAndConditions",
 		"false",
 		"admin",

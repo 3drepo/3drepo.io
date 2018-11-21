@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import ReCAPTCHA from "react-google-recaptcha";
+import ReCAPTCHA from 'react-google-recaptcha';
 
 import { Container } from './reCaptcha.styles';
 

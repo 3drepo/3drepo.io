@@ -52,7 +52,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 		}
 		if (!username || !token) {
 			this.setState({
-				verifyMessage: "Can't verify: Token and/or Username not provided"
+				verifyMessage: 'Can\'t verify: Token and/or Username not provided'
 			});
 		} else {
 			this.props.verifyRequest(username, token);
@@ -79,7 +79,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
 						<Paragraph>
-							{ verifyMessage && verifyMessage }
+							{verifyMessage && verifyMessage}
 						</Paragraph>
 
 						<Buttons container justify="space-between">

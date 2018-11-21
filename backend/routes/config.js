@@ -43,8 +43,8 @@ function createClientConfig(serverConfig, req) {
 		"customLogins" : config.customLogins
 	};
 
-	if (config.hasOwnProperty("captchaClientKey")) {
-		clientConfig.captchaClientKey = config.captchaClientKey;
+	if (config.hasOwnProperty("captcha_client_key")) {
+		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
 
 	// Set up the legal plugins
@@ -54,8 +54,8 @@ function createClientConfig(serverConfig, req) {
 		}
 	}
 
-	if (config.hasOwnProperty("captchaClientKey")) {
-		clientConfig.captchaClientKey = config.captchaClientKey;
+	if (config.hasOwnProperty("captcha_client_key")) {
+		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
 
 	if (req) {
@@ -94,7 +94,7 @@ function createClientConfig(serverConfig, req) {
 	clientConfig.auth =  config.auth;
 
 	if(config.captcha && config.captcha.clientKey) {
-		clientConfig.captchaClientKey = config.captcha.clientKey;
+		clientConfig.captcha_client_key = config.captcha.clientKey;
 	}
 
 	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
