@@ -127,30 +127,6 @@ export class DialogService {
 		this.$mdDialog.cancel();
 	}
 
-	public sessionExpired() {
-
-		if (!this.expiredDialogOpen) {
-
-			this.expiredDialogOpen = true;
-			const content = 'You have been logged out as your session has expired.';
-			return this.$mdDialog.show(
-				this.$mdDialog.alert()
-					.clickOutsideToClose(false)
-					.escapeToClose(false)
-					.title('Session Expired')
-					.textContent(content)
-					.ariaLabel('Session Expired')
-					.ok('OK')
-			).then(() => {
-				this.expiredDialogOpen = false;
-			});
-
-		} else {
-			return Promise.resolve();
-		}
-
-	}
-
 	public confirm(title, content, escapable, ok, cancel) {
 
 		if (!this.expiredDialogOpen) {

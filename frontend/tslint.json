@@ -18,6 +18,7 @@
         "jsx-no-multiline-js": false,
         "jsx-no-lambda": false,
         "jsx-curly-spacing": [true, "never"],
-        "jsx-equals-spacing": [true, "never"]
+        "jsx-equals-spacing": [true, "never"],
+        "jsx-boolean-value": false
     }
 }

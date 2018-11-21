@@ -17,10 +17,10 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
 import { Profile } from './profile.component';
-import { TeamspaceActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/teamspace';
+import { CurrentUserActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
@@ -28,9 +28,9 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onAvatarChange: TeamspaceActions.uploadAvatar,
-	onUserDataChange: TeamspaceActions.updateUser,
-	onPasswordChange: TeamspaceActions.updateUserPassword
+	onAvatarChange: CurrentUserActions.uploadAvatar,
+	onUserDataChange: CurrentUserActions.updateUser,
+	onPasswordChange: CurrentUserActions.updateUserPassword
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);

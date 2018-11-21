@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { dispatch } from '../../../helpers/migration';
+import { AuthActions } from '../../../modules/auth';
 
 export class AuthInterceptor {
 	public static $inject: string[] = [
@@ -24,17 +26,15 @@ export class AuthInterceptor {
 
 	constructor(
 		private $injector: any
-	) {
-	}
+	) {}
 
 	public responseError = (response) => {
 		const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
 		const notLogin = response.data.place !== 'GET /login';
-
 		const unauthorized = response.status === 401 &&
 			invalidMessages.includes(response.data.message);
 
-		const sessionHasExpired = unauthorized && !this.dialogOpen && notLogin;
+		const sessionHasExpired = unauthorized && notLogin;
 		if (sessionHasExpired) {
 			this.sessionExpired();
 		} else {
@@ -56,18 +56,8 @@ export class AuthInterceptor {
 	}
 
 	public sessionExpired = () => {
-
-		const DialogService = this.$injector.get('DialogService');
-		const AuthService = this.$injector.get('AuthService');
-		const StateManager = this.$injector.get('StateManager');
-
-		DialogService.sessionExpired().then(() => {
-			StateManager.resetServiceStates();
-			AuthService.logoutSuccess();
-		});
-
+		dispatch(AuthActions.sessionExpired());
 	}
-
 }
 
 export const AuthInterceptorModule = angular

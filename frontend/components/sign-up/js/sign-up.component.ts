@@ -172,13 +172,6 @@ class SignupController implements ng.IController {
 				});
 			}
 		}, true);
-
-		this.$scope.$watch('AuthService.isLoggedIn()', (newValue) => {
-			// TODO: this is a hack
-			if (newValue === true) {
-				this.goToLoginPage();
-			}
-		});
 	}
 
 	/**
@@ -219,10 +212,6 @@ class SignupController implements ng.IController {
 			}
 		}
 
-	}
-
-	public goToLoginPage() {
-		this.$state.go('app.login');
 	}
 
 	public register(event: any) {

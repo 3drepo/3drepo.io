@@ -164,11 +164,9 @@ class GroupsController implements ng.IController {
 					this.clientConfigService.permissions.PERM_CREATE_ISSUE,
 					this.modelSettings.permissions
 				);
-
 			}
 
 			this.watchNotification();
-
 		});
 
 		this.$scope.$watchCollection(() => {

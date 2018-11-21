@@ -13,9 +13,6 @@
     <!-- Manifest file (PWA)-->
     <link rel="manifest" href="/manifest.json">
 
-    <!-- All CSS minified-->
-    <link rel="stylesheet" type="text/css" href="/dist/three_d_repo.min.css">
-
     <!-- Styling used in the Angular Material demos-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
 
@@ -81,7 +78,7 @@
     </div>
 
     <div id="maintenanceMode" style='height: 100%; display: none; background-color:rgb(12,47,84); color: white; overflow-y: hidden;'>
-      <div style='width:100%; height:100%; margin:0px; text-align: center;'>
+      <div style='width:100%; height:100%; margin: 0; text-align: center;'>
         <img style="margin: 10vh;" src="images/3drepo-logo-white.png" longdesc="3DRepoBuildingInformationModellingSoftware" alt="3D Repo">
         <table style="margin: 0 auto;  margin-top: 5vh; text-align: center;">
           <tr>
@@ -136,13 +133,12 @@
 
     <!-- Entry point for all components-->
     <div ui-view="main" flex layout="column"></div>
+    <app />
 
     <!-- CSS AND JAVASCRIPT -->
 
     <!-- Load config from server and dependencies + 3D Repo JavaScript-->
     <script src="/config/config.js"></script>
-    <script src="/dist/three_d_repo.min.js" async></script>
-
     <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded" async></script>
 
     <!-- Load LiveReload if on Dev-->
@@ -150,14 +146,13 @@
       if (window) {
 
         if (window.ClientConfig && window.ClientConfig.development === true) {
-            console.debug("Development Environment");
-            console.debug("Development - Loading livereload.js");
-            var src = "//localhost:35729/livereload.js";
-            var script = document.createElement("script");
-            script.setAttribute("src", src);
-            document.head.appendChild(script);
+          console.debug("Development Environment");
+          console.debug("Development - Loading livereload.js");
+          var src = "//localhost:35729/livereload.js";
+          var script = document.createElement("script");
+          script.setAttribute("src", src);
+          document.head.appendChild(script);
         }
-
       }
     </script>
   </body>
