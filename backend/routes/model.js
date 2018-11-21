@@ -273,7 +273,7 @@ function updateModel(req, res, next) {
 	}
 
 	promise.then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model });
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model, setting });
 	}).catch(err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
