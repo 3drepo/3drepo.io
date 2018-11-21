@@ -45,6 +45,12 @@ home [ui-view] > * {
 	z-index: 1;
 }
 
+home [ui-view] login,
+home [ui-view] password-forgot,
+home [ui-view] password-change {
+	height: 100%;
+}
+
 home #model {
 	pointer-events: all;
 }

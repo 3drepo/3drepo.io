@@ -21,12 +21,15 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../../helpers/migration';
 
 import { TopMenu } from './topMenu.component';
-import { selectCurrentUser } from '../../../modules/teamspace';
+import { selectCurrentUser } from '../../../modules/currentUser';
+import { AuthActions } from '../../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	onLogout: AuthActions.logout
+}, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));

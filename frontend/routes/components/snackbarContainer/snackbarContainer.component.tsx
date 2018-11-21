@@ -21,7 +21,6 @@ import { ThemeProvider } from 'styled-components';
 import Snackbar from '@material-ui/core/Snackbar';
 
 import { MuiTheme, theme } from '../../../styles';
-import { Container } from './snackbarContainer.styles';
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 
 interface IProps {

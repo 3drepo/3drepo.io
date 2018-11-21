@@ -20,10 +20,9 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
 import { Teamspaces } from './teamspaces.component';
-import { selectCurrentTeamspace, selectIsPending } from '../../modules/teamspace';
+import { selectCurrentTeamspace, selectIsPending } from '../../modules/currentUser';
 import { selectTeamspaces, TeamspacesActions } from '../../modules/teamspaces';
 import { ModelActions } from './../../modules/model';
-
 import { DialogActions } from '../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
