@@ -128,7 +128,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 			passwordStrengthMessage: ''
 		});
 
-		if (this.reCaptchaWrapperRef) {
+		if (this.reCaptchaWrapperRef.current) {
 			this.reCaptchaWrapperRef.current.reCaptchaRef.current.reset();
 		}
 	}
@@ -161,7 +161,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				<Logo />
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
 					<Panel title="Sign up">
-						<Headline>{'Creating a 3D Repo account is free'}</Headline>
+						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
 							initialValues={RegistrationInitialValues}
 							onSubmit={this.handleSubmit}

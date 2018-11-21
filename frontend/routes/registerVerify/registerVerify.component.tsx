@@ -44,15 +44,14 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { username, token, pay} = queryString.parse(this.props.location.search);
+		const { username, token } = queryString.parse(this.props.location.search);
 		const { verifyMessage } = this.props;
+		const missingParams = !username || !token;
+		const missingParamsMessage = 'Can\'t verify: Token and/or Username not provided';
 
-		if (verifyMessage) {
-			this.setState({ verifyMessage });
-		}
-		if (!username || !token) {
+		if (missingParams || verifyMessage) {
 			this.setState({
-				verifyMessage: 'Can\'t verify: Token and/or Username not provided'
+				verifyMessage: missingParams ? missingParamsMessage : verifyMessage
 			});
 		} else {
 			this.props.verifyRequest(username, token);

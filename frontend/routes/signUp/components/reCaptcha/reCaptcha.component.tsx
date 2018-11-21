@@ -55,7 +55,7 @@ export class ReCaptcha extends React.PureComponent<IProps, IState> {
 	}
 
 	public onReCaptchaChange = (value) => {
-		this.setState({ value}, this.handleChange);
+		this.setState({ value }, this.handleChange);
 	}
 
 	public render() {
@@ -66,7 +66,7 @@ export class ReCaptcha extends React.PureComponent<IProps, IState> {
 				<ReCAPTCHA
 						onBlur={onBlur}
 						sitekey={key}
-						onChange={(value) => this.onReCaptchaChange(value)}
+						onChange={this.onReCaptchaChange}
 						ref={this.reCaptchaRef}
 					/>
 			</Container>

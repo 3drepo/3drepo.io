@@ -94,7 +94,7 @@ export const StyledFormControl = styled(FormControl)`
 `;
 
 export const ButtonContainer = styled.div`
-  display: flex;
+	display: flex;
 	justify-content: flex-end;
 	margin: 12px 0 24px;
 `;
