@@ -1,3 +1,4 @@
+import { APIService } from './../../home/js/api.service';
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -62,7 +63,8 @@ export class PanelService {
 
 	public static $inject: string[] = [
 		"EventService",
-		"TreeService"
+		"TreeService",
+		"APIService"
 	];
 
 	private panelCards: IPanelCards;
@@ -70,7 +72,8 @@ export class PanelService {
 
 	constructor(
 		private EventService: any,
-		private TreeService: any
+		private TreeService: any,
+		private apiService: APIService
 	) {
 		this.reset();
 	}
@@ -112,6 +115,15 @@ export class PanelService {
 					selected: false,
 					noToggle: true,
 					icon: "fa-cloud-download",
+					divider: true
+				},
+				{
+					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download",
 					divider: true
 				},
 				{
@@ -291,6 +303,14 @@ export class PanelService {
 				},
 				{
 					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download"
+				},
+				{
+					hidden: false,
 					value: "mitigation_status",
 					label: "Mitigation Status",
 					toggle: false,
@@ -376,7 +396,15 @@ export class PanelService {
 					label: "Delete All",
 					selected: false,
 					noToggle: true,
-					icon: "delete"
+					icon: "fa-trash"
+				},
+				{
+					hidden: false,
+					value: "downloadJSON",
+					label: "Download JSON",
+					selected: false,
+					noToggle: true,
+					icon: "fa-download"
 				}
 			],
 			options: [
@@ -493,6 +521,25 @@ export class PanelService {
 			]
 		});
 
+	}
+
+	/**
+	 * Download server response JSON file from panel menu
+	 *
+	 * @param content The JSON response to download
+	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
+	 * @param contentType content type for downloaded file : "text/plain", "application/json"
+	 */
+
+	public downloadJSON(fileName, endpoint) {
+		this.apiService.get(endpoint).then((res) => {
+			const content = JSON.stringify(res.data, null, 2);
+			const a = document.createElement("a");
+			const file = new Blob([content]);
+			a.href = URL.createObjectURL(file);
+			a.download = fileName + ".json";
+			a.click();
+		});
 	}
 
 	/**
