@@ -25,6 +25,7 @@ const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
 const Job = require("./job");
+const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
 
@@ -387,6 +388,11 @@ schema.statics.createUser = function (logger, username, password, customData, to
 	}
 };
 
+function formatPronouns(str) {
+	const strArr = str.toLowerCase().split(" ");
+	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+}
+
 schema.statics.verify = function (username, token, options) {
 
 	options = options || {};
@@ -418,7 +424,10 @@ schema.statics.verify = function (username, token, options) {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID });
 		}
 
-	}).then(() => {
+	}).then((user) => {
+		const name = user.customData.firstName && user.customData.firstName.length > 0 ?
+			formatPronouns(user.customData.firstName) : user.user;
+		Mailer.sendWelcomeUserEmail(user.customData.email, {user: name});
 
 		if (!skipImportToyModel) {
 
@@ -433,11 +442,13 @@ schema.statics.verify = function (username, token, options) {
 		Role.createTeamSpaceRole(username).then(() => {
 			return Role.grantTeamSpaceRoleToUser(username, username);
 		}
-		).catch(() => {
-			systemLogger.logError("Failed to create role for ", username);
+		).catch((err) => {
+			systemLogger.logError("Failed to create role for ", username, err);
 		});
 
-		Job.addDefaultJobs(username);
+		Job.addDefaultJobs(username).catch((err) => {
+			systemLogger.logError("Failed to create default jobs for ", username, err);
+		});
 
 	});
 };

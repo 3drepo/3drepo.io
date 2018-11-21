@@ -91,6 +91,12 @@ function sendVerifyUserEmail(to, data) {
 	return sendEmail(template, to, data);
 }
 
+function sendWelcomeUserEmail(to, data) {
+
+	const template = require("./templates/uponVerified");
+	return sendEmail(template, to, data);
+}
+
 function sendResetPasswordEmail(to, data) {
 
 	data.url = getURL("forgotPassword", {token: data.token, username: data.username});
@@ -212,6 +218,7 @@ function sendImportError(data) {
 
 module.exports = {
 	sendVerifyUserEmail,
+	sendWelcomeUserEmail,
 	sendResetPasswordEmail,
 	sendPaymentReceivedEmail,
 	sendContactEmail,
