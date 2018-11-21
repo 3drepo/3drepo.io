@@ -145,7 +145,7 @@ class RisksListController implements ng.IController {
 
 			case "downloadJSON":
 				const jsonEndpoint = this.account + "/" + this.model + "/risks.json";
-				this.PanelService.downloadJSON(jsonEndpoint, "risks");
+				this.PanelService.downloadJSON("risks", jsonEndpoint);
 				break;
 		}
 	}
