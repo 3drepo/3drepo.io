@@ -21,7 +21,7 @@ import { uploadFileStatuses } from './../model/model.helpers';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	setTeamspaces: ['teamspaces'],
-	setModelUploadStatus: ['teamspace', 'project', 'model', 'status'],
+	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
 	// Projects
 	createProject: ['teamspace', 'projectData'],
 	updateProject: ['teamspace', 'projectName', 'projectData'],
@@ -105,8 +105,8 @@ const createModelSuccess = (state = INITIAL_STATE, action) => {
 	const targetModels = foundProject.models;
 	const createdModel = action.modelData;
 
-	if (action.modelData.federate) {
-		createdModel.timestamp = new Date();
+	if (action.modelData.federate && action.modelData.timestamp) {
+		createdModel.timestamp = action.modelData.timestamp;
 	}
 
 	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, createdModel];
@@ -125,12 +125,10 @@ const removeModelSuccess = (state = INITIAL_STATE, action) => {
 const setModelUploadStatus = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.project);
 	const modelIndex = foundProject.models.findIndex((model) => model.model === action.model);
-	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].status = action.status;
-
-	if (action.status === uploadFileStatuses.ok) {
-		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = new Date();
+	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].status = action.modelData.status;
+	if (action.modelData.timestamp) {
+		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = action.modelData.timestamp;
 	}
-
 	return { ...state, teamspaces };
 };
 

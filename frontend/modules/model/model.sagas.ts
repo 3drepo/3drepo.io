@@ -73,7 +73,7 @@ export function* downloadModel({ teamspace, modelId }) {
 }
 
 export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName }) {
-	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, uploadFileStatuses[modelData.status]));
+	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData));
 
 	if (modelData.status === uploadFileStatuses.ok) {
 		yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
