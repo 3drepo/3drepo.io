@@ -107,12 +107,10 @@ export class AuthService {
 		this.$interval(() => {
 			this.shouldAutoLogout();
 		}, 1000 * checkLoginMismatch);
-
 	}
 
 	public shouldAutoLogout() {
 		const sessionLogin = this.getUsername();
-
 		// We are logged in on another tab but not this OR
 		// we are looged out in another tab and not this
 		const loginStateMismatch = (sessionLogin && !this.isLoggedIn()) ||
