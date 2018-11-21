@@ -57,7 +57,7 @@ export const SubmodelsList = styled.div`
 `;
 
 export const Time = styled.div`
-  color: ${COLOR.BLACK_30};
+  color: ${COLOR.BLACK_40};
   font-weight: ${FONT_WEIGHT.NORMAL};
   margin-right: 8px;
   font-size: 12px;
@@ -83,7 +83,7 @@ export const Status = styled.span`
   display: flex;
   width: 100%;
   font-weight: 400;
-  color: ${COLOR.BLACK_30};
+  color: ${COLOR.BLACK_40};
   font-size: 12px;
 `;
 
