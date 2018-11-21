@@ -33,8 +33,8 @@ export class StaticPage extends React.PureComponent<IProps, any> {
 
 		return clientConfigService.legalTemplates.map((page) => (
 			<Route
-				key={page.route}
-				path={`${match.url}${page.route}`}
+				key={page.page}
+				path={`${match.url}${page.page}`}
 				render={() =>
 					<PageTemplate title={page.title}>
 						{this.getFile(page.fileName)}

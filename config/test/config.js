@@ -147,9 +147,9 @@ module.exports = {
 	},
 	bcf_dir: '/tmp',
 	legal: [
-		{title: "Terms & Conditions", type: "agreeTo", route: "terms", fileName: "terms.html"},
-		{title: "Privacy", type: "haveRead", route: "privacy", fileName: "privacy.html"},
-		{title: "Cookies", type: "haveRead", route: "cookies", fileName: "cookies.html"}
+		{title: "Terms & Conditions", type: "agreeTo", page: "terms", fileName: "terms.html"},
+		{title: "Privacy", type: "haveRead", page: "privacy", fileName: "privacy.html"},
+		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
 	unitySettings: {
