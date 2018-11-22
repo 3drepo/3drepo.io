@@ -44,9 +44,7 @@ import './routes/angularBindings';
 // @ts-ignore
 requireAll(require.context('./components', true, /\.css$/));
 // @ts-ignore
-requireAll(require.context('./components', true, /\.pug$/));
-// @ts-ignore
-requireAll(require.context('../pug/legal', true, /\.pug$/));
+requireAll(require.context('./components', true, /\.pug/));
 
 // Kickstart the application
 angular.bootstrap(document.body, ['3drepo'], { strictDi: true });
