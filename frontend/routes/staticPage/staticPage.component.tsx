@@ -26,7 +26,7 @@ interface IProps {
 }
 
 export class StaticPage extends React.PureComponent<IProps, any> {
-	public getFile = (fileName) => require(`./../../staticPages/${fileName}`);
+	public getFile = (fileName) => require(`./../../staticPages/legal/${fileName}`);
 
 	public render() {
 		const { match } = this.props;
