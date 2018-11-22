@@ -106,24 +106,8 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		template: '<register-verify />'
 	});
 
-	// Static pages
 	$stateProvider.state('app.static', {
-		url: '',
-		template: '<ui-view />'
-	});
-
-	$stateProvider.state('app.static.privacy', {
-		url: '/privacy',
-		template: '<static-page />'
-	});
-
-	$stateProvider.state('app.static.terms', {
-		url: '/terms',
-		template: '<static-page />'
-	});
-
-	$stateProvider.state('app.static.cookies', {
-		url: '/cookies',
+		url: '/{path:cookies|terms|privacy}',
 		template: '<static-page />'
 	});
 
