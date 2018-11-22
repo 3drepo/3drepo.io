@@ -124,11 +124,11 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "downloadJSON",
-					label: "Download JSON",
+					value: 'downloadJSON',
+					label: 'Download JSON',
 					selected: false,
 					noToggle: true,
-					icon: "fa-download",
+					icon: 'fa-download',
 					divider: true
 				},
 				{
@@ -308,11 +308,11 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "downloadJSON",
-					label: "Download JSON",
+					value: 'downloadJSON',
+					label: 'Download JSON',
 					selected: false,
 					noToggle: true,
-					icon: "fa-download"
+					icon: 'fa-download'
 				},
 				{
 					hidden: false,
@@ -526,10 +526,10 @@ export class PanelService {
 	public downloadJSON(fileName, endpoint) {
 		this.apiService.get(endpoint).then((res) => {
 			const content = JSON.stringify(res.data, null, 2);
-			const a = document.createElement("a");
+			const a = document.createElement('a');
 			const file = new Blob([content]);
 			a.href = URL.createObjectURL(file);
-			a.download = fileName + ".json";
+			a.download = fileName + '.json';
 			a.click();
 		});
 	}

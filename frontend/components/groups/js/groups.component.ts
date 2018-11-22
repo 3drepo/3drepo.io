@@ -34,8 +34,8 @@ class GroupsController implements ng.IController {
 		'ClientConfigService',
 		'IconsConstant',
 		'ChatService',
-        'PanelService'
-    ];
+		'PanelService'
+		];
 
 	private onContentHeightRequest: any;
 	private groups: any;
@@ -200,10 +200,10 @@ class GroupsController implements ng.IController {
 						case 'deleteAll':
 							this.deleteAllGroups();
 							break;
-						case "downloadJSON":
-							const jsonEndpoint = this.account + "/" + this.model +
-							"/groups/revision/master/head/?noIssues=true&noRisks=true";
-							this.panelService.downloadJSON("groups", jsonEndpoint);
+						case 'downloadJSON':
+							const jsonEndpoint = this.account + '/' + this.model +
+							'/groups/revision/master/head/?noIssues=true&noRisks=true';
+							this.panelService.downloadJSON('groups', jsonEndpoint);
 							break;
 						default:
 							console.error('Groups option menu selection unhandled');

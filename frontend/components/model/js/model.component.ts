@@ -26,7 +26,7 @@ class ModelController implements ng.IController {
 		'$compile',
 		'$mdDialog',
 
-        'EventService',
+		'EventService',
 		'TreeService',
 		'RevisionsService',
 		'AuthService',

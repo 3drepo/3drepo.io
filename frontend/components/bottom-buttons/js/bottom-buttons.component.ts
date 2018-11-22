@@ -206,7 +206,7 @@ class BottomButtonsController implements ng.IController {
 		});
 
 		this.clipButton = {
-			label: "Clip",
+			label: 'Clip',
 			editMode: false,
 			numClips: 0,
 			click: () => {
@@ -214,14 +214,14 @@ class BottomButtonsController implements ng.IController {
 			},
 			modes : [
 				{
-					tooltip: "Start box clip",
+					tooltip: 'Start box clip',
 					text: 6,
 					click: () => {
 						this.startClip(false);
 					}
 				},
 				{
-					tooltip: "Start single clip",
+					tooltip: 'Start single clip',
 					text: 1,
 					click: () => {
 						this.startClip(true);
@@ -312,7 +312,7 @@ class BottomButtonsController implements ng.IController {
 
 	private enableClipEdit() {
 		this.clipButton.editMode = true;
-		this.clipButton.background = "#FF9800"; // FIXME: This should really be a constant with highlight colour
+		this.clipButton.background = '#FF9800'; // FIXME: This should really be a constant with highlight colour
 		this.ViewerService.startClipEdit();
 	}
 

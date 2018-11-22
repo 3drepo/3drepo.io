@@ -224,9 +224,9 @@ class IssuesListController implements ng.IController {
 				this.$window.open(bcfUrl, '_blank');
 				break;
 
-			case "downloadJSON":
-				const jsonEndpoint = this.account + "/" + this.model + "/issues.json";
-				this.PanelService.downloadJSON("issues", jsonEndpoint);
+			case 'downloadJSON':
+				const jsonEndpoint = this.account + '/' + this.model + '/issues.json';
+				this.PanelService.downloadJSON('issues', jsonEndpoint);
 				break;
 
 			case 'importBCF':
