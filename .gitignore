@@ -13,8 +13,12 @@ frontend/custom/test
 frontend/docs
 frontend/tests/e2e/built
 
+frontend/package.json
 frontend/yarn.lock
 backend/yarn.lock
+
+package-lock.json
+yarn.lock
 
 yarn-error.log
 bower_components
