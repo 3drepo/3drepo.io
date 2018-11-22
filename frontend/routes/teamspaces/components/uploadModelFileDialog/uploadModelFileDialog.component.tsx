@@ -109,7 +109,9 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 	public validateFileFormat = (value) => {
 		const fileSplit = value.name.split('.');
-		return fileSplit.indexOf('i') !== -1;
+		const findI = fileSplit.indexOf('i') !== -1;
+		const findDgn = fileSplit.indexOf('dgn') !== -1;
+		return findI && findDgn;
 	}
 
 	public render() {
