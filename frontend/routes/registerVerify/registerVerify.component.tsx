@@ -57,6 +57,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 			this.props.verifyRequest(username, token);
 		}
 	}
+
 	public componentDidUpdate(prevProps) {
 		const { verifyMessage } = this.props;
 
@@ -64,6 +65,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 			this.setState({ verifyMessage });
 		}
 	}
+
 	public render() {
 		const { verifyMessage } = this.state;
 		const { isPending } = this.props;

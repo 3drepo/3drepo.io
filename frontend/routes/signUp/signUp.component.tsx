@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
+import { omit } from 'lodash';
 import { Formik, Field, Form } from 'formik';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
@@ -106,17 +107,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 	public reCaptchaWrapperRef = React.createRef<any>();
 
 	public handleSubmit = (values, form) => {
-		const data = {
-			captcha: values.captcha,
-			company: values.company,
-			countryCode: values.countryCode,
-			email: values.email,
-			firstName: values.firstName,
-			lastName: values.lastName,
-			password: values.password,
-			mailListAgreed: values.mailListAgreed
-		};
-
+		const data = omit(values, 'username', 'emailConfirm', 'passwordConfirm', 'termsAgreed');
 		this.props.onRegister(values.username, data);
 		this.resetForm(form);
 	}
