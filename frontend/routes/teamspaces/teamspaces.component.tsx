@@ -93,9 +93,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { teamspace } = queryString.parse(this.props.location.search);
+		const lastTeamspace = localStorage.getItem('lastTeamspace');
 
 		this.setState({
-			activeTeamspace: teamspace || this.props.currentTeamspace,
+			activeTeamspace: lastTeamspace || teamspace || this.props.currentTeamspace,
 			teamspacesItems: getTeamspacesItems(this.props.teamspaces)
 		});
 	}
@@ -116,6 +117,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
+		}
+	}
+
+	public componentWillUnmount() {
+		if (!this.props.history.location.pathname.startsWith('/viewer')) {
+			localStorage.removeItem('lastTeamspace');
+			localStorage.removeItem('lastProject');
 		}
 	}
 
@@ -282,6 +290,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 			});
 
+			localStorage.setItem('lastProject', props.projectName);
+			localStorage.setItem('lastTeamspace', activeTeamspace);
 			const analyticService = getAngularService('AnalyticService') as any;
 			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
 		} else {
@@ -345,10 +355,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public isActiveProject = (projectName) => {
 		const queryParams = queryString.parse(this.props.location.search);
 		const { project } = queryParams;
-		if (project) {
-			return project === projectName;
-		}
+		const lastProject = localStorage.getItem('lastProject');
 
+		if (project) {
+			return projectName === project;
+		} else if (lastProject) {
+			return projectName === lastProject;
+		}
 		return false;
 	}
 

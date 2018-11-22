@@ -95,6 +95,7 @@ const updateModelSuccess = (state = INITIAL_STATE, action) => {
 
 	if (action.modelData.federate) {
 		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].subModels = action.modelData.subModels;
+		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = action.modelData.timestamp;
 	}
 
 	return { ...state, teamspaces };
