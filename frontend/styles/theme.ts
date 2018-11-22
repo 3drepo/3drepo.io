@@ -64,7 +64,7 @@ export const MuiTheme = createMuiTheme({
 		MuiFormControlLabel: {
 			label: {
 				fontSize: '14px',
-				color: theme.colors.BLACK_60,
+				color: theme.colors.BLACK_60
 			}
 		},
 		MuiFormLabel: {
