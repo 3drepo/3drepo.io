@@ -61,9 +61,9 @@ export function* createModel({ teamspace, modelData }) {
 	try {
 		const response = yield API.createModel(teamspace, modelData);
 		const createdModel = {
-			...response.data,
+			...response.data.setting,
+			model: response.data.model,
 			projectName: modelData.project,
-			federate: modelData.federate,
 			subModels: modelData.subModels
 		};
 
@@ -76,9 +76,15 @@ export function* createModel({ teamspace, modelData }) {
 
 export function* updateModel({ teamspace, modelId, modelData }) {
 	try {
-		yield API.updateModel(teamspace, modelId, modelData);
+		const response = yield API.updateModel(teamspace, modelId, modelData);
+		const updatedModel = {
+			...response.data.setting,
+			project: modelData.project,
+			subModels: modelData.subModels
+		};
+
 		yield put(SnackbarActions.show(`${modelData.federate ? 'Federation' : 'Model'} updated`));
-		yield put(TeamspacesActions.updateModelSuccess(teamspace, modelId, modelData));
+		yield put(TeamspacesActions.updateModelSuccess(teamspace, modelId, updatedModel));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'model', e.response));
 	}

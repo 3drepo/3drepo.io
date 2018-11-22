@@ -54,16 +54,26 @@ export const MuiTheme = createMuiTheme({
 				}
 			}
 		},
+		MuiInputBase: {
+			root: {
+				'&$disabled': {
+					color: theme.colors.BLACK_60
+				}
+			}
+		},
 		MuiFormControlLabel: {
 			label: {
 				fontSize: '14px',
-				color: theme.colors.BLACK_60
+				color: theme.colors.BLACK_60,
 			}
 		},
 		MuiFormLabel: {
 			root: {
-				fontSize: '14px',
-				color: theme.colors.BLACK_60
+				'fontSize': '14px',
+				'color': theme.colors.BLACK_60,
+				'&$disabled': {
+					color: theme.colors.BLACK_60
+				}
 			}
 		},
 		MuiDialogTitle: {

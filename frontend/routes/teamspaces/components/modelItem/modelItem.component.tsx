@@ -105,15 +105,19 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount = () => {
-		const { activeTeamspace, projectName, model, subscribeOnStatusChange, name } = this.props;
-		const modelData = { modelId: model, modelName: name };
-		subscribeOnStatusChange(activeTeamspace, projectName, modelData);
+		const { activeTeamspace, projectName, model, subscribeOnStatusChange, name, federate } = this.props;
+		if (!federate) {
+			const modelData = { modelId: model, modelName: name };
+			subscribeOnStatusChange(activeTeamspace, projectName, modelData);
+		}
 	}
 
 	public componentWillUnmount = () => {
-		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange, name } = this.props;
-		const modelData = { modelId: model, modelName: name };
-		unsubscribeOnStatusChange(activeTeamspace, projectName, modelData);
+		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange, name, federate } = this.props;
+		if (!federate) {
+			const modelData = { modelId: model, modelName: name };
+			unsubscribeOnStatusChange(activeTeamspace, projectName, modelData);
+		}
 	}
 
 	public renderSubModels = (subModels = []) => {
