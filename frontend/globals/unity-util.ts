@@ -501,7 +501,7 @@ export class UnityUtil {
 	*  Start clip editing in single plane mode
 	*/
 	public static startSingleClip() {
-		UnityUtil.toUnity("StartSingleClip", undefined, undefined);
+		UnityUtil.toUnity('StartSingleClip', undefined, undefined);
 	}
 
 	/**
@@ -789,7 +789,7 @@ export class UnityUtil {
 	 */
 	public static reset() {
 		UnityUtil.disableMeasuringTool();
-		UnityUtil.toUnity("ClearCanvas", UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**

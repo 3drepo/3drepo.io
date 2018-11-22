@@ -143,9 +143,9 @@ class RisksListController implements ng.IController {
 				this.risksService.state.risksCardOptions.showPins = this.menuOption.selected;
 				break;
 
-			case "downloadJSON":
-				const jsonEndpoint = this.account + "/" + this.model + "/risks.json";
-				this.PanelService.downloadJSON("risks", jsonEndpoint);
+			case 'downloadJSON':
+				const jsonEndpoint = this.account + '/' + this.model + '/risks.json';
+				this.PanelService.downloadJSON('risks', jsonEndpoint);
 				break;
 		}
 	}
