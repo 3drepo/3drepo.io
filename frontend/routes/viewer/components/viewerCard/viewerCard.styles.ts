@@ -17,4 +17,37 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div``;
+export const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+`;
+
+export const Title = styled.div`
+  align-items: center;
+  display: flex;
+`;
+
+export const Actions = styled.div`
+  align-items: center;
+  display: flex;
+`;
+
+export const Action = styled.span`
+  cursor: pointer;
+  margin-left: 18px;
+  height: 22px;
+`;
+
+export const TitleIcon = styled.i`
+  align-self: center;
+  height: 22px;
+  cursor: pointer;
+  margin-right: 18px;
+`;
+
+export const ViewCardContent = styled.div`
+  background-color: rgb(250, 250, 250);
+`;
+
+export const ViewCardFooter = styled.div``;

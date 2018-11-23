@@ -17,33 +17,68 @@
 
 import * as React from 'react';
 
-import { Container } from './viewerCard.styles';
+import {
+	Action,
+	Actions,
+	Title,
+	TitleIcon,
+	TitleContainer,
+	ViewCardContent,
+	ViewCardFooter
+} from './viewerCard.styles';
 import { Panel } from '../../../components/panel/panel.component';
 
-const ViewerCardTitle = ({title, Icon}) => (
-	<p>
-		{title}
-		{Icon}
-	</p>
-);
+const ViewerCardTitle = ({title, Icon, renderActions}) => {
+	return (
+		<TitleContainer>
+			<Title> {Icon && <TitleIcon>{Icon}</TitleIcon>} {title} </Title>
+			{renderActions && renderActions()}
+		</TitleContainer>
+	);
+};
 
 interface IProps {
 	title: string;
-	Icon: JSX.Element;
+	Icon?: JSX.Element;
+	actions?: any[];
+	renderFooterContent?: () => JSX.Element;
 }
 
 export class ViewerCard extends React.PureComponent<IProps, any> {
 	public getTitle = () => {
-		const { title, Icon } = this.props;
+		const { title, Icon, actions } = this.props;
 		return (
-			<ViewerCardTitle title={title} Icon={Icon} />
+			<ViewerCardTitle
+				title={title}
+				Icon={Icon}
+				renderActions={() => this.renderTitleActions(actions)}
+			/>
 		);
 	}
 
+	public renderTitleActions = (actions) => (
+		<Actions>
+			{actions.map(({ Icon, handleAction }, index) => (
+				<Action key={index}>
+					<Icon onClick={handleAction} />
+				</Action>
+			))}
+		</Actions>
+	)
+
 	public render() {
+		const { children, renderFooterContent } = this.props;
+
 		return (
 			<Panel title={this.getTitle()}>
-				ViewerCard component
+				<ViewCardContent>
+					{children}
+				</ViewCardContent>
+				{renderFooterContent &&
+				<ViewCardFooter>
+					{renderFooterContent()}
+				</ViewCardFooter>
+				}
 			</Panel>
 		);
 	}

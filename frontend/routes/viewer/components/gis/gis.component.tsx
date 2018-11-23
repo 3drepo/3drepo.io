@@ -18,6 +18,10 @@
 import * as React from 'react';
 
 import { ViewerCard } from '../viewerCard/viewerCard.component';
+import LayersIcon from '@material-ui/icons/Layers';
+import SearchIcon from '@material-ui/icons/Search';
+import MoreIcon from '@material-ui/icons/MoreVert';
+
 import { Container } from './gis.styles';
 
 interface IProps {
@@ -25,11 +29,40 @@ interface IProps {
 }
 
 export class Gis extends React.PureComponent<IProps, any> {
+	public handleIconClick = () => {}
+
+	public handleSearchClick = () => {}
+
+	public handleMoreClick = () => {}
+
+	public getTitleIcon = () => {
+		return <LayersIcon onClick={this.handleIconClick} />;
+	}
+
+	public getActions = () => [
+		{
+			Icon: SearchIcon,
+			handleAction: this.handleSearchClick
+		},
+		{
+			Icon: MoreIcon,
+			handleAction: this.handleMoreClick
+		}
+	]
+
+	public renderFooterContent = () => (
+		<>GIS footer</>
+	)
 
 	public render() {
 		return (
-			<ViewerCard>
-
+			<ViewerCard
+				title="GIS"
+				Icon={this.getTitleIcon()}
+				actions={this.getActions()}
+				renderFooterContent={this.renderFooterContent}
+				>
+				GIS content
 			</ViewerCard>
 		);
 	}

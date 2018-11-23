@@ -19,6 +19,7 @@ import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
 import { ViewerCard } from './viewer/components/viewerCard/viewerCard.component';
+import { Gis } from './viewer/components/gis/gis.component';
 
 angular
 	.module('3drepo')
@@ -34,4 +35,5 @@ angular
 	.component('signUp', wrap(SignUp, ['onLogoClick']))
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('passwordChange', wrap(PasswordChange))
-	.component('viewerCard', wrap(ViewerCard));
+	.component('viewerCard', wrap(ViewerCard))
+	.component('gisCard', wrap(Gis));
