@@ -18,6 +18,7 @@ import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 // Components
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
+import { ViewerCard } from './viewer/components/viewerCard/viewerCard.component';
 
 angular
 	.module('3drepo')
@@ -31,4 +32,6 @@ angular
 	.component('registerRequest', wrap(RegisterRequest))
 	.component('registerVerify', wrap(RegisterVerify))
 	.component('signUp', wrap(SignUp, ['onLogoClick']))
-	.component('staticPageViewer', wrap(StaticPageViewer));
+	.component('staticPageViewer', wrap(StaticPageViewer))
+	.component('passwordChange', wrap(PasswordChange))
+	.component('viewerCard', wrap(ViewerCard));

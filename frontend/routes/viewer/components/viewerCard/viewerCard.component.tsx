@@ -18,18 +18,33 @@
 import * as React from 'react';
 
 import { Container } from './viewerCard.styles';
+import { Panel } from '../../../components/panel/panel.component';
+
+const ViewerCardTitle = ({title, Icon}) => (
+	<p>
+		{title}
+		{Icon}
+	</p>
+);
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	title: string;
+	Icon: JSX.Element;
 }
 
 export class ViewerCard extends React.PureComponent<IProps, any> {
+	public getTitle = () => {
+		const { title, Icon } = this.props;
+		return (
+			<ViewerCardTitle title={title} Icon={Icon} />
+		);
+	}
 
 	public render() {
 		return (
-			<Container>
+			<Panel title={this.getTitle()}>
 				ViewerCard component
-			</Container>
+			</Panel>
 		);
 	}
 }

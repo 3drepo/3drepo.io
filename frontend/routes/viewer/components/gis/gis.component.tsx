@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 
+import { ViewerCard } from '../viewerCard/viewerCard.component';
 import { Container } from './gis.styles';
 
 interface IProps {
@@ -27,9 +28,9 @@ export class Gis extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container>
-				Gis component
-			</Container>
+			<ViewerCard>
+
+			</ViewerCard>
 		);
 	}
 }
