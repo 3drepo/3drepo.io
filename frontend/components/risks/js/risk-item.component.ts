@@ -19,9 +19,8 @@ import { APIService } from "../../home/js/api.service";
 import { AuthService } from "../../home/js/auth.service";
 import { DialogService } from "../../home/js/dialog.service";
 import { MeasureService } from "../../measure/js/measure.service";
-import { NotificationEvents } from "../../notifications/js/notification.events";
-import { NotificationRisksEvents } from "../../notifications/js/notification.risks.events";
-import { NotificationService } from "../../notifications/js/notification.service";
+import { ChatEvents } from "../../chat/js/chat.events";
+import { ChatService } from "../../chat/js/chat.service";
 import { RisksService } from "./risks.service";
 import { StateManagerService } from "../../home/js/state-manager.service";
 import { TreeService } from "../../tree/js/tree.service";
@@ -40,7 +39,7 @@ class RiskItemController implements ng.IController {
 
 		"RisksService",
 		"APIService",
-		"NotificationService",
+		"ChatService",
 		"AuthService",
 		"AnalyticService",
 		"StateManager",
@@ -70,7 +69,7 @@ class RiskItemController implements ng.IController {
 	private levels: any[];
 	private statuses: any[];
 	private actions: any;
-	private notificationStarted = false;
+	private chatEventsStarted = false;
 	private popStateHandler;
 	private refreshHandler;
 	private data;
@@ -93,7 +92,7 @@ class RiskItemController implements ng.IController {
 	private riskItemComponent;
 	private commentThumbnail;
 	private contentHeight;
-	private risksNotifications: NotificationRisksEvents;
+	private risksChatEvents: ChatEvents;
 
 	constructor(
 		private $location,
@@ -106,7 +105,7 @@ class RiskItemController implements ng.IController {
 
 		private risksService: RisksService,
 		private apiService: APIService,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private authService: AuthService,
 		private analyticService: AnalyticService,
 		private stateManager: StateManagerService,
@@ -207,7 +206,7 @@ class RiskItemController implements ng.IController {
 			}
 		};
 
-		this.notificationStarted = false;
+		this.chatEventsStarted = false;
 
 		this.setContentHeight();
 		history.pushState(null, null, document.URL);
@@ -249,7 +248,7 @@ class RiskItemController implements ng.IController {
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.risksNotifications.unsubscribeFromUpdated(this.onRiskUpdated);
+			this.risksChatEvents.unsubscribeFromUpdated(this.onRiskUpdated);
 		}
 
 	}
@@ -309,7 +308,7 @@ class RiskItemController implements ng.IController {
 				this.risksService.getRisk(this.data.account, this.data.model, this.data._id)
 					.then((fetchedRisk) => {
 						this.setEditRiskData(fetchedRisk);
-						this.startNotification();
+						this.startChatEvents();
 						this.failedToLoad = false;
 						// Update the risk data on risk service so search would work better
 						this.risksService.updateRisks(this.riskData);
@@ -745,7 +744,7 @@ class RiskItemController implements ng.IController {
 				this.submitDisabled = true;
 				this.setContentHeight();
 
-				this.startNotification();
+				this.startChatEvents();
 				this.saving = false;
 
 				const riskState = {
@@ -878,15 +877,15 @@ class RiskItemController implements ng.IController {
 
 	}
 
-	public startNotification() {
+	public startChatEvents() {
 
-		if (this.data && !this.notificationStarted) {
-			this.notificationStarted = true;
+		if (this.data && !this.chatEventsStarted) {
+			this.chatEventsStarted = true;
 
-			this.risksNotifications = this.notificationService.getChannel(this.data.account, this.data.model).risks;
+			this.risksChatEvents = this.chatService.getChannel(this.data.account, this.data.model).risks;
 
 			// Watch for risk change
-			this.risksNotifications.subscribeToUpdated(this.onRiskUpdated, this);
+			this.risksChatEvents.subscribeToUpdated(this.onRiskUpdated, this);
 		}
 	}
 

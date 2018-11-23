@@ -1,3 +1,5 @@
+import { number } from "prop-types";
+
 /**
  *  Copyright (C) 2016 3D Repo Ltd
  *
@@ -17,6 +19,24 @@
 
 import { formatBytes, formatBytesGB } from '../../../services/formatting/formatCapacity';
 import { invoiceDate, prettyDate } from '../../../services/formatting/formatDate';
+
+/**
+ * Gets the date of the sunday thats away from the offset .
+ * If offsets == 0 is last sunday (if today is sunday returns today)
+ * If offset > 0 , the sundays from next week on
+ * If offset < 0 , the sundays before the current week
+ */
+export const getSunday = (offset: number = 0) => {
+	const sunday = new Date();
+	sunday.setDate(sunday.getDate() - sunday.getDay() + offset * 7 );
+	sunday.setHours(0, 0, 0, 0);
+	return sunday;
+};
+
+export const simpleDate = (input) => {
+	const date: Date = new Date(input);
+	return date.toLocaleDateString("en-GB", {day: "numeric", month: "short", year: "numeric"});
+};
 
 export const FormatBytesGBModule = angular
 	.module("3drepo")

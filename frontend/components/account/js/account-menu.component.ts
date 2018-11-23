@@ -19,9 +19,10 @@ class AccountMenuController implements ng.IController {
 
 	public static $inject: string[] = [
 		"$scope",
-
+		"$location",
 		"AuthService",
-		"StateManager"
+		"StateManager",
+		"ChatService"
 	];
 
 	private $mdOpenMenu;
@@ -31,9 +32,11 @@ class AccountMenuController implements ng.IController {
 
 	constructor(
 		private $scope: ng.IScope,
+		private $location: any,
 
 		private AuthService: any,
-		private StateManager: any
+		private StateManager: any,
+		private ChatService: any
 	) {}
 
 	public $onInit() {

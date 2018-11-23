@@ -16,6 +16,7 @@
  */
 
 "use strict";
+const _ = require("lodash");
 const sharp = require("sharp");
 const nodeuuid = require("node-uuid");
 const mongo = require("mongodb");
@@ -35,10 +36,14 @@ function Utils() {
 
 	/** *****************************************************************************
 	* Convert a string to a UUID
-	* @param {string} uuid - String representation of a UUID
+	* @param {string | Buffer} uuid - String representation of a UUID, or the UUID
 	* @returns {Buffer} binuuid - Binary representation of a UUID
 	*******************************************************************************/
 	this.stringToUUID = function(uuid) {
+		if (!_.isString(uuid)) {
+			return uuid;
+		}
+
 		const bytes = nodeuuid.parse(uuid);
 		const buf   = new Buffer.from(bytes);
 
@@ -94,7 +99,7 @@ function Utils() {
 	* @returns {Boolean}
 	*******************************************************************************/
 	this.isUUID = function(uuid) {
-		return uuid && Boolean(uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
+		return uuid && uuid.match && Boolean(uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i));
 	};
 
 	/** *****************************************************************************
@@ -114,14 +119,10 @@ function Utils() {
 	 * Map http promise error to our defined error codes
 	 *
 	 * @param {Object} err object from mongoose
-	 * @param {number} channelsCount Number of channels, 1 for now
-	 * @param {boolean} isLittleEndian True or false
-	 * @return {Object} our defined response code
 	 */
 	this.mongoErrorToResCode = function(err) {
-
-		// let _ = require('lodash');
 		const responseCodes = require("./response_codes");
+
 		if(err.name === "ValidationError") {
 			return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
 		} else if(err.name === "MongoError") {
@@ -172,6 +173,22 @@ function Utils() {
 		const screenshot = base64Screenshot.replace("data:image/png;base64,", "");
 		const screenshotBuf = Buffer.from(screenshot, "base64");
 		return this.resizeAndCropScreenshot(screenshotBuf, width, height, true);
+	};
+
+	this.objectIdToString = function(obj) {
+		if (!obj || Object.keys(obj).length === 0 || _.isString(obj)) {
+			return obj;
+		}
+
+		if (obj instanceof mongo.Binary) {
+			return self.uuidToString(obj);
+		}
+
+		if (Array.isArray(obj)) {
+			return obj.map(o=> self.objectIdToString(o));
+		}
+
+		return  _.mapValues(obj, self.objectIdToString);
 	};
 
 	/**
