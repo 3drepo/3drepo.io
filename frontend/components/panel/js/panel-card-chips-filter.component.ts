@@ -70,7 +70,7 @@ class PanelCardChipsFilterController implements ng.IController {
 	}
 
 	private formatChip(chip) {
-		return  chip.nameType + (chip.nameType === "" ? "" : ":" ) + chip.name;
+		return  chip.nameType.trim() + (chip.nameType.trim() === "" ? "" : ":" ) + chip.name.trim();
 	}
 
 	private onPaste(event: ClipboardEvent) {
@@ -90,8 +90,7 @@ class PanelCardChipsFilterController implements ng.IController {
 				const value: Date = this.$mdDateLocale.parseDate(name);
 
 				if (  !isNaN( value.getTime())) { // If it is a date
-					const nameType = c.split(":")[0];
-					const testTrim = nameType.trim();
+					const nameType = c.split(":")[0].trim();
 					const type = this.snakeCase(nameType);
 					return  {name, nameType, type, value};
 				}
