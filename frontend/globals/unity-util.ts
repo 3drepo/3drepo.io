@@ -257,6 +257,12 @@ export class UnityUtil {
 		}
 	}
 
+	public static clipUpdated(nPlanes) {
+		if (UnityUtil.viewer && UnityUtil.viewer.numClipPlanesUpdated) {
+			UnityUtil.viewer.numClipPlanesUpdated(nPlanes);
+		}
+	}
+
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
@@ -493,10 +499,31 @@ export class UnityUtil {
 	}
 
 	/**
-	*  Turn off any clipping planes imposed into the viewer
+	*  Start clip editing in single plane mode
 	*/
-	public static disableClippingPlanes() {
-		UnityUtil.toUnity("DisableClip", undefined, undefined);
+	public static startSingleClip() {
+		UnityUtil.toUnity("StartSingleClip", undefined, undefined);
+	}
+
+	/**
+	*  Start clip editing in box mode
+	*/
+	public static startBoxClip() {
+		UnityUtil.toUnity("StartBoxClip", undefined, undefined);
+	}
+
+	/**
+	*  Start editing mode with current clip plane state
+	*/
+	public static startClipEdit() {
+		UnityUtil.toUnity("StartClipEdit", undefined, undefined);
+	}
+
+	/**
+	*  Stop editing mode
+	*/
+	public static stopClipEdit() {
+		UnityUtil.toUnity("StopClipEdit", undefined, undefined);
 	}
 
 	/**
@@ -763,7 +790,6 @@ export class UnityUtil {
 	 */
 	public static reset() {
 		UnityUtil.disableMeasuringTool();
-		UnityUtil.disableClippingPlanes();
 		UnityUtil.toUnity("ClearCanvas", UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
@@ -927,7 +953,15 @@ export class UnityUtil {
 			param.nameSpace = account + "." + model;
 		}
 		param.requiresBroadcast = requireBroadcast;
-		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+		UnityUtil.toUnity("UpdateClip", UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Reset clipping plane
+	 * This will also toggle edit mode to false
+	 */
+	public static disableClippingPlanes() {
+		UnityUtil.toUnity("DisableClip", undefined, undefined);
 	}
 
 	/**

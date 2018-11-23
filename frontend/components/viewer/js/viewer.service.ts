@@ -76,19 +76,24 @@ export class ViewerService {
 	}
 
 	public updateViewerSettings(settings) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.updateSettings(settings);
-		}
+		});
 	}
 
 	public updateClippingPlanes(params) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.updateClippingPlanes(
 				params.clippingPlanes,
-				params.fromClipPanel,
 				params.account,
 				params.model
 			);
+		});
+	}
+
+	public getNumPlanes() {
+		if (this.viewer) {
+			return this.viewer.getNumPlanes();
 		}
 	}
 
@@ -147,7 +152,7 @@ export class ViewerService {
 	}
 
 	public setCamera(params) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.setCamera(
 				params.position,
 				params.view_dir,
@@ -158,7 +163,7 @@ export class ViewerService {
 				params.account,
 				params.model
 			);
-		}
+		});
 	}
 
 	public removeUnsavedPin() {
@@ -167,18 +172,18 @@ export class ViewerService {
 	}
 
 	public changePinColours(params) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.changePinColours(
 				params.id,
 				params.colours
 			);
-		}
+		});
 	}
 
 	public clearHighlights() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.clearHighlights();
-		}
+		});
 	}
 
 	public getCurrentViewpoint(params) {
@@ -215,24 +220,18 @@ export class ViewerService {
 		});
 	}
 
-	public clearClippingPlanes() {
-		if (this.viewer) {
-			this.viewer.clearClippingPlanes();
-		}
-	}
-
 	public getObjectsStatus(params) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.getObjectsStatus(
 				params.account,
 				params.model,
 				params.promise
 			);
-		}
+		});
 	}
 
 	public highlightObjects(params)  {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.highlightObjects(
 				params.account,
 				params.model,
@@ -242,22 +241,21 @@ export class ViewerService {
 				params.multi,
 				params.forceReHighlight
 			);
-		}
+		});
 	}
 
 	public unhighlightObjects(params)  {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.unhighlightObjects(
 				params.account,
 				params.model,
 				params.id ? [params.id] : params.ids
 			);
-		}
+		});
 	}
 
 	public getNavMode() {
 		if (this.viewer) {
-			// this.$timeout();
 			return this.viewer.currentNavMode;
 		}
 	}
@@ -276,21 +274,21 @@ export class ViewerService {
 	}
 
 	public switchObjectVisibility(account, model, ids, visibility)  {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.switchObjectVisibility(account, model, ids, visibility);
-		}
+		});
 	}
 
 	public hideHiddenByDefaultObjects() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.hideHiddenByDefaultObjects();
-		}
+		});
 	}
 
 	public showHiddenByDefaultObjects() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.showHiddenByDefaultObjects();
-		}
+		});
 	}
 
 	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
@@ -326,20 +324,22 @@ export class ViewerService {
 
 	public getScreenshot(promise) {
 		if (promise) {
-			this.viewer.getScreenshot(promise);
+			this.initialised.promise.then(() => {
+				this.viewer.getScreenshot(promise);
+			});
 		}
 	}
 
 	public goToExtent() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.showAll();
-		}
+		});
 	}
 
 	public setNavMode(mode) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.setNavMode(mode);
-		}
+		});
 	}
 
 	public unityInserted(): boolean {
@@ -386,15 +386,15 @@ export class ViewerService {
 	}
 
 	public activateMeasure() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.setMeasureMode(true);
-		}
+		});
 	}
 
 	public disableMeasure() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.setMeasureMode(false);
-		}
+		});
 	}
 
 	public callInit() {
@@ -451,94 +451,118 @@ export class ViewerService {
 	}
 
 	public diffToolEnableWithClashMode() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.diffToolEnableWithClashMode();
-		}
+		});
 	}
 
 	public diffToolEnableWithDiffMode() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.diffToolEnableWithDiffMode();
-		}
+		});
 	}
 
 	public diffToolDisableAndClear() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.diffToolDisableAndClear();
-		}
+		});
 
 	}
 
 	public diffToolShowBaseModel() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.diffToolShowBaseModel();
-		}
+		});
 	}
 
 	public diffToolShowComparatorModel() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.diffToolShowComparatorModel();
-		}
+		});
 	}
 
 	public diffToolDiffView() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.diffToolDiffView();
-		}
+		});
 	}
 
 	public resetMapSources(source) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.resetMapSources(source);
-		}
+		});
 	}
 
 	public addMapSource(source) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.addMapSource(source);
-		}
+		});
 	}
 
 	public removeMapSource(source) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.removeMapSource(source);
-		}
+		});
 	}
 
 	public mapInitialise(surveyPoints) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.mapInitialise(surveyPoints);
-		}
+		});
 	}
 
 	public  mapStart() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.mapStart();
-		}
+		});
 	}
 
 	public mapStop() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.mapStop();
-		}
+		});
 	}
 
 	public overrideMeshColor(account, model, meshIDs, color) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.overrideMeshColor(account, model, meshIDs, color);
-		}
+		});
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.resetMeshColor(account, model, meshIDs);
-		}
+		});
 	}
 
 	public startAreaSelect() {
 		if (this.viewer) {
 			this.viewer.startAreaSelect();
 		}
+	}
+
+	public startBoxClip() {
+		this.initialised.promise.then(() => {
+			this.viewer.startBoxClip();
+		});
+	}
+
+	public startSingleClip() {
+		this.initialised.promise.then(() => {
+			this.viewer.startSingleClip();
+		});
+	}
+
+	public startClipEdit() {
+		this.initialised.promise.then(() => {
+			this.viewer.startClipEdit();
+		});
+	}
+
+	public stopClipEdit() {
+		this.initialised.promise.then(() => {
+			this.viewer.stopClipEdit();
+		});
 	}
 
 	public stopAreaSelect() {
@@ -553,32 +577,32 @@ export class ViewerService {
 	}
 
 	public zoomToHighlightedMeshes() {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.zoomToHighlightedMeshes();
-		}
+		});
 	}
 
 	public helicopterSpeedDown(value: number) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.helicopterSpeedDown();
 			this.helicopterSpeedUpdate(value);
-		}
+		});
 	}
 
 	public helicopterSpeedUp(value: number) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.helicopterSpeedUp();
 			this.helicopterSpeedUpdate(value);
-		}
+		});
 	}
 
 	public helicopterSpeedReset(updateDefaultSpeed: boolean) {
-		if (this.viewer) {
+		this.initialised.promise.then(() => {
 			this.viewer.helicopterSpeedReset();
 			if (updateDefaultSpeed) {
 				this.helicopterSpeedUpdate(1);
 			}
-		}
+		});
 	}
 
 	public getHeliSpeed() {
