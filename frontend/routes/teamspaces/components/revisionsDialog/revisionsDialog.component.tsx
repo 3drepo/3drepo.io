@@ -49,11 +49,10 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public revisionClickHandler = ({ tag, _id }) => () => {
-		const { modelId, handleClose, history, location: { pathname } } = this.props;
+		const { teamspace, modelId, handleClose, history } = this.props;
 
 		handleClose();
-
-		history.push(`${pathname}/${modelId}/${tag || _id}`);
+		history.push(`/viewer/${teamspace}/${modelId}/${tag || _id}`);
 		const analyticService = getAngularService('AnalyticService') as any;
 
 		analyticService.sendEvent({
