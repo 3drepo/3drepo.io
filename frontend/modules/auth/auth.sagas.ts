@@ -77,12 +77,18 @@ export function* logout() {
 }
 
 export function* authenticate() {
+	// TODO: Replace to proper service after migration
+	const AuthService = getAngularService('AuthService') as any;
+
 	try {
 		const { data: { username }} = yield API.authenticate();
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
 			avatarUrl: getAvatarUrl(username)
 		}));
+
+		yield AuthService.initialAuthPromise.resolve();
+
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
 		if (e.response.status === 401) {
@@ -90,6 +96,7 @@ export function* authenticate() {
 		} else {
 			yield put(DialogActions.showErrorDialog('authenticate', 'user', e.response));
 		}
+		yield AuthService.initialAuthPromise.reject();
 	}
 }
 

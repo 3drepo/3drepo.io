@@ -76,16 +76,20 @@ export class App extends React.PureComponent<IProps, IState> {
 		const { location, history, isAuthenticated } = this.props;
 		const isStaticRoute = this.isStaticRoute(location.pathname);
 		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
+			const referrer = `${location.pathname}${location.search}`;
 			if (isAuthenticated) {
 				runAngularTimeout(() => {
-					history.push(this.state.referrer);
+					// TODO: This statement should be removed after viewer migration
+					const isViewer = referrer.includes('viewer');
+					const state = isViewer ? referrer : this.state.referrer;
+					history.push(state);
 				});
 				changes.referrer = DEFAULT_REDIRECT;
 
 				this.toggleAutoLogout();
 			} else {
 				if (location.pathname !== MAIN_ROUTE_PATH) {
-					changes.referrer = `${location.pathname }${ location.search }`;
+					changes.referrer = referrer;
 				}
 
 				this.toggleAutoLogout(false);

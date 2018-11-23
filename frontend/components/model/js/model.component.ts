@@ -15,6 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dispatch, getState } from '../../../helpers/migration';
+import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
+
 class ModelController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -100,6 +103,9 @@ class ModelController implements ng.IController {
 				this.$element[0].querySelector('#modelUI')
 			);
 		});
+
+		const username = selectCurrentUser (getState()).username;
+		dispatch(CurrentUserActions.fetchUser(username));
 
 		this.watchers();
 	}

@@ -83,7 +83,14 @@ function StateManagerRun(
 
 		if (isLoginRequired && !isAuthenticated) {
 			event.preventDefault();
-			$state.go('app.login');
+
+			const initialAuthPromise = isAuthenticated === null
+				? AuthService.initialAuthPromise.promise
+				: Promise.reject();
+
+			initialAuthPromise.catch(() => {
+				$state.go('app.login');
+			});
 		}
 
 		StateManager.setState(toParams);
