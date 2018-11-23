@@ -31,8 +31,8 @@ class PanelCardOptionMenuController implements ng.IController {
 	) { }
 
 	public addPreventCloseToDatepicker() {
-		const pickerButtons = this.$element[0].getElementsByClassName("md-datepicker button");
-		Array.from(pickerButtons).forEach((p) => p.setAttribute("md-prevent-menu-close", "true"));
+		const pickerButtons = this.$element[0].querySelectorAll(".md-datepicker-triangle-button, .md-datepicker-button");
+		pickerButtons.forEach( (p) => p.setAttribute("md-prevent-menu-close", "true"));
 	}
 
 	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem) {
