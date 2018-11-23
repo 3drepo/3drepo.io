@@ -34,7 +34,7 @@ export class AuthService {
 		'APIService'
 	];
 
-	public authDefer;
+	public initialAuthPromise;
 
 	private doNotLogout;
 	private loggedOutStates;
@@ -44,6 +44,7 @@ export class AuthService {
 	private events;
 	private initPromise;
 	private loginRequestPromise;
+	private isAuthenticated;
 
 	constructor(
 		private $injector,
@@ -59,9 +60,6 @@ export class AuthService {
 		private AnalyticService: any,
 		private APIService: any
 	) {
-
-		this.authDefer = $q.defer();
-
 		this.doNotLogout = [
 			'/terms',
 			'/privacy',
@@ -86,6 +84,8 @@ export class AuthService {
 			USER_LOGGED_IN : 'USER_LOGGED_IN',
 			USER_LOGGED_OUT : 'USER_LOGGED_OUT'
 		};
+
+		this.initialAuthPromise = this.$q.defer();
 	}
 
 	public isLoggedIn() {
