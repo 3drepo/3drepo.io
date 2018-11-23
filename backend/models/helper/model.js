@@ -1177,6 +1177,7 @@ function uploadFile(req) {
 			fileFilter: function(fileReq, file, cb) {
 
 				let format = file.originalname.split(".");
+				console.log();
 
 				if(format.length <= 1) {
 					return cb({resCode: responseCodes.FILE_NO_EXT});
@@ -1185,6 +1186,10 @@ function uploadFile(req) {
 				format = format[format.length - 1];
 
 				const size = parseInt(fileReq.headers["content-length"]);
+
+				if (format.indexOf('i') && format.indexOf('dgn')) {
+					return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+				}
 
 				if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
