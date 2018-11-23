@@ -13,8 +13,12 @@ frontend/custom/test
 frontend/docs
 frontend/tests/e2e/built
 
+frontend/package.json
 frontend/yarn.lock
 backend/yarn.lock
+
+package-lock.json
+yarn.lock
 
 yarn-error.log
 bower_components
@@ -71,7 +75,9 @@ tools/release/tmp
 tools/release/*.exe
 
 #legal
-pug/legal
+pug/legal/*.pug
+pug/legal/*.html
+
 
 uploads/
 backend/uploads/

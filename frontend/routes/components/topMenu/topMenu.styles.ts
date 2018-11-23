@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
+import * as LogoStyles from '../logo/logo.styles';
 
 export const Container = styled.div`
   display: flex;
@@ -26,27 +27,11 @@ export const Container = styled.div`
   z-index: 1;
   padding-right: 5px;
   height: 80px;
-`;
 
-export const Logo = styled.img`
-  position: absolute;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 150px;
-	pointer-events: inherit;
-	outline: none;
-	user-select: none;
-  filter: drop-shadow(0 0 1px ${COLOR.BLACK_50});
-
-  &:hover {
-    cursor: pointer;
-	  user-select: none;
-  }
-
-  @media (max-width: 767px) {
-    & {
-      display: none;
-    }
+  ${LogoStyles.Image} {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 `;

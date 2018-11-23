@@ -51,20 +51,23 @@ interface IProps {
 	onDownloadClick: (event) => void;
 	onSettingsClick: (event) => void;
 	onPermissionsClick: (event) => void;
-	subscribeOnStatusChange: (teamspace, project, modelId) => void;
-	unsubscribeOnStatusChange: (teamspace, project, modelId) => void;
+	subscribeOnStatusChange: (teamspace, project, modelData) => void;
+	unsubscribeOnStatusChange: (teamspace, project, modelData) => void;
 }
 
 interface IState {
 	hovered: boolean;
+	actionsMenuOpen: boolean;
 }
 
-const isPendingStatus = (status) => status && status !== 'ok' && status !== 'failed';
+const isPendingStatus = (status) => status &&
+	status === 'uploading' || status === 'queued' || status === 'processing';
 
 export class ModelItem extends React.PureComponent<IProps, IState> {
 	public state = {
 		hovered: false,
-		statusText: ''
+		statusText: '',
+		actionsMenuOpen: false
 	};
 
 	private modelActions: IAction[] = [];
@@ -102,13 +105,19 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount = () => {
-		const { activeTeamspace, projectName, model, subscribeOnStatusChange } = this.props;
-		subscribeOnStatusChange(activeTeamspace, projectName, model);
+		const { activeTeamspace, projectName, model, subscribeOnStatusChange, name, federate } = this.props;
+		if (!federate) {
+			const modelData = { modelId: model, modelName: name };
+			subscribeOnStatusChange(activeTeamspace, projectName, modelData);
+		}
 	}
 
 	public componentWillUnmount = () => {
-		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange } = this.props;
-		unsubscribeOnStatusChange(activeTeamspace, projectName, model);
+		const { activeTeamspace, projectName, model, unsubscribeOnStatusChange, name, federate } = this.props;
+		if (!federate) {
+			const modelData = { modelId: model, modelName: name };
+			unsubscribeOnStatusChange(activeTeamspace, projectName, modelData);
+		}
 	}
 
 	public renderSubModels = (subModels = []) => {
@@ -143,9 +152,14 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		</Status>
 	)
 
+	public toggleActionsMenuOpen = (event) => {
+		event.stopPropagation();
+		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
+	}
+
 	public render() {
 		const { name, subModels, timestamp, onModelItemClick, status } = this.props;
-		const { hovered } = this.state;
+		const { hovered, actionsMenuOpen } = this.state;
 		const isFederation = Boolean(subModels);
 		const actions = isFederation ? this.federationActions : this.modelActions;
 		const isPending = isPendingStatus(status);
@@ -167,12 +181,17 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 							justify="flex-end"
 							pending={isPending ? 1 : 0}
 						>
-							{ timestamp && !hovered && !isPending &&
+							{ timestamp && !hovered && !isPending && !actionsMenuOpen &&
 								<Time>
 									<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />
 								</Time>
 							}
-							<RowMenu open={hovered} disabled={isPending}>
+							<RowMenu
+								open={hovered}
+								disabled={isPending}
+								forceOpen={actionsMenuOpen}
+								toggleForceOpen={this.toggleActionsMenuOpen}
+							>
 								{this.renderActions(actions)}
 							</RowMenu>
 						</TimeWrapper>

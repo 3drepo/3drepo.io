@@ -82,7 +82,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 										<Row>
 											<PropertyWrapper>
 												<Property width="160">
-													{revision.tag ? revision.tag : '(empty tag)'}
+													{revision.tag ? revision.tag : '(no tag)'}
 												</Property>
 												<Property>
 													{revision.author}
@@ -92,18 +92,18 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 												<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
 											</Property>
 										</Row>
-										<Description>{revision.desc ? revision.desc : '(empty description)'}
+										<Description>{revision.desc ? revision.desc : '(no description)'}
 									</Description>
 								</Item>)
 							) }
 						</StyledList>
-						<StyledDialogActions>
-							<Button variant="raised" color="secondary" onClick={handleClose}>
-								Cancel
-							</Button>
-						</StyledDialogActions>
 					</>
 				}
+				<StyledDialogActions>
+					<Button variant="raised" color="secondary" onClick={handleClose}>
+						Cancel
+					</Button>
+				</StyledDialogActions>
 			</StyledDialogContent>
 		);
 	}

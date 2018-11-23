@@ -19,8 +19,9 @@ import * as React from 'react';
 import { MuiThemeProvider } from '@material-ui/core';
 
 import { MuiTheme } from '../../../styles';
-import { Container, Logo } from './topMenu.styles';
+import { Container } from './topMenu.styles';
 import { UserMenu } from './components/userMenu/userMenu.component';
+import { Logo } from '../logo/logo.component';
 
 interface IProps {
 	currentUser: any;
@@ -35,21 +36,14 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 	public render() {
 		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
 
-		const logoProps = {
-			src: logoUrl,
-			alt: '3D Repo',
-			longdesc: '3DRepoBuildingInformationModellingSoftware',
-			onClick: onLogoClick
-		};
-
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Container>
-					<Logo {...logoProps} />
-					{ userMenuProps.currentUser.username && <UserMenu
+					<Logo onClick={onLogoClick} />
+					<UserMenu
 						{...userMenuProps}
 						onTeamspacesClick={this.props.onLogoClick}
-					/> }
+					/>
 				</Container>
 			</MuiThemeProvider>
 		);

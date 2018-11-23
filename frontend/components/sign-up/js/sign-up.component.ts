@@ -77,13 +77,6 @@ class SignupController implements ng.IController {
 	public $onInit() {
 
 		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
-		this.AuthService.sendLoginRequest().then((response) => {
-			if (response.data.username) {
-				this.goToLoginPage();
-			}
-		}).catch((response) => {
-			console.debug('User is not logged in');
-		});
 
 		this.enterKey = 13;
 		this.agreeToText = '',
@@ -179,13 +172,6 @@ class SignupController implements ng.IController {
 				});
 			}
 		}, true);
-
-		this.$scope.$watch('AuthService.isLoggedIn()', (newValue) => {
-			// TODO: this is a hack
-			if (newValue === true) {
-				this.goToLoginPage();
-			}
-		});
 	}
 
 	/**
@@ -226,10 +212,6 @@ class SignupController implements ng.IController {
 			}
 		}
 
-	}
-
-	public goToLoginPage() {
-		this.$state.go('app.login');
 	}
 
 	public register(event: any) {

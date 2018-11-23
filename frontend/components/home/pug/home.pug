@@ -20,8 +20,8 @@ div.homeContainer(
 
 	.homeHolder(layout="column" flex ng-if="!vm.isLegalPage")
 		top-menu(
+			ng-if="vm.isAuthenticated"
 			is-lite-mode="vm.isLiteMode"
-			logo-url="vm.topLogo"
 			on-lite-mode-change="vm.onLiteModeChange"
 			on-logout="vm.logout"
 			on-logo-click="vm.home"
@@ -43,6 +43,3 @@ div.homeContainer(
 			target="_blank"
 			rel="noopener"
 			href="{{display.page}}") {{display.title}}
-
-dialog-container
-snackbar-container

@@ -163,7 +163,6 @@ class ModelController implements ng.IController {
 		);
 
 		this.$location.path('/dashboard/teamspaces');
-
 	}
 
 	public setupModelInfo() {

@@ -33,7 +33,7 @@ import { selectTeamspacesWithAdminAccess } from '../../modules/teamspaces/teamsp
 import {
 	selectCurrentTeamspace as selectDefaultTeamspace,
 	selectCurrentUser
-} from '../../modules/teamspace';
+} from '../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	defaultTeamspace: selectDefaultTeamspace,

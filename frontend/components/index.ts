@@ -1,5 +1,4 @@
 // Components & services
-import './account/js/account.service';
 import './account/js/account-upload.service';
 import './bottom-buttons/js/bottom-buttons.component';
 import './clip/js/clip.component';
@@ -33,7 +32,6 @@ import './issues/js/issues.component';
 import './issues/js/issue-screen-shot.component';
 import './issues/js/issues-list.component';
 import './issues/js/issues.service';
-import './login/js/login.component';
 import './measure/js/measure.service';
 import './model/js/model.component';
 import './notifications/js/notification.service';
@@ -47,8 +45,6 @@ import './panel/js/panel-card-option-visible.component';
 import './panel/js/panel-card-option-chips-filter.component';
 import './panel/js/panel.component';
 import './panel/js/panel.service';
-import './password-change/js/password-change.component';
-import './password-forgot/js/password-forgot.component';
 import './payment/js/payment.component';
 import './privacy/js/privacy.component';
 import './register-request/js/register-request.component';

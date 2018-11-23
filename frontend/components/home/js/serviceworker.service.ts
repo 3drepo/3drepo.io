@@ -54,7 +54,6 @@ export class SWService {
 
 		navigator.serviceWorker.register(swPath).then(
 			(registration) => {
-
 				// Registration was successful
 				this.debugSW('registration successful: ' + registration);
 

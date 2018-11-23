@@ -25,18 +25,18 @@ import { StyledGrid, StyledGrow } from './rowMenu.styles';
 interface IProps {
 	open?: boolean;
 	disabled?: boolean;
+	forceOpen?: boolean;
+	toggleForceOpen?: (event) => void;
 }
 
 interface IState {
 	open: boolean;
-	forceOpen: boolean;
 	pointerEvents: boolean;
 }
 
 export class RowMenu extends React.PureComponent<IProps, IState> {
 	public state = {
 		open: false,
-		forceOpen: false,
 		pointerEvents: false
 	};
 
@@ -52,11 +52,6 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public toggleForceOpen = (event) => {
-		event.stopPropagation();
-		this.setState({forceOpen: !this.state.forceOpen});
-	}
-
 	public onMenuEnter = () => {
 		this.setState({pointerEvents: false});
 	}
@@ -66,8 +61,8 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { children, disabled } = this.props;
-		const { open, forceOpen } = this.state;
+		const { children, disabled, forceOpen, toggleForceOpen } = this.props;
+		const { open } = this.state;
 
 		const growProps = !disabled && {
 			in: open || forceOpen,
@@ -98,7 +93,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					{children}
 					</StyledGrid>
 				</StyledGrow>
-				<IconButton aria-label="Toggle menu" onClick={this.toggleForceOpen} disabled={disabled}>
+				<IconButton aria-label="Toggle menu" onClick={toggleForceOpen} disabled={disabled}>
 					<MoreVert fontSize="small" />
 				</IconButton>
 			</StyledGrid>

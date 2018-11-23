@@ -72,7 +72,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.login', {
 		url: '/login',
-		template: '<login login-message="vm.loginMessage"/>',
+		template: '<login headline-text="vm.loginMessage" />',
 		data: {
 			isLogoutRequired: true
 		},
@@ -100,10 +100,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state('app.passwordChange', {
 		url: '/password-change?token&username',
 		template: `
-			<password-change
-				token="vm.query.token"
-				username="vm.query.username"
-			/>
+			<password-change />
 		`,
 		data: {
 			isLogoutRequired: true
