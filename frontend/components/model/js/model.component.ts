@@ -26,7 +26,6 @@ class ModelController implements ng.IController {
 		"$compile",
 		"$mdDialog",
 
-		"ClipService",
 		"EventService",
 		"TreeService",
 		"RevisionsService",
@@ -63,7 +62,6 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
-		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -227,7 +225,6 @@ class ModelController implements ng.IController {
 		}
 
 		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
-		this.ClipService.initClip(this.settings.properties.unit);
 		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
 			.catch((error) => {
 				console.error("Error initialising tree: ", error);

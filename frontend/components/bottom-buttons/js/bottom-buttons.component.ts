@@ -39,6 +39,7 @@ class BottomButtonsController implements ng.IController {
 	private customIcons: any;
 	private isFocusMode: boolean;
 	private escapeFocusModeButton: HTMLElement;
+	private clipButton: any;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -164,6 +165,11 @@ class BottomButtonsController implements ng.IController {
 					}
 				}
 			}
+
+			this.clipButton.numClips = this.ViewerService.getNumPlanes();
+			if (!this.clipButton.numClips) {
+				this.disableClipEdit();
+			}
 		}, 1000);
 
 	}
@@ -198,6 +204,32 @@ class BottomButtonsController implements ng.IController {
 			label: "Isolate",
 			click: () => { this.isolate(); }
 		});
+
+		this.clipButton = {
+			label: "Clip",
+			editMode: false,
+			numClips: 0,
+			click: () => {
+				this.clipButtonClicked();
+			},
+			modes : [
+				{
+					tooltip: "Start box clip",
+					text: 6,
+					click: () => {
+						this.startClip(false);
+					}
+				},
+				{
+					tooltip: "Start single clip",
+					text: 1,
+					click: () => {
+						this.startClip(true);
+					}
+				}
+			]
+		};
+		this.bottomButtons.push(this.clipButton);
 
 		this.bottomButtons.push({
 			label: "Focus",
@@ -251,6 +283,43 @@ class BottomButtonsController implements ng.IController {
 		}
 		const allElementsHolder = this.getAllElementHolder();
 		allElementsHolder.style.visibility = (this.isFocusMode) ? "hidden" : "visible";
+	}
+
+	private clipButtonClicked() {
+		if (this.clipButton.editMode) {
+			// We're currently in edit mode, toggle it off
+			this.disableClipEdit();
+		} else {
+			if (this.clipButton.numClips) {
+				this.enableClipEdit();
+			} else {
+				// toggle panel
+				this.clipButton.showPanel = !this.clipButton.showPanel;
+			}
+		}
+
+	}
+
+	private startClip(isSingle) {
+		if (isSingle) {
+			this.ViewerService.startSingleClip();
+		} else {
+			this.ViewerService.startBoxClip();
+		}
+		this.clipButton.showPanel = false;
+		this.enableClipEdit();
+	}
+
+	private enableClipEdit() {
+		this.clipButton.editMode = true;
+		this.clipButton.background = "#FF9800"; // FIXME: This should really be a constant with highlight colour
+		this.ViewerService.startClipEdit();
+	}
+
+	private disableClipEdit() {
+		this.clipButton.editMode = false;
+		delete this.clipButton.background;
+		this.ViewerService.stopClipEdit();
 	}
 
 }

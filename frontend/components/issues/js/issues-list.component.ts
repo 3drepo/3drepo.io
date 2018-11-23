@@ -32,10 +32,10 @@ class IssuesListController implements ng.IController {
 		"$element",
 		"$filter",
 
-		"APIService",
 		"IssuesService",
 		"ClientConfigService",
-		"StateManager"
+		"StateManager",
+		"PanelService"
 	];
 
 	private toShow: string;
@@ -63,11 +63,10 @@ class IssuesListController implements ng.IController {
 		private $element,
 		private $filter,
 
-		private apiService: APIService,
 		private issuesService: IssuesService,
 		private clientConfigService: any,
-		private stateManager: StateManagerService
-
+		private stateManager: StateManagerService,
+		private PanelService: any
 	) {}
 
 	public $onInit() {
@@ -223,6 +222,11 @@ class IssuesListController implements ng.IController {
 				const bcfEndpoint = this.account + "/" + this.model + "/issues.bcfzip?ids=" + ids.join(",");
 				const bcfUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, bcfEndpoint);
 				this.$window.open(bcfUrl, "_blank");
+				break;
+
+			case "downloadJSON":
+				const jsonEndpoint = this.account + "/" + this.model + "/issues.json";
+				this.PanelService.downloadJSON("issues", jsonEndpoint);
 				break;
 
 			case "importBCF":
