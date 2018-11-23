@@ -16,7 +16,6 @@
  */
 import { APIService } from '../../home/js/api.service';
 import { AuthService } from '../../home/js/auth.service';
-import { ClipService } from '../../clip/js/clip.service';
 import { IChip } from '../../panel/js/panel-card-chips-filter.component';
 import { MultiSelectService } from '../../viewer/js/multi-select.service';
 import { PanelService } from '../../panel/js/panel.service';
@@ -37,7 +36,6 @@ export class RisksService {
 		'APIService',
 		'AuthService',
 		'ClientConfigService',
-		'ClipService',
 		'MultiSelectService',
 		'PanelService',
 		'TreeService',
@@ -59,7 +57,6 @@ export class RisksService {
 		private apiService: APIService,
 		private authService: AuthService,
 		private clientConfigService: any,
-		private clipService: ClipService,
 		private multiSelectService: MultiSelectService,
 		private panelService: PanelService,
 		private treeService: TreeService,
@@ -718,12 +715,11 @@ export class RisksService {
 
 			const riskData = {
 				clippingPlanes: risk.viewpoint.clippingPlanes,
-				fromClipPanel: false,
 				account: risk.account,
 				model: risk.model
 			};
 
-			this.clipService.updateClippingPlane(riskData);
+			this.viewerService.updateClippingPlanes(riskData);
 
 		} else {
 			// This risk does not have a viewpoint, go to default viewpoint

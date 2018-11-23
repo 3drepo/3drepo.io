@@ -16,7 +16,6 @@
  */
 import { APIService } from '../../home/js/api.service';
 import { AuthService } from '../../home/js/auth.service';
-import { ClipService } from '../../clip/js/clip.service';
 import { IChip } from '../../panel/js/panel-card-chips-filter.component';
 import { MultiSelectService } from '../../viewer/js/multi-select.service';
 import { PanelService } from '../../panel/js/panel.service';
@@ -36,7 +35,6 @@ export class IssuesService {
 		'APIService',
 		'AuthService',
 		'ClientConfigService',
-		'ClipService',
 		'MultiSelectService',
 		'PanelService',
 		'TreeService',
@@ -57,7 +55,6 @@ export class IssuesService {
 		private apiService: APIService,
 		private authService: AuthService,
 		private clientConfigService: any,
-		private clipService: ClipService,
 		private multiSelectService: MultiSelectService,
 		private panelService: PanelService,
 		private treeService: TreeService,
@@ -686,12 +683,11 @@ export class IssuesService {
 
 			const issueData = {
 				clippingPlanes: issue.viewpoint.clippingPlanes,
-				fromClipPanel: false,
 				account: issue.account,
 				model: issue.model
 			};
 
-			this.clipService.updateClippingPlane(issueData);
+			this.viewerService.updateClippingPlanes(issueData);
 
 		} else {
 			// This issue does not have a viewpoint, go to default viewpoint

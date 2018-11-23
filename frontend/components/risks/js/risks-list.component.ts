@@ -28,7 +28,8 @@ class RisksListController implements ng.IController {
 		'$filter',
 
 		'RisksService',
-		'ClientConfigService'
+		'ClientConfigService',
+		'PanelService'
 	];
 
 	private toShow: string;
@@ -57,7 +58,8 @@ class RisksListController implements ng.IController {
 		private $filter,
 
 		private risksService: RisksService,
-		private clientConfigService: any
+		private clientConfigService: any,
+		private PanelService: any
 	) {}
 
 	public $onInit() {
@@ -139,6 +141,11 @@ class RisksListController implements ng.IController {
 
 			case 'showPins':
 				this.risksService.state.risksCardOptions.showPins = this.menuOption.selected;
+				break;
+
+			case 'downloadJSON':
+				const jsonEndpoint = this.account + '/' + this.model + '/risks.json';
+				this.PanelService.downloadJSON('risks', jsonEndpoint);
 				break;
 		}
 	}

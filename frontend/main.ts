@@ -10,10 +10,15 @@ import * as io from 'socket.io-client';
 import 'simplebar';
 import 'ngclipboard';
 
+const requireAll = (r) => r.keys().forEach(r);
+
+// @ts-ignore
+requireAll(require.context('./css', true, /\.css/));
+
 // css from libs
 import 'simplebar/dist/simplebar.min.css';
 import 'angular-material/angular-material.min.css';
-import 'font-awesome/css/font-awesome.min.css';
+import 'font-awesome/css/font-awesome.css';
 
 // TypeScript compiled globals
 import { UnityUtil } from './globals/unity-util';
@@ -36,12 +41,8 @@ import './components';
 // React components
 import './routes/angularBindings';
 
-const requireAll = (r) => r.keys().forEach(r);
-
 // @ts-ignore
 requireAll(require.context('./components', true, /\.css/));
-// @ts-ignore
-requireAll(require.context('./css', true, /\.css/));
 // @ts-ignore
 requireAll(require.context('./components', true, /\.pug/));
 // @ts-ignore

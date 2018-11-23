@@ -42,7 +42,6 @@ export class FileInputField extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleChange = (event) => {
-
 		const { name, onChange } = this.props;
 
 		if (onChange) {

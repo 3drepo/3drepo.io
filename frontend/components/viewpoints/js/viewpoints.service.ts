@@ -25,7 +25,6 @@ export class ViewpointsService {
 		'$timeout',
 		'$q',
 		'APIService',
-		'ClipService',
 		'ViewerService'
 	];
 
@@ -36,7 +35,6 @@ export class ViewpointsService {
 		private $q: any,
 
 		private APIService: any,
-		private ClipService: any,
 		private ViewerService: any
 	) {
 		this.reset();
@@ -229,12 +227,11 @@ export class ViewpointsService {
 			if (view.clippingPlanes) {
 				const clipData = {
 					clippingPlanes: view.clippingPlanes,
-					fromClipPanel: false,
 					account: teamspace,
 					model
 				};
 
-				this.ClipService.updateClippingPlane(clipData);
+				this.ViewerService.updateClippingPlanes(clipData);
 			}
 		}
 	}

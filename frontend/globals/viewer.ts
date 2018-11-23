@@ -152,6 +152,8 @@ export class Viewer {
 	public settings;
 	public nav;
 
+	public numClips;
+
 	public setSpeed;
 	public currentViewpoint;
 	public changeAvatarHeight;
@@ -278,6 +280,7 @@ export class Viewer {
 			Module.errorhandler = UnityUtil.onUnityError;
 
 			this.currentNavMode = null;
+			this.numClips = 0;
 
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
@@ -616,23 +619,32 @@ export class Viewer {
 		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
-	public updateClippingPlanes(clipPlanes: any, fromPanel: boolean, account, model) {
-		if (!clipPlanes || clipPlanes.length === 0) {
-			UnityUtil.disableClippingPlanes();
-		}
-
-		if (clipPlanes && clipPlanes.length > 0 ) {
-			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
-		}
-
-		if (clipPlanes && clipPlanes.length > 1) {
-			console.error('More than 1 clipping planes requested!');
-			UnityUtil.updateClippingPlanes(clipPlanes[0], !fromPanel, account, model);
-		}
+	public updateClippingPlanes(clipPlanes: any, account, model) {
+		UnityUtil.updateClippingPlanes(clipPlanes ?  clipPlanes : [], false, account, model);
 	}
 
-	public clearClippingPlanes() {
-		UnityUtil.disableClippingPlanes();
+	public startBoxClip() {
+		UnityUtil.startBoxClip();
+	}
+
+	public startSingleClip() {
+		UnityUtil.startSingleClip();
+	}
+
+	public startClipEdit() {
+		UnityUtil.startClipEdit();
+	}
+
+	public stopClipEdit() {
+		UnityUtil.stopClipEdit();
+	}
+
+	public numClipPlanesUpdated(nPlanes) {
+		this.numClips = nPlanes;
+	}
+
+	public getNumPlanes() {
+		return this.numClips;
 	}
 
 	/****************************************************************************

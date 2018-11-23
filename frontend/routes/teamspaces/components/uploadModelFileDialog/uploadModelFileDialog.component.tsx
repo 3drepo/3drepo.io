@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as dayjs from 'dayjs';
 import * as Yup from 'yup';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field } from 'formik';
 
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
@@ -35,7 +35,7 @@ import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploa
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,
-	file:Yup.mixed().required('Required')
+	file: Yup.mixed().required()
 });
 
 interface IProps {
@@ -93,7 +93,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		const formatedDate = dayjs(lastRevision.timestamp).format('DD MMM YYYY');
 
 		if (lastRevision.tag) {
-			return `${info}: ${lastRevision.tag} - ${formatedDate}`;
+			return `${info}: ${ lastRevision.tag } - ${ formatedDate }`;
 		}
 
 		return `${info}: ${formatedDate}`;
@@ -132,7 +132,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
 						<Field
 							name="revisionName"
-							render={({ field, form }) =>
+							render={ ({ field, form }) =>
 								<TextField
 									{...field}
 									error={Boolean(form.errors.revisionName)}
@@ -141,10 +141,10 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									margin="normal"
 									fullWidth={true}
 								/>}
-						/>
+								/>
 						<Field
 							name="revisionDesc"
-							render={({ field }) =>
+							render={ ({ field }) =>
 								<TextField
 									{...field}
 									label="Description"
@@ -152,7 +152,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									fullWidth={true}
 								/>}
 						/>
-						{modelSettings.properties &&
+						{ modelSettings.properties &&
 							<ModelInfo>
 								{`Model units: ${unitsMap[modelSettings.properties.unit]}`}
 							</ModelInfo>
@@ -169,20 +169,20 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									onClick={handleClose}
 									color="secondary">
 									Cancel
-									</CancelButton>}
+									</CancelButton> }
 							/>
-							<Field render={({ form }) =>
+							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
 									variant="raised"
 									color="secondary"
 									disabled={(!form.isValid || form.isValidating)}>
-									Upload
-									</Button>} />
+										Upload
+									</Button>}	/>
 						</StyledDialogActions>
 					</DialogContent>
 				</Form>
-			</Formik>
+		</Formik>
 		);
 	}
 }

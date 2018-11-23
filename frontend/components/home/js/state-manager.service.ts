@@ -30,7 +30,6 @@ export class StateManagerService {
 
 		'AuthService',
 		'ClientConfigService',
-		'ClipService',
 		'CompareService',
 		'GroupsService',
 		'PanelService',
@@ -60,7 +59,6 @@ export class StateManagerService {
 
 		private AuthService: any,
 		private ClientConfigService: any,
-		private ClipService: any,
 		private CompareService: any,
 		private GroupsService: any,
 		private PanelService: any,
@@ -90,7 +88,6 @@ export class StateManagerService {
 	public resetServiceStates() {
 		// We reset the state of all our services so that
 		// they're back to intial states
-		this.ClipService.reset();
 		this.CompareService.reset();
 		this.GroupsService.reset();
 		this.PanelService.reset();

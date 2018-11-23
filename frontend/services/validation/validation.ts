@@ -61,7 +61,9 @@ export const schema = {
 		.matches(/^[A-Za-z0-9_]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC),
 
 	required: Yup.string()
-		.required(VALIDATIONS_MESSAGES.REQUIRED),
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
+		.max(20, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.matches(/^[A-Za-z0-9_]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC)
 };
 
 export const getPasswordStrengthMessage = (score: number) => {

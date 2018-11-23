@@ -15,6 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dispatch, getState } from '../../../helpers/migration';
+import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
+
 class ModelController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -26,7 +29,6 @@ class ModelController implements ng.IController {
 		'$compile',
 		'$mdDialog',
 
-		'ClipService',
 		'EventService',
 		'TreeService',
 		'RevisionsService',
@@ -63,7 +65,6 @@ class ModelController implements ng.IController {
 		private $compile,
 		private $mdDialog,
 
-		private ClipService,
 		private EventService,
 		private TreeService,
 		private RevisionsService,
@@ -102,6 +103,9 @@ class ModelController implements ng.IController {
 				this.$element[0].querySelector('#modelUI')
 			);
 		});
+
+		const username = selectCurrentUser (getState()).username;
+		dispatch(CurrentUserActions.fetchUser(username));
 
 		this.watchers();
 	}
@@ -224,7 +228,6 @@ class ModelController implements ng.IController {
 		}
 
 		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
-		this.ClipService.initClip(this.settings.properties.unit);
 		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
 			.catch((error) => {
 				console.error('Error initialising tree: ', error);
