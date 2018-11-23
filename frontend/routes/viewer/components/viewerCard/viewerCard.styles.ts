@@ -16,11 +16,18 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles/colors';
 
 export const TitleContainer = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
+
+  && {
+    button {
+      color: white;
+    }
+  }
 `;
 
 export const Title = styled.div`
@@ -34,20 +41,21 @@ export const Actions = styled.div`
 `;
 
 export const Action = styled.span`
-  cursor: pointer;
-  margin-left: 18px;
-  height: 22px;
+  color: ${COLOR.WHITE};
 `;
 
 export const TitleIcon = styled.i`
   align-self: center;
   height: 22px;
-  cursor: pointer;
   margin-right: 18px;
 `;
 
 export const ViewCardContent = styled.div`
-  background-color: rgb(250, 250, 250);
+  background-color: ${COLOR.WHITE_87};
+  padding: 24px;
 `;
 
-export const ViewCardFooter = styled.div``;
+export const ViewCardFooter = styled.div`
+  background-color: ${COLOR.WHITE};
+  padding: 24px;
+`;

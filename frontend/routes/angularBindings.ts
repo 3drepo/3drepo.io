@@ -19,7 +19,7 @@ import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
 import { ViewerCard } from './viewer/components/viewerCard/viewerCard.component';
-import { Gis } from './viewer/components/gis/gis.component';
+import Gis from './viewer/components/gis/gis.container';
 
 angular
 	.module('3drepo')

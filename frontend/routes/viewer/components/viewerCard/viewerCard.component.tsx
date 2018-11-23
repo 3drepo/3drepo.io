@@ -41,7 +41,7 @@ interface IProps {
 	title: string;
 	Icon?: JSX.Element;
 	actions?: any[];
-	renderFooterContent?: () => JSX.Element;
+	renderFooterContent?: () => JSX.Element | null;
 }
 
 export class ViewerCard extends React.PureComponent<IProps, any> {
@@ -58,9 +58,9 @@ export class ViewerCard extends React.PureComponent<IProps, any> {
 
 	public renderTitleActions = (actions) => (
 		<Actions>
-			{actions.map(({ Icon, handleAction }, index) => (
+			{actions.map(({ Button }, index) => (
 				<Action key={index}>
-					<Icon onClick={handleAction} />
+					<Button />
 				</Action>
 			))}
 		</Actions>

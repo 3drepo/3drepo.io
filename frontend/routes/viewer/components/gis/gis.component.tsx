@@ -16,53 +16,155 @@
  */
 
 import * as React from 'react';
-
+import { cond } from 'lodash';
 import { ViewerCard } from '../viewerCard/viewerCard.component';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+
+import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
 import SearchIcon from '@material-ui/icons/Search';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import SaveIcon from '@material-ui/icons/Save';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 
 import { Container } from './gis.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	location: any;
+	fetchModelSettings: (teamspace, modelId) => void;
+	settings: any;
+	isPending: boolean;
+}
+interface IState {
+	settingsModeActive: boolean;
 }
 
+const MenuButton = ({ IconProps, Icon, ...props }) => (
+	<IconButton
+		{...props}
+		aria-label="Show GIS menu"
+		aria-haspopup="true"
+	>
+		<MoreIcon {...IconProps} />
+	</IconButton>
+);
+
 export class Gis extends React.PureComponent<IProps, any> {
-	public handleIconClick = () => {}
+	public state = {
+		settingsModeActive: false
+	};
 
-	public handleSearchClick = () => {}
-
-	public handleMoreClick = () => {}
-
-	public getTitleIcon = () => {
-		return <LayersIcon onClick={this.handleIconClick} />;
+	public componentDidMount() {
+		const { teamspace, modelId } = this.getDataFromPathname();
+		this.props.fetchModelSettings(teamspace, modelId);
 	}
+
+	public componentDidUpdate(prevProps) {
+		const { settings } = this.props;
+		const pointExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
+		console.log('cdU', pointExists);
+	}
+
+	public getDataFromPathname = () => {
+		const pathnameElements = this.props.location.pathname.replace('/viewer/', '').split('/');
+
+		return {
+			teamspace: pathnameElements[0],
+			modelId: pathnameElements[1],
+			revision: pathnameElements[2] || null
+		};
+	}
+
+	public handleSearchClick = () => {};
+
+	public handleSaveClick = () => {};
+
+	public handleToggleSettings = () => {
+		this.setState({
+			settingsModeActive: !this.state.settingsModeActive
+		});
+	}
+
+	public getTitleIcon = () => <LayersIcon />;
+
+	public renderMenuContent = () => (
+		<List>
+			<ListItem onClick={this.handleToggleSettings} button>Settings</ListItem>
+		</List>
+	)
+
+	public getMenuButton = () => 	(
+		<ButtonMenu
+			renderButton={MenuButton}
+			renderContent={this.renderMenuContent}
+			PopoverProps={ {
+				anchorOrigin: {
+					vertical: 'top',
+					horizontal: 'right'
+				}
+			} }
+	/>)
+
+	public getSearchButton = () => 	(
+		<IconButton aria-label="Search" onClick={this.handleSearchClick}>
+			<SearchIcon color="inherit" />
+		</IconButton>
+	)
 
 	public getActions = () => [
 		{
-			Icon: SearchIcon,
-			handleAction: this.handleSearchClick
+			Button: this.getSearchButton
 		},
 		{
-			Icon: MoreIcon,
-			handleAction: this.handleMoreClick
+			Button: this.getMenuButton
 		}
 	]
 
-	public renderFooterContent = () => (
-		<>GIS footer</>
-	)
+	public renderFooterContent = (isActive) => {
+		if (isActive) {
+			return (
+				<IconButton aria-label="Save" onClick={this.handleSaveClick}>
+					<SaveIcon color="inherit" />
+				</IconButton>	
+			);
+		}
+		return null;
+	}
+
+	public renderSettings = () => {
+		return (
+			<>
+				GIS Point - World Coordinates
+				Latitude
+				Longitude
+				Elevation
+				Angle from North (clockwise degrees)
+				Project base Point - Model Coordinates
+				X
+				Y
+				Z
+			</>
+		);
+	}
+
+	public renderMapLayers = () => {
+		return (
+			<>Map Layers</>
+		);
+	}
 
 	public render() {
+		const { settingsModeActive } = this.state;
+
 		return (
 			<ViewerCard
 				title="GIS"
 				Icon={this.getTitleIcon()}
 				actions={this.getActions()}
-				renderFooterContent={this.renderFooterContent}
-				>
-				GIS content
+				renderFooterContent={() => this.renderFooterContent(settingsModeActive)}
+			>
+				{settingsModeActive ? this.renderSettings() : this.renderMapLayers()}
 			</ViewerCard>
 		);
 	}
