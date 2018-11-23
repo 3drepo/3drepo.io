@@ -23,6 +23,5 @@ md-menu-bar
 							ng-repeat="menuItem in menuItem.menu track by menuItem.label"
 							ng-if="!menuItem.hidden")
 
-						div(layout="column" layout-align="center center")
 							div(class="md-button md-ink-ripple" ng-click="vm.onClickItem(menuItem, parentItem)" aria-label="{{menuItem.label}}" ng-attr-md-prevent-menu-close="{{menuItem.stopClose && 'md-prevent-menu-close'}}" ng-disabled="menuItem.disabled")
-										ng-include(src="'/templates/panel-card-option-menu-item.html'")
+								ng-include(src="'/templates/panel-card-option-menu-item.html'")
