@@ -42,27 +42,11 @@ const CSSLoader = {
 const CSSExternalLoader = {
   test: /\.css$/,
   include: /node-modules/,
-  use: [
-    'style-loader',
-    {
-      loader: 'css-loader',
-      options: {
-        importLoaders: 1
-      }
-    },
-    {
-      loader: 'postcss-loader',
-      options: {
-        config: {
-          path: './internals/webpack/tools'
-        }
-      }
-    }
-  ]
+  use: ['style-loader', 'css-loader']
 };
 
 const FontLoader = {
-  test: /\.(eot|otf|ttf|woff|woff2)$/,
+  test: /\.(woff(2)?|ttf|otf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
   use: [{
     loader: 'file-loader',
     options: {
