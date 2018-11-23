@@ -28,7 +28,7 @@ const BaseStyles = styled(Grid)`
 
 export const ItemLabel = styled(BaseStyles)`
   font-size: 14px;
-	color: ${COLOR.BLACK_60};
+  color: ${COLOR.BLACK_60};
 `;
 
 export const ItemLabelDetail = styled(BaseStyles)`
