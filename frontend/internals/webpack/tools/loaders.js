@@ -18,7 +18,7 @@ const LodashTSLoader = {
 
 const CSSLoader = {
   test: /\.css$/,
-  exclude: /node-modules/,
+  exclude: /node_modules/,
   use:[
     'style-loader', 
     { 
@@ -41,12 +41,13 @@ const CSSLoader = {
 
 const CSSExternalLoader = {
   test: /\.css$/,
-  include: /node-modules/,
+  include: /node_modules/,
   use: ['style-loader', 'css-loader']
 };
 
 const FontLoader = {
   test: /\.(woff(2)?|ttf|otf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+  include: /node_modules/,
   use: [{
     loader: 'file-loader',
     options: {
