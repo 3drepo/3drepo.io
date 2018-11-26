@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { cond } from 'lodash';
+import { cond, isEmpty } from 'lodash';
 import { ViewerCard } from '../viewerCard/viewerCard.component';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 
@@ -28,13 +28,16 @@ import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 
-import { Container } from './gis.styles';
+import { SettingsForm } from './components/settingsForm/settingsForm.component';
 
 interface IProps {
 	location: any;
 	fetchModelSettings: (teamspace, modelId) => void;
+	fetchModelMaps: (teamspace, modelId) => void;
+	updateModelSettings: (modelData, settings) => void;
 	settings: any;
 	isPending: boolean;
+	maps: any[];
 }
 interface IState {
 	settingsModeActive: boolean;
@@ -50,20 +53,30 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
-export class Gis extends React.PureComponent<IProps, any> {
+export class Gis extends React.PureComponent<IProps, IState> {
 	public state = {
-		settingsModeActive: false
+		settingsModeActive: true
 	};
+
+	public formRef = React.createRef<any>();
 
 	public componentDidMount() {
 		const { teamspace, modelId } = this.getDataFromPathname();
 		this.props.fetchModelSettings(teamspace, modelId);
+		this.props.fetchModelMaps(teamspace, modelId);
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { settings } = this.props;
-		const pointExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
-		console.log('cdU', pointExists);
+		const { settings, maps } = this.props;
+		const changes = {} as any;
+
+		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
+
+		if (isEmpty(prevProps.settings) && !isEmpty(this.props.settings)) {
+			changes.settingsModeActive = !pointsExists;
+		}
+
+		this.setState(changes);
 	}
 
 	public getDataFromPathname = () => {
@@ -76,9 +89,9 @@ export class Gis extends React.PureComponent<IProps, any> {
 		};
 	}
 
-	public handleSearchClick = () => {};
-
-	public handleSaveClick = () => {};
+	public handleSaveClick = () => {
+		this.formRef.current.formikRef.current.submitForm();
+	}
 
 	public handleToggleSettings = () => {
 		this.setState({
@@ -104,47 +117,52 @@ export class Gis extends React.PureComponent<IProps, any> {
 					horizontal: 'right'
 				}
 			} }
+			ButtonProps={ {
+				disabled: this.props.isPending || this.state.settingsModeActive
+			} }
 	/>)
 
-	public getSearchButton = () => 	(
-		<IconButton aria-label="Search" onClick={this.handleSearchClick}>
-			<SearchIcon color="inherit" />
-		</IconButton>
-	)
-
 	public getActions = () => [
-		{
-			Button: this.getSearchButton
-		},
 		{
 			Button: this.getMenuButton
 		}
 	]
 
-	public renderFooterContent = (isActive) => {
-		if (isActive) {
+	public renderFooterContent = () => {
+		if (this.state.settingsModeActive) {
 			return (
-				<IconButton aria-label="Save" onClick={this.handleSaveClick}>
+				<IconButton type="submit" aria-label="Save" onClick={this.handleSaveClick}>
 					<SaveIcon color="inherit" />
-				</IconButton>	
+				</IconButton>
 			);
 		}
 		return null;
 	}
 
 	public renderSettings = () => {
+		let values = {} as any;
+		const settings = this.props.settings;
+
+		if (settings.surveyPoints && settings.surveyPoints.length) {
+			const [ {
+				position: [ axisX, axisY, axisZ ],
+				latLong: [ latitude, longitude ]
+			} ] = settings.surveyPoints;
+
+			values = { axisX, axisY, axisZ, latitude, longitude };
+		}
+
+		if (settings.angleFromNorth) {
+			values.angleFromNorth = settings.angleFromNorth;
+		}
+
 		return (
-			<>
-				GIS Point - World Coordinates
-				Latitude
-				Longitude
-				Elevation
-				Angle from North (clockwise degrees)
-				Project base Point - Model Coordinates
-				X
-				Y
-				Z
-			</>
+			<SettingsForm
+				ref={this.formRef}
+				initialValues={values}
+				updateModelSettings={this.props.updateModelSettings}
+				getDataFromPathname={this.getDataFromPathname}
+			/>
 		);
 	}
 
@@ -162,9 +180,12 @@ export class Gis extends React.PureComponent<IProps, any> {
 				title="GIS"
 				Icon={this.getTitleIcon()}
 				actions={this.getActions()}
-				renderFooterContent={() => this.renderFooterContent(settingsModeActive)}
+				renderFooterContent={this.renderFooterContent}
+				pending={this.props.isPending}
 			>
-				{settingsModeActive ? this.renderSettings() : this.renderMapLayers()}
+				{
+					settingsModeActive ? this.renderSettings() : this.renderMapLayers()
+				}
 			</ViewerCard>
 		);
 	}

@@ -15,26 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
 
-export const selectModelDomain = (state) => Object.assign({}, state.model);
+import { COLOR } from './../../../../../../styles/colors';
 
-export const selectSettings = createSelector(
-	selectModelDomain, (state) => state.settings
-);
+export const Container = styled.div``;
 
-export const selectRevisions = createSelector(
-	selectModelDomain, (state) => state.revisions
-);
+export const Header = styled.div``;
 
-export const selectIsPending = createSelector(
-	selectModelDomain, (state) => state.isPending
-);
+export const Headline = styled(Typography)`
+  && {
+    margin-top: 24px;
+  }
+`;
 
-export const selectUploadStatus = createSelector(
-	selectModelDomain, (state) => state.uploadStatus
-);
-
-export const selectMaps = createSelector(
-	selectModelDomain, (state) => state.maps
-);
+export const StyledTextField = styled(TextField)`
+  width: 100%;
+`;

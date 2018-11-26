@@ -27,6 +27,7 @@ import {
 	ViewCardFooter
 } from './viewerCard.styles';
 import { Panel } from '../../../components/panel/panel.component';
+import { Loader } from './../../../components/loader/loader.component';
 
 const ViewerCardTitle = ({title, Icon, renderActions}) => {
 	return (
@@ -42,6 +43,7 @@ interface IProps {
 	Icon?: JSX.Element;
 	actions?: any[];
 	renderFooterContent?: () => JSX.Element | null;
+	pending?: boolean;
 }
 
 export class ViewerCard extends React.PureComponent<IProps, any> {
@@ -66,18 +68,29 @@ export class ViewerCard extends React.PureComponent<IProps, any> {
 		</Actions>
 	)
 
+	public renderLoader = () => (
+		<ViewCardContent>
+			<Loader />
+		</ViewCardContent>
+	)
+
 	public render() {
-		const { children, renderFooterContent } = this.props;
+		const { children, renderFooterContent, pending } = this.props;
 
 		return (
 			<Panel title={this.getTitle()}>
-				<ViewCardContent>
-					{children}
-				</ViewCardContent>
-				{renderFooterContent &&
-				<ViewCardFooter>
-					{renderFooterContent()}
-				</ViewCardFooter>
+				{
+					pending ? this.renderLoader() :
+					<>
+						<ViewCardContent>
+							{children}
+						</ViewCardContent>
+						{renderFooterContent &&
+						<ViewCardFooter>
+							{renderFooterContent()}
+						</ViewCardFooter>
+						}
+					</>
 				}
 			</Panel>
 		);

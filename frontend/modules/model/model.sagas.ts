@@ -137,6 +137,16 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 	}
 }
 
+export function* fetchMaps({ teamspace, modelId }) {
+	try {
+		const response = yield API.getModelMaps(teamspace, modelId);
+
+		yield put(ModelActions.fetchMapsSuccess(response.data.maps));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('get', 'model maps', e.response));
+	}
+}
+
 export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS, fetchSettings);
 	yield takeLatest(ModelTypes.UPDATE_SETTINGS, updateSettings);
@@ -146,4 +156,5 @@ export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.ON_MODEL_STATUS_CHANGED, onModelStatusChanged);
 	yield takeLatest(ModelTypes.SUBSCRIBE_ON_STATUS_CHANGE, subscribeOnStatusChange);
 	yield takeLatest(ModelTypes.UNSUBSCRIBE_ON_STATUS_CHANGE, unsubscribeOnStatusChange);
+	yield takeLatest(ModelTypes.FETCH_MAPS, fetchMaps);
 }

@@ -19,16 +19,19 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { connect, addRouting } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings, selectIsPending } from './../../../../modules/model';
+import { ModelActions, selectSettings, selectIsPending, selectMaps } from './../../../../modules/model';
 import { Gis } from './gis.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	maps: selectMaps
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelSettings: ModelActions.fetchSettings
+	fetchModelSettings: ModelActions.fetchSettings,
+	fetchModelMaps: ModelActions.fetchMaps,
+	updateModelSettings: ModelActions.updateSettings
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis)));
