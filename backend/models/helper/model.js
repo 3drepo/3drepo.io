@@ -1187,7 +1187,7 @@ function uploadFile(req) {
 
 				const size = parseInt(fileReq.headers["content-length"]);
 
-				if (format.indexOf('i') && format.indexOf('dgn')) {
+				if (format.indexOf('i') && format.indexOf('dgn') === -1) {
 					return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 				}
 
