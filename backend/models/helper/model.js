@@ -1182,7 +1182,7 @@ function uploadFile(req) {
 					return cb({resCode: responseCodes.FILE_NO_EXT});
 				}
 
-				if (format.indexOf("i") !== -1 && format.indexOf("dgn") !== -1) {
+				if (format[format.length - 1] === "dgn" && format[format.length - 2] === "i") {
 					return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 				}
 
