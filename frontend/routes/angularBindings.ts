@@ -14,7 +14,6 @@ import PasswordChange from './passwordChange/passwordChange.container';
 // Components
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
-import Notifications from './notifications/notifications.container';
 
 angular
 	.module('3drepo')
@@ -24,6 +23,5 @@ angular
 	.component('modelSettings', wrap(ModelSettings))
 	.component('login', wrap(Login, ['headlineText']))
 	.component('passwordForgot', wrap(PasswordForgot))
-	.component('passwordChange', wrap(PasswordChange))
-    .component('notifications', wrap(Notifications, ['location', 'stateManager', 'chatService', 'userAccount']));
-
+	.component('passwordChange', wrap(PasswordChange));
+/*     .component('notifications', wrap(Notifications, ['location', 'stateManager', 'chatService', 'userAccount'])); */

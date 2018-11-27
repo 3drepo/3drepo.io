@@ -15,21 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import * as LogoStyles from '../logo/logo.styles';
+import { createSelector } from 'reselect';
 
-export const Container = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  padding-right: 5px;
-  height: 80px;
+export const selectNotificationsDomain = (state) => Object.assign({}, state.notifications);
 
-  ${LogoStyles.Image} {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-`;
+export const selectNotifications = createSelector(
+	selectNotificationsDomain, (state) => state.notifications
+);

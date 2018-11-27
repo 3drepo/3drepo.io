@@ -29,26 +29,45 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	patchNotification: ['notificationPatch']
 }, { prefix: 'NOTIFICATIONS_' });
 
-export const INITIAL_STATE = [];
+export const INITIAL_STATE = {
+	notifications: []
+};
 
-export const setNotifications = (state = INITIAL_STATE, { notifications }) =>  (notifications) ;
+export const setNotifications = (state = INITIAL_STATE, { notifications }) => {
+	return {...state, notifications};
+};
 
 const sortByTimeStamp = (notifications) => notifications.sort((a, b) => b.timestamp - a.timestamp);
 
-export const upsertNotification = (state = INITIAL_STATE, { notification }) =>  {
-	const index = state.findIndex((n) => n._id === notification._id);
-	const newState = state.concat([]);
-	newState.splice(index, (index >= 0 ? 1 : 0), notification);
-	return sortByTimeStamp(newState);
+const setSortedNotifications = (state, notifications) => {
+	return { ...state, notifications: sortByTimeStamp(notifications) };
 };
 
-export const deleteNotification = (state = INITIAL_STATE, { notification }) =>  {
-	return state.filter((n) => n._id !== notification._id);
+export const upsertNotification = (state = INITIAL_STATE, { notification }) => {
+	const index = state.notifications.findIndex((n) => n._id === notification._id);
+	const notifications = state.notifications.concat([]);
+	notifications.splice(index, (index >= 0 ? 1 : 0), notification);
+
+	return setSortedNotifications(state, notifications);
 };
 
-export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) =>  {
+export const deleteNotification = (state = INITIAL_STATE, { notification }) => {
+	const updatedNotifications = state.notifications.filter(({ _id }) => _id !== notification._id);
+
+	return {...state, notifications: updatedNotifications };
+};
+
+export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) => {
 	const _id = notificationPatch._id;
-	return sortByTimeStamp(state.map((n) => n._id === _id ?  {...n, ...notificationPatch} : n ));
+	const updatedNotifications = state.notifications.map((notification) => {
+		if (notification._id === _id) {
+			return { ...notification, ...notificationPatch };
+		}
+
+		return notification;
+	});
+
+	return setSortedNotifications(state, updatedNotifications);
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

@@ -14,21 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { ListItem } from '@material-ui/core';
-import { FONT_WEIGHT } from '../../styles';
 
-export const EmptyItem = styled(ListItem)`
-	&&& {
-		height: calc(100% - 64px);
-		display: flex;
-		align-items: center;
-		justify-content: center;
+import * as React from 'react';
+import { ItemLabel } from '../../../components.styles';
+import { NotificationsPanelItem } from '../../notifications.styles';
+import { NotificationsPanelHeaderContainer } from './panelHeader.styles';
+
+
+export class NotificationsPanelHeader extends React.PureComponent<any, any> {
+	public render() {
+		const { labelLeft, labelRight, style } = this.props;
+		return (
+			<NotificationsPanelItem style={style}>
+				<NotificationsPanelHeaderContainer>
+					<ItemLabel>
+						{labelLeft}
+					</ItemLabel>
+					<ItemLabel>
+						{labelRight}
+					</ItemLabel>
+				</NotificationsPanelHeaderContainer>
+			</NotificationsPanelItem>
+		);
 	}
-`;
-
-export const EmptyItemText = styled.h3`
-	max-width: 142px;
-	font-weight: ${FONT_WEIGHT.NORMAL};
-	color: rgba(0,0,0,0.54);
-`;
+}

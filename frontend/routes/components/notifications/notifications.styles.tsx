@@ -14,24 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import * as React from 'react';
-import { Icon } from '@material-ui/core';
-import { EmptyItem, EmptyItemText } from './notifications.emptyIem.styles';
+import { ListItem, List} from '@material-ui/core';
+import Notifications from '@material-ui/icons/Notifications';
+import { COLOR } from '../../../styles';
 
-export class NotificationEmptyItem extends React.PureComponent {
-	public render = () => {
-		return (
-			<EmptyItem>
-				<div>
-					<EmptyItemText>
-						You have no new notifications.
-					</EmptyItemText>
-				</div>
-				<div >
-					<Icon fontSize='large' color='disabled' >notifications</Icon>
-				</div>
-			</EmptyItem>
-			);
+export const NotificationsPanelItem = styled(ListItem)`
+	&& {
+		padding-left: 5px;
+		padding-right: 5px;
+		padding-bottom: 5px;
+		padding-top: 0;
+		width: 100%;
+		display: block;
 	}
-}
+`;
+
+export const NotificationsList = styled(List)`
+	&& {
+		height: 100%;
+		width: 300px;
+	}
+`;
+
+export const NotificationsIcon = styled(Notifications)`
+	&& {
+		color: ${COLOR.WHITE};
+		font-size: 35px;
+		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
+	}
+`;

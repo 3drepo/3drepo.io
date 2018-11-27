@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,25 +16,18 @@
  */
 
 import * as React from 'react';
-import DialogContent from '@material-ui/core/DialogContent';
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
+import Notifications from '@material-ui/icons/Notifications';
+import { EmptyItem, EmptyItemText } from './emptyItem.styles';
 
-interface IProps {
-	handleResolve: () => string;
-	handleCancel: () => string;
+export class NotificationEmptyItem extends React.PureComponent {
+	public render() {
+		return (
+			<EmptyItem>
+				<Notifications fontSize="large" color="disabled" />
+				<EmptyItemText>
+					You have no new notifications.
+				</EmptyItemText>
+			</EmptyItem>
+			);
+	}
 }
-export const DeleteAllNotificationsDialog = (props) => {
-	return (
-		<>
-			<DialogContent>
-				Are you sure you want to delete all notifications?
-			</DialogContent>
-
-			<DialogActions>
-				<Button onClick={props.handleClose} color="secondary">Cancel</Button>;
-				<Button onClick={props.handleResolve} variant="raised" color="secondary">Ok</Button>;
-			</DialogActions>
-		</>
-	);
-};

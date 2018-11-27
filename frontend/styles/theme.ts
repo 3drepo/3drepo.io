@@ -145,7 +145,8 @@ export const MuiTheme = createMuiTheme({
 		MuiToolbar: {
 			root: {
 				backgroundColor: theme.colors.PRIMARY_MAIN,
-				color: theme.colors.WHITE_87
+				color: theme.colors.WHITE_87,
+				padding: '0 16px !important'
 			},
 			regular: {
 				/* tslint:disable */
@@ -160,7 +161,11 @@ export const MuiTheme = createMuiTheme({
 		MuiDrawer: {
 			paper: {
 				backgroundColor: 'rgb(250,250,250)',
-				boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.2)'
+				boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.2)',
+				zIndex: 10
+			},
+			paperAnchorDockedRight: {
+				borderLeft: 'none'
 			}
 		},
 		MuiListItemText: {

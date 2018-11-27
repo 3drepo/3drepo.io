@@ -16,9 +16,26 @@
  */
 
 import styled from 'styled-components';
-import { ListSubheader } from '@material-ui/core';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import Toolbar from '@material-ui/core/Toolbar';
+
+export const StyledToolbar = styled(Toolbar)`
+	&& {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+`;
 
 export const ListSubheaderContainer = styled(ListSubheader)`
-&& {
-	padding: 0px;
-}`;
+	&& {
+		padding: 0px;
+	}
+`;
+
+export const RightContent = styled.div`
+	height: 100%;
+	align-items: center;
+	display: flex;
+	margin-right: -15px;
+`;

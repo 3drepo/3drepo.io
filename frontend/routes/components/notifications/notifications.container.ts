@@ -15,16 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../helpers/migration';
+import { connect } from '../../../helpers/migration';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Notifications } from './notifications.component';
-import { NotificationsActions} from '../../modules/notifications';
-import { UserManagementActions, selectUsersSuggestions } from '../../modules/userManagement';
+import { NotificationsActions, selectNotifications } from '../../../modules/notifications';
+import { selectCurrentUser } from '../../../modules/currentUser';
+import { withRouter } from 'react-router';
 
 const mapStateToProps = createStructuredSelector({
-	notifications: (x) => x.notifications
+	notifications: selectNotifications,
+	currentUser: selectCurrentUser
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -36,4 +38,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	deleteNotification: NotificationsActions.deleteNotification
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Notifications);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications));

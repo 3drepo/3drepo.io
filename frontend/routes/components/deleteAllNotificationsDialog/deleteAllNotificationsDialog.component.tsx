@@ -15,21 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import * as LogoStyles from '../logo/logo.styles';
+import * as React from 'react';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
 
-export const Container = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  padding-right: 5px;
-  height: 80px;
+interface IProps {
+	handleResolve: () => string;
+	handleClose: () => string;
+}
+export const DeleteAllNotificationsDialog = (props: IProps) => {
+	return (
+		<>
+			<DialogContent>
+				Are you sure you want to delete all notifications?
+			</DialogContent>
 
-  ${LogoStyles.Image} {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-`;
+			<DialogActions>
+				<Button onClick={props.handleClose} color="secondary">Cancel</Button>;
+				<Button onClick={props.handleResolve} variant="raised" color="secondary">Ok</Button>;
+			</DialogActions>
+		</>
+	);
+};

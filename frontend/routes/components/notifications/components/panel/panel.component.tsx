@@ -15,11 +15,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { List } from '@material-ui/core';
 import * as React from 'react';
-import { INotification, NotificationItem } from './notification.item';
-import { NotificationsPanelHeader } from './notifications.panel.header';
-import { NotificationsPanelItem } from './notifications.styles';
+
+import { NotificationsPanelItem } from '../../notifications.styles';
+import { INotification, NotificationItem } from '../notificationItem/notificationItem.component';
+import { NotificationsPanelHeader } from '../panelHeader/panelHeader.component';
+import { List } from './panel.styles';
 
 interface IProps {
 	labelLeft?: string;
@@ -27,28 +28,31 @@ interface IProps {
 	notifications: INotification[];
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
-	location: any;
-	stateManager: any;
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
-	public render = () => {
+	public renderNotifications = (notifications) => {
+		return notifications.map((notification) => (
+			<NotificationItem key={notification._id} {...notification} {...this.props} />
+		));
+	}
+
+	public render() {
 		const {notifications, labelLeft, labelRight} = this.props;
 
-		if (this.props.notifications.length === 0) {
+		if (!notifications.length) {
 			return null;
 		}
 
-		return (<>
-					<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
-					<NotificationsPanelItem>
-							<List style={{paddingBottom: 0, paddingTop: 0}} >
-								{notifications.map((notification) =>
-									<NotificationItem key={notification._id}
-									{...notification} {...this.props }/>
-								)}
-							</List>
-					</NotificationsPanelItem>
-				</>);
+		return (
+			<>
+				<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
+				<NotificationsPanelItem>
+					<List style={{paddingBottom: 0, paddingTop: 0}}>
+						{this.renderNotifications(notifications)}
+					</List>
+				</NotificationsPanelItem>
+			</>
+		);
 	}
 }

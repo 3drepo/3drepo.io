@@ -14,13 +14,12 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as API from '../../../services/api";
-import { APIService } from "../../home/js/api.service';
-import { dispatch } from "../../../helpers/migration";
+import * as API from '../../../services/api';
+import { dispatch, history } from '../../../helpers/migration';
 import { IChip } from '../../panel/js/panel-card-chips-filter.component';
-import { IssuesService } from "./issues.service";
-import { NotificationsActions } from "../../../modules/notifications";
-import { StateManagerService } from "../../home/js/state-manager.service";
+import { IssuesService } from './issues.service';
+import { NotificationsActions } from '../../../modules/notifications';
+import { StateManagerService } from '../../home/js/state-manager.service';
 
 class IssuesListController implements ng.IController {
 
@@ -31,10 +30,11 @@ class IssuesListController implements ng.IController {
 		'$compile',
 		'$element',
 		'$filter',
+		'$state',
 
 		'IssuesService',
-        'ClientConfigService',
-        'StateManager',
+		'ClientConfigService',
+		'StateManager',
 		'PanelService'
 	];
 
@@ -62,6 +62,7 @@ class IssuesListController implements ng.IController {
 		private $compile,
 		private $element,
 		private $filter,
+		private $state,
 
 		private issuesService: IssuesService,
 		private clientConfigService: any,
@@ -90,7 +91,7 @@ class IssuesListController implements ng.IController {
 			true
 		);
 
-		this.$scope.$watch("vm.stateManager.state.notificationId", this.filterByNotification.bind(this));
+		this.$scope.$watch('vm.$state.params.notificationId', this.filterByNotification.bind(this));
 
 		this.$scope.$watch('vm.issuesToShow', () => {
 			this.setContentAndSize();
@@ -104,8 +105,9 @@ class IssuesListController implements ng.IController {
 			const oldDateFromChip = oldChips.find((c) => c.type === 'date_from');
 			const oldDateToChip = oldChips.find((c) => c.type === 'date_to');
 
-			if (this.stateManager.state.notificationId && chips.length === 0) {
-				this.stateManager.state.notificationId = null;
+			if (this.$state.params.notificationId && chips.length === 0) {
+				const queryWithoutNotification = location.search.replace(`notificationId=${this.$state.params.notificationId}`, '');
+				history.push(`${location.pathname}${queryWithoutNotification}`);
 			}
 
 			if (!!dateFromChip && !!dateToChip) {
@@ -153,20 +155,23 @@ class IssuesListController implements ng.IController {
 
 	public filterByNotification(notificationId) {
 		if (notificationId) {
-			let chip: IChip = {name: "assignedIssues",
-			nameType: "Notification",
-			value: [],
-			type: "notification"};
+			let chip: IChip = {
+				name: 'assignedIssues',
+				nameType: 'Notification',
+				value: [],
+				type: 'notification'
+			};
 
 			this.filterChips = [chip];
 
 			dispatch(NotificationsActions.sendUpdateNotificationRead(notificationId, true));
-			API.getNotification(notificationId)
-			.then((n) => {
-				chip = {name: "assignedIssues",
-					nameType: "Notification",
+			API.getNotification(notificationId).then((n) => {
+				chip = {
+					name: 'assignedIssues',
+					nameType: 'Notification',
 					value: n.data.issuesId,
-					type: "notification"};
+					type: 'notification'
+				};
 
 				this.filterChips = [chip];
 			});
