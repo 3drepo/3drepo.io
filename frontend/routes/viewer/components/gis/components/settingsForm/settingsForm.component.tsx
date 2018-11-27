@@ -17,12 +17,10 @@
 
 import * as React from 'react';
 import { isEmpty, isEqual } from 'lodash';
-import { Formik, Field } from 'formik';
-import * as Yup from 'yup';
+import { Formik, Form, Field } from 'formik';
+import FormHelperText from '@material-ui/core/FormHelperText';
 
-import { schema } from '../../../../../../services/validation';
-
-import { Container, Header,  Headline, StyledTextField } from './settingsForm.styles';
+import { Header, Headline, StyledTextField } from './settingsForm.styles';
 
 interface IProps {
 	updateModelSettings: (modelData, settings) => void;
@@ -37,6 +35,7 @@ interface IState {
 	axisX?: number;
 	axisY?: number;
 	axisZ?: number;
+	submittedValues: any;
 }
 
 export class SettingsForm extends React.PureComponent<IProps, IState> {
@@ -46,7 +45,8 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 		axisX: 0,
 		axisY: 0,
 		axisZ: 0,
-		angleFromNorth: 0
+		angleFromNorth: 0,
+		submittedValues: this.props.initialValues
 	};
 
 	public formikRef = React.createRef<any>();
@@ -98,8 +98,7 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
-	public handleSubmit = (values) => {
-		console.log('Handle submit', values);
+	public handleSubmit = (values, form) => {
 		const { angleFromNorth, axisX, axisY, axisZ, latitude, longitude } = values;
 
 		const settings = {
@@ -111,8 +110,16 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 		};
 
 		const { teamspace, modelId } = this.props.getDataFromPathname();
-		const modelData = { teamspace, project: 'test', modelId };
-		this.props.updateModelSettings(modelData, settings);
+		const project = localStorage.getItem('lastProject');
+		const modelData = { teamspace, project, modelId };
+
+		if (isEqual(this.state.submittedValues, values)) {
+			form.setError('Points have not been changed');
+		} else {
+			form.setError('');
+			this.props.updateModelSettings(modelData, settings);
+			this.setState({ submittedValues: values});
+		}
 	}
 
 	public render() {
@@ -123,48 +130,50 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 				initialValues={this.props.initialValues}
 				onSubmit={this.handleSubmit}
 				ref={this.formikRef}>
-				<Container>
-					<Header>
-						To visualize map tiles match GIS point with project base point
-					</Header>
 
-					<Headline color="primary" variant="subheading">
-						GIS Point - World Coordinates
-					</Headline>
+				{(form) => (
+					<Form>
+						<Header>
+							To visualize map tiles match GIS point with project base point
+						</Header>
 
-						<Field name="latitude" render={ ({ field }) => (
-							<StyledTextField
-								{...field}
-								type="number"
-								label="Latitude (Decimal)"
-								margin="normal"
-								value={latitude}
-								onChange={this.handlePointChange(field.onChange, field.name)}
-							/>
-						)} />
-						<Field name="longitude" render={ ({ field }) => (
-							<StyledTextField
-								{...field}
-								type="number"
-								label="Longitude"
-								margin="normal"
-								value={longitude}
-								onChange={this.handlePointChange(field.onChange, field.name)}
-							/>
-						)} />
-						<Field name="angleFromNorth" render={ ({ field }) => (
-							<StyledTextField
-								{...field}
-								type="number"
-								label="Angle from North (Clockwise Degrees)"
-								margin="normal"
-								value={angleFromNorth}
-								onChange={this.handlePointChange(field.onChange, field.name)}
-							/>
-						)} />
-					<Headline color="primary" variant="subheading">
-						Project base Point - Model Coordinates
-					</Headline>
+						<Headline color="primary" variant="subheading">
+							GIS Point - World Coordinates
+						</Headline>
+
+							<Field name="latitude" render={ ({ field }) => (
+								<StyledTextField
+									{...field}
+									type="number"
+									label="Latitude (Decimal)"
+									margin="normal"
+									value={latitude}
+									onChange={this.handlePointChange(field.onChange, field.name)}
+								/>
+							)} />
+							<Field name="longitude" render={ ({ field }) => (
+								<StyledTextField
+									{...field}
+									type="number"
+									label="Longitude"
+									margin="normal"
+									value={longitude}
+									onChange={this.handlePointChange(field.onChange, field.name)}
+								/>
+							)} />
+							<Field name="angleFromNorth" render={ ({ field }) => (
+								<StyledTextField
+									{...field}
+									type="number"
+									label="Angle from North (Clockwise Degrees)"
+									margin="normal"
+									value={angleFromNorth}
+									onChange={this.handlePointChange(field.onChange, field.name)}
+								/>
+							)} />
+						<Headline color="primary" variant="subheading">
+							Project base Point - Model Coordinates
+						</Headline>
 
 						<Field name="axisX" render={ ({ field }) => (
 							<StyledTextField
@@ -196,7 +205,9 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 								onChange={this.handlePointChange(field.onChange, field.name)}
 							/>
 						)} />
-				</Container>
+						{form.error && <FormHelperText error={true}>{form.error}</FormHelperText>}
+					</Form>
+				)}
 			</Formik>
 		);
 	}

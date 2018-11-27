@@ -16,18 +16,18 @@
  */
 
 import * as React from 'react';
-import { cond, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { ViewerCard } from '../viewerCard/viewerCard.component';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 
 import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
-import SearchIcon from '@material-ui/icons/Search';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 
+import { FooterWrapper, StyledSaveButton } from './gis.styles';
 import { SettingsForm } from './components/settingsForm/settingsForm.component';
 
 interface IProps {
@@ -131,9 +131,11 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	public renderFooterContent = () => {
 		if (this.state.settingsModeActive) {
 			return (
-				<IconButton type="submit" aria-label="Save" onClick={this.handleSaveClick}>
-					<SaveIcon color="inherit" />
-				</IconButton>
+				<FooterWrapper>
+					<StyledSaveButton type="submit" aria-label="Save" onClick={this.handleSaveClick}>
+						<SaveIcon color="inherit" />
+					</StyledSaveButton>
+				</FooterWrapper>
 			);
 		}
 		return null;

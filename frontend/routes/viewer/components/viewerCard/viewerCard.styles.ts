@@ -58,4 +58,7 @@ export const ViewCardContent = styled.div`
 export const ViewCardFooter = styled.div`
   background-color: ${COLOR.WHITE};
   padding: 24px;
+  padding: 8px 24px;
+  border-top: 1px solid ${COLOR.BLACK_20};
+  display: flex;
 `;

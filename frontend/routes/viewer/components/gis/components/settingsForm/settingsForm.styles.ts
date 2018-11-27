@@ -19,10 +19,6 @@ import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 
-import { COLOR } from './../../../../../../styles/colors';
-
-export const Container = styled.div``;
-
 export const Header = styled.div``;
 
 export const Headline = styled(Typography)`

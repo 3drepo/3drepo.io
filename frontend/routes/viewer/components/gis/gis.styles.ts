@@ -17,4 +17,17 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div``;
+import IconButton from '@material-ui/core/IconButton';
+
+export const FooterWrapper = styled.div`
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const StyledSaveButton = styled(IconButton)`
+  && {
+    align-self: flex-end;
+  }
+`;

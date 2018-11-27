@@ -85,7 +85,7 @@ export class ViewerCard extends React.PureComponent<IProps, any> {
 						<ViewCardContent>
 							{children}
 						</ViewCardContent>
-						{renderFooterContent &&
+						{renderFooterContent() &&
 						<ViewCardFooter>
 							{renderFooterContent()}
 						</ViewCardFooter>
