@@ -25,7 +25,7 @@ export const TitleContainer = styled.div`
 
   && {
     button {
-      color: white;
+      color: ${COLOR.WHITE};
     }
   }
 `;

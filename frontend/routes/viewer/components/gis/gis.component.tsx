@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty, includes } from 'lodash';
 import { ViewerCard } from '../viewerCard/viewerCard.component';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 
@@ -26,8 +26,20 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
-import { FooterWrapper, StyledSaveButton } from './gis.styles';
+import {
+	FooterWrapper,
+	StyledSaveButton,
+	StyledSelect,
+	StyledSelectItem,
+	MapLayer,
+	MapName,
+	MapNameWrapper,
+	StyledMapIcon,
+	VisibilityButton
+} from './gis.styles';
 import { SettingsForm } from './components/settingsForm/settingsForm.component';
 
 interface IProps {
@@ -37,10 +49,18 @@ interface IProps {
 	updateModelSettings: (modelData, settings) => void;
 	settings: any;
 	isPending: boolean;
-	maps: any[];
+	mapsProviders: any[];
+	initializeMap: (params) => void;
+	addSource: (source) => void;
+	removeSource: (source) => void;
+	resetSources: () => void;
+	isInitializedMap: boolean;
+	visiblieSources: any[];
 }
 interface IState {
 	settingsModeActive: boolean;
+	activeMapIndex: number;
+	visiblieSources: any[];
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -55,7 +75,10 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 export class Gis extends React.PureComponent<IProps, IState> {
 	public state = {
-		settingsModeActive: true
+		settingsModeActive: true,
+		activeMapIndex: 0,
+		visiblieSources: [],
+		pointsExists: false
 	};
 
 	public formRef = React.createRef<any>();
@@ -64,16 +87,35 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { teamspace, modelId } = this.getDataFromPathname();
 		this.props.fetchModelSettings(teamspace, modelId);
 		this.props.fetchModelMaps(teamspace, modelId);
+		this.props.resetSources();
+	}
+
+	public componentWillUnmount() {
+		this.props.resetSources();
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { settings, maps } = this.props;
+		const { settings, visiblieSources } = this.props;
 		const changes = {} as any;
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
+		changes.pointsExists = pointsExists;
 
-		if (isEmpty(prevProps.settings) && !isEmpty(this.props.settings)) {
+		if (isEmpty(prevProps.settings) && !isEmpty(settings)) {
+			const surveySettings = {
+				surveyPoints: settings.surveyPoints,
+				angleFromNorth: settings.angleFromNorth || 0
+			};
+
 			changes.settingsModeActive = !pointsExists;
+
+			if (pointsExists && !this.props.isInitializedMap) {
+				this.props.initializeMap(surveySettings);
+			}
+		}
+
+		if (visiblieSources.length !== prevProps.visiblieSources.length) {
+			changes.visiblieSources = visiblieSources;
 		}
 
 		this.setState(changes);
@@ -90,7 +132,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSaveClick = () => {
-		this.formRef.current.formikRef.current.submitForm();
+		const settingsForm = this.formRef.current.formikRef.current;
+		settingsForm.submitForm();
 	}
 
 	public handleToggleSettings = () => {
@@ -112,28 +155,23 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			renderButton={MenuButton}
 			renderContent={this.renderMenuContent}
 			PopoverProps={ {
-				anchorOrigin: {
-					vertical: 'top',
-					horizontal: 'right'
-				}
+				anchorOrigin: { vertical: 'center', horizontal: 'left' }
 			} }
 			ButtonProps={ {
 				disabled: this.props.isPending || this.state.settingsModeActive
 			} }
 	/>)
 
-	public getActions = () => [
-		{
-			Button: this.getMenuButton
-		}
-	]
+	public getActions = () => [ { Button: this.getMenuButton } ];
 
 	public renderFooterContent = () => {
 		if (this.state.settingsModeActive) {
 			return (
 				<FooterWrapper>
-					<StyledSaveButton type="submit" aria-label="Save" onClick={this.handleSaveClick}>
-						<SaveIcon color="inherit" />
+					<StyledSaveButton
+						type="submit" aria-label="Save" onClick={this.handleSaveClick} disabled={this.props.isPending}
+					>
+						<SaveIcon color="secondary" />
 					</StyledSaveButton>
 				</FooterWrapper>
 			);
@@ -168,9 +206,51 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public handleChangeMapProvider = (event) => {
+		this.setState({
+			activeMapIndex: event.target.value
+		}, () => {
+			this.props.resetSources();
+		});
+	}
+
+	public renderVisibilityButton = (layer) => {
+		return(
+			<VisibilityButton>
+				{includes(this.state.visiblieSources, layer.source)
+					? <VisibilityIcon onClick={() => this.props.removeSource(layer.source)}/>
+					: <VisibilityOffIcon onClick={() => this.props.addSource(layer.source)} />
+				}
+			</VisibilityButton>
+		);
+	}
+
 	public renderMapLayers = () => {
+		const { mapsProviders } = this.props;
+		const { activeMapIndex } = this.state;
+
 		return (
-			<>Map Layers</>
+			<>
+				<StyledSelect
+					onChange={this.handleChangeMapProvider}
+					value={activeMapIndex}>
+					{mapsProviders.map((mapProvider, index) => (
+						<StyledSelectItem key={mapProvider.name} value={index}>
+							{mapProvider.name}
+						</StyledSelectItem>
+					) ) }
+				</StyledSelect>
+				{ mapsProviders[activeMapIndex].layers.map((layer) => (
+					<MapLayer key={layer.name}>
+						<MapNameWrapper>
+							<StyledMapIcon color="inherit" />
+							<MapName>{layer.name}</MapName>
+						</MapNameWrapper>
+
+						{this.renderVisibilityButton(layer)}
+					</MapLayer>
+				)) }
+			</>
 		);
 	}
 
@@ -185,9 +265,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				renderFooterContent={this.renderFooterContent}
 				pending={this.props.isPending}
 			>
-				{
-					settingsModeActive ? this.renderSettings() : this.renderMapLayers()
-				}
+				{settingsModeActive ? this.renderSettings() : this.renderMapLayers()}
 			</ViewerCard>
 		);
 	}

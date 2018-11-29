@@ -20,18 +20,25 @@ import { bindActionCreators } from 'redux';
 import { connect, addRouting } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectSettings, selectIsPending, selectMaps } from './../../../../modules/model';
+import { GisActions, selectIsInitializedMap, selectVisibleSources } from './../../../../modules/gis';
 import { Gis } from './gis.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	isPending: selectIsPending,
-	maps: selectMaps
+	mapsProviders: selectMaps,
+	isInitializedMap: selectIsInitializedMap,
+	visiblieSources: selectVisibleSources
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelSettings: ModelActions.fetchSettings,
 	fetchModelMaps: ModelActions.fetchMaps,
-	updateModelSettings: ModelActions.updateSettings
+	updateModelSettings: ModelActions.updateSettings,
+	initializeMap: GisActions.initializeMap,
+	addSource: GisActions.addSource,
+	removeSource: GisActions.removeSource,
+	resetSources: GisActions.resetSources
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis)));

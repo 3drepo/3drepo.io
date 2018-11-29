@@ -16,9 +16,10 @@
  */
 
 import * as React from 'react';
+import * as Yup from 'yup';
 import { isEmpty, isEqual } from 'lodash';
 import { Formik, Form, Field } from 'formik';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 
 import { Header, Headline, StyledTextField } from './settingsForm.styles';
 
@@ -29,24 +30,40 @@ interface IProps {
 }
 
 interface IState {
-	latitude?: number;
-	longitude?: number;
-	angleFromNorth?: number;
-	axisX?: number;
-	axisY?: number;
-	axisZ?: number;
-	submittedValues: any;
+	latitude?: number|string;
+	longitude?: number|string;
+	angleFromNorth?: number|string;
+	axisX?: number|string;
+	axisY?: number|string;
+	axisZ?: number|string;
 }
 
+const validateRequiredNumber =
+	Yup.number()
+	.required(VALIDATIONS_MESSAGES.REQUIRED);
+
+const SettingsSchema = Yup.object().shape({
+	latitude: validateRequiredNumber,
+	longitude: validateRequiredNumber,
+	axisX: validateRequiredNumber,
+	axisY: validateRequiredNumber,
+	axisZ: validateRequiredNumber,
+	angleFromNorth: validateRequiredNumber
+});
+
+const defaultFieldProps = {
+	type: 'number',
+	required: true,
+	margin: 'normal'
+};
 export class SettingsForm extends React.PureComponent<IProps, IState> {
 	public state = {
-		latitude: 0,
-		longitude: 0,
-		axisX: 0,
-		axisY: 0,
-		axisZ: 0,
-		angleFromNorth: 0,
-		submittedValues: this.props.initialValues
+		latitude: '',
+		longitude: '',
+		axisX: '',
+		axisY: '',
+		axisZ: '',
+		angleFromNorth: ''
 	};
 
 	public formikRef = React.createRef<any>();
@@ -98,7 +115,7 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
-	public handleSubmit = (values, form) => {
+	public handleSubmit = (values) => {
 		const { angleFromNorth, axisX, axisY, axisZ, latitude, longitude } = values;
 
 		const settings = {
@@ -112,14 +129,7 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 		const { teamspace, modelId } = this.props.getDataFromPathname();
 		const project = localStorage.getItem('lastProject');
 		const modelData = { teamspace, project, modelId };
-
-		if (isEqual(this.state.submittedValues, values)) {
-			form.setError('Points have not been changed');
-		} else {
-			form.setError('');
-			this.props.updateModelSettings(modelData, settings);
-			this.setState({ submittedValues: values});
-		}
+		this.props.updateModelSettings(modelData, settings);
 	}
 
 	public render() {
@@ -129,85 +139,86 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 			<Formik
 				initialValues={this.props.initialValues}
 				onSubmit={this.handleSubmit}
+				validationSchema={SettingsSchema}
 				ref={this.formikRef}>
+				<Form>
+					<Header>
+						To visualize map tiles match GIS point with project base point
+					</Header>
+					<Headline color="primary" variant="subheading">
+						GIS Point - World Coordinates
+					</Headline>
+					<Field name="latitude" render={ ({ field, form }) => (
+						<StyledTextField
+							{...field}
+							{...defaultFieldProps}
+							error={Boolean(form.errors.latitude)}
+							helperText={form.errors.latitude}
+							label="Latitude (Decimal)"
+							value={latitude}
+							onChange={this.handlePointChange(field.onChange, field.name)}
+						/>
+					)} />
+					<Field name="longitude" render={ ({ field, form }) => (
+						<StyledTextField
+							{...field}
+							{...defaultFieldProps}
+							error={Boolean(form.errors.longitude)}
+							helperText={form.errors.longitude}
+							label="Longitude"
+							value={longitude}
+							onChange={this.handlePointChange(field.onChange, field.name)}
+						/>
+					)} />
+					<Field name="angleFromNorth" render={ ({ field, form }) => (
+						<StyledTextField
+							{...field}
+							{...defaultFieldProps}
+							error={Boolean(form.errors.angleFromNorth)}
+							helperText={form.errors.angleFromNorth}
+							label="Angle from North (Clockwise Degrees)"
+							value={angleFromNorth}
+							onChange={this.handlePointChange(field.onChange, field.name)}
+						/>
+					)} />
+					<Headline color="primary" variant="subheading">
+						Project base Point - Model Coordinates
+					</Headline>
 
-				{(form) => (
-					<Form>
-						<Header>
-							To visualize map tiles match GIS point with project base point
-						</Header>
-
-						<Headline color="primary" variant="subheading">
-							GIS Point - World Coordinates
-						</Headline>
-
-							<Field name="latitude" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									type="number"
-									label="Latitude (Decimal)"
-									margin="normal"
-									value={latitude}
-									onChange={this.handlePointChange(field.onChange, field.name)}
-								/>
-							)} />
-							<Field name="longitude" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									type="number"
-									label="Longitude"
-									margin="normal"
-									value={longitude}
-									onChange={this.handlePointChange(field.onChange, field.name)}
-								/>
-							)} />
-							<Field name="angleFromNorth" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									type="number"
-									label="Angle from North (Clockwise Degrees)"
-									margin="normal"
-									value={angleFromNorth}
-									onChange={this.handlePointChange(field.onChange, field.name)}
-								/>
-							)} />
-						<Headline color="primary" variant="subheading">
-							Project base Point - Model Coordinates
-						</Headline>
-
-						<Field name="axisX" render={ ({ field }) => (
-							<StyledTextField
-								{...field}
-								type="number"
-								label="x (mm)"
-								margin="normal"
-								value={axisX}
-								onChange={this.handlePointChange(field.onChange, field.name)}
-							/>
-						)} />
-						<Field name="axisY" render={ ({ field }) => (
-							<StyledTextField
-								{...field}
-								type="number"
-								label="y (mm)"
-								margin="normal"
-								value={axisY}
-								onChange={this.handlePointChange(field.onChange, field.name)}
-							/>
-						)} />
-						<Field name="axisZ" render={ ({ field }) => (
-							<StyledTextField
-								{...field}
-								type="number"
-								label="z (mm)"
-								margin="normal"
-								value={axisZ}
-								onChange={this.handlePointChange(field.onChange, field.name)}
-							/>
-						)} />
-						{form.error && <FormHelperText error={true}>{form.error}</FormHelperText>}
-					</Form>
-				)}
+					<Field name="axisX" render={ ({ field, form }) => (
+						<StyledTextField
+							{...field}
+							{...defaultFieldProps}
+							error={Boolean(form.errors.axisX)}
+							helperText={form.errors.axisX}
+							label="x (mm)"
+							value={axisX}
+							onChange={this.handlePointChange(field.onChange, field.name)}
+						/>
+					)} />
+					<Field name="axisY" render={ ({ field, form }) => (
+						<StyledTextField
+							{...field}
+							{...defaultFieldProps}
+							error={Boolean(form.errors.axisY)}
+							helperText={form.errors.axisY}
+							label="y (mm)"
+							value={axisY}
+							onChange={this.handlePointChange(field.onChange, field.name)}
+						/>
+					)} />
+					<Field name="axisZ" render={ ({ field, form }) => (
+						<StyledTextField
+							{...field}
+							{...defaultFieldProps}
+							error={Boolean(form.errors.axisZ)}
+							helperText={form.errors.axisZ}
+							label="z (mm)"
+							value={axisZ}
+							onChange={this.handlePointChange(field.onChange, field.name)}
+						/>
+					)} />
+				</Form>
 			</Formik>
 		);
 	}
