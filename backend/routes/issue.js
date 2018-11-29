@@ -4,7 +4,7 @@
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.ap
+ *  License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,376 +14,196 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-"use strict";
-const _ = require("lodash");
-const express = require("express");
-const router = express.Router({mergeParams: true});
-const middlewares = require("../middlewares/middlewares");
 
+"use strict";
+
+const express = require("express");
+const router = express.Router({ mergeParams: true });
+const middlewares = require("../middlewares/middlewares");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const Issue = require("../models/issue");
+const Group = require("../models/group");
 const utils = require("../utils");
-const multer = require("multer");
-const config = require("../config.js");
+const systemLogger = require("../logger.js").systemLogger;
 
-const User = require("../models/user");
-const Job = require("../models/job");
-const ModelHelper = require("../models/helper/model");
+/**
+ * @api {get} /groups/revision/master/head/ List model groups
+ * @apiName listGroups
+ * @apiGroup Groups
+ */
+router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
+/**
+ * @api {get} /groups/revision/:rid/ List model groups by revision
+ * @apiName listGroupsByRevision
+ * @apiGroup Groups
+ */
+router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
+/*
+ * @api {get} /groups/revision/master/head/:uid/ Find group in model
+ * @apiName findGroup
+ * @apiGroup Groups
+ */
+router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
+/*
+ * @api {get} /groups/revision/:rid/:uid/ Find group in model by revision
+ * @apiName findGroupByRevision
+ * @apiGroup Groups
+ */
+router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
-const stringToUUID = utils.stringToUUID;
+/**
+ * @api {put} /groups/:uid/ Update group
+ * @apiName updateGroup
+ * @apiGroup Groups
+ */
+router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
+/**
+ * @api {post} /groups/ Add a group
+ * @apiName createGroup
+ * @apiDescription Add a group to the model.
+ * @apiGroup Groups
+ */
+router.post("/groups/", middlewares.issue.canCreate, createGroup);
+// @deprecated -  use deleteGroups with single id instead.
+router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
+/**
+ * @api {delete} /groups/ Delete groups
+ * @apiName deleteGroups
+ * @apiDescription Delete groups from the model.
+ * @apiGroup Groups
+ */
+router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
-router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
-router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+const getDbColOptions = function (req) {
+	return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
+};
 
-router.get("/issues.json", middlewares.issue.canView, listIssues);
-router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
-router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
+function listGroups(req, res, next) {
 
-router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
-router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
-router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
-router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
-router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
-
-// router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
-router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
-
-router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
-
-router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
-router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
-
-router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
-router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
-
-function storeIssue(req, res, next) {
-	const data = req.body;
-	data.owner = req.session.user.username;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-	data.revId = req.params.rid;
-
-	Issue.createIssue({account: req.params.account, model: req.params.model}, data).then(issue => {
-		req.dataModel =  issue;
-		next();
-	}).catch(err => {
-		responseCodes.onError(req, res, err);
-	});
-}
-
-function updateIssue(req, res, next) {
-	const data = req.body;
-	data.owner = req.session.user.username;
-	data.requester = req.session.user.username;
-	data.revId = req.params.rid;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-
-	const dbCol = {account: req.params.account, model: req.params.model};
-	const issueId = req.params.issueId;
-	let action;
-
-	Issue.findById(dbCol, utils.stringToUUID(issueId)).then(issue => {
-		if(!issue) {
-			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
-		}
-
-		req.oldDataModel = _.cloneDeep(issue.toObject());
-
-		if (data.hasOwnProperty("comment") && data.edit) {
-			action = issue.updateComment(data.commentIndex, data);
-
-		} else if(data.sealed) {
-			action = issue.updateComment(data.commentIndex, data);
-
-		} else if(data.commentIndex >= 0 && data.delete) {
-			action = issue.removeComment(data.commentIndex, data);
-
-		} else if (data.hasOwnProperty("comment")) {
-			action = issue.updateComment(null, data);
-
-		} else if (data.hasOwnProperty("closed") && data.closed) {
-			action = Promise.reject("This action is deprecated, use PUT issues/id.json {\"status\": \"closed\"}");
-
-		} else if (data.hasOwnProperty("closed") && !data.closed) {
-			action = Promise.reject("This action is deprecated, use PUT issues/id.json {\"status\": \"closed\"}");
-
-		} else {
-
-			action = User.findByUserName(req.params.account).then(dbUser => {
-
-				return Job.findByUser(dbUser.user, req.session.user.username).then(_job => {
-					const job = _job ?  _job._id : null;
-					const accountPerm = dbUser.customData.permissions.findByUser(req.session.user.username);
-					const userIsAdmin = ModelHelper.isUserAdmin(
-						req.params.account,
-						req.params.model,
-						req.session.user.username
-					);
-
-					return userIsAdmin.then(projAdmin => {
-
-						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = issue.creator_role === job && issue.creator_role && job;
-						const hasAssignedJob = job === issue.assigned_roles[0];
-
-						return issue.updateAttrs(data, isAdmin, hasOwnerJob, hasAssignedJob);
-
-					}).catch(err =>{
-						if(err) {
-							return Promise.reject(err);
-						} else{
-							return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);
-						}
-					});
-
-				});
-
-			});
-		}
-
-		return action;
-
-	}).then(actionResult => {
-		req.dataModel =  actionResult;
-		next();
-	}).catch(err => {
-		responseCodes.onError(req, res, err);
-	});
-}
-
-function listIssues(req, res, next) {
-
-	// let params = req.params;
+	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
-	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-	const projection = {
-		extras: 0,
-		"comments": 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
 
-	let findIssue;
-	if(req.query.shared_id) {
-		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
-	} else if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
-	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
-	}
-
-	findIssue.then(issues => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-
-}
-
-function getIssuesBCF(req, res, next) {
-	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-
-	let ids;
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	let getBCFZipRS;
-
+	let groupList;
 	if (req.params.rid) {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
+		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid);
 	} else {
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
+		groupList = Group.listGroups(dbCol, req.query, "master", null);
 	}
 
-	getBCFZipRS.then(zipRS => {
+	groupList.then(groups => {
 
-		const headers = {
-			"Content-Disposition": "attachment;filename=issues.bcfzip",
-			"Content-Type": "application/zip"
-		};
-
-		res.writeHead(200, headers);
-		zipRS.pipe(res);
-
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-
-}
-
-function findIssueById(req, res, next) {
-
-	const params = req.params;
-	const place = utils.APIInfo(req);
-	const dbCol =  {account: req.params.account, model: req.params.model};
-
-	Issue.findByUID(dbCol, params.uid).then(issue => {
-
-		Issue.update(dbCol, { _id: stringToUUID(params.uid) }, { $inc: { viewCount: "1" }}).exec();
-		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
-
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-
-}
-
-function renderIssuesHTML(req, res, next) {
-
-	const place = utils.APIInfo(req);
-	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-	let findIssue;
-	const noClean = false;
-
-	const projection = {
-		extras: 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	let ids;
-	if(req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
-	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
-	}
-
-	findIssue.then(issues => {
-		// Split issues by type
-		const splitIssues   = {open : [], closed: []};
-
-		for (let i = 0; i < issues.length; i++) {
-			if (issues[i].hasOwnProperty("comments")) {
-				for (let j = 0; j < issues[i].comments.length; j++) {
-					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
-				}
-			}
-
-			if(issues[i].closed || issues[i].status === "closed") {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.closed.push(issues[i]);
-			} else {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.open.push(issues[i]);
-			}
-		}
-
-		res.render("issues.pug", {
-			issues : splitIssues,
-			url: function (path) {
-				return config.apiAlgorithm.apiUrl(C.GET_API, path);
-			}
+		groups.forEach((group, i) => {
+			groups[i] = group.clean();
 		});
 
+		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
+
 	}).catch(err => {
+
+		systemLogger.logError(err.stack);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+
+	});
+}
+
+function findGroup(req, res, next) {
+
+	const dbCol = getDbColOptions(req);
+	const place = utils.APIInfo(req);
+
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null);
+	}
+
+	groupItem.then(group => {
+		if (!group) {
+			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
+		} else {
+			return Promise.resolve(group);
+		}
+	}).then(group => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
+	}).catch(err => {
+		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
-function importBCF(req, res, next) {
+function createGroup(req, res, next) {
+	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
+	if (req.body.objects) {
+		const create = Group.createGroup(getDbColOptions(req), sessionId, req.body);
+
+		create.then(group => {
+
+			responseCodes.respond(place, req, res, next, responseCodes.OK, group);
+
+		}).catch(err => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
+		});
+	} else {
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
+}
+
+/**
+ * @deprecated -  use deleteGroups with single id instead.
+ */
+function deleteGroup(req, res, next) {
+
+	req.query.ids = req.params.id;
+
+	return deleteGroups(req, res, next);
+}
+
+function deleteGroups(req, res, next) {
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
 
-	// check space
-	function fileFilter(fileReq, file, cb) {
+	if (req.query.ids) {
+		const ids = req.query.ids.split(",");
 
-		const acceptedFormat = [
-			"bcf", "bcfzip", "zip"
-		];
+		Group.deleteGroups(getDbColOptions(req), sessionId, ids).then(() => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success" });
+		}).catch(err => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
+		});
+	} else {
+		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	}
+}
 
-		let format = file.originalname.split(".");
-		format = format.length <= 1 ? "" : format.splice(-1)[0];
+function updateGroup(req, res, next) {
+	const dbCol = getDbColOptions(req);
+	const place = utils.APIInfo(req);
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-		const size = parseInt(fileReq.headers["content-length"]);
-
-		if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-		}
-
-		if(size > config.uploadSizeLimit) {
-			return cb({ resCode: responseCodes.SIZE_LIMIT });
-		}
-
-		cb(null, true);
+	let groupItem;
+	if (req.params.rid) {
+		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid);
+	} else {
+		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
 	}
 
-	if(!config.bcf_dir) {
-		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined"});
-	}
+	groupItem.then(group => {
 
-	const upload = multer({
-		dest: config.bcf_dir,
-		fileFilter: fileFilter
-	});
-
-	upload.single("file")(req, res, function (err) {
-		if (err) {
-			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
-
-		} else if(!req.file.size) {
-			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+		if (!group) {
+			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
 		} else {
-
-			Issue.importBCF({socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username}, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "ok"});
-			}).catch(error => {
-				responseCodes.respond(place, req, res, next, error, error);
-			});
+			return group.updateGroup(dbCol, sessionId, req.body);
 		}
-	});
-}
 
-function getScreenshot(req, res, next) {
-
-	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-
-	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+	}).then(group => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
+		systemLogger.logError(err.stack);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 	});
-
-}
-
-function getScreenshotSmall(req, res, next) {
-
-	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-
-	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
-	});
-
-}
-
-function getThumbnail(req, res, next) {
-
-	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-
-	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
-	});
-
 }
 
 module.exports = router;
