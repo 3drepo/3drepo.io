@@ -7,5 +7,6 @@ export * from './jobs';
 export * from './projects';
 export * from './models';
 export * from './billing';
+export * from './notifications';
 
 export default API;

@@ -29,6 +29,9 @@ import { ErrorDialog } from './components/errorDialog/errorDialog.component';
 import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
 import { LoadingDialog } from './components/loadingDialog/loadingDialog.component';
 import { DIALOG_TYPES } from '../../../modules/dialog/dialog.redux';
+/* tslint:disable */
+import { DeleteAllNotificationsDialog } from './components/deleteAllNotificationsDialog/deleteAllNotificationsDialog.component';
+/* tslint:enable */
 
 interface IProps {
 	config: any;
@@ -39,6 +42,7 @@ interface IProps {
 
 const DIALOG_TEMPLATES = {
 	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
+	[DIALOG_TYPES.CONFIRM_DELETE_ALL_NOTIFICATIONS]: DeleteAllNotificationsDialog,
 	[DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
 	[DIALOG_TYPES.ERROR]: ErrorDialog,
 	[DIALOG_TYPES.LOADING]: LoadingDialog

@@ -86,6 +86,13 @@ function StateManagerRun(
 
 		const queryParams = $location.search();
 
+		// /** Hack: query strings are working erratically with the statemanager
+		//  * hacking a solution for passing the notificationId
+		// */
+		if (queryParams.notificationId)	{
+			StateManager.state.notificationId =  queryParams.notificationId;
+		}
+
 		if (Object.keys(queryParams).length === 0) {
 			StateManager.clearQuery();
 		} else {
