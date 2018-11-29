@@ -406,7 +406,6 @@ export class CompareService {
 		this.state.loadingComparison = true;
 		// This is only ever called in non fed models, so
 		// it's safe to assume targetModels.length === 1
-		console.log("Calling loadComparator");
 		this.ViewerService.diffToolLoadComparator(
 			this.state.targetModels[0].account,
 			this.state.targetModels[0].model,
