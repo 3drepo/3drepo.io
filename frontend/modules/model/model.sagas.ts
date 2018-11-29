@@ -40,9 +40,6 @@ export function* fetchSettings({ teamspace, modelId }) {
 
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
-		console.log('[updateSettings] teamspace, project, modelId',teamspace, project, modelId);
-		console.log('[updateSettings] settings',settings);
-
 		yield API.editModelSettings(teamspace, modelId, settings);
 
 		yield put(TeamspacesActions.updateModelSuccess(

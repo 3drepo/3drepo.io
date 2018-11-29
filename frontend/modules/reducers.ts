@@ -11,6 +11,7 @@ import { reducer as modelReducer } from './model/model.redux';
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
 import { reducer as staticPagesReducer } from './staticPages/staticPages.redux';
+import { reducer as gisReducer } from './gis/gis.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -25,6 +26,7 @@ export default function createReducer() {
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,
-		staticPages: staticPagesReducer// <-- INJECT MODULE REDUCER -->
+		staticPages: staticPagesReducer,
+        gis: gisReducer// <-- INJECT MODULE REDUCER -->
 	});
 }
