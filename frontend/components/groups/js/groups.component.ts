@@ -205,7 +205,7 @@ class GroupsController implements ng.IController {
 						case "downloadJSON":
 							const jsonEndpoint = this.account + "/" + this.model +
 							"/groups/revision/master/head/?noIssues=true&noRisks=true";
-							this.panelService.downloadJSON("groups", jsonEndpoint);
+							this.panelService.downloadJSON("groups", jsonEndpoint, this.model, this.account);
 							break;
 						default:
 							console.error("Groups option menu selection unhandled");
