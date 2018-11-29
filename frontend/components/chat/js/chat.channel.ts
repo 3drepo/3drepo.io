@@ -58,7 +58,7 @@ export class ChatChannel {
 	constructor(private chatService: ChatService, private account: string, private modelStr: string) {
 		this.groups = new ChatEvents(this, 'group');
 		this.issues = new IssuesChatEvents(this);
-		this.risks = new ChatEvents(this, "risk");
+		this.risks = new ChatEvents(this, 'risk');
 		this.model = new ModelChatEvents(this);
 		this.views = new ChatEvents(this, 'view');
 		this.notifications = new NotificationsChatEvents(this);

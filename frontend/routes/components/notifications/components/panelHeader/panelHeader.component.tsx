@@ -20,7 +20,6 @@ import { ItemLabel } from '../../../components.styles';
 import { NotificationsPanelItem } from '../../notifications.styles';
 import { NotificationsPanelHeaderContainer } from './panelHeader.styles';
 
-
 export class NotificationsPanelHeader extends React.PureComponent<any, any> {
 	public render() {
 		const { labelLeft, labelRight, style } = this.props;
