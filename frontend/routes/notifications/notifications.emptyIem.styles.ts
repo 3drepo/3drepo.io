@@ -14,24 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { ListItem } from '@material-ui/core';
+import { FONT_WEIGHT } from '../../styles';
 
-import { NotificationEvents } from "./notification.events";
-import { NotificationsChannel } from "./notifications.channel";
-
-export class NotificationIssuesEvents extends NotificationEvents {
-	private comments: { [id: string]: NotificationEvents};
-
-	constructor(protected channel: NotificationsChannel) {
-		super(channel, "issue");
-		this.comments = {};
+export const EmptyItem = styled(ListItem)`
+	&&& {
+		height: calc(100% - 64px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
+`;
 
-	public getCommentsNotifications(id: string): NotificationEvents {
-		if (!this.comments[id]) {
-			this.comments[id] =  new NotificationEvents(this.channel, "comment", id);
-		}
-
-		return this.comments[id];
-	}
-
-}
+export const EmptyItemText = styled.h3`
+	max-width: 142px;
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	color: rgba(0,0,0,0.54);
+`;

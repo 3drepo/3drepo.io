@@ -1157,6 +1157,22 @@ schema.methods.generateCommentsGUID = function() {
 	});
 };
 
+schema.statics.isIssueAssignment = function(oldIssue, newIssue) {
+	if (!oldIssue) {
+		return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
+	}
+
+	return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
+};
+
+schema.statics.isIssueBeingClosed = function(oldIssue, newIssue) {
+	if (!oldIssue) {
+		return false;
+	}
+
+	return oldIssue.status !== "closed" &&  newIssue.status === "closed";
+};
+
 schema.methods.getBCFMarkup = function(account, model, unit) {
 	this.generateCommentsGUID();
 	this.save();

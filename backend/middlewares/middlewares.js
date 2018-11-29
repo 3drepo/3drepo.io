@@ -28,10 +28,11 @@
 
 	// init ampq and import queue object
 	const importQueue = require("../services/queue");
-	const getPermissionsAdapter = require("./getPermissionsAdapter");
 	const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
 	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const checkMultiplePermissions = require("./checkPermissions").checkMultiplePermissions;
+	const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
+	const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -148,29 +149,6 @@
 		}
 
 	}
-
-	function hasReadAccessToModelHelper(username, account, model) {
-		return checkPermissionsHelper(
-			username,
-			account,
-			"",
-			model,
-			readAccessToModel,
-			getPermissionsAdapter
-		).then(data => data.granted);
-	}
-
-	function isAccountAdminHelper(username, account, model) {
-		return checkPermissionsHelper(
-			username,
-			account,
-			"",
-			model,
-			[C.PERM_TEAMSPACE_ADMIN],
-			getPermissionsAdapter
-		).then(data => data.granted);
-	}
-
 	function canCreateModel(req, res, next) {
 		if(req.body.subModels) {
 			checkPermissions([C.PERM_CREATE_FEDERATION])(req, res, next);
@@ -202,6 +180,8 @@
 		project: require("./project"),
 		job: require("./job"),
 		issue: require("./issue"),
+		notification: require("./notification"),
+		chat: require("./chat"),
 
 		isHereEnabled: isHereEnabled,
 

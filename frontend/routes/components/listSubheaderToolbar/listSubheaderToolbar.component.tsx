@@ -14,24 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import * as React from 'react';
+import { ListSubheaderContainer } from './listSubheaderToolbar.styles';
+import { ListSubheader, Toolbar } from '@material-ui/core';
 
-import { NotificationEvents } from "./notification.events";
-import { NotificationsChannel } from "./notifications.channel";
+interface IProps {
+	rightContent: JSX.Element;
+}
 
-export class NotificationRisksEvents extends NotificationEvents {
-	private comments: { [id: string]: NotificationEvents};
-
-	constructor(protected channel: NotificationsChannel) {
-		super(channel, "risk");
-		this.comments = {};
+export class ListSubheaderToolbar extends React.PureComponent<IProps, any> {
+	public render() {
+		return (<ListSubheaderContainer >
+					<Toolbar>
+						{this.props.children}
+						<div style={{position: 'absolute', right: 0}}>
+							{this.props.rightContent}
+						</div>
+					</Toolbar>
+				</ListSubheaderContainer>);
 	}
-
-	public getCommentsNotifications(id: string): NotificationEvents {
-		if (!this.comments[id]) {
-			this.comments[id] =  new NotificationEvents(this.channel, "comment", id);
-		}
-
-		return this.comments[id];
-	}
-
 }

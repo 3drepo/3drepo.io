@@ -14,8 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { IssuesService } from "./issues.service";
+import * as API from "../../../services/api";
+import { APIService } from "../../home/js/api.service";
+import { dispatch } from "../../../helpers/migration";
 import { IChip } from "../../panel/js/panel-card-chips-filter.component";
+import { IssuesService } from "./issues.service";
+import { NotificationsActions } from "../../../modules/notifications";
+import { StateManagerService } from "../../home/js/state-manager.service";
 
 class IssuesListController implements ng.IController {
 
@@ -28,8 +33,9 @@ class IssuesListController implements ng.IController {
 		"$filter",
 
 		"IssuesService",
-		"PanelService",
-		"ClientConfigService"
+		"ClientConfigService",
+		"StateManager",
+		"PanelService"
 	];
 
 	private toShow: string;
@@ -58,19 +64,17 @@ class IssuesListController implements ng.IController {
 		private $filter,
 
 		private issuesService: IssuesService,
-		private PanelService: any,
-		private clientConfigService: any
+		private clientConfigService: any,
+		private stateManager: StateManagerService,
+		private PanelService: any
 	) {}
 
 	public $onInit() {
-
 		this.toShow = "list";
 		this.focusedIssueIndex = null;
-		this.selectedIssueIndex = null;
 		this.internalSelectedIssue = null;
 		this.setupBcfImportInput(); // Necessary since angularjs doesnt support ng-change with file typeinputs.
 		this.watchers();
-
 	}
 
 	public watchers() {
@@ -86,6 +90,8 @@ class IssuesListController implements ng.IController {
 			true
 		);
 
+		this.$scope.$watch("vm.stateManager.state.notificationId", this.filterByNotification.bind(this));
+
 		this.$scope.$watch("vm.issuesToShow", () => {
 			this.setContentAndSize();
 			this.issuesService.showIssuePins();
@@ -97,6 +103,10 @@ class IssuesListController implements ng.IController {
 
 			const oldDateFromChip = oldChips.find((c) => c.type === "date_from");
 			const oldDateToChip = oldChips.find((c) => c.type === "date_to");
+
+			if (this.stateManager.state.notificationId && chips.length === 0) {
+				this.stateManager.state.notificationId = null;
+			}
 
 			if (!!dateFromChip && !!dateToChip) {
 				if (dateFromChip.value.getTime() > dateToChip.value.getTime()) {
@@ -139,7 +149,28 @@ class IssuesListController implements ng.IController {
 			},
 			true
 		);
+	}
 
+	public filterByNotification(notificationId) {
+		if (notificationId) {
+			let chip: IChip = {name: "assignedIssues",
+			nameType: "Notification",
+			value: [],
+			type: "notification"};
+
+			this.filterChips = [chip];
+
+			dispatch(NotificationsActions.sendUpdateNotificationRead(notificationId, true));
+			API.getNotification(notificationId)
+			.then((n) => {
+				chip = {name: "assignedIssues",
+					nameType: "Notification",
+					value: n.data.issuesId,
+					type: "notification"};
+
+				this.filterChips = [chip];
+			});
+		}
 	}
 
 	public setupBcfImportInput() {
