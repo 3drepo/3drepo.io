@@ -1,4 +1,8 @@
 import { APIService } from './../../home/js/api.service';
+import * as moment from 'moment';
+import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
+import { consolidateStreamedStyles } from 'styled-components';
+
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -150,29 +154,29 @@ export class PanelService {
 					toggleFilterChips: true,
 					upperDivider: true,
 					menu: [{
-							hidden: false,
-							value: "open",
-							label: "Open",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "in progress",
-							label: "In progress",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "for approval",
-							label: "For approval",
-							toggle: true
-						}, {
-							hidden: false,
-							value: "closed",
-							label: "Closed",
-							toggle: true,
-							stopClose: true
-						}]
+						hidden: false,
+						value: "open",
+						label: "Open",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "in progress",
+						label: "In progress",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "for approval",
+						label: "For approval",
+						toggle: true
+					}, {
+						hidden: false,
+						value: "closed",
+						label: "Closed",
+						toggle: true,
+						stopClose: true
+					}]
 				},
 				{
 					hidden: false,
@@ -185,30 +189,30 @@ export class PanelService {
 					keepCheckSpace: false,
 					toggleFilterChips: true,
 					menu: [{
-							hidden: false,
-							value: "none",
-							label: "None",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "low",
-							label: "Low",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "medium",
-							label: "Medium",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "high",
-							label: "High",
-							toggle: true,
-							stopClose: true
-						}]
+						hidden: false,
+						value: "none",
+						label: "None",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "low",
+						label: "Low",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "medium",
+						label: "Medium",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "high",
+						label: "High",
+						toggle: true,
+						stopClose: true
+					}]
 				},
 				{
 					value: "topic_type", // the whole menu will be replaced once the topic types are loaded
@@ -234,21 +238,21 @@ export class PanelService {
 					label: "Date",
 					toggle: false,
 					menu: [{
-							hidden: false,
-							value: "from",
-							label: "From",
-							stopClose: true,
-							toggleFilterChips: true,
-							date: true
-						},
-						{
-							hidden: false,
-							value: "to",
-							label: "To     ",
-							stopClose: true,
-							toggleFilterChips: true,
-							date: true
-						}
+						hidden: false,
+						value: "from",
+						label: "From",
+						stopClose: true,
+						toggleFilterChips: true,
+						date: true
+					},
+					{
+						hidden: false,
+						value: "to",
+						label: "To     ",
+						stopClose: true,
+						toggleFilterChips: true,
+						date: true
+					}
 					]
 				},
 				{
@@ -265,7 +269,7 @@ export class PanelService {
 			minHeight: 260,
 			fixedHeight: false,
 			options: [
-				{type: "menu", visible: true},
+				{ type: "menu", visible: true },
 				{
 					type: "chips-filter",
 					visible: true
@@ -321,36 +325,36 @@ export class PanelService {
 					toggleFilterChips: true,
 					upperDivider: true,
 					menu: [{
-							hidden: false,
-							value: "",
-							label: "Unmitigated",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "proposed",
-							label: "Proposed",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "agreed_partial",
-							label: "Agreed (Partial)",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "agreed_fully",
-							label: "Agreed (Fully)",
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: "rejected",
-							label: "Rejected",
-							toggle: true,
-							stopClose: true
-						}]
+						hidden: false,
+						value: "",
+						label: "Unmitigated",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "proposed",
+						label: "Proposed",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "agreed_partial",
+						label: "Agreed (Partial)",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "agreed_fully",
+						label: "Agreed (Fully)",
+						toggle: true,
+						stopClose: true
+					}, {
+						hidden: false,
+						value: "rejected",
+						label: "Rejected",
+						toggle: true,
+						stopClose: true
+					}]
 				},
 				{
 					value: "creator_role", // the whole menu will be replaced once the creators roles are loaded
@@ -366,8 +370,8 @@ export class PanelService {
 				}
 			],
 			options: [
-				{type: "menu", visible: true},
-				{type: "chips-filter", visible: true}
+				{ type: "menu", visible: true },
+				{ type: "chips-filter", visible: true }
 			],
 			add: true
 		});
@@ -408,8 +412,8 @@ export class PanelService {
 				}
 			],
 			options: [
-				{type: "menu", visible: true},
-				{type: "filter", visible: true}
+				{ type: "menu", visible: true },
+				{ type: "filter", visible: true }
 			],
 			add: true
 		});
@@ -424,7 +428,7 @@ export class PanelService {
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "filter", visible: true}
+				{ type: "filter", visible: true }
 			]
 		});
 
@@ -465,8 +469,8 @@ export class PanelService {
 				}
 			],
 			options: [
-				{type: "menu", visible: true},
-				{type: "filter", visible: true}
+				{ type: "menu", visible: true },
+				{ type: "filter", visible: true }
 			]
 		});
 
@@ -504,7 +508,7 @@ export class PanelService {
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{type: "close", visible: true}
+				{ type: "close", visible: true }
 			]
 		});
 
@@ -515,18 +519,29 @@ export class PanelService {
 	 *
 	 * @param content The JSON response to download
 	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
-	 * @param contentType content type for downloaded file : "text/plain", "application/json"
+	 * @param modelID Model ID to used to obtain model data.
+	 * @param account User account used as param to obtain model data.
 	 */
 
-	public downloadJSON(fileName, endpoint) {
-		this.apiService.get(endpoint).then((res) => {
-			const content = JSON.stringify(res.data, null, 2);
-			const a = document.createElement("a");
-			const file = new Blob([content]);
-			a.href = URL.createObjectURL(file);
-			a.download = fileName + ".json";
-			a.click();
-		});
+	public downloadJSON(fileName, endpoint, modelID, account) {
+
+		const timestamp = moment().format("DD-MM-YYYYTkk:mm:ss");
+
+		const modelEndpoint = `${account}/${modelID}.json`;
+
+		this.apiService.get(modelEndpoint)
+			.then((res) => {
+				return res.data.name.split(" ").join("");
+			}).then((modelName) => {
+				this.apiService.get(endpoint).then((res) => {
+					const content = JSON.stringify(res.data, null, 2);
+					const a = document.createElement("a");
+					const file = new Blob([content]);
+					a.href = URL.createObjectURL(file);
+					a.download = `${modelName}_${timestamp}_${fileName}.json`;
+					a.click();
+				});
+			});
 	}
 
 	/**
@@ -538,10 +553,10 @@ export class PanelService {
 	 * @param menuItem The new menu containing all the menu items for filtering
 	 * @param subItems The menu items that will be added to the new menu
 	 */
-	public setChipFilterMenuItem( panelType: string, menuItem: any, subItems: any[] ) {
-		let panel: IPanelCard = this.panelCards.left.find((pc) => pc.type === panelType );
+	public setChipFilterMenuItem(panelType: string, menuItem: any, subItems: any[]) {
+		let panel: IPanelCard = this.panelCards.left.find((pc) => pc.type === panelType);
 
-		const newMenu: IMenuItem =  {
+		const newMenu: IMenuItem = {
 			hidden: false,
 			value: menuItem.value,
 			label: menuItem.label,
@@ -561,14 +576,14 @@ export class PanelService {
 			this.setPanelMenu(panel, newMenu);
 		}
 
-		panel = this.panelCards.right.find((pc) => pc.type === panelType );
+		panel = this.panelCards.right.find((pc) => pc.type === panelType);
 
 		if (!!panel) {
 			this.setPanelMenu(panel, newMenu);
 		}
 	}
 
-	public setPanelMenu(panel: IPanelCard,  menu: any) {
+	public setPanelMenu(panel: IPanelCard, menu: any) {
 		const oldMenuIndex = panel.menu.findIndex((mi) => mi.value === menu.value);
 
 		if (oldMenuIndex > 0) {
@@ -591,8 +606,8 @@ export class PanelService {
 			(panelCard) => this.setSelectedMenuInPanelCard(panelCard, menuType, menuSubType, selected));
 	}
 
-	public setSelectedMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, selected: boolean) {
-		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+	public setSelectedMenuInPanelCard(panelCard: IPanelCard, menuType: string, menuSubType: string, selected: boolean) {
+		const item = this.getSubmenu(panelCard, menuType, menuSubType);
 		if (!item) { return; }
 		item.selected = selected;
 	}
@@ -602,27 +617,27 @@ export class PanelService {
 			(panelCard) => this.setDateValueFromMenuInPanelCard(panelCard, menuType, menuSubType, value));
 	}
 
-	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, value: Date ) {
-		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard, menuType: string, menuSubType: string, value: Date) {
+		const item = this.getSubmenu(panelCard, menuType, menuSubType);
 		if (!item) { return; }
 		item.dateValue = value;
 	}
 
-	public getSubmenu(panelCard: IPanelCard,  menuType: string, menuSubType: string): IMenuItem {
+	public getSubmenu(panelCard: IPanelCard, menuType: string, menuSubType: string): IMenuItem {
 		const menu = panelCard.menu.find((m) => m.value === menuType);
 		if (!menu) { return null; }
-		return menu.menu.find((m) => m.value === menuSubType );
+		return menu.menu.find((m) => m.value === menuSubType);
 	}
 
 	public getPanelsByType(panelCardType: string): IPanelCard[] {
 		const panels: IPanelCard[] = [];
-		let panelCard = this.panelCards.left.find( (pc) => pc.type === panelCardType);
+		let panelCard = this.panelCards.left.find((pc) => pc.type === panelCardType);
 
 		if (panelCard) {
 			panels.push(panelCard);
 		}
 
-		panelCard = this.panelCards.right.find( (pc) => pc.type === panelCardType);
+		panelCard = this.panelCards.right.find((pc) => pc.type === panelCardType);
 
 		if (panelCard) {
 			panels.push(panelCard);
