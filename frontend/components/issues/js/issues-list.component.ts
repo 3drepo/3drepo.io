@@ -215,8 +215,7 @@ class IssuesListController implements ng.IController {
 			case "print":
 				const printEndpoint = this.account + "/" + this.model + "/issues.html?ids=" + ids.join(",");
 				const printUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, printEndpoint);
-				console.log(printEndpoint);
-				// this.$window.open(printUrl, "_blank");
+				this.$window.open(printUrl, "_blank");
 				break;
 
 			case "exportBCF":
