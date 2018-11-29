@@ -215,7 +215,8 @@ class IssuesListController implements ng.IController {
 			case "print":
 				const printEndpoint = this.account + "/" + this.model + "/issues.html?ids=" + ids.join(",");
 				const printUrl = this.clientConfigService.apiUrl(this.clientConfigService.GET_API, printEndpoint);
-				this.$window.open(printUrl, "_blank");
+				console.log(printEndpoint);
+				// this.$window.open(printUrl, "_blank");
 				break;
 
 			case "exportBCF":
@@ -226,7 +227,7 @@ class IssuesListController implements ng.IController {
 
 			case "downloadJSON":
 				const jsonEndpoint = this.account + "/" + this.model + "/issues.json";
-				this.PanelService.downloadJSON("issues", jsonEndpoint);
+				this.PanelService.downloadJSON("issues", jsonEndpoint, this.model, this.account);
 				break;
 
 			case "importBCF":
