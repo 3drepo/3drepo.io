@@ -377,7 +377,6 @@ class HomeController implements ng.IController {
 	}
 
 	public handlePaths() {
-
 		// TODO: this is a bit of a hack, it would be nice to
 		// include this in the StateManager
 		if (this.hasTrailingSlash()) {
@@ -387,14 +386,10 @@ class HomeController implements ng.IController {
 		// If it's a logged in page just redirect to the
 		// users teamspace page
 		this.AuthService.authDefer.promise.then(() => {
-			if (
-				this.AuthService.loggedOutPage() &&
-				this.AuthService.getUsername()
-			) {
+			if ( this.AuthService.loggedOutPage() && this.AuthService.getUsername()) {
 				this.$location.path("/" + this.AuthService.getUsername());
 			}
 		});
-
 	}
 
 	public pageCheck(state, pages) {

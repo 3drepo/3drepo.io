@@ -37,7 +37,7 @@ export class StateManagerService {
 		"RisksService"
 	];
 
-	private state: any;
+	public state: any;
 	private changedState: any;
 	private structure: any;
 	private changed: any;

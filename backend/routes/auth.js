@@ -39,7 +39,7 @@ router.get("/login", checkLogin);
 router.post("/forgot-password", forgotPassword);
 router.get("/version", printVersion);
 
-router.get("/:account.json", middlewares.loggedIn, listInfo);
+router.get("/:account.json", middlewares.loggedIn, listInfo); // TODO: divide into different endpoints that makes sense.
 
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);

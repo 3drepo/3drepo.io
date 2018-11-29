@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationsChannel } from "./notifications.channel";
+import { Icon, Tooltip } from '@material-ui/core';
+import * as React from 'react';
+import { SmallIconButtonStyled } from './smallIconButton.styles';
 
-export class NotificationModelEvents {
-	constructor(private channel: NotificationsChannel) {
-	}
+interface IProps {
+	onClick?: (event: React.SyntheticEvent) => void;
+	tooltip: string;
+}
 
-	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {
-		this.channel.subscribe("modelStatusChanged", callback, context);
-	}
-
-	public unsubscribeFromStatusChanged(callback: (data: any) => void) {
-		this.channel.unsubscribe("modelStatusChanged", callback);
+export class SmallIconButton extends React.PureComponent<IProps, any> {
+	public render = () => {
+		return (
+			<Tooltip title={this.props.tooltip}>
+			<SmallIconButtonStyled
+				component="span"
+				aria-label={this.props.tooltip}
+				onClick={this.props.onClick}>
+				<Icon>{this.props.children}</Icon>
+			</SmallIconButtonStyled>
+		</Tooltip>
+		);
 	}
 }
