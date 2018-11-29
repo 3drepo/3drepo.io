@@ -33,7 +33,7 @@ import { INotification } from './components/notificationItem/notificationItem.co
 import { NotificationEmptyItem } from './components/emptyItem/emptyItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsBadge, NotificationsList, NotificationsIcon } from './notifications.styles';
+import { NotificationsList, NotificationsIcon } from './notifications.styles';
 
 /**
  * Gets the date of the sunday thats away from the offset .
