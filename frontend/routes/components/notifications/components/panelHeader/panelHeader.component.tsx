@@ -15,23 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationEvents } from './notification.events';
-import { NotificationsChannel } from './notifications.channel';
+import * as React from 'react';
+import { ItemLabel } from '../../../components.styles';
+import { NotificationsPanelItem } from '../../notifications.styles';
+import { NotificationsPanelHeaderContainer } from './panelHeader.styles';
 
-export class NotificationIssuesEvents extends NotificationEvents {
-	private comments: { [id: string]: NotificationEvents};
-
-	constructor(protected channel: NotificationsChannel) {
-		super(channel, 'issue');
-		this.comments = {};
+export class NotificationsPanelHeader extends React.PureComponent<any, any> {
+	public render() {
+		const { labelLeft, labelRight, style } = this.props;
+		return (
+			<NotificationsPanelItem style={style}>
+				<NotificationsPanelHeaderContainer>
+					<ItemLabel>
+						{labelLeft}
+					</ItemLabel>
+					<ItemLabel>
+						{labelRight}
+					</ItemLabel>
+				</NotificationsPanelHeaderContainer>
+			</NotificationsPanelItem>
+		);
 	}
-
-	public getCommentsNotifications(id: string): NotificationEvents {
-		if (!this.comments[id]) {
-			this.comments[id] =  new NotificationEvents(this.channel, 'comment', id);
-		}
-
-		return this.comments[id];
-	}
-
 }

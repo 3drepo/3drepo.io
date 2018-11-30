@@ -89,7 +89,7 @@ export function* onModelStatusChanged({ modelData, teamspace, project, modelId, 
 
 export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
-	const notificationService = yield getAngularService('NotificationService');
+	const notificationService = yield getAngularService('ChatService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
 	const onChanged = (changedModelData) =>
@@ -99,7 +99,7 @@ export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 
 export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
-	const notificationService = yield getAngularService('NotificationService');
+	const notificationService = yield getAngularService('ChatService');
 	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
 	const onChanged = (changedModelData) =>

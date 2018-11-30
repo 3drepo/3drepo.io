@@ -41,7 +41,7 @@ interface IState {
 	color?: string;
 }
 
-export class NewJobForm extends React.PureComponent<IProps, IState> {
+export class NewJobForm extends React.PureComponent<IProps, any> {
 	public state = {
 		name: '',
 		color: ''

@@ -135,6 +135,74 @@ export const MuiTheme = createMuiTheme({
 				marginRight: '10px',
 				marginBottom: '10px'
 			}
+		},
+		MuiTypography: {
+			title: {
+				fontSize: 20,
+				fontWeight: 400
+			}
+		},
+		MuiToolbar: {
+			root: {
+				backgroundColor: theme.colors.PRIMARY_MAIN,
+				color: theme.colors.WHITE_87,
+				padding: '0 16px !important'
+			},
+			regular: {
+				/* tslint:disable */
+				height: 40,
+				minHeight: 40,
+				'@media (min-width: 600px)': {
+					minHeight: 0
+				}
+				/* tslint:enable */
+			}
+		},
+		MuiDrawer: {
+			paper: {
+				backgroundColor: 'rgb(250,250,250)',
+				boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.2)',
+				zIndex: 10
+			},
+			paperAnchorDockedRight: {
+				borderLeft: 'none'
+			}
+		},
+		MuiListItemText: {
+			root: {
+				minWidth: 10
+			},
+			primary: {
+				overflow: 'hidden',
+				textOverflow: 'ellipsis',
+				whiteSpace: 'nowrap'
+			},
+			secondary: {
+				overflow: 'hidden',
+				textOverflow: 'ellipsis',
+				whiteSpace: 'nowrap'
+			}
+		},
+		MuiBadge: {
+			badge: {
+				width: 20,
+				height: 20,
+				top: 1,
+				right: -4,
+				pointerEvents: 'none'
+			},
+			colorPrimary: {
+				backgroundColor: '#e8004e'
+			},
+			colorSecondary: { // Secondary color is used to make the badge disappear
+				backgroundColor: 'transparent',
+				color: 'transparent'
+			}
+		},
+		MuiIcon: {
+			fontSizeLarge: {
+				fontSize: 35
+			}
 		}
 	}
 });

@@ -266,7 +266,6 @@ class HomeController implements ng.IController {
 	}
 
 	public handlePaths() {
-
 		// TODO: this is a bit of a hack, it would be nice to
 		// include this in the StateManager
 		if (this.hasTrailingSlash()) {

@@ -120,7 +120,7 @@ account-dir #account .userContentNoMargin {
   margin-top: 0 !important;
 }
 
-account-dir #account {  
+account-dir #account {
   background-size: contain;
   position: absolute;
   width: 100%;
@@ -419,11 +419,17 @@ account-info md-list {
 
 /** Account Menu ******************************************************************************************************/
 account-menu {
-  z-index: 3;
+  z-index: 30;
   position: absolute;
   top: 0;
   right: 0;
+  padding: 16px;
 }
+
+account-menu > * {
+  margin-left: 10px;
+}
+
 account-menu md-icon {
   color: #FFFFFF;
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
@@ -433,10 +439,19 @@ account-menu md-icon {
   outline: none;
 }
 
-account-menu button {
-    width: 65px !important;
-    height: 65px !important;
+#accountMenu button {
+    margin: 0px;
+    padding: 0px;
+    height: 49px;
 }
+
+
+#accountMenu button md-icon{
+  margin-top: -10px;
+  margin-left: -3px;
+}
+
+
 
 account-menu #accountMenuContent {
   border-radius: 4px;
@@ -453,8 +468,10 @@ account-menu #accountMenuContent md-menu-item > .md-button {
 }
 
 .newModelDialog .uploadProgress {
+/* csslint ignore:start */
   width: 25px;
   height: 25px;
+/* csslint ignore:end */
   display: inline;
   margin-left: 15px;
 }

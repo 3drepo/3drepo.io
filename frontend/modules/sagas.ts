@@ -6,6 +6,7 @@ import billingSaga from './billing/billing.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import modelSaga from './model/model.sagas';
 import authSaga from './auth/auth.sagas';
+import notificationsSaga from './notifications/notifications.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -16,6 +17,7 @@ export default function* rootSaga() {
 		fork(billingSaga),
 		fork(teamspacesSaga),
 		fork(modelSaga),
-		fork(authSaga)// <-- INJECT MODULE SAGA -->
+		fork(authSaga),
+		fork(notificationsSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

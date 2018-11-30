@@ -39,10 +39,16 @@ const deleteRequest = (url, ...options) => {
 	return axios.delete(requestUrl, ...options);
 };
 
+const patchRequest = (url, ...options) => {
+	const requestUrl = clientConfigService.apiUrl(clientConfigService.POST_API, url);
+	return axios.patch(requestUrl, ...options);
+};
+
 export const API = {
 	get: getRequest,
 	post: postRequest,
 	put: putRequest,
+	patch: patchRequest,
 	delete: deleteRequest
 };
 

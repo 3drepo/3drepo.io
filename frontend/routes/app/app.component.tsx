@@ -39,6 +39,7 @@ interface IState {
 const DEFAULT_REDIRECT = '/dashboard/teamspaces';
 const MAIN_ROUTE_PATH =  '/';
 const STATIC_ROUTES = [
+	'login',
 	'cookies',
 	'terms',
 	'privacy',
@@ -55,8 +56,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		autologoutInterval: clientConfigService.login_check_interval || 4
 	};
 
-	public is;
-
 	private authenticationInterval;
 
 	public isStaticRoute(path) {
@@ -65,6 +64,12 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.authenticate();
+
+		const initialReferrer = location.pathname !== MAIN_ROUTE_PATH
+			? `${location.pathname}${location.search}`
+			: DEFAULT_REDIRECT;
+
+		this.setState({ referrer: initialReferrer });
 	}
 
 	public componentWillMount() {
@@ -76,22 +81,12 @@ export class App extends React.PureComponent<IProps, IState> {
 		const { location, history, isAuthenticated } = this.props;
 		const isStaticRoute = this.isStaticRoute(location.pathname);
 		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
-			const referrer = `${location.pathname}${location.search}`;
 			if (isAuthenticated) {
-				runAngularTimeout(() => {
-					// TODO: This statement should be removed after viewer migration
-					const isViewer = referrer.includes('viewer');
-					const state = isViewer ? referrer : this.state.referrer;
-					history.push(state);
-				});
-				changes.referrer = DEFAULT_REDIRECT;
-
 				this.toggleAutoLogout();
+				runAngularTimeout(() => {
+					history.push(this.state.referrer);
+				});
 			} else {
-				if (location.pathname !== MAIN_ROUTE_PATH) {
-					changes.referrer = referrer;
-				}
-
 				this.toggleAutoLogout(false);
 				runAngularTimeout(() => {
 					history.push('/login');
@@ -101,7 +96,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		if (isStaticRoute && isAuthenticated) {
 			runAngularTimeout(() => {
-				history.push('/dashboard/teamspaces');
+				history.push(DEFAULT_REDIRECT);
 			});
 		}
 

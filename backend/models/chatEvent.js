@@ -25,13 +25,16 @@ const eventTypes = Object.freeze({
 });
 
 function insertEventQueue(event, emitter, account, model, extraKeys, data) {
+	model = !model ? "" : `::${model}`;
+	extraKeys =  !extraKeys ? [] : extraKeys;
+	const channel = account + model;
+	const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
+	event = `${account}${model}${extraPrefix}::${event}`;
 
 	const msg = {
 		event,
+		channel,
 		emitter,
-		account,
-		model,
-		extraKeys,
 		data
 	};
 

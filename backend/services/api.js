@@ -104,6 +104,10 @@ module.exports.createApp = function (serverConfig) {
 	app.use("/", require("../routes/plan"));
 	// auth handler
 	app.use("/", require("../routes/auth"));
+
+	// notifications handler
+	app.use("/me", require("../routes/notification")); // Sho
+
 	// subscriptions handler
 	app.use("/:account", require("../routes/subscriptions"));
 	// invoices handler

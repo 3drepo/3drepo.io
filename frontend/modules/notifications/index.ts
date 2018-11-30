@@ -15,17 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationsChannel } from './notifications.channel';
+export {
+	NotificationsTypes,
+	NotificationsActions
+} from './notifications.redux';
 
-export class NotificationModelEvents {
-	constructor(private channel: NotificationsChannel) {
-	}
-
-	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {
-		this.channel.subscribe('modelStatusChanged', callback, context);
-	}
-
-	public unsubscribeFromStatusChanged(callback: (data: any) => void) {
-		this.channel.unsubscribe('modelStatusChanged', callback);
-	}
-}
+export * from './notifications.selectors';

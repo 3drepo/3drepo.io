@@ -22,6 +22,7 @@ import { MuiTheme } from '../../../styles';
 import { Container } from './topMenu.styles';
 import { UserMenu } from './components/userMenu/userMenu.component';
 import { Logo } from '../logo/logo.component';
+import Notifications from '../notifications/notifications.container';
 
 interface IProps {
 	currentUser: any;
@@ -40,6 +41,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 			<MuiThemeProvider theme={MuiTheme}>
 				<Container>
 					<Logo onClick={onLogoClick} />
+					<Notifications />
 					<UserMenu
 						{...userMenuProps}
 						onTeamspacesClick={this.props.onLogoClick}

@@ -76,22 +76,11 @@ module.exports.createApp = function (server, serverConfig) {
 
 		// consume event queue and fire msg to clients if they have subscribed related event
 		queue.consumeEventMessage(msg => {
-
-			if(msg.event && msg.account) {
+			if(msg.event && msg.channel) {
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 
-				const modelNameSpace = msg.model ?  `::${msg.model}` : "";
-				let extraPrefix = "";
-
-				if(Array.isArray(msg.extraKeys) && msg.extraKeys.length > 0) {
-					msg.extraKeys.forEach(key => {
-						extraPrefix += `::${key}`;
-					});
-				}
-
-				const eventName = `${msg.account}${modelNameSpace}${extraPrefix}::${msg.event}`;
-				emitter.to(`${msg.account}${modelNameSpace}`).emit(eventName, msg.data);
+				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
 		});
 

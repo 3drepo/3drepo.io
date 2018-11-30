@@ -33,7 +33,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$stateProvider.state('app.viewer', {
-		url: '/viewer/:teamspace/:modelId/:revision?issueId&riskId',
+		url: '/viewer/:teamspace/:modelId/:revision?issueId&riskId&notificationId',
 		template: `
 			<model
 				is-lite-mode="vm.isLiteMode"

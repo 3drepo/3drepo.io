@@ -20,9 +20,9 @@ import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { IssuesService } from './issues.service';
 import { MeasureService } from '../../measure/js/measure.service';
-import { NotificationEvents } from '../../notifications/js/notification.events';
-import { NotificationIssuesEvents } from '../../notifications/js/notification.issues.events';
-import { NotificationService } from '../../notifications/js/notification.service';
+import { ChatEvents } from '../../chat/js/chat.events';
+import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
+import { ChatService } from '../../chat/js/chat.service';
 import { StateManagerService } from '../../home/js/state-manager.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
@@ -40,7 +40,7 @@ class IssueController implements ng.IController {
 
 		'IssuesService',
 		'APIService',
-		'NotificationService',
+		'ChatService',
 		'AuthService',
 		'AnalyticService',
 		'StateManager',
@@ -70,7 +70,7 @@ class IssueController implements ng.IController {
 	private priorities: any[];
 	private statuses: any;
 	private actions: any;
-	private notificationStarted = false;
+	private chatStarted = false;
 	private popStateHandler;
 	private refreshHandler;
 	private data;
@@ -92,8 +92,8 @@ class IssueController implements ng.IController {
 	private issueComponent;
 	private commentThumbnail;
 	private contentHeight;
-	private issuesNotifications: NotificationIssuesEvents;
-	private commentsNotifications: NotificationEvents;
+	private chatEventsIssues: IssuesChatEvents;
+	private chatEventsComments: ChatEvents;
 
 	constructor(
 		private $location,
@@ -106,7 +106,7 @@ class IssueController implements ng.IController {
 
 		private issuesService: IssuesService,
 		private apiService: APIService,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private authService: AuthService,
 		private analyticService: AnalyticService,
 		private stateManager: StateManagerService,
@@ -181,7 +181,7 @@ class IssueController implements ng.IController {
 			}
 		};
 
-		this.notificationStarted = false;
+		this.chatStarted = false;
 
 		this.setContentHeight();
 		history.pushState(null, null, document.URL);
@@ -193,7 +193,6 @@ class IssueController implements ng.IController {
 		this.refreshHandler = (event) => {
 			return this.stateManager.refreshHandler(event);
 		};
-
 		// listen for user clicking the back button
 		window.addEventListener('popstate', this.popStateHandler);
 		window.addEventListener('beforeunload', this.refreshHandler);
@@ -227,10 +226,10 @@ class IssueController implements ng.IController {
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.issuesNotifications.unsubscribeFromUpdated(this.onIssueUpdated);
-			this.commentsNotifications.unsubscribeFromCreated(this.onCommentCreated);
-			this.commentsNotifications.unsubscribeFromUpdated (this.onCommentUpdated);
-			this.commentsNotifications.unsubscribeFromDeleted(this.onCommentDeleted);
+			this.chatEventsIssues.unsubscribeFromUpdated(this.onIssueUpdated);
+			this.chatEventsComments.unsubscribeFromCreated(this.onCommentCreated);
+			this.chatEventsComments.unsubscribeFromUpdated (this.onCommentUpdated);
+			this.chatEventsComments.unsubscribeFromDeleted(this.onCommentDeleted);
 		}
 
 	}
@@ -278,7 +277,7 @@ class IssueController implements ng.IController {
 				this.issuesService.getIssue(this.data.account, this.data.model, this.data._id)
 					.then((fetchedIssue) => {
 						this.setEditIssueData(fetchedIssue);
-						this.startNotification();
+						this.startChatEvents();
 						this.issueFailedToLoad = false;
 						// Update the issue data on issue service so search would work better
 						this.issuesService.updateIssues(this.issueData);
@@ -525,7 +524,7 @@ class IssueController implements ng.IController {
 			this.issuesService.updateIssue(this.issueData, statusChangeData)
 				.then((response) => {
 					if (response) {
-						const respData = response.data.issue;
+						const respData = response.data;
 						this.issuesService.populateIssue(respData);
 						this.issueData = respData;
 
@@ -925,7 +924,7 @@ class IssueController implements ng.IController {
 				this.submitDisabled = true;
 				this.setContentHeight();
 
-				this.startNotification();
+				this.startChatEvents();
 				this.saving = false;
 
 				const issueState = {
@@ -1008,7 +1007,7 @@ class IssueController implements ng.IController {
 				this.issuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
 						this.saving = false;
-						this.afterNewComment(response.data.issue, false);
+						this.afterNewComment(response.data, false);
 					})
 					.catch((error) => {
 						this.errorSavingComment(error);
@@ -1248,35 +1247,35 @@ class IssueController implements ng.IController {
 		this.$scope.$apply();
 	}
 
-	public startNotification() {
+	public startChatEvents() {
 
-		if (this.data && !this.notificationStarted) {
-			this.notificationStarted = true;
+		if (this.data && !this.chatStarted) {
+			this.chatStarted = true;
 
-			this.issuesNotifications =  this.notificationService.getChannel(this.data.account, this.data.model).issues;
+			this.chatEventsIssues =  this.chatService.getChannel(this.data.account, this.data.model).issues;
 
 			/*
 			* Watch for issue change
 			*/
 
-			this.issuesNotifications.subscribeToUpdated( this.onIssueUpdated, this);
+			this.chatEventsIssues.subscribeToUpdated( this.onIssueUpdated, this);
 
-			this.commentsNotifications = this.issuesNotifications.getCommentsNotifications(this.data._id);
+			this.chatEventsComments = this.chatEventsIssues.getCommentsChatEvents(this.data._id);
 
 			/*
 			* Watch for new comments
 			*/
-			this.commentsNotifications.subscribeToCreated(this.onCommentCreated, this);
+			this.chatEventsComments.subscribeToCreated(this.onCommentCreated, this);
 
 			/*
 			* Watch for comment changed
 			*/
-			this.commentsNotifications.subscribeToUpdated(this.onCommentUpdated, this);
+			this.chatEventsComments.subscribeToUpdated(this.onCommentUpdated, this);
 
 			/*
 			* Watch for comment deleted
 			*/
-			this.commentsNotifications.subscribeToDeleted(this.onCommentDeleted, this);
+			this.chatEventsComments.subscribeToDeleted(this.onCommentDeleted, this);
 		}
 	}
 

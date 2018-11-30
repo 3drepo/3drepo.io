@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../styles';
 import * as LogoStyles from '../logo/logo.styles';
 
 export const Container = styled.div`
@@ -24,7 +23,6 @@ export const Container = styled.div`
   justify-content: flex-end;
   align-items: center;
   position: relative;
-  z-index: 1;
   padding-right: 5px;
   height: 80px;
 

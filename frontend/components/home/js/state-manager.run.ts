@@ -68,13 +68,6 @@ function StateManagerRun(
 		}
 
 		AnalyticService.sendPageView(location);
-
-		const queryParams = $location.search();
-		if (Object.keys(queryParams).length) {
-			StateManager.clearQuery();
-		} else {
-			StateManager.setQuery(queryParams);
-		}
 	});
 
 	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {

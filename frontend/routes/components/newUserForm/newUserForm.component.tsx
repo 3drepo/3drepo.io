@@ -49,7 +49,7 @@ interface IState {
 	isAdmin: boolean;
 }
 
-export class NewUserForm extends React.PureComponent<IProps, IState> {
+export class NewUserForm extends React.PureComponent<IProps, any> {
 	public state = {
 		name: '',
 		job: '',

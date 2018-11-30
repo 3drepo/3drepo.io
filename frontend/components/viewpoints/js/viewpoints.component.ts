@@ -15,8 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationEvents } from '../../notifications/js/notification.events';
-import { NotificationService } from '../../notifications/js/notification.service';
+import { ChatEvents } from '../../chat/js/chat.events';
+import { ChatService } from '../../chat/js/chat.service';
 
 class ViewsController implements ng.IController {
 
@@ -29,7 +29,7 @@ class ViewsController implements ng.IController {
 		'AuthService',
 		'ClientConfigService',
 		'ViewpointsService',
-		'NotificationService'
+		'ChatService'
 	];
 
 	private onShowItem: any;
@@ -49,7 +49,7 @@ class ViewsController implements ng.IController {
 	private editSelectedView: any;
 	private filterText: string;
 	private viewpointNameMaxlength: number;
-	private viewsNotifications: NotificationEvents;
+	private viewsNotifications: ChatEvents;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -60,7 +60,7 @@ class ViewsController implements ng.IController {
 		private AuthService,
 		private ClientConfigService: any,
 		private ViewpointsService: any,
-		private notificationsService: NotificationService
+		private notificationsService: ChatService
 	) { }
 
 	public $onInit() {

@@ -17,8 +17,8 @@
 import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { GroupsService } from './groups.service';
-import { NotificationEvents } from '../../notifications/js/notification.events';
-import { NotificationService } from '../../notifications/js/notification.service';
+import { ChatEvents } from '../../chat/js/chat.events';
+import { ChatService } from '../../chat/js/chat.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { PanelService } from '../../panel/js/panel.service';
 
@@ -33,7 +33,7 @@ class GroupsController implements ng.IController {
 		'AuthService',
 		'ClientConfigService',
 		'IconsConstant',
-		'NotificationService',
+		'ChatService',
 		'PanelService'
 		];
 
@@ -63,7 +63,7 @@ class GroupsController implements ng.IController {
 	private lastColorOverride: any;
 	private selectedNodes: any[];
 	private filterText: string;
-	private groupsNotifications: NotificationEvents;
+	private groupsChatEvents: ChatEvents;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -75,7 +75,7 @@ class GroupsController implements ng.IController {
 		private authService: AuthService,
 		private clientConfigService: any,
 		private iconsConstant: any,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private panelService: PanelService
 	) { }
 
@@ -105,14 +105,14 @@ class GroupsController implements ng.IController {
 			[[234, 32, 39], [0, 98, 102], [87, 88, 187], [27, 20, 100], [111, 30, 81]]
 		];
 
-		this.groupsNotifications = this.notificationService.getChannel(this.account, this.model).groups;
+		this.groupsChatEvents = this.chatService.getChannel(this.account, this.model).groups;
 	}
 
 	public $onDestroy() {
 		this.groups = [];
-		this.groupsNotifications.unsubscribeFromCreated(this.onGroupsCreated);
-		this.groupsNotifications.unsubscribeFromUpdated(this.onGroupsUpdated);
-		this.groupsNotifications.unsubscribeFromDeleted(this.onGroupsDeleted);
+		this.groupsChatEvents.unsubscribeFromCreated(this.onGroupsCreated);
+		this.groupsChatEvents.unsubscribeFromUpdated(this.onGroupsUpdated);
+		this.groupsChatEvents.unsubscribeFromDeleted(this.onGroupsDeleted);
 	}
 
 	public watchers() {
@@ -166,7 +166,7 @@ class GroupsController implements ng.IController {
 				);
 			}
 
-			this.watchNotification();
+			this.watchChatEvents();
 		});
 
 		this.$scope.$watchCollection(() => {
@@ -467,10 +467,10 @@ class GroupsController implements ng.IController {
 	}
 
 	/*** Realtime sync  */
-	public watchNotification() {
-		this.groupsNotifications.subscribeToCreated(this.onGroupsCreated, this);
-		this.groupsNotifications.subscribeToUpdated(this.onGroupsUpdated, this);
-		this.groupsNotifications.subscribeToDeleted(this.onGroupsDeleted, this);
+	public watchChatEvents() {
+		this.groupsChatEvents.subscribeToCreated(this.onGroupsCreated, this);
+		this.groupsChatEvents.subscribeToUpdated(this.onGroupsUpdated, this);
+		this.groupsChatEvents.subscribeToDeleted(this.onGroupsDeleted, this);
 	}
 
 	public onGroupsCreated(group) {

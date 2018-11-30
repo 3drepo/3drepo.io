@@ -9,6 +9,7 @@ import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as authReducer } from './auth/auth.redux';
+import { reducer as notificationsReducer } from './notifications/notifications.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -21,6 +22,7 @@ export default function createReducer() {
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
 		model: modelReducer,
-		auth: authReducer// <-- INJECT MODULE REDUCER -->
+		auth: authReducer,
+		notifications: notificationsReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

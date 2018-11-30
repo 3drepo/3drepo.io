@@ -103,14 +103,8 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		this.setState({
 			fileName: event.target.value.name
 		});
-		onChange(event, ...params);
-	}
 
-	public validateFileFormat = (value) => {
-		const fileSplit = value.name.split('.');
-		const findI = fileSplit[fileSplit.length - 2] === 'i';
-		const findDgn = fileSplit[fileSplit.length - 1] === 'dgn';
-		return findI && findDgn;
+		onChange(event, ...params);
 	}
 
 	public render() {
@@ -159,12 +153,12 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 						}
 						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
 						<StyledDialogActions>
-							<Field name="file" validate={this.validateFileFormat} render={({ field }) =>
+							<Field name="file" render={({ field }) =>
 								<FileInputField
 									{...field}
 									onChange={this.handleFileChange(field.onChange)}
-								/>} />
-							<Field render={() =>
+						/>} />
+							<Field render={ () =>
 								<CancelButton
 									onClick={handleClose}
 									color="secondary">

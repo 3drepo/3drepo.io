@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationsChannel } from './notifications.channel';
+import { ChatChannel } from './chat.channel';
 
 enum EventType {
 	CREATED = 'Created',
@@ -23,8 +23,8 @@ enum EventType {
 	DELETED = 'Deleted'
 }
 
-export class NotificationEvents {
-	constructor(protected channel: NotificationsChannel, private entity: string, private keys: any = null) {
+export class ChatEvents {
+	constructor(protected channel: ChatChannel, private entity: string, private keys: any = null) {
 
 	}
 

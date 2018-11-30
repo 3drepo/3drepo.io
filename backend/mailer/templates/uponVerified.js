@@ -661,7 +661,7 @@ const html = data => `
 
 
 
-                        <img alt="" src="https://www.dropbox.com/s/2pw08kqvxex4zto/Quick%20User%20Guide.jpg?raw=1" width="264" style="max-width: 791px; border-radius: 0%;" class="mcnImage">
+                        <img alt="" src="https://www.dropbox.com/s/2njbarvrfxtwtbb/Guides.jpg?raw=1" width="264" style="max-width: 791px; border-radius: 0%;" class="mcnImage">
 
 
 
@@ -671,8 +671,7 @@ const html = data => `
             <table class="mcnCaptionRightTextContentContainer" align="right" border="0" cellpadding="0" cellspacing="0" width="264">
                 <tbody><tr>
                     <td valign="top" class="mcnTextContent" style="line-height: 150%; text-align: left;">
-                        <div style="text-align: left;"><span style="color:#808080"><span style="font-size:16px"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">The Quick Start guide&nbsp;is an introductory manual, taking you on a step by step journey through our platform. You will learn how to upload models, create federations &amp; issues and cover the basics of model navigation.</span></span></span><br>
-&nbsp;</div>
+                        <div style="text-align: left;"><span style="color:#808080"><span style="font-size:16px"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">User Guides provide you with a brief or comprehensive step by step journey through our platform. You will learn how to upload models, navigate them and create federations & issues.</div>
 
                     </td>
                 </tr>
@@ -695,8 +694,8 @@ const html = data => `
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
-                                    <a href="http://3drepo.org/wp-content/uploads/2018/11/3D-Repo-Quick-Start-Guide.pdf" title="Quick Start Guide" class="" target="_blank">
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/76po72y098jsz5m/Quick-Start%20Guide%20Button.png?raw=1" width="564" style="max-width: 1200px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 1%;" class="mcnImage">
+                                    <a href="http://3drepo.org/support/#User_Guides" title="User Guides" class="" target="_blank">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/hjqlpjes4wfsogw/User%20Guides.png?raw=1" width="564" style="max-width: 1200px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 1%;" class="mcnImage">
                                     </a>
 
                             </td>
@@ -755,7 +754,7 @@ const html = data => `
                     <td class="mcnCaptionLeftImageContent" align="center" valign="top">
 
 
-                        <img alt="" src="https://www.dropbox.com/s/66c5jf2fvfbrm2r/How%20to%20Videos.jpg?raw=1" width="264" style="max-width:656px;" class="mcnImage">
+                        <img alt="" src="https://www.dropbox.com/s/dxw7oe9jhpafrmd/Video%20Tutorials.jpg?raw=1" width="264" style="max-width:656px;" class="mcnImage">
 
 
                     </td>
@@ -764,7 +763,7 @@ const html = data => `
             <table class="mcnCaptionLeftTextContentContainer" align="left" border="0" cellpadding="0" cellspacing="0" width="264">
                 <tbody><tr>
                     <td valign="top" class="mcnTextContent" style="font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; line-height: 150%; text-align: left;">
-                        <div style="text-align: left;">For additional features and visual guidance, visit our 'How To' video channel. A live demo will highlight the step by step process you need to take as a user.</div>
+                        <div style="text-align: left;">For additional features and visual guidance, visit our 'Video Tutorials' page. Our videos will show you a step by step process you need to take as a user.</div>
 
                     </td>
                 </tr>
@@ -806,8 +805,8 @@ const html = data => `
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
-                                    <a href="https://www.youtube.com/playlist?list=PLS-KUH7mmZWh8vyBos3acJf61N22HGwuZ" title="How to Videos" class="" target="_blank">
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/9v83zob6b03z2ba/How%20to%20Videos%20Button.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                    <a href="http://3drepo.org/support/#Video_Tutorials" title="Video tutorials" class="" target="_blank">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/pz691gi8x1lspjb/Video%20Tutorials.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
 
                             </td>
@@ -852,7 +851,7 @@ const html = data => `
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
                             If you have any further questions, our support team will be happy to assist you.<br>
-Please, forward your queries to&nbsp;<a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank">support@3drepo.org</a><br>
+Please, forward your queries to&nbsp;<a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank">support@3drepo.org</a> or visit our <a href="http://www.3drepo.org/support/" target="_blank">support page</a>.<br>
 <br>
 All the best,&nbsp;<br>
 <br>

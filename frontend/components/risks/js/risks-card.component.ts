@@ -17,7 +17,7 @@
 import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { EventService } from '../../home/js/event.service';
-import { NotificationService } from '../../notifications/js/notification.service';
+import { ChatService } from '../../chat/js/chat.service';
 import { RevisionsService } from '../../revisions/js/revisions.service';
 import { RisksService } from './risks.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
@@ -38,7 +38,7 @@ class RisksCardController implements ng.IController {
 		'RisksService',
 		'EventService',
 		'AuthService',
-		'NotificationService',
+		'ChatService',
 		'RevisionsService',
 		'ClientConfigService',
 		'DialogService',
@@ -85,7 +85,7 @@ class RisksCardController implements ng.IController {
 		private risksService: RisksService,
 		private eventService: EventService,
 		private authService: AuthService,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private revisionsService: RevisionsService,
 		private clientConfigService: any,
 		private dialogService: DialogService,
@@ -126,14 +126,14 @@ class RisksCardController implements ng.IController {
 
 		this.risksService.reset();
 
-		let channel = this.notificationService.getChannel(this.account, this.model);
+		let channel = this.chatService.getChannel(this.account, this.model);
 
 		channel.risks.unsubscribeFromCreated(this.onRiskCreated);
 		channel.risks.unsubscribeFromUpdated(this.risksService.updateRisks);
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
-				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel =  this.chatService.getChannel(subModel.database, subModel.model);
 				channel.risks.unsubscribeFromCreated(this.onRiskCreated);
 				channel.risks.unsubscribeFromUpdated(this.risksService.updateRisks);
 		});
@@ -153,7 +153,7 @@ class RisksCardController implements ng.IController {
 				});
 
 				this.subModels = this.modelSettings.subModels || [];
-				this.watchNotification();
+				this.watchChatEvents();
 
 			}
 		});
@@ -253,17 +253,17 @@ class RisksCardController implements ng.IController {
 		this.onContentHeightRequest({height});
 	}
 
-	public watchNotification() {
+	public watchChatEvents() {
 		// Watch for new risks
 
-		let channel = this.notificationService.getChannel(this.account, this.model);
+		let channel = this.chatService.getChannel(this.account, this.model);
 
 		channel.risks.subscribeToCreated(this.onRiskCreated, this);
 		channel.risks.subscribeToUpdated(this.risksService.updateRisks, this.risksService);
 
 		// Do the same for all subModels
 		(this.subModels || []).forEach((subModel) => {
-				channel =  this.notificationService.getChannel(subModel.database, subModel.model);
+				channel =  this.chatService.getChannel(subModel.database, subModel.model);
 				channel.risks.subscribeToCreated(this.onRiskCreated, this);
 				channel.risks.subscribeToUpdated(this.risksService.updateRisks, this.risksService);
 		});

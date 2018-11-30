@@ -244,7 +244,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
 
-		if (rowsValuesChanged && !sortChanged && !orderChanged) {
+		if (rowsValuesChanged && !rowsChanged && !sortChanged && !orderChanged) {
 			changes.processedRows = updateProcessedRows({
 				updatedRows: this.props.rows,
 				processedRows: prevState.processedRows
