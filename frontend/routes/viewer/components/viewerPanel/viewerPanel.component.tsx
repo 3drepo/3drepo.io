@@ -45,7 +45,12 @@ interface IProps {
 	pending?: boolean;
 }
 
-export class ViewerPanel extends React.PureComponent<IProps, any> {
+export class ViewerCard extends React.PureComponent<IProps, any> {
+	public static defaultProps = {
+		renderFooterContent: () => null,
+		actions: []
+	};
+
 	public getTitle = () => {
 		const { title, Icon, actions } = this.props;
 		return (

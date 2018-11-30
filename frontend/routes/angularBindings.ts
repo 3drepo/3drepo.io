@@ -20,6 +20,7 @@ import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
 import { ViewerPanel } from './viewer/components/viewerPanel/viewerPanel.component';
 import Gis from './viewer/components/gis/gis.container';
+import Views from './viewer/components/views/views.container';
 
 angular
 	.module('3drepo')
@@ -36,4 +37,5 @@ angular
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('passwordChange', wrap(PasswordChange))
 	.component('viewerPanel', wrap(ViewerPanel))
-	.component('gis', wrap(Gis, ['maxHeight']));
+	.component('gis', wrap(Gis, ['maxHeight']))
+	.component('viewsCard', wrap(Views));
