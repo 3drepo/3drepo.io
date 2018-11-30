@@ -6,7 +6,6 @@ import './compare/js/compare.service';
 import './cookies/js/cookies.component';
 import './docs/js/docs.component';
 import './docs/js/docs.service';
-import './gis/js/gis.service';
 import './groups/js/groups.component';
 import './groups/js/groups.service';
 import './home/js/analytic.service';
