@@ -1,5 +1,4 @@
 import { APIService } from './../../home/js/api.service';
-import * as moment from 'moment';
 import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
 import { consolidateStreamedStyles } from 'styled-components';
 
