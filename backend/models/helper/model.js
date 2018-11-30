@@ -1182,15 +1182,13 @@ function uploadFile(req) {
 					return cb({resCode: responseCodes.FILE_NO_EXT});
 				}
 
-				if (format[format.length - 1] === "dgn" && format[format.length - 2] === "i") {
-					return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-				}
+				const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
 
 				format = format[format.length - 1];
 
 				const size = parseInt(fileReq.headers["content-length"]);
 
-				if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+				if(isIdgn || acceptedFormat.indexOf(format.toLowerCase()) === -1) {
 					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 				}
 
