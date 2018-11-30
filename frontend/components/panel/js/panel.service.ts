@@ -69,7 +69,8 @@ export class PanelService {
 		"$filter",
 		"EventService",
 		"TreeService",
-		"APIService"
+		"APIService",
+		"ViewerService"
 	];
 
 	private panelCards: IPanelCards;
@@ -79,7 +80,8 @@ export class PanelService {
 		private $filter: any,
 		private EventService: any,
 		private TreeService: any,
-		private apiService: APIService
+		private apiService: APIService,
+		private viewerService: ViewerService
 	) {
 		this.reset();
 	}
@@ -525,24 +527,17 @@ export class PanelService {
 	 * @param account User account used as param to obtain model data.
 	 */
 
-	public downloadJSON(fileName, endpoint, modelID, account) {
+	public downloadJSON(fileName, endpoint) {
 		const timestamp = this.$filter("prettyDate")(Date.now(), {showSeconds: false});
-
-		const modelEndpoint = `${account}/${modelID}.json`;
-
-		this.apiService.get(modelEndpoint)
-			.then((res) => {
-				return res.data.name.split(" ").join("");
-			}).then((modelName) => {
-				this.apiService.get(endpoint).then((res) => {
-					const content = JSON.stringify(res.data, null, 2);
-					const a = document.createElement("a");
-					const file = new Blob([content]);
-					a.href = URL.createObjectURL(file);
-					a.download = `${modelName}_${timestamp}_${fileName}.json`;
-					a.click();
-				});
-			});
+		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : "";
+		this.apiService.get(endpoint).then((res) => {
+			const content = JSON.stringify(res.data, null, 2);
+			const a = document.createElement("a");
+			const file = new Blob([content]);
+			a.href = URL.createObjectURL(file);
+			a.download = `${modelName}_${timestamp}_${fileName}.json`;
+			a.click();
+		});
 	}
 
 	/**
