@@ -17,6 +17,8 @@
 
 import * as React from 'react';
 import { ViewerCard } from '../viewerCard/viewerCard.component';
+import { getDataFromPathname } from './../../viewer.helpers';
+
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
@@ -26,33 +28,52 @@ import {
 	FooterWrapper,
 	ViewsCountInfo,
 	StyledFooterButton
- } from './views.styles';
+} from './views.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	location: any;
+	fetchModelViewpoints: (teamspace, modelId) => void;
+	viewpoints: any[];
 }
 
 interface IState {
-	views: any[];
+	viewpoints: any[];
 }
 
 export class Views extends React.PureComponent<IProps, IState> {
 	public state = {
-		views: []
+		viewpoints: []
 	};
+
+	public componentDidMount() {
+		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
+		this.props.fetchModelViewpoints(teamspace, modelId);
+	}
+
+	public componentDidUpdate(prevProps, prevState) {
+		const { viewpoints } = this.props;
+
+		const changes = {} as any;
+
+		if (viewpoints.length !== prevProps.viewpoints.length) {
+			changes.viewpoints = viewpoints;
+		}
+
+		this.setState(changes);
+	}
 
 	public getTitleIcon = () => <PhotoCameraIcon/>;
 
-	public handleSearchView = () => {
+	public handleSearchViewpoint = () => {
 		console.log('Search');
 	}
 
-	public handleAddView = () => {
+	public handleAddViewpoint = () => {
 		console.log('Add');
 	}
 
 	public getSearchButton = () => 	(
-		<IconButton onClick={this.handleSearchView}>
+		<IconButton onClick={this.handleSearchViewpoint}>
 			<SearchIcon />
 		</IconButton>)
 
@@ -64,12 +85,20 @@ export class Views extends React.PureComponent<IProps, IState> {
 	public renderFooterContent = () => {
 		return (
 			<FooterWrapper>
-				<ViewsCountInfo>{`${this.state.views.length} views displayed`}</ViewsCountInfo>
-				<StyledFooterButton aria-label="Add view" onClick={this.handleAddView}>
+				<ViewsCountInfo>
+					{this.state.viewpoints.length ? `${this.state.viewpoints.length} views displayed` : 'Add new viewpoint'}
+				</ViewsCountInfo>
+				<StyledFooterButton aria-label="Add view" onClick={this.handleAddViewpoint}>
 					<AddCircleIcon color="secondary" />
 				</StyledFooterButton>
 			</FooterWrapper>
 		);
+	}
+
+	public renderViewpoints = () => {
+		return this.state.viewpoints.map((viewpoint, index) => (
+			<div key={index}>{viewpoint.name}</div>
+		)
 	}
 
 	public render() {
@@ -80,7 +109,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 				actions={this.getActions()}
 				renderFooterContent={this.renderFooterContent}
 			>
-				Views component
+				{!this.state.viewpoints.length ? 'No viewpoints have been created yet' : this.renderViewpoints()}
 			</ViewerCard>
 		);
 	}
