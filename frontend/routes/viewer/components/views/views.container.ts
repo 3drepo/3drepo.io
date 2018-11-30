@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../../helpers/migration';
-
+import { connect, addRouting } from '../../../../helpers/migration';
+import { ModelActions, selectViewpoints } from './../../../../modules/model';
 import { Views } from './views.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	viewpoints: selectViewpoints
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchModelViewpoints: ModelActions.fetchViewpoints
+}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Views);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Views)));
