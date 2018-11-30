@@ -1,5 +1,4 @@
 import { APIService } from './../../home/js/api.service';
-import { ViewerService } from './../../viewer/js/viewer.service';
 import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
 import { consolidateStreamedStyles } from 'styled-components';
 
@@ -81,7 +80,7 @@ export class PanelService {
 		private EventService: any,
 		private TreeService: any,
 		private apiService: APIService,
-		private viewerService: ViewerService
+		private viewerService: any
 	) {
 		this.reset();
 	}
