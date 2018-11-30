@@ -25,13 +25,38 @@ const ChatEvent = require("./chatEvent");
 
 const view = {};
 
-view.findByUID = function (dbCol, uid, projection) {
+function clean(dbCol, viewToClean) {
+	const keys = ["_id"];
+
+	viewToClean.account = dbCol.account;
+	viewToClean.model = dbCol.model;
+
+	keys.forEach((key) => {
+		if (viewToClean[key]) {
+			viewToClean[key] = utils.uuidToString(viewToClean[key]);
+		}
+	});
+
+	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
+		delete viewToClean.screenshot.buffer;
+		viewToClean.screenshot.thumbnail =
+			viewToClean.account + "/" + viewToClean.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
+	}
+
+	return viewToClean;
+}
+
+view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
 
 			if (!vp) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+			}
+
+			if (cleanResponse) {
+				clean(dbCol, vp);
 			}
 
 			return vp;
@@ -44,10 +69,7 @@ view.listViewpoints = function (dbCol) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
 			results.forEach((result) => {
-				result._id = utils.uuidToString(result._id);
-				if (result.screenshot && result.screenshot.buffer) {
-					delete result.screenshot.buffer;
-				}
+				clean(dbCol, result);
 			});
 			return results;
 		});
@@ -107,13 +129,10 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 
 			const id = utils.stringToUUID(uuid.v1());
 
-			const thumbnailUrl = `${dbCol.account}/${dbCol.model}/viewpoints/${utils.uuidToString(id)}/thumbnail.png`;
-
 			if (croppedScreenshot) {
 				// Remove the base64 version of the screenshotgetViewpointThumbnail
 				delete data.screenshot.base64;
 				data.screenshot.buffer = new Buffer.from(croppedScreenshot, "base64");
-				data.screenshot.thumbnail = thumbnailUrl;
 			}
 
 			const newViewpoint = {

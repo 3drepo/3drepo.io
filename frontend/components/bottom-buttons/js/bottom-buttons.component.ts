@@ -166,8 +166,9 @@ class BottomButtonsController implements ng.IController {
 				}
 			}
 
+			const lastCount = this.clipButton.numClips;
 			this.clipButton.numClips = this.ViewerService.getNumPlanes();
-			if (!this.clipButton.numClips) {
+			if (!this.clipButton.numClips && lastCount !== this.clipButton.numClips) {
 				this.disableClipEdit();
 			}
 		}, 1000);
