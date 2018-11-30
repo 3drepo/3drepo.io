@@ -69,6 +69,10 @@ export const MapLayer = styled.div`
   padding: 12px 0;
   justify-content: space-between;
   position: relative;
+
+  :last-child {
+    padding-bottom: 0;
+  }
 `;
 
 export const MapNameWrapper = styled.div`

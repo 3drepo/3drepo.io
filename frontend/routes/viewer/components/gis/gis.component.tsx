@@ -173,12 +173,12 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		<ButtonMenu
 			renderButton={MenuButton}
 			renderContent={this.renderMenuContent}
-			PopoverProps={ {
+			PopoverProps={{
 				anchorOrigin: { vertical: 'center', horizontal: 'left' }
-			} }
-			ButtonProps={ {
+			}}
+			ButtonProps={{
 				disabled: this.props.isPending || this.state.settingsModeActive
-			} }
+			}}
 	/>)
 
 	public getActions = () => {
@@ -193,7 +193,10 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			return (
 				<FooterWrapper>
 					<StyledSaveButton
-						type="submit" aria-label="Save" onClick={this.handleSaveClick} disabled={this.props.isPending}
+						type="submit"
+						aria-label="Save"
+						onClick={this.handleSaveClick}
+						disabled={this.props.isPending}
 					>
 						<SaveIcon color="secondary" />
 					</StyledSaveButton>
@@ -208,10 +211,10 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const settings = this.props.settings;
 
 		if (settings.surveyPoints && settings.surveyPoints.length) {
-			const [ {
-				position: [ axisX, axisY, axisZ ],
-				latLong: [ latitude, longitude ]
-			} ] = settings.surveyPoints;
+			const [{
+				position: [axisX, axisY, axisZ],
+				latLong: [latitude, longitude]
+			}] = settings.surveyPoints;
 
 			values = { axisX, axisY, axisZ, latitude, longitude };
 		}
@@ -239,7 +242,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderVisibilityButton = (layer) => {
-		return(
+		return (
 			<VisibilityButton>
 				{includes(this.state.visiblieSources, layer.source)
 					? <VisibilityIcon onClick={() => this.props.removeSource(layer.source)}/>
@@ -247,6 +250,27 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				}
 			</VisibilityButton>
 		);
+	}
+
+	public renderMapProviders = (mapsProviders = []) => {
+		return mapsProviders.map((mapProvider, index) => (
+			<StyledSelectItem key={mapProvider.name} value={index}>
+				{mapProvider.name}
+			</StyledSelectItem>
+		));
+	}
+
+	public renderLayers = (mapLayers = []) => {
+		return mapLayers.map((layer) => (
+			<MapLayer key={layer.name}>
+				<MapNameWrapper>
+					<StyledMapIcon color="inherit" />
+					<MapName>{layer.name}</MapName>
+				</MapNameWrapper>
+
+				{this.renderVisibilityButton(layer)}
+			</MapLayer>
+		));
 	}
 
 	public renderMapLayers = () => {
@@ -258,22 +282,9 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				<StyledSelect
 					onChange={this.handleChangeMapProvider}
 					value={activeMapIndex}>
-					{mapsProviders.map((mapProvider, index) => (
-						<StyledSelectItem key={mapProvider.name} value={index}>
-							{mapProvider.name}
-						</StyledSelectItem>
-					) ) }
+					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
-				{ mapsProviders[activeMapIndex].layers.map((layer) => (
-					<MapLayer key={layer.name}>
-						<MapNameWrapper>
-							<StyledMapIcon color="inherit" />
-							<MapName>{layer.name}</MapName>
-						</MapNameWrapper>
-
-						{this.renderVisibilityButton(layer)}
-					</MapLayer>
-				)) }
+				{this.renderLayers(mapsProviders[activeMapIndex].layers)}
 			</>
 		);
 	}

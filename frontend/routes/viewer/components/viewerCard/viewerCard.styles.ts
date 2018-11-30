@@ -21,21 +21,15 @@ import { COLOR } from '../../../../styles/colors';
 export const TitleContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  margin: 0 -16px;
+  width: calc(100% + 32px);
 
-  && {
-    button {
-      color: ${COLOR.WHITE};
+  button {
+    color: ${COLOR.WHITE};
 
-      &:disabled {
-        color: ${COLOR.GRAY};
-      }
+    &:disabled {
+      color: ${COLOR.GRAY};
     }
-
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -4px;
   }
 `;
 

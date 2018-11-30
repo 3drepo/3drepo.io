@@ -36,6 +36,7 @@ interface IPanelCard {
 	add?: boolean;
 	menu?: IMenuItem[];
 	minHeight?: number;
+	isReactComponent?: boolean;
 }
 
 export interface IMenuItem {
@@ -501,7 +502,8 @@ export class PanelService {
 			icon: 'layers',
 			minHeight: 80,
 			fixedHeight: false,
-			options: []
+			options: [],
+			isReactComponent: true
 		});
 
 		this.panelCards.right.push({

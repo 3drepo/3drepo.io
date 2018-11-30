@@ -36,4 +36,4 @@ angular
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('passwordChange', wrap(PasswordChange))
 	.component('viewerCard', wrap(ViewerCard))
-	.component('gisCard', wrap(Gis));
+	.component('gis', wrap(Gis));
