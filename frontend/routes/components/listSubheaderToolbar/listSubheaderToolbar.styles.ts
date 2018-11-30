@@ -29,7 +29,7 @@ export const StyledToolbar = styled(Toolbar)`
 
 export const ListSubheaderContainer = styled(ListSubheader)`
 	&& {
-		padding: 0px;
+		padding: 0;
 	}
 `;
 
