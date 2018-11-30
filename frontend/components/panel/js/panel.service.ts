@@ -66,6 +66,7 @@ export interface IMenuItem {
 export class PanelService {
 
 	public static $inject: string[] = [
+		"$filter",
 		"EventService",
 		"TreeService",
 		"APIService"
@@ -75,6 +76,7 @@ export class PanelService {
 	private templatepanelCards: IPanelCards;
 
 	constructor(
+		private $filter: any,
 		private EventService: any,
 		private TreeService: any,
 		private apiService: APIService
@@ -524,8 +526,7 @@ export class PanelService {
 	 */
 
 	public downloadJSON(fileName, endpoint, modelID, account) {
-
-		const timestamp = moment().format("DD-MM-YYYYTkk:mm:ss");
+		const timestamp = this.$filter("prettyDate")(Date.now(), {showSeconds: false});
 
 		const modelEndpoint = `${account}/${modelID}.json`;
 
