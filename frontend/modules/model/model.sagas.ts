@@ -42,8 +42,14 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 	try {
 		yield API.editModelSettings(teamspace, modelId, settings);
 
-		yield put(TeamspacesActions.updateModelSuccess(
-			teamspace, modelId, { project, model: modelId, name: settings.name } ));
+		if (project && settings.name) {
+			yield put(
+				TeamspacesActions.updateModelSuccess(teamspace, modelId, { project, model: modelId, name: settings.name } )
+			);
+		}
+
+		yield put(ModelActions.updateSettingsSuccess(settings));
+
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'model settings', e.response));

@@ -17,7 +17,6 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep, keyBy } from 'lodash';
-import { uploadFileStatuses } from './../model/model.helpers';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	setTeamspaces: ['teamspaces'],
@@ -89,10 +88,9 @@ const getModelData = (state, teamspace, projectName) => {
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, action) => {
 	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.project);
+
 	const modelIndex = foundProject.models.findIndex((model) => model.model === action.modelId);
-
 	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].name = action.modelData.name;
-
 	if (action.modelData.federate) {
 		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].subModels = action.modelData.subModels;
 		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = action.modelData.timestamp;

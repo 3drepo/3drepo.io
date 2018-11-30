@@ -22,6 +22,7 @@ import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component'
 
 import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
@@ -61,6 +62,7 @@ interface IState {
 	settingsModeActive: boolean;
 	activeMapIndex: number;
 	visiblieSources: any[];
+	pointsExists: boolean;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -94,14 +96,14 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		this.props.resetSources();
 	}
 
-	public componentDidUpdate(prevProps) {
-		const { settings, visiblieSources } = this.props;
+	public componentDidUpdate(prevProps, prevState) {
+		const { settings, visiblieSources, initializeMap, resetSources } = this.props;
 		const changes = {} as any;
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
 		changes.pointsExists = pointsExists;
 
-		if (isEmpty(prevProps.settings) && !isEmpty(settings)) {
+		if (isEmpty(prevProps.settings) && !isEmpty(settings) || settings !== prevProps.settings) {
 			const surveySettings = {
 				surveyPoints: settings.surveyPoints,
 				angleFromNorth: settings.angleFromNorth || 0
@@ -109,9 +111,14 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 			changes.settingsModeActive = !pointsExists;
 
-			if (pointsExists && !this.props.isInitializedMap) {
-				this.props.initializeMap(surveySettings);
+			if (pointsExists) {
+				resetSources();
+				initializeMap(surveySettings);
 			}
+		}
+
+		if (prevState.pointsExists !== this.state.pointsExists) {
+			changes.settingsModeActive = !this.state.pointsExists;
 		}
 
 		if (visiblieSources.length !== prevProps.visiblieSources.length) {
@@ -142,7 +149,19 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public getTitleIcon = () => <LayersIcon />;
+	public getTitleIcon = () => {
+		if (this.state.settingsModeActive) {
+			return (
+				<IconButton
+					disabled={!this.state.pointsExists}
+					disableRipple={true}
+					onClick={this.handleToggleSettings}>
+						<ArrowBack />
+				</IconButton>
+			);
+		}
+		return <LayersIcon />;
+	}
 
 	public renderMenuContent = () => (
 		<List>
@@ -162,7 +181,12 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			} }
 	/>)
 
-	public getActions = () => [ { Button: this.getMenuButton } ];
+	public getActions = () => {
+		if (!this.state.settingsModeActive) {
+			return [ { Button: this.getMenuButton } ];
+		}
+		return [];
+	}
 
 	public renderFooterContent = () => {
 		if (this.state.settingsModeActive) {

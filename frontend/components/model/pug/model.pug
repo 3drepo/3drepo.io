@@ -2,12 +2,12 @@
 // tabindex is required for ng-keydown to work on a div/directive
 #model()
 	#project-viewport-container.row(tabindex="0", tdr-focus="true")
-	
+
 	measure(
 		ng-if="!vm.isLiteMode"
 		id='measure-tool'
-	 	account='vm.account' 
-		model='vm.model' 
+	 	account='vm.account'
+		model='vm.model'
 		settings='vm.settings')
 
 	#modelUI
@@ -16,6 +16,10 @@
 			model="vm.model"
 			model-name="vm.settings.name"
 			revision="vm.revision")
+
+
+		div(style="width: 380px; position: absolute; margin: 0 0 0 500px; z-index: 26; top: 30px;")
+			gis-card
 
 		panel#leftPanel(
 			is-lite-mode="vm.isLiteMode"

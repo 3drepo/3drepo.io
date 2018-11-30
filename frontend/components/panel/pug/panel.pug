@@ -1,6 +1,5 @@
 div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
-		viewer-card
 
 		div(ng-repeat="contentItem in vm.contentItems track by contentItem.type")
 			panel-card(

@@ -129,6 +129,7 @@ export class SettingsForm extends React.PureComponent<IProps, IState> {
 		const { teamspace, modelId } = this.props.getDataFromPathname();
 		const project = localStorage.getItem('lastProject');
 		const modelData = { teamspace, project, modelId };
+
 		this.props.updateModelSettings(modelData, settings);
 	}
 

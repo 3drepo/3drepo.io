@@ -26,7 +26,16 @@ export const TitleContainer = styled.div`
   && {
     button {
       color: ${COLOR.WHITE};
+
+      &:disabled {
+        color: ${COLOR.GRAY};
+      }
     }
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -4px;
   }
 `;
 
@@ -44,10 +53,13 @@ export const Action = styled.span`
   color: ${COLOR.WHITE};
 `;
 
-export const TitleIcon = styled.i`
+export const TitleIcon = styled.div`
   align-self: center;
-  height: 22px;
-  margin-right: 18px;
+  height: 100%;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const ViewCardContent = styled.div`
