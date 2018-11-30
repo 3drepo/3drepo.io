@@ -46,13 +46,17 @@ function clean(dbCol, viewToClean) {
 	return viewToClean;
 }
 
-view.findByUID = function (dbCol, uid, projection) {
+view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
 
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then((_dbCol) => {
 		return _dbCol.findOne({ _id: utils.stringToUUID(uid) }, projection).then(vp => {
 
 			if (!vp) {
 				return Promise.reject(responseCodes.VIEW_NOT_FOUND);
+			}
+
+			if (cleanResponse) {
+				clean(dbCol, vp);
 			}
 
 			return vp;
