@@ -25,7 +25,7 @@ import { Settings } from './components/settings/settings.component';
 
 import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
-import ArrowBack from '@material-ui/icons/ArrowBack';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import List from '@material-ui/core/List';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -157,9 +157,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				<IconButton
 					disabled={!this.state.pointsExists}
 					disableRipple={true}
-					onClick={this.handleToggleSettings}
-				>
-					<ArrowBack />
+					onClick={this.handleToggleSettings}>
+						<ArrowBackIcon />
 				</IconButton>
 			);
 		}
