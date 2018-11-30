@@ -1,4 +1,5 @@
 import { APIService } from './../../home/js/api.service';
+import { APIService } from './../../viewer/js/viewer.service';
 import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
 import { consolidateStreamedStyles } from 'styled-components';
 
