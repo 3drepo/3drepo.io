@@ -40,7 +40,7 @@ function clean(dbCol, viewToClean) {
 	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
 		delete viewToClean.screenshot.buffer;
 		viewToClean.screenshot.thumbnail =
-			viewToClean.account + "/" + viewToClean.model + "/viewpoints/"+ viewToClean._id + "/thumbnail.png";
+			viewToClean.account + "/" + viewToClean.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
 	}
 
 	return viewToClean;
@@ -65,7 +65,7 @@ view.listViewpoints = function (dbCol) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
 			results.forEach((result) => {
-				result = clean(dbCol, result);
+				clean(dbCol, result);
 			});
 			return results;
 		});
