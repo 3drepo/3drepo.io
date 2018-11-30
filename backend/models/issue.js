@@ -28,7 +28,6 @@ const Ref = require("./ref");
 const GenericObject = require("./base/repo").GenericObject;
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
-const middlewares = require("../middlewares/middlewares");
 const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
@@ -385,6 +384,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 			const promises = [];
 			refs.forEach(ref => {
+				const middlewares = require("../middlewares/middlewares");
 				const childDbName = ref.owner || dbColOptions.account;
 				const childModel = ref.project;
 
