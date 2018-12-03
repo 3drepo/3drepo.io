@@ -24,4 +24,3 @@ angular
 	.component('login', wrap(Login, ['headlineText']))
 	.component('passwordForgot', wrap(PasswordForgot))
 	.component('passwordChange', wrap(PasswordChange));
-/*     .component('notifications', wrap(Notifications, ['location', 'stateManager', 'chatService', 'userAccount'])); */

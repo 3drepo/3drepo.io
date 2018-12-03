@@ -130,7 +130,7 @@ export class CompareService {
 		model.targetRevision[this.state.mode].tag = revision.tag || timestamp || revision.name;
 
 		if (this.state.compareEnabled) {
-			this.state.compareEnabled = false;
+			this.disableComparison();
 		}
 	}
 
@@ -367,7 +367,6 @@ export class CompareService {
 	}
 
 	public compare() {
-
 		if (this.state.compareEnabled) {
 			this.disableComparison();
 		} else {
@@ -404,9 +403,6 @@ export class CompareService {
 	}
 
 	public diffModel() {
-
-		this.ViewerService.diffToolDisableAndClear();
-
 		this.state.loadingComparison = true;
 		// This is only ever called in non fed models, so
 		// it's safe to assume targetModels.length === 1
@@ -415,7 +411,6 @@ export class CompareService {
 			this.state.targetModels[0].model,
 			this.state.targetModels[0].targetRevision.diff.name)
 			.then(() => {
-				this.ViewerService.diffToolEnableWithDiffMode();
 				this.modelsLoaded();
 			})
 			.catch((error) => {
@@ -425,7 +420,6 @@ export class CompareService {
 	}
 
 	public startComparisonFed(isDiffMode: boolean) {
-		this.ViewerService.diffToolDisableAndClear();
 
 		this.loadModels(isDiffMode).then(() => {
 			if (isDiffMode) {
