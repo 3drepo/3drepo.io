@@ -25,8 +25,31 @@ const responseCodes = require("../response_codes.js");
 const History = require("../models/history");
 const utils = require("../utils");
 
+/**
+ * @api {get} /revisions.json List all revisions
+ * @apiName listRevisions
+ * @apiGroup Revisions
+ */
+
 router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
+
+/**
+ * @api {get} /revisions/:branch.json List all revisions by branch
+ * @apiName listRevisionsByBranch
+ * @apiGroup Revisions
+ * @apiParam {String} branch.json Branch values 
+ */
+
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
+
+/**
+ * @api {put} /revisions/:id/tag Update Revision Tag 
+ * @apiName updateRevisionTag
+ * @apiGroup Revisions
+ * @apiParam {String} id Unique Revision ID
+ * @apiParam {String} tag Tag to update
+ */
+
 router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
 
 function listRevisions(req, res, next) {
