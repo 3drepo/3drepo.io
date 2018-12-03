@@ -20,29 +20,39 @@ import { ViewerCard } from '../viewerCard/viewerCard.component';
 import { getDataFromPathname } from './../../viewer.helpers';
 
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
+import MenuList from '@material-ui/core/MenuList';
+import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
+import Input from '@material-ui/core/Input';
 import SearchIcon from '@material-ui/icons/Search';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import SaveIcon from '@material-ui/icons/Save';
 
 import {
 	FooterWrapper,
 	ViewsCountInfo,
-	StyledFooterButton
+	ViewpointsList,
+	ViewpointItem,
+	Thumbnail,
+	Name
 } from './views.styles';
 
 interface IProps {
 	location: any;
 	fetchModelViewpoints: (teamspace, modelId) => void;
+	createViewpoint: (teamspace, modelId, viewName) => void;
 	viewpoints: any[];
 }
 
 interface IState {
 	viewpoints: any[];
+	addMode: boolean;
 }
 
 export class Views extends React.PureComponent<IProps, IState> {
 	public state = {
-		viewpoints: []
+		viewpoints: [],
+		addMode: false
 	};
 
 	public componentDidMount() {
@@ -68,8 +78,18 @@ export class Views extends React.PureComponent<IProps, IState> {
 		console.log('Search');
 	}
 
+	public handleSave = () => {
+		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
+
+		console.log('Save');
+		this.props.createViewpoint(teamspace, modelId, 'Test');
+	}
+
 	public handleAddViewpoint = () => {
 		console.log('Add');
+		this.setState({
+			addMode: true
+		});
 	}
 
 	public getSearchButton = () => 	(
@@ -85,20 +105,41 @@ export class Views extends React.PureComponent<IProps, IState> {
 	public renderFooterContent = () => {
 		return (
 			<FooterWrapper>
-				<ViewsCountInfo>
-					{this.state.viewpoints.length ? `${this.state.viewpoints.length} views displayed` : 'Add new viewpoint'}
-				</ViewsCountInfo>
-				<StyledFooterButton aria-label="Add view" onClick={this.handleAddViewpoint}>
-					<AddCircleIcon color="secondary" />
-				</StyledFooterButton>
+				{
+					this.state.addMode ?
+					<>
+						<Input placeholder="Add new viewport..." />
+						<IconButton aria-label="Add view" onClick={this.handleSave}>
+							<SaveIcon color="secondary" />
+						</IconButton>
+					</> :
+					<>
+						<ViewsCountInfo>
+							{this.state.viewpoints.length ? `${this.state.viewpoints.length} views displayed` : 'Add new viewpoint'}
+						</ViewsCountInfo>
+						<IconButton aria-label="Add view" onClick={this.handleAddViewpoint}>
+							<AddCircleIcon color="secondary" />
+						</IconButton>
+					</>
+				}
+
 			</FooterWrapper>
 		);
 	}
 
 	public renderViewpoints = () => {
-		return this.state.viewpoints.map((viewpoint, index) => (
-			<div key={index}>{viewpoint.name}</div>
-		)
+		return (
+			<ViewpointsList>
+				{ this.state.viewpoints.map(
+						(viewpoint, index) => (
+							<ViewpointItem key={index}>
+								<Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} />
+								<Name>{viewpoint.name}</Name>
+							</ViewpointItem>
+						)
+					)
+				}
+			</ViewpointsList>);
 	}
 
 	public render() {

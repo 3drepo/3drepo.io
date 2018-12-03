@@ -106,3 +106,12 @@ export const getModelRevisions = (teamspace, modelId) => {
 export const getModelMaps = (teamspace, modelId) => {
 	return api.get(`${teamspace}/${modelId}/maps`);
 };
+
+/**
+ * Get model maps
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelViewpoints = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/viewpoints`);
+};
