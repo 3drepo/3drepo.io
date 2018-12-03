@@ -32,22 +32,101 @@ const httpsPost = require("../libs/httpsReq").post;
 
 const multer = require("multer");
 
+/**
+ * @api {post} /login Create a Login session
+ * @apiName login
+ * @apiGroup Auth
+ */
 router.post("/login", login);
+
+/**
+ * @api {get} /logout/ Create a logout request
+ * @apiName logout
+ * @apiGroup Auth
+ */
+
 router.post("/logout", logout);
 
+/**
+ * @api {get} /login/ Check user is logged in
+ * @apiName checkLogin
+ * @apiGroup Auth
+ */
+
 router.get("/login", checkLogin);
+
+/**
+ * @api {get} /forgot-password/ User Forgot Password request
+ * @apiName forgotPassword
+ * @apiGroup Auth
+ */
+
 router.post("/forgot-password", forgotPassword);
+
+/**
+ * @api {get} /version/ Print application version
+ * @apiName printVersion
+ * @apiGroup Auth
+ */
+
 router.get("/version", printVersion);
+
+/**
+ * @api {get} /:account.json/ List ..? user info
+ * @apiName listInfo
+ * @apiGroup Auth
+ */
 
 router.get("/:account.json", middlewares.loggedIn, listInfo); // TODO: divide into different endpoints that makes sense.
 
+/**
+ * @api {get} /:account.json/ Get User Avatar
+ * @apiName getAvatar
+ * @apiGroup Auth
+ */
+
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
+
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
+
+/**
+ * @api {post} /:account/avatar Get User Avatar
+ * @apiName uploadAvatar
+ * @apiGroup Auth
+ */
+
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
+
+/**
+ * @api {post} /:account Sign up form 
+ * @apiName signUp
+ * @apiGroup Auth
+ */
+
 router.post("/:account", signUp);
 
+/**
+ * @api {post} /:account/verify Verify the user 
+ * @apiName verify
+ * @apiGroup Auth
+ */
+
 router.post("/:account/verify", verify);
+
+/**
+ * @api {put} /:account Update User password
+ * @apiName updateUser
+ * @apiGroup Auth
+ */
+
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
+
+/**
+ * @api {put} /:account/password Reset User Password
+ * @apiName resetPassword
+ * @apiGroup Auth
+ */
+
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
