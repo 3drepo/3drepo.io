@@ -1,3 +1,6 @@
+import { selectIsAuthenticated } from '../../../modules/auth';
+import { getState, history } from '../../../helpers/migration';
+
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -142,7 +145,23 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	});
 
 	$httpProvider.interceptors.push('AuthInterceptor');
-	$urlRouterProvider.otherwise('/');
+
+	$urlRouterProvider.otherwise(($injector) => {
+		const AuthService = $injector.get('AuthService');
+		const isAuthenticated = selectIsAuthenticated(getState());
+
+		if (!isAuthenticated) {
+			const initialAuthPromise = isAuthenticated === null
+				? AuthService.initialAuthPromise.promise
+				: Promise.reject();
+
+			initialAuthPromise.catch(() => {
+				history.push('/login');
+			});
+		} else {
+			history.push('/dashboard/teamspaces');
+		}
+	});
 }
 
 export const StateManagerConfigModule = angular
