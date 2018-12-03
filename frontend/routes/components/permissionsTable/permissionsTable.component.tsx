@@ -16,27 +16,20 @@
  */
 
 import * as React from 'react';
-import { pick, matches, isEqual, cond, get, isEmpty, memoize } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { pick, isEqual, isEmpty, memoize } from 'lodash';
 import Radio from '@material-ui/core/Radio';
-import SimpleBar from 'simplebar-react';
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // @ts-ignore
 import * as AdminIconSrc from '../../../icons/how_to_reg.svg';
 
-import { MODEL_ROLES_TYPES, MODEL_ROLES_LIST } from '../../../constants/model-permissions';
+import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { CELL_TYPES, CustomTable, CheckboxField } from '../customTable/customTable.component';
 import { CellUserSearch } from '../customTable/components/cellUserSearch/cellUserSearch.component';
 import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { UserItem } from '../userItem/userItem.component';
-import { TextOverlay } from '../textOverlay/textOverlay.component';
 
 import {
-	Container,
 	PermissionsCellContainer,
 	DisabledCheckbox
 } from './permissionsTable.styles';
@@ -114,7 +107,7 @@ interface IState {
 	currentUser: any;
 }
 
-export class PermissionsTable extends React.PureComponent<IProps, any> {
+export class PermissionsTable extends React.PureComponent<IProps, IState> {
 	public state = {
 		rows: [],
 		cells: [],
@@ -236,7 +229,6 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 			changes.rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
 			changes.currentUser = this.props.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
 		}
-
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
@@ -266,14 +258,14 @@ export class PermissionsTable extends React.PureComponent<IProps, any> {
 
 		return (
 			<>
-				{cells.length ? (
+				{ cells.length ? (
 					<CustomTable
 						cells={cells}
 						rows={rows}
 						onSelectionChange={this.handleSelectionChange}
 						renderCheckbox={this.renderCustomCheckbox}
 					/>
-				) : null}
+				) : null }
 			</>
 		);
 	}

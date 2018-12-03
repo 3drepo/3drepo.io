@@ -2,6 +2,7 @@ export const ellipsis = (width) => `
 	text-overflow: ellipsis;
 	width: ${width};
 	overflow: hidden;
+	white-space: nowrap;
 `;
 
 export const isWindows = (properties) => {

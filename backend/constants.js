@@ -453,12 +453,12 @@
 		"info",
 		"contact",
 		"cookies",
-		"passwordChange",
-		"passwordForgot",
+		"password-change",
+		"password-forgot",
 		"pricing",
 		"privacy",
-		"registerRequest",
-		"registerVerify",
+		"register-request",
+		"register-verify",
 		"signUp",
 		"termsAndConditions",
 		"false",
@@ -530,9 +530,9 @@
 	define("ISSUE_STATUS_CLOSED", "closed");
 
 	define("MAIL_URLS",{
-		"forgotPassword": data => `/passwordChange?username=${data.username}&token=${data.token}`,
-		"verify": data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
-		"model": data => `/${data.account}/${data.model}`
+		"forgotPassword": data => `/password-change?username=${data.username}&token=${data.token}`,
+		"verify": data => `/register-verify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
+		"model": data => `/viewer/${data.model}`
 	});
 
 	define("DEFAULT_JOBS",[

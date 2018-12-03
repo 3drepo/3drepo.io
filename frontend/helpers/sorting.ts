@@ -1,4 +1,4 @@
-import {orderBy} from "lodash";
+import {orderBy} from 'lodash';
 
 export const sortByName = (data = [], options: {order: any}) => {
 	return orderBy(
@@ -19,7 +19,7 @@ export const sortByField = (data = [], options: {order: any, config: any}) => {
 
 	return orderBy(
 		data,
-		(item) => (item[options.config.field] || "").toLowerCase().trim(),
+		(item) => (item[options.config.field] || '').toLowerCase().trim(),
 		options.order
 	);
 };

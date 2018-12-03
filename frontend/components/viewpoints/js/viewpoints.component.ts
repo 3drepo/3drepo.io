@@ -15,21 +15,21 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NotificationEvents } from "../../notifications/js/notification.events";
-import { NotificationService } from "../../notifications/js/notification.service";
+import { ChatEvents } from '../../chat/js/chat.events';
+import { ChatService } from '../../chat/js/chat.service';
 
 class ViewsController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"$element",
+		'$scope',
+		'$timeout',
+		'$element',
 
-		"DialogService",
-		"AuthService",
-		"ClientConfigService",
-		"ViewpointsService",
-		"NotificationService"
+		'DialogService',
+		'AuthService',
+		'ClientConfigService',
+		'ViewpointsService',
+		'ChatService'
 	];
 
 	private onShowItem: any;
@@ -49,7 +49,7 @@ class ViewsController implements ng.IController {
 	private editSelectedView: any;
 	private filterText: string;
 	private viewpointNameMaxlength: number;
-	private viewsNotifications: NotificationEvents;
+	private viewsNotifications: ChatEvents;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -60,7 +60,7 @@ class ViewsController implements ng.IController {
 		private AuthService,
 		private ClientConfigService: any,
 		private ViewpointsService: any,
-		private notificationsService: NotificationService
+		private notificationsService: ChatService
 	) { }
 
 	public $onInit() {
@@ -68,12 +68,12 @@ class ViewsController implements ng.IController {
 		this.ViewpointsService.getViewpoints(this.account, this.model).then(() => {
 			this.loading = false;
 		});
-		this.toShow = "views";
+		this.toShow = 'views';
 		this.loading = true;
 		this.savingView = false;
 		this.canAddView = false;
 		this.viewpoints = [];
-		this.filterText = "";
+		this.filterText = '';
 		this.viewpointsToShow = [];
 		this.editSelectedView = false;
 		this.viewpointNameMaxlength = 80;
@@ -92,7 +92,7 @@ class ViewsController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.filterText", (searchQuery: string) => {
+		this.$scope.$watch('vm.filterText', (searchQuery: string) => {
 			this.filterText = searchQuery;
 			this.filterViewpoints();
 
@@ -104,19 +104,19 @@ class ViewsController implements ng.IController {
 			angular.extend(this, newState);
 		}, true);
 
-		this.$scope.$watchCollection("vm.viewpoints", () => {
+		this.$scope.$watchCollection('vm.viewpoints', () => {
 			this.setContentHeight();
 			this.filterViewpoints();
 		});
 
-		this.$scope.$watch("vm.hideItem", (newValue) => {
+		this.$scope.$watch('vm.hideItem', (newValue) => {
 			if (newValue) {
-				this.toShow = "views";
+				this.toShow = 'views';
 				this.setContentHeight();
 			}
 		});
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 				this.canAddView = this.AuthService.hasPermission(
 					this.ClientConfigService.permissions.PERM_CREATE_ISSUE,
@@ -167,9 +167,9 @@ class ViewsController implements ng.IController {
 	public createViewpoint() {
 		this.ViewpointsService.createViewpoint(this.account, this.model, this.newView.name)
 			.catch((error) => {
-				this.handleViewError("create", error);
+				this.handleViewError('create', error);
 			});
-		this.toShow = "views";
+		this.toShow = 'views';
 		this.onHideItem();
 	}
 
@@ -180,7 +180,7 @@ class ViewsController implements ng.IController {
 				this.selectedView = null;
 			})
 			.catch((error) => {
-				this.handleViewError("delete", error);
+				this.handleViewError('delete', error);
 			});
 	}
 
@@ -201,7 +201,7 @@ class ViewsController implements ng.IController {
 					this.resetEditState();
 				})
 				.catch((error) => {
-					this.handleViewError("update", error);
+					this.handleViewError('update', error);
 					this.resetEditState();
 				});
 		}
@@ -213,7 +213,7 @@ class ViewsController implements ng.IController {
 	}
 
 	public addView() {
-		this.newView = { name: "View " + (this.viewpoints.length + 1) };
+		this.newView = { name: 'View ' + (this.viewpoints.length + 1) };
 		this.showNewViewPane();
 	}
 
@@ -222,14 +222,14 @@ class ViewsController implements ng.IController {
 	}
 
 	public showNewViewPane() {
-		this.toShow = "view";
+		this.toShow = 'view';
 		this.onShowItem();
 		this.focusViewpointName();
 	}
 
 	public focusViewpointName() {
 		this.$timeout(() => {
-			const input: HTMLElement = this.$element[0].querySelector("#viewpointName");
+			const input: HTMLElement = this.$element[0].querySelector('#viewpointName');
 			input.focus();
 		});
 	}
@@ -244,7 +244,7 @@ class ViewsController implements ng.IController {
 
 	public setContentHeight() {
 
-		if (this.toShow === "view") {
+		if (this.toShow === 'view') {
 			return 250;
 		}
 
@@ -262,7 +262,7 @@ class ViewsController implements ng.IController {
 	}
 
 	private filterViewpoints() {
-		if (this.filterText !== undefined && this.filterText !== "") {
+		if (this.filterText !== undefined && this.filterText !== '') {
 			this.viewpointsToShow = this.ViewpointsService.filterViewpoints(this.filterText);
 		} else {
 			this.viewpointsToShow = this.viewpoints;
@@ -273,21 +273,21 @@ class ViewsController implements ng.IController {
 
 export const ViewpointsComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		modelSettings: "<",
-		filterText: "<",
-		onContentHeightRequest: "&",
-		onShowItem: "&",
-		onHideItem: "&",
-		hideItem: "<"
+		account: '<',
+		model: '<',
+		revision: '<',
+		modelSettings: '<',
+		filterText: '<',
+		onContentHeightRequest: '&',
+		onShowItem: '&',
+		onHideItem: '&',
+		hideItem: '<'
 	},
 	controller: ViewsController,
-	controllerAs: "vm",
-	templateUrl: "templates/viewpoints.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/viewpoints.html'
 };
 
 export const ViewpointsComponentModule = angular
-	.module("3drepo")
-	.component("viewpoints", ViewpointsComponent);
+	.module('3drepo')
+	.component('viewpoints', ViewpointsComponent);

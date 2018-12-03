@@ -14,40 +14,40 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AnalyticService } from "../../home/js/analytic.service";
-import { APIService } from "../../home/js/api.service";
-import { AuthService } from "../../home/js/auth.service";
-import { DialogService } from "../../home/js/dialog.service";
-import { IssuesService } from "./issues.service";
-import { MeasureService } from "../../measure/js/measure.service";
-import { NotificationEvents } from "../../notifications/js/notification.events";
-import { NotificationIssuesEvents } from "../../notifications/js/notification.issues.events";
-import { NotificationService } from "../../notifications/js/notification.service";
-import { StateManagerService } from "../../home/js/state-manager.service";
-import { TreeService } from "../../tree/js/tree.service";
-import { ViewerService } from "../../viewer/js/viewer.service";
+import { AnalyticService } from '../../home/js/analytic.service';
+import { APIService } from '../../home/js/api.service';
+import { AuthService } from '../../home/js/auth.service';
+import { DialogService } from '../../home/js/dialog.service';
+import { IssuesService } from './issues.service';
+import { MeasureService } from '../../measure/js/measure.service';
+import { ChatEvents } from '../../chat/js/chat.events';
+import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
+import { ChatService } from '../../chat/js/chat.service';
+import { StateManagerService } from '../../home/js/state-manager.service';
+import { TreeService } from '../../tree/js/tree.service';
+import { ViewerService } from '../../viewer/js/viewer.service';
 
 class IssueController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$location",
-		"$q",
-		"$mdDialog",
-		"$element",
-		"$state",
-		"$timeout",
-		"$scope",
+		'$location',
+		'$q',
+		'$mdDialog',
+		'$element',
+		'$state',
+		'$timeout',
+		'$scope',
 
-		"IssuesService",
-		"APIService",
-		"NotificationService",
-		"AuthService",
-		"AnalyticService",
-		"StateManager",
-		"MeasureService",
-		"ViewerService",
-		"TreeService",
-		"DialogService"
+		'IssuesService',
+		'APIService',
+		'ChatService',
+		'AuthService',
+		'AnalyticService',
+		'StateManager',
+		'MeasureService',
+		'ViewerService',
+		'TreeService',
+		'DialogService'
 	];
 
 	private issueFailedToLoad: boolean;
@@ -70,7 +70,7 @@ class IssueController implements ng.IController {
 	private priorities: any[];
 	private statuses: any;
 	private actions: any;
-	private notificationStarted = false;
+	private chatStarted = false;
 	private popStateHandler;
 	private refreshHandler;
 	private data;
@@ -92,8 +92,8 @@ class IssueController implements ng.IController {
 	private issueComponent;
 	private commentThumbnail;
 	private contentHeight;
-	private issuesNotifications: NotificationIssuesEvents;
-	private commentsNotifications: NotificationEvents;
+	private chatEventsIssues: IssuesChatEvents;
+	private chatEventsComments: ChatEvents;
 
 	constructor(
 		private $location,
@@ -106,7 +106,7 @@ class IssueController implements ng.IController {
 
 		private issuesService: IssuesService,
 		private apiService: APIService,
-		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private authService: AuthService,
 		private analyticService: AnalyticService,
 		private stateManager: StateManagerService,
@@ -124,11 +124,11 @@ class IssueController implements ng.IController {
 		this.editingCommentIndex = null;
 		this.aboutToBeDestroyed = false;
 
-		this.reasonCommentText = "Comment requires text";
-		this.reasonTitleText = "Issue requires name";
-		this.disabledReason = "";
+		this.reasonCommentText = 'Comment requires text';
+		this.reasonTitleText = 'Issue requires name';
+		this.disabledReason = '';
 
-		this.issueProgressInfo = "Loading Issue...";
+		this.issueProgressInfo = 'Loading Issue...';
 		this.textInputHasFocusFlag = false;
 		this.submitDisabled = true;
 		this.pinDisabled = true;
@@ -138,23 +138,23 @@ class IssueController implements ng.IController {
 		this.clearPin = false;
 
 		this.priorities = [
-			{value: "none", label: "None"},
-			{value: "low", label: "Low"},
-			{value: "medium", label: "Medium"},
-			{value: "high", label: "High"}
+			{value: 'none', label: 'None'},
+			{value: 'low', label: 'Low'},
+			{value: 'medium', label: 'Medium'},
+			{value: 'high', label: 'High'}
 		];
 		this.statuses = [
-			{value: "open", label: "Open"},
-			{value: "in progress", label: "In progress"},
-			{value: "for approval", label: "For approval"},
-			{value: "closed", label: "Closed"}
+			{value: 'open', label: 'Open'},
+			{value: 'in progress', label: 'In progress'},
+			{value: 'for approval', label: 'For approval'},
+			{value: 'closed', label: 'Closed'}
 		];
 
 		this.actions = {
 			screen_shot: {
-				id: "screenshot",
-				icon: "camera_alt",
-				label: "Screen shot",
+				id: 'screenshot',
+				icon: 'camera_alt',
+				label: 'Screen shot',
 				disabled: () => {
 					if (!this.data) {
 						return this.submitDisabled;
@@ -168,9 +168,9 @@ class IssueController implements ng.IController {
 				selected: false
 			},
 			pin: {
-				id: "pin",
-				icon: "place",
-				label: "Pin",
+				id: 'pin',
+				icon: 'place',
+				label: 'Pin',
 				disabled: () => {
 					return this.submitDisabled || this.pinHidden;
 				},
@@ -181,7 +181,7 @@ class IssueController implements ng.IController {
 			}
 		};
 
-		this.notificationStarted = false;
+		this.chatStarted = false;
 
 		this.setContentHeight();
 		history.pushState(null, null, document.URL);
@@ -193,10 +193,9 @@ class IssueController implements ng.IController {
 		this.refreshHandler = (event) => {
 			return this.stateManager.refreshHandler(event);
 		};
-
 		// listen for user clicking the back button
-		window.addEventListener("popstate", this.popStateHandler);
-		window.addEventListener("beforeunload", this.refreshHandler);
+		window.addEventListener('popstate', this.popStateHandler);
+		window.addEventListener('beforeunload', this.refreshHandler);
 		this.watchers();
 	}
 
@@ -206,8 +205,8 @@ class IssueController implements ng.IController {
 	 */
 	public $onDestroy() {
 
-		window.removeEventListener("popstate", this.popStateHandler);
-		window.removeEventListener("beforeunload", this.refreshHandler);
+		window.removeEventListener('popstate', this.popStateHandler);
+		window.removeEventListener('beforeunload', this.refreshHandler);
 
 		this.issuesService.removeUnsavedPin();
 
@@ -227,10 +226,10 @@ class IssueController implements ng.IController {
 
 		// unsubscribe on destroy
 		if (this.data) {
-			this.issuesNotifications.unsubscribeFromUpdated(this.onIssueUpdated);
-			this.commentsNotifications.unsubscribeFromCreated(this.onCommentCreated);
-			this.commentsNotifications.unsubscribeFromUpdated (this.onCommentUpdated);
-			this.commentsNotifications.unsubscribeFromDeleted(this.onCommentDeleted);
+			this.chatEventsIssues.unsubscribeFromUpdated(this.onIssueUpdated);
+			this.chatEventsComments.unsubscribeFromCreated(this.onCommentCreated);
+			this.chatEventsComments.unsubscribeFromUpdated (this.onCommentUpdated);
+			this.chatEventsComments.unsubscribeFromDeleted(this.onCommentDeleted);
 		}
 
 	}
@@ -238,13 +237,13 @@ class IssueController implements ng.IController {
 	public watchers() {
 
 		// This keeps the colours updated etc
-		this.$scope.$watch("vm.issueData", () => {
+		this.$scope.$watch('vm.issueData', () => {
 			// if (this.issueData) {
 			// 	IssuesService.populateIssue(this.issueData);
 			// }
 		}, true);
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
 				this.canComment();
@@ -252,7 +251,7 @@ class IssueController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch("vm.availableJobs", () => {
+		this.$scope.$watch('vm.availableJobs', () => {
 			// Role
 			if (this.availableJobs) {
 				this.modelJobs = this.availableJobs.map((availableJob) => {
@@ -264,11 +263,11 @@ class IssueController implements ng.IController {
 				});
 
 				// Always have an unassign option for users
-				this.modelJobs.push("Unassigned");
+				this.modelJobs.push('Unassigned');
 			}
 		});
 
-		this.$scope.$watch("vm.data", () => {
+		this.$scope.$watch('vm.data', () => {
 
 			// Data
 			if (this.data && this.statuses && this.statuses.length) {
@@ -278,7 +277,7 @@ class IssueController implements ng.IController {
 				this.issuesService.getIssue(this.data.account, this.data.model, this.data._id)
 					.then((fetchedIssue) => {
 						this.setEditIssueData(fetchedIssue);
-						this.startNotification();
+						this.startChatEvents();
 						this.issueFailedToLoad = false;
 						// Update the issue data on issue service so search would work better
 						this.issuesService.updateIssues(this.issueData);
@@ -367,18 +366,18 @@ class IssueController implements ng.IController {
 
 	public getPlaceholderText() {
 		if (this.canComment()) {
-			return "Write a new comment";
-		} else if (this.issueData.status === "closed") {
-			return "You cannot comment on a closed issue";
+			return 'Write a new comment';
+		} else if (this.issueData.status === 'closed') {
+			return 'You cannot comment on a closed issue';
 		} else {
-			return "You do not have permission to leave comments";
+			return 'You do not have permission to leave comments';
 		}
 	}
 
 	public convertCommentTopicType() {
 		if (this.issueData && this.issueData.comments) {
 			this.issueData.comments.forEach((comment) => {
-				if (comment.action && comment.action.property === "topic_type") {
+				if (comment.action && comment.action.property === 'topic_type') {
 					this.issuesService.convertActionCommentToText(comment, this.topic_types);
 				}
 			});
@@ -403,9 +402,9 @@ class IssueController implements ng.IController {
 		});
 
 		// Old issues
-		this.issueData.priority = (!this.issueData.priority) ? "none" : this.issueData.priority;
-		this.issueData.status = (!this.issueData.status) ? "open" : this.issueData.status;
-		this.issueData.topic_type = (!this.issueData.topic_type) ? "for_information" : this.issueData.topic_type;
+		this.issueData.priority = (!this.issueData.priority) ? 'none' : this.issueData.priority;
+		this.issueData.status = (!this.issueData.status) ? 'open' : this.issueData.status;
+		this.issueData.topic_type = (!this.issueData.topic_type) ? 'for_information' : this.issueData.topic_type;
 		this.issueData.assigned_roles = (!this.issueData.assigned_roles) ? [] : this.issueData.assigned_roles;
 
 		this.handleBCFPriority(this.issueData.priority);
@@ -455,7 +454,7 @@ class IssueController implements ng.IController {
 	}
 
 	public disableStatusOption(status) {
-		return (status.value === "closed" || status.value === "open") &&
+		return (status.value === 'closed' || status.value === 'open') &&
 			!this.issuesService.canChangeStatusToClosed(
 				this.issueData,
 				this.userJob,
@@ -510,7 +509,7 @@ class IssueController implements ng.IController {
 		if (this.data && this.issueData.account && this.issueData.model) {
 
 			// If it's unassigned we can update so that there are no assigned roles
-			if (this.issueData.assigned_roles.indexOf("Unassigned") !== -1) {
+			if (this.issueData.assigned_roles.indexOf('Unassigned') !== -1) {
 				this.issueData.assigned_roles = [];
 			}
 
@@ -525,7 +524,7 @@ class IssueController implements ng.IController {
 			this.issuesService.updateIssue(this.issueData, statusChangeData)
 				.then((response) => {
 					if (response) {
-						const respData = response.data.issue;
+						const respData = response.data;
 						this.issuesService.populateIssue(respData);
 						this.issueData = respData;
 
@@ -556,8 +555,8 @@ class IssueController implements ng.IController {
 			this.canComment();
 
 			this.analyticService.sendEvent({
-				eventCategory: "Issue",
-				eventAction: "edit"
+				eventCategory: 'Issue',
+				eventAction: 'edit'
 			});
 		}
 
@@ -566,18 +565,18 @@ class IssueController implements ng.IController {
 	}
 
 	public handleUpdateError(error) {
-		const content = "We tried to update your issue but it failed. " +
-		"If this continues please message support@3drepo.io.";
+		const content = 'We tried to update your issue but it failed. ' +
+		'If this continues please message support@3drepo.io.';
 		const escapable = true;
 		console.error(error);
-		this.dialogService.text("Error Updating Issue", content, escapable);
+		this.dialogService.text('Error Updating Issue', content, escapable);
 	}
 
 	public getCommentPlaceholderText() {
 		if (this.canComment()) {
-			return "Write your comment here";
+			return 'Write your comment here';
 		} else {
-			return "You are not able to comment";
+			return 'You are not able to comment';
 		}
 	}
 
@@ -604,7 +603,7 @@ class IssueController implements ng.IController {
 	public showViewpoint(event, viewpoint) {
 		// README: vm should also highlight selected objects within vm issue, but
 		// will require a lot of rewriting for vm to work at present!
-		if (viewpoint && (event.type === "click")) {
+		if (viewpoint && (event.type === 'click')) {
 
 			// We clone the issueData so that we don't
 			// overwrite the original issue data itself
@@ -644,8 +643,8 @@ class IssueController implements ng.IController {
 			controller() {
 				this.issueComponent = parentScope;
 			},
-			controllerAs: "vm",
-			templateUrl: "templates/issue-screen-shot-dialog.html",
+			controllerAs: 'vm',
+			templateUrl: 'templates/issue-screen-shot-dialog.html',
 			targetEvent: event
 		});
 	}
@@ -661,7 +660,7 @@ class IssueController implements ng.IController {
 		const selected = this.actions[action].selected;
 
 		switch (action) {
-		case "pin":
+		case 'pin':
 
 			if (selected) {
 				this.issuesService.setPinDropMode(true);
@@ -673,7 +672,7 @@ class IssueController implements ng.IController {
 			}
 			break;
 
-		case "screen_shot":
+		case 'screen_shot':
 
 			// There is no concept of selected in screenshot as there will be a popup once you click the button
 			this.actions[action].selected = false;
@@ -782,12 +781,12 @@ class IssueController implements ng.IController {
 				// show the user a popup if something goes wrong at any point
 
 				this.saving = false;
-				const content = "Something went wrong saving the issue. " +
-				"If this continues please message support@3drepo.io.";
+				const content = 'Something went wrong saving the issue. ' +
+				'If this continues please message support@3drepo.io.';
 				const escapable = true;
 
-				this.dialogService.text("Error Saving Issue", content, escapable);
-				console.error("Something went wrong saving the Issue: ", error);
+				this.dialogService.text('Error Saving Issue', content, escapable);
+				console.error('Something went wrong saving the Issue: ', error);
 			});
 
 	}
@@ -875,7 +874,7 @@ class IssueController implements ng.IController {
 	public doSaveIssue(viewpoint, screenShot) {
 
 		// Remove base64 header text from screenShot and add to viewpoint
-		screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+		screenShot = screenShot.substring(screenShot.indexOf(',') + 1);
 		viewpoint.screenshot = screenShot;
 
 		// Save issue
@@ -925,28 +924,28 @@ class IssueController implements ng.IController {
 				this.submitDisabled = true;
 				this.setContentHeight();
 
-				this.startNotification();
+				this.startChatEvents();
 				this.saving = false;
 
 				const issueState = {
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					issue: this.data._id,
+					issueId: this.data._id,
 					noSet: true
 				};
 
 				this.disabledReason = this.reasonCommentText;
 
 				this.$state.go(
-					"home.account.model.issue",
+					'app.viewer',
 					issueState,
 					{notify: false}
 				);
 
 				this.analyticService.sendEvent({
-					eventCategory: "Issue",
-					eventAction: "create"
+					eventCategory: 'Issue',
+					eventAction: 'create'
 				});
 
 			});
@@ -990,14 +989,14 @@ class IssueController implements ng.IController {
 			const promises = [];
 
 			if (highlightedGroupData) {
-				promises.push(this.apiService.post(this.account + "/" + this.model + "/groups", highlightedGroupData)
+				promises.push(this.apiService.post(this.account + '/' + this.model + '/groups', highlightedGroupData)
 					.then((highlightedGroupResponse) => {
 						this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 					}));
 			}
 
 			if (hiddenGroupData) {
-				promises.push(this.apiService.post(this.account + "/" + this.model + "/groups", hiddenGroupData)
+				promises.push(this.apiService.post(this.account + '/' + this.model + '/groups', hiddenGroupData)
 					.then((hiddenGroupResponse) => {
 						this.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
 						this.commentViewpoint.hideIfc = this.treeService.getHideIfc();
@@ -1008,7 +1007,7 @@ class IssueController implements ng.IController {
 				this.issuesService.saveComment(this.issueData, this.comment, this.commentViewpoint)
 					.then((response) => {
 						this.saving = false;
-						this.afterNewComment(response.data.issue, false);
+						this.afterNewComment(response.data, false);
 					})
 					.catch((error) => {
 						this.errorSavingComment(error);
@@ -1018,36 +1017,36 @@ class IssueController implements ng.IController {
 			});
 
 			this.analyticService.sendEvent({
-				eventCategory: "Issue",
-				eventAction: "comment"
+				eventCategory: 'Issue',
+				eventAction: 'comment'
 			});
 		});
 
 	}
 
 	public errorSavingComment(error) {
-		const content = "Something went wrong saving the comment. " +
-		"If this continues please message support@3drepo.io.";
+		const content = 'Something went wrong saving the comment. ' +
+		'If this continues please message support@3drepo.io.';
 		const escapable = true;
-		this.dialogService.text("Error Saving Comment", content, escapable);
-		console.error("Something went wrong saving the issue comment: ", error);
+		this.dialogService.text('Error Saving Comment', content, escapable);
+		console.error('Something went wrong saving the issue comment: ', error);
 	}
 
 	public errorDeleteComment(error) {
-		const content = "Something went wrong deleting the comment. " +
-		"If this continues please message support@3drepo.io.";
+		const content = 'Something went wrong deleting the comment. ' +
+		'If this continues please message support@3drepo.io.';
 		const escapable = true;
-		this.dialogService.text("Error Deleting Comment", content, escapable);
-		console.error("Something went wrong deleting the issue comment: ", error);
+		this.dialogService.text('Error Deleting Comment', content, escapable);
+		console.error('Something went wrong deleting the issue comment: ', error);
 	}
 
 	public errorSavingScreemshot(error) {
-		const content = "Something went wrong saving the screenshot. " +
-		"If this continues please message support@3drepo.io.";
+		const content = 'Something went wrong saving the screenshot. ' +
+		'If this continues please message support@3drepo.io.';
 		const escapable = true;
 
-		this.dialogService.text("Error Saving Screenshot", content, escapable);
-		console.error("Something went wrong saving the screenshot: ", error);
+		this.dialogService.text('Error Saving Screenshot', content, escapable);
+		console.error('Something went wrong saving the screenshot: ', error);
 	}
 
 	/**
@@ -1114,8 +1113,8 @@ class IssueController implements ng.IController {
 			});
 
 		this.analyticService.sendEvent({
-			eventCategory: "Issue",
-			eventAction: "deleteComment"
+			eventCategory: 'Issue',
+			eventAction: 'deleteComment'
 		});
 
 		this.setContentHeight();
@@ -1130,7 +1129,7 @@ class IssueController implements ng.IController {
 
 		this.savedScreenShot = data.screenShot;
 
-		if (typeof this.data === "object") {
+		if (typeof this.data === 'object') {
 
 			// Comment
 			this.commentThumbnail = data.screenShot;
@@ -1153,7 +1152,7 @@ class IssueController implements ng.IController {
 		viewpointPromise.promise
 			.then((viewpoint) => {
 				this.commentViewpoint = viewpoint;
-				this.commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
+				this.commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(',') + 1);
 			}).catch((error) => {
 				this.errorSavingScreemshot(error);
 			});
@@ -1179,7 +1178,7 @@ class IssueController implements ng.IController {
 		if (this.data) {
 
 			// Description text
-			if (this.canChangeDescription() || (this.issueData && this.issueData.hasOwnProperty("desc")) ) {
+			if (this.canChangeDescription() || (this.issueData && this.issueData.hasOwnProperty('desc')) ) {
 				height += descriptionTextHeight;
 			}
 			// Description thumbnail
@@ -1192,7 +1191,7 @@ class IssueController implements ng.IController {
 			if (this.issueData && this.issueData.comments) {
 				for (let i = 0; i < this.issueData.comments.length; i++) {
 					height += commentTextHeight;
-					if (this.issueData.comments[i].viewpoint && this.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+					if (this.issueData.comments[i].viewpoint && this.issueData.comments[i].viewpoint.hasOwnProperty('screenshot')) {
 						height += commentImageHeight;
 					}
 				}
@@ -1214,7 +1213,7 @@ class IssueController implements ng.IController {
 		if (height) {
 			this.contentHeight({height});
 		} else {
-			console.error("Height was trying to be set to falsy value");
+			console.error('Height was trying to be set to falsy value');
 		}
 
 	}
@@ -1222,7 +1221,7 @@ class IssueController implements ng.IController {
 	public commentAreaScrollToBottom() {
 
 		this.$timeout(() => {
-			const commentArea = document.getElementById("descriptionAndComments");
+			const commentArea = document.getElementById('descriptionAndComments');
 			if (commentArea) {
 				commentArea.scrollTop = commentArea.scrollHeight;
 			}
@@ -1248,35 +1247,35 @@ class IssueController implements ng.IController {
 		this.$scope.$apply();
 	}
 
-	public startNotification() {
+	public startChatEvents() {
 
-		if (this.data && !this.notificationStarted) {
-			this.notificationStarted = true;
+		if (this.data && !this.chatStarted) {
+			this.chatStarted = true;
 
-			this.issuesNotifications =  this.notificationService.getChannel(this.data.account, this.data.model).issues;
+			this.chatEventsIssues =  this.chatService.getChannel(this.data.account, this.data.model).issues;
 
 			/*
 			* Watch for issue change
 			*/
 
-			this.issuesNotifications.subscribeToUpdated( this.onIssueUpdated, this);
+			this.chatEventsIssues.subscribeToUpdated( this.onIssueUpdated, this);
 
-			this.commentsNotifications = this.issuesNotifications.getCommentsNotifications(this.data._id);
+			this.chatEventsComments = this.chatEventsIssues.getCommentsChatEvents(this.data._id);
 
 			/*
 			* Watch for new comments
 			*/
-			this.commentsNotifications.subscribeToCreated(this.onCommentCreated, this);
+			this.chatEventsComments.subscribeToCreated(this.onCommentCreated, this);
 
 			/*
 			* Watch for comment changed
 			*/
-			this.commentsNotifications.subscribeToUpdated(this.onCommentUpdated, this);
+			this.chatEventsComments.subscribeToUpdated(this.onCommentUpdated, this);
 
 			/*
 			* Watch for comment deleted
 			*/
-			this.commentsNotifications.subscribeToDeleted(this.onCommentDeleted, this);
+			this.chatEventsComments.subscribeToDeleted(this.onCommentDeleted, this);
 		}
 	}
 
@@ -1311,7 +1310,7 @@ class IssueController implements ng.IController {
 		let deleteIndex;
 		deleteIndex = this.issueData.comments.findIndex((comment) => comment.guid === newComment.guid);
 
-		this.issueData.comments[deleteIndex].comment = "This comment has been deleted.";
+		this.issueData.comments[deleteIndex].comment = 'This comment has been deleted.';
 
 		this.$scope.$apply();
 		this.commentAreaScrollToBottom();
@@ -1324,25 +1323,25 @@ class IssueController implements ng.IController {
 
 export const IssueComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		data: "=",
-		exit: "&",
-		event: "<",
-		selectedIssueLoaded: "<",
-		contentHeight: "&",
-		selectedObjects: "<",
-		modelSettings: "<",
-		setInitialSelectedObjects: "&",
-		userJob: "<",
-		availableJobs: "<"
+		account: '<',
+		model: '<',
+		revision: '<',
+		data: '=',
+		exit: '&',
+		event: '<',
+		selectedIssueLoaded: '<',
+		contentHeight: '&',
+		selectedObjects: '<',
+		modelSettings: '<',
+		setInitialSelectedObjects: '&',
+		userJob: '<',
+		availableJobs: '<'
 	},
 	controller: IssueController,
-	controllerAs: "vm",
-	templateUrl: "templates/issue.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/issue.html'
 };
 
 export const IssueComponentModule = angular
-	.module("3drepo")
-	.component("issue", IssueComponent);
+	.module('3drepo')
+	.component('issue', IssueComponent);

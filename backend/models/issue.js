@@ -27,7 +27,6 @@ const History = require("./history");
 const Ref = require("./ref");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
-const middlewares = require("../middlewares/middlewares");
 const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
@@ -383,6 +382,7 @@ schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, 
 
 			const promises = [];
 			refs.forEach(ref => {
+				const middlewares = require("../middlewares/middlewares");
 				const childDbName = ref.owner || dbColOptions.account;
 				const childModel = ref.project;
 
@@ -1142,6 +1142,22 @@ schema.methods.generateCommentsGUID = function() {
 			comment.viewpoint = this.viewpoints[0].guid;
 		}
 	});
+};
+
+schema.statics.isIssueAssignment = function(oldIssue, newIssue) {
+	if (!oldIssue) {
+		return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
+	}
+
+	return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
+};
+
+schema.statics.isIssueBeingClosed = function(oldIssue, newIssue) {
+	if (!oldIssue) {
+		return false;
+	}
+
+	return oldIssue.status !== "closed" &&  newIssue.status === "closed";
 };
 
 schema.methods.getBCFMarkup = function(account, model, unit) {

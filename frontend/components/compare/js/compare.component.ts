@@ -18,14 +18,14 @@
 class CompareController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$filter",
-		"$q",
+		'$scope',
+		'$filter',
+		'$q',
 
-		"ViewerService",
-		"RevisionsService",
-		"CompareService",
-		"TreeService"
+		'ViewerService',
+		'RevisionsService',
+		'CompareService',
+		'TreeService'
 	];
 
 	private revision: any;
@@ -60,7 +60,7 @@ class CompareController implements ng.IController {
 	public $onInit() {
 
 		this.CompareService.disableComparison();
-		this.loadingInfo = "Loading comparison...";
+		this.loadingInfo = 'Loading comparison...';
 		this.compareTypes = this.CompareService.state.compareTypes;
 		this.mode = this.CompareService.mode;
 		this.modelType = this.CompareService.modelType;
@@ -88,13 +88,13 @@ class CompareController implements ng.IController {
 
 		}, true);
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 				this.modelsReady.resolve(this.modelSettingsReady());
 			}
 		});
 
-		this.$scope.$watchCollection("vm.baseModels", (s) => {
+		this.$scope.$watchCollection('vm.baseModels', (s) => {
 			const modelHeight = 81;
 			const cardHeight = 184;
 			const modelCount = (s || []).length;
@@ -113,7 +113,6 @@ class CompareController implements ng.IController {
 	}
 
 	public modelSettingsReady() {
-
 		this.CompareService.state.isFed = this.modelSettings.federate;
 
 		const modelsReady = [];
@@ -193,17 +192,17 @@ class CompareController implements ng.IController {
 
 export const CompareComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "<",
-		model: "<",
-		revision: "<",
-		modelSettings: "<",
-		onContentHeightRequest: "&"
+		account: '<',
+		model: '<',
+		revision: '<',
+		modelSettings: '<',
+		onContentHeightRequest: '&'
 	},
 	controller: CompareController,
-	controllerAs: "vm",
-	templateUrl: "templates/compare.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/compare.html'
 };
 
 export const CompareComponentModule = angular
-	.module("3drepo")
-	.component("compare", CompareComponent);
+	.module('3drepo')
+	.component('compare', CompareComponent);

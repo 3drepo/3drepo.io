@@ -19,17 +19,17 @@ import { formatBytes, formatBytesGB } from '../../../services/formatting/formatC
 import { invoiceDate, prettyDate } from '../../../services/formatting/formatDate';
 
 export const FormatBytesGBModule = angular
-	.module("3drepo")
-	.filter("formatBytesGB", () => formatBytesGB);
+	.module('3drepo')
+	.filter('formatBytesGB', () => formatBytesGB);
 
 export const FormatBytesModule = angular
-	.module("3drepo")
-	.filter("formatBytes", () => formatBytes);
+	.module('3drepo')
+	.filter('formatBytes', () => formatBytes);
 
 export const InvoiceDateModule = angular
-	.module("3drepo")
-	.filter("invoiceDate", () => invoiceDate);
+	.module('3drepo')
+	.filter('invoiceDate', () => invoiceDate);
 
 export const PrettyDateModule = angular
-	.module("3drepo")
-	.filter("prettyDate", () => prettyDate);
+	.module('3drepo')
+	.filter('prettyDate', () => prettyDate);

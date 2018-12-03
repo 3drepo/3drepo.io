@@ -282,9 +282,9 @@ function importToyProject(account, username) {
 
 		return Promise.all([
 
-			importToyModel(account, username, "Lego_House_Architecture", "ae234e5d-3b75-4b8c-b461-7529d5bec583", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "39b51fe5-0fcb-4734-8e10-d8088bec9d45", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "3749c3cc-375d-406a-9f0d-2d059e8e782f", project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "33586989-6130-4787-8ea5-b56b81286ccf", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "81abd908-d0b2-46f5-a9d5-38471dbfab72", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "94020bb8-07d3-4811-ae29-040c961ed92f", project.name)
 
 		]).then(models => {
 
@@ -303,7 +303,7 @@ function importToyProject(account, username) {
 				};
 			});
 
-			return importToyModel(account, username, "Lego_House_Federation", "b50fd608-46b4-4ba6-a97f-7bbc18c51932", project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "51dc4f4c-0f55-4c97-b62d-3383f7d23ab3", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -783,7 +783,6 @@ function removeModel(account, model, forceRemove) {
 			if (isSub) {
 				return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
 			}
-
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
 				deletePromises.push(setting.remove());
@@ -793,7 +792,6 @@ function removeModel(account, model, forceRemove) {
 				systemLogger.logError("Failed to remove collections: ", err);
 				return Promise.reject(responseCodes.REMOVE_MODEL_FAILED);
 			});
-
 		});
 	});
 }

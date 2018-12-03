@@ -2,22 +2,25 @@
 	This file contains react components conversion to angular context.
 	It should be change to ReactRouter file if app is fully migrated
 */
-import * as React from 'react';
 import { react2angular as wrap } from 'react2angular';
-import { BrowserRouter as Router } from 'react-router-dom';
 
 // Routes
-import DialogContainer from './components/dialogContainer/dialogContainer.container';
-import SnackbarContainer from './components/snackbarContainer/snackbarContainer.container';
-import Billing from './billing/billing.container';
+import App from './app/app.container';
+import ModelSettings from './modelSettings/modelSettings.container';
+import Login from './login/login.container';
+import PasswordForgot from './passwordForgot/passwordForgot.container';
+import PasswordChange from './passwordChange/passwordChange.container';
 
-import UserManagement from './userManagement/userManagement.container';
-import Profile from './profile/profile.container';
+// Components
+import Dashboard from './dashboard/dashboard.container';
+import TopMenu from './components/topMenu/topMenu.container';
 
 angular
 	.module('3drepo')
-	.component('dialogContainer', wrap(DialogContainer))
-	.component('snackbarContainer', wrap(SnackbarContainer))
-	.component('userManagement', wrap(UserManagement, ['projects', 'users']))
-	.component('profile', wrap(Profile))
-	.component('billing', wrap(Billing));
+	.component('app', wrap(App))
+	.component('dashboard', wrap(Dashboard))
+	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogoClick']))
+	.component('modelSettings', wrap(ModelSettings))
+	.component('login', wrap(Login, ['headlineText']))
+	.component('passwordForgot', wrap(PasswordForgot))
+	.component('passwordChange', wrap(PasswordChange));

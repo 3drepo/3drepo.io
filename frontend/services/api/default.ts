@@ -1,8 +1,23 @@
 import axios from 'axios';
-import { clientConfigService } from "../clientConfig";
+import { clientConfigService } from '../clientConfig';
 import { memoize } from 'lodash';
+import { getAngularService } from '../../helpers/migration';
 
 axios.defaults.withCredentials = true;
+
+axios.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		try {
+			const interceptor = getAngularService('AuthInterceptor') as any;
+			interceptor.responseError(error.response);
+			error.response.handled = true;
+			return Promise.reject(error);
+		} catch (e) {
+			return Promise.reject(error);
+		}
+	}
+);
 
 const getRequest = (url, ...options) => {
 	const requestUrl = clientConfigService.apiUrl(clientConfigService.GET_API, url);
@@ -24,10 +39,16 @@ const deleteRequest = (url, ...options) => {
 	return axios.delete(requestUrl, ...options);
 };
 
+const patchRequest = (url, ...options) => {
+	const requestUrl = clientConfigService.apiUrl(clientConfigService.POST_API, url);
+	return axios.patch(requestUrl, ...options);
+};
+
 export const API = {
 	get: getRequest,
 	post: postRequest,
 	put: putRequest,
+	patch: patchRequest,
 	delete: deleteRequest
 };
 

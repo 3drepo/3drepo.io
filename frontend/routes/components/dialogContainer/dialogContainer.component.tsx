@@ -16,19 +16,14 @@
  */
 
 import * as React from 'react';
-import { dispatch } from '../../../helpers/migration';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 
+import { dispatch } from '../../../helpers/migration';
 import { MuiTheme } from '../../../styles';
-import { RemoveUserDialog } from './components/removeUserDialog/removeUserDialog.component';
-import { ErrorDialog } from './components/errorDialog/errorDialog.component';
-import { FederationReminderDialog } from './components/federationReminderDialog/federationReminderDialog.component';
-import { LoadingDialog } from './components/loadingDialog/loadingDialog.component';
-import { DIALOG_TYPES } from '../../../modules/dialog/dialog.redux';
 
 interface IProps {
 	config: any;
@@ -37,56 +32,58 @@ interface IProps {
 	hide: () => void;
 }
 
-const DIALOG_TEMPLATES = {
-	[DIALOG_TYPES.CONFIRM_USER_REMOVE]: RemoveUserDialog,
-	[DIALOG_TYPES.FEDERATION_REMINDER_DIALOG]: FederationReminderDialog,
-	[DIALOG_TYPES.ERROR]: ErrorDialog,
-	[DIALOG_TYPES.LOADING]: LoadingDialog
-};
-
 export class DialogContainer extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
 		isOpen: false
 	};
 
-	public handleClose = () => {
-		this.props.hide();
+	public handleCallback = (callback) => {
+		const action = callback();
 
-		if (this.props.config.onCancel) {
-			dispatch(this.props.config.onCancel());
+		if (action) {
+			dispatch(action);
 		}
 	}
 
-	public handleResolve = () => {
+	public handleClose = (...args) => {
+		this.props.hide();
+
+		if (this.props.config.onCancel) {
+			this.handleCallback(this.props.config.onCancel.bind(null, ...args));
+		}
+	}
+
+	public handleResolve = (...args) => {
 		this.props.hide();
 
 		if (this.props.config.onConfirm) {
-			dispatch(this.props.config.onConfirm());
+			this.handleCallback(this.props.config.onConfirm.bind(null, ...args));
 		}
 	}
 
 	public render() {
-		const { content, title, isOpen, templateType } = this.props.config;
-		const data = this.props.data || {};
-
-		const DialogTemplate = DIALOG_TEMPLATES[templateType];
+		const { content, title, template: DialogTemplate } = this.props.config;
+		const data = {
+			content,
+			...(this.props.data || {})
+		};
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Dialog open={this.props.isOpen} onClose={this.handleClose}>
-					{title && <DialogTitle disableTypography>{title}</DialogTitle>}
-					{content && !DialogTemplate && (
+					{title && <DialogTitle disableTypography={true}>{title}</DialogTitle>}
+					{ content && !DialogTemplate && (
 							<DialogContent>
 								<div dangerouslySetInnerHTML={{ __html: content }} />
 							</DialogContent>
-						)}
-					{DialogTemplate && (
+						) }
+					{ DialogTemplate && (
 						<DialogTemplate
 							{...data}
 							handleResolve={this.handleResolve}
 							handleClose={this.handleClose}
 						/>
-					)}
+					) }
 				</Dialog>
 			</MuiThemeProvider>
 		);

@@ -33,3 +33,67 @@ export const fetchModelsPermissions = (teamspace, models) => {
 export const updateModelsPermissions = (teamspace, permissionsList) => {
 	return api.post(`${teamspace}/models/permissions`, permissionsList);
 };
+
+/**
+ * Create new model
+ * @param teamspace
+ * @param model
+ */
+export const createModel = (teamspace, modelData) => {
+	return api.post(`${teamspace}/model`, modelData);
+};
+
+/**
+ * Update model
+ * @param teamspace
+ * @param model
+ */
+export const updateModel = (teamspace, modelId, modelData) => {
+	return api.put(`${teamspace}/${modelId}`, modelData);
+};
+
+/**
+ * Remove model
+ * @param teamspace
+ * @param modelId
+ */
+export const removeModel = (teamspace, modelId) => {
+	return api.delete(`${teamspace}/${modelId}`);
+};
+
+/**
+ * Upload model file
+ * @param teamspace
+ * @param modelId
+ * @param fileData
+ */
+export const uploadModelFile = (teamspace, modelId, fileData) => {
+	return api.post(`${teamspace}/${modelId}/upload`, fileData);
+};
+
+/**
+ * Get model settings
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelSettings = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}.json`);
+};
+
+/**
+ * Edit model settings
+ * @param teamspace
+ * @param modelId
+ */
+export const editModelSettings = (teamspace, modelId, settings) => {
+	return api.put(`${teamspace}/${modelId}/settings`, settings);
+};
+
+/**
+ * Get model revisions
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelRevisions = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/revisions.json`);
+};

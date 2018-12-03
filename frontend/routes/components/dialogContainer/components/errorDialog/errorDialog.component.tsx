@@ -11,16 +11,6 @@ interface IProps {
 	handleResolve: () => string;
 }
 export const ErrorDialog = (props: IProps) => {
-	const renderItems = (items) => {
-		return items.map((item) => (<p>item</p>));
-	};
-
-	const description = `\
-		User { {:: memberName } } has permissions assigned on the following items,\
-		they will be removed together with the license. \
-		Do you really want to remove this license?
-	`;
-
 	const { method, dataType, message, status } = props;
 	return (
 		<>
@@ -31,9 +21,9 @@ export const ErrorDialog = (props: IProps) => {
 				}
 
 				<br /><br/>
-				<strong>{ message }</strong>
+				<strong>{message}</strong>
 				<br />
-				{ status && (<code>(Status Code: {status})</code>) }
+				{status && (<code>(Status Code: {status})</code>)}
 				<br /><br />
 				If this is unexpected please message support@3drepo.io.
 			</DialogContent>

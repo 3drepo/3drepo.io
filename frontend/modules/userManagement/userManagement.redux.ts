@@ -22,10 +22,10 @@ import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'jobs', 'jobsColors'],
+	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'currentUser'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
-	addUserSuccess: ['user'],
+	addUserSuccess: ['user', 'currentUser'],
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
@@ -33,7 +33,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateJob: ['username', 'job'],
 	updateUserJobSuccess: ['username', 'job'],
 	updatePermissions: ['permissions'],
-	updatePermissionsSuccess: ['permissions'],
+	updatePermissionsSuccess: ['permissions', 'currentUser'],
 	getUsersSuggestions: ['searchText'],
 	getUsersSuggestionsSuccess: ['suggestions'],
 	clearUsersSuggestions: [],
@@ -72,11 +72,12 @@ export const INITIAL_STATE = {
  * @param users
  * @returns
  */
-const prepareUserData = (teamspaceName, users): object => {
+const prepareUserData = (teamspaceName, currentUser, userData): object => {
 	return {
-		...users,
-		isAdmin: users.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-		isOwner: teamspaceName === users.user
+		...userData,
+		isAdmin: userData.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
+		isOwner: teamspaceName === userData.user,
+		isCurrentUser: currentUser === userData.user
 	};
 };
 
@@ -98,8 +99,9 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 };
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace } = action;
-	const users = action.users.map(prepareUserData.bind(null, teamspace.name));
+	const { teamspace, currentUser } = action;
+	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
+
 	return Object.assign({}, INITIAL_STATE, {
 		users,
 		isPending: false,
@@ -113,10 +115,10 @@ export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
 	return {...state, isPending};
 };
 
-export const addUserSuccess = (state = INITIAL_STATE, { user }) => {
+export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
 	const users = [
 		...state.users,
-		prepareUserData(state.selectedTeamspace, user)
+		prepareUserData(state.selectedTeamspace, currentUser, user)
 	];
 	return {...state, users};
 };
@@ -144,11 +146,11 @@ export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) =
 	return {...state, users};
 };
 
-export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
+export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions, currentUser }) => {
 	const users = [...state.users].map((userData) => {
 		if (userData.user === permissions.user) {
 			const newUserData = {...userData, ...permissions};
-			return prepareUserData(state.selectedTeamspace, newUserData);
+			return prepareUserData(state.selectedTeamspace, currentUser, newUserData);
 		}
 
 		return userData;

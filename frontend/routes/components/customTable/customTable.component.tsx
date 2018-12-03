@@ -16,33 +16,24 @@
  */
 
 import * as React from 'react';
-import {
-	matchesProperty, cond, orderBy, pick, values,
-	stubTrue, first, isEqual, identity, isEmpty, omit
-} from 'lodash';
+import { matchesProperty, cond, orderBy, pick, values, stubTrue, isEqual, isEmpty } from 'lodash';
 import SimpleBar from 'simplebar-react';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
 import Checkbox from '@material-ui/core/Checkbox';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';
 import { JobItem } from '../jobItem/jobItem.component';
-import { UserItem } from '../userItem/userItem.component';
 import { Highlight } from '../highlight/highlight.component';
-import { ColorPicker } from '../colorPicker/colorPicker.component';
-
-import { CellUserSearch } from './components/cellUserSearch/cellUserSearch.component';
 import { TableHeading } from './components/tableHeading/tableHeading.component';
-import { CellSelect } from './components/cellSelect/cellSelect.component';
 
 import { Container, Head, BodyWrapper, Body, Row, Cell, CheckboxCell } from './customTable.styles';
 
-export const TableButton = ({icon, onClick, disabled}) => {
+export const TableButton = ({Icon, onClick, disabled}) => {
 	return (
 		<IconButton onClick={onClick} disabled={disabled}>
-			<Icon>{icon}</Icon>
+			<Icon />
 		</IconButton>
 	);
 };
@@ -69,19 +60,6 @@ export const CELL_TYPES = {
 };
 
 const EQUALITY_CHECK_FIELDS = ['id', '_id', 'name', 'user', 'model'];
-
-const HEADER_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: CellUserSearch,
-	[CELL_TYPES.NAME]: CellUserSearch
-};
-
-const ROW_CELL_COMPONENTS = {
-	[CELL_TYPES.USER]: UserItem,
-	[CELL_TYPES.JOB]: CellSelect,
-	[CELL_TYPES.PERMISSIONS]: CellSelect,
-	[CELL_TYPES.ICON_BUTTON]: TableButton,
-	[CELL_TYPES.COLOR]: ColorPicker
-};
 
 const CELL_DEFAULT_PROPS = {
 	[CELL_TYPES.EMPTY]: {
@@ -192,8 +170,6 @@ const getSearchFields = (cells) => {
 	return searchFields ? searchFields.searchBy : [];
 };
 
-const FIELDS_TO_OMIT = ['selected', 'data', 'disabled'];
-
 interface IProps {
 	cells: any[];
 	rows: any[];
@@ -201,6 +177,8 @@ interface IProps {
 	onSelectionChange?: (selectedRows) => void;
 	renderCheckbox?: (props, data) => React.ReactChild;
 	onSearch?: (props) => any[];
+	rowStyle?: any;
+	checkboxDisabled?: boolean;
 }
 
 interface IState {
@@ -266,7 +244,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const sortChanged = prevState.currentSort.type !== this.state.currentSort.type;
 		const orderChanged = prevState.currentSort.order !== this.state.currentSort.order;
 
-		if (rowsValuesChanged && !sortChanged && !orderChanged) {
+		if (rowsValuesChanged && !rowsChanged && !sortChanged && !orderChanged) {
 			changes.processedRows = updateProcessedRows({
 				updatedRows: this.props.rows,
 				processedRows: prevState.processedRows
@@ -360,6 +338,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 
 	public handleSelectAll = (event, checked) => {
 		const selectedRows = checked ? [...this.state.processedRows] : [];
+
 		this.setState({selectedRows}, () => {
 			this.props.onSelectionChange(selectedRows);
 		});
@@ -377,10 +356,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	public renderHeader = (cells) => {
 		const {currentSort} = this.state;
 		const setTooltip = (Component, text) => (
-			<Tooltip
-				title={text}
-				placement="bottom-end"
-			>
+			<Tooltip title={text} placement="bottom-end">
 				{Component}
 			</Tooltip>
 		);
@@ -433,10 +409,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 */
 	public renderRows = (cells = [], data = [], showCheckbox) => {
 		return data.map((row, index) => {
-			const rowProps = {key: index, clickable: showCheckbox && !row.disabled};
-
+			const rowProps = {clickable: showCheckbox && !row.disabled, style: this.props.rowStyle};
 			return (
-				<Row {...rowProps}>
+				<Row key={index} {...rowProps}>
 					{
 						showCheckbox ? (
 							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>
@@ -483,10 +458,9 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { cells, onSelectionChange, rows } = this.props;
+		const { cells, onSelectionChange, rows, checkboxDisabled } = this.props;
 		const { processedRows } = this.state;
 		const showCheckbox = Boolean(onSelectionChange);
-
 		const numberOfSelectedRows = processedRows.filter(({selected}) => selected).length;
 		const selectedAll = numberOfSelectedRows && numberOfSelectedRows === rows.length;
 		const isIndeterminate = Boolean(numberOfSelectedRows && !selectedAll);
@@ -501,7 +475,8 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 									this.renderCheckbox({
 										onChange: this.handleSelectAll,
 										indeterminate: isIndeterminate,
-										checked: selectedAll || isIndeterminate
+										checked: selectedAll || isIndeterminate,
+										disabled: checkboxDisabled
 									})
 								}
 							</CheckboxCell>
@@ -511,7 +486,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 				</Head>
 				<BodyWrapper>
 					<Body innerRef={this.rowsContainerRef}>
-						<SimpleBar data-simplebar-x-hidden>
+						<SimpleBar data-simplebar-x-hidden={true}>
 							{this.renderRows(cells, processedRows, showCheckbox)}
 						</SimpleBar>
 					</Body>

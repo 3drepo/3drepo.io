@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 
-import { FONT_WEIGHT } from '../../../styles';
+import { FONT_WEIGHT, COLOR } from '../../../styles';
 
 export const Container = styled(Paper)`
   && {
@@ -27,6 +27,7 @@ export const Container = styled(Paper)`
     width: ${(props: any) => props.width || 'auto'};
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 `;
 
@@ -35,7 +36,7 @@ export const Title = styled.div`
   font-weight: ${FONT_WEIGHT.NORMAL};
   height: 40px;
   border-radius: 4px 4px 0 0;
-  background-color: rgb(12,47,84);
+  background-color: ${COLOR.PRIMARY_MAIN};
   color: rgba(255,255,255,0.87);
   display: flex;
   justify-content: flex-start;
@@ -47,4 +48,11 @@ export const Content = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+export const LoaderContainer = styled.div`
+  position: relative;
+  padding-top: 100px;
+  display: flex;
+  justify-content: center;
 `;

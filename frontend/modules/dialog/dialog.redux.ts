@@ -17,17 +17,11 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
-
-export const DIALOG_TYPES = {
-	ERROR: 1,
-	CONFIRM_USER_REMOVE: 2,
-	FEDERATION_REMINDER_DIALOG: 3,
-	LOADING: 4
-};
+import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;
-	templateType: 'error' | 'confirm' | 'default' | 'confirmUserRemove';
+	template?: JSX.Element;
 	content?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
@@ -37,25 +31,31 @@ interface IDialogConfig {
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showErrorDialog: ['method', 'dataType', 'error'],
-	hideDialog: []
+	showConfirmDialog: ['config'],
+	hideDialog: [],
+	setPendingState: ['isPending']
 }, { prefix: 'DIALOG_' });
 
 export const INITIAL_STATE = {
 	isOpen: false,
+	isPending: false,
 	config: {},
 	data: null
 };
 
 export const showDialog = (state = INITIAL_STATE, action) => {
-	const config = omit(action.config, 'data');
-
+	const config = omit(action.config, 'data') as IDialogConfig;
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
 export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error } ) => {
+	if (error.handled) {
+		return state;
+	}
+
 	const config = {
 		title: 'Error',
-		templateType: DIALOG_TYPES.ERROR,
+		template: ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -67,12 +67,23 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error
 	return showDialog(state, {config});
 };
 
-export const hideDialog = (state = INITIAL_STATE, action) => {
-	return { ...state, isOpen: false };
+export const showConfirmDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
+	return showDialog(state, { config });
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const hideDialog = (state = INITIAL_STATE) => {
+	return { ...state, isOpen: false, isPending: false };
+};
+
+export const setPendingState = (state = INITIAL_STATE, {isPending}) => {
+	return { ...state, isPending };
+};
+
+export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
-	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog
+	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
+	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
+	[DialogTypes.SET_PENDING_STATE]: setPendingState
 });

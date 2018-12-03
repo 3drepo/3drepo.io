@@ -18,10 +18,11 @@
 class RegisterVerifyController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$window",
+		'$window',
+		'$state',
 
-		"APIService",
-		"StateManager"
+		'APIService',
+		'StateManager'
 	];
 
 	private username;
@@ -34,54 +35,51 @@ class RegisterVerifyController implements ng.IController {
 
 	constructor(
 		private $window: ng.IWindowService,
+		private $state,
 
 		private APIService,
 		private StateManager
 	) {}
 
 	public $onInit() {
-		if (
-			this.StateManager && this.StateManager.query &&
-			this.StateManager.query.username && this.StateManager.query.token
-		) {
-
-			this.username = this.StateManager.query.username,
-			this.token = this.StateManager.query.token;
+		if (this.$state.params.username && this.$state.params.token) {
+			this.username = this.$state.params.username,
+			this.token = this.$state.params.token;
 			this.verified = false;
 			this.showPaymentWait = false;
 			this.databaseName = this.username;
 
-			this.verifyErrorMessage = "Verifying. Please wait...";
-			this.APIService.post(this.username + "/verify", { token: this.token})
+			this.verifyErrorMessage = 'Verifying. Please wait...';
+			this.APIService.post(this.username + '/verify', { token: this.token})
 				.then((response) => {
 					if (response.status === 200) {
 						this.verified = true;
 						this.verifySuccessMessage = `Congratulations. You have successfully signed up for 3D Repo.
 						You may now login to you account.`;
-					} else if (response.data.code === "ALREADY_VERIFIED") {
+					} else if (response.data.code === 'ALREADY_VERIFIED') {
 						this.verified = true;
 						this.verifySuccessMessage = `You have already verified your account successfully.
 						You may now login to your account.`;
 					} else {
-						this.verifyErrorMessage = "Error with verification";
+						this.verifyErrorMessage = 'Error with verification';
 					}
 				}).catch((error) => {
-					if (error.data.code === "ALREADY_VERIFIED") {
+					if (error.data.code === 'ALREADY_VERIFIED') {
 						this.verified = true;
 						this.verifySuccessMessage = `You have already verified your account successfully.
 						You may now login to your account.`;
 					} else {
-						this.verifyErrorMessage = "Error with verification";
+						this.verifyErrorMessage = 'Error with verification';
 					}
 				});
 
 		} else {
-			this.verifyErrorMessage = "Can't verify: Token and/or Username not provided";
+			this.verifyErrorMessage = 'Can\'t verify: Token and/or Username not provided';
 		}
 	}
 
 	public goToLoginPage() {
-		this.$window.location.href = "/";
+		this.$window.location.href = '/';
 	}
 
 }
@@ -89,10 +87,10 @@ class RegisterVerifyController implements ng.IController {
 export const RegisterVerifyComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: RegisterVerifyController,
-	controllerAs: "vm",
-	templateUrl: "templates/register-verify.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/register-verify.html'
 };
 
 export const RegisterVerifyComponentModule = angular
-	.module("3drepo")
-	.component("registerVerify", RegisterVerifyComponent);
+	.module('3drepo')
+	.component('registerVerify', RegisterVerifyComponent);

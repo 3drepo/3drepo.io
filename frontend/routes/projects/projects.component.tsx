@@ -56,8 +56,7 @@ interface IState {
 }
 
 export class Projects extends React.PureComponent<IProps, IState> {
-
-	public static getDerivedStateFromProps = (nextProps, prevState) => {
+	public static getDerivedStateFromProps = (nextProps) => {
 		const queryParams = queryString.parse(nextProps.location.search);
 		return {
 			currentView: Number(queryParams.view || PERMISSIONS_VIEWS.PROJECTS)
@@ -91,7 +90,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		this.updateUrlParams({view: updatedView});
 	}
 
-	public onProjectChange = (projectName) => {
+	public onProjectChange = (event, projectName) => {
 		this.updateUrlParams({project: projectName});
 		if (this.props.onProjectChange) {
 			this.props.onProjectChange(projectName);
@@ -110,10 +109,11 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		} as any;
 		const queryParams = queryString.parse(location.search);
 
-		const hasProperProject = projects.find(({ name }) => name === queryParams.project);
-		if (hasProperProject) {
+		const project = projects.find(({ name }) => name === queryParams.project);
+
+		if (project) {
 			state.selectedProject = queryParams.project;
-			this.onProjectChange(queryParams.project);
+			this.onProjectChange(null, queryParams.project);
 		} else {
 			state.selectedProject = '';
 		}
@@ -139,35 +139,35 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderPermissionsView = (props) => {
-		const {currentView} = this.state;
+	public renderPermissionsView = () => {
+		const { currentView } = this.state;
+
 		return (
 			<>
-				{ currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions /> }
-				{ currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions /> }
+				{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
+				{currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions />}
 			</>
 		);
 	}
 
 	public render() {
-		const {currentProject, location, match} = this.props;
-		const {currentView, models, modelsPermissions, projectsPermissions, selectedProject, projectsItems} = this.state;
-
+		const {match} = this.props;
+		const {currentView, selectedProject, projectsItems} = this.state;
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>
 				<UserManagementTab footerLabel={footerLabel}>
 					<>
 						<Options
-							container
+							container={true}
 							direction="row"
 							justify="space-between"
 							alignContent="center"
 						>
-							<SelectContainer item>
+							<SelectContainer item={true}>
 								<FormControl fullWidth={true}>
-									<InputLabel shrink htmlFor="project">
-											Project
+									<InputLabel shrink={true} htmlFor="project">
+										Project
 									</InputLabel>
 									<CellSelect
 										items={projectsItems}
@@ -179,7 +179,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 									/>
 								</FormControl>
 							</SelectContainer>
-							<Grid item>
+							<Grid item={true}>
 								<SwitchButton
 									color="secondary"
 									onClick={this.handleViewChange}

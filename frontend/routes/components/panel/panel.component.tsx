@@ -17,14 +17,13 @@
 
 import * as React from 'react';
 
-import { PaperProps } from '@material-ui/core/Paper';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { ThemeProvider } from 'styled-components';
 import { MuiTheme, theme } from '../../../styles';
 import { Container, Title, Content } from './panel.styles';
 
 interface IProps {
-	title: string;
+	title?: string | JSX.Element;
 	children: any;
 	paperProps?: any;
 }
@@ -33,10 +32,8 @@ export const Panel = (props: IProps) => (
 	<ThemeProvider theme={theme}>
 		<MuiThemeProvider theme={MuiTheme}>
 			<Container {...props.paperProps}>
-				<Title>{props.title}</Title>
-				<Content>
-					{props.children}
-				</Content>
+				<Title> {props.title} </Title>
+				<Content> {props.children} </Content>
 			</Container>
 		</MuiThemeProvider>
 	</ThemeProvider>

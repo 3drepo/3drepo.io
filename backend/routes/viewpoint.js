@@ -60,12 +60,11 @@ function findViewpoint(req, res, next) {
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
 
-	Viewpoint.findByUID(dbCol, req.params.uid)
+	Viewpoint.findByUID(dbCol, req.params.uid, undefined, true)
 		.then(view => {
 			if(!view) {
 				return Promise.reject({resCode: responseCodes.VIEW_NOT_FOUND});
 			} else {
-				view._id = utils.uuidToString(view._id);
 				return Promise.resolve(view);
 			}
 		}).then(view => {
