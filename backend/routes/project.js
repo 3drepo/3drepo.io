@@ -56,7 +56,7 @@
 	 * @apiName listProject
 	 * @apiGroup Project
 	 * 
-	 * @apiParam project Project to list
+	 * @apiParam {String} project Project to list
 	 */
 
 	router.get("/projects/:project",  middlewares.project.canView, listProject);
@@ -66,7 +66,7 @@
 	 * @apiName deleteProject
 	 * @apiGroup Project
 	 * 
-	 * @apiParam project Project to delete
+	 * @apiParam {String} project Project to delete
 	 */
 
 	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
