@@ -25,10 +25,50 @@
 	const Project = require("../models/project");
 	const utils = require("../utils");
 
+	/**
+	 * @api {post} /projects Create a project
+	 * @apiName createProject
+	 * @apiGroup Project
+	 */
+
 	router.post("/projects", middlewares.project.canCreate, createProject);
+
+	/**
+	 * @api {put} /projects/:project Update a project
+	 * @apiName updateProject
+	 * @apiGroup Project
+	 * 
+	 * @apiParam {String} project Project to update 
+	 */
+
 	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
+
+	/**
+	 * @api {get} /projects List all projects
+	 * @apiName listProjects
+	 * @apiGroup Project
+	 */
+
 	router.get("/projects", middlewares.project.canList, listProjects);
+
+	/**
+	 * @api {get} /projects/:project List a project
+	 * @apiName listProject
+	 * @apiGroup Project
+	 * 
+	 * @apiParam project Project to list
+	 */
+
 	router.get("/projects/:project",  middlewares.project.canView, listProject);
+
+	/**
+	 * @api {delete} /projects/:project Delete a project
+	 * @apiName deleteProject
+	 * @apiGroup Project
+	 * 
+	 * @apiParam project Project to delete
+	 */
+
 	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
 
 	function createProject(req, res, next) {
