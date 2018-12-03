@@ -25,7 +25,20 @@ const responseCodes = require("../response_codes.js");
 const config = require("../config");
 const utils = require("../utils");
 
+/**
+ * @api {get} /subscriptions List all subscriptions
+ * @apiName listSubscriptions
+ * @apiGroup Subscription
+ */
+
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
+
+/**
+ * @api {get} /subscriptions Update a subscription
+ * @apiName updateSubscription
+ * @apiGroup Subscription
+ */
+
 router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
 
 function updateSubscription(req, res, next) {
