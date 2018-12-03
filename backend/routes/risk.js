@@ -30,6 +30,7 @@ const config = require("../config.js");
  * @api {get} /risks/:uid.json Find Risk by ID
  * @apiName findRiskById
  * @apiGroup Risks
+ * 
  * @apiParam {String} id Risk unique ID.
  */
 
@@ -39,6 +40,7 @@ router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
  * @api {get} /risks/:uid/thumbnail.png Get Risks Thumbnail
  * @apiName getThumbnail
  * @apiGroup Risks
+ * 
  * @apiParam {String} id Risk unique ID.
  */
 
@@ -64,6 +66,7 @@ router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreensho
  * @api {get} /risks/:uid/screenshotSmall.png  Get Small Risks Screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Risks
+ * 
  * @apiParam {String} id Risk unique ID.
  */
 
@@ -73,6 +76,7 @@ router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScre
  * @api {get} /risks/:rid/risks.json  List all Risks by revision ID
  * @apiName listRisks
  * @apiGroup Risks
+ * 
  * @apiParam {String} id Revision unique ID.
  */
 
@@ -90,16 +94,58 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
  * @api {get} /risks.html  Render all Risks as HTML by revision ID
  * @apiName renderRisksHTML
  * @apiGroup Risks
+ * 
  * @apiParam {String} id Revision unique ID.
  */
 
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
+/**
+ * @api {post} /risks.json  Store Risks
+ * @apiName storeRisk
+ * @apiGroup Risks
+ * 
+ * @apiParam {String} id Revision unique ID.
+ */
+
 router.post("/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
+
+/**
+ * @api {put} /risks/riskId.json  Update risks based on revision
+ * @apiName updateRisk
+ * @apiGroup Risks
+ * 
+ * @apiParam {String} riskId.json Risk unique ID.
+ */
+
 router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
 
+/**
+ * @api {post} /revision/:rid/risks.json  Store risks based on Revision ID
+ * @apiName storeRisk
+ * @apiGroup Risks
+ * 
+ * @apiParam {String} rid Revision unique ID.
+ */
+
 router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
+
+/**
+ * @api {put} /revision/:rid/risks/:riskId.json  Update Risk based on revision ID
+ * @apiName  updateRisk
+ * @apiGroup Risks
+ * 
+ * @apiParam {String} rid Revision unique ID.
+ * @apiParam {String} rid Risk unique ID.
+ */
+
 router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+
+/**
+ * @api {delete} /risks/ Delete risks 
+ * @apiName deleteRisks
+ * @apiGroup Risks
+ */
 
 router.delete("/risks/", middlewares.connectQueue, middlewares.issue.canCreate, deleteRisks);
 
