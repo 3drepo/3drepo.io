@@ -92,7 +92,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<FormContainer container={true} direction="column">
-						<Headline color="primary" variant="subheading">Basic information</Headline>
+						<Headline color="primary" variant="subheading">Basic Information</Headline>
 						<Grid container={true} direction="row" wrap="nowrap">
 							<StyledDropzone
 								disabled={isAvatarPending}

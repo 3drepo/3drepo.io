@@ -87,7 +87,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<FormContainer container={true} direction="column">
-						<Headline color="primary" variant="subheading">Password settings</Headline>
+						<Headline color="primary" variant="subheading">Password Settings</Headline>
 						<FieldsRow container={true} wrap="nowrap">
 							<Field name="oldPassword" render={ ({ field, form }) => (
 								<StyledTextField
