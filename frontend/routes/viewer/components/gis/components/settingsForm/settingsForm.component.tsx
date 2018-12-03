@@ -19,7 +19,7 @@ import * as React from 'react';
 import * as Yup from 'yup';
 import { Form, Field } from 'formik';
 
-import { ViewCardFooter, ViewCardContent } from './../../../viewerCard/viewerCard.styles';
+import { ViewerPanelFooter, ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { Header, Headline, StyledTextField, FooterWrapper, StyledSaveButton } from './settingsForm.styles';
 
@@ -45,11 +45,11 @@ const defaultFieldProps = {
 };
 
 export const SettingsForm = (props) => {
-	const { latitude, longitude, angleFromNorth, axisX, axisY, axisZ } = props.values;
-	const { handleChange } = props;
+	const {values: {latitude, longitude, angleFromNorth, axisX, axisY, axisZ}, handleChange} = props;
+
 	return (
 		<Form>
-			<ViewCardContent>
+			<ViewerPanelContent>
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>
@@ -126,8 +126,8 @@ export const SettingsForm = (props) => {
 						onChange={handleChange}
 					/>
 				)} />
-			</ViewCardContent>
-			<ViewCardFooter>
+			</ViewerPanelContent>
+			<ViewerPanelFooter>
 				<FooterWrapper>
 					<Field render={ ({ form }) =>
 						<StyledSaveButton
@@ -139,7 +139,7 @@ export const SettingsForm = (props) => {
 							<SaveIcon color="secondary" />
 						</StyledSaveButton>} />
 				</FooterWrapper>
-			</ViewCardFooter>
+			</ViewerPanelFooter>
 		</Form>
 	);
 };

@@ -18,7 +18,7 @@ import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 // Components
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
-import { ViewerCard } from './viewer/components/viewerCard/viewerCard.component';
+import { ViewerPanel } from './viewer/components/viewerPanel/viewerPanel.component';
 import Gis from './viewer/components/gis/gis.container';
 
 angular
@@ -35,5 +35,5 @@ angular
 	.component('signUp', wrap(SignUp, ['onLogoClick']))
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('passwordChange', wrap(PasswordChange))
-	.component('viewerCard', wrap(ViewerCard))
+	.component('viewerPanel', wrap(ViewerPanel))
 	.component('gis', wrap(Gis));

@@ -23,13 +23,12 @@ import {
 	Title,
 	TitleIcon,
 	TitleContainer,
-	ViewCardContent,
-	ViewCardFooter
-} from './viewerCard.styles';
+	ViewerPanelContent
+} from './ViewerPanel.styles';
 import { Panel } from '../../../components/panel/panel.component';
-import { Loader } from './../../../components/loader/loader.component';
+import { Loader } from '../../../components/loader/loader.component';
 
-const ViewerCardTitle = ({title, Icon, renderActions}) => {
+const ViewerPanelTitle = ({title, Icon, renderActions}) => {
 	return (
 		<TitleContainer>
 			<Title> {Icon && <TitleIcon>{Icon}</TitleIcon>} {title} </Title>
@@ -46,11 +45,11 @@ interface IProps {
 	pending?: boolean;
 }
 
-export class ViewerCard extends React.PureComponent<IProps, any> {
+export class ViewerPanel extends React.PureComponent<IProps, any> {
 	public getTitle = () => {
 		const { title, Icon, actions } = this.props;
 		return (
-			<ViewerCardTitle
+			<ViewerPanelTitle
 				title={title}
 				Icon={Icon}
 				renderActions={() => this.renderTitleActions(actions)}
@@ -69,21 +68,17 @@ export class ViewerCard extends React.PureComponent<IProps, any> {
 	)
 
 	public renderLoader = () => (
-		<ViewCardContent>
+		<ViewerPanelContent>
 			<Loader />
-		</ViewCardContent>
+		</ViewerPanelContent>
 	)
 
 	public render() {
-		const { children, renderFooterContent, pending } = this.props;
+		const { children, pending } = this.props;
 
 		return (
 			<Panel title={this.getTitle()}>
-				{ pending ? this.renderLoader() :
-					<>
-						{children}
-					</>
-				}
+				{pending ? this.renderLoader() : children}
 			</Panel>
 		);
 	}

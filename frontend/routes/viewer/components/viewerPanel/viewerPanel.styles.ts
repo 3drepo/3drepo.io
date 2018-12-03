@@ -56,12 +56,12 @@ export const TitleIcon = styled.div`
   justify-content: center;
 `;
 
-export const ViewCardContent = styled.div`
+export const ViewerPanelContent = styled.div`
   background-color: ${COLOR.WHITE_87};
   padding: 24px;
 `;
 
-export const ViewCardFooter = styled.div`
+export const ViewerPanelFooter = styled.div`
   background-color: ${COLOR.WHITE};
   padding: 24px;
   padding: 8px 24px;

@@ -19,8 +19,8 @@ import * as React from 'react';
 import { isEmpty, includes } from 'lodash';
 import { withFormik } from 'formik';
 
-import { ViewerCard } from '../viewerCard/viewerCard.component';
-import { ViewCardContent } from '../viewerCard/viewerCard.styles';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { SettingsForm, SettingsSchema } from './components/settingsForm/settingsForm.component';
 
@@ -191,9 +191,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			formValues = { axisX, axisY, axisZ, latitude, longitude };
 		}
 
-		if (settings.angleFromNorth) {
-			formValues.angleFromNorth = settings.angleFromNorth;
-		}
+		formValues.angleFromNorth = settings.angleFromNorth || 0;
 
 		const EnhancedSettingsForm = withFormik({
 			mapPropsToValues: () => (formValues),
@@ -263,14 +261,14 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { activeMapIndex } = this.state;
 
 		return (
-			<ViewCardContent>
+			<ViewerPanelContent>
 				<StyledSelect
 					onChange={this.handleChangeMapProvider}
 					value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{this.renderLayers(mapsProviders[activeMapIndex].layers)}
-			</ViewCardContent>
+			</ViewerPanelContent>
 		);
 	}
 
@@ -278,14 +276,14 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { settingsModeActive } = this.state;
 
 		return (
-			<ViewerCard
+			<ViewerPanel
 				title="GIS"
 				Icon={this.getTitleIcon()}
 				actions={this.getActions()}
 				pending={this.props.isPending}
 			>
 				{settingsModeActive ? this.renderSettings() : this.renderMapLayers()}
-			</ViewerCard>
+			</ViewerPanel>
 		);
 	}
 }
