@@ -65,8 +65,6 @@ describe('Notifications', function() {
 
 	before(function(done) {
 		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-
 			async.parallel(
 				usernames.map(username => done =>
 				{
@@ -104,25 +102,40 @@ describe('Notifications', function() {
 	describe(" of type assign issue", function() {
 		let issuesId = [];
 
-		before(function(done){
-			const issue = Object.assign({"name":"Assign notification test"}, baseIssue);
+		const updateIssue = (modelId, issue , id, next) =>
+			agents.teamSpace1.put(`/${account}/${modelId}/issues/${id}.json`)
+				.send(issue)
+				.expect(200 , function(err, res) {
+						next(err);
+					})
+
+
+		const assignIssue = (modelId, name) => done => {
+			const issue = Object.assign({"name":( name || "Assign notification test") }, baseIssue);
 			const issueAssignJobA = Object.assign({}, issue, {"assigned_roles":["jobA"]});
 
-			async.series([next =>
-				agents.teamSpace1.post(`/${account}/${model}/issues.json`)
+			async.waterfall([next =>
+				agents.teamSpace1.post(`/${account}/${modelId}/issues.json`)
 					.send(issue)
 					.expect(200 , function(err, res) {
 							issuesId.push(res.body._id);
-							next(err);
+							next(err, res.body._id);
 						}),
-				next =>
-				 agents.teamSpace1.put(`/${account}/${model}/issues/${issuesId[0]}.json`)
-				 	.send(issueAssignJobA)
-				 	.expect(200 , function(err, res) {
-				 			next(err);
-						 })
+				updateIssue.bind(this, modelId, issueAssignJobA)
 				], done);
-		});
+		}
+
+
+		const fetchNotification = function(agent) {
+			return function() {
+				const next = arguments[arguments.length-1];
+
+				agent.get(NOTIFICATIONS_URL)
+					.expect(200, (err, res) => next(err, res.body));
+		}};
+
+
+		before(assignIssue(model));
 
 		it("should not be created for viewers and jobB type users", function(done) {
 			const users = ["unassignedTeamspace1UserJobA",
@@ -132,7 +145,6 @@ describe('Notifications', function() {
 			"collaboratorTeamspace1Model1JobB",
 			"adminTeamspace1JobB",
 			"teamSpace1"];
-
 
 			async.parallel(users.map( username => next => {
 					agents[username].get(NOTIFICATIONS_URL)
@@ -160,7 +172,7 @@ describe('Notifications', function() {
 						expect(notification.teamSpace).to.equal(account);
 						expect(notification.modelId).to.equal(model);
 						expect(notification.read).to.equal(false);
-
+						expect(notification.modelName).to.equal("Model 1");
 						next(err);
 					})
 
@@ -207,70 +219,147 @@ describe('Notifications', function() {
 				})
 			})
 
-
-
 			async.series( [ next => async.parallel(notificationsRequests, next),
 							next => async.parallel(markAsRead, next),
 							next => async.parallel(notificationsRequests, next),
 							next => async.parallel(readNotifications, next),
 			], done);
-
-
 		});
 
 		it("should not be able to be deleted by other people which are not the user that were adressed originaly", done => {
-			let notificationId = "";
+			async.waterfall([
+				fetchNotification(agents.collaboratorTeamspace1Model1JobA),
 
-			const fetchNotification = next => {
-				agents.collaboratorTeamspace1Model1JobA
-					.get(NOTIFICATIONS_URL)
-					.expect(200, function(err, res) {
-						expect(res.body.length).to.equal(1);
-						const notification = res.body[0];
-						notificationId =  notification._id;
-						next(err);
-					})
-			};
+				(notifications,next) => agents.commenterTeamspace1Model1JobA
+						.delete(`${NOTIFICATIONS_URL}/${notifications[0]._id}`)
+						.expect(404, next),
 
-			async.series([
-				fetchNotification,
-				next => agents.commenterTeamspace1Model1JobA
-						.delete(`${NOTIFICATIONS_URL}/${notificationId}`)
-						.expect(200, next),
-				fetchNotification
+				fetchNotification(agents.collaboratorTeamspace1Model1JobA),
+
+				(notifications,next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(1);
+					next()
+				}
 			], done)
 		})
 
-		it("should be able to be deleted by the user that were adressed originally", done => {
-			let notificationId = "";
-
-			async.series([
-				next => agents.collaboratorTeamspace1Model1JobA
-					.get(NOTIFICATIONS_URL)
-					.expect(200, function(err, res) {
-						notificationId =  res.body[0]._id;
-						next(err);
-					})
-				,
-				next => agents.commenterTeamspace1Model1JobA
-						.delete(`${NOTIFICATIONS_URL}/${notificationId}`)
+		it("should be able to be deleted by the user which was addressed originally", done => {
+			async.waterfall([
+				fetchNotification(agents.collaboratorTeamspace1Model1JobA),
+				(notifications, next) =>
+					agents.collaboratorTeamspace1Model1JobA
+						.delete(`${NOTIFICATIONS_URL}/${notifications[0]._id}`)
 						.expect(200, next),
+
+				fetchNotification(agents.collaboratorTeamspace1Model1JobA),
+				(notifications,next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(0);
+					next()
+				}
+			], done)
+		})
+
+		it("should be updated if a another issue has been assign in the same model", done => {
+			async.waterfall([
+					assignIssue(model, "Assign issue notification test / issue 2"),
+					fetchNotification(agents.adminTeamspace1JobA),
+					(notifications, next) => {
+						expect(notifications).to.be.an("array").and.to.have.length(1);
+						expect(notifications[0].issuesId).to.be.an("array").and.to.eql(issuesId);
+						next();
+					}
+				], done)
+		})
+
+		//should be removed the
+		it("should remove an issue Id if the issue has been assign to a diferent profile", done => {
+			const issue =  Object.assign({}, baseIssue, { "assigned_roles":[] });
+			const issueJobA = Object.assign({}, issue, {"assigned_roles":["jobA"], "name":"back to jobA"});
+			const issueID1 = issuesId[0];
+			const issueID2 = issuesId[1];
+
+			async.waterfall([
+				updateIssue.bind(this, model, issue, issueID1),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(1);
+					expect(notifications[0].issuesId.sort()).to.be.an("array").and.to.eql( [issueID2]);
+					next();
+				},
+				updateIssue.bind(this, model, issueJobA, issueID1),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(1);
+					expect(notifications[0].issuesId.sort()).to.be.an("array").and.to.eql(issuesId.sort());
+					next();
+				},
+			],done)
+		})
+
+
+		it("should remove an issue id if the issue has been closed", done => {
+			const issue = Object.assign({}, baseIssue, {status: "closed"});
+			const issueId = issuesId.pop();
+
+			async.waterfall([
+				updateIssue.bind(this, model,issue, issueId),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(1);
+					expect(notifications[0].issuesId.sort()).to.be.an("array").and.to.eql([issuesId[0]]);
+					next();
+				}
+			], done);
+		})
+
+		it("should be deleted after the las issue associated in that model has been closed", done => {
+			const issue = Object.assign({}, baseIssue, {status: "closed"});
+			const issueId = issuesId.pop();
+
+			async.waterfall([
+				updateIssue.bind(this, model,issue, issueId),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(0);
+					next();
+				}
+			], done);
+		})
+
+		it("should add a second notification if an issue has been assign in another model", done => {
+			const model2 = "00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5";
+
+			async.waterfall([
+				assignIssue(model, "Assign issue model1"),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(1);
+					expect(notifications[0].issuesId).to.be.an("array").and.to.eql([issuesId[0]]);
+					next();
+				},
+				assignIssue(model2, "Assign issue model2"),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(2);
+					const notIssue1 = notifications.find(notification => notification.issuesId.some(item => item == issuesId[0]));
+					const notIssue2 = notifications.find(notification => notification.issuesId.some(item => item == issuesId[1]));
+
+					expect(notIssue1).to.not.be.null;
+					expect(notIssue2).to.not.be.null;
+
+					expect(notIssue1.issuesId).to.have.length(1);
+					expect(notIssue2.issuesId).to.have.length(1);
+
+					next();
+				},
+
 			], done)
 		})
 
 
-		// - before
-		// I assume:
-		// cleared notifications
-		// unassigned issue1Model1Teamspace1
-		// unassigned issue2Model1Teamspace1
-		// unassigned issue1Model2Teamspace2
-		// unassigned issue2Model2Teamspace2
 
+//			const model2Id = "00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5";
 
-		// - assign issue1_teamspace1 to jobA in model 1 teamspace1
-		//   -> collaboratorTeamspace1JobA, commenterTeamspace1JobA , adminTeamspace1JobA , should have one notification with the issue id of issue1model1
-		//   -> rest of the users shouldnt have notifications
 	});
 
 });
