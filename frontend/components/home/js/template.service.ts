@@ -18,8 +18,8 @@
 export class TemplateService {
 
 	public static $inject: string[] = [
-		"$http",
-		"$templateCache"
+		'$http',
+		'$templateCache'
 	];
 
 	constructor(
@@ -40,5 +40,5 @@ export class TemplateService {
 }
 
 export const TemplateServiceModule = angular
-	.module("3drepo")
-	.service("TemplateService", TemplateService);
+	.module('3drepo')
+	.service('TemplateService', TemplateService);

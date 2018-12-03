@@ -34,11 +34,11 @@ before_install:
 install:
     - cd ./backend
     - yarn install
-    - yarn run lint
+    - yarn lint
     - cd ./../frontend
     - yarn install
-    - yarn run lint
-    - yarn run build
+    - yarn lint
+    - yarn build
 
 cache:
   yarn: true
@@ -50,14 +50,14 @@ services:
   - mongodb
 
 script:
-    - yarn run wdm:update
-    - yarn run wdm:start > /dev/null 2>&1 &
+    - yarn wdm:update
+    - yarn wdm:start > /dev/null 2>&1 &
     - cd ./../backend
-    - yarn run test
+    - yarn test
       #    - cd ./../
       #    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5
       #    - cd ./frontend
-      #    - yarn run e2e
+      #    - yarn e2e
 
 notifications:
     email:

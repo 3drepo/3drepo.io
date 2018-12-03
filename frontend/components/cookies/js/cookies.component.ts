@@ -18,7 +18,7 @@
 class CookiesController implements ng.IController {
 
 	public static $inject: string[] = [
-		"StateManager"
+		'StateManager'
 	];
 
 	constructor(
@@ -36,10 +36,10 @@ class CookiesController implements ng.IController {
 export const CookiesComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: CookiesController,
-	controllerAs: "vm",
-	templateUrl: "templates/cookies.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/cookies.html'
 };
 
 export const CookiesComponentModule = angular
-	.module("3drepo")
-	.component("cookies", CookiesComponent);
+	.module('3drepo')
+	.component('cookies', CookiesComponent);

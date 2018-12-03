@@ -17,7 +17,8 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { pick, isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
+import RemoveCircle from '@material-ui/icons/RemoveCircle';
 
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
@@ -26,7 +27,6 @@ import { UserManagementTab } from '../components/userManagementTab/userManagemen
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { Container } from './jobs.styles';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
@@ -103,7 +103,7 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					icon: 'remove_circle',
+					Icon: RemoveCircle,
 					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
@@ -119,7 +119,7 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
 
 		const colorsChanged = !isEqual(prevProps.colors, this.props.colors);
@@ -134,36 +134,35 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderNewJobForm = (container) => {
+	public renderNewJobFormPanel = ({ closePanel }) => {
 		const formProps = {
 			title: 'Add new job',
 			colors: this.props.colors,
 			onSave: this.onSave
 		};
-
-		return (
-			<FloatingActionPanel
-				container={container}
-				key={this.state.panelKey}
-				render={({ closePanel }) => {
-					return <NewJobForm {...formProps} onCancel={closePanel} />;
-				}}
-			/>
-		);
+		return <NewJobForm {...formProps} onCancel={closePanel} />;
 	}
+
+	public renderNewJobForm = (container) => (
+		<FloatingActionPanel
+			container={container}
+			key={this.state.panelKey}
+			render={this.renderNewJobFormPanel}
+		/>
+	)
 
 	public render() {
 		const { containerElement, rows } = this.state;
 
 		return (
 			<Container>
-					<UserManagementTab footerLabel="Manage jobs">
-							<CustomTable
-									cells={JOBS_TABLE_CELLS}
-									rows={rows}
-							/>
-					</UserManagementTab>
-					{containerElement && this.renderNewJobForm(containerElement)}
+				<UserManagementTab footerLabel="Manage jobs">
+					<CustomTable
+						cells={JOBS_TABLE_CELLS}
+						rows={rows}
+					/>
+				</UserManagementTab>
+				{containerElement && this.renderNewJobForm(containerElement)}
 			</Container>
 		);
 	}

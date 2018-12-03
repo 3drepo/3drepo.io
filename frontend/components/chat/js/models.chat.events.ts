@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatChannel } from "./chat.channel";
+import { ChatChannel } from './chat.channel';
 
 export class ModelChatEvents {
 	constructor(private channel: ChatChannel) {
 	}
 
 	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {
-		this.channel.subscribe("modelStatusChanged", callback, context);
+		this.channel.subscribe('modelStatusChanged', callback, context);
 	}
 
 	public unsubscribeFromStatusChanged(callback: (data: any) => void) {
-		this.channel.unsubscribe("modelStatusChanged", callback);
+		this.channel.unsubscribe('modelStatusChanged', callback);
 	}
 }

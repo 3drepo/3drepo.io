@@ -18,9 +18,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import Icon from '@material-ui/core/Icon';
 import Tooltip from '@material-ui/core/Tooltip';
-import Button from '@material-ui/core/Button';
+import Add from '@material-ui/icons/Add';
 
 import { Container, Panel, FloatingButtonContainer, FloatingButton } from './floatingActionPanel.styles';
 
@@ -28,7 +27,7 @@ interface IProps {
 	render: (closePanel: any) => void;
 	container?: HTMLElement;
 	children?: any;
-	icon?: string;
+	Icon?: string;
 	buttonProps?: any;
 }
 
@@ -65,11 +64,12 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderPanel() {
-		const { icon, buttonProps = {} } = this.props;
+		const { Icon, buttonProps = {} } = this.props;
 		const { anchorEl, open } = this.state;
 
 		const shouldOpen = open && Boolean(anchorEl);
 		const disabledTooltip = !buttonProps.label || !buttonProps.disabled;
+		const IconComponent = Icon || Add;
 
 		return (
 			<Container>
@@ -88,7 +88,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 							onClick={this.handleClick}
 							disabled={buttonProps.disabled}
 						>
-							<Icon>{icon || 'add'}</Icon>
+							<IconComponent />
 						</FloatingButton>
 					</FloatingButtonContainer>
 				</Tooltip>
@@ -96,14 +96,14 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 					open={shouldOpen}
 					anchorEl={anchorEl}
 					onClose={this.handleClose}
-					anchorOrigin={{
+					anchorOrigin={ {
 						vertical: 'top',
 						horizontal: 'left'
-					}}
-					transformOrigin={{
+					} }
+					transformOrigin={ {
 						vertical: 'top',
 						horizontal: 'right'
-					}}
+					} }
 				>
 					{
 						this.props.children || this.props.render({
@@ -126,7 +126,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 		const shouldUsePortal = Boolean(this.props.container);
 		return (
 			<>
-				{ shouldUsePortal ? this.renderInContainer(this.props.container) : this.renderPanel() }
+				{shouldUsePortal ? this.renderInContainer(this.props.container) : this.renderPanel()}
 			</>
 		);
 	}

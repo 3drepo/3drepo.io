@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatChannel } from "./chat.channel";
+import { ChatChannel } from './chat.channel';
 
 enum EventType {
-	CREATED = "Created",
-	UPDATED = "Updated",
-	DELETED = "Deleted"
+	CREATED = 'Created',
+	UPDATED = 'Updated',
+	DELETED = 'Deleted'
 }
 
 export class ChatEvents {

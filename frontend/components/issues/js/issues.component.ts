@@ -14,29 +14,29 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AuthService } from "../../home/js/auth.service";
-import { DialogService } from "../../home/js/dialog.service";
-import { EventService } from "../../home/js/event.service";
-import { IssuesService } from "./issues.service";
-import { ChatService } from "../../chat/js/chat.service";
-import { RevisionsService } from "../../revisions/js/revisions.service";
-import { ViewerService } from "../../viewer/js/viewer.service";
+import { AuthService } from '../../home/js/auth.service';
+import { DialogService } from '../../home/js/dialog.service';
+import { EventService } from '../../home/js/event.service';
+import { IssuesService } from './issues.service';
+import { ChatService } from '../../chat/js/chat.service';
+import { RevisionsService } from '../../revisions/js/revisions.service';
+import { ViewerService } from '../../viewer/js/viewer.service';
 
 class IssuesController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"$state",
+		'$scope',
+		'$timeout',
+		'$state',
 
-		"IssuesService",
-		"EventService",
-		"AuthService",
-		"ChatService",
-		"RevisionsService",
-		"ClientConfigService",
-		"DialogService",
-		"ViewerService"
+		'IssuesService',
+		'EventService',
+		'AuthService',
+		'ChatService',
+		'RevisionsService',
+		'ClientConfigService',
+		'DialogService',
+		'ViewerService'
 	];
 
 	private model: string;
@@ -88,14 +88,13 @@ class IssuesController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.issuesService.removeUnsavedPin();
 
 		this.saveIssueDisabled = true;
 		this.allIssues = [];
 		this.issuesToShow = [];
 		this.showProgress = true;
-		this.progressInfo = "Loading issues";
+		this.progressInfo = 'Loading issues';
 		this.availableJobs = null;
 		this.selectedIssue = null;
 		this.autoSaveComment = false;
@@ -107,16 +106,19 @@ class IssuesController implements ng.IController {
 		this.issuesReady = this.issuesService.getIssuesAndJobs(this.account, this.model, this.revision)
 			.then(() => {
 				this.$timeout(() => {
-					this.toShow = "showIssues";
+					if (this.$state.params.issueId) {
+						this.issuesService.state.displayIssue = this.$state.params.issueId;
+					}
+					this.toShow = 'showIssues';
 					this.showAddButton = true;
 					this.showProgress = false;
 				}, 1000);
 			})
 			.catch((error) => {
-				const content = "We had an issue getting all the issues and jobs for this model. " +
-					"If this continues please message support@3drepo.io.";
+				const content = 'We had an issue getting all the issues and jobs for this model. ' +
+					'If this continues please message support@3drepo.io.';
 				const escapable = true;
-				this.dialogService.text("Error Getting Model Issues and Jobs", content, escapable);
+				this.dialogService.text('Error Getting Model Issues and Jobs', content, escapable);
 				console.error(error);
 			});
 
@@ -135,7 +137,7 @@ class IssuesController implements ng.IController {
 
 		// Do the same for all subModels
 		([] || this.subModels).forEach((subModel) => {
-				channel =  this.chatService.getChannel(subModel.database, subModel.model);
+				channel = this.chatService.getChannel(subModel.database, subModel.model);
 				channel.issues.unsubscribeFromCreated(this.onIssueCreated);
 				channel.issues.unsubscribeFromUpdated(this.issuesService.updateIssues);
 		});
@@ -144,11 +146,11 @@ class IssuesController implements ng.IController {
 	public watchers() {
 
 		// New issue must have type and non-empty title
-		this.$scope.$watch("vm.title", () => {
-			this.saveIssueDisabled = (angular.isUndefined(this.title) || (this.title.toString() === ""));
+		this.$scope.$watch('vm.title', () => {
+			this.saveIssueDisabled = (angular.isUndefined(this.title) || (this.title.toString() === ''));
 		});
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 
 				this.issuesReady.then(() => {
@@ -169,7 +171,7 @@ class IssuesController implements ng.IController {
 			return this.revisionsService.status.data;
 		}, () => {
 			if (this.revisionsService.status.data) {
-				this.revisions = this.revisionsService.status.data[this.account + ":" + this.model];
+				this.revisions = this.revisionsService.status.data[this.account + ':' + this.model];
 			}
 		}, true);
 
@@ -209,34 +211,32 @@ class IssuesController implements ng.IController {
 		/*
 		 * Go back to issues list
 		 */
-		this.$scope.$watch("vm.hideItem", (newValue) => {
+		this.$scope.$watch('vm.hideItem', (newValue) => {
 			if (angular.isDefined(newValue) && newValue) {
-				this.toShow = "showIssues";
+				this.toShow = 'showIssues';
 				this.showAddButton = true;
 				let issueListItemId;
 
 				if (this.issuesService.state.selectedIssue && this.issuesService.state.selectedIssue._id) {
-					issueListItemId = "issue" + this.issuesService.state.selectedIssue._id;
+					issueListItemId = 'issue' + this.issuesService.state.selectedIssue._id;
 				}
 
-				this.issuesService.state.displayIssue = null;
-				this.selectedMenuOption = null;
+				if (!newValue) {
+					this.issuesService.state.displayIssue = null;
+					this.selectedMenuOption = null;
 
-				this.$state.go("home.account.model",
-					{
-						account: this.account,
-						model: this.model,
-						revision: this.revision,
-						noSet: true
-					},
-					{notify: false}
-				).then(() => {
 					const element = document.getElementById(issueListItemId);
 					if (element && element.scrollIntoView) {
 						element.scrollIntoView();
 					}
-				});
-
+				} else {
+					this.issuesService.state.displayIssue = null;
+					this.issuesService.resetSelectedIssue();
+					this.$state.go('app.viewer', {
+						modelId: this.model,
+						revision: this.revision
+					});
+				}
 			}
 		});
 
@@ -254,7 +254,7 @@ class IssuesController implements ng.IController {
 	 */
 	public closeAddAlert() {
 		this.showAddAlert = false;
-		this.addAlertText = "";
+		this.addAlertText = '';
 	}
 
 	/**
@@ -291,7 +291,7 @@ class IssuesController implements ng.IController {
 	public shouldShowIssue(issue) {
 
 		if (!issue) {
-			console.error("Issue is undefined/null: ", issue);
+			console.error('Issue is undefined/null: ', issue);
 			return;
 		}
 
@@ -328,7 +328,7 @@ class IssuesController implements ng.IController {
 		});
 
 		if (!issueRevision || !currentRevision) {
-			console.error("Issue revision or current revision are not set: ", issueRevision, currentRevision);
+			console.error('Issue revision or current revision are not set: ', issueRevision, currentRevision);
 			return true;
 		}
 
@@ -354,17 +354,17 @@ class IssuesController implements ng.IController {
 			.then((data) => {
 
 				this.importingBCF = false;
-				this.issuesService.state.allIssues = (data === "") ? [] : data;
+				this.issuesService.state.allIssues = (data === '') ? [] : data;
 				this.$timeout();
 
 			})
 			.catch((error) => {
 
 				this.importingBCF = false;
-				const content = "We tried to get import BCF but it failed. " +
-					"If this continues please message support@3drepo.io.";
+				const content = 'We tried to get import BCF but it failed. ' +
+					'If this continues please message support@3drepo.io.';
 				const escapable = true;
-				this.dialogService.text("Error Getting User Job", content, escapable);
+				this.dialogService.text('Error Getting User Job', content, escapable);
 				console.error(error);
 				this.$timeout();
 
@@ -383,14 +383,14 @@ class IssuesController implements ng.IController {
 		}
 
 		if (issue) {
-
 			this.viewerService.highlightObjects([]);
-			this.$state.go("home.account.model.issue",
+
+			this.$state.go('app.viewer',
 				{
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					issue: issue._id,
+					issueId: issue._id,
 					noSet: true
 				},
 				{notify: false}
@@ -402,7 +402,7 @@ class IssuesController implements ng.IController {
 			this.issuesService.resetSelectedIssue();
 		}
 
-		this.toShow = "showIssue";
+		this.toShow = 'showIssue';
 		this.showAddButton = false;
 		this.onShowItem();
 
@@ -413,7 +413,7 @@ class IssuesController implements ng.IController {
 	 * @param issue
 	 */
 	public editIssueExit(issue) {
-		document.getElementById("issue" + issue._id).scrollIntoView();
+		document.getElementById('issue' + issue._id).scrollIntoView();
 		this.hideItem = true;
 	}
 
@@ -421,26 +421,26 @@ class IssuesController implements ng.IController {
 
 export const IssuesComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "=",
-		model: "=",
-		branch:  "=",
-		revision: "=",
-		filterChips: "=",
-		modelSettings: "=",
-		show: "=",
-		showAdd: "=",
-		selectedMenuOption: "=",
-		onContentHeightRequest: "&",
-		onShowItem : "&",
-		hideItem: "=",
-		selectedObjects: "=",
-		setInitialSelectedObjects: "&"
+		account: '=',
+		model: '=',
+		branch:  '=',
+		revision: '=',
+		filterChips: '=',
+		modelSettings: '=',
+		show: '=',
+		showAdd: '=',
+		selectedMenuOption: '=',
+		onContentHeightRequest: '&',
+		onShowItem : '&',
+		hideItem: '=',
+		selectedObjects: '=',
+		setInitialSelectedObjects: '&'
 	},
 	controller: IssuesController,
-	controllerAs: "vm",
-	templateUrl: "templates/issues.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/issues.html'
 };
 
 export const IssuesComponentModule = angular
-	.module("3drepo")
-	.component("issues", IssuesComponent);
+	.module('3drepo')
+	.component('issues', IssuesComponent);

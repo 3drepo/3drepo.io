@@ -20,7 +20,7 @@ declare const ga;
 export class AnalyticService {
 
 	public static $inject: string[] = [
-		"ClientConfigService"
+		'ClientConfigService'
 	];
 
 	constructor(
@@ -31,14 +31,14 @@ export class AnalyticService {
 	public init() {
 
 		if (this.ClientConfigService.development) {
-			console.debug("Development - Not loading Google Analyitics or remarketing");
+			console.debug('Development - Not loading Google Analyitics or remarketing');
 		}
 
 		if (this.ClientConfigService &&
 			!this.ClientConfigService.development &&
 			this.ClientConfigService.gaTrackId
 		) {
-			console.debug("Adding Google Analytics and Remarketing");
+			console.debug('Adding Google Analytics and Remarketing');
 			this.insertGA();
 			this.insertRemarketing();
 		}
@@ -46,28 +46,28 @@ export class AnalyticService {
 	}
 
 	public addScriptBySrc(src) {
-		const script = document.createElement("script");
-		script.setAttribute("src", src);
+		const script = document.createElement('script');
+		script.setAttribute('src', src);
 		script.async = true;
 		document.head.appendChild(script);
 	}
 
 	public addScriptByText(js) {
-		const script = document.createElement("script");
-		script.setAttribute("text", js);
+		const script = document.createElement('script');
+		script.setAttribute('text', js);
 		document.head.appendChild(script);
 	}
 
 	public insertRemarketing() {
 
-		const script = "" +
-			"/* <![CDATA[ */" +
-			" const google_conversion_id = !{googleConversionId}; " +
-			" const google_custom_params = window.google_tag_params; " +
-			" const google_remarketing_only = true; " +
-			"/* ]]> */";
+		const script = '' +
+			'/* <![CDATA[ */' +
+			' const google_conversion_id = !{googleConversionId}; ' +
+			' const google_custom_params = window.google_tag_params; ' +
+			' const google_remarketing_only = true; ' +
+			'/* ]]> */';
 
-		const src = "//www.googleadservices.com/pagead/conversion.js";
+		const src = '//www.googleadservices.com/pagead/conversion.js';
 
 		this.addScriptByText(script);
 		this.addScriptBySrc(src);
@@ -75,7 +75,7 @@ export class AnalyticService {
 	}
 
 	public insertGA() {
-		console.debug("Initialising GA...");
+		console.debug('Initialising GA...');
 
 		// TS doesn't like googles minified code...
 
@@ -91,14 +91,14 @@ export class AnalyticService {
 		/* tslint:enable */
 
 		if (this.ClientConfigService.userId) {
-			ga("create", this.ClientConfigService.gaTrackId, "auto", { userId: this.ClientConfigService.userId });
+			ga('create', this.ClientConfigService.gaTrackId, 'auto', { userId: this.ClientConfigService.userId });
 		} else {
-			ga("create", this.ClientConfigService.gaTrackId, "auto");
+			ga('create', this.ClientConfigService.gaTrackId, 'auto');
 		}
 	}
 
 	public isGoogleAnalyticEnabled() {
-		return typeof ga !== "undefined" && ga !== null;
+		return typeof ga !== 'undefined' && ga !== null;
 	}
 
 	public sendPageView(location) {
@@ -106,7 +106,7 @@ export class AnalyticService {
 			return;
 		}
 
-		ga("send", "pageview", location.pathname + location.search);
+		ga('send', 'pageview', location.pathname + location.search);
 	}
 
 	public sendEvent(event) {
@@ -114,9 +114,9 @@ export class AnalyticService {
 			return;
 		}
 
-		event.hitType = "event";
+		event.hitType = 'event';
 
-		ga("send", event);
+		ga('send', event);
 	}
 
 	public setUserId(userId) {
@@ -124,11 +124,11 @@ export class AnalyticService {
 			return;
 		}
 
-		ga("set", "userId", userId);
+		ga('set', 'userId', userId);
 	}
 
 }
 
 export const AnalyticServiceModule = angular
-	.module("3drepo")
-	.service("AnalyticService", AnalyticService);
+	.module('3drepo')
+	.service('AnalyticService', AnalyticService);

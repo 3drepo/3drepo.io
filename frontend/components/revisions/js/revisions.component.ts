@@ -1,13 +1,13 @@
 class RevisionsController implements ng.IController {
-
 	public static $inject: string[] = [
-		"$scope",
-		"$filter",
-		"$location",
+		'$scope',
+		'$filter',
+		'$location',
+		'$state',
 
-		"DialogService",
-		"RevisionsService",
-		"APIService"
+		'DialogService',
+		'RevisionsService',
+		'APIService'
 	];
 
 	private revisionsLoading;
@@ -21,6 +21,7 @@ class RevisionsController implements ng.IController {
 		private $scope: ng.IScope,
 		private $filter: any, // TODO: Figure out how to make Filters work with TSC
 		private $location: ng.ILocationService,
+		private $state,
 
 		private DialogService,
 		private RevisionsService,
@@ -37,11 +38,11 @@ class RevisionsController implements ng.IController {
 			return this.RevisionsService.status.ready;
 		}, () => {
 
-			const revisionDate = this.$filter("prettyDate");
+			const revisionDate = this.$filter('prettyDate');
 
 			if (this.RevisionsService.status.ready === true) {
 
-				this.revisions = this.RevisionsService.status.data[this.account + ":" + this.model];
+				this.revisions = this.RevisionsService.status.data[this.account + ':' + this.model];
 				this.revisionsLoading = false;
 
 				if (!this.revisions || !this.revisions[0]) {
@@ -87,7 +88,7 @@ class RevisionsController implements ng.IController {
 				this.revisions = revisions;
 			});
 
-		this.DialogService.showDialog("revisions-dialog.html", this.$scope, event, true);
+		this.DialogService.showDialog('revisions-dialog.html', this.$scope, event, true);
 	}
 
 	public revisionTimestamp(timestamp: string) {
@@ -95,11 +96,12 @@ class RevisionsController implements ng.IController {
 	}
 
 	public goToRevision(revId) {
-
 		this.revision = revId;
 		this.DialogService.closeDialog();
-		this.$location.path(`/${this.account}/${this.model}/${revId}`);
-
+		this.$state.go('app.viewer', {
+			modelId: this.model,
+			revision: revId
+		});
 	}
 
 	public closeDialog() {
@@ -110,16 +112,16 @@ class RevisionsController implements ng.IController {
 
 export const RevisionsComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "=",
-		model: "=",
-		modelName: "=",
-		revision: "="
+		account: '=',
+		model: '=',
+		modelName: '=',
+		revision: '='
 	},
 	controller: RevisionsController,
-	controllerAs: "vm",
-	templateUrl: "templates/revisions.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/revisions.html'
 };
 
 export const RevisionsComponentModule = angular
-	.module("3drepo")
-	.component("revisions", RevisionsComponent);
+	.module('3drepo')
+	.component('revisions', RevisionsComponent);

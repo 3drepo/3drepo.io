@@ -18,9 +18,7 @@
 import * as React from 'react';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
-
-import { Container } from './defaultSnackbar.styles';
+import Close from '@material-ui/icons/Close';
 
 interface IProps {
 	message: string;
@@ -31,16 +29,16 @@ export const DefaultSnackbar = (props: IProps) => {
 	return (
 		<SnackbarContent
 			message={props.message}
-			action={[
+			action={ [
 				<IconButton
 					key="close"
 					aria-label="Close"
 					color="inherit"
 					onClick={props.onClose}
 				>
-					<Icon>close</Icon>
+					<Close />
 				</IconButton>
-			]}
+			] }
 		/>
 	);
 };

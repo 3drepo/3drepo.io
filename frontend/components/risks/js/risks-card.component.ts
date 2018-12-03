@@ -14,13 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { AuthService } from "../../home/js/auth.service";
-import { DialogService } from "../../home/js/dialog.service";
-import { EventService } from "../../home/js/event.service";
-import { ChatService } from "../../chat/js/chat.service";
-import { RevisionsService } from "../../revisions/js/revisions.service";
-import { RisksService } from "./risks.service";
-import { ViewerService } from "../../viewer/js/viewer.service";
+import { AuthService } from '../../home/js/auth.service';
+import { DialogService } from '../../home/js/dialog.service';
+import { EventService } from '../../home/js/event.service';
+import { ChatService } from '../../chat/js/chat.service';
+import { RevisionsService } from '../../revisions/js/revisions.service';
+import { RisksService } from './risks.service';
+import { ViewerService } from '../../viewer/js/viewer.service';
 
 enum RisksCardState {
 	ShowRisksList,
@@ -30,19 +30,19 @@ enum RisksCardState {
 class RisksCardController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$timeout",
-		"$state",
-		"$q",
+		'$scope',
+		'$timeout',
+		'$state',
+		'$q',
 
-		"RisksService",
-		"EventService",
-		"AuthService",
-		"ChatService",
-		"RevisionsService",
-		"ClientConfigService",
-		"DialogService",
-		"ViewerService"
+		'RisksService',
+		'EventService',
+		'AuthService',
+		'ChatService',
+		'RevisionsService',
+		'ClientConfigService',
+		'DialogService',
+		'ViewerService'
 	];
 
 	private account: string;
@@ -97,7 +97,7 @@ class RisksCardController implements ng.IController {
 		this.risksService.removeUnsavedPin();
 
 		this.showProgress = true;
-		this.progressInfo = "Loading risks";
+		this.progressInfo = 'Loading risks';
 		this.onContentHeightRequest({height: 70}); // To show the loading progress
 		this.savingRisk = false;
 		this.revisionsStatus = this.revisionsService.status;
@@ -111,10 +111,10 @@ class RisksCardController implements ng.IController {
 				}, 1000);
 			})
 			.catch((error) => {
-				const content = "Failed to retrieve risks and jobs for this model. " +
-					"If this continues, please message support@3drepo.org.";
+				const content = 'Failed to retrieve risks and jobs for this model. ' +
+					'If this continues, please message support@3drepo.org.';
 				const escapable = true;
-				this.dialogService.text("Error getting risks and jobs", content, escapable);
+				this.dialogService.text('Error getting risks and jobs', content, escapable);
 				console.error(error);
 			});
 
@@ -142,7 +142,7 @@ class RisksCardController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.modelSettings", () => {
+		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 
 				this.risksReady.then(() => {
@@ -162,7 +162,7 @@ class RisksCardController implements ng.IController {
 			return this.revisionsService.status.data;
 		}, () => {
 			if (this.revisionsService.status.data) {
-				this.revisions = this.revisionsService.status.data[this.account + ":" + this.model];
+				this.revisions = this.revisionsService.status.data[this.account + ':' + this.model];
 			}
 		}, true);
 
@@ -201,33 +201,31 @@ class RisksCardController implements ng.IController {
 		/*
 		 * Go back to risks list
 		 */
-		this.$scope.$watch("vm.hideItem", (newValue) => {
+		this.$scope.$watch('vm.hideItem', (newValue) => {
 			if (angular.isDefined(newValue) && newValue) {
 				this.toShow = RisksCardState.ShowRisksList;
 				let risksListItemId;
 
 				if (this.risksService.state.selectedRisk && this.risksService.state.selectedRisk._id) {
-					risksListItemId = "risk" + this.risksService.state.selectedRisk._id;
+					risksListItemId = 'risk' + this.risksService.state.selectedRisk._id;
 				}
 
 				this.risksService.state.displayRisk = null;
 				this.selectedMenuOption = null;
 
-				this.$state.go("home.account.model",
-					{
-						account: this.account,
-						model: this.model,
-						revision: this.revision,
-						noSet: true
-					},
-					{notify: false}
-				).then(() => {
+				if (!newValue) {
 					const element = document.getElementById(risksListItemId);
 					if (element && element.scrollIntoView) {
 						element.scrollIntoView();
 					}
-				});
-
+				} else {
+					this.risksService.state.displayRisk = null;
+					this.risksService.resetSelectedRisk();
+					this.$state.go('app.viewer', {
+						modelId: this.model,
+						revision: this.revision
+					});
+				}
 			}
 		});
 
@@ -245,7 +243,7 @@ class RisksCardController implements ng.IController {
 	 */
 	public closeAddAlert() {
 		this.showAddAlert = false;
-		this.addAlertText = "";
+		this.addAlertText = '';
 	}
 
 	/**
@@ -307,7 +305,7 @@ class RisksCardController implements ng.IController {
 				}
 			}
 		} else {
-			console.error("Risk is undefined/null: ", risk);
+			console.error('Risk is undefined/null: ', risk);
 		}
 
 	}
@@ -319,7 +317,7 @@ class RisksCardController implements ng.IController {
 		});
 
 		if (!riskRevision || !currentRevision) {
-			console.error("Risk revision or current revision are not set: ", riskRevision, currentRevision);
+			console.error('Risk revision or current revision are not set: ', riskRevision, currentRevision);
 			return true;
 		}
 
@@ -340,15 +338,14 @@ class RisksCardController implements ng.IController {
 		}
 
 		if (risk) {
-
 			this.viewerService.highlightObjects([]);
-			// TODO Change state to risk
-			this.$state.go("home.account.model.risk",
+
+			this.$state.go('app.viewer',
 				{
 					account: this.account,
 					model: this.model,
 					revision: this.revision,
-					risk: risk._id,
+					riskId: risk._id,
 					noSet: true
 				},
 				{notify: false}
@@ -370,7 +367,7 @@ class RisksCardController implements ng.IController {
 	 * @param risk
 	 */
 	public editRiskExit(risk) {
-		document.getElementById("risk" + risk._id).scrollIntoView();
+		document.getElementById('risk' + risk._id).scrollIntoView();
 		this.hideItem = true;
 	}
 
@@ -394,10 +391,10 @@ class RisksCardController implements ng.IController {
 	public deleteSelectedRisk() {
 		this.risksService.deleteSelectedRisk(this.account, this.model)
 			.catch((err) => {
-				const content = "Risk deletion failed. " +
-					"If this continues, please contact support@3drepo.org.";
+				const content = 'Risk deletion failed. ' +
+					'If this continues, please contact support@3drepo.org.';
 				const escapable = true;
-				this.dialogService.text("Error deleting risks", content, escapable);
+				this.dialogService.text('Error deleting risks', content, escapable);
 				console.error(err);
 			});
 	}
@@ -405,26 +402,26 @@ class RisksCardController implements ng.IController {
 
 export const RisksCardComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "=",
-		model: "=",
-		branch:  "=",
-		revision: "=",
-		filterChips: "=",
-		modelSettings: "=",
-		show: "=",
-		showAdd: "=",
-		selectedMenuOption: "=",
-		onContentHeightRequest: "&",
-		onShowItem : "&",
-		hideItem: "=",
-		selectedObjects: "=",
-		setInitialSelectedObjects: "&"
+		account: '=',
+		model: '=',
+		branch:  '=',
+		revision: '=',
+		filterChips: '=',
+		modelSettings: '=',
+		show: '=',
+		showAdd: '=',
+		selectedMenuOption: '=',
+		onContentHeightRequest: '&',
+		onShowItem : '&',
+		hideItem: '=',
+		selectedObjects: '=',
+		setInitialSelectedObjects: '&'
 	},
 	controller: RisksCardController,
-	controllerAs: "vm",
-	templateUrl: "templates/risks-card.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/risks-card.html'
 };
 
 export const RisksCardComponentModule = angular
-	.module("3drepo")
-	.component("risks", RisksCardComponent);
+	.module('3drepo')
+	.component('risks', RisksCardComponent);

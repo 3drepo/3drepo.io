@@ -15,26 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Icon, Tooltip } from '@material-ui/core';
 import * as React from 'react';
+import { Tooltip } from '@material-ui/core';
 import { SmallIconButtonStyled } from './smallIconButton.styles';
 
 interface IProps {
 	onClick?: (event: React.SyntheticEvent) => void;
+	Icon: React.ComponentType;
 	tooltip: string;
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
-	public render = () => {
+	public render() {
+		const { Icon, tooltip, onClick } = this.props;
 		return (
-			<Tooltip title={this.props.tooltip}>
-			<SmallIconButtonStyled
-				component="span"
-				aria-label={this.props.tooltip}
-				onClick={this.props.onClick}>
-				<Icon>{this.props.children}</Icon>
-			</SmallIconButtonStyled>
-		</Tooltip>
+			<Tooltip title={tooltip}>
+				<SmallIconButtonStyled
+					component="span"
+					aria-label={tooltip}
+					onClick={onClick}>
+					<Icon />
+				</SmallIconButtonStyled>
+			</Tooltip>
 		);
 	}
 }

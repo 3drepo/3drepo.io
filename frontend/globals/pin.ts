@@ -79,16 +79,16 @@ export class Pin {
 
 		this.highlighted = !this.highlighted;
 
-		const depthMode = this.highlighted ? "ALWAYS" : "LESS" ;
+		const depthMode = this.highlighted ? 'ALWAYS' : 'LESS' ;
 		const highlighted = this.highlighted.toString();
 
-		this.pinHeadIsHighlighted.setAttribute("value", highlighted);
-		this.ghostPinHeadIsHighlighted.setAttribute("value", highlighted);
-		this.coneIsHighlighted.setAttribute("value", highlighted);
-		this.ghostConeIsHighlighted.setAttribute("value", highlighted);
+		this.pinHeadIsHighlighted.setAttribute('value', highlighted);
+		this.ghostPinHeadIsHighlighted.setAttribute('value', highlighted);
+		this.coneIsHighlighted.setAttribute('value', highlighted);
+		this.ghostConeIsHighlighted.setAttribute('value', highlighted);
 
-		this.pinHeadDepth.setAttribute("depthFunc", depthMode);
-		this.coneDepth.setAttribute("depthFunc", depthMode);
+		this.pinHeadDepth.setAttribute('depthFunc', depthMode);
+		this.coneDepth.setAttribute('depthFunc', depthMode);
 	}
 
 }

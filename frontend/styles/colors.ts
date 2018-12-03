@@ -8,9 +8,11 @@ export const COLOR = {
 	WHITE: '#fff',
 	WHITE_87: 'rgba(255, 255, 255, 0.87)',
 	BLACK: '#000',
+	BLACK_6: 'rgba(0, 0, 0, .06)',
 	BLACK_20: 'rgba(0, 0, 0, .2)',
 	BLACK_30: 'rgba(0, 0, 0, .3)',
 	BLACK_40: 'rgba(0, 0, 0, .4)',
+	BLACK_50: 'rgba(0, 0, 0, .5)',
 	BLACK_60: 'rgba(0, 0, 0, .6)',
-	BLACK_6: 'rgba(0, 0, 0, .06)'
+	GRAY: '#f0f0f0'
 };

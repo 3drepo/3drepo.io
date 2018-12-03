@@ -14,34 +14,37 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { dispatch } from "../../../helpers/migration";
+import { dispatch, getState } from '../../../helpers/migration';
+import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
+import { selectCurrentUser } from '../../../modules/currentUser';
 
 export class AuthService {
-
 	public static $inject: string[] = [
-		"$injector",
-		"$q",
-		"$interval",
-		"$location",
-		"$window",
-		"$mdDialog",
+		'$injector',
+		'$q',
+		'$interval',
+		'$location',
+		'$window',
+		'$mdDialog',
+		'$timeout',
+		'$state',
 
-		"ClientConfigService",
-		"AnalyticService",
-		"APIService"
+		'ClientConfigService',
+		'AnalyticService',
+		'APIService'
 	];
 
-	public authDefer;
+	public initialAuthPromise;
 
 	private doNotLogout;
-	private legalPages;
-	private loggedOutPages;
-	private loggedOutPagesCamel;
+	private loggedOutStates;
 	private username;
 	private loggedIn;
 	private state;
 	private events;
 	private initPromise;
+	private loginRequestPromise;
+	private isAuthenticated;
 
 	constructor(
 		private $injector,
@@ -50,253 +53,98 @@ export class AuthService {
 		private $location,
 		private $window,
 		private $mdDialog,
+		private $timeout,
+		private $state,
 
 		private ClientConfigService: any,
 		private AnalyticService: any,
 		private APIService: any
 	) {
-
-		this.authDefer = $q.defer();
-
 		this.doNotLogout = [
-			"/terms",
-			"/privacy",
-			"/signUp",
-			"/passwordForgot",
-			"/passwordChange",
-			"/registerRequest",
-			"/registerVerify"
+			'/terms',
+			'/privacy',
+			'/signUp',
+			'/passwordForgot',
+			'/passwordChange',
+			'/registerRequest',
+			'/registerVerify'
 		];
 
-		this.legalPages = [
-			"terms",
-			"privacy",
-			"cookies"
+		this.loggedOutStates = [
+			'app.login',
+			'app.signUp',
+			'app.passwordForgot',
+			'app.registerRequest',
+			'app.registerVerify',
+			'app.passwordChange'
 		];
-
-		this.loggedOutPages = [
-			"sign-up",
-			"password-forgot",
-			"register-request",
-			"register-verify",
-			"password-change"
-		];
-
-		this.loggedOutPagesCamel = [
-			"signUp",
-			"passwordForgot",
-			"registerRequest",
-			"registerVerify",
-			"passwordChange"
-		];
-
-		// TODO: null means it"s the first login,
-		// should be a seperate var
-		this.loggedIn = null;
-
-		this.initAutoLogout();
 
 		this.state = {};
 		this.events = {
-			USER_LOGGED_IN : "USER_LOGGED_IN",
-			USER_LOGGED_OUT : "USER_LOGGED_OUT"
+			USER_LOGGED_IN : 'USER_LOGGED_IN',
+			USER_LOGGED_OUT : 'USER_LOGGED_OUT'
 		};
 
+		this.initialAuthPromise = this.$q.defer();
 	}
 
 	public isLoggedIn() {
-		return this.loggedIn;
-	}
-
-	public  initAutoLogout() {
-		// Check for mismatch
-		const checkLoginMismatch = this.ClientConfigService.login_check_interval || 4; // Seconds
-
-		this.$interval(() => {
-			this.shouldAutoLogout();
-		}, 1000 * checkLoginMismatch);
-
-	}
-
-	public loginSuccess(response: any) {
-
-		this.loggedIn = true;
-		this.username = response.data.username;
-
-		// Set the session as logged in on the client
-		// using local storage
-		localStorage.setItem("loggedIn", "true");
-
-		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
-			username: response.data.username,
-			initialiser: response.data.initialiser,
-			flags: response.data.flags
-		});
-
-		this.AnalyticService.setUserId(this.username);
-
-		this.authDefer.resolve(this.loggedIn);
-	}
-
-	public loginFailure(response) {
-		this.loggedIn = false;
-		this.username = null;
-
-		const initialiser = response.initialiser;
-		response.initialiser = undefined;
-
-		localStorage.setItem("loggedIn", "false");
-
-		this.setCurrentEvent(this.events.USER_LOGGED_IN, {
-			username: null,
-			initialiser,
-			error: response.data
-		});
-
-		this.authDefer.resolve(response.data);
-	}
-
-	public logoutSuccess() {
-		this.loggedIn  = false;
-		this.username  = null;
-
-		localStorage.setItem("loggedIn", "false");
-		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {});
-
-		this.authDefer.resolve(this.loggedIn);
-		dispatch({type: 'RESET_APP'});
-	}
-
-	public logoutFailure(reason) {
-		this.loggedIn  = false;
-		this.username  = null;
-
-		this.setCurrentEvent(this.events.USER_LOGGED_OUT, {
-			error: reason
-		});
-
-		this.authDefer.resolve(this.loggedIn);
-	}
-
-	public clearCurrentEvent() {
-		this.setCurrentEvent(null, null);
-	}
-
-	public setCurrentEvent(event, data) {
-		this.state.currentEvent = event;
-		this.state.currentData = data;
-	}
-
-	public localStorageLoggedIn() {
-		if (localStorage.getItem("loggedIn") === "true") {
-			return true;
-		}
-		return false;
-	}
-
-	public shouldAutoLogout() {
-
-		const sessionLogin = this.localStorageLoggedIn();
-
-		// We are logged in on another tab but not this OR
-		// we are looged out in another tab and not this
-		const loginStateMismatch = (sessionLogin && !this.loggedIn) ||
-									(!sessionLogin && this.loggedIn);
-
-		// Check if we're on a logged out page i.e. registerVerify
-		const isLoggedOutPage = this.loggedOutPage();
-
-		if (loginStateMismatch && !isLoggedOutPage) {
-			this.$window.location.reload();
-		} else if (loginStateMismatch && isLoggedOutPage) {
-			this.$location.path("/");
-		}
-
-	}
-
-	public loggedOutPage() {
-		const path = this.$location.path();
-		const isLoggedOutPage = this.loggedOutPagesCamel.filter((page) => {
-			return path.indexOf(page) !== -1;
-		}).length > 0;
-		return isLoggedOutPage;
-	}
-
-	// TODO: This needs tidying up. Probably lots of irrelvant logic in this now
-	public init() {
-
-		this.initPromise = this.$q.defer();
-
-		// If we are not logged in, check
-		// with the API server whether we
-		// are or not
-		if (this.loggedIn === null) {
-			// Initialize
-
-			this.sendLoginRequest()
-				.then((data) => {
-
-					data.initialiser = true;
-					this.loginSuccess(data);
-
-				})
-				.catch((reason) => {
-					if (this.loggedIn === null) {
-
-						reason.initialiser = true;
-						this.loginFailure(reason);
-
-					}
-				});
-
-			this.authDefer.promise.then(() => {
-				this.initPromise.resolve(this.loggedIn);
-			}).catch((error) => {
-				this.initPromise.reject(error);
-			});
-
-		}
-
-		return this.initPromise.promise;
+		return selectIsAuthenticated(getState());
 	}
 
 	public getUsername() {
-		return this.username;
-	}
-
-	public sendLoginRequest() {
-		return this.APIService.get("login");
-	}
-
-	public login(loginUsername, password) {
-		this.authDefer = this.$q.defer();
-		this.clearCurrentEvent();
-
-		const postData = {username: loginUsername, password};
-
-		this.APIService.post("login", postData)
-			.then(this.loginSuccess.bind(this))
-			.catch(this.loginFailure.bind(this));
-
-		return this.authDefer.promise;
-	}
-
-	public logout() {
-		this.authDefer = this.$q.defer();
-
-		this.APIService.post("logout")
-			.then(this.logoutSuccess.bind(this))
-			.catch(this.logoutFailure.bind(this));
-
-		return this.authDefer.promise;
+		return selectCurrentUser(getState()).username;
 	}
 
 	public hasPermission(requiredPerm, permissions) {
 		return permissions.indexOf(requiredPerm) !== -1;
 	}
 
+	public initAutoLogout() {
+		// Check for mismatch
+		const checkLoginMismatch = this.ClientConfigService.login_check_interval || 4; // Seconds
+
+		this.$interval(() => {
+			this.shouldAutoLogout();
+		}, 1000 * checkLoginMismatch);
+	}
+
+	public shouldAutoLogout() {
+		const sessionLogin = this.getUsername();
+		// We are logged in on another tab but not this OR
+		// we are looged out in another tab and not this
+		const loginStateMismatch = (sessionLogin && !this.isLoggedIn()) ||
+									(!sessionLogin && this.isLoggedIn());
+
+		// Check if we're on a logged out page i.e. registerVerify
+		const isLoggedOutPage = this.loggedOutPage();
+		const isStatic = this.$state.current.name.includes('app.static');
+		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
+			this.$window.location.reload();
+		} else if (loginStateMismatch && isLoggedOutPage) {
+			if (sessionLogin) {
+				dispatch(AuthActions.logout());
+			}
+		}
+		this.$location.path('/login');
+		this.resetApp();
+	}
+
+	public resetApp() {
+		localStorage.setItem('loggedIn', 'false');
+		localStorage.removeItem('username');
+		dispatch({ type: 'RESET_APP' });
+	}
+
+	public loggedOutPage() {
+		const state = this.$state.current.name;
+
+		return this.loggedOutStates.some((page) => {
+			return state.indexOf(page) !== -1;
+		});
+	}
 }
 
 export const AuthServiceModule = angular
-	.module("3drepo")
-	.service("AuthService", AuthService);
+	.module('3drepo')
+	.service('AuthService', AuthService);

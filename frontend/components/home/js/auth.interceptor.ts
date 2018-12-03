@@ -14,28 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { dispatch } from '../../../helpers/migration';
+import { AuthActions } from '../../../modules/auth';
 
 export class AuthInterceptor {
-
 	public static $inject: string[] = [
-		"$injector"
+		'$injector'
 	];
 
 	private dialogOpen = false;
 
 	constructor(
 		private $injector: any
-	) {
-	}
+	) {}
 
-	public responseError(response) {
-
-		const notLogin = response.data.place !== "GET /login";
-
+	public responseError = (response) => {
+		const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
+		const notLogin = response.data.place !== 'GET /login';
 		const unauthorized = response.status === 401 &&
-							response.data.message === "You are not logged in";
-		const sessionHasExpired = unauthorized && !this.dialogOpen && notLogin;
+			invalidMessages.includes(response.data.message);
 
+		const sessionHasExpired = unauthorized && notLogin;
 		if (sessionHasExpired) {
 			this.sessionExpired();
 		} else {
@@ -44,33 +43,23 @@ export class AuthInterceptor {
 
 	}
 
-	public request(config) {
+	public request = (config) => {
 		return config;
 	}
 
-	public requestError(config) {
+	public requestError = (config) => {
 		return config;
 	}
 
-	public response(res) {
+	public response = (res) => {
 		return res;
 	}
 
-	public sessionExpired() {
-
-		const DialogService = this.$injector.get("DialogService");
-		const AuthService = this.$injector.get("AuthService");
-		const StateManager = this.$injector.get("StateManager");
-
-		DialogService.sessionExpired().then(() => {
-			StateManager.resetServiceStates();
-			AuthService.logoutSuccess();
-		});
-
+	public sessionExpired = () => {
+		dispatch(AuthActions.sessionExpired());
 	}
-
 }
 
 export const AuthInterceptorModule = angular
-	.module("3drepo")
-	.service("AuthInterceptor", AuthInterceptor);
+	.module('3drepo')
+	.service('AuthInterceptor', AuthInterceptor);

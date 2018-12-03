@@ -18,8 +18,8 @@
 export class GISService {
 
 	public static $inject: string[] = [
-		"APIService",
-		"ViewerService"
+		'APIService',
+		'ViewerService'
 	];
 
 	private initialised: boolean;
@@ -42,7 +42,7 @@ export class GISService {
 					mapProviders.forEach((mapProvider) => {
 						if (mapProvider.layers && mapProvider.layers.length > 0) {
 							mapProvider.layers.forEach((mapLayer) => {
-								mapLayer.visibility = "invisible";
+								mapLayer.visibility = 'invisible';
 							});
 						}
 					});
@@ -98,9 +98,9 @@ export class GISService {
 	}
 
 	public toggleLayerVisibility(layer: any) {
-		layer.visibility = (layer.visibility === "visible") ? "invisible" : "visible";
+		layer.visibility = (layer.visibility === 'visible') ? 'invisible' : 'visible';
 
-		if (layer.visibility === "visible") {
+		if (layer.visibility === 'visible') {
 			this.addMapSource(layer.source);
 		} else {
 			this.removeMapSource(layer.source);
@@ -111,5 +111,5 @@ export class GISService {
 }
 
 export const GISServiceModule = angular
-	.module("3drepo")
-	.service("GISService", GISService);
+	.module('3drepo')
+	.service('GISService', GISService);

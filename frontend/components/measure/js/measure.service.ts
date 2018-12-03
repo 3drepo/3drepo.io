@@ -18,7 +18,7 @@
 export class MeasureService {
 
 	public static $inject: string[] = [
-		"ViewerService"
+		'ViewerService'
 	];
 
 	private state: any;
@@ -63,5 +63,5 @@ export class MeasureService {
 }
 
 export const MeasureServiceModule = angular
-	.module("3drepo")
-	.service("MeasureService", MeasureService);
+	.module('3drepo')
+	.service('MeasureService', MeasureService);

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
-import { ListSubheaderContainer } from './listSubheaderToolbar.styles';
-import { ListSubheader, Toolbar } from '@material-ui/core';
+import { ListSubheaderContainer, StyledToolbar, RightContent } from './listSubheaderToolbar.styles';
 
 interface IProps {
 	rightContent: JSX.Element;
@@ -24,13 +23,17 @@ interface IProps {
 
 export class ListSubheaderToolbar extends React.PureComponent<IProps, any> {
 	public render() {
-		return (<ListSubheaderContainer >
-					<Toolbar>
+		return (
+			<ListSubheaderContainer>
+				<StyledToolbar>
+					<div>
 						{this.props.children}
-						<div style={{position: 'absolute', right: 0}}>
-							{this.props.rightContent}
-						</div>
-					</Toolbar>
-				</ListSubheaderContainer>);
+					</div>
+					<RightContent>
+						{this.props.rightContent}
+					</RightContent>
+				</StyledToolbar>
+			</ListSubheaderContainer>
+		);
 	}
 }
