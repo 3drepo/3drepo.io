@@ -20,6 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../../../helpers/migration';
 import { ModelActions, selectViewpoints } from './../../../../modules/model';
+import { ViewsActions } from './../../../../modules/views';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -27,7 +28,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelViewpoints: ModelActions.fetchViewpoints
+	fetchModelViewpoints: ModelActions.fetchViewpoints,
+	createViewpoint: ViewsActions.createViewpoint
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Views)));

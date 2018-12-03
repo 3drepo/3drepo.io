@@ -16,7 +16,9 @@
  */
 
 import styled from 'styled-components';
-import IconButton from '@material-ui/core/IconButton';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+
 import { COLOR } from '../../../../styles/colors';
 
 export const FooterWrapper = styled.div`
@@ -40,5 +42,28 @@ export const ViewsCountInfo = styled.p`
   justify-content: center;
 `;
 
-export const StyledFooterButton = styled(IconButton)`
+export const ViewpointsList = styled(MenuList)`
+  && {
+    padding: 0;
+  }
+`;
+
+export const ViewpointItem = styled(MenuItem)`
+  && {
+    height: 80px;
+    padding: 8px;
+  }
+
+  &&:not(:first-child) {
+    border-top: 1px solid ${COLOR.BLACK_20};
+  }
+`;
+
+export const Thumbnail = styled.img`
+  width: 80px;
+  height: 100%;
+`;
+
+export const Name = styled.h3`
+  margin-left: 16px;
 `;
