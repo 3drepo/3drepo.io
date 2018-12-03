@@ -17,85 +17,109 @@
 
 "use strict";
 (() => {
+         const middlewares = require("../middlewares/middlewares");
+         const express = require("express");
+         const router = express.Router({ mergeParams: true });
 
-	const middlewares = require("../middlewares/middlewares");
-	const express = require("express");
-	const router = express.Router({ mergeParams: true });
+         const responseCodes = require("../response_codes.js");
+         const config = require("../config");
+         const utils = require("../utils");
+         const Invoice = require("../models/invoice");
+         const moment = require("moment");
 
-	const responseCodes = require("../response_codes.js");
-	const config = require("../config");
-	const utils = require("../utils");
-	const Invoice = require("../models/invoice");
-	const moment = require("moment");
+         /**
+          * @api {get} /invoices List all invoices
+          * @apiName listInvoices
+          * @apiGroup Invoice
+          */
 
-	router.get("/invoices", middlewares.isAccountAdmin, listInvoices);
-	router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
-	router.get("/invoices/:invoiceNo.pdf", middlewares.isAccountAdmin, renderInvoicePDF);
+         router.get("/invoices", middlewares.isAccountAdmin, listInvoices);
 
-	function listInvoices(req, res, next) {
+         /**
+          * @api {get} /invoices/:invoiceNo.html Render invoices as HTML
+          * @apiName renderInvoice
+          * @apiGroup Invoice
+          */
 
-		const responsePlace = utils.APIInfo(req);
-		Invoice.findByAccount(req.params.account).then(invoices => {
+         router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, invoices);
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
+         /**
+          * @api {get} /invoices/:invoiceNo.pdf Render invoices as PDF
+          * @apiName renderInvoicePDF
+          * @apiGroup Invoice
+          */
 
-	function renderInvoice(req, res, next) {
+         router.get("/invoices/:invoiceNo.pdf", middlewares.isAccountAdmin, renderInvoicePDF);
 
-		const responsePlace = utils.APIInfo(req);
-		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(invoice => {
+         function listInvoices(req, res, next) {
+           const responsePlace = utils.APIInfo(req);
+           Invoice.findByAccount(req.params.account)
+             .then(invoices => {
+               responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, invoices);
+             })
+             .catch(err => {
+               responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+             });
+         }
 
-			if(!invoice) {
-				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
-			}
+         function renderInvoice(req, res, next) {
+           const responsePlace = utils.APIInfo(req);
+           Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo)
+             .then(invoice => {
+               if (!invoice) {
+                 return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+               }
 
-			let template = "invoice.pug";
+               let template = "invoice.pug";
 
-			if(invoice.type === "refund") {
-				template = "refund.pug";
-			}
+               if (invoice.type === "refund") {
+                 template = "refund.pug";
+               }
 
-			// console.log( invoice.toJSON());
+               // console.log( invoice.toJSON());
 
-			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
+               res.render(template, {
+                 billing: invoice.toJSON(),
+                 baseURL: config.getBaseURL()
+               });
+             })
+             .catch(err => {
+               responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+             });
+         }
 
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
+         function renderInvoicePDF(req, res, next) {
+           const responsePlace = utils.APIInfo(req);
+           let invoice;
 
-	function renderInvoicePDF(req, res, next) {
+           Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo)
+             .then(_invoice => {
+               invoice = _invoice;
+               if (!invoice) {
+                 return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+               }
 
-		const responsePlace = utils.APIInfo(req);
-		let invoice;
+               return invoice.generatePDF();
+             })
+             .then(pdf => {
+               res.writeHead(200, {
+                 "Content-Type": "application/pdf",
+                 "Content-disposition": `inline; filename="${moment(
+                   invoice.createdAtDate
+                 )
+                   .utc()
+                   .format("YYYY-MM-DD")}_${invoice.type}-${
+                   invoice.invoiceNo
+                 }.pdf"`,
+                 "Content-Length": pdf.length
+               });
 
-		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_invoice => {
+               res.end(pdf);
+             })
+             .catch(err => {
+               responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+             });
+         }
 
-			invoice = _invoice;
-			if(!invoice) {
-				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
-			}
-
-			return invoice.generatePDF();
-
-		}).then(pdf => {
-
-			res.writeHead(200, {
-				"Content-Type": "application/pdf",
-				"Content-disposition": `inline; filename="${moment(invoice.createdAtDate).utc().format("YYYY-MM-DD")}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
-				"Content-Length": pdf.length
-			});
-
-			res.end(pdf);
-
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
-
-	module.exports = router;
-
-})();
+         module.exports = router;
+       })();
