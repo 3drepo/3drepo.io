@@ -24,7 +24,7 @@ import {
 	TitleIcon,
 	TitleContainer,
 	ViewerPanelContent
-} from './ViewerPanel.styles';
+} from './viewerPanel.styles';
 import { Panel } from '../../../components/panel/panel.component';
 import { Loader } from '../../../components/loader/loader.component';
 
