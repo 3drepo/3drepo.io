@@ -36,18 +36,22 @@ router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroup
  * @api {get} /groups/revision/:rid/ List model groups by revision
  * @apiName listGroupsByRevision
  * @apiGroup Groups
+ * @apiParam {String} id Revision unique ID.
  */
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 /*
  * @api {get} /groups/revision/master/head/:uid/ Find group in model
  * @apiName findGroup
  * @apiGroup Groups
+ * @apiParam {String} id Group unique ID.
  */
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
 /*
  * @api {get} /groups/revision/:rid/:uid/ Find group in model by revision
  * @apiName findGroupByRevision
  * @apiGroup Groups
+ * @apiParam {String} id Revision unique ID.
+ * @apiParam {String} id Group unique ID.
  */
 router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
@@ -55,17 +59,23 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  * @api {put} /groups/:uid/ Update group
  * @apiName updateGroup
  * @apiGroup Groups
+ * @apiParam {String} id Group unique ID.
  */
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
+
 /**
  * @api {post} /groups/ Add a group
  * @apiName createGroup
  * @apiDescription Add a group to the model.
  * @apiGroup Groups
  */
+
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
+
 // @deprecated -  use deleteGroups with single id instead.
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
+
+
 /**
  * @api {delete} /groups/ Delete groups
  * @apiName deleteGroups
