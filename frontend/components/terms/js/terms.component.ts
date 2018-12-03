@@ -18,7 +18,7 @@
 class TermsController implements ng.IController {
 
 	public static $inject: string[] = [
-		"StateManager"
+		'StateManager'
 	];
 
 	constructor(private StateManager) {}
@@ -33,10 +33,10 @@ class TermsController implements ng.IController {
 export const TermsComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: TermsController,
-	controllerAs: "vm",
-	templateUrl: "templates/terms.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/terms.html'
 };
 
 export const TermsComponentModule = angular
-	.module("3drepo")
-	.component("terms", TermsComponent);
+	.module('3drepo')
+	.component('terms', TermsComponent);

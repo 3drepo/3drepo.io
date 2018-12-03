@@ -18,11 +18,11 @@
 export class DocsService {
 
 	public static $inject: string[] = [
-		"$q",
+		'$q',
 
-		"ClientConfigService",
-		"APIService",
-		"ViewerService"
+		'ClientConfigService',
+		'APIService',
+		'ViewerService'
 	];
 
 	private state: any;
@@ -49,7 +49,7 @@ export class DocsService {
 	}
 
 	public getDocs(account, model, metadataId) {
-		const url = account + "/" + model + "/meta/" + metadataId + ".json";
+		const url = account + '/' + model + '/meta/' + metadataId + '.json';
 		return this.APIService.get(url)
 			.then((json) => {
 				return this.handleDocs(account, model, metadataId, json);
@@ -80,7 +80,7 @@ export class DocsService {
 
 			})
 			.catch((error) => {
-				console.error("Error getting metadata: ", error);
+				console.error('Error getting metadata: ', error);
 			});
 	}
 
@@ -124,12 +124,12 @@ export class DocsService {
 			const meta = json.data.meta[i];
 
 			// Get data type
-			dataType = meta.hasOwnProperty("mime") ?
+			dataType = meta.hasOwnProperty('mime') ?
 				meta.mime :
-				"Meta Data";
+				'Meta Data';
 
-			if (dataType === "application/pdf") {
-				dataType = "PDF";
+			if (dataType === 'application/pdf') {
+				dataType = 'PDF';
 			}
 
 			// Add data to type group
@@ -139,7 +139,7 @@ export class DocsService {
 			docsData[dataType].data.push(meta);
 
 			// Setup PDF url
-			const endpoint = account + "/" + model + "/" + meta._id + ".pdf";
+			const endpoint = account + '/' + model + '/' + meta._id + '.pdf';
 			meta.url = this.ClientConfigService.apiUrl(
 				this.ClientConfigService.GET_API,
 				endpoint
@@ -153,5 +153,5 @@ export class DocsService {
 }
 
 export const DocsServiceModule = angular
-	.module("3drepo")
-	.service("DocsService", DocsService);
+	.module('3drepo')
+	.service('DocsService', DocsService);

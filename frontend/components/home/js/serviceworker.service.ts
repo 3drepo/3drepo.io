@@ -18,8 +18,8 @@
 export class SWService {
 
 	public static $inject: string[] = [
-		"DialogService",
-		"ClientConfigService"
+		'DialogService',
+		'ClientConfigService'
 	];
 
 	private sw: string;
@@ -30,48 +30,47 @@ export class SWService {
 		private DialogService: any,
 		private ClientConfigService: any
 	) {
-		this.path = "/";
+		this.path = '/';
 		this.newVersionDialogOpen = false;
-		this.sw = "service-worker"; // The name of the service worker
+		this.sw = 'service-worker'; // The name of the service worker
 
 	}
 
 	public init() {
-		if ("serviceWorker" in navigator) {
+		if ('serviceWorker' in navigator) {
 			this.registerSW(this.sw);
 		}
 	}
 
 	public debugSW(message) {
-		console.debug("ServiceWorker (" + this.sw + ") - " + message);
+		console.debug('ServiceWorker (' + this.sw + ') - ' + message);
 	}
 
 	public registerSW(sw)  {
 
-		const swPath = this.path + sw + ".js";
+		const swPath = this.path + sw + '.js';
 
-		this.debugSW("path: " + swPath);
+		this.debugSW('path: ' + swPath);
 
 		navigator.serviceWorker.register(swPath).then(
 			(registration) => {
-
 				// Registration was successful
-				this.debugSW("registration successful: " + registration);
+				this.debugSW('registration successful: ' + registration);
 
 				registration.onupdatefound = () => {
-					this.debugSW("onupdatefound fired" + registration);
+					this.debugSW('onupdatefound fired' + registration);
 					this.handleSWRegistration(registration);
 				};
 
-				if (typeof registration.update === "function") {
-					this.debugSW("updating Service Worker...");
+				if (typeof registration.update === 'function') {
+					this.debugSW('updating Service Worker...');
 					registration.update();
 				}
 
 			},
 			(err) => {
 				// registration failed :(
-				this.debugSW("registration failed: " + err);
+				this.debugSW('registration failed: ' + err);
 			}
 		);
 
@@ -79,28 +78,28 @@ export class SWService {
 
 	public handleSWRegistration(registration) {
 
-		this.debugSW("calling handleSWRegistration asdas");
+		this.debugSW('calling handleSWRegistration asdas');
 
 		if (registration.waiting) {
-			this.debugSW("waiting " + registration.waiting);
-			registration.waiting.onstatechange = this.onStateChange("waiting");
+			this.debugSW('waiting ' + registration.waiting);
+			registration.waiting.onstatechange = this.onStateChange('waiting');
 		}
 
 		if (registration.installing) {
-			this.debugSW("installing " + registration.installing);
-			registration.installing.onstatechange = this.onStateChange("installing");
+			this.debugSW('installing ' + registration.installing);
+			registration.installing.onstatechange = this.onStateChange('installing');
 		}
 
 		if (registration.active) {
-			this.debugSW("active " + registration.active);
-			registration.active.onstatechange = this.onStateChange("active");
+			this.debugSW('active ' + registration.active);
+			registration.active.onstatechange = this.onStateChange('active');
 		}
 	}
 
 	public onStateChange(from) {
 		return (event) => {
-			this.debugSW("statechange " + from + " to " + event.target.state);
-			if (from === "installing" && event.target.state === "activated") {
+			this.debugSW('statechange ' + from + ' to ' + event.target.state);
+			if (from === 'installing' && event.target.state === 'activated') {
 				this.showDialog();
 			}
 		};
@@ -124,5 +123,5 @@ export class SWService {
 }
 
 export const SWServiceModule = angular
-	.module("3drepo")
-	.service("SWService", SWService);
+	.module('3drepo')
+	.service('SWService', SWService);

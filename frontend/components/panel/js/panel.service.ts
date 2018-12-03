@@ -65,11 +65,12 @@ export interface IMenuItem {
 export class PanelService {
 
 	public static $inject: string[] = [
-		"$filter",
-		"EventService",
-		"TreeService",
-		"APIService",
-		"ViewerService"
+		'$filter',
+		'$state',
+		'EventService',
+		'TreeService',
+		'APIService',
+		'ViewerService'
 	];
 
 	private panelCards: IPanelCards;
@@ -77,6 +78,7 @@ export class PanelService {
 
 	constructor(
 		private $filter: any,
+		private $state: any,
 		private EventService: any,
 		private TreeService: any,
 		private apiService: APIService,
@@ -86,59 +88,60 @@ export class PanelService {
 	}
 
 	public reset() {
+		const { issueId, riskId } = this.$state.params;
 		this.panelCards = {
 			left: [],
 			right: []
 		};
 
 		this.panelCards.left.push({
-			type: "issues",
-			title: "Issues",
+			type: 'issues',
+			title: 'Issues',
 			showLiteMode: true,
-			show: true,
-			help: "List current issues",
-			icon: "place",
+			show: issueId || !riskId,
+			help: 'List current issues',
+			icon: 'place',
 			menu: [
 				{
 					hidden: false,
-					value: "print",
-					label: "Print",
+					value: 'print',
+					label: 'Print',
 					selected: false,
 					noToggle: true,
-					icon: "fa-print"
+					icon: 'fa-print'
 				},
 				{
 					hidden: false,
-					value: "importBCF",
-					label: "Import BCF",
+					value: 'importBCF',
+					label: 'Import BCF',
 					selected: false,
 					noToggle: true,
-					icon: "fa-upload"
+					icon: 'fa-upload'
 				},
 				{
 					hidden: false,
-					value: "exportBCF",
-					label: "Export BCF",
+					value: 'exportBCF',
+					label: 'Export BCF',
 					selected: false,
 					noToggle: true,
-					icon: "fa-cloud-download",
+					icon: 'fa-cloud-download',
 					divider: true
 				},
 				{
 					hidden: false,
-					value: "downloadJSON",
-					label: "Download JSON",
+					value: 'downloadJSON',
+					label: 'Download JSON',
 					selected: false,
 					noToggle: true,
-					icon: "fa-download",
+					icon: 'fa-download',
 					divider: true
 				},
 				{
 					hidden: false,
-					value: "sortByDate",
-					label: "Sort by Date",
-					firstSelectedIcon: "fa-sort-amount-desc",
-					secondSelectedIcon: "fa-sort-amount-asc",
+					value: 'sortByDate',
+					label: 'Sort by Date',
+					firstSelectedIcon: 'fa-sort-amount-desc',
+					secondSelectedIcon: 'fa-sort-amount-asc',
 					toggle: false,
 					selected: false,
 					firstSelected: true,
@@ -147,8 +150,8 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "status",
-					label: "Status",
+					value: 'status',
+					label: 'Status',
 					toggle: false,
 					selected: false,
 					firstSelected: false,
@@ -157,34 +160,34 @@ export class PanelService {
 					toggleFilterChips: true,
 					upperDivider: true,
 					menu: [{
-						hidden: false,
-						value: "open",
-						label: "Open",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "in progress",
-						label: "In progress",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "for approval",
-						label: "For approval",
-						toggle: true
-					}, {
-						hidden: false,
-						value: "closed",
-						label: "Closed",
-						toggle: true,
-						stopClose: true
-					}]
+							hidden: false,
+							value: 'open',
+							label: 'Open',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'in progress',
+							label: 'In progress',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'for approval',
+							label: 'For approval',
+							toggle: true
+						}, {
+							hidden: false,
+							value: 'closed',
+							label: 'Closed',
+							toggle: true,
+							stopClose: true
+						}]
 				},
 				{
 					hidden: false,
-					value: "priority",
-					label: "Priority",
+					value: 'priority',
+					label: 'Priority',
 					toggle: false,
 					selected: false,
 					firstSelected: false,
@@ -192,76 +195,76 @@ export class PanelService {
 					keepCheckSpace: false,
 					toggleFilterChips: true,
 					menu: [{
-						hidden: false,
-						value: "none",
-						label: "None",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "low",
-						label: "Low",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "medium",
-						label: "Medium",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "high",
-						label: "High",
-						toggle: true,
-						stopClose: true
-					}]
+							hidden: false,
+							value: 'none',
+							label: 'None',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'low',
+							label: 'Low',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'medium',
+							label: 'Medium',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'high',
+							label: 'High',
+							toggle: true,
+							stopClose: true
+						}]
 				},
 				{
-					value: "topic_type", // the whole menu will be replaced once the topic types are loaded
+					value: 'topic_type', // the whole menu will be replaced once the topic types are loaded
 					hidden: false,
-					label: "Type",
+					label: 'Type',
 					toggle: false
 				},
 				{
-					value: "creator_role", // the whole menu will be replaced once the creators roles are loaded
+					value: 'creator_role', // the whole menu will be replaced once the creators roles are loaded
 					hidden: false,
-					label: "Created by",
+					label: 'Created by',
 					toggle: false
 				},
 				{
-					value: "assigned_roles", // the whole menu will be replaced once the assigned roles are loaded
+					value: 'assigned_roles', // the whole menu will be replaced once the assigned roles are loaded
 					hidden: false,
-					label: "Assigned to",
+					label: 'Assigned to',
 					toggle: false
 				},
 				{
-					value: "date",
+					value: 'date',
 					hidden: false,
-					label: "Date",
+					label: 'Date',
 					toggle: false,
 					menu: [{
-						hidden: false,
-						value: "from",
-						label: "From",
-						stopClose: true,
-						toggleFilterChips: true,
-						date: true
-					},
-					{
-						hidden: false,
-						value: "to",
-						label: "To     ",
-						stopClose: true,
-						toggleFilterChips: true,
-						date: true
-					}
+							hidden: false,
+							value: 'from',
+							label: 'From',
+							stopClose: true,
+							toggleFilterChips: true,
+							date: true
+						},
+						{
+							hidden: false,
+							value: 'to',
+							label: 'To     ',
+							stopClose: true,
+							toggleFilterChips: true,
+							date: true
+						}
 					]
 				},
 				{
 					hidden: false,
-					value: "showSubModels",
-					label: "Show sub model issues",
+					value: 'showSubModels',
+					label: 'Show sub model issues',
 					toggle: true,
 					selected: false,
 					firstSelected: false,
@@ -272,9 +275,9 @@ export class PanelService {
 			minHeight: 260,
 			fixedHeight: false,
 			options: [
-				{ type: "menu", visible: true },
+				{type: 'menu', visible: true},
 				{
-					type: "chips-filter",
+					type: 'chips-filter',
 					visible: true
 				}
 			],
@@ -282,27 +285,27 @@ export class PanelService {
 		});
 
 		this.panelCards.left.push({
-			type: "risks",
-			title: "SafetiBase",
+			type: 'risks',
+			title: 'SafetiBase',
 			showLiteMode: true,
-			show: false,
-			help: "Risk register",
-			icon: "report_problem",
+			show: Boolean(riskId),
+			help: 'Risk register',
+			icon: 'report_problem',
 			minHeight: 260,
 			fixedHeight: false,
 			menu: [
 				{
 					hidden: false,
-					value: "print",
-					label: "Print",
+					value: 'print',
+					label: 'Print',
 					selected: false,
 					noToggle: true,
-					icon: "fa-print"
+					icon: 'fa-print'
 				},
 				{
 					hidden: false,
-					value: "showPins",
-					label: "Show Pins",
+					value: 'showPins',
+					label: 'Show Pins',
 					toggle: true,
 					selected: true,
 					noToggle: false,
@@ -310,16 +313,16 @@ export class PanelService {
 				},
 				{
 					hidden: false,
-					value: "downloadJSON",
-					label: "Download JSON",
+					value: 'downloadJSON',
+					label: 'Download JSON',
 					selected: false,
 					noToggle: true,
-					icon: "fa-download"
+					icon: 'fa-download'
 				},
 				{
 					hidden: false,
-					value: "mitigation_status",
-					label: "Mitigation Status",
+					value: 'mitigation_status',
+					label: 'Mitigation Status',
 					toggle: false,
 					selected: false,
 					firstSelected: false,
@@ -328,190 +331,190 @@ export class PanelService {
 					toggleFilterChips: true,
 					upperDivider: true,
 					menu: [{
-						hidden: false,
-						value: "",
-						label: "Unmitigated",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "proposed",
-						label: "Proposed",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "agreed_partial",
-						label: "Agreed (Partial)",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "agreed_fully",
-						label: "Agreed (Fully)",
-						toggle: true,
-						stopClose: true
-					}, {
-						hidden: false,
-						value: "rejected",
-						label: "Rejected",
-						toggle: true,
-						stopClose: true
-					}]
+							hidden: false,
+							value: '',
+							label: 'Unmitigated',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'proposed',
+							label: 'Proposed',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'agreed_partial',
+							label: 'Agreed (Partial)',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'agreed_fully',
+							label: 'Agreed (Fully)',
+							toggle: true,
+							stopClose: true
+						}, {
+							hidden: false,
+							value: 'rejected',
+							label: 'Rejected',
+							toggle: true,
+							stopClose: true
+						}]
 				},
 				{
-					value: "creator_role", // the whole menu will be replaced once the creators roles are loaded
+					value: 'creator_role', // the whole menu will be replaced once the creators roles are loaded
 					hidden: false,
-					label: "Created by",
+					label: 'Created by',
 					toggle: false
 				},
 				{
-					value: "assigned_roles", // the whole menu will be replaced once the assigned roles are loaded
+					value: 'assigned_roles', // the whole menu will be replaced once the assigned roles are loaded
 					hidden: false,
-					label: "Assigned to",
+					label: 'Assigned to',
 					toggle: false
 				}
 			],
 			options: [
-				{ type: "menu", visible: true },
-				{ type: "chips-filter", visible: true }
+				{type: 'menu', visible: true},
+				{type: 'chips-filter', visible: true}
 			],
 			add: true
 		});
 
 		this.panelCards.left.push({
-			type: "groups",
-			title: "Groups",
+			type: 'groups',
+			title: 'Groups',
 			showLiteMode: true,
 			show: false,
-			help: "List current groups",
-			icon: "group_work",
+			help: 'List current groups',
+			icon: 'group_work',
 			minHeight: 80,
 			fixedHeight: false,
 			menu: [
 				{
 					hidden: false,
-					value: "overrideAll",
-					label: "Override All",
+					value: 'overrideAll',
+					label: 'Override All',
 					selected: false,
 					toggle: true,
 					keepCheckSpace: true
 				},
 				{
 					hidden: false,
-					value: "deleteAll",
-					label: "Delete All",
+					value: 'deleteAll',
+					label: 'Delete All',
 					selected: false,
 					noToggle: true,
-					icon: "fa-trash"
+					icon: 'fa-trash'
 				},
 				{
 					hidden: false,
-					value: "downloadJSON",
-					label: "Download JSON",
+					value: 'downloadJSON',
+					label: 'Download JSON',
 					selected: false,
 					noToggle: true,
-					icon: "fa-download"
+					icon: 'fa-download'
 				}
 			],
 			options: [
-				{ type: "menu", visible: true },
-				{ type: "filter", visible: true }
+				{type: 'menu', visible: true},
+				{type: 'filter', visible: true}
 			],
 			add: true
 		});
 
 		this.panelCards.left.push({
-			type: "viewpoints",
-			title: "Views",
+			type: 'viewpoints',
+			title: 'Views',
 			showLiteMode: true,
 			show: false,
-			help: "List current viewpoints",
-			icon: "camera_alt",
+			help: 'List current viewpoints',
+			icon: 'camera_alt',
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{ type: "filter", visible: true }
+				{type: 'filter', visible: true}
 			]
 		});
 
 		this.panelCards.left.push({
-			type: "tree",
-			title: "Tree",
+			type: 'tree',
+			title: 'Tree',
 			showLiteMode: true,
 			show: false,
-			help: "Model elements shown in a tree structure",
-			icon: "device_hub",
+			help: 'Model elements shown in a tree structure',
+			icon: 'device_hub',
 			minHeight: 80,
 			fixedHeight: false,
 			menu: [
 				{
 					hidden: false,
-					value: "showAll",
-					label: "Show All",
+					value: 'showAll',
+					label: 'Show All',
 					selected: false,
 					noToggle: true,
-					icon: "fa-eye"
+					icon: 'fa-eye'
 				},
 				{
 					hidden: false,
-					value: "isolate",
-					label: "Isolate Selected",
+					value: 'isolate',
+					label: 'Isolate Selected',
 					selected: false,
 					noToggle: true,
-					icon: "fa-scissors"
+					icon: 'fa-scissors'
 				},
 				{
 					hidden: false,
-					value: "hideIfc",
-					label: "Hide IFC spaces",
+					value: 'hideIfc',
+					label: 'Hide IFC spaces',
 					selected: true,
 					toggle: true,
 					keepCheckSpace: true,
-					icon: "fa-home"
+					icon: 'fa-home'
 				}
 			],
 			options: [
-				{ type: "menu", visible: true },
-				{ type: "filter", visible: true }
+				{type: 'menu', visible: true},
+				{type: 'filter', visible: true}
 			]
 		});
 
 		this.panelCards.left.push({
-			type: "compare",
-			title: "Compare",
+			type: 'compare',
+			title: 'Compare',
 			showLiteMode: false,
 			show: false,
-			help: "Show clashes and differences between models",
-			icon: "compare",
+			help: 'Show clashes and differences between models',
+			icon: 'compare',
 			minHeight: 265,
 			fixedHeight: false,
 			options: []
 		});
 
 		this.panelCards.left.push({
-			type: "gis",
-			title: "GIS",
+			type: 'gis',
+			title: 'GIS',
 			showLiteMode: false,
 			show: false,
-			help: "Add various GIS data to the view",
-			icon: "layers",
+			help: 'Add various GIS data to the view',
+			icon: 'layers',
 			minHeight: 80,
 			fixedHeight: false,
 			options: []
 		});
 
 		this.panelCards.right.push({
-			type: "docs",
-			title: "BIM Data",
+			type: 'docs',
+			title: 'BIM Data',
 			show: false,
 			showLiteMode: false,
-			help: "Documents",
-			icon: "content_copy",
+			help: 'Documents',
+			icon: 'content_copy',
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				{ type: "close", visible: true }
+				{type: 'close', visible: true}
 			]
 		});
 
@@ -527,11 +530,11 @@ export class PanelService {
 	 */
 
 	public downloadJSON(fileName, endpoint) {
-		const timestamp = this.$filter("prettyDate")(Date.now(), {showSeconds: false});
-		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : "";
+		const timestamp = this.$filter('prettyDate')(Date.now(), {showSeconds: false});
+		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : '';
 		this.apiService.get(endpoint).then((res) => {
 			const content = JSON.stringify(res.data, null, 2);
-			const a = document.createElement("a");
+			const a = document.createElement('a');
 			const file = new Blob([content]);
 			a.href = URL.createObjectURL(file);
 			a.download = `${modelName}_${timestamp}_${fileName}.json`;
@@ -657,7 +660,7 @@ export class PanelService {
 
 		this.panelCards.left[issuesCardIndex].menu
 			.forEach((item) => {
-				if (item.value === "showSubModels") {
+				if (item.value === 'showSubModels') {
 					item.hidden = hide;
 				}
 			});
@@ -698,14 +701,14 @@ export class PanelService {
 	}
 
 	public setHideIfc(value: boolean) {
-		this.setMenuItemToggle("tree", "hideIfc", value);
+		this.setMenuItemToggle('tree', 'hideIfc', value);
 	}
 
 	public setOverrideAll(value: boolean) {
-		this.setMenuItemToggle("groups", "overrideAll", value);
+		this.setMenuItemToggle('groups', 'overrideAll', value);
 	}
 }
 
 export const PanelServiceModule = angular
-	.module("3drepo")
-	.service("PanelService", PanelService);
+	.module('3drepo')
+	.service('PanelService', PanelService);

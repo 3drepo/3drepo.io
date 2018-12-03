@@ -18,9 +18,9 @@
 export class RevisionsService {
 
 	public static $inject: string[] = [
-		"$filter",
-		"APIService",
-		"ClientConfigService"
+		'$filter',
+		'APIService',
+		'ClientConfigService'
 	];
 
 	public status: any;
@@ -31,7 +31,7 @@ export class RevisionsService {
 		private APIService,
 		private ClientConfigService
 	) {
-		this.revisionDateFilter = this.$filter("prettyDate");
+		this.revisionDateFilter = this.$filter('prettyDate');
 		this.status = {
 			data: {},
 			ready: false
@@ -40,16 +40,16 @@ export class RevisionsService {
 
 	public listAll(account, model) {
 
-		return this.APIService.get(account + "/" + model + "/revisions.json")
+		return this.APIService.get(account + '/' + model + '/revisions.json')
 			.then((response) => {
 
 				if (response.status === 200) {
 					this.status.ready = true;
-					this.status.data[account + ":" + model] = response.data;
+					this.status.data[account + ':' + model] = response.data;
 					return response.data;
 				} else {
 					this.status.ready = false;
-					this.status.data[account + ":" + model] = null;
+					this.status.data[account + ':' + model] = null;
 					return response.data;
 				}
 
@@ -64,5 +64,5 @@ export class RevisionsService {
 }
 
 export const RevisionsServiceModule = angular
-	.module("3drepo")
-	.service("RevisionsService", RevisionsService);
+	.module('3drepo')
+	.service('RevisionsService', RevisionsService);

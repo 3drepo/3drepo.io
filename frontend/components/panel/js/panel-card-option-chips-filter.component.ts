@@ -28,13 +28,13 @@ class PanelCardOptionChipsFilterController implements ng.IController {
 
 export const PanelCardOptionChipsFilterComponent: ng.IComponentOptions = {
 	bindings: {
-		chipsFilterVisible: "="
+		chipsFilterVisible: '='
 	},
 	controller: PanelCardOptionChipsFilterController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-chips-filter.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card-option-chips-filter.html'
 };
 
 export const PanelCardOptionChipsFilterComponentModule = angular
-	.module("3drepo")
-	.component("panelCardOptionChipsFilter", PanelCardOptionChipsFilterComponent);
+	.module('3drepo')
+	.component('panelCardOptionChipsFilter', PanelCardOptionChipsFilterComponent);

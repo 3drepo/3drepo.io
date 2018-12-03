@@ -17,7 +17,7 @@
 
 function ThemeConfig($mdThemingProvider) {
 
-	const paletteName = "three_d_repo_primary";
+	const paletteName = 'three_d_repo_primary';
 
 	/* tslint:disable */
 	$mdThemingProvider.definePalette(paletteName, {
@@ -41,15 +41,15 @@ function ThemeConfig($mdThemingProvider) {
 	});
 	/* tslint:enable */
 
-	$mdThemingProvider.theme("default")
+	$mdThemingProvider.theme('default')
 		.primaryPalette(paletteName)
 		.accentPalette(paletteName)
-		.warnPalette("red");
+		.warnPalette('red');
 
-	$mdThemingProvider.setDefaultTheme("default");
+	$mdThemingProvider.setDefaultTheme('default');
 
 }
 
 export const ThemeConfigModule = angular
-	.module("3drepo")
-	.config(["$mdThemingProvider", ThemeConfig]);
+	.module('3drepo')
+	.config(['$mdThemingProvider', ThemeConfig]);

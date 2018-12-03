@@ -16,12 +16,10 @@
  */
 
 import styled from 'styled-components';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { memoize } from 'lodash';
 
 import { COLOR, FONT_WEIGHT, isWindows, isFirefox } from '../../../styles';
 
-import * as JobItem from '../jobItem/jobItem.styles';
 import * as UserItem from '../userItem/userItem.styles';
 import * as CellSelect from './components/cellSelect/cellSelect.styles';
 
@@ -61,14 +59,14 @@ export const Container = styled.div`
 	}
 
 	${UserItem.Name},
-	${CellSelect.StyledSelect},
+	${/* sc-selector */ CellSelect.StyledSelect},
 	${Cell} {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;
 	}
 
-	${CellSelect.StyledSelect}:after,
-	${CellSelect.StyledSelect}:before {
+	${/* sc-selector */ CellSelect.StyledSelect}:after,
+	${/* sc-selector */ CellSelect.StyledSelect}:before {
 		display: none;
 	}
 `;

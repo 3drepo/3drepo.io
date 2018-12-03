@@ -18,14 +18,14 @@
 class ScreenshotController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$q",
-		"$timeout",
-		"$element",
+		'$q',
+		'$timeout',
+		'$element',
 
-		"APIService",
-		"EventService",
-		"ViewerService",
-		"DialogService"
+		'APIService',
+		'EventService',
+		'ViewerService',
+		'DialogService'
 	];
 
 	private highlightBackground: string; // = "#FF9800";
@@ -78,7 +78,7 @@ class ScreenshotController implements ng.IController {
 
 	public $onInit() {
 
-		this.highlightBackground = "#FF9800";
+		this.highlightBackground = '#FF9800';
 		this.screenshotPromise = this.$q.defer();
 
 		this.mouseDragX = 0;
@@ -89,41 +89,41 @@ class ScreenshotController implements ng.IController {
 		this.isEraseMode = false;
 		this.mouseButton = 0;
 		this.mouseDragging = false;
-		this.penCol = "#DD0000";
+		this.penCol = '#DD0000';
 		this.penIndicatorSize = 16;
 		this.hasDrawnOnCanvas = false;
 
 		this.penColors = {
 			red : {
-				color: "#DD0000",
-				label:  "Red"
+				color: '#DD0000',
+				label:  'Red'
 			},
 			green : {
-				color: "#00dd44",
-				label:  "Green"
+				color: '#00dd44',
+				label:  'Green'
 			},
 			blue : {
-				color: "#004edd",
-				label:  "Blue"
+				color: '#004edd',
+				label:  'Blue'
 			},
 			eraser : {
-				color: "rgba(0, 0, 0, 1)",
-				label: "Eraser"
+				color: 'rgba(0, 0, 0, 1)',
+				label: 'Eraser'
 			}
 		};
 
-		if (typeof this.screenshot !== "undefined") {
+		if (typeof this.screenshot !== 'undefined') {
 			this.screenshotUse = this.screenshot;
 		} else {
 			this.$element.ready(() => {
 
-				angular.element((window as any)).bind("resize", () => {
+				angular.element((window as any)).bind('resize', () => {
 					this.handleResize();
 				});
 
 				// Get scribble canvas
-				this.scribbleCanvas = document.getElementById("scribbleCanvas");
-				this.scribbleCanvasContext = this.scribbleCanvas.getContext("2d");
+				this.scribbleCanvas = document.getElementById('scribbleCanvas');
+				this.scribbleCanvasContext = this.scribbleCanvas.getContext('2d');
 
 				// Prevent blurring on resize
 				this.scribbleCanvasContext.mozImageSmoothingEnabled = false;
@@ -145,7 +145,7 @@ class ScreenshotController implements ng.IController {
 				// Pen indicator
 				this.showPenIndicator = false;
 				this.changePenSize();
-				this.actionsPointerEvents = "auto";
+				this.actionsPointerEvents = 'auto';
 
 				// Get the screen shot
 				this.ViewerService.getScreenshot(this.screenshotPromise);
@@ -158,11 +158,11 @@ class ScreenshotController implements ng.IController {
 
 				// Set up action buttons
 				this.actions = {
-					draw : {icon: "border_color", action: "draw", label: "Draw", color: this.highlightBackground},
-					erase : {icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
+					draw : {icon: 'border_color', action: 'draw', label: 'Draw', color: this.highlightBackground},
+					erase : {icon: 'fa fa-eraser', action: 'erase', label: 'Erase', color: ''}
 				};
 
-				this.currentAction = "draw";
+				this.currentAction = 'draw';
 			});
 
 		}
@@ -171,8 +171,8 @@ class ScreenshotController implements ng.IController {
 
 	public handleScreenshotError(error) {
 		console.error(error);
-		const title = "Error With Screenshot";
-		const content = "Something went wrong creating or rendering the screenshot. Please try again.";
+		const title = 'Error With Screenshot';
+		const content = 'Something went wrong creating or rendering the screenshot. Please try again.';
 		this.DialogService.text(title, content, true);
 	}
 
@@ -184,7 +184,7 @@ class ScreenshotController implements ng.IController {
 		raf(() => {
 			const imgObj = new Image();
 			try {
-				imgObj.src = this.scribbleCanvas.toDataURL("image/png");
+				imgObj.src = this.scribbleCanvas.toDataURL('image/png');
 			} catch (error) {
 				this.handleScreenshotError(error);
 			}
@@ -219,9 +219,9 @@ class ScreenshotController implements ng.IController {
 	public changePenSize() {
 		this.penToIndicatorRatio = 0.5;
 		this.penSize = this.penIndicatorSize * this.penToIndicatorRatio;
-		const el = this.$element[0].querySelector("#screenshotPenIndicator");
+		const el = this.$element[0].querySelector('#screenshotPenIndicator');
 		this.penIndicator = angular.element(el);
-		this.penIndicator.css("font-size", this.penIndicatorSize + "px");
+		this.penIndicator.css('font-size', this.penIndicatorSize + 'px');
 	}
 
 	public closeDialog() {
@@ -230,7 +230,7 @@ class ScreenshotController implements ng.IController {
 
 	public normaliseInteraction(coordinate, event) {
 		switch (coordinate) {
-			case "x":
+			case 'x':
 				if (event.layerX) {
 					return event.layerX;
 				} else if (event.touches && event.touches[0]) {
@@ -238,7 +238,7 @@ class ScreenshotController implements ng.IController {
 					const canvasEl = touch.target.getBoundingClientRect();
 					return touch.clientX - canvasEl.x;
 				}
-			case "y":
+			case 'y':
 				if (event.layerY) {
 					return event.layerY;
 				} else if (event.touches  && event.touches[0]) {
@@ -255,13 +255,13 @@ class ScreenshotController implements ng.IController {
 		event.stopPropagation();
 		event.returnValue = false;
 
-		this.mouseDragX = this.normaliseInteraction("x", event);
-		this.mouseDragY = this.normaliseInteraction("y", event);
+		this.mouseDragX = this.normaliseInteraction('x', event);
+		this.mouseDragY = this.normaliseInteraction('y', event);
 		this.mouseDragging = true;
 
 		this.updateImage(canvas);
 		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-		this.actionsPointerEvents = "none";
+		this.actionsPointerEvents = 'none';
 	}
 
 	public endDraw(event: any, canvas: any) {
@@ -277,7 +277,7 @@ class ScreenshotController implements ng.IController {
 
 		this.updateImage(canvas);
 		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-		this.actionsPointerEvents = "auto";
+		this.actionsPointerEvents = 'auto';
 	}
 
 	public outOfDrawCanvas(event: any, canvas: any) {
@@ -293,7 +293,7 @@ class ScreenshotController implements ng.IController {
 		this.updateImage(canvas);
 
 		this.EventService.send(this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-		this.actionsPointerEvents = "auto";
+		this.actionsPointerEvents = 'auto';
 	}
 
 	public moveOnDrawCanvas(event: any, canvas: any) {
@@ -301,8 +301,8 @@ class ScreenshotController implements ng.IController {
 		event.stopPropagation();
 		event.returnValue = false;
 
-		this.mouseDragX = this.normaliseInteraction("x", event);
-		this.mouseDragY = this.normaliseInteraction("y", event);
+		this.mouseDragX = this.normaliseInteraction('x', event);
+		this.mouseDragY = this.normaliseInteraction('y', event);
 
 		if (!this.mouseDragging && !this.showPenIndicator) {
 			this.$timeout(() => {
@@ -326,27 +326,27 @@ class ScreenshotController implements ng.IController {
 
 	public initCanvas(canvas: any) {
 
-		this.addCanvasEventListener(canvas, "touchstart", this.startDraw.bind(this));
-		this.addCanvasEventListener(canvas, "mousedown", this.startDraw.bind(this));
+		this.addCanvasEventListener(canvas, 'touchstart', this.startDraw.bind(this));
+		this.addCanvasEventListener(canvas, 'mousedown', this.startDraw.bind(this));
 
-		this.addCanvasEventListener(canvas, "touchend", this.endDraw.bind(this));
-		this.addCanvasEventListener(canvas, "mouseup", this.endDraw.bind(this));
+		this.addCanvasEventListener(canvas, 'touchend', this.endDraw.bind(this));
+		this.addCanvasEventListener(canvas, 'mouseup', this.endDraw.bind(this));
 
-		this.addCanvasEventListener(canvas, "touchleave", this.outOfDrawCanvas.bind(this));
-		this.addCanvasEventListener(canvas, "mouseout", this.outOfDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, 'touchleave', this.outOfDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, 'mouseout', this.outOfDrawCanvas.bind(this));
 
-		this.addCanvasEventListener(canvas, "touchmove", this.moveOnDrawCanvas.bind(this));
-		this.addCanvasEventListener(canvas, "mousemove", this.moveOnDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, 'touchmove', this.moveOnDrawCanvas.bind(this));
+		this.addCanvasEventListener(canvas, 'mousemove', this.moveOnDrawCanvas.bind(this));
 
 	}
 
 	public updateImage(canvas) {
 
-		if (this.currentAction === "" || !this.mouseDragging) {
+		if (this.currentAction === '' || !this.mouseDragging) {
 			return;
 		}
 
-		const context = canvas.getContext("2d");
+		const context = canvas.getContext('2d');
 
 		if (this.lastMouseDragX < 0 || this.lastMouseDragY < 0) {
 			this.lastMouseDragX = this.mouseDragX;
@@ -358,7 +358,7 @@ class ScreenshotController implements ng.IController {
 
 		// Draw line
 		context.beginPath();
-		context.lineCap = "round";
+		context.lineCap = 'round';
 		context.moveTo(this.lastMouseDragX, this.lastMouseDragY);
 		context.lineTo(this.mouseDragX, this.mouseDragY);
 
@@ -370,37 +370,37 @@ class ScreenshotController implements ng.IController {
 
 	public setupErase() {
 		this.isEraseMode = true;
-		this.scribbleCanvasContext.globalCompositeOperation = "destination-out";
-		this.penCol = "rgba(0, 0, 0, 1)";
+		this.scribbleCanvasContext.globalCompositeOperation = 'destination-out';
+		this.penCol = 'rgba(0, 0, 0, 1)';
 	}
 
 	public setupScribble() {
 		this.isEraseMode = false;
-		this.scribbleCanvasContext.globalCompositeOperation = "source-over";
-		this.penCol = "#DD0000";
+		this.scribbleCanvasContext.globalCompositeOperation = 'source-over';
+		this.penCol = '#DD0000';
 	}
 
 	public doAction(action) {
 
 		const disableAction = action === this.currentAction;
 		if (disableAction) {
-			action = "";
+			action = '';
 		}
 
 		for (const actionKey in this.actions) {
 			if (action !== actionKey) {
-				this.actions[actionKey].color = "";
+				this.actions[actionKey].color = '';
 			} else if (action === actionKey) {
 				this.actions[actionKey].color = this.highlightBackground;
 			}
 		}
 
 		switch (action) {
-		case "draw":
+		case 'draw':
 			this.setupScribble();
 			break;
 
-		case "erase":
+		case 'erase':
 			this.setupErase();
 			break;
 		}
@@ -409,8 +409,8 @@ class ScreenshotController implements ng.IController {
 	}
 
 	public saveScreenshot() {
-		const screenshotCanvas: any = document.getElementById("screenshotCanvas");
-		const screenshotCanvasContext = screenshotCanvas.getContext("2d");
+		const screenshotCanvas: any = document.getElementById('screenshotCanvas');
+		const screenshotCanvasContext = screenshotCanvas.getContext('2d');
 		const screenshotImage = new Image();
 		let screenshot;
 
@@ -420,7 +420,7 @@ class ScreenshotController implements ng.IController {
 		screenshotCanvasContext.drawImage(screenshotImage, 0, 0, screenshotCanvas.width, screenshotCanvas.height);
 		screenshotCanvasContext.drawImage(this.scribbleCanvas, 0, 0);
 
-		screenshot = screenshotCanvas.toDataURL("image/png");
+		screenshot = screenshotCanvas.toDataURL('image/png');
 		this.screenshotSave({screenshot});
 
 		this.closeDialog();
@@ -434,22 +434,22 @@ class ScreenshotController implements ng.IController {
 		const positionLeft = x - width / 2;
 		const positionTop = (y - height / 2);
 
-		this.penIndicator.css("left", positionLeft + "px");
-		this.penIndicator.css("top", (positionTop + 45) + "px");
+		this.penIndicator.css('left', positionLeft + 'px');
+		this.penIndicator.css('top', (positionTop + 45) + 'px');
 	}
 
 }
 
 export const ScreenshotComponent: ng.IComponentOptions = {
 	bindings: {
-		screenshotSave: "&",
-		screenshot: "="
+		screenshotSave: '&',
+		screenshot: '='
 	},
 	controller: ScreenshotController,
-	controllerAs: "vm",
-	templateUrl: "templates/screenshot.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/screenshot.html'
 };
 
 export const ScreenshotComponentModule = angular
-	.module("3drepo")
-	.component("screenshot", ScreenshotComponent);
+	.module('3drepo')
+	.component('screenshot', ScreenshotComponent);

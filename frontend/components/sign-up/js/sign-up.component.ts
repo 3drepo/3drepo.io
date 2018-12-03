@@ -17,19 +17,21 @@
 declare const grecaptcha;
 
 import { evaluatePassword } from '../../../services/validation';
+import { history } from '../../../helpers/migration';
 
 class SignupController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope",
-		"$mdDialog",
-		"$location",
-		"$window",
-		"$timeout",
+		'$scope',
+		'$mdDialog',
+		'$location',
+		'$window',
+		'$timeout',
+		'$state',
 
-		"ClientConfigService",
-		"APIService",
-		"AuthService"
+		'ClientConfigService',
+		'APIService',
+		'AuthService'
 	];
 
 	private reCaptchaResponse;
@@ -65,6 +67,7 @@ class SignupController implements ng.IController {
 		private $location,
 		private $window,
 		private $timeout,
+		private $state,
 
 		private ClientConfigService,
 		private APIService,
@@ -74,25 +77,18 @@ class SignupController implements ng.IController {
 	public $onInit() {
 
 		this.allowedPhone = new RegExp(/^[0-9 ()+-]+$/);
-		this.AuthService.sendLoginRequest().then((response) => {
-			if (response.data.username) {
-				this.goToLoginPage();
-			}
-		}).catch((response) => {
-			console.debug("User is not logged in");
-		});
 
 		this.enterKey = 13;
-		this.agreeToText = "",
-		this.haveReadText = "";
+		this.agreeToText = '',
+		this.haveReadText = '';
 
-		this.buttonLabel = "Sign Up!";
+		this.buttonLabel = 'Sign Up!';
 		this.newUser = {
-			username: "", email: "", confirmEmail: "",
-			company: "", confirmPassword: "", password: "", mailListAgreed: true, tcAgreed: false
+			username: '', email: '', confirmEmail: '',
+			company: '', confirmPassword: '', password: '', mailListAgreed: true, tcAgreed: false
 		};
 		this.version = this.ClientConfigService.VERSION;
-		this.logo = "/images/3drepo-logo-white.png";
+		this.logo = '/images/3drepo-logo-white.png';
 		this.captchaKey = this.ClientConfigService.captcha_client_key;
 
 		this.mailListAgreed = this.newUser.mailListAgreed;
@@ -104,7 +100,7 @@ class SignupController implements ng.IController {
 		let gbIndex;
 
 		this.countries.find((country, i) => {
-			if (country.code === "GB") {
+			if (country.code === 'GB') {
 				gbIndex = i;
 			}
 		});
@@ -115,7 +111,7 @@ class SignupController implements ng.IController {
 		* Recapcha
 		*/
 
-		const reCaptchaExists = this.ClientConfigService.auth.hasOwnProperty("captcha") &&
+		const reCaptchaExists = this.ClientConfigService.auth.hasOwnProperty('captcha') &&
 			(this.ClientConfigService.auth.captcha);
 
 		if (reCaptchaExists) {
@@ -123,17 +119,17 @@ class SignupController implements ng.IController {
 				this.captchaKey = this.ClientConfigService.captcha_client_key;
 				this.useReCAPTCHA = true;
 			} else {
-				console.debug("Captcha key is not set in config");
+				console.debug('Captcha key is not set in config');
 			}
 
 		} else {
-			console.debug("Captcha is not set in config");
+			console.debug('Captcha is not set in config');
 		}
 
 		// Legal text
 		if (this.isDefined(this.ClientConfigService.legal)) {
 			this.showLegalText = true;
-			this.legalText = "";
+			this.legalText = '';
 			for (const legalItem in this.ClientConfigService.legal) {
 				if (this.ClientConfigService.legal[legalItem]) {
 					this.handleLegalItem(legalItem);
@@ -141,12 +137,12 @@ class SignupController implements ng.IController {
 			}
 
 			this.legalText = this.agreeToText;
-			if (this.legalText !== "") {
-				this.legalText += " and ";
+			if (this.legalText !== '') {
+				this.legalText += ' and ';
 			}
 			this.legalText += this.haveReadText;
-			if (this.legalText !== "") {
-				this.legalText += ".";
+			if (this.legalText !== '') {
+				this.legalText += '.';
 			}
 		}
 		this.watchers();
@@ -162,27 +158,20 @@ class SignupController implements ng.IController {
 		* Watch changes to register fields to clear warning message
 		*/
 
-		this.$scope.$watch("vm.newUser", (newValue) => {
+		this.$scope.$watch('vm.newUser', (newValue) => {
 			if (this.isDefined(newValue)) {
-				this.registerErrorMessage = "";
+				this.registerErrorMessage = '';
 			}
 			if (this.newUser.password !== undefined) {
 				evaluatePassword(this.newUser.password).then(({ validPassword, comment }) => {
 					this.$timeout(() => {
 						this.passwordResult = validPassword;
 						this.passwordStrength = comment;
-						this.$scope.signup.password.$setValidity("required", this.passwordResult);
+						this.$scope.signup.password.$setValidity('required', this.passwordResult);
 					});
 				});
 			}
 		}, true);
-
-		this.$scope.$watch("AuthService.isLoggedIn()", (newValue) => {
-			// TODO: this is a hack
-			if (newValue === true) {
-				this.goToLoginPage();
-			}
-		});
 	}
 
 	/**
@@ -192,12 +181,12 @@ class SignupController implements ng.IController {
 	public checkDuplicateValues(isPasswordField) {
 		if (isPasswordField) {
 			const passwordValid = this.newUser.password === this.newUser.confirmPassword;
-			this.$scope.signup.confirmPassword.$setValidity("invalid", passwordValid);
-			this.registerPasswordMessage = passwordValid ? "" : "(Password mismatched)";
+			this.$scope.signup.confirmPassword.$setValidity('invalid', passwordValid);
+			this.registerPasswordMessage = passwordValid ? '' : '(Password mismatched)';
 		} else {
 			const emailValid = this.newUser.email === this.newUser.confirmEmail;
-			this.$scope.signup.confirmEmail.$setValidity("invalid", emailValid);
-			this.registerConfirmEmailMessage = emailValid ? "" : "(Email mismatched)";
+			this.$scope.signup.confirmEmail.$setValidity('invalid', emailValid);
+			this.registerConfirmEmailMessage = emailValid ? '' : '(Email mismatched)';
 		}
 	}
 
@@ -208,25 +197,21 @@ class SignupController implements ng.IController {
 			const legal = this.ClientConfigService.legal[legalItem];
 			const legalText = this.getLegalText(legal);
 
-			if (legal.type === "agreeTo") {
-				if (this.agreeToText === "") {
-					this.agreeToText = "I agree to the " + legalText;
+			if (legal.type === 'agreeTo') {
+				if (this.agreeToText === '') {
+					this.agreeToText = 'I agree to the ' + legalText;
 				} else {
-					this.agreeToText += " and the " + legalText;
+					this.agreeToText += ' and the ' + legalText;
 				}
-			} else if (legal.type === "haveRead") {
-				if (this.haveReadText === "") {
-					this.haveReadText = "I have read the " + legalText + " policy";
+			} else if (legal.type === 'haveRead') {
+				if (this.haveReadText === '') {
+					this.haveReadText = 'I have read the ' + legalText + ' policy';
 				} else {
-					this.haveReadText += " and the " + legalText + " policy";
+					this.haveReadText += ' and the ' + legalText + ' policy';
 				}
 			}
 		}
 
-	}
-
-	public goToLoginPage() {
-		this.$window.location.href = "/";
 	}
 
 	public register(event: any) {
@@ -240,7 +225,7 @@ class SignupController implements ng.IController {
 	}
 
 	public showPage() {
-		this.$location.path("/registerRequest");
+		this.$location.path('/register-request');
 	}
 
 	/**
@@ -259,9 +244,9 @@ class SignupController implements ng.IController {
 
 	public getPasswordLabel() {
 		if (this.newUser.password && this.passwordStrength) {
-			return "(" + this.passwordStrength + ")";
+			return '(' + this.passwordStrength + ')';
 		}
-		return "";
+		return '';
 	}
 
 	/**
@@ -285,9 +270,9 @@ class SignupController implements ng.IController {
 
 			const emailInvalid = this.$scope.signup.$error.email;
 			if (emailInvalid) {
-				this.registerErrorMessage = "Email is invalid";
+				this.registerErrorMessage = 'Email is invalid';
 			} else {
-				this.registerErrorMessage = "Please fill all required fields";
+				this.registerErrorMessage = 'Please fill all required fields';
 			}
 			return;
 		}
@@ -299,22 +284,22 @@ class SignupController implements ng.IController {
 		}
 
 		if (!this.newUser.password || this.newUser.password.length < 8) {
-			this.registerErrorMessage = "Password must be at least 8 characters long";
+			this.registerErrorMessage = 'Password must be at least 8 characters long';
 			return;
 		}
 
 		if (!this.passwordResult) {
-			this.registerErrorMessage = "Password is too weak; ";
+			this.registerErrorMessage = 'Password is too weak; ';
 			return;
 		}
 
 		if (this.newUser.confirmPassword !== this.newUser.password) {
-			this.registerErrorMessage = "Password mismatched";
+			this.registerErrorMessage = 'Password mismatched';
 			return;
 		}
 
 		if (this.newUser.confirmEmail !== this.newUser.email) {
-			this.registerErrorMessage = "Email mismatched";
+			this.registerErrorMessage = 'Email mismatched';
 			return;
 		}
 
@@ -325,7 +310,7 @@ class SignupController implements ng.IController {
 		if (allowRegister) {
 			this.sendRegistration();
 		} else {
-			this.registerErrorMessage = "You must agree to the terms and conditions";
+			this.registerErrorMessage = 'You must agree to the terms and conditions';
 		}
 
 	}
@@ -376,10 +361,10 @@ class SignupController implements ng.IController {
 export const SignupComponent: ng.IComponentOptions = {
 	bindings: {},
 	controller: SignupController,
-	controllerAs: "vm",
-	templateUrl: "templates/sign-up.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/sign-up.html'
 };
 
 export const SignupComponentModule = angular
-	.module("3drepo")
-	.component("signUp", SignupComponent);
+	.module('3drepo')
+	.component('signUp', SignupComponent);

@@ -17,11 +17,11 @@
 
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
-import Icon from '@material-ui/core/Icon';
+import Search from '@material-ui/icons/Search';
 
 import { FONT_WEIGHT, COLOR } from '../../../../../styles';
 
-export const SearchIcon = styled(Icon)`
+export const SearchIcon = styled(Search)`
 	&& {
 		font-size: 14px;
 		font-weight: ${FONT_WEIGHT.SEMIBOLD};
@@ -53,6 +53,11 @@ export const SearchField = styled(TextField).attrs({
 
 	.search-field__label {
 		margin-top: 3px;
+		transform: translate(0, 5px) scale(1);
+
+		&[data-shrink='true'] {
+			transform: translate(0, -8px) scale(0.75) !important;
+		}
 	}
 
 	.search-field__label ~ div {
@@ -67,14 +72,6 @@ export const SearchField = styled(TextField).attrs({
 
 		&:not(:hover):before {
 			opacity: 0;
-		}
-	}
-
-	.search-field__label {
-		transform: translate(0, 5px) scale(1);
-
-		&[data-shrink='true'] {
-			transform: translate(0, -8px) scale(0.75) !important;
 		}
 	}
 `;

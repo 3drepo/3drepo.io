@@ -20,18 +20,18 @@
 function tdrFocus($timeout) {
 	return {
 		link: (scope, element) => {
-			scope.$watch("trigger", (value) => {
-				if (value.toString() === "true") {
+			scope.$watch('trigger', (value) => {
+				if (value.toString() === 'true') {
 					$timeout(() => {
 						element[0].focus();
 					});
 				}
 			});
 		},
-		scope: { trigger: "@tdrFocus" }
+		scope: { trigger: '@tdrFocus' }
 	};
 }
 
 export const TdrFocusModule = angular
-	.module("3drepo")
-	.directive("tdrFocus", ["$timeout", tdrFocus]);
+	.module('3drepo')
+	.directive('tdrFocus', ['$timeout', tdrFocus]);

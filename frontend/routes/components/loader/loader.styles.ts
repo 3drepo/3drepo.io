@@ -16,14 +16,17 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: ${(props: any) => props.horizontal ? 'row-reverse' : 'column'};
   align-items: center;
   justify-content: center;
 `;
 
 export const Content = styled.div`
-  margin-top: 20px;
+  margin-top:  ${(props: any) => props.horizontal ? '0' : '20px'};
+  margin-right:  ${(props: any) => props.horizontal ? '10px' : '0'};
+  color: ${COLOR.BLACK_40};
 `;
