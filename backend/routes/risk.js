@@ -26,16 +26,72 @@ const Risk = require("../models/risk");
 const utils = require("../utils");
 const config = require("../config.js");
 
+/**
+ * @api {get} /risks/:uid.json Find Risk by ID
+ * @apiName findRiskById
+ * @apiGroup Risks
+ * @apiParam {String} id Risk unique ID.
+ */
+
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
+
+/**
+ * @api {get} /risks/:uid/thumbnail.png Get Risks Thumbnail
+ * @apiName getThumbnail
+ * @apiGroup Risks
+ * @apiParam {String} id Risk unique ID.
+ */
+
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+
+/**
+ * @api {get} /risks.json List All Risks
+ * @apiName listRisks
+ * @apiGroup Risks
+ */
 
 router.get("/risks.json", middlewares.issue.canView, listRisks);
 
+/**
+ * @api {get} /risks/:uid/screenshot.png  Get Risks Screenshot
+ * @apiName getScreenshot
+ * @apiGroup Risks
+ */
+
 router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreenshot);
+
+/**
+ * @api {get} /risks/:uid/screenshotSmall.png  Get Small Risks Screenshot
+ * @apiName getScreenshotSmall
+ * @apiGroup Risks
+ * @apiParam {String} id Risk unique ID.
+ */
+
 router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+
+/**
+ * @api {get} /risks/:rid/risks.json  List all Risks by revision ID
+ * @apiName listRisks
+ * @apiGroup Risks
+ * @apiParam {String} id Revision unique ID.
+ */
+
 router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
 
+/**
+ * @api {get} /risks.html  Render all Risks as HTML
+ * @apiName renderRisksHTML
+ * @apiGroup Risks
+ */
+
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
+
+/**
+ * @api {get} /risks.html  Render all Risks as HTML by revision ID
+ * @apiName renderRisksHTML
+ * @apiGroup Risks
+ * @apiParam {String} id Revision unique ID.
+ */
 
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
