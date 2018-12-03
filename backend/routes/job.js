@@ -86,7 +86,7 @@
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
 	/**
-	 * @api {get} /jobs/colors listColors
+	 * @api {get} /jobs/colors List all Colors
 	 * @apiName listColors
 	 * @apiGroup Jobs
 	 */
