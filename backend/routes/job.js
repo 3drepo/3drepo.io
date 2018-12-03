@@ -44,7 +44,7 @@
 	 * @api {put} /jobs/:jobId Update User Job
 	 * @apiName updateJob
 	 * @apiGroup Jobs
-	 * @apiParam jobId Unique Job ID
+	 * @apiParam {String} jobId Unique Job ID.
 	 */
 
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
@@ -62,7 +62,7 @@
 	 * @apiName addUserToJob
 	 * @apiGroup Jobs
 	 * @apiParam jobId Unique Job ID
-	 * @apiParam user User to assign job to
+	 * @apiParam {String} user User to assign job to.
 	 */
 
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
@@ -71,7 +71,7 @@
 	 * @api {delete} /jobs Remove a job from a user
 	 * @apiName removeUserFromJobs
 	 * @apiGroup Jobs
-	 * @apiParam user User to remove job from
+	 * @apiParam {Object} user User to remove job from.
 	 */
 
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
@@ -80,7 +80,7 @@
 	 * @api {delete} /jobs/:jobId Delete a job
 	 * @apiName deleteJob
 	 * @apiGroup Jobs
-	 * @apiParam jobId Unique Job ID
+	 * @apiParam {String} jobId Unique Job ID.
 	 */
 
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
