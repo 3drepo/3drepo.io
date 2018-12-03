@@ -79,17 +79,9 @@ export class ViewerCard extends React.PureComponent<IProps, any> {
 
 		return (
 			<Panel title={this.getTitle()}>
-				{
-					pending ? this.renderLoader() :
+				{ pending ? this.renderLoader() :
 					<>
-						<ViewCardContent>
-							{children}
-						</ViewCardContent>
-						{renderFooterContent() &&
-						<ViewCardFooter>
-							{renderFooterContent()}
-						</ViewCardFooter>
-						}
+						{children}
 					</>
 				}
 			</Panel>

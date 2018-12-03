@@ -17,31 +17,31 @@
 
 import * as React from 'react';
 import { isEmpty, includes } from 'lodash';
+import { withFormik } from 'formik';
+
 import { ViewerCard } from '../viewerCard/viewerCard.component';
+import { ViewCardContent } from '../viewerCard/viewerCard.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import { SettingsForm, SettingsSchema } from './components/settingsForm/settingsForm.component';
 
 import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import {
-	FooterWrapper,
-	StyledSaveButton,
 	StyledSelect,
-	StyledSelectItem,
 	MapLayer,
 	MapName,
 	MapNameWrapper,
 	StyledMapIcon,
 	VisibilityButton
 } from './gis.styles';
-import { SettingsForm } from './components/settingsForm/settingsForm.component';
 
 interface IProps {
 	location: any;
@@ -129,18 +129,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	}
 
 	public getDataFromPathname = () => {
-		const pathnameElements = this.props.location.pathname.replace('/viewer/', '').split('/');
-
-		return {
-			teamspace: pathnameElements[0],
-			modelId: pathnameElements[1],
-			revision: pathnameElements[2] || null
-		};
-	}
-
-	public handleSaveClick = () => {
-		const settingsForm = this.formRef.current.formikRef.current;
-		settingsForm.submitForm();
+		const [teamspace, modelId, revision] = this.props.location.pathname.replace('/viewer/', '').split('/');
+		return { teamspace, modelId, revision };
 	}
 
 	public handleToggleSettings = () => {
@@ -188,26 +178,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		return [];
 	}
 
-	public renderFooterContent = () => {
-		if (this.state.settingsModeActive) {
-			return (
-				<FooterWrapper>
-					<StyledSaveButton
-						type="submit"
-						aria-label="Save"
-						onClick={this.handleSaveClick}
-						disabled={this.props.isPending}
-					>
-						<SaveIcon color="secondary" />
-					</StyledSaveButton>
-				</FooterWrapper>
-			);
-		}
-		return null;
-	}
-
 	public renderSettings = () => {
-		let values = {} as any;
+		let formValues = {} as any;
 		const settings = this.props.settings;
 
 		if (settings.surveyPoints && settings.surveyPoints.length) {
@@ -216,21 +188,36 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				latLong: [latitude, longitude]
 			}] = settings.surveyPoints;
 
-			values = { axisX, axisY, axisZ, latitude, longitude };
+			formValues = { axisX, axisY, axisZ, latitude, longitude };
 		}
 
 		if (settings.angleFromNorth) {
-			values.angleFromNorth = settings.angleFromNorth;
+			formValues.angleFromNorth = settings.angleFromNorth;
 		}
 
-		return (
-			<SettingsForm
-				ref={this.formRef}
-				initialValues={values}
-				updateModelSettings={this.props.updateModelSettings}
-				getDataFromPathname={this.getDataFromPathname}
-			/>
-		);
+		const EnhancedSettingsForm = withFormik({
+			mapPropsToValues: () => (formValues),
+			handleSubmit: (values) => {
+				const { angleFromNorth, axisX, axisY, axisZ, latitude, longitude } = values;
+
+				const pointsSettings = {
+					angleFromNorth,
+					surveyPoints: [{
+						position: [axisX, axisY, axisZ],
+						latLong: [latitude, longitude]
+					}]
+				};
+
+				const { teamspace, modelId } = this.getDataFromPathname();
+				const project = localStorage.getItem('lastProject');
+				const modelData = { teamspace, project, modelId };
+
+				this.props.updateModelSettings(modelData, pointsSettings);
+			},
+			validationSchema: SettingsSchema
+		})(SettingsForm);
+
+		return <EnhancedSettingsForm />;
 	}
 
 	public handleChangeMapProvider = (event) => {
@@ -252,16 +239,15 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderMapProviders = (mapsProviders = []) => {
-		return mapsProviders.map((mapProvider, index) => (
-			<StyledSelectItem key={mapProvider.name} value={index}>
+	public renderMapProviders = (mapsProviders = []) =>
+		mapsProviders.map((mapProvider, index) => (
+			<MenuItem key={mapProvider.name} value={index}>
 				{mapProvider.name}
-			</StyledSelectItem>
-		));
-	}
+			</MenuItem>
+		))
 
-	public renderLayers = (mapLayers = []) => {
-		return mapLayers.map((layer) => (
+	public renderLayers = (mapLayers = []) =>
+		mapLayers.map((layer) => (
 			<MapLayer key={layer.name}>
 				<MapNameWrapper>
 					<StyledMapIcon color="inherit" />
@@ -270,22 +256,21 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 				{this.renderVisibilityButton(layer)}
 			</MapLayer>
-		));
-	}
+		))
 
 	public renderMapLayers = () => {
 		const { mapsProviders } = this.props;
 		const { activeMapIndex } = this.state;
 
 		return (
-			<>
+			<ViewCardContent>
 				<StyledSelect
 					onChange={this.handleChangeMapProvider}
 					value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{this.renderLayers(mapsProviders[activeMapIndex].layers)}
-			</>
+			</ViewCardContent>
 		);
 	}
 
@@ -297,7 +282,6 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				title="GIS"
 				Icon={this.getTitleIcon()}
 				actions={this.getActions()}
-				renderFooterContent={this.renderFooterContent}
 				pending={this.props.isPending}
 			>
 				{settingsModeActive ? this.renderSettings() : this.renderMapLayers()}

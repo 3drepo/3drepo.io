@@ -19,23 +19,9 @@ import styled from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import MapIcon from '@material-ui/icons/Map';
 
 import { COLOR } from './../../../../styles/colors';
-
-export const FooterWrapper = styled.div`
-  align-self: flex-end;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
-
-export const StyledSaveButton = styled(IconButton)`
-  && {
-    align-self: flex-end;
-  }
-`;
 
 export const StyledSelect = styled(Select)`
   margin-bottom: 12px;
@@ -43,9 +29,6 @@ export const StyledSelect = styled(Select)`
   && {
     width: 100%;
   }
-`;
-
-export const StyledSelectItem = styled(MenuItem)`
 `;
 
 export const StyledMapIcon = styled(MapIcon)`

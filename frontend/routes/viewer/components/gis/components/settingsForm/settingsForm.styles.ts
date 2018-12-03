@@ -18,6 +18,9 @@
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+
+import { COLOR } from '../../../../../../styles';
 
 export const Header = styled.div``;
 
@@ -29,4 +32,23 @@ export const Headline = styled(Typography)`
 
 export const StyledTextField = styled(TextField)`
   width: 100%;
+`;
+
+export const FooterWrapper = styled.div`
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const StyledSaveButton = styled(IconButton)`
+  && {
+    align-self: flex-end;
+
+    &:disabled {
+      svg {
+        color: ${COLOR.BLACK_40};
+      }
+    }
+  }
 `;
