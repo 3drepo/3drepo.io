@@ -28,7 +28,24 @@ const hereBaseDomain = ".base.maps.cit.api.here.com";
 const hereAerialDomain = ".aerial.maps.cit.api.here.com";
 const hereTrafficDomain = ".traffic.maps.cit.api.here.com";
 
+/**
+ * @api {get} .:model/maps List all Maps
+ * @apiName listMaps
+ * @apiGroup Maps
+ * @apiParam {String} model Model to list maps for .
+ */
+
 router.get("/:model/maps/", listMaps);
+
+/**
+ * @api {get} /:model/maps/osm/:zoomLevel/:gridx/:gridy.png Get OSMT file
+ * @apiName getOSMTile
+ * @apiGroup Maps
+ * @apiParam {Number} zoomLevel Map Zoom level.
+ * @apiParam model Model to list maps for 
+ * @apiParam model Model to list maps for 
+ */
+
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
 router.get("/:model/maps/hereinfo/", middlewares.isHereEnabled, getHereBaseInfo);
 router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereMapsTile);
