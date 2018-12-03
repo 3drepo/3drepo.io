@@ -83,6 +83,14 @@
     "sinon": "3.2.1",
     "supertest": "3.0.0"
   },
+  "apidoc": {
+    "name": "3D Repo API Documentation",
+    "description": "Detailed Documentation of API endpoints",
+    "apidoc": {
+      "title": "3D Repo API Documentation",
+      "url": "https://3drepo.github.io/3drepo.io/"
+    }
+  },
   "description": "The backend for 3drepo.io",
   "main": "3drepo.js",
   "author": "3D Repo",
