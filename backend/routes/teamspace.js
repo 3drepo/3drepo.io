@@ -25,11 +25,48 @@
 	const User = require("../models/user");
 	const utils = require("../utils");
 
+	/**
+	 * @api {get} /quota Get Quota Information
+	 * @apiName getQuotaInfo
+	 * @apiGroup Teamspace
+	 */
+
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
 
+	/**
+	 * @api {get} /members Get Member List
+	 * @apiName getMemberList
+	 * @apiGroup Teamspace
+	 */
+
 	router.get("/members", middlewares.loggedIn, getMemberList);
+
+	/**
+	 * @api {delete} /members/:user Remove a team member
+	 * @apiName removeTeamMember
+	 * @apiGroup Teamspace
+	 * 
+	 * @apiParam {String} user User (Member) to remove
+	 */
+
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
+
+	/**
+	 * @api {get} /members/search/:searchString Search for a member without a membership
+	 * @apiName findUsersWithoutMembership
+	 * @apiGroup Teamspace
+	 * 
+	 * @apiParam {String} searchString Search string provided to find member
+	 */
+
 	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
+
+	/**
+	 * @api {post} /members Create a Team Member
+	 * @apiName addTeamMember
+	 * @apiGroup Teamspace
+	 */
+
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
 	function getQuotaInfo(req, res, next) {
