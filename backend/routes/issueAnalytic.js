@@ -27,9 +27,9 @@
          /**
           * @api {get} /issues/analytics.:format Get Issue Analytics
           * @apiName getIssueAnalytics
-          * @apiGroup Issues
+          * @apiGroup Issues Analytics
           */
-		 
+
          router.get("/issues/analytics.:format", middlewares.issue.canView, getIssueAnalytics);
 
          function getIssueAnalytics(req, res, next) {

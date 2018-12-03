@@ -31,25 +31,33 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiName listGroups
  * @apiGroup Groups
  */
+
 router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
 /**
  * @api {get} /groups/revision/:rid/ List model groups by revision
+ * @apiDescription List all groups using the revision ID
  * @apiName listGroupsByRevision
  * @apiGroup Groups
+ * 
  * @apiParam {String} id Revision unique ID.
  */
+
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 /*
  * @api {get} /groups/revision/master/head/:uid/ Find group in model
+ * @apiDescription Find a group by model using the group ID
  * @apiName findGroup
  * @apiGroup Groups
+ * 
  * @apiParam {String} id Group unique ID.
  */
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
 /*
  * @api {get} /groups/revision/:rid/:uid/ Find group in model by revision
  * @apiName findGroupByRevision
+ * @apiDescription Find a group by revision ID and Group ID
  * @apiGroup Groups
+ * 
  * @apiParam {String} id Revision unique ID.
  * @apiParam {String} id Group unique ID.
  */
@@ -58,13 +66,15 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 /**
  * @api {put} /groups/:uid/ Update group
  * @apiName updateGroup
+ * @apiDescription Update a group using Group ID
  * @apiGroup Groups
+ * 
  * @apiParam {String} id Group unique ID.
  */
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
 /**
- * @api {post} /groups/ Add a group
+ * @api {post} /groups/ Create a group
  * @apiName createGroup
  * @apiDescription Add a group to the model.
  * @apiGroup Groups

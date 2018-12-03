@@ -37,7 +37,8 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
  * @api {get} /revisions/:branch.json List all revisions by branch
  * @apiName listRevisionsByBranch
  * @apiGroup Revisions
- * @apiParam {String} branch.json Branch values 
+ * 
+ * @apiParam {String} branch.json Branch required to list revisions for. 
  */
 
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
@@ -46,6 +47,7 @@ router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevi
  * @api {put} /revisions/:id/tag Update Revision Tag 
  * @apiName updateRevisionTag
  * @apiGroup Revisions
+ * 
  * @apiParam {String} id Unique Revision ID
  * @apiParam {String} tag Tag to update
  */

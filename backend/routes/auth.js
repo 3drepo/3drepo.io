@@ -72,9 +72,10 @@ router.post("/forgot-password", forgotPassword);
 router.get("/version", printVersion);
 
 /**
- * @api {get} /:account.json/ List ..? user info
+ * @api {get} /:account.json/ List account information
  * @apiName listInfo
  * @apiGroup Auth
+ * @apiParam account.json The Account to list information for.
  */
 
 router.get("/:account.json", middlewares.loggedIn, listInfo); // TODO: divide into different endpoints that makes sense.
@@ -83,16 +84,19 @@ router.get("/:account.json", middlewares.loggedIn, listInfo); // TODO: divide in
  * @api {get} /:account.json/ Get User Avatar
  * @apiName getAvatar
  * @apiGroup Auth
+ * @apiParam account The avatar image for requested account.
  */
 
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 
+/* NOTE: Duplicate request , Does this need to removed ? */
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 
 /**
  * @api {post} /:account/avatar Get User Avatar
  * @apiName uploadAvatar
  * @apiGroup Auth
+ * @apiParam account The account to upload avatar to.
  */
 
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);

@@ -37,7 +37,9 @@ const stringToUUID = utils.stringToUUID;
  * @api {get} /issues/:uid.json Find Issue by ID
  * @apiName findIssueById
  * @apiGroup Issues
+ * 
  * @apiParam {Number} id Issue unique ID.
+ * 
  * @apiSuccess {Object} issue The Issue matching the Issue ID
  * @apiSuccessExample Example of returned data on success:
  * {
@@ -76,6 +78,7 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
  * @api {get} /issues/:uid.json Get Issue Thumbnail
  * @apiName findIssueById
  * @apiGroup Issues
+ * 
  * @apiParam {Number} id Issue unique ID.
  */
 
@@ -109,6 +112,7 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
  * @api {get} /issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
  * @apiGroup Issues
+ * 
  * @apiParam {String} id Viewpoint unique ID.
  */
 
@@ -118,6 +122,7 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
  * @api {get} /issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Issues
+ * 
  * @apiParam {String} id Viewpoint unique ID.
  */
 
@@ -127,6 +132,7 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  * @api {get} /revision/:rid/issues.json Get all Issues by revision ID
  * @apiName listIssues
  * @apiGroup Issues
+ * 
  * @apiParam {String} id Revision unique ID.
  */
 
@@ -136,6 +142,7 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
  * @api {get} /revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
+ * 
  * @apiParam {String} id Revision unique ID.
  */
 
@@ -145,6 +152,7 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
  * @api {post} /revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
+ * 
  * @apiParam {String} id Revision unique ID.
  */
 
@@ -152,7 +160,6 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
 
 
 // router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
-
 
 /**
  * @api {get} /issues.html Issues response into as HTML
@@ -163,20 +170,52 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
 router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {get} /issues.html Issues response into as HTML by revision ID
- * @apiName renderIssuesHTML
+ * @api {get} revision/:rid/issues.html Issues response into as HTML by revision ID
+ * @apiName  renderIssuesHTML
  * @apiGroup Issues
+ * 
  * @apiParam {String} id Revision unique ID.
  */
 
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
-
+/**
+ * @api {post} /issues.json Save an Issue
+ * @apiName storeIssue
+ * @apiGroup Issues
+ */
 
 router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {post} issues/:issuesId.json Update an Issue
+ * @apiName updateIssue
+ * @apiGroup Issues
+ * 
+ * @apiParam {String} issueId.json Unique Issue ID to update.
+ */
+
 router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
+/**
+ * @api {post} /issuesId.json Store issue based on revision 
+ * @apiName storeIssue
+ * @apiGroup Issues
+ * 
+ * @apiParam {String} rid Unique Revision ID to store.
+ */
+
 router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {put} revision/"rid/issues/:issueId.json Update issue based on revision
+ * @apiName updateIssue
+ * @apiGroup Issues
+ * 
+ * @apiParam {String} rid Unique Revision ID to update to.
+ * @apiParam {String} issueId Unique Issue ID to update.
+ */
+
 router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
