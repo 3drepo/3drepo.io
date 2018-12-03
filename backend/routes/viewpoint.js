@@ -26,11 +26,59 @@ const Viewpoint = require("../models/viewpoint");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
+
+/**
+ * @api {get} /viewpoints List all Viewpoints 
+ * @apiName listViewpoints
+ * @apiGroup Viewpoint
+ */
+
 router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
+
+/**
+ * @api {get} /viewpoints/:uid Find a Viewpoint
+ * @apiName findViewpoint
+ * @apiGroup Viewpoint
+ * 
+ * @apiParam {String} id Unique Viewpoint ID
+ */
+
 router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
+
+/**
+ * @api {put} /viewpoints/:uid Update a Viewpoint
+ * @apiName updateViewpoint
+ * @apiGroup Viewpoint
+ * 
+ * @apiParam {String} id Unique Viewpoint ID
+ */
+
 router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
+
+/**
+ * @api {post} /viewpoints/ Create a Viewpoint
+ * @apiName createViewpoint
+ * @apiGroup Viewpoint
+ */
+
 router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
+
+/**
+ * @api {delete} /viewpoints/:uid Delete a Viewpoint
+ * @apiName deleteViewpoint
+ * @apiGroup Viewpoint
+ */
+
 router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
+
+/**
+ * @api {get} /viewpoints/:uid Get a Viewpoint Thumbnail 
+ * @apiName getViewpointThumbnail
+ * @apiGroup Viewpoint
+ * 
+ * @apiParam {String} id Unique Viewpoint ID 
+ */
+
 router.get("/viewpoints/:uid/thumbnail.png", middlewares.issue.canView, getViewpointThumbnail);
 
 const getDbColOptions = function(req) {
