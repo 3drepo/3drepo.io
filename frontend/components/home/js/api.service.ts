@@ -18,8 +18,8 @@
 export class APIService {
 
 	public static $inject: string[] = [
-		"$http",
-		"ClientConfigService"
+		'$http',
+		'ClientConfigService'
 	];
 
 	constructor(
@@ -35,12 +35,12 @@ export class APIService {
 	public getErrorMessage(resData: any): string {
 
 		const messages = {
-			FILE_FORMAT_NOT_SUPPORTED: "Unsupported file format",
-			SIZE_LIMIT_PAY: "Insufficient quota for model",
-			USER_NOT_VERIFIED: "Please click on the link in the verify email sent to your account",
-			ALREADY_VERIFIED: "You have already verified your account successfully. You may now login to your account.",
-			INVALID_CAPTCHA_RES: "Please prove you're not a robot",
-			USER_EXISTS: "User already exists"
+			FILE_FORMAT_NOT_SUPPORTED: 'Unsupported file format',
+			SIZE_LIMIT_PAY: 'Insufficient quota for model',
+			USER_NOT_VERIFIED: 'Please click on the link in the verify email sent to your account',
+			ALREADY_VERIFIED: 'You have already verified your account successfully. You may now login to your account.',
+			INVALID_CAPTCHA_RES: 'Please prove you\'re not a robot',
+			USER_EXISTS: 'User already exists'
 		};
 
 		let message;
@@ -82,10 +82,7 @@ export class APIService {
 		};
 
 		const request = this.$http.get(urlUse, config);
-		// const response = AuthService.handleSessionExpiration(request);
-
 		return request;
-
 	}
 
 	/**
@@ -161,7 +158,7 @@ export class APIService {
 			data,
 			withCredentials: true,
 			headers: {
-				"Content-Type": "application/json"
+				'Content-Type': 'application/json'
 			}
 		};
 
@@ -170,15 +167,15 @@ export class APIService {
 	}
 
 	public checkUrl(url: string) {
-		if (typeof url !== "string") {
-			throw new Error("URL is not a string");
+		if (typeof url !== 'string') {
+			throw new Error('URL is not a string');
 		} else if (url.length === 0) {
-			throw new Error("Empty URL provided");
+			throw new Error('Empty URL provided');
 		}
 	}
 
 }
 
 export const APIServiceModule = angular
-	.module("3drepo")
-	.service("APIService", APIService);
+	.module('3drepo')
+	.service('APIService', APIService);

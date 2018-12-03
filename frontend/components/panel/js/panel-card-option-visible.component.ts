@@ -18,7 +18,7 @@
 class PanelCardOptionVisibleController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$scope"
+		'$scope'
 	];
 
 	private visible;
@@ -27,30 +27,30 @@ class PanelCardOptionVisibleController implements ng.IController {
 	constructor(
 		private $scope: ng.IScope
 	) {
-		this.icon = "visibility";
+		this.icon = 'visibility';
 	}
 
 	public $ngInit() {
-		this.$scope.$watch("vm.visible", () => {});
+		this.$scope.$watch('vm.visible', () => {});
 	}
 
 	public toggleVisible(event) {
 		event.stopPropagation();
 		this.visible = !this.visible;
-		this.icon = this.visible ? "visibility" : "visibility_off";
+		this.icon = this.visible ? 'visibility' : 'visibility_off';
 	}
 
 }
 
 export const PanelCardOptionVisibleComponent: ng.IComponentOptions = {
 	bindings: {
-		visible: "="
+		visible: '='
 	},
 	controller: PanelCardOptionVisibleController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-visible.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card-option-visible.html'
 };
 
 export const PanelCardOptionVisibleComponentModule = angular
-	.module("3drepo")
-	.component("panelCardOptionVisible", PanelCardOptionVisibleComponent);
+	.module('3drepo')
+	.component('panelCardOptionVisible', PanelCardOptionVisibleComponent);

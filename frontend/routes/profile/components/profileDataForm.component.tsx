@@ -91,9 +91,9 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handleProfileUpdate}
 			>
 				<Form>
-					<FormContainer container direction="column">
+					<FormContainer container={true} direction="column">
 						<Headline color="primary" variant="subheading">Basic information</Headline>
-						<Grid container direction="row" wrap="nowrap">
+						<Grid container={true} direction="row" wrap="nowrap">
 							<StyledDropzone
 								disabled={isAvatarPending}
 								accept=".gif,.jpg,.png"
@@ -105,50 +105,50 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 									<DropzoneMessage>+</DropzoneMessage>
 								</DropzoneContent>
 							</StyledDropzone>
-							<Grid container direction="column">
-								<FieldsRow container wrap="nowrap">
-									<Field name="firstName" render={({ field, form }) => (
+							<Grid container={true} direction="column">
+								<FieldsRow container={true} wrap="nowrap">
+									<Field name="firstName" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.firstName)}
 											helperText={form.errors.firstName}
-											required
+											required={true}
 											label="First name"
 											margin="normal"
 										/>
 									)} />
-									<Field name="lastName" render={({ field, form }) => (
+									<Field name="lastName" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.lastName)}
 											helperText={form.errors.lastName}
-											required
+											required={true}
 											label="Last name"
 											margin="normal"
 										/>
 									)} />
 								</FieldsRow>
-								<FieldsRow container wrap="nowrap">
+								<FieldsRow container={true} wrap="nowrap">
 									<StyledTextField
 										value={username}
 										label="Username"
 										margin="normal"
 										disabled={true}
 									/>
-									<Field name="email" render={({ field, form }) => (
+									<Field name="email" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.email)}
 											helperText={form.errors.email}
 											label="Email"
 											margin="normal"
-											required
+											required={true}
 										/>
 									)} />
 								</FieldsRow>
 							</Grid>
 						</Grid>
-						<Field render={({ form }) => (
+						<Field render={ ({ form }) => (
 							<StyledButton
 								color="secondary"
 								variant="raised"

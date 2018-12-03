@@ -1,13 +1,28 @@
+const getSubdomain = () => {
+	const {host} = location;
+	if (host.indexOf('.') < 0) {
+		return '';
+	}
+	return host.split('.')[0];
+};
+
 export class ClientConfigService {
 	public responseCodes;
 	public countries;
+	public units;
+	public acceptedFormat;
 	public apiUrl;
 	public GET_API;
 	public POST_API;
+	public VERSION;
+	public userNotice;
+	// tslint:disable-next-line
+	public login_check_interval;
 	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;
 	private C;
+	private customLogins;
 
 	constructor() {
 		if (window && window.ClientConfig) {
@@ -42,7 +57,7 @@ export class ClientConfigService {
 
 			this.apiUrlCounter[type] += 1;
 
-			return this.apiUrls[type][functionIndex] + "/" + path;
+			return this.apiUrls[type][functionIndex] + '/' + path;
 		};
 
 		for (const k in this.apiUrls) {
@@ -52,7 +67,18 @@ export class ClientConfigService {
 		}
 
 		return roundRobin;
+	}
 
+	public getCustomLogoPath() {
+		const subdomain = getSubdomain();
+		const custom = this.customLogins && this.customLogins[subdomain];
+
+		if (subdomain && custom && custom.topLogo &&
+			typeof custom.topLogo === 'string') {
+			return custom.topLogo;
+		}
+
+		return '';
 	}
 }
 

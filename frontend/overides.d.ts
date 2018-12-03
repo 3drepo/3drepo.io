@@ -27,4 +27,5 @@ declare global {
 		webkitRequestFullscreen: () => void;
 	}
 }
+
 export {};

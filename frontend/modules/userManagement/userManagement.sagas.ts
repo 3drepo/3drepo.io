@@ -15,23 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, call, takeLatest, all, select } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { UserManagementTypes, UserManagementActions } from './userManagement.redux';
 import { DialogActions } from '../dialog/dialog.redux';
-
-import { selectCurrentTeamspace, selectCurrentProject } from '../userManagement/userManagement.selectors';
-import { selectTeamspacesWithAdminAccess } from '../teamspace/teamspace.selectors';
-import { DIALOG_TYPES } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
+import { selectTeamspacesWithAdminAccess } from '../teamspaces/teamspaces.selectors';
+import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { selectCurrentUser } from '../currentUser';
+
+import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
+import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
+import {
+	FederationReminderDialog
+} from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
 		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
+		const currentUser = yield select(selectCurrentUser);
 
 		const [users] = yield all([
 			API.fetchUsers(teamspace),
@@ -39,7 +44,11 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 			put(JobsActions.fetchJobsColors(teamspace))
 		]);
 
-		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(teamspaceDetails, users.data));
+		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
+			teamspaceDetails,
+			users.data,
+			currentUser.username
+		));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'teamspace details', error.response));
 		yield put(UserManagementActions.setPendingState(false));
@@ -50,7 +59,9 @@ export function* addUser({ user }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data } = yield API.addUser(teamspace, user);
-		yield put(UserManagementActions.addUserSuccess(data));
+		const currentUser = yield select(selectCurrentUser);
+
+		yield put(UserManagementActions.addUserSuccess(data, currentUser.username));
 		yield put(SnackbarActions.show('User added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('add', 'licence', error.response));
@@ -60,7 +71,7 @@ export function* addUser({ user }) {
 export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.removeUser(teamspace, username);
+		yield API.removeUser(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 	} catch (error) {
 		const responseCode = API.getResponseCode('USER_IN_COLLABORATOR_LIST');
@@ -69,7 +80,7 @@ export function* removeUser({ username }) {
 		if (errorData.status === 400 && errorData.value === responseCode) {
 			const config = {
 				title: 'Remove User',
-				templateType: DIALOG_TYPES.CONFIRM_USER_REMOVE,
+				template: RemoveUserDialog,
 				confirmText: 'Remove',
 				onConfirm: () => UserManagementActions.removeUserCascade(username),
 				data: {
@@ -81,7 +92,7 @@ export function* removeUser({ username }) {
 			};
 
 			if (errorData.teamspace) {
-				config.data.teamspacePerms = errorData.teamspace.permissions.join(", ");
+				config.data.teamspacePerms = errorData.teamspace.permissions.join(', ');
 			}
 
 			yield put(DialogActions.showDialog(config));
@@ -94,7 +105,7 @@ export function* removeUser({ username }) {
 export function* removeUserCascade({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.removeUserCascade(teamspace, username);
+		yield API.removeUserCascade(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 		yield put(SnackbarActions.show('User removed'));
 	} catch (error) {
@@ -105,7 +116,7 @@ export function* removeUserCascade({ username }) {
 export function* updateUserJob({ username, job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield (
+		yield (
 				job ?
 				API.updateUserJob(teamspace, job, username) :
 				API.removeUserJob(teamspace, username)
@@ -120,8 +131,10 @@ export function* updateUserJob({ username, job }) {
 export function* updatePermissions({ permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.setUserPermissions(teamspace, permissions);
-		yield put(UserManagementActions.updatePermissionsSuccess(permissions));
+		const currentUser = yield select(selectCurrentUser);
+
+		yield API.setUserPermissions(teamspace, permissions);
+		yield put(UserManagementActions.updatePermissionsSuccess(permissions, currentUser));
 		yield put(SnackbarActions.show('Teamspace permissions updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'teamspace permissions', error.response));
@@ -155,7 +168,7 @@ export function* updateProjectPermissions({ permissions }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const {name} = yield select(selectCurrentProject);
 		const project = {name, permissions};
-		yield API.updateProject(teamspace, project);
+		yield API.updateProject(teamspace, project.name, project);
 
 		yield put(UserManagementActions.updateProjectPermissionsSuccess(permissions));
 		yield put(SnackbarActions.show('Project permissions updated'));
@@ -206,7 +219,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 		if (permissionlessModels.length) {
 			const config = {
 				title: 'Reminder about Federation Permissions',
-				templateType: DIALOG_TYPES.FEDERATION_REMINDER_DIALOG,
+				template: FederationReminderDialog,
 				onConfirm: () => resolveUpdate,
 				data: {
 					models: permissionlessModels

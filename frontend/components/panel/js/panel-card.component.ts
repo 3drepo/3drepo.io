@@ -14,21 +14,21 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PanelService, IMenuItem } from "./panel.service";
-import { IChip } from "./panel-card-chips-filter.component";
+import { PanelService, IMenuItem } from './panel.service';
+import { IChip } from './panel-card-chips-filter.component';
 
 class PanelCardController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$window",
-		"$scope",
-		"$timeout",
-		"$element",
-		"$compile",
-		"$filter",
+		'$window',
+		'$scope',
+		'$timeout',
+		'$element',
+		'$compile',
+		'$filter',
 
-		"PanelService",
-		"EventService"
+		'PanelService',
+		'EventService'
 	];
 
 	public vm = this;
@@ -80,7 +80,7 @@ class PanelCardController implements ng.IController {
 		this.currentHighlightedOptionIndex = -1;
 
 		angular.element(() => {
-			this.options = angular.element(this.$element[0].querySelector("#options"));
+			this.options = angular.element(this.$element[0].querySelector('#options'));
 		});
 
 		this.watchers();
@@ -92,7 +92,7 @@ class PanelCardController implements ng.IController {
 
 	public watchers() {
 
-		this.$scope.$watch("vm.contentData.type", (newValue) => {
+		this.$scope.$watch('vm.contentData.type', (newValue) => {
 			if (newValue) {
 				angular.element(() => {
 					this.createToolbarOptions();
@@ -104,7 +104,7 @@ class PanelCardController implements ng.IController {
 		/*
 		* Watch show on contentData to toggle elements off
 		*/
-		this.$scope.$watch("vm.contentData.show", (newValue) => {
+		this.$scope.$watch('vm.contentData.show', (newValue) => {
 			if ((this.isDefined(newValue) && !newValue)) {
 				this.hideItem();
 			}
@@ -113,7 +113,7 @@ class PanelCardController implements ng.IController {
 		/*
 		* Watch for card in edit mode
 		*/
-		this.$scope.$watch("vm.showEdit", (newValue) => {
+		this.$scope.$watch('vm.showEdit', (newValue) => {
 			if (this.isDefined(newValue)) {
 				this.hideItem();
 			}
@@ -122,7 +122,7 @@ class PanelCardController implements ng.IController {
 		/*
 		* Watch for content item to hide itself
 		*/
-		this.$scope.$watch("vm.hideSelectedItem", (newValue) => {
+		this.$scope.$watch('vm.hideSelectedItem', (newValue) => {
 			if (this.isDefined(newValue) && newValue) {
 				this.statusIcon = this.contentData.icon;
 			}
@@ -131,7 +131,7 @@ class PanelCardController implements ng.IController {
 		/*
 		* Watch for content item to hide itself
 		*/
-		this.$scope.$watch("vm.chipsFilterVisible", (visible) => {
+		this.$scope.$watch('vm.chipsFilterVisible', (visible) => {
 			// Recalculate the height
 			this.onContentHeightRequest(this.contentData.requestedHeight);
 
@@ -140,25 +140,25 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch ( () => this.$element[0].querySelector("#header").clientHeight,
+		this.$scope.$watch ( () => this.$element[0].querySelector('#header').clientHeight,
 			(newValue, oldValue) => {
 				this.contentData.panelTakenHeight = newValue;
 				this.onContentHeightRequest(this.contentData.requestedHeight);
 		});
 
-		this.$scope.$watch("vm.selectedMenuOption", (newValue: any) => {
+		this.$scope.$watch('vm.selectedMenuOption', (newValue: any) => {
 			if (!!newValue && (newValue.toggleFilterChips || (newValue.subItem && newValue.subItem.toggleFilterChips))) {
 				this.toggleFilterChips(newValue);
 			}
 		});
 
-		this.$scope.$watchCollection("vm.chipsFilterChips", (newValue: IChip[], oldValue: IChip[]) => {
+		this.$scope.$watchCollection('vm.chipsFilterChips', (newValue: IChip[], oldValue: IChip[]) => {
 			const deletedChips = oldValue.filter((old) => newValue.indexOf(old) === -1);
 			const addedChips = newValue.filter((newV) => oldValue.indexOf(newV) === -1);
 
 			deletedChips.forEach((c) => {
 				if (Date.prototype.isPrototypeOf(c.value)) {
-					const types = c.type.split("_");
+					const types = c.type.split('_');
 					this.panelService.setDateValueFromMenu(this.contentData.type,  types[0], types[1], null);
 					return;
 				}
@@ -167,7 +167,7 @@ class PanelCardController implements ng.IController {
 
 			addedChips.forEach((c) => {
 				if (Date.prototype.isPrototypeOf(c.value)) {
-					const types = c.type.split("_");
+					const types = c.type.split('_');
 					this.panelService.setDateValueFromMenu(this.contentData.type,  types[0], types[1], c.value);
 					return;
 				}
@@ -180,7 +180,7 @@ class PanelCardController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watchCollection("vm.contentData.menu", (newValue: IMenuItem[], oldValue: IMenuItem[]) => {
+		this.$scope.$watchCollection('vm.contentData.menu', (newValue: IMenuItem[], oldValue: IMenuItem[]) => {
 			if (!newValue) {
 				return;
 			}
@@ -208,7 +208,7 @@ class PanelCardController implements ng.IController {
 	* Watch type on contentData to create content and tool bar options
 	*/
 	public hasFilter() {
-		const filter = this.contentData.options.find((item) => item.type === "filter");
+		const filter = this.contentData.options.find((item) => item.type === 'filter');
 		return filter !== undefined;
 	}
 
@@ -216,7 +216,7 @@ class PanelCardController implements ng.IController {
 	* Watch type on contentData to create content and tool bar options
 	*/
 	public hasChipsFilter() {
-		const filter = this.contentData.options.find((item) => item.type === "chips-filter");
+		const filter = this.contentData.options.find((item) => item.type === 'chips-filter');
 		return filter !== undefined;
 	}
 
@@ -244,13 +244,13 @@ class PanelCardController implements ng.IController {
 	}
 
 	public toggleDateFilterChip(item: IMenuItem) {
-		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value + "_" + item.subItem.value);
+		const chipIndex =  this.chipsFilterChips.findIndex( (c) => c.type === item.value + '_' + item.subItem.value);
 
 		const newChip: IChip = {
-			name: this.$filter("date")(item.subItem.dateValue, "d/M/yyyy"),
+			name: this.$filter('date')(item.subItem.dateValue, 'd/M/yyyy'),
 			nameType: item.label + item.subItem.label,
 			value: item.subItem.dateValue,
-			type: item.value + "_" + item.subItem.value
+			type: item.value + '_' + item.subItem.value
 		};
 
 		if (chipIndex === -1) {
@@ -280,7 +280,7 @@ class PanelCardController implements ng.IController {
 	 * Content wants to show an individual item
 	 */
 	public showItem() {
-		this.statusIcon = "arrow_back";
+		this.statusIcon = 'arrow_back';
 		this.hideMenuButton = true;
 		this.hideSelectedItem = false; // So that a change to this value is propagated
 	}
@@ -302,7 +302,7 @@ class PanelCardController implements ng.IController {
 		let optionElement;
 		const optionData = this.contentData.options;
 
-		if (this.contentData.hasOwnProperty("options")) {
+		if (this.contentData.hasOwnProperty('options')) {
 
 			optionData.forEach((op, i) => {
 				const optionType = op.type;
@@ -324,7 +324,7 @@ class PanelCardController implements ng.IController {
 		let optionElement = `<panel-card-option-${optionType}
 							id='panel-card-option-${optionType}'`;
 
-		const isMenuOrFilter = optionType === "menu" || optionType === "filter";
+		const isMenuOrFilter = optionType === 'menu' || optionType === 'filter';
 
 		if (isMenuOrFilter) {
 			optionElement += ` ng-if='!vm.hideMenuButton' `;
@@ -332,7 +332,7 @@ class PanelCardController implements ng.IController {
 			optionElement += ` ng-if='vm.contentData.options[${i}].visible'`;
 		}
 
-		this.contentData.options[i].color = "";
+		this.contentData.options[i].color = '';
 
 		const options = this.getOptionSpecificAttrs(optionType);
 		optionElement += ` style='color:{{vm.contentData.options[${i}].color}}'
@@ -344,20 +344,20 @@ class PanelCardController implements ng.IController {
 	public getOptionSpecificAttrs(optionType) {
 
 		switch (optionType) {
-		case "filter":
-			return "show-filter='vm.showFilter'";
+		case 'filter':
+			return 'show-filter=\'vm.showFilter\'';
 
-		case "chips-filter":
-			return "chips-filter-visible='vm.chipsFilterVisible' ng-show='!vm.hideMenuButton'";
+		case 'chips-filter':
+			return 'chips-filter-visible=\'vm.chipsFilterVisible\' ng-show=\'!vm.hideMenuButton\'';
 
-		case "visible":
-			return " visible='vm.visible'";
+		case 'visible':
+			return ' visible=\'vm.visible\'';
 
-		case "menu":
-			return "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
+		case 'menu':
+			return 'menu=\'vm.contentData.menu\' selected-menu-option=\'vm.selectedMenuOption\'';
 
-		case "close":
-			return "show='vm.contentData.show'";
+		case 'close':
+			return 'show=\'vm.contentData.show\'';
 		}
 	}
 
@@ -374,22 +374,22 @@ class PanelCardController implements ng.IController {
 
 export const PanelCardComponent: ng.IComponentOptions = {
 	bindings: {
-		account: "=",
-		branch: "=",
-		contentData: "=",
-		model: "=",
-		modelSettings: "=",
-		onHeightRequest: "&",
-		position: "=",
-		revision: "=",
-		selectedObjects: "=",
-		setInitialSelectedObjects: "&"
+		account: '=',
+		branch: '=',
+		contentData: '=',
+		model: '=',
+		modelSettings: '=',
+		onHeightRequest: '&',
+		position: '=',
+		revision: '=',
+		selectedObjects: '=',
+		setInitialSelectedObjects: '&'
 	},
 	controller: PanelCardController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card.html'
 };
 
 export const PanelCardComponentModule = angular
-	.module("3drepo")
-	.component("panelCard", PanelCardComponent);
+	.module('3drepo')
+	.component('panelCard', PanelCardComponent);

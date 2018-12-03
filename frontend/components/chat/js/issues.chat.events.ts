@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatEvents } from "./chat.events";
-import { ChatChannel } from "./chat.channel";
+import { ChatEvents } from './chat.events';
+import { ChatChannel } from './chat.channel';
 
 export class IssuesChatEvents extends ChatEvents {
 	private comments: { [id: string]: ChatEvents};
 
 	constructor(protected channel: ChatChannel) {
-		super(channel, "issue");
+		super(channel, 'issue');
 		this.comments = {};
 	}
 
 	public getCommentsChatEvents(id: string): ChatEvents {
 		if (!this.comments[id]) {
-			this.comments[id] =  new ChatEvents(this.channel, "comment", id);
+			this.comments[id] =  new ChatEvents(this.channel, 'comment', id);
 		}
 
 		return this.comments[id];

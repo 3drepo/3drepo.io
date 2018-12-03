@@ -14,16 +14,16 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { IMenuItem } from "./panel.service";
+import { IMenuItem } from './panel.service';
 
 class PanelCardOptionMenuController implements ng.IController {
 
 	public static $inject: string[] = [
-		"$element"
+		'$element'
 	];
 
 	public menu;
-	public buttonLabel: string = "";
+	public buttonLabel: string = '';
 	public selectedMenuOption;
 
 	constructor(
@@ -31,12 +31,12 @@ class PanelCardOptionMenuController implements ng.IController {
 	) { }
 
 	public addPreventCloseToDatepicker() {
-		const pickerButtons = this.$element[0].querySelectorAll(".md-datepicker-triangle-button, .md-datepicker-button");
-		pickerButtons.forEach( (p) => p.setAttribute("md-prevent-menu-close", "true"));
+		const pickerButtons = this.$element[0].querySelectorAll('.md-datepicker-triangle-button, .md-datepicker-button');
+		pickerButtons.forEach( (p) => p.setAttribute('md-prevent-menu-close', 'true'));
 	}
 
 	public menuItemSelected(menuItem: IMenuItem, parentMenuItem: IMenuItem) {
-		if (menuItem.hasOwnProperty("toggle")) {
+		if (menuItem.hasOwnProperty('toggle')) {
 			if (menuItem.toggle) {
 				menuItem.selected = !menuItem.selected;
 			} else {
@@ -79,15 +79,15 @@ class PanelCardOptionMenuController implements ng.IController {
 
 export const PanelCardOptionMenuComponent: ng.IComponentOptions = {
 	bindings: {
-		menu: "=",
-		selectedMenuOption: "=",
-		buttonLabel: "&?"
+		menu: '=',
+		selectedMenuOption: '=',
+		buttonLabel: '&?'
 	},
 	controller: PanelCardOptionMenuController,
-	controllerAs: "vm",
-	templateUrl: "templates/panel-card-option-menu.html"
+	controllerAs: 'vm',
+	templateUrl: 'templates/panel-card-option-menu.html'
 };
 
 export const PanelCardOptionMenuComponentModule = angular
-	.module("3drepo")
-	.component("panelCardOptionMenu", PanelCardOptionMenuComponent);
+	.module('3drepo')
+	.component('panelCardOptionMenu', PanelCardOptionMenuComponent);

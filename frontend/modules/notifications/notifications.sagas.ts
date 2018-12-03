@@ -17,18 +17,16 @@
 
 import { put, takeLatest, select} from 'redux-saga/effects';
 
-import api, * as API from '../../services/api';
-import { NotificationsTypes, NotificationsActions } from './notifications.redux';
+import * as API from '../../services/api';
+import {
+	DeleteAllNotificationsDialog
+} from '../../routes/components/deleteAllNotificationsDialog/deleteAllNotificationsDialog.component';
 import { DialogActions } from '../dialog';
-import { DIALOG_TYPES } from '../dialog/dialog.redux';
+import { NotificationsTypes, NotificationsActions, selectNotifications } from './index';
 
-function selectNotifications(state) {
-	return state.notifications;
-}
-
-function selectNotification(id, state) {
-	return state.notifications.find((n) => n._id === id );
-}
+const getNotificationById = (notifications, id) => {
+	return notifications.find((n) => n._id === id );
+};
 
 export function* sendGetNotifications() {
 	const resp = yield API.getNotifications();
@@ -37,14 +35,14 @@ export function* sendGetNotifications() {
 
 export function* sendUpdateNotificationRead({ notificationId, read }) {
 	try {
-
-		const notification = yield select(selectNotification.bind(null, notificationId));
+		const notifications = yield select(selectNotifications);
+		const notification = yield getNotificationById(notifications, notificationId);
 		if (notification.read === read) {
 			return;
 		}
 
 		yield put(NotificationsActions.patchNotification({_id: notificationId, read}));
-		const resp = yield API.patchNotification(notificationId, {read});
+		yield API.patchNotification(notificationId, {read});
 	} catch (error) {
 		yield put(NotificationsActions.patchNotification({_id: notificationId, read: !read}));
 		yield put(DialogActions.showErrorDialog('update', 'notification', error.response));
@@ -52,14 +50,15 @@ export function* sendUpdateNotificationRead({ notificationId, read }) {
 }
 
 export function* sendDeleteNotification({ notificationId }) {
-	const notification = yield select(selectNotification.bind(null, notificationId));
+	const notifications = yield select(selectNotifications);
+	const notification = yield getNotificationById(notifications, notificationId);
 	if (!notification) {
 		return;
 	}
 
 	try {
 		yield put(NotificationsActions.deleteNotification(notification));
-		const resp = yield API.deleteNotification(notificationId);
+		yield API.deleteNotification(notificationId);
 	} catch (error) {
 		yield put(NotificationsActions.upsertNotification(notification));
 		yield put(DialogActions.showErrorDialog('delete', 'notification', error.response));
@@ -71,7 +70,7 @@ export function* sendDeleteAllNotifications() {
 
 	try {
 		yield put(NotificationsActions.setNotifications([]));
-		const resp = yield API.deleteAllNotifications();
+		yield API.deleteAllNotifications();
 	} catch (error) {
 		yield put(NotificationsActions.setNotifications(notifications));
 		yield put(DialogActions.showErrorDialog('delete', 'notification', error.response));
@@ -81,8 +80,7 @@ export function* sendDeleteAllNotifications() {
 export function* confirmSendDeleteAllNotifications() {
 	const config = {
 		title: 'Delete All Notifications',
-		templateType: DIALOG_TYPES.CONFIRM_DELETE_ALL_NOTIFICATIONS ,
-		confirmText: 'Delete',
+		template: DeleteAllNotificationsDialog ,
 		onConfirm: NotificationsActions.sendDeleteAllNotifications
 	};
 

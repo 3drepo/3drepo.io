@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {get} from "lodash";
+import {get} from 'lodash';
 
 export class DialogService {
 
 	public static $inject: string[] = [
-		"$mdDialog"
+		'$mdDialog'
 	];
 
 	private expiredDialogOpen;
@@ -54,14 +54,14 @@ export class DialogService {
 		}
 
 		if (this.disconnectedDialogOpen === true) {
-			console.debug("Notifications - Disconnect dialog currently open");
+			console.debug('Notifications - Disconnect dialog currently open');
 			return;
 		}
 
-		const title = "Notification Service Disconnected";
-		const content = "Your connection to the 3D Repo's notification service has dropped. " +
-		"3D Repo may not behave as expected when commenting and changing issues. Try refreshing the page" +
-		" to reconnect.";
+		const title = 'Notification Service Disconnected';
+		const content = 'Your connection to the 3D Repo\'s notification service has dropped. ' +
+		'3D Repo may not behave as expected when commenting and changing issues. Try refreshing the page' +
+		' to reconnect.';
 		const escapable = true;
 
 		// Opening the dialog
@@ -75,8 +75,8 @@ export class DialogService {
 				.title(title)
 				.htmlContent(content)
 				.ariaLabel(title)
-				.ok("Continue")
-				.cancel("Mute Notifications")
+				.ok('Continue')
+				.cancel('Mute Notifications')
 		)
 			.then(() => {
 				this.disconnectedDialogOpen = false;
@@ -127,30 +127,6 @@ export class DialogService {
 		this.$mdDialog.cancel();
 	}
 
-	public sessionExpired() {
-
-		if (!this.expiredDialogOpen) {
-
-			this.expiredDialogOpen = true;
-			const content = "You have been logged out as your session has expired.";
-			return this.$mdDialog.show(
-				this.$mdDialog.alert()
-					.clickOutsideToClose(false)
-					.escapeToClose(false)
-					.title("Session Expired")
-					.textContent(content)
-					.ariaLabel("Session Expired")
-					.ok("OK")
-			).then(() => {
-				this.expiredDialogOpen = false;
-			});
-
-		} else {
-			return Promise.resolve();
-		}
-
-	}
-
 	public confirm(title, content, escapable, ok, cancel) {
 
 		if (!this.expiredDialogOpen) {
@@ -191,7 +167,7 @@ export class DialogService {
 					.title(title)
 					.textContent(content)
 					.ariaLabel(title)
-					.ok("OK")
+					.ok('OK')
 			);
 
 		} else {
@@ -215,7 +191,7 @@ export class DialogService {
 					.title(title)
 					.htmlContent(content)
 					.ariaLabel(title)
-					.ok("OK")
+					.ok('OK')
 			);
 		} else {
 			return Promise.resolve();
@@ -225,7 +201,7 @@ export class DialogService {
 
 	public newUpdate() {
 
-		const title = "Update Available";
+		const title = 'Update Available';
 		const content = `A new version of 3D Repo is available! <br> <br>
 			Please reload the page for the latest version. See the latest changelog
 			<a href='https://github.com/3drepo/3drepo.io/releases/latest'>here</a>.`;
@@ -243,22 +219,22 @@ export class DialogService {
 				.title(title)
 				.htmlContent(content)
 				.ariaLabel(title)
-				.ok("Reload")
-				.cancel("I'll reload in a moment")
+				.ok('Reload')
+				.cancel('I\'ll reload in a moment')
 		)
 			.then(() => {
 				window.location.reload();
 			})
 			.catch(() => {
-				console.debug("User didn't reload");
+				console.debug('User didn\'t reload');
 			});
 
 	}
 
 	public showError = (action: string, type: string, error: any) => {
-		const message = get(error, "data.message", "");
+		const message = get(error, 'data.message', '');
 
-		const title = "Error";
+		const title = 'Error';
 		const subtitle = action && type ?
 			`Something went wrong trying to ${action} the ${type}:` :
 			`Something went wrong:`;
@@ -268,7 +244,7 @@ export class DialogService {
 				<br><br>
 				<strong>${message}</strong>
 				<br>
-				${error.status ? `<code>(Status Code: ${error.status})</code>` : ""}
+				${error.status ? `<code>(Status Code: ${error.status})</code>` : ''}
 				<br><br>
 				If this is unexpected please message support@3drepo.io.
 			`;
@@ -281,5 +257,5 @@ export class DialogService {
 }
 
 export const DialogServiceModule = angular
-	.module("3drepo")
-	.service("DialogService", DialogService);
+	.module('3drepo')
+	.service('DialogService', DialogService);

@@ -23,8 +23,17 @@ import api from './';
  * @param project
  * @param options
  */
-export const fetchProject = (teamspace, project, options = {}) => {
-	return api.get(`${teamspace}/projects/${project}`, options);
+export const fetchProject = (teamspace, projectName, options = {}) => {
+	return api.get(`${teamspace}/projects/${projectName}`, options);
+};
+
+/**
+ * Create new project
+ * @param teamspace
+ * @param project
+ */
+export const createProject = (teamspace, projectData) => {
+	return api.post(`${teamspace}/projects`, projectData);
 };
 
 /**
@@ -32,6 +41,15 @@ export const fetchProject = (teamspace, project, options = {}) => {
  * @param teamspace
  * @param project
  */
-export const updateProject = (teamspace, project) => {
-	return api.put(`${teamspace}/projects/${project.name}`, project);
+export const updateProject = (teamspace, projectName, projectData) => {
+	return api.put(`${teamspace}/projects/${projectName}`, projectData);
+};
+
+/**
+ * Remove project
+ * @param teamspace
+ * @param project
+ */
+export const removeProject = (teamspace, projectName) => {
+	return api.delete(`${teamspace}/projects/${projectName}`);
 };

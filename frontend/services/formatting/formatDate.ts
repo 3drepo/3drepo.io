@@ -59,3 +59,8 @@ export const prettyDate = (input, showFullDateTime) => {
 		.replace('Sat ', '')
 		.replace('Sun ', '');
 };
+
+export const simpleDate = (input) => {
+	const date: Date = new Date(input);
+	return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
