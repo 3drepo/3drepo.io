@@ -1,4 +1,7 @@
 import { APIService } from './../../home/js/api.service';
+import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
+import { consolidateStreamedStyles } from 'styled-components';
+
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -62,22 +65,24 @@ export interface IMenuItem {
 export class PanelService {
 
 	public static $inject: string[] = [
+		'$filter',
 		'$state',
-
 		'EventService',
 		'TreeService',
-		'APIService'
+		'APIService',
+		'ViewerService'
 	];
 
 	private panelCards: IPanelCards;
 	private templatepanelCards: IPanelCards;
 
 	constructor(
+		private $filter: any,
 		private $state: any,
-
 		private EventService: any,
 		private TreeService: any,
-		private apiService: APIService
+		private apiService: APIService,
+		private viewerService: any
 	) {
 		this.reset();
 	}
@@ -520,16 +525,19 @@ export class PanelService {
 	 *
 	 * @param content The JSON response to download
 	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
-	 * @param contentType content type for downloaded file : "text/plain", "application/json"
+	 * @param modelID Model ID to used to obtain model data.
+	 * @param account User account used as param to obtain model data.
 	 */
 
 	public downloadJSON(fileName, endpoint) {
+		const timestamp = this.$filter('prettyDate')(Date.now(), {showSeconds: false});
+		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : '';
 		this.apiService.get(endpoint).then((res) => {
 			const content = JSON.stringify(res.data, null, 2);
 			const a = document.createElement('a');
 			const file = new Blob([content]);
 			a.href = URL.createObjectURL(file);
-			a.download = fileName + '.json';
+			a.download = `${modelName}_${timestamp}_${fileName}.json`;
 			a.click();
 		});
 	}
@@ -543,10 +551,10 @@ export class PanelService {
 	 * @param menuItem The new menu containing all the menu items for filtering
 	 * @param subItems The menu items that will be added to the new menu
 	 */
-	public setChipFilterMenuItem( panelType: string, menuItem: any, subItems: any[] ) {
-		let panel: IPanelCard = this.panelCards.left.find((pc) => pc.type === panelType );
+	public setChipFilterMenuItem(panelType: string, menuItem: any, subItems: any[]) {
+		let panel: IPanelCard = this.panelCards.left.find((pc) => pc.type === panelType);
 
-		const newMenu: IMenuItem =  {
+		const newMenu: IMenuItem = {
 			hidden: false,
 			value: menuItem.value,
 			label: menuItem.label,
@@ -566,14 +574,14 @@ export class PanelService {
 			this.setPanelMenu(panel, newMenu);
 		}
 
-		panel = this.panelCards.right.find((pc) => pc.type === panelType );
+		panel = this.panelCards.right.find((pc) => pc.type === panelType);
 
 		if (!!panel) {
 			this.setPanelMenu(panel, newMenu);
 		}
 	}
 
-	public setPanelMenu(panel: IPanelCard,  menu: any) {
+	public setPanelMenu(panel: IPanelCard, menu: any) {
 		const oldMenuIndex = panel.menu.findIndex((mi) => mi.value === menu.value);
 
 		if (oldMenuIndex > 0) {
@@ -596,8 +604,8 @@ export class PanelService {
 			(panelCard) => this.setSelectedMenuInPanelCard(panelCard, menuType, menuSubType, selected));
 	}
 
-	public setSelectedMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, selected: boolean) {
-		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+	public setSelectedMenuInPanelCard(panelCard: IPanelCard, menuType: string, menuSubType: string, selected: boolean) {
+		const item = this.getSubmenu(panelCard, menuType, menuSubType);
 		if (!item) { return; }
 		item.selected = selected;
 	}
@@ -607,27 +615,27 @@ export class PanelService {
 			(panelCard) => this.setDateValueFromMenuInPanelCard(panelCard, menuType, menuSubType, value));
 	}
 
-	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard,  menuType: string, menuSubType: string, value: Date ) {
-		const item  = this.getSubmenu(panelCard, menuType, menuSubType);
+	public setDateValueFromMenuInPanelCard(panelCard: IPanelCard, menuType: string, menuSubType: string, value: Date) {
+		const item = this.getSubmenu(panelCard, menuType, menuSubType);
 		if (!item) { return; }
 		item.dateValue = value;
 	}
 
-	public getSubmenu(panelCard: IPanelCard,  menuType: string, menuSubType: string): IMenuItem {
+	public getSubmenu(panelCard: IPanelCard, menuType: string, menuSubType: string): IMenuItem {
 		const menu = panelCard.menu.find((m) => m.value === menuType);
 		if (!menu) { return null; }
-		return menu.menu.find((m) => m.value === menuSubType );
+		return menu.menu.find((m) => m.value === menuSubType);
 	}
 
 	public getPanelsByType(panelCardType: string): IPanelCard[] {
 		const panels: IPanelCard[] = [];
-		let panelCard = this.panelCards.left.find( (pc) => pc.type === panelCardType);
+		let panelCard = this.panelCards.left.find((pc) => pc.type === panelCardType);
 
 		if (panelCard) {
 			panels.push(panelCard);
 		}
 
-		panelCard = this.panelCards.right.find( (pc) => pc.type === panelCardType);
+		panelCard = this.panelCards.right.find((pc) => pc.type === panelCardType);
 
 		if (panelCard) {
 			panels.push(panelCard);
