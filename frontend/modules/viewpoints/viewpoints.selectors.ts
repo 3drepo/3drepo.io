@@ -15,13 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
+import { createSelector } from 'reselect';
 
-export const { Types: ViewsTypes, Creators: ViewsActions } = createActions({
-	createViewpoint: ['teamspace', 'modelId', 'viewName']
-}, { prefix: 'VIEWS_' });
+export const selectViewpointsDomain = (state) => Object.assign({}, state.viewpoints);
 
-export const INITIAL_STATE = {};
+export const selectIsPending = createSelector(
+	selectViewpointsDomain, (state) => state.isPending
+);
 
-export const reducer = createReducer(INITIAL_STATE, {
-});
+export const selectViewpointsItems = createSelector(
+	selectViewpointsDomain, (state) => {
+    console.log('Select viewpoints items', state.items);
+    return state.items
+  }
+);

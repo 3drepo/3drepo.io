@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+export {
+	ViewpointsTypes,
+	ViewpointsActions
+} from './viewpoints.redux';
 
-export const selectViewsDomain = state => Object.assign({}, state.views);
+export * from './viewpoints.selectors';

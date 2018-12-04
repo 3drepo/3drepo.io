@@ -13,7 +13,7 @@ import { reducer as notificationsReducer } from './notifications/notifications.r
 import { reducer as staticPagesReducer } from './staticPages/staticPages.redux';
 import { reducer as gisReducer } from './gis/gis.redux';
 import { reducer as viewerReducer } from './viewer/viewer.redux';
-import { reducer as viewsReducer } from './views/views.redux';
+import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -31,6 +31,6 @@ export default function createReducer() {
 		staticPages: staticPagesReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,
-		views: viewsReducer// <-- INJECT MODULE REDUCER -->
+		viewpoints: viewpointsReducer// <-- INJECT MODULE REDUCER -->
 	});
 }
