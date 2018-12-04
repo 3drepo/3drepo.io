@@ -38,7 +38,3 @@ export const selectUploadStatus = createSelector(
 export const selectMaps = createSelector(
 	selectModelDomain, (state) => state.maps
 );
-
-export const selectViewpoints = createSelector(
-	selectModelDomain, (state) => state.viewpoints
-);

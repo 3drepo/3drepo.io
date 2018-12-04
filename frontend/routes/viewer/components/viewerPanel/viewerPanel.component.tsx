@@ -43,12 +43,14 @@ interface IProps {
 	actions?: any[];
 	renderFooterContent?: () => JSX.Element | null;
 	pending?: boolean;
+	isPadding?: boolean;
 }
 
 export class ViewerCard extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
 		renderFooterContent: () => null,
-		actions: []
+		actions: [],
+		isPadding: true
 	};
 
 	public getTitle = () => {

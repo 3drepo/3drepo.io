@@ -58,9 +58,9 @@ export const TitleIcon = styled.div`
 
 export const ViewerPanelContent = styled.div`
   background-color: ${COLOR.WHITE_87};
-  padding: 24px;
+  padding: ${(props: any) => props.isPadding ? '24px' : '0'};
   overflow: auto;
-`;
+` as any;
 
 export const ViewerPanelFooter = styled.div`
   background-color: ${COLOR.WHITE};
