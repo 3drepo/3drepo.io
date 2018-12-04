@@ -1630,6 +1630,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 													matchingIssue[complexAttr].push(issue[complexAttr][i]);
 												} else {
 													// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
+													matchingIssue[complexAttr] = issue[complexAttr];
 												}
 											}
 											if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
@@ -1729,8 +1730,8 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 						}
 
 						groupData.objects.push({
-							groupAccount,
-							groupModel,
+							account: groupAccount,
+							model: groupModel,
 							ifc_guids: groupObject.objects[groupAccount][groupModel].ifc_guids
 						});
 					}
@@ -2035,7 +2036,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 								if (highlightedGroupObject) {
 									highlightedGroupData = createGroupData(highlightedGroupObject);
 									groupPromises.push(
-										Group.createGroup(groupDbCol, highlightedGroupData).then(group => {
+										Group.createGroup(groupDbCol, undefined, highlightedGroupData).then(group => {
 											vp.highlighted_group_id = utils.stringToUUID(group._id);
 										})
 									);
@@ -2112,13 +2113,13 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 										}
 
 										groupPromises.push(
-											Group.createGroup(groupDbCol, shownGroupData).then(group => {
+											Group.createGroup(groupDbCol, undefined, shownGroupData).then(group => {
 												vp.shown_group_id = utils.stringToUUID(group._id);
 											})
 										);
 									} else if (hiddenGroupObject) {
 										groupPromises.push(
-											Group.createGroup(groupDbCol, createGroupData(hiddenGroupObject)).then(group => {
+											Group.createGroup(groupDbCol, undefined, createGroupData(hiddenGroupObject)).then(group => {
 												vp.hidden_group_id = utils.stringToUUID(group._id);
 											})
 										);

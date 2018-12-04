@@ -29,6 +29,19 @@ const History = require("./history");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
+const fieldTypes = {
+	"description": "[object String]",
+	"name": "[object String]",
+	"author": "[object String]",
+	"createdAt": "[object Number]",
+	"updatedBy": "[object String]",
+	"updatedAt": "[object Number]",
+	"objects": "[object Array]",
+	"color": "[object Array]",
+	"issue_id": "[object Object]",
+	"risk_id": "[object Object]"
+};
+
 const groupSchema = Schema({
 	_id: Object,
 	name: String,
@@ -118,7 +131,7 @@ groupSchema.statics.isIfcGuid = function (value) {
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
+function getObjectsArrayAsIfcGuids(data) {
 
 	const ifcGuidPromises = [];
 
@@ -204,7 +217,7 @@ groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
+			return getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
 				group.objects = ifcObjects;
 				return group;
 			});
@@ -367,21 +380,9 @@ groupSchema.methods.updateGroup = function (dbCol, sessionId, data) {
 
 groupSchema.methods.updateAttrs = function (dbCol, data) {
 
-	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id", "risk_id"];
-		const fieldTypes = {
-			"description": "[object String]",
-			"name": "[object String]",
-			"author": "[object String]",
-			"createdAt": "[object Number]",
-			"updatedBy": "[object String]",
-			"updatedAt": "[object Number]",
-			"objects": "[object Array]",
-			"color": "[object Array]",
-			"issue_id": "[object Object]",
-			"risk_id": "[object Object]"
-		};
 
 		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
@@ -402,11 +403,15 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 		});
 
 		if (typeCorrect) {
-			return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-				return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
-					return { _id: utils.uuidToString(this._id) };
+			if (Object.keys(toUpdate).length !== 0) {
+				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
+					return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
+						return { _id: utils.uuidToString(this._id) };
+					});
 				});
-			});
+			} else {
+				return { _id: utils.uuidToString(this._id) };
+			}
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
@@ -415,30 +420,37 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 };
 
 groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
-	data = _.omit(data, ["focus", "highlighted"]);
-
-	const group = this.model("Group").createInstance({
-		account: dbCol.account,
-		model: dbCol.model
-	});
-
 	const model = dbCol.model;
 
-	group._id = utils.stringToUUID(uuid.v1());
-	return group.save().then((savedGroup) => {
-		return savedGroup.updateAttrs(dbCol, _.cloneDeep(data)).then(() => {
-			data._id = utils.uuidToString(savedGroup._id);
-			if (!data.isIssueGroup) {
-				ChatEvent.newGroups(sessionId, dbCol.account, model, data);
+	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+		let newGroup = this.model("Group").createInstance({
+			account: dbCol.account,
+			model: model
+		});
+
+		Object.keys(data).forEach((key) => {
+			if (data[key]) {
+				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+					if (key === "objects" && data.objects) {
+						newGroup.objects = convertedObjects;
+					} else if (key === "color") {
+						newGroup[key] = data[key].map((c) => parseInt(c, 10));
+					} else {
+						newGroup[key] = data[key];
+					}
+				}
 			}
 
-			return data;
-		}
-			, (err) => {
-			// remove the recently saved new group as update attributes failed
-			return Group.deleteGroup(dbCol, group._id).then(() => {
-				return Promise.reject(err);
-			});
+		});
+
+		newGroup._id = utils.stringToUUID(uuid.v1());
+		return newGroup.save().then((savedGroup) => {
+			savedGroup._id = utils.uuidToString(savedGroup._id);
+			if (!data.isIssueGroup && sessionId) {
+				ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
+			}
+
+			return savedGroup;
 		});
 	});
 };
