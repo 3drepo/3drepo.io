@@ -21,7 +21,7 @@ import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
 
 import { schema } from '../../../services/validation';
-import { SubmitButton } from '../../components/submitButton/submitButton.component';
+
 import {
 	FormContainer,
 	Headline,
@@ -42,8 +42,6 @@ interface IProps {
 	username: string;
 	email: string;
 	isAvatarPending: boolean;
-	isPending: boolean;
-	isInitialized: boolean;
 	onAvatarChange: (file) => void;
 	onUserDataChange: (userData) => void;
 }
@@ -151,9 +149,14 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 							</Grid>
 						</Grid>
 						<Field render={ ({ form }) => (
-							<SubmitButton pending={this.props.isPending} disabled={!form.isValid || form.isValidating}>
+							<StyledButton
+								color="secondary"
+								variant="raised"
+								disabled={!form.isValid || form.isValidating}
+								type="submit"
+							>
 								Update profile
-							</SubmitButton>
+							</StyledButton>
 						)} />
 					</FormContainer>
 				</Form>

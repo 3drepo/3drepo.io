@@ -22,7 +22,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { SubmitButton } from '../components/submitButton/submitButton.component';
 
 export const FormContainer = styled(Grid)`
 	padding: 24px;
@@ -39,8 +38,8 @@ export const Container = styled.div`
 
 export const Headline = styled(Typography)``;
 
-export const StyledButton = styled(SubmitButton)`
-	&&& {
+export const StyledButton = styled(Button)`
+	&& {
 		margin-top: 16px;
 		align-self: flex-end;
 	}

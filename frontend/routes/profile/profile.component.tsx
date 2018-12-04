@@ -29,28 +29,21 @@ interface IProps {
 	onUserDataChange: (userData) => void;
 	onAvatarChange: (file) => void;
 	isAvatarPending: boolean;
-	isPending: boolean;
-	isInitialized: boolean;
 }
 
 export class Profile extends React.PureComponent<IProps, any> {
 
 	public render() {
-		const {
-			currentUser, onUserDataChange, onAvatarChange, onPasswordChange,
-			isAvatarPending, isPending, isInitialized
-		} = this.props;
+		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending, onPasswordChange } = this.props;
 
 		const profileDataFormProps = {
 			isAvatarPending,
-			isPending,
-			isInitialized,
 			onUserDataChange,
 			onAvatarChange,
 			...pick(currentUser, ['firstName', 'lastName', 'email', 'avatarUrl', 'username'])
 		} as any;
 
-		const passwordChangeFormProps = { onPasswordChange, isPending, isInitialized } as any;
+		const passwordChangeFormProps = { onPasswordChange } as any;
 
 		return (
 			<Panel title="Profile">
