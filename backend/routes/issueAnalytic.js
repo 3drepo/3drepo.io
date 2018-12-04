@@ -28,8 +28,8 @@
           * @api {get} /issues/analytics.:format Get Issue Analytics
           * @apiName getIssueAnalytics
           * @apiGroup Issues Analytics
-		  * 
-		  * @apiParam analytics.:format Analytics file to create
+		      * 
+		      * @apiParam analytics.:format Analytics file to create
           */
 
          router.get("/issues/analytics.:format", middlewares.issue.canView, getIssueAnalytics);
