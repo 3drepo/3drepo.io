@@ -159,23 +159,6 @@ export function* fetchMaps({ teamspace, modelId }) {
 	}
 }
 
-export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
-
-export function* fetchViewpoints({ teamspace, modelId }) {
-	try {
-		const { data: viewpoints } = yield API.getModelViewpoints(teamspace, modelId);
-		viewpoints.forEach((viewpoint) => {
-			if (viewpoint.screenshot && viewpoint.screenshot.thumbnail) {
-				viewpoint.screenshot.thumbnailUrl = getThumbnailUrl(viewpoint.screenshot.thumbnail);
-			}
-		});
-
-		yield put(ModelActions.fetchViewpointsSuccess(viewpoints));
-	} catch (e) {
-		yield put(DialogActions.showErrorDialog('get', 'model viewpoints', e.response));
-	}
-}
-
 export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS, fetchSettings);
 	yield takeLatest(ModelTypes.UPDATE_SETTINGS, updateSettings);
@@ -186,5 +169,4 @@ export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.SUBSCRIBE_ON_STATUS_CHANGE, subscribeOnStatusChange);
 	yield takeLatest(ModelTypes.UNSUBSCRIBE_ON_STATUS_CHANGE, unsubscribeOnStatusChange);
 	yield takeLatest(ModelTypes.FETCH_MAPS, fetchMaps);
-	yield takeLatest(ModelTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 }

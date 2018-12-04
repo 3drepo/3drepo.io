@@ -60,10 +60,20 @@ export const ViewpointItem = styled(MenuItem)`
 `;
 
 export const Thumbnail = styled.img`
-  width: 80px;
-  height: 100%;
+  width: 79px;
+  height: 79px;
+`;
+
+export const ThumbnailPlaceholder = styled.div`
+  width: 79px;
+  height: 79px;
+  border: 1px solid ${COLOR.BLACK_20};
 `;
 
 export const Name = styled.h3`
   margin-left: 16px;
+`;
+
+export const EmptyStateInfo = styled.p`
+  padding: 24px;
 `;
