@@ -205,7 +205,7 @@ function getObjectsArrayAsIfcGuids(data) {
 	return Promise.all(ifcGuidPromises).then(ifcObjects => {
 		return ifcObjects;
 	});
-};
+}
 
 groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 
@@ -423,7 +423,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	const model = dbCol.model;
 
 	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
-		let newGroup = this.model("Group").createInstance({
+		const newGroup = this.model("Group").createInstance({
 			account: dbCol.account,
 			model: model
 		});
