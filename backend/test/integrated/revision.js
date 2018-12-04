@@ -137,8 +137,8 @@ describe("Revision", function () {
 
 	it("get tree by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/fulltree.json`)
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.TREE_NOT_FOUND.value);
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -190,28 +190,6 @@ describe("Revision", function () {
 
 	it("get idToMeshes of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/idToMeshes.json`)
-			.expect(200, function(err, res) {
-				done(err);
-			});
-	});
-
-	// meshes
-	it("get all meshes by revision id should succeed", function(done) {
-		agent.get(`/${username}/${model}/revision/7349c6eb-4009-4a4a-af66-701a496dbe2e/meshes.json`)
-			.expect(200, function(err, res) {
-				done(err);
-			});
-	});
-
-	it("get meshes by non existing revision should fail", function(done) {
-		agent.get(`/${username}/${model}/revision/000/meshes.json`)
-			.expect(400, function(err, res) {
-				done(err);
-			});
-	});
-
-	it("get meshes of head of master should succeed", function(done) {
-		agent.get(`/${username}/${model}/revision/master/head/meshes.json`)
 			.expect(200, function(err, res) {
 				done(err);
 			});

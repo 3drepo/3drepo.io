@@ -40,7 +40,8 @@ const historySchema = Schema({
 	timestamp: Date,
 	incomplete: Number,
 	coordOffset: [],
-	current: []
+	current: [],
+	rFile: []
 });
 
 historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {

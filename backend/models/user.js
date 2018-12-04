@@ -1,4 +1,5 @@
 /**
+ *
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,7 +21,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
-const DB = require("../db/db");
+const DB = require("../handler/db");
 const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
@@ -37,11 +38,11 @@ const userBilling = require("./userBilling");
 const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
 const Project = require("./project");
+const FileRef = require("./fileRef");
 
 const schema = mongoose.Schema({
 	_id: String,
 	user: String,
-	// db: String,
 	customData: {
 		firstName: String,
 		lastName: String,
@@ -90,21 +91,19 @@ const schema = mongoose.Schema({
 	roles: [{}]
 });
 
-schema.statics.historyChunksStats = function (dbName) {
+schema.statics.getTeamspaceSpaceUsed = function (dbName) {
+	return DB.getCollection(dbName, "settings").then((col) => {
+		return col.find({}, {_id: 1}).toArray().then((settings) => {
+			const spaceUsedProm = [];
+			settings.forEach((setting) => {
+				spaceUsedProm.push(FileRef.getTotalOrgFileSize(dbName, setting._id));
+			});
 
-	return ModelFactory.dbManager.listCollections(dbName).then(collections => {
-
-		const historyChunks = _.filter(collections, collection => collection.name.endsWith(".history.chunks"));
-		const promises = [];
-
-		historyChunks.forEach(collection => {
-			promises.push(ModelFactory.dbManager.getCollectionStats(dbName, collection.name));
+			return Promise.all(spaceUsedProm).then((spacePerModel) => {
+				return spacePerModel.reduce((total, value) => total + value, 0);
+			});
 		});
-
-		return Promise.all(promises);
-
 	});
-
 };
 
 schema.statics.authenticate = function (logger, username, password) {
@@ -139,17 +138,12 @@ schema.statics.authenticate = function (logger, username, password) {
 	});
 };
 
-// schema.statics.filterRoles = function(roles, database){
-// 	return  database ? _.filter(users, { 'db': database }) : roles;
-// };
-
 schema.statics.findByUserName = function (user) {
 	return this.findOne({ account: "admin" }, { user });
 };
 
 schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
 			.find({
 				$and: [{
@@ -491,8 +485,7 @@ schema.methods.updateInfo = function (updateObj) {
 };
 
 schema.statics.findUsernameOrEmail = function (userNameOrEmail) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
 			.findOne({
 				$or: [
@@ -703,15 +696,10 @@ function _findModelDetails(dbUserCache, username, model) {
 function _calSpace(user) {
 
 	const quota = user.customData.billing.getSubscriptionLimits();
-	return User.historyChunksStats(user.user).then(stats => {
+	return User.getTeamspaceSpaceUsed(user.user).then(sizeInBytes => {
 
-		if (stats && quota.spaceLimit > 0) {
-			let totalSize = 0;
-			stats.forEach(stat => {
-				totalSize += stat.size;
-			});
-
-			quota.spaceUsed = totalSize / (1024 * 1024); // In MiB
+		if (quota.spaceLimit > 0) {
+			quota.spaceUsed = sizeInBytes / (1024 * 1024); // In MiB
 		} else if (quota) {
 			quota.spaceUsed = 0;
 		}
@@ -982,8 +970,7 @@ schema.methods.updateSubscriptions = function (plans, billingUser, billingAddres
 };
 
 function updateUser(username, update) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol.update({ user: username }, update);
 	});
 
@@ -1193,8 +1180,7 @@ schema.statics.isHereEnabled = function (username) {
 };
 
 function _isHereEnabled(username) {
-	const db = require("../db/db");
-	return db.getCollection("admin", "system.users").then(dbCol => {
+	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol.findOne({ user: username }, { _id: 0, "customData.hereEnabled": 1 })
 			.then((isHereEnabledResult) => {
 				return isHereEnabledResult.customData.hereEnabled;

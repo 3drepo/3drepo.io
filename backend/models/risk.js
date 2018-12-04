@@ -19,13 +19,11 @@
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
-const db = require("../db/db");
+const db = require("../handler/db");
 
 const ModelSetting = require("./modelSetting");
 const History = require("./history");
 const Ref = require("./ref");
-const GenericObject = require("./base/repo").GenericObject;
-// const middlewares = require("../middlewares/middlewares");
 const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
@@ -162,15 +160,6 @@ risk.createRisk = function(dbCol, newRisk) {
 
 	if (!newRisk.desc || newRisk.desc === "") {
 		newRisk.desc = "(No Description)"; // TODO do we really want this stored?
-	}
-
-	if (newRisk.object_id) {
-		riskAttrPromises.push(
-			GenericObject.getSharedId(dbCol, newRisk.object_id).then((sid) => {
-				newRisk.parent = utils.stringToUUID(sid);
-			})
-		);
-		newRisk.object_id = utils.stringToUUID(newRisk.object_id);
 	}
 
 	// TODO do we want revId like this?

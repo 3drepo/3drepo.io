@@ -22,7 +22,7 @@ const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
-const db = require("../db/db");
+const db = require("../handler/db");
 
 const MODELS_COLL = "settings";
 
