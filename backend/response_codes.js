@@ -223,6 +223,8 @@
 		ISSUE_UPDATE_PERMISSION_DECLINED: { message: "No permission to update issue", status: 400 },
 		ISSUE_UPDATE_FAILED: { message: "Failed updating issue", status: 500 },
 
+		REMOVE_MODEL_FAILED: { message: "Failed to remove data associated with model", status: 500 },
+
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		ISSUE_DUPLICATE_TOPIC_TYPE: { message: "Two or more topic types given are the same", status: 400 },
 
@@ -449,21 +451,28 @@
 
 		let length = 0;
 
-		if (customHeaders) {
-			res.writeHead(responseCodes.OK.status, customHeaders);
-		}
+		let response = responseCodes.OK;
 
-		readStream.on("end", () => {
+		readStream.on("error", error => {
+			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`);
+			response = responseCodes.NO_FILE_FOUND;
+			res.status(response.status);
 			res.end();
-			req[C.REQ_REPO].logger.logInfo("Responded with " + responseCodes.OK.status, {
-				httpCode: responseCodes.OK.status,
-				contentLength: length
-			});
-		});
-
-		readStream.on("data", data => {
+		}).once("data", () => {
+			if (customHeaders) {
+				res.writeHead(response.status, customHeaders);
+			} else {
+				res.status(response.status);
+			}
+		}).on("data", (data) => {
 			res.write(data);
 			length += data.length;
+		}).on("end", () => {
+			res.end();
+			req[C.REQ_REPO].logger.logInfo("Responded with " + response.status, {
+				httpCode: response.status,
+				contentLength: length
+			});
 		});
 	};
 

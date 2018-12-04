@@ -25,7 +25,6 @@ const stringToUUID = utils.stringToUUID;
 const uuidToString = utils.uuidToString;
 const History = require("./history");
 const Ref = require("./ref");
-const GenericObject = require("./base/repo").GenericObject;
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
@@ -82,7 +81,6 @@ actionSchema.set("toObject", { virtuals: true, getters:true });
 
 const schema = Schema({
 	_id: Object,
-	object_id: Object,
 	rev_id: Object,
 	name: { type: String, required: true },
 	topic_type: String,
@@ -509,8 +507,6 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean) {
 
 schema.statics.createIssue = function(dbColOptions, data) {
 
-	const objectId = data.object_id;
-
 	const promises = [];
 
 	const issue = Issue.createInstance(dbColOptions);
@@ -518,14 +514,6 @@ schema.statics.createIssue = function(dbColOptions, data) {
 
 	if(!data.name) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
-	}
-
-	if(objectId) {
-		promises.push(
-			GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
-				issue.parent = stringToUUID(sid);
-			})
-		);
 	}
 
 	let branch;
@@ -550,7 +538,6 @@ schema.statics.createIssue = function(dbColOptions, data) {
 	}).then(count => {
 
 		issue.number  = count + 1;
-		issue.object_id = objectId && stringToUUID(objectId);
 		issue.name = data.name;
 		issue.created = (new Date()).getTime();
 		issue.owner = data.owner;

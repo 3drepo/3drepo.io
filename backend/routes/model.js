@@ -25,6 +25,7 @@ const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
+const JSONAssets = require("../models/jsonAssets");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -48,8 +49,6 @@ router.post("/model",
 	middlewares.canCreateModel,
 	createModel
 );
-router.get("/:model/revision/master/head/meshes.json", middlewares.hasReadAccessToModel, getAllMeshes);
-router.get("/:model/revision/:rev/meshes.json", middlewares.hasReadAccessToModel, getAllMeshes);
 
 // Unity information
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
@@ -296,120 +295,98 @@ function deleteModel(req, res, next) {
 	});
 }
 
-function getAllMeshes(req, res,next) {
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getAllMeshes(account, model, branch, req.params.rev, username).then(meshes => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, meshes.results);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
 function getIdMap(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getIdMap(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
+		req.session.user.username
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getIdMap(account, model, branch, req.params.rev, username).then(idMap => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, idMap.idMaps);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function getIdToMeshes(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getIdToMeshes(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
+		req.session.user.username
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getIdToMeshes(account, model, branch, req.params.rev, username).then(idToMeshes => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, idToMeshes);
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function getModelTree(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getTree(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	const data = ModelHelpers.getFullTree_noSubTree(account, model, branch, req.params.rev, username);
-
-	data.readStreamPromise.then(readStream => {
 		const headers = {
 			"Content-Type" : "application/json"
 		};
-		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || err, err.resCode ? {} : err);
-	});
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
-	// There may be some errors generated during the streaming process but it is to late and unable to return to client anymore
-	data.outputingPromise.catch(err => {
-		// log error
-		req[C.REQ_REPO].logger.logError(JSON.stringify(err));
-		req[C.REQ_REPO].logger.logError(err.stack);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function getModelProperties(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getModelProperties(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
+		req.session.user.username
+	).then(file => {
 
-	const account = req.params.account;
-	const model = req.params.model;
-	const username = req.session.user.username;
-	let branch;
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getModelProperties(account, model, branch, req.params.rev, username).then(properties => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, properties);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function getTreePath(req, res, next) {
+	const revId = req.params.rev;
+	JSONAssets.getTreePath(
+		req.params.account,
+		req.params.model,
+		revId ? undefined : C.MASTER_BRANCH_NAME,
+		revId,
+		req.session.user.username
+	).then(file => {
 
-	const model = req.params.model;
-	const account = req.params.account;
-	const username = req.session.user.username;
-	let branch;
-
-	if (!req.params.rev) {
-		branch = C.MASTER_BRANCH_NAME;
-	}
-
-	ModelHelpers.getTreePath(account, model, branch, req.params.rev, username).then(treePath => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, treePath);
+		const headers = {
+			"Content-Type" : "application/json"
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -442,13 +419,9 @@ function downloadLatest(req, res, next) {
 	ModelHelpers.downloadLatest(req.params.account, req.params.model).then(file => {
 
 		const headers = {
-			"Content-Length": file.meta.length,
-			"Content-Disposition": "attachment;filename=" + file.meta.filename
+			"Content-Length": file.size,
+			"Content-Disposition": "attachment;filename=" + file.fileName
 		};
-
-		if (file.meta.contentType) {
-			headers["Content-Type"] = "application/json";
-		}
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
@@ -628,8 +601,12 @@ function getJsonMpc(req, res, next) {
 	const account = req.params.account;
 	const id = req.params.uid;
 
-	ModelHelpers.getJsonMpc(account, model, id).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
+		const headers = {
+			"Content-Length": file.size,
+			"Content-Disposition": "attachment;filename=" + file.fileName
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -641,9 +618,12 @@ function getUnityBundle(req, res, next) {
 	const account = req.params.account;
 	const id = req.params.uid;
 
-	ModelHelpers.getUnityBundle(account, model, id).then(obj => {
-		req.params.format = "unity3d";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	UnityAssets.getUnityBundle(account, model, id).then(file => {
+		const headers = {
+			"Content-Length": file.size,
+			"Content-Disposition": "attachment;filename=" + file.fileName
+		};
+		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

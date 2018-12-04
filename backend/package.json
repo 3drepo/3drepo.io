@@ -2,7 +2,7 @@
   "name": "3drepo.io-backend",
   "version": "1.0.0",
   "engines": {
-	  "node" : "^8.0.0"
+    "node": "^8.0.0"
   },
   "private": true,
   "scripts": {
@@ -30,6 +30,7 @@
     "app-config": "0.1.5",
     "archiver": "1.1.0",
     "async": "1.5.2",
+    "aws-sdk": "2.344.0",
     "body-parser": "1.15.0",
     "compression": "1.6.1",
     "cors": "2.7.1",

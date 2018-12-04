@@ -75,6 +75,12 @@ module.exports = {
 		username: 'admintesting',
 		password: 'admintesting'
 	},
+	s3: {
+		accessKey: process.env.S3_ACCESS_KEY,
+        secretKey: process.env.S3_SECRET_KEY,
+        region: "eu-west-2",
+		bucketName: "3drepo-travis"
+	},
 	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
