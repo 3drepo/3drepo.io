@@ -32,6 +32,7 @@ const hereTrafficDomain = ".traffic.maps.cit.api.here.com";
  * @api {get} .:model/maps List all Maps
  * @apiName listMaps
  * @apiGroup Maps
+ * 
  * @apiParam {String} model Model to list maps for .
  */
 
@@ -41,28 +42,231 @@ router.get("/:model/maps/", listMaps);
  * @api {get} /:model/maps/osm/:zoomLevel/:gridx/:gridy.png Get OSMT file
  * @apiName getOSMTile
  * @apiGroup Maps
+ * 
  * @apiParam {Number} zoomLevel Map Zoom level.
- * @apiParam model Model to list maps for 
- * @apiParam model Model to list maps for 
+ * @apiParam {String} model Model to list maps for 
  */
 
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
+
+/**
+ * @api {get} /:model/maps/hereinfo/ Get Here Base Info
+ * @apiName getHereBaseInfo
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ */
+
 router.get("/:model/maps/hereinfo/", middlewares.isHereEnabled, getHereBaseInfo);
+
+/**
+ * @api {get} /:model/maps/here/:zoomLevel/:gridx/:gridy.png Get Here Maps Tile
+ * @apiName getHereMapsTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level 
+ * @apiParam {Number} number of tiles along row (x-cordinate) 
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereMapsTile);
+
+/**
+ * @api {get} /:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png Get Here Aerial Maps Tile
+ * @apiName getHereAerialMapsTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} The number of tiles along row (x-cordinate) 
+ * @apiParam {String} Map image type (format) to return
+ */
+
 router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAerialMapsTile);
+
+/**
+ * @api {get} /:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png Get Here Traffic Tile
+ * @apiName getHereTrafficTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} number of tiles along row (x-cordinate) 
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficTile);
+
+/**
+ * @api {get} /:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png Get Here Traffic Flow
+ * @apiName getHereTrafficTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficFlowTile);
+
+/**
+ * @api {get} /:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png Get Here Terrain Tile
+ * @apiName getHereTerrainTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTerrainTile);
+
+/**
+ * @api {get} /:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png Get Here Hybrid Tile
+ * @apiName getHereHybridTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereHybridTile);
+
+/**
+ * @api {get} /:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png Get Here Grey Tile
+ * @apiName getHereGreyTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTile);
+
+/**
+ * @api {get} /:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png Get Here Transit Tile
+ * @apiName getHereGreyTransitTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTransitTile);
+
+/**
+ * @api {get} /:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png Get Here Truck Restrictions
+ * @apiName getHereTruckRestrictionsTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTruckRestrictionsTile);
+
+/**
+ * @api {get} /:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png Get Here Truck Restrictions Overlay Tile
+ * @apiName getHereTruckRestrictionsOverlayTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for 
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTruckRestrictionsOverlayTile);
+
+/**
+ * @api {get} /:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png Get Here Admin Label Tile
+ * @apiName getHereAdminLabelOverlayTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAdminLabelOverlayTile);
+
+/**
+ * @api {get} /:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png Get Here Label Overlay Tile
+ * @apiName getHereAdminLabelOverlayTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereLabelOverlayTile);
+
+
+/**
+ * @api {get} /:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png Get Here Line Label Overlay Tile
+ * @apiName getHereLineLabelOverlayTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
+
 router.get("/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereLineLabelOverlayTile);
+
+/**
+ * @api {get} /:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png Get Here Tollzone Tile
+ * @apiName getHereTollZoneTile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTollZoneTile);
-router.get("/:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHerePOITile);
+
+/**
+ * @api {get} /:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png Get Here POI (Point of Interest) Tile 
+ * @apiName getHerePOITile
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate) 
+ * @apiParam {String}  Map image type (format) to return
+ */
+
+router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHerePOITile);
+
+/**
+ * @api {get} /:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png Get Here Buildings From Longitude and Latitude
+ * @apiName getHereBuildingsFromLongLat
+ * @apiGroup Maps
+ * 
+ * @apiParam {String} model Model to list maps for
+ * @apiParam {Number} zoomLevel Map Zoom level
+ * @apiParam {Number} of tiles along row (x-cordinate)
+ * @apiParam {String}  Map image type (format) to return
+ */
+
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res) {
