@@ -1347,7 +1347,7 @@ schema.methods.getBCFMarkup = function(account, model, unit) {
 					}
 				}).catch(()=> {
 					// catching this error and ignoring - if we can't find the group, we should still export the issue.
-					systemLogger.logInfo("Failed to find group - " + highlightedGroupId);
+					systemLogger.logInfo("Failed to find group - " + utils.uuidToString(highlightedGroupId));
 				})
 			);
 		}
@@ -1383,7 +1383,7 @@ schema.methods.getBCFMarkup = function(account, model, unit) {
 					}
 				}).catch(()=> {
 					// catching this error and ignoring - if we can't find the group, we should still export the issue.
-					systemLogger.logInfo("Failed to find group - " + hiddenGroupId);
+					systemLogger.logInfo("Failed to find group - " + utils.uuidToString(hiddenGroupId));
 				})
 			);
 		}
@@ -1419,7 +1419,7 @@ schema.methods.getBCFMarkup = function(account, model, unit) {
 					}
 				}).catch(()=> {
 					// catching this error and ignoring - if we can't find the group, we should still export the issue.
-					systemLogger.logInfo("Failed to find group - " + shownGroupId);
+					systemLogger.logInfo("Failed to find group - " + utils.uuidToString(shownGroupId));
 				})
 			);
 		}

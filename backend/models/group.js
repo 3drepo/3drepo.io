@@ -131,7 +131,7 @@ groupSchema.statics.isIfcGuid = function (value) {
 /**
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
-function getObjectsArrayAsIfcGuids(data) {
+groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
 
 	const ifcGuidPromises = [];
 
@@ -205,7 +205,7 @@ function getObjectsArrayAsIfcGuids(data) {
 	return Promise.all(ifcGuidPromises).then(ifcObjects => {
 		return ifcObjects;
 	});
-}
+};
 
 groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 
@@ -217,7 +217,7 @@ groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
+			return group.getObjectsArrayAsIfcGuids(null, false).then(ifcObjects => {
 				group.objects = ifcObjects;
 				return group;
 			});
@@ -380,7 +380,7 @@ groupSchema.methods.updateGroup = function (dbCol, sessionId, data) {
 
 groupSchema.methods.updateAttrs = function (dbCol, data) {
 
-	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
 		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id", "risk_id"];
 
@@ -422,12 +422,12 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	const model = dbCol.model;
 
-	return getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
-		const newGroup = this.model("Group").createInstance({
-			account: dbCol.account,
-			model: model
-		});
+	const newGroup = this.model("Group").createInstance({
+		account: dbCol.account,
+		model: model
+	});
 
+	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		Object.keys(data).forEach((key) => {
 			if (data[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
