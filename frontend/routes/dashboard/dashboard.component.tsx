@@ -49,6 +49,7 @@ const MENU_ITEMS = [
 interface IProps {
 	match: any;
 	isPending: boolean;
+	isInitialized: boolean;
 	isAvatarPending: boolean;
 	currentUser: any;
 	fetchUser: (username) => void;
@@ -95,7 +96,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public renderDashboardRoute = ({match}) => (
 		<Content>
-			{ this.props.isPending
+			{ !this.props.isInitialized && this.props.isPending
 				? <RoutePlaceholder />
 				: this.renderRoutes(match, this.props.currentUser)
 			}
@@ -103,7 +104,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { match, currentUser, isPending, isAvatarPending } = this.props;
+		const { match, currentUser, isPending, isInitialized, isAvatarPending } = this.props;
 		return (
 			<Container
 				container={true}
@@ -114,7 +115,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				<Sidebar>
 					<UserInfo
 						{...currentUser}
-						loading={isPending || isAvatarPending}
+						loading={!isInitialized && (isPending || isAvatarPending)}
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>

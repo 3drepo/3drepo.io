@@ -41,12 +41,13 @@ export function* fetchUser({ username }) {
 				avatarUrl: getAvatarUrl(username)
 			})),
 			put(TeamspacesActions.setTeamspaces(accounts)),
-			put(CurrentUserActions.setPendingState(false))
+			put(CurrentUserActions.setAsInitialized())
 		]);
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('fetch', 'user data', e.response));
-		yield put(CurrentUserActions.setPendingState(false));
 	}
+
+	yield put(CurrentUserActions.setPendingState(false));
 }
 
 export function* fetchQuotaInfo({ teamspace }) {
@@ -85,7 +86,6 @@ export function* updateUserPassword({ passwords }) {
 		if (code === 'INCORRECT_USERNAME_OR_PASSWORD') {
 			e.response.data.message = 'Your old password was incorrect';
 		}
-
 		yield put(DialogActions.showErrorDialog('update', 'password', e.response));
 	}
 }

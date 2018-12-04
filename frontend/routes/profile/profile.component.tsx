@@ -17,10 +17,6 @@
 
 import * as React from 'react';
 import { pick } from 'lodash';
-import Dropzone from 'react-dropzone';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Panel } from '../components/panel/panel.component';
 import { ProfileDataForm } from './components/profileDataForm.component';
@@ -33,21 +29,28 @@ interface IProps {
 	onUserDataChange: (userData) => void;
 	onAvatarChange: (file) => void;
 	isAvatarPending: boolean;
+	isPending: boolean;
+	isInitialized: boolean;
 }
 
 export class Profile extends React.PureComponent<IProps, any> {
 
 	public render() {
-		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending, onPasswordChange } = this.props;
+		const {
+			currentUser, onUserDataChange, onAvatarChange, onPasswordChange,
+			isAvatarPending, isPending, isInitialized
+		} = this.props;
 
 		const profileDataFormProps = {
 			isAvatarPending,
+			isPending,
+			isInitialized,
 			onUserDataChange,
 			onAvatarChange,
 			...pick(currentUser, ['firstName', 'lastName', 'email', 'avatarUrl', 'username'])
 		} as any;
 
-		const passwordChangeFormProps = { onPasswordChange } as any;
+		const passwordChangeFormProps = { onPasswordChange, isPending, isInitialized } as any;
 
 		return (
 			<Panel title="Profile">

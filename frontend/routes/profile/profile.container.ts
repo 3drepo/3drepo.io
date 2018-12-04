@@ -20,11 +20,19 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
 import { Profile } from './profile.component';
-import { CurrentUserActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/currentUser';
+import {
+	CurrentUserActions,
+	selectCurrentUser,
+	selectIsAvatarPending,
+	selectIsInitialized,
+	selectIsPending
+} from '../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
-	isAvatarPending: selectIsAvatarPending
+	isAvatarPending: selectIsAvatarPending,
+	isPending: selectIsPending,
+	isInitialized: selectIsInitialized
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
