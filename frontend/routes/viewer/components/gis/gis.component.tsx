@@ -17,12 +17,11 @@
 
 import * as React from 'react';
 import { isEmpty, includes } from 'lodash';
-import { withFormik } from 'formik';
 
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
-import { SettingsForm, SettingsSchema } from './components/settingsForm/settingsForm.component';
+import { Settings } from './components/settings/settings.component';
 
 import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
@@ -178,46 +177,6 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		return [];
 	}
 
-	public renderSettings = () => {
-		let formValues = {} as any;
-		const settings = this.props.settings;
-
-		if (settings.surveyPoints && settings.surveyPoints.length) {
-			const [{
-				position: [axisX, axisY, axisZ],
-				latLong: [latitude, longitude]
-			}] = settings.surveyPoints;
-
-			formValues = { axisX, axisY, axisZ, latitude, longitude };
-		}
-
-		formValues.angleFromNorth = settings.angleFromNorth || 0;
-
-		const EnhancedSettingsForm = withFormik({
-			mapPropsToValues: () => (formValues),
-			handleSubmit: (values) => {
-				const { angleFromNorth, axisX, axisY, axisZ, latitude, longitude } = values;
-
-				const pointsSettings = {
-					angleFromNorth,
-					surveyPoints: [{
-						position: [axisX, axisY, axisZ],
-						latLong: [latitude, longitude]
-					}]
-				};
-
-				const { teamspace, modelId } = this.getDataFromPathname();
-				const project = localStorage.getItem('lastProject');
-				const modelData = { teamspace, project, modelId };
-
-				this.props.updateModelSettings(modelData, pointsSettings);
-			},
-			validationSchema: SettingsSchema
-		})(SettingsForm);
-
-		return <EnhancedSettingsForm />;
-	}
-
 	public handleChangeMapProvider = (event) => {
 		this.setState({
 			activeMapIndex: event.target.value
@@ -262,9 +221,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 		return (
 			<ViewerPanelContent>
-				<StyledSelect
-					onChange={this.handleChangeMapProvider}
-					value={activeMapIndex}>
+				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{this.renderLayers(mapsProviders[activeMapIndex].layers)}
@@ -282,8 +239,15 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				actions={this.getActions()}
 				pending={this.props.isPending}
 			>
-				{settingsModeActive ? this.renderSettings() : this.renderMapLayers()}
+				{settingsModeActive
+					? <Settings
+							values={this.props.settings}
+							updateModelSettings={this.props.updateModelSettings}
+							getDataFromPathname={this.getDataFromPathname}
+						/>
+					: this.renderMapLayers()
+				}
 			</ViewerPanel>
-		);
+	);
 	}
 }
