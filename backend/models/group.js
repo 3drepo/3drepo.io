@@ -429,6 +429,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		Object.keys(data).forEach((key) => {
+			console.log("key: " + key);
 			if (fieldTypes[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
