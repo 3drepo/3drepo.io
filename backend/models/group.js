@@ -428,8 +428,10 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	});
 
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
+
+		let typeCorrect = true;
+
 		Object.keys(data).forEach((key) => {
-			console.log("key: " + key);
 			if (fieldTypes[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
@@ -440,21 +442,25 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 						newGroup[key] = data[key];
 					}
 				} else {
-					return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+					typeCorrect = false;
 				}
 			}
 
 		});
 
 		newGroup._id = utils.stringToUUID(uuid.v1());
-		return newGroup.save().then((savedGroup) => {
-			savedGroup._id = utils.uuidToString(savedGroup._id);
-			if (!data.isIssueGroup && sessionId) {
-				ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
-			}
+		if (typeCorrect) {
+			return newGroup.save().then((savedGroup) => {
+				savedGroup._id = utils.uuidToString(savedGroup._id);
+				if (!data.isIssueGroup && sessionId) {
+					ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
+				}
 
-			return savedGroup;
-		});
+				return savedGroup;
+			});
+		} else {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
 	});
 };
 
