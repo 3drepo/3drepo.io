@@ -87,24 +87,30 @@ export function* generateViewpointObject(teamspace, modelId, viewName) {
 	}
 }
 
-export function* createViewpoint({teamspace, modelId, viewName}) {
+export function* createViewpoint({teamspace, modelId, viewpointName}) {
 	try {
-		const view = yield generateViewpointObject(teamspace, modelId, viewName);
+		const view = yield generateViewpointObject(teamspace, modelId, viewpointName);
 		const { data: {_id} } = yield API.createModelViewpoint(teamspace, modelId, view);
 
-		view._id = _id;
-		view.screenshot.thumbnailUrl = getThumbnailUrl(`${teamspace}/${modelId}/viewpoints/${view._id}/thumbnail.png`);
+		// view._id = _id;
+		// view.screenshot.thumbnailUrl = getThumbnailUrl(`${teamspace}/${modelId}/viewpoints/${view._id}/thumbnail.png`);
 
-		yield put(ViewpointsActions.createViewpointSuccess(view));
 	} catch (error) {
 		console.error(error);
 	}
 }
 
-export function* deleteViewpoint({teamspace, modelId, viewId}) {
+export function* updateViewpoint({teamspace, modelId, viewpointId, newName}) {
 	try {
-		yield API.deleteModelViewpoint(teamspace, modelId, viewId);
-		yield put(ViewpointsActions.deleteModelViewpointSuccess(viewId));
+		yield API.updateModelViewpoint(teamspace, modelId, viewpointId, newName);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
+	try {
+		yield API.deleteModelViewpoint(teamspace, modelId, viewpointId);
 	} catch (error) {
 		console.error(error);
 	}
@@ -112,30 +118,63 @@ export function* deleteViewpoint({teamspace, modelId, viewId}) {
 
 export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 	const notificationService = yield getAngularService('NotificationService');
-	const viewsNotifications = notificationService.getChannel(teamspace, modelId).views;
+	const viewsNotifications = yield notificationService.getChannel(teamspace, modelId).views;
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
 	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+	const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
 
 	viewsNotifications.subscribeToUpdated(onUpdated, this);
 	viewsNotifications.subscribeToCreated(onCreated, this);
+	viewsNotifications.subscribeToDeleted(onDeleted, this);
 }
 
 export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	const notificationService = yield getAngularService('NotificationService');
-	const viewsNotifications = notificationService.getChannel(teamspace, modelId).views;
+	const viewsNotifications = yield notificationService.getChannel(teamspace, modelId).views;
 
-	const onUpdated = (updatedModel) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedModel));
-	const onCreated = (createdModel) => dispatch(ViewpointsActions.createViewpointSuccess(createdModel));
+	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
+	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+	const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
 
 	viewsNotifications.unsubscribeFromUpdated(onUpdated);
-	viewsNotifications.unsubscribeToCreated(onCreated);
+	viewsNotifications.unsubscribeFromCreated(onCreated);
+	viewsNotifications.unsubscribeFromDeleted(onDeleted);
+}
+
+export function* showViewpoint({ teamspace, modelId, view }) {
+	try {
+		const ViewerService = yield getAngularService('ViewerService') as any;
+
+		if (view) {
+			if (view.viewpoint) {
+				view.viewpoint.account = teamspace;
+				view.viewpoint.model = modelId;
+
+				yield ViewerService.setCamera(view.viewpoint);
+			}
+
+			if (view.clippingPlanes) {
+				const clipData = {
+					clippingPlanes: view.clippingPlanes,
+					account: teamspace,
+					modelId
+				};
+
+				yield ViewerService.updateClippingPlanes(clipData);
+			}
+		}
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeLatest(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
+	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
+	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 }
