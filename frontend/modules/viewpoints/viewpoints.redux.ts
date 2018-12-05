@@ -22,14 +22,15 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setPendingState: ['pendingState'],
 	fetchViewpoints: ['teamspace', 'modelId'],
 	fetchViewpointsSuccess: ['viewpoints'],
-	createViewpoint: ['teamspace', 'modelId', 'viewName'],
+	createViewpoint: ['teamspace', 'modelId', 'viewpointName'],
 	createViewpointSuccess: ['viewpoint'],
-	updateViewpoint: ['teamspace', 'modelId', 'viewName'],
+	updateViewpoint: ['teamspace', 'modelId', 'viewpointId', 'newName'],
 	updateViewpointSuccess: ['viewpoint'],
 	deleteViewpoint: ['teamspace', 'modelId', 'viewpointId'],
 	deleteViewpointSuccess: ['viewpointId'],
 	subscribeOnViewpointChanges: ['teamspace', 'modelId'],
-	unsubscribeOnViewpointChanges: ['teamspace', 'modelId']
+	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
+	showViewpoint: ['teamspace', 'modelId', 'view']
 }, { prefix: 'VIEWPOINTS_' });
 
 export const INITIAL_STATE = {
