@@ -96,6 +96,10 @@ FileRef.getUnityBundle = function(account, model, fileName) {
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
+	return fetchFile(account, model + JSON_FILE_REF_EXT, fileName);
+};
+
+FileRef.getJSONFileStream = function(account, model, fileName) {
 	return fetchFileStream(account, model + JSON_FILE_REF_EXT, fileName);
 };
 

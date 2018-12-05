@@ -602,11 +602,7 @@ function getJsonMpc(req, res, next) {
 	const id = req.params.uid;
 
 	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
-		const headers = {
-			"Content-Length": file.size,
-			"Content-Disposition": "attachment;filename=" + file.fileName
-		};
-		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

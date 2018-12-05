@@ -71,7 +71,7 @@ function getFileFromRef(ref, username, filename) {
 				if (revInfo) {
 					const revision = utils.uuidToString(revInfo._id);
 					const fullFileName = `${revision}/${filename}`;
-					return FileRef.getJSONFile(ref.owner, ref.project, fullFileName).then((fileRef) => {
+					return FileRef.getJSONFileStream(ref.owner, ref.project, fullFileName).then((fileRef) => {
 						fileRef.account = ref.owner;
 						fileRef.model = ref.project;
 						return fileRef;
@@ -123,14 +123,14 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 			const subTreesPromise = getFileFromSubModels(account, model, history.current, username, `${filename}.json`);
 
 			if (allowNotFound) {
-				mainTreePromise = FileRef.getJSONFile(account, model, treeFileName).catch(() => {
+				mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName).catch(() => {
 					const fakeStream = Stream.PassThrough();
 					fakeStream.write(JSON.stringify(defaultValues));
 					fakeStream.end();
 					return { fileName: treeFileName, readStream: fakeStream };
 				});
 			} else {
-				mainTreePromise = FileRef.getJSONFile(account, model, treeFileName);
+				mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
 			}
 
 			return mainTreePromise.then((file) => {
@@ -171,8 +171,7 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 JSONAssets.getSuperMeshMapping = function(account, model, id) {
 	const name = `${id}.json.mpc`;
 	return FileRef.getJSONFile(account, model, name).then((file) => {
-		file.fileName = name;
-		return file;
+		return file.Body;
 	});
 };
 
@@ -181,7 +180,7 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 		if(history) {
 			const revId = utils.uuidToString(history._id);
 			const treeFileName = `${revId}/fulltree.json`;
-			const mainTreePromise = FileRef.getJSONFile(account, model, treeFileName);
+			const mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
 			const subTreesPromise = getSubTreeInfo(account, model, history.current);
 
 			return mainTreePromise.then((file) => {
