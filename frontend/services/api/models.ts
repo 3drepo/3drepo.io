@@ -108,10 +108,40 @@ export const getModelMaps = (teamspace, modelId) => {
 };
 
 /**
- * Get model maps
+ * Get model viewpoints
  * @param teamspace
  * @param modelId
  */
 export const getModelViewpoints = (teamspace, modelId) => {
 	return api.get(`${teamspace}/${modelId}/viewpoints`);
+};
+
+/**
+ * Create model viewpoint
+ * @param teamspace
+ * @param modelId
+ */
+export const createModelViewpoint = (teamspace, modelId, view) => {
+	return api.post(`${teamspace}/${modelId}/viewpoints`, view);
+};
+
+/**
+ * Delete model viewpoint
+ * @param teamspace
+ * @param modelId
+ * @param viewId
+ */
+export const deleteModelViewpoint = (teamspace, modelId, viewId) => {
+	return api.delete(`${teamspace}/${modelId}/viewpoints/${viewId}`);
+};
+
+/**
+ * Update model viewpoint name
+ * @param teamspace
+ * @param modelId
+ * @param viewId
+ * @param newName
+ */
+export const updateModelViewpoint = (teamspace, modelId, viewId, newName) => {
+	return api.put(`${teamspace}/${modelId}/viewpoints/${viewId}`, { name: newName });
 };

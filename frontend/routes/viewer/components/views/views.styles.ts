@@ -18,6 +18,10 @@
 import styled from 'styled-components';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
+import TextField from '@material-ui/core/TextField';
+import SaveIcon from '@material-ui/icons/Save';
+import CancelIcon from '@material-ui/icons/Cancel';
+import Input from '@material-ui/core/Input';
 
 import { COLOR } from '../../../../styles/colors';
 
@@ -30,16 +34,12 @@ export const FooterWrapper = styled.div`
 
 export const ViewsCountInfo = styled.p`
   color: ${COLOR.BLACK_40};
-  width: 100%;
-  text-align: center;
-  position: absolute;
-  left: 0;
+  text-align: left;
   height: 100%;
-  top: 0;
   margin: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  width: 100%;
 `;
 
 export const ViewpointsList = styled(MenuList)`
@@ -52,12 +52,13 @@ export const ViewpointItem = styled(MenuItem)`
   && {
     height: 80px;
     padding: 8px;
+    background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
   }
 
   &&:not(:first-child) {
     border-top: 1px solid ${COLOR.BLACK_20};
   }
-`;
+` as any;
 
 export const Thumbnail = styled.img`
   width: 79px;
@@ -76,4 +77,42 @@ export const Name = styled.h3`
 
 export const EmptyStateInfo = styled.p`
   padding: 24px;
+`;
+
+export const NewViewpointName = styled(TextField)`
+  && {
+    margin-left: 12px;
+  }
+`;
+
+export const NewItemWrapper = styled.div`
+  display: flex;
+  flex: 1;
+`;
+
+export const StyledSaveIcon = styled(SaveIcon)`
+  && {
+    cursor: pointer;
+
+    &:hover {
+      color: ${COLOR.BLACK_40};
+    }
+  }
+`;
+
+export const StyledCancelIcon = styled(CancelIcon)`
+  && {
+    cursor: pointer;
+
+    &:hover {
+      color: ${COLOR.BLACK_40};
+    }
+  }
+`;
+
+export const SearchField = styled(Input)`
+  && {
+    padding: 12px;
+    width: 100%;
+  }
 `;

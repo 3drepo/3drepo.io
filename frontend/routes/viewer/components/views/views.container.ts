@@ -30,9 +30,11 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchViewpoints: ViewpointsActions.fetchViewpoints,
 	createViewpoint: ViewpointsActions.createViewpoint,
+	updateViewpoint: ViewpointsActions.updateViewpoint,
 	deleteViewpoint: ViewpointsActions.deleteViewpoint,
 	subscribeOnViewpointChanges: ViewpointsActions.subscribeOnViewpointChanges,
-	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges
+	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges,
+	showViewpoint: ViewpointsActions.showViewpoint
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Views)));
