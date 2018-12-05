@@ -81,8 +81,7 @@ UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 UnityAssets.getUnityBundle = function(account, model, id) {
 	const bundleFileName = `${id}.unity3d`;
 	return FileRef.getUnityBundle(account, model, bundleFileName).then((file) => {
-		file.fileName = bundleFileName;
-		return file;
+		return file.Body;
 	});
 };
 

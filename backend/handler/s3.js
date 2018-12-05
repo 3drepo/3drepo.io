@@ -42,8 +42,12 @@ class S3Handler {
 		}
 	}
 
-	getFile(key) {
+	getFileStream(key) {
 		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).createReadStream();
+	}
+
+	getFile(key) {
+		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).promise();
 	}
 
 	removeFiles(keys) {

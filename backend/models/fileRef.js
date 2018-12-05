@@ -35,7 +35,16 @@ function fetchFile(account, collection, fileName) {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return { readStream: ExternalServices.getFile(entry.type, entry.link), size: entry.size };
+		return ExternalServices.getFile(entry.type, entry.link);
+	});
+}
+
+function fetchFileStream(account, collection, fileName) {
+	return getRefEntry(account, collection, fileName).then((entry) => {
+		if(!entry) {
+			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+		}
+		return { readStream: ExternalServices.getFileStream(entry.type, entry.link), size: entry.size };
 	});
 }
 
@@ -63,7 +72,7 @@ function removeAllFiles(account, collection) {
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFile(account, model + ORIGINAL_FILE_REF_EXT, fileName);
+	return fetchFileStream(account, model + ORIGINAL_FILE_REF_EXT, fileName);
 };
 
 FileRef.getTotalOrgFileSize = function(account, model) {
@@ -87,7 +96,7 @@ FileRef.getUnityBundle = function(account, model, fileName) {
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model + JSON_FILE_REF_EXT, fileName);
+	return fetchFileStream(account, model + JSON_FILE_REF_EXT, fileName);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
