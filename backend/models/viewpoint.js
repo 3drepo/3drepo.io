@@ -144,7 +144,8 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 
 			return _dbCol.insert(newViewpoint).then(() => {
 				return this.updateAttrs(dbCol, id, data).then((result) => {
-					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, Object.assign({ _id: utils.uuidToString(id) }, data));
+					data._id = id;
+					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, clean(dbCol, data));
 					return result;
 				}).catch((err) => {
 					// remove the recently saved new view as update attributes failed
