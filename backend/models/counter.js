@@ -17,7 +17,7 @@
 "use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
-const DB = require("../db/db");
+const DB = require("../handler/db");
 
 const schema = mongoose.Schema({
 	type: String,

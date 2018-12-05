@@ -27,19 +27,17 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const config = require("../../config");
 const History = require("../history");
-const Mesh = require("../mesh");
 const Scene = require("../scene");
 const Ref = require("../ref");
 const utils = require("../../utils");
-const stash = require("./stash");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const Project = require("../project");
-const stream = require("stream");
 const _ = require("lodash");
 const uuid = require("node-uuid");
+const FileRef = require("../fileRef");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -428,574 +426,6 @@ function createFederatedModel(account, model, subModels, modelSettings, toyFed) 
 
 }
 
-function getAllMeshes(account, model, branch, rev, username) {
-	let subModelMeshes;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const refMeshesPromises = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			refMeshesPromises.push(
-				getAllMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						meshes: obj.results.meshes,
-						owner: ref.owner,
-						model: ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(refMeshesPromises);
-
-	}).then(refMeshes => {
-
-		subModelMeshes = refMeshes;
-		return Mesh.getMeshes(account, model, history);
-	}).then(meshes => {
-		const results = {};
-		if(meshes) {
-			results.meshes = meshes;
-		} else {
-			results.meshes = [];
-		}
-
-		if(subModelMeshes.length > 0) {
-			results.subModels = [];
-		}
-		subModelMeshes.forEach(subMeshes => {
-			if (subMeshes && subMeshes.meshes) {
-				results.subModels.push({meshes: subMeshes.meshes, account: subMeshes.owner, model: subMeshes.model});
-			}
-		});
-
-		return Promise.resolve({results, status});
-
-	});
-
-}
-
-function getIdMap(account, model, branch, rev, username) {
-	let subIdMaps;
-	let revId, idMapsFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			revId = utils.uuidToString(history._id);
-			idMapsFileName = `/${account}/${model}/revision/${revId}/idMap.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getIdMaps = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getIdMaps.push(
-				getIdMap(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						idMap: obj.idMaps.idMap,
-						owner: ref.owner,
-						model: ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(getIdMaps);
-
-	}).then(_subIdMaps => {
-
-		subIdMaps = _subIdMaps;
-		return stash.findStashByFilename({ account, model }, "json_mpc", idMapsFileName);
-
-	}).then(buf => {
-		let idMaps = {};
-
-		if(buf) {
-			idMaps = JSON.parse(buf);
-		}
-
-		if (!idMaps.idMap) {
-			idMaps.idMap = [];
-		}
-
-		if(subIdMaps.length > 0) {
-			idMaps.subModels = [];
-		}
-		subIdMaps.forEach(subIdMap => {
-			// Model properties hidden nodes
-			// For a federation concatenate all together in a
-			// single array
-			if (subIdMap && subIdMap.idMap) {
-				idMaps.subModels.push({idMap: subIdMap.idMap, account: subIdMap.owner, model: subIdMap.model});
-			}
-		});
-
-		return Promise.resolve({idMaps, status});
-
-	});
-}
-
-function getIdToMeshes(account, model, branch, rev, username) {
-	let subIdToMeshes;
-	let revId, idToMeshesFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			revId = utils.uuidToString(history._id);
-			idToMeshesFileName = `/${account}/${model}/revision/${revId}/idToMeshes.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const refPromises = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			refPromises.push(
-				getIdToMeshes(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						idToMeshes: obj.idToMeshes,
-						key: ref.owner + "@" + ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(refPromises);
-
-	}).then(_subIdToMeshes => {
-
-		subIdToMeshes = _subIdToMeshes;
-		return stash.findStashByFilename({ account, model }, "json_mpc", idToMeshesFileName);
-
-	}).then(buf => {
-		let idToMeshes = {};
-
-		if(buf) {
-			idToMeshes = JSON.parse(buf);
-		}
-
-		subIdToMeshes.forEach(_subIdToMeshes => {
-			// Model properties hidden nodes
-			// For a federation concatenate all together in a
-			// single array
-			if (_subIdToMeshes && _subIdToMeshes.idToMeshes) {
-				idToMeshes[_subIdToMeshes.key] = _subIdToMeshes.idToMeshes;
-			}
-		});
-
-		return Promise.resolve({idToMeshes, status});
-
-	});
-}
-
-function getModelProperties(account, model, branch, rev, username) {
-
-	let subProperties;
-	let revId, modelPropertiesFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.resolve([]);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve([]);
-		} else {
-			revId = utils.uuidToString(history._id);
-			modelPropertiesFileName = `/${account}/${model}/revision/${revId}/modelProperties.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getModelProps = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getModelProps.push(
-				getModelProperties(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						properties: obj.properties,
-						owner: ref.owner,
-						model: ref.project
-					});
-				})
-					.catch(() => {
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getModelProps);
-
-	}).then(_subProperties => {
-
-		subProperties = _subProperties;
-		return stash.findStashByFilename({ account, model }, "json_mpc", modelPropertiesFileName);
-
-	}).then(buf => {
-		let properties = { hiddenNodes : null };
-
-		if(buf) {
-			properties = JSON.parse(buf);
-		}
-
-		if (!properties.hiddenNodes) {
-			properties.hiddenNodes = [];
-		}
-
-		if(subProperties.length > 0) {
-			properties.subModels = [];
-		}
-		subProperties.forEach(subProperty => {
-			// Model properties hidden nodes
-			// For a federation concatenate all together in a
-			// single array
-
-			if (subProperty.properties.hiddenNodes && subProperty.properties.hiddenNodes.length > 0) {
-				properties.subModels.push({properties: subProperty.properties, account: subProperty.owner, model: subProperty.model});
-			}
-		});
-
-		return Promise.resolve({properties, status});
-
-	});
-}
-
-function getTreePath(account, model, branch, rev, username) {
-	let subTreePaths;
-	let revId, treePathsFileName;
-	let history;
-	let status;
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		return middlewares.hasReadAccessToModelHelper(username, account, model);
-	}).then(granted => {
-		if(!history) {
-			status = "NOT_FOUND";
-			return Promise.reject(responseCodes.INVALID_TAG_NAME);
-		} else if (!granted) {
-			status = "NO_ACCESS";
-			return Promise.resolve(responseCodes.NOT_AUTHORIZED);
-		} else {
-			revId = utils.uuidToString(history._id);
-			treePathsFileName = `/${account}/${model}/revision/${revId}/tree_path.json`;
-
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-			return Ref.find({ account, model }, filter);
-		}
-	}).then(refs => {
-
-		// for all refs get their tree
-		const getTreePaths = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getTreePaths.push(
-				getTreePath(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
-					return Promise.resolve({
-						idToPath: obj.treePaths.idToPath,
-						owner: ref.owner,
-						model: ref.project
-					});
-				}).catch(() => {
-					return Promise.resolve();
-				})
-			);
-		});
-
-		return Promise.all(getTreePaths);
-
-	}).then(_subTreePaths => {
-
-		subTreePaths = _subTreePaths;
-		return stash.findStashByFilename({ account, model }, "json_mpc", treePathsFileName);
-
-	}).then(buf => {
-		let treePaths = {};
-
-		if(buf) {
-			treePaths = JSON.parse(buf);
-		}
-
-		if (!treePaths.idToPath) {
-			treePaths.idToPath = [];
-		}
-
-		if(subTreePaths.length > 0) {
-			treePaths.subModels = [];
-		}
-		subTreePaths.forEach(subTreePath => {
-			// Model properties hidden nodes
-			// For a federation concatenate all together in a
-			// single array
-			if (subTreePath && subTreePath.idToPath) {
-				treePaths.subModels.push({idToPath: subTreePath.idToPath, account: subTreePath.owner, model: subTreePath.model});
-			}
-		});
-
-		return Promise.resolve({treePaths, status});
-
-	});
-}
-
-function getJsonMpc(account, model, uid) {
-
-	const bundleFileName = `/${account}/${model}/${uid}.json.mpc`;
-
-	return stash.findStashByFilename({ account, model }, "json_mpc", bundleFileName).then(buf => {
-		if(!buf) {
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
-		} else {
-			return Promise.resolve(buf);
-		}
-	});
-}
-
-function getUnityBundle(account, model, uid) {
-
-	const bundleFileName = `/${account}/${model}/${uid}.unity3d`;
-
-	return stash.findStashByFilename({ account, model }, "unity3d", bundleFileName).then(buf => {
-		if(!buf) {
-			return Promise.reject(responseCodes.BUNDLE_STASH_NOT_FOUND);
-		} else {
-			return Promise.resolve(buf);
-		}
-	});
-}
-
-// return main tree and urls of sub trees only and let frontend to do the remaining work :)
-// returning a readstream for piping and a promise for error catching while streaming
-function getFullTree_noSubTree(account, model, branch, rev) {
-
-	let history;
-	let stashRs;
-
-	const readStreamPromise = History.getHistory({ account, model }, branch, rev).then(_history => {
-
-		history = _history;
-
-		if(!history) {
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		}
-
-		const revId = utils.uuidToString(history._id);
-		const treeFileName = `/${account}/${model}/revision/${revId}/fulltree.json`;
-
-		// return stash.findStashByFilename({ account, model }, 'json_mpc', treeFileName);
-		return stash.findStashByFilename({ account, model }, "json_mpc", treeFileName, true);
-
-	}).then(rs => {
-
-		// trees.mainTree = buf.toString();
-		if(!rs) {
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		}
-
-		stashRs = rs;
-
-		return stream.PassThrough();
-
-	});
-
-	let pass;
-
-	const outputingPromise = readStreamPromise.then(_pass => {
-
-		pass = _pass;
-
-		return new Promise(function(resolve, reject) {
-
-			pass.write("{\"mainTree\": ");
-
-			stashRs.on("data", d => pass.write(d));
-			stashRs.on("end", ()=> resolve());
-			stashRs.on("error", err => reject(err));
-
-		});
-
-	}).then(() => {
-
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		return Ref.find({ account, model }, filter);
-
-	}).then(refs => {
-
-		pass.write(", \"subTrees\":[");
-
-		return new Promise((resolve) => {
-
-			function eachRef(refIndex) {
-
-				const ref = refs[refIndex];
-
-				let url = `/${ref.owner}/${ref.project}/revision/master/head/fulltree.json`;
-
-				if (utils.uuidToString(ref._rid) !== C.MASTER_BRANCH) {
-					url = `/${ref.owner}/${ref.project}/revision/${ref._rid}/fulltree.json`;
-				}
-
-				if(refIndex > 0) {
-					pass.write(",");
-				}
-
-				pass.write(`{"_id": "${utils.uuidToString(ref._id)}", "url": "${url}", "model": "${ref.project}"}`);
-
-				if(refIndex + 1 < refs.length) {
-					eachRef(refIndex + 1);
-				} else {
-					resolve();
-				}
-
-			}
-
-			if(refs.length) {
-				eachRef(0);
-			} else {
-				resolve();
-			}
-		});
-
-	}).then(() => {
-
-		pass.write("]");
-		pass.write("}");
-		pass.end();
-
-	}).catch(err => {
-
-		pass && pass.end();
-		return Promise.reject(err);
-
-	});
-
-	return {readStreamPromise, outputingPromise};
-}
-
 function searchTree(account, model, branch, rev, searchString, username) {
 
 	const search = (history) => {
@@ -1114,30 +544,23 @@ function listSubModels(account, model, branch) {
 }
 
 function downloadLatest(account, model) {
+	return History.findLatest({account, model}, {rFile: 1}).then((fileEntry) => {
+		if(!fileEntry || !fileEntry.rFile || !fileEntry.rFile.length) {
+			return Promise.reject(responseCodes.NO_FILE_FOUND);
+		}
 
-	return stash.getGridFSBucket(account, `${model}.history`).then(bucket => {
+		// We currently only support single file fetches
+		const fileName = fileEntry.rFile[0];
+		const filePromise = FileRef.getOriginalFile(account, model, fileName);
 
-		return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
+		const fileNameArr = fileName.split("_");
+		const ext = fileNameArr.length > 1 ? "." + fileNameArr.pop() : "";
 
-			if(!file) {
-				return Promise.reject(responseCodes.NO_FILE_FOUND);
-			}
+		const fileNameFormatted = fileNameArr.join("_").substr(36) + ext;
 
-			// change file name
-			const filename = file.filename.split("_");
-			let ext = "";
-
-			if (filename.length > 1) {
-				ext = "." + filename.pop();
-			}
-
-			file.filename = filename.join("_").substr(36) + ext;
-
-			return Promise.resolve({
-				readStream: bucket.openDownloadStream(file._id),
-				meta: file
-			});
-
+		return filePromise.then((file) => {
+			file.fileName = fileNameFormatted;
+			return file;
 		});
 	});
 }
@@ -1310,61 +733,69 @@ function importModel(account, model, username, modelSetting, source, data) {
 
 }
 
-function removeModel(account, model, forceRemove) {
-
-	let setting;
-	return ModelSetting.findById({account, model}, model).then(_setting => {
-
-		setting = _setting;
-
-		if(!setting) {
-			return Promise.reject({resCode: responseCodes.MODEL_NOT_FOUND});
-		}
-
-		return ModelSetting.find({ account, model}, { federate: true });
-
-	}).then(settings => {
-
+function isSubModel(account, model) {
+	return ModelSetting.find({ account, model}, { federate: true }).then((feds) => {
 		const promises = [];
 
-		settings.forEach(modelSetting => {
-			!forceRemove && promises.push(listSubModels(account, modelSetting._id).then(subModels => {
-				if(subModels.find(subModel => subModel.model === model)) {
-					return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
-				}
+		feds.forEach(modelSetting => {
+			promises.push(listSubModels(account, modelSetting._id).then(subModels => {
+				return subModels.find(subModel => subModel.model === model);
 			}));
 		});
 
-		return Promise.all(promises);
-
-	}).then(() => {
-
-		return ModelFactory.dbManager.listCollections(account);
-
-	}).then(collections => {
-		// remove model collections
-
-		const promises = [];
-
-		collections.forEach(collection => {
-			if(collection.name.startsWith(model + ".")) {
-				promises.push(ModelFactory.dbManager.dropCollection(account, collection));
-			}
-		});
-
-		return Promise.all(promises);
-
-	}).then(() => {
-		// remove model settings
-		return setting.remove();
-
-	}).then(() => {
-		// remove model from all project
-		return Project.removeModel(account, model).then((removedData) => {
-			return Object.assign({}, removedData, {federate: setting.federate});
+		return Promise.all(promises).then((results) => {
+			return results.reduce((isSub, current) => isSub || current, false);
 		});
 	});
+}
 
+function removeModelCollections(account, model) {
+	return FileRef.removeAllFilesFromModel(account, model).then(() => {
+		return ModelFactory.dbManager.listCollections(account).then((collections) => {
+			const promises = [];
+
+			collections.forEach(collection => {
+				if(collection.name.startsWith(model + ".")) {
+
+					promises.push(ModelFactory.dbManager.dropCollection(account, collection));
+				}
+			});
+
+			return Promise.all(promises);
+		});
+	});
+}
+
+function removeModel(account, model, forceRemove) {
+
+	return ModelSetting.findById({account, model}, model).then(setting => {
+		if (!setting) {
+			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+		}
+
+		let subModelCheckPromise;
+		if (!forceRemove && !setting.federate) {
+			subModelCheckPromise = isSubModel(account, model);
+
+		} else {
+			subModelCheckPromise = Promise.resolve(false);
+		}
+
+		return subModelCheckPromise.then((isSub) => {
+			if (isSub) {
+				return Promise.reject(responseCodes.MODEL_IS_A_SUBMODEL);
+			}
+			return removeModelCollections(account, model).then(() => {
+				const deletePromises = [];
+				deletePromises.push(setting.remove());
+				deletePromises.push(Project.removeModel(account, model));
+				return Promise.all(deletePromises);
+			}).catch((err) => {
+				systemLogger.logError("Failed to remove collections: ", err);
+				return Promise.reject(responseCodes.REMOVE_MODEL_FAILED);
+			});
+		});
+	});
 }
 
 function getModelPermission(username, setting, account) {
@@ -1577,13 +1008,6 @@ module.exports = {
 	isUserAdmin,
 	createFederatedModel,
 	listSubModels,
-	getAllMeshes,
-	getIdMap,
-	getIdToMeshes,
-	getModelProperties,
-	getTreePath,
-	getJsonMpc,
-	getUnityBundle,
 	searchTree,
 	downloadLatest,
 	fileNameRegExp,
@@ -1593,7 +1017,6 @@ module.exports = {
 	removeModel,
 	getModelPermission,
 	getMetadata,
-	getFullTree_noSubTree,
 	resetCorrelationId,
 	getAllMetadata,
 	getAllIdsWith4DSequenceTag,

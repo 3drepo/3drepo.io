@@ -18,7 +18,6 @@
 "use strict";
 (function() {
 
-	const GridFSBucket = require("mongodb").GridFSBucket;
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
 	const connConfig = {
@@ -80,15 +79,6 @@
 		});
 	}
 
-	function getGridFSBucket(database, collection) {
-		return getDB(database).then(dbConn => {
-			return new GridFSBucket(dbConn, collection);
-		}).catch(err => {
-			disconnect();
-			return Promise.reject(err);
-		});
-	}
-
 	function getCollection(database, colName)	{
 		return getDB(database).then(dbConn => {
 			return dbConn.collection(colName);
@@ -139,7 +129,6 @@
 		getCollection,
 		getCollectionStats,
 		_getCollection,
-		getGridFSBucket,
 		listCollections,
 		runCommand
 	};

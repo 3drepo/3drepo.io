@@ -16,26 +16,22 @@
  */
 
 "use strict";
-const _ = require("lodash");
-const repoBase = require("./base/repo");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const ModelSettings = require("./modelSetting");
 
 const Schema = mongoose.Schema;
 
-const refSchema = Schema(
-	_.extend({}, repoBase.attrs, {
-		// no extra attributes
-		_id: Object,
-		type: { type: String, default: "ref"},
-		unique: Object,
-		project: String,
-		owner: String,
-		_rid: Object
-
-	})
-);
+const refSchema = Schema({
+	_id: Object,
+	shared_id: Object,
+	type: { type: String, default: "ref"},
+	project: String,
+	owner: String,
+	_rid: Object,
+	parents: [],
+	name: String
+});
 
 refSchema.statics.getRefNodes = function(account, model, ids) {
 	return ModelSettings.findById({account}, model).then((settings) => {

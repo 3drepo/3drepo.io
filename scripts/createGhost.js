@@ -3,7 +3,7 @@
 let log_iface = require("../backend/logger.js");
 let systemLogger = log_iface.systemLogger;
 let config = require("../backend/config.js");
-let DB = require('../backend/db/db');
+let DB = require('../backend/handler/db');
 let User = require('../backend/models/user');
 let C = require("../backend/constants");
 let ghosts = C.REPO_BLACKLIST_USERNAME;
@@ -17,7 +17,7 @@ DB.getDB('default').then( db => {
 	require('../backend/models/factory/modelFactory').setDB(db);
 
 }).then(() => {
-	
+
 	let promises = [];
 	console.log(`Assigning ghost users ...`);
 	ghosts.forEach(username => {
@@ -36,7 +36,7 @@ DB.getDB('default').then( db => {
 						console.log(`Failed to create ghost user ${username}`, err);
 					});
 				}
-				
+
 			})
 		);
 	});

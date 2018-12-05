@@ -21,7 +21,7 @@ const job = require("../models/job");
 const modelSettings = require("../models/modelSetting");
 const utils = require("../utils");
 const uuid = require("node-uuid");
-const db = require("../db/db");
+const db = require("../handler/db");
 const _ = require("lodash");
 
 const types = {

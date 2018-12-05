@@ -164,7 +164,20 @@ export class TreeService {
 
 		return this.APIService.get(url, options)
 			.then((json) => {
-				this.idToMeshes = json.data.idToMeshes;
+				const result = json.data;
+				if (result.subModels.length) {
+					// federation - construct the mapping
+					this.idToMeshes = {};
+					result.subModels.forEach((entry) => {
+						const ts = entry.account;
+						const modelId = entry.model;
+						delete entry.account;
+						delete entry.model;
+						this.idToMeshes[`${ts}@${modelId}`] = entry;
+					});
+				} else {
+					this.idToMeshes = result.mainTree;
+				}
 			})
 			.catch((error) => {
 				console.error('Failed to get Id to Meshes:', error);
@@ -224,9 +237,9 @@ export class TreeService {
 
 					const awaitedSubTrees = [];
 
-					if (idToPath && idToPath.treePaths) {
+					if (idToPath && idToPath.mainTree) {
 
-						mainTree.idToPath = idToPath.treePaths.idToPath;
+						mainTree.idToPath = idToPath.mainTree.idToPath;
 
 						if (subTrees) {
 
@@ -237,7 +250,7 @@ export class TreeService {
 
 							subTrees.forEach((subtree) => {
 
-								const subtreeIdToPath = idToPath.treePaths.subModels.find((submodel) => {
+								const subtreeIdToPath = idToPath.subModels.find((submodel) => {
 									return subtree.model === submodel.model;
 								});
 

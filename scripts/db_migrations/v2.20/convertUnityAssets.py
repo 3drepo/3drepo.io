@@ -45,5 +45,5 @@ for database in db.database_names():
 				else:
 					print("\t\tWriting assets file for rev: " + rev_id)
 					updated_json.update({'_id': uuid.UUID(rev_id)})
-					db[dest_col].insert(updated_json)
+					db[dest_col].save(updated_json)
 

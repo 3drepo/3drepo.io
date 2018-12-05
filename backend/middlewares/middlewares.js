@@ -63,15 +63,9 @@
 		return User.findByUserName(account).then(dbUser => {
 
 			limits = dbUser.customData.billing.getSubscriptionLimits();
-			return User.historyChunksStats(account);
+			return User.getTeamspaceSpaceUsed(account);
 
-		}).then(stats => {
-
-			let totalSize = 0;
-
-			stats.forEach(stat => {
-				totalSize += stat.size;
-			});
+		}).then(totalSize => {
 			totalSize /= 1024 * 1024;
 			return Promise.resolve(limits.spaceLimit - totalSize);
 		});

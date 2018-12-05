@@ -5,6 +5,14 @@ from pymongo import MongoClient
 import boto3
 import re
 
+def cleanFileName(fileName):
+	fileNameSplit = fileName.split('/');
+	nameLength = len(fileNameSplit);
+	if "revision" in fileNameSplit:
+		return fileNameSplit[nameLength - 2] +"/" +  fileNameSplit[nameLength - 1];
+	else:
+		return fileNameSplit[nameLength - 1];
+
 if len(sys.argv) < 9:
 	print "Not enough arguments."
 	print "upload_models_s3.py <mongoURL> <mongoPort> <userName> <password> <aws bucket name> <aws region name> <aws Access Key Id> <aws secret access key>"
@@ -45,15 +53,14 @@ for database in db.database_names():
 			model_id = setting.get('_id')
 			print "\t--model: " +  model_id
 			for col_prefix in [".history",".stash.json_mpc", ".stash.unity3d" ]:
-				col_name = model_id + col_prefix
+				col_name = model_id + col_prefix;
 				print "\t\t--stash: " +  col_name
 				fs = gridfs.GridFS(db, col_name)
 				for entry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
-					filename = entry.filename
 					s3_ref = uuid.uuid4()
 ##### Create Reference BSON #####
 					bson_data = {}
-					bson_data['_id'] = filename
+					bson_data['_id'] = cleanFileName(entry.filename)
 					bson_data['link'] = str(s3_ref)
 					bson_data['type'] = "s3"
 					bson_data['size'] = entry.length
@@ -63,5 +70,5 @@ for database in db.database_names():
 ##### Upload to S3 and insert BSON #####
 						s3.upload_fileobj(entry, awsBucketName, str(s3_ref))
 						target_col = col_name + ".ref"
-						db[target_col].insert(bson_data)
+						db[target_col].save(bson_data)
 
