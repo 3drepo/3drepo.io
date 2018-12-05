@@ -39,6 +39,9 @@ import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirecto
 import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 
+import { hasPermissions } from '../../helpers/permissions';
+import { clientConfigService } from '../../services/clientConfig';
+
 const PANEL_PROPS = {
 	title: 'Teamspaces',
 	paperProps: {
