@@ -17,28 +17,32 @@
  */
 
 const request = require("supertest");
-const expect = require("chai").expect;
+const chai = require("chai")
+chai.use(require('chai-shallow-deep-equal'));
+const expect = chai.expect;
 const session =  require("express-session")({ secret: "testing"});
 const config = require("../../config");
 const app = require("../../services/api.js").createApp(
 	{ session: config.api_server.session }
 );
-const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
-const responseCodes = require("../../response_codes.js");
 const async = require("async");
 const http = require("http");
 // let newXhr = require('socket.io-client-cookie');
 const io = require("socket.io-client");
 
-describe("Notification", function () {
+describe("Chat service", function () {
 
 	let server;
 	let agent;
 	let agent2;
-	const username = "testing";
-	const password = "testing";
-	const model = "testproject";
+	let issueId;
+
+
+	const username = "collaboratorTeamspace1Model1JobA"
+	const password = "password";
+
+	const account = "teamSpace1";
+	const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
 	let cookies;
 	let socket;
@@ -60,15 +64,14 @@ describe("Notification", function () {
 			"clippingPlanes":[]
 		},
 		"scale":1,
-		"creator_role":"testproject.collaborator",
-		"assigned_roles":["testproject.collaborator"]
+		"creator_role":"jobA",
+		"assigned_roles":[]
 	};
 
 	let connectSid;
 
 	before(function(done) {
 		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
 
 			const chatServer = http.createServer();
 
@@ -77,7 +80,6 @@ describe("Notification", function () {
 			);
 
 			chatServer.listen(config.chat_server.port, function() {
-				console.log(`chat server listening on ${config.chat_server.port}`);
 				async.series([
 					function(done) {
 						agent = request.agent(server);
@@ -100,9 +102,10 @@ describe("Notification", function () {
 					function(done) {
 						agent2 = request.agent(server);
 						agent2.post("/login")
-							.send({ username: username, password: password })
+							.send({ username: account, password })
 							.expect(200, done);
-					}
+					},
+					done => agent.delete("/me/notifications").expect(200, done)
 				], done);
 
 			});
@@ -116,7 +119,7 @@ describe("Notification", function () {
 		});
 	});
 
-	it("connect to chat server and join room should succee", function(done) {
+	it("connect to chat server and join room should succeed", function(done) {
 		this.timeout(2000);
 
 		// https://gist.github.com/jfromaniello/4087861
@@ -128,10 +131,13 @@ describe("Notification", function () {
 		}});
 		socket.on("connect", function(data) {
 
-			socket.emit("join", {account: username, model: model});
+			socket.emit("join", {account, model});
+
+			socket.emit("join", {account: username});
 
 			socket.on("joined", function(data) {
-				if(data.account === username && data.model === model) {
+				if(data.account === account && data.model === model) {
+					socket.off("joined");
 					done();
 				}
 			});
@@ -163,14 +169,13 @@ describe("Notification", function () {
 		});
 	});
 
-	let issueId;
-
-	it("subscribe new issue notification should succeed", function(done) {
+	it("subscribe new issue chat event should succeed", function(done) {
 
 		// other users post an issue
 		const issue = Object.assign({"name":"Issue test"}, baseIssue);
 
-		socket.on(`${username}::${model}::issueCreated`, function(issues) {
+		socket.on(`${account}::${model}::issueCreated`, function(issues) {
+			socket.off(`${account}::${model}::issueCreated`);
 
 			expect(issues[0]).to.exist;
 			expect(issues[0].name).to.equal(issue.name);
@@ -193,10 +198,11 @@ describe("Notification", function () {
 			expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 			issueId = issues[0]._id;
 
+
 			done();
 		});
 
-		agent2.post(`/${username}/${model}/issues.json`)
+		agent2.post(`/${account}/${model}/issues.json`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -207,10 +213,10 @@ describe("Notification", function () {
 		});
 	});
 
-	it("subscribe new comment notification should succeed", function(done) {
+	it("subscribe new comment chat event should succeed", function(done) {
 		const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 
-		socket.on(`${username}::${model}::${issueId}::commentCreated`, function(resComment) {
+		socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			expect(resComment.viewpoint.up).to.deep.equal(comment.viewpoint.up);
@@ -229,39 +235,38 @@ describe("Notification", function () {
 		});
 
 		// console.log('issueId2', issueId);
-		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
+		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
 			});
 	});
 
-	it("subscribe comment changed notification should succeed", function(done) {
+	it("subscribe comment changed chat event should succeed", function(done) {
 		const comment = {"comment":"abc123456","edit":true,"commentIndex":0};
 
-		socket.on(`${username}::${model}::${issueId}::commentUpdated`, function(resComment) {
+		socket.on(`${account}::${model}::${issueId}::commentUpdated`, function(resComment) {
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			done();
 		});
 
-		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
+		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
 			});
 	});
 
-	it("subscribe comment deleted notification should succeed", function(done) {
-
+	it("subscribe comment deleted chat event should succeed", function(done) {
 		const comment = {"comment":"","delete":true,"commentIndex":0};
 
-		socket.on(`${username}::${model}::${issueId}::commentDeleted`, function(resComment) {
+		socket.on(`${account}::${model}::${issueId}::commentDeleted`, function(resComment) {
 			expect(resComment).to.exist;
 			done();
 		});
 
-		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
+		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -270,32 +275,138 @@ describe("Notification", function () {
 
 	it("subscribe issue change should succeed", function(done) {
 
-		const status = {"priority":"high","status":"open","topic_type":"for info","assigned_roles":["testproject.collaborator"]};
+		const status = {"priority":"high"}
 
-		socket.off(`${username}::${model}::${issueId}::commentCreated`);
+		socket.off(`${account}::${model}::${issueId}::commentCreated`);
 
 		async.parallel([
 			function(done) {
-				socket.on(`${username}::${model}::${issueId}::commentCreated`, function(resComment) {
+				socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
 					expect(resComment).to.exist;
 					expect(resComment.action).to.deep.equal({"property":"priority","from":"low","to":"high"});
+
+					socket.off(`${account}::${model}::${issueId}::commentCreated`);
 					done();
 				});
 			},
 			function(done) {
-				socket.on(`${username}::${model}::issueUpdated`, function(issue) {
+				socket.on(`${account}::${model}::issueUpdated`, function(issue) {
 					expect(issue).to.exist;
 					expect(issue.priority).to.equal("high");
+
+					socket.off(`${account}::${model}::issueUpdated`);
 					done();
 				});
 			}
 		], done);
 
-		agent2.put(`/${username}/${model}/issues/${issueId}.json`)
-			.send(status)
+		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+			.send({"priority":"high"})
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
 			});
 	});
+
+	describe("with notifications", function() {
+		let notificationId = "";
+		let issueId2 = null;
+
+		it("should receive a new notification event when a notification has been created", done => {
+			socket.on(`${username}::notificationUpserted`, function(notification) {
+				socket.off(`${username}::notificationUpserted`);
+
+				expect(notification).to.exist;
+
+				expect(notification).to.shallowDeepEqual({type:"ISSUE_ASSIGNED",teamSpace: account, modelId: model, read: false});
+				expect(notification.issuesId).to.be.an('array').that.includes(issueId);
+
+				notificationId =  notification._id;
+
+				done();
+			});
+
+			agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+			.send({"assigned_roles":["jobA"]})
+			.expect(200 , function(err, res) {
+				if (err) {done(err);}
+			});
+
+		});
+
+		it("should receive an upsert event when another issue of the same model has been assigned to the user", done => {
+			// TODO: finish me
+			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+
+			socket.on(`${username}::notificationUpserted`, function(notification) {
+				socket.off(`${username}::notificationUpserted`);
+
+				expect(notification).to.exist;
+
+				expect(notification).to.shallowDeepEqual({type:"ISSUE_ASSIGNED",
+															teamSpace: account,
+															modelId: model,
+															read: false,
+															_id: notificationId});
+
+				expect(notification.issuesId).to.be.an('array').to.deep.equal([issueId, issueId2]);
+				done();
+			});
+
+			const createIssue =  issue => next => agent2.post(`/${account}/${model}/issues.json`)
+														.send(issue)
+														.expect(200 , next);
+
+			const assignJoBA = (res, next) => {
+				agent2.put(`/${account}/${model}/issues/${res._id}.json`)
+					.send({assigned_roles : ["jobA"]})
+					.expect(200 , function(err, res) {
+						next(err);
+					});
+			};
+
+			async.waterfall([
+				createIssue(issue),
+				(res, next) => {
+					issueId2 = res.body._id;
+					next(null, res.body);
+				},
+				assignJoBA,
+			]);
+		});
+
+		it("should receive an upsert notification when an issue associated with a notification(which has multiple issues) has been closed", done => {
+
+			socket.on(`${username}::notificationUpserted`, function(notification) {
+				socket.off(`${username}::notificationUpserted`);
+
+				expect(notification).to.exist;
+
+				expect(notification).to.shallowDeepEqual({_id: notificationId});
+				expect(notification.issuesId).to.be.an('array').to.deep.equal([issueId]);
+				done();
+			});
+
+			agent2.put(`/${account}/${model}/issues/${issueId2}.json`)
+					.send({status : "closed"})
+					.expect(200 , function(err, res) {
+						if (err) done(err);
+					});
+		});
+
+		it("should receive a delete notification event when the last issue with the notification has been closed", done => {
+			socket.on(`${username}::notificationDeleted`, function(notification) {
+				socket.off(`${username}::notificationDeleted`);
+				expect(notification).to.shallowDeepEqual({_id: notificationId});
+				done();
+			});
+
+			agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+					.send({status : "closed"})
+					.expect(200 , function(err, res) {
+						if (err) done(err);
+					});
+		});
+	});
+
 
 });

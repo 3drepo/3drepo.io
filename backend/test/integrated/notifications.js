@@ -357,9 +357,6 @@ describe('Notifications', function() {
 		})
 
 
-
-//			const model2Id = "00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5";
-
 	});
 
 });
