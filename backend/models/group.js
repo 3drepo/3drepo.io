@@ -449,7 +449,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 		});
 
 		newGroup._id = utils.stringToUUID(uuid.v1());
-		if (typeCorrect) {
+		if (typeCorrect && newGroup.objects) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
 				if (!data.isIssueGroup && sessionId) {
