@@ -57,6 +57,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	};
 
 	private authenticationInterval;
+	private loginInterval;
 
 	public isStaticRoute(path) {
 		return STATIC_ROUTES.includes(path.replace('/', ''));
@@ -64,6 +65,8 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.authenticate();
+		this.toggleAutoLogin();
+		this.toggleAutoLogout();
 
 		const initialReferrer = location.pathname !== MAIN_ROUTE_PATH
 			? `${location.pathname}${location.search}`
@@ -72,8 +75,9 @@ export class App extends React.PureComponent<IProps, IState> {
 		this.setState({ referrer: initialReferrer });
 	}
 
-	public componentWillMount() {
+	public componentWillUnmount() {
 		this.toggleAutoLogout(false);
+		this.toggleAutoLogin(false);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -82,12 +86,13 @@ export class App extends React.PureComponent<IProps, IState> {
 		const isStaticRoute = this.isStaticRoute(location.pathname);
 		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
-				this.toggleAutoLogout();
+				this.toggleAutoLogin(false);
 				runAngularTimeout(() => {
 					history.push(this.state.referrer);
 				});
 			} else {
 				this.toggleAutoLogout(false);
+				this.toggleAutoLogin();
 				runAngularTimeout(() => {
 					history.push('/login');
 				});
@@ -110,6 +115,16 @@ export class App extends React.PureComponent<IProps, IState> {
 			this.authenticationInterval = setInterval(this.handleAutoLogout, this.state.autologoutInterval * 1000);
 		} else {
 			clearInterval(this.authenticationInterval);
+			this.authenticationInterval = null;
+		}
+	}
+
+	public toggleAutoLogin = (shouldStart = true) => {
+		if (shouldStart) {
+			this.loginInterval = setInterval(this.handleAutoLogin, 1000);
+		} else {
+			clearInterval(this.loginInterval);
+			this.loginInterval = null;
 		}
 	}
 
@@ -118,8 +133,22 @@ export class App extends React.PureComponent<IProps, IState> {
 		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
 		const isSessionExpired = hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
-			history.push('/login');
 			logout();
+			runAngularTimeout(() => {
+				history.push('/login');
+			});
+		}
+	}
+
+	public handleAutoLogin = () => {
+		const { isAuthenticated } = this.props;
+		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
+
+		if (hasActiveSession && !isAuthenticated) {
+			this.props.authenticate();
+			if (!this.authenticationInterval) {
+				this.toggleAutoLogout();
+			}
 		}
 	}
 

@@ -48,6 +48,7 @@ export function* login({ username, password }) {
 		}));
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
+		debugger
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
 		} else {
