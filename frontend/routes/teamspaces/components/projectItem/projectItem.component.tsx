@@ -24,11 +24,14 @@ import { TreeList } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 import { ROW_ACTIONS, MODEL_TYPE, FEDERATION_TYPE  } from '../../teamspaces.contants';
 import { RowMenu } from '../rowMenu/rowMenu.component';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { hasPermissions } from '../../../../helpers/permissions';
 
 interface IProps {
 	name: string;
 	models: any[];
 	active: boolean;
+	permissions: any[];
 	renderChildItem: () => JSX.Element;
 	onEditClick: (event) => void;
 	onRemoveClick: (event) => void;
@@ -94,7 +97,9 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
 	}
 
-	public renderProjectActions = ({ hovered }) => (
+	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
+
+	public renderProjectActions = ({ hovered }) => renderWhenTrue((
 		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
@@ -109,7 +114,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				action={this.props.onRemoveClick}
 			/>
 		</RowMenu>
-	)
+	))(this.isProjectAdmin())
 
 	public render() {
 		const { renderChildItem, name, active } = this.props;

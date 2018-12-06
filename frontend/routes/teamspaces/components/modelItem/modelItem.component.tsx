@@ -22,6 +22,8 @@ import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { hasPermissions } from '../../../../helpers/permissions';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Loader } from '../../../components/loader/loader.component';
 
@@ -35,6 +37,7 @@ interface IAction {
 	action: () => void;
 	color?: string;
 	isHidden?: boolean;
+	requiredPermissions?: string;
 }
 interface IProps {
 	name: string;
@@ -45,6 +48,7 @@ interface IProps {
 	projectName: string;
 	subModels?: any[];
 	timestamp: string;
+	permissions?: any[];
 	onModelItemClick: (event) => void;
 	onModelUpload: (event) => void;
 	onRevisionsClick: (event) => void;
@@ -86,6 +90,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 			...ROW_ACTIONS.DELETE,
 			action: props.onDeleteClick
 		}];
+
 		this.modelActions = [{
 			...ROW_ACTIONS.UPLOAD_FILE,
 			action: props.onModelUpload
@@ -127,17 +132,19 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderActions = (actions) => {
-		return actions ? actions.map(({label, action, Icon, color, isHidden = false}, index) => {
+		const { permissions } = this.props;
+		return actions ? actions.map((actionItem, index) => {
+			const {label, action, Icon, color, isHidden = false, requiredPermissions = ''} = actionItem;
 			const iconProps = {color, fontSize: 'small'} as any;
 
 			if (!isHidden && !isPendingStatus(this.props.status)) {
-				return (
+				return renderWhenTrue((
 					<Tooltip title={label} key={index}>
 						<IconButton aria-label={label} onClick={action}>
 							<Icon {...iconProps} />
 						</IconButton>
 					</Tooltip>
-				);
+				))(hasPermissions(requiredPermissions, permissions));
 			}
 		}) : null;
 	}

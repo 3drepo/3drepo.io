@@ -1,1 +1,6 @@
-export const hasPermissions = (requiredPerm, permissions) => permissions.indexOf(requiredPerm) !== -1;
+export const hasPermissions = (requiredPerm = '', permissions) => {
+	if (!requiredPerm) {
+		return true;
+	}
+	return permissions.indexOf(requiredPerm) !== -1;
+};
