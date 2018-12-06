@@ -19,7 +19,7 @@
 
 const config = require("../config.js");
 const systemLogger = require("../logger.js").systemLogger;
-const AWS = require("aws-sdk");
+const AWS = {}; // require("aws-sdk"); - uncomment and add aws-sdk to package.json to revive.
 const https = require("https");
 
 class S3Handler {
