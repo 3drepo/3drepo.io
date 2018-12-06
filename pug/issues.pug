@@ -5,76 +5,145 @@ html(lang="en" ng-app="3drepo").ng-scope
 	style.
 		html, body {
 				font-family: Roboto, sans-serif;
+				margin:0;
+		}
+
+		h1,h2,h3,h4 {
+			margin:5px 0;
+		}
+
+		header {
+			background:#cfcfcf;
+			height:50px;
+			padding:10px;
+			text-align:center;
+			position:relative;
 		}
 		table {
 			border-collapse: separate;
 			border-spacing: 10px;
 		}
+
 		.bold {
 			font-weight: bold;
 		}
+
+		.button-group {
+			position:absolute;
+			top:10px;
+			left:0;
+		}
+
+		button {
+			width:140px;
+			border:none;
+			background:#0E2F53;
+			padding:10px;
+			color:#fff;
+			text-transform:uppercase;
+			margin:5px;
+			border-radius:5px;
+		}		
+
+		.container {
+			width:760px;
+			margin:0 auto;
+			border-left:2px solid #efefef;
+			border-right:2px solid #efefef;
+			padding: 0px 200px;
+		}
+
+		.top-header {
+			text-align:center;
+			font-weight:300;
+		}
+
+		.top-header h1, .top-header h2 {
+			font-weight:400;
+		}
+
+		.row {
+			display:flex;
+		}
+
+		.col {
+			width:100%;
+		}
+
+		.right {
+			text-align:right;
+		}
+
+		.col.text {
+			font-weight:500;
+		}
+
+		.float-right {
+			float:right;
+		}
+
+		.grey-header {
+			font-size:20px;
+			font-weight:400;
+			color:#cfcfcf;
+		}
+
 	head
-		each issueTypeIssues, issueType in issues
-			if issueType === "open" && issueTypeIssues.length > 0
-				h2 Open Issues
-			else if issueType === "closed" && issueTypeIssues.length > 0
-				h2 Closed Issues
+		header
+			div(class="button-group")
+				button Print
+				button Hide Log
+				button Large Pictures
+			img(src="/images/3drepo-logo-white.png" width="120px")
 
-			// TODO: Time stamps - What is going on here?!
-			each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
-				hr
-				table(border=0)
-					tr
-						td(colspan=2)
-							h3 ##{issue.number} #{issue.name}
-					if issue.viewpoint.screenshotSmall
-						tr
-							td(colspan=2) 
-								a(href=url(issue.viewpoint.screenshot) target='_blank')
-									img(src=url(issue.viewpoint.screenshotSmall))
-
-					tr
-						td(colspan=2)
-							b Assigned:
-							span [#{issue.assigned_roles.join(", ")}] 
-
-							b Priority: 
-							span #{issue.priority} 
-
-							b Status: 
-							span #{issue.status} 
-
-							b Type: 
-							span #{issue.topic_type}
-
-					tr
-						td(colspan=2)
-							b Description: 
+		.container
+			.top-header
+				h2 Model Name ABCD1 - Revision
+				h1 Issues Report
+				h4 6th December 2018
+			each issueTypeIssues, issueType in issues
+				if issueType === "open" && issueTypeIssues.length > 0
+					h2 Open Issues
+				else if issueType === "closed" && issueTypeIssues.length > 0
+					h2 Closed Issues
+				
+				// TODO: Time stamps - What is going on here?!
+				each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
+					h3 #{issue.number} #{issue.name}
+					.row
+						.col
+							p username
+							if issue.viewpoint.screenshotSmall 
+							a(href=url(issue.viewpoint.screenshot) target='_blank')
+								img(src=url(issue.viewpoint.screenshotSmall))
+						.col
+							p.right 9th November 2018
+							ul
+							li
+								strong Assigned
+								span.float-right  [#{issue.assigned_roles.join(", ")}]
+							li
+								strong Priority
+								span.float-right  #{issue.priority}
+							li
+								strong Status
+								span.float-right  #{issue.status}
+							li
+								strong Type
+								span.float-right  #{issue.topic_type}
+					.row
+						.col.text
+							p Description: 
 							span #{issue.desc}
-					tr
-						td
-							span.bold #{issue.owner} 
-							span [#{new Date(issue.created).toUTCString()}]
-						td Issue Opened....
+								p.grey-header Activity Log
 					if issue.comments
 						each comment in issue.comments
-							tr
-								td
-									span.bold #{comment.owner} 
-									span [#{new Date(comment.created).toUTCString()}]
-								td 
-									if comment.comment
-										| #{comment.comment}
-									if comment.action
-										| #{comment.action.propertyText} changed from 
-										i #{comment.action.from} 
-										| to 
-										i #{comment.action.to}
-							if comment.viewpoint && comment.viewpoint.screenshotSmall
-								tr
-									td(colspan=2)
-										a(href=url(comment.viewpoint.screenshot) target='_blank')
-											img(src=url(comment.viewpoint.screenshotSmall))
-								
-				br
+							p 
+							span.bold #{comment.owner}
+							span.float-right #{comment.created}	
 
+					hr
+						
+						
+				
+					
