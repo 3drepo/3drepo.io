@@ -54,7 +54,7 @@ class S3Handler {
 	}
 
 	getFile(key) {
-		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).promise();
+		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).promise().then((file) => file.body);
 	}
 
 	removeFiles(keys) {

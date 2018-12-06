@@ -170,9 +170,7 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 
 JSONAssets.getSuperMeshMapping = function(account, model, id) {
 	const name = `${id}.json.mpc`;
-	return FileRef.getJSONFile(account, model, name).then((file) => {
-		return file.Body;
-	});
+	return FileRef.getJSONFile(account, model, name);
 };
 
 JSONAssets.getTree = function(account, model, branch, rev) {

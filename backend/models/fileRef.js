@@ -17,39 +17,60 @@
 
 "use strict";
 const DB = require("../handler/db");
-const ExternalServices = require("../handler/externalServices");
-const ResponseCodes = require("../response_codes");
+// const ExternalServices = require("../handler/externalServices");
+// const ResponseCodes = require("../response_codes");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 
-function getRefEntry(account, collection, fileName) {
+const gridFSMapping = {};
+gridFSMapping[ORIGINAL_FILE_REF_EXT] = ".history";
+gridFSMapping[UNITY_BUNDLE_REF_EXT] = ".stash.unity3d";
+gridFSMapping[JSON_FILE_REF_EXT] = ".stash.json_mpc";
+
+/*
+ * function getRefEntry(account, collection, fileName) {
 	return DB.getCollection(account, collection).then((col) => {
 		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
 	});
-}
+}*/
 
-function fetchFile(account, collection, fileName) {
+function fetchFile(account, model, ext, fileName) {
+	const fileArr = fileName.split("/");
+	const fullFileName = fileArr.length > 1 ? `/${account}/${model}/revision/${fileName}` :  `/${account}/${model}/${fileName}`;
+	return DB.getFileFromGridFS(account, model + gridFSMapping[ext], fullFileName);
+	/*
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return ExternalServices.getFile(entry.type, entry.link);
-	});
+	});*/
 }
 
-function fetchFileStream(account, collection, fileName) {
+function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true) {
+	let fullFileName = fileName;
+	if(imposeModelRoute) {
+		const fileArr = fileName.split("/");
+		fullFileName = fileArr.length > 1 ? `/${account}/${model}/revision/${fileName}` :  `/${account}/${model}/${fileName}`;
+	}
+	return DB.getFileStreamFromGridFS(account, model + gridFSMapping[ext], fullFileName).then((fileInfo) => {
+		return {readStream: fileInfo.stream, size: fileInfo.size};
+	});
+	/*
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return { readStream: ExternalServices.getFileStream(entry.type, entry.link), size: entry.size };
-	});
+	}); */
 }
 
-function removeAllFiles(account, collection) {
-	return DB.getCollection(account, collection).then((col) => {
+function removeAllFiles(/* account, collection*/) {
+
+	return Promise.resolve();
+/*	return DB.getCollection(account, collection).then((col) => {
 		if (col) {
 			const query = [
 				{
@@ -66,17 +87,31 @@ function removeAllFiles(account, collection) {
 				return Promise.all(delPromises);
 			});
 		}
-	});
+	});*/
 }
 
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFileStream(account, model + ORIGINAL_FILE_REF_EXT, fileName);
+	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName, false);
 };
 
 FileRef.getTotalOrgFileSize = function(account, model) {
-	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
+	const colName =  `${model}${gridFSMapping[ORIGINAL_FILE_REF_EXT]}.files`;
+	return DB.getCollection(account, colName).then((col) => {
+		let totalSize = 0;
+		if(col) {
+			return col.find({},{length : 1}).toArray().then((res) => {
+				if (res && res.length) {
+					totalSize =  res.reduce((total, current) => total + current.length, 0);
+				}
+				return totalSize;
+			});
+		}
+		return totalSize;
+	});
+
+/*	return DB.getCollection(account, model, ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
 		if(col) {
 			return col.find({},{size : 1}).toArray().then((res) => {
@@ -89,25 +124,26 @@ FileRef.getTotalOrgFileSize = function(account, model) {
 
 		return totalSize;
 	});
+*/
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
-	return fetchFile(account, model + UNITY_BUNDLE_REF_EXT, fileName);
+	return fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
-	return fetchFile(account, model + JSON_FILE_REF_EXT, fileName);
+	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName);
 };
 
 FileRef.getJSONFileStream = function(account, model, fileName) {
-	return fetchFileStream(account, model + JSON_FILE_REF_EXT, fileName);
+	return fetchFileStream(account, model, JSON_FILE_REF_EXT, fileName);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
 	const promises = [];
-	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
+	promises.push(removeAllFiles(account, model, ORIGINAL_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model, JSON_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model, UNITY_BUNDLE_REF_EXT));
 	return Promise.all(promises);
 };
 
