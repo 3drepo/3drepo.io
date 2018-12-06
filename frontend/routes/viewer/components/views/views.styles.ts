@@ -21,7 +21,12 @@ import MenuList from '@material-ui/core/MenuList';
 import TextField from '@material-ui/core/TextField';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import Input from '@material-ui/core/Input';
+import IconButton from '@material-ui/core/IconButton';
+
+import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles/colors';
 
@@ -45,6 +50,8 @@ export const ViewsCountInfo = styled.p`
 export const ViewpointsList = styled(MenuList)`
   && {
     padding: 0;
+    overflow: auto;
+    max-height: 70vh;
   }
 `;
 
@@ -73,6 +80,9 @@ export const ThumbnailPlaceholder = styled.div`
 
 export const Name = styled.h3`
   margin-left: 16px;
+  font-weight: 400;
+  font-size: 14px;
+  color: black;
 `;
 
 export const EmptyStateInfo = styled.p`
@@ -110,9 +120,69 @@ export const StyledCancelIcon = styled(CancelIcon)`
   }
 `;
 
+export const StyledDeleteIcon = styled(DeleteIcon)`
+  && {
+    cursor: pointer;
+    margin-top: 8px;
+
+    &:hover {
+      color: ${COLOR.BLACK_40};
+    }
+  }
+`;
+
+export const StyledEditIcon = styled(EditIcon)`
+  && {
+    cursor: pointer;
+
+    &:hover {
+      color: ${COLOR.BLACK_40};
+    }
+  }
+`;
+
 export const SearchField = styled(Input)`
   && {
     padding: 12px;
     width: 100%;
+  }
+`;
+
+export const NameRow = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+export const IconsGroup = styled.div`
+  display: flex;
+  align-items: center;
+  margin-right: 21px;
+  flex-direction: column;
+`;
+
+export const StyledForm = styled(Form)`
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const AddIconButton = styled(IconButton)`
+  && {
+    margin-right: -12px;
+  }
+`;
+
+export const SaveIconButton = styled(IconButton)`
+  && {
+    margin-top: 8px;
+    padding: 0;
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 `;
