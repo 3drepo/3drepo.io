@@ -24,8 +24,5 @@ export const selectIsPending = createSelector(
 );
 
 export const selectViewpointsItems = createSelector(
-	selectViewpointsDomain, (state) => {
-    console.log('Select viewpoints items', state.items);
-    return state.items
-  }
+	selectViewpointsDomain, (state) => state.items
 );

@@ -16,7 +16,8 @@
  */
 
 import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Field } from 'formik';
+import { isEmpty } from 'lodash';
 import { ViewerCard } from '../viewerCard/viewerCard.component';
 import { getDataFromPathname } from './../../viewer.helpers';
 
@@ -25,9 +26,6 @@ import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import SaveIcon from '@material-ui/icons/Save';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 
 import {
 	FooterWrapper,
@@ -38,11 +36,17 @@ import {
 	ThumbnailPlaceholder,
 	Name,
 	EmptyStateInfo,
-	NewItemWrapper,
 	NewViewpointName,
 	StyledSaveIcon,
 	StyledCancelIcon,
-	SearchField
+	SearchField,
+	NameRow,
+	IconsGroup,
+	StyledForm,
+	AddIconButton,
+	SaveIconButton,
+	StyledEditIcon,
+	StyledDeleteIcon
 } from './views.styles';
 
 interface IProps {
@@ -60,153 +64,90 @@ interface IProps {
 
 interface IState {
 	viewpoints: any[];
-	addMode: boolean;
 	editMode: boolean;
 	searchMode: boolean;
+	addedNewItem: boolean;
 	activeViewpointId: number;
+	teamspace: string;
+	modelId: string;
 }
 
 export class Views extends React.PureComponent<IProps, IState> {
+	public listRef = React.createRef<any>();
+
 	public state = {
 		viewpoints: [],
-		addMode: false,
 		editMode: false,
 		searchMode: false,
-		activeViewpointId: null
+		addedNewItem: false,
+		activeViewpointId: null,
+		teamspace: '',
+		modelId: ''
 	};
 
 	public componentDidMount() {
 		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
 		this.props.fetchViewpoints(teamspace, modelId);
 		this.props.subscribeOnViewpointChanges(teamspace, modelId);
+		this.setState({ teamspace, modelId });
 	}
 
 	public componentWillUnmount() {
-		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
+		const { teamspace, modelId } = this.state;
 		this.props.unsubscribeOnViewpointChanges(teamspace, modelId);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const { viewpoints } = this.props;
-
 		const changes = {} as any;
 
 		if (viewpoints.length !== prevProps.viewpoints.length || viewpoints !== prevProps.viewpoints) {
 			changes.viewpoints = viewpoints;
+			if (this.state.addedNewItem && viewpoints.length > prevProps.viewpoints.length) {
+				changes.activeViewpointId = viewpoints[viewpoints.length - 1]._id;
+				const listRef = this.listRef.current.listRef;
+				this.setState({ editMode: true }, () => this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200));
+			}
 		}
-
-		this.setState(changes);
-	}
-
-	public getTitleIcon = () => <PhotoCameraIcon />;
-
-	public handleOpenSearchMode = () => {
-		this.setState({
-			searchMode: true
-		});
-	}
-
-	public handleCloseSearchMode = () => {
-		this.setState({
-			searchMode: false
-		});
-	}
-
-	public getSearchButton = () => {
-		if (this.state.searchMode) {
-			return (
-				<IconButton onClick={this.handleCloseSearchMode}>
-					<CancelIcon />
-				</IconButton>
-			);
-		} else {
-			return (
-				<IconButton onClick={this.handleOpenSearchMode}>
-					<SearchIcon />
-				</IconButton>
-			);
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
-	}
-
-	public getActions = () =>
-	[
-		{ Button: this.getSearchButton }
-	]
-
-	public renderFooterContent = () => {
-		return (
-			<FooterWrapper>
-				{
-					<>
-						<ViewsCountInfo>
-							{this.state.viewpoints.length ? `${this.state.viewpoints.length} views displayed` : 'Add new viewpoint'}
-						</ViewsCountInfo>
-
-						<IconButton aria-label="Add view"
-							onClick={this.handleAddMode} disabled={this.state.addMode || this.state.editMode}>
-							<AddCircleIcon color="secondary" />
-						</IconButton>
-					</>
-				}
-
-			</FooterWrapper>
-		);
 	}
 
 	public handleViewpointItemClick = (viewpoint) => {
-		if (this.state.addMode || this.state.editMode) {
-			return;
-		}
+		if (this.state.editMode) { return; }
+
 		this.setState({
 			activeViewpointId: viewpoint._id
 		}, () => {
-			const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
-
+			const { teamspace, modelId } = this.state;
 			this.props.showViewpoint(teamspace, modelId, viewpoint);
 		});
 	}
 
-	public handleAddMode = () => {
-		this.setState({
-			addMode: true,
-			editMode: false
-		});
-	}
-
-	public handleSaveAdd = (values) => {
-		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
-		this.props.createViewpoint(teamspace, modelId, values.name);
-		this.handleCancelAddMode();
-	}
-
 	public handleSaveEdit = (values, viewpointId) => {
-		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
+		const { teamspace, modelId } = this.state;
 		this.props.updateViewpoint(teamspace, modelId, viewpointId, values.newName);
 		this.handleCancelEditMode();
 	}
 
-	public handleCancelAddMode = () => {
-		this.setState({
-			addMode: false
-		});
+	public handleAddViewpoint = () => {
+		const { teamspace, modelId } = this.state;
+		this.props.createViewpoint(teamspace, modelId, `View ${this.props.viewpoints.length + 1}`);
+		this.setState({ addedNewItem: true });
 	}
 
-	public handleCancelEditMode = () => {
-		this.setState({
-			editMode: false
-		});
-	}
+	public handleOpenEditMode = () => this.setState({ editMode: true });
 
-	public handleEditMode = () => {
-		this.setState({
-			editMode: true,
-			addMode: false
-		});
-	}
+	public handleCancelEditMode = () => this.setState({ editMode: false });
+
+	public handleOpenSearchMode = () => this.setState({ searchMode: true });
+
+	public handleCloseSearchMode = () => this.setState({ searchMode: false });
 
 	public handleDelete = (event, viewpointId) => {
 		event.stopPropagation();
-		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
+		const { teamspace, modelId } = this.state;
 		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
 	}
 
@@ -218,31 +159,63 @@ export class Views extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public getTitleIcon = () => <PhotoCameraIcon />;
+
+	public getActions = () => [ { Button: this.getSearchButton } ];
+
+	public getSearchButton = () => {
+		if (this.state.searchMode) {
+			return (
+				<IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>
+			);
+		} else {
+			return (
+				<IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>
+			);
+		}
+	}
+
+	public renderFooterContent = () => (
+		<FooterWrapper>
+			{ <>
+					<ViewsCountInfo>
+						{this.state.viewpoints.length ? `${this.state.viewpoints.length} views displayed` : 'Add new viewpoint'}
+					</ViewsCountInfo>
+					<AddIconButton aria-label="Add view" onClick={this.handleAddViewpoint} disabled={this.state.editMode}>
+						<AddCircleIcon color={this.state.editMode ? 'disabled' : 'secondary'} fontSize="large" />
+					</AddIconButton>
+			</> }
+		</FooterWrapper>
+	)
+
 	public renderViewpoints = () => {
+		const { activeViewpointId, editMode, searchMode, viewpoints } = this.state;
 		return (
 			<>
-				{this.state.searchMode && <SearchField placeholder="Search viewpoint..." onChange={this.handleSearchChange} />}
-				{this.state.searchMode && !this.state.viewpoints.length && <EmptyStateInfo>No viewpoints matched</EmptyStateInfo>}
-				<ViewpointsList>
-					{ this.state.viewpoints.map(
+				{searchMode && <SearchField placeholder="Search viewpoint..." onChange={this.handleSearchChange} />}
+				{searchMode && !viewpoints.length && <EmptyStateInfo>No viewpoints matched</EmptyStateInfo>}
+				<ViewpointsList innerRef={this.listRef}>
+					{ viewpoints.map(
 							(viewpoint) => {
 								return (
 									<ViewpointItem
 										key={viewpoint._id}
+										disableRipple
 										onClick={() => this.handleViewpointItemClick(viewpoint)}
-										active={this.state.activeViewpointId === viewpoint._id ? 1 : 0}>
-										{ viewpoint.screenshot.thumbnailUrl
-											? <Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} />
-											: <ThumbnailPlaceholder />
-										}
+										active={activeViewpointId === viewpoint._id ? 1 : 0}>
+
+										<Thumbnail
+											src={viewpoint.screenshot.thumbnailUrl}
+											key={viewpoint.screenshot.thumbnailUrl}
+											alt={viewpoint.name}
+										/>
 										{
-											this.state.activeViewpointId === viewpoint._id
-											? this.state.editMode
-												?
+											activeViewpointId === viewpoint._id ?
+												editMode ?
 													<Formik
 														initialValues={{newName: viewpoint.name}}
 														onSubmit={(values) => this.handleSaveEdit(values, viewpoint._id)}>
-														<Form>
+														<StyledForm>
 															<Field name="newName" render={ ({ field, form }) => (
 																<NewViewpointName
 																	{...field}
@@ -251,23 +224,22 @@ export class Views extends React.PureComponent<IProps, IState> {
 																	label="New name"
 																/>
 															)} />
-															<StyledCancelIcon color="secondary" onClick={this.handleCancelEditMode} />
-															<IconButton type="submit" disableRipple>
-																<StyledSaveIcon color="secondary"/>
-															</IconButton>
-														</Form>
+															<IconsGroup>
+																<StyledCancelIcon color="secondary" onClick={this.handleCancelEditMode} />
+																<SaveIconButton type="submit" disableRipple={true}>
+																	<StyledSaveIcon color="secondary"/>
+																</SaveIconButton>
+															</IconsGroup>
+														</StyledForm>
 													</Formik>
-												: <>
+												:
+													<NameRow>
 														<Name>{viewpoint.name}</Name>
-														{
-															!this.state.addMode &&
-															<>
-																<EditIcon color="secondary" onClick={this.handleEditMode} />
-																<DeleteIcon color="secondary" onClick={(event) => this.handleDelete(event, viewpoint._id)} />
-															</>
-														}
-
-													</>
+														<IconsGroup>
+															<StyledEditIcon color="secondary" onClick={this.handleOpenEditMode} />
+															<StyledDeleteIcon color="secondary" onClick={(event) => this.handleDelete(event, viewpoint._id)} />
+														</IconsGroup>
+													</NameRow>
 											:	<Name>{viewpoint.name}</Name>
 										}
 									</ViewpointItem>
@@ -291,34 +263,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 				pending={this.props.isPending}
 			>
 				{!this.state.viewpoints.length && !this.state.searchMode
-					? <EmptyStateInfo>No viewpoints have been created yet</EmptyStateInfo>
-					: this.renderViewpoints()}
-
-				{this.state.addMode &&
-				<>
-					<ViewpointItem button={false}>
-						<ThumbnailPlaceholder />
-						<NewItemWrapper>
-							<Formik initialValues={{name: ''}} onSubmit={this.handleSaveAdd}>
-								<Form>
-									<Field name="name" render={ ({ field, form }) => (
-										<NewViewpointName
-											{...field}
-											error={Boolean(form.errors.name)}
-											helperText={form.errors.name}
-											label="Name"
-										/>
-									)} />
-									<StyledCancelIcon color="secondary" onClick={this.handleCancelAddMode} />
-									<IconButton type="submit">
-										<StyledSaveIcon color="secondary"/>
-									</IconButton>
-								</Form>
-							</Formik>
-						</NewItemWrapper>
-					</ViewpointItem>
-				</>
-				}
+					? <EmptyStateInfo>No viewpoints have been created yet</EmptyStateInfo> : this.renderViewpoints()}
 			</ViewerCard>
 		);
 	}
