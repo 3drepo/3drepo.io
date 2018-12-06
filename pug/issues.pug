@@ -136,11 +136,18 @@ html(lang="en" ng-app="3drepo").ng-scope
 							p Description: 
 							span #{issue.desc}
 								p.grey-header Activity Log
-					if issue.comments
-						each comment in issue.comments
-							p 
-							span.bold #{comment.owner}
-							span.float-right #{comment.created}	
+							if issue.comments
+								each comment in issue.comments
+									p 
+									span.bold #{comment.owner}
+									span.float-right #{new Date(comment.created).toUTCString()}	
+										if comment.comment
+											| #{comment.comment}
+										if comment.action
+											| #{comment.action.propertyText} changed from
+											i #{comment.action.from}
+											| to
+											i #{comment.action.to}
 
 					hr
 						
