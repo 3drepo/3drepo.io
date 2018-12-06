@@ -90,11 +90,7 @@ export function* generateViewpointObject(teamspace, modelId, viewName) {
 export function* createViewpoint({teamspace, modelId, viewpointName}) {
 	try {
 		const view = yield generateViewpointObject(teamspace, modelId, viewpointName);
-		const { data: {_id} } = yield API.createModelViewpoint(teamspace, modelId, view);
-
-		// view._id = _id;
-		// view.screenshot.thumbnailUrl = getThumbnailUrl(`${teamspace}/${modelId}/viewpoints/${view._id}/thumbnail.png`);
-
+		yield API.createModelViewpoint(teamspace, modelId, view);
 	} catch (error) {
 		console.error(error);
 	}
@@ -121,7 +117,12 @@ export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 	const viewsNotifications = yield notificationService.getChannel(teamspace, modelId).views;
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
-	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+	const onCreated = (createdView) => {
+		if (!createdView.screenshot.thumbnailUrl && createdView.screenshot.thumbnail) {
+			createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
+			dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+		}
+	};
 	const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
 
 	viewsNotifications.subscribeToUpdated(onUpdated, this);
