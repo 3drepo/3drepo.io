@@ -104,9 +104,7 @@ function createGroup(req, res, next) {
 
 		create.then(group => {
 
-			if (group) {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, group);
-			}
+			responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
