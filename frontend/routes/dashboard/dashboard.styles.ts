@@ -25,6 +25,9 @@ export const Container = styled(Grid)`
     padding: 30px 50px 60px;
     height: 100%;
     overflow: hidden;
+    max-height: 100%;
+    flex-wrap: nowrap;
+    position: absolute;
 
     ${media.tablet`
       height: auto;
