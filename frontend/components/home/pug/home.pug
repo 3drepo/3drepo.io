@@ -4,7 +4,7 @@ div.homeContainer(
 	flex="100"
 	ng-keydown="vm.keyAction($event)"
 	ng-keyup="vm.keyAction($event)")
-	
+
 	viewer(
 		id="viewer"
 		flex="none"
@@ -31,6 +31,7 @@ div.homeContainer(
 			ui-view=""
 			flex="grow"
 			layout="column"
+			style="position: relative;"
 			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all'}"
 		)
 
