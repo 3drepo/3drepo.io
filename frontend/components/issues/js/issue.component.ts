@@ -117,7 +117,6 @@ class IssueController implements ng.IController {
 	) {}
 
 	public $onInit() {
-
 		this.issueFailedToLoad = false;
 
 		this.savedScreenShot = null;
@@ -231,7 +230,7 @@ class IssueController implements ng.IController {
 			this.chatEventsComments.unsubscribeFromUpdated (this.onCommentUpdated);
 			this.chatEventsComments.unsubscribeFromDeleted(this.onCommentDeleted);
 		}
-
+		this.$location.search('issueId', undefined);
 	}
 
 	public watchers() {
