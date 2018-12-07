@@ -53,6 +53,7 @@ interface IProps {
 	headlineText?: string;
 	onLogin: (login, password) => void;
 	isPending: boolean;
+	isAuthenticated: boolean;
 }
 
 interface IState {
@@ -61,14 +62,21 @@ interface IState {
 }
 
 export class Login extends React.PureComponent<IProps, IState> {
+	public formRef = React.createRef<any>();
+
 	public state = {
 		login: '',
 		password: ''
 	};
 
+	public componentDidUpdate({isAuthenticated}) {
+		if (this.props.isAuthenticated && !isAuthenticated) {
+			this.formRef.current.handleReset();
+		}
+	}
+
 	public handleSubmit = (data, form) => {
 		this.props.onLogin(data.login, data.password);
-		form.resetForm();
 	}
 
 	public renderLoginButtons = () => (
@@ -112,6 +120,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 							initialValues={{ login, password }}
 							onSubmit={this.handleSubmit}
 							validationSchema={LoginSchema}
+							ref={this.formRef}
 						>
 							<Form>
 								<Field name="login" render={({ field }) => (
