@@ -29,6 +29,7 @@ const async = require("async");
 const http = require("http");
 // let newXhr = require('socket.io-client-cookie');
 const io = require("socket.io-client");
+const bouncerHelper = require("./bouncerHelper");
 
 describe("Chat service", function () {
 
@@ -380,9 +381,9 @@ describe("Chat service", function () {
 				socket.off(`${username}::notificationUpserted`);
 
 				expect(notification).to.exist;
-
 				expect(notification).to.shallowDeepEqual({_id: notificationId});
 				expect(notification.issuesId).to.be.an('array').to.deep.equal([issueId]);
+
 				done();
 			});
 
@@ -397,6 +398,7 @@ describe("Chat service", function () {
 			socket.on(`${username}::notificationDeleted`, function(notification) {
 				socket.off(`${username}::notificationDeleted`);
 				expect(notification).to.shallowDeepEqual({_id: notificationId});
+
 				done();
 			});
 
@@ -406,6 +408,30 @@ describe("Chat service", function () {
 						if (err) done(err);
 					});
 		});
+
+		it("should receive a model uploaded notification if a model has been uploaded", done => {
+			const eventName = `${username}::notificationUpserted`;
+
+			socket.on(eventName, function(notification) {
+				socket.off(eventName);
+				expect(notification).to.exist;
+
+				expect(notification.type).to.equals("MODEL_UPDATED");
+
+				bouncerHelper.stopBouncerWorker();
+				done();
+			});
+
+			async.series([bouncerHelper.startBouncerWorker,
+				next => agent2.post(`/${account}/${model}/upload`)
+					.field("tag", "onetag")
+					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+					.expect(200, function(err, res) {
+						next(err);
+					})
+				])
+		}).timeout('60s');
+
 	});
 
 

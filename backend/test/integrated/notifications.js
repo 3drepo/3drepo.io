@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const request = require("supertest");
+const bouncerHelper = require("./bouncerHelper");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp(
 	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
@@ -65,30 +66,44 @@ describe('Notifications', function() {
 
 	before(function(done) {
 		server = app.listen(8080, function () {
-			async.parallel(
-				usernames.map(username => done =>
-				{
-					const agent = request.agent(server);
-					agent.post("/login")
-						.send({ username, password})
-						.expect(200, function(err, res) {
-							done(err);
-						});
+			async.series( [
+				(next) => {
+					async.parallel(
+						usernames.map( username => next =>
+						{
+							const agent = request.agent(server);
+							agent.post("/login")
+								.send({ username, password})
+								.expect(200, function(err, res) {
+									next(err);
+								});
 
-					agents[username] = agent;
-				}),
-				() =>
-				async.parallel(
-					usernames.map(username => done =>
-					{
-						const agent = agents[username];
-						agent.delete(NOTIFICATIONS_URL)
-							.expect(200, function(err, res) {
-								done(err);
-							});
-					})
-				, done)
-			);
+							agents[username] = agent;
+						}),next);
+				},
+				(next) => {
+					async.parallel(
+						usernames.map(username => next =>
+						{
+							const agent = agents[username];
+							agent.delete(NOTIFICATIONS_URL)
+								.expect(200, function(err, res) {
+									next(err);
+								});
+						}), next);
+				},
+				(next) => {
+					async.parallel(
+						usernames.map(username => next =>
+						{
+							const agent = agents[username];
+							agent.get(NOTIFICATIONS_URL)
+								.expect(200, function(err, res) {
+									next(err);
+								});
+						}), next);
+				}]
+				, done);
 		});
 	});
 
@@ -356,7 +371,68 @@ describe('Notifications', function() {
 			], done)
 		})
 
+	});
 
+
+	describe("of type model update", ()=> {
+		before(bouncerHelper.startBouncerWorker);
+
+		it("should be created for users with access to the model", done => {
+			const users = ["viewerTeamspace1Model1JobA",
+			"viewerTeamspace1Model1JobB",
+			"commenterTeamspace1Model1JobA",
+			"commenterTeamspace1Model1JobB",
+			"collaboratorTeamspace1Model1JobA",
+			"collaboratorTeamspace1Model1JobB",
+			"adminTeamspace1JobA",
+			"adminTeamspace1JobB",
+			"teamSpace1"]
+
+			const pollForNotification = username => next => {
+				const intervalHandle = setInterval(() => {
+					agents[username].get(NOTIFICATIONS_URL)
+						.expect(200, function(err, res) {
+
+							const notifications =  res.body.filter( n => n.type === "MODEL_UPDATED");
+
+							if (notifications.length > 0) {
+								clearInterval(intervalHandle);
+								expect(notifications.length).to.equal(1);
+								next();
+							}
+						});
+					}, 500);
+			};
+
+
+			async.parallel(
+				users.map(pollForNotification),
+				() => {
+					bouncerHelper.stopBouncerWorker();
+					done();
+				}
+			)
+
+			const upload = next => agents.teamSpace1.post(`/${account}/${model}/upload`)
+				.field("tag", "onetag")
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(200, function(err, res) {
+					if(err) done(err);
+				});
+
+
+			upload();
+
+		}).timeout(60000);
+
+		it("should be not be created for users without access to the model", done => {
+			agents.unassignedTeamspace1UserJobA.get(NOTIFICATIONS_URL)
+			.expect(200, (err, res) => {
+				const notifications =  res.body.filter( n => n.type === "MODEL_UPDATED");
+				expect(notifications.length).to.equal(0);
+				done(err);
+			});
+		});
 	});
 
 });

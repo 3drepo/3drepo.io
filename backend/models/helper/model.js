@@ -123,7 +123,7 @@ function importSuccess(account, model, sharedSpacePath) {
 
 			// Creates model updated notification.
 			History.findLatest({account, model},{tag:1}).then(h => {
-				const revision = (!h.tag) ? "" : h.tag;
+				const revision = (!h || !h.tag) ? "" : h.tag;
 				return notifications.insertModelUpdatedNotifications(account, model, revision);
 			}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 			setting.save();
