@@ -82,7 +82,7 @@ export const Name = styled.h3`
   margin-left: 16px;
   font-weight: 400;
   font-size: 14px;
-  color: black;
+  color: ${COLOR.BLACK};
 `;
 
 export const EmptyStateInfo = styled.p`
@@ -167,7 +167,6 @@ export const StyledForm = styled(Form)`
   align-items: center;
   flex: 1;
   justify-content: space-between;
-  align-items: center;
 `;
 
 export const AddIconButton = styled(IconButton)`
