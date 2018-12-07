@@ -38,4 +38,4 @@ angular
 	.component('passwordChange', wrap(PasswordChange))
 	.component('viewerPanel', wrap(ViewerPanel))
 	.component('gis', wrap(Gis, ['maxHeight']))
-	.component('viewsCard', wrap(Views));
+	.component('views', wrap(Views));

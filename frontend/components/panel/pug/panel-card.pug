@@ -82,19 +82,6 @@ div(layout="column", class="md-whiteframe-1dp")
 				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
 
-			viewpoints(
-				ng-if="vm.contentData.type === 'viewpoints'"
-				account='vm.account'
-				model='vm.model'
-				revision='vm.revision'
-				on-show-item='vm.showItem()'
-				on-hide-item='vm.hideItem()'
-				hide-item='vm.hideSelectedItem'
-				on-content-height-request='vm.onContentHeightRequest(height)'
-				model-settings='vm.modelSettings'
-				show-filter="vm.showFilter"
-				filter-text='vm.filterText')
-
 			docs(
 				ng-if="vm.contentData.type === 'docs'"
 				show-add='vm.showAdd'
