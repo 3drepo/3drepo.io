@@ -204,11 +204,8 @@ export class Views extends React.PureComponent<IProps, IState> {
 										onClick={() => this.handleViewpointItemClick(viewpoint)}
 										active={activeViewpointId === viewpoint._id ? 1 : 0}>
 
-										<Thumbnail
-											src={viewpoint.screenshot.thumbnailUrl}
-											key={viewpoint.screenshot.thumbnailUrl}
-											alt={viewpoint.name}
-										/>
+										{ viewpoint.screenshot.thumbnailUrl
+											? <Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} /> : <ThumbnailPlaceholder />}
 										{
 											activeViewpointId === viewpoint._id ?
 												editMode ?
