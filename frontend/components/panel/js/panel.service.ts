@@ -437,7 +437,8 @@ export class PanelService {
 			fixedHeight: false,
 			options: [
 				{type: 'filter', visible: true}
-			]
+			],
+			isReactComponent: true
 		});
 
 		this.panelCards.left.push({

@@ -170,6 +170,7 @@ class PanelController implements ng.IController {
 		for (let i = 0; i < this.contentItems.length; i++) {
 			if (contentType === this.contentItems[i].type) {
 
+				console.log('contentType',contentType);
 				// Toggle panel show and update number of panels showing count
 				this.contentItems[i].show = !this.contentItems[i].show;
 
