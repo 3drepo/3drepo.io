@@ -37,18 +37,19 @@ interface IState {
 }
 
 const DEFAULT_REDIRECT = '/dashboard/teamspaces';
-const MAIN_ROUTE_PATH =  '/';
-const STATIC_ROUTES = [
+const MAIN_ROUTE_PATH = '/';
+const LOGIN_ROUTE_PATH = '/login';
+
+const PUBLIC_ROUTES = [
 	'login',
-	'cookies',
-	'terms',
-	'privacy',
 	'sign-up',
 	'register-request',
 	'register-verify',
 	'password-forgot',
 	'password-change'
 ] as any;
+
+const STATIC_ROUTES = ['cookies', 'terms', 'privacy'] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -63,10 +64,17 @@ export class App extends React.PureComponent<IProps, IState> {
 		return STATIC_ROUTES.includes(path.replace('/', ''));
 	}
 
+	public isPublicRoute(path) {
+		return PUBLIC_ROUTES.includes(path.replace('/', ''));
+	}
+
 	public componentDidMount() {
 		this.props.authenticate();
-		this.toggleAutoLogin();
-		this.toggleAutoLogout();
+
+		if (!this.isStaticRoute(location.pathname)) {
+			this.toggleAutoLogout();
+			this.toggleAutoLogin();
+		}
 
 		const initialReferrer = location.pathname !== MAIN_ROUTE_PATH
 			? `${location.pathname}${location.search}`
@@ -81,10 +89,13 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const changes = {} as IState;
 		const { location, history, isAuthenticated } = this.props;
 		const isStaticRoute = this.isStaticRoute(location.pathname);
-		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
+		const isPublicRoute = this.isPublicRoute(location.pathname);
+
+		const isPrivateRoute = !isStaticRoute && !isPublicRoute;
+
+		if (isPrivateRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
 				this.toggleAutoLogin(false);
 				runAngularTimeout(() => {
@@ -99,14 +110,12 @@ export class App extends React.PureComponent<IProps, IState> {
 			}
 		}
 
-		if (isStaticRoute && isAuthenticated) {
+		if (isPublicRoute && isAuthenticated) {
+			const isLoginRoute = LOGIN_ROUTE_PATH === location.pathname;
 			runAngularTimeout(() => {
-				history.push(DEFAULT_REDIRECT);
+				history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
+				this.setState({ referrer: DEFAULT_REDIRECT });
 			});
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
 		}
 	}
 

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { subscribe } from '../../../helpers/migration';
-import { selectIsAuthenticated } from '../../../modules/auth';
+import { selectIsAuthenticated, selectIsPending } from '../../../modules/auth';
 
 class HomeController implements ng.IController {
 
@@ -95,7 +95,8 @@ class HomeController implements ng.IController {
 		private DialogService
 	) {
 		subscribe(this, {
-			isAuthenticated: selectIsAuthenticated
+			isAuthenticated: selectIsAuthenticated,
+			isPending: selectIsPending
 		});
 	}
 

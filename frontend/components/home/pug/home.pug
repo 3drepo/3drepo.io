@@ -34,7 +34,7 @@ div.homeContainer(
 			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all'}"
 		)
 
-	#homeLegalContainer( flex="100" layout="column" ng-if="vm.isLegalPage")
+	#homeLegalContainer(flex="100" layout="column" ng-if="vm.isLegalPage")
 		div(ui-view="")
 
 	#legalLinks

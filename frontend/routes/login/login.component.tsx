@@ -100,7 +100,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 			<Container
 				container
 				direction="column"
-				justify="center"
 				alignItems="center"
 				wrap="nowrap">
 				<Logo />
