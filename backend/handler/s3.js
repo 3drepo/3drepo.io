@@ -19,7 +19,8 @@
 
 const config = require("../config.js");
 const systemLogger = require("../logger.js").systemLogger;
-const AWS = require("aws-sdk");
+const AWS = {}; // require("aws-sdk"); - uncomment and add aws-sdk to package.json to revive.
+const https = require("https");
 
 class S3Handler {
 	constructor() {
@@ -28,11 +29,17 @@ class S3Handler {
 			config.s3.secretKey &&
 			config.s3.bucketName &&
 			config.s3.region) {
+			const agent = new https.Agent({
+				maxSockets: 1000
+			});
 
 			AWS.config.update({
 				accessKeyId: config.s3.accessKey,
 				secretAccessKey: config.s3.secretKey,
-				region: config.s3.region
+				region: config.s3.region,
+				httpOptions:{
+					agent: agent
+				}
 			});
 			this.s3Conn = new AWS.S3();
 			this.testConnection();
@@ -42,8 +49,12 @@ class S3Handler {
 		}
 	}
 
-	getFile(key) {
+	getFileStream(key) {
 		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).createReadStream();
+	}
+
+	getFile(key) {
+		return this.s3Conn.getObject({Bucket : config.s3.bucketName, Key: key}).promise().then((file) => file.body);
 	}
 
 	removeFiles(keys) {

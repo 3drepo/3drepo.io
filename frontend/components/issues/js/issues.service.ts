@@ -473,7 +473,7 @@ export class IssuesService {
 		this.populateIssue(issue);
 
 		this.state.allIssues.forEach((oldIssue, i) => {
-			const matches = oldIssue._id === issue._id;
+			const matches = oldIssue._id === issue._id && issue.model === oldIssue.model;
 			if (matches) {
 
 				if (issue.status === 'closed') {
@@ -642,8 +642,9 @@ export class IssuesService {
 			this.treeService.setHideIfc(issue.viewpoint.hideIfc);
 		}
 
-		const hasHiddenOrShownGroup = issue.viewpoint.hasOwnProperty('hidden_group_id') ||
-						issue.viewpoint.hasOwnProperty('shown_group_id') ;
+		const hasHiddenOrShownGroup = issue.viewpoint && (
+			issue.viewpoint.hasOwnProperty('hidden_group_id') ||
+			issue.viewpoint.hasOwnProperty('shown_group_id'));
 
 		this.treeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 
