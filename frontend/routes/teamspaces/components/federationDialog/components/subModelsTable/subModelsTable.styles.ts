@@ -23,8 +23,6 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
 
-export const Container = styled.div``;
-
 export const HeaderCheckboxWrapper = styled.div`
 	display: flex;
 	align-items: center;
@@ -47,6 +45,10 @@ export const StyledCheckbox = styled(Checkbox)`
 `;
 
 export const StyledTable = styled(Table)`
+	&& {
+		width: 50%;
+	}
+
 	td {
 		border-bottom: none;
 	}
