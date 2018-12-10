@@ -88,6 +88,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			color:#cfcfcf;
 		}
 
+		.grey {
+			color:#cfcfcf;
+		}
+
 	head
 		header
 			div(class="button-group")
@@ -118,35 +122,44 @@ html(lang="en" ng-app="3drepo").ng-scope
 								img(src=url(issue.viewpoint.screenshotSmall))
 						.col
 							p.right 9th November 2018
-							ul
-							li
-								strong Assigned
-								span.float-right  [#{issue.assigned_roles.join(", ")}]
-							li
-								strong Priority
-								span.float-right  #{issue.priority}
-							li
-								strong Status
-								span.float-right  #{issue.status}
-							li
-								strong Type
-								span.float-right  #{issue.topic_type}
+							table.details
+								tr
+									td
+									p
+										strong Assigned:
+										span.float-right [#{issue.assigned_roles.join(", ")}]
+								tr
+									td
+									p
+										strong Priority:
+										span.float-right  #{issue.priority}
+								tr
+									td
+									p
+										strong Status:
+										span.float-right  #{issue.status}
+								tr
+									td
+									p
+										strong Type:
+										span.float-right #{issue.topic_type}
+
 					.row
 						.col.text
 							p Description: 
 							span #{issue.desc}
 								p.grey-header Activity Log
 							if issue.comments
-								each comment in issue.comments
-									p 
-									span.bold #{comment.owner}
-									span.float-right #{new Date(comment.created).toUTCString()}	
+								each comment in issue.comments	
 										if comment.comment
 											| #{comment.comment}
+											p 
+												span.grey #{comment.owner}
+												span.grey.float-right #{new Date(comment.created).toUTCString()}
 										if comment.action
-											| #{comment.action.propertyText} changed from
+											| #{comment.action.propertyText} changed from 
 											i #{comment.action.from}
-											| to
+											|  to    
 											i #{comment.action.to}
 
 					hr
