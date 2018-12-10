@@ -387,7 +387,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 			if (!history) {
 				return Promise.reject(responseCodes.INVALID_TAG_NAME);
 			} else {
-				return History.find(dbCol, {timestamp: {"$lte": history.timestamp}}, {_id: 1, current: 1})
+				return History.find(dbCol, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
 					.then((revIds) => {
 						revIds = revIds.map(r => r._id);
 
@@ -400,7 +400,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 	return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
 		return historySearch.then((historySearchResults) => {
 			// Only retrieve risks for current and older revisions
-			filter.rev_id = {"$in": historySearchResults.revIds};
+			filter.rev_id = {"$not" : {"$in": historySearchResults.revIds}};
 
 			return db.getCollection(account, model + ".risks").then((_dbCol) => {
 				// Retrieve risks from top level model/federation

@@ -189,6 +189,10 @@ module.exports = {
 	},
 
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {
+		if (!issue) {
+			return Promise.resolve([]);
+		}
+
 		const assignedRole = issue.assigned_roles[0];
 
 		return job.findByJob(teamSpace,assignedRole)
