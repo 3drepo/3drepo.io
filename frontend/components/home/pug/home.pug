@@ -31,8 +31,7 @@ div.homeContainer(
 			ui-view=""
 			flex="grow"
 			layout="column"
-			style="position: relative;"
-			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all'}"
+			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all','position': vm.$state.current.name === 'app.viewer' ? 'static' : 'relative'}"
 		)
 
 	#homeLegalContainer(flex="100" layout="column" ng-if="vm.isLegalPage")
