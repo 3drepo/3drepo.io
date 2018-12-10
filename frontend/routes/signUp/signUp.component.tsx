@@ -31,17 +31,30 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+// import Select from '@material-ui/core/Select';
 import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
+import { CountriesSelect } from './components/countriesSelect/countriesSelect.component';
 
 import {
 	Container,
 	Headline,
 	StyledGrid,
 	StyledFormControl,
-	ButtonContainer
+	ButtonContainer,
+	StyledSelect
 } from './signUp.styles';
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+	PaperProps: {
+		style: {
+			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+			width: 250
+		}
+	}
+};
 
 const RegistrationInitialValues = {
 	captcha: '',
@@ -55,16 +68,14 @@ const RegistrationInitialValues = {
 	password: '',
 	passwordConfirm: '',
 	termsAgreed: false,
-	mailListAgreed: false
+	mailListAgreed: true
 };
 
 const RegistrationSchema = Yup.object().shape({
-	username: schema.required,
+	username: schema.username,
 	password: schema.password
-		.min(0)
 		.strength(1, 'This password is weak'),
 	passwordConfirm: schema.password
-		.min(0)
 		.equalTo(
 			Yup.ref('password'),
 			'Password confirmation must match password'
@@ -97,14 +108,33 @@ interface IProps {
 
 interface IState {
 	passwordStrengthMessage: string;
+	countries: any[];
+	selectedCountry: string;
 }
 
 export class SignUp extends React.PureComponent<IProps, IState> {
 	public state = {
-		passwordStrengthMessage: ''
+		passwordStrengthMessage: '',
+		countries: [],
+		selectedCountry: ''
 	};
 
 	public reCaptchaWrapperRef = React.createRef<any>();
+
+	public componentDidMount() {
+		const defaultCountry = clientConfigService.countries.find((country) => country.code === 'GB');
+		const countries = clientConfigService.countries.filter((country) => country !== defaultCountry);
+		countries.unshift(defaultCountry);
+		const mappedCountries = countries.map((country) => {
+			return {
+				label: country.name,
+				value: country.code
+			};
+		});
+		console.log('mappedCountries', mappedCountries);
+
+		this.setState({ countries: mappedCountries });
+	}
 
 	public handleSubmit = (values, form) => {
 		const data = omit(values, 'username', 'emailConfirm', 'passwordConfirm', 'termsAgreed');
@@ -136,13 +166,14 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderCountries = () =>
-		clientConfigService.countries.map((country) => (
+		this.state.countries.map((country) => (
 			<MenuItem key={country.code} value={country.code}>
 				{country.name}
 			</MenuItem>
-	))
+		))
 
 	public render() {
+		console.log('clientConfigService.countries',clientConfigService.countries)
 		return (
 			<Container
 				container
@@ -242,15 +273,14 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										/>
 									)} />
 									<StyledFormControl>
-										<InputLabel>Country *</InputLabel>
 										<Field
 											name="countryCode"
 											render={({ field }) => (
-												<Select
+												<CountriesSelect
 													{...field}
-													required>
-													{this.renderCountries()}
-												</Select>
+													label="Countries *"
+													countries={this.state.countries}
+												/>
 											)}
 										/>
 									</StyledFormControl>
@@ -291,13 +321,17 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									)}
 								/>
 								<ButtonContainer>
-									<Field render={({ form }) => (
-										<SubmitButton
-											pending={false}
-											disabled={!form.isValid || form.isValidating}
-										>
-											Sign up
-										</SubmitButton>)}
+									<Field render={({ form }) => {
+										console.log('form', form);
+
+										return (
+											<SubmitButton
+												pending={false}
+												disabled={!form.isValid || form.isValidating}
+											>
+												Sign up
+											</SubmitButton>)
+									} }
 									/>
 								</ButtonContainer>
 							</Form>
