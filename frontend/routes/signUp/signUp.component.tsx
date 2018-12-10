@@ -33,7 +33,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-// import Select from '@material-ui/core/Select';
+import Select from '@material-ui/core/Select';
 import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
 import { CountriesSelect } from './components/countriesSelect/countriesSelect.component';
 
@@ -127,15 +127,14 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		const defaultCountry = clientConfigService.countries.find((country) => country.code === 'GB');
 		const countries = clientConfigService.countries.filter((country) => country !== defaultCountry);
 		countries.unshift(defaultCountry);
-		const mappedCountries = countries.map((country) => {
-			return {
-				label: country.name,
-				value: country.code
-			};
-		});
-		console.log('mappedCountries', mappedCountries);
-
-		this.setState({ countries: mappedCountries });
+		// const mappedCountries = countries.map((country) => {
+		// 	return {
+		// 		label: country.name,
+		// 		value: country.code
+		// 	};
+		// });
+		// this.setState({ countries: mappedCountries });
+		this.setState({ countries });
 	}
 
 	public handleSubmit = (values, form) => {
@@ -275,7 +274,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										/>
 									)} />
 									<StyledFormControl>
-										<Field
+										{/* <Field
 											name="countryCode"
 											render={({ field }) => (
 												<CountriesSelect
@@ -283,6 +282,15 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 													label="Countries *"
 													countries={this.state.countries}
 												/>
+											)}
+										/> */}
+										<InputLabel>Country *</InputLabel>
+										<Field
+											name="countryCode"
+											render={({ field }) => (
+												<Select {...field} >
+													{this.renderCountries()}
+												</Select>
 											)}
 										/>
 									</StyledFormControl>
