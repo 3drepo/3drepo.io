@@ -88,7 +88,7 @@ export const Head = styled(Row)`
 `;
 
 export const Body = styled.div`
-		height: inherit;
+	height: inherit;
 	overflow: hidden;
 	position: absolute;
 	width: 100%;

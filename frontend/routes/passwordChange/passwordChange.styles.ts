@@ -25,6 +25,7 @@ import { COLOR } from '../../styles';
 export const Container = styled(Grid)`
   && {
     height: 100%;
+    padding-top: 30px;
   }
 
   ${PanelStyles.Container} {

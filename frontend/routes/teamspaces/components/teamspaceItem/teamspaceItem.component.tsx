@@ -25,6 +25,9 @@ import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 import StorageNormal from '@material-ui/icons/Storage';
 import StorageOutlined from '@material-ui/icons/StorageOutlined';
 
+import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+
 interface IProps {
 	account: string;
 	projects: any[];
@@ -33,18 +36,28 @@ interface IProps {
 	onToggle: () => void;
 	renderChildItem: () => JSX.Element;
 	onAddProject: () => void;
+	permissions: any[];
 }
 
 export const TeamspaceItem = (props: IProps) => {
-	const { account, projects, onToggle, active, renderChildItem, isMyTeamspace, onAddProject} = props;
+	const {
+		account,
+		projects,
+		onToggle,
+		active,
+		renderChildItem,
+		isMyTeamspace,
+		onAddProject,
+		permissions
+	} = props;
 
-	const renderActions = () => (
+	const renderActions = () => renderWhenTrue((
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label="Add new project"
 			action={onAddProject}
 		/>
-	);
+	))(hasPermissions('create_project', permissions));
 
 	return (
 		<TreeList
@@ -55,10 +68,10 @@ export const TeamspaceItem = (props: IProps) => {
 			active={active}
 			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
-			IconProps={ {
+			IconProps={{
 				IconOpened: StorageOutlined,
 				IconClosed: StorageNormal
-			} }
+			}}
 			renderActions={renderActions}
 		/>
 	);

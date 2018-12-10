@@ -73,7 +73,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		resetForm(values);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		if (this.props.avatarUrl !== prevProps.avatarUrl) {
 			this.setState({ uploadedAvatar: {} });
 		}

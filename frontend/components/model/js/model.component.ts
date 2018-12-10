@@ -104,7 +104,7 @@ class ModelController implements ng.IController {
 			);
 		});
 
-		const username = selectCurrentUser (getState()).username;
+		const username = selectCurrentUser(getState()).username;
 		dispatch(CurrentUserActions.fetchUser(username));
 
 		this.watchers();
