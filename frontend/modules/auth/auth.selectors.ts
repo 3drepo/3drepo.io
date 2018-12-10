@@ -31,6 +31,6 @@ export const selectIsPending = createSelector(
 	selectAuthDomain, (state) => state.isPending
 );
 
-export const selectVerifyMessage = createSelector(
-	selectAuthDomain, (state) => state.verifyMessage
+export const selectMessage = createSelector(
+	selectAuthDomain, (state) => state.message
 );

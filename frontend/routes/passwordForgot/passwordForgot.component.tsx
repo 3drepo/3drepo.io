@@ -29,6 +29,7 @@ import { SubmitButton } from '../components/submitButton/submitButton.component'
 interface IProps {
 	sendRequest: (userNameOrEmail) => void;
 	isPending: boolean;
+	message: string;
 }
 
 interface IState {
@@ -46,52 +47,56 @@ export class PasswordForgot extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { userNameOrEmail } = this.state;
-		const { isPending } = this.props;
+		const { isPending, message } = this.props;
 
 		return (
 			<Container
 				container
 				direction="column"
 				alignItems="center">
-				<Logo />
-
+				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
 					<Panel title="Forgot password">
-						<Message>Please enter your username or email</Message>
-
-						<Formik
-							initialValues={{ userNameOrEmail }}
-							onSubmit={this.handleSubmit}
-						>
-							<Form>
-								<Field name="userNameOrEmail" render={({ field }) => (
-									<TextField
-										{...field}
-										margin="normal"
-										placeholder="Type username or email..."
-										fullWidth
-									/>
-								)} />
-								<Buttons container justify="space-between">
-									<StyledButton
-										color="secondary"
-										component={Link}
-										to="/login"
-										disabled={isPending}
-									>
-										Back to Login
-									</StyledButton>
-									<Field render={({ form }) => (
-										<SubmitButton
-											pending={isPending}
-											disabled={!form.isValid || form.isValidating}
-										>
-											Send request
-										</SubmitButton>
-									)} />
-								</Buttons>
-							</Form>
-						</Formik>
+						{ message
+							? <Message>{message}</Message>
+							:
+							<>
+								<Message>Please enter your username or email</Message>
+								<Formik
+									initialValues={{ userNameOrEmail }}
+									onSubmit={this.handleSubmit}
+								>
+									<Form>
+										<Field name="userNameOrEmail" render={({ field }) => (
+											<TextField
+												{...field}
+												margin="normal"
+												placeholder="Type username or email..."
+												fullWidth
+											/>
+										)} />
+										<Buttons container justify="space-between">
+											<StyledButton
+												color="secondary"
+												component={Link}
+												to="/login"
+												disabled={isPending}
+											>
+												Back to Login
+											</StyledButton>
+											<Field render={({ form }) => (
+												<SubmitButton
+													pending={isPending}
+													disabled={!form.isValid || form.isValidating}
+												>
+													Send request
+												</SubmitButton>
+											)} />
+										</Buttons>
+									</Form>
+								</Formik>
+							</>
+						}
 					</Panel>
 				</Grid>
 			</Container>

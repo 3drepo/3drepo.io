@@ -95,14 +95,14 @@ function Option(props) {
 }
 
 function ValueContainer(props) {
-  return <div >{props.children}</div>;
+	return <div >{props.children}</div>;
 }
 
 const components = {
 	Option,
 	Control,
-	ValueContainer,
-	Menu
+	ValueContainer
+	// Menu
 };
 
 export class CountriesSelect extends React.PureComponent<IProps, IState> {

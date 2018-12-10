@@ -30,28 +30,28 @@ interface IProps {
 	location: any;
 	history: any;
 	verifyRequest: (username, token) => void;
-	verifyMessage: string;
+	message: string;
 	isPending: boolean;
 }
 
 interface IState {
-	verifyMessage: string;
+	message: string;
 }
 
 export class RegisterVerify extends React.PureComponent<IProps, IState> {
 	public state = {
-		verifyMessage: ''
+		message: ''
 	};
 
 	public componentDidMount() {
 		const { username, token } = queryString.parse(this.props.location.search);
-		const { verifyMessage } = this.props;
+		const { message } = this.props;
 		const missingParams = !username || !token;
 		const missingParamsMessage = 'Can\'t verify: Token and/or Username not provided';
 
-		if (missingParams || verifyMessage) {
+		if (missingParams || message) {
 			this.setState({
-				verifyMessage: missingParams ? missingParamsMessage : verifyMessage
+				message: missingParams ? missingParamsMessage : message
 			});
 		} else {
 			this.props.verifyRequest(username, token);
@@ -59,15 +59,15 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { verifyMessage } = this.props;
+		const { message } = this.props;
 
-		if (prevProps.verifyMessage !== verifyMessage) {
-			this.setState({ verifyMessage });
+		if (prevProps.message !== message) {
+			this.setState({ message });
 		}
 	}
 
 	public render() {
-		const { verifyMessage } = this.state;
+		const { message } = this.state;
 		const { isPending } = this.props;
 
 		return (
@@ -79,7 +79,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
-						{verifyMessage && <Paragraph> {verifyMessage} </Paragraph>}
+						{message && <Paragraph> {message} </Paragraph>}
 						<Buttons container justify="space-between">
 							<StyledButton
 								color="secondary"

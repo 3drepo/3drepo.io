@@ -17,6 +17,8 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
+import { Link } from 'react-router-dom';
+
 import { omit } from 'lodash';
 import { Formik, Field, Form } from 'formik';
 
@@ -180,7 +182,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				direction="column"
 				justify="center"
 				alignItems="center">
-				<Logo />
+				<Link to="/login"><Logo /></Link>
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
 					<Panel title="Sign up">
 						<Headline>Creating a 3D Repo account is free</Headline>
