@@ -127,13 +127,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		const defaultCountry = clientConfigService.countries.find((country) => country.code === 'GB');
 		const countries = clientConfigService.countries.filter((country) => country !== defaultCountry);
 		countries.unshift(defaultCountry);
-		// const mappedCountries = countries.map((country) => {
-		// 	return {
-		// 		label: country.name,
-		// 		value: country.code
-		// 	};
-		// });
-		// this.setState({ countries: mappedCountries });
 		this.setState({ countries });
 	}
 
@@ -174,7 +167,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		))
 
 	public render() {
-		console.log('clientConfigService.countries',clientConfigService.countries)
 		return (
 			<Container
 				container
@@ -274,21 +266,11 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										/>
 									)} />
 									<StyledFormControl>
-										{/* <Field
-											name="countryCode"
-											render={({ field }) => (
-												<CountriesSelect
-													{...field}
-													label="Countries *"
-													countries={this.state.countries}
-												/>
-											)}
-										/> */}
 										<InputLabel>Country *</InputLabel>
 										<Field
 											name="countryCode"
 											render={({ field }) => (
-												<Select {...field} >
+												<Select {...field}>
 													{this.renderCountries()}
 												</Select>
 											)}
@@ -331,17 +313,13 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									)}
 								/>
 								<ButtonContainer>
-									<Field render={({ form }) => {
-										console.log('form', form);
-
-										return (
-											<SubmitButton
-												pending={false}
-												disabled={!form.isValid || form.isValidating}
-											>
-												Sign up
-											</SubmitButton>)
-									} }
+									<Field render={({ form }) => (
+										<SubmitButton
+											pending={false}
+											disabled={!form.isValid || form.isValidating}
+										>
+											Sign up
+										</SubmitButton>)}
 									/>
 								</ButtonContainer>
 							</Form>

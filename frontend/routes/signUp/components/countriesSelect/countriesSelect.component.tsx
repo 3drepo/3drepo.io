@@ -16,18 +16,9 @@
  */
 
 import * as React from 'react';
-import { withStyles } from '@material-ui/core/styles';
 import { theme } from '../../../../styles/theme';
-import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import Typography from '@material-ui/core/Typography';
-import NoSsr from '@material-ui/core/NoSsr';
-import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
-import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
-import CancelIcon from '@material-ui/icons/Cancel';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
 import { StyledSelect, StyledTextField, Input } from './countriesSelect.styles';
 
 interface IProps {
@@ -130,9 +121,7 @@ export class CountriesSelect extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				{/* <InputLabel>Country *</InputLabel> */}
 				<StyledSelect
-					// styles={selectStyles}
 					components={components}
 					options={this.props.countries}
 					onChange={this.handleChange}
