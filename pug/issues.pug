@@ -66,6 +66,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			display:flex;
 		}
 
+		.row.screenshot {
+			width:100%;
+		}
+
 		.col {
 			width:100%;
 		}
@@ -74,8 +78,14 @@ html(lang="en" ng-app="3drepo").ng-scope
 			text-align:right;
 		}
 
-		.col.text {
-			font-weight:500;
+		.col.description {
+			font-weight:400;
+			display:block;
+		}
+
+		.col.screenshot img {
+			max-width:96%;
+			height:auto;
 		}
 
 		.float-right {
@@ -92,19 +102,53 @@ html(lang="en" ng-app="3drepo").ng-scope
 			color:#cfcfcf;
 		}
 
+		h1.titles, h2.titles {
+			font-weight:500;
+		}
+
+		h4.date {
+			font-weight:400;
+		}
+
+		i {
+			padding:0px 5px;
+			font-weight:500;
+		}
+
+		.hide {
+			display:none;
+		}
+
+	script.
+
+		function printDialog() {
+			return window.print();
+		}
+
+		function showHide(e) {
+			const panelToHide = document.querySelectorAll(".activityLog");
+			panelToHide.forEach(elem =>{
+				elem.classList.toggle('hide');
+			});
+		}
+
+		function changeImageSize(e) {
+		
+		}
+			
 	head
 		header
 			div(class="button-group")
-				button Print
-				button Hide Log
-				button Large Pictures
+				button(onclick="printDialog()") Print
+				button(onclick="showHide(event)") Hide Log
+				button(onclick="changeImageSize()") Large Pictures
 			img(src="/images/3drepo-logo-white.png" width="120px")
 
 		.container
 			.top-header
-				h2 Model Name ABCD1 - Revision
-				h1 Issues Report
-				h4 6th December 2018
+				h2.titles Model Name ABCD1 - Revision #{reportValues.currentRevision}
+				h1.titles Issues Report
+				h4.date #{reportValues.reportDate}
 			each issueTypeIssues, issueType in issues
 				if issueType === "open" && issueTypeIssues.length > 0
 					h2 Open Issues
@@ -114,20 +158,20 @@ html(lang="en" ng-app="3drepo").ng-scope
 				// TODO: Time stamps - What is going on here?!
 				each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 					h3 #{issue.number} #{issue.name}
-					.row
-						.col
-							p username
+					.row.screenshot
+						.col.screenshot
+							p.grey #{reportValues.currentUser}
 							if issue.viewpoint.screenshotSmall 
 							a(href=url(issue.viewpoint.screenshot) target='_blank')
-								img(src=url(issue.viewpoint.screenshotSmall))
+								img(src=url(issue.viewpoint.screenshot))
 						.col
-							p.right 9th November 2018
+							p.right.grey 9th November 2018
 							table.details
 								tr
 									td
 									p
 										strong Assigned:
-										span.float-right [#{issue.assigned_roles.join(", ")}]
+										span.float-right #{issue.assigned_roles.join(", ")}
 								tr
 									td
 									p
@@ -145,22 +189,23 @@ html(lang="en" ng-app="3drepo").ng-scope
 										span.float-right #{issue.topic_type}
 
 					.row
-						.col.text
+						.col.description
 							p Description: 
 							span #{issue.desc}
+							.activityLog
 								p.grey-header Activity Log
-							if issue.comments
-								each comment in issue.comments	
-										if comment.comment
-											| #{comment.comment}
-											p 
-												span.grey #{comment.owner}
-												span.grey.float-right #{new Date(comment.created).toUTCString()}
-										if comment.action
-											| #{comment.action.propertyText} changed from 
-											i #{comment.action.from}
-											|  to    
-											i #{comment.action.to}
+								if issue.comments
+									each comment in issue.comments	
+											if comment.comment
+												| #{comment.comment}
+												p 
+													span.grey #{comment.owner} 
+													span.grey.float-right #{new Date(comment.created).toUTCString()}
+											if comment.action
+												| #{comment.action.propertyText} changed from
+												i #{comment.action.from} 
+												| to     
+												i #{comment.action.to}
 
 					hr
 						

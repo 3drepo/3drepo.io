@@ -26,6 +26,7 @@ const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
+const moment = require("moment");
 
 const User = require("../models/user");
 const Job = require("../models/job");
@@ -242,6 +243,17 @@ function renderIssuesHTML(req, res, next) {
 	let findIssue;
 	const noClean = false;
 
+	// Print report dynamic values.
+	const reportDate = moment().format("Do MMMM YYYY");
+	const currentUser = req.session.user.username;
+	const currentRevision = req.params.rid;
+	const reportValues = {};
+	reportValues.reportDate = reportDate;
+	reportValues.currentUser = currentUser;
+	reportValues.currentRevision = currentRevision;
+
+	
+
 	const projection = {
 		extras: 0,
 		"viewpoints.extras": 0,
@@ -284,6 +296,7 @@ function renderIssuesHTML(req, res, next) {
 
 		res.render("issues.pug", {
 			issues : splitIssues,
+			reportValues : reportValues,
 			url: function (path) {
 				return config.apiAlgorithm.apiUrl(C.GET_API, path);
 			}
