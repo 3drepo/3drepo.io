@@ -507,7 +507,7 @@ export class TreeService {
 			}
 
 			// Check top level and then check if sub model of fed
-			let meshes = idToMeshes[childNode._id];
+			let meshes = childNode.type === 'mesh' ? [childNode._id] : idToMeshes[childNode._id];
 
 			if (meshes === undefined && idToMeshes[key]) {
 				meshes = idToMeshes[key][childNode._id];
