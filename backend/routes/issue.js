@@ -246,11 +246,11 @@ function renderIssuesHTML(req, res, next) {
 	// Print report dynamic values.
 	const reportDate = moment().format("Do MMMM YYYY");
 	const currentUser = req.session.user.username;
-	const currentRevision = req.params.rid;
+	// const currentRevision = req.params.rid;
 	const reportValues = {};
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
-	reportValues.currentRevision = currentRevision;
+	// reportValues.currentRevision = currentRevision;
 
 	
 
@@ -284,6 +284,13 @@ function renderIssuesHTML(req, res, next) {
 					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
 				}
 			}
+			
+			const issueDate = moment(issues[i].created).format("Do MMMM YYYY");
+			console.log(">>>>>>>>>>>>>>>", issueDate);
+			const currentRevision = issueDate[i].rev_id;
+			console.log(currentRevision);
+			// console.log("ISSSUEEESSSSS", issues[i])
+			// console.log("issues", issues[i].created);
 
 			if(issues[i].closed || issues[i].status === "closed") {
 				issues[i].created = new Date(issues[i].created).toString();
@@ -293,6 +300,7 @@ function renderIssuesHTML(req, res, next) {
 				splitIssues.open.push(issues[i]);
 			}
 		}
+
 
 		res.render("issues.pug", {
 			issues : splitIssues,

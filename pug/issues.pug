@@ -112,11 +112,15 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		i {
 			padding:0px 5px;
-			font-weight:500;
+			font-weight:700;
 		}
 
 		.hide {
 			display:none;
+		}
+
+		.wrap {
+			flex-wrap:wrap;
 		}
 
 	script.
@@ -127,13 +131,15 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		function showHide(e) {
 			const panelToHide = document.querySelectorAll(".activityLog");
-			panelToHide.forEach(elem =>{
+			panelToHide.forEach(elem => {
 				elem.classList.toggle('hide');
-			});
+			})
 		}
 
 		function changeImageSize(e) {
-		
+			const imageDiv = document.querySelector('.row.screenshot');
+			console.log(imageDiv.style);
+				imageDiv.classList.toggle('wrap');
 		}
 			
 	head
@@ -146,7 +152,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		.container
 			.top-header
-				h2.titles Model Name ABCD1 - Revision #{reportValues.currentRevision}
+				h2.titles Model Name ABCD1 - Revision 
 				h1.titles Issues Report
 				h4.date #{reportValues.reportDate}
 			each issueTypeIssues, issueType in issues
@@ -165,7 +171,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 							a(href=url(issue.viewpoint.screenshot) target='_blank')
 								img(src=url(issue.viewpoint.screenshot))
 						.col
-							p.right.grey 9th November 2018
+							p.right.grey #{issue.created.toString()}
 							table.details
 								tr
 									td
