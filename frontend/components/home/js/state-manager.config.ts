@@ -83,10 +83,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.signUp', {
 		url: '/sign-up',
-		template: '<sign-up />',
-		data: {
-			isLogoutRequired: true
-		}
+		template: '<sign-up />'
 	});
 
 	$stateProvider.state('app.passwordForgot', {

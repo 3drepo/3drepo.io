@@ -28,7 +28,6 @@ const CONTENT_PADDING = 20;
 
 export const StyledSelect = styled(Select)`
 	&& {
-		color: red;
 		max-height: 300px;
 	}
 `;

@@ -25,7 +25,7 @@ interface IProps {
 	value: any[];
 	onChange: (event) => void;
 	onBlur: (event) => void;
-	key: string;
+	sitekey: string;
 }
 
 interface IState {
@@ -59,13 +59,13 @@ export class ReCaptcha extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { onBlur, key } = this.props;
+		const { onBlur, sitekey } = this.props;
 
 		return (
 			<Container>
 				<ReCAPTCHA
 						onBlur={onBlur}
-						sitekey={key}
+						sitekey={sitekey}
 						onChange={this.onReCaptchaChange}
 						ref={this.reCaptchaRef}
 					/>

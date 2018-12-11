@@ -18,7 +18,6 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Link } from 'react-router-dom';
-
 import { omit } from 'lodash';
 import { Formik, Field, Form } from 'formik';
 
@@ -35,27 +34,22 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
-import { CountriesSelect } from './components/countriesSelect/countriesSelect.component';
 
 import {
 	Container,
 	Headline,
 	StyledGrid,
 	StyledFormControl,
-	ButtonContainer,
-	StyledSelect
+	ButtonContainer
 } from './signUp.styles';
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-	PaperProps: {
-		style: {
-			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-			width: 250
-		}
-	}
+const PaperPropsStyle = {
+	maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+	width: 250,
+	transform: 'translate3d(0, 0, 0)'
 };
 
 const RegistrationInitialValues = {
@@ -111,17 +105,19 @@ interface IProps {
 interface IState {
 	passwordStrengthMessage: string;
 	countries: any[];
-	selectedCountry: string;
 }
 
 export class SignUp extends React.PureComponent<IProps, IState> {
 	public state = {
 		passwordStrengthMessage: '',
-		countries: [],
-		selectedCountry: ''
+		countries: []
 	};
 
 	public reCaptchaWrapperRef = React.createRef<any>();
+	public listRef = React.createRef<any>();
+	public inputRef = React.createRef<any>();
+	public innerRef = React.createRef<any>();
+	public myInnerRef = React.createRef<any>();
 
 	public componentDidMount() {
 		const defaultCountry = clientConfigService.countries.find((country) => country.code === 'GB');
@@ -258,7 +254,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									)} />
 								</FieldsRow>
 								<FieldsRow container wrap="nowrap">
-									<Field name="company" render={({ field, form }) => (
+									<Field name="company" render={({ field }) => (
 										<StyledTextField
 											{...field}
 											label="Company"
@@ -270,7 +266,10 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<Field
 											name="countryCode"
 											render={({ field }) => (
-												<Select {...field}>
+												<Select
+													{...field}
+													MenuProps={{ PaperProps: {style: PaperPropsStyle}}}
+												>
 													{this.renderCountries()}
 												</Select>
 											)}
@@ -284,7 +283,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										render={({ field }) =>
 											<ReCaptcha
 												{...field}
-												key={clientConfigService.captcha_client_key}
+												sitekey={clientConfigService.captcha_client_key}
 												ref={this.reCaptchaWrapperRef}
 											/>}
 									/>
