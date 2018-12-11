@@ -241,7 +241,7 @@ class TreeController implements ng.IController {
 		}
 
 		this.TreeService.setTreeNodeStatus(node, newState);
-		this.TreeService.updateModelVisibility(node);
+		this.TreeService.updateModelVisibility([node]);
 		this.nodesToShow = this.nodesToShow.concat();
 
 	}

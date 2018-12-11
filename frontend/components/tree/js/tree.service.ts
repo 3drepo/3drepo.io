@@ -670,7 +670,7 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
-		this.updateModelVisibility();
+		this.updateModelVisibility(nodes);
 	}
 
 	/**
@@ -679,7 +679,7 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
-		this.updateModelVisibility();
+		this.updateModelVisibility(nodes);
 	}
 
 	public setTreeNodeStatus(node: any, visibility: string) {
@@ -845,11 +845,11 @@ export class TreeService {
 	 * Apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	public updateModelVisibility(node = this.allNodes) {
+	public updateModelVisibility(node = [this.allNodes]) {
 
 		return this.onReady().then(() => {
 
-			const childNodes = this.getMeshMapFromNodes([node]);
+			const childNodes = this.getMeshMapFromNodes(node);
 			const hidden = {};
 			const shown = {};
 
