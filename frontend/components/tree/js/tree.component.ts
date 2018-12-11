@@ -230,18 +230,11 @@ class TreeController implements ng.IController {
 
 	public toggleTreeNode($event, node) {
 		$event.stopPropagation();
-
-		const newState = (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState) ?
-							this.TreeService.VISIBILITY_STATES.visible :
-							this.TreeService.VISIBILITY_STATES.invisible;
-
-		// Unhighlight the node in the viewer if we're making it invisible
-		if (newState === this.TreeService.VISIBILITY_STATES.invisible && node.selected) {
-			this.TreeService.deselectNodes([node]);
+		if (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState ) {
+			this.TreeService.showTreeNodes([node]);
+		} else {
+			this.TreeService.hideTreeNodes([node]);
 		}
-
-		this.TreeService.setTreeNodeStatus(node, newState);
-		this.TreeService.updateModelVisibility([node]);
 		this.nodesToShow = this.nodesToShow.concat();
 
 	}

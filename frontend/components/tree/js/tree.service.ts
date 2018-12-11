@@ -652,24 +652,11 @@ export class TreeService {
 	}
 
 	/**
-	 * Set the given visibility of a set of nodes
-	 * @param nodes	Array of nodes to be hidden.
-	 */
-	public setVisibilityOfNodes(nodes: any[], visibility: string) {
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			if (node && node.toggleState !== visibility) {
-				this.setTreeNodeStatus(node, visibility);
-			}
-		}
-	}
-
-	/**
 	 * Hide a collection of nodes.
 	 * @param nodes	Array of nodes to be hidden.
 	 */
 	public hideTreeNodes(nodes: any[]) {
-		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.invisible);
+		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.invisible);
 		this.updateModelVisibility(nodes);
 	}
 
@@ -678,62 +665,15 @@ export class TreeService {
 	 * @param nodes	Array of nodes to be shown.
 	 */
 	public showTreeNodes(nodes: any[]) {
-		this.setVisibilityOfNodes(nodes, this.VISIBILITY_STATES.visible);
+		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.visible);
 		this.updateModelVisibility(nodes);
-	}
-
-	public setTreeNodeStatus(node: any, visibility: string) {
-
-		if (node && (this.VISIBILITY_STATES.parentOfInvisible === visibility || visibility !== node.toggleState)) {
-			const priorToggleState = node.toggleState;
-
-			let children = [];
-			const leafNodes = [];
-			const parentNode = node;
-
-			if (node.children) {
-				children = children.concat(node.children);
-			} else {
-				children = [node];
-			}
-
-			while (children.length > 0) {
-				const child = children.pop();
-
-				if (child.children && child.toggleState !== visibility) {
-					children = children.concat(child.children);
-				}
-
-				if (!child.hasOwnProperty('defaultState')) {
-					if (visibility === this.VISIBILITY_STATES.visible && this.canShowNode(child)) {
-						child.toggleState = this.VISIBILITY_STATES.visible;
-					} else {
-						this.setNodeSelection(child, this.SELECTION_STATES.unselected);
-						child.toggleState = this.VISIBILITY_STATES.invisible;
-					}
-				} else {
-					if (visibility === this.VISIBILITY_STATES.visible) {
-						child.toggleState = (this.getHideIfc()) ? child.defaultState : this.VISIBILITY_STATES.visible;
-					} else {
-						this.setNodeSelection(child, this.SELECTION_STATES.unselected);
-						child.toggleState = this.VISIBILITY_STATES.invisible;
-					}
-				}
-			}
-
-			if (node && visibility === this.VISIBILITY_STATES.invisible) {
-				this.deselectNodes([node]);
-			}
-
-			this.updateParentVisibility(parentNode);
-		}
 	}
 
 	/**
 	 * Hide all tree nodes.
 	 */
 	public hideAllTreeNodes(updateModel) {
-		this.setTreeNodeStatus(this.allNodes, this.VISIBILITY_STATES.invisible);
+		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.invisible);
 		if (updateModel) {
 			this.updateModelVisibility();
 		}
@@ -743,7 +683,7 @@ export class TreeService {
 	 * Show all tree nodes.
 	 */
 	public showAllTreeNodes(updateModel) {
-		this.setTreeNodeStatus(this.allNodes, this.VISIBILITY_STATES.visible);
+		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.visible);
 
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
@@ -839,58 +779,6 @@ export class TreeService {
 
 			}
 		}
-	}
-
-	/**
-	 * Apply changes to the viewer.
-	 * @param node	Node to toggle visibility. All children will also be toggled.
-	 */
-	public updateModelVisibility(node = [this.allNodes]) {
-
-		return this.onReady().then(() => {
-
-			const childNodes = this.getMeshMapFromNodes(node);
-			const hidden = {};
-			const shown = {};
-
-			for (const key in childNodes) {
-				if (!key) {
-					continue;
-				}
-				const childMeshes = childNodes[key].meshes;
-
-				if (!childMeshes) {
-					continue;
-				}
-
-				for (let i = 0; i < childMeshes.length; i++) {
-
-					const id  = childMeshes[i];
-					const childNode = this.getNodeById(id);
-
-					if (childNode) {
-
-						if (childNode.toggleState === this.VISIBILITY_STATES.invisible) {
-							hidden[childNode._id] = childNode;
-						} else {
-							delete hidden[childNode._id];
-						}
-
-						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
-							shown[childNode._id] = childNode;
-						} else {
-							delete shown[childNode._id];
-						}
-
-					}
-				}
-			}
-
-			this.handleVisibility(hidden, false);
-			this.handleVisibility(shown, true);
-
-		});
-
 	}
 
 	/**
@@ -1000,14 +888,17 @@ export class TreeService {
 	 */
 	public deselectNodes(nodes: any[]) {
 		nodes = this.sanitiseNodeArray(nodes);
+		const actionNodes = [];
 		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			this.setNodeSelection(node, this.SELECTION_STATES.unselected);
+			if (nodes[i].selected !== this.SELECTION_STATES.unselected) {
+				this.setNodeSelection(nodes[i], this.SELECTION_STATES.unselected);
+				actionNodes.push(nodes[i]);
+			}
 		}
 
 		return this.onReady().then(() => {
 
-			const highlightMap = this.getMeshMapFromNodes(nodes);
+			const highlightMap = this.getMeshMapFromNodes(actionNodes);
 
 			for (const key in highlightMap) {
 				if (!highlightMap.hasOwnProperty(key)) {
@@ -1471,6 +1362,105 @@ export class TreeService {
 		}
 
 		return seenParents;
+	}
+
+	private setTreeNodeStatus(nodes: any[], visibility: string) {
+		if (nodes.length && visibility === this.VISIBILITY_STATES.invisible) {
+			this.deselectNodes(nodes);
+		}
+		nodes.forEach((node) => {
+			if (node && (this.VISIBILITY_STATES.parentOfInvisible === visibility || visibility !== node.toggleState)) {
+				const priorToggleState = node.toggleState;
+
+				let children = [];
+				const leafNodes = [];
+				const parentNode = node;
+
+				if (node.children) {
+					children = children.concat(node.children);
+				} else {
+					children = [node];
+				}
+
+				while (children.length > 0) {
+					const child = children.pop();
+
+					if (child.children && child.toggleState !== visibility) {
+						children = children.concat(child.children);
+					}
+
+					if (!child.hasOwnProperty('defaultState')) {
+						if (visibility === this.VISIBILITY_STATES.visible && this.canShowNode(child)) {
+							child.toggleState = this.VISIBILITY_STATES.visible;
+						} else {
+							this.setNodeSelection(child, this.SELECTION_STATES.unselected);
+							child.toggleState = this.VISIBILITY_STATES.invisible;
+						}
+					} else {
+						if (visibility === this.VISIBILITY_STATES.visible) {
+							child.toggleState = (this.getHideIfc()) ? child.defaultState : this.VISIBILITY_STATES.visible;
+						} else {
+							this.setNodeSelection(child, this.SELECTION_STATES.unselected);
+							child.toggleState = this.VISIBILITY_STATES.invisible;
+						}
+					}
+				}
+
+				this.updateParentVisibility(parentNode);
+			}
+		});
+	}
+
+	/**
+	 * Apply changes to the viewer.
+	 * @param node	Node to toggle visibility. All children will also be toggled.
+	 */
+	private updateModelVisibility(node = [this.allNodes]) {
+
+		return this.onReady().then(() => {
+
+			const childNodes = this.getMeshMapFromNodes(node);
+			const hidden = {};
+			const shown = {};
+
+			for (const key in childNodes) {
+				if (!key) {
+					continue;
+				}
+				const childMeshes = childNodes[key].meshes;
+
+				if (!childMeshes) {
+					continue;
+				}
+
+				for (let i = 0; i < childMeshes.length; i++) {
+
+					const id  = childMeshes[i];
+					const childNode = this.getNodeById(id);
+
+					if (childNode) {
+
+						if (childNode.toggleState === this.VISIBILITY_STATES.invisible) {
+							hidden[childNode._id] = childNode;
+						} else {
+							delete hidden[childNode._id];
+						}
+
+						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
+							shown[childNode._id] = childNode;
+						} else {
+							delete shown[childNode._id];
+						}
+
+					}
+				}
+			}
+
+			this.handleVisibility(hidden, false);
+			this.handleVisibility(shown, true);
+
+		});
+
 	}
 
 }
