@@ -17,10 +17,6 @@
 
 import * as React from 'react';
 import { pick } from 'lodash';
-import Dropzone from 'react-dropzone';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Panel } from '../components/panel/panel.component';
 import { ProfileDataForm } from './components/profileDataForm.component';

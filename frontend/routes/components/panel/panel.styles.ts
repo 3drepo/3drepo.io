@@ -35,6 +35,7 @@ export const Title = styled.div`
   font-size: 20px;
   font-weight: ${FONT_WEIGHT.NORMAL};
   height: 40px;
+  min-height: 40px;
   border-radius: 4px 4px 0 0;
   background-color: ${COLOR.PRIMARY_MAIN};
   color: rgba(255,255,255,0.87);
@@ -48,6 +49,7 @@ export const Content = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 `;
 
 export const LoaderContainer = styled.div`

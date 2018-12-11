@@ -22,24 +22,30 @@ import BookmarksOutlined from '@material-ui/icons/BookmarksOutlined';
 import { TreeList } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { hasPermissions } from '../../../../helpers/permissions';
 
 interface IProps {
 	name: string;
 	items: any[];
 	renderChildItem: () => JSX.Element;
 	onAddClick: (event) => void;
+	permissions: any[];
 }
 
 export const ModelDirectoryItem = (props: IProps) => {
-	const { renderChildItem, name, items, onAddClick } = props;
+	const { renderChildItem, name, items, onAddClick, permissions } = props;
 
-	const renderActions = () => (
+	const hasFedPermissions = hasPermissions('create_federation', permissions);
+	const hasModelPermissions = hasPermissions('create_model', permissions);
+
+	const renderActions = () => renderWhenTrue((
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label={`Add new ${name.slice(0, -1).toLowerCase()}`}
 			action={onAddClick}
 		/>
-	);
+	))(hasFedPermissions || hasModelPermissions);
 
 	return (
 		<TreeList

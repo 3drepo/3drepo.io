@@ -76,9 +76,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state('app.login', {
 		url: '/login',
 		template: '<login headline-text="vm.loginMessage" />',
-		data: {
-			isLogoutRequired: true
-		},
 		params: {
 			referrer: { dynamic: true, value: null }
 		}
@@ -86,28 +83,17 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.signUp', {
 		url: '/sign-up',
-		template: '<sign-up />',
-		data: {
-			isLogoutRequired: true
-		}
+		template: '<sign-up />'
 	});
 
 	$stateProvider.state('app.passwordForgot', {
 		url: '/password-forgot',
-		template: '<password-forgot />',
-		data: {
-			isLogoutRequired: true
-		}
+		template: '<password-forgot />'
 	});
 
 	$stateProvider.state('app.passwordChange', {
 		url: '/password-change?token&username',
-		template: `
-			<password-change />
-		`,
-		data: {
-			isLogoutRequired: true
-		}
+		template: '<password-change />'
 	});
 
 	$stateProvider.state('app.registerRequest', {
@@ -117,10 +103,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.registerVerify', {
 		url: '/register-verify?token&username?pay',
-		template: '<register-verify />',
-		data: {
-			isLogoutRequired: true
-		}
+		template: '<register-verify />'
 	});
 
 	// Static pages
@@ -131,17 +114,26 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 
 	$stateProvider.state('app.static.privacy', {
 		url: '/privacy',
-		template: '<privacy id="privacy" />'
+		template: '<privacy id="privacy" />',
+		data: {
+			isLegal: true
+		}
 	});
 
 	$stateProvider.state('app.static.terms', {
 		url: '/terms',
-		template: '<terms id="terms" />'
+		template: '<terms id="terms" />',
+		data: {
+			isLegal: true
+		}
 	});
 
 	$stateProvider.state('app.static.cookies', {
 		url: '/cookies',
-		template: '<cookies id="cookies" />'
+		template: '<cookies id="cookies" />',
+		data: {
+			isLegal: true
+		}
 	});
 
 	$httpProvider.interceptors.push('AuthInterceptor');

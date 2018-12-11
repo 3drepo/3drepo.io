@@ -4,7 +4,7 @@ div.homeContainer(
 	flex="100"
 	ng-keydown="vm.keyAction($event)"
 	ng-keyup="vm.keyAction($event)")
-	
+
 	viewer(
 		id="viewer"
 		flex="none"
@@ -31,10 +31,10 @@ div.homeContainer(
 			ui-view=""
 			flex="grow"
 			layout="column"
-			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all'}"
+			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all','position': vm.$state.current.name === 'app.viewer' ? 'static' : 'relative'}"
 		)
 
-	#homeLegalContainer( flex="100" layout="column" ng-if="vm.isLegalPage")
+	#homeLegalContainer(flex="100" layout="column" ng-if="vm.isLegalPage")
 		div(ui-view="")
 
 	#legalLinks
