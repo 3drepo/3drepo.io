@@ -374,12 +374,12 @@ class RiskItemController implements ng.IController {
 	}
 
 	public canSubmitUpdateRisk() {
-		return this.isRiskDataChanged() &&
+		return this.isRiskDataChanged() && (!this.data ||
 			this.risksService.canSubmitUpdateRisk(
 			this.savedData,
 			this.userJob,
 			this.modelSettings.permissions
-		);
+		));
 	}
 
 	public handleUpdateError(error) {
@@ -891,7 +891,6 @@ class RiskItemController implements ng.IController {
 
 	private isRiskDataChanged() {
 		let changed = !this.savedData;
-
 		if (this.riskData) {
 			const keys = Object.keys(this.riskData);
 			let keyIdx = 0;
@@ -908,7 +907,7 @@ class RiskItemController implements ng.IController {
 			}
 		}
 
-		return changed;
+		return changed && this.riskData && this.riskData.name;
 	}
 
 	private updateSavedRisk(risk) {
