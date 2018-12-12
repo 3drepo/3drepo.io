@@ -136,7 +136,7 @@ export const SettingsForm = (props) => {
 							color="secondary"
 							disabled={!form.isValid || form.isValidating}
 						>
-							<SaveIcon color="secondary" />
+							<SaveIcon />
 						</StyledSaveButton>} />
 				</FooterWrapper>
 			</ViewerPanelFooter>

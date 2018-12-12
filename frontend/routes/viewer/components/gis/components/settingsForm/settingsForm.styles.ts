@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
+import SaveIcon from '@material-ui/icons/Save';
 
 import { COLOR } from '../../../../../../styles';
 
@@ -44,10 +45,22 @@ export const FooterWrapper = styled.div`
 export const StyledSaveButton = styled(IconButton)`
   && {
     align-self: flex-end;
+    background-color: ${COLOR.SECONDARY_MAIN};
+    color: ${COLOR.WHITE};
 
     &:disabled {
+      background-color: ${COLOR.GRAY};
+
       svg {
-        color: ${COLOR.BLACK_40};
+        color: ${COLOR.WHITE};
+      }
+    }
+
+    &:hover {
+      background-color: ${COLOR.SECONDARY_LIGHT};
+
+      svg {
+        color: ${COLOR.WHITE};
       }
     }
   }
