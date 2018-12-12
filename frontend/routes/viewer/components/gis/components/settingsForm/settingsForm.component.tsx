@@ -99,7 +99,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.axisX)}
 						helperText={form.errors.axisX}
-						label={`x (${unit})`}
+						label={unit ? `x (${unit})` : 'x'}
 						value={axisX}
 						onChange={handleChange}
 					/>
@@ -110,7 +110,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.axisY)}
 						helperText={form.errors.axisY}
-						label={`y (${unit})`}
+						label={unit ? `y (${unit})` : 'y'}
 						value={axisY}
 						onChange={handleChange}
 					/>
@@ -121,7 +121,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.axisZ)}
 						helperText={form.errors.axisZ}
-						label={`z (${unit})`}
+						label={unit ? `z (${unit})` : 'z'}
 						value={axisZ}
 						onChange={handleChange}
 					/>

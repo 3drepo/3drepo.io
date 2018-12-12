@@ -20,14 +20,27 @@ import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
 import MapIcon from '@material-ui/icons/Map';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import { COLOR } from './../../../../styles/colors';
+
+export const StyledMenuItem = styled(MenuItem)`
+  && {
+    /* color: green; */
+  }
+`;
 
 export const StyledSelect = styled(Select)`
   margin-bottom: 12px;
 
   && {
+    color: blue;
     width: 100%;
+
+    [role="button"] {
+      padding: 16px 0;
+      color: ${COLOR.BLACK};
+    }
   }
 `;
 
@@ -60,6 +73,9 @@ export const MapLayer = styled.div`
 
 export const MapNameWrapper = styled.div`
   display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: ${COLOR.BLACK_60};
 `;
 
 export const MapName = styled.div`

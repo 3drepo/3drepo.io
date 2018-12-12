@@ -352,7 +352,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="axisX" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										label="x (mm)"
+										label={`x (${properties.unit})`}
 										margin="normal"
 										error={Boolean(form.errors.axisX)}
 										helperText={form.errors.axisX}
@@ -362,7 +362,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									<StyledTextField
 										{...field}
 										name="axisY"
-										label="y (mm)"
+										label={`y (${properties.unit})`}
 										margin="normal"
 										error={Boolean(form.errors.axisY)}
 										helperText={form.errors.axisY}
@@ -371,7 +371,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="axisZ" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										label="z (mm)"
+										label={`z (${properties.unit})`}
 										margin="normal"
 										error={Boolean(form.errors.axisZ)}
 										helperText={form.errors.axisZ}

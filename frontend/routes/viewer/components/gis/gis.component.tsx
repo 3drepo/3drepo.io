@@ -31,7 +31,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import MenuItem from '@material-ui/core/MenuItem';
 
 import {
 	StyledSelect,
@@ -39,7 +38,8 @@ import {
 	MapName,
 	MapNameWrapper,
 	StyledMapIcon,
-	VisibilityButton
+	VisibilityButton,
+	StyledMenuItem
 } from './gis.styles';
 
 interface IProps {
@@ -198,9 +198,9 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public renderMapProviders = (mapsProviders = []) =>
 		mapsProviders.map((mapProvider, index) => (
-			<MenuItem key={mapProvider.name} value={index}>
+			<StyledMenuItem key={mapProvider.name} value={index}>
 				{mapProvider.name}
-			</MenuItem>
+			</StyledMenuItem>
 		))
 
 	public renderLayers = (mapLayers = []) =>
@@ -221,7 +221,10 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 		return (
 			<ViewerPanelContent>
-				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
+				<StyledSelect
+					onChange={this.handleChangeMapProvider}
+					value={activeMapIndex}
+				>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{this.renderLayers(mapsProviders[activeMapIndex].layers)}
@@ -229,8 +232,32 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public getSettingsValues = () => {
+		const { settings } = this.props;
+		const values = {} as any;
+
+		if (settings) {
+			values.surveyPoints = settings.surveyPoints || [];
+			values.angleFromNorth = settings.angleFromNorth || 0;
+		}
+
+		return values;
+	}
+
+	public getSettingsProperties = () => {
+		const { settings } = this.props;
+		const properties = {} as any;
+
+		if (settings && settings.properties) {
+			properties.unit = settings.properties.unit || '';
+		}
+
+		return properties;
+	}
+
 	public render() {
 		const { settingsModeActive } = this.state;
+		console.log('this.props.settings',this.props.settings, this.props.settings.surveyPoints, this.props.settings.angleFromNorth)
 
 		return (
 			<ViewerPanel
@@ -241,7 +268,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			>
 				{settingsModeActive
 					? <Settings
-							values={this.props.settings}
+							values={this.getSettingsValues()}
+							properties={this.getSettingsProperties()}
 							updateModelSettings={this.props.updateModelSettings}
 							getDataFromPathname={this.getDataFromPathname}
 						/>
