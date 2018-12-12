@@ -2,10 +2,24 @@ doctype html
 html(lang="en" ng-app="3drepo").ng-scope
 	script(type="text/javascript", src="/config.js")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
+	//- <-! must add background-color and !important for displaying on a printed web page. 
 	style.
+		@media print 
+		{
+			button {
+				display:none!important;
+			}
+
+			@page {
+			size: auto;
+			margin: 0;
+			}
+		}
+
 		html, body {
 				font-family: Roboto, sans-serif;
 				margin:0;
+				-webkit-print-color-adjust: exact !important;
 		}
 
 		h1,h2,h3,h4 {
@@ -13,7 +27,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		}
 
 		header {
-			background:#cfcfcf;
+			background-color:#cfcfcf !important; 
 			height:50px;
 			padding:10px;
 			text-align:center;
@@ -50,7 +64,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			margin:0 auto;
 			border-left:2px solid #efefef;
 			border-right:2px solid #efefef;
-			padding: 0px 200px;
+			padding:0 20px;
 		}
 
 		.top-header {
@@ -92,6 +106,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			float:right;
 		}
 
+		.float-none {
+			float:none;
+		}
+
 		.grey-header {
 			font-size:20px;
 			font-weight:400;
@@ -106,13 +124,21 @@ html(lang="en" ng-app="3drepo").ng-scope
 			font-weight:500;
 		}
 
+		h1.titles {
+			font-size:18px;
+		}
+
+		h2.titles {
+			font-size:35px;
+		}
+
 		h4.date {
 			font-weight:400;
 		}
 
 		i {
 			padding:0px 5px;
-			font-weight:700;
+			font-weight:500;
 		}
 
 		.hide {
@@ -123,6 +149,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			flex-wrap:wrap;
 		}
 
+		.fitImage {
+			object-fit:cover;
+		}
+
 	script.
 
 		function printDialog() {
@@ -131,15 +161,23 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		function showHide(e) {
 			const panelToHide = document.querySelectorAll(".activityLog");
+
 			panelToHide.forEach(elem => {
 				elem.classList.toggle('hide');
 			})
 		}
 
 		function changeImageSize(e) {
-			const imageDiv = document.querySelector('.row.screenshot');
-			console.log(imageDiv.style);
-				imageDiv.classList.toggle('wrap');
+			const imageDiv = document.querySelectorAll(".row.screenshot");
+			const statusList = document.querySelectorAll("span.float-right");
+
+			statusList.forEach(span => {
+				span.classList.toggle("float-none");				
+			})	
+
+			imageDiv.forEach(elem => {
+				elem.classList.toggle("wrap");				
+			})
 		}
 			
 	head
@@ -152,8 +190,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		.container
 			.top-header
-				h2.titles Model Name ABCD1 - Revision 
-				h1.titles Issues Report
+				h1.titles
+					| Model Name ABCD1 -
+					br
+					|  Revision #{reportValues.currentRevision}
+				h2.titles Issues Report
 				h4.date #{reportValues.reportDate}
 			each issueTypeIssues, issueType in issues
 				if issueType === "open" && issueTypeIssues.length > 0
@@ -169,9 +210,9 @@ html(lang="en" ng-app="3drepo").ng-scope
 							p.grey #{reportValues.currentUser}
 							if issue.viewpoint.screenshotSmall 
 							a(href=url(issue.viewpoint.screenshot) target='_blank')
-								img(src=url(issue.viewpoint.screenshot))
+								img(class="fitImage" src=url(issue.viewpoint.screenshot) style="width:100%; height:400px;")
 						.col
-							p.right.grey #{issue.created.toString()}
+							p.right.grey #{reportValues.issueDate}
 							table.details
 								tr
 									td
@@ -206,7 +247,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 												| #{comment.comment}
 												p 
 													span.grey #{comment.owner} 
-													span.grey.float-right #{new Date(comment.created).toUTCString()}
+													span.grey.float-right #{comment.created}
 											if comment.action
 												| #{comment.action.propertyText} changed from
 												i #{comment.action.from} 
