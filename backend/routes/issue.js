@@ -243,17 +243,17 @@ function renderIssuesHTML(req, res, next) {
 	let findIssue;
 	const noClean = false;
 
-	// Print report dynamic values.
+	/**
+	 * Print report dynamic values.
+	 **/ 
+	const reportValues = {};
 	const reportDate = moment().format("Do MMMM YYYY");
 	const currentUser = req.session.user.username;
-	// const currentRevision = req.params.rid;
-	const reportValues = {};
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
-	// reportValues.currentRevision = currentRevision;
 
-	
-
+	console.log(req.params.account);
+;
 	const projection = {
 		extras: 0,
 		"viewpoints.extras": 0,
@@ -282,15 +282,14 @@ function renderIssuesHTML(req, res, next) {
 			if (issues[i].hasOwnProperty("comments")) {
 				for (let j = 0; j < issues[i].comments.length; j++) {
 					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
+					issues[i].comments[j].created = moment(issues[i].comments[j].created.toString()).format("hh:mm, Do MMM YYYY");
 				}
 			}
 			
-			const issueDate = moment(issues[i].created).format("Do MMMM YYYY");
-			console.log(">>>>>>>>>>>>>>>", issueDate);
-			const currentRevision = issueDate[i].rev_id;
-			console.log(currentRevision);
-			// console.log("ISSSUEEESSSSS", issues[i])
-			// console.log("issues", issues[i].created);
+			const issueDate = moment(issues[i].created).format("Do MMM YYYY");
+
+			reportValues.issueDate = issueDate;
+			reportValues.currentRevision = issues[i].rev_id;
 
 			if(issues[i].closed || issues[i].status === "closed") {
 				issues[i].created = new Date(issues[i].created).toString();
