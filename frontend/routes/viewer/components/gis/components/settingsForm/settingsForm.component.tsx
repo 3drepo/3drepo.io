@@ -45,7 +45,7 @@ const defaultFieldProps = {
 };
 
 export const SettingsForm = (props) => {
-	const {values: {latitude, longitude, angleFromNorth, axisX, axisY, axisZ}, handleChange} = props;
+	const {values: {latitude, longitude, angleFromNorth, axisX, axisY, axisZ}, handleChange, unit} = props;
 
 	return (
 		<Form>
@@ -90,7 +90,7 @@ export const SettingsForm = (props) => {
 					/>
 				)} />
 				<Headline color="primary" variant="subheading">
-					Project base Point - Model Coordinates
+					Project Base Point - Model Coordinates
 				</Headline>
 
 				<Field name="axisX" render={ ({ field, form }) => (
@@ -99,7 +99,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.axisX)}
 						helperText={form.errors.axisX}
-						label="x (mm)"
+						label={`x (${unit})`}
 						value={axisX}
 						onChange={handleChange}
 					/>
@@ -110,7 +110,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.axisY)}
 						helperText={form.errors.axisY}
-						label="y (mm)"
+						label={`y (${unit})`}
 						value={axisY}
 						onChange={handleChange}
 					/>
@@ -121,7 +121,7 @@ export const SettingsForm = (props) => {
 						{...defaultFieldProps}
 						error={Boolean(form.errors.axisZ)}
 						helperText={form.errors.axisZ}
-						label="z (mm)"
+						label={`z (${unit})`}
 						value={axisZ}
 						onChange={handleChange}
 					/>

@@ -24,6 +24,7 @@ interface IProps {
 	values: {
 		surveyPoints: any[];
 		angleFromNorth: number;
+		properties: any;
 	};
 	updateModelSettings: (modelData, settings) => void;
 	getDataFromPathname: () => { teamspace, modelId, revision };
@@ -48,9 +49,14 @@ export class Settings extends React.PureComponent<IProps, any> {
 	}
 
 	public renderForm = () => {
+		const props = {
+			unit: this.props.values.properties.unit
+		} as any;
+
 		const Form = withFormik({
 			mapPropsToValues: () => ( this.getFormValues(this.props.values)),
 			handleSubmit: (values) => {
+
 				const { angleFromNorth, axisX, axisY, axisZ, latitude, longitude } = values;
 
 				const pointsSettings = {
@@ -70,7 +76,7 @@ export class Settings extends React.PureComponent<IProps, any> {
 			validationSchema: SettingsSchema
 		})(SettingsForm);
 
-		return <Form />;
+		return <Form {...props} />;
 	}
 
 	public render() {
