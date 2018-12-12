@@ -93,10 +93,7 @@ export class App extends React.PureComponent<IProps, IState> {
 			if (isAuthenticated) {
 				this.toggleAutoLogin(false);
 				runAngularTimeout(() => {
-					// TODO: This statement should be removed after viewer migration
-					const isViewer = referrer.includes('viewer');
-					const state = isViewer ? referrer : this.state.referrer;
-					history.push(state);
+					history.push(this.state.referrer);
 				});
 			} else {
 				this.toggleAutoLogout(false);
