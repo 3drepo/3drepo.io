@@ -113,8 +113,8 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 }
 
 export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
-	const notificationService = yield getAngularService('NotificationService');
-	const viewsNotifications = yield notificationService.getChannel(teamspace, modelId).views;
+	const ChatService = yield getAngularService('ChatService');
+	const viewsNotifications = yield ChatService.getChannel(teamspace, modelId).views;
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
 	const onCreated = (createdView) => {
@@ -131,8 +131,8 @@ export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 }
 
 export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
-	const notificationService = yield getAngularService('NotificationService');
-	const viewsNotifications = yield notificationService.getChannel(teamspace, modelId).views;
+	const ChatService = yield getAngularService('ChatService');
+	const viewsNotifications = yield ChatService.getChannel(teamspace, modelId).views;
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
 	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
