@@ -28,6 +28,7 @@ import LayersIcon from '@material-ui/icons/Layers';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import List from '@material-ui/core/List';
+import MenuItem from '@material-ui/core/MenuItem';
 import ListItem from '@material-ui/core/ListItem';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
@@ -38,8 +39,7 @@ import {
 	MapName,
 	MapNameWrapper,
 	StyledMapIcon,
-	VisibilityButton,
-	StyledMenuItem
+	VisibilityButton
 } from './gis.styles';
 
 interface IProps {
@@ -198,9 +198,9 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public renderMapProviders = (mapsProviders = []) =>
 		mapsProviders.map((mapProvider, index) => (
-			<StyledMenuItem key={mapProvider.name} value={index}>
+			<MenuItem key={mapProvider.name} value={index}>
 				{mapProvider.name}
-			</StyledMenuItem>
+			</MenuItem>
 		))
 
 	public renderLayers = (mapLayers = []) =>
@@ -227,7 +227,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
-				{this.renderLayers(mapsProviders[activeMapIndex].layers)}
+				{mapsProviders[activeMapIndex].layers && this.renderLayers(mapsProviders[activeMapIndex].layers)}
 			</ViewerPanelContent>
 		);
 	}
@@ -257,7 +257,6 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { settingsModeActive } = this.state;
-		console.log('this.props.settings',this.props.settings, this.props.settings.surveyPoints, this.props.settings.angleFromNorth)
 
 		return (
 			<ViewerPanel

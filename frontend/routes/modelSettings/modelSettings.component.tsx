@@ -46,6 +46,7 @@ import {
 	BackButton,
 	LoaderContainer
 } from './modelSettings.styles';
+import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
@@ -171,7 +172,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		return changes;
 	}
 
-	public handleUpdateSettings = (data) => {
+	public handleUpdateSettings = (data, form) => {
 		const { match, location, updateModelSettings } = this.props;
 		const { modelId, teamspace } = match.params;
 		const queryParams = queryString.parse(location.search);
@@ -189,7 +190,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			type,
 			fourDSequenceTag,
 			surveyPoints: [{
-				position: [ axisX, -axisZ, -axisY ],
+				position: [ axisX, axisY, axisZ ],
 				latLong: [ latitude, longitude ]
 			}],
 			topicTypes: types
@@ -386,13 +387,11 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								type="submit"
 								variant="raised"
 								color="secondary"
-								disabled={
-									!form.isValid ||
-									form.isValidating
-								}
+								disabled={!form.isValid || form.isValidating}
 							>
 								Save
-							</Button>} />
+							</Button>}
+						/>
 					</Grid>
 				</StyledForm>
 			</Formik>

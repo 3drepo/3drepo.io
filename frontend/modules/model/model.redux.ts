@@ -58,9 +58,6 @@ const fetchMapsSuccess = (state = INITIAL_STATE, { maps }) => {
 };
 
 const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
-	console.log('State settings', state.settings);
-	console.log('new settings', settings);
-
 	return { ...state, settings: { ...state.settings, ...settings} };
 };
 

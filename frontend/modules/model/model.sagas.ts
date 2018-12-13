@@ -16,10 +16,10 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-
+import { cloneDeep } from 'lodash';
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
-import { uploadFileStatuses } from './model.helpers';
+import { uploadFileStatuses, changePositionFormat } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
@@ -28,9 +28,8 @@ import { SnackbarActions } from './../snackbar';
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
-
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
-
+		settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
@@ -40,16 +39,16 @@ export function* fetchSettings({ teamspace, modelId }) {
 
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
-		yield API.editModelSettings(teamspace, modelId, settings);
+		const modifiedSettings = cloneDeep(settings);
+		modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
+		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 
 		if (project && settings.name) {
 			yield put(
 				TeamspacesActions.updateModelSuccess(teamspace, modelId, { project, model: modelId, name: settings.name } )
 			);
 		}
-
 		yield put(ModelActions.updateSettingsSuccess(settings));
-
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('update', 'model settings', e.response));

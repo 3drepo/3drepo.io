@@ -20,21 +20,13 @@ import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
 import MapIcon from '@material-ui/icons/Map';
-import MenuItem from '@material-ui/core/MenuItem';
 
 import { COLOR } from './../../../../styles/colors';
-
-export const StyledMenuItem = styled(MenuItem)`
-  && {
-    /* color: green; */
-  }
-`;
 
 export const StyledSelect = styled(Select)`
   margin-bottom: 12px;
 
   && {
-    color: blue;
     width: 100%;
 
     [role="button"] {
