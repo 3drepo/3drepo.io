@@ -189,7 +189,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			type,
 			fourDSequenceTag,
 			surveyPoints: [{
-				position: [ axisX, axisY, axisZ ],
+				position: [ axisX, -axisZ, -axisY ],
 				latLong: [ latitude, longitude ]
 			}],
 			topicTypes: types
@@ -230,7 +230,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public renderForm = () => {
 		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
-		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
+		const { latitude, longitude, axisX, angleFromNorth, elevation, topicTypes } = this.state;
+		const axisZ = -this.state.axisY;
+		const axisY = -this.state.axisZ;
 
 		return	(
 			<Formik
