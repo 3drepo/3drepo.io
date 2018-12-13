@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { Formik, Field } from 'formik';
 import { isEmpty } from 'lodash';
-import { ViewerCard } from '../viewerCard/viewerCard.component';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { getDataFromPathname } from './../../viewer.helpers';
 
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
@@ -251,17 +251,16 @@ export class Views extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<ViewerCard
+			<ViewerPanel
 				title="Views"
 				Icon={this.getTitleIcon()}
 				actions={this.getActions()}
-				renderFooterContent={this.renderFooterContent}
-				isPadding={false}
 				pending={this.props.isPending}
 			>
 				{!this.state.viewpoints.length && !this.state.searchMode
 					? <EmptyStateInfo>No viewpoints have been created yet</EmptyStateInfo> : this.renderViewpoints()}
-			</ViewerCard>
+				{this.renderFooterContent()}
+			</ViewerPanel>
 		);
 	}
 }

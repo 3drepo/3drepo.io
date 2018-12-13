@@ -41,16 +41,12 @@ interface IProps {
 	title: string;
 	Icon?: JSX.Element;
 	actions?: any[];
-	renderFooterContent?: () => JSX.Element | null;
 	pending?: boolean;
-	isPadding?: boolean;
 }
 
-export class ViewerCard extends React.PureComponent<IProps, any> {
+export class ViewerPanel extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
-		renderFooterContent: () => null,
-		actions: [],
-		isPadding: true
+		actions: []
 	};
 
 	public getTitle = () => {
@@ -81,7 +77,7 @@ export class ViewerCard extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { children, pending } = this.props;
+		const { children, pending, renderFooterContent } = this.props;
 
 		return (
 			<Panel title={this.getTitle()}>

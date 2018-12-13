@@ -235,8 +235,16 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { activeMapIndex } = this.state;
 
 		return (
+<<<<<<< HEAD
 			<ViewerPanelContent>
 				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
+=======
+			<ViewerPanelContent isPadding={true}>
+				<StyledSelect
+					onChange={this.handleChangeMapProvider}
+					value={activeMapIndex}
+				>
+>>>>>>> ISSUE #1259 - Add fixes after rebasing
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{mapsProviders[activeMapIndex].layers && this.renderLayers(mapsProviders[activeMapIndex].layers)}

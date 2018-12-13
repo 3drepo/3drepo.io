@@ -47,7 +47,7 @@ export const SettingsForm = (props) => {
 
 	return (
 		<StyledForm>
-			<ViewerPanelContent>
+			<ViewerPanelContent isPadding={true}>
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>
