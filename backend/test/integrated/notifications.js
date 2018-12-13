@@ -114,7 +114,7 @@ describe('Notifications', function() {
 		});
 	});
 
-	describe(" of type assign issue", function() {
+	describe("of type assign issue", function() {
 		let issuesId = [];
 
 		const updateIssue = (modelId, issue , id, next) =>
@@ -371,8 +371,31 @@ describe('Notifications', function() {
 			], done)
 		})
 
-	});
+		it("should be created when a new issue has being created with a JobA assigned directly", done => {
+			const issue = Object.assign({"name": "New notification for jobA " }, baseIssue);
+			const issueJobA = Object.assign({}, issue, {"assigned_roles":["jobA"]});
 
+			async.waterfall([
+				next => {
+					agents.adminTeamspace1JobA.delete(NOTIFICATIONS_URL)
+						.expect(200, () => {next();});
+					},
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(0);
+					next();
+				},
+				next => agents.teamSpace1.post(`/${account}/${model}/issues.json`)
+					.send(issueJobA)
+						.expect(200, next),
+				fetchNotification(agents.adminTeamspace1JobA),
+				(notifications, next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(1);
+					next();
+				},
+				], done);
+		});
+	});
 
 	describe("of type model update", ()=> {
 		before(bouncerHelper.startBouncerWorker);

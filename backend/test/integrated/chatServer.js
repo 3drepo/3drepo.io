@@ -409,6 +409,37 @@ describe("Chat service", function () {
 					});
 		});
 
+
+		it("should receive an upsert event when a new issue has being created ", done => {
+			const eventName = `${username}::notificationUpserted`;
+
+			// TODO: finish me
+			const issue = Object.assign({}, baseIssue, {"name":"Issue test", assigned_roles : ["jobA"]});
+
+			socket.on(eventName, function(notification) {
+				socket.off(eventName);
+
+				expect(notification).to.shallowDeepEqual({type:"ISSUE_ASSIGNED",
+															teamSpace: account,
+															modelId: model,
+															read: false});
+				done();
+			});
+
+			const createIssue =  issue => next => agent2.post(`/${account}/${model}/issues.json`)
+														.send(issue)
+														.expect(200 , next);
+
+			const deleteAllNotifications  = next => agent2.delete("/me/notifications")
+				.expect(200, err => next(err));
+
+			async.waterfall([
+				deleteAllNotifications,
+				createIssue(issue)
+			]);
+		});
+
+
 		it("should receive a model uploaded notification if a model has been uploaded", done => {
 			const eventName = `${username}::notificationUpserted`;
 

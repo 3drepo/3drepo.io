@@ -124,22 +124,11 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 		this.props.sendUpdateNotificationRead(this.props._id, false);
 	}
 
-	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.type !== this.props.type ) {
-			this.setState({ icon: getIcon(this.props) });
-		}
-
-		if (prevProps.issuesId !== this.props.issuesId || prevProps.revision !== this.props.revision) {
-			this.setState({ details : getDetails(this.props)});
-		}
-
-		if (prevProps.modelName !== this.props.modelName) {
-			this.setState({ summary: getSummary(this.props) });
-		}
-	}
-
 	public render = () => {
 		const {read} =  this.props;
+		const icon = getIcon(this.props);
+		const details = getDetails(this.props);
+		const summary = getSummary(this.props);
 
 		const containerProps: any = {
 			read: read.toString(),
@@ -150,27 +139,16 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 			<Container {...containerProps}>
 				<Item button>
 					<Avatar>
-						{this.state.icon}
+						{icon}
 					</Avatar>
 
-					{read &&
-						<NotificationItemText
-							primaryColor="rgba(0, 0, 0, 0.54)"
-							secondaryColor="rgba(0, 0, 0, 0.24)"
-							fontWeight={FONT_WEIGHT.NORMAL}
-							primary={this.state.details}
-							secondary={this.state.summary}
-						/>
-					}
-					{!read &&
-						<NotificationItemText
-							primaryColor="rgba(0, 0, 0, 0.87)"
-							secondaryColor="rgba(0, 0, 0, 0.54)"
-							fontWeight={FONT_WEIGHT.BOLD}
-							primary={this.state.details}
-							secondary={this.state.summary}
-						/>
-					}
+					<NotificationItemText
+						primaryColor={read ? 'rgba(0, 0, 0, 0.54)' : 'rgba(0, 0, 0, 0.87)'}
+						secondaryColor={read ? 'rgba(0, 0, 0, 0.24)' : 'rgba(0, 0, 0, 0.54)'}
+						fontWeight={read ? FONT_WEIGHT.NORMAL : FONT_WEIGHT.BOLD}
+						primary={details}
+						secondary={summary}
+					/>
 
 					<ItemSecondaryAction>
 						<SmallIconButton
