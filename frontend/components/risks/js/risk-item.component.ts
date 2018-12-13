@@ -251,6 +251,17 @@ class RiskItemController implements ng.IController {
 			this.risksChatEvents.unsubscribeFromUpdated(this.onRiskUpdated);
 		}
 
+		this.$state.go('app.viewer',
+			{
+				account: this.account,
+				model: this.model,
+				revision: this.revision,
+				riskId: null,
+				noSet: true
+			},
+			{ notify: false }
+		);
+
 	}
 
 	public watchers() {
