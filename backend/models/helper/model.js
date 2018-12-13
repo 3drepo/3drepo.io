@@ -337,7 +337,8 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 
 	let createModelPromise;
 
-	const isFed = subModels && subModels.length;
+	const isFed = sub
+	 && subModels.length;
 	if(isFed) {
 		createModelPromise = createNewFederation(account, modelName, data, modelDirName);
 	} else {

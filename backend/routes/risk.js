@@ -25,6 +25,8 @@ const responseCodes = require("../response_codes.js");
 const Risk = require("../models/risk");
 const utils = require("../utils");
 const config = require("../config.js");
+const moment = require("moment");
+const model = require("./model");
 
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -153,6 +155,15 @@ function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
+	/**
+	* Create dynamic Print report values to use in template.
+	**/
+	const reportValues = {};
+	const reportDate = moment().format("Do MMMM YYYY");
+	const currentUser = req.session.user.username;
+	reportValues.reportDate = reportDate;
+	reportValues.currentUser = currentUser;
+
 	const projection = {
 		extras: 0,
 		"viewpoint.extras": 0,
@@ -181,16 +192,24 @@ function renderRisksHTML(req, res, next) {
 
 		for (let i = 0; i < risks.length; i++) {
 			if (risks[i].closed || risks[i].status === "closed") {
-				risks[i].created = new Date(risks[i].created).toString();
+				risks[i].created = moment(risks[i].created).format("hh:mm, Do MMM YYYY");
 				splitRisks.closed.push(risks[i]);
 			} else {
-				risks[i].created = new Date(risks[i].created).toString();
+				risks[i].created = moment(risks[i].created).format("hh:mm, Do MMM YYYY");
 				splitRisks.open.push(risks[i]);
 			}
+
+			const currentRevision = risks[i].rev_id;
+			reportValues.currentRevision = currentRevision;
 		}
+
+		// const modelsettings = model.getModelSettings(req)
+		// console.log("MODEL SETTINGS", modelsettings);
+		console.log("MODEL SETTINGS", req);
 
 		res.render("risks.pug", {
 			risks : splitRisks,
+			reportValues:reportValues,
 			url: function (path) {
 				return config.apiAlgorithm.apiUrl(C.GET_API, path);
 			}

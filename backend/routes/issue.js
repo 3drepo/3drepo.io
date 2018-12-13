@@ -244,7 +244,7 @@ function renderIssuesHTML(req, res, next) {
 	const noClean = false;
 
 	/**
-	 * Print report dynamic values.
+	 * Create dynamic Print report values to use in template.
 	 **/ 
 	const reportValues = {};
 	const reportDate = moment().format("Do MMMM YYYY");
@@ -252,8 +252,6 @@ function renderIssuesHTML(req, res, next) {
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
 
-	console.log(req.params.account);
-;
 	const projection = {
 		extras: 0,
 		"viewpoints.extras": 0,
@@ -282,14 +280,15 @@ function renderIssuesHTML(req, res, next) {
 			if (issues[i].hasOwnProperty("comments")) {
 				for (let j = 0; j < issues[i].comments.length; j++) {
 					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
-					issues[i].comments[j].created = moment(issues[i].comments[j].created.toString()).format("hh:mm, Do MMM YYYY");
+					issues[i].comments[j].created = moment(issues[i].comments[j].created).format("hh:mm, Do MMM YYYY");
 				}
 			}
 			
 			const issueDate = moment(issues[i].created).format("Do MMM YYYY");
+			const currentRevision = issues[i].rev_id;
 
 			reportValues.issueDate = issueDate;
-			reportValues.currentRevision = issues[i].rev_id;
+			reportValues.currentRevision = currentRevision
 
 			if(issues[i].closed || issues[i].status === "closed") {
 				issues[i].created = new Date(issues[i].created).toString();

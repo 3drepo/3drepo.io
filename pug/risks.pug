@@ -3,78 +3,266 @@ html(lang="en" ng-app="3drepo").ng-scope
 	script(type="text/javascript", src="/config.js")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 	style.
+		@media print 
+		{
+			button {
+				display:none!important;
+			}
+
+			@page {
+			size: auto;
+			margin: 0;
+			}
+		}
+
 		html, body {
-				font-family: Roboto, sans-serif;
+			font-family: Roboto, sans-serif;
+			margin:0;
+			-webkit-print-color-adjust: exact !important;
+		}
+
+		h1,h2,h3,h4 {
+			margin:5px 0;
+		}
+
+		header {
+			background-color:#cfcfcf !important; 
+			height:50px;
+			padding:10px;
+			text-align:center;
+			position:relative;
 		}
 		table {
 			border-collapse: separate;
 			border-spacing: 10px;
 		}
+
 		.bold {
 			font-weight: bold;
 		}
-	head
+
+		.button-group {
+			position:absolute;
+			top:10px;
+			left:0;
+		}
+
+		button {
+			width:140px;
+			border:none;
+			background:#0E2F53;
+			padding:10px;
+			color:#fff;
+			text-transform:uppercase;
+			margin:5px;
+			border-radius:5px;
+		}		
+
+		.container {
+			width:760px;
+			margin:0 auto;
+			border-left:2px solid #efefef;
+			border-right:2px solid #efefef;
+			padding:0 20px;
+		}
+
+		.top-header {
+			text-align:center;
+			font-weight:300;
+		}
+
+		.top-header h1, .top-header h2 {
+			font-weight:400;
+		}
+
+		.row {
+			display:flex;
+		}
+
+		.row.screenshot {
+			width:100%;
+		}
+
+		.col {
+			width:100%;
+		}
+
+		.right {
+			text-align:right;
+		}
+
+		.col.description {
+			font-weight:400;
+			display:block;
+		}
+
+		.col.screenshot img {
+			max-width:96%;
+			height:auto;
+		}
+
+		.float-right {
+			float:right;
+		}
+
+		.float-none {
+			float:none;
+		}
+
+		.grey-header {
+			font-size:20px;
+			font-weight:400;
+			color:#cfcfcf;
+		}
+
+		.grey {
+			color:#cfcfcf;
+		}
+
+		h1.titles, h2.titles {
+			font-weight:500;
+		}
+
+		h1.titles {
+			font-size:18px;
+		}
+
+		h2.titles {
+			font-size:35px;
+		}
+
+		h4.date {
+			font-weight:400;
+		}
+
+		i {
+			padding:0px 5px;
+			font-weight:500;
+		}
+
+		.hide {
+			display:none;
+		}
+
+		.wrap {
+			flex-wrap:wrap;
+		}
+
+		.fitImage {
+			object-fit:cover;
+		}
+	script.
+
+		function printDialog() {
+			return window.print();
+		}
+
+		function showHide(e) {
+			const panelToHide = document.querySelectorAll(".activityLog");
+
+			panelToHide.forEach(elem => {
+				elem.classList.toggle('hide');
+			})
+		}
+
+		function changeImageSize(e) {
+			const imageDiv = document.querySelectorAll(".row.screenshot");
+			const statusList = document.querySelectorAll("span.float-right");
+
+			statusList.forEach(span => {
+				span.classList.toggle("float-none");				
+			})	
+
+			imageDiv.forEach(elem => {
+				elem.classList.toggle("wrap");				
+			})
+		}
+head
+	header
+		div(class="button-group")
+			button(onclick="printDialog()") Print
+			//- button(onclick="showHide(event)") Hide Log
+			button(onclick="changeImageSize()") Large Pictures
+		img(src="/images/3drepo-logo-white.png" width="120px")
+
+	.container
+		.top-header
+			h1.titles
+				| Model Name ABCD1 -
+				br
+				|  Revision - #{reportValues.currentRevision}
+			h2.titles Risks Report
+			h4.date #{reportValues.reportDate}
 		each risksByStatus, status in risks
 			if status === "open" && risksByStatus.length > 0
 				h2 Open Risks
 			else if status === "closed" && risksByStatus.length > 0
 				h2 Closed Risks
-
-			// TODO: Time stamps - What is going on here?!
 			each risk in risksByStatus.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
-				hr
-				table(border=0)
-					tr
-						td(colspan=2)
-							h3 ##{risk.number} #{risk.name}
-					if risk.viewpoint.screenshotSmall
-						tr
-							td(colspan=2) 
-								a(href=url(risk.viewpoint.screenshot) target='_blank')
-									img(src=url(risk.viewpoint.screenshotSmall))
-
-					tr
-						td(colspan=2)
-							b Assigned:
-							span [#{risk.assigned_roles.join(", ")}] 
-
-							b Priority: 
-							span #{risk.priority} 
-
-							b Status: 
-							span #{risk.status} 
-
-							b Type: 
-							span #{risk.topic_type}
-
-					tr
-						td(colspan=2)
-							b Description: 
-							span #{risk.desc}
-					tr
-						td
-							span.bold #{risk.owner} 
-							span [#{new Date(risk.created).toUTCString()}]
-						td Risk Opened....
-					if risk.comments
-						each comment in risk.comments
-							tr
-								td
-									span.bold #{comment.owner} 
-									span [#{new Date(comment.created).toUTCString()}]
-								td 
-									if comment.comment
-										| #{comment.comment}
-									if comment.action
-										| #{comment.action.propertyText} changed from 
-										i #{comment.action.from} 
-										| to 
-										i #{comment.action.to}
-							if comment.viewpoint && comment.viewpoint.screenshotSmall
+				h3 #{risk.number} #{risk.name}
+				.row.screenshot
+					.col.screenshot
+						p.grey #{reportValues.currentUser}
+						if risk.viewpoint.screenshotSmall
+						a(href=url(risk.viewpoint.screenshot) target='_blank')
+							img(class="fitImage" src=url(risk.viewpoint.screenshotSmall) style="width:100%; height:400px;")
+					.col
+						p.right.grey #{risk.created}
+							table.details
 								tr
-									td(colspan=2)
-										a(href=url(comment.viewpoint.screenshot) target='_blank')
-											img(src=url(comment.viewpoint.screenshotSmall))
-								
-				br
+									td
+									p
+										strong Risk Owner
+										span.float-right #{risk.owner}
+								tr
+									td
+									p
+										strong Risk Likelihood
+										span.float-right #{risk.likelihood}
+								tr
+									td
+									p
+										strong Risk Consequence
+										span.float-right #{risk.consequence}
+								tr
+									td
+									p
+										strong Risk Level
+										span.float-right #{risk.level_of_risk}
+								tr
+									td
+									p
+										strong Mitigation Status
+										span.float-right #{risk.mitigation_status}
+								tr
+									td
+									p
+										strong Category
+										span.float-right #{risk.category}
+								tr
+									td
+									p
+										strong Associated Activity
+										span.float-right #{risk.associated_activity}
+
+				.row
+					.col.description
+						p Description
+						span #{risk.desc}
+						//- .activityLog
+						//- 	p.grey-header Activity Log
+						//- 	if risk.comments
+						//- 		each comment in risk.comments
+						//- 			if comment.comment
+						//- 			| #{comment.comment}
+						//- 			p
+						//- 				span.grey #{comment.owner}
+						//- 				span.gre.float-right #{comment.created}
+						//- 			if comment.action
+						//- 				| #{comment.action.propertyText} changed from
+						//- 				i #{comment.action.from}
+						//- 				| to
+						//- 				i #{comment.action.to}
+
+
 
