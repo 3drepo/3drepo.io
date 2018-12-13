@@ -176,8 +176,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const { modelId, teamspace } = match.params;
 		const queryParams = queryString.parse(location.search);
 		const { project } = queryParams;
-		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag, topicTypes } = data;
-		const { axisX, axisY, axisZ, latitude, longitude } = this.state;
+		const { name, unit, type, code, elevation, angleFromNorth, fourDSequenceTag,
+			topicTypes, axisX, axisY, axisZ, latitude, longitude } = data;
 		const types = topicTypes.map((topicType) => topicType.label);
 
 		const settings = {
