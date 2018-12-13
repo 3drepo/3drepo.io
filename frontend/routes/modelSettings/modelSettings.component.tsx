@@ -54,10 +54,10 @@ const ModelSettingsSchema = Yup.object().shape({
 	longitude: schema.measureNumberDecimal,
 	latitude: schema.measureNumberDecimal,
 	elevation: schema.measureNumberDecimal,
-	angleFromNorth: schema.measureNumberIntegers,
-	axisY: schema.measureNumberIntegers,
-	axisX: schema.measureNumberIntegers,
-	axisZ: schema.measureNumberIntegers
+	angleFromNorth: schema.measureNumberDecimal,
+	axisY: schema.measureNumberDecimal,
+	axisX: schema.measureNumberDecimal,
+	axisZ: schema.measureNumberDecimal
 });
 
 const PANEL_PROPS = {
