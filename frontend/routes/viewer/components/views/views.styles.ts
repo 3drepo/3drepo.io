@@ -35,6 +35,9 @@ export const FooterWrapper = styled.div`
   width: 100%;
   position: relative;
   justify-content: flex-end;
+  align-items: center;
+  padding: 10px 16px;
+  box-sizing: border-box;
 `;
 
 export const ViewsCountInfo = styled.p`
