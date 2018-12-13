@@ -77,7 +77,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { children, pending, renderFooterContent } = this.props;
+		const { children, pending } = this.props;
 
 		return (
 			<Panel title={this.getTitle()}>
