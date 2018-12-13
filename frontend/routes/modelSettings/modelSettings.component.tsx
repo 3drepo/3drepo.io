@@ -27,6 +27,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 
 import { Loader } from '../components/loader/loader.component';
 
+import { schema } from '../../services/validation';
 import { runAngularTimeout } from '../../helpers/migration';
 import { clientConfigService } from '../../services/clientConfig';
 
@@ -49,7 +50,14 @@ import {
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
 		.max(5)
-		.matches(/^[A-Za-z0-9]+$/)
+		.matches(/^[A-Za-z0-9]+$/),
+	longitude: schema.measureNumberDecimal,
+	latitude: schema.measureNumberDecimal,
+	elevation: schema.measureNumberDecimal,
+	angleFromNorth: schema.measureNumberDecimal,
+	axisY: schema.measureNumberDecimal,
+	axisX: schema.measureNumberDecimal,
+	axisZ: schema.measureNumberDecimal
 });
 
 const PANEL_PROPS = {
@@ -191,14 +199,6 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		updateModelSettings(modelData, settings);
 	}
 
-	public handlePointChange = (onChange, name) => (event, ...params) => {
-		this.setState({
-			[name]: Number(event.target.value)
-		});
-
-		onChange(event, ...params);
-	}
-
 	public handleBackLink = () => {
 		const { history, location, match } = this.props;
 		const queryParams = queryString.parse(location.search);
@@ -307,77 +307,72 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 						<Grid container={true} direction="row" wrap="nowrap">
 							<GridColumn container={true} direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
-								<Field name="latitude" render={ ({ field }) => (
+								<Field name="latitude" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
 										label="Latitude (Decimal)"
 										margin="normal"
-										value={latitude}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										error={Boolean(form.errors.latitude)}
+										helperText={form.errors.latitude}
 									/>
 								)} />
-								<Field name="longitude" render={ ({ field }) => (
+								<Field name="longitude" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
 										label="Longitude"
 										margin="normal"
-										value={longitude}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										error={Boolean(form.errors.longitude)}
+										helperText={form.errors.longitude}
 									/>
 								)} />
-								<Field name="elevation" render={ ({ field }) => (
+								<Field name="elevation" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
 										label="Elevation"
 										margin="normal"
-										value={elevation}
 										disabled={true}
+										error={Boolean(form.errors.elevation)}
+										helperText={form.errors.elevation}
 									/>
 								)} />
-								<Field name="angleFromNorth" render={ ({ field }) => (
+								<Field name="angleFromNorth" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
 										label="Angle from North (Clockwise Degrees)"
 										margin="normal"
-										value={angleFromNorth}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										error={Boolean(form.errors.angleFromNorth)}
+										helperText={form.errors.angleFromNorth}
 									/>
 								)} />
 							</GridColumn>
 							<GridColumn container={true} direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Project Point</Headline>
-								<Field name="axisX" render={ ({ field }) => (
+								<Field name="axisX" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
 										label="x (mm)"
 										margin="normal"
-										value={axisX}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										error={Boolean(form.errors.axisX)}
+										helperText={form.errors.axisX}
 									/>
 								)} />
-								<Field name="axisY" render={ ({ field }) => (
+								<Field name="axisY" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
+										name="axisY"
 										label="y (mm)"
 										margin="normal"
-										value={axisY}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										error={Boolean(form.errors.axisY)}
+										helperText={form.errors.axisY}
 									/>
 								)} />
-								<Field name="axisZ" render={ ({ field }) => (
+								<Field name="axisZ" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										type="number"
 										label="z (mm)"
 										margin="normal"
-										value={axisZ}
-										onChange={this.handlePointChange(field.onChange, field.name)}
+										error={Boolean(form.errors.axisZ)}
+										helperText={form.errors.axisZ}
 									/>
 								)} />
 							</GridColumn>

@@ -93,7 +93,7 @@ export class SnackbarContainer extends React.PureComponent<IProps, IState> {
 			<ThemeProvider theme={theme}>
 				<MuiThemeProvider theme={MuiTheme}>
 					<Snackbar
-						autoHideDuration={2000}
+						autoHideDuration={5000}
 						anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 						onClose={this.handleClose}
 						onExited={this.handleExited}

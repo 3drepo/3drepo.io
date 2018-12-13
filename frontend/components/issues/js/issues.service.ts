@@ -128,9 +128,10 @@ export class IssuesService {
 	public getIssuesAndJobs(account: string, model: string, revision: string) {
 		return Promise.all([
 			this.getUserJobForModel(account, model),
-			this.getIssuesData(account, model, revision),
 			this.getTeamspaceJobs(account, model)
-		]);
+		]).then(() => {
+			return this.getIssuesData(account, model, revision);
+		});
 	}
 
 	public getIssuesData(account: string, model: string, revision: string) {
