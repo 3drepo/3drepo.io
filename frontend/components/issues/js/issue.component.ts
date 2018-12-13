@@ -230,18 +230,20 @@ class IssueController implements ng.IController {
 			this.chatEventsComments.unsubscribeFromUpdated (this.onCommentUpdated);
 			this.chatEventsComments.unsubscribeFromDeleted(this.onCommentDeleted);
 		}
-		this.$location.search('issueId', undefined);
+
+		this.$state.go('app.viewer',
+			{
+				account: this.account,
+				model: this.model,
+				revision: this.revision,
+				issueId: null,
+				noSet: true
+			},
+			{ notify: false }
+		);
 	}
 
 	public watchers() {
-
-		// This keeps the colours updated etc
-		this.$scope.$watch('vm.issueData', () => {
-			// if (this.issueData) {
-			// 	IssuesService.populateIssue(this.issueData);
-			// }
-		}, true);
-
 		this.$scope.$watch('vm.modelSettings', () => {
 			if (this.modelSettings) {
 				this.topic_types = this.modelSettings.properties && this.modelSettings.properties.topicTypes || [];
