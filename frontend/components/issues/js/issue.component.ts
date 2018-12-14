@@ -224,12 +224,10 @@ class IssueController implements ng.IController {
 		this.clearPin = true;
 
 		// unsubscribe on destroy
-		if (this.data) {
-			this.chatEventsIssues.unsubscribeFromUpdated(this.onIssueUpdated);
-			this.chatEventsComments.unsubscribeFromCreated(this.onCommentCreated);
-			this.chatEventsComments.unsubscribeFromUpdated (this.onCommentUpdated);
-			this.chatEventsComments.unsubscribeFromDeleted(this.onCommentDeleted);
-		}
+		this.chatEventsIssues.unsubscribeFromUpdated(this.onIssueUpdated);
+		this.chatEventsComments.unsubscribeFromCreated(this.onCommentCreated);
+		this.chatEventsComments.unsubscribeFromUpdated (this.onCommentUpdated);
+		this.chatEventsComments.unsubscribeFromDeleted(this.onCommentDeleted);
 
 		this.$state.go('app.viewer',
 			{
@@ -1230,7 +1228,7 @@ class IssueController implements ng.IController {
 	}
 
 	public onIssueUpdated(issue) {
-		if (issue._id !== this.data._id) {
+		if (!this.data || issue._id !== this.data._id) {
 			return;
 		}
 

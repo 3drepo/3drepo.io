@@ -247,9 +247,7 @@ class RiskItemController implements ng.IController {
 		this.clearPin = true;
 
 		// unsubscribe on destroy
-		if (this.data) {
-			this.risksChatEvents.unsubscribeFromUpdated(this.onRiskUpdated);
-		}
+		this.risksChatEvents.unsubscribeFromUpdated(this.onRiskUpdated);
 
 		this.$state.go('app.viewer',
 			{
