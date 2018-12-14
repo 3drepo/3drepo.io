@@ -120,7 +120,7 @@ export const StatusIcon = styled.i`
   display: block;
   width: 12px;
   height: 12px;
-  background-color: red;
+  background-color: ${COLOR.PRIMARY_DARK};
   border-radius: 50%;
   margin-right: 6px;
 `;
