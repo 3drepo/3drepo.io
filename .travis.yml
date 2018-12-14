@@ -29,7 +29,7 @@ before_install:
     - git status
     - cd backend && mongorestore
     - cd ../../../
-    - cp -r ./submodules/tests/frontend/staticPages/legal/ ./staticPages/legal
+    - cp -r ./submodules/tests/frontend/home/legal/ ./home/legal
 
 install:
     - cd ./backend
