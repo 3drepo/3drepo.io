@@ -57,6 +57,7 @@
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
+    "react-truncate": "^2.4.0",
     "react2angular": "^4.0.4",
     "redux": "^4.0.0",
     "redux-connect-standalone": "^0.0.1",
