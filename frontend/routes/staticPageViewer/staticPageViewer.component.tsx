@@ -21,16 +21,8 @@ import { Route } from 'react-router-dom';
 import PageTemplate from './components/pageTemplate/pageTemplate.container';
 import { STATIC_ROUTES } from '../../services/staticPages';
 
-interface IProps {
-	match: any;
-}
-
-export class StaticPage extends React.PureComponent<IProps, any> {
-	public render() {
-		const { match } = this.props;
-
-		return STATIC_ROUTES.map(({ title, path, fileName }) => (
-			<Route key={path} path={path} render={() => <PageTemplate title={title} fileName={fileName} />}	/>
-		));
-	}
-}
+export const StaticPageViewer = () => {
+	return STATIC_ROUTES.map(({ title, path, fileName }) => (
+		<Route key={path} path={path} render={() => <PageTemplate title={title} fileName={fileName} />}	/>
+	));
+};

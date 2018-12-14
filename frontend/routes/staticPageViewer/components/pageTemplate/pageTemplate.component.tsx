@@ -36,7 +36,6 @@ export class PageTemplate extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { templates, fileName } = this.props;
-		console.log('templates', templates);
 		return (
 			<ThemeProvider theme={theme}>
 				<MuiThemeProvider theme={MuiTheme}>

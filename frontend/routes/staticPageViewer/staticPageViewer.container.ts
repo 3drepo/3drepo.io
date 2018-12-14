@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
 import { addRouting } from '../../helpers/migration';
 
-import { StaticPage } from './staticPageViewer.component';
+import { StaticPageViewer } from './staticPageViewer.component';
 
-export default addRouting(withRouter(StaticPage));
+export default addRouting(withRouter(StaticPageViewer));

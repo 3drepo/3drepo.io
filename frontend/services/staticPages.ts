@@ -5,7 +5,6 @@ import axios from 'axios';
 export const getStaticRoutes = memoize(() => {
 	return clientConfigService.legalTemplates.map((route) => {
 		const path = route.page || (route.fileName.split('/').slice(-1)[0] || '').split('.')[0];
-
 		return { ...route, path: `/${path}` };
 	});
 });
