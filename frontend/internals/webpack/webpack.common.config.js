@@ -40,7 +40,8 @@ module.exports = (options) => {
         { from: 'images/**', to: '../' },
         { from: 'icons/*', to: '../' },
         { from: 'unity/**', to: '../' },
-        { from: 'manifest-icons/*', to: '../' }
+        { from: 'manifest-icons/*', to: '../' },
+        { from: '../html/**', to: '../templates', flatten: true }
       ], options),
       new HTMLWebpackPlugin({
         template: './index.html',

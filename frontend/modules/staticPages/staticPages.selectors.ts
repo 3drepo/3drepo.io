@@ -15,4 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as StaticPage } from './staticPage.container';
+import { createSelector } from 'reselect';
+
+export const selectStaticPagesDomain = (state) => Object.assign({}, state.staticPages);
+
+export const selectStaticPagesTemplates = createSelector(
+	selectStaticPagesDomain, (state) => state.templates
+);
+
+export const selectStaticPagesIsPending = createSelector(
+	selectStaticPagesDomain, (state) => state.isPending
+);

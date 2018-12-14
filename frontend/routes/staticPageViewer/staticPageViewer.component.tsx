@@ -18,29 +18,19 @@
 import * as React from 'react';
 import { Route } from 'react-router-dom';
 
-import { PageTemplate } from './components/pageTemplate/pageTemplate.component';
-import { clientConfigService } from '../../services/clientConfig';
+import PageTemplate from './components/pageTemplate/pageTemplate.container';
+import { STATIC_ROUTES } from '../../services/staticPages';
 
 interface IProps {
 	match: any;
 }
 
 export class StaticPage extends React.PureComponent<IProps, any> {
-	public getFile = (fileName) => require(`./../../staticPages/legal/${fileName}`);
-
 	public render() {
 		const { match } = this.props;
 
-		return clientConfigService.legalTemplates.map((page) => (
-			<Route
-				key={page.page}
-				path={`${match.url}${page.page}`}
-				render={() =>
-					<PageTemplate title={page.title}>
-						{this.getFile(page.fileName)}
-					</PageTemplate>
-				}
-			/>
+		return STATIC_ROUTES.map(({ title, path, fileName }) => (
+			<Route key={path} path={path} render={() => <PageTemplate title={title} fileName={fileName} />}	/>
 		));
 	}
 }

@@ -18,12 +18,8 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
+import { addRouting } from '../../helpers/migration';
 
-import { StaticPage } from './staticPage.component';
+import { StaticPage } from './staticPageViewer.component';
 
-const mapStateToProps = createStructuredSelector({});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(StaticPage)));
+export default addRouting(withRouter(StaticPage));

@@ -10,7 +10,7 @@ import ModelSettings from './modelSettings/modelSettings.container';
 import Login from './login/login.container';
 import PasswordForgot from './passwordForgot/passwordForgot.container';
 import PasswordChange from './passwordChange/passwordChange.container';
-import StaticPage from './staticPage/staticPage.container';
+import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 
 // Components
 import Dashboard from './dashboard/dashboard.container';
@@ -25,4 +25,4 @@ angular
 	.component('login', wrap(Login, ['headlineText']))
 	.component('passwordForgot', wrap(PasswordForgot))
 	.component('passwordChange', wrap(PasswordChange))
-	.component('staticPage', wrap(StaticPage));
+	.component('staticPageViewer', wrap(StaticPageViewer));

@@ -23,21 +23,32 @@ import { Container, Content, Header, Logo, Title } from './pageTemplate.styles';
 
 interface IProps {
 	title: string;
-	children: any;
+	fileName: string;
+	isPending: boolean;
+	templates: object;
+	loadTemplate: (fileName) => void;
 }
 
-export const PageTemplate = (props: IProps) => {
+export class PageTemplate extends React.PureComponent<IProps, any> {
+	public async componentDidMount() {
+		this.props.loadTemplate(this.props.fileName);
+	}
 
-	return (
-		<ThemeProvider theme={theme}>
+	public render() {
+		const { templates, fileName } = this.props;
+		console.log('templates', templates);
+		return (
+			<ThemeProvider theme={theme}>
 				<MuiThemeProvider theme={MuiTheme}>
 					<Container>
 						<Header>
-							<Title>{props.title}</Title>
+							<Title>{this.props.title}</Title>
 							<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
 						</Header>
-						<Content dangerouslySetInnerHTML={{ __html: props.children }} />
+						<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
 					</Container>
 				</MuiThemeProvider>
-		</ThemeProvider>);
-};
+			</ThemeProvider>
+		);
+	}
+}
