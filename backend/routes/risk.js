@@ -26,7 +26,8 @@ const Risk = require("../models/risk");
 const utils = require("../utils");
 const config = require("../config.js");
 const moment = require("moment");
-const model = require("./model");
+const ModelSetting = require("../models/modelSetting");
+const User = require('../models/user');
 
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -164,6 +165,17 @@ function renderRisksHTML(req, res, next) {
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
 
+	ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
+		.then(setting => {
+			reportValues.modelName = setting.name;
+		});
+	
+	User.findByUserName(req.session.user.username)
+		.then(username => {
+			reportValues.fullName = username.customData.firstName + ' ' + username.customData.lastName;
+			reportValues.userCompany = username.customData.billing.billingInfo.company;
+		})
+
 	const projection = {
 		extras: 0,
 		"viewpoint.extras": 0,
@@ -202,10 +214,6 @@ function renderRisksHTML(req, res, next) {
 			const currentRevision = risks[i].rev_id;
 			reportValues.currentRevision = currentRevision;
 		}
-
-		// const modelsettings = model.getModelSettings(req)
-		// console.log("MODEL SETTINGS", modelsettings);
-		console.log("MODEL SETTINGS", req);
 
 		res.render("risks.pug", {
 			risks : splitRisks,

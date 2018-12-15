@@ -181,6 +181,7 @@ head
 	header
 		div(class="button-group")
 			button(onclick="printDialog()") Print
+			//- TODO: Risks log will be added on a later release.
 			//- button(onclick="showHide(event)") Hide Log
 			button(onclick="changeImageSize()") Large Pictures
 		img(src="/images/3drepo-logo-white.png" width="120px")
@@ -188,7 +189,7 @@ head
 	.container
 		.top-header
 			h1.titles
-				| Model Name ABCD1 -
+				| Model Name - #{reportValues.modelName}
 				br
 				|  Revision - #{reportValues.currentRevision}
 			h2.titles Risks Report
@@ -202,7 +203,7 @@ head
 				h3 #{risk.number} #{risk.name}
 				.row.screenshot
 					.col.screenshot
-						p.grey #{reportValues.currentUser}
+						p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
 						if risk.viewpoint.screenshotSmall
 						a(href=url(risk.viewpoint.screenshot) target='_blank')
 							img(class="fitImage" src=url(risk.viewpoint.screenshotSmall) style="width:100%; height:400px;")
@@ -249,6 +250,7 @@ head
 					.col.description
 						p Description
 						span #{risk.desc}
+						//- TODO: Risks log will be added on a later release.
 						//- .activityLog
 						//- 	p.grey-header Activity Log
 						//- 	if risk.comments
