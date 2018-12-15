@@ -161,13 +161,15 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		function showHide(e) {
 			const panelToHide = document.querySelectorAll(".activityLog");
-
 			panelToHide.forEach(elem => {
 				elem.classList.toggle('hide');
+				e.srcElement.textContent = elem.classList.contains('hide') ? "SHOW LOG" : "HIDE LOG"
 			})
 		}
 
 		function changeImageSize(e) {
+		
+
 			const imageDiv = document.querySelectorAll(".row.screenshot");
 			const statusList = document.querySelectorAll("span.float-right");
 
@@ -176,8 +178,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			})	
 
 			imageDiv.forEach(elem => {
-				elem.classList.toggle("wrap");				
+				elem.classList.toggle("wrap");		
+				e.srcElement.textContent = elem.classList.contains('wrap') ? "SMALL PICTURES" : "LARGE PICTURES";
 			})
+
 		}
 			
 	head
@@ -185,7 +189,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			div(class="button-group")
 				button(onclick="printDialog()") Print
 				button(onclick="showHide(event)") Hide Log
-				button(onclick="changeImageSize()") Large Pictures
+				button(onclick="changeImageSize(event)") Large Pictures
 			img(src="/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
 
 		.container

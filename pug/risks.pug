@@ -174,7 +174,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 			})	
 
 			imageDiv.forEach(elem => {
-				elem.classList.toggle("wrap");				
+				elem.classList.toggle("wrap");			
+				e.srcElement.textContent = elem.classList.contains('wrap') ? "SMALL PICTURES" : "LARGE PICTURES";
 			})
 		}
 head
@@ -183,7 +184,7 @@ head
 			button(onclick="printDialog()") Print
 			//- TODO: Risks log will be added on a later release.
 			//- button(onclick="showHide(event)") Hide Log
-			button(onclick="changeImageSize()") Large Pictures
+			button(onclick="changeImageSize(event)") Large Pictures
 		img(src="/images/3drepo-logo-white.png" width="120px")
 
 	.container
