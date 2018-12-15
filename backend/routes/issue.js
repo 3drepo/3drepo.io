@@ -31,6 +31,7 @@ const moment = require("moment");
 const User = require("../models/user");
 const Job = require("../models/job");
 const ModelHelper = require("../models/helper/model");
+const ModelSetting = require("../models/modelSetting");
 
 const stringToUUID = utils.stringToUUID;
 
@@ -251,6 +252,17 @@ function renderIssuesHTML(req, res, next) {
 	const currentUser = req.session.user.username;
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
+
+	ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
+		.then(setting => {
+			reportValues.modelName = setting.name;
+		});
+
+	User.findByUserName(req.session.user.username)
+		.then(username => {
+			reportValues.fullName = username.customData.firstName + ' ' + username.customData.lastName;
+			reportValues.userCompany = username.customData.billing.billingInfo.company;
+		})
 
 	const projection = {
 		extras: 0,
