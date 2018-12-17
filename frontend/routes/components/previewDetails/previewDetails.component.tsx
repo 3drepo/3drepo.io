@@ -34,7 +34,7 @@ interface IProps {
 	createdAt: string;
 	statusIcon: {
 		color: string;
-		icon: string;
+		name: string;
 	};
 	renderCollapsableContent: () => void;
 }

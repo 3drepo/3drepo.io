@@ -50,7 +50,7 @@ interface IProps {
 	roleColor: string;
 	statusIcon: {
 		color: string;
-		icon: string;
+		name: string;
 	};
 }
 
