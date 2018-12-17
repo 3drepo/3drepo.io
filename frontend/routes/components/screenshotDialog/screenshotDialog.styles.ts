@@ -17,8 +17,17 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+  width: 80vw;
+  height: 80vh;
+  position: relative;
+`;
 
-export const Canvas = styled.canvas`
+export const Canvas = styled.canvas``;
 
+export const ToolsContainer = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
 `;
