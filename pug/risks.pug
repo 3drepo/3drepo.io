@@ -10,11 +10,13 @@ html(lang="en" ng-app="3drepo").ng-scope
 			}
 
 			@page {
-			size: auto;
-			margin: 0;
+				size: auto;
+				margin: 0;
 			}
 
-
+			hr.break {
+				page-break-after: always;
+			}
 		}
 
 		html, body {
@@ -279,6 +281,7 @@ head
 						//- 				i #{comment.action.from}
 						//- 				| to
 						//- 				i #{comment.action.to}
+				hr.break
 
 
 
