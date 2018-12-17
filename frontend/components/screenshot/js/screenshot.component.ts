@@ -164,7 +164,6 @@ class ScreenshotController implements ng.IController {
 
 				this.currentAction = 'draw';
 			});
-
 		}
 
 	}
