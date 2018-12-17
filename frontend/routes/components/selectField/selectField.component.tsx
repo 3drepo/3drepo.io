@@ -20,7 +20,6 @@ import * as React from 'react';
 import Select from '@material-ui/core/Select';
 import { MuiTheme } from '../../../styles/theme';
 
-
 export class SelectField extends React.PureComponent<any, any> {
 	public menuWrapper;
 	public menuItems;
@@ -45,27 +44,21 @@ export class SelectField extends React.PureComponent<any, any> {
 	}
 
 	public blurItem = (selectedItem) => {
-		if (selectedItem && !event.target.classList.contains('focused')) {
+		if (selectedItem) {
 			selectedItem.style.backgroundColor = '';
 			selectedItem = null;
 		}
 	}
 
 	public handleMouseMove = (event) => {
-		if (this.selectedItem && !event.target.classList.contains('focused')) {
-			this.blurItem(this.selectedItem);
-		}
+		this.blurItem(this.selectedItem);
 	}
 
 	public handleKeyPress = (event) => {
 		clearTimeout(this.searchTimeout);
-		
-		if (this.selectedItem) {
-			this.blurItem(this.selectedItem);
-		}
+		this.blurItem(this.selectedItem);
 
 		const { key: pressedKey } = event;
-
 		if (pressedKey.length === 1) {
 			this.query += pressedKey;
 
