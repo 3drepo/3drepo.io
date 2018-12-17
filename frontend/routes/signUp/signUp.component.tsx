@@ -43,6 +43,7 @@ import {
 	ButtonContainer
 } from './signUp.styles';
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
+import { SelectField } from '../components/selectField/selectField.component';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -263,24 +264,19 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 									)} />
 									<StyledFormControl>
 										<InputLabel>Country *</InputLabel>
-										<Field
-											name="countryCode"
-											render={({ field }) => (
-												<Select
-													{...field}
-													MenuProps={{ PaperProps: {style: PaperPropsStyle}}}
-												>
-													{this.renderCountries()}
-												</Select>
-											)}
-										/>
+										<Field name="countryCode" render={({ field }) => (
+											<SelectField
+												{...field}
+												MenuProps={{ PaperProps: {style: PaperPropsStyle}}}
+											>
+												{this.renderCountries()}
+											</SelectField>
+										)} />
 									</StyledFormControl>
 								</FieldsRow>
 
 								{ clientConfigService.captcha_client_key &&
-									<Field
-										name="captcha"
-										render={({ field }) =>
+									<Field name="captcha" render={({ field }) =>
 											<ReCaptcha
 												{...field}
 												sitekey={clientConfigService.captcha_client_key}
@@ -288,9 +284,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											/>}
 									/>
 								}
-								<Field
-									name="mailListAgreed"
-									render={({ field }) => (
+								<Field name="mailListAgreed" render={({ field }) => (
 										<FormControlLabel
 											{...field}
 											value={field.value ? '1' : '0'}
@@ -299,10 +293,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										/>
 									)}
 								/>
-								<Field
-									name="termsAgreed"
-									required
-									render={({ field }) => (
+								<Field name="termsAgreed" required render={({ field }) => (
 										<FormControlLabel
 											{...field}
 											value={field.value ? '1' : '0'}
