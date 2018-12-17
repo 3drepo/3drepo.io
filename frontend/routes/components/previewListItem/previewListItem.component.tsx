@@ -35,16 +35,18 @@ import {
 	Container,
 	ThumbnailWrapper,
 	Status,
-	ArrowContainer
+	ArrowContainer,
+	StyledArrowIcon
 } from './previewListItem.styles';
 
 interface IProps {
 	itemClick: () => void;
-	handleArrowClick: () => void;
+	onArrowClick: () => void;
 	title: string;
 	description: string;
 	author: string;
-	createdAt: string;
+	createdDate: string;
+	dueDate: string;
 	thumbnail: string;
 	status: string;
 	priority: string;
@@ -63,15 +65,27 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 		this.setState({ active: true });
 	}
 
-	public getStatusIcon = () => {
-		return (<StatusIcon />);
+	public renderArrowContainer = () => {
+		if (this.state.active) {
+			return (
+				<ArrowContainer onClick={this.props.onArrowClick}>
+					<StyledArrowIcon />
+				</ArrowContainer>
+			);
+		}
+		return null;
+	}
+
+	public get isExpiredDate() {
+		const { createdDate, dueDate } = this.props;
+		return createdDate >= dueDate ? 1 : 0;
 	}
 
 	public render() {
-		const { title, description, author, createdAt, thumbnail, status, priority, handleArrowClick } = this.props;
+		const { title, description, author, createdDate, thumbnail } = this.props;
 
 		return (
-			<MenuItemContainer expired={0} onClick={this.handleItemClick}>
+			<MenuItemContainer expired={this.isExpiredDate} onClick={this.handleItemClick}>
 				<Container>
 					<RoleIndicator />
 					<ThumbnailWrapper>
@@ -81,11 +95,11 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 						<Title>{title}</Title>
 						<Details>
 							<Status>
-								{this.getStatusIcon()}
+								<StatusIcon />
 								<Author>{author}</Author>
 							</Status>
 							<Date>
-								<DateTime value={createdAt} format="DD MMM" />
+								<DateTime value={createdDate} format="DD MMM" />
 							</Date>
 						</Details>
 						<Description>
@@ -95,10 +109,7 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 						</Description>
 					</Content>
 				</Container>
-				{ this.state.active &&
-					<ArrowContainer onClick={handleArrowClick}>
-						<ArrowIcon />
-					</ArrowContainer>}
+				{this.renderArrowContainer()}
 			</MenuItemContainer>
 		);
 	}

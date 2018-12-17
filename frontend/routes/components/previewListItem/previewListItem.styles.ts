@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem';
+import ArrowIcon from '@material-ui/icons/ArrowForward';
 
 import { COLOR } from '../../../styles/colors';
 
@@ -30,7 +31,7 @@ export const MenuItemContainer = styled(MenuItem)`
     padding: 7px 40px 7px 7px;
 
     &:hover {
-      background-color: ${COLOR.GRAY};
+      background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
     }
   }
 ` as any;
@@ -45,10 +46,10 @@ export const ArrowContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
 
-  svg {
-    color: ${COLOR.WHITE};
-  }
+export const StyledArrowIcon = styled(ArrowIcon)`
+  color: ${COLOR.WHITE};
 `;
 
 export const Container = styled.div`
