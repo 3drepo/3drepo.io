@@ -16,25 +16,21 @@
  */
 
 import * as React from 'react';
+
+import Typography from '@material-ui/core/Typography';
 import Truncate from 'react-truncate';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 
-import { DateTime } from './../dateTime/dateTime.component';
+import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
 
 import {
 	MenuItemContainer,
 	Thumbnail,
 	Content,
-	Title,
 	Description,
-	Author,
-	Date,
 	RoleIndicator,
-	StatusIcon,
-	Details,
 	Container,
 	ThumbnailWrapper,
-	Status,
 	ArrowContainer,
 	StyledArrowIcon
 } from './previewListItem.styles';
@@ -50,6 +46,12 @@ interface IProps {
 	thumbnail: string;
 	status: string;
 	priority: string;
+	count: number;
+	roleColor: string;
+	statusIcon: {
+		color: string;
+		icon: string;
+	};
 }
 
 interface IState {
@@ -87,21 +89,17 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 		return (
 			<MenuItemContainer expired={this.isExpiredDate} onClick={this.handleItemClick}>
 				<Container>
-					<RoleIndicator />
+					<RoleIndicator color={roleColor} />
 					<ThumbnailWrapper>
 						<Thumbnail src={thumbnail} />
 					</ThumbnailWrapper>
 					<Content>
-						<Title>{title}</Title>
-						<Details>
-							<Status>
-								<StatusIcon />
-								<Author>{author}</Author>
-							</Status>
-							<Date>
-								<DateTime value={createdDate} format="DD MMM" />
-							</Date>
-						</Details>
+						<Typography>{`${count}. ${name}`}</Typography>
+						<PreviewItemInfo
+							author={author}
+							statusIcon={statusIcon}
+							createdAt={createdDate}
+						/>
 						<Description>
 							<Truncate lines={3}>
 								{description}

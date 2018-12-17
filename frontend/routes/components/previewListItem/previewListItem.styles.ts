@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 
@@ -76,36 +75,9 @@ export const Content = styled.div`
   flex: 1;
 `;
 
-export const Status = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-export const Title = styled(Typography)`
-  margin: 0;
-
-  && {
-    line-height: 1;
-  }
-`;
-
 export const Description = styled.div`
   font-size: 12px;
   line-height: 1.25;
-  color: ${COLOR.BLACK_60};
-`;
-
-export const Author = styled(Typography)`
-  margin-right: 6px;
-
-  && {
-    color: ${COLOR.BLACK_60};
-    font-size: 12px;
-  }
-`;
-
-export const Date = styled.span`
-  font-size: 12px;
   color: ${COLOR.BLACK_60};
 `;
 
@@ -115,19 +87,4 @@ export const RoleIndicator = styled.div`
   height: auto;
   margin-right: 7px;
   width: 5px;
-`;
-
-export const StatusIcon = styled.i`
-  display: block;
-  width: 12px;
-  height: 12px;
-  background-color: ${COLOR.PRIMARY_DARK};
-  border-radius: 50%;
-  margin-right: 6px;
-`;
-
-export const Details = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
 `;
