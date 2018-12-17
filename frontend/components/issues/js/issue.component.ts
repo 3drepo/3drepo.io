@@ -26,6 +26,9 @@ import { ChatService } from '../../chat/js/chat.service';
 import { StateManagerService } from '../../home/js/state-manager.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
+import { ScreenshotDialog } from '../../../routes/components/screenshotDialog/screenshotDialog.component';
+import { dispatch } from '../../../helpers/migration';
+import { DialogActions } from '../../../modules/dialog';
 
 class IssueController implements ng.IController {
 
@@ -638,14 +641,31 @@ class IssueController implements ng.IController {
 	 */
 	public showScreenshotDialog(event) {
 		const parentScope = this;
-		this.$mdDialog.show({
+
+		console.log('open draw here');
+
+		const config = {
+			title: 'Screenshot dialog',
+			template: ScreenshotDialog,
+			confirmText: 'Remove',
+			onConfirm: () => {
+				console.log('on save');
+			},
+			data: {
+				initialImage: ''
+			}
+		};
+
+		dispatch(DialogActions.showDialog(config));
+
+/* 		this.$mdDialog.show({
 			controller() {
 				this.issueComponent = parentScope;
 			},
 			controllerAs: 'vm',
 			templateUrl: 'templates/issue-screen-shot-dialog.html',
 			targetEvent: event
-		});
+		}); */
 	}
 
 	/**

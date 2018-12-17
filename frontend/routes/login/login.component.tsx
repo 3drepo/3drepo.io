@@ -29,6 +29,9 @@ import { Logo } from '../components/logo/logo.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
 import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 import { Footer } from './components/footer';
+import { dispatch } from '../../helpers/migration';
+import { DialogActions } from '../../modules/dialog';
+import { ScreenshotDialog } from '../components/screenshotDialog/screenshotDialog.component';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,
@@ -67,6 +70,22 @@ export class Login extends React.PureComponent<IProps, IState> {
 		login: '',
 		password: ''
 	};
+
+	public componentDidMount() {
+		const config = {
+			title: 'Screenshot dialog',
+			template: ScreenshotDialog,
+			confirmText: 'Remove',
+			onConfirm: () => {
+				console.log('on save');
+			},
+			data: {
+				initialImage: ''
+			}
+		};
+
+		dispatch(DialogActions.showDialog(config));
+	}
 
 	public componentDidUpdate({isAuthenticated}) {
 		if (this.props.isAuthenticated && !isAuthenticated) {
