@@ -16,12 +16,9 @@
  */
 
 import * as React from 'react';
-import CanvasDraw from 'react-canvas-draw';
-import { LazyBrush } from 'lazy-brush';
-import { Catenary } from 'catenary-curve';
 
-import { Container, Canvas } from './screenshotDialog.styles';
 import Button from '@material-ui/core/Button';
+import { Container, Canvas, ToolsContainer } from './screenshotDialog.styles';
 
 interface IProps {
 	image: string;
@@ -31,21 +28,16 @@ interface IProps {
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: '#00ff00',
-		isErase: false,
 		brushSize: 5
 	};
 
 	public isDrawing;
 
-	public canvasRef = React.createRef();
-	public brushRef = React.createRef();
-
-	public innerWidth;
-	public innerHeight;
+	public canvasRef = React.createRef<any>();
+	public brushRef = React.createRef<any>();
 
 	public prevMousePosition = { x: 0, y: 0 };
 	public currMousePosition = { x: 0, y: 0 };
-	public canvasOffset = { x: 0, y: 0 };
 
 	get canvas() {
 		return this.canvasRef.current as any;
@@ -59,18 +51,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return this.brushRef.current;
 	}
 
-	public handleErase = () => {
-		this.setState({
-			isErase: true
-		});
+	public setBrushMode = () => {
+		this.canvasContext.globalCompositeOperation = 'source-over';
+		this.canvasContext.strokeStyle = this.state.color;
+		this.canvasContext.lineWidth = this.state.brushSize;
 	}
 
-	public setSize() {
-		this.innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		this.innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-
-		this.canvas.width = (this.innerWidth * 80) / 100;
-		this.canvas.height = (this.innerHeight * 80) / 100;
+	public setEraseMode = () => {
+		this.canvasContext.globalCompositeOperation = 'destination-out';
+		this.canvasContext.lineWidth = this.state.brushSize;
 	}
 
 	public setSmoothing(context) {
@@ -87,63 +76,56 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		};
 	}
 
-	public handleMouseDown = (e) => {
-		const { x, y } = this.getPointerPosition(e.nativeEvent);
+	public handleMouseDown = (event) => {
+		const { x, y } = this.getPointerPosition(event.nativeEvent);
 		this.prevMousePosition.x = this.currMousePosition.x = x;
 		this.prevMousePosition.y = this.currMousePosition.y = y;
 		this.isDrawing = true;
 	}
 
-	public handleMouseUp = (e) => {
+	public handleMouseUp = () => {
 		this.isDrawing = false;
 	}
 
-	public handleMouseMove = (e) => {
-		this.currMousePosition = this.getPointerPosition(e.nativeEvent);
+	public drawLine = (context, startPosition, endPosition) => {
+		context.beginPath();
+		context.moveTo(startPosition.x, startPosition.y);
+		context.lineTo(endPosition.x, endPosition.y);
+		context.lineJoin = context.lineCap = 'round';
+		context.stroke();
+	}
+
+	public handleMouseMove = (event) => {
+		this.currMousePosition = this.getPointerPosition(event.nativeEvent);
 
 		if (this.isDrawing) {
-				this.canvasContext.beginPath();
-				if (!this.state.isErase) {
-						this.canvasContext.globalCompositeOperation = 'source-over';
-						this.canvasContext.strokeStyle = 'black';
-						this.canvasContext.lineWidth = 3;
-				} else {
-						this.canvasContext.globalCompositeOperation = 'destination-out';
-						this.canvasContext.lineWidth = 10;
-				}
-				this.canvasContext.moveTo(this.prevMousePosition.x, this.prevMousePosition.y);
-				this.canvasContext.lineTo(this.currMousePosition.x, this.currMousePosition.y);
-				this.canvasContext.lineJoin = this.canvasContext.lineCap = 'round';
-				this.canvasContext.stroke();
+			this.drawLine(this.canvasContext, this.prevMousePosition, this.currMousePosition);
 		}
+
 		this.prevMousePosition.x = this.currMousePosition.x;
 		this.prevMousePosition.y = this.currMousePosition.y;
 	}
 
 	public componentDidMount() {
 		this.setSmoothing(this.canvasContext);
-		//sthis.setSize();
-		this.canvasOffset.x = this.canvas.offsetLeft;
-		this.canvasOffset.y = this.canvas.offsetTop;
+		this.setBrushMode();
 	}
 
 	public render() {
 		return (
 			<Container>
-				<Button>Pencil</Button>
-				<Button onClick={this.handleErase}>Erase</Button>
-				<div ref={this.brushRef}>test</div>
+				<ToolsContainer>
+					<Button onClick={this.setBrushMode}>Pencil</Button>
+					<Button onClick={this.setEraseMode}>Erase</Button>
+				</ToolsContainer>
 				<Canvas
-					width={600}
-					height={600}
-
+					width={window.innerWidth * 0.8}
+					height={window.innerHeight * 0.8}
 					innerRef={this.canvasRef}
 					onMouseDown={this.handleMouseDown}
 					onTouchStart={this.handleMouseDown}
-
 					onMouseUp={this.handleMouseUp}
 					onTouchEnd={this.handleMouseUp}
-
 					onMouseMove={this.handleMouseMove}
 					onTouchMove={this.handleMouseMove}
 				/>
