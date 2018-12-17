@@ -36,6 +36,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		table {
 			border-collapse: separate;
 			border-spacing: 10px;
+			width:100%;
 		}
 
 		.bold {
@@ -104,6 +105,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		.float-right {
 			float:right;
+		}
+
+		span.float-right {
+			font-weight:400;
+			padding-right:20px;
 		}
 
 		.float-none {
@@ -182,6 +188,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 				e.srcElement.textContent = elem.classList.contains('wrap') ? "SMALL PICTURES" : "LARGE PICTURES";
 			})
 
+
+
 		}
 			
 	head
@@ -209,35 +217,35 @@ html(lang="en" ng-app="3drepo").ng-scope
 				// TODO: Time stamps - What is going on here?!
 				each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 					h3 #{issue.number} #{issue.name}
+					p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
+						span.right.grey.float-right #{reportValues.issueDate}
 					.row.screenshot
 						.col.screenshot
-							p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
 							if issue.viewpoint.screenshotSmall 
 							a(href=url(issue.viewpoint.screenshot) target='_blank')
 								img(class="fitImage" src=url(issue.viewpoint.screenshot) style="width:100%; height:400px;")
 						.col
-							p.right.grey #{reportValues.issueDate}
-							table.details
-								tr
+								table.details
+									tr
 									td
-									p
-										strong Assigned:
-										span.float-right #{issue.assigned_roles.join(", ")}
-								tr
+										strong 
+											| Assigned:
+											span.float-right #{issue.assigned_roles.join(", ")}
+									tr
 									td
-									p
-										strong Priority:
-										span.float-right  #{issue.priority}
-								tr
+										strong 
+											| Priority:
+											span.float-right  #{issue.priority}
+									tr
 									td
-									p
-										strong Status:
-										span.float-right  #{issue.status}
-								tr
+										strong 
+											| Status:
+											span.float-right  #{issue.status}
+									tr
 									td
-									p
-										strong Type:
-										span.float-right #{issue.topic_type}
+										strong 
+											| Type:
+											span.float-right #{issue.topic_type}
 
 					.row
 						.col.description

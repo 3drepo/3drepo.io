@@ -13,6 +13,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 			size: auto;
 			margin: 0;
 			}
+
+
 		}
 
 		html, body {
@@ -35,6 +37,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 		table {
 			border-collapse: separate;
 			border-spacing: 10px;
+			width:100%;
+		}
+
+		.clear {
+			clear:both;
 		}
 
 		.bold {
@@ -103,6 +110,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		.float-right {
 			float:right;
+		}
+
+		span.float-right {
+			font-weight:400;
+			padding-left:20px;
 		}
 
 		.float-none {
@@ -202,50 +214,51 @@ head
 				h2 Closed Risks
 			each risk in risksByStatus.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 				h3 #{risk.number} #{risk.name}
+				p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany}) 
+						span.right-grey.float-right #{risk.created}
 				.row.screenshot
 					.col.screenshot
-						p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
 						if risk.viewpoint.screenshotSmall
 						a(href=url(risk.viewpoint.screenshot) target='_blank')
-							img(class="fitImage" src=url(risk.viewpoint.screenshotSmall) style="width:100%; height:400px;")
+							img(class="fitImage" src=url(risk.viewpoint.screenshot))
 					.col
-						p.right.grey #{risk.created}
 							table.details
 								tr
-									td
-									p
-										strong Risk Owner
+								td
+									strong
+										| Risk Owner
 										span.float-right #{risk.owner}
 								tr
-									td
-									p
-										strong Risk Likelihood
+								td
+									strong
+										| Risk Likelihood
 										span.float-right #{risk.likelihood}
 								tr
-									td
-									p
-										strong Risk Consequence
+								td
+									strong
+										| Risk Consequence
 										span.float-right #{risk.consequence}
 								tr
-									td
-									p
-										strong Risk Level
+								td
+									strong
+										| Risk Level
 										span.float-right #{risk.level_of_risk}
 								tr
-									td
-									p
-										strong Mitigation Status
+								td
+									strong
+										| Mitigation Status
 										span.float-right #{risk.mitigation_status}
 								tr
-									td
-									p
-										strong Category
+								td
+									strong
+										| Category
 										span.float-right #{risk.category}
 								tr
-									td
-									p
-										strong Associated Activity
+								td
+									strong
+										| Associated Activity
 										span.float-right #{risk.associated_activity}
+
 
 				.row
 					.col.description
