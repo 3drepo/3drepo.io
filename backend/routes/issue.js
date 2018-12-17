@@ -243,7 +243,6 @@ function renderIssuesHTML(req, res, next) {
 	let findIssue;
 	const noClean = false;
 
-
 	/**
 	* Create dynamic Print report values to use in template.
 	**/
