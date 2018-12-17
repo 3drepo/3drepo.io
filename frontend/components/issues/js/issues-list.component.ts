@@ -106,8 +106,17 @@ class IssuesListController implements ng.IController {
 			const oldDateToChip = oldChips.find((c) => c.type === 'date_to');
 
 			if (this.$state.params.notificationId && chips.length === 0) {
-				const queryWithoutNotification = location.search.replace(`notificationId=${this.$state.params.notificationId}`, '');
-				history.push(`${location.pathname}${queryWithoutNotification}`);
+				this.$state.go('app.viewer',
+					{
+						account: this.account,
+						model: this.model,
+						revision: this.revision,
+						issueId: null,
+						notificationId: null,
+						noSet: true
+					},
+					{ notify: false }
+				);
 			}
 
 			if (!!dateFromChip && !!dateToChip) {

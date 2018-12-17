@@ -114,7 +114,7 @@ historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
 historySchema.statics.findByTag = function(dbColOptions, tag, projection) {
 
 	projection = projection || {};
-	return History.findOne(dbColOptions, { tag }, projection);
+	return History.findOne(dbColOptions, { tag, incomplete: {"$exists": false }}, projection);
 
 };
 

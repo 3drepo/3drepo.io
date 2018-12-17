@@ -258,7 +258,7 @@ function createNewModel(teamspace, modelName, data) {
 						timestamp: undefined
 					};
 
-					ChatEvent.newModel(data.sessionId, teamspace, modelData);
+					// ChatEvent.newModel(data.sessionId, teamspace, modelData);
 					return {modelData, settings};
 				});
 			});
