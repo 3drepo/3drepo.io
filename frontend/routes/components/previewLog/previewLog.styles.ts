@@ -35,7 +35,7 @@ export const UserMessage = styled.span`
 
 export const SystemMessage = styled.span`
   color: ${COLOR.BLACK_60};
-  padding: 4px;
+  padding: 4px 0;
   display: inline-block;
   font-size: 12px;
 `;

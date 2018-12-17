@@ -35,9 +35,11 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 		return null;
 	}
 
-	public renderMessage = (action, comment) => {
+	public renderMessage = (action, comment, created) => {
 		if (action) {
-			return <SystemMessage>{action.text}</SystemMessage>;
+			return (
+				<SystemMessage>{action.text} at <DateTime value={created} format="HH:mm DD MMM" /></SystemMessage>
+			);
 		}
 		if (comment) {
 			return <UserMessage>{comment}</UserMessage>;
@@ -45,17 +47,25 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 		return null;
 	}
 
+	public renderInfo = (action, owner, created) => {
+		if (!action) {
+			return (
+			<Info>
+				<Author>{owner}</Author>
+				<DateTime value={created} format="HH:mm DD MMM" />
+			</Info>);
+		}
+		return null;
+	}
+
 	public render() {
 		const { action, comment, created, viewpoint, owner } = this.props;
-		console.log('this.props', this.props);
+
 		return (
 			<Container>
-				{this.renderMessage(action, comment)}
+				{this.renderMessage(action, comment, created)}
 				{this.renderScreenshot(viewpoint)}
-				<Info>
-					<Author>{owner}</Author>
-					<DateTime value={created} format="HH:mm DD MMM" />
-				</Info>
+				{this.renderInfo(action, owner, created)}
 			</Container>
 		);
 	}
