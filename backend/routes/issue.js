@@ -242,7 +242,11 @@ function renderIssuesHTML(req, res, next) {
 	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let findIssue;
 	const noClean = false;
-	/* Create dynamic Print report values to use in template */ 
+
+
+	/**
+	* Create dynamic Print report values to use in template.
+	**/
 	const reportValues = {};
 	const reportDate = moment().format("Do MMMM YYYY");
 	const currentUser = req.session.user.username;
