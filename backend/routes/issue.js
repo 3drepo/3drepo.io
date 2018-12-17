@@ -247,6 +247,7 @@ function renderIssuesHTML(req, res, next) {
 	/**
 	 * Create dynamic Print report values to use in template.
 	 **/ 
+
 	const reportValues = {};
 	const reportDate = moment().format("Do MMMM YYYY");
 	const currentUser = req.session.user.username;
@@ -260,7 +261,7 @@ function renderIssuesHTML(req, res, next) {
 
 	User.findByUserName(req.session.user.username)
 		.then(username => {
-			reportValues.fullName = username.customData.firstName + ' ' + username.customData.lastName;
+			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
 			reportValues.userCompany = username.customData.billing.billingInfo.company;
 		})
 
@@ -295,12 +296,12 @@ function renderIssuesHTML(req, res, next) {
 					issues[i].comments[j].created = moment(issues[i].comments[j].created).format("hh:mm, Do MMM YYYY");
 				}
 			}
-			
+
 			const issueDate = moment(issues[i].created).format("Do MMM YYYY");
 			const currentRevision = issues[i].rev_id;
 
 			reportValues.issueDate = issueDate;
-			reportValues.currentRevision = currentRevision
+			reportValues.currentRevision = currentRevision;
 
 			if(issues[i].closed || issues[i].status === "closed") {
 				issues[i].created = new Date(issues[i].created).toString();

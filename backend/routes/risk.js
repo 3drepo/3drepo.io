@@ -172,9 +172,9 @@ function renderRisksHTML(req, res, next) {
 	
 	User.findByUserName(req.session.user.username)
 		.then(username => {
-			reportValues.fullName = username.customData.firstName + ' ' + username.customData.lastName;
+			reportValues.fullName = username.customData.firstName + "" + username.customData.lastName;
 			reportValues.userCompany = username.customData.billing.billingInfo.company;
-		})
+		});
 
 	const projection = {
 		extras: 0,
