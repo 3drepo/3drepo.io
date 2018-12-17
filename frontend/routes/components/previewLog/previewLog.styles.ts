@@ -16,9 +16,51 @@
  */
 
 import styled from 'styled-components';
+import { Typography } from '@material-ui/core';
 
 import { COLOR } from '../../../styles/colors';
 
 export const Container = styled.div`
+  background-color: ${COLOR.WHITE_87};
+  padding: 20px 0;
+`;
+
+export const UserMessage = styled.span`
   background-color: ${COLOR.WHITE};
+  padding: 4px;
+  box-shadow: 0px 2px 5px ${COLOR.BLACK_6};
+  display: inline-block;
+  font-size: 12px;
+`;
+
+export const SystemMessage = styled.span`
+  color: ${COLOR.BLACK_60};
+  padding: 4px;
+  display: inline-block;
+  font-size: 12px;
+`;
+
+export const Screenshot = styled.img`
+  display: block;
+  max-width: 100%;
+  height: 180px;
+  width: 100%;
+  object-fit: cover;
+  margin: 8px 0;
+`;
+
+export const Info = styled.div`
+  color: ${COLOR.BLACK_40};
+  display: flex;
+  font-size: 11px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+`;
+
+export const Author = styled(Typography)`
+  && {
+    color: ${COLOR.BLACK_40};
+    font-size: 11px;
+  }
 `;

@@ -17,18 +17,45 @@
 
 import * as React from 'react';
 
-import { Container } from './previewLog.styles';
-
+import { Author, Container, UserMessage, SystemMessage, Info, Screenshot } from './previewLog.styles';
+import { DateTime } from './../dateTime/dateTime.component';
 interface IProps {
-	noop: string; // TODO: Remove sample
+	comment: string;
+	viewpoint: any;
+	created: number;
+	owner: string;
+	action: any;
 }
 
 export class PreviewLog extends React.PureComponent<IProps, any> {
+	public renderScreenshot = (viewpoint) => {
+		if (viewpoint && viewpoint.screenshotPath) {
+			return <Screenshot src={viewpoint.screenshotPath} />;
+		}
+		return null;
+	}
+
+	public renderMessage = (action, comment) => {
+		if (action) {
+			return <SystemMessage>{action.text}</SystemMessage>;
+		}
+		if (comment) {
+			return <UserMessage>{comment}</UserMessage>;
+		}
+		return null;
+	}
 
 	public render() {
+		const { action, comment, created, viewpoint, owner } = this.props;
+		console.log('this.props', this.props);
 		return (
 			<Container>
-				PreviewLog component
+				{this.renderMessage(action, comment)}
+				{this.renderScreenshot(viewpoint)}
+				<Info>
+					<Author>{owner}</Author>
+					<DateTime value={created} format="HH:mm DD MMM" />
+				</Info>
 			</Container>
 		);
 	}
