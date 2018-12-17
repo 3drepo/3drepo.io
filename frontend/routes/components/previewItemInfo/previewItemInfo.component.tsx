@@ -18,26 +18,24 @@
 import * as React from 'react';
 import { DateTime } from './../dateTime/dateTime.component';
 
-import { Author, Date, StatusIcon, Details, Container, Status } from './previewItemInfo.styles';
+import { Author, Date, Details, Container, Status } from './previewItemInfo.styles';
 
 interface IProps {
 	author: string;
-	statusIcon: {
-		name: string,
-		color: string
-	};
 	createdAt: string;
+	StatusIconComponent: any;
+	statusColor: string;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 	public render() {
-		const { author, createdAt, statusIcon } = this.props;
+		const { author, createdAt, statusColor, StatusIconComponent } = this.props;
 
 		return (
 			<Container>
 				<Details>
-					<Status>
-						<StatusIcon iconcolor={statusIcon.color} size="small">{statusIcon.name}</StatusIcon>
+					<Status color={statusColor}>
+						<StatusIconComponent color="inherit" fontSize="small" />
 						<Author>{author}</Author>
 					</Status>
 					<Date>

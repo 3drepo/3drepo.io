@@ -21,9 +21,7 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
-import {
-	Container, Collapsable, Details, Summary, MoreIcon, NotCollapsable, CollapsableContent
-} from './previewDetails.styles';
+import { Container, Collapsable, Details, Summary, MoreIcon, CollapsableContent } from './previewDetails.styles';
 import { RoleIndicator } from './../previewListItem/previewListItem.styles';
 
 interface IProps {
@@ -32,16 +30,13 @@ interface IProps {
 	count: number;
 	author: string;
 	createdAt: string;
-	statusIcon: {
-		color: string;
-		name: string;
-	};
-	renderCollapsableContent: () => void;
+	StatusIconComponent: any;
+	statusColor: string;
 }
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public render() {
-		const { roleColor, name, count, author, createdAt, statusIcon, children, renderCollapsableContent } = this.props;
+		const { roleColor, name, count, author, createdAt, children, StatusIconComponent, statusColor } = this.props;
 
 		return (
 			<Container>
@@ -51,17 +46,17 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						<Typography>{`${count}. ${name}`}</Typography>
 					</Summary>
 					<Details>
-						<PreviewItemInfo author={author} statusIcon={statusIcon} createdAt={createdAt} />
+						<PreviewItemInfo
+							author={author}
+							createdAt={createdAt}
+							StatusIconComponent={StatusIconComponent}
+							statusColor={statusColor}
+						/>
 						<CollapsableContent>
-							{renderCollapsableContent()}
+							{children}
 						</CollapsableContent>
 					</Details>
 				</Collapsable>
-				{children &&
-					<NotCollapsable>
-						{children}
-					</NotCollapsable>
-				}
 			</Container>
 		);
 	}

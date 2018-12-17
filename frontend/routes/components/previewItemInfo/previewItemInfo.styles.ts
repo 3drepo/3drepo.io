@@ -29,6 +29,7 @@ export const Container = styled.div`
 export const Status = styled.div`
   display: flex;
   align-items: center;
+  color: ${(props) => props.color || COLOR.WHITE};
 `;
 
 export const Name = styled(Typography)`
@@ -41,6 +42,7 @@ export const Name = styled(Typography)`
 
 export const Author = styled(Typography)`
   margin-right: 6px;
+
   && {
     color: ${COLOR.BLACK_60};
     font-size: 12px;
@@ -53,7 +55,6 @@ export const Date = styled.span`
 `;
 
 export const StatusIcon = styled(Icon)`
-  color: ${(props: any) => props.iconcolor || COLOR.BLACK};
   margin-right: 4px;
 
   && {

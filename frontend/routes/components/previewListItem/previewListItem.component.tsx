@@ -38,7 +38,7 @@ import {
 interface IProps {
 	itemClick: () => void;
 	onArrowClick: () => void;
-	title: string;
+	name: string;
 	description: string;
 	author: string;
 	createdDate: string;
@@ -48,10 +48,8 @@ interface IProps {
 	priority: string;
 	count: number;
 	roleColor: string;
-	statusIcon: {
-		color: string;
-		name: string;
-	};
+	StatusIconComponent: any;
+	statusColor: string;
 }
 
 interface IState {
@@ -84,7 +82,17 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { title, description, author, createdDate, thumbnail } = this.props;
+		const {
+			name,
+			roleColor,
+			count,
+			description,
+			author,
+			createdDate,
+			thumbnail,
+			StatusIconComponent,
+			statusColor
+		} = this.props;
 
 		return (
 			<MenuItemContainer expired={this.isExpiredDate} onClick={this.handleItemClick}>
@@ -97,7 +105,8 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 						<Typography>{`${count}. ${name}`}</Typography>
 						<PreviewItemInfo
 							author={author}
-							statusIcon={statusIcon}
+							StatusIconComponent={StatusIconComponent}
+							statusColor={statusColor}
 							createdAt={createdDate}
 						/>
 						<Description>

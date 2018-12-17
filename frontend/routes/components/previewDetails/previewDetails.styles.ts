@@ -55,10 +55,4 @@ export const MoreIcon = styled.div`
 
 export const CollapsableContent = styled.div`
   margin: 16px 0;
-` as any;
-
-export const NotCollapsable = styled.div`
-  background-color: ${COLOR.BLACK_6};
-  border-top: 2px solid ${COLOR.BLACK_20};
-  padding: 8px;
 `;
