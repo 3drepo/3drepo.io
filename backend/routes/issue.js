@@ -27,7 +27,6 @@ const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
 const moment = require("moment");
-
 const User = require("../models/user");
 const Job = require("../models/job");
 const ModelHelper = require("../models/helper/model");
@@ -243,11 +242,9 @@ function renderIssuesHTML(req, res, next) {
 	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	let findIssue;
 	const noClean = false;
-
 	/**
 	 * Create dynamic Print report values to use in template.
 	 **/ 
-
 	const reportValues = {};
 	const reportDate = moment().format("Do MMMM YYYY");
 	const currentUser = req.session.user.username;
@@ -263,7 +260,7 @@ function renderIssuesHTML(req, res, next) {
 		.then(username => {
 			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
 			reportValues.userCompany = username.customData.billing.billingInfo.company;
-		})
+		});
 
 	const projection = {
 		extras: 0,
@@ -311,7 +308,6 @@ function renderIssuesHTML(req, res, next) {
 				splitIssues.open.push(issues[i]);
 			}
 		}
-
 
 		res.render("issues.pug", {
 			issues : splitIssues,

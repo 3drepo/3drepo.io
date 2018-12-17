@@ -27,7 +27,7 @@ const utils = require("../utils");
 const config = require("../config.js");
 const moment = require("moment");
 const ModelSetting = require("../models/modelSetting");
-const User = require('../models/user');
+const User = require("../models/user");
 
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -169,10 +169,9 @@ function renderRisksHTML(req, res, next) {
 		.then(setting => {
 			reportValues.modelName = setting.name;
 		});
-	
 	User.findByUserName(req.session.user.username)
 		.then(username => {
-			reportValues.fullName = username.customData.firstName + "" + username.customData.lastName;
+			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
 			reportValues.userCompany = username.customData.billing.billingInfo.company;
 		});
 
