@@ -23,7 +23,7 @@ import { Author, Date, StatusIcon, Details, Container, Status } from './previewI
 interface IProps {
 	author: string;
 	statusIcon: {
-		icon: string,
+		name: string,
 		color: string
 	};
 	createdAt: string;
@@ -37,7 +37,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 			<Container>
 				<Details>
 					<Status>
-						<StatusIcon iconcolor={statusIcon.color} size="small">{statusIcon.icon}</StatusIcon>
+						<StatusIcon iconcolor={statusIcon.color} size="small">{statusIcon.name}</StatusIcon>
 						<Author>{author}</Author>
 					</Status>
 					<Date>
