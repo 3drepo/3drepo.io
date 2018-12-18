@@ -22,12 +22,13 @@ import { COLOR } from '../../../styles/colors';
 
 export const Container = styled.div`
   background-color: ${COLOR.WHITE_87};
-  padding: 20px 0;
+  padding: 10px;
 `;
 
 export const UserMessage = styled.span`
   background-color: ${COLOR.WHITE};
-  padding: 4px;
+  color: ${COLOR};
+  padding: 6px;
   box-shadow: 0px 2px 5px ${COLOR.BLACK_6};
   display: inline-block;
   font-size: 12px;
@@ -40,14 +41,24 @@ export const SystemMessage = styled.span`
   font-size: 12px;
 `;
 
+export const ScreenshotMessage = styled.span`
+  background-color: ${COLOR.WHITE};
+  padding: 6px;
+  box-shadow: 0px 2px 5px ${COLOR.BLACK_6};
+  display: block;
+  font-size: 12px;
+  border-radius: 0 0 2px 2px;
+`;
+
 export const Screenshot = styled.img`
   display: block;
   max-width: 100%;
   height: 180px;
   width: 100%;
   object-fit: cover;
-  margin: 8px 0;
-`;
+  margin: 8px 0 0;
+  border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
+` as any;
 
 export const Info = styled.div`
   color: ${COLOR.BLACK_40};

@@ -17,7 +17,9 @@
 
 import * as React from 'react';
 
-import { Author, Container, UserMessage, SystemMessage, Info, Screenshot } from './previewLog.styles';
+import {
+	Author, Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage
+} from './previewLog.styles';
 import { DateTime } from './../dateTime/dateTime.component';
 interface IProps {
 	comment: string;
@@ -28,11 +30,13 @@ interface IProps {
 }
 
 export class PreviewLog extends React.PureComponent<IProps, any> {
-	public renderScreenshot = (viewpoint) => {
-		if (viewpoint && viewpoint.screenshotPath) {
-			return <Screenshot src={viewpoint.screenshotPath} />;
-		}
-		return null;
+	public renderScreenshot = (viewpoint, comment) => {
+		return (
+			<>
+				<Screenshot src={viewpoint.screenshotPath} withMessage={!!comment} />
+				{comment && <ScreenshotMessage>{comment}</ScreenshotMessage>}
+			</>
+		);
 	}
 
 	public renderMessage = (action, comment, created) => {
@@ -50,10 +54,11 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 	public renderInfo = (action, owner, created) => {
 		if (!action) {
 			return (
-			<Info>
-				<Author>{owner}</Author>
-				<DateTime value={created} format="HH:mm DD MMM" />
-			</Info>);
+				<Info>
+					<Author>{owner}</Author>
+					<DateTime value={created} format="HH:mm DD MMM" />
+				</Info>
+			);
 		}
 		return null;
 	}
@@ -63,8 +68,11 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container>
-				{this.renderMessage(action, comment, created)}
-				{this.renderScreenshot(viewpoint)}
+				{
+					viewpoint && viewpoint.screenshotPath
+					? this.renderScreenshot(viewpoint, comment)
+					: this.renderMessage(action, comment, created)
+				}
 				{this.renderInfo(action, owner, created)}
 			</Container>
 		);
