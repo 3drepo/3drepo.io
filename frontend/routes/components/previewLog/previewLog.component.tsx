@@ -16,17 +16,21 @@
  */
 
 import * as React from 'react';
+import Tooltip from '@material-ui/core/Tooltip';
+import { DateTime } from './../dateTime/dateTime.component';
 
 import {
 	Author, Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage
 } from './previewLog.styles';
-import { DateTime } from './../dateTime/dateTime.component';
+
 interface IProps {
 	comment: string;
 	viewpoint: any;
 	created: number;
 	owner: string;
 	action: any;
+	companyName: string;
+	userName: string;
 }
 
 export class PreviewLog extends React.PureComponent<IProps, any> {
@@ -51,11 +55,17 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 		return null;
 	}
 
-	public renderInfo = (action, owner, created) => {
+	public renderInfo = (action, owner, created, companyName, userName) => {
 		if (!action) {
 			return (
 				<Info>
-					<Author>{owner}</Author>
+					{
+						userName && companyName
+						? <Tooltip title={`${userName} (${companyName})`}>
+								<Author>{owner}</Author>
+							</Tooltip>
+						: <Author>{owner}</Author>
+					}
 					<DateTime value={created} format="HH:mm DD MMM" />
 				</Info>
 			);
@@ -64,7 +74,7 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { action, comment, created, viewpoint, owner } = this.props;
+		const { action, comment, created, viewpoint, owner, companyName, userName } = this.props;
 
 		return (
 			<Container>
@@ -73,7 +83,7 @@ export class PreviewLog extends React.PureComponent<IProps, any> {
 					? this.renderScreenshot(viewpoint, comment)
 					: this.renderMessage(action, comment, created)
 				}
-				{this.renderInfo(action, owner, created)}
+				{this.renderInfo(action, owner, created, companyName, userName)}
 			</Container>
 		);
 	}
