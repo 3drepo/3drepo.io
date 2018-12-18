@@ -22,7 +22,6 @@ import { StyledIndicator } from './indicator.styles';
 
 interface IProps {
 	color?: string;
-	container?: HTMLElement;
 	size: number;
 }
 
@@ -43,15 +42,13 @@ export class Indicator extends React.PureComponent <IProps, any> {
 	}
 
 	public render() {
-		const { container, ...props} = this.props;
-
 		return (
 			<>
 				<EventListener
 					target="window"
 					onMouseMove={this.handleMouseMove}
 				/>
-				<StyledIndicator {...props} innerRef={this.indicatorRef} />
+				<StyledIndicator {...this.props} innerRef={this.indicatorRef} />
 			</>
 		);
 	}
