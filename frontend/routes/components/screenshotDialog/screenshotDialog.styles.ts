@@ -37,6 +37,11 @@ export const Container = styled.div`
   }
 `;
 
+export const HiddenCanvas = styled.canvas`
+  position: absolute;
+  z-index: -1;
+`;
+
 export const Canvas = styled.canvas`
   position: absolute;
   z-index: 2;
@@ -84,4 +89,5 @@ export const BackgroundImage = styled.img`
   position: absolute;
   bottom: 0;
   top: 0;
+  user-select: none;
 `;

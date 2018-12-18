@@ -76,8 +76,8 @@ export class Login extends React.PureComponent<IProps, IState> {
 			title: 'Screenshot dialog',
 			template: ScreenshotDialog,
 			confirmText: 'Remove',
-			onConfirm: () => {
-				console.log('on save');
+			onConfirm: (screenshot) => {
+				console.log('on save', screenshot);
 			},
 			data: {
 				initialImage: ''
