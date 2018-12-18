@@ -30,4 +30,6 @@ export const ToolsContainer = styled.div`
   bottom: 0;
   left: 50%;
   transform: translate(-50%, 0);
+  display: flex;
+  align-items: center;
 `;

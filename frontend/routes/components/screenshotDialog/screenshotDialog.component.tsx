@@ -19,6 +19,7 @@ import * as React from 'react';
 
 import Button from '@material-ui/core/Button';
 import { Container, Canvas, ToolsContainer } from './screenshotDialog.styles';
+import { ColorPicker } from '../colorPicker/colorPicker.component';
 
 interface IProps {
 	image: string;
@@ -69,12 +70,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		context.imageSmoothingEnabled = false;
 	}
 
-	public getPointerPosition = (event) => {
-		return {
-			x: event.offsetX,
-			y: event.offsetY
-		};
-	}
+	public getPointerPosition = (event) => ({
+		x: event.offsetX,
+		y: event.offsetY
+	})
 
 	public handleMouseDown = (event) => {
 		const { x, y } = this.getPointerPosition(event.nativeEvent);
@@ -106,6 +105,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.prevMousePosition.y = this.currMousePosition.y;
 	}
 
+	public handleColorChange = (color) => {
+		this.setState({color}, this.setBrushMode);
+	}
+
 	public componentDidMount() {
 		this.setSmoothing(this.canvasContext);
 		this.setBrushMode();
@@ -115,6 +118,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<ToolsContainer>
+					<ColorPicker onChange={this.handleColorChange} />
 					<Button onClick={this.setBrushMode}>Pencil</Button>
 					<Button onClick={this.setEraseMode}>Erase</Button>
 				</ToolsContainer>
