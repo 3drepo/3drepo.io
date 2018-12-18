@@ -17,6 +17,8 @@
 
 import * as React from 'react';
 import { range } from 'lodash';
+import EventListener from 'react-event-listener';
+
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
@@ -36,6 +38,8 @@ import { ColorPicker } from '../colorPicker/colorPicker.component';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Indicator } from './components/indicator/indicator.component';
+import { loadImage } from '../../../helpers/images';
+import { getPointerPosition } from '../../../helpers/events';
 
 interface IProps {
 	image: string;
@@ -91,6 +95,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return this.toolsRef.current;
 	}
 
+	public setCanvasSize = () => {
+		const width = this.containerElement.offsetWidth;
+		const height = this.containerElement.offsetHeight;
+		this.canvas.width = width;
+		this.canvas.height = height;
+		this.canvas.style.width = width;
+		this.canvas.style.height = height;
+	}
+
 	public setBrushMode = () => {
 		this.canvasContext.globalCompositeOperation = 'source-over';
 		this.canvasContext.strokeStyle = this.state.color;
@@ -103,7 +116,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.canvasContext.globalCompositeOperation = 'destination-out';
 		this.canvasContext.lineWidth = this.state.brushSize;
 
-		this.setState({ activeTool: TOOL_TYPES.ERASER });
+		this.setState({ activeTool: TOOL_TYPES.ERASER, color: COLOR.WHITE });
 	}
 
 	public setSmoothing(context) {
@@ -113,13 +126,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		context.imageSmoothingEnabled = false;
 	}
 
-	public getPointerPosition = (event) => ({
-		x: event.offsetX,
-		y: event.offsetY
-	})
-
 	public handleMouseDown = (event) => {
-		const { x, y } = this.getPointerPosition(event.nativeEvent);
+		const { x, y } = getPointerPosition(event.nativeEvent);
 		this.prevMousePosition.x = this.currMousePosition.x = x;
 		this.prevMousePosition.y = this.currMousePosition.y = y;
 		this.isDrawing = true;
@@ -143,7 +151,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleMouseMove = (event) => {
-		this.currMousePosition = this.getPointerPosition(event.nativeEvent);
+		this.currMousePosition = getPointerPosition(event.nativeEvent);
 
 		if (this.isDrawing) {
 			this.drawLine(this.canvasContext, this.prevMousePosition, this.currMousePosition);
@@ -174,14 +182,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return 'action';
 	}
 
-	public handleSave = () => {
+	public handleSave = async () => {
 		const hiddenCanvasContext = this.hiddenCanvas.getContext('2d');
 		const { width, height } = this.canvas;
-		const screenshotImage = new Image();
+
+		const screenshotImage = await loadImage(FAKE_DATE_URL) as any;
 
 		this.hiddenCanvas.width = width;
 		this.hiddenCanvas.height = height;
-		screenshotImage.src = FAKE_DATE_URL;
 		hiddenCanvasContext.drawImage(screenshotImage, 0, 0, width, height);
 		hiddenCanvasContext.drawImage(this.canvas, 0, 0);
 
@@ -189,7 +197,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.props.handleResolve(screenshot);
 	}
 
+	public handleResize = async () => {
+		const image = await loadImage(this.canvas.toDataURL('image/png')) as any;
+		this.setCanvasSize();
+
+		this.canvasContext.drawImage(
+			image, 0, 0, image.width, image.height,
+			0, 0, this.canvas.width, this.canvas.height
+		);
+
+		this.setBrushMode();
+	}
+
 	public componentDidMount() {
+		this.setCanvasSize();
 		this.setSmoothing(this.canvasContext);
 		this.setBrushMode();
 	}
@@ -203,6 +224,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container innerRef={this.containerRef}>
+				<EventListener target="window" onResize={this.handleResize} />
 				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
 				<BackgroundImage src={FAKE_DATE_URL} />
 				<Indicator color={color} size={brushSize} container={this.containerElement} />
@@ -252,8 +274,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					</StyledButton>
 				</ToolsContainer>
 				<Canvas
-					width={window.innerWidth * 0.8}
-					height={window.innerHeight * 0.8}
 					innerRef={this.canvasRef}
 					onMouseDown={this.handleMouseDown}
 					onTouchStart={this.handleMouseDown}
