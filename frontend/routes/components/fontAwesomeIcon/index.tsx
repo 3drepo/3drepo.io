@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FontAwesomeIconComponent from './app.container';
+import * as React from 'react';
+import FontAwesomeIconComponent from './fontAwesomeIcon.component';
 
 export const FontAwesomeIcon = FontAwesomeIconComponent;
 
 // Before add new icon's component, add required fa icon to library in "services/fontAwesome"
-
-export const Eraser = (props) => <FontAwesomeIcon {...props} icon="eraser" />;
+export const Eraser = (props) => <FontAwesomeIconComponent {...props} icon="eraser" />;
