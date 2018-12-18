@@ -16,10 +16,7 @@
  */
 
 import * as React from 'react';
-
-import Typography from '@material-ui/core/Typography';
 import Truncate from 'react-truncate';
-import ArrowIcon from '@material-ui/icons/ArrowForward';
 
 import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
 
@@ -32,7 +29,8 @@ import {
 	Container,
 	ThumbnailWrapper,
 	ArrowContainer,
-	StyledArrowIcon
+	StyledArrowIcon,
+	Name
 } from './previewListItem.styles';
 
 interface IProps {
@@ -51,7 +49,6 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 }
-
 interface IState {
 	active: boolean;
 }
@@ -102,7 +99,7 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 						<Thumbnail src={thumbnail} />
 					</ThumbnailWrapper>
 					<Content>
-						<Typography>{`${count}. ${name}`}</Typography>
+						<Name>{`${count}. ${name}`}</Name>
 						<PreviewItemInfo
 							author={author}
 							StatusIconComponent={StatusIconComponent}

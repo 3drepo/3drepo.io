@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import MenuItem from '@material-ui/core/MenuItem';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
+import Typography from '@material-ui/core/Typography';
 
 import { COLOR } from '../../../styles/colors';
 
@@ -49,6 +50,12 @@ export const ArrowContainer = styled.div`
 
 export const StyledArrowIcon = styled(ArrowIcon)`
   color: ${COLOR.WHITE};
+`;
+
+export const Name = styled(Typography)`
+  && {
+    line-height: 1;
+  }
 `;
 
 export const Container = styled.div`
