@@ -20,6 +20,7 @@ import * as React from 'react';
 import Button from '@material-ui/core/Button';
 import { Container, Canvas, ToolsContainer } from './screenshotDialog.styles';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
+import { COLOR } from '../../../styles';
 
 interface IProps {
 	image: string;
@@ -28,7 +29,7 @@ interface IProps {
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
-		color: '#00ff00',
+		color: COLOR.RED,
 		brushSize: 5
 	};
 
@@ -115,10 +116,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
+		const { color } = this.state;
 		return (
 			<Container>
 				<ToolsContainer>
-					<ColorPicker onChange={this.handleColorChange} />
+					<ColorPicker disableUnderline={true} value={color} onChange={this.handleColorChange} />
 					<Button onClick={this.setBrushMode}>Pencil</Button>
 					<Button onClick={this.setEraseMode}>Erase</Button>
 				</ToolsContainer>

@@ -657,15 +657,6 @@ class IssueController implements ng.IController {
 		};
 
 		dispatch(DialogActions.showDialog(config));
-
-/* 		this.$mdDialog.show({
-			controller() {
-				this.issueComponent = parentScope;
-			},
-			controllerAs: 'vm',
-			templateUrl: 'templates/issue-screen-shot-dialog.html',
-			targetEvent: event
-		}); */
 	}
 
 	/**

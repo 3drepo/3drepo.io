@@ -81,6 +81,9 @@ export class Login extends React.PureComponent<IProps, IState> {
 			},
 			data: {
 				initialImage: ''
+			},
+			DialogProps: {
+				fullScreen: true
 			}
 		};
 

@@ -16,20 +16,32 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../styles';
+import * as ColorPickerStyles from '../../components/colorPicker/colorPicker.styles';
 
 export const Container = styled.div`
-  width: 80vw;
-  height: 80vh;
+  height: 100%;
+  width: 100%;
   position: relative;
+
+
+  ${ColorPickerStyles.ColorSelect} {
+    border-bottom: none;
+    width: 60px;
+  }
 `;
 
 export const Canvas = styled.canvas``;
 
 export const ToolsContainer = styled.div`
   position: absolute;
-  bottom: 0;
+  bottom: 40px;
   left: 50%;
   transform: translate(-50%, 0);
   display: flex;
   align-items: center;
+  background: ${COLOR.WHITE};
+  padding: 10px 30px;
+  box-shadow: 0 0 10px ${COLOR.BLACK_20};
+  border-radius: 4px;
 `;
