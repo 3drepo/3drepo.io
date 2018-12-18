@@ -29,7 +29,7 @@ export const UserMessage = styled.span`
   background-color: ${COLOR.WHITE};
   color: ${COLOR};
   padding: 6px;
-  box-shadow: 0px 2px 5px ${COLOR.BLACK_6};
+  box-shadow: 0 2px 5px ${COLOR.BLACK_6};
   display: inline-block;
   font-size: 12px;
 `;
@@ -44,7 +44,7 @@ export const SystemMessage = styled.span`
 export const ScreenshotMessage = styled.span`
   background-color: ${COLOR.WHITE};
   padding: 6px;
-  box-shadow: 0px 2px 5px ${COLOR.BLACK_6};
+  box-shadow: 0 2px 5px ${COLOR.BLACK_6};
   display: block;
   font-size: 12px;
   border-radius: 0 0 2px 2px;
