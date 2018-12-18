@@ -16,6 +16,9 @@
  */
 
 import styled from 'styled-components';
+import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
+
 import { COLOR } from '../../../styles';
 import * as ColorPickerStyles from '../../components/colorPicker/colorPicker.styles';
 
@@ -23,25 +26,62 @@ export const Container = styled.div`
   height: 100%;
   width: 100%;
   position: relative;
-
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   ${ColorPickerStyles.ColorSelect} {
     border-bottom: none;
-    width: 60px;
+    width: 50px;
   }
 `;
 
-export const Canvas = styled.canvas``;
+export const Canvas = styled.canvas`
+  position: absolute;
+  z-index: 2;
+`;
 
 export const ToolsContainer = styled.div`
   position: absolute;
-  bottom: 40px;
+  z-index: 3;
+  bottom: 35px;
   left: 50%;
   transform: translate(-50%, 0);
   display: flex;
   align-items: center;
-  background: ${COLOR.WHITE};
-  padding: 10px 30px;
+  background: ${COLOR.WHITE_87};
+  padding: 5px 10px 5px 20px;
   box-shadow: 0 0 10px ${COLOR.BLACK_20};
   border-radius: 4px;
+  transition: opacity 200ms ease-in-out;
+`;
+
+export const StyledButton = styled(Button)`
+  && {
+    padding: 8px;
+  }
+
+  &:last-child {
+    margin-left: 8px;
+  }
+`;
+
+export const OptionsDivider = styled(Divider)`
+  && {
+    margin: 0 12px;
+    height: 48px;
+    width: 1px;
+    opacity: 0.5;
+  }
+`;
+
+export const BackgroundImage = styled.img`
+  width: 100%;
+  text-align: center;
+  margin: auto;
+  padding: 0;
+  position: absolute;
+  bottom: 0;
+  top: 0;
 `;
