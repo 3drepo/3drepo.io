@@ -28,7 +28,8 @@ import {
 	ToolsContainer,
 	OptionsDivider,
 	StyledButton,
-	BackgroundImage
+	BackgroundImage,
+	HiddenCanvas
 } from './screenshotDialog.styles';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
 import { COLOR } from '../../../styles';
@@ -36,7 +37,7 @@ import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltip
 
 interface IProps {
 	image: string;
-	onConfirm: (screenshot) => void;
+	handleResolve: (screenshot) => void;
 	handleClose: () => void;
 }
 
@@ -55,13 +56,17 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	};
 
 	public isDrawing;
+	public prevMousePosition = { x: 0, y: 0 };
+	public currMousePosition = { x: 0, y: 0 };
 
 	public canvasRef = React.createRef<any>();
 	public brushRef = React.createRef<any>();
 	public toolsRef = React.createRef<any>();
+	public hiddenCanvasRef = React.createRef<any>();
 
-	public prevMousePosition = { x: 0, y: 0 };
-	public currMousePosition = { x: 0, y: 0 };
+	get hiddenCanvas() {
+		return this.hiddenCanvasRef.current as any;
+	}
 
 	get canvas() {
 		return this.canvasRef.current as any;
@@ -156,6 +161,21 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return 'action';
 	}
 
+	public handleSave = () => {
+		const hiddenCanvasContext = this.hiddenCanvas.getContext('2d');
+		const { width, height } = this.canvas;
+		const screenshotImage = new Image();
+
+		this.hiddenCanvas.width = width;
+		this.hiddenCanvas.height = height;
+		screenshotImage.src = FAKE_DATE_URL;
+		hiddenCanvasContext.drawImage(screenshotImage, 0, 0, width, height);
+		hiddenCanvasContext.drawImage(this.canvas, 0, 0);
+
+		const screenshot = this.hiddenCanvas.toDataURL('image/png');
+		this.props.handleResolve(screenshot);
+	}
+
 	public componentDidMount() {
 		this.setSmoothing(this.canvasContext);
 		this.setBrushMode();
@@ -165,6 +185,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const { color } = this.state;
 		return (
 			<Container>
+				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
 				<BackgroundImage src={FAKE_DATE_URL} />
 				<ToolsContainer innerRef={this.toolsRef}>
 					<ColorPicker disableUnderline={true} value={color} onChange={this.handleColorChange} />
@@ -188,7 +209,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					/>
 					<OptionsDivider />
 					<StyledButton onClick={this.props.handleClose} color="primary">Cancel</StyledButton>
-					<StyledButton color="secondary" variant="raised">Save</StyledButton>
+					<StyledButton
+						onClick={this.handleSave}
+						color="secondary"
+						variant="raised"
+					>
+						Save
+					</StyledButton>
 				</ToolsContainer>
 				<Canvas
 					width={window.innerWidth * 0.8}
