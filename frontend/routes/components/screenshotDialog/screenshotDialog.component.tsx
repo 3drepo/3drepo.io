@@ -16,8 +16,9 @@
  */
 
 import * as React from 'react';
-
-import IconButton from '@material-ui/core/IconButton';
+import { range } from 'lodash';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 
@@ -32,8 +33,9 @@ import {
 	HiddenCanvas
 } from './screenshotDialog.styles';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
-import { COLOR } from '../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { Indicator } from './components/indicator/indicator.component';
 
 interface IProps {
 	image: string;
@@ -59,10 +61,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public prevMousePosition = { x: 0, y: 0 };
 	public currMousePosition = { x: 0, y: 0 };
 
+	public containerRef = React.createRef<any>();
 	public canvasRef = React.createRef<any>();
 	public brushRef = React.createRef<any>();
 	public toolsRef = React.createRef<any>();
 	public hiddenCanvasRef = React.createRef<any>();
+
+	get containerElement() {
+		return this.containerRef.current;
+	}
 
 	get hiddenCanvas() {
 		return this.hiddenCanvasRef.current as any;
@@ -150,6 +157,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState({color}, this.setBrushMode);
 	}
 
+	public handleBrushSizeChange = (event) => {
+		this.setState({brushSize: event.target.value}, () => {
+			this.canvasContext.lineWidth = this.state.brushSize;
+		});
+	}
+
 	public clearCanvas = () => {
 		this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
@@ -181,14 +194,35 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setBrushMode();
 	}
 
+	public renderBrushSizes = () => range(56, 1).map((size, index) => (
+		<MenuItem key={index} value={size}>{size}</MenuItem>
+	))
+
 	public render() {
-		const { color } = this.state;
+		const { color, brushSize } = this.state;
+
 		return (
-			<Container>
+			<Container innerRef={this.containerRef}>
 				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
 				<BackgroundImage src={FAKE_DATE_URL} />
+				<Indicator color={color} size={brushSize} container={this.containerElement} />
 				<ToolsContainer innerRef={this.toolsRef}>
 					<ColorPicker disableUnderline={true} value={color} onChange={this.handleColorChange} />
+					<Select
+						disableUnderline
+						value={brushSize}
+						onChange={this.handleBrushSizeChange}
+						SelectDisplayProps={{
+							style: {
+								fontWeight: FONT_WEIGHT.BOLDER,
+								fontSize: '14px',
+								paddingRight: '25px',
+								textAlign: 'center'
+							}
+						}}
+					>
+						{this.renderBrushSizes()}
+					</Select>
 					<OptionsDivider />
 					<TooltipButton
 						label="Draw"
