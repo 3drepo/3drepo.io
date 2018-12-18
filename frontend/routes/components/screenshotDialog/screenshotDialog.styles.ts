@@ -33,7 +33,7 @@ export const Container = styled.div`
 
   ${ColorPickerStyles.ColorSelect} {
     border-bottom: none;
-    width: 50px;
+    width: 60px;
   }
 `;
 
