@@ -28,7 +28,7 @@ import { Tools } from './components/tools/tools.component';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
-	disableTools?: boolean;
+	disabled?: boolean;
 	handleResolve: (screenshot) => void;
 	handleClose: () => void;
 }
@@ -109,14 +109,19 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.prevMousePosition.y = this.currMousePosition.y = y;
 		this.isDrawing = true;
 
-		this.toolsElement.style.pointerEvents = 'none';
-		this.toolsElement.style.opacity = .2;
+		if (!this.props.disabled) {
+			this.toolsElement.style.pointerEvents = 'none';
+			this.toolsElement.style.opacity = .2;
+		}
 	}
 
 	public handleMouseUp = () => {
 		this.isDrawing = false;
-		this.toolsElement.style.pointerEvents = 'auto';
-		this.toolsElement.style.opacity = 1;
+
+		if (!this.props.disabled) {
+			this.toolsElement.style.pointerEvents = 'auto';
+			this.toolsElement.style.opacity = 1;
+		}
 	}
 
 	public drawLine = (context, startPosition, endPosition) => {
@@ -130,7 +135,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleMouseMove = (event) => {
 		this.currMousePosition = getPointerPosition(event.nativeEvent);
 
-		if (this.isDrawing) {
+		if (this.isDrawing && !this.props.disabled) {
 			this.drawLine(this.canvasContext, this.prevMousePosition, this.currMousePosition);
 		}
 
@@ -196,7 +201,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public renderTools = renderWhenTrue(() => (
+	public renderIndicator = renderWhenTrue(() => (
+		<Indicator color={this.state.color} size={this.state.brushSize} />
+	));
+
+	public renderTools = () => (
 		<Tools
 			innerRef={this.toolsRef}
 			size={this.state.brushSize}
@@ -208,19 +217,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onColorChange={this.handleColorChange}
 			onCancel={this.props.handleClose}
 			onSave={this.handleSave}
+			disabled={this.props.disabled}
 		/>
-	));
+	)
 
 	public render() {
-		const { color, brushSize, sourceImage } = this.state;
+		const { sourceImage } = this.state;
 
 		return (
 			<Container innerRef={this.containerRef}>
 				<EventListener target="window" onResize={this.handleResize} />
 				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
 				<BackgroundImage src={sourceImage} />
-				<Indicator color={color} size={brushSize} />
-				{this.renderTools(!this.props.disableTools)}
+				{this.renderIndicator(!this.props.disabled)}
+				{this.renderTools()}
 				<Canvas
 					innerRef={this.canvasRef}
 					onMouseDown={this.handleMouseDown}

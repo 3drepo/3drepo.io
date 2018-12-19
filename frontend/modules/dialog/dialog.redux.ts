@@ -80,6 +80,7 @@ export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 		template: ScreenshotDialog,
 		onConfirm: action.config.onSave,
 		data: {
+			disabled: action.config.disabled,
 			sourceImage: action.config.sourceImage || ''
 		},
 		DialogProps: {

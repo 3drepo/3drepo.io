@@ -27,11 +27,13 @@ import { ToolsContainer, OptionsDivider, StyledButton } from './tools.styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { FONT_WEIGHT } from '../../../../../styles';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 
 interface IProps {
 	innerRef: any;
 	size: number;
 	color: string;
+	disabled?: boolean;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onClearClick: () => void;
@@ -66,15 +68,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 		return 'action';
 	}
 
-	public render() {
-		const {
-			size, color, innerRef,
-			onDrawClick, onEraseClick, onClearClick, onColorChange, onBrushSizeChange,
-			onCancel, onSave
-		} = this.props;
-
+	public renderToolset = renderWhenTrue(() => {
+		const { size, color, onDrawClick, onEraseClick, onClearClick, onColorChange, onBrushSizeChange } = this.props;
 		return (
-			<ToolsContainer innerRef={innerRef}>
+			<>
 				<ColorPicker disableUnderline={true} value={color} onChange={onColorChange} />
 				<Select
 					disableUnderline
@@ -106,8 +103,22 @@ export class Tools extends React.PureComponent<IProps, any> {
 				/>
 				<TooltipButton label="Clear" action={onClearClick} Icon={ClearIcon} />
 				<OptionsDivider />
+			</>
+		);
+	});
+
+	public renderSaveButton = renderWhenTrue(() => (
+		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
+	));
+
+	public render() {
+		const { innerRef, disabled, onCancel } = this.props;
+
+		return (
+			<ToolsContainer innerRef={innerRef} disabled={disabled}>
+				{this.renderToolset(!disabled)}
 				<StyledButton onClick={onCancel} color="primary">Cancel</StyledButton>
-				<StyledButton onClick={onSave} color="secondary" variant="raised">Save</StyledButton>
+				{this.renderSaveButton(!disabled)}
 			</ToolsContainer>
 		);
 	}
