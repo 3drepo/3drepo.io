@@ -42,7 +42,7 @@ import { loadImage } from '../../../helpers/images';
 import { getPointerPosition } from '../../../helpers/events';
 
 interface IProps {
-	sourceImage: string;
+	sourceImage: string | Promise<string>;
 	handleResolve: (screenshot) => void;
 	handleClose: () => void;
 }
@@ -56,7 +56,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: COLOR.RED,
 		brushSize: 5,
-		activeTool: TOOL_TYPES.BRUSH
+		activeTool: TOOL_TYPES.BRUSH,
+		sourceImage: ''
 	};
 
 	public isDrawing;
@@ -183,7 +184,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleSave = async () => {
 		const hiddenCanvasContext = this.hiddenCanvas.getContext('2d');
 		const { width, height } = this.canvas;
-		const screenshotImage = await loadImage(this.props.sourceImage) as any;
+		const screenshotImage = await loadImage(this.state.sourceImage) as any;
 		const imageRatio = screenshotImage.height / screenshotImage.width;
 		const destImageHeight = width * imageRatio;
 
@@ -214,10 +215,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setBrushMode();
 	}
 
-	public componentDidMount() {
-		this.setCanvasSize();
-		this.setSmoothing(this.canvasContext);
-		this.setBrushMode();
+	public async componentDidMount() {
+		const sourceImage = await Promise.resolve(this.props.sourceImage);
+
+		this.setState({ sourceImage }, () => {
+			this.setCanvasSize();
+			this.setSmoothing(this.canvasContext);
+			this.setBrushMode();
+		});
 	}
 
 	public renderBrushSizes = () => range(56, 1).map((size, index) => (
@@ -225,13 +230,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	))
 
 	public render() {
-		const { color, brushSize } = this.state;
+		const { color, brushSize, sourceImage } = this.state;
 
 		return (
 			<Container innerRef={this.containerRef}>
 				<EventListener target="window" onResize={this.handleResize} />
 				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
-				<BackgroundImage src={this.props.sourceImage} />
+				<BackgroundImage src={sourceImage} />
 				<Indicator color={color} size={brushSize} />
 				<ToolsContainer innerRef={this.toolsRef}>
 					<ColorPicker disableUnderline={true} value={color} onChange={this.handleColorChange} />
