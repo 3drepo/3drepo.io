@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { dispatch, getState } from '../../../helpers/migration';
-import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
+import { getState } from '../../../helpers/migration';
+import { selectIsAuthenticated } from '../../../modules/auth';
 import { selectCurrentUser } from '../../../modules/currentUser';
 
 export class AuthService {
@@ -98,42 +98,6 @@ export class AuthService {
 
 	public hasPermission(requiredPerm, permissions) {
 		return permissions.indexOf(requiredPerm) !== -1;
-	}
-
-	public initAutoLogout() {
-		// Check for mismatch
-		const checkLoginMismatch = this.ClientConfigService.login_check_interval || 4; // Seconds
-
-		this.$interval(() => {
-			this.shouldAutoLogout();
-		}, 1000 * checkLoginMismatch);
-	}
-
-	public shouldAutoLogout() {
-		const sessionLogin = this.getUsername();
-		// We are logged in on another tab but not this OR
-		// we are looged out in another tab and not this
-		const loginStateMismatch = (sessionLogin && !this.isLoggedIn()) ||
-									(!sessionLogin && this.isLoggedIn());
-
-		// Check if we're on a logged out page i.e. registerVerify
-		const isLoggedOutPage = this.loggedOutPage();
-		const isStatic = this.$state.current.name.includes('app.static');
-		if (loginStateMismatch && !isLoggedOutPage && !isStatic) {
-			this.$window.location.reload();
-		} else if (loginStateMismatch && isLoggedOutPage) {
-			if (sessionLogin) {
-				dispatch(AuthActions.logout());
-			}
-		}
-		this.$location.path('/login');
-		this.resetApp();
-	}
-
-	public resetApp() {
-		localStorage.setItem('loggedIn', 'false');
-		localStorage.removeItem('username');
-		dispatch({ type: 'RESET_APP' });
 	}
 
 	public loggedOutPage() {

@@ -20,6 +20,8 @@
 
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
+	const GridFSBucket = require("mongodb").GridFSBucket;
+	const responseCodes = require("../response_codes");
 	const connConfig = {
 		autoReconnect: true
 	};
@@ -97,6 +99,42 @@
 		});
 	}
 
+	function getGridFSBucket(database, collection) {
+		return getDB(database).then(dbConn => {
+			return new GridFSBucket(dbConn, {bucketName: collection});
+		}).catch(err => {
+			disconnect();
+			return Promise.reject(err);
+		});
+	}
+
+	function getFileStreamFromGridFS(database, collection, filename) {
+		return getGridFSBucket(database,collection).then((bucket) => {
+			return bucket.find({filename}).toArray().then(file => {
+				if(file.length === 0) {
+					return Promise.reject(responseCodes.NO_FILE_FOUND);
+				}
+				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
+			});
+		});
+	}
+
+	function getFileFromGridFS(database, collection, filename) {
+		return getFileStreamFromGridFS(database, collection, filename).then((file) => {
+			const fileStream = file.stream;
+			return new Promise((resolve) => {
+				const bufs = [];
+				fileStream.on("data", function(d) {
+					bufs.push(d);
+				});
+
+				fileStream.on("end", function() {
+					resolve(Buffer.concat(bufs));
+				});
+			});
+		});
+	}
+
 	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
 	function _getCollection(database, colName)	{
 		return db.db(database).collection(colName);
@@ -128,6 +166,8 @@
 		getAuthDB,
 		getCollection,
 		getCollectionStats,
+		getFileStreamFromGridFS,
+		getFileFromGridFS,
 		_getCollection,
 		listCollections,
 		runCommand

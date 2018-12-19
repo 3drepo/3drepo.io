@@ -72,6 +72,8 @@ function StateManagerRun(
 
 	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
+		const isLegal = Boolean(get(toState.data, 'isLegal'));
+
 		const isAuthenticated = selectIsAuthenticated(getState());
 
 		if (isLoginRequired && !isAuthenticated) {
@@ -83,6 +85,10 @@ function StateManagerRun(
 
 			initialAuthPromise.catch(() => {
 				$state.go('app.login');
+			});
+		} else if (!isLoginRequired && !isLegal && isAuthenticated === null && !toState.name.includes('app.login')) {
+			AuthService.initialAuthPromise.promise.then(() => {
+				history.push('/dashboard/teamspaces');
 			});
 		}
 

@@ -73,7 +73,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 		resetForm(values);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		if (this.props.avatarUrl !== prevProps.avatarUrl) {
 			this.setState({ uploadedAvatar: {} });
 		}
@@ -92,7 +92,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<FormContainer container={true} direction="column">
-						<Headline color="primary" variant="subheading">Basic information</Headline>
+						<Headline color="primary" variant="subheading">Basic Information</Headline>
 						<Grid container={true} direction="row" wrap="nowrap">
 							<StyledDropzone
 								disabled={isAvatarPending}

@@ -32,7 +32,7 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 
 export const INITIAL_STATE = {
 	isAuthenticated: null,
-	isPending: false
+	isPending: null
 };
 
 export const loginSuccess = (state = INITIAL_STATE) => {

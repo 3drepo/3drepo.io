@@ -29,8 +29,12 @@ const getNotificationById = (notifications, id) => {
 };
 
 export function* sendGetNotifications() {
-	const resp = yield API.getNotifications();
-	yield put(NotificationsActions.setNotifications(resp.data));
+	try {
+		const { data } = yield API.getNotifications();
+		yield put(NotificationsActions.setNotifications(data));
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('fetch', 'notifications', e.response));
+	}
 }
 
 export function* sendUpdateNotificationRead({ notificationId, read }) {

@@ -64,6 +64,7 @@ class GroupsController implements ng.IController {
 	private selectedNodes: any[];
 	private filterText: string;
 	private groupsChatEvents: ChatEvents;
+	private watchingGroups: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -98,6 +99,8 @@ class GroupsController implements ng.IController {
 				this.loading = false;
 			});
 
+		this.watchingGroups = false;
+
 		this.groupColours = [
 			[[255, 195, 18], [196, 229, 56], [52, 152, 219], [253, 167, 223], [237, 76, 103]],
 			[[247, 159, 31], [163, 203, 56], [18, 137, 167], [217, 128, 250], [181, 52, 113]],
@@ -113,6 +116,7 @@ class GroupsController implements ng.IController {
 		this.groupsChatEvents.unsubscribeFromCreated(this.onGroupsCreated);
 		this.groupsChatEvents.unsubscribeFromUpdated(this.onGroupsUpdated);
 		this.groupsChatEvents.unsubscribeFromDeleted(this.onGroupsDeleted);
+		this.watchingGroups = false;
 	}
 
 	public watchers() {
@@ -468,9 +472,12 @@ class GroupsController implements ng.IController {
 
 	/*** Realtime sync  */
 	public watchChatEvents() {
-		this.groupsChatEvents.subscribeToCreated(this.onGroupsCreated, this);
-		this.groupsChatEvents.subscribeToUpdated(this.onGroupsUpdated, this);
-		this.groupsChatEvents.subscribeToDeleted(this.onGroupsDeleted, this);
+		if (!this.watchingGroups) {
+			this.groupsChatEvents.subscribeToCreated(this.onGroupsCreated, this);
+			this.groupsChatEvents.subscribeToUpdated(this.onGroupsUpdated, this);
+			this.groupsChatEvents.subscribeToDeleted(this.onGroupsDeleted, this);
+			this.watchingGroups = true;
+		}
 	}
 
 	public onGroupsCreated(group) {

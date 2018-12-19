@@ -179,22 +179,7 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
-/**
- * @api {post} /issues.json Save an Issue
- * @apiName storeIssue
- * @apiGroup Issues
- */
-
-router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
-
-/**
- * @api {post} issues/:issuesId.json Update an Issue
- * @apiName updateIssue
- * @apiGroup Issues
- * 
- * @apiParam {String} issueId.json Unique Issue ID to update.
- */
-
+router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**

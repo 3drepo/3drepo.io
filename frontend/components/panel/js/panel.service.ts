@@ -538,7 +538,9 @@ export class PanelService {
 			const file = new Blob([content]);
 			a.href = URL.createObjectURL(file);
 			a.download = `${modelName}_${timestamp}_${fileName}.json`;
+			document.body.appendChild(a); // needed for firefox
 			a.click();
+			document.body.removeChild(a);
 		});
 	}
 

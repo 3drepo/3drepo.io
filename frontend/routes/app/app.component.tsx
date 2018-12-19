@@ -37,18 +37,19 @@ interface IState {
 }
 
 const DEFAULT_REDIRECT = '/dashboard/teamspaces';
-const MAIN_ROUTE_PATH =  '/';
-const STATIC_ROUTES = [
+const MAIN_ROUTE_PATH = '/';
+const LOGIN_ROUTE_PATH = '/login';
+
+const PUBLIC_ROUTES = [
 	'login',
-	'cookies',
-	'terms',
-	'privacy',
 	'sign-up',
 	'register-request',
 	'register-verify',
 	'password-forgot',
 	'password-change'
 ] as any;
+
+const STATIC_ROUTES = ['cookies', 'terms', 'privacy'] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -57,13 +58,23 @@ export class App extends React.PureComponent<IProps, IState> {
 	};
 
 	private authenticationInterval;
+	private loginInterval;
 
 	public isStaticRoute(path) {
 		return STATIC_ROUTES.includes(path.replace('/', ''));
 	}
 
+	public isPublicRoute(path) {
+		return PUBLIC_ROUTES.includes(path.replace('/', ''));
+	}
+
 	public componentDidMount() {
 		this.props.authenticate();
+
+		if (!this.isStaticRoute(location.pathname)) {
+			this.toggleAutoLogout();
+			this.toggleAutoLogin();
+		}
 
 		const initialReferrer = location.pathname !== MAIN_ROUTE_PATH
 			? `${location.pathname}${location.search}`
@@ -72,36 +83,39 @@ export class App extends React.PureComponent<IProps, IState> {
 		this.setState({ referrer: initialReferrer });
 	}
 
-	public componentWillMount() {
+	public componentWillUnmount() {
 		this.toggleAutoLogout(false);
+		this.toggleAutoLogin(false);
 	}
 
 	public componentDidUpdate(prevProps) {
-		const changes = {} as IState;
 		const { location, history, isAuthenticated } = this.props;
 		const isStaticRoute = this.isStaticRoute(location.pathname);
-		if (!isStaticRoute && isAuthenticated !== prevProps.isAuthenticated) {
+		const isPublicRoute = this.isPublicRoute(location.pathname);
+
+		const isPrivateRoute = !isStaticRoute && !isPublicRoute;
+
+		if (isPrivateRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
-				this.toggleAutoLogout();
+				this.toggleAutoLogin(false);
 				runAngularTimeout(() => {
 					history.push(this.state.referrer);
 				});
 			} else {
 				this.toggleAutoLogout(false);
+				this.toggleAutoLogin();
 				runAngularTimeout(() => {
 					history.push('/login');
 				});
 			}
 		}
 
-		if (isStaticRoute && isAuthenticated) {
+		if (isPublicRoute && isAuthenticated) {
+			const isLoginRoute = LOGIN_ROUTE_PATH === location.pathname;
 			runAngularTimeout(() => {
-				history.push(DEFAULT_REDIRECT);
+				history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
+				this.setState({ referrer: DEFAULT_REDIRECT });
 			});
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
 		}
 	}
 
@@ -110,6 +124,16 @@ export class App extends React.PureComponent<IProps, IState> {
 			this.authenticationInterval = setInterval(this.handleAutoLogout, this.state.autologoutInterval * 1000);
 		} else {
 			clearInterval(this.authenticationInterval);
+			this.authenticationInterval = null;
+		}
+	}
+
+	public toggleAutoLogin = (shouldStart = true) => {
+		if (shouldStart) {
+			this.loginInterval = setInterval(this.handleAutoLogin, 1000);
+		} else {
+			clearInterval(this.loginInterval);
+			this.loginInterval = null;
 		}
 	}
 
@@ -118,8 +142,22 @@ export class App extends React.PureComponent<IProps, IState> {
 		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
 		const isSessionExpired = hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
-			history.push('/login');
 			logout();
+			runAngularTimeout(() => {
+				history.push('/login');
+			});
+		}
+	}
+
+	public handleAutoLogin = () => {
+		const { isAuthenticated } = this.props;
+		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
+
+		if (hasActiveSession && !isAuthenticated) {
+			this.props.authenticate();
+			if (!this.authenticationInterval) {
+				this.toggleAutoLogout();
+			}
 		}
 	}
 

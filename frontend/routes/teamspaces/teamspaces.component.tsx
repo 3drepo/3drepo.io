@@ -101,7 +101,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 
 		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
@@ -344,9 +344,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderModelDirectoryItem = (projectName) =>
 		(modelProps) => this.renderModel({ ...modelProps, projectName })
 
-	public renderModelDirectory = (props) => (
+	public renderModelDirectory = (permissions, props) => (
 		<ModelDirectoryItem
 			{...props}
+			permissions={permissions}
 			renderChildItem={this.renderModelDirectoryItem(props.projectName)}
 			onAddClick={this.createModelDirectoryAddHandler(props)}
 		/>
@@ -381,7 +382,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return (
 			<ProjectItem
 				{...props}
-				renderChildItem={this.renderModelDirectory}
+				renderChildItem={this.renderModelDirectory.bind(this, props.permissions)}
 				onEditClick={this.openProjectDialog(activeTeamspace, props.name)}
 				onPermissionsClick={
 					this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
@@ -393,19 +394,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderTeamspaces = (teamspaces) => {
-		return teamspaces.map((teamspace, index) => (
-			<TeamspaceItem
-				{...teamspace}
-				key={index}
-				active={this.isActiveTeamspace(teamspace.account)}
-				isMyTeamspace={index === 0}
-				renderChildItem={this.renderProject}
-				onToggle={this.onTeamspaceClick.bind(this, teamspace)}
-				onAddProject={this.openProjectDialog(teamspace.account)}
-			/>
-		));
-	}
+	public renderTeamspaces = (teamspaces) => teamspaces.map((teamspace, index) => (
+		<TeamspaceItem
+			{...teamspace}
+			key={index}
+			active={this.isActiveTeamspace(teamspace.account)}
+			isMyTeamspace={index === 0}
+			renderChildItem={this.renderProject}
+			onToggle={this.onTeamspaceClick.bind(this, teamspace)}
+			onAddProject={this.openProjectDialog(teamspace.account)}
+		/>
+	))
 
 	public renderMenuButton = (isPending, props) => (
 		<MenuButton

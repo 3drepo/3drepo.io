@@ -20,27 +20,27 @@ axios.interceptors.response.use(
 );
 
 const getRequest = (url, ...options) => {
-	const requestUrl = clientConfigService.apiUrl(clientConfigService.GET_API, url);
+	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 	return axios.get(requestUrl, ...options);
 };
 
 const postRequest = (url, ...options) => {
-	const requestUrl = clientConfigService.apiUrl(clientConfigService.POST_API, url);
+	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
 	return axios.post(requestUrl, ...options);
 };
 
 const putRequest = (url, ...options) => {
-	const requestUrl = clientConfigService.apiUrl(clientConfigService.POST_API, url);
+	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
 	return axios.put(requestUrl, ...options);
 };
 
 const deleteRequest = (url, ...options) => {
-	const requestUrl = clientConfigService.apiUrl(clientConfigService.POST_API, url);
+	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
 	return axios.delete(requestUrl, ...options);
 };
 
 const patchRequest = (url, ...options) => {
-	const requestUrl = clientConfigService.apiUrl(clientConfigService.POST_API, url);
+	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
 	return axios.patch(requestUrl, ...options);
 };
 
@@ -53,7 +53,7 @@ export const API = {
 };
 
 export const getAPIUrl = (url: string) => {
-	return clientConfigService.apiUrl(clientConfigService.GET_API, url);
+	return encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 };
 
 export const getResponseCode = memoize((errorToFind) => {

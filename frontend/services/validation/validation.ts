@@ -22,7 +22,9 @@ export const VALIDATIONS_MESSAGES = {
 	REQUIRED: 'This field is required',
 	TOO_SHORT_STRING: 'Must be at least ${min} characters',
 	TOO_LONG_STRING: 'Must be at most ${max} characters',
-	NOT_ALPHANUMERIC: 'Must use alphanumeric characters'
+	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
+	DECIMAL: 'Must be a decimal number or integer',
+	INTEGER: 'Must be an integer'
 };
 
 Yup.addMethod(Yup.string, 'differentThan', differentThan );
@@ -61,7 +63,10 @@ export const schema = {
 		.matches(/^[A-Za-z0-9_]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC),
 
 	required: Yup.string()
-		.required(VALIDATIONS_MESSAGES.REQUIRED)
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
+
+	measureNumberDecimal: Yup.string().matches(/^([+-]?([0-9]*[.])?[0-9]+)$/, VALIDATIONS_MESSAGES.DECIMAL),
+	measureNumberIntegers: Yup.string().matches(/^[+-]?([0-9]*)$/, VALIDATIONS_MESSAGES.INTEGER)
 };
 
 export const getPasswordStrengthMessage = (score: number) => {

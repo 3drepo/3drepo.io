@@ -28,6 +28,7 @@ export function* createProject({ teamspace, projectData }) {
 		const response = yield API.createProject(teamspace, projectData);
 
 		yield put(SnackbarActions.show('Project created'));
+
 		yield put(TeamspacesActions.createProjectSuccess(teamspace, response.data));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('create', 'project', e.response));
@@ -62,6 +63,7 @@ export function* createModel({ teamspace, modelData }) {
 		const response = yield API.createModel(teamspace, modelData);
 		const createdModel = {
 			...response.data.setting,
+			permissions: response.data.permissions,
 			model: response.data.model,
 			projectName: modelData.project,
 			subModels: modelData.subModels

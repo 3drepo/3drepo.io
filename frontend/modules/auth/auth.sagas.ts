@@ -50,6 +50,8 @@ export function* login({ username, password }) {
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
+		} else if (e.response.status === 400 && e.response.code === 'ALREADY_LOGGED_IN') {
+			yield put(AuthActions.authenticate());
 		} else {
 			yield put(DialogActions.showErrorDialog('login', 'user', e.response));
 		}

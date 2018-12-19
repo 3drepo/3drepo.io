@@ -27,20 +27,24 @@ import Edit from '@material-ui/icons/Edit';
 export const ROW_ACTIONS = {
 	PERMISSIONS: {
 		label: 'Permissions',
-		Icon: People
+		Icon: People,
+		requiredPermissions: 'manage_model_permission'
 	},
 	SETTINGS: {
 		label: 'Settings',
-		Icon: Settings
+		Icon: Settings,
+		requiredPermissions: 'change_model_settings'
 	},
 	DELETE: {
 		label: 'Delete',
 		Icon: Delete,
-		color: 'error'
+		color: 'error',
+		requiredPermissions: 'delete_model'
 	},
 	UPLOAD_FILE: {
 		label: 'Upload file',
-		Icon: CloudUpload
+		Icon: CloudUpload,
+		requiredPermissions: 'upload_files'
 	},
 	REVISIONS: {
 		label: 'Revisions',
@@ -48,7 +52,8 @@ export const ROW_ACTIONS = {
 	},
 	DOWNLOAD: {
 		label: 'Download',
-		Icon: CloudDownload
+		Icon: CloudDownload,
+		requiredPermissions: 'download_model'
 	},
 	ADD_NEW: {
 		label: 'Add new item',
@@ -56,7 +61,8 @@ export const ROW_ACTIONS = {
 	},
 	EDIT: {
 		label: 'Edit',
-		Icon: Edit
+		Icon: Edit,
+		requiredPermissions: 'edit_federation'
 	}
 };
 

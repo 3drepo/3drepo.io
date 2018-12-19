@@ -221,16 +221,15 @@ class IssuesController implements ng.IController {
 					issueListItemId = 'issue' + this.issuesService.state.selectedIssue._id;
 				}
 
+				this.issuesService.state.displayIssue = null;
+				this.selectedMenuOption = null;
 				if (!newValue) {
-					this.issuesService.state.displayIssue = null;
-					this.selectedMenuOption = null;
 
 					const element = document.getElementById(issueListItemId);
 					if (element && element.scrollIntoView) {
 						element.scrollIntoView();
 					}
 				} else {
-					this.issuesService.state.displayIssue = null;
 					this.issuesService.resetSelectedIssue();
 					this.$state.go('app.viewer', {
 						modelId: this.model,

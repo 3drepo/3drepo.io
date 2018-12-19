@@ -1,6 +1,6 @@
-{ "VERSION" : "2.19.3",
+{ "VERSION" : "2.20.1",
   "unity" : {
-	"current" : "2.10.0",
+	"current" : "2.20.0",
 	"supported": []
   },
   "navis" :{

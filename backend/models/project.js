@@ -81,7 +81,11 @@
 			}];
 		}
 
-		return project.save().then(() => project);
+		return project.save().then(() => {
+			const proj = project.toObject();
+			proj.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
+			return proj;
+		});
 
 	};
 

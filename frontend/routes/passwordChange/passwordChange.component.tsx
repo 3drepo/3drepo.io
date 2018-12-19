@@ -164,7 +164,6 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 			<Container
 				container
 				direction="column"
-				justify="center"
 				alignItems="center">
 				<Logo />
 
