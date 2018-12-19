@@ -26,7 +26,6 @@ import { ChatService } from '../../chat/js/chat.service';
 import { StateManagerService } from '../../home/js/state-manager.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
-import { ScreenshotDialog } from '../../../routes/components/screenshotDialog/screenshotDialog.component';
 import { dispatch } from '../../../helpers/migration';
 import { DialogActions } from '../../../modules/dialog';
 
@@ -624,11 +623,13 @@ class IssueController implements ng.IController {
 	public showScreenShot(event, viewpoint) {
 		if (viewpoint.screenshot) {
 			this.showScreenshotDialog({
-				sourceImage: this.apiService.getAPIUrl(viewpoint.screenshot)
+				sourceImage: this.apiService.getAPIUrl(viewpoint.screenshot),
+				disableTools: true
 			});
 		} else if (this.issueData.descriptionThumbnail) {
 			this.showScreenshotDialog({
-				sourceImage: this.issueData.descriptionThumbnail
+				sourceImage: this.issueData.descriptionThumbnail,
+				disableTools: true
 			});
 		}
 	}
@@ -636,20 +637,11 @@ class IssueController implements ng.IController {
 	/**
 	 * Show screen shot dialog
 	 */
-	public showScreenshotDialog(options: { title?: string, sourceImage: string | Promise<string>}) {
-		const config = {
-			title: options.title || 'Screenshot',
-			template: ScreenshotDialog,
-			onConfirm: this.screenShotSave,
-			data: {
-				sourceImage: options.sourceImage || ''
-			},
-			DialogProps: {
-				fullScreen: true
-			}
-		};
-
-		dispatch(DialogActions.showDialog(config));
+	public showScreenshotDialog(options) {
+		dispatch(DialogActions.showScreenshotDialog({
+			...options,
+			onSave: this.screenShotSave
+		}));
 	}
 
 	/**
@@ -758,7 +750,6 @@ class IssueController implements ng.IController {
 	public saveIssue() {
 
 		const viewpointPromise = this.$q.defer();
-		const screenShotPromise = this.$q.defer();
 		const objectsPromise = this.$q.defer();
 
 		if (this.commentViewpoint) {
@@ -779,7 +770,7 @@ class IssueController implements ng.IController {
 			.then((results) => {
 				const [viewpoint, objectInfo] = results;
 				viewpoint.hideIfc = this.treeService.getHideIfc();
-				return this.handleObjects(viewpoint, objectInfo, screenShotPromise);
+				return this.handleObjects(viewpoint, objectInfo);
 			})
 			.catch((error) => {
 				// We have a top level catch which will
@@ -796,7 +787,7 @@ class IssueController implements ng.IController {
 
 	}
 
-	public handleObjects(viewpoint, objectInfo, screenShotPromise) {
+	public handleObjects(viewpoint, objectInfo) {
 
 		// TODO - clean up repeated code below
 		if (this.savedScreenShot !== null) {
@@ -810,17 +801,13 @@ class IssueController implements ng.IController {
 
 		} else {
 			// Get a screen shot if not already created
-			this.viewerService.getScreenshot(screenShotPromise);
-
-			return screenShotPromise.promise
-				.then((screenShot) => {
-					if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-						return this.createGroup(viewpoint, screenShot, objectInfo);
-					} else {
-						return this.doSaveIssue(viewpoint, screenShot);
-					}
-				});
-
+			return this.viewerService.getScreenshot().then((screenShot) => {
+				if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+					return this.createGroup(viewpoint, screenShot, objectInfo);
+				} else {
+					return this.doSaveIssue(viewpoint, screenShot);
+				}
+			});
 		}
 
 	}
@@ -1129,15 +1116,15 @@ class IssueController implements ng.IController {
 	 * A screen shot has been saved
 	 * @param data
 	 */
-	public screenShotSave(data) {
+	public screenShotSave = (screenshot) => {
 		const viewpointPromise = this.$q.defer();
 
-		this.savedScreenShot = data.screenShot;
+		this.savedScreenShot = screenshot;
 
 		if (typeof this.data === 'object') {
 
 			// Comment
-			this.commentThumbnail = data.screenShot;
+			this.commentThumbnail = screenshot;
 
 			// Get the viewpoint and add the screen shot to it
 			// Remove base64 header text from screen shot
@@ -1147,7 +1134,7 @@ class IssueController implements ng.IController {
 
 		} else {
 			// Description
-			this.issueData.descriptionThumbnail = data.screenShot;
+			this.issueData.descriptionThumbnail = screenshot;
 
 			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.account, model: this.model}
@@ -1157,7 +1144,7 @@ class IssueController implements ng.IController {
 		viewpointPromise.promise
 			.then((viewpoint) => {
 				this.commentViewpoint = viewpoint;
-				this.commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(',') + 1);
+				this.commentViewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
 			}).catch((error) => {
 				this.errorSavingScreemshot(error);
 			});
