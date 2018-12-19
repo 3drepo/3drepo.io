@@ -20,6 +20,7 @@ export class ClientConfigService {
 	public login_check_interval;
 	// tslint:disable-next-line
 	public captcha_client_key;
+	public legalTemplates;
 	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;

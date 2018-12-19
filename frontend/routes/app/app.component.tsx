@@ -16,11 +16,11 @@
  */
 
 import * as React from 'react';
-import { isEmpty } from 'lodash';
 import { runAngularTimeout } from '../../helpers/migration';
 import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
+import { isStaticRoute } from '../../services/staticPages';
 
 interface IProps {
 	location: any;
@@ -49,8 +49,6 @@ const PUBLIC_ROUTES = [
 	'password-change'
 ] as any;
 
-const STATIC_ROUTES = ['cookies', 'terms', 'privacy'] as any;
-
 export class App extends React.PureComponent<IProps, IState> {
 	public state = {
 		referrer: DEFAULT_REDIRECT,
@@ -60,10 +58,6 @@ export class App extends React.PureComponent<IProps, IState> {
 	private authenticationInterval;
 	private loginInterval;
 
-	public isStaticRoute(path) {
-		return STATIC_ROUTES.includes(path.replace('/', ''));
-	}
-
 	public isPublicRoute(path) {
 		return PUBLIC_ROUTES.includes(path.replace('/', ''));
 	}
@@ -71,7 +65,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		this.props.authenticate();
 
-		if (!this.isStaticRoute(location.pathname)) {
+		if (!isStaticRoute(location.pathname)) {
 			this.toggleAutoLogout();
 			this.toggleAutoLogin();
 		}
@@ -90,10 +84,10 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const { location, history, isAuthenticated } = this.props;
-		const isStaticRoute = this.isStaticRoute(location.pathname);
+		const isStatic = isStaticRoute(location.pathname);
 		const isPublicRoute = this.isPublicRoute(location.pathname);
 
-		const isPrivateRoute = !isStaticRoute && !isPublicRoute;
+		const isPrivateRoute = !isStatic && !isPublicRoute;
 
 		if (isPrivateRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {

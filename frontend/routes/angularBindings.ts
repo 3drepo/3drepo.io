@@ -10,9 +10,11 @@ import ModelSettings from './modelSettings/modelSettings.container';
 import Login from './login/login.container';
 import PasswordForgot from './passwordForgot/passwordForgot.container';
 import PasswordChange from './passwordChange/passwordChange.container';
-import SignUp from './signUp/signUp.container';
 import RegisterRequest from './registerRequest/registerRequest.container';
 import RegisterVerify from './registerVerify/registerVerify.container';
+import SignUp from './signUp/signUp.container';
+import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
+
 // Components
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
@@ -26,6 +28,7 @@ angular
 	.component('login', wrap(Login, ['headlineText']))
 	.component('passwordForgot', wrap(PasswordForgot))
 	.component('passwordChange', wrap(PasswordChange))
-	.component('signUp', wrap(SignUp, ['onLogoClick']))
 	.component('registerRequest', wrap(RegisterRequest))
-	.component('registerVerify', wrap(RegisterVerify));
+	.component('registerVerify', wrap(RegisterVerify))
+	.component('signUp', wrap(SignUp, ['onLogoClick']))
+	.component('staticPageViewer', wrap(StaticPageViewer));

@@ -19,6 +19,7 @@ import { history, getState } from '../../../helpers/migration';
 import { get } from 'lodash';
 
 import { selectIsAuthenticated } from '../../../modules/auth';
+import { isStaticRoute } from '../../../services/staticPages';
 
 function StateManagerRun(
 	$location,
@@ -72,7 +73,7 @@ function StateManagerRun(
 
 	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
 		const isLoginRequired = Boolean(get(toState.data, 'isLoginRequired'));
-		const isLegal = Boolean(get(toState.data, 'isLegal'));
+		const isStatic = isStaticRoute(location.pathname);
 
 		const isAuthenticated = selectIsAuthenticated(getState());
 
@@ -86,7 +87,7 @@ function StateManagerRun(
 			initialAuthPromise.catch(() => {
 				$state.go('app.login');
 			});
-		} else if (!isLoginRequired && !isLegal && isAuthenticated === null && !toState.name.includes('app.login')) {
+		} else if (!isLoginRequired && !isStatic && isAuthenticated === null && !toState.name.includes('app.login')) {
 			AuthService.initialAuthPromise.promise.then(() => {
 				history.push('/dashboard/teamspaces');
 			});
