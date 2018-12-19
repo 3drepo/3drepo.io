@@ -182,28 +182,26 @@ export class ViewpointsService {
 	 */
 	public generateViewpointObject(teamspace: string, model: string, viewName: string) {
 		const viewpointDefer = this.$q.defer();
-		const screenshotDefer = this.$q.defer();
+		const screenshotPromise = this.ViewerService.getScreenshot();
 		this.ViewerService.getCurrentViewpoint({
 			promise: viewpointDefer,
 			account: teamspace,
 			model
 		});
 
-		this.ViewerService.getScreenshot(screenshotDefer);
-		return Promise.all([viewpointDefer.promise, screenshotDefer.promise])
-			.then((results: any) => {
+		return Promise.all([viewpointDefer.promise, screenshotPromise])
+			.then(([viewpointsData, screenshot]: any) => {
 				const viewpoint: any = {};
-				const base64Screenshot = results[1];
 				viewpoint.name = viewName;
-				viewpoint.clippingPlanes = results[0].clippingPlanes;
+				viewpoint.clippingPlanes = viewpointsData.clippingPlanes;
 				viewpoint.viewpoint = {};
-				viewpoint.viewpoint.position = results[0].position;
-				viewpoint.viewpoint.up = results[0].up;
-				viewpoint.viewpoint.look_at = results[0].look_at;
-				viewpoint.viewpoint.view_dir = results[0].view_dir;
-				viewpoint.viewpoint.right = results[0].right;
+				viewpoint.viewpoint.position = viewpointsData.position;
+				viewpoint.viewpoint.up = viewpointsData.up;
+				viewpoint.viewpoint.look_at = viewpointsData.look_at;
+				viewpoint.viewpoint.view_dir = viewpointsData.view_dir;
+				viewpoint.viewpoint.right = viewpointsData.right;
 				viewpoint.screenshot = {
-					base64: base64Screenshot
+					base64: screenshot
 				};
 				return viewpoint;
 			});

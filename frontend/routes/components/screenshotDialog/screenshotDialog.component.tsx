@@ -104,21 +104,21 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleMouseDown = (event) => {
-		const { x, y } = getPointerPosition(event.nativeEvent);
-		this.prevMousePosition.x = this.currMousePosition.x = x;
-		this.prevMousePosition.y = this.currMousePosition.y = y;
-		this.isDrawing = true;
-
 		if (!this.props.disabled) {
+			const { x, y } = getPointerPosition(event.nativeEvent);
+			this.prevMousePosition.x = this.currMousePosition.x = x;
+			this.prevMousePosition.y = this.currMousePosition.y = y;
+			this.isDrawing = true;
+
 			this.toolsElement.style.pointerEvents = 'none';
 			this.toolsElement.style.opacity = .2;
 		}
 	}
 
 	public handleMouseUp = () => {
-		this.isDrawing = false;
-
 		if (!this.props.disabled) {
+			this.isDrawing = false;
+
 			this.toolsElement.style.pointerEvents = 'auto';
 			this.toolsElement.style.opacity = 1;
 		}
@@ -135,7 +135,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleMouseMove = (event) => {
 		this.currMousePosition = getPointerPosition(event.nativeEvent);
 
-		if (this.isDrawing && !this.props.disabled) {
+		if (this.isDrawing) {
 			this.drawLine(this.canvasContext, this.prevMousePosition, this.currMousePosition);
 		}
 
