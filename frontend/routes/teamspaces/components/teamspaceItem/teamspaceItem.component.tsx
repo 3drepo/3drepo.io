@@ -57,7 +57,7 @@ export const TeamspaceItem = (props: IProps) => {
 			label="Add new project"
 			action={onAddProject}
 		/>
-	))(hasPermissions('create_project', permissions));
+	))(hasPermissions('create_project', permissions)) as any;
 
 	return (
 		<TreeList

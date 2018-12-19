@@ -114,7 +114,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				action={this.props.onRemoveClick}
 			/>
 		</RowMenu>
-	))(this.isProjectAdmin())
+	))(this.isProjectAdmin()) as any
 
 	public render() {
 		const { renderChildItem, name, active } = this.props;
