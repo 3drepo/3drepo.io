@@ -18,6 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
+import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
 interface IDialogConfig {
 	title: string;
@@ -33,7 +34,8 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showErrorDialog: ['method', 'dataType', 'error'],
 	showConfirmDialog: ['config'],
 	hideDialog: [],
-	setPendingState: ['isPending']
+	setPendingState: ['isPending'],
+	showScreenshotDialog: ['config']
 }, { prefix: 'DIALOG_' });
 
 export const INITIAL_STATE = {
@@ -72,6 +74,22 @@ export const showConfirmDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
+export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
+	const config = {
+		title: action.config.title || 'Screenshot',
+		template: ScreenshotDialog,
+		onConfirm: action.config.onSave,
+		data: {
+			sourceImage: action.config.sourceImage || ''
+		},
+		DialogProps: {
+			fullScreen: true
+		}
+	};
+
+	return showDialog(state, {config});
+};
+
 export const hideDialog = (state = INITIAL_STATE) => {
 	return { ...state, isOpen: false, isPending: false };
 };
@@ -85,5 +103,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_DIALOG]: showDialog,
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
-	[DialogTypes.SET_PENDING_STATE]: setPendingState
+	[DialogTypes.SET_PENDING_STATE]: setPendingState,
+	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog
 });

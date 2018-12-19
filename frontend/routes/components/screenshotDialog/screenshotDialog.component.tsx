@@ -16,47 +16,27 @@
  */
 
 import * as React from 'react';
-import { range } from 'lodash';
 import EventListener from 'react-event-listener';
 
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import BorderColorIcon from '@material-ui/icons/BorderColor';
-import ClearIcon from '@material-ui/icons/Clear';
-
-import { Eraser } from '../fontAwesomeIcon';
-import {
-	Container,
-	Canvas,
-	ToolsContainer,
-	OptionsDivider,
-	StyledButton,
-	BackgroundImage,
-	HiddenCanvas
-} from './screenshotDialog.styles';
-import { ColorPicker } from '../colorPicker/colorPicker.component';
-import { COLOR, FONT_WEIGHT } from '../../../styles';
-import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { Container, Canvas, BackgroundImage, HiddenCanvas } from './screenshotDialog.styles';
+import { COLOR } from '../../../styles';
 import { Indicator } from './components/indicator/indicator.component';
 import { loadImage } from '../../../helpers/images';
 import { getPointerPosition } from '../../../helpers/events';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { Tools } from './components/tools/tools.component';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
+	disableTools?: boolean;
 	handleResolve: (screenshot) => void;
 	handleClose: () => void;
 }
-
-const TOOL_TYPES = {
-	BRUSH: 1,
-	ERASER: 2
-};
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: COLOR.RED,
 		brushSize: 5,
-		activeTool: TOOL_TYPES.BRUSH,
 		sourceImage: ''
 	};
 
@@ -107,15 +87,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.canvasContext.globalCompositeOperation = 'source-over';
 		this.canvasContext.strokeStyle = this.state.color;
 		this.canvasContext.lineWidth = this.state.brushSize;
-
-		this.setState({ activeTool: TOOL_TYPES.BRUSH });
 	}
 
 	public setEraseMode = () => {
 		this.canvasContext.globalCompositeOperation = 'destination-out';
 		this.canvasContext.lineWidth = this.state.brushSize;
 
-		this.setState({ activeTool: TOOL_TYPES.ERASER, color: COLOR.WHITE });
+		this.setState({ color: COLOR.WHITE });
 	}
 
 	public setSmoothing(context) {
@@ -174,13 +152,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 
-	public getToolColor = (toolType) => {
-		if (this.state.activeTool === toolType) {
-			return 'secondary';
-		}
-		return 'action';
-	}
-
 	public handleSave = async () => {
 		const hiddenCanvasContext = this.hiddenCanvas.getContext('2d');
 		const { width, height } = this.canvas;
@@ -225,9 +196,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public renderBrushSizes = () => range(56, 1).map((size, index) => (
-		<MenuItem key={index} value={size}>{size}</MenuItem>
-	))
+	public renderTools = renderWhenTrue(() => (
+		<Tools
+			innerRef={this.toolsRef}
+			size={this.state.brushSize}
+			color={this.state.color}
+			onDrawClick={this.setBrushMode}
+			onEraseClick={this.setEraseMode}
+			onClearClick={this.clearCanvas}
+			onBrushSizeChange={this.handleBrushSizeChange}
+			onColorChange={this.handleColorChange}
+			onCancel={this.props.handleClose}
+			onSave={this.handleSave}
+		/>
+	));
 
 	public render() {
 		const { color, brushSize, sourceImage } = this.state;
@@ -238,51 +220,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
 				<BackgroundImage src={sourceImage} />
 				<Indicator color={color} size={brushSize} />
-				<ToolsContainer innerRef={this.toolsRef}>
-					<ColorPicker disableUnderline={true} value={color} onChange={this.handleColorChange} />
-					<Select
-						disableUnderline
-						value={brushSize}
-						onChange={this.handleBrushSizeChange}
-						SelectDisplayProps={{
-							style: {
-								fontWeight: FONT_WEIGHT.BOLDER,
-								fontSize: '14px',
-								paddingRight: '25px',
-								textAlign: 'center'
-							}
-						}}
-					>
-						{this.renderBrushSizes()}
-					</Select>
-					<OptionsDivider />
-					<TooltipButton
-						label="Draw"
-						color={this.getToolColor(TOOL_TYPES.BRUSH)}
-						action={this.setBrushMode}
-						Icon={BorderColorIcon}
-					/>
-					<TooltipButton
-						label="Erase"
-						color={this.getToolColor(TOOL_TYPES.ERASER)}
-						action={this.setEraseMode}
-						Icon={Eraser}
-					/>
-					<TooltipButton
-						label="Clear"
-						action={this.clearCanvas}
-						Icon={ClearIcon}
-					/>
-					<OptionsDivider />
-					<StyledButton onClick={this.props.handleClose} color="primary">Cancel</StyledButton>
-					<StyledButton
-						onClick={this.handleSave}
-						color="secondary"
-						variant="raised"
-					>
-						Save
-					</StyledButton>
-				</ToolsContainer>
+				{this.renderTools(!this.props.disableTools)}
 				<Canvas
 					innerRef={this.canvasRef}
 					onMouseDown={this.handleMouseDown}

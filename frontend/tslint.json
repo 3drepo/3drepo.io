@@ -1,24 +1,38 @@
 {   
-    "configPath": "./",
-    "extends": ["tslint:recommended", "tslint-react"],
-    "rules": {
-        "indent": [true, "tabs"],
-        "jsdoc-format": false,
-        "prefer-for-of": false,
-        "no-console": [true, "log", "warning"],
-        "object-literal-sort-keys": false,
-        "no-empty": false,
-        "ordered-imports": false,
-        "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
-        "forin": false,
-        "no-bitwise": false,
-        "quotemark": [true, "single", "jsx-double"],
-
-        "jsx-alignment": false,
-        "jsx-no-multiline-js": false,
-        "jsx-no-lambda": false,
-        "jsx-curly-spacing": [true, "never"],
-        "jsx-equals-spacing": [true, "never"],
-        "jsx-boolean-value": false
-    }
+	"configPath": "./",
+	"extends": ["tslint:recommended", "tslint-react"],
+	"rules": {
+		"indent": [true, "tabs"],
+		"jsdoc-format": false,
+		"prefer-for-of": false,
+		"no-console": [true, "log", "warning"],
+		"object-literal-sort-keys": false,
+		"no-empty": false,
+		"ordered-imports": false,
+		"trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
+		"forin": false,
+		"no-bitwise": false,
+		"quotemark": [true, "single", "jsx-double"],
+		"member-ordering": [
+			true,
+			{
+				"order": [
+					"public-static-field",
+					"private-static-field",
+					"private-instance-field",
+					"public-constructor",
+					"private-constructor",
+					"public-instance-method",
+					"protected-instance-method",
+					"private-instance-method"
+				]
+			}
+		],
+		"jsx-alignment": false,
+		"jsx-no-multiline-js": false,
+		"jsx-no-lambda": false,
+		"jsx-curly-spacing": [true, "never"],
+		"jsx-equals-spacing": [true, "never"],
+		"jsx-boolean-value": false
+	}
 }
