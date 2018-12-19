@@ -15,12 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 
 import { COLOR } from '../../../../../styles';
 import * as ColorPickerStyles from '../../../../components/colorPicker/colorPicker.styles';
+
+export const StyledButton = styled(Button)`
+  && {
+    padding: 8px;
+  }
+
+  &:last-child {
+    margin-left: 8px;
+  }
+`;
 
 export const ToolsContainer = styled.div`
   position: absolute;
@@ -40,17 +50,15 @@ export const ToolsContainer = styled.div`
     border-bottom: none;
     width: 60px;
   }
-`;
 
-export const StyledButton = styled(Button)`
-  && {
-    padding: 8px;
-  }
+  &[disabled] {
+    padding-left: 10px;
 
-  &:last-child {
-    margin-left: 8px;
+    ${StyledButton} {
+      margin-left: 0;
+    }
   }
-`;
+` as any;
 
 export const OptionsDivider = styled(Divider)`
   && {

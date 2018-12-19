@@ -624,12 +624,12 @@ class IssueController implements ng.IController {
 		if (viewpoint.screenshot) {
 			this.showScreenshotDialog({
 				sourceImage: this.apiService.getAPIUrl(viewpoint.screenshot),
-				disableTools: true
+				disabled: true
 			});
 		} else if (this.issueData.descriptionThumbnail) {
 			this.showScreenshotDialog({
 				sourceImage: this.issueData.descriptionThumbnail,
-				disableTools: true
+				disabled: true
 			});
 		}
 	}
