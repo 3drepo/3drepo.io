@@ -623,29 +623,26 @@ class IssueController implements ng.IController {
 	 */
 	public showScreenShot(event, viewpoint) {
 		if (viewpoint.screenshot) {
-
-			// We have a saved screenshot we use that
-			this.screenShot = this.apiService.getAPIUrl(viewpoint.screenshot);
-			this.showScreenshotDialog();
+			this.showScreenshotDialog({
+				sourceImage: this.apiService.getAPIUrl(viewpoint.screenshot)
+			});
 		} else if (this.issueData.descriptionThumbnail) {
-
-			// We haven't saved yet we can use the thumbnail
-			this.screenShot = this.issueData.descriptionThumbnail;
-			this.showScreenshotDialog();
+			this.showScreenshotDialog({
+				sourceImage: this.issueData.descriptionThumbnail
+			});
 		}
 	}
 
 	/**
 	 * Show screen shot dialog
 	 */
-	public showScreenshotDialog() {
+	public showScreenshotDialog(options: { title?: string, sourceImage: string | Promise<string>}) {
 		const config = {
-			title: 'Screenshot',
+			title: options.title || 'Screenshot',
 			template: ScreenshotDialog,
-			confirmText: 'Remove',
 			onConfirm: this.screenShotSave,
 			data: {
-				sourceImage: ''
+				sourceImage: options.sourceImage || ''
 			},
 			DialogProps: {
 				fullScreen: true
@@ -684,7 +681,9 @@ class IssueController implements ng.IController {
 			this.actions[action].selected = false;
 
 			delete this.screenShot; // Remove any clicked on screen shot
-			this.showScreenshotDialog();
+			this.showScreenshotDialog({
+				sourceImage: this.viewerService.getScreenshot()
+			});
 			break;
 
 		}

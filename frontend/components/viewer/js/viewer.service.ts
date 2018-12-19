@@ -322,12 +322,18 @@ export class ViewerService {
 		}
 	}
 
-	public getScreenshot(promise) {
-		if (promise) {
-			this.initialised.promise.then(() => {
-				this.viewer.getScreenshot(promise);
-			});
-		}
+	public async getScreenshot() {
+		await this.initialised.promise;
+
+		// This is anti-pattern, but first we need to modify unity-util to use proper solution
+		const deferred = {} as any;
+		const promise = new Promise((resolve) => {
+			deferred.resolve = resolve;
+		});
+		deferred.promise = promise;
+
+		this.viewer.getScreenshot(deferred);
+		return deferred.promise;
 	}
 
 	public goToExtent() {
