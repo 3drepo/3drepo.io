@@ -29,7 +29,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	sendRequest: AuthActions.sendPasswordChangeRequest
+	sendRequest: AuthActions.sendPasswordChangeRequest,
+	clearMessage: AuthActions.clearAuthMessage
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(PasswordForgot)));

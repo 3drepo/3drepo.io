@@ -30,6 +30,7 @@ interface IProps {
 	sendRequest: (userNameOrEmail) => void;
 	isPending: boolean;
 	message: string;
+	clearMessage: () => void;
 }
 
 interface IState {
@@ -41,8 +42,12 @@ export class PasswordForgot extends React.PureComponent<IProps, IState> {
 		userNameOrEmail: ''
 	};
 
-	public handleSubmit = (data, form) => {
+	public handleSubmit = (data) => {
 		this.props.sendRequest(data.userNameOrEmail);
+	}
+
+	public componentWillUnmount() {
+		this.props.clearMessage();
 	}
 
 	public render() {

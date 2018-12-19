@@ -168,8 +168,8 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 			<Container
 				container
 				direction="column"
-				justify="center"
-				alignItems="center">
+				alignItems="center"
+				wrap="nowrap">
 				<Link to="/login"><Logo /></Link>
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
 					<Panel title="Sign up">

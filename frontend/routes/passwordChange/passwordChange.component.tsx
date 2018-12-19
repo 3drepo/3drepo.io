@@ -42,9 +42,10 @@ const PasswordChangeSchema = Yup.object().shape({
 
 interface IProps {
 	location: any;
-	changePassword: (username, token, password) => void;
 	isPending: boolean;
 	message: string;
+	changePassword: (username, token, password) => void;
+	clearMessage: () => void;
 }
 
 interface IState {
@@ -83,6 +84,10 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 		this.setState({
 			hasInvalidParams: !token || !username
 		});
+	}
+
+	public componentWillUnmount() {
+		this.props.clearMessage();
 	}
 
 	public renderBackToLogin = () => (

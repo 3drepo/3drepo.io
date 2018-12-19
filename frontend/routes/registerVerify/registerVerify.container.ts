@@ -28,7 +28,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	verifyRequest: AuthActions.verify
+	verifyRequest: AuthActions.verify,
+	clearMessage: AuthActions.clearAuthMessage
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterVerify)));

@@ -30,7 +30,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	setLocalSessionStatus: ['status'],
 	register: ['username', 'data'],
 	verify: ['username', 'token'],
-	setAuthMessage: ['message']
+	setAuthMessage: ['message'],
+	clearAuthMessage: []
 }, { prefix: 'AUTH_' });
 
 export const INITIAL_STATE = {
@@ -62,10 +63,15 @@ export const setAuthMessage = (state = INITIAL_STATE, { message }) => {
 	return { ...state, message };
 };
 
+export const clearAuthMessage = (state = INITIAL_STATE) => {
+	return { ...state, message: '' };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
 	[AuthTypes.LOGIN_FAILURE]: loginFailure,
 	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
 	[AuthTypes.SET_LOCAL_SESSION_STATUS]: setLocalSessionStatus,
-	[AuthTypes.SET_AUTH_MESSAGE]: setAuthMessage
+	[AuthTypes.SET_AUTH_MESSAGE]: setAuthMessage,
+	[AuthTypes.CLEAR_AUTH_MESSAGE]: clearAuthMessage
 });

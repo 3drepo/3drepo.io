@@ -29,9 +29,10 @@ interface IProps {
 	match: any;
 	location: any;
 	history: any;
-	verifyRequest: (username, token) => void;
 	message: string;
 	isPending: boolean;
+	verifyRequest: (username, token) => void;
+	clearMessage: () => void;
 }
 
 interface IState {
@@ -66,6 +67,10 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public componentWillUnmount() {
+		this.props.clearMessage();
+	}
+
 	public render() {
 		const { message } = this.state;
 		const { isPending } = this.props;
@@ -74,8 +79,9 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 			<Container
 				container
 				direction="column"
-				justify="center"
-				alignItems="center">
+				alignItems="center"
+				wrap="nowrap"
+			>
 				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">

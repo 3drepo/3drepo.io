@@ -23,19 +23,15 @@ import { Logo } from '../components/logo/logo.component';
 
 import { Container, Paragraph } from './registerRequest.styles';
 
-interface IProps {
-	noop: string; // TODO: Remove sample
-}
-
-export class RegisterRequest extends React.PureComponent<IProps, any> {
-
+export class RegisterRequest extends React.PureComponent<any, any> {
 	public render() {
 		return (
 			<Container
 				container
 				direction="column"
-				justify="center"
-				alignItems="center">
+				alignItems="center"
+				wrap="nowrap"
+				>
 				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Sign up request">
