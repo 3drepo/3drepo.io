@@ -172,7 +172,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		return changes;
 	}
 
-	public handleUpdateSettings = (data, form) => {
+	public handleUpdateSettings = (data) => {
 		const { match, location, updateModelSettings } = this.props;
 		const { modelId, teamspace } = match.params;
 		const queryParams = queryString.parse(location.search);
@@ -190,7 +190,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			type,
 			fourDSequenceTag,
 			surveyPoints: [{
-				position: [ axisX, axisY, axisZ ],
+				position: [ Number(axisX), Number(axisY), Number(axisZ) ],
 				latLong: [ latitude, longitude ]
 			}],
 			topicTypes: types
@@ -231,9 +231,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public renderForm = () => {
 		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
-		const { latitude, longitude, axisX, angleFromNorth, elevation, topicTypes } = this.state;
-		const axisZ = -this.state.axisY;
-		const axisY = -this.state.axisZ;
+		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
 
 		return	(
 			<Formik
