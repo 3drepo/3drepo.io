@@ -16,6 +16,7 @@
  */
 import { subscribe } from '../../../helpers/migration';
 import { selectIsAuthenticated, selectIsPending } from '../../../modules/auth';
+import { STATIC_ROUTES } from '../../../services/staticPages';
 
 class HomeController implements ng.IController {
 
@@ -131,12 +132,9 @@ class HomeController implements ng.IController {
 		this.state = this.StateManager.state;
 		this.query = this.StateManager.query;
 
-		this.legalDisplays = [];
-		if (angular.isDefined(this.ClientConfigService.legal)) {
-			this.legalDisplays = this.ClientConfigService.legal;
-		}
-		this.legalDisplays.push({title: 'Pricing', page: 'http://3drepo.org/pricing'});
-		this.legalDisplays.push({title: 'Contact', page: 'http://3drepo.org/contact/'});
+		this.legalDisplays = STATIC_ROUTES;
+		this.legalDisplays.push({title: 'Pricing', path: 'http://3drepo.org/pricing'});
+		this.legalDisplays.push({title: 'Contact', path: 'http://3drepo.org/contact/'});
 
 		this.isLiteMode = this.getLiteModeState();
 		this.handlePotentialMobile();
