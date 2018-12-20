@@ -53,7 +53,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 		activeTool: TOOL_TYPES.BRUSH
 	};
 
-	public handleToolClick = (type, callback?) => (event) => {
+	public handleToolClick = (type, callback?) => () => {
 		this.setState({ activeTool: type }, callback);
 	}
 
@@ -77,6 +77,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 					disableUnderline
 					value={size}
 					onChange={onBrushSizeChange}
+					MenuProps={{
+						MenuListProps: {
+							style: {
+								maxHeight: '30vh'
+							}
+						}
+					}}
 					SelectDisplayProps={{
 						style: {
 							fontWeight: FONT_WEIGHT.BOLDER,
