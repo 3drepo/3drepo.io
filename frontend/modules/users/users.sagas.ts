@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, call } from 'redux-saga/effects';
+import { put, select, call, takeEvery } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 
 import * as API from '../../services/api';
 import { UsersTypes, UsersActions } from './users.redux';
 import { selectCachedResponses } from './users.selectors';
 
-const CACHE_RESPONSE_TTL = 10000;
+const CACHE_RESPONSE_TTL = 40000;
 
 export function* fetchUserDetails({ teamspace, username }) {
 	try {
@@ -33,23 +33,17 @@ export function* fetchUserDetails({ teamspace, username }) {
 
 		if (!cachedResponses[key]) {
 			apiResponse = yield API.getUserDetails(teamspace, username);
-
-			const date = new Date();
-			const time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-			apiResponse.data = {
-				firstName: `${username}`, lastName: 'Surname', companyName: 'Company X', time
-			}; // TODO: Remove them after real backend data
 		}
 
 		const response = cachedResponses[key] || apiResponse.data;
 
 		yield put(UsersActions.setUserDetailsResponse(key, response));
-		yield	call(delay, CACHE_RESPONSE_TTL);
-		yield	put(UsersActions.setUserDetailsResponse(key, null));
-	} catch (e) {
-	}
+		yield call(delay, CACHE_RESPONSE_TTL, true);
+		yield put(UsersActions.setUserDetailsResponse(key, null));
+
+	} catch (e) {}
 }
 
 export default function* UsersSaga() {
-	yield takeLatest(UsersTypes.FETCH_USER_DETAILS, fetchUserDetails);
+	yield takeEvery(UsersTypes.FETCH_USER_DETAILS, fetchUserDetails);
 }

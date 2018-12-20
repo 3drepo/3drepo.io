@@ -33,11 +33,11 @@ export class HoverableUsername extends React.PureComponent<IProps, any> {
 
 	public get tootliptText() {
 		if (this.props.userDetails) {
-			const { firstName, lastName, companyName, time } = this.props.userDetails;
+			const { firstName, lastName, company } = this.props.userDetails;
 			return (
 				<TooltipText>
 					<FullName>{firstName} {lastName}</FullName>
-					<CompanyName>{companyName} {time}</CompanyName>
+					<CompanyName>{company}</CompanyName>
 				</TooltipText>
 			);
 		}

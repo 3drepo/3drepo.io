@@ -24,5 +24,10 @@ export const selectCachedResponses = createSelector(
 );
 
 export const selectUserDetails = (teamspace, username) => createSelector(
-	selectCachedResponses, (responses) => responses[`${teamspace}-${username}`]
+	selectCachedResponses, (responses) => {
+		if (responses && responses[`${teamspace}-${username}`]) {
+			return responses[`${teamspace}-${username}`];
+		}
+		return null;
+	}
 );
