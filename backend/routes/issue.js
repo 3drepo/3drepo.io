@@ -236,6 +236,10 @@ function findIssueById(req, res, next) {
 
 }
 
+function formatDate(dateToFormat, formatToUse) {
+	return moment(dateToFormat).format(formatToUse);
+}
+
 function renderIssuesHTML(req, res, next) {
 
 	const place = utils.APIInfo(req);
@@ -247,7 +251,7 @@ function renderIssuesHTML(req, res, next) {
 	* Create dynamic Print report values to use in template.
 	**/
 	const reportValues = {};
-	const reportDate = moment().format("Do MMMM YYYY");
+	const reportDate = formatDate(new Date(), "Do MMMM YYYY");
 	const currentUser = req.session.user.username;
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
@@ -291,7 +295,7 @@ function renderIssuesHTML(req, res, next) {
 			if (issues[i].hasOwnProperty("comments")) {
 				for (let j = 0; j < issues[i].comments.length; j++) {
 					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
-					issues[i].comments[j].created = moment(issues[i].comments[j].created).format("hh:mm, Do MMM YYYY");
+					issues[i].comments[j].created = formatDate(issues[i].comments[j].created, "hh:mm, Do MMM YYYY");
 				}
 			}
 
