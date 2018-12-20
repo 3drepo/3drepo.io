@@ -68,10 +68,3 @@ export const Info = styled.div`
   justify-content: space-between;
   margin-top: 8px;
 `;
-
-export const Author = styled(Typography)`
-  && {
-    color: ${COLOR.BLACK_40};
-    font-size: 11px;
-  }
-`;
