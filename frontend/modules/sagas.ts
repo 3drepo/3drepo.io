@@ -23,6 +23,6 @@ export default function* rootSaga() {
 		fork(authSaga),
 		fork(notificationsSaga),
 		fork(staticPagesSaga),
-        fork(gisSaga)// <-- INJECT MODULE SAGA -->
+		fork(gisSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

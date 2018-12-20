@@ -27,6 +27,6 @@ export default function createReducer() {
 		auth: authReducer,
 		notifications: notificationsReducer,
 		staticPages: staticPagesReducer,
-        gis: gisReducer// <-- INJECT MODULE REDUCER -->
+		gis: gisReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

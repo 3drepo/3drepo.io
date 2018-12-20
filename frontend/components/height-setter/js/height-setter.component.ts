@@ -27,16 +27,7 @@ const bindings: IBindings = {
 	onHeightUpdate: '&'
 };
 
-class Changes implements ng.IOnChangesObject, IBindings {
-	[key: string]: ng.IChangesObject<any>;
-
-	public contentData: ng.IChangesObject<any>;
-	public onHeightUpdate: ng.IChangesObject<any>;
-}
-
-/* tslint:disable */
 class HeightSetterController implements ng.IController, IBindings {
-/* tslint:enable */
 	public static $inject: string[] = [
 		'$element',
 		'$timeout',
@@ -93,7 +84,6 @@ class HeightSetterController implements ng.IController, IBindings {
 	public handleElementChange = (mutationsList) => {
 		const shouldUpdateHeight = mutationsList
 			.some((mutation) => mutation.type === 'childList' && mutation.addedNodes.length);
-		debugger;
 		if (shouldUpdateHeight) {
 			this.updateHeight();
 		}
