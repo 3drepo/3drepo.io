@@ -15,22 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import Select from 'react-select';
+import TextField from '@material-ui/core/TextField';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
+import { theme } from '../../../../styles/theme';
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated
-);
+export const StyledSelect = styled(Select)`
+	width: 100%;
+	/* display: flex; */
+`;
 
-export const selectActiveSession = createSelector(
-	selectAuthDomain, () => JSON.parse(window.localStorage.getItem('loggedIn'))
-);
+export const StyledTextField = styled(TextField)`
+	/* width: 100%;
+	display: flex; */
+`;
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending
-);
-
-export const selectMessage = createSelector(
-	selectAuthDomain, (state) => state.message
-);
+export const Input = styled.div`
+	width: 100%;
+	display: flex;
+`;

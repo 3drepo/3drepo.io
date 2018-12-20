@@ -110,8 +110,6 @@ class HomeController implements ng.IController {
 		this.AnalyticService.init();
 		this.SWService.init();
 
-		this.precacheTeamspaceTemplate();
-
 		// Pages to not attempt a interval triggered logout from
 
 		this.legalPages = this.AuthService.legalPages;
@@ -276,20 +274,6 @@ class HomeController implements ng.IController {
 		return pages.some((page) => {
 			return state[page] === true;
 		});
-	}
-
-	public precacheTeamspaceTemplate() {
-
-		// The account teamspace template is hefty. If we cache it ASAP
-		// we can improve the percieved performance for the user
-
-		const preCacheTemplates = [
-			'templates/sign-up.html',
-			'templates/register-request.html'
-		];
-
-		this.TemplateService.precache(preCacheTemplates);
-
 	}
 
 	public handlePotentialMobile() {

@@ -15,22 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
-
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated
-);
-
-export const selectActiveSession = createSelector(
-	selectAuthDomain, () => JSON.parse(window.localStorage.getItem('loggedIn'))
-);
-
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending
-);
-
-export const selectMessage = createSelector(
-	selectAuthDomain, (state) => state.message
-);
+export const Container = styled.div`
+  margin: 24px 0 18px;
+`;

@@ -17,13 +17,14 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
-import { getAngularService } from '../../helpers/migration';
+import { getAngularService, history } from '../../helpers/migration';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { SnackbarActions } from '../snackbar';
+import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
 
 export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
@@ -123,7 +124,8 @@ export function* sendPasswordChangeRequest({ userNameOrEmail }) {
 
 	try {
 		yield API.forgotPassword(userNameOrEmail);
-		yield put(SnackbarActions.show('Thank you. You will receive an email shortly with a link to change your password.'));
+		yield put(AuthActions.setAuthMessage(forgotPasswordMessages.success));
+
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
 	}
@@ -135,11 +137,39 @@ export function* changePassword({ username, token, password }) {
 
 	try {
 		yield API.changePassword(username, token, password);
-		yield put(SnackbarActions.show('Your password has been reset.'));
+		yield put(AuthActions.setAuthMessage(changePasswordMessages.success));
 	} catch (e) {
 		yield put(DialogActions.showErrorDialog('change', 'password', e.response));
 	}
 
+	yield put(AuthActions.setPendingStatus(false));
+}
+
+export function* register({ username, data }) {
+	yield put(AuthActions.setPendingStatus(true));
+
+	try {
+		yield API.register(username, data);
+		yield history.push('register-request');
+	} catch (e) {
+		yield put(DialogActions.showErrorDialog('register', 'user', e.response));
+	}
+	yield put(AuthActions.setPendingStatus(false));
+}
+
+export function* verify({ username, token }) {
+	yield put(AuthActions.setPendingStatus(true));
+
+	try {
+		yield API.verify(username, token);
+		yield put(AuthActions.setAuthMessage(verificationMessages.success));
+	} catch (e) {
+		if (e.response.data.code === 'ALREADY_VERIFIED') {
+			yield put(AuthActions.setAuthMessage(verificationMessages.alreadyVerified));
+		} else {
+			yield put(AuthActions.setAuthMessage(e.response.data.message));
+		}
+	}
 	yield put(AuthActions.setPendingStatus(false));
 }
 
@@ -150,4 +180,6 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.SESSION_EXPIRED, sessionExpired);
 	yield takeLatest(AuthTypes.SEND_PASSWORD_CHANGE_REQUEST, sendPasswordChangeRequest);
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
+	yield takeLatest(AuthTypes.REGISTER, register);
+	yield takeLatest(AuthTypes.VERIFY, verify);
 }

@@ -17,20 +17,12 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
+import { withRouter } from 'react-router-dom';
+import { RegisterRequest } from './registerRequest.component';
 
-import { PasswordChange } from './passwordChange.component';
-import { AuthActions, selectIsPending, selectMessage } from '../../modules/auth';
+const mapStateToProps = createStructuredSelector({});
 
-const mapStateToProps = createStructuredSelector({
-	isPending: selectIsPending,
-	message: selectMessage
-});
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	changePassword: AuthActions.changePassword,
-	clearMessage: AuthActions.clearAuthMessage
-}, dispatch);
-
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(PasswordChange)));
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterRequest)));

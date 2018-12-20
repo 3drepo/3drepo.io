@@ -15,22 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import Grid from '@material-ui/core/Grid';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
+import * as PanelStyles from '../components/panel/panel.styles';
+import { COLOR, FONT_WEIGHT } from '../../styles';
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated
-);
+const CONTENT_PADDING = 20;
 
-export const selectActiveSession = createSelector(
-	selectAuthDomain, () => JSON.parse(window.localStorage.getItem('loggedIn'))
-);
+export const Container = styled(Grid)`
+	&& {
+		height: 100%;
+		padding-top: 30px;
+	}
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending
-);
+	${PanelStyles.Container} {
+		margin-top: 30px;
+	}
 
-export const selectMessage = createSelector(
-	selectAuthDomain, (state) => state.message
-);
+	${PanelStyles.Content} {
+		padding: ${CONTENT_PADDING}px;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+`;
+
+export const Paragraph = styled.p`
+	color: ${COLOR.BLACK};
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	margin-top: 10px;
+`;
