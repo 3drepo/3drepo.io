@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
-import { Container, Username } from './hoverableUsername.styles';
+import { Container, Username, TooltipText, FullName, CompanyName } from './hoverableUsername.styles';
 
 interface IProps {
 	name: string;
@@ -33,8 +33,13 @@ export class HoverableUsername extends React.PureComponent<IProps, any> {
 
 	public get tootliptText() {
 		if (this.props.userDetails) {
-			const { firstName, lastName, companyName, time} = this.props.userDetails;
-			return `${firstName} ${lastName} (${companyName}) [${time}]`;
+			const { firstName, lastName, companyName, time } = this.props.userDetails;
+			return (
+				<TooltipText>
+					<FullName>{firstName} {lastName}</FullName>
+					<CompanyName>{companyName} {time}</CompanyName>
+				</TooltipText>
+			);
 		}
 		return '';
 	}

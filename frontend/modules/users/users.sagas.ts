@@ -37,7 +37,7 @@ export function* fetchUserDetails({ teamspace, username }) {
 			const date = new Date();
 			const time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 			apiResponse.data = {
-				firstName: username, lastName: username, companyName: 'Fake company name', time
+				firstName: `${username}`, lastName: 'Surname', companyName: 'Company X', time
 			}; // TODO: Remove them after real backend data
 		}
 

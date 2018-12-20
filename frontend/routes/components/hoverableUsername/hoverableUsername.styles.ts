@@ -30,3 +30,7 @@ export const Username = styled(Typography)`
     font-size: 11px;
   }
 `;
+
+export const TooltipText = styled.div``;
+export const FullName = styled.div``;
+export const CompanyName = styled.div``;
