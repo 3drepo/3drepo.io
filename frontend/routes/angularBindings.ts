@@ -36,4 +36,4 @@ angular
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('passwordChange', wrap(PasswordChange))
 	.component('viewerPanel', wrap(ViewerPanel))
-	.component('gis', wrap(Gis));
+	.component('gis', wrap(Gis, ['maxHeight']));

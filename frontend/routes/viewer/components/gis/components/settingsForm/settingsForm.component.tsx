@@ -21,13 +21,11 @@ import { Form, Field } from 'formik';
 
 import { ViewerPanelFooter, ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { Header, Headline, StyledTextField, FooterWrapper, StyledSaveButton } from './settingsForm.styles';
+import { StyledForm, Header, Headline, StyledTextField, FooterWrapper, StyledSaveButton } from './settingsForm.styles';
 
 import SaveIcon from '@material-ui/icons/Save';
 
-const validateRequiredNumber =
-	Yup.number()
-	.required(VALIDATIONS_MESSAGES.REQUIRED);
+const validateRequiredNumber = Yup.number().required(VALIDATIONS_MESSAGES.REQUIRED);
 
 export const SettingsSchema = Yup.object().shape({
 	latitude: validateRequiredNumber,
@@ -48,7 +46,7 @@ export const SettingsForm = (props) => {
 	const {values: {latitude, longitude, angleFromNorth, axisX, axisY, axisZ}, handleChange, unit} = props;
 
 	return (
-		<Form>
+		<StyledForm>
 			<ViewerPanelContent>
 				<Header>
 					To visualize map tiles match GIS point with project base point
@@ -140,6 +138,6 @@ export const SettingsForm = (props) => {
 						</StyledSaveButton>} />
 				</FooterWrapper>
 			</ViewerPanelFooter>
-		</Form>
+		</StyledForm>
 	);
 };

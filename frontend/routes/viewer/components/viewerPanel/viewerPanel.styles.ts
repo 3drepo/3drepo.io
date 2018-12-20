@@ -59,6 +59,7 @@ export const TitleIcon = styled.div`
 export const ViewerPanelContent = styled.div`
   background-color: ${COLOR.WHITE_87};
   padding: 24px;
+  overflow: auto;
 `;
 
 export const ViewerPanelFooter = styled.div`
@@ -67,4 +68,5 @@ export const ViewerPanelFooter = styled.div`
   padding: 8px 24px;
   border-top: 1px solid ${COLOR.BLACK_20};
   display: flex;
+  flex: none;
 `;

@@ -19,9 +19,14 @@ import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
-import SaveIcon from '@material-ui/icons/Save';
+import { Form } from 'formik';
 
 import { COLOR } from '../../../../../../styles';
+
+export const StyledForm = styled(Form)`
+  display: flex;
+  flex-direction: column;
+`;
 
 export const Header = styled.div``;
 
