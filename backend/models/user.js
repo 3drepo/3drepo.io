@@ -1177,7 +1177,7 @@ schema.statics.teamspaceMemberCheck = function (teamspace, user) {
 
 schema.statics.getTeamMemberInfo = function (teamspace, user) {
 	return User.findByUserName(user).then((userEntry) => {
-		if(!userEntry.isMemberOfTeamspace(teamspace)) {
+		if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		} else {
 			return {
