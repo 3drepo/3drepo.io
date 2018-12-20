@@ -8,6 +8,7 @@ import modelSaga from './model/model.sagas';
 import authSaga from './auth/auth.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import staticPagesSaga from './staticPages/staticPages.sagas';
+import usersSaga from './users/users.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -20,6 +21,7 @@ export default function* rootSaga() {
 		fork(modelSaga),
 		fork(authSaga),
 		fork(notificationsSaga),
-		fork(staticPagesSaga)// <-- INJECT MODULE SAGA -->
+		fork(staticPagesSaga),
+		fork(usersSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }
