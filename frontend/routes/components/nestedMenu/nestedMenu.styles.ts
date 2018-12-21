@@ -16,5 +16,46 @@
  */
 
 import styled from 'styled-components';
+import List from '@material-ui/core/List';
+import { COLOR } from './../../../styles/colors';
+import ListItem from '@material-ui/core/ListItem';
+import Typography from '@material-ui/core/Typography';
 
-export const Container = styled.div``;
+export const MenuList = styled(List)`
+  background-color: ${COLOR.WHITE};
+  width: 100%;
+  min-width: 140px;
+  max-width: 300px;
+`;
+
+export const NestedWrapper = styled.div`
+  position: relative;
+`;
+
+export const ChildMenu = styled.div`
+  background-color: ${COLOR.WHITE};
+  position: absolute;
+  left: 100%;
+  top: 0;
+  z-index: 1;
+  min-width: 80px;
+  max-width: 220px;
+`;
+
+export const StyledItemText = styled(Typography)`
+  && {
+    color: ${COLOR.BLACK_60};
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+`;
+
+export const StyledListItem = styled(ListItem)`
+  && {
+    padding: 2px 10px;
+    height: 30px;
+  }
+`;

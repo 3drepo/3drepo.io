@@ -17,41 +17,83 @@
 
 import * as React from 'react';
 
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import { SubMenuItem } from './components/subMenuItem/subMenuItem.component';
+import List from '@material-ui/core/List';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ArrowRight from '@material-ui/icons/ArrowRight';
+
+import { MenuList, NestedWrapper, ChildMenu, StyledItemText, StyledListItem } from './nestedMenu.styles';
 
 interface IProps {
-	menuItems: any[];
+	items: any[];
 }
 
+export const MenuListItem = ({Icon, caption, parent = false, onMouseEnter = null}) => (
+	<StyledListItem button onMouseEnter={parent ? onMouseEnter : null}>
+		{Icon &&
+			<ListItemIcon>
+				<Icon />
+			</ListItemIcon>
+		}
+		<StyledItemText>{caption} {parent && <ArrowRight />}</StyledItemText>
+	</StyledListItem>
+);
 export class NestedMenu extends React.PureComponent<IProps, any> {
 	public state = {
-		open: false
+		activeItem: null
 	};
 
+	public parentRef = React.createRef<HTMLElement>();
+
+	public showSubMenu = (e) => {
+		this.setState({ activeItem: e });
+	}
+
+	public hideSubMenu = () => {
+		this.setState({ activeItem: null });
+	}
 
 	public render() {
-		const { menuItems, open } = this.props;
+		const { items } = this.props;
 
 		return (
-			<Menu open={open}>
-				{menuItems.map((item) => {
-					if (item.hasOwnProperty('subMenuItems')) {
+			<MenuList>
+			{
+				items.map((item, index) => {
+					if (!item.subItems) {
 						return (
-							<SubMenuItem
-								key={item.key}
+							<MenuListItem
+								Icon={item.Icon}
 								caption={item.caption}
-								menuItems={item.subMenuItems}
 							/>
 						);
+					} else {
+						return (
+							<NestedWrapper onMouseLeave={this.hideSubMenu}>
+								<MenuListItem
+									Icon={item.Icon}
+									caption={item.caption}
+									parent={true}
+									onMouseEnter={() => this.showSubMenu(index)}
+								/>
+								{index === this.state.activeItem &&
+									<ChildMenu>
+										<List>
+											{item.subItems.map((subItem) =>
+												(<MenuListItem
+														Icon={subItem.Icon}
+														caption={subItem.caption}
+													/>
+												))
+											}
+										</List>
+									</ChildMenu>
+								}
+							</NestedWrapper>
+						);
 					}
-
-					return(
-						<MenuItem key={item.key}>{item.caption}</MenuItem>
-					);
-				})}
-			</Menu>
+				})
+			}
+			</MenuList>
 		);
 	}
 }
