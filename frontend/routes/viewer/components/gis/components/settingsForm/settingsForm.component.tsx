@@ -17,11 +17,11 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Form, Field } from 'formik';
+import { Field } from 'formik';
 
-import { ViewerPanelFooter, ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
+import { ViewerPanelFooter, ViewerPanelContent, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { StyledForm, Header, Headline, StyledTextField, FooterWrapper, StyledSaveButton } from './settingsForm.styles';
+import { StyledForm, Header, Headline, StyledTextField } from './settingsForm.styles';
 
 import SaveIcon from '@material-ui/icons/Save';
 
@@ -47,7 +47,7 @@ export const SettingsForm = (props) => {
 
 	return (
 		<StyledForm>
-			<ViewerPanelContent isPadding={true}>
+			<ViewerPanelContent className="height-catcher" isPadding={true}>
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>
@@ -125,18 +125,18 @@ export const SettingsForm = (props) => {
 					/>
 				)} />
 			</ViewerPanelContent>
-			<ViewerPanelFooter>
-				<FooterWrapper>
-					<Field render={ ({ form }) =>
-						<StyledSaveButton
-							type="submit"
-							aria-label="Save"
-							color="secondary"
-							disabled={!form.isValid || form.isValidating}
-						>
-							<SaveIcon />
-						</StyledSaveButton>} />
-				</FooterWrapper>
+			<ViewerPanelFooter alignItems="center" justify="flex-end">
+				<Field render={({ form }) => (
+					<ViewerPanelButton
+						type="submit"
+						aria-label="Save"
+						color="secondary"
+						disabled={!form.isValid || form.isValidating}
+						variant="fab"
+					>
+						<SaveIcon />
+					</ViewerPanelButton>
+				)} />
 			</ViewerPanelFooter>
 		</StyledForm>
 	);

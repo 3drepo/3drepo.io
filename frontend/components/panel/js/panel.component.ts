@@ -229,7 +229,8 @@ class PanelController implements ng.IController {
 			const takenHeight = c.panelTakenHeight;
 			const spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
 			itemsLeftToCalculateSpace--;
-			c.height = Math.max(Math.min((c.requestedHeight || c.minHeight), spaceDivisions - takenHeight ), c.minHeight);
+			const newHeight = Math.max(Math.min((c.requestedHeight || c.minHeight), spaceDivisions - takenHeight), c.minHeight);
+			c.height = isNaN(newHeight) ? availableHeight : newHeight;
 			availableHeight -= c.height + takenHeight;
 		});
 	}

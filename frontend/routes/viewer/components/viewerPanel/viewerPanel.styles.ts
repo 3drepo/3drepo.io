@@ -17,56 +17,71 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../styles/colors';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 export const TitleContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin: 0 -16px;
-  width: calc(100% + 32px);
+	display: flex;
+	justify-content: space-between;
+	margin: 0 -16px;
+	width: calc(100% + 32px);
 
-  button {
-    color: ${COLOR.WHITE};
+	button {
+		color: ${COLOR.WHITE};
 
-    &:disabled {
-      color: ${COLOR.GRAY};
-    }
-  }
+		&:disabled {
+			color: ${COLOR.GRAY};
+		}
+	}
 `;
 
 export const Title = styled.div`
-  align-items: center;
-  display: flex;
+	align-items: center;
+	display: flex;
 `;
 
 export const Actions = styled.div`
-  align-items: center;
-  display: flex;
+	align-items: center;
+	display: flex;
 `;
 
 export const Action = styled.span`
-  color: ${COLOR.WHITE};
+	color: ${COLOR.WHITE};
 `;
 
 export const TitleIcon = styled.div`
-  align-self: center;
-  height: 100%;
-  width: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	align-self: center;
+	height: 100%;
+	width: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 `;
 
 export const ViewerPanelContent = styled.div`
-  background-color: ${COLOR.WHITE_87};
-  padding: ${(props: any) => props.isPadding ? '24px' : '0'};
-  overflow: auto;
+	background-color: ${COLOR.WHITE_87};
+	padding: ${(props: any) => props.isPadding ? '24px' : '0'};
+	overflow: auto;
 ` as any;
 
-export const ViewerPanelFooter = styled.div`
-  background-color: ${COLOR.WHITE};
-  padding: 24px;
-  padding: 8px 24px;
-  border-top: 1px solid ${COLOR.BLACK_20};
-  display: flex;
-  flex: none;
+export const ViewerPanelFooter = styled(Grid).attrs({
+	direction: 'row',
+	container: true,
+	wrap: 'nowrap'
+})`
+	background-color: ${COLOR.WHITE};
+	padding: 0 16px;
+	border-top: 1px solid ${COLOR.BLACK_20};
+	flex: none;
+	height: 65px;
+	font-size: 14px;
+`;
+
+export const ViewerPanelButton = styled(Button)`
+	&& {
+		flex: none;
+		margin-right: -3px;
+		width: 40px;
+		height: 40px;
+	}
 `;

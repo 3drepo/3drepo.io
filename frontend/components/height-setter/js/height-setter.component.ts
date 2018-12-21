@@ -65,7 +65,7 @@ class HeightSetterController implements ng.IController, IBindings {
 	}
 
 	get contentHeight() {
-		return this.content[0].querySelector('form > div:first-child').scrollHeight;
+		return this.content[0].querySelector('.height-catcher').scrollHeight;
 	}
 
 	public $onInit(): void {}

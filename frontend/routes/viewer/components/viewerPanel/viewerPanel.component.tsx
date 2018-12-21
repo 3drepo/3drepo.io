@@ -71,7 +71,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	)
 
 	public renderLoader = () => (
-		<ViewerPanelContent>
+		<ViewerPanelContent isPadding={true}>
 			<Loader />
 		</ViewerPanelContent>
 	)
