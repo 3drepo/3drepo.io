@@ -17,32 +17,26 @@
 
 import * as React from 'react';
 import Truncate from 'react-truncate';
-import ArrowIcon from '@material-ui/icons/ArrowForward';
 
-import { DateTime } from './../dateTime/dateTime.component';
+import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
 
 import {
 	MenuItemContainer,
 	Thumbnail,
 	Content,
-	Title,
 	Description,
-	Author,
-	Date,
 	RoleIndicator,
-	StatusIcon,
-	Details,
 	Container,
 	ThumbnailWrapper,
-	Status,
 	ArrowContainer,
-	StyledArrowIcon
+	StyledArrowIcon,
+	Name
 } from './previewListItem.styles';
 
 interface IProps {
 	itemClick: () => void;
 	onArrowClick: () => void;
-	title: string;
+	name: string;
 	description: string;
 	author: string;
 	createdDate: string;
@@ -50,8 +44,11 @@ interface IProps {
 	thumbnail: string;
 	status: string;
 	priority: string;
+	count: number;
+	roleColor: string;
+	StatusIconComponent: any;
+	statusColor: string;
 }
-
 interface IState {
 	active: boolean;
 }
@@ -82,26 +79,33 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { title, description, author, createdDate, thumbnail } = this.props;
+		const {
+			name,
+			roleColor,
+			count,
+			description,
+			author,
+			createdDate,
+			thumbnail,
+			StatusIconComponent,
+			statusColor
+		} = this.props;
 
 		return (
 			<MenuItemContainer expired={this.isExpiredDate} onClick={this.handleItemClick}>
 				<Container>
-					<RoleIndicator />
+					<RoleIndicator color={roleColor} />
 					<ThumbnailWrapper>
 						<Thumbnail src={thumbnail} />
 					</ThumbnailWrapper>
 					<Content>
-						<Title>{title}</Title>
-						<Details>
-							<Status>
-								<StatusIcon />
-								<Author>{author}</Author>
-							</Status>
-							<Date>
-								<DateTime value={createdDate} format="DD MMM" />
-							</Date>
-						</Details>
+						<Name>{`${count}. ${name}`}</Name>
+						<PreviewItemInfo
+							author={author}
+							StatusIconComponent={StatusIconComponent}
+							statusColor={statusColor}
+							createdAt={createdDate}
+						/>
 						<Description>
 							<Truncate lines={3}>
 								{description}
