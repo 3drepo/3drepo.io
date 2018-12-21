@@ -337,8 +337,8 @@ export class Viewer {
 		UnityUtil.viewer = this;
 	}
 
-	public getScreenshot(promise) {
-		UnityUtil.requestScreenShot(promise);
+	public getScreenshot() {
+		return UnityUtil.requestScreenShot();
 	}
 
 	public diffToolSetAsComparator(account: string, model: string) {
