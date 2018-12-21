@@ -433,7 +433,7 @@ export class PanelService {
 			show: false,
 			help: 'List current viewpoints',
 			icon: 'camera_alt',
-			minHeight: 80,
+			minHeight: 150,
 			fixedHeight: false,
 			options: [
 				{type: 'filter', visible: true}

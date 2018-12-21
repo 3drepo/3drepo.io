@@ -39,13 +39,13 @@ export const ModelDirectoryItem = (props: IProps) => {
 	const hasFedPermissions = hasPermissions('create_federation', permissions);
 	const hasModelPermissions = hasPermissions('create_model', permissions);
 
-	const renderActions = () => renderWhenTrue((
+	const renderActions = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label={`Add new ${name.slice(0, -1).toLowerCase()}`}
 			action={onAddClick}
 		/>
-	))(hasFedPermissions || hasModelPermissions);
+	))(hasFedPermissions || hasModelPermissions) as any;
 
 	return (
 		<TreeList
