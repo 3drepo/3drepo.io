@@ -18,8 +18,8 @@
 import * as React from 'react';
 import { Field } from 'formik';
 
-import { ViewerPanelFooter, ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
-import { StyledForm, Header, Headline, StyledTextField, FooterWrapper, StyledSaveButton } from './settingsForm.styles';
+import { ViewerPanelFooter, ViewerPanelContent, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { StyledForm, Header, Headline, StyledTextField } from './settingsForm.styles';
 
 import SaveIcon from '@material-ui/icons/Save';
 
@@ -99,18 +99,18 @@ export const SettingsForm = (props) => {
 					/>
 				)} />
 			</ViewerPanelContent>
-			<ViewerPanelFooter>
-				<FooterWrapper>
-					<Field render={ ({ form }) =>
-						<StyledSaveButton
-							type="submit"
-							aria-label="Save"
-							color="secondary"
-							disabled={!form.isValid || form.isValidating}
-						>
-							<SaveIcon />
-						</StyledSaveButton>} />
-				</FooterWrapper>
+			<ViewerPanelFooter alignItems="center" justify="flex-end">
+				<Field render={({ form }) => (
+					<ViewerPanelButton
+						type="submit"
+						aria-label="Save"
+						color="secondary"
+						disabled={!form.isValid || form.isValidating}
+						variant="fab"
+					>
+						<SaveIcon />
+					</ViewerPanelButton>
+				)} />
 			</ViewerPanelFooter>
 		</StyledForm>
 	);

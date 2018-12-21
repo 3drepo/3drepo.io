@@ -24,20 +24,15 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Input from '@material-ui/core/Input';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 
 import { Form } from 'formik';
-
 import { COLOR } from '../../../../styles/colors';
 
-export const FooterWrapper = styled.div`
+export const Container = styled.div`
   display: flex;
-  width: 100%;
-  position: relative;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 10px 16px;
-  box-sizing: border-box;
+  flex-direction: column;
 `;
 
 export const ViewsCountInfo = styled.p`
@@ -148,6 +143,7 @@ export const SearchField = styled(Input)`
   && {
     padding: 12px;
     width: 100%;
+    flex: none;
   }
 `;
 
@@ -161,7 +157,7 @@ export const NameRow = styled.div`
 export const IconsGroup = styled.div`
   display: flex;
   align-items: center;
-  margin-right: 21px;
+  margin-right: 11px;
   flex-direction: column;
 `;
 
@@ -170,12 +166,6 @@ export const StyledForm = styled(Form)`
   align-items: center;
   flex: 1;
   justify-content: space-between;
-`;
-
-export const AddIconButton = styled(IconButton)`
-  && {
-    margin-right: -12px;
-  }
 `;
 
 export const SaveIconButton = styled(IconButton)`
