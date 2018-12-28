@@ -1,1 +1,14 @@
-{  "name": "3D Repo API Documentation",  "version": "0.0.0",  "description": "Detailed Documentation of API endpoints",  "apidoc": "0.3.0",  "sampleUrl": false,  "defaultVersion": "0.0.0",  "generator": {    "name": "apidoc",    "time": "2018-12-03T15:41:01.684Z",    "url": "http://apidocjs.com",    "version": "0.17.7"  }}
+{
+  "name": "3D Repo API Documentation",
+  "version": "0.0.0",
+  "description": "Detailed Documentation of API endpoints",
+  "apidoc": "0.3.0",
+  "sampleUrl": false,
+  "defaultVersion": "0.0.0",
+  "generator": {
+    "name": "apidoc",
+    "time": "2018-12-28T19:30:16.380Z",
+    "url": "http://apidocjs.com",
+    "version": "0.17.7"
+  }
+}
