@@ -88,7 +88,10 @@ export class UnityUtil {
 			onProgress: this.onProgress
 		};
 		UnityLoader.Error.handler = this.onUnityError;
-		if (window && (window as any).Module) {
+		if (window) {
+			if (!(window as any).Module) {
+				window.Module = {};
+			}
 			unitySettings.Module = (window as any).Module;
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
