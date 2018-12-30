@@ -281,11 +281,6 @@ config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 
-// Settings for Unity
-config.unitySettings = coalesce(config.unitySettings, {
-	TOTAL_MEMORY: 2130706432
-});
-
 // default vat validation url
 config.vat = coalesce(config.vat, {});
 config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl");
