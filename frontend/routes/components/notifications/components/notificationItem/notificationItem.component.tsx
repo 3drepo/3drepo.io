@@ -49,6 +49,7 @@ const TYPES = {
 interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	onClick?: (e: React.SyntheticEvent) => void;
 	history: any;
 }
 
@@ -106,13 +107,26 @@ const getSummary  = (notification) =>  `In ${notification.modelName}`;
 export class NotificationItem extends React.PureComponent<IProps, IState> {
 	public gotoNotification = () => {
 		const {teamSpace, modelId, _id: notificationId, history} = this.props;
-		let url = `/viewer/${teamSpace}/${modelId}`;
+		let pathname = `/viewer/${teamSpace}/${modelId}`;
+		let search = '';
 
 		if (this.props.type === TYPES.ISSUE_ASSIGNED) {
-			url += `?notificationId=${notificationId}`;
+			search = `?notificationId=${notificationId}`;
 		}
 
-		history.push(url);
+		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
+			pathname += `/${this.props.revision}`;
+		}
+
+		this.props.sendUpdateNotificationRead(this.props._id, true);
+		history.push({pathname, search});
+	}
+
+	public onClick = (e: React.SyntheticEvent) => {
+		if (this.props.onClick) {
+			this.props.onClick(e);
+		}
+		this.gotoNotification();
 	}
 
 	public delete = (e: React.SyntheticEvent) => {
@@ -138,7 +152,7 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 
 		const containerProps: any = {
 			read: read.toString(),
-			onClick: this.gotoNotification
+			onClick: this.onClick
 		};
 
 		return (

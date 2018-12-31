@@ -111,7 +111,6 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public deleteAllNotifications = (e: React.SyntheticEvent) => {
 		this.toggleMenu(e);
-		this.toggleDrawer();
 		this.props.confirmSendDeleteAllNotifications();
 	}
 
@@ -197,6 +196,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				labelLeft={`In ${notifications[0].teamSpace}`}
 				{...this.props}
 				notifications={notifications}
+				closePanel={this.toggleDrawer}
 			/>
 		));
 	}

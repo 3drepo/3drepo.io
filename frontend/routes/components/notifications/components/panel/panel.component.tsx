@@ -28,12 +28,13 @@ interface IProps {
 	notifications: INotification[];
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	closePanel: (e: React.SyntheticEvent) => void;
 }
 
 export class NotificationsPanel extends React.PureComponent<IProps, any> {
 	public renderNotifications = (notifications) => {
 		return notifications.map((notification) => (
-			<NotificationItem key={notification._id} {...notification} {...this.props} />
+			<NotificationItem key={notification._id} {...notification} {...this.props} onClick={this.props.closePanel} />
 		));
 	}
 
