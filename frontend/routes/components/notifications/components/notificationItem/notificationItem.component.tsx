@@ -85,9 +85,9 @@ const NotificationItemText = (props) => {
 const getIcon = (notification) => {
 	switch (notification.type) {
 		case TYPES.ISSUE_ASSIGNED:
-			return Place;
+			return (<Place/>);
 		case TYPES.MODEL_UPDATED:
-			return ChangeHistory;
+			return (<ChangeHistory/>);
 	}
 };
 
@@ -106,7 +106,13 @@ const getSummary  = (notification) =>  `In ${notification.modelName}`;
 export class NotificationItem extends React.PureComponent<IProps, IState> {
 	public gotoNotification = () => {
 		const {teamSpace, modelId, _id: notificationId, history} = this.props;
-		history.push(`/viewer/${teamSpace}/${modelId}?notificationId=${notificationId}`);
+		let url = `/viewer/${teamSpace}/${modelId}`;
+
+		if (this.props.type === TYPES.ISSUE_ASSIGNED) {
+			url += `?notificationId=${notificationId}`;
+		}
+
+		history.push(url);
 	}
 
 	public delete = (e: React.SyntheticEvent) => {
