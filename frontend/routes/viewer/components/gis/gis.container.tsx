@@ -28,7 +28,7 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	mapsProviders: selectMaps,
 	isInitializedMap: selectIsInitializedMap,
-	visiblieSources: selectVisibleSources
+	visibleSources: selectVisibleSources
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -38,7 +38,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	initializeMap: GisActions.initializeMap,
 	addSource: GisActions.addSource,
 	removeSource: GisActions.removeSource,
-	resetSources: GisActions.resetSources
+	resetSources: GisActions.resetSources,
+	resetMap: GisActions.resetMap
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis)));

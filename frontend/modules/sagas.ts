@@ -10,6 +10,7 @@ import notificationsSaga from './notifications/notifications.sagas';
 import staticPagesSaga from './staticPages/staticPages.sagas';
 import gisSaga from './gis/gis.sagas';
 
+import viewerSaga from './viewer/viewer.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -23,6 +24,7 @@ export default function* rootSaga() {
 		fork(authSaga),
 		fork(notificationsSaga),
 		fork(staticPagesSaga),
-		fork(gisSaga)// <-- INJECT MODULE SAGA -->
+		fork(gisSaga),
+		fork(viewerSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

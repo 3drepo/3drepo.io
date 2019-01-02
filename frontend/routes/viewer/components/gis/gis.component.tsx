@@ -41,6 +41,7 @@ import {
 	StyledMapIcon,
 	VisibilityButton
 } from './gis.styles';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 
 interface IProps {
 	location: any;
@@ -50,17 +51,18 @@ interface IProps {
 	settings: any;
 	isPending: boolean;
 	mapsProviders: any[];
-	initializeMap: (params) => void;
+	initializeMap: (params, sources?) => void;
 	addSource: (source) => void;
 	removeSource: (source) => void;
 	resetSources: () => void;
+	resetMap: () => void;
 	isInitializedMap: boolean;
-	visiblieSources: any[];
+	visibleSources: any[];
 }
 interface IState {
 	settingsModeActive: boolean;
 	activeMapIndex: number;
-	visiblieSources: any[];
+	visibleSources: any[];
 	pointsExists: boolean;
 }
 
@@ -78,41 +80,54 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	public state = {
 		settingsModeActive: true,
 		activeMapIndex: 0,
-		visiblieSources: [],
+		visibleSources: [],
 		pointsExists: false
 	};
 
 	public formRef = React.createRef<any>();
 
-	public componentDidMount() {
-		const { teamspace, modelId } = this.getDataFromPathname();
-		this.props.fetchModelSettings(teamspace, modelId);
-		this.props.fetchModelMaps(teamspace, modelId);
-		this.props.resetSources();
+	get surveySettings() {
+		const { settings } = this.props;
+
+		return {
+			surveyPoints: settings.surveyPoints,
+			angleFromNorth: settings.angleFromNorth || 0
+		};
 	}
 
-	public componentWillUnmount() {
-		this.props.resetSources();
+	public componentDidMount() {
+		const { settings, initializeMap } = this.props;
+		const { teamspace, modelId } = this.getDataFromPathname();
+
+		if (this.props.settings._id !== modelId) {
+			this.props.fetchModelSettings(teamspace, modelId);
+			this.props.fetchModelMaps(teamspace, modelId);
+			this.props.resetSources();
+		}
+
+		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
+		if (pointsExists) {
+			initializeMap(this.surveySettings);
+			this.setState({ pointsExists });
+		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { settings, visiblieSources, initializeMap, resetSources } = this.props;
+		const { settings, visibleSources, initializeMap, resetSources } = this.props;
 		const changes = {} as any;
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
-		changes.pointsExists = pointsExists;
+
+		if (prevState.pointsExists !== pointsExists) {
+			changes.pointsExists = pointsExists;
+		}
 
 		if (isEmpty(prevProps.settings) && !isEmpty(settings) || settings !== prevProps.settings) {
-			const surveySettings = {
-				surveyPoints: settings.surveyPoints,
-				angleFromNorth: settings.angleFromNorth || 0
-			};
-
 			changes.settingsModeActive = !pointsExists;
 
 			if (pointsExists) {
 				resetSources();
-				initializeMap(surveySettings);
+				initializeMap(this.surveySettings);
 			}
 		}
 
@@ -120,11 +135,9 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			changes.settingsModeActive = !this.state.pointsExists;
 		}
 
-		if (visiblieSources.length !== prevProps.visiblieSources.length) {
-			changes.visiblieSources = visiblieSources;
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
-
-		this.setState(changes);
 	}
 
 	public getDataFromPathname = () => {
@@ -144,8 +157,9 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				<IconButton
 					disabled={!this.state.pointsExists}
 					disableRipple={true}
-					onClick={this.handleToggleSettings}>
-						<ArrowBack />
+					onClick={this.handleToggleSettings}
+				>
+					<ArrowBack />
 				</IconButton>
 			);
 		}
@@ -185,16 +199,17 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderVisibilityButton = (layer) => {
-		return (
-			<VisibilityButton>
-				{includes(this.state.visiblieSources, layer.source)
-					? <VisibilityIcon onClick={() => this.props.removeSource(layer.source)}/>
-					: <VisibilityOffIcon onClick={() => this.props.addSource(layer.source)} />
-				}
-			</VisibilityButton>
-		);
-	}
+	public renderHideLayerButton = (layer, statement) => renderWhenTrue(
+		<VisibilityButton onClick={() => this.props.removeSource(layer.source)}>
+			<VisibilityIcon />
+		</VisibilityButton>
+	)(statement)
+
+	public renderShowLayerButton = (layer, statement) => renderWhenTrue(
+		<VisibilityButton onClick={() => this.props.addSource(layer.source)}>
+			<VisibilityOffIcon/>
+		</VisibilityButton>
+	)(statement)
 
 	public renderMapProviders = (mapsProviders = []) =>
 		mapsProviders.map((mapProvider, index) => (
@@ -211,7 +226,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 					<MapName>{layer.name}</MapName>
 				</MapNameWrapper>
 
-				{this.renderVisibilityButton(layer)}
+				{this.renderShowLayerButton(layer, !includes(this.props.visibleSources, layer.source))}
+				{this.renderHideLayerButton(layer, includes(this.props.visibleSources, layer.source))}
 			</MapLayer>
 		))
 
@@ -221,10 +237,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 		return (
 			<ViewerPanelContent>
-				<StyledSelect
-					onChange={this.handleChangeMapProvider}
-					value={activeMapIndex}
-				>
+				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{mapsProviders[activeMapIndex].layers && this.renderLayers(mapsProviders[activeMapIndex].layers)}

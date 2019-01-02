@@ -16,15 +16,14 @@
  */
 
 import { put, takeLatest, select } from 'redux-saga/effects';
-import { getAngularService } from '../../helpers/migration';
 
 import { GisTypes, GisActions } from './gis.redux';
+import { ViewerActions } from '../viewer';
 import { selectVisibleSources } from './gis.selectors';
 
 export function* initializeMap({params}) {
 	try {
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.mapInitialise(params, true);
+		yield put(ViewerActions.mapInitialise(params));
 		yield put(GisActions.initializeMapSuccess(true));
 
 	} catch (error) {}
@@ -32,12 +31,14 @@ export function* initializeMap({params}) {
 
 export function* addSource({source}) {
 	try {
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.addMapSource(source);
 		const visibleSources = yield select(selectVisibleSources);
 
+		if (!visibleSources.includes(source)) {
+			yield put(ViewerActions.addMapSource(source));
+		}
+
 		if (!visibleSources.length) {
-			yield ViewerService.mapStart();
+			yield put(ViewerActions.mapStart());
 		}
 		yield put(GisActions.addSourceSuccess(source));
 	} catch (error) {}
@@ -45,12 +46,11 @@ export function* addSource({source}) {
 
 export function* removeSource({source}) {
 	try {
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.removeMapSource(source);
+		yield put(ViewerActions.removeMapSource(source));
 		const visibleSources = yield select(selectVisibleSources);
 
 		if (visibleSources.length === 1) {
-			yield ViewerService.mapStop();
+			yield put(ViewerActions.mapStop());
 		}
 
 		yield put(GisActions.removeSourceSuccess(source));
@@ -59,12 +59,16 @@ export function* removeSource({source}) {
 
 export function* resetSources() {
 	try {
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.resetMapSources();
-		yield ViewerService.mapStop();
-
+		yield put(GisActions.resetMap());
 		yield put(GisActions.resetSourcesSuccess());
 	} catch (error) {}
+}
+
+export function* resetMap() {
+	try {
+		yield put(ViewerActions.resetMapSources());
+		yield put(ViewerActions.mapStop());
+	} catch (error) { }
 }
 
 export default function* GisSaga() {
@@ -72,4 +76,5 @@ export default function* GisSaga() {
 	yield takeLatest(GisTypes.ADD_SOURCE, addSource);
 	yield takeLatest(GisTypes.REMOVE_SOURCE, removeSource);
 	yield takeLatest(GisTypes.RESET_SOURCES, resetSources);
+	yield takeLatest(GisTypes.RESET_MAP, resetMap);
 }

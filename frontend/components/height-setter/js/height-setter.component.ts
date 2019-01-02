@@ -43,12 +43,13 @@ class HeightSetterController implements ng.IController, IBindings {
 	private headerHeight;
 	private content;
 	private observer;
+	private initialTimeout;
 
 	private removeHeightWatch;
 
 	constructor(private $element, private $timeout, private $scope) {
 		this.observer = new MutationObserver(this.handleElementChange);
-		this.$timeout(() => {
+		this.initialTimeout = this.$timeout(() => {
 			this.reactElement = this.$element.children().children();
 			this.container = this.reactElement.children();
 			this.headerHeight = this.container.children()[0].clientHeight;
@@ -91,7 +92,10 @@ class HeightSetterController implements ng.IController, IBindings {
 
 	public $onDestroy() {
 		this.observer.disconnect();
-		this.removeHeightWatch();
+		this.$timeout.cancel(this.initialTimeout);
+		if (this.removeHeightWatch) {
+			this.removeHeightWatch();
+		}
 	}
 }
 
