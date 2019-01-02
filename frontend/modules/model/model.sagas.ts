@@ -28,12 +28,80 @@ import { SnackbarActions } from './../snackbar';
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
-		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
+		const { data: settings2 } = yield API.getModelSettings(teamspace, modelId);
+
+		const settings = {
+			_id: '067a7522-6dd8-4258-97a0-be756e596324',
+			timestamp: new Date('2017-10-30T12:08:18.000Z'),
+			status: 'ok',
+			type: 'Structural',
+			desc: '',
+			owner: 'carmen',
+			name: 'Clinic_S',
+			subModels: [],
+			properties: {
+				code: 'STR',
+				unit: 'mm',
+				topicTypes: [
+					{
+						value: 'for_information',
+						label: 'For information'
+					},
+					{
+						value: 'vr',
+						label: 'VR'
+					},
+					{
+						value: 'clash',
+						label: 'Clash'
+					},
+					{
+						value: 'diff',
+						label: 'Diff'
+					},
+					{
+						value: 'rfi',
+						label: 'RFI'
+					},
+					{
+						value: 'risk',
+						label: 'Risk'
+					},
+					{
+						value: 'hs',
+						label: 'H&S'
+					},
+					{
+						value: 'design',
+						label: 'Design'
+					},
+					{
+						value: 'constructibility',
+						label: 'Constructibility'
+					},
+					{
+						value: 'gis',
+						label: 'GIS'
+					}
+				]
+			},
+			permissions: [
+				{
+					user: 'carmen',
+					permission: 'collaborator'
+				}
+			],
+			users: [],
+			__v: 12,
+			surveyPoints: [],
+			heliSpeed: -8
+		};
+
 		settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'model settings', e));
 	}
 }
 
@@ -51,7 +119,7 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 		yield put(ModelActions.updateSettingsSuccess(settings));
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('update', 'model settings', e.response));
+		yield put(DialogActions.showErrorDialog('update', 'model settings', e));
 	}
 }
 
@@ -64,7 +132,7 @@ export function* fetchRevisions({ teamspace, modelId }) {
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'model revisions', e));
 	}
 }
 
@@ -73,7 +141,7 @@ export function* downloadModel({ teamspace, modelId }) {
 		const url = yield API.getAPIUrl(`${teamspace}/${modelId}/download/latest`);
 		window.open(url, '_blank');
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
+		yield put(DialogActions.showErrorDialog('download', 'model', e));
 	}
 }
 
@@ -137,7 +205,7 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 			}
 		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('upload', 'model', e.response));
+		yield put(DialogActions.showErrorDialog('upload', 'model', e));
 		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelData.modelId, uploadFileStatuses.failed));
 	}
 }
@@ -148,7 +216,7 @@ export function* fetchMaps({ teamspace, modelId }) {
 
 		yield put(ModelActions.fetchMapsSuccess(response.data.maps));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('get', 'model maps', e.response));
+		yield put(DialogActions.showErrorDialog('get', 'model maps', e));
 	}
 }
 
