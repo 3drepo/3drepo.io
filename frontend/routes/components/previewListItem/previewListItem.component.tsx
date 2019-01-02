@@ -19,6 +19,7 @@ import * as React from 'react';
 import Truncate from 'react-truncate';
 
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 import {
 	MenuItemContainer,
@@ -32,7 +33,6 @@ import {
 	StyledArrowIcon,
 	Name
 } from './previewListItem.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	name: string;
@@ -56,16 +56,11 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		return createdDate >= dueDate ? 1 : 0;
 	}
 
-	public renderArrowContainer = () => {
-		if (this.props.active) {
-			return (
-				<ArrowContainer onClick={this.props.onArrowClick}>
-					<StyledArrowIcon />
-				</ArrowContainer>
-			);
-		}
-		return null;
-	}
+	public renderArrowContainer = () => renderWhenTrue(
+		<ArrowContainer onClick={this.props.onArrowClick}>
+			<StyledArrowIcon />
+		</ArrowContainer>
+	)(this.state.active)
 
 	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
 	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
