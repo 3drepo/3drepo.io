@@ -28,76 +28,12 @@ import { SnackbarActions } from './../snackbar';
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
-		const { data: settings2 } = yield API.getModelSettings(teamspace, modelId);
+		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
 
-		const settings = {
-			_id: '067a7522-6dd8-4258-97a0-be756e596324',
-			timestamp: new Date('2017-10-30T12:08:18.000Z'),
-			status: 'ok',
-			type: 'Structural',
-			desc: '',
-			owner: 'carmen',
-			name: 'Clinic_S',
-			subModels: [],
-			properties: {
-				code: 'STR',
-				unit: 'mm',
-				topicTypes: [
-					{
-						value: 'for_information',
-						label: 'For information'
-					},
-					{
-						value: 'vr',
-						label: 'VR'
-					},
-					{
-						value: 'clash',
-						label: 'Clash'
-					},
-					{
-						value: 'diff',
-						label: 'Diff'
-					},
-					{
-						value: 'rfi',
-						label: 'RFI'
-					},
-					{
-						value: 'risk',
-						label: 'Risk'
-					},
-					{
-						value: 'hs',
-						label: 'H&S'
-					},
-					{
-						value: 'design',
-						label: 'Design'
-					},
-					{
-						value: 'constructibility',
-						label: 'Constructibility'
-					},
-					{
-						value: 'gis',
-						label: 'GIS'
-					}
-				]
-			},
-			permissions: [
-				{
-					user: 'carmen',
-					permission: 'collaborator'
-				}
-			],
-			users: [],
-			__v: 12,
-			surveyPoints: [],
-			heliSpeed: -8
-		};
+		if (settings.surveyPoints) {
+			settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
+		}
 
-		settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
