@@ -18,7 +18,9 @@
 import * as React from 'react';
 import { DateTime } from './../dateTime/dateTime.component';
 import HoverableUsername from './../hoverableUsername/hoverableUsername.container';
-import { Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage } from './log.styles';
+import {
+	Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage, ScreenshotWrapper
+} from './log.styles';
 
 interface IProps {
 	comment: string;
@@ -35,7 +37,9 @@ export class Log extends React.PureComponent<IProps, any> {
 	public renderScreenshot = (viewpoint, comment) => {
 		return (
 			<>
-				<Screenshot src={viewpoint.screenshotPath} withMessage={!!comment} />
+				<ScreenshotWrapper withMessage={!!comment}>
+					<Screenshot src={viewpoint.screenshotPath} />
+				</ScreenshotWrapper>
 				{comment && <ScreenshotMessage>{comment}</ScreenshotMessage>}
 			</>
 		);

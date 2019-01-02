@@ -49,16 +49,6 @@ export const ScreenshotMessage = styled.span`
   border-radius: 0 0 2px 2px;
 `;
 
-export const Screenshot = styled.img`
-  display: block;
-  max-width: 100%;
-  height: 180px;
-  width: 100%;
-  object-fit: cover;
-  margin: 8px 0 0;
-  border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
-` as any;
-
 export const Info = styled.div`
   color: ${COLOR.BLACK_40};
   display: flex;
@@ -67,3 +57,25 @@ export const Info = styled.div`
   justify-content: space-between;
   margin-top: 8px;
 `;
+
+export const ScreenshotWrapper = styled.div`
+  width: 100%;
+  padding-top: 42%;
+  overflow: hidden;
+  position: relative;
+  margin: 8px 0 0;
+  border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
+` as any;
+
+export const Screenshot = styled.img`
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+` as any;
