@@ -223,7 +223,9 @@ module.exports = {
 
 		return notifications;
 	},
-
+	insertModelUpdatedFailedNotifications :  async function(teamSpace, modelId, user) {
+		return [];
+	},
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {
 		if (!issue) {
 			return Promise.resolve([]);

@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
 import { cloneDeep } from 'lodash';
+import { put, takeLatest, select } from 'redux-saga/effects';
+
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
 import { uploadFileStatuses, changePositionFormat } from './model.helpers';
@@ -24,6 +25,7 @@ import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
+import { selectCurrentUser } from '../currentUser';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
@@ -87,6 +89,11 @@ export function* downloadModel({ teamspace, modelId }) {
 
 export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName }) {
 	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData));
+
+	const currentUser = yield select(selectCurrentUser);
+	if (modelData.user !== currentUser.username) {
+		return;
+	}
 
 	if (modelData.status === uploadFileStatuses.ok) {
 		yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
