@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
-import { Container, Username, TooltipText, FullName, CompanyName } from './hoverableUsername.styles';
+import { Container, Username, TooltipText, FullName, CompanyName } from './dynamicUsername.styles';
 
 interface IProps {
 	name: string;
@@ -26,12 +26,12 @@ interface IProps {
 	userDetails: any;
 }
 
-export class HoverableUsername extends React.PureComponent<IProps, any> {
+export class DynamicUsername extends React.PureComponent<IProps, any> {
 	public handleOnHover = () => {
 		this.props.fetchUserDetails(this.props.teamspace, this.props.name);
 	}
 
-	public get tootliptText() {
+	get tootliptText() {
 		if (this.props.userDetails) {
 			const { firstName, lastName, company } = this.props.userDetails;
 			return (

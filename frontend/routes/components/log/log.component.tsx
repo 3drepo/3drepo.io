@@ -17,10 +17,12 @@
 
 import * as React from 'react';
 import { DateTime } from './../dateTime/dateTime.component';
-import HoverableUsername from './../hoverableUsername/hoverableUsername.container';
+import DynamicUsername from './../dynamicUsername/dynamicUsername.container';
 import {
 	Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage, ScreenshotWrapper
 } from './log.styles';
+
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	comment: string;
@@ -34,51 +36,58 @@ interface IProps {
 }
 
 export class Log extends React.PureComponent<IProps, any> {
-	public renderScreenshot = (viewpoint, comment) => {
-		return (
-			<>
-				<ScreenshotWrapper withMessage={!!comment}>
-					<Screenshot src={viewpoint.screenshotPath} />
-				</ScreenshotWrapper>
-				{comment && <ScreenshotMessage>{comment}</ScreenshotMessage>}
-			</>
-		);
+	get isScreenshot() {
+		return this.props.viewpoint && this.props.viewpoint.screenshotPath;
 	}
 
-	public renderMessage = (action, comment, created) => {
-		if (action) {
-			return (
-				<SystemMessage>{action.text} at <DateTime value={created} format="HH:mm DD MMM" /></SystemMessage>
-			);
-		}
-		if (comment) {
-			return <UserMessage>{comment}</UserMessage>;
-		}
-		return null;
+	get isAction() {
+		return Boolean(this.props.action);
 	}
 
-	public renderInfo = (action, owner, created, teamspace) => {
-		if (!action) {
-			return (
-				<Info>
-					{<HoverableUsername teamspace={teamspace} name={owner} />}
-					<DateTime value={created} format="HH:mm DD MMM" />
-				</Info>
-			);
-		}
-		return null;
+	get isCommentWithScreenshot() {
+		return Boolean(this.props.comment) && Boolean(this.props.viewpoint.screenshotPath);
 	}
+
+	get isPlainComment() {
+		return Boolean(this.props.comment) && !Boolean(this.props.viewpoint.screenshotPath);
+	}
+
+	public renderScreenshotMessage = () => renderWhenTrue(
+		<>
+			<ScreenshotWrapper withMessage={!!this.props.comment}>
+				{ this.props.viewpoint && this.props.viewpoint.screenshotPath ?
+				<Screenshot src={this.props.viewpoint.screenshotPath} />
+				: null }
+			</ScreenshotWrapper>
+			{this.props.comment && <ScreenshotMessage>{this.props.comment}</ScreenshotMessage>}
+		</>
+	)(this.isCommentWithScreenshot)
+
+	public renderSystemMessage = () => renderWhenTrue(
+			<SystemMessage>
+				{this.props.action ? this.props.action.text : null}
+				at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
+			</SystemMessage>
+		)(Boolean(this.props.action))
+
+	public renderUserMessage = () => renderWhenTrue(
+		<UserMessage>{this.props.comment}</UserMessage>
+	)(this.isPlainComment)
+
+	public renderInfo = () => renderWhenTrue(
+		<Info>
+			{<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />}
+			<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+		</Info>
+	)(!this.isAction)
 
 	public render() {
-		const { action, comment, created, viewpoint, owner, teamspace } = this.props;
 		return (
 			<Container>
-				{
-					viewpoint && viewpoint.screenshotPath
-					? this.renderScreenshot(viewpoint, comment)
-					: this.renderMessage(action, comment, created)
-				}
-				{this.renderInfo(action, owner, created, teamspace)}
+				{this.renderSystemMessage()}
+				{this.renderUserMessage()}
+				{this.renderScreenshotMessage()}
+				{this.renderInfo()}
 			</Container>
 		);
 	}

@@ -19,7 +19,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../helpers/migration';
 
-import { HoverableUsername } from './hoverableUsername.component';
+import { DynamicUsername } from './dynamicUsername.component';
 import { UsersActions, selectUserDetails } from '../../../modules/users';
 
 const mapStateToProps = ({}, { teamspace, name }) => createStructuredSelector({
@@ -30,4 +30,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchUserDetails: UsersActions.fetchUserDetails
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(HoverableUsername);
+export default connect(mapStateToProps, mapDispatchToProps)(DynamicUsername);

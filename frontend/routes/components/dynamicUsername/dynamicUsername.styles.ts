@@ -15,4 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as HoverableUsername } from './hoverableUsername.container';
+import styled from 'styled-components';
+import Typography from '@material-ui/core/Typography';
+import { COLOR } from '../../../styles/colors';
+
+export const Container = styled.div``;
+
+export const Username = styled(Typography)`
+  padding: 2px;
+
+  && {
+    display: inline-block;
+    color: ${COLOR.BLACK_40};
+    font-size: 11px;
+  }
+`;
+
+export const TooltipText = styled.div``;
+export const FullName = styled.div``;
+export const CompanyName = styled.div``;

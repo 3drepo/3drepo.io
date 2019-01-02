@@ -22,7 +22,7 @@ import * as API from '../../services/api';
 import { UsersTypes, UsersActions } from './users.redux';
 import { selectCachedResponses } from './users.selectors';
 
-const CACHE_RESPONSE_TTL = 40000;
+const CACHE_RESPONSE_TTL = 4000;
 
 export function* fetchUserDetails({ teamspace, username }) {
 	try {
@@ -38,9 +38,11 @@ export function* fetchUserDetails({ teamspace, username }) {
 		const response = cachedResponses[key] || apiResponse.data;
 
 		yield put(UsersActions.setUserDetailsResponse(key, response));
-		yield call(delay, CACHE_RESPONSE_TTL, true);
-		yield put(UsersActions.setUserDetailsResponse(key, null));
 
+		if (!cachedResponses[key]) {
+			yield call(delay, CACHE_RESPONSE_TTL, true);
+			yield put(UsersActions.setUserDetailsResponse(key, null));
+		}
 	} catch (e) {}
 }
 
