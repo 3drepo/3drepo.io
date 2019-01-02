@@ -18,7 +18,12 @@
 import * as React from 'react';
 import Truncate from 'react-truncate';
 
+<<<<<<< HEAD
 import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
+=======
+import { DateTime } from './../dateTime/dateTime.component';
+import { renderWhenTrue } from '../../../helpers/rendering';
+>>>>>>> ISSUE_1271 - Fix PR comments
 
 import {
 	MenuItemContainer,
@@ -62,16 +67,11 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 		this.setState({ active: true });
 	}
 
-	public renderArrowContainer = () => {
-		if (this.state.active) {
-			return (
-				<ArrowContainer onClick={this.props.onArrowClick}>
-					<StyledArrowIcon />
-				</ArrowContainer>
-			);
-		}
-		return null;
-	}
+	public renderArrowContainer = () => renderWhenTrue(
+		<ArrowContainer onClick={this.props.onArrowClick}>
+			<StyledArrowIcon />
+		</ArrowContainer>
+	)(this.state.active)
 
 	public get isExpiredDate() {
 		const { createdDate, dueDate } = this.props;
