@@ -206,16 +206,17 @@ module.exports = {
 	 */
 	insertModelUpdatedNotifications: async function(teamSpace, modelId, revision) {
 		const allUsers = await User.getAllUsersInTeamspace(teamSpace);
-		const usersAndPerms = await Promise.all(allUsers.map(async user => {
+		const users = [];
+		await Promise.all(allUsers.map(async user => {
 			const access = await hasReadAccessToModelHelper(user, teamSpace, modelId);
-			return ({user,access});
+			if (access) {
+				users.push(user);
+			}
 		}));
 
-		const users = usersAndPerms.filter(u=>u.access);
-
-		const notifications = await Promise.all(users.map(async u => {
-			const notification = await this.insertModelUpdatedNotification(u.user, teamSpace, modelId, revision);
-			return ({username:u.user, notification});
+		const notifications = await Promise.all(users.map(async username => {
+			const notification = await this.insertModelUpdatedNotification(username, teamSpace, modelId, revision);
+			return ({username, notification});
 		}));
 
 		await fillModelNames(notifications.map(un => un.notification));
