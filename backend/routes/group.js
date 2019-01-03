@@ -57,42 +57,111 @@ router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroup
  * @apiName listGroupsByRevision
  * @apiGroup Groups
  * 
+ * @apiDescription List all groups using based on which revision is currently selected.
+ * 
  * @apiParam {String} id Revision unique ID.
  * 
  * @apiSuccess (200) {Object[]} List of all Groups based on Revision ID.
+ * @apiSuccessExample {json} Success-Response
+ * 
+ * HTTP/1.1 200 OK
+ * [
+ *	{
+ *		"_id": "model_ID",
+ *		"name": "Group 1",
+ *		"description": "This is test group for revision 2",
+ *		"author": "username",
+ *		"updatedBy": "username",
+ *		"updatedAt": 1546537564888,
+ *		"createdAt": 1546537564888,
+ *		"__v": 0,
+ *		"color": [
+ *		121,
+ *		130,
+ *		211
+ *	],
+ *		"objects": []
+ *	}
+ *	]
  */
 
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
-/*
+
+/**
  * @api {get} /groups/revision/master/head/:uid/ Find group in model
  * @apiDescription Find a group by model using the group ID
  * @apiName findGroup
  * @apiGroup Groups
  * 
  * @apiParam {String} id Group unique ID.
+ * 
+ * @apiDescription Find a group using it's Group ID
+ * 
+ * @apiSuccess (200) {Object} Group matching provided ID.
+ * @apiSuccessExample {json} Success-Response
+ * 
+ * HTTP/1.1 200 OK
+ * {
+    "_id": "group_ID",
+    "color": [
+        121,
+        130,
+        211
+    ],
+    "objects": []
+}
  */
+
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
-/*
+/**
  * @api {get} /groups/revision/:rid/:uid/ Find group in model by revision
  * @apiName findGroupByRevision
  * @apiDescription Find a group by revision ID and Group ID
  * @apiGroup Groups
  * 
+ * @apiDescription Find a single group using the unique Group ID and a Revision ID.
+ * 
  * @apiParam {String} id Revision unique ID.
  * @apiParam {String} id Group unique ID.
- */
-router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
-
-/**
- * @api {put} /groups/:uid/ Update group
- * @apiName updateGroup
- * @apiDescription Update a group using Group ID
- * @apiGroup Groups
  * 
- * @apiParam {String} id Group unique ID.
+ * @apiSuccess (200) {Object} Group
+ * @apiSuccessExample {json} Success-Response
+ * 
+ * HTTP/1.1 200 OK
+ * [
+ *		{
+ *			"_id": "789b2ed0-0f7f-11e9-b909-833ae21f045f",
+ *			"name": "Group 1",
+ *			"description": "This is test group for revision 2",
+ *			"author": "username",
+ *			"updatedBy": "username",
+ *			"updatedAt": 1546553617888,
+ *			"createdAt": 1546537564888,
+ *			"__v": 0,
+ *			"color": [
+ *				121,
+ *				130,
+ *				211
+ *			],
+ *			"objects": [
+ *					{
+ *						"account": "account_username",
+ *						"model": "6e7d81fb-85c8-4b09-9ad6-6ba099261099",
+ *						"ifc_guids": [],
+ *						"shared_ids": [
+ *						"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ *						"db18ef69-6d6e-49a0-846e-907346abb39d",
+ *						"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ *						"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ *						"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ *					]
+ *				}
+ *			]
+ *		}
+ *	]
  * @apiError GROUP_NOT_FOUND Group Not Found
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 404 Not Found
  *  {
  *    "message": "Group not found",
@@ -100,6 +169,37 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  *    "code": "GROUP_NOT_FOUND",
  *    "value": 53,
  *    "place": "PUT /groups/revision"
+ *	}
+ */
+router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
+
+/**
+ * @api {put} /groups/:uid/ Update group
+ * @apiName updateGroup
+ * @apiGroup Groups
+ * 
+ * @apiDescription Update a specific group using a unique group ID.
+ * 
+ * @apiSuccess (200) {Object} Group Object
+ * 
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *   "_id":"c5f0fd00-0fab-11e9-bf22-eb8649763304"
+ * }
+ * 
+ * @apiParam {String} id Group unique ID.
+ * 
+ * @apiError GROUP_NOT_FOUND Group Not Found
+ * @apiErrorExample {json} Error-Response
+ *  
+ * HTTP/1.1 404 Not Found
+ *  {
+ *    "message": "Group not found",
+ *    "status": 404,
+ *    "code": "GROUP_NOT_FOUND",
+ *    "value": 53,
+ *    "place": "PUT /groups/"
  *	}
  */
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
@@ -110,6 +210,20 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * @apiDescription Add a group to the model.
  * @apiGroup Groups
  * 
+ * @apiSuccess (200) {Object} Group Created
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 		"__v":0,
+ * 		"_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
+ * 		"name":"Group 1","description":"",
+ * 		"author":"username",
+ * 		"updatedBy":"username",
+ * 		"updatedAt":"2019-01-03T23:03:37.411Z",
+ * 		"createdAt":"2019-01-03T23:03:37.411Z",
+ * 		"color":[44,50,125],
+ * 		"objects":[]
+ * }
  */
 
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
@@ -117,12 +231,22 @@ router.post("/groups/", middlewares.issue.canCreate, createGroup);
 // @deprecated -  use deleteGroups with single id instead.
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
 
-
 /**
  * @api {delete} /groups/ Delete groups
  * @apiName deleteGroups
  * @apiDescription Delete groups from the model.
  * @apiGroup Groups
+ * 
+ * @apiDescription Delete single group using unique group ID.
+ * 
+ * @apiSuccess (200) Status success
+ * @apiSuccessExample {json} Success-Response
+ * 
+ * HTTP/1.1 200 OK
+ * {
+ * 	"status":"success"
+ * }
+ * 
  */
 router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
