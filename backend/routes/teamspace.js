@@ -127,6 +127,18 @@
 		});
 	}
 
+	function getTeamMemberInfo(req, res, next) {
+		User.getTeamMemberInfo(
+			req.params.account,
+			req.params.user
+		).then(info => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, info);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
+	}
+
 	function getMemberList(req, res, next) {
 		User.findByUserName(req.session.user.username).then(user => {
 			if(!user) {
