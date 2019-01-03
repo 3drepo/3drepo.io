@@ -26,7 +26,6 @@ export default function* rootSaga() {
 		fork(notificationsSaga),
 		fork(staticPagesSaga),
 		fork(usersSaga),
-		fork(staticPagesSaga),
 		fork(gisSaga),
 		fork(viewerSaga),
 		fork(viewpointsSaga)// <-- INJECT MODULE SAGA -->
