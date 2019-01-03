@@ -8,6 +8,7 @@ import modelSaga from './model/model.sagas';
 import authSaga from './auth/auth.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import staticPagesSaga from './staticPages/staticPages.sagas';
+import usersSaga from './users/users.sagas';
 import gisSaga from './gis/gis.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
@@ -23,6 +24,8 @@ export default function* rootSaga() {
 		fork(modelSaga),
 		fork(authSaga),
 		fork(notificationsSaga),
+		fork(staticPagesSaga),
+		fork(usersSaga),
 		fork(staticPagesSaga),
 		fork(gisSaga),
 		fork(viewerSaga),

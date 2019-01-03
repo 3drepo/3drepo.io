@@ -47,6 +47,15 @@ export const removeUser = (teamspace, username): Promise<any> => {
 };
 
 /**
+ * Get user details
+ * @param teamspace
+ * @param username
+ */
+export const getUserDetails = (teamspace, username): Promise<any> => {
+	return api.get(`${teamspace}/members/${username}`);
+};
+
+/**
  * Remove user from teamspace (cascade)
  * @param teamspace
  * @param username
