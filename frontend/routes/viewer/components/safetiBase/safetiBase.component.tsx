@@ -17,19 +17,43 @@
 
 import * as React from 'react';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container } from './safetiBase.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	risks: any[];
+	fetchRisks: () => void;
 }
 
-export class SafetiBase extends React.PureComponent<IProps, any> {
+interface IState {
+	activeRisk: number;
+}
+
+export class SafetiBase extends React.PureComponent<IProps, IState> {
+	public renderRisksList = renderWhenTrue(() => {
+		return this.props.risks.map((risk) => (
+			<PreviewListItem
+				{...risk}
+			/>
+		));
+	});
+
+	public componentDidMount() {
+		this.props.fetchRisks();
+	}
 
 	public render() {
 		return (
-			<Container>
-				SafetiBase component
-			</Container>
+			<ViewerPanel
+				title="SafetiBase"
+				Icon={this.getTitleIcon()}
+				actions={this.getActions()}
+				pending={this.props.isPending}
+			>
+				{this.renderRisksList(true)}
+			</ViewerPanel>
 		);
 	}
 }
