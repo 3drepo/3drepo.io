@@ -5,6 +5,46 @@ define({ "api": [
     "title": "Create a permission",
     "name": "createPermission",
     "group": "Account_Permission",
+    "description": "<p>Create a new account permissions</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "String[]",
+            "optional": false,
+            "field": "permissions",
+            "description": "<p>Account Level Permission types</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n [\n    {\n      \"user\": \"username1\",\n      \"permissions\": [\n          \"permission_type\"\n      ]\n    }\n ]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "Missing",
+            "description": "<p>or invalid arguments</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "HTTP/1.1 400 Bad Request\n  {\n    \"message\": \"Missing or invalid arguments\",\n    \"status\": 400,\n    \"code\": \"INVALID_ARGUMENTS\",\n    \"value\": 10,\n    \"place\": \"POST /permissions\"\n  }",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./accountPermission.js",
     "groupTitle": "Account_Permission"
@@ -28,6 +68,26 @@ define({ "api": [
         ]
       }
     },
+    "description": "<p>Update an existing permission for a teamspace member.</p>",
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "Missing",
+            "description": "<p>or invalid arguments</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "HTTP/1.1 401 Unauth­orized",
+          "content": "\nHTTP/1.1 401 Unauth­orized\n  {\n    \"message\": \"Missing or invalid arguments\",\n    \"status\": 401,\n    \"code\": \"NOT_AUTHORIZED\",\n    \"value\": 9,\n    \"place\": \"GET /permissions\"\n  }",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./accountPermission.js",
     "groupTitle": "Account_Permission"
@@ -38,6 +98,53 @@ define({ "api": [
     "title": "List all permissions",
     "name": "listPermissions",
     "group": "Account_Permission",
+    "description": "<p>List all account level permissions</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "String",
+            "optional": false,
+            "field": "user",
+            "description": "<p>Current user account</p>"
+          },
+          {
+            "group": "200",
+            "type": "String[]",
+            "optional": false,
+            "field": "permissions",
+            "description": "<p>Account level permissions</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n [\n    {\n      \"user\": \"username\",\n      \"permissions\": [\n          \"teamspace_admin\"\n      ]\n    }\n ]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NOT_AUTHORIZED",
+            "description": "<p>Not Authorized</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Example",
+          "content": "HTTP/1.1 401 Unauthorized\n  {\n    \"message\": \"Not Authorized\",\n    \"status\": 401,\n    \"code\": \"NOT_AUTHORIZED\",\n    \"value\": 9,\n    \"place\": \"GET /permissions\"\n  }",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./accountPermission.js",
     "groupTitle": "Account_Permission"
@@ -48,6 +155,7 @@ define({ "api": [
     "title": "Update a permission",
     "name": "updatePermission",
     "group": "Account_Permission",
+    "description": "<p>Create a new account level permission for a user.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -61,41 +169,207 @@ define({ "api": [
         ]
       }
     },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n[\n   {\n    \"model\": \"model_ID\",\n    \"name\": \"model_name\",\n    \"permissions\": [\n        {\n            \"user\": \"username1\"\n        },\n        {\n            \"user\": \"username2\"\n        }\n    ],\n    \"subModels\": []\n   }\n]",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./accountPermission.js",
     "groupTitle": "Account_Permission"
+  },
+  {
+    "type": "post",
+    "url": "/:account",
+    "title": "Sign up form",
+    "name": "signUp",
+    "group": "Authorisation_",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>New Account username to register.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Sign up a new user account.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "optional": false,
+            "field": "account",
+            "description": "<p>New Account username</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n \"account\":\"newAccountUsername\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "SIGN_UP_PASSWORD_MISSING",
+            "description": "<p>Sign Up Password is missing.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n  \"message\": \"Password is missing\",\n  \"status\": 400,\n  \"code\": \"SIGN_UP_PASSWORD_MISSING\",\n  \"value\": 57,\n  \"place\": \"POST /nabile\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "./auth.js",
+    "groupTitle": "Authorisation_"
   },
   {
     "type": "get",
     "url": "/login/",
     "title": "Check user is logged in",
     "name": "checkLogin",
-    "group": "Auth",
+    "group": "Authorisation",
+    "description": "<p>Check user is still logged into current session.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Registered Account Username.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>Registered User Account Password</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "User",
+            "description": "<p>profile.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n\t{\n  \"username\": \"username1\",\n  \"roles\": [\n      {\n          \"role\": \"team_member\",\n          \"db\": \"database_name\"\n      },\n      {\n          \"role\": \"team_member\",\n          \"db\": \"database_name1\"\n      },\n      {\n          \"role\": \"team_member\",\n          \"db\": \"database_name2\"\n      }\n  ],\n  \"flags\": {\n      \"termsPrompt\": false\n  }\n\t}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "get",
     "url": "/forgot-password/",
     "title": "User Forgot Password request",
     "name": "forgotPassword",
-    "group": "Auth",
+    "group": "Authorisation",
+    "description": "<p>Reset a registered user password.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Username to use for password reset</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email to use for password reset</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Empty",
+            "description": "<p>Object</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "SIGN_UP_PASSWORD_MISSING",
+            "description": "<p>Password is missing</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n  \"message\": \"Password is missing\",\n  \"status\": 400,\n  \"code\": \"SIGN_UP_PASSWORD_MISSING\",\n  \"value\": 57,\n  \"place\": \"POST /forgotPassword\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "get",
     "url": "/:account.json/",
     "title": "Get User Avatar",
     "name": "getAvatar",
-    "group": "Auth",
+    "group": "Authorisation",
     "parameter": {
       "fields": {
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "String",
             "optional": false,
             "field": "account",
             "description": "<p>The avatar image for requested account.</p>"
@@ -103,21 +377,54 @@ define({ "api": [
         ]
       }
     },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "avatar",
+            "description": "<p>User Avatar Image</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "404": [
+          {
+            "group": "404",
+            "optional": false,
+            "field": "USER_DOES_NOT_HAVE_AVATAR",
+            "description": "<p>User does not have an avatar</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 404 Not Found\n{\n  \"message\": \"User does not have an avatar\",\n  \"status\": 404,\n  \"code\": \"SIGN_UP_PASSWORD_MISSING\",\n  \"place\": \"POST /:account/avatar\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "get",
     "url": "/:account.json/",
     "title": "List account information",
     "name": "listInfo",
-    "group": "Auth",
+    "group": "Authorisation",
     "parameter": {
       "fields": {
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "String",
             "optional": false,
             "field": "account.json",
             "description": "<p>The Account to list information for.</p>"
@@ -125,101 +432,391 @@ define({ "api": [
         ]
       }
     },
+    "description": "<p>List account information for provided account.json file.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "User",
+            "description": "<p>account</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n    \"accounts\": [\n        {\n            \"account\": \"username1\",\n            \"projects\": [\n                {\n                    \"_id\": \"model_ID\",\n                    \"name\": \"Sample_Project\",\n                    \"__v\": 37,\n                    \"permissions\": [\n                        \"create_model\",\n                        \"create_federation\",\n                        \"admin_project\",\n                        \"edit_project\",\n                        \"delete_project\",\n                        \"upload_files_all_models\",\n                        \"edit_federation_all_models\",\n                        \"create_issue_all_models\",\n                        \"comment_issue_all_models\",\n                        \"view_issue_all_models\",\n                        \"view_model_all_models\",\n                        \"download_model_all_models\",\n                        \"change_model_settings_all_models\"\n                    ],\n                    \"models\": [\n                        {\n                            \"permissions\": [\n                                \"change_model_settings\",\n                                \"upload_files\",\n                                \"create_issue\",\n                                \"comment_issue\",\n                                \"view_issue\",\n                                \"view_model\",\n                                \"download_model\",\n                                \"edit_federation\",\n                                \"delete_federation\",\n                                \"delete_model\",\n                                \"manage_model_permission\"\n                            ],\n                            \"model\": \"model_ID_1\",\n                            \"name\": \"Model_Name_1\",\n                            \"status\": \"ok\",\n                            \"timestamp\": \"2018-11-27T09:59:56.470Z\"\n                        },\n                        {\n                            \"permissions\": [\n                                \"change_model_settings\",\n                                \"upload_files\",\n                                \"create_issue\",\n                                \"comment_issue\",\n                                \"view_issue\",\n                                \"view_model\",\n                                \"download_model\",\n                                \"edit_federation\",\n                                \"delete_federation\",\n                                \"delete_model\",\n                                \"manage_model_permission\"\n                            ],\n                            \"model\": \"model_ID_2\",\n                            \"name\": \"Model_Name_2\",\n                            \"status\": \"ok\",\n                            \"timestamp\": \"2018-11-27T09:57:19.345Z\"\n                        },\n                        {\n                            \"permissions\": [\n                                \"change_model_settings\",\n                                \"upload_files\",\n                                \"create_issue\",\n                                \"comment_issue\",\n                                \"view_issue\",\n                                \"view_model\",\n                                \"download_model\",\n                                \"edit_federation\",\n                                \"delete_federation\",\n                                \"delete_model\",\n                                \"manage_model_permission\"\n                            ],\n                            \"model\": \"model_ID_3\",\n                            \"name\": \"Model_Name_3\",\n                            \"status\": \"ok\",\n                            \"timestamp\": \"2018-11-26T17:19:26.175Z\"\n                        },\n                        {\n                            \"permissions\": [\n                                \"change_model_settings\",\n                                \"upload_files\",\n                                \"create_issue\",\n                                \"comment_issue\",\n                                \"view_issue\",\n                                \"view_model\",\n                                \"download_model\",\n                                \"edit_federation\",\n                                \"delete_federation\",\n                                \"delete_model\",\n                                \"manage_model_permission\"\n                            ],\n                            \"model\": \"mode_ID_4\",\n                            \"name\": \"Model_Name_4\",\n                            \"status\": \"queued\",\n                            \"timestamp\": null\n                        }\n                    ]\n                },\n                {\n                    \"_id\": \"model_ID_3\",\n                    \"name\": \"Model_Name_4\",\n                    \"__v\": 2,\n                    \"permissions\": [\n                        \"create_model\",\n                        \"create_federation\",\n                        \"admin_project\",\n                        \"edit_project\",\n                        \"delete_project\",\n                        \"upload_files_all_models\",\n                        \"edit_federation_all_models\",\n                        \"create_issue_all_models\",\n                        \"comment_issue_all_models\",\n                        \"view_issue_all_models\",\n                        \"view_model_all_models\",\n                        \"download_model_all_models\",\n                        \"change_model_settings_all_models\"\n                    ],\n                    \"models\": [\n                        {\n                            \"permissions\": [\n                                \"change_model_settings\",\n                                \"upload_files\",\n                                \"create_issue\",\n                                \"comment_issue\",\n                                \"view_issue\",\n                                \"view_model\",\n                                \"download_model\",\n                                \"edit_federation\",\n                                \"delete_federation\",\n                                \"delete_model\",\n                                \"manage_model_permission\"\n                            ],\n                            \"model\": \"model_ID_5\",\n                            \"name\": \"model\",\n                            \"status\": \"queued\",\n                            \"timestamp\": \"2018-11-22T15:47:57.000Z\"\n                        }\n                    ]\n                }\n            ],\n            \"models\": [],\n            \"fedModels\": [],\n            \"isAdmin\": true,\n            \"permissions\": [\n                \"assign_licence\",\n                \"revoke_licence\",\n                \"teamspace_admin\",\n                \"create_project\",\n                \"create_job\",\n                \"delete_job\",\n                \"assign_job\",\n                \"view_projects\"\n            ]\n        }",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "post",
     "url": "/login",
     "title": "Create a Login session",
     "name": "login",
-    "group": "Auth",
+    "group": "Authorisation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Account username</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>User account password</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Login into a verified and registered 3D Repo account.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "User",
+            "description": "<p>account information.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n\t{\n  \"username\": \"username1\",\n  \"roles\": [\n      {\n          \"role\": \"team_member\",\n          \"db\": \"database_name\"\n      },\n      {\n          \"role\": \"team_member\",\n          \"db\": \"database_name1\"\n      },\n      {\n          \"role\": \"team_member\",\n          \"db\": \"database_name2\"\n      }\n  ],\n  \"flags\": {\n      \"termsPrompt\": false\n  }\n\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>User was not authorised.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 401 Unauth­orized\n  {\n    \"message\": \"Not Authorized\",\n    \"status\": 401,\n    \"code\": \"NOT_AUTHORIZED\",\n    \"value\": 9,\n    \"place\": \"GET /login\"\n  }",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "get",
     "url": "/logout/",
     "title": "Create a logout request",
     "name": "logout",
-    "group": "Auth",
+    "group": "Authorisation",
+    "description": "<p>Logout current user</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Account username</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Registered Account Username</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n \"username\": \"username1\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "get",
     "url": "/version/",
     "title": "Print application version",
     "name": "printVersion",
-    "group": "Auth",
+    "group": "Authorisation",
+    "description": "<p>Print current application version.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Current",
+            "description": "<p>Application Version number.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n  \"VERSION\": \"2.20.1\",\n  \"unity\": {\n      \"current\": \"2.20.0\",\n      \"supported\": []\n   },\n  \"navis\": {\n      \"current\": \"2.16.0\",\n      \"supported\": [\n          \"2.8.0\"\n      ]\n  },\n  \"unitydll\": {\n      \"current\": \"2.8.0\",\n      \"supported\": []\n  }\n }",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "put",
     "url": "/:account/password",
     "title": "Reset User Password",
     "name": "resetPassword",
-    "group": "Auth",
+    "group": "Authorisation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>Account to reset password for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>New password to reset to.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Reset existing user account password</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "optional": false,
+            "field": "account",
+            "description": "<p>Account username</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": " HTTP/1.1 200 OK\n {\n\t\"account\":\"username1\"\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "TOKEN_INVALID",
+            "description": "<p>Token is invalid or expired.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"message\":\"Token is invalid or expired\",\n\t\"status\":400,\"code\":\"TOKEN_INVALID\",\n\t\"value\":59,\n\t\"place\": \"PUT /username1/password\"\n\t}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
-  },
-  {
-    "type": "post",
-    "url": "/:account",
-    "title": "Sign up form",
-    "name": "signUp",
-    "group": "Auth",
-    "version": "0.0.0",
-    "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "put",
     "url": "/:account",
     "title": "Update User password",
     "name": "updateUser",
-    "group": "Auth",
+    "group": "Authorisation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>Registered Account Username</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "optional": false,
+            "field": "User",
+            "description": "<p>Updated</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n \"account\":\"newAccountUsername\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "post",
     "url": "/:account/avatar",
     "title": "Get User Avatar",
     "name": "uploadAvatar",
-    "group": "Auth",
+    "group": "Authorisation",
     "parameter": {
       "fields": {
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "String",
             "optional": false,
             "field": "account",
             "description": "<p>The account to upload avatar to.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "image",
+            "description": "<p>The avatar to upload.</p>"
           }
         ]
       }
     },
+    "description": "<p>Upload a new user Avatar.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "status",
+            "description": "<p>Status of Avatar upload.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n \"status\":\"success\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "type": "post",
     "url": "/:account/verify",
     "title": "Verify the user",
     "name": "verify",
-    "group": "Auth",
+    "group": "Authorisation",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "account",
+            "description": "<p>New account username.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "optional": false,
+            "field": "Account",
+            "description": "<p>Verified</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ALREADY_VERIFIED",
+            "description": "<p>User Already verified</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n  \"message\": \"Already verified\",\n  \"status\": 400,\n  \"code\": \"ALREADY_VERIFIED\",\n  \"value\": 60,\n  \"place\": \"POST /niblux/verify\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./auth.js",
-    "groupTitle": "Auth"
+    "groupTitle": "Authorisation"
   },
   {
     "success": {
@@ -277,6 +874,27 @@ define({ "api": [
     "title": "List model groups",
     "name": "listGroups",
     "group": "Groups",
+    "description": "<p>Get all groups for current model.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "List",
+            "description": "<p>of all Groups</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n\t{\n\t\t\"_id\":\"model_ID\",\n\t\t\"__v\":0,\n\t\t\"name\":\"Changed\",\n\t\t\"author\":\"username\",\n\t\t\"createdAt\":1536747251756,\n\t\t\"updatedBy\":\"username\",\n\t\t\"updatedAt\":1536747551043,\n\t\t\"color\":[152,233,75],\n\t\t\"objects\":[]\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./group.js",
     "groupTitle": "Groups"
@@ -3126,6 +3744,51 @@ define({ "api": [
     "title": "Create a Team Member",
     "name": "addTeamMember",
     "group": "Teamspace",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "searchString",
+            "description": "<p>Search string required to find team member.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Team",
+            "description": "<p>member profile</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "User",
+            "description": "<p>not found The <code>searchString</code> of the User was not found.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "{",
+          "content": "{\n\t\t\"message\": \"User not found\",\n\t\t\"status\": 404,\n\t\t\"code\": \"USER_NOT_FOUND\",\n\t\t\"value\": 1,\n\t\t\"place\": \"POST /members\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./teamspace.js",
     "groupTitle": "Teamspace"

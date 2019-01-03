@@ -30,6 +30,24 @@ const systemLogger = require("../logger.js").systemLogger;
  * @api {get} /groups/revision/master/head/ List model groups
  * @apiName listGroups
  * @apiGroup Groups
+ * 
+ * @apiDescription Get all groups for current model.
+ * 
+ * @apiSuccess (200) {Object[]} List of all Groups
+ * @apiSuccessExample {json} Success-Response
+ * 
+ * HTTP/1.1 200 OK
+ * 	{
+ * 		"_id":"model_ID",
+ * 		"__v":0,
+ * 		"name":"Changed",
+ * 		"author":"username",
+ * 		"createdAt":1536747251756,
+ * 		"updatedBy":"username",
+ * 		"updatedAt":1536747551043,
+ * 		"color":[152,233,75],
+ * 		"objects":[]
+ * }
  */
 
 router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
@@ -40,6 +58,8 @@ router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroup
  * @apiGroup Groups
  * 
  * @apiParam {String} id Revision unique ID.
+ * 
+ * @apiSuccess (200) {Object[]} List of all Groups based on Revision ID.
  */
 
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
@@ -70,6 +90,17 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  * @apiGroup Groups
  * 
  * @apiParam {String} id Group unique ID.
+ * @apiError GROUP_NOT_FOUND Group Not Found
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 404 Not Found
+ *  {
+ *    "message": "Group not found",
+ *    "status": 404,
+ *    "code": "GROUP_NOT_FOUND",
+ *    "value": 53,
+ *    "place": "PUT /groups/revision"
+ *	}
  */
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
@@ -78,6 +109,7 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * @apiName createGroup
  * @apiDescription Add a group to the model.
  * @apiGroup Groups
+ * 
  */
 
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
