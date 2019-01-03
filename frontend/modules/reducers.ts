@@ -31,7 +31,6 @@ export default function createReducer() {
 		notifications: notificationsReducer,
 		staticPages: staticPagesReducer,
 		users: usersReducer,
-		staticPages: staticPagesReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,
 		viewpoints: viewpointsReducer// <-- INJECT MODULE REDUCER -->
