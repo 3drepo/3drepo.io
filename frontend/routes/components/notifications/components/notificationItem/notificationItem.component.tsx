@@ -39,16 +39,19 @@ export interface INotification {
 	issuesId?: string[];
 	revision?: string;
 	timestamp: number;
+	errorMessage?: string;
 }
 
 const TYPES = {
 	ISSUE_ASSIGNED : 'ISSUE_ASSIGNED',
-	MODEL_UPDATED : 'MODEL_UPDATED'
+	MODEL_UPDATED : 'MODEL_UPDATED',
+	MODEL_UPDATED_FAILED : 'MODEL_UPDATED_FAILED'
 };
 
 interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	showUpdatedFailedError: (errorMessage: string) => void;
 	onClick?: (e: React.SyntheticEvent) => void;
 	history: any;
 }
@@ -88,6 +91,7 @@ const getIcon = (notification) => {
 		case TYPES.ISSUE_ASSIGNED:
 			return (<Place/>);
 		case TYPES.MODEL_UPDATED:
+		case TYPES.MODEL_UPDATED_FAILED:
 			return (<ChangeHistory/>);
 	}
 };
@@ -98,7 +102,8 @@ const getDetails = (notification: IProps) => {
 			return `${notification.issuesId.length} assigned issues `;
 		case TYPES.MODEL_UPDATED:
 			return !notification.revision ? 'New revision uploaded' : `Revision ${notification.revision} uploaded`;
-
+		case TYPES.MODEL_UPDATED_FAILED:
+			return 'New revision failed to import';
 	}
 };
 
@@ -106,6 +111,13 @@ const getSummary  = (notification) =>  `In ${notification.modelName}`;
 
 export class NotificationItem extends React.PureComponent<IProps, IState> {
 	public gotoNotification = () => {
+		this.props.sendUpdateNotificationRead(this.props._id, true);
+
+		if (this.props.type === TYPES.MODEL_UPDATED_FAILED) {
+			this.props.showUpdatedFailedError(this.props.errorMessage);
+			return;
+		}
+
 		const {teamSpace, modelId, _id: notificationId, history} = this.props;
 		let pathname = `/viewer/${teamSpace}/${modelId}`;
 		let search = '';
@@ -118,7 +130,6 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 			pathname += `/${this.props.revision}`;
 		}
 
-		this.props.sendUpdateNotificationRead(this.props._id, true);
 		history.push({pathname, search});
 	}
 
@@ -126,6 +137,7 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 		if (this.props.onClick) {
 			this.props.onClick(e);
 		}
+
 		this.gotoNotification();
 	}
 

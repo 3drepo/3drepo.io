@@ -119,7 +119,10 @@ function importSuccess(account, model, sharedSpacePath, user) {
 				setting.timestamp = new Date();
 			}
 			setting.markModified("errorReason");
-			ChatEvent.modelStatusChanged(null, account, model, Object.assign({}, setting , user));
+
+			// hack to add the user field to send to the user
+			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+			ChatEvent.modelStatusChanged(null, account, model, data);
 
 			// Creates model updated notification.
 			History.findLatest({account, model},{tag:1}).then(h => {
@@ -174,7 +177,7 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 		}
 
 		// Creates model updated failed notification.
-		notifications.insertModelUpdatedFailedNotifications(account, model, user)
+		notifications.insertModelUpdatedFailedNotifications(account, model, user, errMsg)
 			.then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 
 	}).catch(err => {

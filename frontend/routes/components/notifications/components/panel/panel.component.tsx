@@ -28,6 +28,7 @@ interface IProps {
 	notifications: INotification[];
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	showUpdatedFailedError: (errorMessage: string) => void;
 	closePanel: (e: React.SyntheticEvent) => void;
 }
 

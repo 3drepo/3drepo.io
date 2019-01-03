@@ -91,10 +91,15 @@ export function* confirmSendDeleteAllNotifications() {
 	yield put(DialogActions.showDialog(config));
 }
 
+export function* showUpdatedFailedError({ errorMessage }) {
+	yield put(DialogActions.showErrorDialog('update', 'model', { data : {message : errorMessage} }));
+}
+
 export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.SEND_GET_NOTIFICATIONS, sendGetNotifications);
 	yield takeLatest(NotificationsTypes.SEND_UPDATE_NOTIFICATION_READ, sendUpdateNotificationRead);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_NOTIFICATION, sendDeleteNotification);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_ALL_NOTIFICATIONS, sendDeleteAllNotifications);
 	yield takeLatest(NotificationsTypes.CONFIRM_SEND_DELETE_ALL_NOTIFICATIONS, confirmSendDeleteAllNotifications);
+	yield takeLatest(NotificationsTypes.SHOW_UPDATED_FAILED_ERROR, showUpdatedFailedError);
 }

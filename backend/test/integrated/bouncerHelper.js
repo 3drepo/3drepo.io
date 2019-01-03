@@ -10,6 +10,7 @@ const ERRCODE_BUNDLE_GEN_FAIL = 14;
 const softFails = [7,10,15]; //failures that should go through to generate bundle
 
 let channel = null;
+let fail = false;
 
 
 const logger = new (winston.Logger)({
@@ -38,31 +39,35 @@ function handleMessage(cmd, rid, callback){
 		const cmdFile = require(cmdArr[1]);
 		const cmdDatabase = cmdFile.database;
 		const cmdProject = cmdFile.project;
+		const user = cmdFile.owner;
 		callback(JSON.stringify({
 			value: 0,
 			database: cmdDatabase,
-			project: cmdProject
+			project: cmdProject,
+			user
 		}), true);
 	} else {
 		const cmdArr = cmd.split(' ');
 		const cmdFile = require(cmdArr[2]);
 		const cmdDatabase = cmdFile.database;
 		const cmdProject = cmdFile.project;
+		const user = cmdFile.owner;
 		callback(JSON.stringify({
 			status: "processing",
 			database: cmdDatabase,
-			project: cmdProject
+			project: cmdProject,
+			user
 		}), false);
 
 		setTimeout(() => {
 			callback(JSON.stringify({
-				value: 0,
+				value: fail ? 1 : 0,
 				database: cmdDatabase,
-				project: cmdProject
+				project: cmdProject,
+				user
 			}), true);
 		}, 10000);
 	}
-
 }
 /*
  * @param {sendAck} sendAck - Should an acknowledgement be sent with callback (true/false)
@@ -116,7 +121,9 @@ function disconnectQ(){
 }
 
 module.exports = {
-	startBouncerWorker : (callback) => {
+	startBouncerWorker : (callback, sendFail) => {
+		callback = callback;
+		fail = !!sendFail;
 		logger.info("Initialising bouncer client queue...");
 		connectQ(callback);
 	 },

@@ -439,10 +439,8 @@ describe("Chat service", function () {
 			]);
 		});
 
-
 		it("should receive a model uploaded notification if a model has been uploaded", done => {
 			const eventName = `${username}::notificationUpserted`;
-
 			socket.on(eventName, function(notification) {
 				socket.off(eventName);
 				expect(notification).to.exist;
@@ -463,7 +461,29 @@ describe("Chat service", function () {
 				])
 		}).timeout('60s');
 
-	});
+		it("should receive a model FAILED uploaded notification if a model uploaded had failed", done => {
+			const eventName = `${username}::notificationUpserted`;
 
+			socket.on(eventName, function(notification) {
+				socket.off(eventName);
+				expect(notification).to.exist;
+
+				expect(notification.type).to.equals("MODEL_UPDATED_FAILED");
+
+				bouncerHelper.stopBouncerWorker();
+				done();
+			});
+
+			async.series([next => bouncerHelper.startBouncerWorker(next, true),
+				next => agent.post(`/${account}/${model}/upload`)
+					.field("tag", "onetag")
+					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+					.expect(200, function(err, res) {
+						next(err);
+					})
+				])
+		}).timeout('30s');
+
+	});
 
 });

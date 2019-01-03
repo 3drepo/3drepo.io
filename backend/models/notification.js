@@ -28,7 +28,8 @@ const User = require("./user");
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
 	ISSUE_CREATED : "ISSUE_CREATED",
-	MODEL_UPDATED : "MODEL_UPDATED"
+	MODEL_UPDATED : "MODEL_UPDATED",
+	MODEL_UPDATED_FAILED : "MODEL_UPDATED_FAILED"
 };
 
 const NOTIFICATIONS_DB = "notifications";
@@ -223,9 +224,24 @@ module.exports = {
 
 		return notifications;
 	},
-	insertModelUpdatedFailedNotifications :  async function(teamSpace, modelId, user) {
-		return [];
+
+	/**
+	 * This function inserts model update failed notifications
+	 *
+	 * @param {*} teamSpace
+	 * @param {*} modelId
+	 * @param {*} user
+	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
+	 *
+	 */
+	insertModelUpdatedFailedNotifications :  async function(teamSpace, modelId,  username, errorMessage) {
+		const data = {teamSpace,  modelId, errorMessage};
+		const notification = await this.insertNotification(username, types.MODEL_UPDATED_FAILED, data);
+		const notifications = [{username, notification}];
+		await fillModelNames([notification]);
+		return notifications;
 	},
+
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {
 		if (!issue) {
 			return Promise.resolve([]);

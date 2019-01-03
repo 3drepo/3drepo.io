@@ -54,6 +54,7 @@ interface IProps {
 	sendGetNotifications: () => void;
 	confirmSendDeleteAllNotifications: () => void;
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
+	showUpdatedFailedError: (errorMessage: string) => void;
 	sendDeleteNotification: (id: string) => void;
 	deleteNotification: (notification: any) => void;
 	upsertNotification: (notification: any) => void;

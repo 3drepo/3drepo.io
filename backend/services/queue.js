@@ -339,11 +339,11 @@
 					if ("processing" === status) {
 						ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
 					} else {
-					//	if (resErrorCode === 0) {
-					//		ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath, resUser);
-				//		} else {
+						if (resErrorCode === 0) {
+							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath, resUser);
+						} else {
 							ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
-				//		}
+						}
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}
 				}, { noAck: true });
