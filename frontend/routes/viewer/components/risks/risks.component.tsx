@@ -38,6 +38,8 @@ interface IState {
 }
 
 export class Risks extends React.PureComponent<IProps, IState> {
+	private state: IState = {};
+
 	public renderRisksList = renderWhenTrue(() => {
 		const Items = this.props.risks.map((risk) => (
 			<PreviewListItem

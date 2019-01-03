@@ -18,9 +18,9 @@ import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 // Components
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
-import { ViewerPanel } from './viewer/components/viewerPanel/viewerPanel.component';
 import Gis from './viewer/components/gis/gis.container';
 import Views from './viewer/components/views/views.container';
+import Risks from './viewer/components/risks/risks.container';
 
 angular
 	.module('3drepo')
@@ -37,4 +37,5 @@ angular
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('viewerPanel', wrap(ViewerPanel))
 	.component('gis', wrap(Gis))
+    .component('risks', wrap(Risks))
 	.component('views', wrap(Views, ['teamspace', 'modelId']));
