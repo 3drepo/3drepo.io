@@ -35,14 +35,69 @@ const multer = require("multer");
 /**
  * @api {post} /login Create a Login session
  * @apiName login
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiParam {String} username Account username
+ * @apiParam {String} password User account password
+ *
+ * @apiDescription Login into a verified and registered 3D Repo account.
+ *
+ * @apiSuccess (200) {Object} User account information.
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * 	{
+ *   "username": "username1",
+ *   "roles": [
+ *       {
+ *           "role": "team_member",
+ *           "db": "database_name"
+ *       },
+ *       {
+ *           "role": "team_member",
+ *           "db": "database_name1"
+ *       },
+ *       {
+ *           "role": "team_member",
+ *           "db": "database_name2"
+ *       }
+ *   ],
+ *   "flags": {
+ *       "termsPrompt": false
+ *   }
+ *	}
+ *
+ * @apiError NotAuthorized User was not authorised.
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 401 Unauth­orized
+ *   {
+ *     "message": "Not Authorized",
+ *     "status": 401,
+ *     "code": "NOT_AUTHORIZED",
+ *     "value": 9,
+ *     "place": "GET /login"
+ *   }
  */
 router.post("/login", login);
 
 /**
  * @api {get} /logout/ Create a logout request
  * @apiName logout
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiDescription Logout current user
+ *
+ * @apiParam {String} username Account username
+ *
+ * @apiSuccess (200) {String} username Registered Account Username
+ * 
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *  "username": "username1"
+ * }
+ * 
  */
 
 router.post("/logout", logout);
@@ -50,7 +105,36 @@ router.post("/logout", logout);
 /**
  * @api {get} /login/ Check user is logged in
  * @apiName checkLogin
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiDescription Check user is still logged into current session.
+ * 
+ * @apiParam {String} username Registered Account Username.
+ * @apiParam {String} password Registered User Account Password
+ * 
+ * @apiSuccess (200) {Object} User profile.
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * 	{
+ *   "username": "username1",
+ *   "roles": [
+ *       {
+ *           "role": "team_member",
+ *           "db": "database_name"
+ *       },
+ *       {
+ *           "role": "team_member",
+ *           "db": "database_name1"
+ *       },
+ *       {
+ *           "role": "team_member",
+ *           "db": "database_name2"
+ *       }
+ *   ],
+ *   "flags": {
+ *       "termsPrompt": false
+ *   }
+ *	}
  */
 
 router.get("/login", checkLogin);
@@ -58,7 +142,26 @@ router.get("/login", checkLogin);
 /**
  * @api {get} /forgot-password/ User Forgot Password request
  * @apiName forgotPassword
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ *
+ * @apiDescription Reset a registered user password.
+ *
+ * @apiParam {String} username Username to use for password reset
+ * @apiParam {String} email Email to use for password reset
+ * 
+ * @apiSuccess (200) {Object} Empty Object
+ *
+ * @apiError SIGN_UP_PASSWORD_MISSING Password is missing
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 400 Bad Request
+ * {
+ *   "message": "Password is missing",
+ *   "status": 400,
+ *   "code": "SIGN_UP_PASSWORD_MISSING",
+ *   "value": 57,
+ *   "place": "POST /forgotPassword"
+ * }
  */
 
 router.post("/forgot-password", forgotPassword);
@@ -66,7 +169,31 @@ router.post("/forgot-password", forgotPassword);
 /**
  * @api {get} /version/ Print application version
  * @apiName printVersion
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiDescription Print current application version.
+ * 
+ * @apiSuccess (200) {Object} Current Application Version number.
+ * 
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *   "VERSION": "2.20.1",
+ *   "unity": {
+ *       "current": "2.20.0",
+ *       "supported": []
+ *    },
+ *   "navis": {
+ *       "current": "2.16.0",
+ *       "supported": [
+ *           "2.8.0"
+ *       ]
+ *   },
+ *   "unitydll": {
+ *       "current": "2.8.0",
+ *       "supported": []
+ *   }
+ *  }
  */
 
 router.get("/version", printVersion);
@@ -74,17 +201,196 @@ router.get("/version", printVersion);
 /**
  * @api {get} /:account.json/ List account information
  * @apiName listInfo
- * @apiGroup Auth
- * @apiParam account.json The Account to list information for.
+ * @apiGroup Authorisation
+ * @apiParam {String} account.json The Account to list information for.
+ * 
+ * @apiDescription List account information for provided account.json file.
+ * 
+ * @apiSuccess (200) {Object[]} User account 
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+    "accounts": [
+        {
+            "account": "username1",
+            "projects": [
+                {
+                    "_id": "model_ID",
+                    "name": "Sample_Project",
+                    "__v": 37,
+                    "permissions": [
+                        "create_model",
+                        "create_federation",
+                        "admin_project",
+                        "edit_project",
+                        "delete_project",
+                        "upload_files_all_models",
+                        "edit_federation_all_models",
+                        "create_issue_all_models",
+                        "comment_issue_all_models",
+                        "view_issue_all_models",
+                        "view_model_all_models",
+                        "download_model_all_models",
+                        "change_model_settings_all_models"
+                    ],
+                    "models": [
+                        {
+                            "permissions": [
+                                "change_model_settings",
+                                "upload_files",
+                                "create_issue",
+                                "comment_issue",
+                                "view_issue",
+                                "view_model",
+                                "download_model",
+                                "edit_federation",
+                                "delete_federation",
+                                "delete_model",
+                                "manage_model_permission"
+                            ],
+                            "model": "model_ID_1",
+                            "name": "Model_Name_1",
+                            "status": "ok",
+                            "timestamp": "2018-11-27T09:59:56.470Z"
+                        },
+                        {
+                            "permissions": [
+                                "change_model_settings",
+                                "upload_files",
+                                "create_issue",
+                                "comment_issue",
+                                "view_issue",
+                                "view_model",
+                                "download_model",
+                                "edit_federation",
+                                "delete_federation",
+                                "delete_model",
+                                "manage_model_permission"
+                            ],
+                            "model": "model_ID_2",
+                            "name": "Model_Name_2",
+                            "status": "ok",
+                            "timestamp": "2018-11-27T09:57:19.345Z"
+                        },
+                        {
+                            "permissions": [
+                                "change_model_settings",
+                                "upload_files",
+                                "create_issue",
+                                "comment_issue",
+                                "view_issue",
+                                "view_model",
+                                "download_model",
+                                "edit_federation",
+                                "delete_federation",
+                                "delete_model",
+                                "manage_model_permission"
+                            ],
+                            "model": "model_ID_3",
+                            "name": "Model_Name_3",
+                            "status": "ok",
+                            "timestamp": "2018-11-26T17:19:26.175Z"
+                        },
+                        {
+                            "permissions": [
+                                "change_model_settings",
+                                "upload_files",
+                                "create_issue",
+                                "comment_issue",
+                                "view_issue",
+                                "view_model",
+                                "download_model",
+                                "edit_federation",
+                                "delete_federation",
+                                "delete_model",
+                                "manage_model_permission"
+                            ],
+                            "model": "mode_ID_4",
+                            "name": "Model_Name_4",
+                            "status": "queued",
+                            "timestamp": null
+                        }
+                    ]
+                },
+                {
+                    "_id": "model_ID_3",
+                    "name": "Model_Name_4",
+                    "__v": 2,
+                    "permissions": [
+                        "create_model",
+                        "create_federation",
+                        "admin_project",
+                        "edit_project",
+                        "delete_project",
+                        "upload_files_all_models",
+                        "edit_federation_all_models",
+                        "create_issue_all_models",
+                        "comment_issue_all_models",
+                        "view_issue_all_models",
+                        "view_model_all_models",
+                        "download_model_all_models",
+                        "change_model_settings_all_models"
+                    ],
+                    "models": [
+                        {
+                            "permissions": [
+                                "change_model_settings",
+                                "upload_files",
+                                "create_issue",
+                                "comment_issue",
+                                "view_issue",
+                                "view_model",
+                                "download_model",
+                                "edit_federation",
+                                "delete_federation",
+                                "delete_model",
+                                "manage_model_permission"
+                            ],
+                            "model": "model_ID_5",
+                            "name": "model",
+                            "status": "queued",
+                            "timestamp": "2018-11-22T15:47:57.000Z"
+                        }
+                    ]
+                }
+            ],
+            "models": [],
+            "fedModels": [],
+            "isAdmin": true,
+            "permissions": [
+                "assign_licence",
+                "revoke_licence",
+                "teamspace_admin",
+                "create_project",
+                "create_job",
+                "delete_job",
+                "assign_job",
+                "view_projects"
+            ]
+        }
  */
 
-router.get("/:account.json", middlewares.loggedIn, listInfo); // TODO: divide into different endpoints that makes sense.
+router.get("/:account.json", middlewares.loggedIn, listInfo); 
+// TODO: divide into different endpoints that makes sense.
 
 /**
  * @api {get} /:account.json/ Get User Avatar
  * @apiName getAvatar
- * @apiGroup Auth
- * @apiParam account The avatar image for requested account.
+ * @apiGroup Authorisation
+ * @apiParam {String} account The avatar image for requested account.
+ * 
+ * @apiSuccess (200) {Object} avatar User Avatar Image
+ * 
+ * @apiError (404) USER_DOES_NOT_HAVE_AVATAR User does not have an avatar
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 404 Not Found
+ * {
+ *   "message": "User does not have an avatar",
+ *   "status": 404,
+ *   "code": "SIGN_UP_PASSWORD_MISSING",
+ *   "place": "POST /:account/avatar"
+ * }
  */
 
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
@@ -95,8 +401,18 @@ router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 /**
  * @api {post} /:account/avatar Get User Avatar
  * @apiName uploadAvatar
- * @apiGroup Auth
- * @apiParam account The account to upload avatar to.
+ * @apiGroup Authorisation
+ * @apiParam {String} account The account to upload avatar to.
+ * @apiParam {Object} image The avatar to upload.
+ * 
+ * @apiDescription Upload a new user Avatar.
+ * 
+ * @apiSuccess (200) {Object} status Status of Avatar upload.
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *  "status":"success"
+ * }
  */
 
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
@@ -104,7 +420,30 @@ router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 /**
  * @api {post} /:account Sign up form 
  * @apiName signUp
- * @apiGroup Auth
+ * @apiGroup Authorisation]
+ * 
+ * @apiParam {String} account New Account username to register.
+ *
+ * @apiDescription Sign up a new user account.
+ * 
+ * @apiSuccess (200) account New Account username
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *  "account":"newAccountUsername"
+ * } 
+ * 
+ * @apiError SIGN_UP_PASSWORD_MISSING Sign Up Password is missing.
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 400 Bad Request
+ * {
+ *   "message": "Password is missing",
+ *   "status": 400,
+ *   "code": "SIGN_UP_PASSWORD_MISSING",
+ *   "value": 57,
+ *   "place": "POST /nabile"
+ * }
  */
 
 router.post("/:account", signUp);
@@ -112,7 +451,23 @@ router.post("/:account", signUp);
 /**
  * @api {post} /:account/verify Verify the user 
  * @apiName verify
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiParam {String} account New account username.
+ * 
+ * @apiSuccess (200) Account Verified
+ * 
+ * @apiError ALREADY_VERIFIED User Already verified
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 400 Bad Request
+ * {
+ *   "message": "Already verified",
+ *   "status": 400,
+ *   "code": "ALREADY_VERIFIED",
+ *   "value": 60,
+ *   "place": "POST /niblux/verify"
+ * }
  */
 
 router.post("/:account/verify", verify);
@@ -120,7 +475,16 @@ router.post("/:account/verify", verify);
 /**
  * @api {put} /:account Update User password
  * @apiName updateUser
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiParam {String} account Registered Account Username
+ * 
+ * @apiSuccess (200) User Updated
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *  "account":"newAccountUsername"
+ * }
  */
 
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
@@ -128,7 +492,30 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 /**
  * @api {put} /:account/password Reset User Password
  * @apiName resetPassword
- * @apiGroup Auth
+ * @apiGroup Authorisation
+ * 
+ * @apiParam {String} account Account to reset password for.
+ * @apiParam {String} password New password to reset to.
+ * 
+ * @apiDescription Reset existing user account password
+ *
+ * @apiSuccess (200) account Account username
+ * @apiSuccessExample {json} Success-Response
+ *  HTTP/1.1 200 OK
+ *  {
+ * 	"account":"username1"
+ *  }
+ * 
+ * @apiError TOKEN_INVALID Token is invalid or expired.
+ * @apiErrorExample {json} Error-Response
+ * 
+ * HTTP/1.1 400 Bad Request
+ * {
+ * 	"message":"Token is invalid or expired",
+ * 	"status":400,"code":"TOKEN_INVALID",
+ * 	"value":59,
+ * 	"place": "PUT /username1/password"
+ * 	}
  */
 
 router.put("/:account/password", resetPassword);
