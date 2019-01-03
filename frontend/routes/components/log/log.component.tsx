@@ -52,7 +52,18 @@ export class Log extends React.PureComponent<IProps, any> {
 		return Boolean(this.props.comment) && !Boolean(this.props.viewpoint.screenshotPath);
 	}
 
-	public renderScreenshotMessage = () => renderWhenTrue(
+	public renderUserMessage = renderWhenTrue(
+		<UserMessage>{this.props.comment}</UserMessage>
+	);
+
+	public renderSystemMessage = renderWhenTrue(
+		<SystemMessage>
+			{this.props.action ? this.props.action.text : null}
+			at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
+		</SystemMessage>
+	);
+
+	public renderScreenshotMessage = renderWhenTrue(
 		<>
 			<ScreenshotWrapper withMessage={!!this.props.comment}>
 				{ this.props.viewpoint && this.props.viewpoint.screenshotPath ?
@@ -61,33 +72,22 @@ export class Log extends React.PureComponent<IProps, any> {
 			</ScreenshotWrapper>
 			{this.props.comment && <ScreenshotMessage>{this.props.comment}</ScreenshotMessage>}
 		</>
-	)(this.isCommentWithScreenshot)
+	);
 
-	public renderSystemMessage = () => renderWhenTrue(
-			<SystemMessage>
-				{this.props.action ? this.props.action.text : null}
-				at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
-			</SystemMessage>
-		)(Boolean(this.props.action))
-
-	public renderUserMessage = () => renderWhenTrue(
-		<UserMessage>{this.props.comment}</UserMessage>
-	)(this.isPlainComment)
-
-	public renderInfo = () => renderWhenTrue(
+	public renderInfo = renderWhenTrue(
 		<Info>
 			{<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />}
 			<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
 		</Info>
-	)(!this.isAction)
+	);
 
 	public render() {
 		return (
 			<Container>
-				{this.renderSystemMessage()}
-				{this.renderUserMessage()}
-				{this.renderScreenshotMessage()}
-				{this.renderInfo()}
+				{this.renderSystemMessage(Boolean(this.props.action))}
+				{this.renderUserMessage(this.isPlainComment)}
+				{this.renderScreenshotMessage(this.isCommentWithScreenshot)}
+				{this.renderInfo(!this.isAction)}
 			</Container>
 		);
 	}
