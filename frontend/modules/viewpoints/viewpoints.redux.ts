@@ -48,7 +48,7 @@ const fetchViewpointsSuccess = (state = INITIAL_STATE, {viewpoints}) => {
 
 const createViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
 	const items = cloneDeep(state.items);
-	const viewpoints = [...items, viewpoint ];
+	const viewpoints = [...items, viewpoint];
 
 	return { ...state, items: viewpoints };
 };

@@ -19,6 +19,7 @@ import { put, takeLatest, all } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
+import { DialogActions } from '../dialog';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -52,19 +53,19 @@ function defer() {
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
 		const viewpointDefer = defer();
-		const screenshotDefer = defer();
 
 		const ViewerService = yield getAngularService('ViewerService') as any;
+		const screenshotPromise = ViewerService.getScreenshot();
+
 		yield ViewerService.getCurrentViewpoint({
 			promise: viewpointDefer,
 			account: teamspace,
 			model: modelId
 		});
-		yield ViewerService.getScreenshot(screenshotDefer);
 
 		const result = yield all([
 			viewpointDefer.promise,
-			screenshotDefer.promise
+			screenshotPromise
 		]);
 
 		const generatedObject = {
@@ -92,7 +93,7 @@ export function* createViewpoint({teamspace, modelId, viewpointName}) {
 		const view = yield generateViewpointObject(teamspace, modelId, viewpointName);
 		yield API.createModelViewpoint(teamspace, modelId, view);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('create', 'model viewpoint', error));
 	}
 }
 
@@ -100,7 +101,7 @@ export function* updateViewpoint({teamspace, modelId, viewpointId, newName}) {
 	try {
 		yield API.updateModelViewpoint(teamspace, modelId, viewpointId, newName);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('update', 'model viewpoint', error));
 	}
 }
 
@@ -108,7 +109,7 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	try {
 		yield API.deleteModelViewpoint(teamspace, modelId, viewpointId);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('delete', 'model viewpoint', error));
 	}
 }
 
