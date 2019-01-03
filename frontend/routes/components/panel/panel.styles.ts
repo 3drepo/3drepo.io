@@ -35,6 +35,7 @@ export const Title = styled.div`
   font-size: 20px;
   font-weight: ${FONT_WEIGHT.NORMAL};
   height: 40px;
+  overflow: hidden;
   min-height: 40px;
   border-radius: 4px 4px 0 0;
   background-color: ${COLOR.PRIMARY_MAIN};

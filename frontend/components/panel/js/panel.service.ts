@@ -381,7 +381,8 @@ export class PanelService {
 				{type: 'menu', visible: true},
 				{type: 'chips-filter', visible: true}
 			],
-			add: true
+			add: true,
+			isReactComponent: true
 		});
 
 		this.panelCards.left.push({

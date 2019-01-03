@@ -19,7 +19,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
-import { SafetiBase } from './safetiBase.component';
+import { SafetiBase } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({});
 

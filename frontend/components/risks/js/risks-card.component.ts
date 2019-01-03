@@ -426,4 +426,4 @@ export const RisksCardComponent: ng.IComponentOptions = {
 
 export const RisksCardComponentModule = angular
 	.module('3drepo')
-	.component('risks', RisksCardComponent);
+	.component('risks-old', RisksCardComponent);

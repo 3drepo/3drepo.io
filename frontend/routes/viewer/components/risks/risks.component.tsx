@@ -16,40 +16,67 @@
  */
 
 import * as React from 'react';
+import ReportProblem from '@material-ui/icons/ReportProblem';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+
+import IconButton from '@material-ui/core/IconButton';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container } from './safetiBase.styles';
+import { Container } from './risks.styles';
 
 interface IProps {
 	risks: any[];
+	isPending?: boolean;
 	fetchRisks: () => void;
 }
 
 interface IState {
-	activeRisk: number;
+	activeRisk?: number;
+	openedRisk?: boolean;
 }
 
-export class SafetiBase extends React.PureComponent<IProps, IState> {
+export class Risks extends React.PureComponent<IProps, IState> {
 	public renderRisksList = renderWhenTrue(() => {
-		return this.props.risks.map((risk) => (
+		const Items = this.props.risks.map((risk) => (
 			<PreviewListItem
 				{...risk}
 			/>
 		));
+
+		return <>{Items}</>;
 	});
 
 	public componentDidMount() {
 		this.props.fetchRisks();
 	}
 
+	public toggleSettings = () => {
+
+	}
+
+	public renderTitleIcon = () => {
+		if (this.state.openedRisk) {
+			return (
+				<IconButton onClick={this.toggleSettings} >
+					<ArrowBack />
+				</IconButton>
+			);
+		}
+		return <ReportProblem />;
+	}
+
+	public renderActions = () => {
+		return [];
+	}
+
 	public render() {
 		return (
 			<ViewerPanel
 				title="SafetiBase"
-				Icon={this.getTitleIcon()}
-				actions={this.getActions()}
+				Icon={this.renderTitleIcon()}
+				actions={this.renderActions()}
 				pending={this.props.isPending}
 			>
 				{this.renderRisksList(true)}
