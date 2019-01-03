@@ -853,6 +853,26 @@
     "name": "createGroup",
     "description": "<p>Add a group to the model.</p>",
     "group": "Groups",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Group",
+            "description": "<p>Created</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n\t\t\"__v\":0,\n\t\t\"_id\":\"efa67a80-0fab-11e9-a0ed-edada3f501fd\",\n\t\t\"name\":\"Group 1\",\"description\":\"\",\n\t\t\"author\":\"username\",\n\t\t\"updatedBy\":\"username\",\n\t\t\"updatedAt\":\"2019-01-03T23:03:37.411Z\",\n\t\t\"createdAt\":\"2019-01-03T23:03:37.411Z\",\n\t\t\"color\":[44,50,125],\n\t\t\"objects\":[]\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./group.js",
     "groupTitle": "Groups"
@@ -862,8 +882,134 @@
     "url": "/groups/",
     "title": "Delete groups",
     "name": "deleteGroups",
-    "description": "<p>Delete groups from the model.</p>",
+    "description": "<p>Delete single group using unique group ID.</p>",
     "group": "Groups",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "optional": false,
+            "field": "Status",
+            "description": "<p>success</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n{\n\t\"status\":\"success\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "./group.js",
+    "groupTitle": "Groups"
+  },
+  {
+    "type": "get",
+    "url": "/groups/revision/master/head/:uid/",
+    "title": "Find group in model",
+    "description": "<p>Find a group using it's Group ID</p>",
+    "name": "findGroup",
+    "group": "Groups",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Group unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Group",
+            "description": "<p>matching provided ID.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"_id\": \"group_ID\",\n    \"color\": [\n        121,\n        130,\n        211\n    ],\n    \"objects\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "./group.js",
+    "groupTitle": "Groups"
+  },
+  {
+    "type": "get",
+    "url": "/groups/revision/:rid/:uid/",
+    "title": "Find group in model by revision",
+    "name": "findGroupByRevision",
+    "description": "<p>Find a single group using the unique Group ID and a Revision ID.</p>",
+    "group": "Groups",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Revision unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Group",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n[\n\t\t{\n\t\t\t\"_id\": \"789b2ed0-0f7f-11e9-b909-833ae21f045f\",\n\t\t\t\"name\": \"Group 1\",\n\t\t\t\"description\": \"This is test group for revision 2\",\n\t\t\t\"author\": \"username\",\n\t\t\t\"updatedBy\": \"username\",\n\t\t\t\"updatedAt\": 1546553617888,\n\t\t\t\"createdAt\": 1546537564888,\n\t\t\t\"__v\": 0,\n\t\t\t\"color\": [\n\t\t\t\t121,\n\t\t\t\t130,\n\t\t\t\t211\n\t\t\t],\n\t\t\t\"objects\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"account\": \"account_username\",\n\t\t\t\t\t\t\"model\": \"6e7d81fb-85c8-4b09-9ad6-6ba099261099\",\n\t\t\t\t\t\t\"ifc_guids\": [],\n\t\t\t\t\t\t\"shared_ids\": [\n\t\t\t\t\t\t\"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3\",\n\t\t\t\t\t\t\"db18ef69-6d6e-49a0-846e-907346abb39d\",\n\t\t\t\t\t\t\"c532ff34-6669-4807-b7f3-6a0ffb17b027\",\n\t\t\t\t\t\t\"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d\",\n\t\t\t\t\t\t\"3f881fa8-2b7b-443e-920f-396c1c85e903\"\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "GROUP_NOT_FOUND",
+            "description": "<p>Group Not Found</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": "\nHTTP/1.1 404 Not Found\n {\n   \"message\": \"Group not found\",\n   \"status\": 404,\n   \"code\": \"GROUP_NOT_FOUND\",\n   \"value\": 53,\n   \"place\": \"PUT /groups/revision\"\n\t}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./group.js",
     "groupTitle": "Groups"
@@ -903,7 +1049,7 @@
     "type": "get",
     "url": "/groups/revision/:rid/",
     "title": "List model groups by revision",
-    "description": "<p>List all groups using the revision ID</p>",
+    "description": "<p>List all groups using based on which revision is currently selected.</p>",
     "name": "listGroupsByRevision",
     "group": "Groups",
     "parameter": {
@@ -919,6 +1065,26 @@
         ]
       }
     },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "List",
+            "description": "<p>of all Groups based on Revision ID.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\": \"model_ID\",\n\t\t\"name\": \"Group 1\",\n\t\t\"description\": \"This is test group for revision 2\",\n\t\t\"author\": \"username\",\n\t\t\"updatedBy\": \"username\",\n\t\t\"updatedAt\": 1546537564888,\n\t\t\"createdAt\": 1546537564888,\n\t\t\"__v\": 0,\n\t\t\"color\": [\n\t\t121,\n\t\t130,\n\t\t211\n\t],\n\t\t\"objects\": []\n\t}\n\t]",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "./group.js",
     "groupTitle": "Groups"
@@ -928,8 +1094,28 @@
     "url": "/groups/:uid/",
     "title": "Update group",
     "name": "updateGroup",
-    "description": "<p>Update a group using Group ID</p>",
     "group": "Groups",
+    "description": "<p>Update a specific group using a unique group ID.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Group",
+            "description": "<p>Object</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n  \"_id\":\"c5f0fd00-0fab-11e9-bf22-eb8649763304\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "parameter": {
       "fields": {
         "Parameter": [
@@ -942,6 +1128,25 @@
           }
         ]
       }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "GROUP_NOT_FOUND",
+            "description": "<p>Group Not Found</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response",
+          "content": " \nHTTP/1.1 404 Not Found\n {\n   \"message\": \"Group not found\",\n   \"status\": 404,\n   \"code\": \"GROUP_NOT_FOUND\",\n   \"value\": 53,\n   \"place\": \"PUT /groups/\"\n\t}",
+          "type": "json"
+        }
+      ]
     },
     "version": "0.0.0",
     "filename": "./group.js",
@@ -1090,16 +1295,6 @@
     "groupTitle": "Issues"
   },
   {
-    "type": "get",
-    "url": "/issues.bcfzip",
-    "title": "Get Issues BCF zip file",
-    "name": "getIssuesBCF",
-    "group": "Issues",
-    "version": "0.0.0",
-    "filename": "./issue.js",
-    "groupTitle": "Issues"
-  },
-  {
     "type": "post",
     "url": "/revision/:rid/issues.bcfzip",
     "title": "Post Issues BCF zip file by revision ID",
@@ -1141,6 +1336,16 @@
         ]
       }
     },
+    "version": "0.0.0",
+    "filename": "./issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/issues.bcfzip",
+    "title": "Get Issues BCF zip file",
+    "name": "getIssuesBCF",
+    "group": "Issues",
     "version": "0.0.0",
     "filename": "./issue.js",
     "groupTitle": "Issues"
@@ -1236,6 +1441,16 @@
   },
   {
     "type": "get",
+    "url": "/issues.html",
+    "title": "Issues response into as HTML",
+    "name": "renderIssuesHTML",
+    "group": "Issues",
+    "version": "0.0.0",
+    "filename": "./issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
     "url": "revision/:rid/issues.html",
     "title": "Issues response into as HTML by revision ID",
     "name": "renderIssuesHTML",
@@ -1253,16 +1468,6 @@
         ]
       }
     },
-    "version": "0.0.0",
-    "filename": "./issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/issues.html",
-    "title": "Issues response into as HTML",
-    "name": "renderIssuesHTML",
-    "group": "Issues",
     "version": "0.0.0",
     "filename": "./issue.js",
     "groupTitle": "Issues"
@@ -1460,8 +1665,8 @@
   },
   {
     "type": "get",
-    "url": "/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png",
-    "title": "Get Here Admin Label Tile",
+    "url": "/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png",
+    "title": "Get Here Label Overlay Tile",
     "name": "getHereAdminLabelOverlayTile",
     "group": "Maps",
     "parameter": {
@@ -1504,8 +1709,8 @@
   },
   {
     "type": "get",
-    "url": "/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png",
-    "title": "Get Here Label Overlay Tile",
+    "url": "/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png",
+    "title": "Get Here Admin Label Tile",
     "name": "getHereAdminLabelOverlayTile",
     "group": "Maps",
     "parameter": {
@@ -2011,50 +2216,6 @@
   },
   {
     "type": "get",
-    "url": "/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png",
-    "title": "Get Here Traffic Flow",
-    "name": "getHereTrafficTile",
-    "group": "Maps",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to list maps for</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "zoomLevel",
-            "description": "<p>Map Zoom level</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "of",
-            "description": "<p>tiles along row (x-cordinate)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "Map",
-            "description": "<p>image type (format) to return</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "./maps.js",
-    "groupTitle": "Maps"
-  },
-  {
-    "type": "get",
     "url": "/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png",
     "title": "Get Here Traffic Tile",
     "name": "getHereTrafficTile",
@@ -2082,6 +2243,50 @@
             "optional": false,
             "field": "number",
             "description": "<p>of tiles along row (x-cordinate)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "Map",
+            "description": "<p>image type (format) to return</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./maps.js",
+    "groupTitle": "Maps"
+  },
+  {
+    "type": "get",
+    "url": "/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png",
+    "title": "Get Here Traffic Flow",
+    "name": "getHereTrafficTile",
+    "group": "Maps",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to list maps for</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "zoomLevel",
+            "description": "<p>Map Zoom level</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "of",
+            "description": "<p>tiles along row (x-cordinate)</p>"
           },
           {
             "group": "Parameter",
@@ -2297,7 +2502,7 @@
   {
     "type": "get",
     "url": "/revision/:rev/meta/findObjsWith/:metaKey.json",
-    "title": "Get all meta data with field based on master branch",
+    "title": "Get all meta data with field based on revision",
     "name": "getAllIdsWithMetadataField",
     "group": "Meta",
     "parameter": {
@@ -2327,7 +2532,7 @@
   {
     "type": "get",
     "url": "/revision/:rev/meta/findObjsWith/:metaKey.json",
-    "title": "Get all meta data with field based on revision",
+    "title": "Get all meta data with field based on master branch",
     "name": "getAllIdsWithMetadataField",
     "group": "Meta",
     "parameter": {
@@ -2467,6 +2672,29 @@
   },
   {
     "type": "get",
+    "url": "/:model/revision/master/head/idMap.json",
+    "title": "Get ID Map",
+    "name": "getIdMap",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to Get ID Map for.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:model/revision/:rev/idMap.json",
     "title": "Get Tree Path",
     "name": "getIdMap",
@@ -2497,9 +2725,9 @@
   },
   {
     "type": "get",
-    "url": "/:model/revision/master/head/idMap.json",
-    "title": "Get ID Map",
-    "name": "getIdMap",
+    "url": "/:model/revision/:rev/idToMeshes.json",
+    "title": "Get ID Meshes",
+    "name": "getIdToMeshes",
     "group": "Model",
     "parameter": {
       "fields": {
@@ -2509,7 +2737,14 @@
             "type": "String",
             "optional": false,
             "field": "model",
-            "description": "<p>Model to Get ID Map for.</p>"
+            "description": "<p>Model to use.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>Revision to use.</p>"
           }
         ]
       }
@@ -2533,36 +2768,6 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model to get ID Meshes for.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "./model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
-    "url": "/:model/revision/:rev/idToMeshes.json",
-    "title": "Get ID Meshes",
-    "name": "getIdToMeshes",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to use.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "rev",
-            "description": "<p>Revision to use.</p>"
           }
         ]
       }
@@ -2818,6 +3023,29 @@
   },
   {
     "type": "get",
+    "url": "/:model/revision/master/head/unityAssets.json",
+    "title": "Get Unity Assets based on model",
+    "name": "getUnityAssets",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "unityAssets.json",
+            "description": "<p>Model to get Unity Assets for.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:model/revision/:rev/unityAssets.json",
     "title": "Get Unity Assets based on revision and model",
     "name": "getUnityAssets",
@@ -2838,29 +3066,6 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to get Unity Assets for.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "./model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
-    "url": "/:model/revision/master/head/unityAssets.json",
-    "title": "Get Unity Assets based on model",
-    "name": "getUnityAssets",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "unityAssets.json",
-            "description": "<p>Model to get Unity Assets for.</p>"
           }
         ]
       }
@@ -3078,29 +3283,6 @@
     "groupTitle": "Model"
   },
   {
-    "type": "get",
-    "url": "/:model/download/latest",
-    "title": "Upload Model.",
-    "name": "uploadModel",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to download.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "./model.js",
-    "groupTitle": "Model"
-  },
-  {
     "type": "post",
     "url": "/:model/revision/master/head/searchtree.json",
     "title": "Upload Model.",
@@ -3115,6 +3297,29 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model to upload.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:model/download/latest",
+    "title": "Upload Model.",
+    "name": "uploadModel",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to download.</p>"
           }
         ]
       }
@@ -3596,6 +3801,16 @@
   {
     "type": "get",
     "url": "/risks.html",
+    "title": "Render all Risks as HTML",
+    "name": "renderRisksHTML",
+    "group": "Risks",
+    "version": "0.0.0",
+    "filename": "./risk.js",
+    "groupTitle": "Risks"
+  },
+  {
+    "type": "get",
+    "url": "/risks.html",
     "title": "Render all Risks as HTML by revision ID",
     "name": "renderRisksHTML",
     "group": "Risks",
@@ -3612,16 +3827,6 @@
         ]
       }
     },
-    "version": "0.0.0",
-    "filename": "./risk.js",
-    "groupTitle": "Risks"
-  },
-  {
-    "type": "get",
-    "url": "/risks.html",
-    "title": "Render all Risks as HTML",
-    "name": "renderRisksHTML",
-    "group": "Risks",
     "version": "0.0.0",
     "filename": "./risk.js",
     "groupTitle": "Risks"
@@ -3674,29 +3879,6 @@
   },
   {
     "type": "put",
-    "url": "/revision/:rid/risks/:riskId.json",
-    "title": "Update Risk based on revision ID",
-    "name": "updateRisk",
-    "group": "Risks",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "rid",
-            "description": "<p>Revision unique ID.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "./risk.js",
-    "groupTitle": "Risks"
-  },
-  {
-    "type": "put",
     "url": "/risks/riskId.json",
     "title": "Update risks based on revision",
     "name": "updateRisk",
@@ -3710,6 +3892,29 @@
             "optional": false,
             "field": "riskId.json",
             "description": "<p>Risk unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./risk.js",
+    "groupTitle": "Risks"
+  },
+  {
+    "type": "put",
+    "url": "/revision/:rid/risks/:riskId.json",
+    "title": "Update Risk based on revision ID",
+    "name": "updateRisk",
+    "group": "Risks",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rid",
+            "description": "<p>Revision unique ID.</p>"
           }
         ]
       }
