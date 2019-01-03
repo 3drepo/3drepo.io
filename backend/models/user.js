@@ -1175,6 +1175,21 @@ schema.statics.teamspaceMemberCheck = function (teamspace, user) {
 	});
 };
 
+schema.statics.getTeamMemberInfo = function (teamspace, user) {
+	return User.findByUserName(user).then((userEntry) => {
+		if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		} else {
+			return {
+				user,
+				firstName: userEntry.customData.firstName,
+				lastName: userEntry.customData.lastName,
+				company: _.get(userEntry.customData, "billing.billingInfo.company", null)
+			};
+		}
+	});
+};
+
 schema.statics.isHereEnabled = function (username) {
 	return _isHereEnabled(username);
 };

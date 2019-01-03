@@ -28,6 +28,7 @@
 	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
 
 	router.get("/members", middlewares.loggedIn, getMemberList);
+	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
@@ -59,6 +60,18 @@
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
+	}
+
+	function getTeamMemberInfo(req, res, next) {
+		User.getTeamMemberInfo(
+			req.params.account,
+			req.params.user
+		).then(info => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, info);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
 	}
 
 	function getMemberList(req, res, next) {
