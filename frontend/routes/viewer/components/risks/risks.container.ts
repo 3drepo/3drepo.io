@@ -17,12 +17,12 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 
-import { SafetiBase } from './risks.component';
+import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(SafetiBase);
+export default connect(mapStateToProps, mapDispatchToProps)(Risks);
