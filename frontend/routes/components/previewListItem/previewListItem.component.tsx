@@ -18,12 +18,8 @@
 import * as React from 'react';
 import Truncate from 'react-truncate';
 
-<<<<<<< HEAD
 import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
-=======
-import { DateTime } from './../dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../helpers/rendering';
->>>>>>> ISSUE_1271 - Fix PR comments
 
 import {
 	MenuItemContainer,
