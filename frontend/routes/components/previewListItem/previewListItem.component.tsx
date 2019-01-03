@@ -56,11 +56,11 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		return createdDate >= dueDate ? 1 : 0;
 	}
 
-	public renderArrowContainer = () => renderWhenTrue(
+	public renderArrowContainer = renderWhenTrue(
 		<ArrowContainer onClick={this.props.onArrowClick}>
 			<StyledArrowIcon />
 		</ArrowContainer>
-	)(this.state.active)
+	);
 
 	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
 	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
@@ -100,7 +100,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 						</Description>
 					</Content>
 				</Container>
-				{this.renderArrowContainer()}
+				{this.renderArrowContainer(this.state.active)}
 			</MenuItemContainer>
 		);
 	}
