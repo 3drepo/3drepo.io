@@ -65,6 +65,19 @@
 	 * @api {post} /members Create a Team Member
 	 * @apiName addTeamMember
 	 * @apiGroup Teamspace
+	 * @apiParam {String} searchString Search string required to find team member. 
+	 * 
+	 * @apiSuccess (200) {Object} Team member profile
+	 * 
+	 * @apiError User not found The <code>searchString</code> of the User was not found.
+	 * @apiErrorExample
+	 * {
+	 * 		"message": "User not found",
+	 *		"status": 404,
+	 *		"code": "USER_NOT_FOUND",
+	 *		"value": 1,
+	 *		"place": "POST /members"
+	 * }
 	 */
 
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
