@@ -23,6 +23,8 @@ const html = data => `
 	<br>
 	model: ${data.model}
 	<br>
+	user: ${data.username}
+	<br>
 	Error: ${data.err}
 	<br>
 	Bouncer Error Code : ${data.bouncerErr}

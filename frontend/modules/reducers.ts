@@ -10,6 +10,7 @@ import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
+import { reducer as staticPagesReducer } from './staticPages/staticPages.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -23,6 +24,7 @@ export default function createReducer() {
 		teamspaces: teamspacesReducer,
 		model: modelReducer,
 		auth: authReducer,
-		notifications: notificationsReducer// <-- INJECT MODULE REDUCER -->
+		notifications: notificationsReducer,
+		staticPages: staticPagesReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

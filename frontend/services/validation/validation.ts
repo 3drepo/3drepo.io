@@ -24,7 +24,8 @@ export const VALIDATIONS_MESSAGES = {
 	TOO_LONG_STRING: 'Must be at most ${max} characters',
 	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
 	DECIMAL: 'Must be a decimal number or integer',
-	INTEGER: 'Must be an integer'
+	INTEGER: 'Must be an integer',
+	USERNAME_CHARS: 'Must use only letters, numbers, hypens or underscores'
 };
 
 Yup.addMethod(Yup.string, 'differentThan', differentThan );
@@ -61,6 +62,10 @@ export const schema = {
 		.required(VALIDATIONS_MESSAGES.REQUIRED)
 		.max(20, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 		.matches(/^[A-Za-z0-9_]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC),
+
+	username: Yup.string()
+		.matches(/^[A-Za-z0-9_-]+$/, VALIDATIONS_MESSAGES.USERNAME_CHARS)
+		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
 	required: Yup.string()
 		.required(VALIDATIONS_MESSAGES.REQUIRED),

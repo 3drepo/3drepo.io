@@ -21,13 +21,6 @@ export const TDR = () => {
 				console.error('No version number in config...');
 			}
 
-			if (window.ClientConfig.unitySettings) {
-				// Assign unity settings
-				window.Module = ClientConfig.unitySettings;
-
-			} else {
-				console.error('ClientConfig does not have any provided Unity settings!');
-			}
 		}
 
 		if (!maintenanceMode) {

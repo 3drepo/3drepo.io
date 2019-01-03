@@ -851,7 +851,7 @@ export class IssuesService {
 	}
 
 	public handleHidden(objects) {
-		this.treeService.hideNodesBySharedIds(objects);
+		this.treeService.hideNodesBySharedIds(objects, true);
 	}
 
 	public handleShown(objects) {

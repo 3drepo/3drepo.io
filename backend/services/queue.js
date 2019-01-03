@@ -332,6 +332,7 @@
 					const resErrorMessage = resData.message;
 					const resDatabase = resData.database;
 					const resProject = resData.project;
+					const resUser = resData.user ? resData.user : "unknown";
 
 					const status = resData.status;
 
@@ -341,7 +342,7 @@
 						if (resErrorCode === 0) {
 							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);
 						} else {
-							ModelHelper.importFail(resDatabase, resProject, resErrorCode, resErrorMessage, true);
+							ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
 						}
 						defer && delete self.deferedObjs[rep.properties.correlationId];
 					}

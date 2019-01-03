@@ -71,8 +71,8 @@ tools/release/tmp
 tools/release/*.exe
 
 #legal
-pug/legal/*.pug
-pug/legal/*.html
+pug/legal/*
+resource/legal/*
 
 
 uploads/
