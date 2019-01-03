@@ -18,7 +18,6 @@
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
-import { TreeList } from '../components/treeList/treeList.component';
 
 export const Head = styled.div`
 	font-size: 14px;
