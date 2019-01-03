@@ -49,6 +49,7 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 }
+
 interface IState {
 	active: boolean;
 }
