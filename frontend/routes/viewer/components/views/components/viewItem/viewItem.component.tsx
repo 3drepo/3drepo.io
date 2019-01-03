@@ -18,6 +18,8 @@
 import * as React from 'react';
 import { Formik, Field } from 'formik';
 
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+
 import {
 	ViewpointItem,
 	StyledForm,
@@ -36,19 +38,64 @@ import {
 
 interface IProps {
 	viewpoint: any;
-	onViewpointItemClick: (viewpoint) => void;
+	handleClick: (viewpoint) => void;
 	updateViewpoint: (teamspace, modelId, viewpointId, newName) => void;
 	deleteViewpoint: (teamspace, modelId, viewpointId) => void;
 	onCancelEditMode: () => void;
 	onOpenEditMode: () => void;
-	isActive: boolean;
+	active: boolean;
 	editMode: boolean;
 	teamspace: string;
 	modelId: string;
 }
 
 export class ViewItem extends React.PureComponent<IProps, any> {
-	public handleSaveEdit = (values, viewpointId) => {
+	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
+
+	public renderScreenshot = (viewpoint) => renderWhenTrue(() => (
+		<Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} />
+	))(viewpoint.screenshot.thumbnailUrl)
+
+	public renderViewpointForm = (viewpoint) => renderWhenTrue(() => {
+		return (
+			<Formik
+				initialValues={{ newName: viewpoint.name }}
+				onSubmit={this.handleSaveEdit(viewpoint._id)}>
+				<StyledForm>
+					<Field name="newName" render={({ field, form }) => (
+						<NewViewpointName
+							{...field}
+							error={Boolean(form.errors.name)}
+							helperText={form.errors.name}
+							label="New name"
+						/>
+					)} />
+					<IconsGroup>
+						<StyledCancelIcon color="secondary" onClick={this.props.onCancelEditMode} />
+						<SaveIconButton type="submit" disableRipple={true}>
+							<StyledSaveIcon color="secondary" />
+						</SaveIconButton>
+					</IconsGroup>
+				</StyledForm>
+			</Formik>
+		);
+	})(this.props.active && this.props.editMode)
+
+	public renderViewpointName = (viewpoint) => renderWhenTrue(() => (
+		<Name>{viewpoint.name}</Name>
+	))(!this.props.active)
+
+	public renderViewpointData = (viewpoint) => renderWhenTrue(() => (
+		<NameRow>
+			<Name>{viewpoint.name}</Name>
+			<IconsGroup>
+				<StyledEditIcon color="secondary" onClick={this.props.onOpenEditMode} />
+				<StyledDeleteIcon color="secondary" onClick={(event) => this.handleDelete(event, viewpoint._id)} />
+			</IconsGroup>
+		</NameRow>
+	))(this.props.active && !this.props.editMode)
+
+	public handleSaveEdit = (viewpointId) => (values) => {
 		const { teamspace, modelId } = this.props;
 		this.props.updateViewpoint(teamspace, modelId, viewpointId, values.newName);
 		this.props.onCancelEditMode();
@@ -59,52 +106,20 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		const { teamspace, modelId } = this.props;
 		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
 	}
-
 	public render() {
-		const { viewpoint, onViewpointItemClick, onCancelEditMode, onOpenEditMode, isActive, editMode } = this.props;
+		const { viewpoint, handleClick, active } = this.props;
 
 		return (
 			<ViewpointItem
-				key={viewpoint._id}
 				disableRipple
-				onClick={() => onViewpointItemClick(viewpoint)}
-				active={isActive ? 1 : 0}>
+				onClick={handleClick}
+				active={active}>
 
-				{ viewpoint.screenshot.thumbnailUrl
-					? <Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} /> : <ThumbnailPlaceholder />}
-				{
-					isActive ?
-						editMode ?
-							<Formik
-								initialValues={{newName: viewpoint.name}}
-								onSubmit={(values) => this.handleSaveEdit(values, viewpoint._id)}>
-								<StyledForm>
-									<Field name="newName" render={ ({ field, form }) => (
-										<NewViewpointName
-											{...field}
-											error={Boolean(form.errors.name)}
-											helperText={form.errors.name}
-											label="New name"
-										/>
-									)} />
-									<IconsGroup>
-										<StyledCancelIcon color="secondary" onClick={onCancelEditMode} />
-										<SaveIconButton type="submit" disableRipple={true}>
-											<StyledSaveIcon color="secondary"/>
-										</SaveIconButton>
-									</IconsGroup>
-								</StyledForm>
-							</Formik>
-						:
-							<NameRow>
-								<Name>{viewpoint.name}</Name>
-								<IconsGroup>
-									<StyledEditIcon color="secondary" onClick={onOpenEditMode} />
-									<StyledDeleteIcon color="secondary" onClick={(event) => this.handleDelete(event, viewpoint._id)} />
-								</IconsGroup>
-							</NameRow>
-					:	<Name>{viewpoint.name}</Name>
-				}
+				{this.renderScreenshot(viewpoint)}
+				{this.renderScreenshotPlaceholder(!viewpoint.screenshot.thumbnailUrl)}
+				{this.renderViewpointForm(viewpoint)}
+				{this.renderViewpointData(viewpoint)}
+				{this.renderViewpointName(viewpoint)}
 			</ViewpointItem>
 		);
 	}

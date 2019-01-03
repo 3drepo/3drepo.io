@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import { Formik, Field } from 'formik';
 import { isEmpty } from 'lodash';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { getDataFromPathname } from './../../viewer.helpers';
@@ -27,28 +26,11 @@ import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/Add';
 
-import {
-	ViewsCountInfo,
-	ViewpointsList,
-	ViewpointItem,
-	Thumbnail,
-	ThumbnailPlaceholder,
-	Name,
-	EmptyStateInfo,
-	NewViewpointName,
-	StyledSaveIcon,
-	StyledCancelIcon,
-	SearchField,
-	NameRow,
-	IconsGroup,
-	StyledForm,
-	SaveIconButton,
-	StyledEditIcon,
-	StyledDeleteIcon,
-	Container
-} from './views.styles';
+import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+
+import { ViewItem } from './components/viewItem/viewItem.component';
 
 interface IProps {
 	isPending: boolean;
@@ -86,8 +68,6 @@ export class Views extends React.PureComponent<IProps, IState> {
 
 	public listRef = React.createRef<any>();
 
-	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
-
 	public renderSearch = renderWhenTrue(() => (
 		<SearchField placeholder="Search viewpoint..." onChange={this.handleSearchChange} />
 	));
@@ -103,18 +83,19 @@ export class Views extends React.PureComponent<IProps, IState> {
 				{ viewpoints.map(
 						(viewpoint) => {
 							return (
-								<ViewpointItem
+								<ViewItem
 									key={viewpoint._id}
-									disableRipple
-									onClick={this.handleViewpointItemClick(viewpoint)}
-									active={Number(activeViewpointId === viewpoint._id)}>
-
-									{this.renderScreenshot(viewpoint)}
-									{this.renderScreenshotPlaceholder(!viewpoint.screenshot.thumbnailUrl)}
-									{this.renderViewpointForm(viewpoint)}
-									{this.renderViewpointData(viewpoint)}
-									{this.renderViewpointName(viewpoint)}
-								</ViewpointItem>
+									viewpoint={viewpoint}
+									handleClick={this.handleViewpointItemClick(viewpoint)}
+									active={Number(activeViewpointId === viewpoint._id) as any}
+									editMode={this.state.editMode}
+									onCancelEditMode={this.handleCancelEditMode}
+									onOpenEditMode={this.handleOpenEditMode}
+									updateViewpoint={this.props.updateViewpoint}
+									deleteViewpoint={this.props.deleteViewpoint}
+									teamspace={this.state.teamspace}
+									modelId={this.state.modelId}
+								/>
 							);
 						}
 					)
@@ -126,10 +107,6 @@ export class Views extends React.PureComponent<IProps, IState> {
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No viewpoints have been created yet</EmptyStateInfo>
 	));
-
-	public renderScreenshot = (viewpoint) => renderWhenTrue(() => (
-		<Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} />
-	))(viewpoint.screenshot.thumbnailUrl)
 
 	public componentDidMount() {
 		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
@@ -220,45 +197,6 @@ export class Views extends React.PureComponent<IProps, IState> {
 			);
 		}
 	}
-
-	public renderViewpointForm = (viewpoint) => renderWhenTrue(() => {
-		return (
-			<Formik
-				initialValues={{ newName: viewpoint.name }}
-				onSubmit={this.handleSaveEdit(viewpoint._id)}>
-				<StyledForm>
-					<Field name="newName" render={({ field, form }) => (
-						<NewViewpointName
-							{...field}
-							error={Boolean(form.errors.name)}
-							helperText={form.errors.name}
-							label="New name"
-						/>
-					)} />
-					<IconsGroup>
-						<StyledCancelIcon color="secondary" onClick={this.handleCancelEditMode} />
-						<SaveIconButton type="submit" disableRipple={true}>
-							<StyledSaveIcon color="secondary" />
-						</SaveIconButton>
-					</IconsGroup>
-				</StyledForm>
-			</Formik>
-		);
-	})(this.state.activeViewpointId === viewpoint._id && this.state.editMode)
-
-	public renderViewpointData = (viewpoint) => renderWhenTrue(() => (
-		<NameRow>
-			<Name>{viewpoint.name}</Name>
-			<IconsGroup>
-				<StyledEditIcon color="secondary" onClick={this.handleOpenEditMode} />
-				<StyledDeleteIcon color="secondary" onClick={(event) => this.handleDelete(event, viewpoint._id)} />
-			</IconsGroup>
-		</NameRow>
-	))(this.state.activeViewpointId === viewpoint._id && !this.state.editMode)
-
-	public renderViewpointName = (viewpoint) => renderWhenTrue(() => (
-		<Name>{viewpoint.name}</Name>
-	))(this.state.activeViewpointId !== viewpoint._id)
 
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">

@@ -18,15 +18,8 @@
 import styled from 'styled-components';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-import TextField from '@material-ui/core/TextField';
-import SaveIcon from '@material-ui/icons/Save';
-import CancelIcon from '@material-ui/icons/Cancel';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import Input from '@material-ui/core/Input';
-import IconButton from '@material-ui/core/IconButton';
 
-import { Form } from 'formik';
 import { COLOR } from '../../../../styles/colors';
 
 export const Container = styled.div`
@@ -64,32 +57,8 @@ export const ViewpointItem = styled(MenuItem)`
   }
 ` as any;
 
-export const Thumbnail = styled.img`
-  width: 79px;
-  height: 79px;
-`;
-
-export const ThumbnailPlaceholder = styled.div`
-  width: 79px;
-  height: 79px;
-  border: 1px solid ${COLOR.BLACK_20};
-`;
-
-export const Name = styled.h3`
-  margin-left: 16px;
-  font-weight: 400;
-  font-size: 14px;
-  color: ${COLOR.BLACK};
-`;
-
 export const EmptyStateInfo = styled.p`
   padding: 24px;
-`;
-
-export const NewViewpointName = styled(TextField)`
-  && {
-    margin-left: 12px;
-  }
 `;
 
 export const NewItemWrapper = styled.div`
@@ -97,83 +66,10 @@ export const NewItemWrapper = styled.div`
   flex: 1;
 `;
 
-export const StyledSaveIcon = styled(SaveIcon)`
-  && {
-    cursor: pointer;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
-  }
-`;
-
-export const StyledCancelIcon = styled(CancelIcon)`
-  && {
-    cursor: pointer;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
-  }
-`;
-
-export const StyledDeleteIcon = styled(DeleteIcon)`
-  && {
-    cursor: pointer;
-    margin-top: 8px;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
-  }
-`;
-
-export const StyledEditIcon = styled(EditIcon)`
-  && {
-    cursor: pointer;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
-  }
-`;
-
 export const SearchField = styled(Input)`
   && {
     padding: 12px;
     width: 100%;
     flex: none;
-  }
-`;
-
-export const NameRow = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-export const IconsGroup = styled.div`
-  display: flex;
-  align-items: center;
-  margin-right: 11px;
-  flex-direction: column;
-`;
-
-export const StyledForm = styled(Form)`
-  display: flex;
-  align-items: center;
-  flex: 1;
-  justify-content: space-between;
-`;
-
-export const SaveIconButton = styled(IconButton)`
-  && {
-    margin-top: 8px;
-    padding: 0;
-
-    &:hover {
-      background-color: transparent;
-    }
   }
 `;
