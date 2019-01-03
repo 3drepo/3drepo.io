@@ -63,11 +63,11 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 		this.setState({ active: true });
 	}
 
-	public renderArrowContainer = () => renderWhenTrue(
+	public renderArrowContainer = renderWhenTrue(
 		<ArrowContainer onClick={this.props.onArrowClick}>
 			<StyledArrowIcon />
 		</ArrowContainer>
-	)(this.state.active)
+	);
 
 	public get isExpiredDate() {
 		const { createdDate, dueDate } = this.props;
@@ -109,7 +109,7 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 						</Description>
 					</Content>
 				</Container>
-				{this.renderArrowContainer()}
+				{this.renderArrowContainer(this.state.active)}
 			</MenuItemContainer>
 		);
 	}
