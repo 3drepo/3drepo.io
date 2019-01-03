@@ -73,13 +73,17 @@
 	}
 
 	function isTeamspaceMember(req, res, next) {
-		const teamspace = req.params.account;
-		const user = req.session.user.username;
-		return User.teamspaceMemberCheck(teamspace, user).then(() => {
-			next();
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
+		if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+			responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+		} else {
+			const teamspace = req.params.account;
+			const user = req.session.user.username;
+			return User.teamspaceMemberCheck(teamspace, user).then(() => {
+				next();
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		}
 	}
 
 	function hasCollaboratorQuota(req, res, next) {
