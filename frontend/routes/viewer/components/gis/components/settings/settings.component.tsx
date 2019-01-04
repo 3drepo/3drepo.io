@@ -16,9 +16,21 @@
  */
 
 import * as React from 'react';
+import * as Yup from 'yup';
 import { withFormik } from 'formik';
 
-import { SettingsForm, SettingsSchema } from './../settingsForm/settingsForm.component';
+import { schema } from '../../../../../../services/validation';
+import { SettingsForm } from './../settingsForm/settingsForm.component';
+
+const SettingsSchema = Yup.object().shape({
+	longitude: schema.measureNumberDecimal,
+	latitude: schema.measureNumberDecimal,
+	elevation: schema.measureNumberDecimal,
+	angleFromNorth: schema.measureNumberDecimal,
+	axisY: schema.measureNumberDecimal,
+	axisX: schema.measureNumberDecimal,
+	axisZ: schema.measureNumberDecimal
+});
 
 interface IProps {
 	values: {

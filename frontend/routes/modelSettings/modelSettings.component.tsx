@@ -46,7 +46,6 @@ import {
 	BackButton,
 	LoaderContainer
 } from './modelSettings.styles';
-import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()

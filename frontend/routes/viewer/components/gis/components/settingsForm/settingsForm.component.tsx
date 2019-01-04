@@ -16,34 +16,20 @@
  */
 
 import * as React from 'react';
-import * as Yup from 'yup';
-import { Form, Field } from 'formik';
+import { Field } from 'formik';
 
 import { ViewerPanelFooter, ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { StyledForm, Header, Headline, StyledTextField, FooterWrapper, StyledSaveButton } from './settingsForm.styles';
 
 import SaveIcon from '@material-ui/icons/Save';
 
-const validateRequiredNumber = Yup.number().required(VALIDATIONS_MESSAGES.REQUIRED);
-
-export const SettingsSchema = Yup.object().shape({
-	latitude: validateRequiredNumber,
-	longitude: validateRequiredNumber,
-	axisX: validateRequiredNumber,
-	axisY: validateRequiredNumber,
-	axisZ: validateRequiredNumber,
-	angleFromNorth: validateRequiredNumber
-});
-
 const defaultFieldProps = {
-	type: 'number',
 	required: true,
 	margin: 'normal'
 };
 
 export const SettingsForm = (props) => {
-	const {values: {latitude, longitude, angleFromNorth, axisX, axisY, axisZ}, handleChange, unit} = props;
+	const {unit} = props;
 
 	return (
 		<StyledForm>
@@ -61,7 +47,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.latitude)}
 						helperText={form.errors.latitude}
 						label="Latitude (Decimal)"
-						onChange={handleChange}
 					/>
 				)} />
 				<Field name="longitude" render={ ({ field, form }) => (
@@ -71,7 +56,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.longitude)}
 						helperText={form.errors.longitude}
 						label="Longitude"
-						onChange={handleChange}
 					/>
 				)} />
 				<Field name="angleFromNorth" render={ ({ field, form }) => (
@@ -81,7 +65,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.angleFromNorth)}
 						helperText={form.errors.angleFromNorth}
 						label="Angle from North (Clockwise Degrees)"
-						onChange={handleChange}
 					/>
 				)} />
 				<Headline color="primary" variant="subheading">
@@ -95,7 +78,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisX)}
 						helperText={form.errors.axisX}
 						label={unit ? `x (${unit})` : 'x'}
-						onChange={handleChange}
 					/>
 				)} />
 				<Field name="axisY" render={ ({ field, form }) => (
@@ -105,7 +87,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisY)}
 						helperText={form.errors.axisY}
 						label={unit ? `y (${unit})` : 'y'}
-						onChange={handleChange}
 					/>
 				)} />
 				<Field name="axisZ" render={ ({ field, form }) => (
@@ -115,7 +96,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisZ)}
 						helperText={form.errors.axisZ}
 						label={unit ? `z (${unit})` : 'z'}
-						onChange={handleChange}
 					/>
 				)} />
 			</ViewerPanelContent>
