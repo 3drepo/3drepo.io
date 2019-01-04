@@ -15,18 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { FontAwesomeIcon as FontAwesomeIconComponent } from '@fortawesome/react-fontawesome';
-import { IconProps } from '@material-ui/core/Icon';
-import { IconContainer } from './fontAwesomeIcon.styles';
+import styled from 'styled-components';
+import Icon from '@material-ui/core/Icon';
+import { MuiTheme } from '../../../styles';
 
-interface IProps {
-	icon: any;
-	IconProps?: IconProps;
-}
+export const IconContainer = styled(Icon).attrs({
+	classes: {
+		colorSecondary: 'secondary',
+		colorPrimary: 'primary'
+	}
+})`
+	&& {
+		display: flex;
+		align-items: center;
+	}
 
-export default (props: IProps) => (
-	<IconContainer {...props.IconProps}>
-		<FontAwesomeIconComponent icon={props.icon} />
-	</IconContainer>
-);
+	svg {
+		fill: currentColor;
+	}
+
+	&.secondary {
+		color: ${MuiTheme.palette.secondary.main}
+	}
+
+	&.primary {
+		color: ${MuiTheme.palette.primary.main}
+	}
+`;

@@ -97,6 +97,11 @@ export const MuiTheme = createMuiTheme({
 		MuiDialog: {
 			paper: {
 				background: '#fafafa'
+			},
+			paperFullScreen: {
+				maxWidth: 'calc(100% - 96px)',
+				maxHeight: 'calc(100% - 96px)',
+				borderRadius: '4px'
 			}
 		},
 		MuiSelect: {
