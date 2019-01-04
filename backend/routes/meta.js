@@ -26,7 +26,7 @@
               const C = require("../constants");
 
               // Get meta data
-
+]
               /**
                * @api {get} /revision/master/head/meta/4DTaskSequence.json  Get All meta data for 4D Sequence Tags
                * @apiName getAllIdsWith4DSequenceTag
