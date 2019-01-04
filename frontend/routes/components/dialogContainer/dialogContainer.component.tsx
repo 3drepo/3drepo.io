@@ -24,6 +24,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 
 import { dispatch } from '../../../helpers/migration';
 import { MuiTheme } from '../../../styles';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	config: any;
@@ -36,6 +37,28 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
 		isOpen: false
 	};
+
+	public renderContent = renderWhenTrue(
+		<DialogContent>
+			<div dangerouslySetInnerHTML={{ __html: this.props.config.content }} />
+		</DialogContent>
+	);
+
+	public renderTemplate = renderWhenTrue(() => {
+		const { content, template: DialogTemplate } = this.props.config;
+		const data = {
+			content,
+			...(this.props.data || {})
+		};
+
+		return (
+			<DialogTemplate
+				{...data}
+				handleResolve={this.handleResolve}
+				handleClose={this.handleClose}
+			/>
+		);
+	});
 
 	public handleCallback = (callback) => {
 		const action = callback();
@@ -62,28 +85,14 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { content, title, template: DialogTemplate } = this.props.config;
-		const data = {
-			content,
-			...(this.props.data || {})
-		};
+		const { content, title, template, DialogProps } = this.props.config;
 
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
-				<Dialog open={this.props.isOpen} onClose={this.handleClose}>
+				<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
 					{title && <DialogTitle disableTypography={true}>{title}</DialogTitle>}
-					{ content && !DialogTemplate && (
-							<DialogContent>
-								<div dangerouslySetInnerHTML={{ __html: content }} />
-							</DialogContent>
-						) }
-					{ DialogTemplate && (
-						<DialogTemplate
-							{...data}
-							handleResolve={this.handleResolve}
-							handleClose={this.handleClose}
-						/>
-					) }
+					{this.renderContent(content && !template)}
+					{this.renderTemplate(this.props.config.template)}
 				</Dialog>
 			</MuiThemeProvider>
 		);

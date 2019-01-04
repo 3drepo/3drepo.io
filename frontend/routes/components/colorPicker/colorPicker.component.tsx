@@ -372,10 +372,10 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 							/>
 							<ColorPointer
 								innerRef={this.pointerRef}
-								style={ {
+								style={{
 									top: pointerTop,
 									left: pointerLeft
-								} }
+								}}
 							/>
 						</CanvasContainer>
 						<CanvasContainer item={true}>

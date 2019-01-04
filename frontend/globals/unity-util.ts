@@ -322,11 +322,17 @@ export class UnityUtil {
 	}
 
 	public static screenshotReady(screenshot) {
-		const ssJSON = JSON.parse(screenshot);
+		try {
+			const ssJSON = JSON.parse(screenshot);
 
-		UnityUtil.screenshotPromises.forEach((promise) => {
-			promise.resolve(ssJSON.ssBytes);
-		});
+			UnityUtil.screenshotPromises.forEach((promise) => {
+				promise.resolve(ssJSON.ssBytes);
+			});
+		} catch (error) {
+			UnityUtil.screenshotPromises.forEach((promise) => {
+				promise.reject(error);
+			});
+		}
 
 		UnityUtil.screenshotPromises = [];
 	}
@@ -829,9 +835,13 @@ export class UnityUtil {
 	 * base64.
 	 * @param {object} promise - promise that will be resolved, returning with the screenshot
 	 */
-	public static requestScreenShot(promise) {
-		UnityUtil.screenshotPromises.push(promise);
+	public static requestScreenShot() {
+		const newScreenshotPromise = new Promise((resolve, reject) => {
+			this.screenshotPromises.push({ resolve, reject});
+		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
+
+		return newScreenshotPromise;
 	}
 
 	/**

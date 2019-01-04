@@ -53,9 +53,9 @@ const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints = [] }) => {
 	return { ...state, viewpointsMap };
 };
 
-const createViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
+const createViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
 	const viewpointsMap = cloneDeep(state.viewpointsMap);
-	viewpointsMap[viewpoint._id] = viewpoint;
+	viewpointsMap[viewpoint._id] = viewpoint ;
 
 	const componentState = {
 		...state.componentState,

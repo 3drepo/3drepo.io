@@ -322,12 +322,9 @@ export class ViewerService {
 		}
 	}
 
-	public getScreenshot(promise) {
-		if (promise) {
-			this.initialised.promise.then(() => {
-				this.viewer.getScreenshot(promise);
-			});
-		}
+	public async getScreenshot() {
+		await this.initialised.promise;
+		return this.viewer.getScreenshot();
 	}
 
 	public goToExtent() {

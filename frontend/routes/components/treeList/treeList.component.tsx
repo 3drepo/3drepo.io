@@ -59,7 +59,7 @@ interface IProps {
 	IconProps?: any;
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
-	renderActions?: (props) => JSX.Element;
+	renderActions?: (props) => (JSX.Element | Element);
 	onRootClick?: (state) => void;
 }
 

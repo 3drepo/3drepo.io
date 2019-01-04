@@ -25,6 +25,8 @@ import { RisksService } from './risks.service';
 import { StateManagerService } from '../../home/js/state-manager.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
+import { dispatch } from '../../../helpers/migration';
+import { DialogActions } from '../../../modules/dialog';
 
 class RiskItemController implements ng.IController {
 
@@ -442,36 +444,28 @@ class RiskItemController implements ng.IController {
 		if (viewpoint.screenshot) {
 
 			// We have a saved screenshot we use that
-			this.screenshot = this.apiService.getAPIUrl(viewpoint.screenshot);
-			this.showScreenshotDialog(event);
+			this.showScreenshotDialog({
+				sourceImage: this.apiService.getAPIUrl(viewpoint.screenshot),
+				disabled: true
+			});
 		} else if (this.riskData.descriptionThumbnail) {
 
 			// We haven't saved yet we can use the thumbnail
-			this.screenshot = this.riskData.descriptionThumbnail;
-			this.showScreenshotDialog(event);
+			this.showScreenshotDialog({
+				sourceImage: this.riskData.descriptionThumbnail,
+				disabled: true
+			});
 		}
 	}
 
 	/**
-	 * Show screenshot dialog
-	 * @param event
+	 * Show screen shot dialog
 	 */
-	public showScreenshotDialog($event) {
-		const config = {
-			attachTo: angular.element(document.body),
-			controller: () => {},
-			locals: {
-				parentCtrl: this
-			},
-			bindToController: true,
-			controllerAs: 'vm',
-			targetEvent: $event,
-			templateUrl: 'templates/screenshot-dialog.html',
-			clickOutsideToClose: true,
-			escapeToClose: true,
-			focusOnOpen: true
-		};
-		this.$mdDialog.show(config);
+	public showScreenshotDialog(options) {
+		dispatch(DialogActions.showScreenshotDialog({
+			...options,
+			onSave: this.screenshotSave
+		}));
 	}
 
 	/**
@@ -503,7 +497,9 @@ class RiskItemController implements ng.IController {
 			this.actions[action].selected = false;
 
 			delete this.screenshot; // Remove any clicked on screenshot
-			this.showScreenshotDialog(event);
+			this.showScreenshotDialog({
+				sourceImage: this.viewerService.getScreenshot()
+			});
 			break;
 
 		}
@@ -532,7 +528,6 @@ class RiskItemController implements ng.IController {
 	public saveRisk() {
 
 		const viewpointPromise = this.$q.defer();
-		const screenshotPromise = this.$q.defer();
 		const objectsPromise = this.$q.defer();
 
 		// Get the viewpoint
@@ -549,7 +544,7 @@ class RiskItemController implements ng.IController {
 			.then((results) => {
 				const [viewpoint, objectInfo] = results;
 				viewpoint.hideIfc = this.treeService.getHideIfc();
-				return this.handleObjects(viewpoint, objectInfo, screenshotPromise);
+				return this.handleObjects(viewpoint, objectInfo);
 			})
 			.catch((error) => {
 				// We have a top level catch which will
@@ -616,7 +611,7 @@ class RiskItemController implements ng.IController {
 		this.risksService.populateRisk(this.riskData);
 	}
 
-	public handleObjects(viewpoint, objectInfo, screenshotPromise) {
+	public handleObjects(viewpoint, objectInfo) {
 
 		// TODO - clean up repeated code below
 		if (this.savedScreenshot !== null) {
@@ -630,10 +625,7 @@ class RiskItemController implements ng.IController {
 
 		} else {
 			// Get a screen shot if not already created
-			this.viewerService.getScreenshot(screenshotPromise);
-
-			return screenshotPromise.promise
-				.then((screenshot) => {
+			return this.viewerService.getScreenshot().then((screenshot) => {
 					if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 						return this.createGroup(viewpoint, screenshot, objectInfo);
 					} else {
@@ -794,15 +786,15 @@ class RiskItemController implements ng.IController {
 	 * A screen shot has been saved
 	 * @param data
 	 */
-	public screenshotSave(data) {
+	public screenshotSave = (screenshot) => {
 		const viewpointPromise = this.$q.defer();
 
-		this.savedScreenshot = data.screenshot;
+		this.savedScreenshot = screenshot;
 
 		if (typeof this.data === 'object') {
 
 			// Comment
-			this.commentThumbnail = data.screenshot;
+			this.commentThumbnail = screenshot;
 
 			// Get the viewpoint and add the screen shot to it
 			// Remove base64 header text from screen shot
@@ -812,7 +804,7 @@ class RiskItemController implements ng.IController {
 
 		} else {
 			// Description
-			this.riskData.descriptionThumbnail = data.screenshot;
+			this.riskData.descriptionThumbnail = screenshot;
 
 			this.viewerService.getCurrentViewpoint(
 				{promise: viewpointPromise, account: this.account, model: this.model}
@@ -822,7 +814,7 @@ class RiskItemController implements ng.IController {
 		viewpointPromise.promise
 			.then((viewpoint) => {
 				this.commentViewpoint = viewpoint;
-				this.commentViewpoint.screenshot = data.screenshot.substring(data.screenshot.indexOf(',') + 1);
+				this.commentViewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
 			}).catch((error) => {
 				this.errorSavingScreenshot(error);
 			});
