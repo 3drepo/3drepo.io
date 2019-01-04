@@ -143,20 +143,19 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
  *				130,
  *				211
  *			],
- *			"objects": 
- 			[
-*				{
-*			"account": "account_username",
-*			"model": "6e7d81fb-85c8-4b09-9ad6-6ba099261099",
-*			"ifc_guids": [],
-*			"shared_ids": [
-*			"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
-*			"db18ef69-6d6e-49a0-846e-907346abb39d",
-*			"c532ff34-6669-4807-b7f3-6a0ffb17b027",
-*			"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
-*			"3f881fa8-2b7b-443e-920f-396c1c85e903"		
-			]
-*				}
+ *			"objects": [
+ *					{
+ *						"account": "account_username",
+ *						"model": "6e7d81fb-85c8-4b09-9ad6-6ba099261099",
+ *						"ifc_guids": [],
+ *						"shared_ids": [
+ *						"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ *						"db18ef69-6d6e-49a0-846e-907346abb39d",
+ *						"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ *						"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ *						"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ *					]
+ *				}
  *			]
  *		}
  *	]
@@ -211,14 +210,13 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * @apiDescription Add a group to the model.
  * @apiGroup Groups
  * 
- * @apiSuccess (200) {Object} Group Group Created
+ * @apiSuccess (200) {Object} Group Created
  * @apiSuccessExample {json} Success-Response
- * 
  * HTTP/1.1 200 OK
  * {
  * 		"__v":0,
  * 		"_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
- * 		"name":"Group 1","description":"This is a description for this group.",
+ * 		"name":"Group 1","description":"",
  * 		"author":"username",
  * 		"updatedBy":"username",
  * 		"updatedAt":"2019-01-03T23:03:37.411Z",
@@ -241,7 +239,7 @@ router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
  * 
  * @apiDescription Delete single group using unique group ID.
  * 
- * @apiSuccess (200) {Object} Status success
+ * @apiSuccess (200) Status success
  * @apiSuccessExample {json} Success-Response
  * 
  * HTTP/1.1 200 OK
