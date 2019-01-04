@@ -15,18 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { FontAwesomeIcon as FontAwesomeIconComponent } from '@fortawesome/react-fontawesome';
-import { IconProps } from '@material-ui/core/Icon';
-import { IconContainer } from './fontAwesomeIcon.styles';
+import styled from 'styled-components';
 
-interface IProps {
-	icon: any;
-	IconProps?: IconProps;
-}
+export const Container = styled.div`
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
-export default (props: IProps) => (
-	<IconContainer {...props.IconProps}>
-		<FontAwesomeIconComponent icon={props.icon} />
-	</IconContainer>
-);
+export const HiddenCanvas = styled.canvas`
+  position: absolute;
+  z-index: -1;
+`;
+
+export const Canvas = styled.canvas`
+  position: absolute;
+  z-index: 2;
+`;
+
+export const BackgroundImage = styled.img`
+  width: 100%;
+  text-align: center;
+  margin: auto;
+  padding: 0;
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  user-select: none;
+`;

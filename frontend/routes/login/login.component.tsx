@@ -68,13 +68,13 @@ export class Login extends React.PureComponent<IProps, IState> {
 		password: ''
 	};
 
-	public componentDidUpdate({isAuthenticated}) {
+	public componentDidUpdate({ isAuthenticated }) {
 		if (this.props.isAuthenticated && !isAuthenticated) {
 			this.formRef.current.handleReset();
 		}
 	}
 
-	public handleSubmit = (data, form) => {
+	public handleSubmit = (data) => {
 		this.props.onLogin(data.login, data.password);
 	}
 
