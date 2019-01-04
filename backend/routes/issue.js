@@ -40,35 +40,46 @@ const stringToUUID = utils.stringToUUID;
  * 
  * @apiParam {Number} id Issue unique ID.
  * 
+ * @apiDescription Find an issue with the requested Issue ID.
+ * 
  * @apiSuccess {Object} issue The Issue matching the Issue ID
- * @apiSuccessExample Example of returned data on success:
+ * @apiSuccessExample {json} Success-Response.
+ * HTTP/1.1 200 OK
  * {
-		account: "T_E_S_T"
-		assigned_roles: []
-		commentCount: 0
-		created: 1542723030489
-		creator_role: "3D Repo"
-		desc: "(No Description)"
-		model: "0687ef98-52b8-4910-a211-4cef1cb7422c"
-		modelCode: ""
-		name: "Issue one"
-		norm: []
-		number: 1
-		owner: "nabile"
-		position: []
-		priority: "none"
-		rev_id: "97569b32-deb2-4ab4-98d6-bf0fe45b7d55"
-		scale: 1
-		status: "open"
-		thumbnail: "T_E_S_T/0687ef98-52b8-4910-a211-4cef1cb7422c/issues/09a4bf10-ecce-11e8-9c10-cbf0778834d1/thumbnail.png"
-		topic_type: "for_information"
-		typePrefix: "Architectural"
-		viewCount: 1	
-		viewpoint: {near: 24.057758331298828, far: 12028.87890625, fov: 1.0471975803375244,…}
-		__v: 0
-		_id: "09a4bf10-ecce-11e8-9c10-cbf0778834d1"
+ *		account: "username"
+ *		assigned_roles: []
+ *		commentCount: 0
+ *		created: 1542723030489
+ *		creator_role: "3D Repo"
+ *		desc: "(No Description)"
+ *		model: "model_ID"
+ *		modelCode: ""
+ *		name: "Issue one"
+ *		norm: []
+ *		number: 1
+ *		owner: "username"
+ *		position: []
+ *		priority: "none"
+ *		rev_id: "revision_ID"
+ *		scale: 1
+ *		status: "open"
+ *		thumbnail: "USERNAME/MODEL_ID/issues/ISSUE_ID/thumbnail.png"
+ *		topic_type: "for_information"
+ *		typePrefix: "Architectural"
+ *		viewCount: 1	
+ *		viewpoint: {near: 24.057758331298828, far: 12028.87890625, fov: 1.0471975803375244,…}
+ *		__v: 0
+ *		_id: "ISSUE_ID"
  * }
- * @apiError IssueNotFound The issue requested was not found
+ *
+ * @apiError ISSUE_NOT_FOUND Issue not found
+ * @apiErrorExample 
+ * HTTP/1.1 404 Not Found
+ * {
+ *   "place": "GET /issues/issue_ID.json",
+ *   "status": 500,
+ *   "message": "Issue not found",
+ * }
  * 
  */
 
@@ -80,6 +91,11 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
  * @apiGroup Issues
  * 
  * @apiParam {Number} id Issue unique ID.
+ * 
+ * @apiDescription Retrieve thumbnail screenshot image for requested issue.
+ * 
+ * @apiSuccess 200 {Object} thumbnail Thumbnail Image
+ * 
  */
 
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -88,6 +104,58 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * @api {get} /issues.json Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
+ * 
+ * @apiDescription List all available issue for current model. 
+ * 
+ * @apiSuccess (200) {Object} Issue Object. 
+ * @apiSuccessExample {json} Success-Response.
+ * HTTP/1.1 200 OK
+ * [
+ * 	{
+ * 		"_id":"ISSUE_ID",
+ * 		"creator_role":"Client","scale":1,
+ * 		"due_date":1543881600000,
+ * 		"priority":"low",
+ * 		"desc":"reverse",
+ * 		"topic_type":"for_information",
+ * 		"status":"for approval",
+ * 		"owner":"username",
+ * 		"created":1546217360002,
+ * 		"name":"Without reverse",
+ * 		"number":2,
+ * 		"rev_id":"REVISION_ID",
+ * 		"__v":0,
+ * 		"assigned_roles":["Architect"],
+ * 		"viewCount":1,
+ * 		"commentCount":0,
+ * 		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
+ * 		"norm":[0,0,0],
+ * 		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
+ * 		"typePrefix":"sample",
+ * 		"modelCode":"",
+ * 		"account":"username",
+ * 		"model":"MODEL_ID",
+ * 		"viewpoint":
+ * 			{
+ * 				"near":54.739341735839844,
+ * 				"far":27369.669921875,
+ * 				"fov":1.0471975803375244,
+ * 				"aspect_ratio":1.451704502105713,
+ * 				"hideIfc":true,
+ * 				"guid":"9279d95e-3aee-49c2-ba45-9d2302044597",
+ * 				"_id":"5c296790e5f57704580ca00a",
+ * 				"type":"perspective",
+ * 				"screenshot":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png",
+ * 				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
+ * 				"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
+ * 				"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
+ * 				"position":[-3360.6259765625,5111.28125,2853.4453125],
+ * 				"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
+ * 				"screenshotSmall":"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png"
+ * 			}
+ * 	}
+ * ]
+ * 
  */
 
 router.get("/issues.json", middlewares.issue.canView, listIssues);
@@ -96,6 +164,8 @@ router.get("/issues.json", middlewares.issue.canView, listIssues);
  * @api {get} /issues.bcfzip Get Issues BCF zip file 
  * @apiName getIssuesBCF
  * @apiGroup Issues
+ * 
+ * @apiDescription Get a downloaded zip file of all Issues BCF.
  */
 
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
@@ -104,6 +174,8 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
  * @api {post} /issues.bcfzip Import BCF file
  * @apiName importBCF
  * @apiGroup Issues
+ * 
+ * @apiDescription Upload an Issues BCF file.
  */
 
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
@@ -111,9 +183,11 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 /**
  * @api {get} /issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
- * @apiGroup Issues
+ * @apiGroup Issue.
  * 
  * @apiParam {String} id Viewpoint unique ID.
+ * 
+ * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
 
 router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
@@ -124,6 +198,8 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
  * @apiGroup Issues
  * 
  * @apiParam {String} id Viewpoint unique ID.
+ * 
+ * @apiSuccess (200) {Object} Issue Screenshot.
  */
 
 router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
@@ -134,6 +210,54 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  * @apiGroup Issues
  * 
  * @apiParam {String} id Revision unique ID.
+ * 
+ * @apiDescription Get all issues related to specific revision ID.
+ * 
+ * @apiSuccess (200) {Object} Issues Object
+ * @apiSuccessExample {json} Success-Response
+ * 
+ * [
+ * 	{
+ * 		"_id":"issue_ID",
+ * 		"creator_role":"Client",
+ * 		"scale":1,
+ * 		"due_date":1547424000000,
+ * 		"priority":"low",
+ * 		"desc":"This is a description",
+ * 		"topic_type":"for_information",
+ * 		"status":"open","owner":"username",
+ * 		"created":1546626949432,
+ * 		"name":"An Issue for API",
+ * 		"number":3,
+ * 		"rev_id":"9cf31c6e-37cc-4625-8cee-270cf731059e",
+ * 		"__v":0,
+ * 		"assigned_roles":["Architect"],
+ * 		"viewCount":1,"commentCount":0,
+ * 		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
+ * 		"norm":[],"position":[],
+ * 		"typePrefix":"sample",
+ * 		"modelCode":"",
+ * 		"account":"username",
+ * 		"model":"MODEL_ID",
+ * 		"viewpoint":
+ * 			{
+ * 				"near":54.739341735839844,
+ * 				"far":27369.669921875,
+ * 				"fov":1.0471975803375244,
+ * 				"aspect_ratio":2.522167444229126,
+ * 				"hideIfc":true,
+ * 				"guid":"5afbe23f-8307-42d0-ba77-f031922281ce",
+ * 				"_id":"5c2fa785b4af3c45f8f83c60",
+ * 				"type":"perspective",
+ * 				"screenshot":"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png",
+ * 				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
+ * 					"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
+ * 					"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
+ * 					"position":[-3360.6259765625,5111.28125,2853.4453125],
+ * 					"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
+ * 					"screenshotSmall"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png"}
+ * 	}
+ * ]
  */
 
 router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
@@ -144,6 +268,9 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
  * @apiGroup Issues
  * 
  * @apiParam {String} id Revision unique ID.
+ * 
+ * @apiDescription Get Issues BCF export based on revision ID.
+ * 
  */
 
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
@@ -154,6 +281,16 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
  * @apiGroup Issues
  * 
  * @apiParam {String} id Revision unique ID.
+ * 
+ * @apiDescription Upload Issues BCF file using current revision ID.
+ * 
+ * @apiSuccess (200) {Object} Status
+ * @apiSuccessExample {json} Success-Response.
+ * HTTP
+ * {
+ * 	"status":"ok"
+ * }
+ * 
  */
 
 router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
@@ -165,6 +302,8 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
  * @api {get} /issues.html Issues response into as HTML
  * @apiName renderIssuesHTML
  * @apiGroup Issues
+ * 
+ * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
  */
 
 router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
@@ -175,11 +314,36 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
  * @apiGroup Issues
  * 
  * @apiParam {String} id Revision unique ID.
+ * 
+ * @apiDescription Render all Issues into a HTML webpage based on current revision ID.
  */
 
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
+/**
+ * @api {post} /issues.json Create a new issue.
+ * @apiName  storeIssue
+ * @apiGroup Issues
+ * *
+ * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
+ */
+
 router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {put} /issues.json/issueId.json Update an Issue.
+ * @apiName  updateIssue
+ * @apiGroup Issues
+ *
+ * @apiParam {String} id Issue unique ID.
+ *
+ * @apiDescription Update an issue with an existing Issue ID
+ * 
+ * @apiSuccess (200) {Object} Updated Issue Object.
+ * @apiSuccessExample {json} Success-Response
+ * 
+ */
+
 router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
