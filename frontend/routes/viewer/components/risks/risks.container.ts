@@ -20,9 +20,19 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Risks } from './risks.component';
+import { RisksActions, selectRisks } from '../../../../modules/risks';
+import { selectJobs, selectJobsColors } from '../../../../modules/jobs';
+import { selectSettings } from '../../../../modules/model';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	modelSettings: selectSettings,
+	risks: selectRisks,
+	jobs: selectJobs,
+	jobsColors: selectJobsColors
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchRisks: RisksActions.fetchRisks
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Risks);

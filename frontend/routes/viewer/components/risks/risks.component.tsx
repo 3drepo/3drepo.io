@@ -27,9 +27,13 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container } from './risks.styles';
 
 interface IProps {
+	teamspace: string;
+	model: any;
 	risks: any[];
+	jobs: any[];
+	revision?: string;
 	isPending?: boolean;
-	fetchRisks: () => void;
+	fetchRisks: (teamspace, model, revision) => void;
 }
 
 interface IState {
@@ -38,20 +42,19 @@ interface IState {
 }
 
 export class Risks extends React.PureComponent<IProps, IState> {
-	private state: IState = {};
+	public state: IState = {};
 
 	public renderRisksList = renderWhenTrue(() => {
-		const Items = this.props.risks.map((risk) => (
-			<PreviewListItem
-				{...risk}
-			/>
+		const Items = this.props.risks.map((risk, index) => (
+			<PreviewListItem key={index} {...risk} />
 		));
 
 		return <>{Items}</>;
 	});
 
 	public componentDidMount() {
-		this.props.fetchRisks();
+		const {teamspace, model, revision} = this.props;
+		this.props.fetchRisks(teamspace, model, revision);
 	}
 
 	public toggleSettings = () => {

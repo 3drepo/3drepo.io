@@ -50,23 +50,23 @@ div(layout="column", class="md-whiteframe-1dp")
 				filter-chips="vm.chipsFilterChips"
 				selected-menu-option='vm.selectedMenuOption')
 
-			risks(
-				ng-if="vm.contentData.type === 'risks'"
-				account='vm.account'
-				model='vm.model'
-				show-add='vm.showAdd'
-				show='vm.contentData.show'
-				on-content-height-request='vm.onContentHeightRequest(height)'
-				on-show-item='vm.showItem()'
-				hide-item='vm.hideSelectedItem'
-				show-edit='vm.showEdit'
-				branch='vm.branch'
-				model-settings='vm.modelSettings'
-				revision='vm.revision'
-				selected-objects='vm.selectedObjects'
-				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-				filter-chips="vm.chipsFilterChips"
-				selected-menu-option='vm.selectedMenuOption')
+			//- risks-old(
+			//- 	ng-if="vm.contentData.type === 'risks'"
+			//- 	account='vm.account'
+			//- 	model='vm.model'
+			//- 	show-add='vm.showAdd'
+			//- 	show='vm.contentData.show'
+			//- 	on-content-height-request='vm.onContentHeightRequest(height)'
+			//- 	on-show-item='vm.showItem()'
+			//- 	hide-item='vm.hideSelectedItem'
+			//- 	show-edit='vm.showEdit'
+			//- 	branch='vm.branch'
+			//- 	model-settings='vm.modelSettings'
+			//- 	revision='vm.revision'
+			//- 	selected-objects='vm.selectedObjects'
+			//- 	set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
+			//- 	filter-chips="vm.chipsFilterChips"
+			//- 	selected-menu-option='vm.selectedMenuOption')
 
 			groups(
 				ng-if="vm.contentData.type === 'groups'"

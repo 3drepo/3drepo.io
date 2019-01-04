@@ -206,9 +206,9 @@ function deleteRisks(req, res, next) {
 }
 
 function listRisks(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
+
 	const projection = {
 		extras: 0,
 		"comments": 0,

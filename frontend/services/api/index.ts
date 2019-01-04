@@ -10,5 +10,6 @@ export * from './profile';
 export * from './models';
 export * from './billing';
 export * from './notifications';
+export * from './risks';
 
 export default API;

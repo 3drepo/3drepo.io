@@ -15,6 +15,7 @@ import { reducer as usersReducer } from './users/users.redux';
 import { reducer as gisReducer } from './gis/gis.redux';
 import { reducer as viewerReducer } from './viewer/viewer.redux';
 import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
+import { reducer as risksReducer } from './risks/risks.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -33,6 +34,7 @@ export default function createReducer() {
 		users: usersReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,
-		viewpoints: viewpointsReducer// <-- INJECT MODULE REDUCER -->
+		viewpoints: viewpointsReducer,
+		risks: risksReducer// <-- INJECT MODULE REDUCER -->
 	});
 }
