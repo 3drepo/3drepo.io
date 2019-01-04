@@ -236,7 +236,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { activeMapIndex } = this.state;
 
 		return (
-			<ViewerPanelContent>
+			<ViewerPanelContent className="height-catcher">
 				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>

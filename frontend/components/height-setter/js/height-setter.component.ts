@@ -44,6 +44,7 @@ class HeightSetterController implements ng.IController, IBindings {
 	private content;
 	private observer;
 	private initialTimeout;
+	private updateHeightTimeout;
 
 	private removeHeightWatch;
 
@@ -71,7 +72,7 @@ class HeightSetterController implements ng.IController, IBindings {
 	public $onInit(): void {}
 
 	public updateHeight = () => {
-		this.$timeout(() => {
+		this.updateHeightTimeout = this.$timeout(() => {
 			const requestedHeight = this.contentHeight + this.headerHeight;
 
 			this.contentData.panelTakenHeight = this.headerHeight;
@@ -82,22 +83,24 @@ class HeightSetterController implements ng.IController, IBindings {
 		});
 	}
 
-		public handleElementChange = (mutationsList) => {
-			const shouldUpdateHeight = mutationsList
-				.some((mutation) => mutation.type === 'childList' && mutation.addedNodes.length);
+	public handleElementChange = (mutationsList) => {
+		const shouldUpdateHeight = mutationsList
+			.some((mutation) => mutation.type === 'childList' && mutation.addedNodes.length);
 
-			if (shouldUpdateHeight) {
-				this.updateHeight();
-			}
+		if (shouldUpdateHeight) {
+			this.updateHeight();
 		}
+	}
 
-		public $onDestroy() {
-			this.observer.disconnect();
-			this.$timeout.cancel(this.initialTimeout);
-			if (this.removeHeightWatch) {
-				this.removeHeightWatch();
-			}
+	public $onDestroy() {
+		this.observer.disconnect();
+		this.$timeout.cancel(this.initialTimeout);
+		this.$timeout.cancel(this.updateHeightTimeout);
+
+		if (this.removeHeightWatch) {
+			this.removeHeightWatch();
 		}
+	}
 }
 
 export const HeightSetterComponent: ng.IComponentOptions = {

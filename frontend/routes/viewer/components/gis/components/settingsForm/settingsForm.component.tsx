@@ -61,7 +61,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.latitude)}
 						helperText={form.errors.latitude}
 						label="Latitude (Decimal)"
-						value={latitude}
 						onChange={handleChange}
 					/>
 				)} />
@@ -72,7 +71,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.longitude)}
 						helperText={form.errors.longitude}
 						label="Longitude"
-						value={longitude}
 						onChange={handleChange}
 					/>
 				)} />
@@ -83,7 +81,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.angleFromNorth)}
 						helperText={form.errors.angleFromNorth}
 						label="Angle from North (Clockwise Degrees)"
-						value={angleFromNorth}
 						onChange={handleChange}
 					/>
 				)} />
@@ -98,7 +95,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisX)}
 						helperText={form.errors.axisX}
 						label={unit ? `x (${unit})` : 'x'}
-						value={axisX}
 						onChange={handleChange}
 					/>
 				)} />
@@ -109,7 +105,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisY)}
 						helperText={form.errors.axisY}
 						label={unit ? `y (${unit})` : 'y'}
-						value={axisY}
 						onChange={handleChange}
 					/>
 				)} />
@@ -120,7 +115,6 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisZ)}
 						helperText={form.errors.axisZ}
 						label={unit ? `z (${unit})` : 'z'}
-						value={axisZ}
 						onChange={handleChange}
 					/>
 				)} />
