@@ -30,3 +30,7 @@ export const selectActiveSession = createSelector(
 export const selectIsPending = createSelector(
 	selectAuthDomain, (state) => state.isPending
 );
+
+export const selectMessage = createSelector(
+	selectAuthDomain, (state) => state.message
+);

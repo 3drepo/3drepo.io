@@ -88,7 +88,10 @@ export class UnityUtil {
 			onProgress: this.onProgress
 		};
 		UnityLoader.Error.handler = this.onUnityError;
-		if (window && (window as any).Module) {
+		if (window) {
+			if (!(window as any).Module) {
+				window.Module = {};
+			}
 			unitySettings.Module = (window as any).Module;
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
@@ -556,6 +559,27 @@ export class UnityUtil {
 	 */
 	public static enableMeasuringTool() {
 		UnityUtil.toUnity('StartMeasuringTool', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Enable soft shadows - the highest shadow quality
+	 */
+	public static enableSoftShadows() {
+		UnityUtil.toUnity('EnableSoftShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable hard shadows
+	 */
+	public static enableHardShadows() {
+		UnityUtil.toUnity('EnableHardShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable shadows
+	 */
+	public static disableShadows() {
+		UnityUtil.toUnity('DisableShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**

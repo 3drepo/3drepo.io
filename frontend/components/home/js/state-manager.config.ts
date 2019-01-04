@@ -1,6 +1,6 @@
 import { selectIsAuthenticated } from '../../../modules/auth';
 import { getState, history } from '../../../helpers/migration';
-
+import { STATIC_ROUTES_PATHS } from '../../../services/staticPages';
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -106,34 +106,9 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		template: '<register-verify />'
 	});
 
-	// Static pages
 	$stateProvider.state('app.static', {
-		url: '',
-		template: '<ui-view />'
-	});
-
-	$stateProvider.state('app.static.privacy', {
-		url: '/privacy',
-		template: '<privacy id="privacy" />',
-		data: {
-			isLegal: true
-		}
-	});
-
-	$stateProvider.state('app.static.terms', {
-		url: '/terms',
-		template: '<terms id="terms" />',
-		data: {
-			isLegal: true
-		}
-	});
-
-	$stateProvider.state('app.static.cookies', {
-		url: '/cookies',
-		template: '<cookies id="cookies" />',
-		data: {
-			isLegal: true
-		}
+		url: `/{path:${STATIC_ROUTES_PATHS.map((path) => path.replace('/', '')).join('|')}}`,
+		template: '<static-page-viewer />'
 	});
 
 	$httpProvider.interceptors.push('AuthInterceptor');

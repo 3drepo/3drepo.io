@@ -16,6 +16,7 @@
  */
 import { subscribe } from '../../../helpers/migration';
 import { selectIsAuthenticated, selectIsPending } from '../../../modules/auth';
+import { STATIC_ROUTES } from '../../../services/staticPages';
 
 class HomeController implements ng.IController {
 
@@ -109,8 +110,6 @@ class HomeController implements ng.IController {
 		this.AnalyticService.init();
 		this.SWService.init();
 
-		this.precacheTeamspaceTemplate();
-
 		// Pages to not attempt a interval triggered logout from
 
 		this.legalPages = this.AuthService.legalPages;
@@ -131,12 +130,9 @@ class HomeController implements ng.IController {
 		this.state = this.StateManager.state;
 		this.query = this.StateManager.query;
 
-		this.legalDisplays = [];
-		if (angular.isDefined(this.ClientConfigService.legal)) {
-			this.legalDisplays = this.ClientConfigService.legal;
-		}
-		this.legalDisplays.push({title: 'Pricing', page: 'http://3drepo.org/pricing'});
-		this.legalDisplays.push({title: 'Contact', page: 'http://3drepo.org/contact/'});
+		this.legalDisplays = STATIC_ROUTES;
+		this.legalDisplays.push({title: 'Pricing', path: 'http://3drepo.org/pricing'});
+		this.legalDisplays.push({title: 'Contact', path: 'http://3drepo.org/contact/'});
 
 		this.isLiteMode = this.getLiteModeState();
 		this.handlePotentialMobile();
@@ -278,20 +274,6 @@ class HomeController implements ng.IController {
 		return pages.some((page) => {
 			return state[page] === true;
 		});
-	}
-
-	public precacheTeamspaceTemplate() {
-
-		// The account teamspace template is hefty. If we cache it ASAP
-		// we can improve the percieved performance for the user
-
-		const preCacheTemplates = [
-			'templates/sign-up.html',
-			'templates/register-request.html'
-		];
-
-		this.TemplateService.precache(preCacheTemplates);
-
 	}
 
 	public handlePotentialMobile() {

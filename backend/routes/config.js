@@ -39,7 +39,6 @@ function createClientConfig(serverConfig, req) {
 		"development" : config.development,
 		"googleConversionId": config.googleConversionId,
 		"userNotice" : config.userNotice,
-		"unitySettings" : config.unitySettings,
 		"customLogins" : config.customLogins
 	};
 

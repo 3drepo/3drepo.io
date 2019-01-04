@@ -655,9 +655,9 @@ export class TreeService {
 	 * Hide a collection of nodes.
 	 * @param nodes	Array of nodes to be hidden.
 	 */
-	public hideTreeNodes(nodes: any[]) {
+	public hideTreeNodes(nodes: any[], fullUpdate = false) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.invisible);
-		this.updateModelVisibility(nodes);
+		this.updateModelVisibility(fullUpdate ? undefined : nodes);
 	}
 
 	/**
@@ -1113,13 +1113,14 @@ export class TreeService {
 	/**
 	 * Hide series of nodes by an array of shared IDs (rather than unique IDs)
 	 * @param objects objects to hide
+	 * @param update the whole tree's visibility status
 	 */
-	public hideNodesBySharedIds(objects: any[]) {
+	public hideNodesBySharedIds(objects: any[], fullUpdate = false) {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
 
-				this.hideTreeNodes(nodes);
+				this.hideTreeNodes(nodes, fullUpdate);
 
 			})
 			.catch((error) => {

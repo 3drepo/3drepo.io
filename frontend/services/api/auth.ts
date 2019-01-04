@@ -51,3 +51,17 @@ export const forgotPassword = (userNameOrEmail) => {
 export const changePassword = (username, token, newPassword) => {
 	return api.put(`${username}/password`, { token, newPassword });
 };
+
+/**
+ * Register user
+ */
+export const register = (username, data) => {
+	return api.post(username, { ...data });
+};
+
+/**
+ * Verify user
+ */
+export const verify = (username, token) => {
+	return api.post(`${username}/verify`, { token });
+};
