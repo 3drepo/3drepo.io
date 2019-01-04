@@ -43,6 +43,7 @@ interface IProps {
 	deleteViewpoint: (teamspace, modelId, viewpointId) => void;
 	onCancelEditMode: () => void;
 	onOpenEditMode: () => void;
+	onSaveEdit: (viewpointId) => (values) => void;
 	active: boolean;
 	editMode: boolean;
 	teamspace: string;
@@ -60,7 +61,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		return (
 			<Formik
 				initialValues={{ newName: viewpoint.name }}
-				onSubmit={this.handleSaveEdit(viewpoint._id)}>
+				onSubmit={this.props.onSaveEdit(viewpoint._id)}>
 				<StyledForm>
 					<Field name="newName" render={({ field, form }) => (
 						<NewViewpointName
@@ -68,6 +69,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 							error={Boolean(form.errors.name)}
 							helperText={form.errors.name}
 							label="New name"
+							autoFocus
 						/>
 					)} />
 					<IconsGroup>
@@ -95,23 +97,19 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		</NameRow>
 	))(this.props.active && !this.props.editMode)
 
-	public handleSaveEdit = (viewpointId) => (values) => {
-		const { teamspace, modelId } = this.props;
-		this.props.updateViewpoint(teamspace, modelId, viewpointId, values.newName);
-		this.props.onCancelEditMode();
-	}
-
 	public handleDelete = (event, viewpointId) => {
 		event.stopPropagation();
 		const { teamspace, modelId } = this.props;
 		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
 	}
+
 	public render() {
 		const { viewpoint, handleClick, active } = this.props;
 
 		return (
 			<ViewpointItem
 				disableRipple
+
 				onClick={handleClick}
 				active={active}>
 
