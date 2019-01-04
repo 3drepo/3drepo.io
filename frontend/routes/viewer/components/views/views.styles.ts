@@ -25,6 +25,7 @@ import { COLOR } from '../../../../styles/colors';
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 export const ViewsCountInfo = styled.p`
@@ -68,7 +69,6 @@ export const NewItemWrapper = styled.div`
 
 export const SearchField = styled(Input)`
   && {
-    padding: 12px;
     width: 100%;
     flex: none;
   }

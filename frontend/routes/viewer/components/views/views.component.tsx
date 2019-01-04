@@ -53,6 +53,7 @@ interface IState {
 	activeViewpointId: number;
 	teamspace: string;
 	modelId: string;
+	searchQuery: string;
 }
 
 export class Views extends React.PureComponent<IProps, IState> {
@@ -63,13 +64,23 @@ export class Views extends React.PureComponent<IProps, IState> {
 		addedNewItem: false,
 		activeViewpointId: null,
 		teamspace: '',
-		modelId: ''
+		modelId: '',
+		searchQuery: ''
 	};
 
 	public listRef = React.createRef<any>();
 
 	public renderSearch = renderWhenTrue(() => (
-		<SearchField placeholder="Search viewpoint..." onChange={this.handleSearchChange} />
+		<SearchField
+			placeholder="Search viewpoint..."
+			onChange={this.handleSearchChange}
+			autoFocus
+			inputProps={{
+				style: {
+					padding: 12
+				}
+			}}
+		/>
 	));
 
 	public renderNotFound = renderWhenTrue(() => (
@@ -95,6 +106,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 									deleteViewpoint={this.props.deleteViewpoint}
 									teamspace={this.state.teamspace}
 									modelId={this.state.modelId}
+									onSaveEdit={this.handleSaveEdit}
 								/>
 							);
 						}
@@ -109,9 +121,17 @@ export class Views extends React.PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		const { teamspace, modelId } = getDataFromPathname(this.props.location.pathname);
-		this.props.fetchViewpoints(teamspace, modelId);
-		this.props.subscribeOnViewpointChanges(teamspace, modelId);
+		const { location, viewpoints, fetchViewpoints, subscribeOnViewpointChanges } = this.props;
+		const { teamspace, modelId } = getDataFromPathname(location.pathname);
+		const loadedViewpoints = Boolean(viewpoints.length);
+
+		if (loadedViewpoints) {
+			this.setState({ viewpoints });
+		} else {
+			fetchViewpoints(teamspace, modelId);
+		}
+
+		subscribeOnViewpointChanges(teamspace, modelId);
 		this.setState({ teamspace, modelId });
 	}
 
@@ -120,13 +140,19 @@ export class Views extends React.PureComponent<IProps, IState> {
 		this.props.unsubscribeOnViewpointChanges(teamspace, modelId);
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const { viewpoints } = this.props;
+		const { searchQuery, addedNewItem } = this.state;
 		const changes = {} as any;
+		const searchQueryChanged = prevState.searchQuery !== searchQuery;
+		const viewpointsChanged = viewpoints.length !== prevProps.viewpoints.length || viewpoints !== prevProps.viewpoints;
 
-		if (viewpoints.length !== prevProps.viewpoints.length || viewpoints !== prevProps.viewpoints) {
-			changes.viewpoints = viewpoints;
-			if (this.state.addedNewItem && viewpoints.length > prevProps.viewpoints.length) {
+		if (viewpointsChanged || searchQueryChanged) {
+			changes.viewpoints = viewpoints.filter(
+				(viewpoint) => viewpoint.name.toLowerCase().indexOf(searchQuery) !== -1
+			);
+
+			if (addedNewItem && viewpoints.length > prevProps.viewpoints.length) {
 				changes.activeViewpointId = viewpoints[viewpoints.length - 1]._id;
 				const listRef = this.listRef.current.listRef;
 				this.setState({ editMode: true }, () => this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200));
@@ -149,9 +175,14 @@ export class Views extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSaveEdit = (viewpointId) => (values) => {
-		const { teamspace, modelId } = this.state;
+		const { teamspace, modelId, addedNewItem } = this.state;
 		this.props.updateViewpoint(teamspace, modelId, viewpointId, values.newName);
-		this.handleCancelEditMode();
+		this.setState({ editMode: false });
+		if (addedNewItem) {
+			this.setState({
+				addedNewItem: false
+			});
+		}
 	}
 
 	public handleAddViewpoint = () => {
@@ -162,11 +193,25 @@ export class Views extends React.PureComponent<IProps, IState> {
 
 	public handleOpenEditMode = () => this.setState({ editMode: true });
 
-	public handleCancelEditMode = () => this.setState({ editMode: false });
+	public handleCancelEditMode = () => {
+		if (this.state.addedNewItem) {
+			const { teamspace, modelId, activeViewpointId } = this.state;
+			this.props.deleteViewpoint(teamspace, modelId, activeViewpointId);
+
+			this.setState({
+				addedNewItem: false
+			});
+		}
+		this.setState({ editMode: false });
+	}
 
 	public handleOpenSearchMode = () => this.setState({ searchMode: true });
 
-	public handleCloseSearchMode = () => this.setState({ searchMode: false });
+	public handleCloseSearchMode = () =>
+		this.setState({
+			searchMode: false,
+			viewpoints: this.props.viewpoints
+		})
 
 	public handleDelete = (event, viewpointId) => {
 		event.stopPropagation();
@@ -175,11 +220,8 @@ export class Views extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSearchChange = (event) => {
-		this.setState({
-			viewpoints: this.props.viewpoints.filter(
-				(viewpoint) => viewpoint.name.toLowerCase().indexOf(event.currentTarget.value) !== -1
-			)
-		});
+		const searchQuery = event.currentTarget.value.toLowerCase();
+		this.setState({ searchQuery });
 	}
 
 	public getTitleIcon = () => <PhotoCameraIcon />;
@@ -218,6 +260,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { searchMode, viewpoints } = this.state;
 		const hasViewpoints = Boolean(viewpoints.length);
+
 		return (
 			<ViewerPanel
 				title="Views"
