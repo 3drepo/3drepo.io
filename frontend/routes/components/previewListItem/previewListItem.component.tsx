@@ -108,9 +108,7 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 							createdAt={createdDate}
 						/>
 						<Description>
-							<Truncate lines={3}>
-								{description}
-							</Truncate>
+							<Truncate lines={3}>{description}</Truncate>
 						</Description>
 					</Content>
 				</Container>

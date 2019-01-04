@@ -932,43 +932,42 @@ export class RisksService {
 			});
 	}
 
-	public saveRisk(risk) {
+	// public saveRisk(risk) {
+	// 	const base = risk.account + '/' + risk.model;
+	// 	let saveUrl;
 
-		const base = risk.account + '/' + risk.model;
-		let saveUrl;
+	// 	if (risk.rev_id) {
+	// 		saveUrl = base + '/revision/' + risk.rev_id + '/risks.json';
+	// 	} else {
+	// 		saveUrl = base + '/risks.json';
+	// 	}
 
-		if (risk.rev_id) {
-			saveUrl = base + '/revision/' + risk.rev_id + '/risks.json';
-		} else {
-			saveUrl = base + '/risks.json';
-		}
+	// 	if (risk.pickedPos !== null) {
+	// 		risk.position = risk.pickedPos;
+	// 		risk.norm = risk.pickedNorm;
+	// 	}
 
-		if (risk.pickedPos !== null) {
-			risk.position = risk.pickedPos;
-			risk.norm = risk.pickedNorm;
-		}
+	// 	return this.apiService.post(saveUrl, risk);
 
-		return this.apiService.post(saveUrl, risk);
+	// }
 
-	}
+	// /**
+	//  * Update risk
+	//  * @param risk
+	//  * @param riskData
+	//  * @returns {*}
+	//  */
+	// public updateRisk(risk, riskData) {
+	// 	let endpoint = risk.account + '/' + risk.model;
 
-	/**
-	 * Update risk
-	 * @param risk
-	 * @param riskData
-	 * @returns {*}
-	 */
-	public updateRisk(risk, riskData) {
-		let endpoint = risk.account + '/' + risk.model;
+	// 	if (risk.rev_id) {
+	// 		endpoint += '/revision/' + risk.rev_id + '/risks/' +  risk._id + '.json';
+	// 	} else {
+	// 		endpoint += '/risks/' + risk._id + '.json';
+	// 	}
 
-		if (risk.rev_id) {
-			endpoint += '/revision/' + risk.rev_id + '/risks/' +  risk._id + '.json';
-		} else {
-			endpoint += '/risks/' + risk._id + '.json';
-		}
-
-		return this.apiService.put(endpoint, riskData);
-	}
+	// 	return this.apiService.put(endpoint, riskData);
+	// }
 
 	public getJobColor(id) {
 		let roleColor = '#ffffff';
