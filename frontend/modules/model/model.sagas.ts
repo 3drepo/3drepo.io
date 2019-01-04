@@ -44,7 +44,11 @@ export function* fetchSettings({ teamspace, modelId }) {
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
 		const modifiedSettings = cloneDeep(settings);
-		modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
+
+		if (modifiedSettings.surveyPoints) {
+			modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
+		}
+
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 
 		if (project && settings.name) {
