@@ -154,7 +154,11 @@ function updateIssue(req, res, next) {
 
 function listIssues(req, res, next) {
 
-	// let params = req.params;
+	let ids;
+	if (req.query.ids) {
+		ids = req.query.ids.split(",");
+	}
+
 	const place = utils.APIInfo(req);
 	const dbCol =  {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 	const projection = {
@@ -171,9 +175,9 @@ function listIssues(req, res, next) {
 	if(req.query.shared_id) {
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, null, ids);
 	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
+		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, ids, req.query.sortBy);
 	}
 
 	findIssue.then(issues => {
