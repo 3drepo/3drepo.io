@@ -130,11 +130,12 @@ function importSuccess(account, model, sharedSpacePath) {
  * Sets failed status, error code, chat event, and E-mail upon import failure
  * @param {account} acount - User account
  * @param {model} model - Model
+ * @param {user} - user who initiated the request
  * @param {errCode} errCode - Defined bouncer error code or IO response code
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
  * @param {sendMail} sendMail - Boolean to determine if a notification E-mail will be sent
  */
-function importFail(account, model, errCode, errMsg, sendMail) {
+function importFail(account, model, user, errCode, errMsg, sendMail) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		// mark model failed
 		setting.status = "failed";
@@ -155,7 +156,7 @@ function importFail(account, model, errCode, errMsg, sendMail) {
 			Mailer.sendImportError({
 				account,
 				model,
-				username: account,
+				username: user,
 				err: errMsg,
 				corID: setting.corID,
 				bouncerErr: errCode

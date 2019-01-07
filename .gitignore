@@ -72,7 +72,7 @@ tools/release/*.exe
 
 #legal
 pug/legal/*
-resource/legal/*
+resources/legal/*
 
 
 uploads/
