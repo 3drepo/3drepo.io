@@ -62,6 +62,7 @@ export const Container = styled.div`
   display: flex;
   height: 80px;
   overflow: hidden;
+  flex: 1;
 `;
 
 export const Thumbnail = styled.img`
@@ -83,8 +84,9 @@ export const Content = styled.div`
 `;
 
 export const Description = styled.div`
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.25;
+  margin-top: 3px;
   color: ${COLOR.BLACK_60};
 `;
 

@@ -25,6 +25,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container } from './risks.styles';
+import { prepareRisk } from '../../../../helpers/risks';
 
 interface IProps {
 	teamspace: string;
@@ -33,38 +34,54 @@ interface IProps {
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
+	activeRisk?: string;
+	showDetails?: boolean;
 	fetchRisks: (teamspace, model, revision) => void;
+	setActiveRisk: (riskId: string) => void;
+	toggleDetails: (showDetails: boolean) => void;
 }
 
 interface IState {
 	activeRisk?: number;
-	openedRisk?: boolean;
+	showDetails?: boolean;
 }
 
 export class Risks extends React.PureComponent<IProps, IState> {
-	public state: IState = {};
-
-	public renderRisksList = renderWhenTrue(() => {
-		const Items = this.props.risks.map((risk, index) => (
-			<PreviewListItem key={index} {...risk} />
-		));
-
-		return <>{Items}</>;
-	});
-
 	public componentDidMount() {
 		const {teamspace, model, revision} = this.props;
 		this.props.fetchRisks(teamspace, model, revision);
 	}
 
-	public toggleSettings = () => {
+	public handleRiskFocus = (riskId) => () => {
+		this.props.setActiveRisk(riskId);
+	}
 
+	public handleRiskClick = () => () => {
+		this.props.toggleDetails(true);
+	}
+
+	public renderRisksList = renderWhenTrue(() => {
+		const Items = this.props.risks.map((risk, index) => (
+			<PreviewListItem
+				{...prepareRisk(risk, this.props.jobs)}
+				key={index}
+				onItemClick={this.handleRiskFocus(risk._id)}
+				onArrowClick={this.handleRiskClick()}
+				active={this.props.activeRisk === risk._id}
+			/>
+		));
+
+		return <>{Items}</>;
+	});
+
+	public closeDetails = () => {
+		this.props.toggleDetails(false);
 	}
 
 	public renderTitleIcon = () => {
-		if (this.state.openedRisk) {
+		if (this.props.showDetails) {
 			return (
-				<IconButton onClick={this.toggleSettings} >
+				<IconButton onClick={this.closeDetails} >
 					<ArrowBack />
 				</IconButton>
 			);

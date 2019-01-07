@@ -19,18 +19,30 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
-	fetchRisksSuccess: ['risks']
+	fetchRisksSuccess: ['risks'],
+	setActiveRisk: ['riskId'],
+	toggleDetails: ['showDetails']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
 	risks: [],
-	isPending: true
+	isPending: true,
+	activeRisk: null,
+	showDetails: false
 };
 
-export const fetchRisksSuccess = (state = INITIAL_STATE, {risks}) => {
-	return {...state, risks};
+export const fetchRisksSuccess = (state = INITIAL_STATE, { risks }) => {
+	return {...state, risks, activeRisk: null, showDetails: false};
+};
+
+export const setActiveRisk = (state = INITIAL_STATE, { riskId }) => ({ ...state, activeRisk: riskId });
+
+export const toggleDetails = (state = INITIAL_STATE, { showDetails }) => {
+	return {...state, showDetails, activeRisk: null};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess
+	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
+	[RisksTypes.SET_ACTIVE_RISK]: setActiveRisk,
+	[RisksTypes.TOGGLE_DETAILS]: toggleDetails
 });

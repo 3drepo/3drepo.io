@@ -19,6 +19,7 @@ import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { ViewpointsActions } from '../../../modules/viewpoints';
+import { JobsActions } from '../../../modules/jobs';
 
 class ModelController implements ng.IController {
 
@@ -126,6 +127,7 @@ class ModelController implements ng.IController {
 
 		const username = selectCurrentUser(getState()).username;
 		dispatch(CurrentUserActions.fetchUser(username));
+		dispatch(JobsActions.fetchJobs(this.account));
 
 		subscribe(this, this.onModelSettingsChange);
 

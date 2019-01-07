@@ -18,7 +18,7 @@
 import * as React from 'react';
 import Truncate from 'react-truncate';
 
-import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
+import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 
 import {
 	MenuItemContainer,
@@ -32,39 +32,32 @@ import {
 	StyledArrowIcon,
 	Name
 } from './previewListItem.styles';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
-	itemClick: () => void;
-	onArrowClick: () => void;
 	name: string;
 	description: string;
 	author: string;
 	createdDate: string;
-	dueDate: string;
 	thumbnail: string;
-	status: string;
-	priority: string;
-	count: number;
 	roleColor: string;
 	StatusIconComponent: any;
 	statusColor: string;
+	dueDate?: string;
+	count?: number;
+	active?: boolean;
+	onItemClick: (event?) => void;
+	onArrowClick: (event?) => void;
 }
 
-interface IState {
-	active: boolean;
-}
-
-export class PreviewListItem extends React.PureComponent<IProps, IState> {
-	public state = {
-		active: false
-	};
-
-	public handleItemClick = () => {
-		this.setState({ active: true });
+export class PreviewListItem extends React.PureComponent<IProps, any> {
+	get isExpiredDate() {
+		const { createdDate, dueDate } = this.props;
+		return createdDate >= dueDate ? 1 : 0;
 	}
 
 	public renderArrowContainer = () => {
-		if (this.state.active) {
+		if (this.props.active) {
 			return (
 				<ArrowContainer onClick={this.props.onArrowClick}>
 					<StyledArrowIcon />
@@ -74,14 +67,11 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 		return null;
 	}
 
-	public get isExpiredDate() {
-		const { createdDate, dueDate } = this.props;
-		return createdDate >= dueDate ? 1 : 0;
-	}
+	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
+	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
 
 	public render() {
 		const {
-			name,
 			roleColor,
 			count,
 			description,
@@ -89,18 +79,21 @@ export class PreviewListItem extends React.PureComponent<IProps, IState> {
 			createdDate,
 			thumbnail,
 			StatusIconComponent,
-			statusColor
+			statusColor,
+			onItemClick
 		} = this.props;
 
 		return (
-			<MenuItemContainer expired={this.isExpiredDate} onClick={this.handleItemClick}>
+			<MenuItemContainer expired={this.isExpiredDate} onClick={onItemClick}>
 				<Container>
 					<RoleIndicator color={roleColor} />
 					<ThumbnailWrapper>
 						<Thumbnail src={thumbnail} />
 					</ThumbnailWrapper>
 					<Content>
-						<Name>{`${count}. ${name}`}</Name>
+						{this.renderNameWithCounter(count)}
+						{this.renderName(!count)}
+
 						<PreviewItemInfo
 							author={author}
 							StatusIconComponent={StatusIconComponent}
