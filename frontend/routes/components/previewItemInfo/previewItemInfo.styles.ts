@@ -24,6 +24,7 @@ import { COLOR } from './../../../styles/colors';
 export const Container = styled.div`
   min-width: 0;
   flex: 1;
+  margin-top: 5px;
 `;
 
 export const Status = styled.div`
@@ -41,9 +42,9 @@ export const Name = styled(Typography)`
 `;
 
 export const Author = styled(Typography)`
-  margin-right: 6px;
-
   && {
+    margin-right: 6px;
+    margin-left: 5px;
     color: ${COLOR.BLACK_60};
     font-size: 12px;
   }
@@ -53,14 +54,6 @@ export const Date = styled.span`
   font-size: 12px;
   color: ${COLOR.BLACK_60};
 `;
-
-export const StatusIcon = styled(Icon)`
-  margin-right: 4px;
-
-  && {
-    font-size: 14px;
-  }
-` as any;
 
 export const Details = styled.div`
   align-items: center;

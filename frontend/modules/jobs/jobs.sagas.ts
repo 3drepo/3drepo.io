@@ -46,7 +46,7 @@ export function* fetchJobsColors({ teamspace }) {
 export function* updateJobColor({ job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.updateJob(teamspace, job);
+		yield API.updateJob(teamspace, job);
 
 		yield put(JobsActions.updateJobSuccess(job));
 		yield put(SnackbarActions.show('Job color updated'));
@@ -58,7 +58,7 @@ export function* updateJobColor({ job }) {
 export function* createJob({ job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.createJob(teamspace, job);
+		yield API.createJob(teamspace, job);
 
 		yield put(JobsActions.createJobSuccess(job));
 		yield put(SnackbarActions.show('Job created'));
@@ -70,7 +70,7 @@ export function* createJob({ job }) {
 export function* removeJob({ jobId }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const data = yield API.deleteJob(teamspace, jobId);
+		yield API.deleteJob(teamspace, jobId);
 
 		yield put(JobsActions.removeJobSuccess(jobId));
 		yield put(SnackbarActions.show('Job removed'));

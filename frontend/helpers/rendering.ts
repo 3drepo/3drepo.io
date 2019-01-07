@@ -6,6 +6,6 @@ export const getWindowWidth = () =>
 export const getWindowHeight = () =>
 	window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
-export const renderWhenTrue = (Component: JSX.Element | (() => JSX.Element)) => (trueStatement: boolean) => {
+export const renderWhenTrue = (Component: JSX.Element | (() => JSX.Element)) => (trueStatement) => {
 	return (trueStatement ? result({ Component }, 'Component') : null) as JSX.Element | JSX.Element[];
 };

@@ -26,3 +26,11 @@ export const selectRisks = createSelector(
 export const selectIsPending = createSelector(
 	selectRisksDomain, (state) => state.isPending
 );
+
+export const selectActiveRisk = createSelector(
+	selectRisksDomain, (state) => state.activeRisk
+);
+
+export const selectShowDetails = createSelector(
+	selectRisksDomain, (state) => state.showDetails
+);
