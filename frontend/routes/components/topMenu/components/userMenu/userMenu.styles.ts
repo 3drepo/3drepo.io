@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import Icon from '@material-ui/core/Icon';
 import List from '@material-ui/core/List';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItem from '@material-ui/core/ListItem';

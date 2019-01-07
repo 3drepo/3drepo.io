@@ -32,10 +32,10 @@ export class ViewerService {
 	public pin: any;
 	public newPinId: string;
 	public currentModel: any;
+	public initialised: any;
 
 	private pinData: any;
 	private viewer: any;
-	private initialised: any;
 	private Viewer: any;
 	private model: string;
 	private account: string;
@@ -511,7 +511,7 @@ export class ViewerService {
 		});
 	}
 
-	public  mapStart() {
+	public mapStart() {
 		this.initialised.promise.then(() => {
 			this.viewer.mapStart();
 		});

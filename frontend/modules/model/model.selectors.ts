@@ -34,3 +34,7 @@ export const selectIsPending = createSelector(
 export const selectUploadStatus = createSelector(
 	selectModelDomain, (state) => state.uploadStatus
 );
+
+export const selectMaps = createSelector(
+	selectModelDomain, (state) => state.maps
+);

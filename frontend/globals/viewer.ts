@@ -764,7 +764,7 @@ export class Viewer {
 	/**
 	 * Start map generation
 	 */
-	public  mapStart() {
+	public mapStart() {
 		UnityUtil.mapStart();
 	}
 

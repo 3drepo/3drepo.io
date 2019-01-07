@@ -33,7 +33,7 @@ export function* sendGetNotifications() {
 		const { data } = yield API.getNotifications();
 		yield put(NotificationsActions.setNotifications(data));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'notifications', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'notifications', e));
 	}
 }
 
@@ -49,7 +49,7 @@ export function* sendUpdateNotificationRead({ notificationId, read }) {
 		yield API.patchNotification(notificationId, {read});
 	} catch (error) {
 		yield put(NotificationsActions.patchNotification({_id: notificationId, read: !read}));
-		yield put(DialogActions.showErrorDialog('update', 'notification', error.response));
+		yield put(DialogActions.showErrorDialog('update', 'notification', error));
 	}
 }
 
@@ -65,7 +65,7 @@ export function* sendDeleteNotification({ notificationId }) {
 		yield API.deleteNotification(notificationId);
 	} catch (error) {
 		yield put(NotificationsActions.upsertNotification(notification));
-		yield put(DialogActions.showErrorDialog('delete', 'notification', error.response));
+		yield put(DialogActions.showErrorDialog('delete', 'notification', error));
 	}
 }
 
@@ -77,7 +77,7 @@ export function* sendDeleteAllNotifications() {
 		yield API.deleteAllNotifications();
 	} catch (error) {
 		yield put(NotificationsActions.setNotifications(notifications));
-		yield put(DialogActions.showErrorDialog('delete', 'notification', error.response));
+		yield put(DialogActions.showErrorDialog('delete', 'notification', error));
 	}
 }
 
