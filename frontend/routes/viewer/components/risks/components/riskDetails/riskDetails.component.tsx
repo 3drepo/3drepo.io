@@ -15,13 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { COLOR } from '../../../../styles';
+import * as React from 'react';
 
-export const ListContainer = styled.div`
-  height: 100%;
-`;
+import { Container } from './riskDetails.styles';
 
-export const Summary = styled.div`
-  color: ${COLOR.BLACK_40};
-`;
+interface IProps {
+	noop: string; // TODO: Remove sample
+}
+
+export class RiskDetails extends React.PureComponent<IProps, any> {
+
+	public render() {
+		return (
+			<Container>
+				RiskDetails component
+			</Container>
+		);
+	}
+}
