@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import List from '@material-ui/core/List';
-import { COLOR } from './../../../styles/colors';
+import { COLOR } from '../../../styles/colors';
 import ListItem from '@material-ui/core/ListItem';
 import Typography from '@material-ui/core/Typography';
 
