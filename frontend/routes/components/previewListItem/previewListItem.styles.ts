@@ -28,7 +28,14 @@ export const MenuItemContainer = styled(MenuItem)`
   && {
     background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
     height: auto;
-    padding: 7px 40px 7px 7px;
+    border-bottom: 1px solid ${COLOR.BLACK_6};
+    padding: 0;
+/*     padding: 3px 40px 3px 7px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    height: 94px;
+    justify-content: center; */
 
     &:hover {
       background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
@@ -63,6 +70,7 @@ export const Container = styled.div`
   height: 80px;
   overflow: hidden;
   flex: 1;
+  padding: 7px 40px 7px 7px;
 `;
 
 export const Thumbnail = styled.img`

@@ -16,12 +16,5 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../styles';
 
-export const ListContainer = styled.div`
-  height: 100%;
-`;
-
-export const Summary = styled.div`
-  color: ${COLOR.BLACK_40};
-`;
+export const Container = styled.div``;
