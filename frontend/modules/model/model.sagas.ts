@@ -30,7 +30,7 @@ export function* fetchSettings({ teamspace, modelId }) {
 		yield put(ModelActions.setPendingState(true));
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
 
-		if (settings.surveyPoints) {
+		if (settings.surveyPoints && settings.surveyPoints.length) {
 			settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
 		}
 
@@ -45,7 +45,7 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 	try {
 		const modifiedSettings = cloneDeep(settings);
 
-		if (modifiedSettings.surveyPoints) {
+		if (modifiedSettings.surveyPoints && settings.surveyPoints.length) {
 			modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
 		}
 
