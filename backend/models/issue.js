@@ -1291,6 +1291,25 @@ schema.methods.getBCFMarkup = function(account, model, unit) {
 			}
 		};
 
+		if (_.get(vp, "clippingPlanes") && vp.clippingPlanes.length > 0) {
+			viewpointXmlObj.VisualizationInfo.ClippingPlanes = {};
+			viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane = [];
+			for (let i = 0; i < vp.clippingPlanes.length; i++) {
+				viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane.push({
+					Location:{
+						X: -vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].distance * scale,
+						Y: vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].distance * scale,
+						Z: -vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].distance * scale
+					},
+					Direction:{
+						X: vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].clipDirection,
+						Y: -vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].clipDirection,
+						Z: vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].clipDirection
+					}
+				});
+			}
+		}
+
 		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
 
 			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
