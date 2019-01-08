@@ -21,7 +21,6 @@ import { Link } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as queryString from 'query-string';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
@@ -43,8 +42,10 @@ const PasswordChangeSchema = Yup.object().shape({
 
 interface IProps {
 	location: any;
-	changePassword: (username, token, password) => void;
 	isPending: boolean;
+	message: string;
+	changePassword: (username, token, password) => void;
+	clearMessage: () => void;
 }
 
 interface IState {
@@ -83,6 +84,10 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 		this.setState({
 			hasInvalidParams: !token || !username
 		});
+	}
+
+	public componentWillUnmount() {
+		this.props.clearMessage();
 	}
 
 	public renderBackToLogin = () => (
@@ -165,12 +170,17 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 				container
 				direction="column"
 				alignItems="center">
-				<Logo />
-
+				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
 					<Panel title="Forgot password">
-						{hasInvalidParams && this.renderInvalidParams()}
-						{!hasInvalidParams && this.renderResetPasswordForm(newPassword, newPasswordConfirm)}
+						{ this.props.message
+							? <Message>{this.props.message}</Message>
+							:
+							<>
+								{hasInvalidParams && this.renderInvalidParams()}
+								{!hasInvalidParams && this.renderResetPasswordForm(newPassword, newPasswordConfirm)}
+							</>
+						}
 					</Panel>
 				</Grid>
 			</Container>

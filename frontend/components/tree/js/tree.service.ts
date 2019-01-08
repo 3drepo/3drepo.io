@@ -51,6 +51,7 @@ export class TreeService {
 	private idToObjRef;
 	private SELECTION_STATES;
 	private VISIBILITY_STATES;
+	private meshesToUpdate; // Set of meshes that are pending a visibility update in unity.
 
 	constructor(
 		private $q: ng.IQService,
@@ -70,6 +71,7 @@ export class TreeService {
 		this.treeMapReady = this.$q.defer();
 		this.generatedMaps = null;
 
+		this.meshesToUpdate = new Set();
 		this.state = {};
 		this.state.hideIfc = true;
 		this.allNodes = undefined;
@@ -657,7 +659,7 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.invisible);
-		this.updateModelVisibility(nodes);
+		this.updateModelVisibility();
 	}
 
 	/**
@@ -666,7 +668,7 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.visible);
-		this.updateModelVisibility(nodes);
+		this.updateModelVisibility();
 	}
 
 	/**
@@ -1118,9 +1120,7 @@ export class TreeService {
 
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
-
 				this.hideTreeNodes(nodes);
-
 			})
 			.catch((error) => {
 				console.error(error);
@@ -1370,8 +1370,6 @@ export class TreeService {
 		}
 		nodes.forEach((node) => {
 			if (node && (this.VISIBILITY_STATES.parentOfInvisible === visibility || visibility !== node.toggleState)) {
-				const priorToggleState = node.toggleState;
-
 				let children = [];
 				const leafNodes = [];
 				const parentNode = node;
@@ -1382,14 +1380,25 @@ export class TreeService {
 					children = [node];
 				}
 
+				if (node.type === 'mesh') {
+					this.meshesToUpdate.add(node);
+				}
+
 				while (children.length > 0) {
 					const child = children.pop();
 
-					if (child.children && child.toggleState !== visibility) {
-						children = children.concat(child.children);
+					if (child.toggleState !== visibility) {
+						if (child.type === 'mesh') {
+							this.meshesToUpdate.add(child);
+						}
+
+						if (child.children) {
+							children = children.concat(child.children);
+						}
 					}
 
 					if (!child.hasOwnProperty('defaultState')) {
+						// FIXME: why can't this be merged with if defaultState exists?
 						if (visibility === this.VISIBILITY_STATES.visible && this.canShowNode(child)) {
 							child.toggleState = this.VISIBILITY_STATES.visible;
 						} else {
@@ -1415,54 +1424,31 @@ export class TreeService {
 	 * Apply changes to the viewer.
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
-	private updateModelVisibility(node = [this.allNodes]) {
+	private updateModelVisibility() {
 
 		return this.onReady().then(() => {
 
-			const childNodes = this.getMeshMapFromNodes(node);
-			const hidden = {};
-			const shown = {};
+			if (this.meshesToUpdate.size > 0) {
+				const hidden = {};
+				const shown = {};
 
-			for (const key in childNodes) {
-				if (!key) {
-					continue;
-				}
-				const childMeshes = childNodes[key].meshes;
+				this.meshesToUpdate.forEach((meshNode) => {
+					const model = meshNode.model || meshNode.project;
+					const key = meshNode.account + '@' + model;
 
-				if (!childMeshes) {
-					continue;
-				}
-
-				for (let i = 0; i < childMeshes.length; i++) {
-
-					const id  = childMeshes[i];
-					const childNode = this.getNodeById(id);
-
-					if (childNode) {
-
-						if (childNode.toggleState === this.VISIBILITY_STATES.invisible) {
-							hidden[childNode._id] = childNode;
-						} else {
-							delete hidden[childNode._id];
-						}
-
-						if (childNode.toggleState === this.VISIBILITY_STATES.visible) {
-							shown[childNode._id] = childNode;
-						} else {
-							delete shown[childNode._id];
-						}
-
+					if (meshNode.toggleState === this.VISIBILITY_STATES.invisible) {
+						hidden[meshNode._id] = meshNode;
+					} else {
+						shown[meshNode._id] = meshNode;
 					}
-				}
+				});
+
+				this.handleVisibility(hidden, false);
+				this.handleVisibility(shown, true);
 			}
-
-			this.handleVisibility(hidden, false);
-			this.handleVisibility(shown, true);
-
+			this.meshesToUpdate.clear();
 		});
-
 	}
-
 }
 
 export const TreeServiceModule = angular

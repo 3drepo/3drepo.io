@@ -7,6 +7,7 @@ import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import modelSaga from './model/model.sagas';
 import authSaga from './auth/auth.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
+import staticPagesSaga from './staticPages/staticPages.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -18,6 +19,7 @@ export default function* rootSaga() {
 		fork(teamspacesSaga),
 		fork(modelSaga),
 		fork(authSaga),
-		fork(notificationsSaga)// <-- INJECT MODULE SAGA -->
+		fork(notificationsSaga),
+		fork(staticPagesSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

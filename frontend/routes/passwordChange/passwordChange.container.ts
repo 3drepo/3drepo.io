@@ -21,14 +21,16 @@ import { withRouter } from 'react-router-dom';
 import { connect, addRouting } from '../../helpers/migration';
 
 import { PasswordChange } from './passwordChange.component';
-import { AuthActions, selectIsPending } from '../../modules/auth';
+import { AuthActions, selectIsPending, selectMessage } from '../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	message: selectMessage
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	changePassword: AuthActions.changePassword
+	changePassword: AuthActions.changePassword,
+	clearMessage: AuthActions.clearAuthMessage
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(PasswordChange)));
