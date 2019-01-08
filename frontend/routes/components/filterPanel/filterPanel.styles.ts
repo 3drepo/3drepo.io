@@ -17,9 +17,12 @@
 
 import styled from 'styled-components';
 import { COLOR } from './../../../styles/colors';
+import Popper from '@material-ui/core/Popper';
+import TextField from '@material-ui/core/TextField';
 
 export const Container = styled.div`
   background-color: ${COLOR.WHITE};
+  padding: 4px;
 `;
 
 export const SelectedFilters = styled.div`
@@ -31,4 +34,39 @@ export const SelectedFilters = styled.div`
 export const InputContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  position: relative;
+
+  .react-autosuggest__container {
+    width: 100%;
+  }
+`;
+
+export const SuggestionsList = styled(Popper)`
+	z-index: 12323;
+	margin-top: -15px;
+  position: absolute;
+
+	.react-autosuggest__suggestions-list {
+		max-height: 250px;
+		overflow: auto;
+		padding-left: 0;
+	}
+
+	.react-autosuggest__suggestion {
+		list-style: none;
+		height: 62px;
+		border-bottom: 1px solid ${COLOR.BLACK_6};
+		display: flex;
+		flex: 1;
+		align-items: center;
+	}
+
+	.react-autosuggest__suggestion > div {
+		flex: 1;
+  }
+`;
+
+export const StyledTextField = styled(TextField)`
+	font-size: 14px;
+	margin-bottom: 12px;
 `;

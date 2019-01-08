@@ -16,15 +16,19 @@
  */
 
 import * as React from 'react';
+import * as Autosuggest from 'react-autosuggest';
+import { ENTER_KEY } from '../../../constants/keys';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import Chip from '@material-ui/core/Chip';
 import Input from '@material-ui/core/Input';
+import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { FiltersMenu } from '../filtersMenu/filtersMenu.component';
-import { Container, SelectedFilters, InputContainer } from './filterPanel.styles';
+import { Container, SelectedFilters, InputContainer, SuggestionsList, StyledTextField } from './filterPanel.styles';
 
 interface IProps {
 	filters: any[];
@@ -33,6 +37,8 @@ interface IProps {
 
 interface IState {
 	selectedFilters: any[];
+	value: any;
+	suggestions: any[];
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -45,10 +51,36 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	  </IconButton>
 	);
 
+const languages = [
+	{
+		name: 'Status:Done',
+		year: 1972
+	},
+	{
+		name: 'Status:In Progress',
+		year: 2012
+	}
+];
+
+const getSuggestions = (value) => {
+	const inputValue = value.trim().toLowerCase();
+	const inputLength = inputValue.length;
+
+	return inputLength === 0 ? [] : languages.filter((lang) =>
+		lang.name.toLowerCase().slice(0, inputLength) === inputValue
+	);
+};
+
+const getSuggestionValue = (suggestion) => suggestion.name;
+
 export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public state = {
-		selectedFilters: []
+		selectedFilters: [],
+		value: '',
+		suggestions: []
 	};
+
+	private popperNode = null;
 
   public renderFiltersMenu = () => (
 	    <FiltersMenu
@@ -94,7 +126,90 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderSuggestion = (suggestion, {isHighlighted}) => {
+		return (
+			<MenuItem selected={isHighlighted} component="div">
+				{suggestion.name}
+			</MenuItem>
+		);
+	}
+
+	public renderInputComponent = (inputProps) => {
+		const {inputRef , ref, ...other} = inputProps;
+
+		return (
+			<StyledTextField
+				fullWidth={true}
+				InputProps={ {
+					inputRef: (node) => {
+						ref(node);
+						inputRef(node);
+					}
+				} }
+				{...other}
+			/>
+		);
+	}
+
+	public renderSuggestionsContainer = (options) => (
+		<SuggestionsList
+			anchorEl={this.popperNode}
+			open={Boolean(options.children)}
+			placement="bottom"
+		>
+			<Paper
+				square={true}
+				{...options.containerProps}
+				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
+			>
+				{options.children}
+			</Paper>
+		</SuggestionsList>
+	)
+
+	public onChange = (event, { newValue }) => {
+		this.setState({
+			value: newValue
+		});
+	}
+
+	public handleNewFilterSubmit: any = (event) => {
+		if (event.key === ENTER_KEY) {
+			event.preventDefault();
+
+			const newSelectedFilter = {
+				label: 'Status',
+				type: 'NORMAL',
+				value: {
+					label: 'In progress',
+					value: 'in_progress'
+				}
+			};
+			this.setState((prevState) => ({
+				selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
+			}), () => {
+				this.props.onChange(this.state.selectedFilters);
+			});
+
+			event.target.value = '';
+		}
+	}
+
+	public onSuggestionsFetchRequested = ({ value }) => {
+		this.setState({
+			suggestions: getSuggestions(value)
+		});
+	}
+
+	public onSuggestionsClearRequested = () => {
+		this.setState({
+			suggestions: []
+		});
+	}
+
 	public render() {
+		const { value, suggestions } = this.state;
+
 		return (
 			<Container>
 				<SelectedFilters>
@@ -109,8 +224,26 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						)
 					}
 				</SelectedFilters>
+
 				<InputContainer>
-					<Input />
+					<Autosuggest
+						suggestions={suggestions}
+						onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+						onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+						getSuggestionValue={getSuggestionValue}
+						renderSuggestion={this.renderSuggestion}
+						renderInputComponent={this.renderInputComponent}
+						inputProps={ {
+							placeholder: 'Filter',
+							value,
+							onChange: this.onChange,
+							onKeyPress: this.handleNewFilterSubmit,
+							inputRef: (node) => {
+								this.popperNode = node;
+							}
+						} }
+						renderSuggestionsContainer={this.renderSuggestionsContainer}
+					/>
 					<ButtonMenu
 						renderButton={MenuButton}
 						renderContent={this.renderFiltersMenu}
