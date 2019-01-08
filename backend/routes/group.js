@@ -44,11 +44,13 @@ const getDbColOptions = function(req) {
 function listGroups(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
-	const place = utils.APIInfo(req);
+	const place = utils.APIInfo(req);	
 
 	let groupList;
 	if (req.params.rid) {
 		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid);
+	} else if (req.query.ids) {
+		groupList = Group.findByIdsGroup(dbCol, req.query.ids.split(","));
 	} else {
 		groupList = Group.listGroups(dbCol, req.query, "master", null);
 	}

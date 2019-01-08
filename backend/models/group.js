@@ -285,6 +285,14 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function (model, branch, revId,
 	});
 };
 
+groupSchema.statics.findByIdsGroup = function (dbCol, ids) {
+
+	ids = utils.stringsToUUIDs(ids);
+	return this.find(dbCol, {_id:{"$in": ids}});
+	
+}
+
+
 groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
