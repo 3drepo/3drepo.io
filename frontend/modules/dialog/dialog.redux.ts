@@ -48,7 +48,12 @@ export const showDialog = (state = INITIAL_STATE, action) => {
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
-export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error } ) => {
+export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
+	const isImplementationError = !error.response;
+	if (isImplementationError) {
+		console.error(error);
+	}
+
 	if (error.handled) {
 		return state;
 	}
@@ -59,8 +64,8 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error
 		data: {
 			method,
 			dataType,
-			status: error.status,
-			message: get(error, 'data.message', '')
+			status: get(error.response, 'status', 'Implementation error'),
+			message: get(error.response, 'data.message', error.message || '')
 		}
 	};
 

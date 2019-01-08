@@ -30,6 +30,10 @@ panel #items {
   pointer-events: inherit;
 }
 
+panel #items #reactComponent {
+  
+}
+
 panel {
   z-index: 25;
 }

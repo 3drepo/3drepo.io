@@ -189,7 +189,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			type,
 			fourDSequenceTag,
 			surveyPoints: [{
-				position: [ axisX, -axisZ, -axisY ],
+				position: [ Number(axisX), Number(axisY), Number(axisZ) ],
 				latLong: [ latitude, longitude ]
 			}],
 			topicTypes: types
@@ -230,9 +230,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 	public renderForm = () => {
 		const { id, name, type, fourDSequenceTag, properties, federate } = this.props.modelSettings;
-		const { latitude, longitude, axisX, angleFromNorth, elevation, topicTypes } = this.state;
-		const axisZ = -this.state.axisY;
-		const axisY = -this.state.axisZ;
+		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
 
 		return	(
 			<Formik
@@ -352,7 +350,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="axisX" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										label="x (mm)"
+										label={`x (${properties.unit})`}
 										margin="normal"
 										error={Boolean(form.errors.axisX)}
 										helperText={form.errors.axisX}
@@ -362,7 +360,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									<StyledTextField
 										{...field}
 										name="axisY"
-										label="y (mm)"
+										label={`y (${properties.unit})`}
 										margin="normal"
 										error={Boolean(form.errors.axisY)}
 										helperText={form.errors.axisY}
@@ -371,7 +369,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								<Field name="axisZ" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										label="z (mm)"
+										label={`z (${properties.unit})`}
 										margin="normal"
 										error={Boolean(form.errors.axisZ)}
 										helperText={form.errors.axisZ}
@@ -386,13 +384,11 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								type="submit"
 								variant="raised"
 								color="secondary"
-								disabled={
-									!form.isValid ||
-									form.isValidating
-								}
+								disabled={!form.isValid || form.isValidating}
 							>
 								Save
-							</Button>} />
+							</Button>}
+						/>
 					</Grid>
 				</StyledForm>
 			</Formik>

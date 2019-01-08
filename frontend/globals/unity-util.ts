@@ -562,6 +562,27 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Enable soft shadows - the highest shadow quality
+	 */
+	public static enableSoftShadows() {
+		UnityUtil.toUnity('EnableSoftShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable hard shadows
+	 */
+	public static enableHardShadows() {
+		UnityUtil.toUnity('EnableHardShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable shadows
+	 */
+	public static disableShadows() {
+		UnityUtil.toUnity('DisableShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
 	 * Get Object Status within the viewer. This will return you the list of
 	 * objects that are currently set invisible, and a list of object that are
 	 * currently highlighted.

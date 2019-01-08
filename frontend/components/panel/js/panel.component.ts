@@ -201,7 +201,6 @@ class PanelController implements ng.IController {
 
 	// *** This method is angular-binded to the panel-cards contained in the panel component ***
 	public heightRequest(contentItem: any, height: number) {
-
 		contentItem.requestedHeight = height; // Keep a note of the requested height
 		if (height > this.maxHeightAvailable) {
 			contentItem.height = this.maxHeightAvailable; // Prevent excessive requests
@@ -217,21 +216,23 @@ class PanelController implements ng.IController {
 	 */
 	public calculateContentHeights() {
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
+
 		const spaceUsedInGaps = this.itemGap * ( this.contentItemsShown.length - 1);
 		let availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
 
 		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => {
-			return  a.requestedHeight + a.panelToolbarHeight - b.requestedHeight - b.panelTakenHeight;
+			return a.requestedHeight + a.panelToolbarHeight - b.requestedHeight - b.panelTakenHeight;
 		});
 
 		let itemsLeftToCalculateSpace = this.contentItemsShown.length;
-		let spaceDivisions = 0;
 
-		orderedContentItems.forEach( (c) => {
-			spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
+		orderedContentItems.forEach((c) => {
+			const takenHeight = c.panelTakenHeight;
+			const spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
 			itemsLeftToCalculateSpace--;
-			c.height = Math.max(Math.min((c.requestedHeight || c.minHeight), spaceDivisions - c.panelTakenHeight ), c.minHeight);
-			availableHeight -= c.height + c.panelTakenHeight;
+			const newHeight = Math.max(Math.min((c.requestedHeight || c.minHeight), spaceDivisions - takenHeight), c.minHeight);
+			c.height = isNaN(newHeight) ? availableHeight : newHeight;
+			availableHeight -= c.height + takenHeight;
 		});
 	}
 

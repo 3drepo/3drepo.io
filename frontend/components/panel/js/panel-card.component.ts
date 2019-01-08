@@ -141,7 +141,7 @@ class PanelCardController implements ng.IController {
 		});
 
 		this.$scope.$watch ( () => this.$element[0].querySelector('#header').clientHeight,
-			(newValue, oldValue) => {
+			(newValue) => {
 				this.contentData.panelTakenHeight = newValue;
 				this.onContentHeightRequest(this.contentData.requestedHeight);
 		});
