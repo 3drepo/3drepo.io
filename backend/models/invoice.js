@@ -22,9 +22,8 @@
 	const ModelFactory = require("./factory/modelFactory");
 	const addressMeta = require("./addressMeta");
 	const moment = require("moment");
-	const fs = require("fs");
 	const pug = require("pug");
-	const phantom = require("phantom");
+	const pdfGen = require("html-pdf");
 	const config = require("../config");
 	const systemLogger = require("../logger.js").systemLogger;
 	const Counter = require("./counter");
@@ -367,13 +366,16 @@
 		});
 	};
 
-	async function printPDF(html, pdfPath) {
-		const instance = await phantom.create();
-		const page = await instance.createPage();
-		await page.property("viewportSize", { width: 1200, height: 1553 });
-		await page.property("content", html);
-		await page.render(pdfPath);
-		await instance.exit();
+	function printPDF(html) {
+		return new Promise((resolve, reject) => {
+			pdfGen.create(html, {width: "210mm", height: "297mm"}).toBuffer((err, buffer) => {
+				if(err) {
+					reject(err);
+				} else {
+					resolve(buffer);
+				}
+			});
+		});
 	}
 
 	schema.methods.generatePDF = function (user) {
@@ -385,8 +387,6 @@
 		if(this.items.length > 0 && (!config.subscriptions || !config.subscriptions.plans[this.items[0].name])) {
 			return Promise.reject(responseCodes.UNKNOWN_PAY_PLAN);
 		}
-
-		const pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
 
 		return new Promise((resolve, reject) => {
 
@@ -405,41 +405,7 @@
 				}
 			});
 		}).then((html) => {
-			return printPDF(html, pdfPath).then(() => {
-				const pdfRS = fs.createReadStream(pdfPath);
-				const bufs = [];
-
-				return new Promise((resolve, reject) => {
-
-					pdfRS.on("data", function (d) {
-						bufs.push(d);
-					});
-					pdfRS.on("end", function () {
-						resolve(Buffer.concat(bufs));
-					});
-					pdfRS.on("err", err => {
-						reject(err);
-					});
-				});
-			});
-
-		}).then(pdf => {
-
-			fs.unlink(pdfPath, function (err) {
-				if (err) {
-					systemLogger.logError("error while deleting tmp invoice pdf file", {
-						message: err.message,
-						err: err,
-						file: pdfPath
-					});
-				} else {
-					systemLogger.logInfo("tmp pdf invoice deleted", {
-						file: pdfPath
-					});
-				}
-			});
-			return pdf;
-
+			return printPDF(html);
 		}).catch(err => {
 			return Promise.reject(err);
 		});

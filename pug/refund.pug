@@ -15,6 +15,7 @@ html(lang="en" ng-app="3drepo")
 
 			html, body {
 				font-family: Roboto, sans-serif;
+				font-size:12px;
 				width: 100%;
 				height: 100%;
 				padding: 0;
@@ -74,16 +75,14 @@ html(lang="en" ng-app="3drepo")
 
 			.companyTitle {
 				font-weight: 500;
-				font-size: 1.2em;
 			}
 
 			.invoice {
 				margin-top: 50px;
-				font-size: 40px;
+				font-size: 30px;
 			}
 
 			#billingPeriod {
-				font-size: 14px;
 				font-weight: 400;
 				color: #8a8a8a;
 			}
@@ -143,7 +142,7 @@ html(lang="en" ng-app="3drepo")
 								p #{billing.info.line2}
 							p #{billing.info.city}
 							p #{billing.info.postalCode}
-							p #{billing.info.country}
+							p #{billing.info.countryName}
 							if billing.info.vat
 								p VAT ID: #{billing.info.vat}
 
@@ -168,4 +167,5 @@ html(lang="en" ng-app="3drepo")
 
 
 			br
+
 
