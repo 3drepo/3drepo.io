@@ -17,18 +17,18 @@
 
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import { ENTER_KEY } from '../../../constants/keys';
+import { omit } from 'lodash';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import Chip from '@material-ui/core/Chip';
-import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { FiltersMenu } from '../filtersMenu/filtersMenu.component';
-import { Container, SelectedFilters, InputContainer, SuggestionsList, StyledTextField } from './filterPanel.styles';
+import {
+	Container, SelectedFilters, InputContainer, SuggestionsList, StyledTextField, StyledChip
+} from './filterPanel.styles';
 
 interface IProps {
 	filters: any[];
@@ -50,26 +50,6 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	    <MoreIcon {...IconProps} />
 	  </IconButton>
 	);
-
-const languages = [
-	{
-		name: 'Status:Done',
-		year: 1972
-	},
-	{
-		name: 'Status:In Progress',
-		year: 2012
-	}
-];
-
-const getSuggestions = (value) => {
-	const inputValue = value.trim().toLowerCase();
-	const inputLength = inputValue.length;
-
-	return inputLength === 0 ? [] : languages.filter((lang) =>
-		lang.name.toLowerCase().slice(0, inputLength) === inputValue
-	);
-};
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
@@ -134,6 +114,25 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public mapFiltersToSuggestions = (filters) =>
+		filters.map((filter) => filter.values.map((value) => {
+			return {
+				name: `${filter.label}:${value.label}`,
+				label: filter.label,
+				type: filter.type,
+				value
+			};
+		})).flat(1)
+
+	public getSuggestions = (value) => {
+		const inputValue = value.trim().toLowerCase();
+		const inputLength = inputValue.length;
+		const filterSuggestions = this.mapFiltersToSuggestions(this.props.filters);
+
+		return inputLength === 0 ? [] : filterSuggestions.filter((filterSuggestion) =>
+		filterSuggestion.name.toLowerCase().slice(0, inputLength) === inputValue);
+	}
+
 	public renderInputComponent = (inputProps) => {
 		const {inputRef , ref, ...other} = inputProps;
 
@@ -173,31 +172,29 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleNewFilterSubmit: any = (event) => {
-		if (event.key === ENTER_KEY) {
-			event.preventDefault();
+	public handleNewFilterSubmit: any = (event, { suggestion }) => {
+		event.preventDefault();
 
-			const newSelectedFilter = {
-				label: 'Status',
-				type: 'NORMAL',
-				value: {
-					label: 'In progress',
-					value: 'in_progress'
-				}
-			};
+		const newFilter = omit(suggestion, 'name');
+		const isAlreadySelected = this.state.selectedFilters.find(((filter) =>
+			JSON.stringify(filter) === JSON.stringify(newFilter)
+		));
+
+		if (!!isAlreadySelected) {
+			this.setState({ value: '' });
+		} else {
 			this.setState((prevState) => ({
-				selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
+				selectedFilters: [...prevState.selectedFilters, omit(suggestion, 'name')],
+				value: ''
 			}), () => {
 				this.props.onChange(this.state.selectedFilters);
 			});
-
-			event.target.value = '';
 		}
 	}
 
 	public onSuggestionsFetchRequested = ({ value }) => {
 		this.setState({
-			suggestions: getSuggestions(value)
+			suggestions: this.getSuggestions(value)
 		});
 	}
 
@@ -215,7 +212,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				<SelectedFilters>
 					{ this.state.selectedFilters.map(
 							(filter, index) => (
-								<Chip
+								<StyledChip
 									key={index}
 									label={`${filter.label}: ${filter.value.label}`}
 									onDelete={() => this.onDeselectFilter(filter)}
@@ -237,12 +234,13 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 							placeholder: 'Filter',
 							value,
 							onChange: this.onChange,
-							onKeyPress: this.handleNewFilterSubmit,
+							// onKeyPress: this.handleNewFilterSubmit,
 							inputRef: (node) => {
 								this.popperNode = node;
 							}
 						} }
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
+						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
 					<ButtonMenu
 						renderButton={MenuButton}

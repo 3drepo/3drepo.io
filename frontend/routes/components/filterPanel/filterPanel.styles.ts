@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { COLOR } from './../../../styles/colors';
 import Popper from '@material-ui/core/Popper';
 import TextField from '@material-ui/core/TextField';
+import Chip from '@material-ui/core/Chip';
 
 export const Container = styled.div`
   background-color: ${COLOR.WHITE};
@@ -69,4 +70,8 @@ export const SuggestionsList = styled(Popper)`
 export const StyledTextField = styled(TextField)`
 	font-size: 14px;
 	margin-bottom: 12px;
+`;
+
+export const StyledChip = styled(Chip)`
+  margin: 2px;
 `;

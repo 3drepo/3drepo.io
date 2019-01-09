@@ -38,13 +38,13 @@ export const ChildMenu = styled.div`
   left: 100%;
   top: 0;
   z-index: 1;
-  min-width: 80px;
-  max-width: 220px;
+  min-width: 120px;
+  max-width: 300px;
 `;
 
 export const StyledItemText = styled(Typography)`
   && {
-    color: ${COLOR.BLACK_60};
+    color: ${COLOR.BLACK};
     font-size: 12px;
     display: flex;
     justify-content: space-between;

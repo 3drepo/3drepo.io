@@ -31,16 +31,24 @@ interface IProps {
 	onToggleFilter: (property, value) => void;
 }
 
-export const MenuListItem = ({Icon, label, onClick, values, onMouseEnter = null, isSelected = false}) => (
-	<StyledListItem button onMouseEnter={parent ? onMouseEnter : null} onClick={onClick}>
-		{Icon &&
-			<ListItemIcon>
-				<Icon />
-			</ListItemIcon>
-		}
-		<StyledItemText>{label} {!!values && <ArrowRight />} {isSelected && <Check fontSize={'small'} />}</StyledItemText>
-	</StyledListItem>
-);
+export const MenuListItem = ({Icon, label, onClick, child, onMouseEnter = null, isSelected = false, type}) => {
+	console.log('type',type)
+	return (
+		<StyledListItem button onMouseEnter={parent ? onMouseEnter : null} onClick={onClick}>
+			{Icon &&
+				<ListItemIcon>
+					<Icon />
+				</ListItemIcon>
+			}
+			<StyledItemText>
+				{label}
+				{!child && <ArrowRight />}
+				{(child && type === 'DATE') && ' datepicker'}
+				{isSelected && <Check fontSize={'small'} />}
+			</StyledItemText>
+		</StyledListItem>
+	);
+}
 
 export class FiltersMenu extends React.PureComponent<IProps, any> {
 	public state = {
@@ -72,8 +80,10 @@ export class FiltersMenu extends React.PureComponent<IProps, any> {
 						(<MenuListItem
 								{...subItem}
 								key={subItem.label}
+								type={item.type}
 								onClick={() => this.toggleSelectItem(item, subItem)}
 								isSelected={this.isSelectedItem(subItem)}
+								child={true}
 							/>
 						))
 					}
@@ -84,15 +94,13 @@ export class FiltersMenu extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { items } = this.props;
-
+		console.log('items', items);
 		return (
 			<MenuList>
 			{
 				items.map((item, index) => (
 					<NestedWrapper key={index} onMouseLeave={this.hideSubMenu}>
-						<MenuListItem
-							{...item} onMouseEnter={() => this.showSubMenu(index)}
-						/>
+						<MenuListItem {...item} onMouseEnter={() => this.showSubMenu(index)} />
 						{this.renderChildItem(index, item)}
 					</NestedWrapper>
 				))
