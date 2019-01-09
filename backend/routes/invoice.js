@@ -76,7 +76,7 @@
 			if(!invoice) {
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
-			return invoice.generatePDF();
+			return invoice.generatePDF(req.params.account);
 
 		}).then(pdf => {
 

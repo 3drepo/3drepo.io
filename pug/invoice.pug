@@ -8,7 +8,7 @@ html(lang="en" ng-app="3drepo")
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 
 		title 3D Repo - Invoice
-		
+
 		// Styling used in the Angular Material demos
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 
@@ -50,7 +50,7 @@ html(lang="en" ng-app="3drepo")
 				font-weight: bold;
 				padding-bottom: 1px;
 				margin-bottom: 9px;
-				border-bottom: 1px solid black; 
+				border-bottom: 1px solid black;
 				border-collapse: collapse;
 			}
 
@@ -77,7 +77,7 @@ html(lang="en" ng-app="3drepo")
 				font-weight: 500;
 				font-size: 1.2em;
 			}
-			
+
 			.invoice {
 				margin-top: 50px;
 				font-size: 40px;
@@ -116,13 +116,15 @@ html(lang="en" ng-app="3drepo")
 				#billingInvoice.topBlocks
 					div
 						img#billingInvoiceLogo(src=baseURL+"/images/logo.png")
-					
+
 					div.invoice
 						p #{billing.pending ? 'Order confirmation': 'Invoice'}
-					
+
 					if !billing.pending
 						br
-						span PayPal transaction ID: #{billing.transactionId}
+						p
+							| PayPal transaction ID:
+							a(href="https://www.paypal.com/activity/payment/#{billing.transactionId}") #{billing.transactionId}
 
 			table(cellspacing="0")
 				tr
@@ -132,9 +134,9 @@ html(lang="en" ng-app="3drepo")
 
 
 				tr.billingClientAddress
-				
-					td.tableCell 
-						div 
+
+					td.tableCell
+						div
 							p #{billing.info.firstName} #{billing.info.lastName}
 							if billing.info.company
 								p #{billing.info.company}
@@ -161,14 +163,16 @@ html(lang="en" ng-app="3drepo")
 					th.tableCell.tableHead VAT
 					th.tableCell.tableHead Total
 
-				
+
 
 				tr
-					td.tableCell.productCol 
-						p 
+					td.tableCell.productCol
+						p
 							| #{billing.items[0].description}
+							| (#{user}
 							if billing.proRata
-								|   (pro-rata)
+								|   ,pro-rata
+							| )
 						p#billingPeriod (#{billing.periodStart} to #{billing.periodEnd})
 
 					td.tableCell #{billing.items.length}
@@ -178,7 +182,7 @@ html(lang="en" ng-app="3drepo")
 					td.tableCell £#{parseFloat(billing.taxAmount).toFixed(2)}
 					td.tableCell £#{parseFloat(billing.amount).toFixed(2)}
 
-			
+
 			br
 
 			p Your next regular monthly payment of £#{billing.nextPaymentAmount.toFixed(2)} will be billed on #{billing.nextPaymentDate}

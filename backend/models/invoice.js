@@ -376,7 +376,7 @@
 		await instance.exit();
 	}
 
-	schema.methods.generatePDF = function () {
+	schema.methods.generatePDF = function (user) {
 
 		if (!config.invoice_dir) {
 			return Promise.reject({ message: "invoice dir is not set in config file" });
@@ -397,7 +397,7 @@
 				template = path.join(__dirname, "../../pug/refund.pug");
 			}
 
-			pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
+			pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort), user }, function (err, html) {
 				if (err) {
 					reject(err);
 				} else {
