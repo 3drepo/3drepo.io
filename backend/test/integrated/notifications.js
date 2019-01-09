@@ -458,4 +458,53 @@ describe('Notifications', function() {
 		});
 	});
 
+	describe("of type model update failed", ()=> {
+		it("should be created for the user that uploaded the model", done => {
+			const username = "collaboratorTeamspace1Model1JobA"
+			const agent = agents[username];
+
+			const pollForNotification = next => {
+				const intervalHandle = setInterval(() => {
+					agent.get(NOTIFICATIONS_URL)
+						.expect(200, function(err, res) {
+							const notifications =  res.body.filter( n => n.type === "MODEL_UPDATED_FAILED");
+
+							if (notifications.length > 0) {
+								clearInterval(intervalHandle);
+								expect(notifications.length).to.equal(1);
+								next();
+							}
+						});
+					}, 500);
+			};
+
+
+			async.series(
+				[(next) => agent.delete(NOTIFICATIONS_URL).expect(200, function(err, res) {
+					next(err);
+				}),
+				(next) => {
+					bouncerHelper.startBouncerWorker(next, true);
+				},
+				pollForNotification],
+				() => {
+					bouncerHelper.stopBouncerWorker();
+					done();
+				}
+			)
+
+			const upload = next => agent.post(`/${account}/${model}/upload`)
+				.field("tag", "onetag")
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(200, function(err, res) {
+					if(err) done(err);
+				});
+
+
+			upload();
+
+		}).timeout(60000);
+
+	});
+
 });
