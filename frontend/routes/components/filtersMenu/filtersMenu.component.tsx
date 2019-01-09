@@ -16,14 +16,17 @@
  */
 
 import * as React from 'react';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import { DatePicker } from 'material-ui-pickers';
 
 import List from '@material-ui/core/List';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import Check from '@material-ui/icons/Check';
 
 import { MenuList, NestedWrapper, ChildMenu, StyledItemText, StyledListItem } from './filtersMenu.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { dateType } from './../filterPanel/filterPanel.component';
 
 interface IProps {
 	items: any[];
@@ -31,31 +34,23 @@ interface IProps {
 	onToggleFilter: (property, value) => void;
 }
 
-export const MenuListItem = ({Icon, label, onClick, child, onMouseEnter = null, isSelected = false, type}) => {
-	console.log('type',type)
-	return (
-		<StyledListItem button onMouseEnter={parent ? onMouseEnter : null} onClick={onClick}>
-			{Icon &&
-				<ListItemIcon>
-					<Icon />
-				</ListItemIcon>
-			}
-			<StyledItemText>
-				{label}
-				{!child && <ArrowRight />}
-				{(child && type === 'DATE') && ' datepicker'}
-				{isSelected && <Check fontSize={'small'} />}
-			</StyledItemText>
-		</StyledListItem>
-	);
+interface IState {
+	from: any;
+	to: any;
 }
 
 export class FiltersMenu extends React.PureComponent<IProps, any> {
 	public state = {
-		activeItem: null
+		activeItem: null,
+		from: new Date(),
+		to: new Date()
 	};
 
 	public parentRef = React.createRef<HTMLElement>();
+
+	public componentDidMount() {
+		const dateFilter = this.props.items.find((filter) => filter.type === dateType);
+	}
 
 	public showSubMenu = (e) => {
 		this.setState({ activeItem: e });
@@ -69,24 +64,47 @@ export class FiltersMenu extends React.PureComponent<IProps, any> {
 		this.props.onToggleFilter(itemParent, item);
 	}
 
-	public isSelectedItem = (item) =>
-		!!this.props.selectedItems.find((filter) => filter.value.value === item.value)
+	public isSelectedItem = (value) =>
+		!!this.props.selectedItems.find((filter) => filter.value.value === value)
 
-	public renderChildItem = (index, item) => renderWhenTrue(
+	public renderListParentItem = (index, item) => {
+		return (
+			<StyledListItem button onMouseEnter={() => this.showSubMenu(index)}>
+				<StyledItemText>
+					{item.label} <ArrowRight />
+				</StyledItemText>
+			</StyledListItem>
+		);
+	}
+
+	public onDateChange = (value, item, subItem) => {
+		this.setState({
+			[subItem.value]: value
+		}, () => {
+			subItem.date = value;
+			this.props.onToggleFilter(item, subItem);
+		});
+	}
+
+	public renderListChildItem = (index, item, subItem) => {
+		return (
+			<StyledListItem button onClick={() => this.toggleSelectItem(item, subItem)} key={`${subItem.label}-${index}`}>
+				<StyledItemText>
+					{subItem.label}
+					{item.type === dateType &&
+						<DatePicker value={this.state[subItem.value]} onChange={(value) => this.onDateChange(value, item, subItem)} />
+					}
+					{this.isSelectedItem(subItem.value) && <Check fontSize={'small'} />}
+				</StyledItemText>
+			</StyledListItem>
+		);
+	}
+
+	public renderChildItems = (index, item) => renderWhenTrue(
 		(
 			<ChildMenu>
 				<List>
-					{item.values.map((subItem) =>
-						(<MenuListItem
-								{...subItem}
-								key={subItem.label}
-								type={item.type}
-								onClick={() => this.toggleSelectItem(item, subItem)}
-								isSelected={this.isSelectedItem(subItem)}
-								child={true}
-							/>
-						))
-					}
+					{item.values.map((subItem) => this.renderListChildItem(index, item, subItem ))}
 				</List>
 			</ChildMenu>
 		)
@@ -94,18 +112,20 @@ export class FiltersMenu extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { items } = this.props;
-		console.log('items', items);
+
 		return (
-			<MenuList>
-			{
-				items.map((item, index) => (
-					<NestedWrapper key={index} onMouseLeave={this.hideSubMenu}>
-						<MenuListItem {...item} onMouseEnter={() => this.showSubMenu(index)} />
-						{this.renderChildItem(index, item)}
-					</NestedWrapper>
-				))
-			}
-			</MenuList>
+			<MuiPickersUtilsProvider utils={DateFnsUtils}>
+				<MenuList>
+				{
+					items.map((item, index) => (
+						<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
+							{this.renderListParentItem(index, item)}
+							{this.renderChildItems(index, item)}
+						</NestedWrapper>
+					))
+				}
+				</MenuList>
+			</MuiPickersUtilsProvider>
 		);
 	}
 }

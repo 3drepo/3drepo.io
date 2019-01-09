@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import List from '@material-ui/core/List';
 import { COLOR } from '../../../styles/colors';
 import ListItem from '@material-ui/core/ListItem';
-import Typography from '@material-ui/core/Typography';
 
 export const MenuList = styled(List)`
   background-color: ${COLOR.WHITE};
@@ -39,18 +38,17 @@ export const ChildMenu = styled.div`
   top: 0;
   z-index: 1;
   min-width: 120px;
-  max-width: 300px;
+  max-width: 400px;
+  width: 100%;
 `;
 
-export const StyledItemText = styled(Typography)`
-  && {
-    color: ${COLOR.BLACK};
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
-  }
+export const StyledItemText = styled.div`
+  color: ${COLOR.BLACK};
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
 `;
 
 export const StyledListItem = styled(ListItem)`

@@ -17,7 +17,8 @@
 
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import { omit } from 'lodash';
+import { omit, cloneDeep } from 'lodash';
+import * as dayjs from 'dayjs';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
@@ -29,6 +30,8 @@ import { FiltersMenu } from '../filtersMenu/filtersMenu.component';
 import {
 	Container, SelectedFilters, InputContainer, SuggestionsList, StyledTextField, StyledChip
 } from './filterPanel.styles';
+
+export const dateType = 'DATE';
 
 interface IProps {
 	filters: any[];
@@ -80,29 +83,51 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public onSelectFilter = (parent, child) => {
+	public onSelectFilter = (parent, child, founded = false) => {
 		const newSelectedFilter = {
 			label: parent.label,
 			type: parent.type,
 			value: {
 				label: child.label,
 				value: child.value
-			}
+			} as any
 		};
-		this.setState((prevState) => ({
-			selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
-		}), () => {
-			this.props.onChange(this.state.selectedFilters);
-		});
+
+		if (parent.type === dateType && child.date) {
+			newSelectedFilter.label = child.label;
+			newSelectedFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
+			if (!founded) {
+				this.setState((prevState) => ({
+					selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
+				}), () => {
+					this.props.onChange(this.state.selectedFilters);
+				});
+			} else {
+				const dateFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
+				const selectedFilters = cloneDeep(this.state.selectedFilters);
+				selectedFilters[dateFilterIndex].value.label = dayjs(child.date).format('DD/MM/YYYY');
+				this.setState(() => ({ selectedFilters }), () => {
+					this.props.onChange(this.state.selectedFilters);
+				});
+			}
+		}
+
+		if (!founded && parent.type !== dateType) {
+			this.setState((prevState) => ({
+				selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
+			}), () => {
+				this.props.onChange(this.state.selectedFilters);
+			});
+		}
 	}
 
 	public onToggleFilter = (parent, child) => {
 		const foundedFilter = this.state.selectedFilters.find((filter) => filter.value.value === child.value);
 
-		if (foundedFilter) {
+		if (foundedFilter && parent.type !== dateType) {
 			this.onDeselectFilter(foundedFilter);
 		} else {
-			this.onSelectFilter(parent, child);
+			this.onSelectFilter(parent, child, foundedFilter);
 		}
 	}
 
@@ -234,7 +259,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 							placeholder: 'Filter',
 							value,
 							onChange: this.onChange,
-							// onKeyPress: this.handleNewFilterSubmit,
 							inputRef: (node) => {
 								this.popperNode = node;
 							}
