@@ -250,6 +250,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 										strong 
 											| Type:
 											span.float-right #{issue.topic_type}
+									tr
+									td
+										strong 
+											| Due Date:
+											span.float-right #{reportValues.issueDate}
 
 					.row
 						.col.description
@@ -266,7 +271,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 													span.grey.float-right #{comment.created}
 											if comment.action
 												| #{comment.action.propertyText} changed from
-												i #{comment.action.from} 
+												i #{comment.action.from}
 												| to     
 												i #{comment.action.to}
 
