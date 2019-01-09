@@ -237,6 +237,7 @@
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
 		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
+		UNKNOWN_PAY_PLAN: { message: "Unknown paypal plan", status: 500},
 
 		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
 		DUP_JOB: {message: "Duplicate job id", status: 400},

@@ -130,11 +130,10 @@
 	});
 
 	schema.virtual("proRata").get(function() {
-		if(this.items.length > 0 && (this.items[0].amount - this.items[0].taxAmount).toFixed(2) === config.subscriptions.plans[this.items[0].name].price.toFixed(2)) {
-			return false;
-		}
-
-		return true;
+		const planInfo = config.subscriptions.plans[this.items[0]];
+		return !planInfo ||
+			!(this.items.length > 0 &&
+				(this.items[0].amount - this.items[0].taxAmount).toFixed(2) === planInfo.price.toFixed(2));
 	});
 
 	// schema.set('toObject', { virtuals: true, getter:true });
@@ -255,7 +254,16 @@
 	};
 
 	schema.statics.findByAccount = function (account) {
-		return this.find({ account }, {state: {"$in": [C.INV_PENDING, C.INV_COMPLETE] }}, { raw: 0, pdf: 0 }, { sort: { createdAt: -1 } });
+		const projection = {
+			createdAt: 1,
+			invoiceNo: 1,
+			createdAtDate: 1,
+			state: 1,
+			items: 1,
+			gateway: 1,
+			currency: 1
+		};
+		return this.find({ account }, {state: {"$in": [C.INV_PENDING, C.INV_COMPLETE] }}, projection, { sort: { createdAt: -1 } });
 	};
 
 	schema.statics.findByPaypalPaymentToken = function(account, paypalPaymentToken) {
@@ -364,17 +372,26 @@
 		});
 	};
 
-	schema.methods.generatePDF = function () {
-		// let cleaned = this.clean();
+	async function printPDF(html, pdfPath) {
+		const instance = await phantom.create();
+		const page = await instance.createPage();
+		await page.property("viewportSize", { width: 1200, height: 1553 });
+		await page.property("content", html);
+		await page.render(pdfPath);
+		await instance.exit();
+	}
 
-		let ph;
-		let page;
-		const htmlPath = `${config.invoice_dir}/${this.id}.html`;
-		const pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
+	schema.methods.generatePDF = function () {
 
 		if (!config.invoice_dir) {
 			return Promise.reject({ message: "invoice dir is not set in config file" });
 		}
+
+		if(this.items.length > 0 && (!config.subscriptions || !config.subscriptions.plans[this.items[0].name])) {
+			return Promise.reject(responseCodes.UNKNOWN_PAY_PLAN);
+		}
+
+		const pdfPath = `${config.invoice_dir}/${this.id}.pdf`;
 
 		return new Promise((resolve, reject) => {
 
@@ -392,39 +409,8 @@
 					resolve(html);
 				}
 			});
-
-		})
-			.then(html => {
-
-				return new Promise((resolve, reject) => {
-					fs.writeFile(htmlPath, html, { flag: "a+" }, err => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-				});
-
-			})
-			.then(() => {
-				return phantom.create();
-			})
-			.then(_ph => {
-				ph = _ph;
-				return ph.createPage();
-			})
-			.then(_page => {
-				page = _page;
-				page.property("viewportSize", { width: 1200, height: 1553 });
-				return page.open(`file://${htmlPath}`);
-			})
-			.then(() => {
-				return page.render(pdfPath);
-			})
-			.then(() => {
-				ph && ph.exit();
-
+		}).then((html) => {
+			return printPDF(html, pdfPath).then(() => {
 				const pdfRS = fs.createReadStream(pdfPath);
 				const bufs = [];
 
@@ -440,45 +426,28 @@
 						reject(err);
 					});
 				});
-			})
-			.then(pdf => {
-
-				fs.unlink(htmlPath, function (err) {
-					if (err) {
-						systemLogger.logError("error while deleting tmp invoice html file", {
-							message: err.message,
-							err: err,
-							file: htmlPath
-						});
-					} else {
-						systemLogger.logInfo("tmp html invoice deleted", {
-							file: htmlPath
-						});
-					}
-				});
-
-				fs.unlink(pdfPath, function (err) {
-					if (err) {
-						systemLogger.logError("error while deleting tmp invoice pdf file", {
-							message: err.message,
-							err: err,
-							file: pdfPath
-						});
-					} else {
-						systemLogger.logInfo("tmp pdf invoice deleted", {
-							file: pdfPath
-						});
-					}
-				});
-
-				return Promise.resolve(pdf);
-
-			})
-			.catch(err => {
-
-				ph && ph.exit();
-				return Promise.reject(err);
 			});
+
+		}).then(pdf => {
+
+			fs.unlink(pdfPath, function (err) {
+				if (err) {
+					systemLogger.logError("error while deleting tmp invoice pdf file", {
+						message: err.message,
+						err: err,
+						file: pdfPath
+					});
+				} else {
+					systemLogger.logInfo("tmp pdf invoice deleted", {
+						file: pdfPath
+					});
+				}
+			});
+			return pdf;
+
+		}).catch(err => {
+			return Promise.reject(err);
+		});
 
 	};
 

@@ -58,8 +58,6 @@
 				template = "refund.pug";
 			}
 
-			// console.log( invoice.toJSON());
-
 			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
 
 		}).catch(err => {
@@ -78,7 +76,6 @@
 			if(!invoice) {
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
-
 			return invoice.generatePDF();
 
 		}).then(pdf => {

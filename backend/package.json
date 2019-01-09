@@ -48,7 +48,7 @@
     "node-uuid": "1.4.7",
     "nodemailer": "2.3.2",
     "paypal-rest-sdk": "1.7.1",
-    "phantom": "4.0.5",
+    "phantom": "6.0.3",
     "pm2": "^2.9.1",
     "pug": "2.0.0-rc.4",
     "serialize-javascript": "1.4.0",
