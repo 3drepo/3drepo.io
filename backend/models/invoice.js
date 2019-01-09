@@ -255,13 +255,8 @@
 
 	schema.statics.findByAccount = function (account) {
 		const projection = {
-			createdAt: 1,
-			invoiceNo: 1,
-			createdAtDate: 1,
-			state: 1,
-			items: 1,
-			gateway: 1,
-			currency: 1
+			raw: 0,
+			pdf: 0
 		};
 		return this.find({ account }, {state: {"$in": [C.INV_PENDING, C.INV_COMPLETE] }}, projection, { sort: { createdAt: -1 } });
 	};
