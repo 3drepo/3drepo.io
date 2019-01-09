@@ -23,6 +23,10 @@ export const selectIsPending = createSelector(
 	selectViewpointsDomain, (state) => state.isPending
 );
 
-export const selectViewpointsItems = createSelector(
-	selectViewpointsDomain, (state) => state.items
+export const selectViewpointsList = createSelector(
+	selectViewpointsDomain, (state) => state.viewpointsList
+);
+
+export const selectNewViewpoint = createSelector(
+	selectViewpointsDomain, (state) => state.newViewpoint
 );

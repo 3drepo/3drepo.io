@@ -19,6 +19,9 @@ import { put, takeLatest, all } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
+import { ViewerActions } from '../viewer';
+import { DialogActions } from '../dialog';
+import { getScreenshot } from '../viewer/viewer.sagas';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -51,8 +54,8 @@ function defer() {
 
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
+		const screenshot = yield getScreenshot();
 		const viewpointDefer = defer();
-		const screenshotDefer = defer();
 
 		const ViewerService = yield getAngularService('ViewerService') as any;
 		yield ViewerService.getCurrentViewpoint({
@@ -60,39 +63,33 @@ export function* generateViewpointObject(teamspace, modelId, viewName) {
 			account: teamspace,
 			model: modelId
 		});
-		yield ViewerService.getScreenshot(screenshotDefer);
 
-		const result = yield all([
-			viewpointDefer.promise,
-			screenshotDefer.promise
-		]);
+		const {clippingPlanes, ...viewpoint} = yield viewpointDefer.promise;
 
 		const generatedObject = {
 			name: viewName,
 			screenshot: {
-				base64: result[1]
+				base64: screenshot,
+				thumbnailUrl: screenshot
 			},
-			viewpoint: {
-				position: result[0].position,
-				up: result[0].up,
-				look_at: result[0].look_at,
-				view_dir: result[0].view_dir,
-				right: result[0].right
-			},
-			clippingPlanes: result[0].clippingPlanes
+			viewpoint,
+			clippingPlanes
 		} as any;
+
 		return generatedObject;
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('generate', 'new viewpoint', error));
 	}
 }
 
-export function* createViewpoint({teamspace, modelId, viewpointName}) {
+export function* createViewpoint({teamspace, modelId, viewpoint}) {
 	try {
-		const view = yield generateViewpointObject(teamspace, modelId, viewpointName);
-		yield API.createModelViewpoint(teamspace, modelId, view);
+		const {data: {_id}} = yield API.createModelViewpoint(teamspace, modelId, viewpoint);
+		viewpoint._id = _id;
+
+		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('create', 'new viewpoint', error));
 	}
 }
 
@@ -100,7 +97,7 @@ export function* updateViewpoint({teamspace, modelId, viewpointId, newName}) {
 	try {
 		yield API.updateModelViewpoint(teamspace, modelId, viewpointId, newName);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('update', 'viewpoint', error));
 	}
 }
 
@@ -108,7 +105,7 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	try {
 		yield API.deleteModelViewpoint(teamspace, modelId, viewpointId);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('remove', 'viewpoint', error));
 	}
 }
 
@@ -166,7 +163,16 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 			}
 		}
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('show', 'viewpoint', error));
+	}
+}
+
+export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
+	try {
+		const view = yield generateViewpointObject(teamspace, modelId, viewpointName);
+		yield put(ViewpointsActions.setNewViewpoint(view));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint', error));
 	}
 }
 
@@ -178,4 +184,5 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
+	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);
 }

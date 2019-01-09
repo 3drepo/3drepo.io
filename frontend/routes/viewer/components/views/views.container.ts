@@ -19,22 +19,30 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect, addRouting } from '../../../../helpers/migration';
-import { ViewpointsActions, selectViewpointsItems, selectIsPending } from './../../../../modules/viewpoints';
+import {
+	ViewpointsActions,
+	selectViewpointsList,
+	selectIsPending,
+	selectNewViewpoint
+} from './../../../../modules/viewpoints';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
-	viewpoints: selectViewpointsItems,
+	viewpoints: selectViewpointsList,
+	newViewpoint: selectNewViewpoint,
 	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchViewpoints: ViewpointsActions.fetchViewpoints,
+	prepareNewViewpoint: ViewpointsActions.prepareNewViewpoint,
 	createViewpoint: ViewpointsActions.createViewpoint,
 	updateViewpoint: ViewpointsActions.updateViewpoint,
 	deleteViewpoint: ViewpointsActions.deleteViewpoint,
 	subscribeOnViewpointChanges: ViewpointsActions.subscribeOnViewpointChanges,
 	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges,
-	showViewpoint: ViewpointsActions.showViewpoint
+	showViewpoint: ViewpointsActions.showViewpoint,
+	setNewViewpoint: ViewpointsActions.setNewViewpoint
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Views)));

@@ -22,7 +22,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setPendingState: ['pendingState'],
 	fetchViewpoints: ['teamspace', 'modelId'],
 	fetchViewpointsSuccess: ['viewpoints'],
-	createViewpoint: ['teamspace', 'modelId', 'viewpointName'],
+	createViewpoint: ['teamspace', 'modelId', 'viewpoint'],
 	createViewpointSuccess: ['viewpoint'],
 	updateViewpoint: ['teamspace', 'modelId', 'viewpointId', 'newName'],
 	updateViewpointSuccess: ['viewpoint'],
@@ -30,11 +30,14 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	deleteViewpointSuccess: ['viewpointId'],
 	subscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
-	showViewpoint: ['teamspace', 'modelId', 'view']
+	showViewpoint: ['teamspace', 'modelId', 'view'],
+	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
+	setNewViewpoint: ['viewpoint']
 }, { prefix: 'VIEWPOINTS_' });
 
 export const INITIAL_STATE = {
-	items: [],
+	viewpointsList: [],
+	newViewpoint: null,
 	isPending: true
 };
 
@@ -42,31 +45,35 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
-const fetchViewpointsSuccess = (state = INITIAL_STATE, {viewpoints}) => {
-	return { ...state, items: viewpoints };
+const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints }) => {
+	return { ...state, viewpointsList: viewpoints };
 };
 
-const createViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
-	const items = cloneDeep(state.items);
-	const viewpoints = [...items, viewpoint ];
+const createViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
+	const viewpointsList = cloneDeep(state.viewpointsList);
+	const viewpoints = [...viewpointsList, viewpoint ];
 
-	return { ...state, items: viewpoints };
+	return { ...state, viewpointsList: viewpoints, newViewpoint: null };
 };
 
-const updateViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
-	const items = cloneDeep(state.items);
-	const updatedViewpointIndex = items.findIndex((item) => item._id === viewpoint._id);
-	const updatedItems = items;
+const updateViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
+	const viewpointsList = cloneDeep(state.viewpointsList);
+	const updatedViewpointIndex = viewpointsList.findIndex((item) => item._id === viewpoint._id);
+	const updatedItems = viewpointsList;
 
 	updatedItems[updatedViewpointIndex].name = viewpoint.name;
-	return { ...state, items: updatedItems };
+	return { ...state, viewpointsList: updatedItems };
 };
 
-const deleteViewpointSuccess = (state = INITIAL_STATE, {viewpointId}) => {
-	const items = cloneDeep(state.items);
-	const updatedItems = items.filter((item) => item._id !== viewpointId);
+const deleteViewpointSuccess = (state = INITIAL_STATE, { viewpointId }) => {
+	const viewpointsList = cloneDeep(state.viewpointsList);
+	const updatedItems = viewpointsList.filter((item) => item._id !== viewpointId);
 
-	return { ...state, items: updatedItems };
+	return { ...state, viewpointsList: updatedItems };
+};
+
+const setNewViewpoint = (state = INITIAL_STATE, { viewpoint }) => {
+	return { ...state, newViewpoint: viewpoint };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -74,5 +81,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS]: fetchViewpointsSuccess,
 	[ViewpointsTypes.CREATE_VIEWPOINT_SUCCESS]: createViewpointSuccess,
 	[ViewpointsTypes.UPDATE_VIEWPOINT_SUCCESS]: updateViewpointSuccess,
-	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess
+	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
+	[ViewpointsTypes.SET_NEW_VIEWPOINT]: setNewViewpoint
 });

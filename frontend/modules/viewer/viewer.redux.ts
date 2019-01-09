@@ -24,7 +24,8 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	addMapSource: ['source'],
 	removeMapSource: ['source'],
 	mapStart: [],
-	mapStop: []
+	mapStop: [],
+	getScreenshot: []
 }, { prefix: 'VIEWER_' });
 
 export const INITIAL_STATE = {};
