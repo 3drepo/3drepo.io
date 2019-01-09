@@ -36,20 +36,22 @@ interface IProps {
 	isPending: boolean;
 	location: any;
 	viewpoints: any[];
+	newViewpoint: any;
 	fetchViewpoints: (teamspace, modelId) => void;
-	createViewpoint: (teamspace, modelId, viewName) => void;
+	createViewpoint: (teamspace, modelId, view) => void;
+	prepareNewViewpoint: (teamspace, modelId, viewName) => void;
 	updateViewpoint: (teamspace, modelId, viewId, newName) => void;
 	deleteViewpoint: (teamspace, modelId, viewId) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	showViewpoint: (teamspace, modelId, view) => void;
+	setNewViewpoint: (view) => void;
 }
 
 interface IState {
 	viewpoints: any[];
 	editMode: boolean;
 	searchMode: boolean;
-	addedNewItem: boolean;
 	activeViewpointId: number;
 	teamspace: string;
 	modelId: string;
@@ -61,7 +63,6 @@ export class Views extends React.PureComponent<IProps, IState> {
 		viewpoints: [],
 		editMode: false,
 		searchMode: false,
-		addedNewItem: false,
 		activeViewpointId: null,
 		teamspace: '',
 		modelId: '',
@@ -87,31 +88,39 @@ export class Views extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No viewpoints matched</EmptyStateInfo>
 	));
 
+	public renderNewViewpoint = renderWhenTrue(() => (
+		<ViewItem
+			viewpoint={this.props.newViewpoint}
+			active={true}
+			editMode={true}
+			onCancelEditMode={this.handleCancelEditMode}
+			onSaveEdit={this.handleSave}
+			teamspace={this.state.teamspace}
+			modelId={this.state.modelId}
+		/>
+	));
+
 	public renderViewpoints = renderWhenTrue(() => {
 		const { activeViewpointId, viewpoints } = this.state;
 		return (
 			<ViewpointsList innerRef={this.listRef}>
-				{ viewpoints.map(
-						(viewpoint) => {
-							return (
-								<ViewItem
-									key={viewpoint._id}
-									viewpoint={viewpoint}
-									handleClick={this.handleViewpointItemClick(viewpoint)}
-									active={Number(activeViewpointId === viewpoint._id) as any}
-									editMode={this.state.editMode}
-									onCancelEditMode={this.handleCancelEditMode}
-									onOpenEditMode={this.handleOpenEditMode}
-									updateViewpoint={this.props.updateViewpoint}
-									deleteViewpoint={this.props.deleteViewpoint}
-									teamspace={this.state.teamspace}
-									modelId={this.state.modelId}
-									onSaveEdit={this.handleSaveEdit}
-								/>
-							);
-						}
-					)
+				{ viewpoints.map((viewpoint) =>  (
+						<ViewItem
+							key={viewpoint._id}
+							viewpoint={viewpoint}
+							handleClick={this.handleViewpointItemClick(viewpoint)}
+							active={(activeViewpointId === viewpoint._id) as any}
+							editMode={this.state.editMode}
+							onCancelEditMode={this.handleCancelEditMode}
+							onOpenEditMode={this.handleOpenEditMode}
+							onDelete={this.handleDelete(viewpoint._id)}
+							teamspace={this.state.teamspace}
+							modelId={this.state.modelId}
+							onSaveEdit={this.handleUpdate(viewpoint._id)}
+						/>
+					))
 				}
+				{this.renderNewViewpoint(this.props.newViewpoint)}
 			</ViewpointsList>
 		);
 	});
@@ -142,7 +151,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const { viewpoints } = this.props;
-		const { searchQuery, addedNewItem } = this.state;
+		const { searchQuery } = this.state;
 		const changes = {} as any;
 		const searchQueryChanged = prevState.searchQuery !== searchQuery;
 		const viewpointsChanged = viewpoints.length !== prevProps.viewpoints.length || viewpoints !== prevProps.viewpoints;
@@ -151,19 +160,13 @@ export class Views extends React.PureComponent<IProps, IState> {
 			changes.viewpoints = viewpoints.filter(
 				(viewpoint) => viewpoint.name.toLowerCase().indexOf(searchQuery) !== -1
 			);
-
-			if (addedNewItem && viewpoints.length > prevProps.viewpoints.length) {
-				changes.activeViewpointId = viewpoints[viewpoints.length - 1]._id;
-				const listRef = this.listRef.current.listRef;
-				this.setState({ editMode: true }, () => this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200));
-			}
 		}
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
 	}
 
-	public handleViewpointItemClick = (viewpoint) => (event) => {
+	public handleViewpointItemClick = (viewpoint) => () => {
 		if (!this.state.editMode) {
 			this.setState({
 				activeViewpointId: viewpoint._id
@@ -174,35 +177,30 @@ export class Views extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleSaveEdit = (viewpointId) => (values) => {
-		const { teamspace, modelId, addedNewItem } = this.state;
+	public handleUpdate = (viewpointId) => (values) => {
+		const { teamspace, modelId } = this.state;
 		this.props.updateViewpoint(teamspace, modelId, viewpointId, values.newName);
 		this.setState({ editMode: false });
-		if (addedNewItem) {
-			this.setState({
-				addedNewItem: false
-			});
-		}
+	}
+
+	public handleSave = () => {
+		const { teamspace, modelId } = this.state;
+		this.props.createViewpoint(teamspace, modelId, this.props.newViewpoint);
 	}
 
 	public handleAddViewpoint = () => {
 		const { teamspace, modelId } = this.state;
-		this.props.createViewpoint(teamspace, modelId, `View ${this.props.viewpoints.length + 1}`);
-		this.setState({ addedNewItem: true });
+		this.props.prepareNewViewpoint(teamspace, modelId, `View ${this.props.viewpoints.length + 1}`);
 	}
 
 	public handleOpenEditMode = () => this.setState({ editMode: true });
 
 	public handleCancelEditMode = () => {
-		if (this.state.addedNewItem) {
-			const { teamspace, modelId, activeViewpointId } = this.state;
-			this.props.deleteViewpoint(teamspace, modelId, activeViewpointId);
-
-			this.setState({
-				addedNewItem: false
-			});
+		if (this.props.newViewpoint) {
+			this.props.setNewViewpoint(null);
+		} else {
+			this.setState({ editMode: false });
 		}
-		this.setState({ editMode: false });
 	}
 
 	public handleOpenSearchMode = () => this.setState({ searchMode: true });
@@ -213,7 +211,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 			viewpoints: this.props.viewpoints
 		})
 
-	public handleDelete = (event, viewpointId) => {
+	public handleDelete = (viewpointId) => (event) => {
 		event.stopPropagation();
 		const { teamspace, modelId } = this.state;
 		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
@@ -248,7 +246,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 			<ViewerPanelButton
 				aria-label="Add view"
 				onClick={this.handleAddViewpoint}
-				disabled={this.state.editMode}
+				disabled={!!this.props.newViewpoint}
 				color="secondary"
 				variant="fab"
 			>

@@ -38,16 +38,15 @@ import {
 
 interface IProps {
 	viewpoint: any;
-	handleClick: (viewpoint) => void;
-	updateViewpoint: (teamspace, modelId, viewpointId, newName) => void;
-	deleteViewpoint: (teamspace, modelId, viewpointId) => void;
-	onCancelEditMode: () => void;
-	onOpenEditMode: () => void;
-	onSaveEdit: (viewpointId) => (values) => void;
 	active: boolean;
 	editMode: boolean;
 	teamspace: string;
 	modelId: string;
+	onCancelEditMode: () => void;
+	onSaveEdit: (values) => void;
+	onDelete?: (event) => void;
+	onOpenEditMode?: () => void;
+	handleClick?: (viewpoint) => void;
 }
 
 export class ViewItem extends React.PureComponent<IProps, any> {
@@ -61,14 +60,14 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		return (
 			<Formik
 				initialValues={{ newName: viewpoint.name }}
-				onSubmit={this.props.onSaveEdit(viewpoint._id)}>
+				onSubmit={this.props.onSaveEdit}>
 				<StyledForm>
 					<Field name="newName" render={({ field, form }) => (
 						<NewViewpointName
 							{...field}
 							error={Boolean(form.errors.name)}
 							helperText={form.errors.name}
-							label="New name"
+							label="View name"
 							autoFocus
 						/>
 					)} />
@@ -92,16 +91,10 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 			<Name>{viewpoint.name}</Name>
 			<IconsGroup>
 				<StyledEditIcon color="secondary" onClick={this.props.onOpenEditMode} />
-				<StyledDeleteIcon color="secondary" onClick={(event) => this.handleDelete(event, viewpoint._id)} />
+				<StyledDeleteIcon color="secondary" onClick={this.props.onDelete} />
 			</IconsGroup>
 		</NameRow>
 	))(this.props.active && !this.props.editMode)
-
-	public handleDelete = (event, viewpointId) => {
-		event.stopPropagation();
-		const { teamspace, modelId } = this.props;
-		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
-	}
 
 	public render() {
 		const { viewpoint, handleClick, active } = this.props;
@@ -109,9 +102,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		return (
 			<ViewpointItem
 				disableRipple
-
 				onClick={handleClick}
-				active={active}>
+				active={Number(active)}>
 
 				{this.renderScreenshot(viewpoint)}
 				{this.renderScreenshotPlaceholder(!viewpoint.screenshot.thumbnailUrl)}
