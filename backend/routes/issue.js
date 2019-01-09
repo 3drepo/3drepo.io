@@ -236,6 +236,14 @@ function findIssueById(req, res, next) {
 
 }
 
+/**
+ * 
+ * @param {Date} dateToFormat 
+ * @param {string} formatToUse
+ * 
+ * Format date by providing a date object 
+ * and required string format. 
+ */
 function formatDate(dateToFormat, formatToUse) {
 	return moment(dateToFormat).format(formatToUse);
 }
@@ -256,16 +264,20 @@ function renderIssuesHTML(req, res, next) {
 	reportValues.reportDate = reportDate;
 	reportValues.currentUser = currentUser;
 
-	ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
+	const modelName = ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
 		.then(setting => {
-			reportValues.modelName = setting.name;
+			 reportValues.modelName = setting.name;
+			 Promise.resolve();
 		});
 
-	User.findByUserName(req.session.user.username)
+	const username = User.findByUserName(req.session.user.username)
 		.then(username => {
 			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
 			reportValues.userCompany = username.customData.billing.billingInfo.company;
+			Promise.resolve();
 		});
+
+	const finaliseValues = Promise.all([modelName, username]);
 
 	const projection = {
 		extras: 0,
@@ -294,12 +306,13 @@ function renderIssuesHTML(req, res, next) {
 		for (let i = 0; i < issues.length; i++) {
 			if (issues[i].hasOwnProperty("comments")) {
 				for (let j = 0; j < issues[i].comments.length; j++) {
-					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
 					issues[i].comments[j].created = formatDate(issues[i].comments[j].created, "hh:mm, Do MMM YYYY");
 				}
 			}
 
-			const issueDate = moment(issues[i].created).format("Do MMM YYYY");
+			issues[i].due_date = formatDate(issues[i].due_date, "hh:mm, Do MMM YYYY");
+			
+			const issueDate = formatDate(issues[i].created, "hh:mm, Do MMM YYYY");
 			const currentRevision = issues[i].rev_id;
 
 			reportValues.issueDate = issueDate;
@@ -314,12 +327,16 @@ function renderIssuesHTML(req, res, next) {
 			}
 		}
 
-		res.render("issues.pug", {
-			issues : splitIssues,
-			reportValues : reportValues,
-			url: function (path) {
-				return config.apiAlgorithm.apiUrl(C.GET_API, path);
-			}
+		finaliseValues.then(()=> {
+			res.render("issues.pug", {
+				issues: splitIssues,
+				reportValues: reportValues,
+				url: function (path) {
+					return config.apiAlgorithm.apiUrl(C.GET_API, path);
+				}
+			});
+		}).catch((err) => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 
 	}).catch(err => {
