@@ -22,13 +22,22 @@ import * as dayjs from 'dayjs';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import CollapseIcon from '@material-ui/icons/ExpandMore';
+import ExpandIcon from '@material-ui/icons/ChevronRight';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { FiltersMenu } from '../filtersMenu/filtersMenu.component';
 import {
-	Container, SelectedFilters, InputContainer, SuggestionsList, StyledTextField, StyledChip
+	Container,
+	SelectedFilters,
+	InputContainer,
+	SuggestionsList,
+	StyledTextField,
+	StyledChip,
+	FiltersButton,
+	ButtonContainer
 } from './filterPanel.styles';
 
 export const dateType = 'DATE';
@@ -42,6 +51,7 @@ interface IState {
 	selectedFilters: any[];
 	value: any;
 	suggestions: any[];
+	filtersOpen: boolean;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -60,7 +70,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedFilters: [],
 		value: '',
-		suggestions: []
+		suggestions: [],
+		filtersOpen: false
 	};
 
 	private popperNode = null;
@@ -147,7 +158,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				type: filter.type,
 				value
 			};
-		})).flat(1)
+		})).flat(1).filter((suggestion) => suggestion.type !== dateType)
 
 	public getSuggestions = (value) => {
 		const inputValue = value.trim().toLowerCase();
@@ -229,12 +240,40 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public collapseFilters = () => {
+		this.setState({
+			filtersOpen: true
+		});
+	}
+
+	public expandFilters = () => {
+		this.setState({
+			filtersOpen: false
+		});
+	}
+
+	public renderFilterButton = () => {
+		if (this.state.filtersOpen) {
+			return(
+				<FiltersButton color="inherit" onClick={this.expandFilters}>
+					<ExpandIcon />
+				</FiltersButton>
+			);
+		} else {
+			return(
+				<FiltersButton color="inherit" onClick={this.collapseFilters}>
+					<CollapseIcon />
+				</FiltersButton>
+			);
+		}
+	}
+
 	public render() {
 		const { value, suggestions } = this.state;
 
 		return (
-			<Container>
-				<SelectedFilters>
+			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
+				<SelectedFilters empty={!this.state.selectedFilters.length}>
 					{ this.state.selectedFilters.map(
 							(filter, index) => (
 								<StyledChip
@@ -246,6 +285,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						)
 					}
 				</SelectedFilters>
+				{this.state.selectedFilters.length ? this.renderFilterButton() : null}
 
 				<InputContainer>
 					<Autosuggest
@@ -266,14 +306,17 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					<ButtonMenu
-						renderButton={MenuButton}
-						renderContent={this.renderFiltersMenu}
-						PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-						PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-						ButtonProps={{ disabled: false }}
-					/>
+					<ButtonContainer>
+						<ButtonMenu
+							renderButton={MenuButton}
+							renderContent={this.renderFiltersMenu}
+							PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+							PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+							ButtonProps={{ disabled: false }}
+						/>
+					</ButtonContainer>
 				</InputContainer>
+
 			</Container>
 		);
 	}

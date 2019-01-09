@@ -18,13 +18,16 @@
 import * as React from 'react';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { DatePicker } from 'material-ui-pickers';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import List from '@material-ui/core/List';
 import ArrowRight from '@material-ui/icons/ArrowRight';
+import Copy from '@material-ui/icons/FileCopy';
 import Check from '@material-ui/icons/Check';
 
-import { MenuList, NestedWrapper, ChildMenu, StyledItemText, StyledListItem } from './filtersMenu.styles';
+import {
+	MenuList, NestedWrapper, ChildMenu, StyledItemText, StyledListItem, StyledDatePicker, CopyItem, CopyText, MenuFooter
+} from './filtersMenu.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { dateType } from './../filterPanel/filterPanel.component';
 
@@ -35,11 +38,12 @@ interface IProps {
 }
 
 interface IState {
+	activeItem: any;
 	from: any;
 	to: any;
 }
 
-export class FiltersMenu extends React.PureComponent<IProps, any> {
+export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	public state = {
 		activeItem: null,
 		from: new Date(),
@@ -92,7 +96,8 @@ export class FiltersMenu extends React.PureComponent<IProps, any> {
 				<StyledItemText>
 					{subItem.label}
 					{item.type === dateType &&
-						<DatePicker value={this.state[subItem.value]} onChange={(value) => this.onDateChange(value, item, subItem)} />
+						<StyledDatePicker
+							value={this.state[subItem.value]} onChange={(value) => this.onDateChange(value, item, subItem)} />
 					}
 					{this.isSelectedItem(subItem.value) && <Check fontSize={'small'} />}
 				</StyledItemText>
@@ -116,14 +121,26 @@ export class FiltersMenu extends React.PureComponent<IProps, any> {
 		return (
 			<MuiPickersUtilsProvider utils={DateFnsUtils}>
 				<MenuList>
-				{
-					items.map((item, index) => (
-						<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
-							{this.renderListParentItem(index, item)}
-							{this.renderChildItems(index, item)}
-						</NestedWrapper>
-					))
-				}
+					{
+						items.map((item, index) => (
+							<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
+								{this.renderListParentItem(index, item)}
+								{this.renderChildItems(index, item)}
+							</NestedWrapper>
+						))
+					}
+					<MenuFooter>
+						<StyledListItem button disabled={!this.props.selectedItems.length}>
+							<StyledItemText>
+								<CopyToClipboard text={JSON.stringify(this.props.selectedItems)}>
+									<CopyItem>
+										<Copy fontSize={'small'} />
+										<CopyText>Copy filters</CopyText>
+									</CopyItem>
+								</CopyToClipboard>
+							</StyledItemText>
+						</StyledListItem>
+					</MenuFooter>
 				</MenuList>
 			</MuiPickersUtilsProvider>
 		);

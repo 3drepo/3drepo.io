@@ -20,32 +20,44 @@ import { COLOR } from './../../../styles/colors';
 import Popper from '@material-ui/core/Popper';
 import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import IconButton from '@material-ui/core/IconButton';
 
 export const Container = styled.div`
   background-color: ${COLOR.WHITE};
-  padding: 4px;
-`;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	padding: 0 5px;
+	height: ${(props: any) => props.filtersOpen ? '64px' : '100%'};
+` as any;
 
 export const SelectedFilters = styled.div`
   display: flex;
   margin: 10px 0;
   flex-wrap: wrap;
-`;
+	padding-right: 40px;
+	min-height: ${(props: any) => props.empty ? '0' : '50px'};
+` as any;
 
 export const InputContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  position: relative;
+  display: block;
+	justify-content: flex-end;
+	position: relative;
 
   .react-autosuggest__container {
     width: 100%;
+		height: 36px;
+    flex: 1;
+    position: absolute;
+    bottom: 0;
   }
 `;
 
 export const SuggestionsList = styled(Popper)`
-	z-index: 12323;
+	z-index: 1;
 	margin-top: -15px;
-  position: absolute;
 
 	.react-autosuggest__suggestions-list {
 		max-height: 250px;
@@ -55,7 +67,7 @@ export const SuggestionsList = styled(Popper)`
 
 	.react-autosuggest__suggestion {
 		list-style: none;
-		height: 62px;
+		height: 44px;
 		border-bottom: 1px solid ${COLOR.BLACK_6};
 		display: flex;
 		flex: 1;
@@ -63,6 +75,7 @@ export const SuggestionsList = styled(Popper)`
 	}
 
 	.react-autosuggest__suggestion > div {
+		font-size: 12px;
 		flex: 1;
   }
 `;
@@ -73,5 +86,25 @@ export const StyledTextField = styled(TextField)`
 `;
 
 export const StyledChip = styled(Chip)`
-  margin: 2px;
+  margin: 8px 3px;
+`;
+
+export const StyledButtonMenu = styled(ButtonMenu)`
+  position: absolute;
+	right: 0;
+`;
+
+export const FiltersButton = styled(IconButton)`
+	align-self: flex-end;
+
+	&& {
+		position: absolute;
+		top: 5px;
+	}
+`;
+
+export const ButtonContainer = styled.div`
+	display: flex;
+	width: 100%;
+	justify-content: flex-end;
 `;

@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import List from '@material-ui/core/List';
 import { COLOR } from '../../../styles/colors';
 import ListItem from '@material-ui/core/ListItem';
+import { DatePicker } from 'material-ui-pickers';
 
 export const MenuList = styled(List)`
   background-color: ${COLOR.WHITE};
@@ -37,13 +38,13 @@ export const ChildMenu = styled.div`
   left: 100%;
   top: 0;
   z-index: 1;
-  min-width: 120px;
+  min-width: 150px;
   max-width: 400px;
   width: 100%;
 `;
 
 export const StyledItemText = styled.div`
-  color: ${COLOR.BLACK};
+  color: ${COLOR.BLACK_60};
   font-size: 12px;
   display: flex;
   justify-content: space-between;
@@ -53,7 +54,32 @@ export const StyledItemText = styled.div`
 
 export const StyledListItem = styled(ListItem)`
   && {
-    padding: 2px 10px;
+    padding: 4px 10px;
     height: 30px;
   }
+`;
+
+export const StyledDatePicker = styled(DatePicker)`
+  && {
+    margin-left: 10px;
+  }
+
+  input {
+    font-size: 12px;
+  }
+`;
+
+export const CopyItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+`;
+
+export const CopyText = styled.span`
+  margin-left: 4px;
+`;
+
+export const MenuFooter = styled.div`
+  border-top: 1px solid ${COLOR.BLACK_40};
+  margin-top: 6px;
 `;
