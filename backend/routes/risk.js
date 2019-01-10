@@ -39,13 +39,13 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
-router.post("/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
-router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
+router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
-router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
-router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk);
+router.put("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
-router.delete("/risks/", middlewares.connectQueue, middlewares.issue.canCreate, deleteRisks);
+router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 function storeRisk(req, res, next) {
 

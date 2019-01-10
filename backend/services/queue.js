@@ -28,6 +28,7 @@
 	const shortid = require("shortid");
 	const systemLogger = require("../logger.js").systemLogger;
 	const Mailer = require("../mailer/mailer");
+	const config = require("../config");
 
 	function ImportQueue() {}
 
@@ -39,6 +40,21 @@
 	ImportQueue.prototype.connect = function (url, options) {
 		if (this.conn) {
 			return Promise.resolve();
+		}
+
+		if (!url) {
+			url = config.cn_queue.host;
+		}
+
+		if (!options) {
+			options = {
+				shared_storage: config.cn_queue.shared_storage,
+				logger: systemLogger,
+				callback_queue: config.cn_queue.callback_queue,
+				worker_queue: config.cn_queue.worker_queue,
+				model_queue: config.cn_queue.model_queue,
+				event_exchange: config.cn_queue.event_exchange
+			};
 		}
 
 		this.uid = shortid.generate();
@@ -352,24 +368,28 @@
 
 	ImportQueue.prototype.insertEventMessage = function (msg) {
 
-		if(!this.channel) {
-			return;
+		try {
+			return this.channel.assertExchange(this.eventExchange, "fanout", {
+				durable: true
+			})
+				.then(() => {
+					return this.channel.publish(
+						this.eventExchange,
+						"",
+						new Buffer.from(JSON.stringify(msg)), {
+							persistent: true
+						}
+					);
+				});
 		}
-
-		msg = JSON.stringify(msg);
-
-		return this.channel.assertExchange(this.eventExchange, "fanout", {
-			durable: true
-		})
-			.then(() => {
-				return this.channel.publish(
-					this.eventExchange,
-					"",
-					new Buffer.from(msg), {
-						persistent: true
-					}
-				);
+		catch(err) {
+			return this.connect().then(() => {
+				return this.insertEventMessage(msg);
+			}).catch((err) => {
+				systemLogger.logError("Error (insertEventQueue): " + err.message);
+				return Promise.resolve();
 			});
+		}
 	};
 
 	ImportQueue.prototype.consumeEventMessage = function (callback) {

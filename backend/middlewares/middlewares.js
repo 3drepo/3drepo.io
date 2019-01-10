@@ -114,16 +114,7 @@
 		const logger = require("../logger.js");
 		const systemLogger = logger.systemLogger;
 
-		return importQueue.connect(config.cn_queue.host, {
-
-			shared_storage: config.cn_queue.shared_storage,
-			logger: systemLogger,
-			callback_queue: config.cn_queue.callback_queue,
-			worker_queue: config.cn_queue.worker_queue,
-			model_queue: config.cn_queue.model_queue,
-			event_exchange: config.cn_queue.event_exchange
-
-		}).then(() => importQueue);
+		return importQueue.connect().then(() => importQueue);
 
 	}
 
