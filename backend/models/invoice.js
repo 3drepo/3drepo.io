@@ -380,10 +380,6 @@
 
 	schema.methods.generatePDF = function (user) {
 
-		if (!config.invoice_dir) {
-			return Promise.reject({ message: "invoice dir is not set in config file" });
-		}
-
 		if(this.items.length > 0 && (!config.subscriptions || !config.subscriptions.plans[this.items[0].name])) {
 			return Promise.reject(responseCodes.UNKNOWN_PAY_PLAN);
 		}
@@ -392,9 +388,9 @@
 
 			const useNonPublicPort = true;
 
-			let template = path.join(__dirname, "../../pug/invoice.pug");
+			let template = path.join(__dirname, "../../resources/pug/invoice.pug");
 			if (this.type === "refund") {
-				template = path.join(__dirname, "../../pug/refund.pug");
+				template = path.join(__dirname, "../../resources/pug/refund.pug");
 			}
 
 			pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort), user }, function (err, html) {
