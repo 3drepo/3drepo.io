@@ -16,9 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEmpty } from 'lodash';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { getDataFromPathname } from './../../viewer.helpers';
 
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
@@ -37,39 +35,30 @@ interface IProps {
 	location: any;
 	viewpoints: any[];
 	newViewpoint: any;
+	activeViewpointId: number;
+	searchEnabled: boolean;
+	searchQuery: string;
+	editMode: boolean;
+	teamspace: string;
+	modelId: string;
 	fetchViewpoints: (teamspace, modelId) => void;
 	createViewpoint: (teamspace, modelId, view) => void;
 	prepareNewViewpoint: (teamspace, modelId, viewName) => void;
 	updateViewpoint: (teamspace, modelId, viewId, newName) => void;
 	deleteViewpoint: (teamspace, modelId, viewId) => void;
+	showViewpoint: (teamspace, modelId, view) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
-	showViewpoint: (teamspace, modelId, view) => void;
-	setNewViewpoint: (view) => void;
+	setState: (componentState) => void;
 }
 
-interface IState {
-	viewpoints: any[];
-	editMode: boolean;
-	searchMode: boolean;
-	activeViewpointId: number;
-	teamspace: string;
-	modelId: string;
-	searchQuery: string;
-}
-
-export class Views extends React.PureComponent<IProps, IState> {
-	public state = {
-		viewpoints: [],
-		editMode: false,
-		searchMode: false,
-		activeViewpointId: null,
-		teamspace: '',
-		modelId: '',
-		searchQuery: ''
-	};
-
+export class Views extends React.PureComponent<IProps, any> {
 	public listRef = React.createRef<any>();
+
+	get footerText() {
+		const { viewpoints } = this.props;
+		return viewpoints.length ? `${viewpoints.length} views displayed` : 'Add new viewpoint';
+	}
 
 	public renderSearch = renderWhenTrue(() => (
 		<SearchField
@@ -91,35 +80,37 @@ export class Views extends React.PureComponent<IProps, IState> {
 	public renderNewViewpoint = renderWhenTrue(() => (
 		<ViewItem
 			viewpoint={this.props.newViewpoint}
-			active={true}
+			active={!this.props.activeViewpointId}
 			editMode={true}
 			onCancelEditMode={this.handleCancelEditMode}
 			onSaveEdit={this.handleSave}
-			teamspace={this.state.teamspace}
-			modelId={this.state.modelId}
+			teamspace={this.props.teamspace}
+			modelId={this.props.modelId}
 		/>
 	));
 
 	public renderViewpoints = renderWhenTrue(() => {
-		const { activeViewpointId, viewpoints } = this.state;
+		const { viewpoints, editMode, teamspace, modelId } = this.props;
+		const { activeViewpointId } = this.props;
+		const Viewpoints = viewpoints.map((viewpoint) => (
+			<ViewItem
+				key={viewpoint._id}
+				viewpoint={viewpoint}
+				handleClick={this.handleViewpointItemClick(viewpoint)}
+				active={(activeViewpointId === viewpoint._id) as any}
+				editMode={editMode}
+				onCancelEditMode={this.handleCancelEditMode}
+				onOpenEditMode={this.handleOpenEditMode}
+				onDelete={this.handleDelete(viewpoint._id)}
+				teamspace={teamspace}
+				modelId={modelId}
+				onSaveEdit={this.handleUpdate(viewpoint._id)}
+			/>
+		));
+
 		return (
 			<ViewpointsList innerRef={this.listRef}>
-				{ viewpoints.map((viewpoint) =>  (
-						<ViewItem
-							key={viewpoint._id}
-							viewpoint={viewpoint}
-							handleClick={this.handleViewpointItemClick(viewpoint)}
-							active={(activeViewpointId === viewpoint._id) as any}
-							editMode={this.state.editMode}
-							onCancelEditMode={this.handleCancelEditMode}
-							onOpenEditMode={this.handleOpenEditMode}
-							onDelete={this.handleDelete(viewpoint._id)}
-							teamspace={this.state.teamspace}
-							modelId={this.state.modelId}
-							onSaveEdit={this.handleUpdate(viewpoint._id)}
-						/>
-					))
-				}
+				{Viewpoints}
 				{this.renderNewViewpoint(this.props.newViewpoint)}
 			</ViewpointsList>
 		);
@@ -130,119 +121,86 @@ export class Views extends React.PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		const { location, viewpoints, fetchViewpoints, subscribeOnViewpointChanges } = this.props;
-		const { teamspace, modelId } = getDataFromPathname(location.pathname);
+		const { viewpoints, fetchViewpoints, subscribeOnViewpointChanges, teamspace, modelId } = this.props;
 		const loadedViewpoints = Boolean(viewpoints.length);
 
-		if (loadedViewpoints) {
-			this.setState({ viewpoints });
-		} else {
+		if (!loadedViewpoints) {
 			fetchViewpoints(teamspace, modelId);
 		}
 
 		subscribeOnViewpointChanges(teamspace, modelId);
-		this.setState({ teamspace, modelId });
 	}
 
 	public componentWillUnmount() {
-		const { teamspace, modelId } = this.state;
+		const { teamspace, modelId } = this.props;
 		this.props.unsubscribeOnViewpointChanges(teamspace, modelId);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
-		const { viewpoints } = this.props;
-		const { searchQuery } = this.state;
-		const changes = {} as any;
-		const searchQueryChanged = prevState.searchQuery !== searchQuery;
-		const viewpointsChanged = viewpoints.length !== prevProps.viewpoints.length || viewpoints !== prevProps.viewpoints;
-
-		if (viewpointsChanged || searchQueryChanged) {
-			changes.viewpoints = viewpoints.filter(
-				(viewpoint) => viewpoint.name.toLowerCase().indexOf(searchQuery) !== -1
-			);
-		}
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
-	}
-
 	public handleViewpointItemClick = (viewpoint) => () => {
-		if (!this.state.editMode) {
-			this.setState({
-				activeViewpointId: viewpoint._id
-			}, () => {
-				const { teamspace, modelId } = this.state;
-				this.props.showViewpoint(teamspace, modelId, viewpoint);
-			});
+		if (!this.props.editMode) {
+			const { teamspace, modelId } = this.props;
+			this.props.showViewpoint(teamspace, modelId, viewpoint);
 		}
 	}
 
 	public handleUpdate = (viewpointId) => (values) => {
-		const { teamspace, modelId } = this.state;
-		this.props.updateViewpoint(teamspace, modelId, viewpointId, values.newName);
-		this.setState({ editMode: false });
+		const { teamspace, modelId, updateViewpoint, setState } = this.props;
+		updateViewpoint(teamspace, modelId, viewpointId, values.newName);
+		setState({ editMode: false });
 	}
 
 	public handleSave = () => {
-		const { teamspace, modelId } = this.state;
-		this.props.createViewpoint(teamspace, modelId, this.props.newViewpoint);
+		const { teamspace, modelId, createViewpoint } = this.props;
+		createViewpoint(teamspace, modelId, this.props.newViewpoint);
 	}
 
 	public handleAddViewpoint = () => {
-		const { teamspace, modelId } = this.state;
-		this.props.prepareNewViewpoint(teamspace, modelId, `View ${this.props.viewpoints.length + 1}`);
+		const { teamspace, modelId, prepareNewViewpoint, viewpoints } = this.props;
+		prepareNewViewpoint(teamspace, modelId, `View ${viewpoints.length + 1}`);
 	}
 
-	public handleOpenEditMode = () => this.setState({ editMode: true });
+	public handleOpenEditMode = () => this.props.setState({ editMode: true });
 
 	public handleCancelEditMode = () => {
-		if (this.props.newViewpoint) {
-			this.props.setNewViewpoint(null);
-		} else {
-			this.setState({ editMode: false });
-		}
+		this.props.setState({
+			editMode: false,
+			newViewpoint: null
+		});
 	}
 
-	public handleOpenSearchMode = () => this.setState({ searchMode: true });
+	public handleOpenSearchMode = () => this.props.setState({ searchEnabled: true });
 
 	public handleCloseSearchMode = () =>
-		this.setState({
-			searchMode: false,
-			viewpoints: this.props.viewpoints
+		this.props.setState({
+			searchEnabled: false,
+			searchQuery: ''
 		})
 
 	public handleDelete = (viewpointId) => (event) => {
 		event.stopPropagation();
-		const { teamspace, modelId } = this.state;
+		const { teamspace, modelId } = this.props;
 		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
 	}
 
 	public handleSearchChange = (event) => {
 		const searchQuery = event.currentTarget.value.toLowerCase();
-		this.setState({ searchQuery });
+		this.props.setState({ searchQuery });
 	}
 
 	public getTitleIcon = () => <PhotoCameraIcon />;
 
-	public getActions = () => [ { Button: this.getSearchButton } ];
+	public getActions = () => [{ Button: this.getSearchButton }];
 
 	public getSearchButton = () => {
-		if (this.state.searchMode) {
-			return (
-				<IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>
-			);
-		} else {
-			return (
-				<IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>
-			);
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
 	public renderFooterContent = () => (
 		<ViewerPanelFooter alignItems="center">
-			<ViewsCountInfo>
-				{this.state.viewpoints.length ? `${this.state.viewpoints.length} views displayed` : 'Add new viewpoint'}
-			</ViewsCountInfo>
+			<ViewsCountInfo>{this.footerText}</ViewsCountInfo>
 			<ViewerPanelButton
 				aria-label="Add view"
 				onClick={this.handleAddViewpoint}
@@ -256,7 +214,7 @@ export class Views extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { searchMode, viewpoints } = this.state;
+		const { searchEnabled, viewpoints } = this.props;
 		const hasViewpoints = Boolean(viewpoints.length);
 
 		return (
@@ -267,9 +225,9 @@ export class Views extends React.PureComponent<IProps, IState> {
 				pending={this.props.isPending}
 			>
 				<Container className="height-catcher">
-					{this.renderEmptyState(!hasViewpoints && !searchMode)}
-					{this.renderSearch(searchMode)}
-					{this.renderNotFound(searchMode && !viewpoints.length)}
+					{this.renderEmptyState(!hasViewpoints && !searchEnabled)}
+					{this.renderSearch(searchEnabled)}
+					{this.renderNotFound(searchEnabled && !viewpoints.length)}
 					{this.renderViewpoints(hasViewpoints)}
 					{this.renderFooterContent()}
 				</Container>

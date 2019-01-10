@@ -11,7 +11,6 @@ import staticPagesSaga from './staticPages/staticPages.sagas';
 import gisSaga from './gis/gis.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
-import viewsSaga from './views/views.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -27,7 +26,6 @@ export default function* rootSaga() {
 		fork(staticPagesSaga),
 		fork(gisSaga),
 		fork(viewerSaga),
-		fork(viewpointsSaga),
-		fork(viewsSaga)// <-- INJECT MODULE SAGA -->
+		fork(viewpointsSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

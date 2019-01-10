@@ -36,5 +36,5 @@ angular
 	.component('signUp', wrap(SignUp, ['onLogoClick']))
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('viewerPanel', wrap(ViewerPanel))
-	.component('gis', wrap(Gis, ['maxHeight']))
-	.component('views', wrap(Views));
+	.component('gis', wrap(Gis))
+	.component('views', wrap(Views, ['teamspace', 'modelId']));

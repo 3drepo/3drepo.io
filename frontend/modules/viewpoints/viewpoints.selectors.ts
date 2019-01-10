@@ -27,6 +27,33 @@ export const selectViewpointsList = createSelector(
 	selectViewpointsDomain, (state) => state.viewpointsList
 );
 
+export const selectFilteredViewpointsList = createSelector(
+	selectViewpointsDomain, (state) => {
+		const { viewpointsList, searchQuery } = state;
+		return viewpointsList;
+	}
+);
+
+export const selectComponentState = createSelector(
+	selectViewpointsDomain, (state) => state.componentState
+);
+
 export const selectNewViewpoint = createSelector(
-	selectViewpointsDomain, (state) => state.newViewpoint
+	selectComponentState, (state) => state.newViewpoint
+);
+
+export const selectActiveViewpoint = createSelector(
+	selectComponentState, (state) => state.activeViewpointId
+);
+
+export const selectSearchQuery = createSelector(
+	selectComponentState, (state) => state.searchQuery
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectEditMode = createSelector(
+	selectComponentState, (state) => state.editMode
 );
