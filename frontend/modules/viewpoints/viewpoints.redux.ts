@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, keyBy } from 'lodash';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],
@@ -40,7 +40,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 
 export const INITIAL_STATE = {
 	isPending: true,
-	viewpointsList: [],
+	viewpointsMap: [],
 	componentState: {}
 };
 
@@ -48,35 +48,35 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
-const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints }) => {
-	return { ...state, viewpointsList: viewpoints };
+const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints = [] }) => {
+	const viewpointsMap = keyBy(viewpoints, '_id');
+	return { ...state, viewpointsMap };
 };
 
 const createViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
-	const viewpointsList = cloneDeep(state.viewpointsList);
-	const viewpoints = [...viewpointsList, viewpoint ];
+	const viewpointsMap = cloneDeep(state.viewpointsMap);
+	viewpointsMap[viewpoint._id] = viewpoint;
+
 	const componentState = {
 		...state.componentState,
 		newViewpoint: null
 	};
 
-	return { ...state, viewpointsList: viewpoints, componentState };
+	return { ...state, viewpointsMap, componentState };
 };
 
 const updateViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
-	const viewpointsList = cloneDeep(state.viewpointsList);
-	const updatedViewpointIndex = viewpointsList.findIndex((item) => item._id === viewpoint._id);
-	const updatedItems = viewpointsList;
+	const viewpointsMap = cloneDeep(state.viewpointsMap);
+	viewpointsMap[viewpoint._id].name = viewpoint.name;
 
-	updatedItems[updatedViewpointIndex].name = viewpoint.name;
-	return { ...state, viewpointsList: updatedItems };
+	return { ...state, viewpointsMap };
 };
 
 const deleteViewpointSuccess = (state = INITIAL_STATE, { viewpointId }) => {
-	const viewpointsList = cloneDeep(state.viewpointsList);
-	const updatedItems = viewpointsList.filter((item) => item._id !== viewpointId);
+	const viewpointsMap = cloneDeep(state.viewpointsMap);
+	delete viewpointsMap[viewpointId];
 
-	return { ...state, viewpointsList: updatedItems };
+	return { ...state, viewpointsMap };
 };
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {

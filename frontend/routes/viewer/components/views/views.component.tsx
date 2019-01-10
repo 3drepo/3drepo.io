@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { isEqual } from 'lodash';
 
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
@@ -24,15 +24,14 @@ import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/Add';
 
-import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-
+import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
 
 interface IProps {
 	isPending: boolean;
-	location: any;
 	viewpoints: any[];
 	newViewpoint: any;
 	activeViewpointId: number;
@@ -53,17 +52,26 @@ interface IProps {
 }
 
 export class Views extends React.PureComponent<IProps, any> {
+	public state = {
+		filteredViewpoints: []
+	};
+
 	public listRef = React.createRef<any>();
 
 	get footerText() {
-		const { viewpoints } = this.props;
+		const { searchEnabled, viewpoints } = this.props;
+		const { filteredViewpoints } = this.state;
+
+		if (searchEnabled) {
+			return `${filteredViewpoints.length} views found`;
+		}
 		return viewpoints.length ? `${viewpoints.length} views displayed` : 'Add new viewpoint';
 	}
 
 	public renderSearch = renderWhenTrue(() => (
 		<SearchField
 			placeholder="Search viewpoint..."
-			onChange={this.handleSearchChange}
+			onChange={this.handleSearchQueryChange}
 			autoFocus
 			inputProps={{
 				style: {
@@ -90,9 +98,11 @@ export class Views extends React.PureComponent<IProps, any> {
 	));
 
 	public renderViewpoints = renderWhenTrue(() => {
-		const { viewpoints, editMode, teamspace, modelId } = this.props;
+		const { editMode, teamspace, modelId } = this.props;
+		const { filteredViewpoints } = this.state;
+
 		const { activeViewpointId } = this.props;
-		const Viewpoints = viewpoints.map((viewpoint) => (
+		const Viewpoints = filteredViewpoints.map((viewpoint) => (
 			<ViewItem
 				key={viewpoint._id}
 				viewpoint={viewpoint}
@@ -122,13 +132,21 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		const { viewpoints, fetchViewpoints, subscribeOnViewpointChanges, teamspace, modelId } = this.props;
-		const loadedViewpoints = Boolean(viewpoints.length);
 
-		if (!loadedViewpoints) {
+		if (!viewpoints.length) {
 			fetchViewpoints(teamspace, modelId);
+		} else {
+			this.setFilteredViewpoints();
 		}
 
 		subscribeOnViewpointChanges(teamspace, modelId);
+	}
+
+	public componentDidUpdate(prevProps) {
+		const { viewpoints, searchQuery } = this.props;
+		if (prevProps.searchQuery !== searchQuery || !isEqual(prevProps.viewpoints, viewpoints)) {
+			this.setFilteredViewpoints();
+		}
 	}
 
 	public componentWillUnmount() {
@@ -144,9 +162,8 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public handleUpdate = (viewpointId) => (values) => {
-		const { teamspace, modelId, updateViewpoint, setState } = this.props;
+		const { teamspace, modelId, updateViewpoint } = this.props;
 		updateViewpoint(teamspace, modelId, viewpointId, values.newName);
-		setState({ editMode: false });
 	}
 
 	public handleSave = () => {
@@ -182,9 +199,18 @@ export class Views extends React.PureComponent<IProps, any> {
 		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
 	}
 
-	public handleSearchChange = (event) => {
+	public handleSearchQueryChange = (event) => {
 		const searchQuery = event.currentTarget.value.toLowerCase();
 		this.props.setState({ searchQuery });
+	}
+
+	public setFilteredViewpoints = () => {
+		const { viewpoints, searchQuery, searchEnabled } = this.props;
+		const filteredViewpoints = searchEnabled ? viewpoints.filter(({ name }) => {
+			return name.toLowerCase().includes(searchQuery.toLowerCase());
+		}) : viewpoints;
+
+		this.setState({ filteredViewpoints });
 	}
 
 	public getTitleIcon = () => <PhotoCameraIcon />;
@@ -216,6 +242,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public render() {
 		const { searchEnabled, viewpoints } = this.props;
 		const hasViewpoints = Boolean(viewpoints.length);
+		const { filteredViewpoints } = this.state;
 
 		return (
 			<ViewerPanel
@@ -227,7 +254,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				<Container className="height-catcher">
 					{this.renderEmptyState(!hasViewpoints && !searchEnabled)}
 					{this.renderSearch(searchEnabled)}
-					{this.renderNotFound(searchEnabled && !viewpoints.length)}
+					{this.renderNotFound(searchEnabled && !filteredViewpoints.length)}
 					{this.renderViewpoints(hasViewpoints)}
 					{this.renderFooterContent()}
 				</Container>

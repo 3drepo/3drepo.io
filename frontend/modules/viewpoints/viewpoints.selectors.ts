@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { createSelector } from 'reselect';
+import { values } from 'lodash';
 
 export const selectViewpointsDomain = (state) => Object.assign({}, state.viewpoints);
 
@@ -24,14 +24,7 @@ export const selectIsPending = createSelector(
 );
 
 export const selectViewpointsList = createSelector(
-	selectViewpointsDomain, (state) => state.viewpointsList
-);
-
-export const selectFilteredViewpointsList = createSelector(
-	selectViewpointsDomain, (state) => {
-		const { viewpointsList, searchQuery } = state;
-		return viewpointsList;
-	}
+	selectViewpointsDomain, (state) => values(state.viewpointsMap)
 );
 
 export const selectComponentState = createSelector(
@@ -47,7 +40,7 @@ export const selectActiveViewpoint = createSelector(
 );
 
 export const selectSearchQuery = createSelector(
-	selectComponentState, (state) => state.searchQuery
+	selectComponentState, (state) => state.searchQuery || ''
 );
 
 export const selectSearchEnabled = createSelector(

@@ -23,15 +23,21 @@ import {
 	selectIsPending,
 	selectNewViewpoint,
 	selectActiveViewpoint,
-	selectFilteredViewpointsList
+	selectViewpointsList,
+	selectSearchQuery,
+	selectSearchEnabled,
+	selectEditMode
 } from './../../../../modules/viewpoints';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
-	viewpoints: selectFilteredViewpointsList,
+	viewpoints: selectViewpointsList,
 	newViewpoint: selectNewViewpoint,
 	activeViewpointId: selectActiveViewpoint,
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	editMode: selectEditMode,
+	searchQuery: selectSearchQuery,
+	searchEnabled: selectSearchEnabled
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
