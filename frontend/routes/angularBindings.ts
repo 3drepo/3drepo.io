@@ -37,5 +37,5 @@ angular
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('passwordChange', wrap(PasswordChange))
 	.component('viewerPanel', wrap(ViewerPanel))
-	.component('gis', wrap(Gis, ['maxHeight']))
-	.component('views', wrap(Views));
+	.component('gis', wrap(Gis))
+	.component('views', wrap(Views, ['teamspace', 'modelId']));

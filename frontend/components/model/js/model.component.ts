@@ -170,7 +170,6 @@ class ModelController implements ng.IController {
 	}
 
 	public setupModelInfo() {
-
 		this.RevisionsService.listAll(this.account, this.model);
 
 		this.loadModelSettings().then(() => {

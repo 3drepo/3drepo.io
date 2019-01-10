@@ -142,6 +142,8 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 
 export function* showViewpoint({ teamspace, modelId, view }) {
 	try {
+		yield put(ViewpointsActions.setComponentState({ activeViewpointId: view._id }));
+
 		const ViewerService = yield getAngularService('ViewerService') as any;
 
 		if (view) {
@@ -163,14 +165,15 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 			}
 		}
 	} catch (error) {
+		yield put(ViewpointsActions.setComponentState({ activeViewpointId: null }));
 		yield put(DialogActions.showErrorDialog('show', 'viewpoint', error));
 	}
 }
 
 export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	try {
-		const view = yield generateViewpointObject(teamspace, modelId, viewpointName);
-		yield put(ViewpointsActions.setNewViewpoint(view));
+		const newViewpoint = yield generateViewpointObject(teamspace, modelId, viewpointName);
+		yield put(ViewpointsActions.setComponentState({ newViewpoint }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint', error));
 	}

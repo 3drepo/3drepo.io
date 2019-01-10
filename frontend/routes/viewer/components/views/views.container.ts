@@ -15,21 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 import {
 	ViewpointsActions,
-	selectViewpointsList,
 	selectIsPending,
-	selectNewViewpoint
+	selectNewViewpoint,
+	selectActiveViewpoint,
+	selectFilteredViewpointsList
 } from './../../../../modules/viewpoints';
 import { Views } from './views.component';
 
 const mapStateToProps = createStructuredSelector({
-	viewpoints: selectViewpointsList,
+	viewpoints: selectFilteredViewpointsList,
 	newViewpoint: selectNewViewpoint,
+	activeViewpointId: selectActiveViewpoint,
 	isPending: selectIsPending
 });
 
@@ -42,7 +43,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	subscribeOnViewpointChanges: ViewpointsActions.subscribeOnViewpointChanges,
 	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges,
 	showViewpoint: ViewpointsActions.showViewpoint,
-	setNewViewpoint: ViewpointsActions.setNewViewpoint
+	setNewViewpoint: ViewpointsActions.setNewViewpoint,
+	setSearchQuery: ViewpointsActions.setSearchQuery,
+	setState: ViewpointsActions.setComponentState
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Views)));
+export default connect(mapStateToProps, mapDispatchToProps)(Views);

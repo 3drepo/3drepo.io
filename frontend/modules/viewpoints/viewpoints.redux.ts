@@ -32,13 +32,16 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	showViewpoint: ['teamspace', 'modelId', 'view'],
 	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
-	setNewViewpoint: ['viewpoint']
+	setNewViewpoint: ['newViewpoint'],
+	setActiveViewpoint: ['activeViewpointId'],
+	setSearchQuery: ['searchQuery'],
+	setComponentState: ['componentState']
 }, { prefix: 'VIEWPOINTS_' });
 
 export const INITIAL_STATE = {
+	isPending: true,
 	viewpointsList: [],
-	newViewpoint: null,
-	isPending: true
+	componentState: {}
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
@@ -52,8 +55,12 @@ const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints }) => {
 const createViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
 	const viewpointsList = cloneDeep(state.viewpointsList);
 	const viewpoints = [...viewpointsList, viewpoint ];
+	const componentState = {
+		...state.componentState,
+		newViewpoint: null
+	};
 
-	return { ...state, viewpointsList: viewpoints, newViewpoint: null };
+	return { ...state, viewpointsList: viewpoints, componentState };
 };
 
 const updateViewpointSuccess = (state = INITIAL_STATE, { viewpoint }) => {
@@ -72,8 +79,8 @@ const deleteViewpointSuccess = (state = INITIAL_STATE, { viewpointId }) => {
 	return { ...state, viewpointsList: updatedItems };
 };
 
-const setNewViewpoint = (state = INITIAL_STATE, { viewpoint }) => {
-	return { ...state, newViewpoint: viewpoint };
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: {...state.componentState, ...componentState} };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -82,5 +89,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.CREATE_VIEWPOINT_SUCCESS]: createViewpointSuccess,
 	[ViewpointsTypes.UPDATE_VIEWPOINT_SUCCESS]: updateViewpointSuccess,
 	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
-	[ViewpointsTypes.SET_NEW_VIEWPOINT]: setNewViewpoint
+	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState
 });
