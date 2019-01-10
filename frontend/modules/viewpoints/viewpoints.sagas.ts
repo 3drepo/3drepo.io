@@ -96,6 +96,10 @@ export function* createViewpoint({teamspace, modelId, viewpoint}) {
 export function* updateViewpoint({teamspace, modelId, viewpointId, newName}) {
 	try {
 		yield API.updateModelViewpoint(teamspace, modelId, viewpointId, newName);
+
+		const updatedView = { _id: viewpointId, name: newName };
+		yield put(ViewpointsActions.updateViewpointSuccess(updatedView));
+		yield put(ViewpointsActions.setComponentState({ editMode: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'viewpoint', error));
 	}
