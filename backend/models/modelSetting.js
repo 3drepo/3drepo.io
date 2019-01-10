@@ -312,6 +312,7 @@ schema.statics.getModelsName = function(teamSpaces) {
 		})
 	).then((modelData)=> modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
 };
+
 const ModelSetting = ModelFactory.createClass(
 	"ModelSetting",
 	schema,
