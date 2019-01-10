@@ -111,9 +111,6 @@
 	function createQueueInstance() {
 
 		// init ampq and import queue object
-		const logger = require("../logger.js");
-		const systemLogger = logger.systemLogger;
-
 		return importQueue.connect().then(() => importQueue);
 
 	}

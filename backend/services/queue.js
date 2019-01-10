@@ -381,12 +381,11 @@
 						}
 					);
 				});
-		}
-		catch(err) {
+		} catch(err) {
 			return this.connect().then(() => {
 				return this.insertEventMessage(msg);
-			}).catch((err) => {
-				systemLogger.logError("Error (insertEventQueue): " + err.message);
+			}).catch((e) => {
+				systemLogger.logError("Error (insertEventQueue): " + e.message);
 				return Promise.resolve();
 			});
 		}
