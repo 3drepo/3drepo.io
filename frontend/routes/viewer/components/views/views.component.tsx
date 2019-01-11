@@ -168,9 +168,10 @@ export class Views extends React.PureComponent<IProps, any> {
 		updateViewpoint(teamspace, modelId, viewpointId, values.newName);
 	}
 
-	public handleSave = () => {
-		const { teamspace, modelId, createViewpoint } = this.props;
-		createViewpoint(teamspace, modelId, this.props.newViewpoint);
+	public handleSave = ({ newName }) => {
+		const { teamspace, modelId, createViewpoint, newViewpoint } = this.props;
+		newViewpoint.name = newName;
+		createViewpoint(teamspace, modelId, newViewpoint);
 	}
 
 	public handleAddViewpoint = () => {
