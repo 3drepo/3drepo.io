@@ -493,8 +493,8 @@ describe("Chat service", function () {
 
 				if (receivedNotifications.length == 2){
 					socket.off(eventName);
-					const types = receivedNotifications.map(n => n.type);
-					expect(types).to.deep.equal(["MODEL_UPDATED_FAILED", "MODEL_UPDATED"]);
+					const types = receivedNotifications.map(n => n.type).sort();
+					expect(types).to.deep.equal([ "MODEL_UPDATED","MODEL_UPDATED_FAILED"]);
 					bouncerHelper.stopBouncerWorker();
 					done();
 				}
