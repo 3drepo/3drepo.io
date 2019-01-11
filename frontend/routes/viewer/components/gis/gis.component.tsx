@@ -103,7 +103,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
-				{activeMapLayers && this.renderLayers(activeMapLayers)}
+				{activeMapLayers ? this.renderLayers(activeMapLayers) : null}
 			</ViewerPanelContent>
 		);
 	});
