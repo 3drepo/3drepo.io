@@ -133,9 +133,9 @@ export class Views extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		const { viewpoints, fetchViewpoints, subscribeOnViewpointChanges, teamspace, modelId } = this.props;
+		const { viewpoints, fetchViewpoints, subscribeOnViewpointChanges, teamspace, modelId, isPending } = this.props;
 
-		if (!viewpoints.length) {
+		if (!viewpoints.length && !isPending) {
 			fetchViewpoints(teamspace, modelId);
 		} else {
 			this.setFilteredViewpoints();
