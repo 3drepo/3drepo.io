@@ -10,7 +10,7 @@ const ERRCODE_BUNDLE_GEN_FAIL = 14;
 const softFails = [7,10,15]; //failures that should go through to generate bundle
 
 let channel = null;
-let fail = false;
+let errorCode = 0;
 
 
 const logger = new (winston.Logger)({
@@ -61,7 +61,7 @@ function handleMessage(cmd, rid, callback){
 
 		setTimeout(() => {
 			callback(JSON.stringify({
-				value: fail ? 1 : 0,
+				value: errorCode,
 				database: cmdDatabase,
 				project: cmdProject,
 				user
@@ -121,9 +121,9 @@ function disconnectQ(){
 }
 
 module.exports = {
-	startBouncerWorker : (callback, sendFail) => {
+	startBouncerWorker : (callback, error = 0) => {
 		callback = callback;
-		fail = !!sendFail;
+		errorCode = error;
 		logger.info("Initialising bouncer client queue...");
 		connectQ(callback);
 	 },

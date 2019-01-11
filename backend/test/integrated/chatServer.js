@@ -474,7 +474,33 @@ describe("Chat service", function () {
 				done();
 			});
 
-			async.series([next => bouncerHelper.startBouncerWorker(next, true),
+			async.series([next => bouncerHelper.startBouncerWorker(next, 1),
+				next => agent.post(`/${account}/${model}/upload`)
+					.field("tag", "onetag")
+					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+					.expect(200, function(err, res) {
+						next(err);
+					})
+				])
+		}).timeout('60s');
+
+		it("should receive a model FAILED uploaded notification and a model updated notification if a model uploaded had been uploaded with a warning type of error", done => {
+			const eventName = `${username}::notificationUpserted`;
+			const receivedNotifications = [];
+
+			socket.on(eventName, function(notification) {
+				receivedNotifications.push(notification);
+
+				if (receivedNotifications.length == 2){
+					socket.off(eventName);
+					const types = receivedNotifications.map(n => n.type);
+					expect(types).to.deep.equal(["MODEL_UPDATED_FAILED", "MODEL_UPDATED"]);
+					bouncerHelper.stopBouncerWorker();
+					done();
+				}
+			});
+
+			async.series([next => bouncerHelper.startBouncerWorker(next, 7),
 				next => agent.post(`/${account}/${model}/upload`)
 					.field("tag", "onetag")
 					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
@@ -483,6 +509,7 @@ describe("Chat service", function () {
 					})
 				])
 		}).timeout('30s');
+
 
 	});
 

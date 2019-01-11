@@ -86,6 +86,12 @@ function convertToErrorCode(bouncerErrorCode) {
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
+function insertModelUpdatedNotificationsLatestReview(account, model) {
+	History.findLatest({account, model},{tag:1}).then(h => {
+		const revision = (!h || !h.tag) ? "" : h.tag;
+		return notifications.insertModelUpdatedNotifications(account, model, revision);
+	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
+}
 function importSuccess(account, model, sharedSpacePath, user) {
 	setStatus(account, model, "ok", user).then(setting => {
 		if (setting) {
@@ -125,10 +131,8 @@ function importSuccess(account, model, sharedSpacePath, user) {
 			ChatEvent.modelStatusChanged(null, account, model, data);
 
 			// Creates model updated notification.
-			History.findLatest({account, model},{tag:1}).then(h => {
-				const revision = (!h || !h.tag) ? "" : h.tag;
-				return notifications.insertModelUpdatedNotifications(account, model, revision);
-			}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
+			insertModelUpdatedNotificationsLatestReview(account, model);
+
 			setting.save();
 		}
 	}).catch(err => {
@@ -179,6 +183,14 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 		// Creates model updated failed notification.
 		notifications.insertModelUpdatedFailedNotifications(account, model, user, errMsg)
 			.then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
+
+		// In case the error was actually a warning,
+		// the model was imported so we still need to send the model_updated notifications
+		const warningCodes = [7, 10, 15];
+
+		if (warningCodes.includes(errCode)) {
+			insertModelUpdatedNotificationsLatestReview(account, model);
+		}
 
 	}).catch(err => {
 		systemLogger.logError("Failed to invoke importFail:" +  err);
