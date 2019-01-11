@@ -14,6 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isEmpty } from 'lodash';
 import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { EventService } from '../../home/js/event.service';
@@ -151,7 +152,7 @@ class IssuesController implements ng.IController {
 		});
 
 		this.$scope.$watch('vm.modelSettings', () => {
-			if (this.modelSettings) {
+			if (!isEmpty(this.modelSettings)) {
 
 				this.issuesReady.then(() => {
 					this.canAddIssue = this.authService.hasPermission(

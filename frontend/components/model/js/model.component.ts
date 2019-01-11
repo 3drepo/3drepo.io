@@ -51,7 +51,7 @@ class ModelController implements ng.IController {
 	private event;
 	private branch;
 	private revision;
-	private settings;
+	private settings: any = {};
 	private issueId;
 	private riskId;
 	private treeMap;
@@ -77,8 +77,7 @@ class ModelController implements ng.IController {
 		private PanelService,
 		private ViewerService
 	) {
-
-		subscribe(this.mapPropsToThis);
+		subscribe(this, this.mapPropsToThis);
 	}
 
 	public mapPropsToThis = (state) => {
@@ -204,7 +203,7 @@ class ModelController implements ng.IController {
 	}
 
 	private loadModel = () => {
-		this.ViewerService.loadViewerModel(
+		return this.ViewerService.loadViewerModel(
 			this.account,
 			this.model,
 			this.branch,
@@ -237,7 +236,6 @@ class ModelController implements ng.IController {
 
 	private handleSettingsChange = async (settings) => {
 		await this.setupViewer(settings);
-
 		if (!this.ViewerService.currentModel.model) {
 			if (this.ViewerService.viewer) {
 				try {
@@ -257,16 +255,6 @@ class ModelController implements ng.IController {
 	private loadModelSettings() {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
-/* 			.catch((error) => {
-				console.error(error);
-				// If we are not logged in the
-				// session expired popup takes prescedence
-				if (error.data.message !== 'You are not logged in') {
-					this.handleModelError();
-				}
-
-				return Promise.reject(error);
-			}); */
 	}
 }
 
