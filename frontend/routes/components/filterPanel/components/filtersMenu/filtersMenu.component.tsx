@@ -25,11 +25,20 @@ import ArrowRight from '@material-ui/icons/ArrowRight';
 import Copy from '@material-ui/icons/FileCopy';
 import Check from '@material-ui/icons/Check';
 
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { DATA_TYPES } from '../../filterPanel.component';
+
 import {
-	MenuList, NestedWrapper, ChildMenu, StyledItemText, StyledListItem, StyledDatePicker, CopyItem, CopyText, MenuFooter
+	MenuList,
+	NestedWrapper,
+	ChildMenu,
+	StyledItemText,
+	StyledListItem,
+	StyledDatePicker,
+	CopyItem,
+	CopyText,
+	MenuFooter
 } from './filtersMenu.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { dateType } from './../filterPanel/filterPanel.component';
 
 interface IProps {
 	items: any[];
@@ -53,7 +62,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	public parentRef = React.createRef<HTMLElement>();
 
 	public componentDidMount() {
-		const dateFilter = this.props.items.find((filter) => filter.type === dateType);
+		const dateFilter = this.props.items.find((filter) => filter.type === DATA_TYPES.DATE);
 	}
 
 	public showSubMenu = (e) => {
@@ -64,7 +73,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		this.setState({ activeItem: null });
 	}
 
-	public toggleSelectItem = (itemParent, item) => {
+	public toggleSelectItem = (itemParent, item) => () => {
 		this.props.onToggleFilter(itemParent, item);
 	}
 
@@ -81,39 +90,37 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public onDateChange = (value, item, subItem) => {
-		this.setState({
-			[subItem.value]: value
-		}, () => {
+	public onDateChange = (item, subItem) => (value) => {
+		this.setState({ [subItem.value]: value } as any, () => {
 			subItem.date = value;
 			this.props.onToggleFilter(item, subItem);
 		});
 	}
 
-	public renderListChildItem = (index, item, subItem) => {
-		return (
-			<StyledListItem button onClick={() => this.toggleSelectItem(item, subItem)} key={`${subItem.label}-${index}`}>
-				<StyledItemText>
-					{subItem.label}
-					{item.type === dateType &&
-						<StyledDatePicker
-							value={this.state[subItem.value]} onChange={(value) => this.onDateChange(value, item, subItem)} />
-					}
-					{this.isSelectedItem(subItem.value) && <Check fontSize={'small'} />}
-				</StyledItemText>
-			</StyledListItem>
-		);
-	}
+	public renderListChildItem = (index, item) => (subItem) => (
+		<StyledListItem
+			button
+			onClick={this.toggleSelectItem(item, subItem)}
+			key={`${subItem.label}-${index}`}
+		>
+			<StyledItemText>
+				{subItem.label}
+				{item.type === DATA_TYPES.DATE &&
+					<StyledDatePicker
+						value={this.state[subItem.value]}
+						onChange={this.onDateChange(item, subItem)}
+					/>
+				}
+				{this.isSelectedItem(subItem.value) && <Check fontSize={'small'} />}
+			</StyledItemText>
+		</StyledListItem>
+	)
 
-	public renderChildItems = (index, item) => renderWhenTrue(
-		(
-			<ChildMenu>
-				<List>
-					{item.values.map((subItem) => this.renderListChildItem(index, item, subItem ))}
-				</List>
-			</ChildMenu>
-		)
-	)(index === this.state.activeItem)
+	public renderChildItems = (index, item) => renderWhenTrue(() => (
+		<ChildMenu>
+			<List>{item.values.map(this.renderListChildItem(index, item))}</List>
+		</ChildMenu>
+	))(index === this.state.activeItem)
 
 	public renderMenuItems = (items) => {
 		return items.map((item, index) => (
@@ -130,7 +137,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 				<StyledItemText>
 					<CopyToClipboard text={JSON.stringify(this.props.selectedItems)}>
 						<CopyItem>
-							<Copy fontSize={'small'} />
+							<Copy fontSize="small" />
 							<CopyText>Copy filters</CopyText>
 						</CopyItem>
 					</CopyToClipboard>

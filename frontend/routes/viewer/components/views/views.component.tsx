@@ -33,6 +33,7 @@ import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container 
 import { ViewItem } from './components/viewItem/viewItem.component';
 
 declare const Viewer: any;
+import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
 
 interface IProps {
 	isPending: boolean;

@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 import List from '@material-ui/core/List';
-import { COLOR } from '../../../styles/colors';
 import ListItem from '@material-ui/core/ListItem';
 import { DatePicker } from 'material-ui-pickers';
+import { COLOR } from '../../../../../styles/colors';
 
 export const MenuList = styled(List)`
   background-color: ${COLOR.WHITE};
