@@ -73,6 +73,8 @@ export class Views extends React.PureComponent<IProps, any> {
 			placeholder="Search viewpoint..."
 			onChange={this.handleSearchQueryChange}
 			autoFocus
+			defaultValue={this.props.searchQuery}
+			fullWidth
 			inputProps={{
 				style: {
 					padding: 12

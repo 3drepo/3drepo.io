@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
 
 import { COLOR } from '../../../../styles/colors';
 
@@ -73,9 +73,8 @@ export const NewItemWrapper = styled.div`
   flex: 1;
 `;
 
-export const SearchField = styled(Input)`
+export const SearchField = styled(TextField)`
   && {
-    width: 100%;
     flex: none;
   }
 `;
