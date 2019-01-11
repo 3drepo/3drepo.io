@@ -28,7 +28,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
-import { FiltersMenu } from '../filtersMenu/filtersMenu.component';
+import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
 	Container,
 	SelectedFilters,
@@ -55,14 +55,14 @@ interface IState {
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
-	  <IconButton
-	    {...props}
-	    aria-label="Show filters menu"
-	    aria-haspopup="true"
-	  >
-	    <MoreIcon {...IconProps} />
-	  </IconButton>
-	);
+  <IconButton
+    {...props}
+    aria-label="Show filters menu"
+    aria-haspopup="true"
+  >
+    <MoreIcon {...IconProps} />
+  </IconButton>
+);
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
@@ -77,12 +77,12 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	private popperNode = null;
 
   public renderFiltersMenu = () => (
-	    <FiltersMenu
-				items={this.props.filters}
-				selectedItems={this.state.selectedFilters}
-				onToggleFilter={this.onToggleFilter}
-	    />
-	  )
+    <FiltersMenu
+			items={this.props.filters}
+			selectedItems={this.state.selectedFilters}
+			onToggleFilter={this.onToggleFilter}
+    />
+  )
 
 	public onDeselectFilter = (selectedFilter) => {
 		this.setState({
@@ -203,9 +203,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	)
 
 	public onChange = (event, { newValue }) => {
-		this.setState({
-			value: newValue
-		});
+		this.setState({ value: newValue });
 	}
 
 	public handleNewFilterSubmit: any = (event, { suggestion }) => {
@@ -235,21 +233,15 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSuggestionsClearRequested = () => {
-		this.setState({
-			suggestions: []
-		});
+		this.setState({ suggestions: [] });
 	}
 
 	public collapseFilters = () => {
-		this.setState({
-			filtersOpen: true
-		});
+		this.setState({ filtersOpen: true });
 	}
 
 	public expandFilters = () => {
-		this.setState({
-			filtersOpen: false
-		});
+		this.setState({ filtersOpen: false });
 	}
 
 	public renderFilterButton = () => {
@@ -268,23 +260,27 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderSelectedFilters = () => (
+		<SelectedFilters empty={!this.state.selectedFilters.length}>
+			{this.state.selectedFilters.map(
+				(filter, index) => (
+					<StyledChip
+						key={index}
+						label={`${filter.label}: ${filter.value.label}`}
+						onDelete={() => this.onDeselectFilter(filter)}
+					/>
+				)
+			)
+			}
+		</SelectedFilters>
+	)
+
 	public render() {
 		const { value, suggestions } = this.state;
 
 		return (
 			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
-				<SelectedFilters empty={!this.state.selectedFilters.length}>
-					{ this.state.selectedFilters.map(
-							(filter, index) => (
-								<StyledChip
-									key={index}
-									label={`${filter.label}: ${filter.value.label}`}
-									onDelete={() => this.onDeselectFilter(filter)}
-								/>
-							)
-						)
-					}
-				</SelectedFilters>
+				{this.renderSelectedFilters()}
 				{this.state.selectedFilters.length ? this.renderFilterButton() : null}
 
 				<InputContainer>
@@ -295,14 +291,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						getSuggestionValue={getSuggestionValue}
 						renderSuggestion={this.renderSuggestion}
 						renderInputComponent={this.renderInputComponent}
-						inputProps={ {
+						inputProps={{
 							placeholder: 'Filter',
 							value,
 							onChange: this.onChange,
 							inputRef: (node) => {
 								this.popperNode = node;
 							}
-						} }
+						}}
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>

@@ -115,32 +115,36 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		)
 	)(index === this.state.activeItem)
 
-	public render() {
-		const { items } = this.props;
+	public renderMenuItems = (items) => {
+		return items.map((item, index) => (
+			<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
+				{this.renderListParentItem(index, item)}
+				{this.renderChildItems(index, item)}
+			</NestedWrapper>
+		));
+	}
 
+	public renderFooter = () => (
+		<MenuFooter>
+			<StyledListItem button disabled={!this.props.selectedItems.length}>
+				<StyledItemText>
+					<CopyToClipboard text={JSON.stringify(this.props.selectedItems)}>
+						<CopyItem>
+							<Copy fontSize={'small'} />
+							<CopyText>Copy filters</CopyText>
+						</CopyItem>
+					</CopyToClipboard>
+				</StyledItemText>
+			</StyledListItem>
+		</MenuFooter>
+	)
+
+	public render() {
 		return (
 			<MuiPickersUtilsProvider utils={DateFnsUtils}>
 				<MenuList>
-					{
-						items.map((item, index) => (
-							<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
-								{this.renderListParentItem(index, item)}
-								{this.renderChildItems(index, item)}
-							</NestedWrapper>
-						))
-					}
-					<MenuFooter>
-						<StyledListItem button disabled={!this.props.selectedItems.length}>
-							<StyledItemText>
-								<CopyToClipboard text={JSON.stringify(this.props.selectedItems)}>
-									<CopyItem>
-										<Copy fontSize={'small'} />
-										<CopyText>Copy filters</CopyText>
-									</CopyItem>
-								</CopyToClipboard>
-							</StyledItemText>
-						</StyledListItem>
-					</MenuFooter>
+					{this.renderMenuItems(this.props.items)}
+					{this.renderFooter()}
 				</MenuList>
 			</MuiPickersUtilsProvider>
 		);
