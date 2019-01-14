@@ -29,9 +29,9 @@ const utils = require("../utils");
  * @api {get} /subscriptions List all subscriptions
  * @apiName listSubscriptions
  * @apiGroup Subscription
- * 
- * @apiDescription List all subscriptions for current user if applicable. 
- * 
+ *
+ * @apiDescription List all subscriptions for current user if applicable.
+ *
  * @apiError (401) NOT_AUTHORIZED Not Authorized
  * @apiErrorExample {json} Error-Response
  * HTTP/1.1 401 Not Authorized

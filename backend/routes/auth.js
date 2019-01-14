@@ -36,7 +36,7 @@ const multer = require("multer");
  * @api {post} /login Create a Login session
  * @apiName login
  * @apiGroup Authorisation
- * 
+ *
  * @apiParam {String} username Account username
  * @apiParam {String} password User account password
  *
@@ -69,7 +69,7 @@ const multer = require("multer");
  *
  * @apiError NotAuthorized User was not authorised.
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 401 Unauth­orized
  *   {
  *     "message": "Not Authorized",
@@ -85,19 +85,19 @@ router.post("/login", login);
  * @api {get} /logout/ Create a logout request
  * @apiName logout
  * @apiGroup Authorisation
- * 
+ *
  * @apiDescription Logout current user
  *
  * @apiParam {String} username Account username
  *
  * @apiSuccess (200) {String} username Registered Account Username
- * 
+ *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
  *  "username": "username1"
  * }
- * 
+ *
  */
 
 router.post("/logout", logout);
@@ -106,12 +106,12 @@ router.post("/logout", logout);
  * @api {get} /login/ Check user is logged in
  * @apiName checkLogin
  * @apiGroup Authorisation
- * 
+ *
  * @apiDescription Check user is still logged into current session.
- * 
+ *
  * @apiParam {String} username Registered Account Username.
  * @apiParam {String} password Registered User Account Password
- * 
+ *
  * @apiSuccess (200) {Object} User profile.
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -148,12 +148,12 @@ router.get("/login", checkLogin);
  *
  * @apiParam {String} username Username to use for password reset
  * @apiParam {String} email Email to use for password reset
- * 
+ *
  * @apiSuccess (200) {Object} Empty Object
  *
  * @apiError SIGN_UP_PASSWORD_MISSING Password is missing
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 400 Bad Request
  * {
  *   "message": "Password is missing",
@@ -170,11 +170,11 @@ router.post("/forgot-password", forgotPassword);
  * @api {get} /version/ Print application version
  * @apiName printVersion
  * @apiGroup Authorisation
- * 
+ *
  * @apiDescription Print current application version.
- * 
+ *
  * @apiSuccess (200) {Object} Current Application Version number.
- * 
+ *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
@@ -203,10 +203,10 @@ router.get("/version", printVersion);
  * @apiName listInfo
  * @apiGroup Authorisation
  * @apiParam {String} account.json The Account to list information for.
- * 
+ *
  * @apiDescription List account information for provided account.json file.
- * 
- * @apiSuccess (200) {Object[]} User account 
+ *
+ * @apiSuccess (200) {Object[]} User account
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
@@ -370,7 +370,7 @@ router.get("/version", printVersion);
         }
  */
 
-router.get("/:account.json", middlewares.loggedIn, listInfo); 
+router.get("/:account.json", middlewares.loggedIn, listInfo);
 // TODO: divide into different endpoints that makes sense.
 
 /**
@@ -378,12 +378,12 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
  * @apiName getAvatar
  * @apiGroup Authorisation
  * @apiParam {String} account The avatar image for requested account.
- * 
+ *
  * @apiSuccess (200) {Object} avatar User Avatar Image
- * 
+ *
  * @apiError (404) USER_DOES_NOT_HAVE_AVATAR User does not have an avatar
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 404 Not Found
  * {
  *   "message": "User does not have an avatar",
@@ -404,9 +404,9 @@ router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
  * @apiGroup Authorisation
  * @apiParam {String} account The account to upload avatar to.
  * @apiParam {Object} image The avatar to upload.
- * 
+ *
  * @apiDescription Upload a new user Avatar.
- * 
+ *
  * @apiSuccess (200) {Object} status Status of Avatar upload.
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -418,24 +418,24 @@ router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 
 /**
- * @api {post} /:account Sign up form 
+ * @api {post} /:account Sign up form
  * @apiName signUp
  * @apiGroup Authorisation]
- * 
+ *
  * @apiParam {String} account New Account username to register.
  *
  * @apiDescription Sign up a new user account.
- * 
+ *
  * @apiSuccess (200) account New Account username
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
  *  "account":"newAccountUsername"
- * } 
- * 
+ * }
+ *
  * @apiError SIGN_UP_PASSWORD_MISSING Sign Up Password is missing.
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 400 Bad Request
  * {
  *   "message": "Password is missing",
@@ -449,17 +449,17 @@ router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 router.post("/:account", signUp);
 
 /**
- * @api {post} /:account/verify Verify the user 
+ * @api {post} /:account/verify Verify the user
  * @apiName verify
  * @apiGroup Authorisation
- * 
+ *
  * @apiParam {String} account New account username.
- * 
+ *
  * @apiSuccess (200) Account Verified
- * 
+ *
  * @apiError ALREADY_VERIFIED User Already verified
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 400 Bad Request
  * {
  *   "message": "Already verified",
@@ -476,9 +476,9 @@ router.post("/:account/verify", verify);
  * @api {put} /:account Update User password
  * @apiName updateUser
  * @apiGroup Authorisation
- * 
+ *
  * @apiParam {String} account Registered Account Username
- * 
+ *
  * @apiSuccess (200) User Updated
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -493,10 +493,10 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  * @api {put} /:account/password Reset User Password
  * @apiName resetPassword
  * @apiGroup Authorisation
- * 
+ *
  * @apiParam {String} account Account to reset password for.
  * @apiParam {String} password New password to reset to.
- * 
+ *
  * @apiDescription Reset existing user account password
  *
  * @apiSuccess (200) account Account username
@@ -505,10 +505,10 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  *  {
  * 	"account":"username1"
  *  }
- * 
+ *
  * @apiError TOKEN_INVALID Token is invalid or expired.
  * @apiErrorExample {json} Error-Response
- * 
+ *
  * HTTP/1.1 400 Bad Request
  * {
  * 	"message":"Token is invalid or expired",

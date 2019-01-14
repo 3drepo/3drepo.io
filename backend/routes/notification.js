@@ -34,7 +34,7 @@ router.get("/notifications", middlewares.loggedIn, getNotifications, responseCod
  * @api {get} /notifications/:id Get a notification
  * @apiName getNotification
  * @apiGroup Notification
- * 
+ *
  * @apiParam {String} id Unique Notification ID
  */
 
@@ -44,7 +44,7 @@ router.get("/notifications/:id", middlewares.loggedIn, getNotification, response
  * @api {patch} /notifications/:id Patch a notification
  * @apiName patchNotification
  * @apiGroup Notification
- * 
+ *
  * @apiParam {String} id Unique Notification ID
  */
 
@@ -58,12 +58,11 @@ router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, resp
 
 router.delete("/notifications", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
 
-
 /**
  * @api {delete} /notifications/:id Delete a notification
  * @apiName deleteNotification
  * @apiGroup Notification
- * 
+ *
  * @apiParam id Unique Notification ID
  */
 

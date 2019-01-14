@@ -28,7 +28,7 @@
 	/**
 	 * @api {post} /permission-templates Create a Permission Template
 	 * @apiName createTemplate
-	 * @apiGroup Permission Template 
+	 * @apiGroup Permission Template
 	 */
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
@@ -36,16 +36,16 @@
 	/**
 	 * @api {get} /permission-templates List all Permission Templates
 	 * @apiName listTemplates
-	 * @apiGroup Permission Template 
+	 * @apiGroup Permission Template
 	 */
-	
+
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
 
 	/**
 	 * @api {get} /:model/permission-templates List all Permission Templates based on Model
 	 * @apiName listTemplates
-	 * @apiGroup Permission Template 
-	 * 
+	 * @apiGroup Permission Template
+	 *
 	 * @apiParam {String} model Model to get permission templates for.
 	 */
 
@@ -54,8 +54,8 @@
 	/**
 	 * @api {delete} /permission-templates/:permissionId Delete permission template
 	 * @apiName deleteTemplate
-	 * @apiGroup Permission Template 
-	 * 
+	 * @apiGroup Permission Template
+	 *
 	 * @apiParam {String} permissionId Unique Permission ID
 	 */
 

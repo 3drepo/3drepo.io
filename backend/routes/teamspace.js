@@ -45,7 +45,7 @@
 	 * @api {delete} /members/:user Remove a team member
 	 * @apiName removeTeamMember
 	 * @apiGroup Teamspace
-	 * 
+	 *
 	 * @apiParam {String} user User (Member) to remove
 	 */
 
@@ -55,7 +55,7 @@
 	 * @api {get} /members/search/:searchString Search for a member without a membership
 	 * @apiName findUsersWithoutMembership
 	 * @apiGroup Teamspace
-	 * 
+	 *
 	 * @apiParam {String} searchString Search string provided to find member
 	 */
 
@@ -65,10 +65,10 @@
 	 * @api {post} /members Create a Team Member
 	 * @apiName addTeamMember
 	 * @apiGroup Teamspace
-	 * @apiParam {String} searchString Search string required to find team member. 
-	 * 
+	 * @apiParam {String} searchString Search string required to find team member.
+	 *
 	 * @apiSuccess (200) {Object} Team member profile
-	 * 
+	 *
 	 * @apiError User not found The <code>searchString</code> of the User was not found.
 	 * @apiErrorExample
 	 * {

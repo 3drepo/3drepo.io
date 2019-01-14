@@ -29,9 +29,9 @@ const utils = require("../utils");
  * @api {get} /revisions.json List all revisions
  * @apiName listRevisions
  * @apiGroup Revisions
- * 
+ *
  * @apiDescription List all revisions for current model.
- * 
+ *
  * @apiSuccess (200) {Object} Revisions Object
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -54,9 +54,9 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
  * @apiName listRevisionsByBranch
  * @apiGroup Revisions
  * @apiParam {String} branch.json Branch required to list revisions for.
- * 
+ *
  * @apiDescription List all revisions using the current branch.
- * 
+ *
  * @apiSuccess (200) Revisions Object based on branch.
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
@@ -89,21 +89,21 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
  *       "branch": "master"
  *   }
  * ]
- * 
+ *
  */
 
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 
 /**
- * @api {put} /revisions/:id/tag Update Revision Tag 
+ * @api {put} /revisions/:id/tag Update Revision Tag
  * @apiName updateRevisionTag
  * @apiGroup Revisions
- * 
- * @apiDescription Update revision tag 
- * 
+ *
+ * @apiDescription Update revision tag
+ *
  * @apiParam {String} id Unique Revision ID
  * @apiParam {String} tag Tag to update
- * 
+ *
  */
 
 router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);

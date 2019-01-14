@@ -11,16 +11,16 @@ const Paypal = require("../models/paypal.js");
 /**
  * @api {post} /paypal/ipn Create Paypal IPN message
  * @apiName handleIPN
- * @apiGroup Payment 
+ * @apiGroup Payment
  * @apiParam id Unique Notification ID
  */
 
 router.post("/paypal/ipn", handleIPN);
 
 /**
- * @api {post} /paypal/ipn Capture a pre-approve payment 
+ * @api {post} /paypal/ipn Capture a pre-approve payment
  * @apiName executeAgreement
- * @apiGroup Payment 
+ * @apiGroup Payment
  */
 
 router.post("/paypal/execute", executeAgreement);

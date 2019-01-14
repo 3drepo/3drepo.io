@@ -37,8 +37,8 @@
 	 * @api {put} /projects/:project Update a project
 	 * @apiName updateProject
 	 * @apiGroup Project
-	 * 
-	 * @apiParam {String} project Project to update 
+	 *
+	 * @apiParam {String} project Project to update
 	 */
 
 	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
@@ -55,7 +55,7 @@
 	 * @api {get} /projects/:project List a project
 	 * @apiName listProject
 	 * @apiGroup Project
-	 * 
+	 *
 	 * @apiParam {String} project Project to list
 	 */
 
@@ -65,7 +65,7 @@
 	 * @api {delete} /projects/:project Delete a project
 	 * @apiName deleteProject
 	 * @apiGroup Project
-	 * 
+	 *
 	 * @apiParam {String} project Project to delete
 	 */
 
