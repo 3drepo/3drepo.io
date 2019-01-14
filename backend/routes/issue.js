@@ -38,11 +38,11 @@ const stringToUUID = utils.stringToUUID;
  * @api {get} /issues/:uid.json Find Issue by ID
  * @apiName findIssueById
  * @apiGroup Issues
- * 
+ *
  * @apiParam {Number} id Issue unique ID.
- * 
+ *
  * @apiDescription Find an issue with the requested Issue ID.
- * 
+ *
  * @apiSuccess {Object} issue The Issue matching the Issue ID
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
@@ -67,21 +67,21 @@ const stringToUUID = utils.stringToUUID;
  *		thumbnail: "USERNAME/MODEL_ID/issues/ISSUE_ID/thumbnail.png"
  *		topic_type: "for_information"
  *		typePrefix: "Architectural"
- *		viewCount: 1	
+ *		viewCount: 1
  *		viewpoint: {near: 24.057758331298828, far: 12028.87890625, fov: 1.0471975803375244,…}
  *		__v: 0
  *		_id: "ISSUE_ID"
  * }
  *
  * @apiError ISSUE_NOT_FOUND Issue not found
- * @apiErrorExample 
+ * @apiErrorExample
  * HTTP/1.1 404 Not Found
  * {
  *   "place": "GET /issues/issue_ID.json",
  *   "status": 500,
  *   "message": "Issue not found",
  * }
- * 
+ *
  */
 
 router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
@@ -90,13 +90,13 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
  * @api {get} /issues/:uid.json Get Issue Thumbnail
  * @apiName findIssueById
  * @apiGroup Issues
- * 
+ *
  * @apiParam {Number} id Issue unique ID.
- * 
+ *
  * @apiDescription Retrieve thumbnail screenshot image for requested issue.
- * 
+ *
  * @apiSuccess 200 {Object} thumbnail Thumbnail Image
- * 
+ *
  */
 
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
@@ -105,10 +105,10 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * @api {get} /issues.json Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
- * 
- * @apiDescription List all available issue for current model. 
- * 
- * @apiSuccess (200) {Object} Issue Object. 
+ *
+ * @apiDescription List all available issue for current model.
+ *
+ * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * [
@@ -156,16 +156,16 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * 			}
  * 	}
  * ]
- * 
+ *
  */
 
 router.get("/issues.json", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /issues.bcfzip Get Issues BCF zip file 
+ * @api {get} /issues.bcfzip Get Issues BCF zip file
  * @apiName getIssuesBCF
  * @apiGroup Issues
- * 
+ *
  * @apiDescription Get a downloaded zip file of all Issues BCF.
  */
 
@@ -175,7 +175,7 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
  * @api {post} /issues.bcfzip Import BCF file
  * @apiName importBCF
  * @apiGroup Issues
- * 
+ *
  * @apiDescription Upload an Issues BCF file.
  */
 
@@ -185,9 +185,9 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
  * @api {get} /issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
  * @apiGroup Issue.
- * 
+ *
  * @apiParam {String} id Viewpoint unique ID.
- * 
+ *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
 
@@ -197,9 +197,9 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
  * @api {get} /issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} id Viewpoint unique ID.
- * 
+ *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
 
@@ -209,14 +209,14 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  * @api {get} /revision/:rid/issues.json Get all Issues by revision ID
  * @apiName listIssues
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} id Revision unique ID.
- * 
+ *
  * @apiDescription Get all issues related to specific revision ID.
- * 
+ *
  * @apiSuccess (200) {Object} Issues Object
  * @apiSuccessExample {json} Success-Response
- * 
+ *
  * [
  * 	{
  * 		"_id":"issue_ID",
@@ -267,11 +267,11 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
  * @api {get} /revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} id Revision unique ID.
- * 
+ *
  * @apiDescription Get Issues BCF export based on revision ID.
- * 
+ *
  */
 
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
@@ -280,22 +280,21 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
  * @api {post} /revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} id Revision unique ID.
- * 
+ *
  * @apiDescription Upload Issues BCF file using current revision ID.
- * 
+ *
  * @apiSuccess (200) {Object} Status
  * @apiSuccessExample {json} Success-Response.
  * HTTP
  * {
  * 	"status":"ok"
  * }
- * 
+ *
  */
 
 router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
-
 
 // router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
 
@@ -303,7 +302,7 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
  * @api {get} /issues.html Issues response into as HTML
  * @apiName renderIssuesHTML
  * @apiGroup Issues
- * 
+ *
  * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
  */
 
@@ -313,9 +312,9 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
  * @api {get} revision/:rid/issues.html Issues response into as HTML by revision ID
  * @apiName  renderIssuesHTML
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} id Revision unique ID.
- * 
+ *
  * @apiDescription Render all Issues into a HTML webpage based on current revision ID.
  */
 
@@ -339,19 +338,18 @@ router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreat
  * @apiParam {String} id Issue unique ID.
  *
  * @apiDescription Update an issue with an existing Issue ID
- * 
+ *
  * @apiSuccess (200) {Object} Updated Issue Object.
- * @apiSuccessExample {json} Success-Response
- * 
+ *
  */
 
 router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /issuesId.json Store issue based on revision 
+ * @api {post} /issuesId.json Store issue based on revision
  * @apiName storeIssue
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} rid Unique Revision ID to store.
  */
 
@@ -361,7 +359,7 @@ router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.
  * @api {put} revision/"rid/issues/:issueId.json Update issue based on revision
  * @apiName updateIssue
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
