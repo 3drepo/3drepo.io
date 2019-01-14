@@ -90,7 +90,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public renderNewViewpoint = renderWhenTrue(() => (
 		<ViewItem
 			viewpoint={this.props.newViewpoint}
-			active={!this.props.activeViewpointId}
+			active={true}
 			editMode={true}
 			onCancelEditMode={this.handleCancelEditMode}
 			onSaveEdit={this.handleSave}
@@ -145,9 +145,17 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { viewpoints, searchQuery } = this.props;
-		if (prevProps.searchQuery !== searchQuery || !isEqual(prevProps.viewpoints, viewpoints)) {
+		const { viewpoints, searchQuery, newViewpoint, setState } = this.props;
+		const viewpointsChanged = !isEqual(prevProps.viewpoints, viewpoints);
+		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
+		if (searchQueryChanged || viewpointsChanged) {
 			this.setFilteredViewpoints();
+
+			if (newViewpoint) {
+				const listRef = this.listRef.current.listRef;
+				setState({ activeViewpointId: null, editMode: false });
+				this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200);
+			}
 		}
 	}
 
