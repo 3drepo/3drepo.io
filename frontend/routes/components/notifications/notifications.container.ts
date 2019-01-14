@@ -35,7 +35,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	sendDeleteNotification: NotificationsActions.sendDeleteNotification,
 	confirmSendDeleteAllNotifications: NotificationsActions.confirmSendDeleteAllNotifications,
 	upsertNotification: NotificationsActions.upsertNotification,
-	deleteNotification: NotificationsActions.deleteNotification
+	deleteNotification: NotificationsActions.deleteNotification,
+	showUpdatedFailedError: NotificationsActions.showUpdatedFailedError
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications));

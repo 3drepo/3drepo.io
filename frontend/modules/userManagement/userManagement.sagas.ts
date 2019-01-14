@@ -50,7 +50,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 			currentUser.username
 		));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'teamspace details', error));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace details', error));
 		yield put(UserManagementActions.setPendingState(false));
 	}
 }
@@ -64,7 +64,7 @@ export function* addUser({ user }) {
 		yield put(UserManagementActions.addUserSuccess(data, currentUser.username));
 		yield put(SnackbarActions.show('User added'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('add', 'licence', error));
+		yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
 	}
 }
 
@@ -97,7 +97,7 @@ export function* removeUser({ username }) {
 
 			yield put(DialogActions.showDialog(config));
 		} else {
-			yield put(DialogActions.showErrorDialog('remove', 'licence', error));
+			yield put(DialogActions.showEndpointErrorDialog('remove', 'licence', error));
 		}
 	}
 }
@@ -109,7 +109,7 @@ export function* removeUserCascade({ username }) {
 		yield put(UserManagementActions.removeUserSuccess(username));
 		yield put(SnackbarActions.show('User removed'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'licence', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'licence', error));
 	}
 }
 
@@ -124,7 +124,7 @@ export function* updateUserJob({ username, job }) {
 		yield put(UserManagementActions.updateUserJobSuccess(username, job));
 		yield put(SnackbarActions.show('User job updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('assign', 'job', error));
+		yield put(DialogActions.showEndpointErrorDialog('assign', 'job', error));
 	}
 }
 
@@ -137,7 +137,7 @@ export function* updatePermissions({ permissions }) {
 		yield put(UserManagementActions.updatePermissionsSuccess(permissions, currentUser));
 		yield put(SnackbarActions.show('Teamspace permissions updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'teamspace permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'teamspace permissions', error));
 	}
 }
 
@@ -147,7 +147,7 @@ export function* getUsersSuggestions({ searchText }) {
 		const {data: suggestions} = yield API.findUsers(teamspace, searchText);
 		yield put(UserManagementActions.getUsersSuggestionsSuccess(suggestions));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('search', 'users', error));
+		yield put(DialogActions.showEndpointErrorDialog('search', 'users', error));
 	}
 }
 
@@ -159,7 +159,7 @@ export function* fetchProject({ project }) {
 
 		yield put(UserManagementActions.setProject(response.data));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'project permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
 	}
 }
 
@@ -173,7 +173,7 @@ export function* updateProjectPermissions({ permissions }) {
 		yield put(UserManagementActions.updateProjectPermissionsSuccess(permissions));
 		yield put(SnackbarActions.show('Project permissions updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'project permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'project permissions', error));
 	}
 }
 
@@ -191,7 +191,7 @@ export function* fetchModelsPermissions({ models }) {
 
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'models/federations permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'models/federations permissions', error));
 	}
 }
 
@@ -231,7 +231,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 			yield put(resolveUpdate);
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'models/federations permissions', error));
 	}
 }
 
@@ -242,7 +242,7 @@ export function* updateModelsPermissions({ modelsWithPermissions, permissions })
 		yield put(UserManagementActions.updateModelPermissionsSuccess(response.data, permissions));
 		yield put(SnackbarActions.show('Models/federations permissions updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'models/federations permissions', error));
 	}
 }
 

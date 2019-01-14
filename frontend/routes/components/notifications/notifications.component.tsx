@@ -54,6 +54,7 @@ interface IProps {
 	sendGetNotifications: () => void;
 	confirmSendDeleteAllNotifications: () => void;
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
+	showUpdatedFailedError: (errorMessage: string) => void;
 	sendDeleteNotification: (id: string) => void;
 	deleteNotification: (notification: any) => void;
 	upsertNotification: (notification: any) => void;
@@ -111,7 +112,6 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public deleteAllNotifications = (e: React.SyntheticEvent) => {
 		this.toggleMenu(e);
-		this.toggleDrawer();
 		this.props.confirmSendDeleteAllNotifications();
 	}
 
@@ -197,6 +197,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				labelLeft={`In ${notifications[0].teamSpace}`}
 				{...this.props}
 				notifications={notifications}
+				closePanel={this.toggleDrawer}
 			/>
 		));
 	}

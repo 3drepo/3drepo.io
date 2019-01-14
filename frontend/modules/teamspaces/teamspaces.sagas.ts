@@ -31,7 +31,7 @@ export function* createProject({ teamspace, projectData }) {
 
 		yield put(TeamspacesActions.createProjectSuccess(teamspace, response.data));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('create', 'project', e));
+		yield put(DialogActions.showEndpointErrorDialog('create', 'project', e));
 	}
 }
 
@@ -42,7 +42,7 @@ export function* updateProject({ teamspace, projectName, projectData }) {
 		yield put(SnackbarActions.show('Project updated'));
 		yield put(TeamspacesActions.updateProjectSuccess(teamspace, projectName, projectData));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('update', 'project', e));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'project', e));
 	}
 }
 
@@ -53,7 +53,7 @@ export function* removeProject({ teamspace, projectName }) {
 		yield put(SnackbarActions.show('Project removed'));
 		yield put(TeamspacesActions.removeProjectSuccess(teamspace, projectName));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('remove', 'project', e));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'project', e));
 	}
 }
 
@@ -72,7 +72,7 @@ export function* createModel({ teamspace, modelData }) {
 		yield put(SnackbarActions.show(`${modelData.federate ? 'Federation' : 'Model'} created`));
 		yield put(TeamspacesActions.createModelSuccess(teamspace, createdModel));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('create', 'model', e));
+		yield put(DialogActions.showEndpointErrorDialog('create', 'model', e));
 	}
 }
 
@@ -88,7 +88,7 @@ export function* updateModel({ teamspace, modelId, modelData }) {
 		yield put(SnackbarActions.show(`${modelData.federate ? 'Federation' : 'Model'} updated`));
 		yield put(TeamspacesActions.updateModelSuccess(teamspace, modelId, updatedModel));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('update', 'model', e));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'model', e));
 	}
 }
 
@@ -102,7 +102,7 @@ export function* removeModel({ teamspace, modelData }) {
 			teamspace, { ...removedModel, projectName: modelData.project, name: modelData.name })
 		);
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('remove', 'model', e));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'model', e));
 	}
 }
 

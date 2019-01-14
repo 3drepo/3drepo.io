@@ -252,7 +252,9 @@
 		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
 		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
 
-		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500}
+		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
+
+		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404}
 
 	};
 

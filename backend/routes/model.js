@@ -451,7 +451,7 @@ function uploadModel(req, res, next) {
 
 	}).then(file => {
 		// api respond ok once the file is uploaded
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded", user: username});
 
 		const data = {
 			tag: req.body.tag,

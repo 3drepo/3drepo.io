@@ -33,7 +33,7 @@ export function* sendGetNotifications() {
 		const { data } = yield API.getNotifications();
 		yield put(NotificationsActions.setNotifications(data));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'notifications', e));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'notifications', e));
 	}
 }
 
@@ -49,7 +49,7 @@ export function* sendUpdateNotificationRead({ notificationId, read }) {
 		yield API.patchNotification(notificationId, {read});
 	} catch (error) {
 		yield put(NotificationsActions.patchNotification({_id: notificationId, read: !read}));
-		yield put(DialogActions.showErrorDialog('update', 'notification', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'notification', error));
 	}
 }
 
@@ -65,7 +65,7 @@ export function* sendDeleteNotification({ notificationId }) {
 		yield API.deleteNotification(notificationId);
 	} catch (error) {
 		yield put(NotificationsActions.upsertNotification(notification));
-		yield put(DialogActions.showErrorDialog('delete', 'notification', error));
+		yield put(DialogActions.showEndpointErrorDialog('delete', 'notification', error));
 	}
 }
 
@@ -77,7 +77,7 @@ export function* sendDeleteAllNotifications() {
 		yield API.deleteAllNotifications();
 	} catch (error) {
 		yield put(NotificationsActions.setNotifications(notifications));
-		yield put(DialogActions.showErrorDialog('delete', 'notification', error));
+		yield put(DialogActions.showEndpointErrorDialog('delete', 'notification', error));
 	}
 }
 
@@ -91,10 +91,15 @@ export function* confirmSendDeleteAllNotifications() {
 	yield put(DialogActions.showDialog(config));
 }
 
+export function* showUpdatedFailedError({ errorMessage }) {
+	yield put(DialogActions.showErrorDialog('update', 'model', errorMessage));
+}
+
 export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.SEND_GET_NOTIFICATIONS, sendGetNotifications);
 	yield takeLatest(NotificationsTypes.SEND_UPDATE_NOTIFICATION_READ, sendUpdateNotificationRead);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_NOTIFICATION, sendDeleteNotification);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_ALL_NOTIFICATIONS, sendDeleteAllNotifications);
 	yield takeLatest(NotificationsTypes.CONFIRM_SEND_DELETE_ALL_NOTIFICATIONS, confirmSendDeleteAllNotifications);
+	yield takeLatest(NotificationsTypes.SHOW_UPDATED_FAILED_ERROR, showUpdatedFailedError);
 }
