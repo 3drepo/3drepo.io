@@ -333,8 +333,7 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  *
  * @apiParam {String} model Model to upload.
  */
-
-router.post("/:model/revision/master/head/searchtree.json", middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
+router.post("/:model/upload", middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
 
 /**
  * @api {get} /:model/download/latest Upload Model.
