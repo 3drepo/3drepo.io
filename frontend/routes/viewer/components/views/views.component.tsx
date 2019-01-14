@@ -144,18 +144,28 @@ export class Views extends React.PureComponent<IProps, any> {
 		subscribeOnViewpointChanges(teamspace, modelId);
 	}
 
-	public componentDidUpdate(prevProps) {
-		const { viewpoints, searchQuery, newViewpoint, setState } = this.props;
+	public componentDidUpdate(prevProps, prevState) {
+		const { viewpoints, searchQuery, newViewpoint, setState, activeViewpointId } = this.props;
 		const viewpointsChanged = !isEqual(prevProps.viewpoints, viewpoints);
 		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
 		if (searchQueryChanged || viewpointsChanged) {
-			this.setFilteredViewpoints();
+			this.setFilteredViewpoints(() => {
+				if (!searchQuery && activeViewpointId) {
+					const isSelectedViewpointVisible = prevState.filteredViewpoints.some(({ _id }) => {
+						return _id === activeViewpointId;
+					});
 
-			if (newViewpoint) {
-				const listRef = this.listRef.current.listRef;
-				setState({ activeViewpointId: null, editMode: false });
-				this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200);
-			}
+					if (!isSelectedViewpointVisible) {
+						setState({ activeViewpointId: null, editMode: false });
+					}
+				}
+
+				if (newViewpoint) {
+					const listRef = this.listRef.current.listRef;
+					setState({ activeViewpointId: null, editMode: false });
+					this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200);
+				}
+			});
 		}
 	}
 
@@ -215,13 +225,13 @@ export class Views extends React.PureComponent<IProps, any> {
 		this.props.setState({ searchQuery });
 	}
 
-	public setFilteredViewpoints = () => {
+	public setFilteredViewpoints = (onSave = () => {}) => {
 		const { viewpoints, searchQuery, searchEnabled } = this.props;
 		const filteredViewpoints = searchEnabled ? viewpoints.filter(({ name }) => {
 			return name.toLowerCase().includes(searchQuery.toLowerCase());
 		}) : viewpoints;
 
-		this.setState({ filteredViewpoints });
+		this.setState({ filteredViewpoints }, onSave);
 	}
 
 	public getTitleIcon = () => <PhotoCameraIcon />;
