@@ -25,10 +25,14 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { getAngularService } from '../../../../helpers/migration';
+
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
+
+declare const Viewer: any;
 
 interface IProps {
 	isPending: boolean;
@@ -55,6 +59,8 @@ export class Views extends React.PureComponent<IProps, any> {
 	public state = {
 		filteredViewpoints: []
 	};
+
+	public ViewerService = getAngularService('ViewerService', this) as any;
 
 	public listRef = React.createRef<any>();
 
@@ -142,6 +148,7 @@ export class Views extends React.PureComponent<IProps, any> {
 		}
 
 		subscribeOnViewpointChanges(teamspace, modelId);
+		this.toggleViewerEvents();
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
@@ -172,6 +179,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public componentWillUnmount() {
 		const { teamspace, modelId } = this.props;
 		this.props.unsubscribeOnViewpointChanges(teamspace, modelId);
+		this.toggleViewerEvents(false);
 	}
 
 	public handleViewpointItemClick = (viewpoint) => () => {
@@ -179,6 +187,13 @@ export class Views extends React.PureComponent<IProps, any> {
 			const { teamspace, modelId } = this.props;
 			this.props.showViewpoint(teamspace, modelId, viewpoint);
 		}
+	}
+
+	public toggleViewerEvents = (enabled = true) => {
+		const eventHandler = enabled ? 'on' : 'off';
+		this.ViewerService[eventHandler](Viewer.EVENT.BACKGROUND_SELECTED, () => {
+			this.props.setState({ activeViewpointId: null, editMode: false });
+		});
 	}
 
 	public handleUpdate = (viewpointId) => (values) => {
