@@ -51,7 +51,7 @@ home [ui-view] password-change,
 home [ui-view] sign-up,
 home [ui-view] register-request,
 home [ui-view] register-verify {
-	height: 100%;
+	padding-bottom: 50px;
 }
 
 home #model {
@@ -62,10 +62,11 @@ home #model {
 	home #homeLogo {
 		display: none;
 	}
+}
 
-	home .homeContainer [ui-view] {
-		overflow: auto;
-	}
+home .homeContainer [ui-view] {
+	overflow: auto;
+	height: 100%;
 }
 
 home #homeLogo {

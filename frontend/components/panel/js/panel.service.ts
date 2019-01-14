@@ -36,6 +36,8 @@ interface IPanelCard {
 	add?: boolean;
 	menu?: IMenuItem[];
 	minHeight?: number;
+	isReactComponent?: boolean;
+	panelTakenHeight?: number;
 }
 
 export interface IMenuItem {
@@ -499,9 +501,10 @@ export class PanelService {
 			show: false,
 			help: 'Add various GIS data to the view',
 			icon: 'layers',
-			minHeight: 80,
+			minHeight: 265,
 			fixedHeight: false,
-			options: []
+			options: [],
+			isReactComponent: true
 		});
 
 		this.panelCards.right.push({

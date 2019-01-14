@@ -19,13 +19,14 @@ div(layout="column", class="md-whiteframe-1dp")
 				// Options
 				#options(layout="row")
 
-		panel-card-chips-filter(id="chips-filter"
-								ng-show="vm.chipsFilterVisible && !vm.hideMenuButton"
-								chips="vm.chipsFilterChips"
-								suggestions="vm.chipsFilterSuggestions"
-								place-holder=" Filter"
-								show-filter="vm.chipsFilterVisible"
-							)
+		panel-card-chips-filter(
+			id="chips-filter"
+			ng-show="vm.chipsFilterVisible && !vm.hideMenuButton"
+			chips="vm.chipsFilterChips"
+			suggestions="vm.chipsFilterSuggestions"
+			place-holder=" Filter"
+			show-filter="vm.chipsFilterVisible"
+		)
 
 	// Card content
 	#panelCardContainer
@@ -137,14 +138,6 @@ div(layout="column", class="md-whiteframe-1dp")
 				revision='vm.revision'
 				model='vm.model'
 				ng-if="vm.contentData.type === 'compare'")
-
-			gis(
-				account='vm.account'
-				model='vm.model'
-				on-content-height-request='vm.onContentHeightRequest(height)'
-				model-settings='vm.modelSettings'
-				ng-if="vm.contentData.type === 'gis'")
-
 
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")
