@@ -166,11 +166,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 	script.
 
 		function printDialog() {
-			const timeStamp =  reportValues.reportDate
-			const modelName = reportValues.modelName;
-			document.title = timeStamp + modelName;
-			console.log("title", document.title);
-			//- return window.print();
+			const timeStamp =  "#{reportValues.documentDate}";
+			const modelName = "#{reportValues.modelName}";
+			document.title = `${modelName}_${timeStamp}`; 
+			return window.print();
 		}
 
 		function showHide(e) {
@@ -195,9 +194,6 @@ html(lang="en" ng-app="3drepo").ng-scope
 				elem.classList.toggle("wrap");		
 				e.srcElement.textContent = elem.classList.contains('wrap') ? "SMALL PICTURES" : "LARGE PICTURES";
 			})
-
-
-
 		}
 			
 	head
