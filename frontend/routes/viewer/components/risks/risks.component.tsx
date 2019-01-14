@@ -440,6 +440,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
+		console.log('risks props', this.props);
 		return (
 			<ViewerPanel
 				title="SafetiBase"

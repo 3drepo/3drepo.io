@@ -446,4 +446,4 @@ export const IssuesComponent: ng.IComponentOptions = {
 
 export const IssuesComponentModule = angular
 	.module('3drepo')
-	.component('issues', IssuesComponent);
+	.component('issues-old', IssuesComponent);
