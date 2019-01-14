@@ -11,7 +11,7 @@
     "restart": "yarn run stop; yarn run start",
     "upgrade": "git checkout master && git pull && yarn run restart",
     "create-ghost": "NODE_ENV=test NODE_CONFIG_DIR=../config node ../scripts/createGhost",
-	"gen-docs": "yarn run apidoc -i routes/ -o docs/ ",
+    "gen-docs": "yarn run apidoc -i routes/ -o docs/ ",
     "test": "yarn run test:unit && yarn run test:int",
     "test:clean-db": "mongorestore --drop ../../tests/backend/dump",
     "test:coverage": "yarn test:int-clean && nyc yarn run test",
