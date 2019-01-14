@@ -251,7 +251,7 @@ router.get("/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png", middlewares
  * @apiParam {Number} of tiles along row (x-cordinate)
  * @apiParam {String}  Map image type (format) to return
  */
-router.get("/:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHerePOITile)
+router.get("/:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHerePOITile);
 
 /**
  * @api {get} /:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png Get Here Buildings From Longitude and Latitude
