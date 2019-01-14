@@ -1,5 +1,6 @@
 doctype html
 html(lang="en" ng-app="3drepo").ng-scope
+	base(href="/")
 	script(type="text/javascript", src="/config.js")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 	//- <-! must add background-color and !important for displaying on a printed web page. 
@@ -202,7 +203,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 				button(onclick="printDialog()") Print
 				button(onclick="showHide(event)") Hide Log
 				button(onclick="changeImageSize(event)") Large Pictures
-			img(src="/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
+			img(src=baseURL+"/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
 
 		.container
 			.top-header

@@ -341,11 +341,14 @@ function renderIssuesHTML(req, res, next) {
 				splitIssues.open.push(issues[i]);
 			}
 		}
+		
+		const useNonPublicPort = true;
 
 		finaliseValues.then(()=> {
 			res.render("issues.pug", {
 				issues: splitIssues,
 				reportValues: reportValues,
+				baseURL: config.getBaseURL(useNonPublicPort),
 				url: function (path) {
 					return config.apiAlgorithm.apiUrl(C.GET_API, path);
 				}
