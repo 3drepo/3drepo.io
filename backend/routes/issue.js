@@ -268,8 +268,10 @@ function renderIssuesHTML(req, res, next) {
 	**/
 	const reportValues = {};
 	const reportDate = formatDate(new Date(), "Do MMMM YYYY");
+	const documentDate = formatDate(new Date(), "DD_MM_YY_hh_mm_ss");
 	const currentUser = req.session.user.username;
 	reportValues.reportDate = reportDate;
+	reportValues.documentDate = documentDate;
 	reportValues.currentUser = currentUser;
 
 	const modelName = ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
