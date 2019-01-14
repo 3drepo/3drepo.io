@@ -14,8 +14,8 @@ html(lang="en" ng-app="3drepo")
 		style(type='text/css').
 
 			html, body {
-				font-family: Roboto, sans-serif;
-				font-size:12px;
+				font-family: Arial, sans-serif;
+				font-size:10px;
 				width: 100%;
 				height: 100%;
 				padding: 0;
@@ -120,7 +120,7 @@ html(lang="en" ng-app="3drepo")
 					if !billing.pending
 						br
 						p
-							| PayPal transaction ID:
+							| PayPal transaction ID: 
 							a(href="https://www.paypal.com/activity/payment/#{billing.transactionId}") #{billing.transactionId}
 
 			table(cellspacing="0")
