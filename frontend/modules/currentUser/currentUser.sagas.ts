@@ -44,7 +44,7 @@ export function* fetchUser({ username }) {
 			put(CurrentUserActions.setAsInitialized())
 		]);
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'user data', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'user data', e));
 	}
 
 	yield put(CurrentUserActions.setPendingState(false));
@@ -56,7 +56,7 @@ export function* fetchQuotaInfo({ teamspace }) {
 
 		yield put(CurrentUserActions.fetchQuotaInfoSuccess({ ...data }));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'quota info', e.response));
+		yield put(DialogActions.showErrorDialog('fetch', 'quota info', e));
 	}
 }
 
@@ -70,7 +70,7 @@ export function* updateUser({ userData }) {
 		yield put(CurrentUserActions.setPendingState(false));
 		yield put(CurrentUserActions.updateUserSuccess(userData));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('update', 'user', e.response));
+		yield put(DialogActions.showErrorDialog('update', 'user', e));
 		yield put(CurrentUserActions.setPendingState(false));
 	}
 }
@@ -86,7 +86,7 @@ export function* updateUserPassword({ passwords }) {
 		if (code === 'INCORRECT_USERNAME_OR_PASSWORD') {
 			e.response.data.message = 'Your old password was incorrect';
 		}
-		yield put(DialogActions.showErrorDialog('update', 'password', e.response));
+		yield put(DialogActions.showErrorDialog('update', 'password', e));
 	}
 }
 
@@ -112,7 +112,7 @@ export function* uploadAvatar({ file }) {
 			throw {response: { data: { message }}};
 		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('upload', 'avatar', e.response));
+		yield put(DialogActions.showErrorDialog('upload', 'avatar', e));
 		yield put(CurrentUserActions.refreshAvatar());
 	}
 }

@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as queryString from 'query-string';
-import { Link, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import {isEqual, isEmpty} from 'lodash';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
