@@ -29,7 +29,6 @@ div.homeContainer(
 
 		div(
 			ui-view=""
-			flex="grow"
 			layout="column"
 			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all','position': vm.$state.current.name === 'app.viewer' ? 'static' : 'relative'}"
 		)

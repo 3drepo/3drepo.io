@@ -189,6 +189,7 @@ function getIssuesBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
+	const dbCol =  {account: account, model: model};
 
 	let ids;
 	if (req.query.ids) {
@@ -205,13 +206,19 @@ function getIssuesBCF(req, res, next) {
 
 	getBCFZipRS.then(zipRS => {
 
-		const headers = {
-			"Content-Disposition": "attachment;filename=issues.bcfzip",
-			"Content-Type": "application/zip"
-		};
+		const timestamp = (new Date()).toLocaleString();
 
-		res.writeHead(200, headers);
-		zipRS.pipe(res);
+		ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
+			const filenamePrefix = (settings.name + "_" + timestamp + "_").replace(/\W+/g, "_");
+
+			const headers = {
+				"Content-Disposition": "attachment;filename=" + filenamePrefix + "issues.bcf",
+				"Content-Type": "application/zip"
+			};
+
+			res.writeHead(200, headers);
+			zipRS.pipe(res);
+		});
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

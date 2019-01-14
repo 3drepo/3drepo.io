@@ -54,7 +54,7 @@ export function* login({ username, password }) {
 		} else if (e.response.status === 400 && e.response.code === 'ALREADY_LOGGED_IN') {
 			yield put(AuthActions.authenticate());
 		} else {
-			yield put(DialogActions.showErrorDialog('login', 'user', e.response));
+			yield put(DialogActions.showErrorDialog('login', 'user', e));
 		}
 	}
 	yield put(AuthActions.setPendingStatus(false));
@@ -73,7 +73,7 @@ export function* logout() {
 		if (e.response.status === 401) {
 			yield put({ type: 'RESET_APP' });
 		} else {
-			yield put(DialogActions.showErrorDialog('logout', 'user', e.response));
+			yield put(DialogActions.showErrorDialog('logout', 'user', e));
 		}
 	}
 	yield put(AuthActions.setLocalSessionStatus(false));
@@ -97,7 +97,7 @@ export function* authenticate() {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
 		} else {
-			yield put(DialogActions.showErrorDialog('authenticate', 'user', e.response));
+			yield put(DialogActions.showErrorDialog('authenticate', 'user', e));
 		}
 		yield AuthService.initialAuthPromise.reject();
 	}
@@ -115,7 +115,7 @@ export function* sessionExpired() {
 			content: 'You have been logged out as your session has expired'
 		}));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('verify', 'user session', e.response));
+		yield put(DialogActions.showErrorDialog('verify', 'user session', e));
 	}
 }
 
@@ -127,7 +127,7 @@ export function* sendPasswordChangeRequest({ userNameOrEmail }) {
 		yield put(AuthActions.setAuthMessage(forgotPasswordMessages.success));
 
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('send', 'request', e.response));
+		yield put(DialogActions.showErrorDialog('send', 'request', e));
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }
@@ -139,7 +139,7 @@ export function* changePassword({ username, token, password }) {
 		yield API.changePassword(username, token, password);
 		yield put(AuthActions.setAuthMessage(changePasswordMessages.success));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('change', 'password', e.response));
+		yield put(DialogActions.showErrorDialog('change', 'password', e));
 	}
 
 	yield put(AuthActions.setPendingStatus(false));
@@ -152,7 +152,7 @@ export function* register({ username, data }) {
 		yield API.register(username, data);
 		yield history.push('register-request');
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('register', 'user', e.response));
+		yield put(DialogActions.showErrorDialog('register', 'user', e));
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }
