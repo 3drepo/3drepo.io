@@ -166,10 +166,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 	script.
 
 		function printDialog() {
-			const timeStamp =  new Date();
-			const modelName; 
-			document.title = "Test Title";
-			return window.print();
+			const timeStamp =  reportValues.reportDate
+			const modelName = reportValues.modelName;
+			document.title = timeStamp + modelName;
+			console.log("title", document.title);
+			//- return window.print();
 		}
 
 		function showHide(e) {

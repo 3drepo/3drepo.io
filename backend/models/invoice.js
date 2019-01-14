@@ -380,9 +380,9 @@
 
 			const useNonPublicPort = true;
 
-			let template = path.join(__dirname, "../../pug/invoice.pug");
+			let template = path.join(__dirname, "../../resources/pug/invoice.pug");
 			if (this.type === "refund") {
-				template = path.join(__dirname, "../../pug/refund.pug");
+				template = path.join(__dirname, "../../resources/pug/refund.pug");
 			}
 
 			pug.renderFile(template, { billing: this.toJSON(), baseURL: config.getBaseURL(useNonPublicPort) }, function (err, html) {
