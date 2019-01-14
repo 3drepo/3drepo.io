@@ -55,13 +55,12 @@ class HeightSetterController implements ng.IController, IBindings {
 			this.container = this.reactElement.children();
 			this.headerHeight = this.container.children()[0].clientHeight;
 			this.content = angular.element(this.container.children()[1]) as any;
-			debugger;
 
 			this.content.css('max-height', `${this.contentData.height}px`);
 			this.observer.observe(this.content[0], { attributes: false, childList: true, subtree: false });
 
 			this.removeHeightWatch = this.$scope.$watch(() => this.contentData.height, (newValue) => {
-				this.content.css('max-height', `${newValue - this.headerHeight}px`);
+				this.content.css('max-height', `${newValue}px`);
 			});
 		});
 	}
@@ -70,7 +69,9 @@ class HeightSetterController implements ng.IController, IBindings {
 		return this.content[0].querySelector('.height-catcher').scrollHeight;
 	}
 
-	public $onInit(): void {}
+	public $onInit(): void {
+		this.updateHeight();
+	}
 
 	public updateHeight = () => {
 		this.updateHeightTimeout = this.$timeout(() => {
@@ -85,7 +86,6 @@ class HeightSetterController implements ng.IController, IBindings {
 	}
 
 	public handleElementChange = (mutationsList) => {
-		debugger;
 		const shouldUpdateHeight = mutationsList
 			.some((mutation) => mutation.type === 'childList' && mutation.addedNodes.length);
 

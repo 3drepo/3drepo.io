@@ -62,7 +62,7 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public ViewerService = getAngularService('ViewerService', this) as any;
 
-	public listRef = React.createRef<any>();
+	public containerRef = React.createRef<any>();
 
 	get footerText() {
 		const { searchEnabled, viewpoints } = this.props;
@@ -127,7 +127,7 @@ export class Views extends React.PureComponent<IProps, any> {
 		));
 
 		return (
-			<ViewpointsList innerRef={this.listRef}>
+			<ViewpointsList>
 				{Viewpoints}
 				{this.renderNewViewpoint(this.props.newViewpoint)}
 			</ViewpointsList>
@@ -168,9 +168,9 @@ export class Views extends React.PureComponent<IProps, any> {
 				}
 
 				if (newViewpoint) {
-					const listRef = this.listRef.current.listRef;
+					const containerRef = this.containerRef.current.containerRef;
 					setState({ activeViewpointId: null, editMode: false });
-					this.listRef.current.listRef.scrollTo(0, listRef.scrollHeight + 200);
+					this.containerRef.current.containerRef.scrollTo(0, containerRef.scrollHeight + 200);
 				}
 			});
 		}
@@ -287,13 +287,13 @@ export class Views extends React.PureComponent<IProps, any> {
 				actions={this.getActions()}
 				pending={this.props.isPending}
 			>
-				<Container className="height-catcher">
+				<Container className="height-catcher" innerRef={this.containerRef}>
 					{this.renderEmptyState(!hasViewpoints && !searchEnabled)}
 					{this.renderSearch(searchEnabled)}
 					{this.renderNotFound(searchEnabled && !filteredViewpoints.length)}
 					{this.renderViewpoints(hasViewpoints)}
-					{this.renderFooterContent()}
 				</Container>
+				{this.renderFooterContent()}
 			</ViewerPanel>
 		);
 	}

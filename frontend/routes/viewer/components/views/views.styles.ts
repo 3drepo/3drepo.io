@@ -25,7 +25,7 @@ import { COLOR } from '../../../../styles/colors';
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 export const ViewsCountInfo = styled.p`
@@ -41,7 +41,7 @@ export const ViewsCountInfo = styled.p`
 export const ViewpointsList = styled(MenuList)`
   && {
     padding: 0;
-    overflow: auto;
+    height: auto;
     max-height: 70vh;
   }
 `;
