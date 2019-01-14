@@ -1,6 +1,6 @@
 {
-  "name": "3drepo.io-backend",
-  "version": "1.0.0",
+  "name": "3drepo.io",
+  "version": "3.0.0",
   "engines": {
     "node": "^8.0.0"
   },
@@ -11,6 +11,7 @@
     "restart": "yarn run stop; yarn run start",
     "upgrade": "git checkout master && git pull && yarn run restart",
     "create-ghost": "NODE_ENV=test NODE_CONFIG_DIR=../config node ../scripts/createGhost",
+    "gen-docs": "yarn run apidoc -i routes/ -o docs/ ",
     "test": "yarn run test:unit && yarn run test:int",
     "test:clean-db": "mongorestore --drop ../../tests/backend/dump",
     "test:coverage": "yarn test:int-clean && nyc yarn run test",
@@ -27,6 +28,7 @@
   },
   "dependencies": {
     "amqplib": "0.4.1",
+    "apidoc": "0.17.7",
     "app-config": "0.1.5",
     "archiver": "1.1.0",
     "async": "1.5.2",
