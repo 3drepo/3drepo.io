@@ -45,7 +45,6 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 router.post("/model",
 	convertProjectToParam,
-	middlewares.connectQueue,
 	middlewares.canCreateModel,
 	createModel
 );
@@ -57,7 +56,7 @@ router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMp
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
 // update federated model
-router.put("/:model", middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
+router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
 
 // model permission
 router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
@@ -86,7 +85,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
-router.post("/:model/upload", middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
+router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
 function updateSettings(req, res, next) {

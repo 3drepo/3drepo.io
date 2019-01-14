@@ -73,6 +73,13 @@
 			return Promise.reject({ message: "Please define event_exchange in queue config" });
 		}
 
+		this.sharedSpacePath = options.shared_storage;
+		this.logger = options.logger;
+		this.callbackQName = options.callback_queue;
+		this.workerQName = options.worker_queue;
+		this.modelQName = options.model_queue;
+		this.eventExchange = options.event_exchange;
+
 		return amqp.connect(url)
 			.then(conn => {
 				this.conn = conn;
@@ -89,19 +96,28 @@
 			})
 			.then(channel => {
 				this.channel = channel;
-				this.sharedSpacePath = options.shared_storage;
-				this.logger = options.logger;
-				this.callbackQName = options.callback_queue;
-				this.workerQName = options.worker_queue;
-				this.modelQName = options.model_queue;
 				this.deferedObjs = {}; // cclw05 - should be deferred?
-				this.eventExchange = options.event_exchange;
 
 				return this._consumeCallbackQueue();
 			})
 			.catch(err => {
 				return Promise.reject(err);
 			});
+	};
+
+	ImportQueue.prototype.getChannel = function () {
+		if (this.conn && this.channel) {
+			return Promise.resolve(this.channel);
+		} else {
+			systemLogger.logInfo("Reconnecting to queue...");
+			return this.connect().then(() => {
+				systemLogger.logInfo("...Connected to queue!");
+				return this.channel;
+			}).catch((err) => {
+				systemLogger.logError("Error (getChannel): " + err.message);
+				return Promise.resolve();
+			});
+		}
 	};
 
 	/** *****************************************************************************
@@ -269,47 +285,55 @@
 	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
 	ImportQueue.prototype._dispatchWork = function (corID, msg, isModelImport) {
-		let info;
+		const _channel = this.getChannel();
 		const queueName = isModelImport ? this.modelQName : this.workerQName;
-		return this.channel.assertQueue(queueName, { durable: true })
-			.then(_info => {
-				info = _info;
+		let info;
 
-				return this.channel.sendToQueue(queueName,
-					new Buffer.from(msg), {
-						correlationId: corID,
-						appId: this.uid,
-						persistent: true
-					}
-				);
+		_channel.then((channel) => {
+			try {
+				return channel.assertQueue(queueName, { durable: true })
+					.then(_info => {
+						info = _info;
 
-			})
-			.then(() => {
-				this.logger.logInfo(
-					"Sent work to queue[" + queueName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
-						corID: corID.toString()
-					}
-				);
+						return channel.sendToQueue(queueName,
+							new Buffer.from(msg), {
+								correlationId: corID,
+								appId: this.uid,
+								persistent: true
+							}
+						);
 
-				if (info.consumerCount <= 0) {
-					this.logger.logError(
-						"No consumer found in the queue", {
-							corID: corID.toString()
+					})
+					.then(() => {
+						this.logger.logInfo(
+							"Sent work to queue[" + queueName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
+								corID: corID.toString()
+							}
+						);
+
+						if (info.consumerCount <= 0) {
+							this.logger.logError(
+								"No consumer found in the queue", {
+									corID: corID.toString()
+								}
+							);
+							this.logger.logInfo("No consumer in queue. Sending email alert...");
+
+							Mailer.sendNoConsumerAlert().then(() => {
+								this.logger.logInfo("Email sent.");
+							}).catch(err =>{
+								this.logger.logInfo("Failed to send email:", err);
+							});
+
 						}
-					);
-					this.logger.logInfo("No consumer in queue. Sending email alert...");
 
-					Mailer.sendNoConsumerAlert().then(() => {
-						this.logger.logInfo("Email sent.");
-					}).catch(err =>{
-						this.logger.logInfo("Failed to send email:", err);
+						return Promise.resolve(() => {});
 					});
-
-				}
-
-				return Promise.resolve(() => {});
-			});
-
+			} catch(err) {
+				systemLogger.logError("Error (_dispatchWork): " + err.message);
+				return Promise.resolve();
+			}
+		});
 	};
 
 	/** *****************************************************************************
@@ -318,104 +342,119 @@
 	 *******************************************************************************/
 	ImportQueue.prototype._consumeCallbackQueue = function () {
 		const self = this;
+		const _channel = this.getChannel();
 		let queue;
 
-		return this.channel.assertExchange(this.callbackQName, "direct", { durable: true })
-			.then(() => {
+		_channel.then((channel) => {
+			try {
+				return channel.assertExchange(this.callbackQName, "direct", { durable: true })
+					.then(() => {
 
-				return this.channel.assertQueue("", { exclusive: true });
+						return channel.assertQueue("", { exclusive: true });
 
-			})
-			.then((q) => {
+					})
+					.then((q) => {
 
-				queue = q.queue;
-				return this.channel.bindQueue(queue, this.callbackQName, this.uid);
+						queue = q.queue;
+						return channel.bindQueue(queue, this.callbackQName, this.uid);
 
-			})
-			.then(() => {
+					})
+					.then(() => {
 
-				return this.channel.consume(queue, function (rep) {
+						return channel.consume(queue, function (rep) {
 
-					self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
+							self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
 
-					const ModelHelper = require("../models/helper/model");
+							const ModelHelper = require("../models/helper/model");
 
-					const defer = self.deferedObjs[rep.properties.correlationId];
+							const defer = self.deferedObjs[rep.properties.correlationId];
 
-					const resData = JSON.parse(rep.content);
+							const resData = JSON.parse(rep.content);
 
-					const resErrorCode = resData.value;
-					const resErrorMessage = resData.message;
-					const resDatabase = resData.database;
-					const resProject = resData.project;
-					const resUser = resData.user ? resData.user : "unknown";
+							const resErrorCode = resData.value;
+							const resErrorMessage = resData.message;
+							const resDatabase = resData.database;
+							const resProject = resData.project;
+							const resUser = resData.user ? resData.user : "unknown";
 
-					const status = resData.status;
+							const status = resData.status;
 
-					if ("processing" === status) {
-						ModelHelper.setStatus(resDatabase, resProject, "processing");
-					} else {
-						if (resErrorCode === 0) {
-							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);
-						} else {
-							ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
-						}
-						defer && delete self.deferedObjs[rep.properties.correlationId];
-					}
-				}, { noAck: true });
-			});
+							if ("processing" === status) {
+								ModelHelper.setStatus(resDatabase, resProject, "processing");
+							} else {
+								if (resErrorCode === 0) {
+									ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath);
+								} else {
+									ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
+								}
+								defer && delete self.deferedObjs[rep.properties.correlationId];
+							}
+						}, { noAck: true });
+					});
+			} catch(err) {
+				systemLogger.logError("Error (_consumeCallbackQueue): " + err.message);
+				return Promise.resolve();
+			}
+		});
 	};
 
 	ImportQueue.prototype.insertEventMessage = function (msg) {
+		const _channel = this.getChannel();
 
-		try {
-			return this.channel.assertExchange(this.eventExchange, "fanout", {
-				durable: true
-			})
-				.then(() => {
-					return this.channel.publish(
-						this.eventExchange,
-						"",
-						new Buffer.from(JSON.stringify(msg)), {
-							persistent: true
-						}
-					);
-				});
-		} catch(err) {
-			return this.connect().then(() => {
-				return this.insertEventMessage(msg);
-			}).catch((e) => {
-				systemLogger.logError("Error (insertEventQueue): " + e.message);
+		_channel.then((channel) => {
+			try {
+				return channel.assertExchange(this.eventExchange, "fanout", {
+					durable: true
+				})
+					.then(() => {
+						return channel.publish(
+							this.eventExchange,
+							"",
+							new Buffer.from(JSON.stringify(msg)), {
+								persistent: true
+							}
+						);
+					});
+			} catch(err) {
+				systemLogger.logError("Error (insertEventMessage): " + err.message);
 				return Promise.resolve();
-			});
-		}
+			}
+		});
 	};
 
 	ImportQueue.prototype.consumeEventMessage = function (callback) {
+		const _channel = this.getChannel();
 		let queue;
 
-		return this.channel.assertExchange(this.eventExchange, "fanout", {
-			durable: true
-		})
-			.then(() => {
+		_channel.then((channel) => {
+			try {
+				return channel.assertExchange(this.eventExchange, "fanout", {
+					durable: true
+				})
+					.then(() => {
 
-				return this.channel.assertQueue("", { exclusive: true });
+						return channel.assertQueue("", { exclusive: true });
 
-			})
-			.then(q => {
+					})
+					.then(q => {
 
-				queue = q.queue;
-				return this.channel.bindQueue(queue, this.eventExchange, "");
+						queue = q.queue;
+						return channel.bindQueue(queue, this.eventExchange, "");
 
-			})
-			.then(() => {
+					})
+					.then(() => {
 
-				return this.channel.consume(queue, function (rep) {
+						return channel.consume(queue, function (rep) {
 
-					callback(JSON.parse(rep.content));
+							callback(JSON.parse(rep.content));
 
-				}, { noAck: true });
-			});
+						}, { noAck: true });
+					});
+			} catch(err) {
+				systemLogger.logError("Error (consumeEventMessage): " + err.message);
+				return Promise.resolve();
+			}
+		});
 	};
 
 	module.exports = new ImportQueue();
