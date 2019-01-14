@@ -14,7 +14,8 @@ html(lang="en" ng-app="3drepo")
 		style(type='text/css').
 
 			html, body {
-				font-family: Roboto, sans-serif;
+				font-family: Arial, sans-serif;
+				font-size:10px;
 				width: 100%;
 				height: 100%;
 				padding: 0;
@@ -49,7 +50,7 @@ html(lang="en" ng-app="3drepo")
 				font-weight: bold;
 				padding-bottom: 1px;
 				margin-bottom: 9px;
-				border-bottom: 1px solid black; 
+				border-bottom: 1px solid black;
 				border-collapse: collapse;
 			}
 
@@ -74,16 +75,14 @@ html(lang="en" ng-app="3drepo")
 
 			.companyTitle {
 				font-weight: 500;
-				font-size: 1.2em;
 			}
-			
+
 			.invoice {
 				margin-top: 50px;
-				font-size: 40px;
+				font-size: 30px;
 			}
 
 			#billingPeriod {
-				font-size: 14px;
 				font-weight: 400;
 				color: #8a8a8a;
 			}
@@ -114,13 +113,15 @@ html(lang="en" ng-app="3drepo")
 				#billingInvoice.topBlocks
 					div
 						img#billingInvoiceLogo(src=baseURL+"/images/logo.png")
-					
+
 					div.invoice
 						p Credit Note
 
 					if !billing.pending
 						br
-						span PayPal transaction ID: #{billing.transactionId}
+						p
+							| PayPal transaction ID: 
+							a(href="https://www.paypal.com/activity/payment/#{billing.transactionId}") #{billing.transactionId}
 
 			table(cellspacing="0")
 				tr
@@ -129,9 +130,9 @@ html(lang="en" ng-app="3drepo")
 					th.tableCell.tableHead Credit Note Number
 
 				tr.billingClientAddress
-				
-					td.tableCell 
-						div 
+
+					td.tableCell
+						div
 							p #{billing.info.firstName} #{billing.info.lastName}
 							if billing.info.company
 								p #{billing.info.company}
@@ -141,7 +142,7 @@ html(lang="en" ng-app="3drepo")
 								p #{billing.info.line2}
 							p #{billing.info.city}
 							p #{billing.info.postalCode}
-							p #{billing.info.country}
+							p #{billing.info.countryName}
 							if billing.info.vat
 								p VAT ID: #{billing.info.vat}
 
@@ -157,13 +158,14 @@ html(lang="en" ng-app="3drepo")
 					th.tableCell.tableHead Total
 
 				tr
-					td.tableCell.productCol 
-						p Refund
+					td.tableCell.productCol
+						p Refund (#{user})
 					td.tableCell £#{parseFloat(billing.netAmount).toFixed(2)}
 					td.tableCell #{parseFloat(billing.taxPercentage).toFixed(2)}%
 					td.tableCell £#{parseFloat(billing.taxAmount).toFixed(2)}
 					td.tableCell £#{parseFloat(billing.amount).toFixed(2)}
 
-			
+
 			br
+
 
