@@ -163,73 +163,44 @@
 
 	function renderInvoice(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
-		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo)
-			.then(invoice => {
-				if (!invoice) {
-					return Promise.reject(responseCodes.BILLING_NOT_FOUND);
-				}
+		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(invoice => {
 
-				let template = "invoice.pug";
+			if(!invoice) {
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
 
-				if (invoice.type === "refund") {
-					template = "refund.pug";
-				}
+			let template = "invoice.pug";
 
-				// console.log( invoice.toJSON());
+			if(invoice.type === "refund") {
+				template = "refund.pug";
+			}
 
-				res.render(template, {
-					billing: invoice.toJSON(),
-					baseURL: config.getBaseURL()
-				});
-			})
-			.catch(err => {
-				responseCodes.respond(
-					responsePlace,
-					req,
-					res,
-					next,
-					err.resCode || utils.mongoErrorToResCode(err),
-					err.resCode ? {} : err
-				);
-			});
+			res.render(template, {billing : invoice.toJSON(), baseURL: config.getBaseURL()});
+
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
 	}
 
-	function renderInvoicePDF(req, res, next) {
-		const responsePlace = utils.APIInfo(req);
+	function renderInvoicePDF(req, res) {
 		let invoice;
 
-		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo)
-			.then(_invoice => {
-				invoice = _invoice;
-				if (!invoice) {
-					return Promise.reject(responseCodes.BILLING_NOT_FOUND);
-				}
+		Invoice.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_invoice => {
 
-				return invoice.generatePDF();
-			})
-			.then(pdf => {
-				res.writeHead(200, {
-					"Content-Type": "application/pdf",
-					"Content-disposition": `inline; filename="${moment(
-						invoice.createdAtDate
-					)
-						.utc()
-						.format("YYYY-MM-DD")}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
-					"Content-Length": pdf.length
-				});
+			invoice = _invoice;
+			if(!invoice) {
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
+			return invoice.generatePDF(req.params.account);
 
-				res.end(pdf);
-			})
-			.catch(err => {
-				responseCodes.respond(
-					responsePlace,
-					req,
-					res,
-					next,
-					err.resCode || utils.mongoErrorToResCode(err),
-					err.resCode ? {} : err
-				);
+		}).then(pdf => {
+
+			res.writeHead(200, {
+				"Content-Type": "application/pdf",
+				"Content-disposition": `inline; filename="${moment(invoice.createdAtDate).utc().format("YYYY-MM-DD")}_${invoice.type}-${invoice.invoiceNo}.pdf"`,
+				"Content-Length": pdf.length
 			});
+		});
 	}
 
 	module.exports = router;
