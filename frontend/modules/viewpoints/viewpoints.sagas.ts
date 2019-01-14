@@ -19,7 +19,6 @@ import { put, takeLatest, all } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
-import { ViewerActions } from '../viewer';
 import { DialogActions } from '../dialog';
 import { getScreenshot } from '../viewer/viewer.sagas';
 
