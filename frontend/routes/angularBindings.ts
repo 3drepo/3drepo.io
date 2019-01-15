@@ -35,7 +35,6 @@ angular
 	.component('registerVerify', wrap(RegisterVerify))
 	.component('signUp', wrap(SignUp, ['onLogoClick']))
 	.component('staticPageViewer', wrap(StaticPageViewer))
-	.component('viewerPanel', wrap(ViewerPanel))
 	.component('gis', wrap(Gis))
-    .component('risks', wrap(Risks, ['teamspace', 'model', 'revision']))
+	.component('risks', wrap(Risks, ['teamspace', 'model', 'revision']))
 	.component('views', wrap(Views, ['teamspace', 'modelId']));

@@ -31,16 +31,29 @@ interface IProps {
 
 interface IState {
 	risk: any;
+	logs: any[];
 }
 
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		risk: {} as any
+		risk: {} as any,
+		logs: []
 	};
 
 	public setPreparedRisk = () => {
 		const risk = prepareRisk(this.props.risk, this.props.jobs);
-		this.setState({ risk });
+		const logs = this.props.risk.comments || [{
+			comment: 'Sample comment',
+			viewpoint: [],
+			created: Date.now(),
+			owner: 'charence',
+			action: null,
+			companyName: 'charence',
+			userName: 'charence',
+			teamspace: 'charence'
+		}];
+
+		this.setState({ risk, logs });
 	}
 
 	public componentDidMount() {
@@ -55,19 +68,21 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderLogListItem = (item) => {
-
+	public renderLogItem = (item, index) => {
+		return <Log key={index} {...item} />;
 	}
 
-	public renderLogList = renderWhenTrue(() => (<div />));
+	public renderLogs = renderWhenTrue(() =>
+		this.state.risk.comments.map(this.renderLogItem)
+	);
 
 	public render() {
-		const { risk } = this.state;
+		const { risk, logs } = this.state;
 
 		return (
 			<Container>
 				<PreviewDetails {...risk} />
-				{/* <Log /> */}
+				{this.renderLogs(logs.length)}
 			</Container>
 		);
 	}
