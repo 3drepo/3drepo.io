@@ -29,31 +29,6 @@ const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
 
-function writeFile(fileName, content) {
-	// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
-	return new Promise((resolve, reject) => {
-		fs.writeFile(fileName, content, { flag: "a+" }, err => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve();
-			}
-		});
-	});
-}
-
-function mkdir(newDir) {
-	return new Promise((resolve, reject) => {
-		fs.mkdir(newDir, (err) => {
-			if (!err || err && err.code === "EEXIST") {
-				resolve();
-			} else {
-				reject(err);
-			}
-		});
-	});
-}
-
 class ImportQueue {
 	constructor() {
 		if(!config.cn_queue ||
@@ -75,6 +50,31 @@ class ImportQueue {
 		this.uid = shortid.generate();
 		this.channel = null;
 		this.connect();
+	}
+
+	writeFile(fileName, content) {
+		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
+		return new Promise((resolve, reject) => {
+			fs.writeFile(fileName, content, { flag: "a+" }, err => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+		});
+	}
+
+	mkdir(newDir) {
+		return new Promise((resolve, reject) => {
+			fs.mkdir(newDir, (err) => {
+				if (!err || err && err.code === "EEXIST") {
+					resolve();
+				} else {
+					reject(err);
+				}
+			});
+		});
 	}
 
 	connect() {
@@ -177,7 +177,7 @@ class ImportQueue {
 				json.desc = desc;
 			}
 
-			return writeFile(jsonFilename, JSON.stringify(json)).then(() => {
+			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
 				const msg = `import -f ${jsonFilename}`;
 				return this._dispatchWork(corID, msg, true);
 			});
@@ -195,9 +195,9 @@ class ImportQueue {
 		const newFileDir = this.sharedSpacePath + "/" + corID;
 		const filename = `${newFileDir}/obj.json`;
 
-		return mkdir(this.sharedSpacePath).then(() => {
-			return mkdir(newFileDir).then(() => {
-				return fs.writeFile(filename, JSON.stringify(defObj)).then(() => {
+		return this.mkdir(this.sharedSpacePath).then(() => {
+			return this.mkdir(newFileDir).then(() => {
+				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
 					const msg = `genFed ${filename} ${account}`;
 					return this._dispatchWork(corID, msg);
 				});
@@ -235,7 +235,7 @@ class ImportQueue {
 		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		const filePath = newFileDir + newFileName;
 
-		return mkdir(newFileDir).then(() => {
+		return this.mkdir(newFileDir).then(() => {
 			const move = copy ? fs.copy : fs.move;
 			return new Promise((resolve, reject) => {
 				move(orgFilePath, filePath, (moveErr) => {
