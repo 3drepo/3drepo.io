@@ -26,6 +26,7 @@ import Billing from '../billing/billing.container';
 import { Container, Sidebar, Content } from './dashboard.styles';
 import { UserInfo } from '../components/userInfo/userInfo.component';
 import { RoutePlaceholder } from './components/routePlaceholder/routePlaceholder.component';
+import { TestContainer } from './../components/testContainer/testContainer.component';
 
 const MENU_ITEMS = [
 	{
@@ -118,6 +119,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 						loading={!isInitialized && (isPending || isAvatarPending)}
 						items={MENU_ITEMS}
 					/>
+					<TestContainer />
 				</Sidebar>
 				<Route path={`${match.url}dashboard`} render={this.renderDashboardRoute} />
 			</Container>

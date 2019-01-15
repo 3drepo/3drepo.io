@@ -20,8 +20,8 @@ import { COLOR } from './../../../styles/colors';
 import Popper from '@material-ui/core/Popper';
 import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import IconButton from '@material-ui/core/IconButton';
+import MoreIcon from '@material-ui/icons/MoreVert';
 
 export const Container = styled.div`
   background-color: ${COLOR.WHITE};
@@ -29,29 +29,38 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	padding: 0 5px;
+	padding: 0 8px;
 	height: ${(props: any) => props.filtersOpen ? '64px' : '100%'};
 ` as any;
 
 export const SelectedFilters = styled.div`
   display: flex;
-  margin: 10px 0;
+  margin: 10px 0 0;
   flex-wrap: wrap;
 	padding-right: 40px;
 	min-height: ${(props: any) => props.empty ? '0' : '50px'};
+	position: relative;
 ` as any;
 
 export const InputContainer = styled.div`
   display: block;
 	justify-content: flex-end;
 	position: relative;
+	margin: 0 6px;
 
   .react-autosuggest__container {
-    width: 100%;
 		height: 36px;
     flex: 1;
     position: absolute;
     bottom: 0;
+		left: 0;
+		right: 0;
+
+		input {
+			color: rgba(0, 0, 0, 0.87);
+			font-size: 14px;
+
+		}
   }
 `;
 
@@ -89,17 +98,20 @@ export const StyledChip = styled(Chip)`
   margin: 8px 3px;
 `;
 
-export const StyledButtonMenu = styled(ButtonMenu)`
-  position: absolute;
-	right: 0;
-`;
-
 export const FiltersButton = styled(IconButton)`
 	align-self: flex-end;
 
 	&& {
 		position: absolute;
-		top: 5px;
+    top: 5px;
+		width: 28px;
+		height: 28px;
+		right: 4px;
+
+		svg {
+			bottom: 0;
+	    position: absolute;
+		}
 	}
 `;
 
@@ -107,4 +119,26 @@ export const ButtonContainer = styled.div`
 	display: flex;
 	width: 100%;
 	justify-content: flex-end;
+`;
+
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		width: 28px;
+		height: 28px;
+		position: absolute;
+    bottom: 6px;
+		right: -6px;
+	}
+`;
+
+export const StyledMoreIcon = styled(MoreIcon)`
+	&& {
+		font-size: 20px;
+		position: absolute;
+	}
+`;
+
+export const ButtonWrapper = styled.div`
+  position: relative;
+	height: 50px;
 `;

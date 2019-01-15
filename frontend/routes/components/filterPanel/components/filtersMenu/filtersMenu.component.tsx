@@ -16,8 +16,9 @@
  */
 
 import * as React from 'react';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider, DatePicker } from 'material-ui-pickers';
+import LuxonUtils from '@date-io/luxon';
+
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import List from '@material-ui/core/List';
@@ -50,13 +51,15 @@ interface IState {
 	activeItem: any;
 	from: any;
 	to: any;
+	selectedDate: any;
 }
 
 export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	public state = {
 		activeItem: null,
 		from: new Date(),
-		to: new Date()
+		to: new Date(),
+		selectedDate: new Date()
 	};
 
 	public parentRef = React.createRef<HTMLElement>();
@@ -77,8 +80,8 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		this.props.onToggleFilter(itemParent, item);
 	}
 
-	public isSelectedItem = (value) =>
-		!!this.props.selectedItems.find((filter) => filter.value.value === value)
+	public isSelectedItem = (item) =>
+		!!this.props.selectedItems.find((filter) => filter.value.value === item.value)
 
 	public renderListParentItem = (index, item) => {
 		return (
@@ -97,24 +100,26 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderListChildItem = (index, item) => (subItem) => (
-		<StyledListItem
-			button
-			onClick={this.toggleSelectItem(item, subItem)}
-			key={`${subItem.label}-${index}`}
-		>
-			<StyledItemText>
-				{subItem.label}
-				{item.type === DATA_TYPES.DATE &&
-					<StyledDatePicker
-						value={this.state[subItem.value]}
-						onChange={this.onDateChange(item, subItem)}
-					/>
-				}
-				{this.isSelectedItem(subItem.value) && <Check fontSize={'small'} />}
-			</StyledItemText>
-		</StyledListItem>
-	)
+	public renderListChildItem = (index, item) => (subItem) => {
+		return (
+			<StyledListItem
+				button
+				onClick={this.toggleSelectItem(item, subItem)}
+				key={`${subItem.label}-${index}`}
+			>
+				<StyledItemText>
+					{subItem.label}
+					{item.type === DATA_TYPES.DATE &&
+						<StyledDatePicker
+							value={this.state[subItem.value]}
+							onChange={this.onDateChange(item, subItem)}
+						/>
+					}
+					{this.isSelectedItem(subItem) && <Check fontSize={'small'} />}
+				</StyledItemText>
+			</StyledListItem>
+		);
+	}
 
 	public renderChildItems = (index, item) => renderWhenTrue(() => (
 		<ChildMenu>
@@ -146,9 +151,13 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		</MenuFooter>
 	)
 
+	public handleDateChange = (date) => {
+		this.setState({ selectedDate: date });
+	}
+
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={DateFnsUtils}>
+			<MuiPickersUtilsProvider utils={LuxonUtils}>
 				<MenuList>
 					{this.renderMenuItems(this.props.items)}
 					{this.renderFooter()}

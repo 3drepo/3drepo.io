@@ -26,6 +26,8 @@ export const MenuList = styled(List)`
   width: 100%;
   min-width: 140px;
   max-width: 300px;
+  box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
+  border-radius: 2px;
 `;
 
 export const NestedWrapper = styled.div`
@@ -41,6 +43,8 @@ export const ChildMenu = styled.div`
   min-width: 150px;
   max-width: 400px;
   width: 100%;
+  box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};
+  border-radius: 0 2px 2px 0;
 `;
 
 export const StyledItemText = styled.div`
@@ -80,6 +84,7 @@ export const CopyText = styled.span`
 `;
 
 export const MenuFooter = styled.div`
-  border-top: 1px solid ${COLOR.BLACK_40};
-  margin-top: 6px;
+  border-top: 1px solid ${COLOR.BLACK_20};
+  margin-top: 8px;
+  padding-top: 8px;
 `;

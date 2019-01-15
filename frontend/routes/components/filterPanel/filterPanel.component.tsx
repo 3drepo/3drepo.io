@@ -20,14 +20,13 @@ import * as Autosuggest from 'react-autosuggest';
 import { omit, cloneDeep } from 'lodash';
 import * as dayjs from 'dayjs';
 
-import IconButton from '@material-ui/core/IconButton';
-import MoreIcon from '@material-ui/icons/MoreVert';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { ENTER_KEY } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
 	Container,
@@ -37,12 +36,16 @@ import {
 	StyledTextField,
 	StyledChip,
 	FiltersButton,
-	ButtonContainer
+	ButtonContainer,
+	StyledIconButton,
+	StyledMoreIcon,
+	ButtonWrapper
 } from './filterPanel.styles';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
-	DATE: 2
+	DATE: 2,
+	QUERY: 2
 };
 
 interface IFilter {
@@ -70,13 +73,15 @@ interface IState {
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
-  <IconButton
-    {...props}
-    aria-label="Show filters menu"
-    aria-haspopup="true"
-  >
-    <MoreIcon {...IconProps} />
-  </IconButton>
+	<ButtonWrapper>
+	  <StyledIconButton
+	    {...props}
+	    aria-label="Show filters menu"
+	    aria-haspopup="true"
+	  >
+	    <StyledMoreIcon {...IconProps} />
+	  </StyledIconButton>
+	</ButtonWrapper>
 );
 
 const getSuggestionValue = (suggestion) => suggestion.name;
@@ -232,6 +237,24 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		this.props.onChange(this.state.selectedFilters);
 	}
 
+	public onSearchSubmit = (event) => {
+		if (event.key === ENTER_KEY) {
+			event.preventDefault();
+			const queryValue = event.target.value;
+			const newFilter = {
+				label: queryValue,
+				type: DATA_TYPES.QUERY,
+				value: {
+					value: queryValue
+				}
+			};
+			this.setState((prevState) => ({
+				selectedFilters: [...prevState.selectedFilters, newFilter],
+				value: ''
+			}), this.handleFiltersChange);
+		}
+	}
+
 	public handleNewFilterSubmit: any = (event, { suggestion }) => {
 		event.preventDefault();
 
@@ -286,11 +309,13 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public renderSelectedFilters = () => (
 		<SelectedFilters empty={!this.state.selectedFilters.length}>
+			{this.state.selectedFilters.length ? this.renderFilterButton() : null}
+
 			{this.state.selectedFilters.map(
 				(filter, index) => (
 					<StyledChip
 						key={index}
-						label={`${filter.label}: ${filter.value.label}`}
+						label={filter.type !== DATA_TYPES.QUERY ? `${filter.label}: ${filter.value.label}` : filter.label}
 						onDelete={() => this.onDeselectFilter(filter)}
 					/>
 				)
@@ -305,7 +330,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		return (
 			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
 				{this.renderSelectedFilters()}
-				{this.state.selectedFilters.length ? this.renderFilterButton() : null}
 
 				<InputContainer>
 					<Autosuggest
@@ -319,6 +343,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 							placeholder: 'Filter',
 							value,
 							onChange: this.onSearchChange,
+							onKeyPress: this.onSearchSubmit,
 							inputRef: (node) => {
 								this.popperNode = node;
 							}
