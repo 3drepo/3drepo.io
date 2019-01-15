@@ -147,4 +147,4 @@ export const RiskDetailsForm = withFormik({
 		};
 	},
 	handleSubmit: () => {}
-})(RiskDetailsFormComponent as any);
+})(RiskDetailsFormComponent as any) as any;
