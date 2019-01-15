@@ -18,133 +18,140 @@ import {FieldsRow, StyledTextField, StyledFormControl } from './riskDetails.styl
 interface IProps {
 	risk: any;
 	jobs: any[];
+	values: any;
+	errors: any;
 	onSubmit: (values) => void;
+	handleChange: () => void;
 }
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, any> {
 	public render() {
+		const { values, errors, handleChange } = this.props;
+
 		return (
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
-					<Field name="safetibase_id" render={({ field }) => (
-						<StyledTextField
-							{...field}
-							label="GUID"
-						/>
-					)} />
+					<StyledTextField
+						onChange={handleChange}
+						value={values.safetibase_id}
+						label="GUID"
+						name="safetibase_id"
+					/>
 
-					<Field name="associated_activity" render={({ field }) => (
-						<StyledTextField
-							{...field}
-							label="Associated Activity"
-						/>
-					)} />
+					<StyledTextField
+						onChange={handleChange}
+						value={values.associated_activity}
+						label="Associated Activity"
+						name="associated_activity"
+					/>
 				</FieldsRow>
 
-				<Field name="desc" render={({ field }) => (
-					<StyledTextField
-						{...field}
-						fullWidth
-						multiline
-						label="Description"
-					/>
-				)} />
+				<StyledTextField
+					onChange={handleChange}
+					value={values.desc}
+					fullWidth
+					multiline
+					label="Description"
+					name="desc"
+				/>
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="assigned_roles">Risk owner</InputLabel>
-						<Field name="assigned_roles" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={this.props.jobs}
-								inputId="assigned_roles"
-							/>
-						)} />
+						<CellSelect
+							onChange={handleChange}
+							value={values.assigned_roles}
+							items={this.props.jobs}
+							inputId="assigned_roles"
+							name="assigned_roles"
+						/>
 					</StyledFormControl>
 
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="category">Category</InputLabel>
-						<Field name="category" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_CATEGORIES}
-								inputId="category"
-							/>
-						)} />
+						<CellSelect
+							name="category"
+							inputId="category"
+							onChange={handleChange}
+							value={values.category}
+							items={RISK_CATEGORIES}
+						/>
 					</StyledFormControl>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
-						<Field name="likelihood" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_LIKELIHOODS}
-								inputId="likelihood"
-							/>
-						)} />
+						<CellSelect
+							name="likelihood"
+							onChange={handleChange}
+							value={values.likelihood}
+							items={RISK_LIKELIHOODS}
+							inputId="likelihood"
+						/>
 					</StyledFormControl>
 
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
-						<Field name="consequence" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_CONSEQUENCES}
-								inputId="consequence"
-							/>
-						)} />
+						<CellSelect
+							name="consequence"
+							inputId="consequence"
+							onChange={handleChange}
+							value={values.consequence}
+							items={RISK_CONSEQUENCES}
+						/>
 					</StyledFormControl>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
-						<Field name="level_of_risk" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={LEVELS_OF_RISK}
-								inputId="level_of_risk"
-								disabled={true}
-							/>
-						)} />
+						<CellSelect
+							name="level_of_risk"
+							onChange={handleChange}
+							value={values.level_of_risk}
+							items={LEVELS_OF_RISK}
+							inputId="level_of_risk"
+							disabled={true}
+						/>
 					</StyledFormControl>
 
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="mitigation_status">Mitigation Status</InputLabel>
-						<Field name="mitigation_status" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_MITIGATION_STATUSES}
-								inputId="mitigation_status"
-							/>
-						)} />
+						<CellSelect
+							onChange={handleChange}
+							value={values.mitigation_status}
+							items={RISK_MITIGATION_STATUSES}
+							inputId="mitigation_status"
+							name="mitigation_status"
+						/>
 					</StyledFormControl>
 				</FieldsRow>
 
-				<Field name="mitigation_desc" render={({ field }) => (
-					<StyledTextField
-						{...field}
-						fullWidth
-						multiline
-						label="Mitigation"
-					/>
-				)} />
+				<StyledTextField
+					onChange={handleChange}
+					value={values.mitigation_desc}
+					fullWidth
+					multiline
+					label="Mitigation"
+					name="mitigation_desc"
+				/>
 			</Form>
 		);
 	}
 }
 
 export const RiskDetailsForm = withFormik({
-	mapPropsToValues: ({ risk }) => {
-		return {
-			...pick(risk, ['safetibase_id', 'associated_activity', 'description', 'mitigation_status']),
-			assigned_roles: get(risk, 'assigned_roles[0]', ''),
-			name: risk.name || 'Untitled risk',
-			likelihood: risk.likelihood || 0,
-			consequence: risk.consequence || 0
-		};
-	},
+	mapPropsToValues: ({ risk }) => ({
+		safetibase_id: risk.safetibase_id || '',
+		associated_activity: risk.associated_activity || '',
+		mitigation_status: risk.mitigation_status || '',
+		mitigation_desc: risk.mitigation_status || '',
+		description: risk.description || '',
+		assigned_roles: get(risk, 'assigned_roles[0]', ''),
+		name: risk.name || 'Untitled risk',
+		likelihood: risk.likelihood || 0,
+		consequence: risk.consequence || 0
+	}),
 	handleSubmit: () => {}
 })(RiskDetailsFormComponent as any) as any;

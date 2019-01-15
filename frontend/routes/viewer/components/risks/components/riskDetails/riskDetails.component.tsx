@@ -81,10 +81,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	}
 
-	public renderRiskOwnerList = () => {
-
-	}
-
 	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
 
 	public renderFooter = () => (
