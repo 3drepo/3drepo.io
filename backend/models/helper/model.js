@@ -624,6 +624,7 @@ function uploadFile(req) {
 				middlewares.freeSpace(account).then(space => {
 
 					if(sizeInMB > space) {
+						console.log(account, model, sizeInMB, space);
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
 						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
 					} else {
