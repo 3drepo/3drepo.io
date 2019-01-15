@@ -44,7 +44,7 @@ function writeFile(fileName, content) {
 
 function mkdir(newDir) {
 	return new Promise((resolve, reject) => {
-		fs.mkdir(newDir, function (err) {
+		fs.mkdir(newDir, (err) => {
 			if (!err || err && err.code === "EEXIST") {
 				resolve();
 			} else {
@@ -88,7 +88,7 @@ class ImportQueue {
 				this.channel = null;
 			});
 
-			conn.on("error", function (err) {
+			conn.on("error", (err)  => {
 				const message = "[AMQP] connection error " + err.message;
 				systemLogger.logError(message);
 				Mailer.sendQueueFailedEmail({message}).catch(() => {});
@@ -238,7 +238,7 @@ class ImportQueue {
 		return mkdir(newFileDir).then(() => {
 			const move = copy ? fs.copy : fs.move;
 			return new Promise((resolve, reject) => {
-				move(orgFilePath, filePath, function (moveErr) {
+				move(orgFilePath, filePath, (moveErr) => {
 					if (moveErr) {
 						reject(moveErr);
 					} else {
