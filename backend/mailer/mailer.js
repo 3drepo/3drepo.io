@@ -19,7 +19,6 @@
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
-const responseCodes = require("../response_codes");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
@@ -162,17 +161,6 @@ function sendNewUser(data) {
 	}
 }
 
-function sendContactEmail(data) {
-
-	const template = require("./templates/contact");
-
-	if(!config.contact || !config.contact.email) {
-		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
-	}
-
-	return sendEmail(template, config.contact.email, data);
-}
-
 function sendPaymentFailedEmail(to, data) {
 
 	const template = require("./templates/paymentFailed");
@@ -230,7 +218,6 @@ module.exports = {
 	sendWelcomeUserEmail,
 	sendResetPasswordEmail,
 	sendPaymentReceivedEmail,
-	sendContactEmail,
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
 	sendModelInvitation,
