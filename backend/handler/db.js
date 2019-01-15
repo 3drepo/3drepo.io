@@ -22,6 +22,7 @@
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const responseCodes = require("../response_codes");
+
 	const connConfig = {
 		autoReconnect: true
 	};
@@ -61,6 +62,7 @@
 		if(Number.isInteger(config.db.timeout)) {
 			connectString += "&socketTimeoutMS=" + config.db.timeout;
 		}
+
 		return connectString;
 	}
 
@@ -162,6 +164,7 @@
 	module.exports = {
 		disconnect,
 		dropCollection,
+		getURL,
 		getDB,
 		getAuthDB,
 		getCollection,

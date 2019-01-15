@@ -22,10 +22,10 @@
 "use strict";
 
 const expressSession = require("express-session");
-const FileStore = require("session-file-store")(expressSession);
+const getURL = require("../handler/db").getURL;
+const MongoDBStore = require("connect-mongodb-session")(expressSession);
 
 module.exports.session = function(config) {
-
 	return expressSession({
 		secret: config.cookie.secret,
 		resave: true,
@@ -37,7 +37,10 @@ module.exports.session = function(config) {
 			path: "/",
 			secure: config.using_ssl
 		},
-		store: new FileStore()
+		store: new MongoDBStore({
+			uri: getURL("admin"),
+			collection: "sessions"
+		})
 	});
 };
 
