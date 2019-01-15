@@ -47,7 +47,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container>
-				<Collapsable expanded>
+				<Collapsable>
 					<Summary expandIcon={<ExpandMoreIcon />}>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(count)}

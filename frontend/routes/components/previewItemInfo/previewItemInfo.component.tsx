@@ -19,7 +19,6 @@ import * as React from 'react';
 
 import { Author, Date, Details, Container, Status } from './previewItemInfo.styles';
 import { DateTime } from '../dateTime/dateTime.component';
-import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	author: string;
@@ -40,7 +39,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 						<Author>{author}</Author>
 					</Status>
 					<Date>
-						<DateTime value={createdAt} format="DD MMM" />
+						<DateTime value={createdAt} format="hh:mm DD MMM" />
 					</Date>
 				</Details>
 			</Container>
