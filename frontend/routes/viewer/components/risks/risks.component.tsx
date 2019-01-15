@@ -83,31 +83,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderDetailsView = renderWhenTrue(() => (
-		<>
-			<ViewerPanelContent className="height-catcher">
-				<RiskDetails {...this.props.riskDetails}/>
-			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<div>
-					<ViewerPanelButton
-						aria-label="Take screenshot"
-						onClick={this.handleNewScreenshot}
-					>Screen</ViewerPanelButton>
-					<ViewerPanelButton
-						aria-label="Add pin"
-						onClick={this.handleNewScreenshot}
-					>Pin</ViewerPanelButton>
-				</div>
-				<ViewerPanelButton
-					aria-label="Add risk"
-					onClick={this.handleAddNewRisk}
-					color="secondary"
-					variant="fab"
-				>
-					<AddIcon />
-				</ViewerPanelButton>
-			</ViewerPanelFooter>
-		</>
+		<RiskDetails {...this.props.riskDetails} />
 	));
 
 	public componentDidMount() {

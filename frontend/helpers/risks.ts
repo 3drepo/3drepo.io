@@ -8,7 +8,7 @@ export const prepareRisk = (risk, jobs = []) => {
 	const roleColor = get(jobs.find((job) => job._id === get(risk.assigned_roles, '[0]')), 'color');
 
 	return {
-		...pick(risk, ['name']),
+		...risk,
 		description: risk.desc,
 		author: risk.owner,
 		createdDate: risk.created,

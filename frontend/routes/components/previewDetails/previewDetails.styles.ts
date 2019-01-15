@@ -39,8 +39,7 @@ export const Details = styled(ExpansionPanelDetails)`
 	&& {
 		display: flex;
 		flex-direction: column;
-		padding: 0;
-		padding-right: 5px;
+		padding: 0 2px;
 	}
 `;
 
