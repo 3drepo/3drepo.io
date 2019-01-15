@@ -18,6 +18,12 @@
 import * as React from 'react';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import PinDrop from '@material-ui/icons/PinDrop';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { ListContainer, Summary } from './../risks/risks.styles';
+import AddIcon from '@material-ui/icons/Add';
+import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
+import { prepareIssue } from '../../../../helpers/issues';
 
 import { Container } from './issues.styles';
 
@@ -25,12 +31,13 @@ interface IProps {
 	teamspace: string;
 	model: any;
 	issues: any[];
+	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
 	activeIssue?: string;
 	showDetails?: boolean;
 	fetchIssues: (teamspace, model, revision) => void;
-	setActiveIssue: (riskId: string) => void;
+	setActiveIssue: (issueId: string) => void;
 	toggleDetails: (showDetails: boolean) => void;
 }
 interface IState {
@@ -54,6 +61,51 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		return [];
 	}
 
+	public renderRisksList = renderWhenTrue(() => {
+		const Items = this.props.issues.map((issue, index) => (
+			<PreviewListItem
+				{...prepareIssue(issue, this.props.jobs)}
+				key={index}
+				onItemClick={this.handleRiskFocus(issue._id)}
+				onArrowClick={this.handleRiskClick()}
+				active={this.props.activeIssue === issue._id}
+			/>
+		));
+
+		return <ListContainer>{Items}</ListContainer>;
+	});
+
+	public handleRiskFocus = (issueId) => () => {
+		this.props.setActiveIssue(issueId);
+	}
+
+	public handleRiskClick = () => () => {
+		this.props.toggleDetails(true);
+	}
+
+	public handleAddNewRisk = () => {
+		this.props.toggleDetails(true);
+	}
+
+	public renderListView = renderWhenTrue(() => (
+		<>
+			<ViewerPanelContent className="height-catcher">
+				{this.renderRisksList(Boolean(this.props.issues.length))}
+			</ViewerPanelContent>
+			<ViewerPanelFooter alignItems="center" justify="space-between">
+				<Summary>{this.props.issues.length} risks displayed</Summary>
+				<ViewerPanelButton
+					aria-label="Add risk"
+					onClick={this.handleAddNewRisk}
+					color="secondary"
+					variant="fab"
+				>
+					<AddIcon />
+				</ViewerPanelButton>
+			</ViewerPanelFooter>
+		</>
+	));
+
 	public render() {
 		console.log('props', this.props);
 		return (
@@ -63,7 +115,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				actions={this.renderActions()}
 				pending={false}
 			>
-				content
+				{this.renderListView(!this.props.showDetails)}
 			</ViewerPanel>
 		);
 	}

@@ -21,9 +21,11 @@ import { connect } from '../../../../helpers/migration';
 
 import { Issues } from './issues.component';
 import { IssuesActions, selectIssues, selectActiveIssue, selectShowDetails } from '../../../../modules/issues';
+import { selectJobs } from '../../../../modules/jobs';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
+	jobs: selectJobs,
 	activeIssue: selectActiveIssue,
 	showDetails: selectShowDetails
 });

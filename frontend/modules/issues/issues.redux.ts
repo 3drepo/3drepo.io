@@ -19,6 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssues: ['teamspace', 'modelId', 'revision'],
+	fetchIssuesSuccess: ['issues'],
 	setActiveIssue: ['issueId'],
 	toggleDetails: ['showDetails']
 }, { prefix: 'ISSUES_' });
@@ -41,6 +42,7 @@ export const toggleDetails = (state = INITIAL_STATE, { showDetails }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.SET_ACTIVE_ISSUE]: setActiveIssue,
 	[IssuesTypes.TOGGLE_DETAILS]: toggleDetails
 });

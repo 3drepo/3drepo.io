@@ -23,6 +23,7 @@ import { DialogActions } from '../dialog';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	try {
+		console.log('fetch issues')
 		const {data} = yield API.getIssues(teamspace, modelId, revision);
 		yield put(IssuesActions.fetchIssuesSuccess(data));
 	} catch (error) {
