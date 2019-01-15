@@ -45,7 +45,7 @@ import {
 export const DATA_TYPES = {
 	UNDEFINED: 1,
 	DATE: 2,
-	QUERY: 2
+	QUERY: 3
 };
 
 interface IFilter {
@@ -112,6 +112,21 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}, this.handleFiltersChange);
 	}
 
+	public onSelectDateFilter = (dateFilter, child, found) => {
+		dateFilter.label = child.label;
+		dateFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
+		console.log('dateFilter.value.label',dateFilter.value.label)
+		if (!found) {
+			this.setState((prevState) => ({
+				selectedFilters: [...prevState.selectedFilters, dateFilter]
+			}), this.handleFiltersChange);
+		} else {
+			const selectedFilters = { ...this.state.selectedFilters };
+			selectedFilters[dateFilter.label].value.label = dayjs(child.date).format('DD/MM/YYYY');
+			this.setState({ selectedFilters }, this.handleFiltersChange);
+		}
+	}
+
 	public onSelectFilter = (parent, child, found = false) => {
 		const newSelectedFilter: ISelectedFilter = {
 			label: parent.label,
@@ -123,18 +138,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		};
 
 		if (parent.type === DATA_TYPES.DATE && child.date) {
-			newSelectedFilter.label = child.label;
-			newSelectedFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
-			if (!found) {
-				this.setState((prevState) => ({
-					selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
-				}), this.handleFiltersChange);
-			} else {
-				const dateFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
-				const selectedFilters = cloneDeep(this.state.selectedFilters);
-				selectedFilters[dateFilterIndex].value.label = dayjs(child.date).format('DD/MM/YYYY');
-				this.setState({ selectedFilters }, this.handleFiltersChange);
-			}
+			console.log('DATE');
+			this.onSelectDateFilter(newSelectedFilter, child, found);
 		}
 
 		if (!found && parent.type !== DATA_TYPES.DATE) {
