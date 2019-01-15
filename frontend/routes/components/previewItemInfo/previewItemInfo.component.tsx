@@ -16,9 +16,10 @@
  */
 
 import * as React from 'react';
-import { DateTime } from './../dateTime/dateTime.component';
 
 import { Author, Date, Details, Container, Status } from './previewItemInfo.styles';
+import { DateTime } from '../dateTime/dateTime.component';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	author: string;
@@ -35,7 +36,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 			<Container>
 				<Details>
 					<Status color={statusColor}>
-						<StatusIconComponent color="inherit" fontSize="small" />
+						{StatusIconComponent && <StatusIconComponent color="inherit" fontSize="small" />}
 						<Author>{author}</Author>
 					</Status>
 					<Date>

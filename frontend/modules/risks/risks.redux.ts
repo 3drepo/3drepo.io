@@ -16,33 +16,33 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { keyBy } from 'lodash';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
 	fetchRisksSuccess: ['risks'],
-	setActiveRisk: ['riskId'],
-	toggleDetails: ['showDetails']
+	setComponentState: ['componentState']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
-	risks: [],
+	risksMap: {},
 	isPending: true,
-	activeRisk: null,
-	showDetails: false
+	componentState: {
+		activeRisk: null,
+		showDetails: false
+	}
 };
 
-export const fetchRisksSuccess = (state = INITIAL_STATE, { risks }) => {
-	return {...state, risks, activeRisk: null, showDetails: false};
+export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
+	const risksMap = keyBy(risks, '_id');
+	return { ...state, risksMap, activeRisk: null, showDetails: false };
 };
 
-export const setActiveRisk = (state = INITIAL_STATE, { riskId }) => ({ ...state, activeRisk: riskId });
-
-export const toggleDetails = (state = INITIAL_STATE, { showDetails }) => {
-	return {...state, showDetails, activeRisk: null};
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
-	[RisksTypes.SET_ACTIVE_RISK]: setActiveRisk,
-	[RisksTypes.TOGGLE_DETAILS]: toggleDetails
+	[RisksTypes.SET_COMPONENT_STATE]: setComponentState
 });

@@ -17,31 +17,24 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../../helpers/migration';
+import { connect } from '../../../../../../helpers/migration';
 
-import { Risks } from './risks.component';
+import { RiskDetails } from './riskDetails.component';
 import {
 	RisksActions,
-	selectRisks,
-	selectActiveRiskId,
-	selectActiveRiskDetails,
-	selectShowDetails
-} from '../../../../modules/risks';
-import { selectJobs } from '../../../../modules/jobs';
-import { selectSettings } from '../../../../modules/model';
+	selectActiveRiskDetails
+} from '../../../../../../modules/risks';
+import { selectJobs } from '../../../../../../modules/jobs';
+import { selectSettings } from '../../../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
-	risks: selectRisks,
 	jobs: selectJobs,
-	activeRiskId: selectActiveRiskId,
-	activeRiskDetails: selectActiveRiskDetails,
-	showDetails: selectShowDetails
+	risk: selectActiveRiskDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchRisks: RisksActions.fetchRisks,
 	setState: RisksActions.setComponentState
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Risks);
+export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);

@@ -100,7 +100,7 @@ export class PanelService {
 			type: 'issues',
 			title: 'Issues',
 			showLiteMode: true,
-			show: issueId || !riskId,
+			show: false, // issueId || !riskId,
 			help: 'List current issues',
 			icon: 'place',
 			menu: [

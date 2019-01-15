@@ -20,35 +20,43 @@ import * as React from 'react';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import { PreviewItemInfo } from './../previewItemInfo/previewItemInfo.component';
-import { Container, Collapsable, Details, Summary, MoreIcon, CollapsableContent } from './previewDetails.styles';
-import { RoleIndicator } from './../previewListItem/previewListItem.styles';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
+import { RoleIndicator } from '../previewListItem/previewListItem.styles';
+import { Container, Collapsable, Details, Summary, CollapsableContent } from './previewDetails.styles';
 
 interface IProps {
 	roleColor: string;
 	name: string;
 	count: number;
 	author: string;
-	createdAt: string;
+	createdDate: string;
 	StatusIconComponent: any;
 	statusColor: string;
 }
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
+	public renderNameWithCounter = renderWhenTrue(() =>
+		<Typography>{`${this.props.count}. ${this.props.name}`}</Typography>
+	);
+
+	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
+
 	public render() {
-		const { roleColor, name, count, author, createdAt, children, StatusIconComponent, statusColor } = this.props;
+		const { roleColor, count, author, createdDate, children, StatusIconComponent, statusColor } = this.props;
 
 		return (
 			<Container>
 				<Collapsable>
-					<Summary expandIcon={<MoreIcon><ExpandMoreIcon /></MoreIcon>}>
+					<Summary expandIcon={<ExpandMoreIcon />}>
 						<RoleIndicator color={roleColor} />
-						<Typography>{`${count}. ${name}`}</Typography>
+						{this.renderNameWithCounter(count)}
+						{this.renderName(!count)}
 					</Summary>
 					<Details>
 						<PreviewItemInfo
 							author={author}
-							createdAt={createdAt}
+							createdAt={createdDate}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>
