@@ -95,7 +95,7 @@ export function* mapStop() {
 export function* getScreenshot() {
 	try {
 		yield put(ViewerActions.waitForViewer());
-		return yield new Promise((resolve, reject) => getViewer().getScreenshot({ resolve, reject }));
+		return yield getViewer().getScreenshot();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'screenshot'));
 	}
