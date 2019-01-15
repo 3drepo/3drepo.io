@@ -18,19 +18,27 @@
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-
-import { COLOR } from '../../../../../../styles';
-
-export const Container = styled.div``;
+import FormControl from '@material-ui/core/FormControl';
 
 export const StyledTextField = styled(TextField)``;
+export const StyledFormControl = styled(FormControl)``;
+
+export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  ${/* sc-selector */ StyledTextField},
+  ${/* sc-selector */ StyledFormControl} {
+    margin: 8px 0;
+  }`;
 
 export const FieldsRow = styled(Grid)`
-  ${StyledTextField}:not(:last-child) {
-    margin-right: 10px;
-  }
+  ${/* sc-selector */ StyledTextField},
+  ${/* sc-selector */ StyledFormControl} {
+    flex: 1;
 
-  ${StyledTextField} {
-
+    &:nth-child(2n + 1) {
+      margin-right: 25px;
+    }
   }
 `;
