@@ -57,9 +57,12 @@ export const InputContainer = styled.div`
 		right: 0;
 
 		input {
-			color: rgba(0, 0, 0, 0.87);
 			font-size: 14px;
 
+			::placeholder {
+				color: ${COLOR.BLACK_60};
+				opacity: 1;
+			}
 		}
   }
 `;
