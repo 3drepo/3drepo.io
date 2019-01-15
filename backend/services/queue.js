@@ -25,9 +25,10 @@
 const amqp = require("amqplib");
 const fs = require("fs.extra");
 const shortid = require("shortid");
-const systemLogger = require("../logger.js").systemLogger;
+const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
+const responseCodes = require("../response_codes");
 
 class ImportQueue {
 	constructor() {
@@ -257,7 +258,7 @@ class ImportQueue {
 	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
 	_dispatchWork(corID, msg, isModelImport) {
-		this.getChannel().then((channel) => {
+		return this.getChannel().then((channel) => {
 			const queueName = isModelImport ? this.modelQName : this.workerQName;
 			return channel.assertQueue(queueName, { durable: true }).then(info => {
 
@@ -284,9 +285,10 @@ class ImportQueue {
 				);
 			});
 		}).catch((err) => {
-			const message = "Failed to insert event:"  + err.message;
+			const message = "Failed to dispatch work:"  + err.message;
 			systemLogger.logError(message);
 			Mailer.sendQueueFailedEmail({message}).catch(() => {});
+			return Promise.reject(responseCodes.QUEUE_CONN_ERR);
 		});
 	}
 

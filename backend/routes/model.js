@@ -449,9 +449,6 @@ function uploadModel(req, res, next) {
 		}
 
 	}).then(file => {
-		// api respond ok once the file is uploaded
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
-
 		const data = {
 			tag: req.body.tag,
 			desc: req.body.desc
@@ -461,10 +458,9 @@ function uploadModel(req, res, next) {
 			type: "upload",
 			file: file
 		};
-		// FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
-		ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
-		}).catch(() => {
 
+		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 		});
 
 	}).catch(err => {
