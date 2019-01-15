@@ -84,12 +84,14 @@ class ImportQueue {
 
 		return amqp.connect(this.url).then(conn => {
 			conn.on("close", () => {
+				systemLogger.logError("[AMQP] connection closed ");
 				this.channel = null;
 			});
 
 			conn.on("error", function (err) {
-				systemLogger.logError("[AMQP] connection error " + err.message);
-				// TODO: error handling
+				const message = "[AMQP] connection error " + err.message;
+				systemLogger.logError(message);
+				Mailer.sendQueueFailedEmail({message}).catch(() => {});
 			});
 
 			return conn.createChannel();
@@ -114,7 +116,6 @@ class ImportQueue {
 			});
 		}).catch((err) => {
 			systemLogger.logError("Failed to consume callback queue: " + err.message);
-			// TODO: send notification
 		});
 	}
 
@@ -136,7 +137,6 @@ class ImportQueue {
 			});
 		}).catch((err) => {
 			systemLogger.logError("Failed to consume event queue: " + err.message);
-			// TODO: send notification
 		});
 	}
 
@@ -282,7 +282,9 @@ class ImportQueue {
 				);
 			});
 		}).catch((err) => {
-			// TODO: error handling
+			const message = "Failed to insert event:"  + err.message;
+			systemLogger.logError(message);
+			Mailer.sendQueueFailedEmail({message}).catch(() => {});
 		});
 	}
 

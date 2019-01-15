@@ -35,7 +35,7 @@ function sendEmail(template, to, data, attachments) {
 
 	const mailOptions = {
 		from: config.mail.sender,
-		to: to,
+		to,
 		subject: typeof template.subject === "function" ? template.subject(data) : template.subject,
 		html: template.html(data)
 	};
@@ -74,6 +74,15 @@ function sendNoConsumerAlert() {
 	if(config.contact) {
 		const template = require("./templates/noConsumers");
 		return sendEmail(template, config.contact.email, {domain: config.host});
+	} else{
+		return Promise.reject({ message: "config.contact is not set"});
+	}
+}
+
+function sendQueueFailedEmail(err) {
+	if(config.contact) {
+		const template = require("./templates/queueFailed");
+		return sendEmail(template, config.contact.email, {domain: config.host, err: JSON.stringify(err)});
 	} else{
 		return Promise.reject({ message: "config.contact is not set"});
 	}
@@ -230,5 +239,6 @@ module.exports = {
 	sendPaymentRefundedEmail,
 	sendImportError,
 	sendNewUser,
-	sendNoConsumerAlert
+	sendNoConsumerAlert,
+	sendQueueFailedEmail
 };
