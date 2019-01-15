@@ -24,12 +24,12 @@ import {
 	RisksActions,
 	selectActiveRiskDetails
 } from '../../../../../../modules/risks';
-import { selectJobs } from '../../../../../../modules/jobs';
+import { selectJobsList } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
-	jobs: selectJobs,
+	jobs: selectJobsList,
 	risk: selectActiveRiskDetails
 });
 

@@ -293,7 +293,7 @@ export class PanelService {
 			show: true, // Boolean(riskId),
 			help: 'Risk register',
 			icon: 'report_problem',
-			minHeight: 260,
+			minHeight: 560,
 			fixedHeight: false,
 			menu: [
 				{

@@ -7,35 +7,37 @@ import SyncProblem from '@material-ui/icons/SyncProblem';
 import { values } from 'lodash';
 
 const LEVELS = {
-	VERY_LOW: { value: 0, label: 'Very Low' },
-	LOW: { value: 1, label: 'Low' },
-	MODERATE: { value: 2, label: 'Moderate' },
-	HIGH: { value: 3, label: 'High' },
-	VERY_HIGHT: { value: 4, label: 'Very High' }
+	VERY_LOW: { value: 0, name: 'Very Low' },
+	LOW: { value: 1, name: 'Low' },
+	MODERATE: { value: 2, name: 'Moderate' },
+	HIGH: { value: 3, name: 'High' },
+	VERY_HIGHT: { value: 4, name: 'Very High' }
 };
 
 const LEVELS_LIST = values(LEVELS);
 
 export const RISK_CATEGORIES = [
-	{ value: 'health_material_effect', label: 'Health - Material effect' },
-	{ value: 'health_mechanical_effect', label: 'Health - Mechanical effect' },
-	{ value: 'safety_fall', label: 'Safety Issue - Fall' },
-	{ value: 'safety_trapped', label: 'Safety Issue - Trapped' },
-	{ value: 'safety_event', label: 'Safety Issue - Event' },
-	{ value: 'safety_handling', label: 'Safety Issue - Handling' },
-	{ value: 'safety_struck', label: 'Safety Issue - Struck' },
-	{ value: 'safety_public', label: 'Safety Issue - Public' },
-	{ value: 'environmental', label: 'Environmental Issue' },
-	{ value: 'commercial', label: 'Commercial Issue' },
-	{ value: 'social', label: 'Social Issue' },
-	{ value: 'other', label: 'Other Issue' },
-	{ value: 'unknown', label: 'UNKNOWN' },
-	{ value: '', label: 'UNSET' }
+	{ value: 'health_material_effect', name: 'Health - Material effect' },
+	{ value: 'health_mechanical_effect', name: 'Health - Mechanical effect' },
+	{ value: 'safety_fall', name: 'Safety Issue - Fall' },
+	{ value: 'safety_trapped', name: 'Safety Issue - Trapped' },
+	{ value: 'safety_event', name: 'Safety Issue - Event' },
+	{ value: 'safety_handling', name: 'Safety Issue - Handling' },
+	{ value: 'safety_struck', name: 'Safety Issue - Struck' },
+	{ value: 'safety_public', name: 'Safety Issue - Public' },
+	{ value: 'environmental', name: 'Environmental Issue' },
+	{ value: 'commercial', name: 'Commercial Issue' },
+	{ value: 'social', name: 'Social Issue' },
+	{ value: 'other', name: 'Other Issue' },
+	{ value: 'unknown', name: 'UNKNOWN' },
+	{ value: '', name: 'UNSET' }
 ];
 
 export const RISK_LIKELIHOODS = [...LEVELS_LIST];
 
 export const RISK_CONSEQUENCES = [...LEVELS_LIST];
+
+export const LEVELS_OF_RISK = [...LEVELS_LIST];
 
 export const RISK_LEVELS = {
 	UNMITIGATED: '',
@@ -45,12 +47,12 @@ export const RISK_LEVELS = {
 	REJECTED: 'rejected'
 };
 
-export const RISK_LEVELS_LIST = [
-	{ value: RISK_LEVELS.UNMITIGATED, label: 'Unmitigated' },
-	{ value: RISK_LEVELS.PROPOSED, label: 'Proposed'},
-	{ value: RISK_LEVELS.AGREED_PARTIAL, label: 'Agreed (Partial)' },
-	{ value: RISK_LEVELS.AGREED_FULLY, label: 'Agreed (Fully)' },
-	{ value: RISK_LEVELS.REJECTED, label: 'Rejected' }
+export const RISK_MITIGATION_STATUSES = [
+	{ value: RISK_LEVELS.UNMITIGATED, name: 'Unmitigated' },
+	{ value: RISK_LEVELS.PROPOSED, name: 'Proposed'},
+	{ value: RISK_LEVELS.AGREED_PARTIAL, name: 'Agreed (Partial)' },
+	{ value: RISK_LEVELS.AGREED_FULLY, name: 'Agreed (Fully)' },
+	{ value: RISK_LEVELS.REJECTED, name: 'Rejected' }
 ];
 
 export const RISK_LEVELS_ICONS = {

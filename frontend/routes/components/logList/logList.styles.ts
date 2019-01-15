@@ -16,21 +16,23 @@
  */
 
 import styled from 'styled-components';
-import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
+import { COLOR } from '../../../styles';
 
-import { COLOR } from '../../../../../../styles';
+export const Container = styled.div`
+  background: ${COLOR.BLACK_20};
+  min-height: 55px;
+  overflow: auto;
+  position: relative;
 
-export const Container = styled.div``;
-
-export const StyledTextField = styled(TextField)``;
-
-export const FieldsRow = styled(Grid)`
-  ${StyledTextField}:not(:last-child) {
-    margin-right: 10px;
-  }
-
-  ${StyledTextField} {
-
+  &:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    content: '';
+    height: 10px;
+    overflow: hidden;
+    box-shadow: inset 0px 4px 7px -4px ${COLOR.BLACK_30};
   }
 `;

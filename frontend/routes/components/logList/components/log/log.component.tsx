@@ -16,13 +16,13 @@
  */
 
 import * as React from 'react';
-import { DateTime } from './../dateTime/dateTime.component';
-import DynamicUsername from './../dynamicUsername/dynamicUsername.container';
+import { DateTime } from '../../../dateTime/dateTime.component';
+import DynamicUsername from '../..//../dynamicUsername/dynamicUsername.container';
 import {
 	Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage, ScreenshotWrapper
 } from './log.styles';
 
-import { renderWhenTrue } from '../../../helpers/rendering';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 
 interface IProps {
 	comment: string;
