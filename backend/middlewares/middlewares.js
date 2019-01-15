@@ -26,8 +26,6 @@
 	const utils = require("../utils");
 	const config = require("../config");
 
-	// init ampq and import queue object
-	const importQueue = require("../services/queue");
 	const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
 	const checkPermissions = require("./checkPermissions").checkPermissions;
 	const checkMultiplePermissions = require("./checkPermissions").checkMultiplePermissions;
@@ -108,29 +106,6 @@
 		});
 	}
 
-	function createQueueInstance() {
-
-		// init ampq and import queue object
-		return importQueue.connect().then(() => importQueue);
-
-	}
-
-	function connectQueue(req, res, next) {
-
-		// init ampq and import queue object
-		if(config.cn_queue) {
-
-			createQueueInstance().then(() => {
-				next();
-			}).catch(err => {
-				responseCodes.respond("Express Middleware - AMPQ", req, res, next, err);
-			});
-
-		} else {
-			next();
-		}
-
-	}
 	function canCreateModel(req, res, next) {
 		if(req.body.subModels) {
 			checkPermissions([C.PERM_CREATE_FEDERATION])(req, res, next);
@@ -182,7 +157,6 @@
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
 		isTeamspaceMember,
-		connectQueue,
 		loggedIn,
 
 		// Helpers
@@ -190,7 +164,6 @@
 		freeSpace,
 		hasReadAccessToModelHelper,
 		isAccountAdminHelper,
-		createQueueInstance,
 		checkPermissionsHelper
 
 	};
