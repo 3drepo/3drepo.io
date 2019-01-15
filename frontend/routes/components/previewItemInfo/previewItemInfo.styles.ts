@@ -17,9 +17,8 @@
 
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
 
-import { COLOR } from './../../../styles/colors';
+import { COLOR } from '../../../styles/colors';
 
 export const Container = styled.div`
   min-width: 0;

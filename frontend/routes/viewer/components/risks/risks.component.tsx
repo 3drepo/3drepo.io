@@ -22,13 +22,13 @@ import AddIcon from '@material-ui/icons/Add';
 
 import IconButton from '@material-ui/core/IconButton';
 
+import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ListContainer, Summary } from './risks.styles';
 import { prepareRisk } from '../../../../helpers/risks';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { RiskDetails } from './components/riskDetails/riskDetails.component';
 
 interface IProps {
 	teamspace: string;
@@ -37,11 +37,11 @@ interface IProps {
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
-	activeRisk?: string;
+	activeRiskId?: string;
 	showDetails?: boolean;
+	riskDetails?: any;
 	fetchRisks: (teamspace, model, revision) => void;
-	setActiveRisk: (riskId: string) => void;
-	toggleDetails: (showDetails: boolean) => void;
+	setState: (componentState: any) => void;
 }
 
 interface IState {
@@ -49,35 +49,6 @@ interface IState {
 }
 
 export class Risks extends React.PureComponent<IProps, IState> {
-	public state: IState = {
-		riskDetails: {}
-	};
-
-	public componentDidMount() {
-		const {teamspace, model, revision} = this.props;
-		this.props.fetchRisks(teamspace, model, revision);
-	}
-
-	public handleRiskFocus = (riskId) => () => {
-		this.props.setActiveRisk(riskId);
-	}
-
-	public handleRiskClick = () => () => {
-		this.props.toggleDetails(true);
-	}
-
-	public handleAddNewRisk = () => {
-		this.props.toggleDetails(true);
-	}
-
-	public handleNewScreenshot = () => {
-
-	}
-
-	public closeDetails = () => {
-		this.props.toggleDetails(false);
-	}
-
 	public renderRisksList = renderWhenTrue(() => {
 		const Items = this.props.risks.map((risk, index) => (
 			<PreviewListItem
@@ -85,7 +56,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				key={index}
 				onItemClick={this.handleRiskFocus(risk._id)}
 				onArrowClick={this.handleRiskClick()}
-				active={this.props.activeRisk === risk._id}
+				active={this.props.activeRiskId === risk._id}
 			/>
 		));
 
@@ -114,7 +85,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public renderDetailsView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
-				<RiskDetails {...this.state.riskDetails}/>
+				<RiskDetails {...this.props.riskDetails}/>
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<div>
@@ -138,6 +109,31 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			</ViewerPanelFooter>
 		</>
 	));
+
+	public componentDidMount() {
+		const {teamspace, model, revision} = this.props;
+		this.props.fetchRisks(teamspace, model, revision);
+	}
+
+	public handleRiskFocus = (riskId) => () => {
+		this.props.setState({ activeRisk: riskId });
+	}
+
+	public handleRiskClick = () => () => {
+		this.toggleDetails(true);
+	}
+
+	public handleAddNewRisk = () => {
+		this.toggleDetails(true);
+	}
+
+	public handleNewScreenshot = () => {
+
+	}
+
+	public closeDetails = () => {
+		this.toggleDetails(false);
+	}
 
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
@@ -166,5 +162,9 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				{this.renderDetailsView(this.props.showDetails)}
 			</ViewerPanel>
 		);
+	}
+
+	private toggleDetails = (showDetails) => {
+		this.props.setState({ showDetails, activeRisk: null });
 	}
 }

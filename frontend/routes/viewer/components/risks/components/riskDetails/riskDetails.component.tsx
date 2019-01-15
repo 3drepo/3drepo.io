@@ -16,19 +16,58 @@
  */
 
 import * as React from 'react';
+import { isEqual } from 'lodash';
 
+import { PreviewDetails } from '../../../../../components/previewDetails/previewDetails.component';
+import { Log } from '../../../../../components/log/log.component';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { prepareRisk } from '../../../../../../helpers/risks';
 import { Container } from './riskDetails.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	jobs: any[];
+	risk: any;
 }
 
-export class RiskDetails extends React.PureComponent<IProps, any> {
+interface IState {
+	risk: any;
+}
+
+export class RiskDetails extends React.PureComponent<IProps, IState> {
+	public state = {
+		risk: {} as any
+	};
+
+	public setPreparedRisk = () => {
+		const risk = prepareRisk(this.props.risk, this.props.jobs);
+		this.setState({ risk });
+	}
+
+	public componentDidMount() {
+		const risk = prepareRisk(this.props.risk);
+		this.setState({ risk });
+	}
+
+	public componentDidUpdate(prevProps) {
+		const riskDataChanged = !isEqual(this.props.risk, prevProps.risk);
+		if (riskDataChanged) {
+			this.setPreparedRisk();
+		}
+	}
+
+	public renderLogListItem = (item) => {
+
+	}
+
+	public renderLogList = renderWhenTrue(() => (<div />));
 
 	public render() {
+		const { risk } = this.state;
+
 		return (
 			<Container>
-				RiskDetails component
+				<PreviewDetails {...risk} />
+				{/* <Log /> */}
 			</Container>
 		);
 	}

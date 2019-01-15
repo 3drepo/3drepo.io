@@ -24,35 +24,40 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import { COLOR } from './../../../styles/colors';
 
 export const Container = styled.div`
-  color: ${COLOR.BLACK_60};
-  background-color: ${COLOR.WHITE};
+	color: ${COLOR.BLACK_60};
+	background-color: ${COLOR.WHITE};
 `;
 
 export const Collapsable = styled(ExpansionPanel)`
-  && {
-    box-shadow: none;
-    padding: 0 8px;
-  }
+	&& {
+		box-shadow: none;
+		padding: 0 12px;
+	}
 `;
 
 export const Details = styled(ExpansionPanelDetails)`
-  && {
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-  }
+	&& {
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		padding-right: 5px;
+	}
 `;
 
-export const Summary = styled(ExpansionPanelSummary)`
-  && {
-    padding: 0;
-  }
-`;
+export const Summary = styled(ExpansionPanelSummary).attrs({
+	classes: {
+		expandIcon: 'summary-icon'
+	}
+})`
+	&& {
+		padding: 0;
 
-export const MoreIcon = styled.div`
-  position: absolute;
+		.summary-icon {
+			right: -8px;
+		}
+	}
 `;
 
 export const CollapsableContent = styled.div`
-  margin: 16px 0;
+	margin: 16px 0;
 `;
