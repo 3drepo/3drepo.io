@@ -5,7 +5,7 @@ import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS } from '../constants/risks';
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
 	const { Icon, color } = getRiskStatus(risk.level_of_risk, risk.mitigation_status);
-	const roleColor = get(jobs.find((job) => job._id === get(risk.assigned_roles, '[0]')), 'color');
+	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
 
 	return {
 		...risk,
