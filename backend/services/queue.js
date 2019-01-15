@@ -100,7 +100,9 @@ class ImportQueue {
 			this.subscribeToQueues();
 			return channel;
 		}).catch((err) => {
-			systemLogger.logError("Failed to connect to rabbitmq: " + err.message);
+			const message = "Failed to connect to rabbitmq: " + err.message;
+			systemLogger.logError(message);
+			Mailer.sendQueueFailedEmail({message}).catch(() => {});
 		});
 	}
 
