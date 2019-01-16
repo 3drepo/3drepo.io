@@ -16,14 +16,13 @@
  */
 
 import * as React from 'react';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import AddIcon from '@material-ui/icons/Add';
 
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { LogList } from '../../../../../components/logList/logList.component';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { prepareRisk } from '../../../../../../helpers/risks';
 import { NewCommentForm } from '../../../newCommentForm/newCommentForm.component';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 
@@ -33,6 +32,13 @@ import { RiskDetailsForm } from './riskDetailsForm.component';
 interface IProps {
 	jobs: any[];
 	risk: any;
+	newRisk: any;
+	teamspace: string;
+	model: string;
+	expandDetails: boolean;
+	saveRisk: (teamspace, modelId, risk) => void;
+	updateRisk: (teamspace, modelId, risk) => void;
+	setState: (componentState) => void;
 }
 
 interface IState {
@@ -42,12 +48,11 @@ interface IState {
 
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		risk: {} as any,
+		risk: {},
 		logs: []
 	};
 
-	public setPreparedRisk = () => {
-		const risk = prepareRisk(this.props.risk, this.props.jobs);
+	public setLogs = () => {
 		const logs = this.props.risk.comments || [{
 			comment: 'Sample comment',
 			viewpoint: [],
@@ -59,22 +64,42 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			teamspace: 'charence'
 		}];
 
-		this.setState({ risk, logs });
+		this.setState({ logs });
 	}
 
 	public componentDidMount() {
-		this.setPreparedRisk();
+		this.setLogs();
 	}
 
 	public componentDidUpdate(prevProps) {
-		const riskDataChanged = !isEqual(this.props.risk, prevProps.risk);
-		if (riskDataChanged) {
-			this.setPreparedRisk();
+		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
+		if (logsChanged) {
+			this.setLogs();
 		}
 	}
 
-	public handleRiskSave = () => {
+	public handleExpandChange = () => {
 
+	}
+
+	public handleNameChange = (event, name) => {
+		const newRisk = { ...this.props.newRisk, name };
+		this.props.setState({ newRisk });
+	}
+
+	public handleRiskSave = (values) => {
+		const { teamspace, model, risk, saveRisk, updateRisk } = this.props;
+		const updatedRisk = {
+			...risk,
+			...omit(values, ['assigned_roles', 'description']),
+			assigned_roles: [values.assigned_roles],
+			desc: values.description
+		};
+		if (updatedRisk._id) {
+			updateRisk(teamspace, model, updatedRisk);
+		} else {
+			saveRisk(teamspace, model, updatedRisk);
+		}
 	}
 
 	public handleNewScreenshot = () => {
@@ -107,19 +132,36 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		</ViewerPanelFooter>
 	)
 
+	public renderPreview = renderWhenTrue(() => {
+		const { expandDetails, newRisk, risk, jobs } = this.props;
+		const riskData = risk._id ? risk : newRisk;
+
+		return (
+			<PreviewDetails
+				{...riskData}
+				defaultExpanded={expandDetails}
+				editable={!riskData._id}
+				onNameChange={this.handleNameChange}
+				onExpandChange={this.handleExpandChange}
+			>
+				<RiskDetailsForm
+					risk={riskData}
+					jobs={jobs}
+					onValueChange={this.handleRiskSave}
+					onSubmit={this.handleRiskSave}
+				/>
+			</PreviewDetails>
+		);
+	});
+
 	public render() {
-		const { risk, logs } = this.state;
+		const { newRisk, risk } = this.props;
+		const { logs } = this.state;
 
 		return (
 			<Container>
 				<ViewerPanelContent className="height-catcher">
-					<PreviewDetails {...risk}>
-						<RiskDetailsForm
-							risk={this.state.risk}
-							jobs={this.props.jobs}
-							onSubmit={this.handleRiskSave}
-						/>
-					</PreviewDetails>
+					{this.renderPreview(risk._id || newRisk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
 				{this.renderFooter()}

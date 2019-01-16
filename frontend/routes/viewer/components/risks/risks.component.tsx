@@ -24,7 +24,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
+import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ListContainer, Summary } from './risks.styles';
 import { prepareRisk } from '../../../../helpers/risks';
@@ -83,7 +83,11 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderDetailsView = renderWhenTrue(() => (
-		<RiskDetails {...this.props.riskDetails} />
+		<RiskDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			{...this.props.riskDetails}
+		/>
 	));
 
 	public componentDidMount() {

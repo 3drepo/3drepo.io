@@ -16,12 +16,15 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy } from 'lodash';
+import { keyBy, cloneDeep } from 'lodash';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
 	fetchRisksSuccess: ['risks'],
-	setComponentState: ['componentState']
+	setComponentState: ['componentState'],
+	saveRisk: ['teamspace', 'modelId', 'riskData'],
+	updateRisk: ['teamspace', 'modelId', 'riskData'],
+	saveRiskSuccess: ['risk']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
@@ -29,7 +32,9 @@ export const INITIAL_STATE = {
 	isPending: true,
 	componentState: {
 		activeRisk: null,
-		showDetails: false
+		showDetails: false,
+		expandDetails: true,
+		newRisk: {}
 	}
 };
 
@@ -38,11 +43,18 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	return { ...state, risksMap, activeRisk: null, showDetails: false };
 };
 
+export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
+	const risksMap = cloneDeep(state.risksMap);
+	risksMap[risk._id] = risk;
+	return { ...state, risksMap };
+};
+
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
-	[RisksTypes.SET_COMPONENT_STATE]: setComponentState
+	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
+	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess
 });

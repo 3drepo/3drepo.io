@@ -17,6 +17,8 @@
 
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { selectJobsList } from '../jobs';
+import { prepareRisk } from '../../helpers/risks';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 
@@ -37,11 +39,21 @@ export const selectActiveRiskId = createSelector(
 );
 
 export const selectActiveRiskDetails = createSelector(
-	selectRisksDomain, selectComponentState, (state, componentState) => {
-		return state.risksMap[componentState.activeRisk] || {};
+	selectRisksDomain, selectComponentState, selectJobsList,
+	(state, componentState, jobsList) => {
+		const risk = state.risksMap[componentState.activeRisk] || {};
+		return prepareRisk(risk, jobsList);
 	}
 );
 
 export const selectShowDetails = createSelector(
 	selectComponentState, (state) => state.showDetails
+);
+
+export const selectExpandDetails = createSelector(
+	selectComponentState, (state) => state.expandDetails
+);
+
+export const selectNewRiskDetails = createSelector(
+	selectComponentState, (state) => state.newRisk
 );

@@ -22,7 +22,9 @@ import { connect } from '../../../../../../helpers/migration';
 import { RiskDetails } from './riskDetails.component';
 import {
 	RisksActions,
-	selectActiveRiskDetails
+	selectActiveRiskDetails,
+	selectExpandDetails,
+	selectNewRiskDetails
 } from '../../../../../../modules/risks';
 import { selectJobsList } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
@@ -30,11 +32,15 @@ import { selectSettings } from '../../../../../../modules/model';
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	jobs: selectJobsList,
-	risk: selectActiveRiskDetails
+	risk: selectActiveRiskDetails,
+	newRisk: selectNewRiskDetails,
+	expandDetails: selectExpandDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setState: RisksActions.setComponentState
+	setState: RisksActions.setComponentState,
+	saveRisk: RisksActions.saveRisk,
+	updateRisk: RisksActions.updateRisk
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);
