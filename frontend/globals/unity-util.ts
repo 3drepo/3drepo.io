@@ -47,8 +47,8 @@ export class UnityUtil {
 	public static unityHasErrored = false;
 
 	public static screenshotPromises = [];
-	public static vpPromise = null;
-	public static objectStatusPromise = null;
+	public static viewpointsPromises = [];
+	public static objectStatusPromises = [];
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	public static defaultHighlightColor = [1, 1, 0];
@@ -301,10 +301,17 @@ export class UnityUtil {
 	}
 
 	public static objectStatusBroadcast(nodeInfo) {
-		if (UnityUtil.objectStatusPromise) {
-			UnityUtil.objectStatusPromise.resolve(JSON.parse(nodeInfo));
+		try {
+			UnityUtil.objectStatusPromises.forEach((promise) => {
+				promise.resolve(JSON.parse(nodeInfo));
+			});
+		} catch (error) {
+			UnityUtil.objectStatusPromises.forEach((promise) => {
+				promise.resolve({});
+			});
 		}
-		UnityUtil.objectStatusPromise = null;
+
+		UnityUtil.objectStatusPromises = [];
 	}
 
 	public static ready() {
@@ -338,16 +345,20 @@ export class UnityUtil {
 	}
 
 	public static viewpointReturned(vpInfo) {
-		if (UnityUtil.vpPromise != null) {
-			let viewpoint = {} ;
-			try {
-				viewpoint = JSON.parse(vpInfo);
-			} catch {
-				console.error('Failed to parse viewpoint', vpInfo);
-			}
-			UnityUtil.vpPromise.resolve(viewpoint);
-			UnityUtil.vpPromise = null;
+		try {
+			const viewpoint = JSON.parse(vpInfo);
+
+			UnityUtil.viewpointsPromises.forEach((promise) => {
+				promise.resolve(viewpoint);
+			});
+		} catch (error) {
+			console.error('Failed to parse viewpoint', vpInfo);
+			UnityUtil.viewpointsPromises.forEach((promise) => {
+				promise.resolve({});
+			});
 		}
+
+		UnityUtil.viewpointsPromises = [];
 	}
 
 	/*
@@ -598,23 +609,16 @@ export class UnityUtil {
 	 * @param {string} model - name of the model
 	 * @param {object} promise - promise that the function will resolve with the object status info.
 	 */
-	public static getObjectsStatus(account, model, promise) {
-		let nameSpace = '';
-		if (account && model) {
-			nameSpace = account + '.' + model;
-		}
-		if (UnityUtil.objectStatusPromise && UnityUtil.objectStatusPromise.then) {
-			UnityUtil.objectStatusPromise.then(() => {
-				UnityUtil._getObjectsStatus(nameSpace, promise);
-			});
-		} else {
-			UnityUtil._getObjectsStatus(nameSpace, promise);
-		}
-	}
+	public static getObjectsStatus(account, model) {
+		const newObjectStatusPromise = new Promise((resolve, reject) => {
+			this.objectStatusPromises.push({ resolve, reject });
+		});
 
-	public static _getObjectsStatus(nameSpace, promise) {
-		UnityUtil.objectStatusPromise = promise;
+		const nameSpace = account && model ? `${account}.${model}` : '';
+
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
+
+		return newObjectStatusPromise;
 	}
 
 	public static getPointInfo() {
@@ -850,24 +854,20 @@ export class UnityUtil {
 	 *  @param {string} model - name of model
 	 *  @param {Object} promise - promises where the viewpoint will be returned when the promise resolves
 	 */
-	public static requestViewpoint(account, model, promise) {
-		// console.log('requestViewPoint', account, model, promise );
-		if (UnityUtil.vpPromise != null) {
-			// console.log("unity no help", UnityUtil.vpPromise);
-			UnityUtil.vpPromise.then(UnityUtil._requestViewpoint(account, model, promise));
-		} else {
-			UnityUtil._requestViewpoint(account, model, promise);
-		}
+	public static requestViewpoint(account, model) {
+		const newViewpointPromise = new Promise((resolve, reject) => {
+			this.viewpointsPromises.push({ resolve, reject });
+		});
 
-	}
-
-	public static _requestViewpoint(account, model, promise) {
 		const param: any = {};
 		if (account && model) {
-			param.namespace = account + '.'  + model;
+			param.namespace = account + '.' + model;
 		}
-		UnityUtil.vpPromise = promise;
+
 		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
+
+		return newViewpointPromise;
+
 	}
 
 	/**

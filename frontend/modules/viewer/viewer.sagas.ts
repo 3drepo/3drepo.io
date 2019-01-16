@@ -21,7 +21,7 @@ import { getAngularService } from '../../helpers/migration';
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
 
-const getViewer = () => {
+export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
 	return ViewerService.getViewer();
 };
@@ -98,6 +98,33 @@ export function* getScreenshot() {
 		return yield getViewer().getScreenshot();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'screenshot'));
+	}
+}
+
+export function* showViewpoint(teamspace, modelId, item) {
+	try {
+		const ViewerService = yield getAngularService('ViewerService') as any;
+
+		if (item) {
+			if (item.viewpoint) {
+				item.viewpoint.account = teamspace;
+				item.viewpoint.model = modelId;
+
+				yield ViewerService.setCamera(item.viewpoint);
+			}
+
+			if (item.clippingPlanes) {
+				const clipData = {
+					clippingPlanes: item.clippingPlanes,
+					account: teamspace,
+					modelId
+				};
+
+				yield ViewerService.updateClippingPlanes(clipData);
+			}
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'viewpoint', error));
 	}
 }
 

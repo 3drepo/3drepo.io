@@ -24,23 +24,27 @@ import {
 	RisksActions,
 	selectActiveRiskDetails,
 	selectExpandDetails,
-	selectNewRiskDetails
+	selectNewRiskDetails,
+	selectNewComment
 } from '../../../../../../modules/risks';
 import { selectJobsList } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
+import { DialogActions } from '../../../../../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	jobs: selectJobsList,
 	risk: selectActiveRiskDetails,
 	newRisk: selectNewRiskDetails,
+	newComment: selectNewComment,
 	expandDetails: selectExpandDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: RisksActions.setComponentState,
 	saveRisk: RisksActions.saveRisk,
-	updateRisk: RisksActions.updateRisk
+	updateRisk: RisksActions.updateRisk,
+	showScreenshotDialog: DialogActions.showScreenshotDialog
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);

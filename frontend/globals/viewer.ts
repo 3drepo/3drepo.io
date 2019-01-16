@@ -488,7 +488,7 @@ export class Viewer {
 	}
 
 	public getObjectsStatus(account, model, promise) {
-		UnityUtil.getObjectsStatus(account, model, promise);
+		return UnityUtil.getObjectsStatus(account, model, promise);
 	}
 
 	public updateSettings(settings) {
@@ -566,8 +566,8 @@ export class Viewer {
 
 	}
 
-	public getCurrentViewpointInfo(account, model, promise) {
-		UnityUtil.requestViewpoint(account, model, promise);
+	public getCurrentViewpointInfo(account, model) {
+		return UnityUtil.requestViewpoint(account, model);
 	}
 
 	public switchFullScreen(vrDisplay) {

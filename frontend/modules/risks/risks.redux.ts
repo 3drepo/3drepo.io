@@ -34,7 +34,8 @@ export const INITIAL_STATE = {
 		activeRisk: null,
 		showDetails: false,
 		expandDetails: true,
-		newRisk: {}
+		newRisk: {},
+		newComment: {}
 	}
 };
 

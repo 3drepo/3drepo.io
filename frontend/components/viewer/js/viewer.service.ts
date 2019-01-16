@@ -186,15 +186,13 @@ export class ViewerService {
 		});
 	}
 
-	public getCurrentViewpoint(params) {
+	public async getCurrentViewpoint({ account, model, promise }) {
 		if (this.viewer) {
-			// Note the Info suffix
-			this.viewer.getCurrentViewpointInfo(
-				params.account,
-				params.model,
-				params.promise
-			);
+			const viewpoint = await this.viewer.getCurrentViewpointInfo(account, model);
+			return promise.resolve(viewpoint);
 		}
+
+		return promise.resolve({});
 	}
 
 	public addPin(params) {
@@ -220,14 +218,10 @@ export class ViewerService {
 		});
 	}
 
-	public getObjectsStatus(params) {
-		this.initialised.promise.then(() => {
-			this.viewer.getObjectsStatus(
-				params.account,
-				params.model,
-				params.promise
-			);
-		});
+	public async getObjectsStatus({ account = '', model = '', promise }) {
+		await this.initialised.promise;
+		const objectStatus = await this.viewer.getObjectsStatus(account, model);
+		return promise.resolve(objectStatus);
 	}
 
 	public highlightObjects(params)  {

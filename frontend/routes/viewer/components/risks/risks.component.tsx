@@ -29,6 +29,7 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ListContainer, Summary } from './risks.styles';
 import { prepareRisk } from '../../../../helpers/risks';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { RISK_LEVELS_ICONS, RISK_LEVELS } from '../../../../constants/risks';
 
 interface IProps {
 	teamspace: string;
@@ -104,11 +105,15 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleAddNewRisk = () => {
-		this.toggleDetails(true);
-	}
-
-	public handleNewScreenshot = () => {
-
+		this.props.setState({
+			showDetails: true,
+			activeRisk: null,
+			newRisk: {
+				name: 'Untitled risk',
+				StatusIconComponent: RISK_LEVELS_ICONS[RISK_LEVELS.UNMITIGATED],
+				author: 'test'
+			}
+		});
 	}
 
 	public closeDetails = () => {

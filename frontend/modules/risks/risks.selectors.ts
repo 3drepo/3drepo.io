@@ -57,3 +57,7 @@ export const selectExpandDetails = createSelector(
 export const selectNewRiskDetails = createSelector(
 	selectComponentState, (state) => state.newRisk
 );
+
+export const selectNewComment = createSelector(
+	selectComponentState, (state) => state.newComment
+);
