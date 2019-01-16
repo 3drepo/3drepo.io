@@ -132,7 +132,7 @@ class ImportQueue {
 				return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
 					return channel.consume(queue.queue, (rep) => {
 						/*eslint-disable */
-						console.log("[ConsumeEventQueue]: New message found, queue: " , queue.queue , rep.content);
+						console.log("[ConsumeEventQueue]: New message found, queue: " , queue.queue);
 						if (this.eventCallback) {
 							this.eventCallback(JSON.parse(rep.content));
 						}
@@ -300,8 +300,6 @@ class ImportQueue {
 			return channel.assertExchange(this.eventExchange, "fanout", {
 				durable: true
 			}).then(() => {
-				/*eslint-disable */
-				console.log("!!! New event message", msg);
 				return channel.publish(
 					this.eventExchange,
 					"",
