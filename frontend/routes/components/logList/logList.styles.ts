@@ -33,6 +33,6 @@ export const Container = styled.div`
     content: '';
     height: 10px;
     overflow: hidden;
-    box-shadow: inset 0px 4px 7px -4px ${COLOR.BLACK_30};
+    box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
   }
 `;

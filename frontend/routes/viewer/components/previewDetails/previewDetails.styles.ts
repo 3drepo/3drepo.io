@@ -21,7 +21,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 
-import { COLOR } from './../../../styles/colors';
+import { COLOR } from './../../../../styles/colors';
 
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};

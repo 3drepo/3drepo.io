@@ -20,7 +20,7 @@ import * as React from 'react';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import { renderWhenTrue } from '../../../helpers/rendering';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import { Container, Collapsable, Details, Summary, CollapsableContent } from './previewDetails.styles';

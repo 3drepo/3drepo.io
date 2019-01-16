@@ -18,7 +18,7 @@
 import * as React from 'react';
 
 import { Author, Date, Details, Container, Status } from './previewItemInfo.styles';
-import { DateTime } from '../dateTime/dateTime.component';
+import { DateTime } from '../../../components/dateTime/dateTime.component';
 
 interface IProps {
 	author: string;
