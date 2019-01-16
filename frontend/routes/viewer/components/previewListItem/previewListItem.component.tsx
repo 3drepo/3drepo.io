@@ -19,7 +19,7 @@ import * as React from 'react';
 import Truncate from 'react-truncate';
 
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
-import { renderWhenTrue } from '../../../helpers/rendering';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 
 import {
 	MenuItemContainer,

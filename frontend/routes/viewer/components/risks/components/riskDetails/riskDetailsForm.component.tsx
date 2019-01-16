@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
-import { pick, get } from 'lodash';
-import { Formik, Field, Form, withFormik } from 'formik';
+import { pick, get, isEqual, isEmpty, debounce } from 'lodash';
+import { Field, Form, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 
 import {
@@ -20,122 +20,169 @@ interface IProps {
 	jobs: any[];
 	values: any;
 	errors: any;
+	formik: any;
 	onSubmit: (values) => void;
-	handleChange: () => void;
+	onValueChange: (event) => void;
+	handleChange: (event) => void;
+	handleSubmit: () => void;
 }
 
-class RiskDetailsFormComponent extends React.PureComponent<IProps, any> {
+interface IState {
+	isSaving: boolean;
+}
+
+class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
+	public formRef = React.createRef();
+
+	public state = {
+		isSaving: false
+	};
+
+	public componentDidUpdate(prevProps, prevState) {
+		const changes = {} as IState;
+		const valuesChanged = !isEqual(prevProps.values, this.props.values);
+		if (valuesChanged && !this.state.isSaving) {
+			this.autoSave();
+		}
+
+		if (valuesChanged && this.state.isSaving) {
+			changes.isSaving = false;
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
+	public autoSave = debounce(() => {
+		const { formik, handleSubmit } = this.props;
+		if (!formik.isValid) {
+			return;
+		}
+
+		this.setState({ isSaving: true }, () => {
+			handleSubmit();
+			this.setState({ isSaving: false });
+		});
+	}, 200);
+
+	public handleChangeAndSubmit = (event, ...args) => {
+		event.persist();
+		this.props.handleChange(event);
+		this.props.handleSubmit();
+	}
+
 	public render() {
 		const { values, errors, handleChange } = this.props;
 
 		return (
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledTextField
-						onChange={handleChange}
-						value={values.safetibase_id}
-						label="GUID"
-						name="safetibase_id"
-					/>
+					<Field name="safetibase_id" render={({ field }) => (
+						<StyledTextField
+							{...field}
+							label="GUID"
+						/>
+					)} />
 
-					<StyledTextField
-						onChange={handleChange}
-						value={values.associated_activity}
-						label="Associated Activity"
-						name="associated_activity"
-					/>
+					<Field name="associated_activity" render={({ field }) => (
+						<StyledTextField
+							{...field}
+							label="Associated Activity"
+						/>
+					)} />
 				</FieldsRow>
 
-				<StyledTextField
-					onChange={handleChange}
-					value={values.desc}
-					fullWidth
-					multiline
-					label="Description"
-					name="desc"
-				/>
+				<Field name="description" render={({ field }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						multiline
+						label="Description"
+					/>
+				)} />
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="assigned_roles">Risk owner</InputLabel>
-						<CellSelect
-							onChange={handleChange}
-							value={values.assigned_roles}
-							items={this.props.jobs}
-							inputId="assigned_roles"
-							name="assigned_roles"
-						/>
+						<Field name="assigned_roles" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={this.props.jobs}
+								inputId="assigned_roles"
+							/>
+						)} />
 					</StyledFormControl>
 
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="category">Category</InputLabel>
-						<CellSelect
-							name="category"
-							inputId="category"
-							onChange={handleChange}
-							value={values.category}
-							items={RISK_CATEGORIES}
-						/>
+						<Field name="category" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={RISK_CATEGORIES}
+								inputId="category"
+							/>
+						)} />
 					</StyledFormControl>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
-						<CellSelect
-							name="likelihood"
-							onChange={handleChange}
-							value={values.likelihood}
-							items={RISK_LIKELIHOODS}
-							inputId="likelihood"
-						/>
+						<Field name="likelihood" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={RISK_LIKELIHOODS}
+								inputId="likelihood"
+							/>
+						)} />
 					</StyledFormControl>
 
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
-						<CellSelect
-							name="consequence"
-							inputId="consequence"
-							onChange={handleChange}
-							value={values.consequence}
-							items={RISK_CONSEQUENCES}
-						/>
+						<Field name="consequence" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={RISK_CONSEQUENCES}
+								inputId="consequence"
+							/>
+						)} />
 					</StyledFormControl>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
-						<CellSelect
-							name="level_of_risk"
-							onChange={handleChange}
-							value={values.level_of_risk}
-							items={LEVELS_OF_RISK}
-							inputId="level_of_risk"
-							disabled={true}
-						/>
+						<Field name="level_of_risk" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={LEVELS_OF_RISK}
+								inputId="level_of_risk"
+								disabled={true}
+							/>
+						)} />
 					</StyledFormControl>
 
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="mitigation_status">Mitigation Status</InputLabel>
-						<CellSelect
-							onChange={handleChange}
-							value={values.mitigation_status}
-							items={RISK_MITIGATION_STATUSES}
-							inputId="mitigation_status"
-							name="mitigation_status"
-						/>
+						<Field name="mitigation_status" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={RISK_MITIGATION_STATUSES}
+								inputId="mitigation_status"
+							/>
+						)} />
 					</StyledFormControl>
 				</FieldsRow>
 
-				<StyledTextField
-					onChange={handleChange}
-					value={values.mitigation_desc}
-					fullWidth
-					multiline
-					label="Mitigation"
-					name="mitigation_desc"
-				/>
+				<Field name="mitigation_desc" render={({ field }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						multiline
+						label="Mitigation"
+					/>
+				)} />
 			</Form>
 		);
 	}
@@ -153,5 +200,8 @@ export const RiskDetailsForm = withFormik({
 		likelihood: risk.likelihood || 0,
 		consequence: risk.consequence || 0
 	}),
-	handleSubmit: () => {}
-})(RiskDetailsFormComponent as any) as any;
+	handleSubmit: (values, { props }) => {
+		(props as IProps).onSubmit(values);
+	},
+	enableReinitialize: true
+})(connect(RiskDetailsFormComponent as any)) as any;

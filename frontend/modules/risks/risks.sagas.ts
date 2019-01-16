@@ -20,6 +20,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { RisksTypes, RisksActions } from './risks.redux';
 import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	try {
@@ -30,6 +31,28 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	}
 }
 
+export function* saveRisk({ teamspace, modelId, riskData }) {
+	try {
+		const { data } = yield API.saveRisk(teamspace, modelId, riskData);
+		yield put(RisksActions.saveRiskSuccess(data));
+		yield put(SnackbarActions.show('Risk created'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('save', 'risk', error));
+	}
+}
+
+export function* updateRisk({ teamspace, modelId, riskData }) {
+	try {
+		const { data } = yield API.updateRisk(teamspace, modelId, riskData);
+		yield put(RisksActions.saveRiskSuccess(data));
+		yield put(SnackbarActions.show('Risk updated'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'risk', error));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
+	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
+	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
 }

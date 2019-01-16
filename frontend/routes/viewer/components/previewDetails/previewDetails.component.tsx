@@ -18,6 +18,7 @@
 import * as React from 'react';
 
 import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -33,30 +34,74 @@ interface IProps {
 	createdDate: string;
 	StatusIconComponent: any;
 	statusColor: string;
+	defaultExpanded: boolean;
+	editable?: boolean;
+	onExpandChange?: (event, expaned: boolean) => void;
+	onNameChange?: (event, name: string) => void;
 }
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
+	public handleNameChange = (event) => {
+		this.props.onNameChange(event, event.target.value);
+	}
+
 	public renderNameWithCounter = renderWhenTrue(() =>
 		<Typography>{`${this.props.count}. ${this.props.name}`}</Typography>
 	);
 
 	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
 
+	public renderNameField = renderWhenTrue(() => (
+		<TextField
+			fullWidth
+			defaultValue={this.props.name}
+			onChange={this.handleNameChange}
+		/>
+	));
+
+	public renderExpandIcon = renderWhenTrue(() => <ExpandMoreIcon />);
+
+	get collapsableProps() {
+		const { editable, defaultExpanded, onExpandChange } = this.props;
+		const props = {
+			defaultExpanded: editable || defaultExpanded,
+			onChange: onExpandChange
+		} as any;
+
+		if (editable) {
+			props.expanded = true;
+		}
+		return props;
+	}
+
 	public render() {
-		const { roleColor, count, author, createdDate, children, StatusIconComponent, statusColor } = this.props;
+		const {
+			roleColor,
+			count,
+			author,
+			createdDate,
+			children,
+			StatusIconComponent,
+			statusColor,
+			editable,
+			onExpandChange
+		} = this.props;
+
+		const createdAt = !editable ? createdDate : null;
 
 		return (
 			<Container>
-				<Collapsable>
-					<Summary expandIcon={<ExpandMoreIcon />}>
+				<Collapsable {...this.collapsableProps}>
+					<Summary expandIcon={this.renderExpandIcon(!editable)}>
 						<RoleIndicator color={roleColor} />
-						{this.renderNameWithCounter(count)}
-						{this.renderName(!count)}
+						{this.renderNameWithCounter(!editable && count)}
+						{this.renderName(!editable && !count)}
+						{this.renderNameField(editable)}
 					</Summary>
 					<Details>
 						<PreviewItemInfo
 							author={author}
-							createdAt={createdDate}
+							createdAt={createdAt}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>
