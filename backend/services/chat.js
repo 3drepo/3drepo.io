@@ -67,7 +67,7 @@ module.exports.createApp = function (server, serverConfig) {
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 
-				console.log("!!! New message", msg);
+				console.log("[On Message Received]", msg.data);
 				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
 		});
@@ -88,14 +88,12 @@ module.exports.createApp = function (server, serverConfig) {
 
 				systemLogger.logError("socket connection without credential");
 				socket.emit(credentialErrorEventName, { message: "Connection without credential"});
-				// console.log(socket.handshake);
 
 				return;
 			}
 
 			const username = socket.handshake.session.user.username;
 			const sessionId =  socket.handshake.session.id;
-			// console.log('socket id', socket.client.id);
 			userToSocket[socket.client.id] = socket;
 
 			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });

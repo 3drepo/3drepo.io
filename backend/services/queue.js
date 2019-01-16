@@ -132,7 +132,7 @@ class ImportQueue {
 				return channel.bindQueue(queue.q, this.eventExchange, "").then(() => {
 					return channel.consume(queue.q, (rep) => {
 						/*eslint-disable */
-						console.log("[ConsumeEventQueue]: New message found", rep);
+						console.log("[ConsumeEventQueue]: New message found", rep.content.data);
 						if (this.eventCallback) {
 							this.eventCallback(JSON.parse(rep.content));
 						}
