@@ -413,8 +413,10 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					});
 				}
 			} else {
+				console.log(this.subscriptions[key]);
 				if(!this.subscriptions[key].expiryDate ||
 					this.subscriptions[key].expiryDate > Date.now()) {
+					console.log("data:" ,  this.subscriptions[key].data);
 					sumLimits.spaceLimit += this.subscriptions[key].data;
 					if(sumLimits.collaboratorLimit !== "unlimited") {
 						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited" ?
