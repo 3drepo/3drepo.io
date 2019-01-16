@@ -380,6 +380,7 @@ billingSchema.methods.getActiveSubscriptions = function() {
 
 billingSchema.methods.getSubscriptionLimits = function() {
 
+	/*eslint-disable */
 	const sumLimits = {};
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
@@ -393,6 +394,7 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	if(!sumLimits.collaboratorLimit) {
 		sumLimits.collaboratorLimit = 0;
 	}
+	console.log("After basic", sumLimits);
 
 	if(this.subscriptions)	{
 		Object.keys(this.subscriptions).forEach(key => {
@@ -421,8 +423,10 @@ billingSchema.methods.getSubscriptionLimits = function() {
 				}
 
 			}
+			console.log("After ", key , sumLimits);
 		});
 	}
+	console.log("Final", sumLimits);
 
 	return sumLimits;
 };
