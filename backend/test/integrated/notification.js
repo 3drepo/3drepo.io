@@ -84,6 +84,7 @@ describe("Notification", function () {
 						agent.post("/login")
 							.send({ username, password })
 							.expect(200, function(err, res) {
+								console.log(res.header);
 								cookies = res.header["set-cookie"][0];
 
 								cookies.split(";").forEach(keyval => {

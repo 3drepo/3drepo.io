@@ -297,6 +297,8 @@ class ImportQueue {
 			return channel.assertExchange(this.eventExchange, "fanout", {
 				durable: true
 			}).then(() => {
+				/*eslint-disable */
+				console.log("!!! New event message", msg);
 				return channel.publish(
 					this.eventExchange,
 					"",

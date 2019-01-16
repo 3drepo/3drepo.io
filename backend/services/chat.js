@@ -63,9 +63,11 @@ module.exports.createApp = function (server, serverConfig) {
 		Queue.subscribeToEventMessages((msg) => {
 			// consume event queue and fire msg to clients if they have subscribed related event
 			if(msg.event && msg.channel) {
+				/*eslint-disable */
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 
+				console.log("!!! New message", msg, !!emitter);
 				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
 		});
