@@ -117,7 +117,6 @@ describe("Uploading a model", function () {
 
 
 		it("should return error (has a subscription but ran out of space)", function(done) {
-			// user: testing loaded with a valid subscription and a model with 6MB and subscription limit is 8MB
 			agent.post(`/${username}/${modelId}/upload`)
 				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
