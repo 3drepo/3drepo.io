@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { isEqual, omit } from 'lodash';
-import AddIcon from '@material-ui/icons/Add';
 
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { LogList } from '../../../../../components/logList/logList.component';
@@ -28,17 +27,21 @@ import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../
 
 import { Container } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
+import { Viewer } from '../../../../../../services/viewer';
 
 interface IProps {
 	jobs: any[];
 	risk: any;
 	newRisk: any;
+	newComment: any;
 	teamspace: string;
 	model: string;
 	expandDetails: boolean;
 	saveRisk: (teamspace, modelId, risk) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
+	postComment: (teamspace, modelId, riskId, comment) => void;
 	setState: (componentState) => void;
+	showScreenshotDialog: (options) => void;
 }
 
 interface IState {
@@ -52,23 +55,25 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		logs: []
 	};
 
-	public setLogs = () => {
-		const logs = this.props.risk.comments || [{
-			comment: 'Sample comment',
-			viewpoint: [],
-			created: Date.now(),
-			owner: 'charence',
-			action: null,
-			companyName: 'charence',
-			userName: 'charence',
-			teamspace: 'charence'
-		}];
+	public commentRef = React.createRef<any>();
 
+	get isNewRisk() {
+		return !this.props.risk._id;
+	}
+
+	get riskData() {
+		return this.isNewRisk ? this.props.newRisk : this.props.risk;
+	}
+
+	public setLogs = () => {
+		const logs = this.props.risk.comments;
 		this.setState({ logs });
 	}
 
 	public componentDidMount() {
-		this.setLogs();
+		if (this.props.risk.comments) {
+			this.setLogs();
+		}
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -76,6 +81,15 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		if (logsChanged) {
 			this.setLogs();
 		}
+	}
+
+	public mergeRiskData = (source, mergeWithEntity) => {
+		return {
+			...source,
+			...omit(mergeWithEntity, ['assigned_roles', 'description']),
+			assigned_roles: [mergeWithEntity.assigned_roles],
+			desc: mergeWithEntity.description
+		};
 	}
 
 	public handleExpandChange = () => {
@@ -87,72 +101,85 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newRisk });
 	}
 
-	public handleRiskSave = (values) => {
-		const { teamspace, model, risk, saveRisk, updateRisk } = this.props;
-		const updatedRisk = {
-			...risk,
-			...omit(values, ['assigned_roles', 'description']),
-			assigned_roles: [values.assigned_roles],
-			desc: values.description
-		};
-		if (updatedRisk._id) {
-			updateRisk(teamspace, model, updatedRisk);
+	public handleRiskFormSubmit = (values) => {
+		const { teamspace, model, updateRisk, setState } = this.props;
+		if (this.isNewRisk) {
+			const newRisk = {...this.riskData, values};
+			setState({ newRisk });
 		} else {
-			saveRisk(teamspace, model, updatedRisk);
+			updateRisk(teamspace, model, this.mergeRiskData(this.riskData, values));
 		}
 	}
 
-	public handleNewScreenshot = () => {
+	public handleSave = (comment) => {
+		const { teamspace, model, newRisk, saveRisk, postComment } = this.props;
+		if (this.isNewRisk) {
+			saveRisk(teamspace, model, this.mergeRiskData(this.riskData, newRisk));
+		} else {
+			postComment(teamspace, model, this.riskData._id, comment);
+		}
+	}
+
+	public setCommentData = (commentData = {}) => {
+		this.props.setState({ newComment: {
+			...this.props.newComment, ...commentData
+		}});
+	}
+
+	public handleNewScreenshot = async () => {
+		const { showScreenshotDialog, teamspace, model } = this.props;
+		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+		showScreenshotDialog({
+			sourceImage: Viewer.getScreenshot(),
+			onSave: (screenshot) => this.setCommentData({ screenshot, viewpoint })
+		});
+	}
+
+	public handleChangePin = () => {
 
 	}
 
-	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
+	public handleSaveButton = () => {
 
-	public renderFooter = () => (
-		<ViewerPanelFooter alignItems="center" justify="space-between">
-			<div>
-				<ViewerPanelButton
-					aria-label="Take screenshot"
-					onClick={this.handleNewScreenshot}
-				>Screen</ViewerPanelButton>
-				<ViewerPanelButton
-					aria-label="Add pin"
-					onClick={this.handleNewScreenshot}
-				>Pin</ViewerPanelButton>
-			</div>
-			<ViewerPanelButton
-				type="submit"
-				aria-label="Add risk"
-				onClick={this.handleRiskSave}
-				color="secondary"
-				variant="fab"
-			>
-				<AddIcon />
-			</ViewerPanelButton>
-		</ViewerPanelFooter>
-	)
+	}
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails, newRisk, risk, jobs } = this.props;
-		const riskData = risk._id ? risk : newRisk;
+		const { expandDetails, jobs } = this.props;
 
 		return (
 			<PreviewDetails
-				{...riskData}
+				{...this.riskData}
 				defaultExpanded={expandDetails}
-				editable={!riskData._id}
+				editable={!this.riskData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 			>
 				<RiskDetailsForm
-					risk={riskData}
+					risk={this.riskData}
 					jobs={jobs}
-					onValueChange={this.handleRiskSave}
-					onSubmit={this.handleRiskSave}
+					onValueChange={this.handleRiskFormSubmit}
+					onSubmit={this.handleRiskFormSubmit}
 				/>
 			</PreviewDetails>
 		);
 	});
+
+	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
+
+	public renderFooter = () => (
+		<ViewerPanelFooter alignItems="center">
+			<NewCommentForm
+				comment={this.props.newComment.comment}
+				screenshot={this.props.newComment.screenshot}
+				viewpoint={this.props.newComment.viewpoint}
+				innerRef={this.commentRef}
+				hideComment={this.isNewRisk}
+				onTakeScreenshot={this.handleNewScreenshot}
+				onChangePin={this.handleChangePin}
+				onSave={this.handleSave}
+			/>
+		</ViewerPanelFooter>
+	)
 
 	public render() {
 		const { newRisk, risk } = this.props;

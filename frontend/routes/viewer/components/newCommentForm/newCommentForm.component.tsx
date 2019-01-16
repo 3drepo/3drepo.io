@@ -21,92 +21,116 @@ import { Formik, Field, Form } from 'formik';
 import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import PinDropIcon from '@material-ui/icons/PinDrop';
-import IconButton from '@material-ui/core/IconButton';
 
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
-	StyledButton, StyledTextField, Actions, ActionsGroup, TextFieldWrapper
+	StyledTextField,
+	Actions,
+	ActionsGroup,
+	TextFieldWrapper,
+	StyledForm,
+	Container
 } from './newCommentForm.styles';
+import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 
 interface IProps {
+	innerRef: any;
+	comment?: string;
+	screenshot?: string;
+	viewpoint?: any;
+	hideComment?: boolean;
+	hidePin?: boolean;
+	hideScreenshot?: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: () => void;
 	onChangePin: () => void;
-	viewpoint: any;
 }
 
 const NewCommentSchema = Yup.object().shape({
-	newComment: Yup.string().max(220)
+	text: Yup.string().max(220)
 });
 
 export class NewCommentForm extends React.PureComponent<IProps, any> {
-	public state = {
-		screenshot: ''
-	};
-
-	public handleSave = ({newComment}, {resetForm}) => {
+	public handleSave = ({ comment }, { resetForm }) => {
 		const {screenshot} = this.state;
-		const updatedViewpoint = {
+		const viewpoint = {
 			...this.props.viewpoint,
 			screenshot
 		};
 
-		this.props.onSave({comment: newComment, updatedViewpoint});
+		this.props.onSave({ comment, viewpoint });
 		resetForm();
-		this.setState({screenshot: ''});
-	}
-
-	public handleTakeScreenshot = () => {
-		this.props.onTakeScreenshot();
 	}
 
 	public handleChangePin = () => {
 		this.props.onChangePin();
 	}
 
+	public renderScreenshotButton = renderWhenTrue(() => (
+		<TooltipButton
+			Icon={CameraIcon}
+			label="Take a screenshot"
+			action={this.props.onTakeScreenshot}
+		/>
+	));
+
+	public renderPinButton = renderWhenTrue(() => (
+		<TooltipButton
+			Icon={PinDropIcon}
+			label="Add a pin"
+			action={this.handleChangePin}
+		/>
+	));
+
+	public renderCommentField = renderWhenTrue(() => (
+		<TextFieldWrapper>
+			<Field name="comment" render={({ field }) => (
+				<StyledTextField
+					{...field}
+					autoFocus={true}
+					placeholder="Write your comment here"
+					multiline={true}
+					fullWidth={true}
+					InputLabelProps={{ shrink: true }}
+					inputProps={{ rowsMax: 4, maxLength: 220 }}
+				/>
+			)} />
+		</TextFieldWrapper>
+	));
+
 	public render() {
+		const { hideComment, hideScreenshot, hidePin, innerRef, comment, screenshot } = this.props;
 		return (
-			<Formik
-				initialValues={{ newComment: '', screenshot: '' }}
-				validationSchema={NewCommentSchema}
-				onSubmit={this.handleSave}
+			<Container>
+				<Formik
+					ref={innerRef}
+					initialValues={{ comment, screenshot }}
+					validationSchema={NewCommentSchema}
+					onSubmit={this.handleSave}
 				>
-				<Form>
-					<TextFieldWrapper>
-						<Field name="newComment" render={ ({ field, form }) => (
-							<StyledTextField
-								{...field}
-								autoFocus={true}
-								placeholder="Write your comment here"
-								multiline={true}
-								fullWidth={true}
-								InputLabelProps={{shrink: true }}
-								inputProps={{ rowsMax: 4, maxLength: 220 }}
-							/>
-						)} />
-					</TextFieldWrapper>
-					<Actions>
-						<ActionsGroup>
-							<IconButton component="span" aria-label="Take a screenshot" onClick={this.handleTakeScreenshot}>
-								<CameraIcon />
-							</IconButton>
-							<IconButton component="span" aria-label="Change a pin" onClick={this.handleChangePin}>
-								<PinDropIcon />
-							</IconButton>
-						</ActionsGroup>
-						<Field render={ ({ form }) =>
-							<StyledButton
-								variant="fab"
-								color="secondary"
-								type="submit"
-								mini={true}
-								disabled={((!form.isValid || form.isValidating) && !this.state.screenshot)}
-								aria-label="Add new comment"
-							>
-								<SaveIcon />
-							</StyledButton>} />
-					</Actions>
-				</Form>
-			</Formik>
+					<StyledForm>
+						{this.renderCommentField(!hideComment)}
+						<Actions>
+							<ActionsGroup>
+								{this.renderScreenshotButton(!hideScreenshot)}
+								{this.renderPinButton(!hidePin)}
+							</ActionsGroup>
+							<Field render={({ form }) =>
+								<ViewerPanelButton
+									variant="fab"
+									color="secondary"
+									type="submit"
+									mini={true}
+									disabled={!hideComment && (!form.isValid || form.isValidating)}
+									aria-label="Add new comment"
+								>
+									<SaveIcon />
+								</ViewerPanelButton>} />
+						</Actions>
+					</StyledForm>
+				</Formik>
+			</Container>
 		);
 	}
 }

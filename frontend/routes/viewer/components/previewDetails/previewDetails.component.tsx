@@ -83,8 +83,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			children,
 			StatusIconComponent,
 			statusColor,
-			editable,
-			onExpandChange
+			editable
 		} = this.props;
 
 		const createdAt = !editable ? createdDate : null;
