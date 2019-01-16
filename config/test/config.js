@@ -80,7 +80,6 @@ module.exports = {
         region: "eu-west-2",
 		bucketName: "3drepo-travis"
 	},
-	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24

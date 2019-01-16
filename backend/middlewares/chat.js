@@ -15,30 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
-const Queue = require("../services/queue");
+const chatEvent = require("../models/chatEvent");
 const C = require("../constants");
-
-const queueUpsertNotification = function(session, notification) {
-	const msg = {
-		event : notification.username + "::notificationUpserted",
-		channel : notification.username,
-		emitter : session,
-		data : notification.notification
-	};
-
-	return Queue.insertEventMessage(msg);
-};
-
-const queueDeleteNotification = function(session, notification) {
-	const msg = {
-		event : notification.username + "::notificationDeleted",
-		channel : notification.username,
-		emitter : session,
-		data : {_id:notification.notification._id}
-	};
-
-	return Queue.insertEventMessage(msg);
-};
 
 module.exports = {
 	onNotification: function(req, res, next) {
@@ -48,8 +26,8 @@ module.exports = {
 		const deletedNotifications = notifications.filter(n => n.deleted);
 		const upsertedNotifications = notifications.filter(n => !n.deleted);
 
-		deletedNotifications.forEach(queueDeleteNotification.bind(null,sessionId));
-		upsertedNotifications.forEach(queueUpsertNotification.bind(null,sessionId));
+		deletedNotifications.forEach(chatEvent.deletedNotification.bind(null,sessionId));
+		upsertedNotifications.forEach(chatEvent.upsertedNotification.bind(null,sessionId));
 		next();
 	}
 };

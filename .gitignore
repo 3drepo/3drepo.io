@@ -81,6 +81,8 @@ backend/coverage
 backend/.nyc_output
 backend/mongodb-prebuilt-*
 backend/3drepo.log
+backend/docs/
 npm-debug.log.*
 .vscode/
 *.swo
+

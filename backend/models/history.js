@@ -129,13 +129,7 @@ historySchema.methods.removeFromCurrent = function(id) {
 };
 
 historySchema.statics.clean = function(histories) {
-	const cleaned = [];
-
-	histories.forEach(history => {
-		cleaned.push(history.clean());
-	});
-
-	return cleaned;
+	return histories.map(h=> h.clean());
 };
 
 historySchema.methods.clean = function() {

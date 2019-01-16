@@ -278,6 +278,7 @@ class ImportQueue {
 						correlationId: corID,
 						appId: this.uid,
 						persistent: true
+
 					}
 				);
 			}).then(() => {
@@ -329,10 +330,10 @@ class ImportQueue {
 		const ModelHelper = require("../models/helper/model");
 
 		if ("processing" === resData.status) {
-			ModelHelper.setStatus(resDatabase, resProject, "processing");
+			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
 		} else {
 			if (resErrorCode === 0) {
-				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath);
+				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
 			} else {
 				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
 			}

@@ -19,9 +19,11 @@ import * as React from 'react';
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';
+
 import PanoramaFishEye from '@material-ui/icons/PanoramaFishEye';
 import Lens from '@material-ui/icons/Lens';
 import Clear from '@material-ui/icons/Clear';
+import ChangeHistory from '@material-ui/icons/ChangeHistory';
 
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
@@ -34,14 +36,30 @@ export interface INotification {
 	modelId: string;
 	teamSpace: string;
 	modelName: string;
-	issuesId: string[];
+	issuesId?: string[];
+	revision?: string;
 	timestamp: number;
+	errorMessage?: string;
 }
+
+const TYPES = {
+	ISSUE_ASSIGNED : 'ISSUE_ASSIGNED',
+	MODEL_UPDATED : 'MODEL_UPDATED',
+	MODEL_UPDATED_FAILED : 'MODEL_UPDATED_FAILED'
+};
 
 interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
+	showUpdatedFailedError: (errorMessage: string) => void;
+	onClick?: (e: React.SyntheticEvent) => void;
 	history: any;
+}
+
+interface IState {
+	icon: React.ComponentType;
+	details: string;
+	summary: string;
 }
 
 const LabelWithTooltip = (props) => (
@@ -68,10 +86,59 @@ const NotificationItemText = (props) => {
 	);
 };
 
-export class NotificationItem extends React.PureComponent<IProps, any> {
+const getIcon = (notification) => {
+	switch (notification.type) {
+		case TYPES.ISSUE_ASSIGNED:
+			return (<Place/>);
+		case TYPES.MODEL_UPDATED:
+		case TYPES.MODEL_UPDATED_FAILED:
+			return (<ChangeHistory/>);
+	}
+};
+
+const getDetails = (notification: IProps) => {
+	switch (notification.type) {
+		case TYPES.ISSUE_ASSIGNED:
+			return `${notification.issuesId.length} assigned issues `;
+		case TYPES.MODEL_UPDATED:
+			return !notification.revision ? 'New revision uploaded' : `Revision ${notification.revision} uploaded`;
+		case TYPES.MODEL_UPDATED_FAILED:
+			return 'New revision failed to import';
+	}
+};
+
+const getSummary  = (notification) =>  `In ${notification.modelName}`;
+
+export class NotificationItem extends React.PureComponent<IProps, IState> {
 	public gotoNotification = () => {
+		this.props.sendUpdateNotificationRead(this.props._id, true);
+
+		if (this.props.type === TYPES.MODEL_UPDATED_FAILED) {
+			this.props.showUpdatedFailedError(this.props.errorMessage);
+			return;
+		}
+
 		const {teamSpace, modelId, _id: notificationId, history} = this.props;
-		history.push(`/viewer/${teamSpace}/${modelId}?notificationId=${notificationId}`);
+		let pathname = `/viewer/${teamSpace}/${modelId}`;
+		let search = '';
+
+		if (this.props.type === TYPES.ISSUE_ASSIGNED) {
+			search = `?notificationId=${notificationId}`;
+		}
+
+		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
+			pathname += `/${this.props.revision}`;
+		}
+
+		history.push({pathname, search});
+	}
+
+	public onClick = (e: React.SyntheticEvent) => {
+		if (this.props.onClick) {
+			this.props.onClick(e);
+		}
+
+		this.gotoNotification();
 	}
 
 	public delete = (e: React.SyntheticEvent) => {
@@ -90,40 +157,30 @@ export class NotificationItem extends React.PureComponent<IProps, any> {
 	}
 
 	public render = () => {
-		const {issuesId, modelName, read} =  this.props;
+		const {read} =  this.props;
+		const icon = getIcon(this.props);
+		const details = getDetails(this.props);
+		const summary = getSummary(this.props);
 
-		const assignedIssuesText = `${issuesId.length} assigned issues `;
-		const modelText = `In ${modelName}`;
 		const containerProps: any = {
 			read: read.toString(),
-			onClick: this.gotoNotification
+			onClick: this.onClick
 		};
 
 		return (
 			<Container {...containerProps}>
 				<Item button>
 					<Avatar>
-						<Place />
+						{icon}
 					</Avatar>
 
-					{read &&
-						<NotificationItemText
-							primaryColor="rgba(0, 0, 0, 0.54)"
-							secondaryColor="rgba(0, 0, 0, 0.24)"
-							fontWeight={FONT_WEIGHT.NORMAL}
-							primary={assignedIssuesText}
-							secondary={modelText}
-						/>
-					}
-					{!read &&
-						<NotificationItemText
-							primaryColor="rgba(0, 0, 0, 0.87)"
-							secondaryColor="rgba(0, 0, 0, 0.54)"
-							fontWeight={FONT_WEIGHT.BOLD}
-							primary={assignedIssuesText}
-							secondary={modelText}
-						/>
-					}
+					<NotificationItemText
+						primaryColor={read ? 'rgba(0, 0, 0, 0.54)' : 'rgba(0, 0, 0, 0.87)'}
+						secondaryColor={read ? 'rgba(0, 0, 0, 0.24)' : 'rgba(0, 0, 0, 0.54)'}
+						fontWeight={read ? FONT_WEIGHT.NORMAL : FONT_WEIGHT.BOLD}
+						primary={details}
+						secondary={summary}
+					/>
 
 					<ItemSecondaryAction>
 						<SmallIconButton

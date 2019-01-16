@@ -26,7 +26,8 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	setNotifications: ['notifications'],
 	upsertNotification: ['notification'],
 	deleteNotification: ['notification'],
-	patchNotification: ['notificationPatch']
+	patchNotification: ['notificationPatch'],
+	showUpdatedFailedError: ['errorMessage']
 }, { prefix: 'NOTIFICATIONS_' });
 
 export const INITIAL_STATE = {
