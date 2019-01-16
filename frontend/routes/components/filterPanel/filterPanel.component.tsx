@@ -115,7 +115,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public onSelectDateFilter = (dateFilter, child, found) => {
 		dateFilter.label = child.label;
 		dateFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
-		console.log('dateFilter.value.label',dateFilter.value.label)
+
 		if (!found) {
 			this.setState((prevState) => ({
 				selectedFilters: [...prevState.selectedFilters, dateFilter]
@@ -138,7 +138,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		};
 
 		if (parent.type === DATA_TYPES.DATE && child.date) {
-			console.log('DATE');
 			this.onSelectDateFilter(newSelectedFilter, child, found);
 		}
 
