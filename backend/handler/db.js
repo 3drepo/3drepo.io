@@ -161,10 +161,17 @@
 		});
 	}
 
+	function getSessionStore(session) {
+		const MongoDBStore = require("connect-mongodb-session")(session);
+		return new MongoDBStore({
+			uri: getURL("admin"),
+			collection: "sessions"
+		});
+	}
+
 	module.exports = {
 		disconnect,
 		dropCollection,
-		getURL,
 		getDB,
 		getAuthDB,
 		getCollection,
@@ -173,6 +180,7 @@
 		getFileFromGridFS,
 		_getCollection,
 		listCollections,
+		getSessionStore,
 		runCommand
 	};
 
