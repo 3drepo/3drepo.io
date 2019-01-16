@@ -380,7 +380,6 @@ billingSchema.methods.getActiveSubscriptions = function() {
 
 billingSchema.methods.getSubscriptionLimits = function() {
 
-	/*eslint-disable */
 	const sumLimits = {};
 	if(config.subscriptions.basic) {
 		sumLimits.spaceLimit = config.subscriptions.basic.data;
@@ -394,8 +393,6 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	if(!sumLimits.collaboratorLimit) {
 		sumLimits.collaboratorLimit = 0;
 	}
-	console.log("After basic", sumLimits);
-
 	if(this.subscriptions)	{
 		Object.keys(this.subscriptions).forEach(key => {
 			if(key === "paypal") {
@@ -413,10 +410,8 @@ billingSchema.methods.getSubscriptionLimits = function() {
 					});
 				}
 			} else {
-				console.log(this.subscriptions[key]);
 				if(!this.subscriptions[key].expiryDate ||
 					this.subscriptions[key].expiryDate > Date.now()) {
-					console.log("data:" ,  this.subscriptions[key].data);
 					sumLimits.spaceLimit += this.subscriptions[key].data;
 					if(sumLimits.collaboratorLimit !== "unlimited") {
 						sumLimits.collaboratorLimit = this.subscriptions[key].collaborators === "unlimited" ?
@@ -425,10 +420,8 @@ billingSchema.methods.getSubscriptionLimits = function() {
 				}
 
 			}
-			console.log("After ", key , sumLimits);
 		});
 	}
-	console.log("Final", sumLimits);
 
 	return sumLimits;
 };

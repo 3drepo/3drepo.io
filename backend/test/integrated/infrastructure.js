@@ -99,7 +99,6 @@ describe("Infrastructure", function () {
 				agent.post(`/testing/${model}/upload`)
 					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 					.expect(500, function(err, res) {
-						console.log(err, res.body);
 						done(err);
 					});
 
