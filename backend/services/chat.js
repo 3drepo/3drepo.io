@@ -66,8 +66,6 @@ module.exports.createApp = function (server, serverConfig) {
 				/*eslint-disable */
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
-
-				console.log("[On Message Received]", msg.data);
 				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
 		});
