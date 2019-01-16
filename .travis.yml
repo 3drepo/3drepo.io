@@ -53,7 +53,7 @@ script:
     - yarn wdm:update
     - yarn wdm:start > /dev/null 2>&1 &
     - cd ./../backend
-    - yarn test:int-one notification.js
+    - yarn test
 
 notifications:
     email:
