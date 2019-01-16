@@ -16,33 +16,33 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { keyBy } from 'lodash';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssues: ['teamspace', 'modelId', 'revision'],
 	fetchIssuesSuccess: ['issues'],
-	setActiveIssue: ['issueId'],
-	toggleDetails: ['showDetails']
+	setComponentState: ['componentState']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
-	issues: [],
+	issuesMap: {},
 	isPending: true,
-	activeIssue: null,
-	showDetails: false
+	componentState: {
+		activeIssue: null,
+		showDetails: false
+	}
 };
 
-export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues }) => {
-	return {...state, issues, activeIssue: null, showDetails: false};
+export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
+	const issuesMap = keyBy(issues, '_id');
+	return {...state, issuesMap, activeIssue: null, showDetails: false};
 };
 
-export const setActiveIssue = (state = INITIAL_STATE, { issueId }) => ({ ...state, activeIssue: issueId });
-
-export const toggleDetails = (state = INITIAL_STATE, { showDetails }) => {
-	return {...state, showDetails, activeIssue: null};
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
-	[IssuesTypes.SET_ACTIVE_ISSUE]: setActiveIssue,
-	[IssuesTypes.TOGGLE_DETAILS]: toggleDetails
+	[IssuesTypes.SET_COMPONENT_STATE]: setComponentState
 });

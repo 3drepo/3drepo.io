@@ -16,17 +16,32 @@
  */
 
 import { createSelector } from 'reselect';
+import { values } from 'lodash';
 
 export const selectIssuesDomain = (state) => Object.assign({}, state.issues);
 
 export const selectIssues = createSelector(
-	selectIssuesDomain, (state) => state.issues
+	selectIssuesDomain, (state) => values(state.issuesMap)
 );
 
-export const selectActiveIssue = createSelector(
-	selectIssuesDomain, (state) => state.activeIssue
+export const selectIsPending = createSelector(
+	selectIssuesDomain, (state) => state.isPending
+);
+
+export const selectComponentState = createSelector(
+	selectIssuesDomain, (state) => state.componentState
+);
+
+export const selectActiveIssueId = createSelector(
+	selectComponentState, (state) => state.activeIssue
+);
+
+export const selectActiveIssueDetails = createSelector(
+	selectIssuesDomain, selectComponentState, (state, componentState) => {
+		return state.issuesMap[componentState.activeIssue] || {};
+	}
 );
 
 export const selectShowDetails = createSelector(
-	selectIssuesDomain, (state) => state.showDetails
+	selectComponentState, (state) => state.showDetails
 );

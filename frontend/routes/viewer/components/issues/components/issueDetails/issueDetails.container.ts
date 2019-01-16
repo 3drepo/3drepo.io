@@ -15,21 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../../../../../helpers/migration';
 
-import * as API from '../../services/api';
-import { IssuesTypes, IssuesActions } from './issues.redux';
-import { DialogActions } from '../dialog';
+import { IssueDetails } from './issueDetails.component';
 
-export function* fetchIssues({teamspace, modelId, revision}) {
-	try {
-		const {data} = yield API.getIssues(teamspace, modelId, revision);
-		yield put(IssuesActions.fetchIssuesSuccess(data));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'issues', error));
-	}
-}
+const mapStateToProps = createStructuredSelector({});
 
-export default function* IssuesSaga() {
-	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
-}
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);

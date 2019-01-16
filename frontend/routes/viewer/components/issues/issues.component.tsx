@@ -24,7 +24,7 @@ import { ListContainer, Summary } from './../risks/risks.styles';
 import AddIcon from '@material-ui/icons/Add';
 import { PreviewListItem } from '../../../components/previewListItem/previewListItem.component';
 import { prepareIssue } from '../../../../helpers/issues';
-
+import IssueDetails from './components/issueDetails/issueDetails.container';
 import { Container } from './issues.styles';
 
 interface IProps {
@@ -34,11 +34,11 @@ interface IProps {
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
-	activeIssue?: string;
+	activeIssueId?: string;
 	showDetails?: boolean;
+	issueDetails?: any;
 	fetchIssues: (teamspace, model, revision) => void;
-	setActiveIssue: (issueId: string) => void;
-	toggleDetails: (showDetails: boolean) => void;
+	setState: (componentState: any) => void;
 }
 interface IState {
 	issueDetails?: any;
@@ -61,42 +61,42 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		return [];
 	}
 
-	public renderRisksList = renderWhenTrue(() => {
+	public handleIssueFocus = (issueId) => () => {
+		this.props.setState({ activeIssue: issueId });
+	}
+
+	public handleIssueClick = () => () => {
+		this.toggleDetails(true);
+	}
+
+	public handleAddNewIssue = () => {
+		this.toggleDetails(true);
+	}
+
+	public renderIssuesList = renderWhenTrue(() => {
 		const Items = this.props.issues.map((issue, index) => (
 			<PreviewListItem
 				{...prepareIssue(issue, this.props.jobs)}
 				key={index}
-				onItemClick={this.handleRiskFocus(issue._id)}
-				onArrowClick={this.handleRiskClick()}
-				active={this.props.activeIssue === issue._id}
+				onItemClick={this.handleIssueFocus(issue._id)}
+				onArrowClick={this.handleIssueClick()}
+				active={this.props.activeIssueId === issue._id}
 			/>
 		));
 
 		return <ListContainer>{Items}</ListContainer>;
 	});
 
-	public handleRiskFocus = (issueId) => () => {
-		this.props.setActiveIssue(issueId);
-	}
-
-	public handleRiskClick = () => () => {
-		this.props.toggleDetails(true);
-	}
-
-	public handleAddNewRisk = () => {
-		this.props.toggleDetails(true);
-	}
-
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
-				{this.renderRisksList(Boolean(this.props.issues.length))}
+				{this.renderIssuesList(Boolean(this.props.issues.length))}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>{this.props.issues.length} risks displayed</Summary>
+				<Summary>{this.props.issues.length} issues displayed</Summary>
 				<ViewerPanelButton
-					aria-label="Add risk"
-					onClick={this.handleAddNewRisk}
+					aria-label="Add issue"
+					onClick={this.handleAddNewIssue}
 					color="secondary"
 					variant="fab"
 				>
@@ -106,8 +106,11 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		</>
 	));
 
+	public renderDetailsView = renderWhenTrue(() => (
+		<IssueDetails {...this.props.issueDetails} />
+	));
+
 	public render() {
-		console.log('props', this.props);
 		return (
 			<ViewerPanel
 				title="Issues"
@@ -116,7 +119,12 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				pending={false}
 			>
 				{this.renderListView(!this.props.showDetails)}
+				{this.renderDetailsView(this.props.showDetails)}
 			</ViewerPanel>
 		);
+	}
+
+	private toggleDetails = (showDetails) => {
+		this.props.setState({ showDetails, activeIssue: null });
 	}
 }

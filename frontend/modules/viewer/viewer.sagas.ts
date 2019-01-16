@@ -29,6 +29,7 @@ export const getViewer = () => {
 export function* waitForViewer() {
 	try {
 		const ViewerService = yield getAngularService('ViewerService') as any;
+		console.log('wait for viewer');
 		yield ViewerService.initialised.promise;
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'viewer'));

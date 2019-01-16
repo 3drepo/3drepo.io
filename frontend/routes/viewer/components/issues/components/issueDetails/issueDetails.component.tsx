@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import * as React from 'react';
 
-import * as API from '../../services/api';
-import { IssuesTypes, IssuesActions } from './issues.redux';
-import { DialogActions } from '../dialog';
+import { Container } from './issueDetails.styles';
 
-export function* fetchIssues({teamspace, modelId, revision}) {
-	try {
-		const {data} = yield API.getIssues(teamspace, modelId, revision);
-		yield put(IssuesActions.fetchIssuesSuccess(data));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'issues', error));
-	}
+interface IProps {
+	noop: string; // TODO: Remove sample
 }
 
-export default function* IssuesSaga() {
-	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
+export class IssueDetails extends React.PureComponent<IProps, any> {
+
+	public render() {
+		return (
+			<Container>
+				IssueDetails component
+			</Container>
+		);
+	}
 }

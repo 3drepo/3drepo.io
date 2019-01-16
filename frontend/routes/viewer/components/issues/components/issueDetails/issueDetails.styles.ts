@@ -15,21 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import styled from 'styled-components';
 
-import * as API from '../../services/api';
-import { IssuesTypes, IssuesActions } from './issues.redux';
-import { DialogActions } from '../dialog';
-
-export function* fetchIssues({teamspace, modelId, revision}) {
-	try {
-		const {data} = yield API.getIssues(teamspace, modelId, revision);
-		yield put(IssuesActions.fetchIssuesSuccess(data));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'issues', error));
-	}
-}
-
-export default function* IssuesSaga() {
-	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
-}
+export const Container = styled.div``;

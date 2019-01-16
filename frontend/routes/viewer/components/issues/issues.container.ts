@@ -20,20 +20,26 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Issues } from './issues.component';
-import { IssuesActions, selectIssues, selectActiveIssue, selectShowDetails } from '../../../../modules/issues';
+import {
+	IssuesActions,
+	selectIssues,
+	selectActiveIssueId,
+	selectShowDetails,
+	selectActiveIssueDetails
+} from '../../../../modules/issues';
 import { selectJobs } from '../../../../modules/jobs';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
 	jobs: selectJobs,
-	activeIssue: selectActiveIssue,
+	activeIssueId: selectActiveIssueId,
+	activeRiskDetails: selectActiveIssueDetails,
 	showDetails: selectShowDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchIssues: IssuesActions.fetchIssues,
-	setActiveIssue: IssuesActions.setActiveIssue,
-	toggleDetails: IssuesActions.toggleDetails
+	setState: IssuesActions.setComponentState
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Issues);
