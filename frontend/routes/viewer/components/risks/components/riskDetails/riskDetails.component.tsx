@@ -19,12 +19,12 @@ import * as React from 'react';
 import { isEqual } from 'lodash';
 import AddIcon from '@material-ui/icons/Add';
 
-import { PreviewDetails } from '../../../../../components/previewDetails/previewDetails.component';
+import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { LogList } from '../../../../../components/logList/logList.component';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { prepareRisk } from '../../../../../../helpers/risks';
-import { NewCommentForm } from '../../../../../components/newCommentForm/newCommentForm.component';
+import { NewCommentForm } from '../../../newCommentForm/newCommentForm.component';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 
 import { Container } from './riskDetails.styles';

@@ -20,7 +20,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 import Typography from '@material-ui/core/Typography';
 
-import { COLOR } from '../../../styles/colors';
+import { COLOR } from '../../../../styles/colors';
 
 export const MenuItemContainer = styled(MenuItem)`
   position: relative;
@@ -30,12 +30,6 @@ export const MenuItemContainer = styled(MenuItem)`
     height: auto;
     border-bottom: 1px solid ${COLOR.BLACK_6};
     padding: 0;
-/*     padding: 3px 40px 3px 7px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    height: 94px;
-    justify-content: center; */
 
     &:hover {
       background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
