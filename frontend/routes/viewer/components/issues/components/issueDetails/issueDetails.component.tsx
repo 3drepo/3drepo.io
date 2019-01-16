@@ -16,19 +16,23 @@
  */
 
 import * as React from 'react';
+import AddIcon from '@material-ui/icons/Add';
 
 import { Container } from './issueDetails.styles';
+import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
 	noop: string; // TODO: Remove sample
 }
 
 export class IssueDetails extends React.PureComponent<IProps, any> {
-
 	public render() {
 		return (
 			<Container>
-				IssueDetails component
+				<ViewerPanelContent className="height-catcher">
+					<IssueDetailsForm />
+				</ViewerPanelContent>
 			</Container>
 		);
 	}
