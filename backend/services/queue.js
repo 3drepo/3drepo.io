@@ -123,26 +123,28 @@ class ImportQueue {
 	}
 
 	consumeEventQueue() {
-		this.getChannel().then((channel) => {
-			return channel.assertExchange(this.eventExchange, "fanout", {
-				durable: true
-			}).then(() => {
-				return channel.assertQueue("", { exclusive: true });
-			}).then(queue => {
-				return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
-					return channel.consume(queue.queue, (rep) => {
-						/*eslint-disable */
-						console.log("[ConsumeEventQueue]: New message found, queue: " , queue.queue);
-						if (this.eventCallback) {
-							this.eventCallback(JSON.parse(rep.content));
-						}
+		if(this.eventCallback) {
+			this.getChannel().then((channel) => {
+				return channel.assertExchange(this.eventExchange, "fanout", {
+					durable: true
+				}).then(() => {
+					return channel.assertQueue("", { exclusive: true });
+				}).then(queue => {
+					return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
+						return channel.consume(queue.queue, (rep) => {
+							/*eslint-disable */
+							console.log("[ConsumeEventQueue]: New message found, queue: " , queue.queue);
+							if (this.eventCallback) {
+								this.eventCallback(JSON.parse(rep.content));
+							}
 
-					}, { noAck: true });
+						}, { noAck: true });
+					});
 				});
+			}).catch((err) => {
+				systemLogger.logError("Failed to consume event queue: " + err.message);
 			});
-		}).catch((err) => {
-			systemLogger.logError("Failed to consume event queue: " + err.message);
-		});
+		}
 	}
 
 	getChannel() {
@@ -339,7 +341,11 @@ class ImportQueue {
 	}
 
 	subscribeToEventMessages(callback) {
+		const wasUndefined = !this.eventCallback;
 		this.eventCallback = callback;
+		if(wasUndefined) {
+			this.consumeEventQueue();
+		}
 	}
 }
 
