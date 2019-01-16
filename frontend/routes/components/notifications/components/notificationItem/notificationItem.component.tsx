@@ -184,7 +184,7 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 
 					<ItemSecondaryAction>
 						<SmallIconButton
-							tooltip={`Mark as ${read ? 'read' : 'unread'}`}
+							tooltip={`Mark as ${read ?  'unread' : 'read'}`}
 							onClick={read ? this.markAsUnread : this.markAsRead}
 							Icon={read ? PanoramaFishEye : Lens}
 						/>
