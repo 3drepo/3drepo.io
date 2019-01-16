@@ -115,7 +115,7 @@ class ImportQueue {
 	consumeCallbackQueue() {
 		return this.getChannel().then((channel) => {
 			return channel.assertQueue(this.callbackQName).then((queue) => {
-				return channel.consume(queue.q, this.processCallbackMsg.bind(this), { noAck: true });
+				return channel.consume(queue.queue, this.processCallbackMsg.bind(this), { noAck: true });
 			});
 		}).catch((err) => {
 			systemLogger.logError("Failed to consume callback queue: " + err.message);
@@ -129,10 +129,10 @@ class ImportQueue {
 			}).then(() => {
 				return channel.assertQueue("", { exclusive: true });
 			}).then(queue => {
-				return channel.bindQueue(queue.q, this.eventExchange, "").then(() => {
-					return channel.consume(queue.q, (rep) => {
+				return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
+					return channel.consume(queue.queue, (rep) => {
 						/*eslint-disable */
-						console.log("[ConsumeEventQueue]: New message found, queue: " , queue.q , rep.content.data);
+						console.log("[ConsumeEventQueue]: New message found, queue: " , queue.queue , rep.content);
 						if (this.eventCallback) {
 							this.eventCallback(JSON.parse(rep.content));
 						}
