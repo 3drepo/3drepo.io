@@ -193,7 +193,7 @@ describe("Notification", function () {
 			expect(issues[0].viewpoint.near).to.equal(issue.viewpoint.near);
 			expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 			issueId = issues[0]._id;
-			console.log("Calling done", issues);
+			console.log("Calling done", issues[0]._id);
 			done();
 		});
 

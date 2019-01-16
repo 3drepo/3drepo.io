@@ -67,7 +67,7 @@ module.exports.createApp = function (server, serverConfig) {
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
 
-				console.log("!!! New message", msg, !!emitter);
+				console.log("!!! New message", msg);
 				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
 		});
