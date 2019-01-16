@@ -192,7 +192,7 @@ describe("Notification", function () {
 			expect(issues[0].viewpoint.near).to.equal(issue.viewpoint.near);
 			expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 			issueId = issues[0]._id;
-
+			console.log("Calling done", issues);
 			done();
 		});
 
@@ -203,6 +203,7 @@ describe("Notification", function () {
 			});
 
 		socket.on("credentialError", function(err) {
+			console.log("Calling done 2");
 			done(err);
 		});
 	});
