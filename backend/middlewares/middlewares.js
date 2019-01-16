@@ -65,6 +65,8 @@
 
 		}).then(totalSize => {
 			totalSize /= 1024 * 1024;
+			/*eslint-disable */
+			console.log("!!!! totalSize: ", totalSize,  " space limit:" , limits.spaceLimit);
 			return Promise.resolve(limits.spaceLimit - totalSize);
 		});
 
