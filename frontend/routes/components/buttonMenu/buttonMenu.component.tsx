@@ -27,6 +27,7 @@ interface IProps {
 	ButtonProps?: IconButtonProps;
 	IconProps?: IIconProps;
 	PopoverProps?: any;
+	PaperProps?: any;
 	renderButton?: (props) => JSX.Element;
 	renderContent?: (props) => JSX.Element;
 	container?: any;
@@ -75,7 +76,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { Icon, renderButton, renderContent, ButtonProps, PopoverProps, IconProps } = this.props;
+		const { Icon, renderButton, renderContent, ButtonProps, PopoverProps, PaperProps, IconProps } = this.props;
 		const { activeMenu } = this.state;
 
 		const buttonProps = {
@@ -92,6 +93,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 				{renderButton(buttonProps)}
 				<StyledPopover
 					{...popoverProps}
+					PaperProps={...PaperProps}
 					open={activeMenu}
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
