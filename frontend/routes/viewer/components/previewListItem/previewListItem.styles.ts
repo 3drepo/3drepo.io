@@ -94,7 +94,7 @@ export const Description = styled.div`
 
 export const RoleIndicator = styled.div`
   background-color: ${(props: any) => props.color || COLOR.WHITE};
-  border: 1px solid ${COLOR.GRAY};
+  border: 1px solid ${(props: any) => props.color ? COLOR.GRAY : COLOR.BLACK_20};
   height: auto;
   margin-right: 7px;
   width: 5px;

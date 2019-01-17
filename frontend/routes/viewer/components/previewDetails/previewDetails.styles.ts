@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { Form } from 'formik';
 
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -59,4 +60,11 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 
 export const CollapsableContent = styled.div`
 	margin: 16px 0;
+`;
+
+export const StyledForm = styled(Form)`
+	&& {
+	  width: 100%;
+    padding-right: 4px !important;
+	}
 `;

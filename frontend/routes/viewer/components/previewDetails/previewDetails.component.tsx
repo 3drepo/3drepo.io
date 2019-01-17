@@ -16,15 +16,18 @@
  */
 
 import * as React from 'react';
+import * as Yup from 'yup';
+import { Formik, Field } from 'formik';
 
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import { schema } from '../../../../services/validation';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
-import { Container, Collapsable, Details, Summary, CollapsableContent } from './previewDetails.styles';
+import { Container, Collapsable, Details, Summary, CollapsableContent, StyledForm } from './previewDetails.styles';
 
 interface IProps {
 	roleColor: string;
@@ -40,8 +43,13 @@ interface IProps {
 	onNameChange?: (event, name: string) => void;
 }
 
+const ValidationSchema = Yup.object().shape({
+	name: schema.required
+});
+
 export class PreviewDetails extends React.PureComponent<IProps, any> {
-	public handleNameChange = (event) => {
+	public handleNameChange = (field) => (event) => {
+		field.onChange(event);
 		this.props.onNameChange(event, event.target.value);
 	}
 
@@ -52,11 +60,25 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
 
 	public renderNameField = renderWhenTrue(() => (
-		<TextField
-			fullWidth
-			defaultValue={this.props.name}
-			onChange={this.handleNameChange}
-		/>
+		<Formik
+			initialValues={{name: this.props.name}}
+			validationSchema={ValidationSchema}
+			onSubmit={() => {}}
+		>
+			<StyledForm>
+				<Field name="name" render={({ field, form }) => (
+					<TextField
+						{...field}
+						autoFocus
+						fullWidth
+						placeholder="Title"
+						onChange={this.handleNameChange(field)}
+						error={Boolean(form.errors.name)}
+						helperText={form.errors.name}
+					/>
+				)} />
+			</StyledForm>
+		</Formik>
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => <ExpandMoreIcon />);
