@@ -63,7 +63,8 @@ export const setNewRisk = (state = INITIAL_STATE) => {
 		assigned_roles: [],
 		likelihood: 0,
 		consequence: 0,
-		level_of_risk: 0
+		level_of_risk: 0,
+		mitigation_status: ''
 	};
 	return setComponentState(state, { componentState: {
 		showDetails: true,

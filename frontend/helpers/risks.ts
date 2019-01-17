@@ -4,7 +4,8 @@ import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS } from '../constants/risks';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
-	const { Icon, color } = getRiskStatus(risk.level_of_risk, risk.mitigation_status);
+	const levelOfRisk = risk.level_of_risk || calculateLevelOfRisk(risk.likelihood, risk.consequence);
+	const { Icon, color } = getRiskStatus(levelOfRisk, risk.mitigation_status);
 	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
 
 	return {
@@ -16,7 +17,7 @@ export const prepareRisk = (risk, jobs = []) => {
 		StatusIconComponent: Icon,
 		statusColor: color,
 		roleColor,
-		level_of_risk: risk.level_of_risk || calculateLevelOfRisk(risk.likelihood, risk.consequence)
+		level_of_risk: levelOfRisk
 	};
 };
 
@@ -24,15 +25,15 @@ export const calculateLevelOfRisk = (likelihood: string, consequence: string): n
 	let levelOfRisk = 0;
 
 	if (likelihood && consequence) {
-		const likelihoodConsequenceScore: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
+		const score: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
 
-		if (6 < likelihoodConsequenceScore) {
+		if (6 < score) {
 			levelOfRisk = 4;
-		} else if (5 < likelihoodConsequenceScore) {
+		} else if (5 < score) {
 			levelOfRisk = 3;
-		} else if (2 < likelihoodConsequenceScore) {
+		} else if (2 < score) {
 			levelOfRisk = 2;
-		} else if (1 < likelihoodConsequenceScore) {
+		} else if (1 < score) {
 			levelOfRisk = 1;
 		} else {
 			levelOfRisk = 0;
