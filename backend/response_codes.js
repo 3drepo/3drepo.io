@@ -116,10 +116,9 @@
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
-		USER_EMAIL_NOT_MATCH: { message: "Incorrect username or email", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
-		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
+		USER_NOT_VERIFIED: { message: "Account not yet verified. Please check your email.", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
 		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
