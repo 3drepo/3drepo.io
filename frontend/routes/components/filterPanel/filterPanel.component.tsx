@@ -57,12 +57,14 @@ interface IFilter {
 interface ISelectedFilter {
 	value: any;
 	label: string;
+	key: string;
 	type?: number;
 }
 
 interface IProps {
 	filters: IFilter[];
 	onChange: (selectedFilters) => void;
+	selectedFilters: any[];
 }
 
 interface IState {
@@ -95,6 +97,12 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	};
 
 	private popperNode = null;
+
+	public componentDidMount = () => {
+		this.setState({
+			selectedFilters: this.props.selectedFilters
+		});
+	}
 
   public renderFiltersMenu = () => (
     <FiltersMenu
@@ -131,6 +139,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		const newSelectedFilter: ISelectedFilter = {
 			label: parent.label,
 			type: parent.type,
+			key: parent.key,
 			value: {
 				label: child.label,
 				value: child.value
@@ -149,7 +158,9 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public onToggleFilter = (parent, child) => {
-		const foundFilter = this.state.selectedFilters.find((filter) => filter.value.value === child.value);
+		const foundFilter = this.state.selectedFilters.find((filter) =>
+			filter.label === parent.label && filter.value.value === child.value
+		);
 
 		if (foundFilter && parent.type !== DATA_TYPES.DATE) {
 			this.onDeselectFilter(foundFilter);
@@ -169,6 +180,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			return {
 				name: `${filter.label}:${value.label}`,
 				label: filter.label,
+				key: filter.key,
 				type: filter.type,
 				value
 			};
@@ -312,7 +324,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderSelectedFilters = () => (
-		<SelectedFilters empty={!this.state.selectedFilters.length}>
+		<SelectedFilters
+			empty={!this.state.selectedFilters.length}
+			filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}
+		>
 			{this.state.selectedFilters.length ? this.renderFilterButton() : null}
 
 			{this.state.selectedFilters.map(

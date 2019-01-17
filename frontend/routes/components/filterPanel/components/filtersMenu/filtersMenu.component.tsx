@@ -80,8 +80,8 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		this.props.onToggleFilter(itemParent, item);
 	}
 
-	public isSelectedItem = (item) =>
-		!!this.props.selectedItems.find((filter) => filter.value.value === item.value)
+	public isSelectedItem = (parentLabel, itemValue) =>
+		!!this.props.selectedItems.find((filter) => filter.label === parentLabel && filter.value.value === itemValue)
 
 	public renderListParentItem = (index, item) => {
 		return (
@@ -112,10 +112,10 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 					{item.type === DATA_TYPES.DATE &&
 						<StyledDatePicker
 							value={this.state[subItem.value]}
-							onChange={this.onDateChange(item, subItem)}
+							onChange={this.onDateChange(item, subItem.value)}
 						/>
 					}
-					{this.isSelectedItem(subItem) && <Check fontSize={'small'} />}
+					{this.isSelectedItem(item.label, subItem.value) && <Check fontSize={'small'} />}
 				</StyledItemText>
 			</StyledListItem>
 		);

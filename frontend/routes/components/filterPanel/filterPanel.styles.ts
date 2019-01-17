@@ -29,27 +29,27 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	padding: 0 8px;
 	height: ${(props: any) => props.filtersOpen ? '50px' : '100%'};
 ` as any;
 
 export const SelectedFilters = styled.div`
   display: flex;
   flex-wrap: wrap;
-	padding-right: 40px;
-	overflow: ${(props: any) => props.filtersOpen ? 'auto' : 'hidden'};
+	padding: 0 40px 0 8px;
+	overflow: ${(props: any) => props.filtersOpen ? 'hidden' : 'auto'};
 	min-height: ${(props: any) => props.empty ? '0' : '50px'};
 	position: relative;
+	max-height: 240px;
 ` as any;
 
 export const InputContainer = styled.div`
   display: block;
 	justify-content: flex-end;
 	position: relative;
-	margin: 0 6px;
+	margin: 0;
 
   .react-autosuggest__container {
-		height: 36px;
+		height: 100%;
     flex: 1;
     position: absolute;
     bottom: 0;
@@ -58,6 +58,8 @@ export const InputContainer = styled.div`
 
 		input {
 			font-size: 14px;
+			height: 30px;
+			padding: 10px 14px;
 
 			::placeholder {
 				color: ${COLOR.BLACK_60};
@@ -106,10 +108,10 @@ export const FiltersButton = styled(IconButton)`
 
 	&& {
 		position: absolute;
-    top: 5px;
+    top: 8px;
 		width: 28px;
 		height: 28px;
-		right: 4px;
+		right: 8px;
 
 		svg {
 			bottom: 0;
@@ -129,8 +131,8 @@ export const StyledIconButton = styled(IconButton)`
 		width: 28px;
 		height: 28px;
 		position: absolute;
-    bottom: 6px;
-		right: -6px;
+    bottom: 10px;
+		right: 10px;
 	}
 `;
 

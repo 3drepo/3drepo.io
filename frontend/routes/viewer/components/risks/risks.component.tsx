@@ -30,8 +30,14 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ListContainer, Summary } from './risks.styles';
 import { prepareRisk } from '../../../../helpers/risks';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { RISK_LEVELS_ICONS, RISK_LEVELS, RISK_FILTERS } from '../../../../constants/risks';
-import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import {
+	RISK_LEVELS_ICONS,
+	RISK_LEVELS,
+	RISK_FILTERS,
+	RISK_MITIGATION_STATUSES,
+	RISK_FILTER_KEYS
+} from '../../../../constants/risks';
+import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
 
 interface IProps {
 	teamspace: string;
@@ -44,7 +50,7 @@ interface IProps {
 	showDetails?: boolean;
 	riskDetails?: any;
 	searchEnabled: boolean;
-	searchQuery: string;
+	selectedFilters: any[];
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
@@ -52,12 +58,21 @@ interface IProps {
 
 interface IState {
 	riskDetails?: any;
-	selectedFilters: any[];
+	filteredRisks: any[];
 }
 
+const UNASSIGNED_JOB = {
+	name: 'Unassigned',
+	value: ''
+};
+
 export class Risks extends React.PureComponent<IProps, IState> {
+	public state = {
+		filteredRisks: []
+	};
+
 	public renderRisksList = renderWhenTrue(() => {
-		const Items = this.props.risks.map((risk, index) => (
+		const Items = this.state.filteredRisks.map((risk, index) => (
 			<PreviewListItem
 				{...prepareRisk(risk, this.props.jobs)}
 				key={index}
@@ -73,10 +88,10 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
-				{this.renderRisksList(this.props.risks.length)}
+				{this.renderRisksList(this.state.filteredRisks.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>{this.props.risks.length} risks displayed</Summary>
+				<Summary>{this.state.filteredRisks.length} risks displayed</Summary>
 				<ViewerPanelButton
 					aria-label="Add risk"
 					onClick={this.handleAddNewRisk}
@@ -96,29 +111,78 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
+	public componentDidMount() {
+		const {teamspace, model, revision} = this.props;
+		this.props.fetchRisks(teamspace, model, revision);
+		this.setState({filteredRisks: this.filteredRisks});
+	}
+
+	public get filteredRisks() {
+		const filteredRisks = this.props.risks.filter((risk) => {
+			return this.props.selectedFilters.some((filter) => {
+				if (filter.type === DATA_TYPES.UNDEFINED) {
+					return risk[filter.key].includes(filter.value.value) || risk[filter.key] === filter.value.value;
+				} else if (filter.type === DATA_TYPES.QUERY) {
+					return risk.name.toLowerCase().includes(filter.value.value.toLowerCase()) ||
+						risk.desc.toLowerCase().includes(filter.value.value.toLowerCase());
+				}
+				return false;
+			});
+		});
+
+		return this.props.selectedFilters.length ? filteredRisks : this.props.risks;
+  }
+
+	public componentDidUpdate(prevProps) {
+		const { risks, selectedFilters } = this.props;
+		const risksChanged = prevProps.risks.length !== risks.length;
+		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+
+		if (risksChanged || filtersChanged) {
+			this.setState({filteredRisks: this.filteredRisks});
+		}
+	}
+
   public handleFilterChange = (selectedFilters) => {
-	    this.setState({
-	      selectedFilters
-	    });
-	  }
+	  this.props.setState({
+      selectedFilters
+    });
+  }
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
 			onChange={this.handleFilterChange}
-  		filters={RISK_FILTERS}
+  		filters={this.filters as any}
+			selectedFilters={this.props.selectedFilters}
 		/>
 	));
 
-	public componentDidMount() {
-		const {teamspace, model, revision} = this.props;
-		this.props.fetchRisks(teamspace, model, revision);
+	get jobsList() {
+		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public get prepareFilters() {
-		return [];
+	public getFilterValues(property) {
+		return property.map(({value, name}) => {
+			return {
+				label: name,
+				value
+			};
+		});
 	}
 
-	public componentDidUpdate() {
+	public get filtersValuesMap() {
+		return {
+			[RISK_FILTER_KEYS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
+			[RISK_FILTER_KEYS.CREATED_BY]: this.getFilterValues(this.props.jobs),
+			[RISK_FILTER_KEYS.ASSIGNED_ROLES]: this.getFilterValues(this.jobsList)
+		};
+	}
+
+	public get filters() {
+		return RISK_FILTERS.map((riskFilter) => {
+			riskFilter.values = this.filtersValuesMap[riskFilter.key];
+			return riskFilter;
+		});
 	}
 
 	public handleRiskFocus = (riskId) => () => {
@@ -150,8 +214,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public handleCloseSearchMode = () =>
 		this.props.setState({
-			searchEnabled: false,
-			searchQuery: ''
+			searchEnabled: false
 		})
 
 	public handleOpenSearchMode = () =>
