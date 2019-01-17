@@ -85,12 +85,12 @@ class ImportQueue {
 
 		return amqp.connect(this.url).then(conn => {
 			conn.on("close", () => {
-				systemLogger.logError("[AMQP] connection closed ");
+				systemLogger.logError("[AMQP] connection closed");
 				this.channel = null;
 			});
 
 			conn.on("error", (err)  => {
-				const message = "[AMQP] connection error " + err.message;
+				const message = "[AMQP] connection error: " + err.message;
 				systemLogger.logError(message);
 				Mailer.sendQueueFailedEmail({message}).catch(() => {});
 			});
@@ -98,8 +98,9 @@ class ImportQueue {
 			return conn.createChannel();
 		}).then(channel => {
 			this.channel = channel;
-			this.subscribeToQueues();
-			return channel;
+			return this.subscribeToQueues().then(() => {
+				return channel;
+			});
 		}).catch((err) => {
 			const message = "Failed to connect to rabbitmq: " + err.message;
 			systemLogger.logError(message);
@@ -108,8 +109,10 @@ class ImportQueue {
 	}
 
 	subscribeToQueues() {
-		this.consumeCallbackQueue();
-		this.consumeEventQueue();
+		return Promise.all([
+				this.consumeCallbackQueue(),
+				this.consumeEventQueue()
+		]);
 	}
 
 	consumeCallbackQueue() {
@@ -290,7 +293,7 @@ class ImportQueue {
 				);
 			});
 		}).catch((err) => {
-			const message = "Failed to dispatch work:"  + err.message;
+			const message = "Failed to dispatch work: "  + err.message;
 			systemLogger.logError(message);
 			Mailer.sendQueueFailedEmail({message}).catch(() => {});
 			return Promise.reject(responseCodes.QUEUE_CONN_ERR);
@@ -312,7 +315,7 @@ class ImportQueue {
 			});
 
 		}).catch((err) => {
-			systemLogger.logError("Failed to insert event:"  + err.message);
+			systemLogger.logError("Failed to insert event: "  + err.message);
 		});
 	}
 
