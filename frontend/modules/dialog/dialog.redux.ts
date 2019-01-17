@@ -77,7 +77,7 @@ export const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataTyp
 	const status = get(error.response, 'status', 'Implementation error');
 	const message = get(error.response, 'data.message', error.message);
 
-	return showDialog(state, { method, dataType, message, status});
+	return showErrorDialog(state, { method, dataType, message, status});
 };
 
 export const showConfirmDialog = (state = INITIAL_STATE, action) => {
