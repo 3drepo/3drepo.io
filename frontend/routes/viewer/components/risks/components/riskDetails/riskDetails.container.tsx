@@ -35,7 +35,6 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	jobs: selectJobsList,
 	risk: selectActiveRiskDetails,
-	newRisk: selectNewRiskDetails,
 	newComment: selectNewComment,
 	expandDetails: selectExpandDetails
 });
