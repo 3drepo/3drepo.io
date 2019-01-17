@@ -184,8 +184,6 @@ html(lang="en" ng-app="3drepo").ng-scope
 		}
 
 		function changeImageSize(e) {
-
-
 			const imageDiv = document.querySelectorAll(".row.screenshot");
 			const statusList = document.querySelectorAll("span.float-right");
 
@@ -223,37 +221,43 @@ html(lang="en" ng-app="3drepo").ng-scope
 						.col.screenshot
 							if issue.viewpoint.screenshotSmall
 							a(href=url(issue.viewpoint.screenshot) target='_blank')
-								img(class="fitImage" src=url(issue.viewpoint.screenshot) style="width:100%; height:200px;")
+								img(class="fitImage" src=url(issue.viewpoint.screenshot) style="width:100%;")
 						.col
 								table.details
 									tr
 									td
 										strong
 											| Assigned:
+									td
 											span.float-right #{issue.assigned_roles.join(", ")}
 									tr
 									td
 										strong
 											| Priority:
+									td
 											span.float-right  #{issue.priority}
 									tr
 									td
 										strong
 											| Status:
+									td
 											span.float-right  #{issue.status}
 									tr
 									td
 										strong
 											| Type:
+									td
 											span.float-right #{issue.topic_type}
 									tr
 									td
 										strong
 											| Due Date:
+									td
 											span.float-right #{reportValues.issueDueDate}
 
 					.row
 						.col.description
+							br
 							p
 								span #{issue.desc}
 							br
