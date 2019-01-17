@@ -546,7 +546,6 @@ function buildRule(rule) {
 			1;
 
 		for (let i = 0; i < clausesCount; i++) {
-			let clause = {};
 			let operation;
 
 			switch (rule.operator) {
@@ -584,30 +583,31 @@ function buildRule(rule) {
 					operation = { $lte: Number(rule.values[i]) };
 					break;
 				case "IN_RANGE":
-					const rangeVal1 = Number(rule.values[i*ruleOperators[rule.operator]]);
-					const rangeVal2 = Number(rule.values[i*ruleOperators[rule.operator] + 1]);
+					const rangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
+					const rangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
 					const rangeLowerOp = {};
 					rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
 					const rangeUpperOp = {};
 					rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
 
 					operation = undefined;
-					clauses.push({ $and: [ rangeLowerOp, rangeUpperOp ]});
+					clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
 					break;
 				case "NOT_IN_RANGE":
-					const exRangeVal1 = Number(rule.values[i*ruleOperators[rule.operator]]);
-					const exRangeVal2 = Number(rule.values[i*ruleOperators[rule.operator] + 1]);
+					const exRangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
+					const exRangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
 					const exRangeLowerOp = {};
 					exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
 					const exRangeUpperOp = {};
 					exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
 
 					operation = undefined;
-					clauses.push({ $and: [ exRangeLowerOp, exRangeUpperOp ]});
+					clauses.push({ $and: [exRangeLowerOp, exRangeUpperOp]});
 					break;
 			}
 
 			if (operation) {
+				const clause = {};
 				clause[fieldName] = operation;
 				clauses.push(clause);
 			}
@@ -624,7 +624,7 @@ function buildRule(rule) {
 }
 
 function rulesToQuery(rules) {
-	let query = { type: "meta" };
+	const query = { type: "meta" };
 	const expressions = [];
 
 	for (let i = 0; i < rules.length; i++) {
@@ -682,15 +682,13 @@ function findSharedIDsByRules(account, model, rules, branch, revId, convertShare
 
 	// Check submodels
 	return Ref.find({account, model}, {type: "ref"}).then((refs) => {
-		const subModelsPromises = [];
-
 		refs.forEach((ref) => {
 			models.add(ref.project);
 		});
 
 		const modelsIter = models.values();
 
-		for (let modelID of modelsIter) {
+		for (const modelID of modelsIter) {
 			const sharedIdsSet = new Set();
 
 			const sharedIdObject = {};
