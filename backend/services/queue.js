@@ -21,75 +21,142 @@
  *       to fulfil the tasks in order for the work to be done.
  ****************************************************************************/
 "use strict";
-(() => {
 
-	const amqp = require("amqplib");
-	const fs = require("fs.extra");
-	const shortid = require("shortid");
-	const systemLogger = require("../logger.js").systemLogger;
-	const Mailer = require("../mailer/mailer");
+const amqp = require("amqplib");
+const fs = require("fs.extra");
+const shortid = require("shortid");
+const systemLogger = require("../logger").systemLogger;
+const Mailer = require("../mailer/mailer");
+const config = require("../config");
+const responseCodes = require("../response_codes");
 
-	function ImportQueue() {}
+class ImportQueue {
+	constructor() {
+		if(!config.cn_queue ||
+			!config.cn_queue.shared_storage ||
+			!config.cn_queue.callback_queue ||
+			!config.cn_queue.worker_queue ||
+			!config.cn_queue.model_queue ||
+			!config.cn_queue.event_exchange
+		) {
+			throw Error("Queue is not configured correctly.");
+		}
 
-	/** *****************************************************************************
-	 * Create a connection and a channel in ampq and init variables
-	 * @param {url} url - ampq connection string
-	 * @param {options} options - defines sharedSpacePath, logger, callbackQName and workerQName
-	 *******************************************************************************/
-	ImportQueue.prototype.connect = function (url, options) {
-		if (this.conn) {
+		this.sharedSpacePath = config.cn_queue.shared_storage;
+		this.callbackQName = config.cn_queue.callback_queue;
+		this.workerQName = config.cn_queue.worker_queue;
+		this.modelQName = config.cn_queue.model_queue;
+		this.eventExchange = config.cn_queue.event_exchange;
+		this.url = config.cn_queue.host;
+		this.uid = shortid.generate();
+		this.channel = null;
+		this.connect();
+	}
+
+	writeFile(fileName, content) {
+		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
+		return new Promise((resolve, reject) => {
+			fs.writeFile(fileName, content, { flag: "a+" }, err => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+		});
+	}
+
+	mkdir(newDir) {
+		return new Promise((resolve, reject) => {
+			fs.mkdir(newDir, (err) => {
+				if (!err || err && err.code === "EEXIST") {
+					resolve();
+				} else {
+					reject(err);
+				}
+			});
+		});
+	}
+
+	connect() {
+		if (this.channel) {
+			return Promise.resolve(this.channel);
+		}
+
+		return amqp.connect(this.url).then(conn => {
+			conn.on("close", () => {
+				systemLogger.logError("[AMQP] connection closed");
+				this.channel = null;
+			});
+
+			conn.on("error", (err)  => {
+				const message = "[AMQP] connection error: " + err.message;
+				systemLogger.logError(message);
+				Mailer.sendQueueFailedEmail({message}).catch(() => {});
+			});
+
+			return conn.createChannel();
+		}).then(channel => {
+			this.channel = channel;
+			return this.subscribeToQueues().then(() => {
+				return channel;
+			});
+		}).catch((err) => {
+			const message = "Failed to connect to rabbitmq: " + err.message;
+			systemLogger.logError(message);
+			Mailer.sendQueueFailedEmail({message}).catch(() => {});
+		});
+	}
+
+	subscribeToQueues() {
+		return Promise.all([
+			this.consumeCallbackQueue(),
+			this.consumeEventQueue()
+		]);
+	}
+
+	consumeCallbackQueue() {
+		return this.getChannel().then((channel) => {
+			return channel.assertQueue(this.callbackQName).then((queue) => {
+				return channel.consume(queue.queue, this.processCallbackMsg.bind(this), { noAck: true });
+			});
+		}).catch((err) => {
+			systemLogger.logError("Failed to consume callback queue: " + err.message);
+		});
+	}
+
+	consumeEventQueue() {
+		if(this.eventCallback) {
+			return this.getChannel().then((channel) => {
+				return channel.assertExchange(this.eventExchange, "fanout", {
+					durable: true
+				}).then(() => {
+					return channel.assertQueue("", { exclusive: true });
+				}).then(queue => {
+					return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
+						return channel.consume(queue.queue, (rep) => {
+							if (this.eventCallback) {
+								this.eventCallback(JSON.parse(rep.content));
+							}
+
+						}, { noAck: true });
+					});
+				});
+			}).catch((err) => {
+				systemLogger.logError("Failed to consume event queue: " + err.message);
+			});
+		} else {
 			return Promise.resolve();
 		}
+	}
 
-		this.uid = shortid.generate();
-
-		if (!options.shared_storage) {
-			return Promise.reject({ message: "Please define shared_storage in queue config" });
-		} else if (!options.logger) {
-			return Promise.reject({ message: "Please define logger in options" });
-		} else if (!options.callback_queue) {
-			return Promise.reject({ message: "Please define callback_queue in queue config" });
-		} else if (!options.worker_queue) {
-			return Promise.reject({ message: "Please define worker_queue in queue config" });
-		} else if (!options.model_queue) {
-			return Promise.reject({ message: "Please define model_queue in queue config" });
-		} else if (!options.event_exchange) {
-			return Promise.reject({ message: "Please define event_exchange in queue config" });
-		}
-
-		return amqp.connect(url)
-			.then(conn => {
-				this.conn = conn;
-
-				conn.on("close", () => {
-					this.conn = null;
-				});
-
-				conn.on("error", function (err) {
-					systemLogger.logError("[AMQP] connection error " + err.message);
-				});
-
-				return conn.createChannel();
-			})
-			.then(channel => {
-				this.channel = channel;
-				this.sharedSpacePath = options.shared_storage;
-				this.logger = options.logger;
-				this.callbackQName = options.callback_queue;
-				this.workerQName = options.worker_queue;
-				this.modelQName = options.model_queue;
-				this.deferedObjs = {}; // cclw05 - should be deferred?
-				this.eventExchange = options.event_exchange;
-
-				return this._consumeCallbackQueue();
-			})
-			.catch(err => {
-				return Promise.reject(err);
-			});
-	};
+	getChannel() {
+		return this.channel ? Promise.resolve(this.channel) : this.connect();
+	}
 
 	/** *****************************************************************************
 	 * Dispatch work to queue to import a model via a file uploaded by User
+	 * @param {string} corID - correlation ID for this request
 	 * @param {filePath} filePath - Path to uploaded file
 	 * @param {orgFileName} orgFileName - Original file name of the file
 	 * @param {databaseName} databaseName - name of database to commit to
@@ -99,112 +166,66 @@
 	 * @param {tag} tag - revision tag
 	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	ImportQueue.prototype.importFile = function (correlationId, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
-		const corID = correlationId;
-
-		let newPath;
+	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
 		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
 
-		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy)
-			.then(obj => {
-				newPath = obj.filePath;
+		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
+			const json = {
+				file: obj.filePath,
+				database: databaseName,
+				project: modelName,
+				owner: userName
+			};
 
-				const json = {
-					file: newPath,
-					database: databaseName,
-					project: modelName,
-					owner: userName
-				};
+			if (tag) {
+				json.tag = tag;
+			}
 
-				if (tag) {
-					json.tag = tag;
-				}
+			if (desc) {
+				json.desc = desc;
+			}
 
-				if (desc) {
-					json.desc = desc;
-				}
-
-				return new Promise((resolve, reject) => {
-					fs.writeFile(jsonFilename, JSON.stringify(json), { flag: "a+" }, err => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-				});
-
-			})
-			.then(() => {
+			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
 				const msg = `import -f ${jsonFilename}`;
 				return this._dispatchWork(corID, msg, true);
 			});
-	};
+
+		});
+	}
 
 	/** *****************************************************************************
 	 * Dispatch work to queue to create a federated model
+	 * @param {string} corID - correlation ID for this request
 	 * @param {account} account - username
 	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
 	 *******************************************************************************/
-	ImportQueue.prototype.createFederatedModel = function (correlationId, account, defObj) {
-		const corID = correlationId;
+	createFederatedModel(corID, account, defObj) {
 		const newFileDir = this.sharedSpacePath + "/" + corID;
 		const filename = `${newFileDir}/obj.json`;
-		// let filename = `${newFileDir}.json`; //cclw05 - is /obj necessary? kept it there for now
 
-		return new Promise((resolve, reject) => {
-			fs.mkdir(this.sharedSpacePath, function (err) {
-				if (!err || err && err.code === "EEXIST") {
-					resolve();
-				} else {
-					reject(err);
-				}
-			});
-		})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					fs.mkdir(newFileDir, function (err) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-
+		return this.mkdir(this.sharedSpacePath).then(() => {
+			return this.mkdir(newFileDir).then(() => {
+				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
+					const msg = `genFed ${filename} ${account}`;
+					return this._dispatchWork(corID, msg);
 				});
-			})
-			.then(() => {
-				return new Promise((resolve, reject) => {
-					fs.writeFile(filename, JSON.stringify(defObj), { flag: "a+" }, err => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-				});
-			})
-			.then(() => {
-				const msg = `genFed ${filename} ${account}`;
-				return this._dispatchWork(corID, msg);
 			});
-
-	};
+		});
+	}
 
 	/** *****************************************************************************
 	 * Dispatch work to import toy model
+	 * @param {string} corID - correlation ID for this request
 	 * @param {string} database - database name
 	 * @param {string} model - model id
 	 * @param {string} modeDirName - the dir name of the model database dump staying in
 	 *******************************************************************************/
-	ImportQueue.prototype.importToyModel = function (correlationId, database, model, options) {
-		const corID = correlationId;
-
+	importToyModel(corID, database, model, options) {
 		const skip = options.skip && JSON.stringify(options.skip) || "";
 		const msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
 
 		return this._dispatchWork(corID, msg);
-	};
+	}
 
 	/** *****************************************************************************
 	 * Move a specified file to shared storage (area shared by queue workers)
@@ -215,35 +236,26 @@
 	 * @param {newFileName} newFileName - New file name to rename to
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
-	ImportQueue.prototype._moveFileToSharedSpace = function (corID, orgFilePath, newFileName, copy) {
+	_moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
 		const ModelHelper = require("../models/helper/model");
-
 		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
 
 		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
 		const filePath = newFileDir + newFileName;
 
-		return new Promise((resolve, reject) => {
-			fs.mkdir(newFileDir, function (err) {
-				if (err) {
-					reject(err);
-				} else {
-
-					const move = copy ? fs.copy : fs.move;
-
-					move(orgFilePath, filePath, function (moveErr) {
-						if (moveErr) {
-							reject(moveErr);
-						} else {
-							resolve({ filePath, newFileDir });
-						}
-					});
-				}
-
+		return this.mkdir(newFileDir).then(() => {
+			const move = copy ? fs.copy : fs.move;
+			return new Promise((resolve, reject) => {
+				move(orgFilePath, filePath, (moveErr) => {
+					if (moveErr) {
+						reject(moveErr);
+					} else {
+						resolve({ filePath, newFileDir });
+					}
+				});
 			});
 		});
-
-	};
+	}
 
 	/** *****************************************************************************
 	 * Insert a job item in worker queue
@@ -252,153 +264,92 @@
 	 * @param {msg} orgFilePath - Path to where the file is currently
 	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
-	ImportQueue.prototype._dispatchWork = function (corID, msg, isModelImport) {
-		let info;
-		const queueName = isModelImport ? this.modelQName : this.workerQName;
-		return this.channel.assertQueue(queueName, { durable: true })
-			.then(_info => {
-				info = _info;
+	_dispatchWork(corID, msg, isModelImport) {
+		return this.getChannel().then((channel) => {
+			const queueName = isModelImport ? this.modelQName : this.workerQName;
+			return channel.assertQueue(queueName, { durable: true }).then(info => {
 
-				return this.channel.sendToQueue(queueName,
+				if (info.consumerCount <= 0) {
+					systemLogger.logInfo("No consumer in queue. Sending email alert...");
+
+					Mailer.sendNoConsumerAlert().then(() => {
+						systemLogger.logInfo("Email sent.");
+					}).catch((err) => {
+						systemLogger.logError("Failed to send email: " + err.message);
+					});
+				}
+				return channel.sendToQueue(queueName,
 					new Buffer.from(msg), {
 						correlationId: corID,
 						appId: this.uid,
 						persistent: true
+
 					}
 				);
-
-			})
-			.then(() => {
-				this.logger.logInfo(
-					"Sent work to queue[" + queueName + "]: " + msg.toString() + " with corr id: " + corID.toString() + " reply queue: " + this.callbackQName, {
-						corID: corID.toString()
-					}
+			}).then(() => {
+				systemLogger.logInfo(
+					"Sent work to queue[" + queueName + "]: " + msg.toString()
+					+ " with corr id: " + corID.toString()
 				);
-
-				if (info.consumerCount <= 0) {
-					this.logger.logError(
-						"No consumer found in the queue", {
-							corID: corID.toString()
-						}
-					);
-					this.logger.logInfo("No consumer in queue. Sending email alert...");
-
-					Mailer.sendNoConsumerAlert().then(() => {
-						this.logger.logInfo("Email sent.");
-					}).catch(err =>{
-						this.logger.logInfo("Failed to send email:", err);
-					});
-
-				}
-
-				return Promise.resolve(() => {});
 			});
+		}).catch((err) => {
+			const message = "Failed to dispatch work: "  + err.message;
+			systemLogger.logError(message);
+			Mailer.sendQueueFailedEmail({message}).catch(() => {});
+			return Promise.reject(responseCodes.QUEUE_CONN_ERR);
+		});
+	}
 
-	};
-
-	/** *****************************************************************************
-	 * Listen to callback queue, resolve promise when job done
-	 * Should be called once only, presumably in constructor
-	 *******************************************************************************/
-	ImportQueue.prototype._consumeCallbackQueue = function () {
-		const self = this;
-		let queue;
-
-		return this.channel.assertExchange(this.callbackQName, "direct", { durable: true })
-			.then(() => {
-
-				return this.channel.assertQueue("", { exclusive: true });
-
-			})
-			.then((q) => {
-
-				queue = q.queue;
-				return this.channel.bindQueue(queue, this.callbackQName, this.uid);
-
-			})
-			.then(() => {
-
-				return this.channel.consume(queue, function (rep) {
-
-					self.logger.logInfo("Job request id " + rep.properties.correlationId + " returned with: " + rep.content);
-
-					const ModelHelper = require("../models/helper/model");
-
-					const defer = self.deferedObjs[rep.properties.correlationId];
-
-					const resData = JSON.parse(rep.content);
-
-					const resErrorCode = resData.value;
-					const resErrorMessage = resData.message;
-					const resDatabase = resData.database;
-					const resProject = resData.project;
-					const resUser = resData.user ? resData.user : "unknown";
-
-					const status = resData.status;
-
-					if ("processing" === status) {
-						ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
-					} else {
-						if (resErrorCode === 0) {
-							ModelHelper.importSuccess(resDatabase, resProject, self.sharedSpacePath, resUser);
-						} else {
-							ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
-						}
-						defer && delete self.deferedObjs[rep.properties.correlationId];
-					}
-				}, { noAck: true });
-			});
-	};
-
-	ImportQueue.prototype.insertEventMessage = function (msg) {
-
-		if(!this.channel) {
-			return;
-		}
-
-		msg = JSON.stringify(msg);
-
-		return this.channel.assertExchange(this.eventExchange, "fanout", {
-			durable: true
-		})
-			.then(() => {
-				return this.channel.publish(
+	insertEventMessage(msg) {
+		this.getChannel().then((channel) => {
+			return channel.assertExchange(this.eventExchange, "fanout", {
+				durable: true
+			}).then(() => {
+				return channel.publish(
 					this.eventExchange,
 					"",
-					new Buffer.from(msg), {
+					new Buffer.from(JSON.stringify(msg)), {
 						persistent: true
 					}
 				);
 			});
-	};
 
-	ImportQueue.prototype.consumeEventMessage = function (callback) {
-		let queue;
+		}).catch((err) => {
+			systemLogger.logError("Failed to insert event: "  + err.message);
+		});
+	}
 
-		return this.channel.assertExchange(this.eventExchange, "fanout", {
-			durable: true
-		})
-			.then(() => {
+	processCallbackMsg(res) {
+		systemLogger.logInfo("Job request id " + res.properties.correlationId
+				+ " returned with: " + res.content);
+		const resData = JSON.parse(res.content);
 
-				return this.channel.assertQueue("", { exclusive: true });
+		const resErrorCode = resData.value;
+		const resErrorMessage = resData.message;
+		const resDatabase = resData.database;
+		const resProject = resData.project;
+		const resUser = resData.user ? resData.user : "unknown";
 
-			})
-			.then(q => {
+		const ModelHelper = require("../models/helper/model");
 
-				queue = q.queue;
-				return this.channel.bindQueue(queue, this.eventExchange, "");
+		if ("processing" === resData.status) {
+			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
+		} else {
+			if (resErrorCode === 0) {
+				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
+			} else {
+				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
+			}
+		}
+	}
 
-			})
-			.then(() => {
+	subscribeToEventMessages(callback) {
+		const wasUndefined = !this.eventCallback;
+		this.eventCallback = callback;
+		if(wasUndefined) {
+			this.consumeEventQueue();
+		}
+	}
+}
 
-				return this.channel.consume(queue, function (rep) {
-
-					callback(JSON.parse(rep.content));
-
-				}, { noAck: true });
-			});
-	};
-
-	module.exports = new ImportQueue();
-
-})();
+module.exports = new ImportQueue();

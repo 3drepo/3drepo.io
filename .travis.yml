@@ -54,10 +54,6 @@ script:
     - yarn wdm:start > /dev/null 2>&1 &
     - cd ./../backend
     - yarn test
-      #    - cd ./../
-      #    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" & sleep 5
-      #    - cd ./frontend
-      #    - yarn e2e
 
 notifications:
     email:

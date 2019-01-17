@@ -108,7 +108,7 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * @apiParam {String} id Revision unique ID.
  */
 
-router.post("/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
+router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
  * @api {put} /risks/riskId.json  Update risks based on revision
@@ -118,7 +118,7 @@ router.post("/risks.json", middlewares.connectQueue, middlewares.issue.canCreate
  * @apiParam {String} riskId.json Risk unique ID.
  */
 
-router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
  * @api {post} /revision/:rid/risks.json  Store risks based on Revision ID
@@ -128,7 +128,7 @@ router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.ca
  * @apiParam {String} rid Revision unique ID.
  */
 
-router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
+router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
  * @api {put} /revision/:rid/risks/:riskId.json  Update Risk based on revision ID
@@ -139,7 +139,7 @@ router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.i
  * @apiParam {String} rid Risk unique ID.
  */
 
-router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.put("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
  * @api {delete} /risks/ Delete risks
@@ -147,7 +147,7 @@ router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middle
  * @apiGroup Risks
  */
 
-router.delete("/risks/", middlewares.connectQueue, middlewares.issue.canCreate, deleteRisks);
+router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 function storeRisk(req, res, next) {
 

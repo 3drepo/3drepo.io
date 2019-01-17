@@ -17,26 +17,11 @@
 
 "use strict";
 const html = data => `
-	Model failed to import. Please help this user out.
-	<br>
-	account: ${data.account}
-	<br>
-	model: ${data.model}
-	<br>
-	user: ${data.username}
-	<br>
-	Error: ${data.err}
-	<br>
-	Bouncer Error Code : ${data.bouncerErr}
-	<br>
-	correlationId: ${data.corID}
-	<br>
-	appId: ${data.appId}
-	<br>
-	domain: ${data.domain}
+	Failed to send work into queue: ${data.err} in ${data.domain}<br><br>
+	Please look into it!
 `;
 
-const subject = data => `[System][${data.domain}] Model import error`;
+const subject = data => `[System][${data.domain}] Queue connection failed`;
 
 module.exports =  {
 	html: html,

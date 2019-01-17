@@ -393,7 +393,6 @@ billingSchema.methods.getSubscriptionLimits = function() {
 	if(!sumLimits.collaboratorLimit) {
 		sumLimits.collaboratorLimit = 0;
 	}
-
 	if(this.subscriptions)	{
 		Object.keys(this.subscriptions).forEach(key => {
 			if(key === "paypal") {

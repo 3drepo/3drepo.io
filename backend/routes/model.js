@@ -80,24 +80,13 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
 
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-// TODO: Possible duplicate route
-/**
- * @api {put} /:model/settings/ Update Model Settings
- * @apiName updateSettings
- * @apiGroup Model
- *
- * @apiParam {String} model Model to update Settings.
- */
-
-router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
-
 /**
  * @api {post} /:model Create a model
  * @apiName createModel
  * @apiGroup Model
  */
 
-router.post("/model",convertProjectToParam,middlewares.connectQueue,middlewares.canCreateModel,createModel);
+router.post("/model",convertProjectToParam,middlewares.canCreateModel,createModel);
 
 // Unity information
 
@@ -152,7 +141,7 @@ router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBun
  * @apiParam {String} model Federated Model to update
  */
 
-router.put("/:model", middlewares.connectQueue, middlewares.hasEditAccessToFedModel, updateModel);
+router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
 
 /**
  * @api {post} /model/permissions Update Multiple Model Permissions
@@ -333,7 +322,7 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  *
  * @apiParam {String} model Model to upload.
  */
-router.post("/:model/upload", middlewares.hasUploadAccessToModel, middlewares.connectQueue, uploadModel);
+router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 
 /**
  * @api {get} /:model/download/latest Upload Model.
@@ -706,9 +695,6 @@ function uploadModel(req, res, next) {
 		}
 
 	}).then(file => {
-		// api respond ok once the file is uploaded
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded", user: username});
-
 		const data = {
 			tag: req.body.tag,
 			desc: req.body.desc
@@ -718,10 +704,9 @@ function uploadModel(req, res, next) {
 			type: "upload",
 			file: file
 		};
-		// FIXME: importModel should no longer return a promise. this should be a function call that expects no return!
-		ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
-		}).catch(() => {
 
+		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 		});
 
 	}).catch(err => {

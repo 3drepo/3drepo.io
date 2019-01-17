@@ -328,7 +328,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
  */
 
-router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {put} /issues.json/issueId.json Update an Issue.
@@ -343,7 +343,7 @@ router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreat
  *
  */
 
-router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.put("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /issuesId.json Store issue based on revision
@@ -353,7 +353,7 @@ router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.
  * @apiParam {String} rid Unique Revision ID to store.
  */
 
-router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {put} revision/"rid/issues/:issueId.json Update issue based on revision
@@ -364,7 +364,7 @@ router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
 
-router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.put("/revision/:rid/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
