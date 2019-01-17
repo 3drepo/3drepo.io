@@ -185,7 +185,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		function changeImageSize(e) {
 			const imageDiv = document.querySelectorAll(".row.screenshot");
-			const statusList = document.querySelectorAll("span.float-right");
+			const statusList = document.querySelectorAll("span.float-right.status");
 
 			statusList.forEach(span => {
 				span.classList.toggle("float-none");
@@ -216,7 +216,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 				each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 					h3 #{issue.number} #{issue.name}
 					p.grey.info #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
-						span.right.grey.info.float-right #{reportValues.issueDate}
+						span.right.grey.info.float-right.status #{reportValues.issueDate}
 					.row.screenshot
 						.col.screenshot
 							if issue.viewpoint.screenshotSmall
@@ -229,31 +229,31 @@ html(lang="en" ng-app="3drepo").ng-scope
 										strong
 											| Assigned:
 									td
-											span.float-right #{issue.assigned_roles.join(", ")}
+											span.float-right.status #{issue.assigned_roles.join(", ")}
 									tr
 									td
 										strong
 											| Priority:
 									td
-											span.float-right  #{issue.priority}
+											span.float-right.status  #{issue.priority}
 									tr
 									td
 										strong
 											| Status:
 									td
-											span.float-right  #{issue.status}
+											span.float-right.status  #{issue.status}
 									tr
 									td
 										strong
 											| Type:
 									td
-											span.float-right #{issue.topic_type}
+											span.float-right.status #{issue.topic_type}
 									tr
 									td
 										strong
 											| Due Date:
 									td
-											span.float-right #{reportValues.issueDueDate}
+											span.float-right.status #{reportValues.issueDueDate}
 
 					.row
 						.col.description
