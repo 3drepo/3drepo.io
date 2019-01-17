@@ -65,3 +65,11 @@ export const selectNewRiskDetails = createSelector(
 export const selectNewComment = createSelector(
 	selectComponentState, (state) => state.newComment
 );
+
+export const selectSearchQuery = createSelector(
+	selectComponentState, (state) => state.searchQuery || ''
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);

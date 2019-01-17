@@ -30,14 +30,14 @@ export const Container = styled.div`
 	flex-direction: column;
 	overflow: hidden;
 	padding: 0 8px;
-	height: ${(props: any) => props.filtersOpen ? '64px' : '100%'};
+	height: ${(props: any) => props.filtersOpen ? '50px' : '100%'};
 ` as any;
 
 export const SelectedFilters = styled.div`
   display: flex;
-  margin: 10px 0 0;
   flex-wrap: wrap;
 	padding-right: 40px;
+	overflow: ${(props: any) => props.filtersOpen ? 'auto' : 'hidden'};
 	min-height: ${(props: any) => props.empty ? '0' : '50px'};
 	position: relative;
 ` as any;

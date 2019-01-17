@@ -25,7 +25,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	saveRisk: ['teamspace', 'modelId', 'riskData'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
-	setNewRisk: []
+	setNewRisk: [],
+	setSearchQuery: ['searchQuery']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {

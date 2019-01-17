@@ -25,7 +25,9 @@ import {
 	selectRisks,
 	selectActiveRiskId,
 	selectActiveRiskDetails,
-	selectShowDetails
+	selectShowDetails,
+	selectSearchQuery,
+	selectSearchEnabled
 } from '../../../../modules/risks';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -35,7 +37,12 @@ const mapStateToProps = createStructuredSelector({
 	risks: selectRisks,
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
-	showDetails: selectShowDetails
+	activeRiskDetails: selectActiveRiskDetails,
+	showDetails: selectShowDetails,
+	searchQuery: selectSearchQuery,
+	searchEnabled: selectSearchEnabled,
+	setSearchQuery: RisksActions.setSearchQuery,
+	setState: RisksActions.setComponentState
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
