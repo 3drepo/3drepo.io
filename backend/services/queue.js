@@ -110,8 +110,8 @@ class ImportQueue {
 
 	subscribeToQueues() {
 		return Promise.all([
-				this.consumeCallbackQueue(),
-				this.consumeEventQueue()
+			this.consumeCallbackQueue(),
+			this.consumeEventQueue()
 		]);
 	}
 
