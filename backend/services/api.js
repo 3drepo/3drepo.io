@@ -19,12 +19,11 @@
 /**
  * Create API Express app
  *
- * @param {Object} serverConfig - Configuration for server
  * @returns
  */
-module.exports.createApp = function (serverConfig) {
-
-	const sharedSession = serverConfig.session;
+module.exports.createApp = function () {
+	const config = require("../config");
+	const session = require("./session").session(config);
 	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
@@ -45,7 +44,7 @@ module.exports.createApp = function (serverConfig) {
 	// Configure various middleware
 	app.use((req, res, next) => {
 
-		sharedSession(req, res, function(err) {
+		session(req, res, function(err) {
 			if(err) {
 				// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
 				// res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });

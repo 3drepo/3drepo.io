@@ -21,8 +21,6 @@ const VERSION = require("./VERSION.json").VERSION;
 
 const config = require("app-config").config;
 
-const sessionFactory = require("./services/session.js");
-
 /** *****************************************************************************
  * Coalesce function
  * @param {Object} variable - variable to coalesce
@@ -148,6 +146,29 @@ if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.pa
 config.subdomains = {};
 config.apiUrls = {};
 
+// Database configuration
+config.db = coalesce(config.db, {});
+config.db.host = coalesce(config.db.host, config.host);
+config.db.host = (config.db.host.constructor === Array) ? config.db.host : [config.db.host];
+
+config.db.port = coalesce(config.db.port, 27017); // Default mongo port
+config.db.port = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
+
+if (config.db.port.length !== config.db.host.length) {
+	console.error("Incorrect number of hosts and ports");
+	// eslint-disable-next-line no-process-exit
+	process.exit(1);
+}
+
+if (config.db.host.length > 1 && !config.db.replicaSet) {
+	console.error("You must specify the replica set name");
+	// eslint-disable-next-line no-process-exit
+	process.exit(1);
+}
+
+config.db.username = coalesce(config.db.username, "username");
+config.db.password = coalesce(config.db.password, "password");
+
 let multipleAPIServer = false;
 
 for (let i = 0; i < config.servers.length; i++) {
@@ -181,8 +202,6 @@ for (let i = 0; i < config.servers.length; i++) {
 			config.subdomains[server.subdomain] = [];
 		}
 
-		server.session = sessionFactory.session(config);
-
 		if (!config.apiUrls.hasOwnProperty(server.type)) {
 			config.apiUrls[server.type] = [];
 		}
@@ -197,10 +216,7 @@ for (let i = 0; i < config.servers.length; i++) {
 		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== "undefined" ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
 	} else if (server.service === "frontend") {
-
-		server.session = sessionFactory.session(config);
 		fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
-
 	} else {
 		fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
 	}
@@ -208,29 +224,6 @@ for (let i = 0; i < config.servers.length; i++) {
 
 // Change the algorithm for choosing an API server
 config.apiAlgorithm = createRoundRobinAlgorithm(config);
-
-// Database configuration
-config.db = coalesce(config.db, {});
-config.db.host = coalesce(config.db.host, config.host);
-config.db.host = (config.db.host.constructor === Array) ? config.db.host : [config.db.host];
-
-config.db.port = coalesce(config.db.port, 27017); // Default mongo port
-config.db.port = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
-
-if (config.db.port.length !== config.db.host.length) {
-	console.error("Incorrect number of hosts and ports");
-	// eslint-disable-next-line no-process-exit
-	process.exit(1);
-}
-
-if (config.db.host.length > 1 && !config.db.replicaSet) {
-	console.error("You must specify the replica set name");
-	// eslint-disable-next-line no-process-exit
-	process.exit(1);
-}
-
-config.db.username = coalesce(config.db.username, "username");
-config.db.password = coalesce(config.db.password, "password");
 
 // Subscription info
 config.subscriptions = coalesce(config.subscriptions, {});

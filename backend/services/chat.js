@@ -17,10 +17,6 @@
 
 "use strict";
 module.exports.createApp = function (server, serverConfig) {
-
-	// let app = require('express');
-	// var server = require('http').Server(app);
-
 	const config = require("../config");
 	const session = require("./session").session(config);
 
@@ -28,7 +24,6 @@ module.exports.createApp = function (server, serverConfig) {
 	const middlewares = require("../middlewares/middlewares");
 	const systemLogger = logger.systemLogger;
 
-	// console.log(serverConfig);
 	const io = require("socket.io")(server, { path: "/" + serverConfig.subdirectory });
 	const sharedSession = require("express-socket.io-session");
 	const _ = require("lodash");
