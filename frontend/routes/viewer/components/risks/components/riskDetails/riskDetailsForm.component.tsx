@@ -38,7 +38,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		isSaving: false
 	};
 
-	public componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
 		const valuesChanged = !isEqual(prevProps.values, this.props.values);
 		if (valuesChanged && !this.state.isSaving) {
@@ -61,6 +61,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 
 		this.setState({ isSaving: true }, () => {
+			debugger;
 			handleSubmit();
 			this.setState({ isSaving: false });
 		});
@@ -73,8 +74,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { values, errors, handleChange } = this.props;
-
 		return (
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
@@ -198,7 +197,9 @@ export const RiskDetailsForm = withFormik({
 		assigned_roles: get(risk, 'assigned_roles[0]', ''),
 		name: risk.name || 'Untitled risk',
 		likelihood: risk.likelihood || 0,
-		consequence: risk.consequence || 0
+		consequence: risk.consequence || 0,
+		level_of_risk: risk.level_of_risk || 0
+
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);
