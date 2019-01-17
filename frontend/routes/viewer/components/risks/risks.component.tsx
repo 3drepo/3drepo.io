@@ -19,7 +19,6 @@ import * as React from 'react';
 import ReportProblem from '@material-ui/icons/ReportProblem';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
-
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -31,11 +30,9 @@ import { ListContainer, Summary } from './risks.styles';
 import { prepareRisk } from '../../../../helpers/risks';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import {
-	RISK_LEVELS_ICONS,
-	RISK_LEVELS,
 	RISK_FILTERS,
 	RISK_MITIGATION_STATUSES,
-	RISK_FILTER_KEYS
+	RISK_FILTER_RELATED_FIELDS
 } from '../../../../constants/risks';
 import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
 
@@ -121,7 +118,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		const filteredRisks = this.props.risks.filter((risk) => {
 			return this.props.selectedFilters.some((filter) => {
 				if (filter.type === DATA_TYPES.UNDEFINED) {
-					return risk[filter.key].includes(filter.value.value) || risk[filter.key] === filter.value.value;
+					return risk[filter.relatedField] && risk[filter.relatedField].includes(filter.value.value) ||
+						risk[filter.relatedField] === filter.value.value;
 				} else if (filter.type === DATA_TYPES.QUERY) {
 					return risk.name.toLowerCase().includes(filter.value.value.toLowerCase()) ||
 						risk.desc.toLowerCase().includes(filter.value.value.toLowerCase());
@@ -172,15 +170,15 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public get filtersValuesMap() {
 		return {
-			[RISK_FILTER_KEYS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
-			[RISK_FILTER_KEYS.CREATED_BY]: this.getFilterValues(this.props.jobs),
-			[RISK_FILTER_KEYS.ASSIGNED_ROLES]: this.getFilterValues(this.jobsList)
+			[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
+			[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
+			[RISK_FILTER_RELATED_FIELDS.ASSIGNED_ROLES]: this.getFilterValues(this.jobsList)
 		};
 	}
 
 	public get filters() {
 		return RISK_FILTERS.map((riskFilter) => {
-			riskFilter.values = this.filtersValuesMap[riskFilter.key];
+			riskFilter.values = this.filtersValuesMap[riskFilter.relatedField];
 			return riskFilter;
 		});
 	}

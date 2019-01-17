@@ -71,7 +71,7 @@ export const RISK_FILTER_DATA_TYPES = {
 	QUERY: DATA_TYPES.QUERY
 };
 
-export const RISK_FILTER_KEYS = {
+export const RISK_FILTER_RELATED_FIELDS = {
 	MITIGATION_STATUS: 'mitigation_status',
 	CREATED_BY: 'creator_role',
 	ASSIGNED_ROLES: 'assigned_roles'
@@ -80,17 +80,17 @@ export const RISK_FILTER_KEYS = {
 export const RISK_FILTERS = [
   {
     label: 'Mitigation Status',
-		key: RISK_FILTER_KEYS.MITIGATION_STATUS,
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
     type: RISK_FILTER_DATA_TYPES.NORMAL
   },
   {
     label: 'Created by',
-		key: RISK_FILTER_KEYS.CREATED_BY,
+		relatedField: RISK_FILTER_RELATED_FIELDS.CREATED_BY,
     type: RISK_FILTER_DATA_TYPES.NORMAL
   },
   {
     label: 'Assigned to',
-		key: RISK_FILTER_KEYS.ASSIGNED_ROLES,
+		relatedField: RISK_FILTER_RELATED_FIELDS.ASSIGNED_ROLES,
     type: RISK_FILTER_DATA_TYPES.NORMAL
   }
 ] as any;
