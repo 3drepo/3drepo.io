@@ -22,8 +22,8 @@ import { PreviewDetails } from '../../../previewDetails/previewDetails.component
 import { LogList } from '../../../../../components/logList/logList.component';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { NewCommentForm } from '../../../newCommentForm/newCommentForm.component';
-import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 
 import { Container } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
@@ -92,8 +92,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		};
 	}
 
-	public handleExpandChange = () => {
-
+	public handleExpandChange = (event, expanded) => {
+		this.props.setState({ expandDetails: expanded });
 	}
 
 	public handleNameChange = (event, name) => {
@@ -126,13 +126,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}});
 	}
 
-	public handleNewScreenshot = async () => {
-		const { showScreenshotDialog, teamspace, model } = this.props;
+	public handleNewScreenshot = async (screenshot) => {
+		const { teamspace, model } = this.props;
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
-		showScreenshotDialog({
-			sourceImage: Viewer.getScreenshot(),
-			onSave: (screenshot) => this.setCommentData({ screenshot, viewpoint })
-		});
+		this.setCommentData({ screenshot, viewpoint });
 	}
 
 	public handleChangePin = () => {
@@ -173,7 +170,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
-				hideComment={this.isNewRisk}
+				hideComment={true}
+				hideScreenshot={!this.isNewRisk}
+				hidePin={!this.isNewRisk}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}

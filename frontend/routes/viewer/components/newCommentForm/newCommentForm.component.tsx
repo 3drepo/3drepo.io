@@ -33,6 +33,7 @@ import {
 	Container
 } from './newCommentForm.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { Viewer } from '../../../../services/viewer';
 
 interface IProps {
 	innerRef: any;
@@ -43,8 +44,9 @@ interface IProps {
 	hidePin?: boolean;
 	hideScreenshot?: boolean;
 	onSave: (commentData) => void;
-	onTakeScreenshot: () => void;
+	onTakeScreenshot: (screenshot) => void;
 	onChangePin: () => void;
+	showScreenshotDialog: (options) => void;
 }
 
 const NewCommentSchema = Yup.object().shape({
@@ -63,6 +65,14 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		resetForm();
 	}
 
+	public handleNewScreenshot = async () => {
+		const { showScreenshotDialog, onTakeScreenshot } = this.props;
+		showScreenshotDialog({
+			sourceImage: Viewer.getScreenshot(),
+			onSave: (screenshot) => onTakeScreenshot(screenshot)
+		});
+	}
+
 	public handleChangePin = () => {
 		this.props.onChangePin();
 	}
@@ -71,7 +81,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		<TooltipButton
 			Icon={CameraIcon}
 			label="Take a screenshot"
-			action={this.props.onTakeScreenshot}
+			action={this.handleNewScreenshot}
 		/>
 	));
 
