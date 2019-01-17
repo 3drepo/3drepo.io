@@ -216,7 +216,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 				each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 					h3 #{issue.number} #{issue.name}
 					p.grey.info #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
-						span.right.grey.info.float-right.status #{reportValues.issueDate}
+						span.right.grey.info.float-right #{reportValues.issueDate}
 					.row.screenshot
 						.col.screenshot
 							if issue.viewpoint.screenshotSmall
