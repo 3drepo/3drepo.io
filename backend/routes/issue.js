@@ -584,18 +584,16 @@ function renderIssuesHTML(req, res, next) {
 
 	const modelName = ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
 		.then(setting => {
-			 reportValues.modelName = setting.name;
-			 Promise.resolve();
+			reportValues.modelName = setting.name;
 		});
 
-	const username = User.findByUserName(req.session.user.username)
+	const usernamePromise = User.findByUserName(req.session.user.username)
 		.then(username => {
 			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
 			reportValues.userCompany = username.customData.billing.billingInfo.company;
-			Promise.resolve();
 		});
 
-	const finaliseValues = Promise.all([modelName, username]);
+	const finaliseValues = Promise.all([modelName, usernamePromise]);
 
 	const projection = {
 		extras: 0,
