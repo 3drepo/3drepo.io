@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import * as React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -31,7 +31,6 @@ import { RiskDetailsForm } from './riskDetailsForm.component';
 interface IProps {
 	jobs: any[];
 	risk: any;
-	newRisk: any;
 	newComment: any;
 	teamspace: string;
 	model: string;
@@ -66,7 +65,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get riskData() {
-		return this.isNewRisk ? this.props.newRisk : this.props.risk;
+		return this.props.risk;
 	}
 
 	get jobsList() {
@@ -96,24 +95,25 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNameChange = (event, name) => {
-		const newRisk = { ...this.props.newRisk, name };
+		const newRisk = { ...this.riskData, name };
 		this.props.setState({ newRisk });
 	}
 
 	public handleRiskFormSubmit = (values) => {
 		const { teamspace, model, updateRisk, setState } = this.props;
+		const preparedRisk = mergeRiskData(this.riskData, values);
+
 		if (this.isNewRisk) {
-			const newRisk = {...this.riskData, values};
-			setState({ newRisk });
+			setState({ newRisk: preparedRisk });
 		} else {
-			updateRisk(teamspace, model, mergeRiskData(this.riskData, values));
+			updateRisk(teamspace, model, preparedRisk);
 		}
 	}
 
 	public handleSave = (comment) => {
-		const { teamspace, model, newRisk, saveRisk, postComment } = this.props;
+		const { teamspace, model, saveRisk, postComment } = this.props;
 		if (this.isNewRisk) {
-			saveRisk(teamspace, model, mergeRiskData(this.riskData, newRisk));
+			saveRisk(teamspace, model, this.riskData);
 		} else {
 			postComment(teamspace, model, this.riskData._id, comment);
 		}
@@ -180,13 +180,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { newRisk, risk } = this.props;
 		const { logs } = this.state;
 
 		return (
 			<Container>
 				<ViewerPanelContent className="height-catcher">
-					{this.renderPreview(risk._id || newRisk)}
+					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
 				{this.renderFooter()}

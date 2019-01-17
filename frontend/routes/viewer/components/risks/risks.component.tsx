@@ -40,16 +40,12 @@ interface IProps {
 	isPending?: boolean;
 	activeRiskId?: string;
 	showDetails?: boolean;
-	riskDetails?: any;
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
+	setNewRisk: () => void;
 }
 
-interface IState {
-	riskDetails?: any;
-}
-
-export class Risks extends React.PureComponent<IProps, IState> {
+export class Risks extends React.PureComponent<IProps, any> {
 	public renderRisksList = renderWhenTrue(() => {
 		const Items = this.props.risks.map((risk, index) => (
 			<PreviewListItem
@@ -87,7 +83,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		<RiskDetails
 			teamspace={this.props.teamspace}
 			model={this.props.model}
-			{...this.props.riskDetails}
 		/>
 	));
 
@@ -97,7 +92,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFocus = (riskId) => () => {
-		this.props.setState({ activeRisk: riskId });
+		this.props.setState({ activeRisk: riskId, expandDetails: true });
 	}
 
 	public handleRiskClick = () => () => {
@@ -105,15 +100,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleAddNewRisk = () => {
-		this.props.setState({
-			showDetails: true,
-			activeRisk: null,
-			newRisk: {
-				name: 'Untitled risk',
-				StatusIconComponent: RISK_LEVELS_ICONS[RISK_LEVELS.UNMITIGATED],
-				author: 'test'
-			}
-		});
+		this.props.setNewRisk();
 	}
 
 	public closeDetails = () => {

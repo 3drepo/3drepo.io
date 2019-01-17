@@ -35,13 +35,13 @@ const mapStateToProps = createStructuredSelector({
 	risks: selectRisks,
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
-	activeRiskDetails: selectActiveRiskDetails,
 	showDetails: selectShowDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisks: RisksActions.fetchRisks,
-	setState: RisksActions.setComponentState
+	setState: RisksActions.setComponentState,
+	setNewRisk: RisksActions.setNewRisk
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Risks);

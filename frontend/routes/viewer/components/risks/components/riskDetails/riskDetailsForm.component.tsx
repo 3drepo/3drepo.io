@@ -216,10 +216,9 @@ export const RiskDetailsForm = withFormik({
 		mitigation_desc: risk.mitigation_status || '',
 		description: risk.description || '',
 		assigned_roles: get(risk, 'assigned_roles[0]', ''),
-		name: risk.name || 'Untitled risk',
-		likelihood: risk.likelihood || 0,
-		consequence: risk.consequence || 0,
-		level_of_risk: risk.level_of_risk || 0
+		likelihood: risk.likelihood,
+		consequence: risk.consequence,
+		level_of_risk: risk.level_of_risk
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);

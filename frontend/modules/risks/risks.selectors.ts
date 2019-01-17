@@ -41,7 +41,7 @@ export const selectActiveRiskId = createSelector(
 export const selectActiveRiskDetails = createSelector(
 	selectRisksDomain, selectComponentState, selectJobsList,
 	(state, componentState, jobsList) => {
-		const risk = state.risksMap[componentState.activeRisk] || {};
+		const risk = state.risksMap[componentState.activeRisk] || componentState.newRisk;
 		return prepareRisk(risk, jobsList);
 	}
 );
