@@ -25,7 +25,33 @@ const responseCodes = require("../response_codes.js");
 const config = require("../config");
 const utils = require("../utils");
 
+/**
+ * @api {get} /subscriptions List all subscriptions
+ * @apiName listSubscriptions
+ * @apiGroup Subscription
+ *
+ * @apiDescription List all subscriptions for current user if applicable.
+ *
+ * @apiError (401) NOT_AUTHORIZED Not Authorized
+ * @apiErrorExample {json} Error-Response
+ * HTTP/1.1 401 Not Authorized
+ * {
+ * 	"message":"Not Authorized",
+ * 	"status":401,"code":
+ * 	"NOT_AUTHORIZED",
+ * 	"value":9,
+ * 	"place":"GET /nabile/subscriptions"
+ * }
+ */
+
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
+
+/**
+ * @api {get} /subscriptions Update a subscription
+ * @apiName updateSubscription
+ * @apiGroup Subscription
+ */
+
 router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
 
 function updateSubscription(req, res, next) {

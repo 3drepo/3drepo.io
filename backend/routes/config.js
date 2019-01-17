@@ -136,8 +136,8 @@ router.get("/config.js", function (req, res) {
 
 	res.header("Content-Type", "text/javascript");
 	res.render(path.resolve(__dirname, "./../../resources/pug/config.pug"), {
-    config: serializedConfig
-  });
+		config: serializedConfig
+	});
 });
 
 module.exports = router;
