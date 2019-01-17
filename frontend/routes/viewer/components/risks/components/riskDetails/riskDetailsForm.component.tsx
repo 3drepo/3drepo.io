@@ -14,6 +14,7 @@ import {
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 
 import {FieldsRow, StyledTextField, StyledFormControl } from './riskDetails.styles';
+import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 
 interface IProps {
 	risk: any;
@@ -40,8 +41,16 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
-		const valuesChanged = !isEqual(prevProps.values, this.props.values);
+		const { values } = this.props;
+		const valuesChanged = !isEqual(prevProps.values, values);
+
 		if (valuesChanged && !this.state.isSaving) {
+			const likelihoodChanged = prevProps.values.likelihood !== values.likelihood;
+			const consequenceChanged = prevProps.values.consequence !== values.consequence;
+
+			if (likelihoodChanged || consequenceChanged) {
+				this.updateLevelOfRisk();
+			}
 			this.autoSave();
 		}
 
@@ -54,6 +63,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public updateLevelOfRisk = () => {
+		const { formik } = this.props;
+		const { likelihood, consequence } = formik.values;
+		const levelOfRisk = calculateLevelOfRisk(likelihood, consequence);
+		formik.setFieldValue('level_of_risk', levelOfRisk);
+	}
+
 	public autoSave = debounce(() => {
 		const { formik, handleSubmit } = this.props;
 		if (!formik.isValid) {
@@ -61,7 +77,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 
 		this.setState({ isSaving: true }, () => {
-			debugger;
+			this.props.formik.setFieldValue();
 			handleSubmit();
 			this.setState({ isSaving: false });
 		});
