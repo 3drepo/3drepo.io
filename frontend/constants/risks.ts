@@ -71,20 +71,26 @@ export const RISK_FILTER_DATA_TYPES = {
 	QUERY: DATA_TYPES.QUERY
 };
 
+export const RISK_FILTER_KEYS = {
+	MITIGATION_STATUS: 'mitigation_status',
+	CREATED_BY: 'creator_role',
+	ASSIGNED_ROLES: 'assigned_roles'
+};
+
 export const RISK_FILTERS = [
   {
     label: 'Mitigation Status',
-		key: 'mitigation_status',
+		key: RISK_FILTER_KEYS.MITIGATION_STATUS,
     type: RISK_FILTER_DATA_TYPES.NORMAL
   },
   {
     label: 'Created by',
-		key: 'created_by',
+		key: RISK_FILTER_KEYS.CREATED_BY,
     type: RISK_FILTER_DATA_TYPES.NORMAL
   },
   {
     label: 'Assigned to',
-		key: 'assigned_to',
+		key: RISK_FILTER_KEYS.ASSIGNED_ROLES,
     type: RISK_FILTER_DATA_TYPES.NORMAL
   }
-];
+] as any;

@@ -37,7 +37,8 @@ export const INITIAL_STATE = {
 		showDetails: false,
 		expandDetails: true,
 		newRisk: {},
-		newComment: {}
+		newComment: {},
+		selectedFilters: []
 	}
 };
 
