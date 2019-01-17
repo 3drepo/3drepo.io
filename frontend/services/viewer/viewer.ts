@@ -1,8 +1,15 @@
-import { Viewer as ViewerComponent } from '../globals/viewer';
-import { getAngularService } from '../helpers/migration';
+import { getAngularService } from '../../helpers/migration';
+import { MultiSelect } from './multiSelect';
+
+const MODE = {
+	NORMAL: 'NORMAL',
+	PIN: 'PIN'
+};
 
 export class ViewerService {
 	private viewerInstance = null;
+	private mode = MODE.NORMAL;
+
 	public pin: any;
 	public pinData: any;
 	public newPinId: string;
@@ -19,6 +26,10 @@ export class ViewerService {
 		this.initialised = angularViewer.initialised.promise;
 
 		return this.viewerInstance;
+	}
+
+	get isPinMode() {
+		return this.mode === MODE.PIN;
 	}
 
 	constructor() {
@@ -112,6 +123,30 @@ export class ViewerService {
 		return await this.viewer.getScreenshot();
 	}
 
+	/**
+	 * PIN
+	 */
+
+	public toggleAreaSelect(on: boolean) {
+		if (this.areaSelectMode !== on) {
+			this.areaSelectMode = on;
+			if (on) {
+				Viewer.startAreaSelect();
+			} else {
+				Viewer.stopAreaSelect();
+			}
+			this.determineCursorIcon();
+		}
+	}
+
+	public setPinDropMode(on: boolean) {
+		this.pin.pinDropMode = on;
+
+		if (on) {
+			MultiSelect.toggleAreaSelect(false);
+		}
+	}
+
 	public async addPin(params) {
 		await this.isViewerReady();
 		return this.viewer.addPin(
@@ -131,9 +166,35 @@ export class ViewerService {
 		this.viewer.removePin(params.id);
 	}
 
+	/**
+	 * Measure
+	 */
+
+	public async activateMeasure() {
+		await this.isViewerReady();
+		this.viewer.setMeasureMode(true);
+	}
+
+	public async disableMeasure() {
+		await this.isViewerReady();
+		this.viewer.setMeasureMode(false);
+	}
+
 	public async getObjectsStatus({ teamspace, model }) {
 		await this.isViewerReady();
 		this.viewer.getObjectsStatus(teamspace, model);
+	}
+
+	public startAreaSelect() {
+		if (this.viewer) {
+			this.viewer.startAreaSelect();
+		}
+	}
+
+	public stopAreaSelect() {
+		if (this.viewer) {
+			this.viewer.stopAreaSelect();
+		}
 	}
 }
 
