@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { isEqual, omit } from 'lodash';
-
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { LogList } from '../../../../../components/logList/logList.component';
+import * as React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { mergeRiskData } from '../../../../../../helpers/risks';
+import { Viewer } from '../../../../../../services/viewer';
+import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
-
 import { Container } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
-import { Viewer } from '../../../../../../services/viewer';
 
 interface IProps {
 	jobs: any[];
@@ -49,6 +48,11 @@ interface IState {
 	logs: any[];
 }
 
+const UNASSIGNED_JOB = {
+	name: 'Unassigned',
+	value: ''
+};
+
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		risk: {},
@@ -63,6 +67,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	get riskData() {
 		return this.isNewRisk ? this.props.newRisk : this.props.risk;
+	}
+
+	get jobsList() {
+		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
 	public setLogs = () => {
@@ -83,15 +91,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public mergeRiskData = (source, mergeWithEntity) => {
-		return {
-			...source,
-			...omit(mergeWithEntity, ['assigned_roles', 'description']),
-			assigned_roles: [mergeWithEntity.assigned_roles],
-			desc: mergeWithEntity.description
-		};
-	}
-
 	public handleExpandChange = (event, expanded) => {
 		this.props.setState({ expandDetails: expanded });
 	}
@@ -107,14 +106,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			const newRisk = {...this.riskData, values};
 			setState({ newRisk });
 		} else {
-			updateRisk(teamspace, model, this.mergeRiskData(this.riskData, values));
+			updateRisk(teamspace, model, mergeRiskData(this.riskData, values));
 		}
 	}
 
 	public handleSave = (comment) => {
 		const { teamspace, model, newRisk, saveRisk, postComment } = this.props;
 		if (this.isNewRisk) {
-			saveRisk(teamspace, model, this.mergeRiskData(this.riskData, newRisk));
+			saveRisk(teamspace, model, mergeRiskData(this.riskData, newRisk));
 		} else {
 			postComment(teamspace, model, this.riskData._id, comment);
 		}
@@ -141,7 +140,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails, jobs } = this.props;
+		const { expandDetails } = this.props;
 
 		return (
 			<PreviewDetails
@@ -153,7 +152,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			>
 				<RiskDetailsForm
 					risk={this.riskData}
-					jobs={jobs}
+					jobs={this.jobsList}
 					onValueChange={this.handleRiskFormSubmit}
 					onSubmit={this.handleRiskFormSubmit}
 				/>

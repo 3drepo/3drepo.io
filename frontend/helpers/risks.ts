@@ -1,4 +1,4 @@
-import { pick, get } from 'lodash';
+import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS } from '../constants/risks';
 
@@ -15,7 +15,8 @@ export const prepareRisk = (risk, jobs = []) => {
 		thumbnail,
 		StatusIconComponent: Icon,
 		statusColor: color,
-		roleColor
+		roleColor,
+		level_of_risk: calculateLevelOfRisk(risk.likelihood, risk.consequence)
 	};
 };
 
@@ -48,4 +49,15 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 	};
 
 	return statusIcon;
+};
+
+export const mergeRiskData = (source, data) => {
+	const hasUnassignedRole = !data.assigned_roles;
+
+	return {
+		...source,
+		...omit(data, ['assigned_roles', 'description']),
+		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
+		desc: data.description
+	};
 };
