@@ -3,7 +3,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 	script(type="text/javascript", src="/config.js")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 	style.
-		@media print 
+		@media print
 		{
 			button {
 				display:none!important;
@@ -30,7 +30,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		}
 
 		header {
-			background-color:#cfcfcf !important; 
+			background-color:#808080 !important;
 			height:50px;
 			padding:10px;
 			text-align:center;
@@ -65,7 +65,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			text-transform:uppercase;
 			margin:5px;
 			border-radius:5px;
-		}		
+		}
 
 		.container {
 			width:760px;
@@ -126,11 +126,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 		.grey-header {
 			font-size:20px;
 			font-weight:400;
-			color:#cfcfcf;
+			color:#808080;
 		}
 
 		.grey {
-			color:#cfcfcf;
+			color:#808080;
 		}
 
 		h1.titles, h2.titles {
@@ -184,11 +184,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 			const statusList = document.querySelectorAll("span.float-right");
 
 			statusList.forEach(span => {
-				span.classList.toggle("float-none");				
-			})	
+				span.classList.toggle("float-none");
+			})
 
 			imageDiv.forEach(elem => {
-				elem.classList.toggle("wrap");			
+				elem.classList.toggle("wrap");
 				e.srcElement.textContent = elem.classList.contains('wrap') ? "SMALL PICTURES" : "LARGE PICTURES";
 			})
 		}
@@ -216,7 +216,7 @@ head
 				h2 Closed Risks
 			each risk in risksByStatus.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 				h3 #{risk.number} #{risk.name}
-				p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany}) 
+				p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
 						span.right-grey.float-right #{risk.created}
 				.row.screenshot
 					.col.screenshot

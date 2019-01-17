@@ -648,13 +648,11 @@ function renderIssuesHTML(req, res, next) {
 			}
 		}
 
-		const useNonPublicPort = true;
-
 		finaliseValues.then(()=> {
 			res.render("issues.pug", {
 				issues: splitIssues,
 				reportValues: reportValues,
-				baseURL: config.getBaseURL(useNonPublicPort),
+				baseURL: config.getBaseURL(),
 				url: function (path) {
 					return config.apiAlgorithm.apiUrl(C.GET_API, path);
 				}
