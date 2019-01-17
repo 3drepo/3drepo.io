@@ -63,7 +63,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 	public handleCallback = (callback) => {
 		const action = callback();
 
-		if (action) {
+		if (action && !action.then) {
 			dispatch(action);
 		}
 	}

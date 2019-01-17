@@ -15,53 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class MeasureService {
-
-	public static $inject: string[] = [
-		'ViewerService'
-	];
-
-	private state: any;
-
-	constructor(
-		private ViewerService: any
-	) {
-		this.state = {
-			active: false,
-			disabled: false
-		};
-	}
-
-	public activateMeasure() {
-		this.state.active = true;
-		this.ViewerService.activateMeasure();
-	}
-
-	public deactivateMeasure() {
-		this.state.active = false;
-		this.ViewerService.disableMeasure();
-	}
-
-	public setDisabled(disabled) {
-		this.state.disabled = disabled;
-
-		// If we're disabling the button we also
-		// want to deactivate the tool itself
-		if (disabled) {
-			this.state.active = false;
-		}
-	}
-
-	public toggleMeasure() {
-		if (!this.state.active) {
-			this.activateMeasure();
-		} else {
-			this.deactivateMeasure();
-		}
-	}
-
-}
+import { Measure } from '../../../services/viewer/measure';
 
 export const MeasureServiceModule = angular
 	.module('3drepo')
-	.service('MeasureService', MeasureService);
+	.service('MeasureService', () => Measure);

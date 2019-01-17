@@ -1,3 +1,5 @@
+import { Measure } from '../../../services/viewer/measure';
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -21,8 +23,7 @@ class RightPanelController implements ng.IController {
 		'$scope',
 		'$timeout',
 		'EventService',
-		'DocsService',
-		'MeasureService'
+		'DocsService'
 	];
 
 	private highlightBackground;
@@ -37,8 +38,7 @@ class RightPanelController implements ng.IController {
 		private $scope,
 		private $timeout,
 		private EventService,
-		private DocsService,
-		private MeasureService
+		private DocsService
 	) {}
 
 	public $onInit() {
@@ -53,24 +53,19 @@ class RightPanelController implements ng.IController {
 		this.measureBackground = '';
 		this.metaBackground = '';
 
-		this.watchers();
-
+		Measure.on(Measure.EVENTS.STATE_CHANGE, this.onMeasureStateChange);
 	}
 
 	public $onDestroy() {
 		this.metaBackground = '';
 		this.measureBackground = '';
-		this.MeasureService.deactivateMeasure();
+		Measure.deactivateMeasure();
 	}
 
-	public watchers() {
-
-		this.$scope.$watch(() => {
-			return this.MeasureService.state;
-		}, () => {
-
-			if (this.measureActive !== this.MeasureService.state.active ) {
-				this.measureActive = this.MeasureService.state.active;
+	public onMeasureStateChange = ({ isActive, isDisabled }) => {
+		this.$timeout(() => {
+			if (this.measureActive !== isActive) {
+				this.measureActive = isActive;
 
 				// Clear the background of measure tooltip
 				if (!this.measureActive) {
@@ -80,16 +75,14 @@ class RightPanelController implements ng.IController {
 				}
 			}
 
-			if (this.measureDisabled !== this.MeasureService.state.disabled ) {
-				this.measureDisabled = this.MeasureService.state.disabled;
+			if (this.measureDisabled !== isDisabled) {
+				this.measureDisabled = isDisabled;
 				if (this.measureDisabled) {
 					this.measureBackground = '';
 					this.measureActive = false;
 				}
 			}
-
-		}, true);
-
+		});
 	}
 
 	public disableOtherModes(setMode) {
@@ -119,7 +112,7 @@ class RightPanelController implements ng.IController {
 			this.toggleAutoMetaData();
 		}
 
-		this.MeasureService.toggleMeasure();
+		Measure.toggleMeasure();
 
 	}
 

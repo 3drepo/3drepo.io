@@ -27,6 +27,10 @@ export const selectRisks = createSelector(
 	selectRisksDomain, (state) => values(state.risksMap)
 );
 
+export const selectRisksMap = createSelector(
+	selectRisksDomain, (state) => state.risksMap
+);
+
 export const selectIsPending = createSelector(
 	selectRisksDomain, (state) => state.isPending
 );
@@ -72,4 +76,8 @@ export const selectSearchEnabled = createSelector(
 
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectShowPins = createSelector(
+	selectComponentState, (state) => state.showPins
 );

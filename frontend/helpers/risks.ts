@@ -1,6 +1,7 @@
 import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS } from '../constants/risks';
+import { PIN_COLORS } from '../styles';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
@@ -50,6 +51,29 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 	};
 
 	return statusIcon;
+};
+
+export const getRiskPinColor = (levelOfRisk: number, selected: boolean = false) => {
+	const levelOfRiskColors = [{
+		pinColor: PIN_COLORS.GREEN,
+		selectedColor: PIN_COLORS.MED_SEA_GREEN
+	}, {
+		pinColor: PIN_COLORS.LIME_GREEN,
+		selectedColor: PIN_COLORS.LIGHT_GREEN
+	}, {
+		pinColor: PIN_COLORS.LEMON_CHIFFON,
+		selectedColor: PIN_COLORS.LIGHT_YELLOW
+	}, {
+		pinColor: PIN_COLORS.DARK_ORANGE,
+		selectedColor: PIN_COLORS.ORANGE
+	}, {
+		pinColor: PIN_COLORS.MAROON,
+		selectedColor: PIN_COLORS.RED
+	}];
+
+	return (selected)
+		? levelOfRiskColors[levelOfRisk].selectedColor
+		: levelOfRiskColors[levelOfRisk].pinColor;
 };
 
 export const mergeRiskData = (source, data) => {

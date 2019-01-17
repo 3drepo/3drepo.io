@@ -22,6 +22,8 @@ import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import PinDropIcon from '@material-ui/icons/PinDrop';
 
+import { Viewer } from '../../../../services/viewer/viewer';
+import { Measure } from '../../../../services/viewer/measure';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
@@ -33,7 +35,6 @@ import {
 	Container
 } from './newCommentForm.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { Viewer } from '../../../../services/viewer';
 
 interface IProps {
 	innerRef: any;
@@ -54,11 +55,18 @@ const NewCommentSchema = Yup.object().shape({
 });
 
 export class NewCommentForm extends React.PureComponent<IProps, any> {
+	public state = {
+		isPinActive: false
+	};
+
+	get pinColor() {
+		return this.state.isPinActive ? 'secondary' : 'action';
+	}
+
 	public handleSave = ({ comment }, { resetForm }) => {
-		const {screenshot} = this.state;
 		const viewpoint = {
 			...this.props.viewpoint,
-			screenshot
+			screenshot: this.props.screenshot
 		};
 
 		this.props.onSave({ comment, viewpoint });
@@ -67,6 +75,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 
 	public handleNewScreenshot = async () => {
 		const { showScreenshotDialog, onTakeScreenshot } = this.props;
+
 		showScreenshotDialog({
 			sourceImage: Viewer.getScreenshot(),
 			onSave: (screenshot) => onTakeScreenshot(screenshot)
@@ -74,7 +83,19 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	}
 
 	public handleChangePin = () => {
-		this.props.onChangePin();
+		const isPinActive = !this.state.isPinActive;
+
+		if (isPinActive) {
+			Viewer.setPinDropMode(true);
+			Measure.deactivateMeasure();
+			Measure.setDisabled(true);
+		} else {
+			Viewer.setPinDropMode(false);
+			Measure.setDisabled(false);
+		}
+
+		this.setState({ isPinActive });
+		// this.props.onChangePin();
 	}
 
 	public renderScreenshotButton = renderWhenTrue(() => (
@@ -88,6 +109,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	public renderPinButton = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={PinDropIcon}
+			color={this.pinColor}
 			label="Add a pin"
 			action={this.handleChangePin}
 		/>

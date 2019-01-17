@@ -25,13 +25,15 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	saveRisk: ['teamspace', 'modelId', 'riskData'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
-	setNewRisk: []
+	setNewRisk: [],
+	showPins: ['filteredRisks']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
 	risksMap: {},
 	isPending: true,
 	componentState: {
+		showPins: true,
 		activeRisk: null,
 		showDetails: false,
 		expandDetails: true,
@@ -65,7 +67,8 @@ export const setNewRisk = (state = INITIAL_STATE) => {
 		likelihood: 0,
 		consequence: 0,
 		level_of_risk: 0,
-		mitigation_status: ''
+		mitigation_status: '',
+		viewpoint: {}
 	};
 	return setComponentState(state, { componentState: {
 		showDetails: true,

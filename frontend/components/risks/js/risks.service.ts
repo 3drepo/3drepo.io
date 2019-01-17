@@ -133,7 +133,7 @@ export class RisksService {
 			this.getTeamspaceJobs(account, model)
 		]);
 	}
-
+/*
 	public getRisksData(account: string, model: string, revision: string) {
 		return this.getRisks(account, model, revision)
 			.then((risks) => {
@@ -158,8 +158,8 @@ export class RisksService {
 
 			});
 
-	}
-
+	} */
+/*
 	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
 		const url = account + '/jobs';
 
@@ -169,9 +169,9 @@ export class RisksService {
 				this.addJobsToAllJobs(response.data);
 				return this.state.availableJobs;
 			});
-	}
+	} */
 
-	public addJobsToAllJobs(jobs: any[]) {
+/* 	public addJobsToAllJobs(jobs: any[]) {
 		const newJobs = jobs.filter((r) => !this.state.allJobs.find( (j) => j._id === r._id ));
 		this.state.allJobs = this.state.allJobs.concat(newJobs).sort( (a, b) => a._id > b._id ? 1 : -1);
 
@@ -194,9 +194,9 @@ export class RisksService {
 				this.state.modelUserJob = response.data;
 				return this.state.modelUserJob;
 			});
-	}
+	} */
 
-	public createBlankRisk(creatorRole) {
+/* 	public createBlankRisk(creatorRole) {
 		return {
 			creator_role: creatorRole,
 			associated_activity: '',
@@ -208,36 +208,36 @@ export class RisksService {
 			assigned_roles: [],
 			viewpoint: {}
 		};
-	}
+	} */
 
-	/**
-	 * Used by state manager to open risk.
-	 */
-	public getDisplayRisk() {
-		if (this.state.displayRisk && this.state.allRisks.length > 0) {
+	// /**
+	//  * Used by state manager to open risk.
+	//  */
+	// public getDisplayRisk() {
+	// 	if (this.state.displayRisk && this.state.allRisks.length > 0) {
 
-			const riskToDisplay = this.state.allRisks.find((risk) => {
-				return risk._id === this.state.displayRisk;
-			});
+	// 		const riskToDisplay = this.state.allRisks.find((risk) => {
+	// 			return risk._id === this.state.displayRisk;
+	// 		});
 
-			return riskToDisplay;
+	// 		return riskToDisplay;
 
-		}
-		return false;
-	}
+	// 	}
+	// 	return false;
+	// }
 
-	public setupRisksToShow(model: string, chips: IChip[]) {
-		this.state.risksToShow = [];
+	// public setupRisksToShow(model: string, chips: IChip[]) {
+	// 	this.state.risksToShow = [];
 
-		if (this.state.allRisks.length > 0) {
-			const filteredRisks = this.filterRisks(model, this.state.allRisks, chips) ;
-			const sortOldest = this.state.risksCardOptions.sortOldestFirst;
-			filteredRisks.sort((a, b) => {
-				return sortOldest ? a.created - b.created : b.created - a.created;
-			});
-			this.state.risksToShow = filteredRisks;
-		}
-	}
+	// 	if (this.state.allRisks.length > 0) {
+	// 		const filteredRisks = this.filterRisks(model, this.state.allRisks, chips) ;
+	// 		const sortOldest = this.state.risksCardOptions.sortOldestFirst;
+	// 		filteredRisks.sort((a, b) => {
+	// 			return sortOldest ? a.created - b.created : b.created - a.created;
+	// 		});
+	// 		this.state.risksToShow = filteredRisks;
+	// 	}
+	// }
 
 	public filterRisks(model: string, risks: any[], chips: IChip[]): any[] {
 		let filters = [];
@@ -556,7 +556,7 @@ export class RisksService {
 		this.removeRiskPin(risk._id);
 	}
 
-	public populateRisk(risk) {
+/* 	public populateRisk(risk) {
 
 		if (risk) {
 			risk.statusIcon = this.getStatusIcon(risk);
@@ -595,14 +595,14 @@ export class RisksService {
 				}
 			}
 		}
-	}
+	} */
 
-	public userJobMatchesCreator(userJob, riskData) {
+/* 	public userJobMatchesCreator(userJob, riskData) {
 		return (userJob._id &&
 			riskData.creator_role &&
 			userJob._id === riskData.creator_role);
 	}
-
+ */
 	public isViewer(permissions) {
 		return permissions && !this.authService.hasPermission(
 			this.clientConfigService.permissions.PERM_COMMENT_ISSUE,
@@ -930,108 +930,6 @@ export class RisksService {
 				}
 				return response.data;
 			});
-	}
-
-	// public saveRisk(risk) {
-	// 	const base = risk.account + '/' + risk.model;
-	// 	let saveUrl;
-
-	// 	if (risk.rev_id) {
-	// 		saveUrl = base + '/revision/' + risk.rev_id + '/risks.json';
-	// 	} else {
-	// 		saveUrl = base + '/risks.json';
-	// 	}
-
-	// 	if (risk.pickedPos !== null) {
-	// 		risk.position = risk.pickedPos;
-	// 		risk.norm = risk.pickedNorm;
-	// 	}
-
-	// 	return this.apiService.post(saveUrl, risk);
-
-	// }
-
-	// /**
-	//  * Update risk
-	//  * @param risk
-	//  * @param riskData
-	//  * @returns {*}
-	//  */
-	// public updateRisk(risk, riskData) {
-	// 	let endpoint = risk.account + '/' + risk.model;
-
-	// 	if (risk.rev_id) {
-	// 		endpoint += '/revision/' + risk.rev_id + '/risks/' +  risk._id + '.json';
-	// 	} else {
-	// 		endpoint += '/risks/' + risk._id + '.json';
-	// 	}
-
-	// 	return this.apiService.put(endpoint, riskData);
-	// }
-
-	public getJobColor(id) {
-		let roleColor = '#ffffff';
-		let found = false;
-		if (id && this.state.availableJobs) {
-			for (let i = 0; i <  this.state.availableJobs.length; i ++) {
-				const job =  this.state.availableJobs[i];
-				if (job._id === id && job.color) {
-					roleColor = job.color;
-					found = true;
-					break;
-				}
-			}
-		}
-		if (!found) {
-			console.debug('Job color not found for', id);
-		}
-		return roleColor;
-	}
-
-	/**
-	 * Set the status icon style and colour
-	 */
-	public getStatusIcon(risk) {
-
-		const statusIcon: any = {};
-
-		switch (risk.level_of_risk) {
-			case 0:
-				statusIcon.colour = '#008000';
-				break;
-			case 1:
-				statusIcon.colour = '#32cd32';
-				break;
-			case 2:
-				statusIcon.colour = '#fffacd';
-				break;
-			case 3:
-				statusIcon.colour = '#ff8c00';
-				break;
-			case 4:
-				statusIcon.colour = '#800000';
-				break;
-		}
-
-		switch (risk.mitigation_status) {
-			case '':
-				statusIcon.icon = 'new_releases';
-				break;
-			case 'proposed':
-				statusIcon.icon = 'error_outline';
-				break;
-			case 'agreed_partial':
-				statusIcon.icon = 'error';
-				break;
-			case 'agreed_fully':
-				statusIcon.icon = 'check_circle';
-				break;
-			case 'rejected':
-				statusIcon.icon = 'sync_problem';
-				break;
-		}
-
-		return statusIcon;
 	}
 
 	public setPinDropMode(on: boolean) {

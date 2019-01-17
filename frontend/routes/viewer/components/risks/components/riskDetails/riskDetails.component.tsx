@@ -20,7 +20,7 @@ import * as React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { mergeRiskData } from '../../../../../../helpers/risks';
-import { Viewer } from '../../../../../../services/viewer';
+import { Viewer } from '../../../../../../services/viewer/viewer';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
