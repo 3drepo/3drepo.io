@@ -37,20 +37,20 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiSuccessExample {json} Success-Response
  *
  * HTTP/1.1 200 OK
- * 	{
- * 		"_id":"model_ID",
- * 		"__v":0,
- * 		"name":"Changed",
- * 		"author":"username",
- * 		"createdAt":1536747251756,
- * 		"updatedBy":"username",
- * 		"updatedAt":1536747551043,
- * 		"color":[152,233,75],
- * 		"objects":[]
+ * {
+ *   "_id":"model_ID",
+ *   "__v":0,
+ *   "name":"Changed",
+ *   "author":"username",
+ *   "createdAt":1536747251756,
+ *   "updatedBy":"username",
+ *   "updatedAt":1536747551043,
+ *   "color":[152,233,75],
+ *   "objects":[]
  * }
  */
-
 router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
+
 /**
  * @api {get} /groups/revision/:rid/ List model groups by revision
  * @apiDescription List all groups using the revision ID
@@ -66,23 +66,23 @@ router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroup
  *
  * HTTP/1.1 200 OK
  * [
- *	{
- *		"_id": "model_ID",
- *		"name": "Group 1",
- *		"description": "This is test group for revision 2",
- *		"author": "username",
- *		"updatedBy": "username",
- *		"updatedAt": 1546537564888,
- *		"createdAt": 1546537564888,
- *		"__v": 0,
- *		"color": [
- *		121,
- *		130,
- *		211
- *	],
- *		"objects": []
- *	}
- *	]
+ *   {
+ *     "_id": "model_ID",
+ *     "name": "Group 1",
+ *     "description": "This is test group for revision 2",
+ *     "author": "username",
+ *     "updatedBy": "username",
+ *     "updatedAt": 1546537564888,
+ *     "createdAt": 1546537564888,
+ *     "__v": 0,
+ *     "color": [
+ *       121,
+ *       130,
+ *       211
+ *     ],
+ *     "objects": []
+ *   }
+ * ]
  */
 
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
@@ -102,17 +102,17 @@ router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
  *
  * HTTP/1.1 200 OK
  * {
-    "_id": "group_ID",
-    "color": [
-        121,
-        130,
-        211
-    ],
-    "objects": []
-}
+ *   "_id": "group_ID",
+ *   "color": [
+ *     121,
+ *     130,
+ *     211
+ *   ],
+ *   "objects": []
+ * }
  */
-
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
+
 /**
  * @api {get} /groups/revision/:rid/:uid/ Find group in model by revision
  * @apiName findGroupByRevision
@@ -129,47 +129,47 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
  *
  * HTTP/1.1 200 OK
  * [
- *		{
- *			"_id": "789b2ed0-0f7f-11e9-b909-833ae21f045f",
- *			"name": "Group 1",
- *			"description": "This is test group for revision 2",
- *			"author": "username",
- *			"updatedBy": "username",
- *			"updatedAt": 1546553617888,
- *			"createdAt": 1546537564888,
- *			"__v": 0,
- *			"color": [
- *				121,
- *				130,
- *				211
- *			],
- *			"objects": [
- *					{
- *						"account": "account_username",
- *						"model": "6e7d81fb-85c8-4b09-9ad6-6ba099261099",
- *						"ifc_guids": [],
- *						"shared_ids": [
- *						"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
- *						"db18ef69-6d6e-49a0-846e-907346abb39d",
- *						"c532ff34-6669-4807-b7f3-6a0ffb17b027",
- *						"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
- *						"3f881fa8-2b7b-443e-920f-396c1c85e903"
- *					]
- *				}
- *			]
- *		}
- *	]
+ *   {
+ *     "_id": "789b2ed0-0f7f-11e9-b909-833ae21f045f",
+ *     "name": "Group 1",
+ *     "description": "This is test group for revision 2",
+ *     "author": "username",
+ *     "updatedBy": "username",
+ *     "updatedAt": 1546553617888,
+ *     "createdAt": 1546537564888,
+ *     "__v": 0,
+ *     "color": [
+ *       121,
+ *       130,
+ *       211
+ *     ],
+ *     "objects": [
+ *       {
+ *         "account": "account_username",
+ *         "model": "6e7d81fb-85c8-4b09-9ad6-6ba099261099",
+ *         "ifc_guids": [],
+ *         "shared_ids": [
+ *           "24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ *           "db18ef69-6d6e-49a0-846e-907346abb39d",
+ *           "c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ *           "fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ *           "3f881fa8-2b7b-443e-920f-396c1c85e903"
+ *         ]
+ *       }
+ *     ]
+ *   }
+ * ]
  * @apiError GROUP_NOT_FOUND Group Not Found
  * @apiErrorExample {json} Error-Response
  *
  * HTTP/1.1 404 Not Found
- *  {
- *    "message": "Group not found",
- *    "status": 404,
- *    "code": "GROUP_NOT_FOUND",
- *    "value": 53,
- *    "place": "PUT /groups/revision"
- *	}
+ * {
+ *   "message": "Group not found",
+ *   "status": 404,
+ *   "code": "GROUP_NOT_FOUND",
+ *   "value": 53,
+ *   "place": "PUT /groups/revision"
+ * }
  */
 router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
@@ -194,13 +194,13 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  * @apiErrorExample {json} Error-Response
  *
  * HTTP/1.1 404 Not Found
- *  {
- *    "message": "Group not found",
- *    "status": 404,
- *    "code": "GROUP_NOT_FOUND",
- *    "value": 53,
- *    "place": "PUT /groups/"
- *	}
+ * {
+ *   "message": "Group not found",
+ *   "status": 404,
+ *   "code": "GROUP_NOT_FOUND",
+ *   "value": 53,
+ *   "place": "PUT /groups/"
+ * }
  */
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
@@ -214,18 +214,17 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- * 		"__v":0,
- * 		"_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
- * 		"name":"Group 1","description":"",
- * 		"author":"username",
- * 		"updatedBy":"username",
- * 		"updatedAt":"2019-01-03T23:03:37.411Z",
- * 		"createdAt":"2019-01-03T23:03:37.411Z",
- * 		"color":[44,50,125],
- * 		"objects":[]
+ *   "__v":0,
+ *   "_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
+ *   "name":"Group 1","description":"",
+ *   "author":"username",
+ *   "updatedBy":"username",
+ *   "updatedAt":"2019-01-03T23:03:37.411Z",
+ *   "createdAt":"2019-01-03T23:03:37.411Z",
+ *   "color":[44,50,125],
+ *   "objects":[]
  * }
  */
-
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
 
 // @deprecated -  use deleteGroups with single id instead.
@@ -244,7 +243,7 @@ router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
  *
  * HTTP/1.1 200 OK
  * {
- * 	"status":"success"
+ *   "status":"success"
  * }
  *
  */
